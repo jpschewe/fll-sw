@@ -1,5 +1,10 @@
 2003-11-09  Jon Schewe  <jpschewe@mtu.net>
 
+	* web/admin/verifyTournamentInitialization.jsp: Fix Oops when
+	setting tournaments.
+
+	* src/fll/xml/GenerateDB.java (generateDB): Handle long region names.
+
 	* web/admin/teamColumnSelection.jsp: Added column sizes to column
 	selection page.
 
