@@ -23,9 +23,9 @@
       (expand-file-name "lib/JonsInfra-0.2.jar" project-root)
       (expand-file-name "lib/junit-3.8.1.jar" project-root)
       (expand-file-name "lib/log4j-1.2.8.jar" project-root)
-      (expand-file-name "lib/mysql-connector-java-3.0.8-stable-bin.jar" project-root)
-      (expand-file-name "lib/common-lib/xercesImpl.jar" project-root)
-      (expand-file-name "lib/common-lib/xmlParserAPIs.jar" project-root)
+      (expand-file-name "lib/mysql-connector-java-3.0.16-ga-bin.jar" project-root)
+      (expand-file-name "lib/xercesImpl.jar" project-root)
+      (expand-file-name "lib/xmlParserAPIs.jar" project-root)
 
       ;; JSTL libraries
       (expand-file-name "lib/dom.jar" project-root)

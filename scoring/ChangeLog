@@ -1,3 +1,10 @@
+2004-12-18  Jon Schewe  <jpschewe@mtu.net>
+
+	* prj.el: Updated the mysql database driver
+
+	* web/WEB-INF/web-default.xml: Changed database host to be
+	127.0.0.1, seems to work better than localhost with newer mysql installs.
+
 2004-12-14  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/xml/ChallengeParser.java (ChallengeParser): Removed

@@ -88,7 +88,7 @@
     <pathelement location="${dir.lib}/JonsInfra-0.2.jar"/>
     <pathelement location="${dir.lib}/junit-3.8.1.jar"/>
     <pathelement location="${dir.lib}/log4j-1.2.8.jar"/>
-    <pathelement location="${dir.lib}/mysql-connector-java-3.0.8-stable-bin.jar"/>
+    <pathelement location="${dir.lib}/mysql-connector-java-3.0.16-ga-bin.jar"/>
     <pathelement location="${dir.lib}/xercesImpl.jar"/>
     <pathelement location="${dir.lib}/xmlParserAPIs.jar"/>
   </path>

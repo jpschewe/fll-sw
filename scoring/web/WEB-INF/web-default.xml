@@ -11,7 +11,7 @@
 
   <context-param>
     <param-name>database_host</param-name>
-    <param-value>localhost</param-value>
+    <param-value>127.0.0.1</param-value>
     <description>
       Machine that the databse is running on.  
     </description>
