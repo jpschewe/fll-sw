@@ -1,0 +1,225 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Install Instructions</title>
+  </head>
+
+  <body>
+    <h1>Install Instructions</h1>
+
+    <p>These insturctions are geared towards Windows 2K and XP, if installing
+      on Linux the instructions are mostly the same, with the exception of
+      getting prompted for installation locations.  In these instructions
+      locations are given for all installs, these are not hard coded into the
+      software anywhere, but it'll make things a lot easier for me to debug over
+      the phone if you use the same directories.</p>
+
+    <p>It is assumed that you have the computers used for the server,
+      scoreboard display and performance score entry are already networked and
+      you MUST know the IP address of the computer that is the server.</p>
+
+    <p>If you do not have a CD, you can download the current version of the
+    software <a href="fll-sw.zip">here</a>.  Unzipping this file will create
+    a directory called fll-sw that contains the various zip files referenced
+    here.  This directory is the same as the /fll directory on the cd.</p>
+
+    <p>Links in <b>bold</b> are external links to sites where the applications
+    can be found if you don't have a cd.</p>
+      
+    <ol>
+      <li><b><a href="http://java.sun.com/j2se/1.4.1/download.html">Install Java (the SDK)</a></b> (the language everything is written in), this is found
+        on the cd in apps/java.  This needs to be done on the server and on any
+        machines that will be used to enter subjective scores
+        <ul>
+          <li>When prompted for where to install it choose c:\packages\jdk-1.4.1</li>
+          <li>When prompted for what to install, just check Program Files, you
+            don't need the other ones</li>
+          <li>When it's done you need to set the environment variable JAVA_HOME to point to the install location
+            <ol>
+              <li>Right click on My Computer and click on Properties</li>
+              <li>Goto Advanced</li>
+              <li>Click on Environment Variables</li>
+              <li>Under System Variables click New</li>
+              <li>For name put JAVA_HOME</li>
+              <li>For value put c:\packages\jdk-1.4.1</li>
+              <li>Click Ok, Ok, Ok</li>
+            </ol>
+          </li>
+        </ul>
+      </li>
+
+      <li><b><a href="http://jakarta.apache.org/builds/jakarta-tomcat-4.0/release/v4.0.6/bin/">Install Apache Tomcat</a></b> (the webserver and JSP container), this is
+        found on the cd in apps/tomcat.  Choose the LE version.
+        <ul>
+          <li>When you start the installer it will tell you where it found
+            Java, if you get an error that it can't find Java, make sure you
+            have the environment variable JAVA_HOME set to the location that you
+            installed Java</li>
+          <li>When prompted for where to install, choose c:\packages\tomcat</li>
+          <li>Use the defaults for everything else</li>
+        </ul>
+      </li>
+
+      <li>Install the server software for the web
+        <ol>
+          <li>Unzip <a href="common-lib.zip">common-lib.zip</a>, this will create two jar files</li>
+          
+          <li>Copy the files xercesImpl.jar and xmlParserAPIs.jar from the directory fll on the cd to c:\packages\tomcat\common\lib</li>
+          
+          <li>Unzip the file <a href="web.zip">web.zip</a> to c:\packages\tomcat\webapps</li>
+          
+          <li>Open up an explorer window to c:\packages\tomcat\work</li>
+
+          <li>Delete any files in there, if the directory exists</li>
+          
+        </ol>
+      </li>
+      
+      <li><b><a href="http://www.mysql.com/downloads/mysql-3.23.html">Install MySQL</a></b> (the database server), this is found on the cd in apps/mysql.
+        <ol>
+          <li>Unzip the file (mysql-3.23.52-win.zip) to somewhere</li>
+
+          <li>In the directory created run setup.exe (the one with the
+          computer symbol next to it, not the pointer one)</li>
+
+          <li>Click Next</li>
+          <li>Click Next</li>
+
+          <li>Select browse and type in c:\packages\mysql, click yes if it
+          asks you about creating the directory</li>
+          
+          <li>Select Typical and Next</li>
+
+          <li>Run c:\packages\mysql\bin\winmysqladmin.exe</li>
+
+          <li>Put in root as the username and fll for the password (you will
+          not be prompted for this if you have installed MySQL before, it will
+          use your previous username and password, if you don't remember what
+          it is, delete c:\winnt\my.ini and try do the previous step
+          again)</li>
+
+          <li>Right click on the stoplight in the system try and goto
+          WinNT->Install the service (you may not be given this option if
+          MySQL already installed itself as a service, this typically happens
+          when you have already installed MySQL in the past)</li>
+
+          <li>Right click on the stoplight in the system try and goto
+          WinNT->Start the service and click ok.  If this fails do the
+          following:</li>
+          <ul>
+            <li>Right click on the stoplight in the system try and goto Start
+            the server standalone, you'll need to do this each time you
+            restart the machine.</li>
+          </ul>
+          
+          <li>When you're done for the day you'll want to shutdown the
+          database by going to shutdown service or shutdown the server
+          standalone, depending on how you started it.</li>
+        </ol>
+      </li>
+
+      <li>Install the actual database
+        <ol>
+          <li>You should already have MySQL running from the previous step, if
+          not, start it.</li>
+          <li>Start up Tomcat: Goto Start->Programs(All Programs on XP)->Apache Tomcat->Start Tomcat, this will cause a command window to come up, don't close it, you can minimize it though.  Server errors will show up here.</li>
+          <li>Open another web browser to <a href="http://localhost:8080/fll-2002/setup">http://localhost:8080/fll-2002/setup</a>
+            <ul>
+              <li>The root username should be root, if you followed the instructions above for setting up MySQL</li>
+              <li>The root password should be fll, if you followed the instructions above for setting up MySQL</li>
+              <li>Unless you have made changes to the xml document, leave the last field blank</li>
+            </ul>
+          </li>
+          <li>Click initialize database and you should go back to the same page with a message at the top that the database was successfully initialized</li>
+          <li>Once that is done you can close the other web browser you opened</li>
+          <li>If you're in Minnesota, do the following:
+            <ul>
+              <li>Copy all of the files from the cd in minnesota-db\fll to c:\packages\mysql\data\fll and allow it to overwrite files</li>
+              <li>Open up an explorer window to c:\packages\mysql\data\fll</li>
+              <li>Select all of the files</li>
+              <li>Right click on the selected files and click properties</li>
+              <li>Click on Read Only until the check box is cleared, this may take a couple of clicks</li>
+              <li>This will replace the Teams and Regions tables with the Minnesota data</li>
+            </ul>
+          </li>
+        </ol>
+      </li>
+
+      <li>Test the server.
+        <ol>
+          <li>Goto Start->Programs(All Programs on XP)->Apache Tomcat->Start Tomcat, this will cause a command window to come up, don't close it, you can minimize it though.  Server errors will show up here.</li>
+          <li>Open up a web browser to <a href="http://localhost:8080/fll-2002">http://localhost:8080/fll-2002</a></li>
+          <li>You should see the main index</li>
+          <li>Goto the Instructions page for information on using these pages</li>
+          <li>From the score entry computers and scoreboard computers make sure you can also get to this page, replacing localhost with the IP address of the server</li>
+          <li>When done for the day you'll want to Goto Start->Programs(All Programs on XP)->Apache Tomcat->Stop Tomcat.</li>
+        </ol>
+      </li>
+
+      <li>Install the subjective score entry app on the computers (I suggest 1 unless you have a tournament that's really big or are really short on time) that will be used to enter this data
+        <ol>
+          <li>Follow the instructions above for installing Java</li>
+          <li>Unzip <a href="subjective.zip">subjective.zip</a> to a location on the computer</li>
+          <li>Goto a computer that's connected to the server and goto the main page, then Administration then Download the datafile for subjective score entry</li>
+          <li>Save this file somewhere on the computer used for subjective score entry, this can be copied around with a floppy</li>
+          
+          <li>Run subjective.bat from the location you unzipped subjective.zip
+          and when prompted give it the location of the subjective.zip file
+          that was downloaded from the server</li>
+          
+          <li>Enter scores for teams by selecting the category at the top then entering the scores under each subcategory</li>
+          <li>Save often</li>
+          <li>When done, quit the application and copy the file back to a computer that has access to the server</li>
+          <li>Goto Adminstration and click on the Browse button next to Upload the datafile for subjective scores</li>
+          <li>Select the file you just copied</li>
+          <li>Click upload and if all is well you'll be returned to the Adminstration page again</li>
+        </ol>
+      </li>
+
+      <li>Send me the data after the tournament is over by zipping up c:\packages\mysql\data\fll and sending it to <a href="mailto:jpschewe@mtu.net">me, jpschewe@mtu.net</a>  Before you zip up this directory please stop the mysql database, otherwise some data might be missing.</li>
+
+      <li>For those interested in looking at the source and possibly making
+      changes the source can be found <a href="src.zip">here</a> along with a
+      <a href="README.developer">README for developers</a>.  The api
+      documentation can be found <a href="api/index.html">here</a>.  Any
+      changes that you do make need to be sent back to me under the terms of
+      the GPL.  I look forward to any fixes you make</li>
+        
+    </ol>
+
+    <p>Once you're done with the tournament you might want to uninstall
+    everything.  This can be accomplised by deleting the JAVA_HOME environment
+    variable.  Then uninstalling all of the applications.</p>
+
+    <p>Things to note:
+      <ul>
+        
+        <li>When entering scores in the subjective scoring application make
+        sure you select another cell after entering data in one before
+        switching to a new category.  Otherwise the data in the cell will be
+        lost</li>
+
+        <li>On the scoreboard page there are two primary scorboard links.  One
+        for 1024x768 and one for 800x600.  Pick the one that is the resolution
+        of your display computer and make sure you set the resolution of your
+        display computer to the native resolution of your projector oor
+        800x600, which ever is higher.  This way things will display
+        reasonably well.  If you have your display computer's resolution set
+        to 1024x768 and when you see the scorboard it seems like the text is
+        unreadable it's probably because your projector's native resolution is
+        800x600.  You should change the resolution of your display computer
+        and then goto the 800x600 scoreboard.</li>
+
+        <li>Developers on widnows might find the tool MySQL-Front handy for
+        messing with the database directly.  I've put it in the apps directory
+        on the cd.</li>
+        
+      </ul>
+    </p>
+
+    <hr>
+      <address><a href="mailto:jpschewe@mtu.net">Jon Schewe</a></address>
+Last modified: $Date$<br>
+Revision: $Revision$<br>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+Predifined Variables in jsp pages:
+HttpServletRequest request
+HttpServletResponse response
+HttpSession session
+ServletConfig config
+ServletContext application
+PageContext pageContext
+HttpJspPage page AKA this
+JspWriter out
+PageContext pageContext
+Throwable exception

@@ -1,0 +1,40 @@
+<%@ page import="fll.Utilities" %>
+<%@ page import="fll.Queries" %>
+  
+<%@ page import="java.sql.Connection" %>
+  
+<%@ page import="org.w3c.dom.Document" %>
+  
+<%
+{ // put this in it's own scope so it can be included multiple times
+  if(null == application.getAttribute("database")) {
+    application.setAttribute("database", "fll");
+  }
+  
+  final String database = (String)application.getAttribute("database");
+    
+  //Initialize the connection
+  if(null == application.getAttribute("connection")) {
+    final Connection connection = Utilities.createDBConnection(application.getInitParameter("database.host"), "fll", "fll", database);
+    application.setAttribute("connection", connection);
+    application.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
+  }
+    
+  if(null == application.getAttribute("adminConnection")) {
+    final Connection adminConnection = Utilities.createDBConnection(application.getInitParameter("database.host"), "fll_admin", "fll_admin", database);
+    application.setAttribute("adminConnection", adminConnection);
+  }
+    
+  if(null == application.getAttribute("challengeDocument")) {  
+    final Document document = Queries.getChallengeDocument((Connection)application.getAttribute("connection"));
+    if(null == document) {
+      throw new RuntimeException("Could not find xml challenge description in the database!");
+    }
+    application.setAttribute("challengeDocument", document);
+  }
+  
+  if(null == application.getAttribute("ScorePageText")) {
+    application.setAttribute("ScorePageText", "FLL");
+  }
+}
+%>

@@ -1,0 +1,217 @@
+<%@ page errorPage="../errorHandler.jsp" %>
+<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+  
+<%@ page import="fll.web.admin.UploadTeams" %>
+
+<%@ page import="org.w3c.dom.Document" %>
+  
+<%@ page import="java.sql.Connection" %>
+  
+<%
+final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
+final Connection connection = (Connection)application.getAttribute("adminConnection");
+
+if(null == session.getAttribute("columnSelectOptions")) {
+  throw new RuntimeException("Error columnSelectOptions not set.  Please start back at administration page and go forward.");
+}
+
+final String errorMessage = (String)session.getAttribute("errorMessage");
+if(null == errorMessage || "".equals(errorMessage)) {
+  UploadTeams.copyFilteredTeams(connection, request);
+}
+%>
+<html>
+  <head>
+    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Team Column Selection)</title>
+  </head>
+
+  <body background='../images/bricks1.gif' bgcolor='#ffffff' topmargin='4'>
+    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Team Column Selection)</h1>
+
+    <p>Do not use the forward and back buttons!  Use the supplied links/buttons.</p>
+
+    <p>Select which columns in your data coorespond to the ones the database
+    understands.  Highlighted columns are required, all others are optional.
+    The datatype column specifies the type of data expected in this column.
+    <b>If a number is expected and you specify a column with text that doesn't
+    convert to a number it will be converted to 0.</b></p>
+
+<%@ include file="sanitizeRules.jsp" %>
+      
+    <% if(null != errorMessage && !"".equals(errorMessage)) { %>
+    <p><font color='red'><%=errorMessage%></font></p>
+    <% } %>
+      
+    <form action="verifyTeams.jsp" method="POST" name="verifyTeams">
+      <table border='1'>
+
+        <tr>
+          <th>Database column</th>
+          <th>Datatype</th>
+          <th>You column</th>
+        </tr>
+          
+        <tr bgcolor='yellow'>
+          <td>TeamNumber</td>
+          <td>Number</td>
+          <td>
+            <select name='TeamNumber'>
+            <option value='' selected>None</option>
+            <%=session.getAttribute("columnSelectOptions")%>
+            </select>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Team Name</td>
+          <td>Text</td>
+          <td>
+            <select name='TeamName'>
+            <option value='' selected>None</option>
+            <%=session.getAttribute("columnSelectOptions")%>
+            </select>
+          </td>
+        </tr>          
+
+        <tr>
+          <td>Organization</td>
+          <td>Text</td>
+          <td>
+            <select name='Organization'>
+            <option value='' selected>None</option>
+            <%=session.getAttribute("columnSelectOptions")%>
+            </select>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Coach</td>
+          <td>Text</td>
+          <td>
+            <select name='Coach'>
+            <option value='' selected>None</option>
+            <%=session.getAttribute("columnSelectOptions")%>
+            </select>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Email Address</td>
+          <td>Text</td>
+          <td>
+            <select name='Email'>
+            <option value='' selected>None</option>
+            <%=session.getAttribute("columnSelectOptions")%>
+            </select>
+          </td>
+        </tr>
+          
+        <tr>
+          <td>Phone</td>
+          <td>Text</td>
+          <td>
+            <select name='Phone'>
+            <option value='' selected>None</option>
+            <%=session.getAttribute("columnSelectOptions")%>
+            </select>
+          </td>
+        </tr>
+
+        <tr>
+          <td>City</td>
+          <td>Text</td>
+          <td>
+            <select name='Phone'>
+            <option value='' selected>None</option>
+            <%=session.getAttribute("columnSelectOptions")%>
+            </select>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Region</td>
+          <td>Text</td>
+          <td>
+            <select name='Region'>
+            <option value='' selected>None</option>
+            <%=session.getAttribute("columnSelectOptions")%>
+            </select>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Division</td>
+          <td>Number</td>
+          <td>
+            <select name='Division'>
+            <option value='' selected>None</option>
+            <%=session.getAttribute("columnSelectOptions")%>
+            </select>
+          </td>
+        </tr>
+          
+        <tr>
+          <td>Number of boys</td>
+          <td>Number</td>
+          <td>
+            <select name='NumBoys'>
+            <option value='' selected>None</option>
+            <%=session.getAttribute("columnSelectOptions")%>
+            </select>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Number of girls</td>
+          <td>Number</td>
+          <td>
+            <select name='NumGirls'>
+            <option value='' selected>None</option>
+            <%=session.getAttribute("columnSelectOptions")%>
+            </select>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Number of medals needed</td>
+          <td>Number</td>
+          <td>
+            <select name='NumMedals'>
+            <option value='' selected>None</option>
+            <%=session.getAttribute("columnSelectOptions")%>
+            </select>
+          </td>
+        </tr>
+
+        <tr>
+          <td>How the team found out about FLL</td>
+          <td>Text</td>
+          <td>
+            <select name='HowFoundOut'>
+            <option value='' selected>None</option>
+            <%=session.getAttribute("columnSelectOptions")%>
+            </select>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Did the team advance to state</td>
+          <td>Text</td>
+          <td>
+            <select name='ToState'>
+            <option value='' selected>None</option>
+            <%=session.getAttribute("columnSelectOptions")%>
+            </select>
+          </td>
+        </tr>
+          
+        <tr>
+          <td colspan='2'><input type='submit' value='Next'></td>
+        </tr>
+          
+      </table> 
+    </form>
+
+<%@ include file="../WEB-INF/jspf/footer.jspf" %>
+  </body>
+</html>

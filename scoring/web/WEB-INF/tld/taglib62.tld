@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN" "http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_1.dtd">
+
+<taglib>
+<tlibversion>1.4</tlibversion>
+<jspversion>1.1</jspversion>
+<shortname>Upload taglib</shortname>
+<uri>http://www.servletsuite.com/servlets/uptag</uri>
+<info>Uploads file</info>
+
+<tag>
+<name>parse</name>
+<tagclass>com.cj.uptag.parseTag</tagclass>
+<teiclass>com.cj.uptag.intVariable</teiclass>
+<bodycontent>JSP</bodycontent>
+<info>parses POST data</info>
+
+<attribute>
+<name>id</name>
+<required>false</required>
+<rtexprvalue>true</rtexprvalue>
+</attribute>
+
+</tag>
+
+<tag>
+<name>getName</name>
+<tagclass>com.cj.uptag.getNameTag</tagclass>
+<teiclass>com.cj.uptag.strVariable</teiclass>
+<bodycontent>empty</bodycontent>
+<info>reads file name</info>
+
+<attribute>
+<name>id</name>
+<required>false</required>
+<rtexprvalue>true</rtexprvalue>
+</attribute>
+
+</tag>
+
+<tag>
+<name>saveFile</name>
+<tagclass>com.cj.uptag.saveFileTag</tagclass>
+<bodycontent>empty</bodycontent>
+<info>saves uploaded file</info>
+
+<attribute>
+<name>path</name>
+<required>false</required>
+<rtexprvalue>true</rtexprvalue>
+</attribute>
+
+</tag>
+
+</taglib>
+
+
+
+

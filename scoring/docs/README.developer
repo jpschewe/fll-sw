@@ -1,0 +1,155 @@
+Read this if you plan to do development or extension of the FLL software.
+
+First, all of the code is currently Copyrighted by INSciTE.
+Please make sure anything you add has the following sort of header:
+  * Copyright (c) 2000-2002 INSciTE.  All rights reserved
+  * INSciTE is on the web at: http://www.hightechkids.org
+  * This code is released under GPL; see LICENSE.txt for details.
+
+If you have development questions or suggestions, please contact:  
+  Jon Schewe	-- jpschewe@mtu.net
+  Eric Engstrom -- engstrom@mtu.net   
+
+Jon is currently developing under Linux but Eric is doing most everything
+under Windows (WinXP).  Everything should work either location and perhaps
+even under MacOS 10, but we don't know anyone who can test that for us at
+the moment.
+
+We also tend to do development in XEmacs and tend to get particular about
+formatting, especially of the Java code.  Take a look at the formatting and
+if you have questions, just ask.  Try NOT to use tabs in the code and set
+the basic offset to 2 spaces.  Well commented code will greatly assist us in
+merging changes, and JavaDOC is almost a requirement.
+
+Before getting started, you'll need the following apps/tools to build
+and test things (newer versions should be fine):
+
+  jdk-1.4.x	(http://java.sun.com/)
+  ant-1.4.1	(http://jakarta.apache.org/ant/)
+  mysql-3.23	(http://www.mysql.com/)
+  tomcat-4.0.x	(http://jakarta.apache.org/tomcat/)
+  cygwin-1.3.x  (http://www.cygwin.com)
+  jdee          (http://jdee.sunsite.dk)
+
+JDEE is a mode for [X]Emacs that makes Java development much easier, should
+  come with XEmacs. 
+JDK is obvious since much of what we do is java at the core.
+ANT is a make like tool for Java that integrates nicely with JDEE for [X]Emacs.
+MySQL is the database engine we use to store data.
+Tomcat is the web-server-lite/JSP (Java Server Page) engine.
+Cygwin adds UN*X like interfaces to Windows, in particular, ssh and cvs.
+  [ you only need Cygwin if you are going to develop under Windows ]
+
+Read for JSP coding conventions
+http://developer.java.sun.com/developer/technicalArticles/javaserverpages/code_convention/
+----------
+Setup of each package:
+
+JDK:  
+  We presume that you already have knowledge of Java and how to install the
+  JDK for your platform.  Unfortunately, if you don't get past this hurdle,
+  the rest only gets worse.
+
+ANT: 
+  
+Tomcat:
+  Download the appropriate version from the tomcat web site.
+
+  Look at the file webapps/tomcat-docs/index.html in the 
+
+To do builds and such you really should read the Tomcat documentation to
+learn the structure of things and how the build file works, since we just use
+theirs.  However here's a quick setup:
+
+- create a file in the same directory as build.xml called build.properties
+with the following (use the top level directory of your tomcat install):
+  catalina.home=/opt/jakarta   (to the install directory of tomcat install - C:\packages\tomcat - DO NOT QUOTE IT.)
+- compile with 'ant compile'
+- deploy with 'ant deploy'
+- after you deloy, restart tomcat
+
+- goto http://localhost:8080/fll-2002/index.jsp
+
+copy xerxesimpl.jar and xercesapi.jar to tomcatinstalldir/common/lib
+
+run starttomcat-script (on programs menu) 
+  (dos box)
+
+mySQL:
+
+Windows Instructions:  (for version 3.23.xx)
+
+1. Install MYSQL (from http:/www.mysql.com) 
+    (presuming $MYSQLDIR = "C:\Packages\mysql")
+2. Run ${MYSQLDIR}/bin/winmysqladmin.exe
+3. In config dialog, enter Admin user / password (e.g. root / fll)
+4. At a command or shell prompt:
+     cd ${FLL}/mysql
+     ${MYSQLDIR}/bin/mysql.exe -u<username> -p<password> < create.sql
+     ${MYSQLDIR}/bin/mysql.exe -u<username> -p<password> fll < populateTables.sql
+
+----------
+CVS notes:
+
+To first check this out:
+> cvs checkout
+
+To get an update use
+> cvs update -d -R
+from a directory in the source tree to update that directory and all
+subdirectories.  This will also delete files that have been removed from the
+repository, with warnings.
+
+To commit changes:
+> cvs commit
+from a directory inside the source tree and modified files, they will be
+flagged as such during an update, will be committed and you'll need to provide
+a log message with your favorite editor.
+
+----------
+Notes for running:
+
+- cookies must be enabled on any web browsers being used for the
+administration pages, specifically the uploading of team data
+
+- The team upload page assumes that the file is tab delimited.  It allows
+basic filtering to occur, but that should be done externally because it's very
+basic with little feedback.  Also note that when columns cannot be merged or
+manipulated by the java.  For example Coach_LastName and Coach_FirstName need
+to be merged externally to be put in the Coach column in our database.  Also
+columns like num_members need to be broken out into boys/girls/medals required
+to be properly input into our database.
+
+
+----------
+MISC:
+
+Application variables we have defined in the jsp's and how to get them initialized:
+- If you add <%@ include file="initializeApplicationVars.jsp" %> to your jsp
+file you'll get the following variables.  You may have to adjust the file
+attribute to point get to the file, it's at the root of our web project.
+  - "connection" (java.sql.Connection) a connection to the database with username 'fll'
+  - "adminConnection" (java.sql.Connection) a connection to the database with username 'fll_admin'
+  - "currentTournament" (java.lang.String) holds the current tournament name (aka region)
+  - "challengeDocument" (org.w3c.dom.Document) the challenge.xml document
+    already parsed
+  - "ScorePageText" (java.lang.String) holds the text displayed at the top of various pages
+  - "database" (java.lang.String) the name of the database that we're currently connected to.
+This should be 'fll' unless things are under development.
+  - "playoffDivision" (java.lang.String) keeps track of the division of the
+brackets being displayed when using the remotely controlled brackets
+  - "playoffRunNumber" (java.lang.Number) keeps track of the current run
+number for the remotely controlled brackets
+
+- call fll.Queries.populateTournamentTeams
+  - "tournamentTeams" (java.util.Map) holds the current tournament's teams
+    keyed by team number, same as calling fll.Queries.getTournamentTeams()
+
+Session variables:
+  - "currentRound" (java.util.List of fll.Team) Used in playoff/brackets.jsp
+  to keep track of the current list of teams in bracket order
+
+Useful websites:
+   http://mtu.net/~jpschewe/JonsInfra/0.2/index.html - JonsInfra documentation
+
+-- eof README.developer
