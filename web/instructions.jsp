@@ -46,8 +46,10 @@
         <li>On the display computer bring up the <a href='display.jsp'>Big
         Screen Display</a> page.  This will display the welcome page, the
         scoreboard and the playoff brackets as needed.  This page is
-        controlled by the <a href='admin/remoteControl.jsp'>Remote
-        Control Page</a> found under administration.</li>
+        controlled by the <a href='admin/remoteControl.jsp'>Remote Control
+        Page</a> found under administration. <b>Important note</b>: Do not
+        close the background window that launched the fullscreen window.
+        This background window actually controls the fullscreen window.</li>
 
         <li>Enter scores for the performance rounds on the <a
         href="scoreEntry/select_team.jsp">score entry</a> page.  I suggest
