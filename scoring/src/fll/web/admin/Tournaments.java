@@ -326,9 +326,6 @@ final public class Tournaments {
       Utilities.closePreparedStatement(deletePrep);
     }
 
-    //reinitialize the TournamentTeams table
-    Queries.populateTournamentTeams(application);
-    
     //finally redirect to index.jsp
     //out.println("DEBUG: normally you'd be redirected to <a href='index.jsp'>here</a>");
     response.sendRedirect(response.encodeRedirectURL("index.jsp"));

@@ -19,8 +19,7 @@
 
     <p>Testers:</p>
     <ul>
-      <li><a href="http://mtu.net/~engstrom">Eric Engstrom</a></li>
-      <li>Bruce Mueller</li>
+      <li>Chuck Davis</li>
     </ul>
       
     <p>The following software packages are used in the application:</p>

@@ -1,3 +1,15 @@
+2003-10-21  Jon Schewe  <jpschewe@mtu.net>
+
+	* docs/README.developer: Removed tournamentTeams application
+	attribute to avoid caching problems (827929).
+
+	* src/fll/Queries.java (computeTotalScore): Fixed so that Bye runs
+	are ignored when computing total score (827932).
+
+	* build.xml: Make subjective.sh and subjective.bat use
+	application.classpath with pathconvert rather than hardcoding it
+	to avoid mistakes (824074).
+
 2003-10-15  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/web/admin/UploadTeams.java (parseFile): Handle empty

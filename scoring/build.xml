@@ -381,20 +381,28 @@
 <jar destfile="${tmp.home}/subjective/subjective.jar"
      basedir="${build.home}/WEB-INF/classes" />
 <copy todir="${tmp.home}/subjective">
-  <fileset dir="${build.home}/WEB-INF/lib">
-    <include name="JonsInfra-0.2.jar" />
-    <include name="mm.mysql-2.0.14-bin.jar" />
-  </fileset>
+  <fileset dir="${lib.home}" />
 </copy>
 
-<!-- FIX should use pathconvert here! -->
-<echo file="${tmp.home}/subjective/subjective.bat"
-      message="%JAVA_HOME%/bin/java -classpath JonsInfra-0.2.jar;mm.mysql-2.0.14-bin.jar;subjective.jar fll.gui.SubjectiveFrame"
-      />
+  <path id="subjective.dist.classpath">
+    <path refid="application.classpath" />
+    <pathelement location="${lib.home}/subjective.jar" />
+  </path>
+  <pathconvert targetos="windows"
+               property="subjective.windows.classpath"
+               refid="subjective.dist.classpath">
+    <map from="${basedir}/${lib.home}" to="." />
+  </pathconvert>
+  <pathconvert targetos="unix"
+               property="subjective.unix.classpath"
+               refid="subjective.dist.classpath">
+    <map from="${basedir}/${lib.home}" to="." />
+  </pathconvert>
 
-<echo file="${tmp.home}/subjective/subjective.sh"
-      message="java -classpath JonsInfra-0.2.jar:mm.mysql-2.0.14-bin.jar:subjective.jar fll.gui.SubjectiveFrame"
-      />
+
+<echo file="${tmp.home}/subjective/subjective.bat">%JAVA_HOME%/bin/java -classpath "${subjective.windows.classpath}" fll.gui.SubjectiveFrame</echo>
+
+<echo file="${tmp.home}/subjective/subjective.sh">java -classpath "${subjective.unix.classpath}" fll.gui.SubjectiveFrame</echo>
 
 <zip zipfile="${dist.home}/subjective.zip">
   <zipfileset prefix="subjective" dir="${tmp.home}/subjective" />
