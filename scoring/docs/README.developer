@@ -26,7 +26,7 @@ and test things (newer versions should be fine):
 
   jdk-1.4.x	(http://java.sun.com/)
   ant-1.4.1	(http://jakarta.apache.org/ant/)
-  mysql-3.23	(http://www.mysql.com/)
+  mysql-4.02+	(http://www.mysql.com/)
   tomcat-4.1.x	(http://jakarta.apache.org/tomcat/)
   cygwin-1.3.x  (http://www.cygwin.com)
   jdee          (http://jdee.sunsite.dk)
