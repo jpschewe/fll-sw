@@ -1,100 +1,32 @@
-<!-- A "project" describes a set of targets that may be requested
-     when Ant is executed.  The "default" attribute defines the
-     target which is executed if no specific target is requested,
-     and the "basedir" attribute defines the current working directory
-     from which Ant executes the requested task.  This is normally
-     set to the current working directory.
--->
+<project name="fll-sw" default="compile">
 
+  <!-- ===================== Property Definitions =========================== -->
 
-<project name="My Project" default="compile" basedir=".">
+  <!-- load build specific properties first -->
+  <property file="build.properties" />
 
-<!-- ===================== Property Definitions =========================== -->
-
-<!--
-
-  Each of the following properties are used in the build script.
-  Values for these properties are set by the first place they are
-  defined, from the following list:
-  * Definitions on the "ant" command line (ant -Dcatalina.home=xyz compile)
-  * Definitions from a "build.properties" file in the top level
-    source directory
-  * Definitions from a "build.properties" file in the developer's
-    home directory
-  * Default definitions in this build.xml file
-
-  You will note below that property values can be composed based on the
-  contents of previously defined properties.  This is a powerful technique
-  that helps you minimize the number of changes required when your development
-  environment is modified.  Note that property composition is allowed within
-  "build.properties" files as well as in the "build.xml" script.
-
--->
   <property file="build.properties" />
 
 
+  <property name="app.name"        value="${ant.project.name}"/>
+  <property name="app.version"     value="2.5"/>
+                                   
+  <property name="dir.build"       value="build"/>
+  <property name="dir.tomcat"      value="unspecified"/>
+  <property name="dir.deploy"      value="${dir.tomcat}/webapps/${app.name}"/>
+  
+  <property name="dir.dist"        value="dist"/>
+  <property name="dir.web"         value="${dir.build}/web" />
+  <property name="dir.bin"         value="${dir.build}/bin" />
+  <property name="dir.lib"         value="lib" />
+  <property name="dir.src"         value="src" />
+  <property name="dir.tmp"         value="tmp" />
+  <property name="web.config"      value="web-default.xml" />
+  <property name="dist.web.config" value="web-default.xml" />
 
-<!-- ==================== File and Directory Names ======================== -->
+  <!--  ==================== Compilation Control Options ==================== -->
 
-<!--
-
-  These properties generally define file and directory names (or paths) that
-  affect where the build process stores its outputs.
-
-  app.name             Base name of this application, used to
-                       construct filenames and directories.
-                       Defaults to "myapp".
-
-  app.version          Version identifier for this application.
-
-  build.home           The directory into which the "prepare" and
-                       "compile" targets will generate their output.
-                       Defaults to "build".
-
-  catalina.home        The directory in which you have installed
-                       a binary distribution of Tomcat 4.  This will
-                       be used by the "deploy" target.
-
-  deploy.home          The name of the directory into which the
-                       deployment hierarchy will be created, and into
-                       which the build directory will be copied.
-                       Defaults to "${catalina.home}/webapps/${app.name}".
-
-  dist.home            The name of the base directory in which
-                       distribution files are created.
-                       Defaults to "dist".
-
-  web.home              The directory that contains the web files, defaults to "web"
-
-  lib.home              The directory that contains the libraries, defaults to "lib"
-
-  src.home              The directory that contains the source, defaults to "src"
-
-  tmp.home              Temporary directory for compiling JSP files, defaults to "tmp"
-
-  web.config            What file to use as web.xml.  Default is web-default.xml
-
-  dist.web.config       What file to use as web.xml when building a
-                        distribution.  Default is web-default.xml
-
--->
-
-<property name="app.name"      value="fll-sw"/>
-<property name="app.version"   value="2.5"/>
-<property name="build.home"    value="build"/>
-<property name="catalina.home" value="foo"/>
-<property name="deploy.home"   value="${catalina.home}/webapps/${app.name}"/>
-<property name="dist.home"     value="dist"/>
-<property name="web.home"       value="web" />
-<property name="lib.home"       value="lib" />
-<property name="src.home"       value="src" />
-<property name="tmp.home"       value="tmp" />
-<property name="web.config" value="web-default.xml" />
-<property name="dist.web.config" value="web-default.xml" />
-
-<!--  ==================== Compilation Control Options ==================== -->
-
-<!--
+  <!--
 
   These properties control option settings on the Javac compiler when it
   is invoked using the <javac> task.
@@ -105,43 +37,43 @@
 
   compile.optimize     Should compilation include the optimize option?
 
--->
+  -->
 
-<property name="compile.debug"       value="true"/>
-<property name="compile.deprecation" value="true"/>
-<property name="compile.optimize"    value="false"/>
-
-
-
-<!-- ==================== External Dependencies =========================== -->
+  <property name="compile.debug"       value="true"/>
+  <property name="compile.deprecation" value="true"/>
+  <property name="compile.optimize"    value="false"/>
 
 
-<!--
+
+  <!-- ==================== External Dependencies =========================== -->
+
+
+  <!--
 
   Use property values to define the locations of external JAR files on which
   your application will depend.  In general, these values will be used for
   two purposes:
   * Inclusion on the classpath that is passed to the Javac compiler
   * Being copied into the "/WEB-INF/lib" directory during execution
-    of the "deploy" target.
+  of the "deploy" target.
 
   Because we will automatically include all of the Java classes that Tomcat 4
   exposes to web applications, we will not need to explicitly list any of those
   dependencies.  You only need to worry about external dependencies for JAR
   files that you are going to include inside your "/WEB-INF/lib" directory.
 
--->
+  -->
 
-<!-- Dummy external dependency -->
-<!--
+  <!-- Dummy external dependency -->
+  <!--
   <property name="foo.jar"
-           value="/path/to/foo.jar"/>
--->
+  value="/path/to/foo.jar"/>
+  -->
 
 
-<!-- ==================== Compilation Classpath =========================== -->
+  <!-- ==================== Compilation Classpath =========================== -->
 
-<!--
+  <!--
 
   Rather than relying on the CLASSPATH environment variable, Ant includes
   features that makes it easy to dynamically construct the classpath you
@@ -150,383 +82,409 @@
   that Tomcat makes available to web applications automatically, plus anything
   that you explicitly added.
 
--->
+  -->
 
-<path id="application.classpath">
-  <pathelement location="${lib.home}/JonsInfra-0.2.jar"/>
-  <pathelement location="${lib.home}/junit-3.8.1.jar"/>
-  <pathelement location="${lib.home}/log4j-1.2.8.jar"/>
-  <pathelement location="${lib.home}/mysql-connector-java-3.0.8-stable-bin.jar"/>
-  <pathelement location="${lib.home}/common-lib/xercesImpl.jar"/>
-  <pathelement location="${lib.home}/common-lib/xmlParserAPIs.jar"/>
-</path>
+  <path id="application.classpath">
+    <pathelement location="${dir.lib}/JonsInfra-0.2.jar"/>
+    <pathelement location="${dir.lib}/junit-3.8.1.jar"/>
+    <pathelement location="${dir.lib}/log4j-1.2.8.jar"/>
+    <pathelement location="${dir.lib}/mysql-connector-java-3.0.8-stable-bin.jar"/>
+    <pathelement location="${dir.lib}/common-lib/xercesImpl.jar"/>
+    <pathelement location="${dir.lib}/common-lib/xmlParserAPIs.jar"/>
+  </path>
 
-<path id="compile.classpath">
-  <!-- Include all JAR files that will be included in /WEB-INF/lib -->
-  <path refid="application.classpath" />
+  <path id="compile.classpath">
+    <!-- Include all JAR files that will be included in /WEB-INF/lib -->
+    <path refid="application.classpath" />
 
-  <pathelement location="${lib.home}/commons-lang-2.0.jar" />
-  <pathelement location="${lib.home}/taglibs-string.jar" />
-  <pathelement location="${lib.home}/uptag.jar"/>
+    <pathelement location="${dir.lib}/commons-lang-2.0.jar" />
+    <pathelement location="${dir.lib}/taglibs-string.jar" />
+    <pathelement location="${dir.lib}/uptag.jar"/>
 
-  <!-- JSTL libraries -->
-  <pathelement location="${lib.home}/dom.jar" />
-  <pathelement location="${lib.home}/jaxen-full.jar" />
-  <pathelement location="${lib.home}/jaxp-api.jar" />
-  <pathelement location="${lib.home}/jstl.jar" />
-  <pathelement location="${lib.home}/sax.jar" />
-  <pathelement location="${lib.home}/saxpath.jar" />
-  <pathelement location="${lib.home}/standard.jar" />
-  <pathelement location="${lib.home}/xalan.jar" />
+    <!-- JSTL libraries -->
+    <pathelement location="${dir.lib}/dom.jar" />
+    <pathelement location="${dir.lib}/jaxen-full.jar" />
+    <pathelement location="${dir.lib}/jaxp-api.jar" />
+    <pathelement location="${dir.lib}/jstl.jar" />
+    <pathelement location="${dir.lib}/sax.jar" />
+    <pathelement location="${dir.lib}/saxpath.jar" />
+    <pathelement location="${dir.lib}/standard.jar" />
+    <pathelement location="${dir.lib}/xalan.jar" />
 
-  <!-- Include all elements that Tomcat exposes to applications -->
-  <pathelement location="${catalina.home}/common/classes"/>
-  <fileset dir="${catalina.home}/common/endorsed">
-    <include name="*.jar"/>
-  </fileset>
+    <!-- Include all elements that Tomcat exposes to applications -->
+    <pathelement location="${dir.tomcat}/common/classes"/>
+    <fileset dir="${dir.tomcat}/common/endorsed">
+      <include name="*.jar"/>
+    </fileset>
 
-  <fileset dir="${catalina.home}/common/lib">
-    <include name="*.jar"/>
-  </fileset>
-  <pathelement location="${catalina.home}/shared/classes"/>
-  <fileset dir="${catalina.home}/shared/lib">
-    <include name="*.jar"/>
-  </fileset>
+    <fileset dir="${dir.tomcat}/common/lib">
+      <include name="*.jar"/>
+    </fileset>
+    <pathelement location="${dir.tomcat}/shared/classes"/>
+    <fileset dir="${dir.tomcat}/shared/lib">
+      <include name="*.jar"/>
+    </fileset>
 
-</path>
-
-
-<target name="init">
-  <tstamp />
-
-  <uptodate property="jsp.notRequired"
-            targetfile="${tmp.home}/.tstamp"
-            >
-    <srcfiles dir="${basedir}/${web.home}" includes="**" />
-  </uptodate>
-</target>
+  </path>
 
 
-<!-- ==================== Clean Target ==================================== -->
+  <target name="init">
+    <tstamp />
 
-<!--
+    <uptodate property="jsp.notRequired"
+      targetfile="${dir.tmp}/.tstamp"
+      >
+      <srcfiles dir="${basedir}/web" includes="**" />
+    </uptodate>
+  </target>
+
+
+  <!-- ==================== Clean Target ==================================== -->
+
+  <!--
 
   The "clean" target deletes any previous "build" and "dist" directory,
   so that you can be ensured the application can be built from scratch.
 
--->
+  -->
 
-<target name="clean"
-   description="Delete old build and dist directories">
-  <delete dir="${build.home}"/>
-  <delete dir="${dist.home}"/>
-  <delete dir="${tmp.home}" />
-</target>
+  <target name="clean"
+    description="Delete old build and dist directories">
+    <delete dir="${dir.build}"/>
+    <delete dir="${dir.dist}"/>
+    <delete dir="${dir.tmp}" />
+  </target>
 
 
 
-<!-- ==================== Compile Target ================================== -->
+  <!-- ==================== Compile Target ================================== -->
 
-<!--
+  <!--
 
   The "compile" target transforms source files (from your "src" directory)
   into object files in the appropriate location in the build directory.
   This example assumes that you will be including your classes in an
   unpacked directory hierarchy under "/WEB-INF/classes".
 
--->
-<target name="compile" depends="prepare,compile.classes,compile.jsp"
-   description="Compile Java sources">
-</target>
+  -->
+  <target name="compile" depends="prepare,compile.classes,compile.jsp"
+    description="Compile Java sources">
+    
+    <!-- build scripts -->
+    <path id="subjective.build.classpath">
+      <path refid="application.classpath" />
+      <pathelement location="${basedir}/web/WEB-INF/classes" />
+    </path>
+    <antcall target="-buildscripts">
+      <param name="app.name" value="subjective" />
+      <param name="class.main" value="fll.gui.SubjectiveFrame" />
+      <param name="-scripts.dir" value="${dir.bin}" />
+      <param name="-scripts.root" value=".." />
+      <reference torefid="-scripts.path" refid="subjective.build.classpath" />
+    </antcall>
+    
+    <copy todir="${dir.build}/lib">
+      <fileset dir="${dir.lib}" />
+    </copy>
+  </target>
 
-<target name="compile.classes" depends="prepare,checkstyle"
-   description="Compile Java sources">
+  <target name="compile.classes" depends="prepare,checkstyle"
+    description="Compile Java sources">
 
-  <!-- Compile Java classes as necessary -->
-  <mkdir    dir="${build.home}/WEB-INF/classes"/>
-  <javac srcdir="src"
-            destdir="${build.home}/WEB-INF/classes"
-             debug="${compile.debug}"
-       deprecation="${compile.deprecation}"
-          optimize="${compile.optimize}"
+    <!-- Compile Java classes as necessary -->
+    <mkdir    dir="${dir.web}/WEB-INF/classes"/>
+    <javac srcdir="src"
+      destdir="${dir.web}/WEB-INF/classes"
+      debug="${compile.debug}"
+      deprecation="${compile.deprecation}"
+      optimize="${compile.optimize}"
       source="1.4"
       target="1.4">
-  <classpath refid="compile.classpath"/>
-  </javac>
-  
-  <!-- Copy associated resource files -->
-  <copy  todir="${build.home}/WEB-INF/classes">
-    <fileset dir="src">
-      <exclude name="**/*.java" />
-    </fileset>
-  </copy>
+      <classpath refid="compile.classpath"/>
+    </javac>
+    
+    <!-- Copy associated resource files -->
+    <copy  todir="${dir.web}/WEB-INF/classes">
+      <fileset dir="src">
+        <exclude name="**/*.java" />
+      </fileset>
+    </copy>
 
-</target>
+  </target>
 
-<!-- not perfect, but will work -->
-<target name="compile.jsp" depends="compile.classes"
+  <!-- not perfect, but will work -->
+  <target name="compile.jsp" depends="compile.classes"
     description="Compile JSP sources"
     unless="jsp.notRequired"
     >
     
-    <mkdir    dir="${tmp.home}" />
-<!--    <jspc srcdir="${web.home}"
-          destdir="${tmp.home}">
-      <include name="**/*.jsp" />
-      <classpath>
-        <pathelement location="${build.home}/WEB-INF/classes" />
-        <path refid="compile.classpath" />
-      </classpath>
-    </jspc> -->
-
-<!-- broken with Tomcat 5 for now -->
-<!--    <java classname="org.apache.jasper.JspC"
-	  fork="yes"
-	  failonerror="true"
-	  taskname="jspc"
-	  dir="${basedir}"
-          >
-      <classpath>
-        <pathelement location="${build.home}/WEB-INF/classes" />
-        <path refid="compile.classpath" />
-      </classpath>
-      <arg line="-d ${tmp.home}" />
-      <arg line="-die9" />
-      <arg line="-webapp ${build.home}" />
-    </java>
-
-    <javac srcdir="${tmp.home}"
-           destdir="${tmp.home}"
-           debug="${compile.debug}"
-           deprecation="${compile.deprecation}"
-           optimize="${compile.optimize}"
-          source="1.4"
-      target="1.4">
+    <mkdir    dir="${dir.tmp}" />
+    <!--    <jspc srcdir="web"
+    destdir="${dir.tmp}">
+    <include name="**/*.jsp" />
     <classpath>
-      <pathelement location="${build.home}/WEB-INF/classes" />
-      <path refid="compile.classpath" />
-    </classpath>
-    </javac> -->
+    <pathelement location="${dir.web}/WEB-INF/classes" />
+    <path refid="compile.classpath" />
+  </classpath>
+  </jspc> -->
 
-<!-- still broken, even though this is what Jakarta says to use
- <taskdef classname="org.apache.jasper.JspC" name="jasper2" > 
-      <classpath id="jspc.classpath"> 
-        <pathelement location="${java.home}/../lib/tools.jar"/> 
-        <fileset dir="${catalina.home}/bin"> 
-          <include name="*.jar"/> 
-        </fileset> 
-        <fileset dir="${catalina.home}/server/lib"> 
-          <include name="*.jar"/> 
-        </fileset> 
-        <fileset dir="${catalina.home}/common/lib"> 
-          <include name="*.jar"/> 
-        </fileset> 
-      </classpath> 
-    </taskdef> 
+    <!-- broken with Tomcat 5 for now -->
+    <!--    <java classname="org.apache.jasper.JspC"
+    fork="yes"
+    failonerror="true"
+    taskname="jspc"
+    dir="${basedir}"
+    >
+    <classpath>
+    <pathelement location="${dir.web}/WEB-INF/classes" />
+    <path refid="compile.classpath" />
+  </classpath>
+    <arg line="-d ${dir.tmp}" />
+    <arg line="-die9" />
+    <arg line="-webapp ${dir.web}" />
+  </java>
+
+    <javac srcdir="${dir.tmp}"
+    destdir="${dir.tmp}"
+    debug="${compile.debug}"
+    deprecation="${compile.deprecation}"
+    optimize="${compile.optimize}"
+    source="1.4"
+    target="1.4">
+    <classpath>
+    <pathelement location="${dir.web}/WEB-INF/classes" />
+    <path refid="compile.classpath" />
+  </classpath>
+  </javac> -->
+
+    <!-- still broken, even though this is what Jakarta says to use
+    <taskdef classname="org.apache.jasper.JspC" name="jasper2" > 
+    <classpath id="jspc.classpath"> 
+    <pathelement location="${java.home}/../lib/tools.jar"/> 
+    <fileset dir="${dir.tomcat}/bin"> 
+    <include name="*.jar"/> 
+  </fileset> 
+    <fileset dir="${dir.tomcat}/server/lib"> 
+    <include name="*.jar"/> 
+  </fileset> 
+    <fileset dir="${dir.tomcat}/common/lib"> 
+    <include name="*.jar"/> 
+  </fileset> 
+  </classpath> 
+  </taskdef> 
 
     <jasper2 
-             validateXml="false" 
-             uriroot="${build.home}" 
-             webXmlFragment="${build.home}/WEB-INF/generated_web.xml" 
-             outputDir="${tmp.home}" /> 
+    validateXml="false" 
+    uriroot="${dir.web}" 
+    webXmlFragment="${dir.web}/WEB-INF/generated_web.xml" 
+    outputDir="${dir.tmp}" /> 
 
-    <javac destdir="${build.home}/WEB-INF/classes"
-           optimize="${compile.optimize}"
-           debug="${compile.debug}"
-           deprecation="${compile.deprecation}"
-           failonerror="true"
-           srcdir="${}/WEB-INF/src" 
-	   excludes="**/*.smap">
-      <classpath>
-        <path refid="compile.classpath" />
-        <pathelement location="${tmp.home}"/>
-        <fileset dir="${build.home}/WEB-INF/lib">
-          <include name="*.jar"/>
-        </fileset>
-        <pathelement location="${catalina.home}/common/classes"/>
-        <fileset dir="${tomcat.home}/common/lib">
-          <include name="*.jar"/>
-        </fileset>
-        <pathelement location="${catalina.home}/shared/classes"/>
-        <fileset dir="${catalina.home}/shared/lib">
-          <include name="*.jar"/>
-        </fileset>
-        <fileset dir="${catalina.home}/bin"> 
-          <include name="*.jar"/> 
-        </fileset> 
-      </classpath>
-      <include name="**" />
-      <exclude name="tags/**" />
-    </javac> -->
-</target>  
+    <javac destdir="${dir.web}/WEB-INF/classes"
+    optimize="${compile.optimize}"
+    debug="${compile.debug}"
+    deprecation="${compile.deprecation}"
+    failonerror="true"
+    srcdir="${}/WEB-INF/src" 
+    excludes="**/*.smap">
+    <classpath>
+    <path refid="compile.classpath" />
+    <pathelement location="${dir.tmp}"/>
+    <fileset dir="${dir.web}/WEB-INF/lib">
+    <include name="*.jar"/>
+  </fileset>
+    <pathelement location="${dir.tomcat}/common/classes"/>
+    <fileset dir="${tomcat.home}/common/lib">
+    <include name="*.jar"/>
+  </fileset>
+    <pathelement location="${dir.tomcat}/shared/classes"/>
+    <fileset dir="${dir.tomcat}/shared/lib">
+    <include name="*.jar"/>
+  </fileset>
+    <fileset dir="${dir.tomcat}/bin"> 
+    <include name="*.jar"/> 
+  </fileset> 
+  </classpath>
+    <include name="**" />
+    <exclude name="tags/**" />
+  </javac> -->
+  </target>  
 
 
-<!-- ==================== Deploy Target =================================== -->
+  <!-- ==================== Deploy Target =================================== -->
 
-<!--
+  <!--
 
   The "deploy" target copies the contents of the build directory into a
   location required by our servlet container, and picks up any external
   dependencies along the way.  AFter restarting the servlet container, you
   can now test your web application.
 
--->
+  -->
 
-<target name="deploy" depends="compile"
-   description="Deploy application to servlet container">
+  <target name="deploy" depends="compile"
+    description="Deploy application to servlet container">
 
-  <!-- first clean out the old files -->
-  <delete>
-    <fileset dir="${deploy.home}">
-      <include name="**" />
-    </fileset>
-  </delete>
+    <!-- first clean out the old files -->
+    <delete>
+      <fileset dir="${dir.deploy}">
+        <include name="**" />
+      </fileset>
+    </delete>
 
-  <!-- Copy the contents of the build directory -->
-  <mkdir     dir="${deploy.home}"/>
-  <copy    todir="${deploy.home}">
-    <fileset dir="${build.home}"/>
-  </copy>
+    <!-- Copy the contents of the build directory -->
+    <mkdir     dir="${dir.deploy}"/>
+    <copy    todir="${dir.deploy}">
+      <fileset dir="${dir.web}"/>
+    </copy>
 
-</target>
-
-
-
-<!-- ==================== Dist Target ===================================== -->
+  </target>
 
 
-<!--
+
+  <!-- ==================== Dist Target ===================================== -->
+
+
+  <!--
 
   The "dist" target creates a binary distribution of your application
   in a directory structure ready to be archived in a tar.gz or zip file.
   Note that this target depends on two others:
   * "deploy" so that the entire web application (including external
-    dependencies) will have been assembled
+  dependencies) will have been assembled
   * "javadoc" so that the application Javadocs will have been created
 
--->
+  -->
 
-<target name="dist" depends="compile,javadoc"
-        description="Create distribution">
+  <target name="dist" depends="compile,javadoc"
+    description="Create distribution">
 
-  <!-- copy docs -->
-  <mkdir dir="${dist.home}/docs" />
-  <copy todir="${dist.home}/docs">
-    <fileset dir="${basedir}/docs" />
-  </copy>
+    <!-- copy docs -->
+    <mkdir dir="${dir.dist}/docs" />
+    <copy todir="${dir.dist}/docs">
+      <fileset dir="${basedir}/docs" />
+    </copy>
 
-  <!-- get the correct web.xml file -->
-  <copy file="${web.home}/WEB-INF/${dist.web.config}"
-        tofile="${build.home}/WEB-INF/web.xml"
-        overwrite="true"
-        />
+    <!-- get the correct web.xml file -->
+    <copy file="web/WEB-INF/${dist.web.config}"
+      tofile="${dir.web}/WEB-INF/web.xml"
+      overwrite="true"
+      />
 
-  <!-- Create web application zip file -->
-  <zip zipfile="${dist.home}/web.zip">
-    <zipfileset dir="${build.home}" prefix="fll-sw" />
-  </zip>
-  
-  
-  <zip zipfile="${dist.home}/common-lib.zip">
-    <zipfileset dir="${lib.home}/common-lib"/>
-  </zip>
-  
-  
-  <!-- stuff for subjective scoring app -->
-  <mkdir dir="${tmp.home}/subjective" />
-  <mkdir dir="${tmp.home}/subjective/lib" />
-  <jar destfile="${tmp.home}/subjective/lib/subjective.jar"
-       basedir="${build.home}/WEB-INF/classes"
-       index="true"
-       />
-  <copy todir="${tmp.home}/subjective/lib">
-    <fileset dir="${lib.home}" />
-  </copy>
-
-  <path id="subjective.dist.classpath">
-    <path refid="application.classpath" />
-    <pathelement location="${lib.home}/subjective.jar" />
-  </path>
-  <pathconvert targetos="windows"
-               property="subjective.windows.classpath"
-               refid="subjective.dist.classpath">
-    <map from="${basedir}" to="." />
-  </pathconvert>
-  <pathconvert targetos="unix"
-               property="subjective.unix.classpath"
-               refid="subjective.dist.classpath">
-    <map from="${basedir}" to="." />
-  </pathconvert>
-
-
-  <echo file="${tmp.home}/subjective/subjective.bat">java -classpath "${subjective.windows.classpath}" fll.gui.SubjectiveFrame</echo>
-  
-  <echo file="${tmp.home}/subjective/subjective.sh">java -classpath "${subjective.unix.classpath}" fll.gui.SubjectiveFrame</echo>
-  
-  <zip zipfile="${dist.home}/subjective.zip">
-    <zipfileset prefix="subjective" dir="${tmp.home}/subjective" />
-  </zip>
-  
-  <zip zipfile="${dist.home}/src.zip">
-    <zipfileset dir="${basedir}">
-      <include name="${web.home}/**" />
-      <include name="${src.home}/**" />
-      <include name="docs/**" />
-      <include name="prj.el" />
-      <include name="build.xml" />
-      <include name="ChangeLog" />
-    </zipfileset>
-  </zip>
-  
-  <zip zipfile="${app.name}-${app.version}.zip">
-    <zipfileset dir="${dist.home}" prefix="fll" />
-  </zip>
-  
-  <delete dir="${tmp.home}" />
-  
-  <echo message="The distribution file is ${app.name}-${app.version}.zip" />
- 
-</target>
-
-
-
-<!-- ==================== Javadoc Target ================================== -->
-
+    <!-- Create web application zip file -->
+    <zip zipfile="${dir.dist}/web.zip">
+      <zipfileset dir="${dir.web}" prefix="${app.name}" />
+    </zip>
+    
+    
+    <zip zipfile="${dir.dist}/common-lib.zip">
+      <zipfileset dir="${dir.lib}/common-lib"/>
+    </zip>
+    
+    
+    <!-- stuff for subjective scoring app -->
+    <mkdir dir="${dir.tmp}/subjective" />
+    <mkdir dir="${dir.tmp}/subjective/lib" />
+    <jar destfile="${dir.tmp}/subjective/lib/subjective.jar"
+      basedir="${dir.web}/WEB-INF/classes"
+      index="true"
+      />
+    <copy todir="${dir.tmp}/subjective/lib">
+      <fileset dir="${dir.lib}" />
+    </copy>
+    <path id="subjective.dist.classpath">
+      <path refid="application.classpath" />
+      <pathelement location="${dir.lib}/subjective.jar" />
+    </path>
 <!--
+    <pathconvert targetos="windows"
+      property="subjective.windows.classpath"
+      refid="subjective.dist.classpath">
+      <map from="${basedir}" to="." />
+    </pathconvert>
+    <pathconvert targetos="unix"
+      property="subjective.unix.classpath"
+      refid="subjective.dist.classpath">
+      <map from="${basedir}" to="." />
+    </pathconvert>
+
+    <echo file="${dir.tmp}/subjective/subjective.bat">java -classpath "${subjective.windows.classpath}" fll.gui.SubjectiveFrame</echo>
+    
+    <echo file="${dir.tmp}/subjective/subjective.sh">java -classpath "${subjective.unix.classpath}" fll.gui.SubjectiveFrame</echo>
+    -->
+
+    <!-- build scripts -->
+    <antcall target="-buildscripts">
+      <param name="app.name" value="subjective" />
+      <param name="class.main" value="fll.gui.SubjectiveFrame" />
+      <param name="-scripts.dir" value="${dir.tmp}/subjective" />
+      <param name="-scripts.root" value="." />
+      <reference torefid="-scripts.path" refid="subjective.dist.classpath" />
+    </antcall>
+    
+    <zip zipfile="${dir.dist}/subjective.zip">
+      <zipfileset prefix="subjective" dir="${dir.tmp}/subjective" />
+    </zip>
+
+    <zip zipfile="${dir.dist}/src.zip">
+      <zipfileset dir="${basedir}">
+        <include name="web/**" />
+        <include name="${dir.src}/**" />
+        <include name="docs/**" />
+        <include name="prj.el" />
+        <include name="build.xml" />
+        <include name="ChangeLog" />
+      </zipfileset>
+    </zip>
+    
+    <zip zipfile="${app.name}-${app.version}.zip">
+      <zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version}" />
+    </zip>
+    
+    <delete dir="${dir.tmp}" />
+    
+    <echo message="The distribution file is ${app.name}-${app.version}.zip" />
+    
+  </target>
+
+
+
+  <!-- ==================== Javadoc Target ================================== -->
+
+  <!--
 
   The "javadoc" target creates Javadoc API documentation for the Java
   classes included in your application.  Normally, this is only required
   when preparing a distribution release, but is available as a separate
   target in case the developer wants to create Javadocs independently.
 
--->
+  -->
 
-<target name="javadoc"
-   description="Create Javadoc API documentation">
+  <target name="javadoc"
+    description="Create Javadoc API documentation">
 
-  <mkdir dir="${dist.home}/api"/>
-  <javadoc sourcepath="src"
-           windowtitle="${app.name}"
-           destdir="${dist.home}/api"
-           packagenames="fll.*"
-           use="true"
-           splitindex="true"
-           additionalparam="-tag beaninfo:a:BeanInfo -tag valid:a:Validity -tag feasible:a:Feasibility -tag test:a:Tests -tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator"
-           >
-    <classpath>
-      <path refid="compile.classpath" />
-      <pathelement location="${build.home}/src" />
-    </classpath>
-  
-  </javadoc>
+    <mkdir dir="${dir.dist}/api"/>
+    <javadoc sourcepath="src"
+      windowtitle="${app.name}"
+      destdir="${dir.dist}/api"
+      packagenames="fll.*"
+      use="true"
+      splitindex="true"
+      additionalparam="-tag beaninfo:a:BeanInfo -tag valid:a:Validity -tag feasible:a:Feasibility -tag test:a:Tests -tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator"
+      >
+      <classpath>
+        <path refid="compile.classpath" />
+        <pathelement location="${dir.src}" />
+      </classpath>
+      
+    </javadoc>
 
-</target>
+  </target>
 
 
 
-<!-- ==================== Prepare Target ================================== -->
+  <!-- ==================== Prepare Target ================================== -->
 
-<!--
+  <!--
 
   The "prepare" target is used to create the "build" destination directory,
   and copy the static contents of your web application to it.  If you need
@@ -535,47 +493,47 @@
 
   Normally, this task is executed indirectly when needed.
 
--->
+  -->
 
-<target name="prepare" depends="init">
+  <target name="prepare" depends="init">
 
-  <!-- Create build directory and copy static content -->
-  <mkdir  dir="${build.home}"/>
-  <copy todir="${build.home}">
-    <fileset dir="${web.home}">
-      <exclude name="**/*.java" />
-      <exclude name="**/common-lib" />
-    </fileset>
-    <filterset>
-      <filter token="APP-VERSION" value="${app.version}" />
-    </filterset>
-  </copy>
-  
-  <!-- Copy static files from external dependencies as needed -->
-  <copy todir="${build.home}/WEB-INF/classes">
-    <fileset dir="${src.home}">
-      <exclude name="**/*.java" />
-    </fileset>
-  </copy>
-  <copy todir="${build.home}/WEB-INF/lib">
-    <fileset dir="${lib.home}">
-      <include name="**/*.jar" />
-      <exclude name="**/common-lib/**" />
-    </fileset>
-  </copy>
+    <!-- Create build directory and copy static content -->
+    <mkdir  dir="${dir.web}"/>
+    <copy todir="${dir.web}">
+      <fileset dir="web">
+        <exclude name="**/*.java" />
+        <exclude name="**/common-lib" />
+      </fileset>
+      <filterset>
+        <filter token="APP-VERSION" value="${app.version}" />
+      </filterset>
+    </copy>
+    
+    <!-- Copy static files from external dependencies as needed -->
+    <copy todir="${dir.web}/WEB-INF/classes">
+      <fileset dir="${dir.src}">
+        <exclude name="**/*.java" />
+      </fileset>
+    </copy>
+    <copy todir="${dir.web}/WEB-INF/lib">
+      <fileset dir="${dir.lib}">
+        <include name="**/*.jar" />
+        <exclude name="**/common-lib/**" />
+      </fileset>
+    </copy>
 
-  <!-- get the correct web.xml file -->
-  <copy file="${web.home}/WEB-INF/${web.config}"
-        tofile="${build.home}/WEB-INF/web.xml"
-        overwrite="true"
-        />
+    <!-- get the correct web.xml file -->
+    <copy file="web/WEB-INF/${web.config}"
+      tofile="${dir.web}/WEB-INF/web.xml"
+      overwrite="true"
+      />
 
-</target>
+  </target>
 
   <target name="test"
-          depends="compile,checkstyle.full"
-          description="Run any unit tests and the full checkstyle"
-          >
+    depends="compile,checkstyle.full"
+    description="Run any unit tests and the full checkstyle"
+    >
     <!-- no unit tests yet -->
   </target>
 
@@ -593,29 +551,73 @@
   </taskdef>
 
   <target name="checkstyle"
-          description="Check for code convention violations"
-          >
-    <mkdir dir="${build.home}/classes" />
+    description="Check for code convention violations"
+    >
+    <mkdir dir="${dir.build}/classes" />
 
     <checkstyle config="checkstyle_checks.xml">
-      <fileset dir="${basedir}/src">
+      <fileset dir="${dir.src}">
         <include name="**/*.java" />
       </fileset>
     </checkstyle>
   </target>
 
   <target name="checkstyle.full"
-          description="Check for code convention violations (more aggressive)"
-          >
-    <mkdir dir="${build.home}/classes" />
+    description="Check for code convention violations (more aggressive)"
+    >
+    <mkdir dir="${dir.build}/classes" />
 
     <checkstyle config="checkstyle_nightly_checks.xml"
-                failOnViolation="false"
-                >
-      <fileset dir="${basedir}/src">
+      failOnViolation="false"
+      >
+      <fileset dir="${dir.src}">
         <include name="**/*.java" />
       </fileset>
     </checkstyle>
   </target>
 
+  <!-- ==================== SECONDARY TARGETS ==================== -->
+  <!-- build scripts to run the application -->
+  <target name="-buildscripts.check">
+    <!-- somewhat hokey, in that we only look at one of the scripts generated -->
+    <uptodate property="-scripts.uptodate"
+      targetfile="${-scripts.dir}/${app.name}.sh">
+      <srcfiles dir="${basedir}" includes="run*.t,${ant.file}" />
+    </uptodate>
+  </target>
+  
+  <target name="-buildscripts" 
+    depends="-buildscripts.check"
+    unless="-scripts.uptodate">
+    <!-- JavaDOME  -->
+    <mkdir dir="${-scripts.dir}" />
+
+    <pathconvert targetos="unix"
+      property="classpath.unix"
+      refid="-scripts.path">
+      <map from="${basedir}" to="${-scripts.root}" />
+    </pathconvert>
+    <pathconvert targetos="windows"
+      property="classpath.windows"
+      refid="-scripts.path">
+      <map from="${basedir}" to="${-scripts.root}" />
+    </pathconvert>
+
+    <copy file="run.sh.t" tofile="${-scripts.dir}/${app.name}.sh" overwrite="true">
+      <filterset>
+        <filter token="CLASSPATH" value="${classpath.unix}" />
+        <filter token="CLASSNAME" value="${class.main}" />
+        <filter token="JAVA_ARGS" value="" />
+      </filterset>
+    </copy>
+    <copy file="run.bat.t" tofile="${-scripts.dir}/${app.name}.bat" overwrite="true">
+      <filterset>
+        <filter token="CLASSPATH" value="${classpath.windows}" />
+        <filter token="CLASSNAME" value="${class.main}" />
+        <filter token="JAVA_ARGS" value="" />
+      </filterset>
+    </copy>
+    
+  </target>
+  
 </project>
