@@ -686,9 +686,6 @@ public class Queries {
    * Total the scores in the database for tournament.  Just totals each row
    * for tournament using document for the appropriate multipliers.
    *
-   * <p><b>NOTE</b>: Doesn't handle enumerated goals.  They are just skipped
-   * when found</p>
-   *
    * @param document the challenge document
    * @param connection connection to database, needs write privileges
    * @throws SQLException if an error occurs
