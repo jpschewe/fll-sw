@@ -512,6 +512,13 @@
 
 </target>
 
+  <target name="test"
+          depends="compile,checkstyle.full"
+          description="Run any unit tests and the full checkstyle"
+          >
+    <!-- no unit tests yet -->
+  </target>
+
   <!-- ===================== Checkstyle =================== -->
   <taskdef resource="checkstyletask.properties">
     <classpath>

@@ -43,6 +43,9 @@ Cygwin adds UN*X like interfaces to Windows, in particular, ssh and cvs.
 Please follow the coding standards put forward at
 http://mtu.net/~jpschewe/java/CodingStandards.html.
 
+Before checking in any code, please run the ant target test to ensure your
+code is correct.
+
 There are some good ideas for JSP coding conventions here as well.
 http://developer.java.sun.com/developer/technicalArticles/javaserverpages/code_convention/
 
