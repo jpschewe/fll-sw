@@ -46,8 +46,8 @@ final Team team = (Team)tournamentTeams.get(new Integer(teamNumber));
 
 //the next run the team will be competing in
 final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumber());
-  
-//what run number we're going to edit/enter  
+
+//what run number we're going to edit/enter
 final int lRunNumber;
 if("1".equals(request.getParameter("EditFlag")) || null != request.getParameter("error")) {
   final String runNumberStr = request.getParameter("RunNumber");
@@ -55,10 +55,17 @@ if("1".equals(request.getParameter("EditFlag")) || null != request.getParameter(
     throw new RuntimeException("Please choose a run number when editing scores");
   }
   final int runNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumberStr).intValue();
-  if(null == request.getParameter("error") && !Playoff.performanceScoreExists(connection, teamNumber, runNumber)) {
-    throw new RuntimeException("Team has not yet competed in run " + runNumber + ".  Please choose a valid run number.");
+  if(runNumber == 0) {
+    lRunNumber = nextRunNumber - 1;
+    if(lRunNumber < 1) {
+      throw new RuntimeException("Selected team has no performance score for this tournament.");
+    }
+  } else {
+    if(null == request.getParameter("error") && !Playoff.performanceScoreExists(connection, teamNumber, runNumber)) {
+      throw new RuntimeException("Team has not yet competed in run " + runNumber + ".  Please choose a valid run number.");
+    }
+    lRunNumber = runNumber;
   }
-  lRunNumber = runNumber;
 } else {
   lRunNumber = nextRunNumber;
 }
