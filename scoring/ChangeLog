@@ -1,3 +1,10 @@
+2003-08-09  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/model/SubjectiveTableModel.java (sort): Use
+	fireTableDataChanged to signify that a sort has occurred instead
+	of fireTableStructureChanged.  This keeps the table columns from
+	getting recreated and loosing the editor. (707840)  
+
 2003-07-27  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/web/GetFile.java (getFile): Make score.xml human
