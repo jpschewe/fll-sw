@@ -1,3 +1,8 @@
+2003-10-24  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/Queries.java (updateScoreTotals): Only check for Bye
+	column on performance scores (bug from Chuck, didn't make it to SF).
+
 2003-10-22  Jon Schewe  <jpschewe@mtu.net>
 	
 	* labeled fll_2003_test_20031022 for testing

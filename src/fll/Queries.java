@@ -716,11 +716,13 @@ public class Queries {
       final NodeList goals = performanceElement.getElementsByTagName("goal");
       rs = selectPrep.executeQuery();
       while(rs.next()) {
-        final int computedTotal = computeTotalScore(rs, goals);
-        updatePrep.setInt(1, Math.max(computedTotal, minimumPerformanceScore));
-        updatePrep.setInt(2, rs.getInt("TeamNumber"));
-        updatePrep.setInt(4, rs.getInt("RunNumber"));
-        updatePrep.executeUpdate();
+        if(!rs.getBoolean("Bye")) {
+          final int computedTotal = computeTotalScore(rs, goals);
+          updatePrep.setInt(1, Math.max(computedTotal, minimumPerformanceScore));
+          updatePrep.setInt(2, rs.getInt("TeamNumber"));
+          updatePrep.setInt(4, rs.getInt("RunNumber"));
+          updatePrep.executeUpdate();
+        }
       }
       rs.close();
       updatePrep.close();
@@ -1180,33 +1182,31 @@ public class Queries {
                                        final NodeList goals)
     throws ParseException, SQLException {
     int computedTotal = 0;
-    if(!rs.getBoolean("Bye")) {
-      for(int i=0; i<goals.getLength(); i++) {
-        final Element goal = (Element)goals.item(i);
-        final String goalName = goal.getAttribute("name");
-        final int multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goal.getAttribute("multiplier")).intValue();
-        final NodeList values = goal.getElementsByTagName("value");
-        if(values.getLength() == 0) {
-          final int score = rs.getInt(goalName);
-          computedTotal += multiplier * score;
-        } else {
-          //enumerated
-          //find value that matches value in DB
-          final String enum = rs.getString(goalName);
-          boolean found = false;
-          int score = -1;
-          for(int v=0; v<values.getLength() && !found; v++) {
-            final Element value = (Element)values.item(v);
-            if(value.getAttribute("value").equals(enum)) {
-              score = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue() * multiplier;
-              found = true;
-            }
+    for(int i=0; i<goals.getLength(); i++) {
+      final Element goal = (Element)goals.item(i);
+      final String goalName = goal.getAttribute("name");
+      final int multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goal.getAttribute("multiplier")).intValue();
+      final NodeList values = goal.getElementsByTagName("value");
+      if(values.getLength() == 0) {
+        final int score = rs.getInt(goalName);
+        computedTotal += multiplier * score;
+      } else {
+        //enumerated
+        //find value that matches value in DB
+        final String enum = rs.getString(goalName);
+        boolean found = false;
+        int score = -1;
+        for(int v=0; v<values.getLength() && !found; v++) {
+          final Element value = (Element)values.item(v);
+          if(value.getAttribute("value").equals(enum)) {
+            score = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue() * multiplier;
+            found = true;
           }
-          if(!found) {
-            throw new RuntimeException("Error, enum value in database for goal: " + goalName + " is not a valid value");
-          }
-          computedTotal += score;
         }
+        if(!found) {
+          throw new RuntimeException("Error, enum value in database for goal: " + goalName + " is not a valid value");
+        }
+        computedTotal += score;
       }
     }
     return computedTotal;
