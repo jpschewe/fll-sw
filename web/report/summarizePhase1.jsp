@@ -13,8 +13,6 @@
 <%@ page import="java.sql.Connection" %>
   
 <%
-Queries.ensureTournamentTeamsPopulated(application);
-      
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
 final String currentTournament = Queries.getCurrentTournament(connection);

@@ -23,7 +23,6 @@ if(null != currentTournamentParam && !"".equals(currentTournamentParam)) {
   if(!Queries.setCurrentTournament(connection, currentTournamentParam)) {
     response.sendRedirect(response.encodeRedirectURL("tournaments.jsp?unknownTournament=" + currentTournamentParam));
   } else {
-    Queries.populateTournamentTeams(application);
     message.append("<i>Tournament changed to " + currentTournamentParam + "</i><br>");
   }
 }

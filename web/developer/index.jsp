@@ -11,7 +11,6 @@
   </c:if>
 
   <%-- just remove the database connections and they'll get recreated on the next page --%>
-  <c:remove var="tournamentTeams" />
   <c:remove var="connection" />
   <c:remove var="datasource" />
 

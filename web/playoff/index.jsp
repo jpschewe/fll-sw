@@ -10,11 +10,9 @@
 <%@ page import="java.sql.Connection" %>
   
 <%
-Queries.ensureTournamentTeamsPopulated(application);
-
 final Connection connection = (Connection)application.getAttribute("connection");
       
-final Map tournamentTeams = (Map)Queries.getTournamentTeams(connection);
+final Map tournamentTeams = Queries.getTournamentTeams(connection);
 final String currentTournament = Queries.getCurrentTournament(connection);
 final List divisions = Queries.getDivisions(connection);
 final int numSeedingRounds = Queries.getNumSeedingRounds(connection);

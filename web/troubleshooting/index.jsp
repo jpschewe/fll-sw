@@ -2,15 +2,6 @@
 
 <%@ page import="fll.Queries" %>
 
-<%@ page import="java.sql.Connection" %>
-<%
-final Connection connection = (Connection)application.getAttribute("connection");
-  
-if(null != request.getParameter("initializeTournamentTeams")) {
-  Queries.ensureTournamentTeamsPopulated(application);
-}
-%>
-
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
@@ -68,14 +59,6 @@ if(null != request.getParameter("initializeTournamentTeams")) {
         </ul>
       </li>
 
-      <li>When you goto the score entry page and want to pick a team, there
-      are no teams in the list or the wrong tournaments teams.  If this
-      happens then there is a table in the database out of sync.  First make
-      sure the correct tournament is selected on the administration page.
-      Then if it's still wrong click the button here.<form action="index.jsp"
-      method="post"><input type='submit' name='initializeTournamentTeams'
-      value='Initialize Tournament Teams'></form></li>
-          
     </ul>
       
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>

@@ -18,8 +18,6 @@ final String yesColor = "#a0ffa0";
 final String noColor = "#ffa0a0";
 final String blankColor = "#a0a0a0";
 
-Queries.ensureTournamentTeamsPopulated(application);
-
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 
 final String lTeamNum = request.getParameter("TeamNumber");
@@ -33,7 +31,8 @@ if(null == lTeamNum) {
 }
 
 final int teamNumber = Integer.parseInt(lTeamNum);
-final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
+final Connection connection = (Connection)application.getAttribute("connection");
+final Map tournamentTeams = Queries.getTournamentTeams(connection);
 if(!tournamentTeams.containsKey(new Integer(teamNumber))) {
   //FIX error, redirect to error page
   //response.sendError(response.SC_BAD_REQUEST, "Team number selected is not valid.");
@@ -44,7 +43,6 @@ if(!tournamentTeams.containsKey(new Integer(teamNumber))) {
 final Team team = (Team)tournamentTeams.get(new Integer(teamNumber));
 
 //the next run the team will be competing in
-final Connection connection = (Connection)application.getAttribute("connection");
 final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumber());
   
 //what run number we're going to edit/enter  
