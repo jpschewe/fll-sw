@@ -15,10 +15,14 @@
       
       <ol>
         
-        <li><b>Not required for Minnesota.</b>Go to the <a href="admin/index.jsp">administration page</a> and
-        upload the team datafile.  This takes in a tab delimited file and uses
-        that information to determine what teams will exist in the
-        database.</li>
+        <li><b>Not required for Minnesota.</b>Go to the <a
+        href="admin/index.jsp">administration page</a> and upload the team
+        datafile.  This takes in a tab delimited file and uses that
+        information to determine what teams will exist in the database.
+        Note the sizes and datatypes of columns.  If the columns in your
+        datafile are too large the text will be truncated.  The most common
+        problem here is with region names and not being able to tell
+        regions apart</li>
 
         <li>If the team data doesn't look quite right you can <a
         href="admin/select_team.jsp">edit it</a></li>

@@ -1133,7 +1133,7 @@ public class Queries {
       insertPrep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location) VALUES(?, ?)");
       
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Teams.Region FROM Teams LEFT JOIN Tournaments ON Teams.REgion = Tournaments.Name WHERE Tournaments.Name IS NULL");
+      rs = stmt.executeQuery("SELECT DISTINCT Teams.Region FROM Teams LEFT JOIN Tournaments ON Teams.REgion = Tournaments.Name WHERE Tournaments.Name IS NULL");
       while(rs.next()) {
         final String region = rs.getString(1);
         insertPrep.setString(1, region);

@@ -46,7 +46,7 @@ if(null == errorMessage || "".equals(errorMessage)) {
       <%-- Note all form elements need to match the names of the columns in the database --%>
         <tr>
           <th>Database column</th>
-          <th>Datatype</th>
+          <th>Datatype - size</th>
           <th>You column</th>
         </tr>
           
@@ -63,7 +63,7 @@ if(null == errorMessage || "".equals(errorMessage)) {
 
         <tr>
           <td>Team Name</td>
-          <td>Text</td>
+          <td>Text - 255 characters</td>
           <td>
             <select name='TeamName'>
             <option value='' selected>None</option>
@@ -74,7 +74,7 @@ if(null == errorMessage || "".equals(errorMessage)) {
 
         <tr>
           <td>Organization</td>
-          <td>Text</td>
+          <td>Text - 255 characters</td>
           <td>
             <select name='Organization'>
             <option value='' selected>None</option>
@@ -85,7 +85,7 @@ if(null == errorMessage || "".equals(errorMessage)) {
 
         <tr>
           <td>Region</td>
-          <td>Text</td>
+          <td>Text - 16 characters</td>
           <td>
             <select name='Region'>
             <option value='' selected>None</option>
@@ -96,7 +96,7 @@ if(null == errorMessage || "".equals(errorMessage)) {
 
         <tr>
           <td>Division</td>
-          <td>Text</td>
+          <td>Text - 32 characters</td>
           <td>
             <select name='Division'>
             <option value='' selected>None</option>

@@ -1,3 +1,11 @@
+2003-11-09  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/admin/teamColumnSelection.jsp: Added column sizes to column
+	selection page.
+
+	* src/fll/Queries.java (insertTournamentsForRegions): Make sure we
+	don't try to create duplicate tournaments.
+
 2003-11-08  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/web/scoreEntry/ScoreEntry.java
