@@ -80,7 +80,7 @@
 -->
 
 <property name="app.name"      value="fll-sw"/>
-<property name="app.version"   value="2.0"/>
+<property name="app.version"   value="2.1"/>
 <property name="build.home"    value="build"/>
 <property name="catalina.home" value="foo"/>
 <property name="deploy.home"   value="${catalina.home}/webapps/${app.name}"/>
