@@ -3,6 +3,8 @@
   
 <html>
 <head>
+  <meta http-equiv='refresh' content='90' />
+    
 <style type="text/css">
         .clock {font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 14px; color: #FFFFFF; background-color: #000080; font-style: normal; font-weight: bold; font-variant: normal}
     </style>
@@ -53,9 +55,6 @@ function fixTime(the_time) {
 
 </script>
         
-<script language=javascript>
-        window.setInterval("location.href='title.jsp'",90000);
-</script>
 </head>
 <body bgcolor='#000080' onload='StartClock()' onunload='KillClock()'>
 <center>

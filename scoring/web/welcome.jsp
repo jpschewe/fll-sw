@@ -9,6 +9,8 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
   
 <html>
   <head>
+    <meta http-equiv='refresh' content='90' />
+    
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%></title>
   </head>
 
@@ -19,7 +21,7 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
       
       <br />
       <br />
-      <img width='600' src='<c:url value="/images/Minnesota-FLL-logo.gif"/>' />
+      <img src='<c:url value="/images/logo.gif"/>' />
 
       <font face='arial' size='3'>
         <b><c:out value="${ScorePageText}" /></b>
