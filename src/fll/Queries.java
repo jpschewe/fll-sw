@@ -737,15 +737,17 @@ public class Queries {
         final NodeList subjectiveGoals = subjectiveElement.getElementsByTagName("goal");
 
         //build up the SQL
-        updatePrep = connection.prepareStatement("UPDATE " + categoryName + " SET ComputedTotal = ? WHERE TeamNumber = ? AND Tournament = ?");
+        updatePrep = connection.prepareStatement("UPDATE " + categoryName + " SET ComputedTotal = ? WHERE TeamNumber = ? AND Tournament = ? AND Judge = ?");
         selectPrep = connection.prepareStatement("SELECT * FROM " + categoryName + " WHERE Tournament = ?");
         selectPrep.setString(1, tournament);
         updatePrep.setString(3, tournament);
         rs = selectPrep.executeQuery();
         while(rs.next()) {
           final int computedTotal = computeTotalScore(rs, subjectiveGoals);
+          final String judge = rs.getString("Judge");
           updatePrep.setInt(1, Math.max(computedTotal, minimumPerformanceScore));
           updatePrep.setInt(2, rs.getInt("TeamNumber"));
+          updatePrep.setString(4, judge);
           updatePrep.executeUpdate();
         }
         rs.close();

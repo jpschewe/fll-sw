@@ -1,3 +1,8 @@
+2003-10-25  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/Queries.java (updateScoreTotals): need different update
+	to include Judge column (830276)
+
 2003-10-24  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/admin/commitTeam.jsp: Report an error on attempting to enter
