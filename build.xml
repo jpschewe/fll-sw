@@ -184,6 +184,7 @@
   <fileset dir="${catalina.home}/common/endorsed">
     <include name="*.jar"/>
   </fileset>
+
   <fileset dir="${catalina.home}/common/lib">
     <include name="*.jar"/>
   </fileset>
@@ -276,7 +277,8 @@
       </classpath>
     </jspc> -->
 
-    <java classname="org.apache.jasper.JspC"
+<!-- broken with Tomcat 5 for now -->
+<!--    <java classname="org.apache.jasper.JspC"
 	  fork="yes"
 	  failonerror="true"
 	  taskname="jspc"
@@ -300,8 +302,58 @@
       <pathelement location="${build.home}/WEB-INF/classes" />
       <path refid="compile.classpath" />
     </classpath>
-    </javac>
+    </javac> -->
 
+<!-- still broken, even though this is what Jakarta says to use
+ <taskdef classname="org.apache.jasper.JspC" name="jasper2" > 
+      <classpath id="jspc.classpath"> 
+        <pathelement location="${java.home}/../lib/tools.jar"/> 
+        <fileset dir="${catalina.home}/bin"> 
+          <include name="*.jar"/> 
+        </fileset> 
+        <fileset dir="${catalina.home}/server/lib"> 
+          <include name="*.jar"/> 
+        </fileset> 
+        <fileset dir="${catalina.home}/common/lib"> 
+          <include name="*.jar"/> 
+        </fileset> 
+      </classpath> 
+    </taskdef> 
+
+    <jasper2 
+             validateXml="false" 
+             uriroot="${build.home}" 
+             webXmlFragment="${build.home}/WEB-INF/generated_web.xml" 
+             outputDir="${tmp.home}" /> 
+
+    <javac destdir="${build.home}/WEB-INF/classes"
+           optimize="${compile.optimize}"
+           debug="${compile.debug}"
+           deprecation="${compile.deprecation}"
+           failonerror="true"
+           srcdir="${}/WEB-INF/src" 
+	   excludes="**/*.smap">
+      <classpath>
+        <path refid="compile.classpath" />
+        <pathelement location="${tmp.home}"/>
+        <fileset dir="${build.home}/WEB-INF/lib">
+          <include name="*.jar"/>
+        </fileset>
+        <pathelement location="${catalina.home}/common/classes"/>
+        <fileset dir="${tomcat.home}/common/lib">
+          <include name="*.jar"/>
+        </fileset>
+        <pathelement location="${catalina.home}/shared/classes"/>
+        <fileset dir="${catalina.home}/shared/lib">
+          <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${catalina.home}/bin"> 
+          <include name="*.jar"/> 
+        </fileset> 
+      </classpath>
+      <include name="**" />
+      <exclude name="tags/**" />
+    </javac> -->
 </target>  
 
 

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="fll.xsd"
+     title="FLL 2004 Challenge: No Limits" >
+
+  <Performance weight="1.0">
+
+    <goal name="serve_dinner"
+	  title="Serve Dinner">
+      <value score="45" title="Full" value="full" />
+      <value score="35" title="Partial" value="partial" />
+    </goal>
+
+    <goal name="open_gate"
+	  title="Open the Gate">
+      <value score="35" title="Full" value="full" />
+      <value score="20" title="Partial" value="partial" />
+    </goal>
+
+    <goal name="play_ball"
+	  title="Each Ball in Your Side of Basket"
+          max="16"
+          multiplier="5" />
+
+    <goal name="ball_center"
+          title="Your Ball in Center Ring"
+          multiplier="50" />
+
+    <goal name="bonus"
+	  title="Bonus: Each Ball in Your Side NOT in the Basket"
+          max="16"
+          multiplier="2" />
+
+    <restriction lowerBound="0"
+		 upperBound="16"
+                 message="There are a maximum of 8 balls on the table"
+                 >
+      <term goal="play_ball" />
+      <term goal="bonus" />
+    </restriction>
+
+    <goal name="push_chairs"
+	  title="Push in the Chairs"
+          max="3"
+          multiplier="10" />
+
+    <goal name="read_sign"
+	  title="Read the Bus Route Signs"
+          multiplier="35" />
+
+    <goal name="cd"
+	  title="Put the CD Away">
+      <value score="40" title="Full" value="full" />
+      <value score="35" title="Partial" value="partial" />
+    </goal>
+
+    <goal name="feed_pets"
+	  title="Feed the Pets"
+          max="3"
+          multiplier="15" />
+
+     <goal name="remove_glasses"
+           title="Remove the Glasses"
+           multiplier="40" />
+
+    <goal name="climb_stairs"
+	  title="Climb the Stairs">
+      <value score="45" title="Full" value="full" />
+      <value score="40" title="Partial" value="partial" />
+    </goal>
+
+    <tiebreaker>
+      <test goal="climb_stairs" winner="high" />
+    </tiebreaker>
+
+  </Performance>
+
+  <subjectiveCategory name="InnovativeDesign"
+                      title="Innovative Design"
+                      weight="0.0"
+                      >
+    <goal name="inFunction"
+          title="Creativity in Function"
+          min="1"
+          max="20" />
+    <goal name="Uniqueness"
+          title="Uniqueness"
+          min="1"
+          max="20" />
+    <goal name="inDesignProcess"
+          title="Creativity in Design Process"
+          min="1"
+          max="20" />
+    <goal name="inDesignAndAppearance"
+          title="Creativity in Design and Appearance"
+          min="1"
+          max="20" />
+    <goal name="OverallCreativity"
+          title="Overall Design and Integration"
+          min="1"
+          max="20" />
+  </subjectiveCategory>
+
+  <subjectiveCategory name="RobustDesign"
+                      title="Robust Design"
+                      weight="0.5"
+                      >
+    <goal name="Structural"
+          title="Structural Design"
+          min="1"
+          max="20" />
+    <goal name="Locomotion"
+          title="Locomotion"
+          min="1"
+          max="20" />
+    <goal name="Manipulation"
+          title="Manipulation"
+          min="1"
+          max="20" />
+    <goal name="Navigation"
+          title="Navigation"
+          min="1"
+          max="20" />
+    <goal name="OverallDesign"
+          title="Overall Design and Integration"
+          min="1"
+          max="20" />
+  </subjectiveCategory>
+
+
+  <subjectiveCategory name="ResearchPresentation"
+                      title="Research Presentation"
+                      weight="1.0"
+                      >
+    <goal name="Research"
+          title="Research"
+          min="1"
+          max="20" />
+    <goal name="Knowledge"
+          title="Knowldege"
+          min="1"
+          max="20" />
+    <goal name="ChallengeSpecific"
+          title="Challenge Specific"
+          min="1"
+          max="20" />
+    <goal name="Presentation"
+          title="Presentation"
+          min="1"
+          max="20" />
+    <goal name="Innovation"
+          title="Innovation"
+          min="1"
+          max="20" />
+  </subjectiveCategory>
+
+  <subjectiveCategory name="Programming"
+                      title="Programming"
+                      weight="0.5"
+                      >
+    <goal name="UseOfLanguage"
+          title="Use of Language"
+          min="1"
+          max="20" />
+    <goal name="Modularity"
+          title="Modularity/Abstraction"
+          min="1"
+          max="20" />
+    <goal name="SensorControl"
+          title="Sensor Control"
+          min="1"
+          max="20" />
+    <goal name="Design"
+          title="Design"
+          min="1"
+          max="20" />
+    <goal name="ProgrammingInGeneral"
+          title="In General"
+          min="1"
+          max="20" />
+  </subjectiveCategory>
+
+  <subjectiveCategory name="Teamwork"
+                      title="Teamwork"
+                      weight="1.0"
+                      >
+    <goal name="TeamIntegration"
+          title="Team Integration"
+          min="1"
+          max="20" />
+    <goal name="Respect"
+          title="Respect"
+          min="1"
+          max="20" />
+    <goal name="FocusedEffort"
+          title="Focused Effort"
+          min="1"
+          max="20" />
+    <goal name="Participation"
+          title="Participation"
+          min="1"
+          max="20" />
+    <goal name="DecisionSolving"
+          title="Decision Making and Problem Solving"
+          min="1"
+          max="20" />
+  </subjectiveCategory>
+
+</fll>
