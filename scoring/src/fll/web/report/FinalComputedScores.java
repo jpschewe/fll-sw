@@ -113,11 +113,9 @@ public final class FinalComputedScores {
         out.println("  </tr>");
         out.println("  <tr><td colspan='" + (subjectiveCategories.getLength() + 4) + "'><hr></td></tr>");
         teamsRS = teamsStmt.executeQuery("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,FinalScores.OverallScore"
-                                         + " FROM SummarizedScores,Teams,FinalScores"
+                                         + " FROM Teams,FinalScores"
                                          + " WHERE FinalScores.TeamNumber = Teams.TeamNumber"
                                          + " AND FinalScores.Tournament = '" + tournament + "'"
-                                         + " AND Teams.TeamNumber = SummarizedScores.TeamNumber"
-                                         + " AND SummarizedScores.Tournament = '" + tournament + "'"
                                          + " AND Teams.Division = '" + division + "'"
                                          + " GROUP BY TeamNumber ORDER BY FinalScores.OverallScore DESC, Teams.TeamNumber");
         while(teamsRS.next()) {
