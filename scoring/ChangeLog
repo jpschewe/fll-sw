@@ -1,3 +1,8 @@
+2003-12-07  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/Queries.java: Updated some documentation as well as
+	minimum score values (subjective was using performance).
+
 2003-12-06  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/playoff/index.jsp: Removed old links to brackets, only use

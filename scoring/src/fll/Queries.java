@@ -746,7 +746,7 @@ public class Queries {
         while(rs.next()) {
           final int computedTotal = computeTotalScore(rs, subjectiveGoals);
           if(Integer.MIN_VALUE != computedTotal) {
-            updatePrep.setInt(1, Math.max(computedTotal, minimumPerformanceScore));
+            updatePrep.setInt(1, computedTotal);
           } else {
             updatePrep.setNull(1, Types.INTEGER);
           }
@@ -1185,7 +1185,7 @@ public class Queries {
    * challenge document.
    *
    * @return the score, 0 on a bye, Integer.MIN_VALUE if all scores in a row
-   * are null (indicating that this row should not be ignored)
+   * are null (indicating that this row should be ignored)
    */
   private static int computeTotalScore(final ResultSet rs,
                                        final NodeList goals)
