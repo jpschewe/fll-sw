@@ -68,38 +68,6 @@ public final class ScoreEntry {
       }
       writer.println();
     }
-
-    //check all restrictions
-//     writer.println("  <!-- check restrictions -->");
-//     final NodeList restrictions = performanceElement.getElementsByTagName("restriction");
-//     for(int i=0; i<restrictions.getLength(); i++) {
-//       final Element element = (Element)restrictions.item(i);
-//       final String lowerBound = element.getAttribute("lowerBound");
-//       final String upperBound = element.getAttribute("upperBound");
-
-//       writer.print("  restrictionSum = ");
-//       final NodeList terms = element.getElementsByTagName("term");
-//       for(int t=0; t<terms.getLength(); t++) {
-//         if(t > 0) {
-//           writer.print(" + ");
-//         }
-        
-//         final Element term = (Element)terms.item(t);
-//         final String coefficient = term.getAttribute("coefficient");
-//         if(term.hasAttribute("goal")) {
-//           final String goal = term.getAttribute("goal");
-//           writer.print(coefficient + " * gbl_" + goal);
-//         } else {
-//           writer.print(coefficient);
-//         }
-//       }
-//       writer.println(";");
-
-//       writer.println("  if(restrictionSum < " + lowerBound + " || restrictionSum > " + upperBound + ") {");
-//       writer.println("    return false;");
-//       writer.println("  }");
-//       writer.newLine();
-//     }
     
     writer.println("  return true;");
     writer.println("}");
