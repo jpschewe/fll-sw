@@ -89,8 +89,8 @@
     <pathelement location="${dir.lib}/junit-3.8.1.jar"/>
     <pathelement location="${dir.lib}/log4j-1.2.8.jar"/>
     <pathelement location="${dir.lib}/mysql-connector-java-3.0.8-stable-bin.jar"/>
-    <pathelement location="${dir.lib}/common-lib/xercesImpl.jar"/>
-    <pathelement location="${dir.lib}/common-lib/xmlParserAPIs.jar"/>
+    <pathelement location="${dir.lib}/xercesImpl.jar"/>
+    <pathelement location="${dir.lib}/xmlParserAPIs.jar"/>
   </path>
 
   <path id="compile.classpath">
@@ -376,11 +376,6 @@
     </zip>
     
     
-    <zip zipfile="${dir.dist}/common-lib.zip">
-      <zipfileset dir="${dir.lib}/common-lib"/>
-    </zip>
-    
-    
     <!-- stuff for subjective scoring app -->
     <mkdir dir="${dir.tmp}/subjective" />
     <mkdir dir="${dir.tmp}/subjective/lib" />
@@ -502,7 +497,6 @@
     <copy todir="${dir.web}">
       <fileset dir="web">
         <exclude name="**/*.java" />
-        <exclude name="**/common-lib" />
       </fileset>
       <filterset>
         <filter token="APP-VERSION" value="${app.version}" />
@@ -518,7 +512,6 @@
     <copy todir="${dir.web}/WEB-INF/lib">
       <fileset dir="${dir.lib}">
         <include name="**/*.jar" />
-        <exclude name="**/common-lib/**" />
       </fileset>
     </copy>
 
