@@ -32,7 +32,6 @@ final public class SubjectiveTableModel extends AbstractTableModel implements So
    * @param scoreDocument XML document that represents the teams that are
    * being scored alnog with the judges and the current set of scores
    * @param subjectiveElement initial subjective category
-   * @param scoreElement initial score element
    */
   public SubjectiveTableModel(final Document scoreDocument,
                               final Element subjectiveElement) {

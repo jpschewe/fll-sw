@@ -40,7 +40,7 @@ final public class FinalComputedScores {
    *
    * @param args ignored
    */
-  public static void main(final String[] arg) {
+  public static void main(final String[] args) {
     try {
       final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
       final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge.xml"));
