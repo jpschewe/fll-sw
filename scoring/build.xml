@@ -437,7 +437,7 @@
 
 <mkdir dir="${dist.home}/api"/>
 <javadoc sourcepath="src"
-         title="${app.name}"
+         windowtitle="${app.name}"
          destdir="${dist.home}/api"
          packagenames="fll.*"
          use="true"

@@ -33,6 +33,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.apache.log4j.Logger;
 
 
 /**
@@ -42,6 +43,8 @@ import org.xml.sax.SAXParseException;
  */
 public class XMLUtils {
 
+  private static final Logger LOG = Logger.getLogger(XMLUtils.class);
+  
   /**
    * Just for debugging.
    *
@@ -58,7 +61,9 @@ public class XMLUtils {
       final Connection connection = Utilities.createDBConnection("disk");
       final Map teams = Queries.getTournamentTeams(connection);
       //final Document document = createTeamsDocument(teams.values());
-      final Document document = createSubjectiveScoresDocument(challengeDocument, teams.values(), connection, "STATE");
+      LOG.info("Teams: " + teams.values());
+      
+      final Document document = createSubjectiveScoresDocument(challengeDocument, teams.values(), connection, "Washburn");
       final XMLWriter xmlwriter = new XMLWriter();
       xmlwriter.setOutput(System.out, null);
       xmlwriter.write(document);

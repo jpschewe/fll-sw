@@ -53,6 +53,7 @@ import fll.model.SubjectiveTableModel;
 import net.mtu.eggplant.util.BasicFileFilter;
 
 import net.mtu.eggplant.util.gui.SortableTable;
+import javax.swing.table.TableCellEditor;
 
 /**
  * Application to enter subjective scores with
@@ -154,25 +155,37 @@ final public class SubjectiveFrame extends JFrame {
     categoryChoice.addActionListener(new ActionListener() {
       public void actionPerformed(final ActionEvent ae) {
         final Element subjectiveElement = (Element)categoryChoice.getSelectedItem();
-        tableModel.setSubjectiveElement(subjectiveElement);
-        
-        final NodeList goals = subjectiveElement.getElementsByTagName("goal");
-        for(int i=0; i<goals.getLength(); i++) {
-          final Node goalDescription = goals.item(i);
-          if(goalDescription.hasChildNodes()) {
-            //enumerated
-            final Vector posValues = new Vector();
-            posValues.add("");
-            Node posValue = goalDescription.getFirstChild();
-            while(null != posValue) {
-              if("value".equals(posValue.getNodeName())) {
-                posValues.add(posValue.getFirstChild().getNodeValue());
-              }
-              posValue = posValue.getNextSibling();
+        if(!subjectiveElement.equals(tableModel.getSubjectiveElement())) {
+          //first stop editing any cells that are currently being edited
+          final int editingColumn = table.getEditingColumn();
+          final int editingRow = table.getEditingRow();
+          if(editingColumn > -1) {
+            final TableCellEditor cellEditor = table.getCellEditor(editingRow, editingColumn);
+            if(null != cellEditor) {
+              cellEditor.stopCellEditing();
             }
+          }
+          
+          tableModel.setSubjectiveElement(subjectiveElement);
+        
+          final NodeList goals = subjectiveElement.getElementsByTagName("goal");
+          for(int i=0; i<goals.getLength(); i++) {
+            final Node goalDescription = goals.item(i);
+            if(goalDescription.hasChildNodes()) {
+              //enumerated
+              final Vector posValues = new Vector();
+              posValues.add("");
+              Node posValue = goalDescription.getFirstChild();
+              while(null != posValue) {
+                if("value".equals(posValue.getNodeName())) {
+                  posValues.add(posValue.getFirstChild().getNodeValue());
+                }
+                posValue = posValue.getNextSibling();
+              }
             
-            final TableColumn column = table.getColumnModel().getColumn(i + 4);
-            column.setCellEditor(new DefaultCellEditor(new JComboBox(posValues)));
+              final TableColumn column = table.getColumnModel().getColumn(i + 4);
+              column.setCellEditor(new DefaultCellEditor(new JComboBox(posValues)));
+            }
           }
         }
       }
