@@ -115,8 +115,9 @@ if(null != numMedalsStr && !"".equals(numMedalsStr) && !"null".equals(numMedalsS
                          request.getParameter("region"),
                          division,
                          numMedals);
+      pageContext.setAttribute("teamCurrentTournament", Queries.getTeamCurrentTournament(connection, teamNumber));
 %>
-      <c:if test="${not empty param.currentTournament}">
+      <c:if test="${teamCurrentTournament != param.currentTournament}">
 <%
         Queries.changeTeamCurrentTournament(connection, challengeDocument, teamNumber, request.getParameter("currentTournament"));
 %>
