@@ -77,7 +77,8 @@ final public class FinalComputedScores {
     ResultSet teamsRS = null;
     ResultSet scaledScoreRS = null;
     try {
-      final NodeList subjectiveCategories = document.getDocumentElement().getElementsByTagName("subjectiveCategory");
+      final Element rootElement = document.getDocumentElement();
+      final NodeList subjectiveCategories = rootElement.getElementsByTagName("subjectiveCategory");
       stmt = connection.createStatement();
       teamsStmt = connection.createStatement();
 
@@ -89,7 +90,7 @@ final public class FinalComputedScores {
       
         out.println("<table border='0'>");
         out.println("  <tr>");
-        out.println("    <th>Team # / Organization / Team Name</th>");
+        out.println("    <th>Team # / Organization / Team Name<br>Weight</th>");
         out.println("    <th>&nbsp;</th>");
         for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
           final Element catElement = (Element)subjectiveCategories.item(cat);
@@ -97,13 +98,15 @@ final public class FinalComputedScores {
           if(catWeight > 0.0) {
             final String catTitle = catElement.getAttribute("title");
 
-            out.println("    <th>" + catTitle + "</th>");
+            out.println("    <th align='center'>" + catTitle + "<br>" + catWeight + "</th>");
           }
         }
 
-        out.println("    <th>Performance</th>");
+        final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
+        final double perfWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(performanceElement.getAttribute("weight")).doubleValue();
+        out.println("    <th align='center'>Performance<br>" + perfWeight + "</th>");
 
-        out.println("    <th>Overall Score</th>");
+        out.println("    <th align='center'>Overall Score</th>");
         out.println("  </tr>");
         out.println("  <tr><td colspan='" + (subjectiveCategories.getLength() + 4) + "'><hr></td></tr>");
         teamsRS = teamsStmt.executeQuery("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,FinalScores.OverallScore"
@@ -150,7 +153,7 @@ final public class FinalComputedScores {
               } else {
                 rawScore = Double.NaN;
               }
-              out.println("    <td" + (Double.isNaN(rawScore) ? " class=warn>No Score" : ">" + SCORE_FORMAT.format(rawScore)) + "</td>");
+              out.println("    <td align='center'" + (Double.isNaN(rawScore) ? " class=warn>No Score" : ">" + SCORE_FORMAT.format(rawScore)) + "</td>");
               rawScoreRS.close();
             }
           }
@@ -168,7 +171,7 @@ final public class FinalComputedScores {
           } else {
             rawScore = Double.NaN;
           }
-          out.println("    <td" + (Double.isNaN(rawScore) ? " class=warn>No Score" : ">" + SCORE_FORMAT.format(rawScore)) + "</td>");
+          out.println("    <td align='center'" + (Double.isNaN(rawScore) ? " class=warn>No Score" : ">" + SCORE_FORMAT.format(rawScore)) + "</td>");
           rawScoreRS.close();
           out.println("    <td>&nbsp;</td>");
           out.println("  </tr>");
@@ -197,7 +200,7 @@ final public class FinalComputedScores {
                 scaledScore = Double.NaN;
               }
 
-              out.println("    <td" + (Double.isNaN(scaledScore) ? " class=warn>No Score" : ">" + SCORE_FORMAT.format(scaledScore)) + "</td>");
+              out.println("    <td align='center'" + (Double.isNaN(scaledScore) ? " class=warn>No Score" : ">" + SCORE_FORMAT.format(scaledScore)) + "</td>");
 
               scaledScoreRS.close();
             }
@@ -218,13 +221,13 @@ final public class FinalComputedScores {
               scaledScore = Double.NaN;
             }
 
-            out.println("    <td" + (Double.isNaN(scaledScore) ? " class=warn>No Score" :  ">" + SCORE_FORMAT.format(scaledScore)) + "</td>");
+            out.println("    <td align='center'" + (Double.isNaN(scaledScore) ? " class=warn>No Score" :  ">" + SCORE_FORMAT.format(scaledScore)) + "</td>");
           }
           
           scaledScoreRS.close();
 
           //total score
-          out.println("    <td" + (Double.isNaN(totalScore) ? " class=warn>No Score" : ">" + SCORE_FORMAT.format(totalScore)) + "</td>");
+          out.println("    <td align='center'" + (Double.isNaN(totalScore) ? " class=warn>No Score" : ">" + SCORE_FORMAT.format(totalScore)) + "</td>");
 
           out.println("  <tr><td colspan='" + (subjectiveCategories.getLength() + 4) + "'><hr></td></tr>");
         }
