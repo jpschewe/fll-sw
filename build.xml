@@ -68,6 +68,10 @@
 
   web.home              The directory that contains the web files, defaults to "web"
 
+  lib.home              The directory that contains the libraries, defaults to "lib"
+
+  src.home              The directory that contains the source, defaults to "src"
+
   tmp.home              Temporary directory for compiling JSP files, defaults to "tmp"
 
   web.config            What file to use as web.xml.  Default is web-default.xml
@@ -81,6 +85,8 @@
 <property name="deploy.home"   value="${catalina.home}/webapps/${app.name}"/>
 <property name="dist.home"     value="dist"/>
 <property name="web.home"       value="web" />
+<property name="lib.home"       value="lib" />
+<property name="src.home"       value="src" />
 <property name="tmp.home"       value="tmp" />
 <property name="web.config" value="web-default.xml" />
 
@@ -149,8 +155,12 @@
 
 <!-- Include all JAR files that will be included in /WEB-INF/lib -->
 <!-- *** CUSTOMIZE HERE AS REQUIRED BY YOUR APPLICATION *** -->
-    <pathelement location="${web.home}/WEB-INF/lib/mm.mysql-2.0.14-bin.jar"/>
-    <pathelement location="${web.home}/WEB-INF/lib/JonsInfra-0.2.jar"/>
+    <pathelement location="${lib.home}/JonsInfra-0.2.jar"/>
+    <pathelement location="${lib.home}/junit-3.8.1.jar"/>
+    <pathelement location="${lib.home}/log4j-1.2.6.jar"/>
+    <pathelement location="${lib.home}/mm.mysql-2.0.14-bin.jar"/>
+    <pathelement location="${lib.home}/common-lib/xercesImpl.jar"/>
+    <pathelement location="${lib.home}/common-lib/xmlParserAPIs.jar"/>
 
 <!-- Include all elements that Tomcat exposes to applications -->
 <pathelement location="${catalina.home}/common/classes"/>
@@ -287,13 +297,6 @@
 <copy    todir="${deploy.home}">
 <fileset dir="${build.home}"/>
 </copy>
-
-<!-- Copy external dependencies as required -->
-<!-- *** CUSTOMIZE HERE AS REQUIRED BY YOUR APPLICATION *** -->
-<mkdir  dir="${deploy.home}/WEB-INF/lib"/>
-<!--
-    <copy todir="${deploy.home}/WEB-INF/lib" file="${foo.jar}"/>
--->
 
   <!-- get the correct web.xml file -->
   <copy file="${web.home}/WEB-INF/${web.config}" tofile="${deploy.home}/WEB-INF/web.xml" />
@@ -472,17 +475,22 @@
 <mkdir  dir="${build.home}"/>
 <copy todir="${build.home}">
 <fileset dir="${web.home}">
-  <exclude name="common-lib" />
-  <exclude name="common-lib/*" />
+  <exclude name="**/*.java" />
 </fileset>
 </copy>
 
 <!-- Copy static files from external dependencies as needed -->
-<copy todir="${catalina.home}/common/lib">
-  <fileset dir="${web.home}/common-lib">
-    <include name="*.jar" />
-  </fileset>
-</copy>
+  <copy todir="${build.home}/WEB-INF/classes">
+    <fileset dir="${src.home}">
+      <exclude name="**/*.java" />
+    </fileset>
+  </copy>
+  <copy todir="${build.home}/WEB-INF/lib">
+    <fileset dir="${lib.home}">
+      <include name="**/*.jar" />
+    </fileset>
+  </copy>
+
 </target>
 
 </project>
