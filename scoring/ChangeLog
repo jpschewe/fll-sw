@@ -1,3 +1,8 @@
+2003-10-15  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/web/admin/UploadTeams.java (parseFile): Handle empty
+	columns as nulls.
+
 2003-10-04  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/Queries.java (getColorForDivisionIndex): Support
