@@ -1,3 +1,8 @@
+2003-12-14  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/admin/commitTeam.jsp: Ensure that scores don't get deleted
+	when team data is edited (859692).
+
 2003-12-07  Jon Schewe  <jpschewe@mtu.net>
 	
 	* Release version 2.2.
