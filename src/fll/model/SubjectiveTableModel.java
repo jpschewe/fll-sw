@@ -152,15 +152,8 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
   
   public boolean isCellEditable(final int row,
                                 final int column) {
-    switch(column) {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-      return false;
-    default:
-      return (column >= getNumGoals() + 4);
-    }
+    return ( (column >= 4) &&
+             (column <  4 + getNumGoals()) );
   }
 
   public void setValueAt(final Object value,
