@@ -1,5 +1,5 @@
 <%@ page errorPage="../errorHandler.jsp" %>
-<%@ taglib uri="../WEB-INF/tld/taglib62.tld" prefix="up" %>
+<%@ taglib uri="/WEB-INF/tld/taglib62.tld" prefix="up" %>
 
 <%@ page import="fll.xml.GenerateDB" %>
 <%@ page import="fll.xml.ChallengeParser" %>

@@ -15,7 +15,7 @@ final String countSQL = "SELECT COUNT(*)"
   + " FROM Teams,Performance"
   + " WHERE Performance.Tournament = '" + currentTournament + "'"
   + " AND Teams.TeamNumber = Performance.TeamNumber"
-  + " ORDER BY Teams.Organization, Performance.RunNumber";
+  + " ORDER BY Teams.Division, Teams.TeamNumber, Performance.RunNumber";
 ResultSet rs = stmt.executeQuery(countSQL);
 rs.next();
 final int numRecords = rs.getInt(1);
