@@ -13,6 +13,10 @@
       var newWindow = null;
       var str = 'height='+height+',width='+width+',toolbar=0,menubar=0,scrollbars=0,location=0,directories=0,status=0,resizable=0,fullscreen=1,left=0,screenX=0,top=0,screenY=0';
 
+      <c:if test="${empty sessionDisplayPage}">
+        <c:set var="sessionDisplayPage" value="none" scope="session"/>
+      </c:if>
+          
       <c:if test="${displayPage != sessionDisplayPage}">
         <c:choose>
           <c:when test='${displayPage == "scoreboard"}'>
