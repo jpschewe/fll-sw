@@ -434,11 +434,12 @@
   
   <!-- stuff for subjective scoring app -->
   <mkdir dir="${tmp.home}/subjective" />
-  <jar destfile="${tmp.home}/subjective/subjective.jar"
+  <mkdir dir="${tmp.home}/subjective/lib" />
+  <jar destfile="${tmp.home}/subjective/lib/subjective.jar"
        basedir="${build.home}/WEB-INF/classes"
        index="true"
        />
-  <copy todir="${tmp.home}/subjective">
+  <copy todir="${tmp.home}/subjective/lib">
     <fileset dir="${lib.home}" />
   </copy>
 
@@ -449,16 +450,16 @@
   <pathconvert targetos="windows"
                property="subjective.windows.classpath"
                refid="subjective.dist.classpath">
-    <map from="${basedir}/${lib.home}" to="." />
+    <map from="${basedir}" to="." />
   </pathconvert>
   <pathconvert targetos="unix"
                property="subjective.unix.classpath"
                refid="subjective.dist.classpath">
-    <map from="${basedir}/${lib.home}" to="." />
+    <map from="${basedir}" to="." />
   </pathconvert>
 
 
-  <echo file="${tmp.home}/subjective/subjective.bat">%JAVA_HOME%\bin\java -classpath "${subjective.windows.classpath}" fll.gui.SubjectiveFrame</echo>
+  <echo file="${tmp.home}/subjective/subjective.bat">java -classpath "${subjective.windows.classpath}" fll.gui.SubjectiveFrame</echo>
   
   <echo file="${tmp.home}/subjective/subjective.sh">java -classpath "${subjective.unix.classpath}" fll.gui.SubjectiveFrame</echo>
   
@@ -483,7 +484,7 @@
   
   <delete dir="${tmp.home}" />
   
-  <echo message="The distribution file is ${app.name}.zip" />
+  <echo message="The distribution file is ${app.name}-${app.version}.zip" />
  
 </target>
 

@@ -1,3 +1,9 @@
+2004-12-09  Jon Schewe  <jpschewe@mtu.net>
+
+	* build.xml: Do a better job of rewriting the library path when
+	creating subjective.bat so that it works on more systems.  Also
+	removed the requirement of JAVA_HOME.
+
 2004-12-08  Dan Churchill <churchid@visi.com>
 
 	* web/admin/select_team.jsp: Added Division to display of teams in the
