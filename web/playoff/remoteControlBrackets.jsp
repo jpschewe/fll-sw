@@ -69,7 +69,7 @@ final List currentRound = tempCurrentRound;
       TD.Leaf {color:#ffffff;font-family:Arial;background-color:#000000}
       TD.Bridge {background-color:#808080}
       FONT {font-family:Arial}
-      FONT.TeamNum {color:#ff8080;font-weight:bold}
+      FONT.TeamNumber {color:#ff8080;font-weight:bold}
       FONT.TeamName {color:#ffffff;font-weight:bold}
       FONT.TeamScore {color:#ffffff;font-weight:bold;font-size:10pt}
       FONT.TIE {color:#ff0000;font-weight:bold}
