@@ -1,3 +1,11 @@
+2003-12-18  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/xml/ImportDB.java: Added check for differences before
+	importing team data.
+
+	* src/fll/web/report/FinalComputedScores.java (generateReport):
+	Added tournament name to the final scores report.
+
 2003-12-17  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/admin/advanceTeams.jsp: Added page to do batch advancement

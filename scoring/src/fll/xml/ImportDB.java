@@ -9,6 +9,7 @@ import fll.Queries;
 import fll.Utilities;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -22,7 +23,7 @@ import org.w3c.dom.NodeList;
  *
  * @version $Revision$
  */
-public class ImportDB {
+public final class ImportDB {
    
   /**
    * Import a database, both databases are assumed to be on the same machine.
@@ -56,10 +57,14 @@ public class ImportDB {
         final String destination = args[5];
 
         
-        System.out.println("Importing data for " + tournament + " from " + source + " to " + destination);
         final Connection connection = Utilities.createDBConnection(host, user, password, destination);
-        final Document challengeDocument = Queries.getChallengeDocument(connection);
-        importDatabase(connection, source, tournament, challengeDocument);
+        
+        final boolean differences = checkForDifferences(connection, source, destination, tournament);
+        if(!differences) {
+          System.out.println("Importing data for " + tournament + " from " + source + " to " + destination);
+          //final Document challengeDocument = Queries.getChallengeDocument(connection);
+          //importDatabase(connection, source, tournament, challengeDocument);
+        }
       }
     } catch(final Exception e) {
       e.printStackTrace();
@@ -144,5 +149,85 @@ public class ImportDB {
     } finally {
       Utilities.closeStatement(stmt);
     }
-  }  
+  }
+
+  /**
+   * Check for differences between two tournaments in team information.
+   *
+   * @return true if there are differences
+   */
+  public static boolean checkForDifferences(final Connection connection,
+                                            final String source,
+                                            final String destination,
+                                            final String tournament)
+    throws SQLException {
+    System.out.println("Comparing team data from " + source + " against " + destination + " for " + tournament);
+
+    Statement stmt = null;
+    ResultSet rs = null;
+    boolean retval = false;
+    try {
+      stmt = connection.createStatement();
+
+      //check name
+      String sql = "SELECT " + destination + ".Teams.TeamNumber, " + destination + ".Teams.TeamName, " + source + ".Teams.TeamName"
+        + " FROM " + destination + ".Teams, " + source + ".Teams, " + source + ".TournamentTeams"
+        + " WHERE " + destination + ".Teams.TeamNumber = " + source + ".Teams.TeamNumber"
+        + " AND " + destination + ".Teams.TeamName <> " + source + ".Teams.TeamName"
+        + " AND " + source + ".Teams.TeamNumber = " + source + ".TournamentTeams.TeamNumber"
+        + " AND " + source + ".TournamentTeams.Tournament = '" + tournament + "'";
+
+      rs = stmt.executeQuery(sql);
+      if(rs.next()) {
+        retval = true;
+        System.out.println("There are teams from tournament " + source + " with different names than the destination database (" + destination + ")");
+        do {
+          System.out.println(rs.getInt(1) + ": " + rs.getString(2) + " -> " + rs.getString(3));
+        } while(rs.next());
+        Utilities.closeResultSet(rs);
+      }
+
+      //check divisions
+      sql = "SELECT " + destination + ".Teams.TeamNumber, " + destination + ".Teams.Division, " + source + ".Teams.Division"
+        + " FROM " + destination + ".Teams, " + source + ".Teams, " + source + ".TournamentTeams"
+        + " WHERE " + destination + ".Teams.TeamNumber = " + source + ".Teams.TeamNumber"
+        + " AND " + destination + ".Teams.Division <> " + source + ".Teams.Division"
+        + " AND " + source + ".Teams.TeamNumber = " + source + ".TournamentTeams.TeamNumber"
+        + " AND " + source + ".TournamentTeams.Tournament = '" + tournament + "'";
+
+      rs = stmt.executeQuery(sql);
+      if(rs.next()) {
+        retval = true;
+        System.out.println("There are teams from tournament " + source + " with different division than the destination database (" + destination + ")");
+        do {
+          System.out.println(rs.getInt(1) + ": " + rs.getString(2) + " -> " + rs.getString(3));
+        } while(rs.next());
+        Utilities.closeResultSet(rs);
+      }
+
+      //check tournaments
+      sql = "SELECT " + destination + ".Teams.TeamNumber, " + destination + ".TournamentTeams.Tournament, " + source + ".TournamentTeams.Tournament"
+        + " FROM " + destination + ".Teams, " + destination + ".TournamentTeams, " + source + ".TournamentTeams"
+        + " WHERE " + destination + ".TournamentTeams.TeamNumber = " + source + ".TournamentTeams.TeamNumber"
+        + " AND " + destination + ".TournamentTeams.Tournament <> " + source + ".TournamentTeams.Tournament"
+        + " AND " + source + ".TournamentTeams.Tournament = '" + tournament + "'"
+        + " AND " + destination + ".Teams.TeamNumber = " + source + ".TournamentTeams.TeamNumber";
+      
+      rs = stmt.executeQuery(sql);
+      if(rs.next()) {
+        retval = true;
+        System.out.println("There are teams from tournament " + source + " with a different tournament than the destination database (" + destination + ")");
+        do {
+          System.out.println(rs.getInt(1) + ": " + rs.getString(2) + " -> " + rs.getString(3));
+        } while(rs.next());
+        Utilities.closeResultSet(rs);
+      }      
+      
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closeStatement(stmt);
+    }
+    return retval;
+  }
+  
 }
