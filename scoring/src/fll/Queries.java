@@ -1290,4 +1290,34 @@ public class Queries {
     }
   }
 
+  /**
+   * Get the value of Bye for the given team number, tournament and run number
+   *
+   * @return true if the score is a bye, false if it's not a bye or the score
+   * does not exist
+   * @throws SQLException on a database error
+   */
+  public static boolean isBye(final Connection connection,
+                              final String tournament,
+                              final int teamNumber,
+                              final int runNumber)
+    throws SQLException, IllegalArgumentException {
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT Bye FROM Performance"
+                             + " WHERE TeamNumber = " + teamNumber
+                             + " AND Tournament = '" + tournament + "'"
+                             + " AND RunNumber = " + runNumber);
+      if(rs.next()) {
+        return rs.getBoolean(1);
+      } else {
+        return false;
+      }
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closeStatement(stmt);
+    }
+  }  
 }

@@ -69,6 +69,10 @@ final int minimumAllowedScore = NumberFormat.getInstance().parse(minimumAllowedS
 //check if this is the last run a team has completed
 final int maxRunCompleted = Queries.getMaxRunNumber(connection, teamNumber);
 pageContext.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == maxRunCompleted));
+
+//check if the score being edited is a bye
+final String tournament = Queries.getCurrentTournament(connection);
+pageContext.setAttribute("isBye", Boolean.valueOf(Queries.isBye(connection, tournament, teamNumber, lRunNumber)));
 %>
   
 <html>
@@ -86,6 +90,7 @@ pageContext.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == maxRunComple
     </style>
 
 <script language="javascript">
+    <c:if test="${not isBye}">
 <!-- No Show -->
 var gbl_NoShow;
 function setNoShow(value) {
@@ -155,6 +160,10 @@ function refresh() {
 
 <%ScoreEntry.generateIsConsistent(out, challengeDocument);%>
     
+<%ScoreEntry.generateIncrementMethods(out, challengeDocument);%>
+
+    </c:if> <!-- end check for bye -->
+        
 function CancelClicked() {
   <c:if test="${editFlag}">
   if (confirm("Cancel and lose changes?") == true) {
@@ -165,15 +174,17 @@ function CancelClicked() {
     window.location.href= "select_team.jsp";
   }
 }
-
-
-<%ScoreEntry.generateIncrementMethods(out, challengeDocument);%>
 </script>
 
   </head>
 
   <c:if test="${editFlag}">
-    <body bgcolor="yellow" onload="init()">
+      <c:if test="${isBye}">
+        <body bgcolor="yellow">
+      </c:if>
+      <c:if test="${not isBye}">
+        <body bgcolor="yellow" onload="init()">
+      </c:if>
   </c:if>
   <c:if test="${not editFlag}">
     <body onload="init()">
@@ -250,54 +261,64 @@ function CancelClicked() {
                 <font size='4'><u>Score</u></font>
               </td>
               <c:if test="${param.error}">
-              <td align='center'>
-                <font size='4'><u>Error Message</u></font>
-              </td>
+                <td align='center'>
+                  <font size='4'><u>Error Message</u></font>
+                </td>
               </c:if>
             </tr>
 
-<%ScoreEntry.generateScoreEntry(out, challengeDocument, request);%>
+            <c:if test="${not isBye}">
+              <%ScoreEntry.generateScoreEntry(out, challengeDocument, request);%>
               
-            <!-- Total Score -->
-            <tr>
-              <td colspan='3'>
-                <font size='4'></u>Total Score:</u></font>
-              </td>
-              <td align='right'>
-                <input type='text' name='totalScore' size='3' readonly>
-              </td>
-              <td>&nbsp;</td>
-            </tr>
-            <tr>
-              <td>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color="red">No Show:</font>
-              </td>
-              <td>
-                <table border='0' cellpadding='0' cellspacing='0' width='150'>
-                  <tr align='center'>
-                    <td>
-                      <input type='radio' name='NoShow' value='1' onclick='setNoShow(1)'>
-                      Yes
-                      &nbsp;&nbsp;
-                      <input type='radio' name='NoShow' value='0' onclick='setNoShow(0)'>
-                      No
-                    </td>
-                  </tr>
-                </table>
-              </td>
-              <td>&nbsp</td>
-              <td>&nbsp</td>
-              <c:if test="${param.error}">
-              <td>&nbsp;</td>
-              </c:if>
-            </tr>
+              <!-- Total Score -->
+              <tr>
+                <td colspan='3'>
+                  <font size='4'></u>Total Score:</u></font>
+                </td>
+                <td align='right'>
+                  <input type='text' name='totalScore' size='3' readonly>
+                </td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color="red">No Show:</font>
+                </td>
+                <td>
+                  <table border='0' cellpadding='0' cellspacing='0' width='150'>
+                    <tr align='center'>
+                      <td>
+                        <input type='radio' name='NoShow' value='1' onclick='setNoShow(1)'>
+                        Yes
+                        &nbsp;&nbsp;
+                        <input type='radio' name='NoShow' value='0' onclick='setNoShow(0)'>
+                        No
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+                <td>&nbsp</td>
+                <td>&nbsp</td>
+                <c:if test="${param.error}">
+                  <td>&nbsp;</td>
+                </c:if>
+              </tr>
+            </c:if> <!-- end check for bye -->
+            <c:if test="${isBye}">
+              <tr>
+                <td colspan='3'><b>Bye Run</b></td>
+              </tr>
+            </c:if>
+              
             <tr>
               <td colspan='3' align='right'>
-                <c:if test="${editFlag}">
-                  <input type='submit' value='Submit Score' onclick='return confirm("You are changing a score -- Are you sure?")'>
-                </c:if>
-                <c:if test="${not editFlag}">
-                  <input type='submit' value='Submit Score' onclick='return confirm("Submit Data -- Are you sure?")'>
+                <c:if test="${not isBye}">
+                  <c:if test="${editFlag}">
+                    <input type='submit' value='Submit Score' onclick='return confirm("You are changing a score -- Are you sure?")'>
+                  </c:if>
+                  <c:if test="${not editFlag}">
+                    <input type='submit' value='Submit Score' onclick='return confirm("Submit Data -- Are you sure?")'>
+                  </c:if>
                 </c:if>
                 <input type='button' value='Cancel' onclick='CancelClicked()'>
                 <c:if test="${editFlag and isLastRun}">
