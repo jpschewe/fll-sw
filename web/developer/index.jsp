@@ -4,19 +4,22 @@
       
 <c:if test="${not empty param.changeDatabase || not empty param.resetDatabase}">
   <c:if test="${not empty param.changeDatabase}" var="test">
-    <c:set var="database" value="${param.changeDatabase}" scope="application" />
+    <c:set var="database" value="${param.database}" scope="application" />
   </c:if>
   <c:if test="${not test}">
     <c:set var="database" value="fll" scope="application" />
   </c:if>
 
-  <%-- just remove the database connections and they'll get recreated on the next page --%>
+  <%-- just remove the database connections and they'll get recreated on the redirect --%>
   <c:remove var="connection" />
   <c:remove var="datasource" />
+  <c:remove var="challengeDocument" />
+  <c:redirect url='index.jsp'>
+    <c:param name="message">
+      <i>Changed database to <c:out value="${database}"/></i><br>
+    </c:param>
+  </c:redirect>
 
-  <c:set var="message">
-    <i>Changed database to <c:out value="${database}"/></i><br>
-  </c:set>
 </c:if>
             
 <html>
@@ -31,7 +34,9 @@
     <p><font color='red'><b>This page is intended for developers only.  If you
     don't know what you're doing, LEAVE THIS PAGE!</b></font></p>
 
-    <p><c:out value="${message}"/></p>
+    <c:if test="${not empty param.message}">
+      <p><c:out value="${param.message}"/></p>
+    </c:if>
             
     <ul>
         

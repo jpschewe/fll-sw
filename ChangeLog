@@ -1,3 +1,25 @@
+2003-11-22  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/display.jsp: Fixed big screen display to only refresh the
+	window when what is to be shown has changed.  
+
+	* web/scoreboard/allteams.jsp: Add some padding at the end of the
+	scrolling of all teams to ensure that the teams can see the last
+	team when running in 800x600 mode.
+
+	* web/display.jsp: Ensure that welcome page doesn't come up everytime.
+
+	* web/instructions.jsp: Tiebreaker info is automatically pulled
+	out of the current document.
+
+	* web/developer/index.jsp: Fixed change database page to properly
+	switch databases.
+
+2003-11-21  Jon Schewe  <jpschewe@mtu.net>
+
+	* Release version 2.1.  Found some bugs, so this is the release
+	used at Sandburg.
+	
 2003-11-19  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/resources/challenge-region-2003.xml: Added new tiebreaker

@@ -106,24 +106,9 @@
         then you'll have to do the tiebreakers by hand, below is the
         tiebreaker order:
           <ol>
-            <li>Interference - winner is the one that doesn't interfere</li>
-            <li>PenaltyLoops - winner is the one with the lowest count here </li>
-            <li>Bushes - winner is the one with the lowest count here</li>
-            <li>MarketTheirs - winner is the one with the highest count here</li>
-            <li>Barrels - winner is the one with the highest count here</li>
-            <li>Bundles on 4th - winner is the one with the highest count here</li>
-            <li>Bundles on 3rd - winner is the one with the highest count here</li>
-            <li>Bundles on 2nd - winner is the one with the highest count here</li>
-            <li>Bundles on 1st - winner is the one with the highest count here</li>
-            <li>Bundles on ground - winner is the one with the highest count here</li>
-            <li>MarketOurs - winner is the one with the highest count here</li>
-            <li>Windmill - winner is the one with the highest count here</li>
-            <li>HouseTriple - winner is the one with the highest count here</li>
-            <li>HouseDouble - winner is the one with the highest count here</li>
-            <li>HouseSingle - winner is the one with the highest count here</li>
-            <li>LoopsOff - winner is the one with the highest count here</li>
-            <li>Bridge - winner is the one with the highest count here</li>
-            <li>Rocks - winner is the one with the highest count here</li>
+            <x:forEach select="$challengeDocument/fll/Performance/tiebreaker/test">
+              <li><x:out select="./@goal" /> - <x:out select="./@winner"/> score wins</li>
+            </x:forEach>
           </ol>
         </li>
         

@@ -152,10 +152,16 @@ variables normally used:
   brackets being displayed when using the remotely controlled brackets
   - "playoffRunNumber" (java.lang.Number) keeps track of the current run
   number for the remotely controlled brackets
+  - "displayPage" (java.lang.String) keeps track of what page should be
+  displayed on the big screen
 
 Session variables:
   - "currentRound" (java.util.List of fll.Team) Used in playoff/brackets.jsp
   to keep track of the current list of teams in bracket order
+  - "sessionDisplayPage" (java.lang.String) Keep track of what page is
+  being shown on the big screen.  Used in conjunction with displayPage to
+  keep from refreshing the display too often.
+  - "datasource" (jsp datasource) database connection for SQL jsp tags.
 
 Useful websites:
    http://mtu.net/~jpschewe/JonsInfra/0.2/index.html - JonsInfra documentation
