@@ -1,4 +1,6 @@
 2003-10-22  Jon Schewe  <jpschewe@mtu.net>
+	
+	* labeled fll_2003_test_20031022 for testing
 
 	* web/scoreEntry/scoreEntry.jsp: Made background yellow instead of
 	grey on edit.  Also changed changed submit prompt for score edit
@@ -36,6 +38,10 @@
 	* src/fll/web/admin/UploadTeams.java (parseFile): Handle empty
 	columns as nulls.
 
+2003-10-07  Jon Schewe  <jpschewe@mtu.net>
+	
+	* labeled fll_2003_test_20031007
+	
 2003-10-04  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/Queries.java (getColorForDivisionIndex): Support
