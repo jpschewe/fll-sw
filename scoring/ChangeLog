@@ -1,3 +1,7 @@
+2003-11-30  Jon Schewe  <jpschewe@mtu.net>
+
+	* Release version 2.2.
+	
 2003-11-29  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/playoff/index.jsp: Updated to handle the situation where
