@@ -16,11 +16,12 @@
   
 <%
 /*
-  Parameters
+  Parameters:
   
   division - String for the division
   runNumber - int for the run number, counted since the very first performance round
-  nextRound - if exists, advance the brackets
+  nextRound - if present use newRunNumber instead of runNumber
+  newRunNumber - if nextRound is present, use this value instead of runNumber
 */
   
 Queries.ensureTournamentTeamsPopulated(application);
@@ -39,37 +40,31 @@ if(null == divisionStr) {
 final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
 final String runNumberStr = request.getParameter("runNumber");
 final int runNumber;
-final List currentRound;
 if(null == runNumberStr) {
   //first time to the page
   runNumber = Queries.getNumSeedingRounds(connection) + 1;
-  
-  currentRound = Playoff.buildInitialBracketOrder(connection, currentTournament, divisionStr, tournamentTeams);
-  session.setAttribute("currentRound", currentRound);
 } else if(null != request.getParameter("nextRound")) {
-  //advance one round
-  final int prevRunNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumberStr).intValue();
-  runNumber = prevRunNumber + 1;
-  
-  currentRound = new LinkedList();
-  final List prevRound = (List)session.getAttribute("currentRound");
-  if(null == prevRound) {
-    throw new RuntimeException("Cannot find previous round bracket order, please go back to the <a href='index.jsp'>playoff main page</a> and start again.");
-  }
-  final Iterator prevIter = prevRound.iterator();
+  runNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("newRunNumber")).intValue();
+} else {
+  runNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumberStr).intValue();
+}
+
+int tempRunNumber = numSeedingRounds + 1;
+List tempCurrentRound = Playoff.buildInitialBracketOrder(connection, currentTournament, divisionStr, tournamentTeams);
+
+while(tempRunNumber < runNumber) {
+  final List newCurrentRound = new LinkedList();
+  final Iterator prevIter = tempCurrentRound.iterator();
   while(prevIter.hasNext()) {
     final Team teamA = (Team)prevIter.next();
     final Team teamB = (Team)prevIter.next();
-    final Team winner = Playoff.pickWinner(connection, challengeDocument, currentTournament, teamA, teamB, prevRunNumber);
-    currentRound.add(winner);
+    final Team winner = Playoff.pickWinner(connection, challengeDocument, currentTournament, teamA, teamB, tempRunNumber);
+    newCurrentRound.add(winner);
   }
-  session.setAttribute("currentRound", currentRound);
-} else {
-  //just refreshing
-  runNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumberStr).intValue();
-  
-  currentRound = (List)session.getAttribute("currentRound");
+  tempCurrentRound = newCurrentRound;
+  tempRunNumber++;
 }
+final List currentRound = tempCurrentRound;
 %>
 
 <html>
@@ -92,7 +87,8 @@ if(null == runNumberStr) {
       <form action='adminbrackets.jsp' method='get'>
         <input type='hidden' name='runNumber' value='<%=runNumber%>'>
         <input type='hidden' name='division' value='<%=divisionStr%>'>
-
+        <input type='hidden' name='newRunNumber' value='<%=runNumber+1%>'>
+              
 <%if(currentRound.size() > 2) {%>
         <input type='submit' name='nextRound' value='Next Round (<%=runNumber+1%>)'>
         <br><br>

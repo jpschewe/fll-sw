@@ -1,3 +1,14 @@
+2003-07-20  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/playoff/remoteControlBrackets.jsp: Reworked to always
+	recompute the teams and don't use session variables.  This makes
+	sure we don't have caching problems. (707839)
+
+	* web/playoff/adminbrackets.jsp: Reworked to always recompute the
+	teams and allow the run number to advance to to be passed in as a
+	parameter.  This should fix the problems with refresh and
+	advancement of rounds. (707838)
+
 2003-07-19  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/report/summarizePhase1.jsp: Modified query to group by

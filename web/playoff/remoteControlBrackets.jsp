@@ -43,38 +43,22 @@ if(null == application.getAttribute("playoffRunNumber")) {
   runNumber = ((Number)application.getAttribute("playoffRunNumber")).intValue();
 }
 
-final List currentRound;
-final Number sessionRunNumber = (Number)session.getAttribute("runNumber");
-if(null == sessionRunNumber || sessionRunNumber.intValue() != runNumber) {
-  int tempRunNumber;
-  List tempCurrentRound;
-  if(null == sessionRunNumber
-     || sessionRunNumber.intValue() > runNumber) {
-    tempRunNumber = numSeedingRounds + 1;
-    tempCurrentRound = Playoff.buildInitialBracketOrder(connection, currentTournament, divisionStr, tournamentTeams);
-  } else {
-    tempRunNumber = sessionRunNumber.intValue();
-    tempCurrentRound = (List)session.getAttribute("currentRound");
+int tempRunNumber = numSeedingRounds + 1;
+List tempCurrentRound = Playoff.buildInitialBracketOrder(connection, currentTournament, divisionStr, tournamentTeams);
+
+while(tempRunNumber < runNumber) {
+  final List newCurrentRound = new LinkedList();
+  final Iterator prevIter = tempCurrentRound.iterator();
+  while(prevIter.hasNext()) {
+    final Team teamA = (Team)prevIter.next();
+    final Team teamB = (Team)prevIter.next();
+    final Team winner = Playoff.pickWinner(connection, challengeDocument, currentTournament, teamA, teamB, tempRunNumber);
+    newCurrentRound.add(winner);
   }
-  
-  while(tempRunNumber < runNumber) {
-    final List newCurrentRound = new LinkedList();
-    final Iterator prevIter = tempCurrentRound.iterator();
-    while(prevIter.hasNext()) {
-      final Team teamA = (Team)prevIter.next();
-      final Team teamB = (Team)prevIter.next();
-      final Team winner = Playoff.pickWinner(connection, challengeDocument, currentTournament, teamA, teamB, tempRunNumber);
-      newCurrentRound.add(winner);
-    }
-    tempCurrentRound = newCurrentRound;
-    tempRunNumber++;
-  }
-  currentRound = tempCurrentRound;
-  session.setAttribute("currentRound", currentRound);
-  session.setAttribute("runNumber", new Integer(runNumber));
-} else {
-  currentRound = (List)session.getAttribute("currentRound");
+  tempCurrentRound = newCurrentRound;
+  tempRunNumber++;
 }
+final List currentRound = tempCurrentRound;
 
 %>
 
