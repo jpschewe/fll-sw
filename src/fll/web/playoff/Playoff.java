@@ -358,7 +358,22 @@ final public class Playoff {
       Utilities.closeResultSet(rs);
       Utilities.closeStatement(stmt);
     }
-  }  
+  }
+
+  /**
+   * Defaults showScore to true.
+   * 
+   * @see #getDisplayString(Connection, String, int, Team, Team, boolean)
+   */
+  public static String getDisplayString(final Connection connection,
+                                        final String currentTournament,
+                                        final int runNumber,
+                                        final Team team,
+                                        final Team otherTeam)
+    throws IllegalArgumentException, SQLException {
+    return getDisplayString(connection, currentTournament, runNumber, team, otherTeam, true);
+  }
+  
   /**
    * What to display given a team number, handles TIE, null and BYE
    *
@@ -368,6 +383,7 @@ final public class Playoff {
    * @param team team to get display string for
    * @param otherTeam team on the other side of the table, used to check for
    * BYE runs, may be null
+   * @param showScore if the score should be shown
    * @throws IllegalArgumentException if teamNumber is invalid
    * @throws SQLException on a database error
    */
@@ -375,7 +391,8 @@ final public class Playoff {
                                         final String currentTournament,
                                         final int runNumber,
                                         final Team team,
-                                        final Team otherTeam)
+                                        final Team otherTeam,
+                                        final boolean showScore)
     throws IllegalArgumentException, SQLException {
     if(Team.BYE.equals(team)) {
       return "<font class='TeamName'>BYE</font>";
@@ -390,7 +407,7 @@ final public class Playoff {
       sb.append("</font>&nbsp;<font class='TeamName'>");
       sb.append(team.getTeamName());
       sb.append("</font>");
-      if(performanceScoreExists(connection, team, runNumber)) {
+      if(showScore && performanceScoreExists(connection, team, runNumber)) {
         sb.append("<font class='TeamScore'>&nbsp;Score: ");
         if(isNoShow(connection, currentTournament, team, runNumber)) {
           sb.append("No Show");

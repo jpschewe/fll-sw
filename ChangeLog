@@ -1,3 +1,8 @@
+2003-12-27  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/playoff/remoteControlBrackets.jsp: Don't show final scores
+	in playoffs (847952).
+
 2003-12-18  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/xml/ImportDB.java: Added check for differences before
