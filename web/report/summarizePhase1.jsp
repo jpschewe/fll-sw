@@ -31,7 +31,7 @@ final ResultSet rs = stmt.executeQuery("SELECT ScoreGroup,Category,COUNT(RawScor
   + " FROM SummarizedScores"
   + " WHERE Category <> 'Performance'"
   + " AND Tournament = '" + currentTournament + "'"
-  + " GROUP BY ScoreGroup ORDER BY Category");
+  + " GROUP BY ScoreGroup,Category ORDER BY Category");
 %>
 
 <html>

@@ -1,3 +1,13 @@
+2003-07-19  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/report/summarizePhase1.jsp: Modified query to group by
+	ScoreGroup and Category.  (707841)
+
+2003-07-16  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/xml/GenerateDB.java (generateDB): varchar fields are
+	limited to 255 characters.
+
 2003-07-06  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/xml/GenerateDB.java (generateDB): Make division a string
