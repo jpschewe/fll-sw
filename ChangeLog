@@ -1,3 +1,7 @@
+2004-01-17  Jon Schewe  <jpschewe@mtu.net>
+	
+	* Release version 2.4.
+	
 2004-01-10  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/display.jsp: Added ability to specify any URL relative to
