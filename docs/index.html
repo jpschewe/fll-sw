@@ -5,6 +5,207 @@
   </head>
 
   <body>
+
+    <h1>Please fully read all instructions before you find the computers
+        to use or going through with actual installation of software</h1>
+    
+    <h1>Hardware Requirements</h1>
+    
+    <p>To run a tournament 4 types of computers will be required.  These
+      types define what software is to run on the computers and how they are
+      used.  The software required for each type of machine is listed below
+      the description of the machine as links to pieces of this document.</p>
+    
+    <ul>
+      <li><a name='#server_pc'>Server</a> - This computer is the brains
+        behind the whole system.  It contains the database and the webserver.
+        This is also the computer that requires the most horsepower.  The
+        minimum hardware that I've successfully run the server on is a
+        Pentium 166Mhz with 64MB of memory, however it was rather slow.  I
+        would suggest at least a Pentium-II 333Mhz with 64MB of RAM, 129MB of
+        RAM is preferred.
+        <ol>
+          <li><a href="#java">Java</a></li>
+          <li><a href="#tomcat">Apache Tomcat</a></li>
+          <li><a href="#server">Server software</a></li>
+          <li><a href="#mysql">MySQL</a></li>
+          <li><a href="#database">Database</a></li>
+        </ol>
+      </li>
+
+      <li><a name='#display_pc'>Display Computer</a> - This computer is
+        used to display scores, either on it's screen or on an LCD projector.
+        LCD projector is recommended.  I've used a Pentium 166Mhz with 32MB
+        RAM for this function at the state tournament without problems, so
+        anything that powerful or greater would work fine.  The important
+        part here is that the display be good.  The monitor/projector and
+        video card need to be capable of at least 800x600 resolution,
+        1024x768 is better, however I understand that LCD projectors of this
+        resolution are rather expensive.  Anything bigger than 1024x768
+        really won't buy you much though.
+        <ol>
+          <li>browser IE 5 or higher and Mozilla 1.4 or higher are
+            acceptable</li>
+        </ol>
+      </li>
+
+      <li><a name='#performance_pc'>Performance score entry</a> - This
+        computer is used to enter performance scores.  Again a Pentium 166Mhz
+        with 32MB RAM should be ok, but more is better.  Especially if
+        Windows 2000 or Windows XP is being used.  Windows 95 or Linux use
+        less resources and so would be good choices if a lower end machine is
+        used.  Here display is also important.  The monitor and video card
+        need to be capable of at least 1024x768.  More is definatly better
+        here, 1280x1024 is pretty nice as well, although this tends to
+        require a larger monitor that adds to cost.
+        <ol>
+          <li>browser IE 5 or higher and Mozilla 1.4 or higher are
+            acceptable</li>
+        </ol>
+      </li>
+
+      <li><a name='#subjective_pc'>Subjective score entry</a> - This
+        computer is used to enter the scores from subjective judging.  A
+        Pentium 166Mhz with 32MB of RAM running Windows 95 would be ok.  I'd
+        suggest a Pentium II 266Mhz or better if possible though as this
+        computer needs to do a little more work than the Performance score
+        entry computer.  The display is also important here.  1024x768 is the
+        recommended display, although it should work with 800x600 as well.
+        <ol>
+          <li><a href="#java">Java</a></li>
+        </ol>
+      </li>
+
+      <li>Printer - This will be used for printing out reports for teams
+      and for determining such things a medals.  Depending on how many
+      copies of things you need for teams I'd also suggest having access to
+      a copier.  Laser printers are best, since it's all black and white,
+      but ink jet printers are ok too.  I've yet to try using a dot matrix
+      printer, but I suppose one could try that too :) The printer is
+      generally connected to the server, although it could be connected to
+      one of the other computers that have web browsers, since all of the
+      reports are available from the web server.</li>
+        
+    </ul>
+    
+    <h2>Number of computers</h2>
+
+    <p>Of course now that you know which types of computer you need and
+    what hardware is required you'll want to know how many computers you
+    really need.  It is conceivable that a tournament be run all on one
+    computer (this would not include a display computer) and all other
+    software would be installed on this one computer, although that's not
+    suggested.  You'll also need one person per computer (except the
+    display computer) for the whole tournament, this is sometimes handled
+    by taking shifts.</p>
+
+    <h3>Minimum</h3>
+    <p>The smallest tournament I've run has been a 16 team tournament with
+      3 computers.  The configuration looks like this:</p>
+    <ul>
+      <li>1 computer that is used for a <a href='#server_pc'>server</a> and
+        <a href='#subjective_pc'>subjective score entry</a>, if these tasks
+        are doubled up I would suggest a Pentium 33Mhz with 128MB RAM or
+        more.</li>
+
+      <li><a href='#display_pc'>1 display computer</li>
+
+      <li><a href='#performance_pc'>1 performance score entry</a></li>
+
+    </ul>
+
+    <h3>Average</h3>
+    <p>An average tournament that has between 16 and 32 teams runs pretty
+    well with the following configuration.</p>
+    <ul>
+      <li><a href='#server_pc'>1 Server</a></li>
+
+      <li><a href='#performance_pc'>2 performance score entry
+          computers</a>.  In this case I'm assuming that 2 full tables are
+        being used (4 teams competing simultaneously).  If more tables are
+        used I would have one performance score entry computer for each full
+        table.</li>
+
+      <li><a href='#display_pc'>1 Display computer</a> The bigger the
+        tournament the more important it is to have a 1024x768 display.</li>
+
+      <li><a href='#subjective_pc'>1 subjective score entry computer</a>
+        It's also possible to use this computer for performance score entry
+        early in the tournament and later switch it over to subjective score
+        entry.</li>
+
+    </ul>
+
+    <h3>Large</h3>
+    <p>Our state tournaments tend to be rather large, so I use this for the
+    large tournament example.  In Minnesota this is between 64 and 70 teams
+    and has thousands of people and lots of hype and pressure, so it's
+    really nice to have extra computers.</p>
+
+    <ul>
+      <li><a href='#server_pc'>1 Server</a></li>
+
+      <li><a href='#performance_pc'>1 performance score entry computer</a>
+      for each full table.  A full table is one in which two teams compete
+      simultaneously.  Our state tournaments typically have 4 tables and
+      therefore 4 of these computers.</li>
+
+      <li><a href='#display_pc'>2 Display computers</a>, one for each end
+      of the gym that the performance piece of the competition is being
+      held in, projecting to LCD displays.  At this point you should really
+      have a computer and LCD projector combination that is capable of
+      1024x768 and big screens.  Ours are about 10 feet on a side.</li>
+
+      <li><a href='#subjective_pc'>1 subjective score entry computer</a>
+        It's also possible to use this computer for performance score entry
+        early in the tournament and later switch it over to subjective score
+        entry.</li>
+
+      <li><a href='#subjective_pc'>5 subjective score entry computers</a>.
+      You may think this is overkill, but I have each of the 5 major
+      subjective categories on a dedicated computer (in the case of the
+      research category this tends to be 3 categories on the same computer
+      though).  This seems to be a nice way to break up duties and keeps
+      the score entry people busy without getting them too stressed out
+      towards the end of the tournament when all of the scores come
+      in and need to be checked.</li>
+
+    </ul>
+
+    <h3>Extra computers that are nice to have</h3>
+    <ul>
+      <li><a href='#performance_pc'>1 computer</a> that is capable of being
+      used to lookup scores and print reports while any issues/problems are
+      being worked out on the server.  Sometimes 2 printers are useful, one
+      on the server and one on this machine because one person wants to
+      print out playoff brackets while another person wants the score
+      report printed for determining medals at the same instant (I speak
+      from experience).  I've not actually had this computer at a
+      tournament, but have definatly seen the need for it.</li>
+      
+      <li><a href='#performance_pc'>1 computer</a> that is capable of being
+      used by the refs only for looking up performance scores for disputes
+      and for displaying the admin version of the brackets to keep track of
+      what's going on during the playoff brackets.  I've not actually had
+      this computer at a tournament, but during the 2002 state tournament I
+      found that having such a computer for the refs to use to show the
+      playoff brackets would be invaluable.</li>
+
+      <li><a href='#display_pc'>1 or more extra display computers</a> that
+      just have monitors on them and can be looked at by teams around the
+      performance area or, if a good network is available, placed around
+      the tournament site.  This idea has yet to have been tried and is by
+      no means required for a tournament, but if used one could get away
+      with only a single LCD projector and just have these computers
+      scattered around.  I'd make sure to remove the keyboard and mouse
+      from these machines so that people don't get into them and mess with
+      the scores.  Better yet, build a password into the score entry web
+      pages so that this isn't a problem.  Now if someone would write
+      it...</li>
+        
+    </ul>
+    
+    
     <h1>Install Instructions</h1>
 
     <p>These insturctions are geared towards Windows 2K and XP, if installing
@@ -19,15 +220,15 @@
       you MUST know the IP address of the computer that is the server.</p>
 
     <p>If you do not have a CD, you can download the current version of the
-    software <a href="fll-sw.zip">here</a>.  Unzipping this file will create
-    a directory called fll-sw that contains the various zip files referenced
-    here.  This directory is the same as the /fll directory on the cd.</p>
+      software <a href="fll-sw.zip">here</a>.  Unzipping this file will create
+      a directory called fll-sw that contains the various zip files referenced
+      here.  This directory is the same as the /fll directory on the cd.</p>
 
     <p>Links in <b>bold</b> are external links to sites where the applications
-    can be found if you don't have a cd.</p>
-      
+      can be found if you don't have a cd.</p>
+    
     <ol>
-      <li><b><a href="http://java.sun.com/j2se/1.4.2/download.html">Install Java (the SDK)</a></b> (the language everything is written in), this is found
+      <li><b><a name='java' href="http://java.sun.com/j2se/1.4.2/download.html">Install Java (the SDK)</a></b> (the language everything is written in), this is found
         on the cd in apps/java.  This needs to be done on the server and on any
         machines that will be used to enter subjective scores
         <ul>
@@ -48,7 +249,7 @@
         </ul>
       </li>
 
-      <li><b><a href="http://jakarta.apache.org/builds/jakarta-tomcat-4.0/release/v4.1.24/bin/">Install Apache Tomcat</a></b> (the webserver and JSP container), this is
+      <li><b><a name='tomcat' href="http://jakarta.apache.org/builds/jakarta-tomcat-4.0/release/v4.1.24/bin/">Install Apache Tomcat</a></b> (the webserver and JSP container), this is
         found on the cd in apps/tomcat.  Choose the LE version.
         <ul>
           <li>When you start the installer it will tell you where it found
@@ -60,7 +261,7 @@
         </ul>
       </li>
 
-      <li>Install the server software for the web
+      <li><a name='server'>Install the server software for the web</a>
         <ol>
           <li>Unzip <a href="common-lib.zip">common-lib.zip</a>, this will create two jar files</li>
           
@@ -69,9 +270,9 @@
           <li>Unzip the file <a href="web.zip">web.zip</a> to c:\packages\tomcat\webapps</li>
 
           <li>If you want to use a different welcome logo than the one
-          provided, replace webapps\fll-sw\images\logo.gif with the image
-          that you'd like to use.  The provided one should be just fine for
-          Minnesota competitions.</li>
+            provided, replace webapps\fll-sw\images\logo.gif with the image
+            that you'd like to use.  The provided one should be just fine for
+            Minnesota competitions.</li>
           
           <li>Open up an explorer window to c:\packages\tomcat\work</li>
 
@@ -80,151 +281,135 @@
         </ol>
       </li>
       
-      <li><b><a href="http://www.mysql.com/downloads/mysql-4.0.html">Install MySQL</a></b> (the database server), this is found on the cd in apps/mysql.
+      <li><b><a name='mysql' href="http://www.mysql.com/downloads/mysql-4.0.html">Install MySQL</a></b> (the database server), this is found on the cd in apps/mysql.
         <ol>
           <li>Unzip the file (mysql-4.0.14b-win.zip) to somewhere</li>
 
           <li>In the directory created run setup.exe (the one with the
-          computer symbol next to it, not the pointer one)</li>
+            computer symbol next to it, not the pointer one)</li>
 
           <li>Click Next</li>
           <li>Click Next</li>
 
           <li>Select browse and type in c:\packages\mysql, click yes if it
-          asks you about creating the directory</li>
+            asks you about creating the directory</li>
           
           <li>Select Typical and Next</li>
 
           <li>Run c:\packages\mysql\bin\winmysqladmin.exe</li>
 
           <li>Put in root as the username and fll for the password (you will
-          not be prompted for this if you have installed MySQL before, it will
-          use your previous username and password, if you don't remember what
-          it is, delete c:\winnt\my.ini and try do the previous step
-          again)</li>
+            not be prompted for this if you have installed MySQL before, it will
+            use your previous username and password, if you don't remember what
+            it is, delete c:\winnt\my.ini and try do the previous step
+            again)</li>
 
           <li>Right click on the stoplight in the system try and goto
-          WinNT->Install the service (you may not be given this option if
-          MySQL already installed itself as a service, this typically happens
-          when you have already installed MySQL in the past)</li>
+            WinNT->Install the service (you may not be given this option if
+            MySQL already installed itself as a service, this typically happens
+            when you have already installed MySQL in the past)</li>
 
           <li>Right click on the stoplight in the system try and goto
-          WinNT->Start the service and click ok.  If this fails do the
-          following:</li>
-          <ul>
-            <li>Right click on the stoplight in the system try and goto Start
+            WinNT->Start the service and click ok.  If this fails do the
+            following:</li>
+        <ul>
+          <li>Right click on the stoplight in the system try and goto Start
             the server standalone, you'll need to do this each time you
             restart the machine.</li>
-          </ul>
-          
-          <li>When you're done for the day you'll want to shutdown the
-          database by going to shutdown service or shutdown the server
-          standalone, depending on how you started it.</li>
-        </ol>
-      </li>
+        </ul>
+        
+      <li>When you're done for the day you'll want to shutdown the
+        database by going to shutdown service or shutdown the server
+        standalone, depending on how you started it.</li>
+    </ol>
+  </li>
 
-      <li>Install the actual database
-        <ol>
-          <li>You should already have MySQL running from the previous step, if
+    <li><a name='database'>Install the actual database</a>
+      <ol>
+        <li>You should already have MySQL running from the previous step, if
           not, start it.</li>
-          <li>Start up Tomcat: Goto Start->Programs(All Programs on XP)->Apache Tomcat->Start Tomcat, this will cause a command window to come up, don't close it, you can minimize it though.  Server errors will show up here.</li>
-          <li>Open another web browser to <a href="http://localhost:8080/fll-2002/setup">http://localhost:8080/fll-2002/setup</a>
-            <ul>
-              <li>The root username should be root, if you followed the instructions above for setting up MySQL</li>
-              <li>The root password should be fll, if you followed the instructions above for setting up MySQL</li>
-              <li>Unless you have made changes to the xml document, leave the last field blank</li>
-            </ul>
-          </li>
-          <li>Click initialize database and you should go back to the same page with a message at the top that the database was successfully initialized</li>
-          <li>Once that is done you can close the other web browser you opened</li>
-          <li>If you're in Minnesota, do the following:
-            <ul>
-              <li>Copy all of the files from the cd in minnesota-db\fll to c:\packages\mysql\data\fll and allow it to overwrite files</li>
-              <li>Open up an explorer window to c:\packages\mysql\data\fll</li>
-              <li>Select all of the files</li>
-              <li>Right click on the selected files and click properties</li>
-              <li>Click on Read Only until the check box is cleared, this may take a couple of clicks</li>
-              <li>This will replace the Teams and Regions tables with the Minnesota data</li>
-            </ul>
-          </li>
-        </ol>
-      </li>
+        <li>Start up Tomcat: Goto Start->Programs(All Programs on XP)->Apache Tomcat->Start Tomcat, this will cause a command window to come up, don't close it, you can minimize it though.  Server errors will show up here.</li>
+        <li>Open another web browser to <a href="http://localhost:8080/fll-2002/setup">http://localhost:8080/fll-2002/setup</a>
+          <ul>
+            <li>The root username should be root, if you followed the instructions above for setting up MySQL</li>
+            <li>The root password should be fll, if you followed the instructions above for setting up MySQL</li>
+            <li>Unless you have made changes to the xml document, leave the last field blank</li>
+          </ul>
+        </li>
+        <li>Click initialize database and you should go back to the same page with a message at the top that the database was successfully initialized</li>
+        <li>Once that is done you can close the other web browser you opened</li>
+        <li>If you're in Minnesota, do the following:
+          <ul>
+            <li>Copy all of the files from the cd in minnesota-db\fll to c:\packages\mysql\data\fll and allow it to overwrite files</li>
+            <li>Open up an explorer window to c:\packages\mysql\data\fll</li>
+            <li>Select all of the files</li>
+            <li>Right click on the selected files and click properties</li>
+            <li>Click on Read Only until the check box is cleared, this may take a couple of clicks</li>
+            <li>This will replace the Teams and Regions tables with the Minnesota data</li>
+          </ul>
+        </li>
+      </ol>
+    </li>
 
-      <li>Test the server.
-        <ol>
-          <li>Goto Start->Programs(All Programs on XP)->Apache Tomcat->Start Tomcat, this will cause a command window to come up, don't close it, you can minimize it though.  Server errors will show up here.</li>
-          <li>Open up a web browser to <a href="http://localhost:8080/fll-2002">http://localhost:8080/fll-2002</a></li>
-          <li>You should see the main index</li>
-          <li>Goto the Instructions page for information on using these pages</li>
-          <li>From the score entry computers and scoreboard computers make sure you can also get to this page, replacing localhost with the IP address of the server</li>
-          <li>When done for the day you'll want to Goto Start->Programs(All Programs on XP)->Apache Tomcat->Stop Tomcat.</li>
-        </ol>
-      </li>
+    <li>Test the server.
+      <ol>
+        <li>Goto Start->Programs(All Programs on XP)->Apache Tomcat->Start Tomcat, this will cause a command window to come up, don't close it, you can minimize it though.  Server errors will show up here.</li>
+        <li>Open up a web browser to <a href="http://localhost:8080/fll-2002">http://localhost:8080/fll-2002</a></li>
+        <li>You should see the main index</li>
+        <li>Goto the Instructions page for information on using these pages</li>
+        <li>From the score entry computers and scoreboard computers make sure you can also get to this page, replacing localhost with the IP address of the server</li>
+        <li>When done for the day you'll want to Goto Start->Programs(All Programs on XP)->Apache Tomcat->Stop Tomcat.</li>
+      </ol>
+    </li>
 
-      <li>Install the subjective score entry app on the computers (I suggest 1 unless you have a tournament that's really big or are really short on time) that will be used to enter this data
-        <ol>
-          <li>Follow the instructions above for installing Java</li>
-          <li>Unzip <a href="subjective.zip">subjective.zip</a> to a location on the computer</li>
-          <li>Goto a computer that's connected to the server and goto the main page, then Administration then Download the datafile for subjective score entry</li>
-          <li>Save this file somewhere on the computer used for subjective score entry, this can be copied around with a floppy</li>
-          
-          <li>Run subjective.bat from the location you unzipped subjective.zip
+    <li><a name='subjective'>Install the subjective score entry app on the computers (I suggest 1 unless you have a tournament that's really big or are really short on time) that will be used to enter this data</a>
+      <ol>
+        <li>Follow the instructions above for installing Java</li>
+        <li>Unzip <a href="subjective.zip">subjective.zip</a> to a location on the computer</li>
+        <li>Goto a computer that's connected to the server and goto the main page, then Administration then Download the datafile for subjective score entry</li>
+        <li>Save this file somewhere on the computer used for subjective score entry, this can be copied around with a floppy</li>
+        
+        <li>Run subjective.bat from the location you unzipped subjective.zip
           and when prompted give it the location of the subjective.zip file
           that was downloaded from the server</li>
-          
-          <li>Enter scores for teams by selecting the category tab at the top then entering the scores under each subcategory</li>
-          <li>Save often</li>
-          <li>When done, quit the application and copy the file back to a computer that has access to the server</li>
-          <li>Goto Adminstration and click on the Browse button next to Upload the datafile for subjective scores</li>
-          <li>Select the file you just copied</li>
-          <li>Click upload and if all is well you'll be returned to the Adminstration page again</li>
-        </ol>
-      </li>
+        
+        <li>Enter scores for teams by selecting the category tab at the top then entering the scores under each subcategory</li>
+        <li>Save often</li>
+        <li>When done, quit the application and copy the file back to a computer that has access to the server</li>
+        <li>Goto Adminstration and click on the Browse button next to Upload the datafile for subjective scores</li>
+        <li>Select the file you just copied</li>
+        <li>Click upload and if all is well you'll be returned to the Adminstration page again</li>
+      </ol>
+    </li>
 
-      <li>Send me the data after the tournament is over by zipping up c:\packages\mysql\data\fll and sending it to <a href="mailto:jpschewe@mtu.net">me, jpschewe@mtu.net</a>  Before you zip up this directory please stop the mysql database, otherwise some data might be missing.</li>
+    <li>Send me the data after the tournament is over by zipping up c:\packages\mysql\data\fll and sending it to <a href="mailto:jpschewe@mtu.net">me, jpschewe@mtu.net</a>  Before you zip up this directory please stop the mysql database, otherwise some data might be missing.</li>
 
-      <li>For those interested in looking at the source and possibly making
+    <li>For those interested in looking at the source and possibly making
       changes the source can be found <a href="src.zip">here</a> along with a
       <a href="README.developer">README for developers</a>.  The api
       documentation can be found <a href="api/index.html">here</a>.  Any
       changes that you do make need to be sent back to me under the terms of
       the GPL.  I look forward to any fixes you make</li>
-        
-    </ol>
+    
+  </ol>
 
     <p>Once you're done with the tournament you might want to uninstall
-    everything.  This can be accomplised by deleting the JAVA_HOME environment
-    variable.  Then uninstalling all of the applications.</p>
+      everything.  This can be accomplished by deleting the JAVA_HOME environment
+      variable.  Then uninstalling all of the applications.</p>
 
     <p>Things to note:
-      <ul>
-        
-        <li>When entering scores in the subjective scoring application make
-        sure you select another cell after entering data in one before
-        switching to a new category.  Otherwise the data in the cell will be
-        lost</li>
-
-        <li>On the scoreboard page there are two primary scorboard links.  One
-        for 1024x768 and one for 800x600.  Pick the one that is the resolution
-        of your display computer and make sure you set the resolution of your
-        display computer to the native resolution of your projector oor
-        800x600, which ever is higher.  This way things will display
-        reasonably well.  If you have your display computer's resolution set
-        to 1024x768 and when you see the scorboard it seems like the text is
-        unreadable it's probably because your projector's native resolution is
-        800x600.  You should change the resolution of your display computer
-        and then goto the 800x600 scoreboard.</li>
-
-        <li>Developers on widnows might find the tool MySQL-Front handy for
+    <ul>
+      
+      <li>Developers on widnows might find the tool MySQLCC handy for
         messing with the database directly.  I've put it in the apps directory
         on the cd.</li>
-        
-      </ul>
-    </p>
+      
+    </ul>
+  </p>
 
     <hr>
-      <address><a href="mailto:jpschewe@mtu.net">Jon Schewe</a></address>
-Last modified: $Date$<br>
-Revision: $Revision$<br>
+    <address><a href="mailto:jpschewe@mtu.net">Jon Schewe</a></address>
+    Last modified: $Date$<br>
+    Revision: $Revision$<br>
   </body>
 </html>
