@@ -16,7 +16,7 @@ final String lEditFlag = request.getParameter("EditFlag");
 
 final Connection connection = (Connection)application.getAttribute("connection");
 final Statement stmt = connection.createStatement();
-final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance");
+final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = '" + Queries.getCurrentTournament(connection) + "'");
 final int maxRunNumber;
 if(rs.next()) {
   maxRunNumber = rs.getInt(1);
