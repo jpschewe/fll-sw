@@ -143,7 +143,9 @@ for(int i=1; i<=10; i++) {
           <input type="submit" value="Upload">
         </form>
       </li>
-            
+
+      <li><a href='remoteControl.jsp'>Remote control of display</a></li>
+      
     </ol>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>

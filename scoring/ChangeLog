@@ -1,5 +1,14 @@
 2003-08-16  Jon Schewe  <jpschewe@mtu.net>
 
+	* Multiple files: Added display page the is used for the display
+	computer.  This page opens up a new window in fullscreen mode
+	(Mozilla users may need to press F11) and then displays the
+	welcome page, the scoreboard or the remotely controlled brackets.
+	This page is controlled via a remote control page accessible from
+	the admin page.  Also the scoreboard pages now automatically
+	detect the screen size and redirect the web browser to the
+	appropriate page. (707891, 707856).
+	
 	* web/WEB-INF/jspf/initializeApplicationVars.jspf: Added cache
 	control headers.  This should keep all pages from being cached in
 	browser and proxy caches.  (707883)

@@ -1,8 +1,9 @@
-
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
   
 <html>
 <head>
+  <meta http-equiv='refresh' content='90'>
 <style type="text/css">
         .clock {font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 14px; background-color: #ffffff; font-style: normal; font-weight: bold; font-variant: normal}
     </style>
@@ -53,16 +54,15 @@ function fixTime(the_time) {
 
 </script>
         
-<script language=javascript>
-        window.setInterval("location.href='title.jsp'",90000);
-</script>
 </head>
-<body background="../images/bricks1.gif" bgcolor="#ffffff" onload='StartClock()' onunload='KillClock()'>
+  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" onload='StartClock()' onunload='KillClock()'>
 <center>
 <table border='0' cellpadding='0' cellspacing='0' width='98%'>
 <tr>
   <td align='center'>
-    <font face='arial' size='3'><b><%=application.getAttribute("ScorePageText")%></b></font>
+    <font face='arial' size='3'>
+      <b><c:out value="${ScorePageText}" /></b>
+    </font>
   </td>
   <td align='right' valign='top' nowrap>
     <form name='theClock'>

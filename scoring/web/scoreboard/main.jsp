@@ -1,13 +1,18 @@
-
-  
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
   
 <%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
   
 <HTML>
 <head>
-<script language=javascript>
-	window.resizeTo(1024,768);
+<script type='text/javascript'>
+  var width = screen.width;
+  var height = screen.height;
+  if(screen.width < 1024) {
+    //redirect to 800x600 scoreboard
+    location.href='<c:url value="/scoreboard_800/main.jsp"/>';
+  } else {
+    window.resizeTo(width, height);
+  }
 </script>
 </head>
 

@@ -61,13 +61,16 @@ function fixTime(the_time) {
 <table border='0' cellpadding='0' cellspacing='0' width='98%'>
 <tr>
   <td align='left'>
-    <font face='arial' size='3' color='#ffffff'><b><%=application.getAttribute("ScorePageText")%></b></font>
+    <font face='arial' size='3'>
+      <b><c:out value="${ScorePageText}" /></b>
+    </font>
   </td>
-    <form name='theClock'>
-  <td align='right' valign='top' nowrap>
-    <input type='text' name='theTime' readonly class='clock' width='8' size='8'>
-  </td>
-    </form>
+            
+  <form name='theClock'>
+    <td align='right' valign='top' nowrap>
+      <input type='text' name='theTime' readonly class='clock' width='8' size='8'>
+    </td>
+  </form>
 </tr>
 
 <tr><td colspan='2'><hr size='1' color='#ffffff'></td></tr>

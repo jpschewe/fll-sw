@@ -2,27 +2,22 @@
 <%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="org.w3c.dom.Document" %>
-
+      
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Iterator" %>
+<%@ page import="java.util.Map" %>
+      
 <%@ page import="fll.Utilities" %>
 <%@ page import="fll.Queries" %>
-  
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.Iterator" %>
-<%@ page import="java.util.List" %>
-
-<%@ page import="java.sql.Connection" %>
-  
+      
 <%
-Queries.ensureTournamentTeamsPopulated(application);
-
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
       
-final Map tournamentTeams = (Map)Queries.getTournamentTeams(connection);
-final String currentTournament = Queries.getCurrentTournament(connection);
 final List divisions = Queries.getDivisions(connection);
+final Map tournamentTeams = (Map)Queries.getTournamentTeams(connection);
 final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
-  
+
 if(null != request.getParameter("division")) {
   application.setAttribute("playoffDivision", request.getParameter("division"));
 }
@@ -40,64 +35,53 @@ if(null == application.getAttribute("playoffRunNumber")) {
 final String playoffDivision = (String)application.getAttribute("playoffDivision");
 final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber")).intValue();
 %>
-  
+      
 <html>
   <head>
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Playoff's)</title>
+    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Display Controller)</title>
   </head>
 
+  <c:if test="${empty displayPage}">
+    <c:set var='displayPage' value='welcome' scope='application'/>
+  </c:if>
+          
+  <c:if test="${not empty param.remotePage}">
+    <c:set var='displayPage' value='${param.remotePage}' scope='application'/>
+  </c:if>
+          
   <body background='<c:url value="/images/bricks1.gif"/>' bgcolor="#ffffff" topmargin='4'>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Playoff menu)</h1>
-      <ol>
-        <li>First you should check to make sure all of the teams have the
-        correct number of rounds.  You can use <a href="check.jsp">this
-        page</a> to check that.  If any teams show up on this page you'll want
-        to try and fix that first.</li>
+    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Display Controller)</h1>
 
-        <li>
-          <B>WARNING: Do not select brackets until all seeding runs have been recorded!</b><br>
-          <form action='main.jsp' method='get'>
-            Goto the bracket page for division <select name='division'>
-<%
-{
-final Iterator divisionIter = divisions.iterator();
-while(divisionIter.hasNext()) {
-  final String div = (String)divisionIter.next();
-%>
-<option value='<%=div%>'><%=div%></option>
-<%
-}
-}
-%>
-            </select>
-            <input type='submit' value='Goto Playoffs'>
-              (requires Internet Explorer)
-          </form>               
-        </li>
+    <p>This page is used to control what page is currently visible on the display screen</p>
 
-        <li>
-          <form action='adminbrackets.jsp' method='get'>
-            Goto the admin/printable bracket page for division <select name='division'>
-<%
-{
-final Iterator divisionIter = divisions.iterator();
-while(divisionIter.hasNext()) {
-  final String div = (String)divisionIter.next();
-%>
-<option value='<%=div%>'><%=div%></option>
-<%
-}
-}
-%>
-            </select>
-            <input type='submit' value='Goto Playoffs'>
-          </form>               
-        </li>
+    <form name='remote' action='remoteControl.jsp' method='post'>
+      <c:if test='${displayPage == "welcome"}'  var='welcomePage'>
+        Welcome <input type='radio' name='remotePage' value='welcome' checked/><br/>
+      </c:if>
+      <c:if test='${not welcomePage}'>
+        Welcome <input type='radio' name='remotePage' value='welcome' /><br/>
+      </c:if>
 
-        <li><a href="remoteMain.jsp">Goto remotely controled brackets</a></li>
+      <c:if test='${displayPage == "scoreboard"}'  var='scoreboardPage'>
+        Scoreboard <input type='radio' name='remotePage' value='scoreboard' checked/><br/>
+      </c:if>
+      <c:if test='${not scoreboardPage}'>
+        Scoreboard <input type='radio' name='remotePage' value='scoreboard' /><br/>
+      </c:if>
 
-        <li>
-          <form action='index.jsp' method='post'>
+      
+      <c:if test='${displayPage == "playoffs"}'  var='playoffsPage'>
+        Playoffs <input type='radio' name='remotePage' value='playoffs' checked/>
+      </c:if>
+      <c:if test='${not playoffsPage}'>
+        Playoffs <input type='radio' name='remotePage' value='playoffs' />
+      </c:if>
+      <b>WARNING: Do not select brackets until all seeding runs have been recorded!</b><br/>
+            
+      <input type='submit' value='Change Display Page'/>
+    </form>
+
+          <form action='remoteControl.jsp' method='post'>
             Select the division and run number to display in the remote brackets.
             Division: <select name='division'> 
 <%
@@ -129,11 +113,7 @@ for(int numRounds = 1; /*numTeams > Math.pow(2, numRounds)*/ numRounds < 10; num
 
             <input type='submit' value='Change values'>
           </form>
-        </li>
-      </ol>
-    </p>
-
-
+            
 
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
