@@ -497,6 +497,12 @@
     <copy todir="${dir.web}">
       <fileset dir="web">
         <exclude name="**/*.java" />
+        <exclude name="**/*.jspf" />
+      </fileset>
+    </copy>
+    <copy todir="${dir.web}">
+      <fileset dir="web">
+        <include name="**/*.jspf" />
       </fileset>
       <filterset>
         <filter token="APP-VERSION" value="${app.version}" />
