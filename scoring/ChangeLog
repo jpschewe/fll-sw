@@ -1,3 +1,6 @@
+2003-03-21  Jon Schewe  <jpschewe@mtu.net>
+        * Moved to SourceForge.net as the project fll-sw/scoring
+ 
 2003-01-29  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/report/performanceRunReport.jsp: Queries.getDivisions()
