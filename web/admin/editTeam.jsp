@@ -41,13 +41,12 @@ String nextTournament = null;
   nextTournament = Queries.getNextTournament(connection, currentTournament);
           
   final Statement stmt = connection.createStatement();
-  final ResultSet rs = stmt.executeQuery("SELECT TeamNumber,TeamName,Organization,Region,Division,NumMedals FROM Teams WHERE TeamNumber = " + teamNumber);
+  final ResultSet rs = stmt.executeQuery("SELECT TeamNumber,TeamName,Organization,Region,Division FROM Teams WHERE TeamNumber = " + teamNumber);
   rs.next();
   final String teamName = rs.getString(2);
   final String organization = rs.getString(3);
   final String region = rs.getString(4);
   final String division = rs.getString(5);
-  final String numMedals = rs.getString(6);
   Utilities.closeResultSet(rs);
   Utilities.closeStatement(stmt);
 %>
@@ -55,7 +54,6 @@ String nextTournament = null;
   document.editTeam.organization.value = "<%= organization == null ? "" : organization %>";
   document.editTeam.region.value = "<%= region == null ? "" : region %>";
   document.editTeam.division.value = "<%= division == null ? "" : division %>";
-  document.editTeam.numMedals.value = "<%= numMedals == null ? "" : numMedals %>";
 </c:if>
 } //end init
 
@@ -125,10 +123,6 @@ function confirmChangeTournament() {
       <tr>
         <td>Division (required)</td>
         <td><input type='text' name='division'></td>
-      </tr>
-      <tr>
-        <td>Number of Medals</td>
-        <td><input type='text' name='numMedals'></td>
       </tr>
 
       <c:if test="${empty param.addTeam}">

@@ -46,13 +46,6 @@ if(null != numGirlsStr && !"".equals(numGirlsStr) && !"null".equals(numGirlsStr)
 } else {
   numGirls = -1;
 }
-final String numMedalsStr = request.getParameter("numMedals");
-final int numMedals;
-if(null != numMedalsStr && !"".equals(numMedalsStr) && !"null".equals(numMedalsStr)) {
-  numMedals = NumberFormat.getInstance().parse(numMedalsStr).intValue();
-} else {
-  numMedals = -1;
-}
 %>
 
 <%-- check which button was pushed --%> 
@@ -91,8 +84,7 @@ if(null != numMedalsStr && !"".equals(numMedalsStr) && !"null".equals(numMedalsS
                                      request.getParameter("teamName"),
                                      request.getParameter("organization"),
                                      request.getParameter("region"),
-                                     division,
-                                     numMedals)) {
+                                     division)) {
 %>
         <c:redirect url='index.jsp'>
           <c:param name='message'>
@@ -113,8 +105,7 @@ if(null != numMedalsStr && !"".equals(numMedalsStr) && !"null".equals(numMedalsS
                          request.getParameter("teamName"),
                          request.getParameter("organization"),
                          request.getParameter("region"),
-                         division,
-                         numMedals);
+                         division);
       pageContext.setAttribute("teamCurrentTournament", Queries.getTeamCurrentTournament(connection, teamNumber));
 %>
       <c:if test="${teamCurrentTournament != param.currentTournament}">

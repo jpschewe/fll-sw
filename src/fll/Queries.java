@@ -1071,8 +1071,7 @@ public class Queries {
                                final String name,
                                final String organization,
                                final String region,
-                               final String division,
-                               final int numMedals)
+                               final String division)
     throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
@@ -1090,17 +1089,12 @@ public class Queries {
         rs = null;
       }
 
-      prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Region, Division, NumMedals, TeamNumber) VALUES (?, ?, ?, ?, ?, ?)");
+      prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Region, Division, TeamNumber) VALUES (?, ?, ?, ?, ?)");
       prep.setString(1, name);
       prep.setString(2, organization);
       prep.setString(3, region);
       prep.setString(4, division);
-      if(-1 == numMedals) {
-        prep.setNull(5, Types.INTEGER);
-      } else {
-        prep.setInt(5, numMedals);
-      }
-      prep.setInt(6, number);
+      prep.setInt(5, number);
       prep.executeUpdate();
 
       stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber) VALUES('" + getCurrentTournament(connection) + "', " + number + ")");
@@ -1121,23 +1115,17 @@ public class Queries {
                                 final String name,
                                 final String organization,
                                 final String region,
-                                final String division,
-                                final int numMedals)
+                                final String division)
     throws SQLException {
     
     PreparedStatement prep = null;
     try {
-      prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Region = ?, Division = ?, NumMedals = ? WHERE TeamNumber = ?");
+      prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Region = ?, Division = ?, WHERE TeamNumber = ?");
       prep.setString(1, name);
       prep.setString(2, organization);
       prep.setString(3, region);
       prep.setString(4, division);
-      if(-1 == numMedals) {
-        prep.setNull(5, Types.INTEGER);
-      } else {
-        prep.setInt(5, numMedals);
-      }
-      prep.setInt(6, number);
+      prep.setInt(5, number);
       prep.executeUpdate();
     } finally {
       Utilities.closePreparedStatement(prep);

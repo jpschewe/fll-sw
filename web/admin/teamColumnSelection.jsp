@@ -106,17 +106,6 @@ if(null == errorMessage || "".equals(errorMessage)) {
         </tr>
           
         <tr>
-          <td>Number of medals needed</td>
-          <td>Number</td>
-          <td>
-            <select name='NumMedals'>
-            <option value='' selected>None</option>
-            <%=session.getAttribute("columnSelectOptions")%>
-            </select>
-          </td>
-        </tr>
-              
-        <tr>
           <td colspan='2'><input type='submit' value='Next'></td>
         </tr>
           
