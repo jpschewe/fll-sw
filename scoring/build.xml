@@ -157,7 +157,7 @@
 <path id="application.classpath">
   <pathelement location="${lib.home}/JonsInfra-0.2.jar"/>
   <pathelement location="${lib.home}/junit-3.8.1.jar"/>
-  <pathelement location="${lib.home}/log4j-1.2.6.jar"/>
+  <pathelement location="${lib.home}/log4j-1.2.8.jar"/>
   <pathelement location="${lib.home}/mm.mysql-2.0.14-bin.jar"/>
   <pathelement location="${lib.home}/common-lib/xercesImpl.jar"/>
   <pathelement location="${lib.home}/common-lib/xmlParserAPIs.jar"/>
