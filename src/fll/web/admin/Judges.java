@@ -55,10 +55,11 @@ final public class Judges {
   public static void generatePage(final JspWriter out,
                                   final ServletContext application,
                                   final HttpServletRequest request,
-                                  final HttpServletResponse response) throws SQLException, IOException, ParseException {
+                                  final HttpServletResponse response)
+    throws SQLException, IOException, ParseException {
     final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
     final Connection connection = (Connection)application.getAttribute("connection");
-    final String tournament = (String)application.getAttribute("currentTournament");
+    final String tournament = Queries.getCurrentTournament(connection);
 
     final NodeList subjectiveCategories = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
 
@@ -86,7 +87,7 @@ final public class Judges {
     if("verify".equals(state)) {
       errorString = generateVerifyTable(out, subjectiveCategories, request);
     } else if("commit".equals(state)) {
-      commitData(subjectiveCategories, request, response, connection, (String)application.getAttribute("currentTournament"));
+      commitData(subjectiveCategories, request, response, connection, Queries.getCurrentTournament(connection));
     }
 
     if("edit".equals(state) || null != errorString) {

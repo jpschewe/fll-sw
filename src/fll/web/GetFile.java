@@ -54,52 +54,68 @@ final public class GetFile {
       xmlwriter.setOutput(response.getOutputStream(), null);
       xmlwriter.write(teamsDocument);
     } else if("score.xml".equals(filename)) {
-      Queries.ensureTournamentTeamsPopulated(application);
-      final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
       final Connection connection = (Connection)application.getAttribute("connection");
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-      final String tournament = (String)application.getAttribute("currentTournament");
+      if(Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
+        Queries.ensureTournamentTeamsPopulated(application);
+        final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
+        final String tournament = Queries.getCurrentTournament(connection);
       
-      final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument,
-                                                                             tournamentTeams.values(),
-                                                                             connection,
-                                                                             tournament);
-      final XMLWriter xmlwriter = new XMLWriter();
+        final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument,
+                                                                               tournamentTeams.values(),
+                                                                               connection,
+                                                                               tournament);
+        final XMLWriter xmlwriter = new XMLWriter();
 
-      response.reset();
-      response.setContentType("text/xml");
-      response.setHeader("Content-Disposition", "filename=score.xml");
-      xmlwriter.setOutput(response.getOutputStream(), null);
-      xmlwriter.setNeedsIndent(true);
-      xmlwriter.write(scoreDocument);
+        response.reset();
+        response.setContentType("text/xml");
+        response.setHeader("Content-Disposition", "filename=score.xml");
+        xmlwriter.setOutput(response.getOutputStream(), null);
+        xmlwriter.setNeedsIndent(true);
+        xmlwriter.write(scoreDocument);
+      } else {
+        response.reset();
+        response.setContentType("text/plain");
+        final ServletOutputStream os = response.getOutputStream();
+        os.println("Judges are not properly assigned, please go back to the administration page and assign judges");
+      }
     } else if("subjective.zip".equals(filename)) {
-      Queries.ensureTournamentTeamsPopulated(application);
-      final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
       final Connection connection = (Connection)application.getAttribute("connection");
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-      final String tournament = (String)application.getAttribute("currentTournament");
+      if(Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
       
-      final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument,
-                                                                             tournamentTeams.values(),
-                                                                             connection,
-                                                                             tournament);
-      final XMLWriter xmlwriter = new XMLWriter();
+        Queries.ensureTournamentTeamsPopulated(application);
+        final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
+        final String tournament = Queries.getCurrentTournament(connection);
       
-      response.reset();
-      response.setContentType("application/zip");
-      response.setHeader("Content-Disposition", "filename=subjective.zip");
-      final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
-      xmlwriter.setOutput(zipOut, "UTF8");
+        final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument,
+                                                                               tournamentTeams.values(),
+                                                                               connection,
+                                                                               tournament);
+        final XMLWriter xmlwriter = new XMLWriter();
       
-      zipOut.putNextEntry(new ZipEntry("challenge.xml"));
-      xmlwriter.write(challengeDocument);
-      zipOut.closeEntry();
-      zipOut.putNextEntry(new ZipEntry("score.xml"));
-      xmlwriter.setNeedsIndent(true);
-      xmlwriter.write(scoreDocument);
-      zipOut.closeEntry();
+        response.reset();
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", "filename=subjective.zip");
+        final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
+        xmlwriter.setOutput(zipOut, "UTF8");
       
-      zipOut.close();
+        zipOut.putNextEntry(new ZipEntry("challenge.xml"));
+        xmlwriter.write(challengeDocument);
+        zipOut.closeEntry();
+        zipOut.putNextEntry(new ZipEntry("score.xml"));
+        xmlwriter.setNeedsIndent(true);
+        xmlwriter.write(scoreDocument);
+        zipOut.closeEntry();
+      
+        zipOut.close();
+      } else {
+        response.reset();
+        response.setContentType("text/plain");
+        final ServletOutputStream os = response.getOutputStream();
+        os.println("Judges are not properly assigned, please go back to the administration page and assign judges");
+      }
+      
     } else {
       response.reset();
       response.setContentType("text/plain");

@@ -1,3 +1,19 @@
+2003-08-10  Jon Schewe  <jpschewe@mtu.net>
+
+	* docs/README.developer (MISC): Removed the application variable
+	currentTournament, just use Queries.getCurrentTournament() all of
+	the time now.
+
+	* web/admin/index.jsp: Make sure we don't grab the current
+	tournament until after it's actually been changed, otherwise the
+	combobox reports the previous tournament after changes.
+
+	* src/fll/web/GetFile.java (getFile): Ensure that
+	judges are assigned before downloading subjective datafile (707847).
+
+	* src/fll/Queries.java (isJudgesProperlyAssigned): Ensure that
+	judges are assigned before downloading subjective datafile (707847).
+
 2003-08-09  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/model/SubjectiveTableModel.java (sort): Use
