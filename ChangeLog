@@ -1,3 +1,11 @@
+2003-04-24  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/gui/SubjectiveFrame.java (SubjectiveFrame): When
+	switching score categories, make sure to tell the table to stop
+	editing a cell, if it is.  This keeps one from losing data when
+	switching categories without first tabing to another cell.
+	(707852)
+
 2003-04-22  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/web/admin/Tournaments.java (verifyData): Allow one to
