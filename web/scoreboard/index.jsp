@@ -3,10 +3,10 @@
 <HTML>
   <HEAD>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument//@title"/> (Scoreboard)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Scoreboard)</title>
   </HEAD>
   <body>
-    <h1><x:out select="$challengeDocument//@title"/> (Scoreboard)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Scoreboard)</h1>
     <ul>
       <li><a href='<c:url value="main.jsp" />'>Primary Scoreboard (1024x768)</a> (requires Internet Explorer)</li>
       <li><a href='<c:url value="/scoreboard_800/main.jsp" />'>Primary Scoreboard

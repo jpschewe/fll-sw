@@ -2,12 +2,12 @@
 
 <html>
   <head>
-    <title><x:out select="$challengeDocument//@title"/> (Instructions)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Instructions)</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument//@title"/> (Instructions)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Instructions)</h1>
         
       <h2><a name='setup'>Setup of tournament</a></h2>
 

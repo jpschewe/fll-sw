@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fll xmlns="http://www.hightechkids.org"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://www.hightechkids.org fll.xsd"
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="fll.xsd"
      title="FLL 2002 Challenge: City Sights" >
 
   <Performance>
@@ -49,7 +48,9 @@
 	  multiplier="12" />
 
     <restriction lowerBound="0"
-		 upperBound="8">
+		 upperBound="8"
+                 message="There are only 8 loops on the table"
+                 >
       <term goal="MarketOurs" />
       <term goal="MarketTheirs" />
       <term goal="PenaltyLoops" />
@@ -57,7 +58,9 @@
 	    goal="LoopsOff" />
     </restriction>
 
-    <restriction lowerBound="4">
+    <restriction lowerBound="4"
+                 message="There must be 4 loops between the our market and penalties"
+                 >
       <term goal="MarketOurs" />
       <term goal="PenaltyLoops" />
     </restriction>
@@ -88,7 +91,9 @@
 	  multiplier="10" />
 
     <restriction lowerBound="0"
-		 upperBound="4">
+		 upperBound="4"
+                 message="There are 4 bundles of pipes total"
+                 >
       <term goal="BG" />
       <term goal="B1" />
       <term goal="B2" />
@@ -111,7 +116,9 @@
 	  multiplier="40" />
 
     <restriction lowerBound="0"
-		 upperBound="3">
+		 upperBound="3"
+                 message="There are 3 houses total"
+                 >
       <term goal="HouseSingle" />
       <term coefficient="2"
 	    goal="HouseDouble" />
@@ -157,6 +164,7 @@
 
   <subjectiveCategory name="InnovativeDesign"
                       title="Innovative Design"
+                      weight="0"
                       >
     <goal name="inFunction"
           title="Creativity in Function"
@@ -249,9 +257,9 @@
                       >
     <goal name="Language"
           title="Language used">
-      <value>RIS</value>
-      <value>RoboLab</value>
-      <value>Unknown</value>
+      <value title="RIS" value="ris" />
+      <value title="RoboLab" value="robolab" />
+      <value title="Unknown" value="unknown" />
     </goal>
     <goal name="UseOfLanguage"
           title="Use of language"

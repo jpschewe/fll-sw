@@ -5,7 +5,7 @@
     <meta http-equiv='refresh' content='60' />
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     
-    <title><x:out select="$challengeDocument//@title"/></title>
+    <title><x:out select="$challengeDocument/fll/@title"/></title>
           
     <script type='text/javascript'>
       var width = screen.width-10;
@@ -30,7 +30,7 @@
 
   <body>
       
-    <h1><x:out select="$challengeDocument//@title"/></h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/></h1>
     
     <p>Leave this page open on the display computer.  It's used to control
     the actual display window.  You may need to press F11 in the newly

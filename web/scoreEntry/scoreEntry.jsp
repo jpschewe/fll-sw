@@ -73,10 +73,10 @@ pageContext.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == (nextRunNumb
 <html>
   <head>
     <c:if test="${not empty param.EditFlag}" var="editFlag">
-      <title><x:out select="$challengeDocument//@title"/> (Score Edit)</title>
+      <title><x:out select="$challengeDocument/fll/@title"/> (Score Edit)</title>
     </c:if>
     <c:if test="${not editFlag}">
-      <title><x:out select="$challengeDocument//@title"/> (Score Entry)</title>
+      <title><x:out select="$challengeDocument/fll/@title"/> (Score Entry)</title>
       <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     </c:if>
       
@@ -181,10 +181,10 @@ function CancelClicked() {
                     <tr>
                       <td valign="middle" align="center">
                         <c:if test="${editFlag}">
-                          <font face="Arial" size="4"><x:out select="$challengeDocument//@title"/> (Score Edit)</font>
+                          <font face="Arial" size="4"><x:out select="$challengeDocument/fll/@title"/> (Score Edit)</font>
                         </c:if>
                         <c:if test="${not editFlag}">
-                          <font face="Arial" size="4"><x:out select="$challengeDocument//@title"/> (Score Entry)</font>
+                          <font face="Arial" size="4"><x:out select="$challengeDocument/fll/@title"/> (Score Entry)</font>
                         </c:if>
                       </td>
                     </tr>
@@ -239,10 +239,11 @@ function CancelClicked() {
                 <table border='0' cellpadding='0' cellspacing='0' width='150'>
                   <tr align='center'>
                     <td>
-                      Yes
                       <input type='radio' name='NoShow' value='1' onclick='setNoShow(1)'>
-                      No
+                      Yes
+                      &nbsp;&nbsp;
                       <input type='radio' name='NoShow' value='0' onclick='setNoShow(0)'>
+                      No
                     </td>
                   </tr>
                 </table>

@@ -6,13 +6,13 @@
 package fll.gui;
 
 
+import fll.model.SubjectiveTableModel;
+
 import fll.xml.XMLUtils;
 import fll.xml.XMLWriter;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -23,6 +23,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -30,34 +33,26 @@ import java.util.zip.ZipOutputStream;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
+
+import net.mtu.eggplant.util.BasicFileFilter;
+
+import net.mtu.eggplant.util.gui.SortableTable;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import fll.model.SubjectiveTableModel;
-
-import net.mtu.eggplant.util.BasicFileFilter;
-
-import net.mtu.eggplant.util.gui.SortableTable;
-import javax.swing.table.TableCellEditor;
-import javax.swing.JTabbedPane;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Iterator;
 
 /**
  * Application to enter subjective scores with
@@ -154,17 +149,15 @@ final public class SubjectiveFrame extends JFrame {
 
       final NodeList goals = subjectiveElement.getElementsByTagName("goal");
       for(int g=0; g<goals.getLength(); g++) {
-        final Node goalDescription = goals.item(g);
+        final Element goalDescription = (Element)goals.item(g);
         if(goalDescription.hasChildNodes()) {
           //enumerated
           final Vector posValues = new Vector();
           posValues.add("");
-          Node posValue = goalDescription.getFirstChild();
-          while(null != posValue) {
-            if("value".equals(posValue.getNodeName())) {
-              posValues.add(posValue.getFirstChild().getNodeValue());
-            }
-            posValue = posValue.getNextSibling();
+          final NodeList posValuesList = goalDescription.getElementsByTagName("value");
+          for(int v=0; v<posValuesList.getLength(); v++) {
+            final Element posValue = (Element)posValuesList.item(v);
+            posValues.add(posValue.getAttribute("title"));
           }
             
           final TableColumn column = table.getColumnModel().getColumn(g + 4);

@@ -3,11 +3,11 @@
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument//@title"/> (Credits)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Credits)</title>
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument//@title"/> (Credits)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Credits)</h1>
 
     <p>This software is licensed by INSciTE under the <a
     href="LICENSE.txt">GPL</a></p>

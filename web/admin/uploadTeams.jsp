@@ -16,11 +16,11 @@ final Connection connection = (Connection)application.getAttribute("connection")
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument//@title"/> (Upload Teams)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Upload Teams)</title>
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument//@title"/> (Upload Teams)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Upload Teams)</h1>
       <up:parse id="numFiles">
 <% final File file = File.createTempFile("fll", null); %>
         <up:saveFile path="<%=file.getAbsolutePath()%>"/>

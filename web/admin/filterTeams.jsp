@@ -26,12 +26,12 @@ if(null == session.getAttribute("columnSelectOptions")) {
   
 <html>
   <head>
-    <title><x:out select="$challengeDocument//@title"/> (Filter Teams)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Filter Teams)</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument//@title"/> (Filter Teams)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Filter Teams)</h1>
 
     <p>There are <%=UploadTeams.applyFilters(connection, request)%> currently
     selected.  Do not use the forward and back buttons!  Use the supplied

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	    targetNamespace="http://www.hightechkids.org"
-            xmlns="http://www.hightechkids.org"
+            xmlns=""
             elementFormDefault="qualified" >
   <xsd:element name="fll">
     <xsd:complexType>
@@ -65,9 +64,44 @@
   </xsd:element>
 
   <xsd:element name="goal">
+    <xsd:annotation>
+      <xsd:documentation>
+        A goal is something that the team may be scored on.  A goal has a
+        maximum and a minimum that define what values are allowed.  It also
+        has a multiplier for cases where this goal is used to count things.
+        If there are no value child elements, then the score is determined
+        by multiplying the count, in the range min to max, by the
+        multiplier.  If there are child elements, the score is the score
+        associated with the choosen child element times the multiplier.
+      </xsd:documentation>
+    </xsd:annotation>
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element name="value" type="databaseName" minOccurs="0" maxOccurs="unbounded" />
+        <xsd:element name="value" minOccurs="0" maxOccurs="unbounded">
+          <xsd:complexType>
+            <xsd:attribute name="score" type="xsd:integer" default="0">
+              <xsd:annotation>
+                <xsd:documentation>
+                  The score one gets for this value of an enumerated goal.
+                </xsd:documentation>
+              </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="title" type="xsd:string" use="required">
+              <xsd:annotation>
+                <xsd:documentation>
+                  The title to display for this value.
+                </xsd:documentation>
+              </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="value" type="xsd:string" use="required">
+              <xsd:annotation>
+                <xsd:documentation>
+                  The value to store in the database for this value.
+                </xsd:documentation>
+              </xsd:annotation>
+            </xsd:attribute>
+          </xsd:complexType>
+        </xsd:element>
       </xsd:sequence>
       <xsd:attribute name="name" type="databaseID" use="required" />
 
@@ -112,6 +146,7 @@
       </xsd:sequence>
       <xsd:attribute name="lowerBound" type="xsd:integer" default="-512" />
       <xsd:attribute name="upperBound" type="xsd:integer" default="512" />
+      <xsd:attribute name="message" type="xsd:string" use="required" />
     </xsd:complexType>
   </xsd:element>
 
@@ -137,13 +172,13 @@
 
   <xsd:simpleType name="databaseName">
     <xsd:restriction base="xsd:string">
-      <xsd:pattern value="\p{L}[\p{L}\p{Nd}]*" />
+      <xsd:pattern value="\p{L}[\p{L}\p{Nd}_]*" />
     </xsd:restriction>
   </xsd:simpleType>
 
   <xsd:simpleType name="databaseID">
     <xsd:restriction base="xsd:ID">
-      <xsd:pattern value="\p{L}[\p{L}\p{Nd}]*" />
+      <xsd:pattern value="\p{L}[\p{L}\p{Nd}_]*" />
     </xsd:restriction>
   </xsd:simpleType>
 

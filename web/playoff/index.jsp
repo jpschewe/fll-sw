@@ -40,11 +40,11 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument//@title"/> (Playoff's)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Playoff's)</title>
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument//@title"/> (Playoff menu)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Playoff menu)</h1>
       <ol>
         <li>First you should check to make sure all of the teams have the
         correct number of rounds.  You can use <a href="check.jsp">this

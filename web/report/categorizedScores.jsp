@@ -21,7 +21,7 @@ if(tournamentReq == null) {
 
 <html>
   <head>
-    <title><x:out select="$challengeDocument//@title"/> (Categorized Scores)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Categorized Scores)</title>
   </head>
 
   <body>

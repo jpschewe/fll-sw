@@ -21,7 +21,7 @@ if(tournamentReq == null) {
 
 <html>
   <head>
-    <title><x:out select="$challengeDocument//@title"/> (Final Computed Scores)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Final Computed Scores)</title>
     <style type="text/css">
     td {font-size: 12px}
     th {font-size: 12px}
@@ -30,7 +30,7 @@ if(tournamentReq == null) {
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument//@title"/> (Final Computed Scores)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Final Computed Scores)</h1>
 
 <% FinalComputedScores.generateReport(tournament, challengeDocument, connection, out); %>
 

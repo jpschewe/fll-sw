@@ -12,12 +12,12 @@ final Connection connection = (Connection)application.getAttribute("connection")
 
 <html>
   <head>
-    <title><x:out select="$challengeDocument//@title"/></title>
+    <title><x:out select="$challengeDocument/fll/@title"/></title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument//@title"/></h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/></h1>
     <ul>
         
       <li>Current Tournament -> <%=Queries.getCurrentTournament(connection)%></li>

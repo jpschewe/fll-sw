@@ -13,11 +13,11 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument//@title"/> (Performance Run <c:out value="${param.RunNumber}"/>)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Performance Run <c:out value="${param.RunNumber}"/>)</title>
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument//@title"/> (Performance Run <c:out value="${param.RunNumber}"/>)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Performance Run <c:out value="${param.RunNumber}"/>)</h1>
 
     <c:if test="${empty param.RunNumber}">
       <font color='red'>You must specify a run number!</font>
