@@ -4,6 +4,14 @@
 (jde-set-project-name "fll-sw")
 (let ((project-root (file-name-directory load-file-name))
       )
+  ;; Setup TAGS list
+  (let ((tag-cons (cons
+                   (expand-file-name "src" project-root)
+                   (expand-file-name "src" project-root))))
+    (if (boundp 'tag-table-alist)
+        (add-to-list 'tag-table-alist tag-cons)
+      (setq tag-table-alist (list tag-cons))))
+  ;; JDE customizations
   (jde-set-variables
    '(jde-run-working-directory (expand-file-name "build/" project-root))
    '(jde-compile-option-directory (expand-file-name "build/" project-root))
@@ -33,6 +41,12 @@
 			   ))
    
    '(jde-compile-option-deprecation t)
+   '(jde-build-function 		'(jde-ant-build))
+   '(jde-ant-working-directory		project-root)
+   '(jde-ant-read-target 		t) ;; prompt for the target name
+   '(jde-ant-enable-find 		t) ;; make jde-ant look for the build file
+   '(jde-ant-complete-target 		nil) ;; don't parse the build file for me
+   '(jde-ant-invocation-method  	'("Java"))
    '(jde-run-option-vm-args '("-DASSERT_BEHAVIOR=CONTINUE "))
  '(jde-gen-buffer-boilerplate (quote (
 				      "/*"

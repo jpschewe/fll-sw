@@ -1,3 +1,9 @@
+2004-12-05  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/xml/ChallengeParser.java (ChallengeParser): Use the
+	context classloader to allow one to change the classloader without
+	changing the code.
+
 2004-11-23  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/WEB-INF/jspf/footer.jspf: Added sw version to the footer page.
