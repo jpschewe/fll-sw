@@ -21,7 +21,7 @@
 function init() {  
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-final Connection connection = (Connection)application.getAttribute("adminConnection");
+final Connection connection = (Connection)application.getAttribute("connection");
 final List tournamentNames = Queries.getTournamentNames(connection);
 
   

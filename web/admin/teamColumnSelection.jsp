@@ -9,7 +9,7 @@
   
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-final Connection connection = (Connection)application.getAttribute("adminConnection");
+final Connection connection = (Connection)application.getAttribute("connection");
 
 if(null == session.getAttribute("columnSelectOptions")) {
   throw new RuntimeException("Error columnSelectOptions not set.  Please start back at administration page and go forward.");

@@ -47,7 +47,7 @@ final public class Playoff {
       if(null == challengeDocument) {
         throw new RuntimeException("Error parsing challenge.xml");
       }
-      final Connection connection = Utilities.createDBConnection("disk", "fll_admin", "fll_admin", "fll");
+      final Connection connection = Utilities.createDBConnection("disk", "fll", "fll", "fll");
 //       final Element performanceElement = (Element)challengeDocument.getDocumentElement().getElementsByTagName("Performance").item(0);
 //       final Element tiebreakerElement = (Element)performanceElement.getElementsByTagName("tiebreaker").item(0);
 //       Node child = tiebreakerElement.getFirstChild();

@@ -48,7 +48,7 @@ final public class UploadTeams {
   public static void main(final String[] args) {
     try {
       final File file = new File("/home/jpschewe/projects/fll/code/2002/results/teams-20021023.csv");
-      final Connection connection = Utilities.createDBConnection("disk", "fll_admin", "fll_admin");
+      final Connection connection = Utilities.createDBConnection("disk", "fll", "fll");
       parseFile(file, connection, new DebugHttpSession());
 //       final String line = "team #	State	Region	Div #	School/Organization	Team Name	Girls	Boys	Minority	Num Medals	Paid	Coach	E-mail	Phone #";
 //       System.out.println(splitLine(line));

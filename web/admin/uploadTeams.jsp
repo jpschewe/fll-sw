@@ -14,7 +14,7 @@
   
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-final Connection connection = (Connection)application.getAttribute("adminConnection");
+final Connection connection = (Connection)application.getAttribute("connection");
 %>
   
 <html>
@@ -28,7 +28,7 @@ final Connection connection = (Connection)application.getAttribute("adminConnect
 <% final File file = File.createTempFile("fll", null); %>
         <up:saveFile path="<%=file.getAbsolutePath()%>"/>
 <%
-UploadTeams.parseFile(file, (Connection)application.getAttribute("adminConnection"), session);
+UploadTeams.parseFile(file, connection, session);
 file.delete();
 %>
       </up:parse>

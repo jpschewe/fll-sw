@@ -20,11 +20,6 @@
     application.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
   }
     
-  if(null == application.getAttribute("adminConnection")) {
-    final Connection adminConnection = Utilities.createDBConnection(application.getInitParameter("database.host"), "fll_admin", "fll_admin", database);
-    application.setAttribute("adminConnection", adminConnection);
-  }
-    
   if(null == application.getAttribute("challengeDocument")) {  
     final Document document = Queries.getChallengeDocument((Connection)application.getAttribute("connection"));
     if(null == document) {

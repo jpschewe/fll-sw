@@ -25,7 +25,6 @@ if(null != request.getParameter("changeDatabase")
   
   //remove application variables that depend on the database connection
   application.removeAttribute("connection");
-  application.removeAttribute("adminConnection");
   application.removeAttribute("tournamentTeams");
   
   message.append("<i>Changed database to " + newDatabase + "</i><br>");
