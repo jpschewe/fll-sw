@@ -24,7 +24,6 @@ pageContext.setAttribute("regions", Queries.getRegions(connection));
         
         
 <c:if test='${"true" == param.verified}'>
-  <!-- FIX process data -->
   <c:forEach var="parameter" items="${paramValues}">
     <c:if test='${"nochange" != parameter.value[0] && "verified" != parameter.key && "submit" != parameter.key}'>
       <!-- need MySQL 4.0.2 or greater for this one! -->

@@ -26,6 +26,7 @@ if(tournamentReq == null) {
     <style type="text/css">
     td {font-size: 12px}
     th {font-size: 12px}
+    .warn { color: red; font-weight: bold }
     </style>
   </head>
 

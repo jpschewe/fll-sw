@@ -1,5 +1,9 @@
 2003-08-10  Jon Schewe  <jpschewe@mtu.net>
 
+	* src/fll/web/report/FinalComputedScores.java (generateReport):
+	Put "No Score" in bold red on final score report for missing
+	scores.  (707890)
+
 	* docs/README.developer (MISC): Removed the application variable
 	currentTournament, just use Queries.getCurrentTournament() all of
 	the time now.

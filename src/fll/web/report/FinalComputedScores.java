@@ -144,7 +144,7 @@ final public class FinalComputedScores {
             } else {
               rawScore = Double.NaN;
             }
-            out.println("    <td>" + SCORE_FORMAT.format(rawScore) + "</td>");
+            out.println("    <td" + (Double.isNaN(rawScore) ? "class=warn>No Score" : ">" + SCORE_FORMAT.format(rawScore)) + "</td>");
             rawScoreRS.close();
           }
 
@@ -161,7 +161,7 @@ final public class FinalComputedScores {
           } else {
             rawScore = Double.NaN;
           }
-          out.println("    <td>" + SCORE_FORMAT.format(rawScore) + "</td>");
+          out.println("    <td" + (Double.isNaN(rawScore) ? "class=warn>No Score" : ">" + SCORE_FORMAT.format(rawScore)) + "</td>");
           rawScoreRS.close();
           out.println("    <td>&nbsp;</td>");
           out.println("  </tr>");
@@ -188,7 +188,7 @@ final public class FinalComputedScores {
               scaledScore = Double.NaN;
             }
 
-            out.println("    <td>" + SCORE_FORMAT.format(scaledScore) + "</td>");
+            out.println("    <td" + (Double.isNaN(scaledScore) ? "class=warn>No Score" : ">" + SCORE_FORMAT.format(scaledScore)) + "</td>");
 
             scaledScoreRS.close();
           }
@@ -208,13 +208,13 @@ final public class FinalComputedScores {
               scaledScore = Double.NaN;
             }
 
-            out.println("    <td>" + SCORE_FORMAT.format(scaledScore) + "</td>");
+            out.println("    <td" + (Double.isNaN(scaledScore) ? "class=warn>No Score" :  ">" + SCORE_FORMAT.format(scaledScore)) + "</td>");
           }
           
           scaledScoreRS.close();
 
           //total score
-          out.println("    <td>" + SCORE_FORMAT.format(totalScore) + "</td>");
+          out.println("    <td" + (Double.isNaN(totalScore) ? "class=warn>No Score" : ">" + SCORE_FORMAT.format(totalScore)) + "</td>");
 
           out.println("  <tr><td colspan='" + (subjectiveCategories.getLength() + 4) + "'><hr></td></tr>");
         }
