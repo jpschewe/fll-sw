@@ -75,88 +75,63 @@
 
   </Performance>
 
-  <subjectiveCategory name="InnovativeDesign"
-                      title="Innovative Design"
-                      weight="0.0"
+  <subjectiveCategory name="Teamwork"
+                      title="Teamwork"
+                      weight="1.0"
                       >
-    <goal name="inFunction"
-          title="Creativity in Function"
+    <goal name="roles"
+          title="Roles and Responsibilities"
           min="1"
           max="20" />
-    <goal name="Uniqueness"
-          title="Uniqueness"
+    <goal name="professionalism"
+          title="Gracious Professionalism"
           min="1"
           max="20" />
-    <goal name="inDesignProcess"
-          title="Creativity in Design Process"
+    <goal name="dynamics"
+          title="Problem Solving & Team Dynamics & Communications"
           min="1"
           max="20" />
-    <goal name="inDesignAndAppearance"
-          title="Creativity in Design and Appearance"
+    <goal name="confidence"
+          title="Confidence & Enthusiasm"
           min="1"
           max="20" />
-    <goal name="OverallCreativity"
-          title="Overall Design and Integration"
+    <goal name="values"
+          title="FLL Values"
           min="1"
           max="20" />
   </subjectiveCategory>
 
+  
   <subjectiveCategory name="RobustDesign"
                       title="Robust Design"
-                      weight="0.5"
+                      weight="1.0"
                       >
-    <goal name="Structural"
+    <goal name="structural"
           title="Structural Design"
           min="1"
           max="20" />
-    <goal name="Locomotion"
+    <goal name="locomotion"
           title="Locomotion"
           min="1"
           max="20" />
-    <goal name="Manipulation"
+    <goal name="manipulation"
           title="Manipulation"
           min="1"
           max="20" />
-    <goal name="Navigation"
+    <goal name="navigation"
           title="Navigation"
           min="1"
           max="20" />
     <goal name="OverallDesign"
-          title="Overall Design and Integration"
+          title="Overall Design"
           min="1"
           max="20" />
   </subjectiveCategory>
 
-
-  <subjectiveCategory name="ResearchPresentation"
-                      title="Research Presentation"
-                      weight="1.0"
-                      >
-    <goal name="Research"
-          title="Research"
-          min="1"
-          max="20" />
-    <goal name="Knowledge"
-          title="Knowldege"
-          min="1"
-          max="20" />
-    <goal name="ChallengeSpecific"
-          title="Challenge Specific"
-          min="1"
-          max="20" />
-    <goal name="Presentation"
-          title="Presentation"
-          min="1"
-          max="20" />
-    <goal name="Innovation"
-          title="Innovation"
-          min="1"
-          max="20" />
-  </subjectiveCategory>
 
   <subjectiveCategory name="Programming"
-                      title="Programming"
-                      weight="0.5"
+                      title="Robust Programming"
+                      weight="1.0"
                       >
     <goal name="UseOfLanguage"
           title="Use of Language"
@@ -180,30 +155,31 @@
           max="20" />
   </subjectiveCategory>
 
-  <subjectiveCategory name="Teamwork"
-                      title="Teamwork"
+  <subjectiveCategory name="project_assessment"
+                      title="Project Assessment"
                       weight="1.0"
                       >
-    <goal name="TeamIntegration"
-          title="Team Integration"
+    <goal name="questions"
+          title="Questions, Language Use"
           min="1"
           max="20" />
-    <goal name="Respect"
-          title="Respect"
+    <goal name="completeness"
+          title="Completeness, Teamwork"
           min="1"
           max="20" />
-    <goal name="FocusedEffort"
-          title="Focused Effort"
+    <goal name="background"
+          title="Background, Data, and Graphics"
           min="1"
           max="20" />
-    <goal name="Participation"
-          title="Participation"
+    <goal name="analysis"
+          title="Analysis and Conclusions"
           min="1"
           max="20" />
-    <goal name="DecisionSolving"
-          title="Decision Making and Problem Solving"
+    <goal name="style"
+          title="Style"
           min="1"
           max="20" />
   </subjectiveCategory>
 
+  
 </fll>
