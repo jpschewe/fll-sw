@@ -76,7 +76,17 @@
     </restriction>
 
     <tiebreaker>
+      <test goal="ball_center" winner="high" />
+      <test goal="play_ball" winner="high" />
+      <test goal="bonus" winner="low" />
+      <test goal="serve_dinner" winner="high" />
+      <test goal="feed_pets" winner="high" />
+      <test goal="read_sign" winner="high" />
       <test goal="climb_stairs" winner="high" />
+      <test goal="open_gate" winner="high" />
+      <test goal="push_chairs" winner="high" />
+      <test goal="remove_glasses" winner="high" />
+      <test goal="cd" winner="high" />
     </tiebreaker>
 
   </Performance>
