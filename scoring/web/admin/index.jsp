@@ -15,7 +15,6 @@
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
-final String currentTournament = Queries.getCurrentTournament(connection);
 final StringBuffer message = new StringBuffer();
 final String messageReq = request.getParameter("message");
 if(null != messageReq) {
@@ -47,6 +46,8 @@ if(null != request.getParameter("addTournamentsForRegions")) {
 }
         
 final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
+final String currentTournament = Queries.getCurrentTournament(connection);
+        
 %>
       
 <html>

@@ -137,7 +137,6 @@ file you'll get the following variables.  You may have to adjust the file
 attribute to point get to the file, it's at the root of our web project.
   - "connection" (java.sql.Connection) a connection to the database with username 'fll'
   - "adminConnection" (java.sql.Connection) a connection to the database with username 'fll_admin'
-  - "currentTournament" (java.lang.String) holds the current tournament name (aka region)
   - "challengeDocument" (org.w3c.dom.Document) the challenge.xml document
     already parsed
   - "ScorePageText" (java.lang.String) holds the text displayed at the top

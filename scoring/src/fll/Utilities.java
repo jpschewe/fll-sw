@@ -81,7 +81,10 @@ public class Utilities {
     try {
       connection = DriverManager.getConnection(myURL);
     } catch(final SQLException sqle) {
-      throw new RuntimeException("Unable to create connection: " + sqle.getMessage());
+      throw new RuntimeException("Unable to create connection: " + sqle.getMessage()
+                                 + " host: " + hostname
+                                 + " database: " + database
+                                 + " user: " + username);
     }
     return connection;
   }

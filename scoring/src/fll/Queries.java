@@ -105,7 +105,7 @@ public class Queries {
    * Get a map of teams for this tournament keyed on team number and put it in
    * application under the key "tournamentTeams".
    *
-   * @param application where to get the currentTournament and connection variables
+   * @param application where to get the connection variables
    * @param force if true, overwrite the value in application
    */
   private static void populateTournamentTeams(final ServletContext application,
@@ -1174,4 +1174,41 @@ public class Queries {
       Utilities.closePreparedStatement(insertPrep);
     }
   }
+
+  /**
+   * Make sure all of the judges are properly assigned for the current tournament
+   *
+   * @param connection the database connection
+   * @param document XML document to describe the tournament
+   * @return true if everything is ok
+   */
+  public static boolean isJudgesProperlyAssigned(final Connection connection,
+                                                 final Document document)
+    throws SQLException {
+
+    final NodeList subjectiveCategories = document.getDocumentElement().getElementsByTagName("subjectiveCategory");
+    
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT id FROM Judges WHERE Tournament = ? AND category = ?");
+      prep.setString(1, getCurrentTournament(connection));
+
+      for(int i=0; i<subjectiveCategories.getLength(); i++) {
+        final String categoryName = ((Element)subjectiveCategories.item(i)).getAttribute("name");
+        prep.setString(2, categoryName);
+        rs = prep.executeQuery();
+        if(!rs.next()) {
+          return false;
+        }
+        Utilities.closeResultSet(rs);
+        rs = null;
+      }
+      return true;
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closePreparedStatement(prep);
+    }
+  }
+  
 }
