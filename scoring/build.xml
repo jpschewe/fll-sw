@@ -281,7 +281,10 @@
 	  failonerror="true"
 	  taskname="jspc"
 	  dir="${basedir}">
-      <classpath refid="compile.classpath"/>
+      <classpath>
+        <pathelement location="${build.home}/WEB-INF/classes" />
+        <path refid="compile.classpath" />
+      </classpath>
       <arg line="-d ${tmp.home}" />
       <arg line="-die9" />
       <arg line="-webapp ${build.home}" />

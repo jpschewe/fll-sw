@@ -89,11 +89,9 @@ final public class GenerateDB {
       //create the database
       stmt.executeUpdate("CREATE DATABASE " + database);
 
-      //give fll_admin full privileges and use password fll_admin
-      stmt.execute("GRANT ALL PRIVILEGES ON " + database + ".* TO fll_admin IDENTIFIED BY 'fll_admin'");
-      stmt.execute("GRANT ALL PRIVILEGES ON " + database + ".* TO fll_admin@localhost IDENTIFIED BY 'fll_admin'");
-      stmt.executeUpdate("GRANT ALL PRIVILEGES ON " + database + ".* TO fll IDENTIFIED BY 'fll'");
-      stmt.executeUpdate("GRANT ALL PRIVILEGES ON " + database + ".* TO fll@localhost IDENTIFIED BY 'fll'");
+      //give fll full privileges and use password fll
+      stmt.execute("GRANT ALL PRIVILEGES ON " + database + ".* TO fll IDENTIFIED BY 'fll'");
+      stmt.execute("GRANT ALL PRIVILEGES ON " + database + ".* TO fll@localhost IDENTIFIED BY 'fll'");
 
     } finally {
       Utilities.closeStatement(stmt);
@@ -102,7 +100,7 @@ final public class GenerateDB {
 
     PreparedStatement prep = null;
     try {
-      connection = Utilities.createDBConnection(host, "fll_admin", "fll_admin", database);
+      connection = Utilities.createDBConnection(host, "fll", "fll", database);
       
       stmt = connection.createStatement();
       

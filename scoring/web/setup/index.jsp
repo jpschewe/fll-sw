@@ -51,7 +51,6 @@ File xmlfile = null;
     
     //remove application variables that depend on the database
     application.removeAttribute("connection");
-    application.removeAttribute("adminConnection");
     application.removeAttribute("tournamentTeams");
     application.removeAttribute("challengeDocument");
   
