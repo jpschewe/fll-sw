@@ -1,4 +1,6 @@
 2003-12-07  Jon Schewe  <jpschewe@mtu.net>
+	
+	* Release version 2.2.
 
 	* src/fll/Queries.java: Updated some documentation as well as
 	minimum score values (subjective was using performance).
