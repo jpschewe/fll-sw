@@ -1,5 +1,8 @@
 <%@ page errorPage="../errorHandler.jsp" %>
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
+  
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
   
 <%@ page import="fll.web.admin.UploadTeams" %>
 
@@ -21,7 +24,7 @@ if(null == session.getAttribute("columnSelectOptions")) {
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Filter Teams)</title>
   </head>
 
-  <body background='../images/bricks1.gif' bgcolor='#ffffff' topmargin='4'>
+  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" topmargin='4'>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Filter Teams)</h1>
 
     <p>There are <%=UploadTeams.applyFilters(connection, request)%> currently
@@ -78,6 +81,6 @@ while(null != filterColumn) {
       </table>
     </form>
 
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>

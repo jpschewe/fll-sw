@@ -86,7 +86,7 @@ public class XMLUtils {
       teamElement.setAttribute("teamNumber", String.valueOf(team.getTeamNumber()));
       teamElement.setAttribute("division", String.valueOf(team.getDivision()));
       teamElement.setAttribute("organization", team.getOrganization());
-      teamElement.setAttribute("region", team.getRegion());
+      teamElement.setAttribute("entryTournament", team.getEntryTournament());
       top.appendChild(teamElement);
     }
 

@@ -43,6 +43,7 @@
    (list 
     "(funcall jde-gen-boilerplate-function)"
     "(jde-gen-get-package-statement)"
+    "'>\"import org.apache.log4j.Logger;\"'n"
     "\"/**\" '>'n"
     "\" * Add class comment here!\" '>'n"
     "\" *\" '>'n"
@@ -52,6 +53,8 @@
     "(file-name-sans-extension (file-name-nondirectory buffer-file-name))" 
     "\" \" (jde-gen-get-extend-class)" 
     "\"{\" '>'n"
+    "'>'n"
+    "'>\"private static final Logger LOG = Logger.getLogger(\"(file-name-sans-extension (file-name-nondirectory buffer-file-name))\".class);\"'n"
     "'>'n"
     "\"public \"" 
     "(file-name-sans-extension (file-name-nondirectory buffer-file-name))" 

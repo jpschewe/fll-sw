@@ -45,6 +45,7 @@ if(null == errorMessage || "".equals(errorMessage)) {
     <form action="verifyTeams.jsp" method="POST" name="verifyTeams">
       <table border='1'>
 
+      <%-- Note all form elements need to match the names of the columns in the database --%>
         <tr>
           <th>Database column</th>
           <th>Datatype</th>
@@ -129,10 +130,11 @@ if(null == errorMessage || "".equals(errorMessage)) {
         </tr>
 
         <tr>
-          <td>Region</td>
+          <td>Entry Tournament (This is the tournament that the team will
+              first show up in)</td>
           <td>Text</td>
           <td>
-            <select name='Region'>
+            <select name='EntryTournament'>
             <option value='' selected>None</option>
             <%=session.getAttribute("columnSelectOptions")%>
             </select>
@@ -194,17 +196,6 @@ if(null == errorMessage || "".equals(errorMessage)) {
           </td>
         </tr>
 
-        <tr>
-          <td>Did the team advance to state</td>
-          <td>Text</td>
-          <td>
-            <select name='ToState'>
-            <option value='' selected>None</option>
-            <%=session.getAttribute("columnSelectOptions")%>
-            </select>
-          </td>
-        </tr>
-          
         <tr>
           <td colspan='2'><input type='submit' value='Next'></td>
         </tr>

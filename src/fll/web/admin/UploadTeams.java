@@ -50,7 +50,7 @@ final public class UploadTeams {
       final File file = new File("/home/jpschewe/projects/fll/code/2002/results/teams-20021023.csv");
       final Connection connection = Utilities.createDBConnection("disk", "fll", "fll");
       parseFile(file, connection, new DebugHttpSession());
-//       final String line = "team #	State	Region	Div #	School/Organization	Team Name	Girls	Boys	Minority	Num Medals	Paid	Coach	E-mail	Phone #";
+//       final String line = "team #	State	Tournament	Div #	School/Organization	Team Name	Girls	Boys	Minority	Num Medals	Paid	Coach	E-mail	Phone #";
 //       System.out.println(splitLine(line));
     } catch(final Exception e) {
       e.printStackTrace();
@@ -284,7 +284,7 @@ final public class UploadTeams {
    * <ul>
    *   <li>Make sure that the column for TeamNumber is specified</li>
    *   <li>Make sure that the TeamNumbers are unique - just use count</li>
-   *   <li>Generate the regions table off of the Regions column?</li>
+   *   <li>TODO: Generate the tournaments table off of the Tournaments column?</li>
    *   <li>Delete all rows from the Teams table</li>
    *   <li>Copy the teams into the Teams table</li>
    * </ul>
@@ -361,6 +361,9 @@ final public class UploadTeams {
         return false;
       }
 
+      //make sure that CurrentTournament = EntryTournament
+      stmt.executeUpdate("UPDATE Teams SET CurrentTournament = EntryTournament");
+      
       return true;
     } finally {
       Utilities.closeStatement(stmt);

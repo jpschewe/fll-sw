@@ -1,6 +1,8 @@
 <%@ page errorPage="../errorHandler.jsp" %>
+
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
   
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
   
 <%@ page import="fll.Utilities" %>
 <%@ page import="fll.Queries" %>
@@ -25,7 +27,7 @@ final Connection connection = (Connection)application.getAttribute("connection")
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Commit Team)</title>
   </head>
 
-  <body background='../images/bricks1.gif' bgcolor='#ffffff' topmargin='4'>
+  <body background='<c:url value="/images/bricks1.gif"/>' bgcolor='#ffffff' topmargin='4'>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Commit Team)</h1>
 
 <%
@@ -85,7 +87,8 @@ if("1".equals(request.getParameter("deleteTeam"))) { //check for the delete flag
   <input type='hidden' name='email' value='<%=request.getParameter("email")%>'>
   <input type='hidden' name='phone' value='<%=request.getParameter("phone")%>'>
   <input type='hidden' name='city' value='<%=request.getParameter("city")%>'>
-  <input type='hidden' name='tournament' value='<%=request.getParameter("tournament")%>'>
+  <input type='hidden' name='entryTournament' value='<%=request.getParameter("entryTournament")%>'>
+  <input type='hidden' name='currentTournament' value='<%=request.getParameter("currentTournament")%>'>
   <input type='hidden' name='reallyDelete' value='1'>
   <input type='hidden' name='deleteTeam' value='1'>
   <input type='submit' value='Delete'>
@@ -106,10 +109,10 @@ if("1".equals(request.getParameter("deleteTeam"))) { //check for the delete flag
       <a href="index.jsp">Return to the admin menu.</a></p>
 <%
     } else {
-      prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Coach, Email, Phone, City, Region, Division, NumBoys, NumGirls, NumMedals, HowFoundOut, TeamNumber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+      prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Coach, Email, Phone, City, EntryTournament, Division, NumBoys, NumGirls, NumMedals, HowFoundOut, CurrentTournament, TeamNumber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     }
   } else {
-    prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Coach = ?, Email = ?, Phone = ?, City = ?, Region = ?, Division = ?, NumBoys = ?, NumGirls = ?, NumMedals = ?, HowFoundOut = ? WHERE TeamNumber = ?");
+    prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Coach = ?, Email = ?, Phone = ?, City = ?, EntryTournament = ?, Division = ?, NumBoys = ?, NumGirls = ?, NumMedals = ?, HowFoundOut = ?, CurrentTournament = ? WHERE TeamNumber = ?");
   }
       
   prep.setString(1, request.getParameter("teamName"));
@@ -118,7 +121,7 @@ if("1".equals(request.getParameter("deleteTeam"))) { //check for the delete flag
   prep.setString(4, request.getParameter("email"));
   prep.setString(5, request.getParameter("phone"));
   prep.setString(6, request.getParameter("city"));
-  prep.setString(7, request.getParameter("tournament"));
+  prep.setString(7, request.getParameter("entryTournament"));
   if(-1 == division) {
     prep.setNull(8, Types.INTEGER);
   } else {
@@ -140,7 +143,8 @@ if("1".equals(request.getParameter("deleteTeam"))) { //check for the delete flag
     prep.setInt(11, numMedals);
   }
   prep.setString(12, request.getParameter("howFoundOut"));
-  prep.setInt(13, teamNumber);
+  prep.setString(13, request.getParameter("currentTournament"));
+  prep.setInt(14, teamNumber);
   prep.executeUpdate();
   Utilities.closePreparedStatement(prep);
 

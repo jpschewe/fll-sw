@@ -25,7 +25,7 @@ if(null != messageReq) {
 final String currentTournamentParam = request.getParameter("currentTournament");
 if(null != currentTournamentParam && !"".equals(currentTournamentParam)) {
   if(!Queries.setCurrentTournament(connection, currentTournamentParam)) {
-    response.sendRedirect(response.encodeRedirectURL("regions.jsp?unknownTournament=" + currentTournamentParam));
+    response.sendRedirect(response.encodeRedirectURL("tournaments.jsp?unknownTournament=" + currentTournamentParam));
   } else {
     application.setAttribute("currentTournament", currentTournamentParam);
     Queries.initializeTournamentTeams(connection);
@@ -64,7 +64,7 @@ final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
           Current Tournament: <select name='currentTournament'>
               <%
               final Statement stmt = connection.createStatement();
-              final ResultSet rs = stmt.executeQuery("Select Region,Location from Regions ORDER BY Region");
+              final ResultSet rs = stmt.executeQuery("Select Name,Location from Tournaments ORDER BY Name");
               while(rs.next()) {
                 final String tournament = rs.getString(1);
                 final String location = rs.getString(2);

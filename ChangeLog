@@ -1,4 +1,28 @@
+2003-04-20  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/web/admin/UploadTeams.java (verifyTeams): make sure that
+	upload page defaults Teams.CurrentTournament =
+	Teams.EntryTournament when uploading team information (707876)
+
 2003-04-19  Jon Schewe  <jpschewe@mtu.net>
+
+	* scripts/convertTournaments.sql: SQL script to convert databases
+	from last season to add support for heirarchial tournaments and to
+	be consistent about region/tournament naming.  This should allow
+	us to use last season's databases for test data.  (707874, 707876)
+
+	* web/admin/editTeam.jsp: Allow the current tournament as well as
+	the entry tournament to be edited to support heirarchial
+	tournaments.  (707876)
+
+	* src/fll/web/admin/Tournaments.java (commitData): Don't delete
+	all of the tournament data when updating information.  Just update
+	the rows.  (707869)
+
+	* src/log4j.properties: Created a logfile for all output in
+	addition to the one going to stdout.
+
+	* build.xml: Upgraded log4j from 1.2.6 to 1.2.8.
 
 	* src/fll/xml/GenerateDB.java (generateDB): Removed fll_admin as a
 	database user.  Just use fll as hte only database user with full

@@ -1,5 +1,8 @@
 <%@ page errorPage="../errorHandler.jsp" %>
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
+  
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="fll.Utilities" %>
 <%@ page import="fll.Queries" %>
@@ -26,13 +29,14 @@ final List tournamentNames = Queries.getTournamentNames(connection);
 
   
 final String addTeam = request.getParameter("addTeam");
-final String tournament;
+final String currentTournament;
+final String entryTournament;
 final String howFoundOut;
 final int teamNumber;
 if(!"1".equals(addTeam)) {
   teamNumber = NumberFormat.getInstance().parse(request.getParameter("teamNumber")).intValue();
   final Statement stmt = connection.createStatement();
-  final ResultSet rs = stmt.executeQuery("SELECT TeamNumber,TeamName,Organization,Coach,Email,Phone,City,Region,Division,NumBoys,NumGirls,NumMedals,HowFoundOut FROM Teams WHERE TeamNumber = " + teamNumber);
+  final ResultSet rs = stmt.executeQuery("SELECT TeamNumber,TeamName,Organization,Coach,Email,Phone,City,EntryTournament,Division,NumBoys,NumGirls,NumMedals,HowFoundOut,CurrentTournament FROM Teams WHERE TeamNumber = " + teamNumber);
   rs.next();
   final String teamName = rs.getString(2);
   final String organization = rs.getString(3);
@@ -40,12 +44,13 @@ if(!"1".equals(addTeam)) {
   final String email = rs.getString(5);
   final String phone = rs.getString(6);
   final String city = rs.getString(7);
-  tournament = rs.getString(8);
+  entryTournament = rs.getString(8);
   final String division = rs.getString(9);
   final String numBoys = rs.getString(10);
   final String numGirls = rs.getString(11);
   final String numMedals = rs.getString(12);
   howFoundOut = rs.getString(13);
+  currentTournament = rs.getString(14);
   Utilities.closeResultSet(rs);
   Utilities.closeStatement(stmt);
 %>
@@ -62,7 +67,8 @@ if(!"1".equals(addTeam)) {
 <%
 } else {
   teamNumber = -1;
-  tournament = "";
+  currentTournament = "";
+  entryTournament = "";
   howFoundOut = "";
 }
 %>
@@ -71,7 +77,7 @@ if(!"1".equals(addTeam)) {
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Edit Team)</title>
   </head>
 
-  <body background='../images/bricks1.gif' bgcolor='#ffffff' topmargin='4' onload='init()'>
+  <body background='<c:url value="/images/bricks1.gif"/>' bgcolor='#ffffff' topmargin='4' onload='init()'>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Edit Team)</h1>
 
     <form action="commitTeam.jsp" method="POST" name="editTeam">
@@ -110,15 +116,33 @@ if(!"1".equals(addTeam)) {
         <td><input type='text' name='city'></td>
       </tr>
       <tr>
-        <td>Tournament (required)</td>
+        <td>Entry Tournament (required)</td>
         <td>
-          <select name='tournament'>
+          <select name='entryTournament'>
           <%
-          final Iterator iter = tournamentNames.iterator();
-          while(iter.hasNext()) {
-            final String tournamentName = (String)iter.next();
+          Iterator tournamentsIter = tournamentNames.iterator();
+          while(tournamentsIter.hasNext()) {
+            final String tournamentName = (String)tournamentsIter.next();
             out.print("<option value='" + tournamentName + "'");
-            if(tournament.equals(tournamentName)) {
+            if(entryTournament.equals(tournamentName)) {
+              out.print(" selected");
+            }
+            out.println(">" + tournamentName + "</option>");
+          }
+          %>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>Current Tournament (required)</td>
+        <td>
+          <select name='currentTournament'>
+          <%
+          tournamentsIter = tournamentNames.iterator();
+          while(tournamentsIter.hasNext()) {
+            final String tournamentName = (String)tournamentsIter.next();
+            out.print("<option value='" + tournamentName + "'");
+            if(currentTournament.equals(tournamentName)) {
               out.print(" selected");
             }
             out.println(">" + tournamentName + "</option>");
@@ -160,6 +184,6 @@ if(!"1".equals(addTeam)) {
     <input type='submit' value='Cancel'>
     </form>
       
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>    
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>    
   </body>
 </html>
