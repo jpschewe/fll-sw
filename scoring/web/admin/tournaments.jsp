@@ -1,6 +1,10 @@
 <%@ page errorPage="../errorHandler.jsp" %>
+  
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
+  
 <%@ page import="fll.web.admin.Tournaments" %>
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+  
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
   
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
@@ -11,7 +15,7 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Edit Tournaments)</title>
   </head>
 
-  <body background='../images/bricks1.gif' bgcolor='#ffffff' topmargin='4'>
+  <body background='<c:url value="/images/bricks1.gif"/>' bgcolor='#ffffff' topmargin='4'>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Edit Tournaments)</h1>
 
 <%
@@ -23,5 +27,5 @@ if(null != unknownTournament) {
 <%}%>
 
 <% Tournaments.generatePage(out, application, request, response); %>
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
 </body></html>

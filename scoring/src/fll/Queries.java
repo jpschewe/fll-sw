@@ -6,14 +6,16 @@
  */
 package fll;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import fll.xml.ChallengeParser;
+import fll.xml.XMLUtils;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import java.text.NumberFormat;
+import java.text.ParseException;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -26,11 +28,11 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import fll.xml.ChallengeParser;
-import fll.xml.XMLUtils;
+import org.apache.log4j.Logger;
 
-import java.text.NumberFormat;
-import java.text.ParseException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 
 /**
@@ -40,6 +42,8 @@ import java.text.ParseException;
  */
 public class Queries {
 
+  private static final Logger LOG = Logger.getLogger(Queries.class);
+  
   /**
    * For debugging
    *
@@ -115,8 +119,7 @@ public class Queries {
     try {
       stmt = connection.createStatement();
 
-      final String sql;
-      sql = "SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, Teams.Region, Teams.Division"
+      final String sql = "SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, Teams.EntryTournament, Teams.Division"
         + " FROM Teams, TournamentTeams"
         + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber";
       rs = stmt.executeQuery(sql);
@@ -125,7 +128,7 @@ public class Queries {
         team.setTeamNumber(rs.getInt("TeamNumber"));
         team.setOrganization(rs.getString("Organization"));
         team.setTeamName(rs.getString("TeamName"));
-        team.setRegion(rs.getString("Region"));
+        team.setEntryTournament(rs.getString("EntryTournament"));
         team.setDivision(rs.getInt("Division"));
         tournamentTeams.put(new Integer(team.getTeamNumber()), team);
       }
@@ -138,7 +141,9 @@ public class Queries {
 
   /**
    * Populate the TournamentTeams table with the team numbers of the teams for
-   * this tournament.  This will delete whatever is in TournamentTeams.  The current tournament is pulled from the TournamentParameters table with getCurrentTournament()
+   * this tournament.  This will delete whatever is in TournamentTeams.  The
+   * current tournament is pulled from the TournamentParameters table with
+   * getCurrentTournament()
    *
    * @param connection the database connection
    * @throws SQLException on a database error
@@ -154,13 +159,9 @@ public class Queries {
 
       stmt.executeUpdate("DELETE FROM TournamentTeams");
       
-      final String sql;
-      if("STATE".equals(currentTournament)) {
-        sql = "SELECT Teams.TeamNumber,Teams.Region FROM Teams WHERE Teams.ToState = 1";
-      } else {
-        sql = "SELECT Teams.TeamNumber,Teams.Region FROM Teams WHERE Teams.Region = '" + currentTournament + "'";
-      }
-      stmt.executeUpdate("INSERT INTO TournamentTeams (TeamNumber, Region) " + sql);
+      final String sql = "SELECT Teams.TeamNumber,Teams.EntryTournament FROM Teams WHERE Teams.CurrentTournament = '" + currentTournament + "'";
+
+      stmt.executeUpdate("INSERT INTO TournamentTeams (TeamNumber, EntryTournament) " + sql);
     } finally {
       Utilities.closeStatement(stmt);
     }
@@ -187,12 +188,7 @@ public class Queries {
     try {
       stmt = connection.createStatement();
       
-      final String sql;
-      if("STATE".equals(currentTournament)) {
-        sql = "SELECT Division FROM Teams WHERE Teams.ToState = 1 GROUP BY Division ORDER BY Division";
-      } else {
-        sql = "SELECT Division FROM Teams WHERE Teams.Region = '" + currentTournament + "' GROUP BY Division ORDER BY Division";
-      }
+      final String sql = "SELECT Division FROM Teams WHERE Teams.CurrentTournament = '" + currentTournament + "' GROUP BY Division ORDER BY Division";
       rs = stmt.executeQuery(sql);
       while(rs.next()) {
         final String division = rs.getString(1);
@@ -590,19 +586,19 @@ public class Queries {
    * Get the current tournament from the database.
    *
    * @return the tournament, or DUMMY if not set.  There should always be a
-   * DUMMY region in the Regions table.
+   * DUMMY tournament in the Tournaments table.
    */
   public static String getCurrentTournament(final Connection connection) throws SQLException {
     ResultSet rs = null;
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Value FROM TournamentParameters WHERE TournamentParameters.Param = 'Region'");
+      rs = stmt.executeQuery("SELECT Value FROM TournamentParameters WHERE TournamentParameters.Param = 'CurrentTournament'");
       if(rs.next()) {
         return rs.getString(1);
       } else {
-        //insert DUMMY region entry
-        stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('Region', 'DUMMY', 'Current running tournemnt name - see Regions table')");
+        //insert DUMMY tournament entry
+        stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('CurrentTournament', 'DUMMY', 'Current running tournemnt name - see Tournaments table')");
         return "DUMMY";
       }
     } finally {
@@ -617,7 +613,7 @@ public class Queries {
    * @param connection db connection
    * @param currentTournament the new value for the current tournament
    * @return true if everything is fine, false if the value is not in the
-   * Regions table and therefore not set
+   * Tournaments table and therefore not set
    */
   public static boolean setCurrentTournament(final Connection connection,
                                              final String currentTournament) throws SQLException {
@@ -625,11 +621,11 @@ public class Queries {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Region FROM Regions WHERE Region = '" + currentTournament + "'");
+      rs = stmt.executeQuery("SELECT Name FROM Tournaments WHERE Name = '" + currentTournament + "'");
       if(rs.next()) {
         //getCurrentTournament ensures that a value already exists here, so
         //update will work
-        stmt.executeUpdate("Update TournamentParameters SET Value = '" + currentTournament + "' WHERE Param = 'Region'");
+        stmt.executeUpdate("UPDATE TournamentParameters SET Value = '" + currentTournament + "' WHERE Param = 'CurrentTournament'");
         return true;
       } else {
         return false;
@@ -651,7 +647,7 @@ public class Queries {
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Region FROM Regions");
+      rs = stmt.executeQuery("SELECT Name FROM Tournaments");
       while(rs.next()) {
         final String tournamentName = rs.getString(1);
         retval.add(tournamentName);

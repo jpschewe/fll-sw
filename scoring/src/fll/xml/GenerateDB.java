@@ -104,20 +104,16 @@ final public class GenerateDB {
       
       stmt = connection.createStatement();
       
-      //Table structure for table 'Regions'
-      stmt.executeUpdate("DROP TABLE IF EXISTS Regions");
-      stmt.executeUpdate("CREATE TABLE Regions ("
-                         + "Region varchar(16) NOT NULL,"
+      //Table structure for table 'Tournaments'
+      stmt.executeUpdate("DROP TABLE IF EXISTS Tournaments");
+      stmt.executeUpdate("CREATE TABLE Tournaments ("
+                         + "Name varchar(16) NOT NULL,"
                          + "Location mediumtext,"
-                         + "Date datetime default NULL,"
-                         + "Contact varchar(50) default NULL,"
-                         + "Phone varchar(20) default NULL,"
-                         + "Description mediumtext,"
-                         + "Directions mediumtext,"
-                         + "PRIMARY KEY (Region)"
+                         + "NextTournament varchar(16) default NULL," //Tournament that teams may advance to from this one
+                         + "PRIMARY KEY (Name)"
                          +")");
-      stmt.executeUpdate("INSERT INTO Regions (Region, Description) VALUES ('DUMMY', 'Default dummy tournament')");
-      stmt.executeUpdate("INSERT INTO Regions (Region, Description) VALUES ('DROP', 'Dummy tournament for teams that drop out')");
+      stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DUMMY', 'Default dummy tournament')");
+      stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DROP', 'Dummy tournament for teams that drop out')");
 
       
       //Table structure for table 'SummarizedScores'
@@ -149,7 +145,8 @@ final public class GenerateDB {
                          + "  TeamNumber int(11) NOT NULL,"
                          + "  TeamName varchar(255) NOT NULL default '',"
                          + "  Organization varchar(255),"
-                         + "  Region varchar(64) NOT NULL default 'DUMMY',"
+                         + "  EntryTournament varchar(16) NOT NULL default 'DUMMY'," //the tournament that the team started at
+                         + "  CurrentTournament varchar(16) NOT NULL default 'DUMMY'," //tournament the team currently always at                         
                          + "  Division int NOT NULL default 1,"
                          + "  Coach varchar(255),"
                          + "  Email varchar(255),"
@@ -167,7 +164,7 @@ final public class GenerateDB {
       stmt.executeUpdate("DROP TABLE IF EXISTS TournamentTeams");
       stmt.executeUpdate("CREATE TABLE TournamentTeams ("
                          + "  TeamNumber int(11) NOT NULL,"
-                         + "  Region varchar(64) NOT NULL default 'DUMMY',"
+                         + "  EntryTournament varchar(16) NOT NULL default 'DUMMY',"
                          + "  PRIMARY KEY (TeamNumber)"
                          + ")");
 
@@ -181,7 +178,7 @@ final public class GenerateDB {
                          + ")");
 
       //populate tournament parameters with default values
-      stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('Region', 'DUMMY', 'This is the currently running tournament name - see Regions table')");
+      stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('CurrentTournament', 'DUMMY', 'This is the currently running tournament name - see Tournaments table')");
       stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('SeedingRounds', 3, 'Number of seeding rounds before elimination round - used to downselect top performance scores in queries')");
       stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('StandardizedMean', 100, 'Standard mean for computing the standardized scores')");
       stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('StandardizedSigma', 20, 'Standard deviation for computing the standardized scores')");

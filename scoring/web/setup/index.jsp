@@ -1,6 +1,9 @@
 <%@ page errorPage="../errorHandler.jsp" %>
+  
 <%@ taglib uri="/WEB-INF/tld/taglib62.tld" prefix="up" %>
 
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
+  
 <%@ page import="fll.xml.GenerateDB" %>
 <%@ page import="fll.xml.ChallengeParser" %>
 
@@ -20,7 +23,7 @@ File xmlfile = null;
     <title>FLL (Database setup)</title>
   </head>
 
-  <body background="../images/bricks1.gif" bgcolor="#ffffff" topmargin='4'>
+  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" topmargin='4'>
     <h1>FLL (Database setup)</h1>
       
 <%if("POST".equals(request.getMethod())) {%>

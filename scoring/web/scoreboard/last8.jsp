@@ -11,7 +11,7 @@
 final Connection connection = (Connection)application.getAttribute("connection");
 final String currentTournament = (String)application.getAttribute("currentTournament");
 final Statement stmt = connection.createStatement();
-final String sql = "SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, Teams.Region, Teams.Division, Performance.Tournament, Performance.RunNumber, Performance.Bye, Performance.NoShow, Performance.TimeStamp, Performance.ComputedTotal"
+final String sql = "SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, Teams.Division, Performance.Tournament, Performance.RunNumber, Performance.Bye, Performance.NoShow, Performance.TimeStamp, Performance.ComputedTotal"
   + " FROM Teams,Performance"
   + " WHERE Performance.Tournament = '" + currentTournament + "'"
   + " AND Teams.TeamNumber = Performance.TeamNumber"

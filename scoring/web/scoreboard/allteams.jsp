@@ -24,7 +24,7 @@ rs.next();
 final int numRecords = rs.getInt(1);
 Utilities.closeResultSet(rs);
 
-final String sql = "SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, Teams.Region, Teams.Division, Performance.Tournament, Performance.RunNumber, Performance.Bye, Performance.NoShow, Performance.ComputedTotal"
+final String sql = "SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, Teams.Division, Performance.Tournament, Performance.RunNumber, Performance.Bye, Performance.NoShow, Performance.ComputedTotal"
   + " FROM Teams,Performance"
   + " WHERE Performance.Tournament = '" + currentTournament + "'"
   + " AND Teams.TeamNumber = Performance.TeamNumber"

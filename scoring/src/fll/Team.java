@@ -56,9 +56,9 @@ final public class Team {
   public void setTeamName(final String v) { _teamName = v; }
 
 
-  private String _region;
-  public String getRegion() { return _region; }
-  public void setRegion(final String v) { _region = v; }
+  private String _entryTournament;
+  public String getEntryTournament() { return _entryTournament; }
+  public void setEntryTournament(final String v) { _entryTournament = v; }
 
   private int _division;
   public int getDivision() { return _division; }

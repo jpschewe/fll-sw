@@ -75,7 +75,7 @@ final public class Tournaments {
     } else {
       out.println("<p><b>Tournament name's must be unique, otherwise the last one in the table will overwrite any others above it with the same name.</b></p>");
       
-      out.println("<table border='1'><tr><th>Name</th><th>Location</th><th>Contact</th><th>Phone</th></tr>");
+      out.println("<table border='1'><tr><th>Name</th><th>Location</th></tr>");
 
       int row = 0; //keep track of which row we're generating
       
@@ -86,14 +86,12 @@ final public class Tournaments {
         Statement stmt = null;
         try {
           stmt = connection.createStatement();
-          rs = stmt.executeQuery("SELECT Region, Location, Contact, Phone FROM Regions");
+          rs = stmt.executeQuery("SELECT Name, Location FROM Tournaments");
           for(row=0; rs.next(); row++) {
             final String name = rs.getString(1);
             final String location = rs.getString(2);
-            final String contact = rs.getString(3);
-            final String phone = rs.getString(4);
             if(!"DUMMY".equals(name)) {
-              generateRow(out, row, name, location, contact, phone);
+              generateRow(out, row, name, location);
             } else {
               row--;
             }
@@ -106,16 +104,12 @@ final public class Tournaments {
         //need to walk the parameters to see what we've been passed
         String name = request.getParameter("name" + row);
         String location = request.getParameter("location" + row);
-        String contact = request.getParameter("contact" + row);
-        String phone = request.getParameter("phone" + row);
         while(null != name) {
-          generateRow(out, row, name, location, contact, phone);
+          generateRow(out, row, name, location);
           
           row++;
           name = request.getParameter("name" + row);
           location = request.getParameter("location" + row);
-          contact = request.getParameter("contact" + row);
-          phone = request.getParameter("phone" + row);
         }
       }
 
@@ -123,7 +117,7 @@ final public class Tournaments {
       final int tableRows = Math.max(numRows, row);
       
       for(; row < tableRows; row++) {
-        generateRow(out, row, null, null, null, null);
+        generateRow(out, row, null, null);
       }
 
       out.println("</table>");
@@ -137,23 +131,28 @@ final public class Tournaments {
 
 
   /**
-   * Generate a row in the Regions table defaulting the form elemenets to the
-   * given information.
+   * Generate a row in the Tournament table defaulting the form elements to
+   * the given information.
    *
    * @param out where to print
    * @param row the row being generated, used for naming form elements
    * @param name name of tournament, can be null
    * @param location location of region, can be null
-   * @param contact contact of region, can be null
-   * @param phone phone of region location, can be null
    */
   private static void generateRow(final JspWriter out,
                                   final int row,
                                   final String name,
-                                  final String location,
-                                  final String contact,
-                                  final String phone) throws IOException {
+                                  final String location) throws IOException {
     out.println("<tr>");
+
+    out.print("  <input type='hidden' name='key" + row + "'");
+    if(null != name) {
+      out.print(" value='" + name + "'");
+    } else {
+      out.print(" value='new'");
+    }
+    out.println(">");
+    
     out.print("  <td><input type='text' name='name" + row + "'");
     if(null != name) {
       out.print(" value='" + name + "'");
@@ -166,17 +165,6 @@ final public class Tournaments {
     }
     out.println(" size='32'></td>");
 
-    out.print("  <td><input type='text' name='contact" + row + "'");
-    if(null != contact) {
-      out.print(" value='" + contact + "'");
-    }
-    out.println(" maxlength='50' size='50'></td>");
-
-    out.print("  <td><input type='text' name='phone" + row + "'");
-    if(null != phone) {
-      out.print(" value='" + phone + "'");
-    }
-    out.println(" maxlength='20' size='20'></td>");
     out.println("</tr>");
   }
 
@@ -189,47 +177,48 @@ final public class Tournaments {
                                  final Connection connection,
                                  final ServletContext application)
     throws SQLException, IOException {
-    Statement stmt = null;
-    PreparedStatement prep = null;
+    PreparedStatement updatePrep = null;
+    PreparedStatement insertPrep = null;
+    PreparedStatement deletePrep = null;
     try {
-      stmt = connection.createStatement();
-
-      //delete old data in Regions
-      stmt.executeUpdate("DELETE FROM Regions");
-      
       //walk request parameters and insert data into database
-      prep = connection.prepareStatement("INSERT INTO Regions (region, location, contact, phone) VALUES(?, ?, ?, ?)");
-      //always insert DUMMY
-      prep.setString(1, "DUMMY");
-      prep.setString(2, null);
-      prep.setString(3, null);
-      prep.setString(4, null);
-      prep.executeUpdate();
-      
+      insertPrep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location) VALUES(?, ?)");
+      updatePrep = connection.prepareStatement("UPDATE Tournaments SET Name = ?, Location = ? WHERE Name = ?");
+      deletePrep = connection.prepareStatement("DELETE FROM Tournaments WHERE Name = ?");
+        
       int row = 0;
+      String key = request.getParameter("key" + row);
       String name = request.getParameter("name" + row);
       String location = request.getParameter("location" + row);
-      String contact = request.getParameter("contact" + row);
-      String phone = request.getParameter("phone" + row);
       while(null != name) {
-        if(!"".equals(name)) {
-          prep.setString(1, name);
-          prep.setString(2, location);
-          prep.setString(3, contact);
-          prep.setString(4, phone);
-          prep.executeUpdate();
+        if("new".equals(key) && !"".equals(name)) {
+          //new tournament
+          insertPrep.setString(1, name);
+          insertPrep.setString(2, name);
+          insertPrep.executeUpdate();
+        } else {
+          if("".equals(name)) {
+            //delete if no name
+            deletePrep.setString(1, name);
+            deletePrep.executeUpdate();
+          } else {
+            //update with new values
+            updatePrep.setString(1, name);
+            updatePrep.setString(2, location);
+            updatePrep.setString(3, name);
+            updatePrep.executeUpdate();
+          }
         }
-          
         row++;
+        key = request.getParameter("key" + row);
         name = request.getParameter("name" + row);
         location = request.getParameter("location" + row);
-        contact = request.getParameter("contact" + row);
-        phone = request.getParameter("phone" + row);
       }
       
     } finally {
-      Utilities.closeStatement(stmt);
-      Utilities.closePreparedStatement(prep);
+      Utilities.closePreparedStatement(insertPrep);
+      Utilities.closePreparedStatement(updatePrep);
+      Utilities.closePreparedStatement(deletePrep);
     }
 
     //reinitialize the TournamentTeams table
