@@ -1,5 +1,8 @@
 2003-10-03  Jon Schewe  <jpschewe@mtu.net>
 
+	* src/fll/model/SubjectiveTableModel.java (SubjectiveTableModel):
+	Added total column on the subjective app (707863).
+
 	* src/fll/web/admin/Tournaments.java (verifyData): Check for
 	circularities in tournaments (766563).
 
