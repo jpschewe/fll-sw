@@ -1,7 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 <%@ taglib prefix="sql" uri="http://java.sun.com/jstl/sql" %>
 <%@ taglib prefix="x" uri="http://java.sun.com/jstl/xml" %>
-<%@ taglib prefix="f" uri="http://java.sun.com/jstl/fmt" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jstl/fmt" %>
 
 <%@ page import="fll.Utilities" %>
 <%@ page import="fll.Queries" %>

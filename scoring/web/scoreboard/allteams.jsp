@@ -67,6 +67,8 @@ function start() {
 </c:if>
 }
 </script>
+
+
 </head>
 
 <body bgcolor='#000080' onload='start()'>
