@@ -92,9 +92,9 @@ final public class FinalComputedScores {
         out.println("    <th>&nbsp;</th>");
         for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
           final Element catElement = (Element)subjectiveCategories.item(cat);
-          final String catName = catElement.getAttribute("name");
+          final String catTitle = catElement.getAttribute("title");
 
-          out.println("    <th>" + catName + "</th>");
+          out.println("    <th>" + catTitle + "</th>");
         }
 
         out.println("    <th>Performance</th>");

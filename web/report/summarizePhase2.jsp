@@ -1,5 +1,6 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="fll.ScoreStandardization" %>
 <%@ page import="fll.Queries" %>
@@ -24,7 +25,7 @@ final String errorMsg = ScoreStandardization.checkDataConsistency(connection);
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Summarize Scores)</title>
   </head>
 
-  <body background="../images/bricks1.gif" bgcolor="#ffffff" topmargin='4'>
+  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" topmargin='4'>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Summarize Scores)</h1>
 
 <%if(null == errorMsg) {%>
@@ -34,6 +35,6 @@ final String errorMsg = ScoreStandardization.checkDataConsistency(connection);
 <p><font color='red'><%=errorMsg%></font></p>
 <%}%>
 
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>

@@ -150,7 +150,7 @@ final public class SubjectiveFrame extends JFrame {
       _tables.add(table);
       final JScrollPane tableScroller = new JScrollPane(table);
       tableScroller.setPreferredSize(new Dimension(640, 480));
-      tabbedPane.addTab(subjectiveElement.getAttribute("name"), tableScroller);
+      tabbedPane.addTab(subjectiveElement.getAttribute("title"), tableScroller);
 
       final NodeList goals = subjectiveElement.getElementsByTagName("goal");
       for(int g=0; g<goals.getLength(); g++) {
@@ -284,22 +284,6 @@ final public class SubjectiveFrame extends JFrame {
 
     private final NodeList _subjectiveCategories;
     
-  }
-
-  private static final class SubjectiveListRenderer extends DefaultListCellRenderer {
-    public static final SubjectiveListRenderer INSTANCE = new SubjectiveListRenderer();
-    private SubjectiveListRenderer() { super(); }
-    public Component getListCellRendererComponent(final JList list,
-                                                  final Object value,
-                                                  final int index,
-                                                  final boolean isSelected,
-                                                  final boolean cellHasFocus) {
-      return super.getListCellRendererComponent(list,
-                                                ((Element)value).getAttribute("name"),
-                                                index,
-                                                isSelected,
-                                                cellHasFocus);
-    }
   }
 
   private List _tables = new LinkedList();

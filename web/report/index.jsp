@@ -1,5 +1,6 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="org.w3c.dom.Document" %>
 
@@ -29,7 +30,7 @@ Utilities.closeStatement(stmt);
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Reporting)</title>
   </head>
 
-  <body background="../images/bricks1.gif" bgcolor="#ffffff" topmargin='4'>
+  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" topmargin='4'>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Reporting)</h1>
 
     <ol>
@@ -55,6 +56,6 @@ Utilities.closeStatement(stmt);
        </li>
     </ol>
 
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>

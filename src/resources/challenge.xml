@@ -155,7 +155,9 @@
 
   </Performance>
 
-  <subjectiveCategory name="InnovativeDesign">
+  <subjectiveCategory name="InnovativeDesign"
+                      title="Innovative Design"
+                      >
     <goal name="inFunction"
           title="Creativity in Function"
           min="1"
@@ -178,7 +180,9 @@
           max="20" />
   </subjectiveCategory>
 
-  <subjectiveCategory name="RobustDesign">
+  <subjectiveCategory name="RobustDesign"
+                      title="Robust Design"
+                      >
     <goal name="Structural"
           title="Structural Design"
           min="1"
@@ -203,7 +207,9 @@
 
 
   <subjectiveCategory name="ResearchQuality"
-                      weight="0.6">
+                      title="Research Quality"
+                      weight="0.6"
+                      >
     <goal name="Research"
           title="Research"
           min="1"
@@ -219,7 +225,9 @@
   </subjectiveCategory>
 
   <subjectiveCategory name="InnovativeSolution"
-                      weight="0.2">
+                      title="Innovative Solution"
+                      weight="0.2"
+                      >
     <goal name="PresentationInGeneral"
           title="In General"
           min="1"
@@ -227,14 +235,18 @@
   </subjectiveCategory>
 
   <subjectiveCategory name="CreativePresentation"
-                      weight="0.2">
+                      title="Creative Presentation"
+                      weight="0.2"
+                      >
     <goal name="Presentation"
           title="Presentation"
           min="1"
           max="20" />
   </subjectiveCategory>
 
-  <subjectiveCategory name="Programming">
+  <subjectiveCategory name="Programming"
+                      title="Programming"
+                      >
     <goal name="Language"
           title="Language used">
       <value>RIS</value>
@@ -263,7 +275,9 @@
           max="20" />
   </subjectiveCategory>
 
-  <subjectiveCategory name="Teamwork">
+  <subjectiveCategory name="Teamwork"
+                      title="Teamwork"
+                      >
     <goal name="TeamIntegration"
           title="Team Integration"
           min="1"

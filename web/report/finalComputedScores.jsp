@@ -1,5 +1,4 @@
-
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="fll.web.report.FinalComputedScores" %>
 <%@ page import="fll.Queries" %>

@@ -64,8 +64,9 @@ final public class ScoreGroupScores {
       for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
         final Element catElement = (Element)subjectiveCategories.item(cat);
         final String catName = catElement.getAttribute("name");
+        final String catTitle = catElement.getAttribute("title");
 
-        generateCategoryTable(tournament, connection, out, catName, division);
+        generateCategoryTable(tournament, connection, out, catName, catTitle, division);
       }
 
       //FIX need page break here
@@ -79,6 +80,7 @@ final public class ScoreGroupScores {
                                             final Connection connection,
                                             final JspWriter out,
                                             final String categoryName,
+                                            final String categoryTitle,
                                             final String division)
     throws SQLException, IOException {
     
@@ -102,7 +104,7 @@ final public class ScoreGroupScores {
       while(groupRS.next()) {
         final String scoreGroup = groupRS.getString(1);
         
-        out.println("<h3>" + categoryName + " Division: " + division + " Score Group: " + scoreGroup + "</h3>");
+        out.println("<h3>" + categoryTitle + " Division: " + division + " Score Group: " + scoreGroup + "</h3>");
           
         out.println("<table border='0'>");
         out.println("  <tr>");
