@@ -62,8 +62,8 @@ public final class ImportDB {
         final boolean differences = checkForDifferences(connection, source, destination, tournament);
         if(!differences) {
           System.out.println("Importing data for " + tournament + " from " + source + " to " + destination);
-          //final Document challengeDocument = Queries.getChallengeDocument(connection);
-          //importDatabase(connection, source, tournament, challengeDocument);
+          final Document challengeDocument = Queries.getChallengeDocument(connection);
+          importDatabase(connection, source, tournament, challengeDocument);
         }
       }
     } catch(final Exception e) {
