@@ -5,6 +5,7 @@
 
 <%@ page import="fll.Team" %>
 <%@ page import="fll.Utilities" %>
+<%@ page import="fll.Queries" %>
 <%@ page import="fll.web.playoff.Playoff" %>
   
 <%@ page import="java.util.Map" %>
@@ -28,8 +29,8 @@ Queries.ensureTournamentTeamsPopulated(application);
 
 final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-final String currentTournament = (String)application.getAttribute("currentTournament");
 final Connection connection = (Connection)application.getAttribute("connection");
+final String currentTournament = Queries.getCurrentTournament(connection);
 
 
 final String divisionStr = request.getParameter("division");
@@ -50,7 +51,7 @@ if(null == runNumberStr) {
 }
 
 int tempRunNumber = numSeedingRounds + 1;
-List tempCurrentRound = Playoff.buildInitialBracketOrder(connection, currentTournament, divisionStr, tournamentTeams);
+List tempCurrentRound = Playoff.buildInitialBracketOrder(connection, divisionStr, tournamentTeams);
 
 while(tempRunNumber < runNumber) {
   final List newCurrentRound = new LinkedList();
@@ -58,7 +59,7 @@ while(tempRunNumber < runNumber) {
   while(prevIter.hasNext()) {
     final Team teamA = (Team)prevIter.next();
     final Team teamB = (Team)prevIter.next();
-    final Team winner = Playoff.pickWinner(connection, challengeDocument, currentTournament, teamA, teamB, tempRunNumber);
+    final Team winner = Playoff.pickWinner(connection, challengeDocument, teamA, teamB, tempRunNumber);
     newCurrentRound.add(winner);
   }
   tempCurrentRound = newCurrentRound;
@@ -102,7 +103,7 @@ for(int index=0; currentIter.hasNext(); index++) {
   final boolean evenBracket = ( ( (index/2) * 2) == index );
   final Team teamA = (Team)currentIter.next();
   final Team teamB = (Team)currentIter.next();
-  final Team winner = Playoff.pickWinner(connection, challengeDocument, currentTournament, teamA, teamB, runNumber);
+  final Team winner = Playoff.pickWinner(connection, challengeDocument, teamA, teamB, runNumber);
 %>
         <tr> <!-- row 1 -->
           <td class='Leaf' width='200'>

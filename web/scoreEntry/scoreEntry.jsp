@@ -10,6 +10,9 @@
 <%@ page import="java.text.NumberFormat" %>
 <%@ page import="java.util.Map" %>
 
+
+<%@ page import="java.sql.Connection" %>
+  
 <%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%
@@ -44,8 +47,9 @@ if(!tournamentTeams.containsKey(new Integer(teamNumber))) {
 }
 final Team team = (Team)tournamentTeams.get(new Integer(teamNumber));
 
-//the next run the team will be competing in   
-final int nextRunNumber = Queries.getNextRunNumber(application, team.getTeamNumber());
+//the next run the team will be competing in
+final Connection connection = (Connection)application.getAttribute("connection");
+final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumber());
   
 //what run number we're going to edit/enter  
 final int lRunNumber;
@@ -166,7 +170,7 @@ function CancelClicked() {
         <!-- top info bar (team name etc) -->
         <tr>
           <td align="center" valign="middle">
-<%if(lRunNumber <= Queries.getNumSeedingRounds((java.sql.Connection)application.getAttribute("connection"))) {%>
+<%if(lRunNumber <= Queries.getNumSeedingRounds(connection)) {%>
             <table border="1" cellpadding="0" cellspacing="0" width="100%" bgcolor='#e0e0e0'>
 <%} else {%>
             <table border="1" cellpadding="0" cellspacing="0" width="100%" bgcolor='red'>

@@ -51,8 +51,8 @@ final public class ScoreStandardization {
 
       final Connection connection = Utilities.createDBConnection("disk");
       final Map teams = Queries.getTournamentTeams(connection);
-      Queries.updateScoreTotals(challengeDocument, connection, "STATE");
-      setSubjectiveScoreGroups(connection, challengeDocument, "STATE", teams.values());
+      Queries.updateScoreTotals(challengeDocument, connection);
+      setSubjectiveScoreGroups(connection, challengeDocument, teams.values());
       summarizeSubjectiveScores(connection, challengeDocument, "STATE");
       summarizePerformanceScores(connection, "STATE");
       standardizeScores(connection, challengeDocument, "STATE");
@@ -76,15 +76,15 @@ final public class ScoreStandardization {
    *
    * @param connection connection to the database
    * @param document the challenge description
-   * @param tournament tournament to work with
    * @param teams collection of {@link Team teams} overwhich to generate score
    * groups
-   * @see Queries#updateScoreTotals(Document, Connection, String)
+   * @see Queries#updateScoreTotals(Document, Connection)
    */
   public static void setSubjectiveScoreGroups(final Connection connection,
                                               final Document document,
-                                              final String tournament,
-                                              final Collection teams) throws SQLException {
+                                              final Collection teams)
+    throws SQLException {
+    final String tournament = Queries.getCurrentTournament(connection);
     PreparedStatement selectPrep = null;
     PreparedStatement updatePrep = null;
     ResultSet rs = null;

@@ -23,11 +23,12 @@
 <% final File file = File.createTempFile("fll", null); %>
         <up:saveFile path="<%=file.getAbsolutePath()%>"/>
 <%
+final Connection connection = (Connection)application.getAttribute("connection");
 UploadSubjectiveData.saveSubjectiveData(out,
                                         file,
-                                        (String)application.getAttribute("currentTournament"),
+                                        Queries.getCurrentTournament(connection),
                                         (Document)application.getAttribute("challengeDocument"),
-                                        (Connection)application.getAttribute("connection"));
+                                        connection);
 file.delete();
 %>
         </li>                  

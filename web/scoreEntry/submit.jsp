@@ -3,6 +3,8 @@
 <%@ page import="fll.Queries" %>
 <%@ page import="fll.web.scoreEntry.Submit" %>
 
+<%@ page import="java.sql.Connection" %>
+  
 <%@ page import="org.w3c.dom.Document" %>
     
 <%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
@@ -13,13 +15,14 @@ final String lDeleteFlag = request.getParameter("delete");
 final String lEditFlag = request.getParameter("EditFlag");
 
 //insert into database here
+final Connection connection = (Connection)application.getAttribute("connection");
 final String sql;
 if(null != lDeleteFlag) {
-  sql = Queries.deletePerformanceScore(application, request);
+  sql = Queries.deletePerformanceScore(connection, request);
 } else if("1".equals(lEditFlag)) {      
-  sql = Queries.updatePerformanceScore(challengeDocument, application, request);
+  sql = Queries.updatePerformanceScore(challengeDocument, connection, request);
 } else {
-  sql = Queries.insertPerformanceScore(challengeDocument, application, request);
+  sql = Queries.insertPerformanceScore(challengeDocument, connection, request);
 }
 %>
   

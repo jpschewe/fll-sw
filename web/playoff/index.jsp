@@ -17,8 +17,8 @@ Queries.ensureTournamentTeamsPopulated(application);
 
 final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-final String currentTournament = (String)application.getAttribute("currentTournament");
 final Connection connection = (Connection)application.getAttribute("connection");
+final String currentTournament = Queries.getCurrentTournament(connection);
 final List divisions = Queries.getDivisions(connection);
 final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
   

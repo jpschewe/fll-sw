@@ -2,6 +2,7 @@
 <%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="fll.web.report.ScoreGroupScores" %>
+<%@ page import="fll.Queries" %>
       
 <%@ page import="java.sql.Connection" %>
 
@@ -12,8 +13,8 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
 final Connection connection = (Connection)application.getAttribute("connection");
 final String tournamentReq = request.getParameter("currentTournament");
 final String tournament;
-if(null == null) {
-  tournament = (String)application.getAttribute("currentTournament");
+if(tournamentReq == null) {
+  tournament = Queries.getCurrentTournament(connection);
 } else {
   tournament = tournamentReq;
 }
