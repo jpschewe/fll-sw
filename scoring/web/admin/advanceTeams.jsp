@@ -28,7 +28,7 @@ final Connection connection = (Connection)application.getAttribute("connection")
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Advance Teams)</h1>
 
-      <form action="advanceTeams.jsp" method="get">
+      <form action="advanceTeams.jsp" method="POST">
         <table border='1'>
           <tr>
             <th>&nbsp;</th>
