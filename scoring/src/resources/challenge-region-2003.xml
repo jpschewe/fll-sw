@@ -171,12 +171,6 @@
                       title="Programming"
                       weight="0.5"
                       >
-    <goal name="Language"
-          title="Language used">
-      <value title="RIS" value="ris" />
-      <value title="RoboLab" value="robolab" />
-      <value title="Unknown" value="unknown" />
-    </goal>
     <goal name="UseOfLanguage"
           title="Use of Language"
           min="1"
