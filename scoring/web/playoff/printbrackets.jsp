@@ -69,7 +69,7 @@ int tempNumRuns = 1;
 while(Math.pow(2, tempNumRuns) < currentRound.size()) {
   tempNumRuns++;
 }
-pageContext.setAttribute("numRuns", new Integer(tempNumRuns));
+pageContext.setAttribute("numRuns", new Integer(tempNumRuns+1));
 %>
 
 <html>
@@ -101,8 +101,16 @@ pageContext.setAttribute("numRuns", new Integer(tempNumRuns));
         <br><br>
       </c:if>
       
-      <table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>
+      <table align='center' width='100%' border='1' cellpadding='3' cellspacing='0'>
         <c:if test="${currentRoundSize > 1}"> <!-- need at least 2 teams -->
+          <tr>
+            <th colspan='2'>Playoff Round 1</th>
+            <th colspan='2'>Playoff Round 2</th>
+            <th colspan='2'>Playoff Round 3</th>
+            <th colspan='2'>Playoff Round 4</th>
+            <th colspan='2'>Playoff Round 5</th>
+          </tr>
+              
           <%
           final Iterator currentIter = currentRound.iterator();
           for(int index=0; currentIter.hasNext(); index++) {
@@ -129,6 +137,12 @@ pageContext.setAttribute("numRuns", new Integer(tempNumRuns));
             </c:if>
 
             <td width='200'>&nbsp;</td>
+
+            <!-- just to see what it'll look like -->
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
           </tr>
           
           <tr> <!-- row 2 -->
@@ -142,10 +156,16 @@ pageContext.setAttribute("numRuns", new Integer(tempNumRuns));
               <!-- skip column for bracket-bracket bar -->
             </c:if>
             <td width='200'>&nbsp;</td>
+
+            <!-- just to see what it'll look like -->
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
           </tr>
           
           <tr> <!-- row 3 -->
-            <td width='200'><font size='4'>Bracket <%=index+1%></font><br></td>
+            <td width='200'><font size='4'>Bracket <%=index+1%></font></td>
             <!-- skip column for A-B bar -->
             <td class='Leaf' width='200'>
               <%=Playoff.getDisplayString(connection, currentTournament, (runNumber+1), winner, null, false)%>
@@ -160,6 +180,11 @@ pageContext.setAttribute("numRuns", new Integer(tempNumRuns));
               <!-- skip column for bracket-bracket bar -->
             </c:if>
 
+            <td width='200'>&nbsp;</td>
+            <!-- just to see what it'll look like -->
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
+            <td width='10'>&nbsp;</td>
             <td width='200'>&nbsp;</td>
           </tr>
           
@@ -183,6 +208,11 @@ pageContext.setAttribute("numRuns", new Integer(tempNumRuns));
             </c:if>
             
             <td width='200'>&nbsp;</td>
+            <!-- just to see what it'll look like -->
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
           </tr>
           
           <tr> <!-- row 5 -->
@@ -198,6 +228,11 @@ pageContext.setAttribute("numRuns", new Integer(tempNumRuns));
               <td width='10'>&nbsp;</td>
             </c:if>
             <td width='200'>&nbsp;</td>
+            <!-- just to see what it'll look like -->
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
           </tr>
 
           <tr> <!-- between row 1 -->
@@ -211,12 +246,18 @@ pageContext.setAttribute("numRuns", new Integer(tempNumRuns));
               <td width='10'>&nbsp;</td>
             </c:if>
             <td width='200'>&nbsp;</td>
+            <!-- just to see what it'll look like -->
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
           </tr>
 
           <tr> <!-- between row 2 -->
             <td width='200'>&nbsp;</td>
             <td width='10'>&nbsp;</td>
             <td width='200'>&nbsp;</td>
+                
             <c:if test="${evenBracket}">
               <!-- skip column for bracket-bracket bar -->
               
@@ -227,12 +268,17 @@ pageContext.setAttribute("numRuns", new Integer(tempNumRuns));
               <c:if test="${currentRoundSize <= 2}">
                 <td width='200'>&nbsp;</td>
               </c:if>
-              
             </c:if>
             <c:if test="${not evenBracket}">
               <td width='10'>&nbsp;</td>
               <td width='200'>&nbsp;</td>
             </c:if>
+                
+            <!-- just to see what it'll look like -->
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
           </tr>
 
           <tr> <!-- between row 3 -->
@@ -245,6 +291,11 @@ pageContext.setAttribute("numRuns", new Integer(tempNumRuns));
             <c:if test="${not evenBracket}">
               <td width='10'>&nbsp;</td>
             </c:if>
+            <td width='200'>&nbsp;</td>
+            <!-- just to see what it'll look like -->
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
+            <td width='10'>&nbsp;</td>
             <td width='200'>&nbsp;</td>
           </tr>
           <%}%> <!-- end for loop -->

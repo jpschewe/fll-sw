@@ -168,7 +168,7 @@ for(int index=0; currentIter.hasNext(); index++) {
         </tr>
         
         <tr> <!-- row 3 -->
-          <td width='200'><font size='4'>Bracket <%=index+1%></font><br></td>
+          <td width='200'><font size='4'>Bracket <%=index+1%></font></td>
           <!-- skip column for A-B bar -->
           <td class='Leaf' width='200'>
 <%if(currentRound.size() > 2) {%>
