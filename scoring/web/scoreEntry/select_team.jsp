@@ -1,6 +1,6 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 
-
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="fll.Utilities" %>
 <%@ page import="fll.Queries" %>
@@ -36,6 +36,7 @@ Utilities.closeStatement(stmt);
 
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Select Team)</title>
 
   <!--<style type='text/css'>
@@ -61,9 +62,7 @@ function editFlagBoxClicked() {
 
 </script>
   </head>
-  <body background="../images/bricks1.gif"
-        bgcolor="#ffffff"
-        >
+  <body>
       
     <form action="scoreEntry.jsp" method="POST" name="selectTeam">
       <!-- top info bar -->
@@ -149,6 +148,6 @@ function editFlagBoxClicked() {
           
         </table>
       </form>
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>

@@ -12,9 +12,10 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
     <meta http-equiv='refresh' content='90' />
     
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%></title>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
-  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" topmargin='4'>
+  <body>
 
     <center>
       <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%></h1>

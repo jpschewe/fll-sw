@@ -23,6 +23,7 @@
 
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
 <script language='javascript'>
 function init() {  
 <%
@@ -91,7 +92,7 @@ function confirmChangeTournament() {
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Edit Team)</title>
   </head>
 
-  <body background='<c:url value="/images/bricks1.gif"/>' bgcolor='#ffffff' topmargin='4' onload='init()'>
+  <bodyonload='init()'>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Edit Team)</h1>
 
     <form action="commitTeam.jsp" method="post" name="editTeam">

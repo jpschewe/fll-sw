@@ -1,5 +1,3 @@
-
-
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
   
 <%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
@@ -22,16 +20,17 @@ if(null == session.getAttribute("columnSelectOptions")) {
 <html>
   <head>
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Filter Teams)</title>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
-  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" topmargin='4'>
+  <body>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Filter Teams)</h1>
 
     <p>There are <%=UploadTeams.applyFilters(connection, request)%> currently
     selected.  Do not use the forward and back buttons!  Use the supplied
     links/buttons.</p>
 
-<%@ include file="sanitizeRules.jsp" %>
+<%@ include file="/WEB-INF/jspf/sanitizeRules.jspf" %>
 
     <form action="filterTeams.jsp" method="POST" name="filterTeams">
       <table border='1'>

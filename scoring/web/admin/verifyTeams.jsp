@@ -1,5 +1,3 @@
-
-
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
   
 <%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
@@ -21,10 +19,11 @@ if(null == session.getAttribute("columnSelectOptions")) {
   
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Verify Teams)</title>
   </head>
 
-  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" topmargin='4'>
+  <body>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Verify Teams)</h1>
 
     <% if(UploadTeams.verifyTeams(connection, request, response, session, out)) { %>

@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 
 <%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
@@ -19,10 +20,11 @@ final Connection connection = (Connection)application.getAttribute("connection")
   
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Upload Teams)</title>
   </head>
 
-  <body background='../images/bricks1.gif' bgcolor='#ffffff' topmargin='4'>
+  <body>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Upload Teams)</h1>
       <up:parse id="numFiles">
 <% final File file = File.createTempFile("fll", null); %>

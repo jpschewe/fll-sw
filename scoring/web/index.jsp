@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 <%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="org.w3c.dom.Document" %>
@@ -17,9 +18,10 @@ final Connection connection = (Connection)application.getAttribute("connection")
 <html>
   <head>
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%></title>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
-  <body background="images/bricks1.gif" bgcolor="#ffffff" topmargin='4'>
+  <body>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%></h1>
 
     <ul>

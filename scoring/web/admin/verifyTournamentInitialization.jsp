@@ -45,10 +45,11 @@ pageContext.setAttribute("regions", Queries.getRegions(connection));
       
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Verify Tournament Initialization)</title>
   </head>
 
-  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" topmargin='4'>
+  <body>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Verify Tournament Initialization)</h1>
 
     <p>The following teams will have their tournament changed if you continue:</p>

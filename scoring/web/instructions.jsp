@@ -9,9 +9,10 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
 <html>
   <head>
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Instructions)</title>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
-  <body background="images/bricks1.gif" bgcolor="#ffffff" topmargin='4'>
+  <body>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Instructions)</h1>
         
       <h2><a name='setup'>Setup of tournament</a></h2>

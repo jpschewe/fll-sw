@@ -1,5 +1,6 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="org.w3c.dom.Document" %>
 
@@ -66,6 +67,7 @@ if(null == runNumberStr) {
 
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Playoff Brackets) Division: <%=divisionStr%> Run Number: <%=runNumber%></title>
   </head>
   <style type='text/css'>
@@ -113,7 +115,7 @@ var documentYposition = 0;
 </script>
 <!-- end stuff for automatic scrolling -->
     
-  <body background="../images/bricks1.gif" bgcolor="#ffffff" topmargin='4' onload='start()'>
+  <body onload='start()'>
     <!-- dummy tag and some blank lines for scolling -->
     <div id="dummy" style="position:absolute"><br><br><br><br><br><br><br><br><br><br><br><br><br>
 

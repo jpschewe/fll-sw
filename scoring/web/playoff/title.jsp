@@ -3,6 +3,7 @@
   
 <html>
 <head>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   <meta http-equiv='refresh' content='90'>
 <style type="text/css">
         .clock {font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 14px; background-color: #ffffff; font-style: normal; font-weight: bold; font-variant: normal}
@@ -55,7 +56,7 @@ function fixTime(the_time) {
 </script>
         
 </head>
-  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" onload='StartClock()' onunload='KillClock()'>
+  <body onload='StartClock()' onunload='KillClock()'>
 <center>
 <table border='0' cellpadding='0' cellspacing='0' width='98%'>
 <tr>

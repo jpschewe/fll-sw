@@ -37,10 +37,11 @@ final ResultSet rs = stmt.executeQuery("SELECT ScoreGroup,Category,COUNT(RawScor
 
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Summarize Scores)</title>
   </head>
 
-  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" topmargin='4'>
+  <body>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Summarize Scores)</h1>
 
     <p>Below is a list of score groups found and what categories they scored.

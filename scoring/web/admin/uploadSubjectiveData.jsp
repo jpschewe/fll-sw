@@ -1,4 +1,3 @@
-
 <%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
   
 <%@ taglib uri="/WEB-INF/tld/taglib62.tld" prefix="up" %>
@@ -13,6 +12,7 @@
   
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     <title>Upload Subjective Data</title>
   </head>
 
@@ -45,6 +45,6 @@ file.delete();
       
 <% response.sendRedirect(response.encodeRedirectURL("index.jsp?message=Subjective+data+uploaded+successfully")); %>
       
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>

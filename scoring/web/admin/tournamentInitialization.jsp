@@ -14,10 +14,11 @@ pageContext.setAttribute("tournamentNames", Queries.getTournamentNames(connectio
 
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Tournament Initialization)</title>
   </head>
 
-  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" topmargin='4'>
+  <body>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Tournament Initialization)</h1>
 
     <p>This page allows you to change the tournament for a group of teams
