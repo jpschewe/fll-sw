@@ -23,7 +23,7 @@ if(null == session.getAttribute("columnSelectOptions")) {
 
     <% if(UploadTeams.verifyTeams(connection, request, response, session, out)) { %>
     <p>Apparently everything uploaded ok.  You probably want to go back to the
-    <a href="index.jsp">adminitration menu</a> now.</p>
+    <a href="index.jsp">administration menu</a> now.</p>
     <% } %>
 
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>

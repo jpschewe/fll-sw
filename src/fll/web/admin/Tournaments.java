@@ -104,7 +104,7 @@ final public class Tournaments {
             final String name = rs.getString(1);
             final String location = rs.getString(2);
             final String next = rs.getString(3);
-            generateRow(out, row, name, location, next);
+            generateRow(out, row, name, name, location, next);
           }
         } finally {
           Utilities.closeResultSet(rs);
@@ -112,13 +112,15 @@ final public class Tournaments {
         }
       } else {
         //need to walk the parameters to see what we've been passed
+        String key = request.getParameter("key" + row);
         String name = request.getParameter("name" + row);
         String location = request.getParameter("location" + row);
         String next = request.getParameter("next" + row); 
         while(null != name) {
-          generateRow(out, row, name, location, next);
+          generateRow(out, row, key, name, location, next);
           
           row++;
+          key = request.getParameter("key" + row);
           name = request.getParameter("name" + row);
           location = request.getParameter("location" + row);
           next = request.getParameter("next" + row);
@@ -129,7 +131,7 @@ final public class Tournaments {
       final int tableRows = Math.max(numRows, row);
       
       for(; row < tableRows; row++) {
-        generateRow(out, row, null, null, null);
+        generateRow(out, row, null, null, null, null);
       }
 
       out.println("</table>");
@@ -154,6 +156,7 @@ final public class Tournaments {
    */
   private static void generateRow(final JspWriter out,
                                   final int row,
+                                  final String key,
                                   final String name,
                                   final String location,
                                   final String next) throws IOException {
@@ -161,7 +164,7 @@ final public class Tournaments {
 
     out.print("  <input type='hidden' name='key" + row + "'");
     if(null != name) {
-      out.print(" value='" + name + "'");
+      out.print(" value='" + key + "'");
     } else {
       out.print(" value='new'");
     }

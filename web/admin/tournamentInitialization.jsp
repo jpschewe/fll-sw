@@ -20,7 +20,7 @@ pageContext.setAttribute("tournamentNames", Queries.getTournamentNames(connectio
 
     <p>This page allows you to change the tournament for a group of teams
     based on the region that they're in.  Any previous tournament
-    assignements for the selected teams will be removed</p>
+    assignments for the selected teams will be removed</p>
       
     <form name="form" action="verifyTournamentInitialization.jsp" method="post">
       <table border='1'>

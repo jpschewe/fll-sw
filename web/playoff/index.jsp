@@ -52,7 +52,7 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
         <li>
           <B>WARNING: Do not select brackets until all seeding runs have been recorded!</b><br>
           <form action='main.jsp' method='get'>
-            Goto the bracket page for division <select name='division'>
+            Go to the bracket page for division <select name='division'>
 <%
 {
 final Iterator divisionIter = divisions.iterator();
@@ -65,14 +65,14 @@ while(divisionIter.hasNext()) {
 }
 %>
             </select>
-            <input type='submit' value='Goto Playoffs'>
+            <input type='submit' value='Go to Playoffs'>
               (requires Internet Explorer)
           </form>               
         </li>
 
         <li>
           <form action='adminbrackets.jsp' method='get'>
-            Goto the admin/printable bracket page for division <select name='division'>
+            Go to the admin/printable bracket page for division <select name='division'>
 <%
 {
 final Iterator divisionIter = divisions.iterator();
@@ -85,11 +85,11 @@ while(divisionIter.hasNext()) {
 }
 %>
             </select>
-            <input type='submit' value='Goto Playoffs'>
+            <input type='submit' value='Go to Playoffs'>
           </form>               
         </li>
 
-        <li><a href="remoteMain.jsp">Goto remotely controled brackets</a></li>
+        <li><a href="remoteMain.jsp">Go to remotely controlled brackets</a></li>
 
         <li>
           <form action='index.jsp' method='post'>
