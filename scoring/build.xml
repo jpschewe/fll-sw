@@ -154,26 +154,40 @@
 
 -->
 
+<path id="application.classpath">
+  <pathelement location="${lib.home}/JonsInfra-0.2.jar"/>
+  <pathelement location="${lib.home}/junit-3.8.1.jar"/>
+  <pathelement location="${lib.home}/log4j-1.2.6.jar"/>
+  <pathelement location="${lib.home}/mm.mysql-2.0.14-bin.jar"/>
+  <pathelement location="${lib.home}/common-lib/xercesImpl.jar"/>
+  <pathelement location="${lib.home}/common-lib/xmlParserAPIs.jar"/>
+</path>
+
 <path id="compile.classpath">
+  <!-- Include all JAR files that will be included in /WEB-INF/lib -->
+  <path refid="application.classpath" />
 
-<!-- Include all JAR files that will be included in /WEB-INF/lib -->
-<!-- *** CUSTOMIZE HERE AS REQUIRED BY YOUR APPLICATION *** -->
-    <pathelement location="${lib.home}/JonsInfra-0.2.jar"/>
-    <pathelement location="${lib.home}/junit-3.8.1.jar"/>
-    <pathelement location="${lib.home}/log4j-1.2.6.jar"/>
-    <pathelement location="${lib.home}/mm.mysql-2.0.14-bin.jar"/>
-    <pathelement location="${lib.home}/common-lib/xercesImpl.jar"/>
-    <pathelement location="${lib.home}/common-lib/xmlParserAPIs.jar"/>
+  <pathelement location="${lib.home}/uptag.jar"/>
 
-<!-- Include all elements that Tomcat exposes to applications -->
-<pathelement location="${catalina.home}/common/classes"/>
-<fileset dir="${catalina.home}/common/lib">
-<include name="*.jar"/>
-</fileset>
-<pathelement location="${catalina.home}/classes"/>
-<fileset dir="${catalina.home}/lib">
-<include name="*.jar"/>
-</fileset>
+  <!-- JSTL libraries -->
+  <pathelement location="${lib.home}/dom.jar" />
+  <pathelement location="${lib.home}/jaxen-full.jar" />
+  <pathelement location="${lib.home}/jaxp-api.jar" />
+  <pathelement location="${lib.home}/jstl.jar" />
+  <pathelement location="${lib.home}/sax.jar" />
+  <pathelement location="${lib.home}/saxpath.jar" />
+  <pathelement location="${lib.home}/standard.jar" />
+  <pathelement location="${lib.home}/xalan.jar" />
+
+  <!-- Include all elements that Tomcat exposes to applications -->
+  <pathelement location="${catalina.home}/common/classes"/>
+    <fileset dir="${catalina.home}/common/lib">
+    <include name="*.jar"/>
+  </fileset>
+  <pathelement location="${catalina.home}/classes"/>
+    <fileset dir="${catalina.home}/lib">
+    <include name="*.jar"/>
+  </fileset>
 
 </path>
 
@@ -236,6 +250,7 @@
      deprecation="${compile.deprecation}"
         optimize="${compile.optimize}">
 <classpath refid="compile.classpath"/>
+
 </javac>
 
 <!-- Copy associated resource files -->
@@ -251,14 +266,14 @@
     description="Compile JSP sources">
     
     <mkdir    dir="${tmp.home}" />
-    <jspc srcdir="${web.home}"
+<!--    <jspc srcdir="${web.home}"
           destdir="${tmp.home}">
       <include name="**/*.jsp" />
       <classpath>
         <pathelement location="${build.home}/WEB-INF/classes" />
         <path refid="compile.classpath" />
       </classpath>
-    </jspc>
+    </jspc> -->
 
     <javac srcdir="${tmp.home}"
               destdir="${tmp.home}"
@@ -301,8 +316,6 @@
 <fileset dir="${build.home}"/>
 </copy>
 
-  <!-- get the correct web.xml file -->
-  <copy file="${web.home}/WEB-INF/${web.config}" tofile="${deploy.home}/WEB-INF/web.xml" />
 </target>
 
 
@@ -354,6 +367,7 @@
   </fileset>
 </copy>
 
+<!-- FIX should use pathconvert here! -->
 <echo file="${tmp.home}/subjective/subjective.bat"
       message="%JAVA_HOME%/bin/java -classpath JonsInfra-0.2.jar;mm.mysql-2.0.14-bin.jar;subjective.jar fll.gui.SubjectiveFrame"
       />
@@ -456,6 +470,9 @@
       <include name="**/*.jar" />
     </fileset>
   </copy>
+
+  <!-- get the correct web.xml file -->
+  <copy file="${web.home}/WEB-INF/${web.config}" tofile="${build.home}/WEB-INF/web.xml" />
 
 </target>
 

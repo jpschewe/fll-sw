@@ -38,10 +38,10 @@ if(null == divisionIndexStr) {
 final String headerColor;
 if((divisionIndex / 2) * 2 == divisionIndex) {
   //even
-  headerColor = "#008000";
+  headerColor = "#800000";
 } else {
   //odd
-  headerColor = "#800000";
+  headerColor = "#008000";
 }
 final String division = (String)divisions.get(divisionIndex);
   

@@ -1,3 +1,11 @@
+2003-04-02  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/scoreboard/allteams.jsp: Started working on using JSTL in
+	the pages (707868)
+
+	* web/scoreboard/top10.jsp: merged in changes from the
+	state tournament (707844)
+
 2003-03-30  Jon Schewe  <jpschewe@mtu.net>
 
 	* Release version 1.0.  This is just the software we used last

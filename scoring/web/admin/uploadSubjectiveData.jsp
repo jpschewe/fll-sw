@@ -1,7 +1,7 @@
 <%@ page errorPage="../errorHandler.jsp" %>
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
   
-<%@ taglib uri="../WEB-INF/tld/taglib62.tld" prefix="up" %>
+<%@ taglib uri="/WEB-INF/tld/taglib62.tld" prefix="up" %>
 
 <%@ page import="fll.web.admin.UploadSubjectiveData" %>
   
