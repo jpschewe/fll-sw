@@ -77,41 +77,7 @@ public class Queries {
   }
   
   private Queries() {
-     
-  }
-
-  /**
-   * Populates the tournament teams if they don't realdy exist.  Defaults
-   * force to false.
-   *
-   * @see #populateTournamentTeams(ServletContext, boolean)
-   */
-  public static void ensureTournamentTeamsPopulated(final ServletContext application) throws SQLException {
-    populateTournamentTeams(application, false);
-  }
-
-  /**
-   * Forces the tournament teams to be populated.  Defaults force to true.
-   *
-   * @see #populateTournamentTeams(ServletContext, boolean)
-   */
-  public static void populateTournamentTeams(final ServletContext application) throws SQLException {
-    populateTournamentTeams(application, true);
-  }
-  
-  /**
-   * Get a map of teams for this tournament keyed on team number and put it in
-   * application under the key "tournamentTeams".
-   *
-   * @param application where to get the connection variables
-   * @param force if true, overwrite the value in application
-   */
-  private static void populateTournamentTeams(final ServletContext application,
-                                              final boolean force) throws SQLException {
-    if(force || null == application.getAttribute("tournamentTeams")) {
-      final Connection connection = (Connection)application.getAttribute("connection");
-      application.setAttribute("tournamentTeams", getTournamentTeams(connection));
-    }
+    //no instances
   }
 
   /**
@@ -1102,7 +1068,7 @@ public class Queries {
       prep.setInt(6, number);
       prep.executeUpdate();
 
-      stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber) VALUES('DUMMY', " + number + ")");
+      stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber) VALUES('" + getCurrentTournament(connection) + "', " + number + ")");
       
       return null;
     } finally {
@@ -1209,36 +1175,40 @@ public class Queries {
   /**
    * Compute total score for values in current row of rs based on goals from
    * challenge document.
+   *
+   * @return the score, 0 on a bye
    */
   private static int computeTotalScore(final ResultSet rs,
                                        final NodeList goals)
     throws ParseException, SQLException {
     int computedTotal = 0;
-    for(int i=0; i<goals.getLength(); i++) {
-      final Element goal = (Element)goals.item(i);
-      final String goalName = goal.getAttribute("name");
-      final int multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goal.getAttribute("multiplier")).intValue();
-      final NodeList values = goal.getElementsByTagName("value");
-      if(values.getLength() == 0) {
-        final int score = rs.getInt(goalName);
-        computedTotal += multiplier * score;
-      } else {
-        //enumerated
-        //find value that matches value in DB
-        final String enum = rs.getString(goalName);
-        boolean found = false;
-        int score = -1;
-        for(int v=0; v<values.getLength() && !found; v++) {
-          final Element value = (Element)values.item(v);
-          if(value.getAttribute("value").equals(enum)) {
-            score = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue() * multiplier;
-            found = true;
+    if(!rs.getBoolean("Bye")) {
+      for(int i=0; i<goals.getLength(); i++) {
+        final Element goal = (Element)goals.item(i);
+        final String goalName = goal.getAttribute("name");
+        final int multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goal.getAttribute("multiplier")).intValue();
+        final NodeList values = goal.getElementsByTagName("value");
+        if(values.getLength() == 0) {
+          final int score = rs.getInt(goalName);
+          computedTotal += multiplier * score;
+        } else {
+          //enumerated
+          //find value that matches value in DB
+          final String enum = rs.getString(goalName);
+          boolean found = false;
+          int score = -1;
+          for(int v=0; v<values.getLength() && !found; v++) {
+            final Element value = (Element)values.item(v);
+            if(value.getAttribute("value").equals(enum)) {
+              score = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue() * multiplier;
+              found = true;
+            }
           }
+          if(!found) {
+            throw new RuntimeException("Error, enum value in database for goal: " + goalName + " is not a valid value");
+          }
+          computedTotal += score;
         }
-        if(!found) {
-          throw new RuntimeException("Error, enum value in database for goal: " + goalName + " is not a valid value");
-        }
-        computedTotal += score;
       }
     }
     return computedTotal;

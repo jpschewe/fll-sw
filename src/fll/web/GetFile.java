@@ -43,8 +43,8 @@ final public class GetFile {
                              final HttpServletResponse response) throws SQLException, IOException {
     final String filename = request.getParameter("filename");
     if("teams.xml".equals(filename)) {
-      Queries.ensureTournamentTeamsPopulated(application);
-      final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
+      final Connection connection = (Connection)application.getAttribute("connection");
+      final Map tournamentTeams = Queries.getTournamentTeams(connection);
       final Document teamsDocument = XMLUtils.createTeamsDocument(tournamentTeams.values());
       final XMLWriter xmlwriter = new XMLWriter();
 
@@ -57,8 +57,7 @@ final public class GetFile {
       final Connection connection = (Connection)application.getAttribute("connection");
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
       if(Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
-        Queries.ensureTournamentTeamsPopulated(application);
-        final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
+        final Map tournamentTeams = Queries.getTournamentTeams(connection);
         final String tournament = Queries.getCurrentTournament(connection);
       
         final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument,
@@ -84,8 +83,7 @@ final public class GetFile {
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
       if(Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
       
-        Queries.ensureTournamentTeamsPopulated(application);
-        final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
+        final Map tournamentTeams = Queries.getTournamentTeams(connection);
         final String tournament = Queries.getCurrentTournament(connection);
       
         final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument,

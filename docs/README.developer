@@ -153,10 +153,6 @@ variables normally used:
   - "playoffRunNumber" (java.lang.Number) keeps track of the current run
   number for the remotely controlled brackets
 
-- call fll.Queries.populateTournamentTeams
-  - "tournamentTeams" (java.util.Map) holds the current tournament's teams
-    keyed by team number, same as calling fll.Queries.getTournamentTeams()
-
 Session variables:
   - "currentRound" (java.util.List of fll.Team) Used in playoff/brackets.jsp
   to keep track of the current list of teams in bracket order
