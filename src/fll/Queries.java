@@ -55,18 +55,21 @@ public class Queries {
   public static void main(final String[] args) {
     try {
       final ClassLoader classLoader = Queries.class.getClassLoader();
-      final Connection connection = Utilities.createDBConnection("localhost");
+      //final Connection connection = Utilities.createDBConnection("localhost");
       
-      final Document challengeDocument = getChallengeDocument(connection);
+      //final Document challengeDocument = getChallengeDocument(connection);
       
       //LOG.info("Tournaments: " + getTournamentNames(connection));
-      updateScoreTotals(challengeDocument, connection);
+      //updateScoreTotals(challengeDocument, connection);
       //System.out.println(getDivisions(connection));
 
       //LOG.info("Before Tournaments: " + getTournamentNames(connection));
       //insertTournamentsForRegions(connection);
       //LOG.info("After Tournaments: " + getTournamentNames(connection));
-      
+
+      for(int i=0; i<10; i++) {
+        LOG.info(i + " " + getColorForDivisionIndex(i));
+      }
     } catch(final Exception e) {
       e.printStackTrace();
     }
@@ -492,7 +495,7 @@ public class Queries {
       + " WHERE Performance.RunNumber <= " + getNumSeedingRounds(connection)
       + " AND Performance.Tournament = '" + currentTournament + "'"
       + " AND Teams.TeamNumber = Performance.TeamNumber"
-      + " AND Teams.Division = " + divisionStr
+      + " AND Teams.Division = '" + divisionStr + "'"
       + " GROUP BY Performance.TeamNumber"
       + " ORDER BY Score DESC, Performance.TeamNumber";
 
@@ -1239,5 +1242,35 @@ public class Queries {
       }
     }
     return computedTotal;
+  }
+
+  /**
+   * Get the color for a division index.  Below are the colors used.
+   *
+   * <table>
+   *   <td><td bgcolor="#800000">0 - #800000</td></tr>
+   *   <td><td bgcolor="#008000">1 - #008000</td></tr>
+   *   <td><td bgcolor="#CC6600">2 - #CC6600</td></tr>
+   *   <td><td bgcolor="#FF00FF">3 - #FF00FF</td></tr>
+   *   <td><td>continue at the top</td></tr>
+   * </ol>
+   *
+   * @param index the division index
+   */
+  public static String getColorForDivisionIndex(final int index)
+    throws SQLException {
+    final int idx = index % 4;
+    switch(idx) {
+    case 0:
+      return "#800000";
+    case 1:
+      return "#008000";
+    case 2:
+      return "#CC6600";
+    case 3:
+      return "#FF00FF";
+    default:
+      throw new RuntimeException("Internal error, cannot choose color");
+    }
   }
 }

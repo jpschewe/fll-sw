@@ -7,6 +7,9 @@
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.ResultSet" %>
 
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Iterator" %>
+      
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
 final String currentTournament = Queries.getCurrentTournament(connection);
@@ -18,6 +21,7 @@ final String sql = "SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName,
   + " ORDER BY Teams.Organization, Teams.TeamNumber, Performance.RunNumber";
 final Statement stmt = connection.createStatement();
 final ResultSet rs = stmt.executeQuery(sql);
+final List divisions = Queries.getDivisions(connection);
 %>
 
 <c:set var="thisURL">
@@ -85,13 +89,19 @@ if(rs.next()) {
     <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' height='15' width='1'></td></tr>
     <tr align='left'>
 <%
-    String divisionStr = rs.getString("Division");
-    final String headerColor;
-    if("1".equals(divisionStr)) {
-      headerColor = "#800000";
-    } else {
-      headerColor = "#008000";
+    final String divisionStr = rs.getString("Division");
+    final Iterator divisionIter = divisions.iterator();
+    boolean found = false;
+    int index = 0;
+    while(divisionIter.hasNext() && !found) {
+      final String div = (String)divisionIter.next();
+      if(divisionStr.equals(div)) {
+        found = true;
+      } else {
+        index++;
+      }
     }
+    final String headerColor = Queries.getColorForDivisionIndex(index);
 %>
       <td width='25%' bgcolor='<%=headerColor%>'>
         <font size='2'><b>&nbsp;&nbsp;Division:&nbsp;<%=divisionStr%>&nbsp;&nbsp;</b></font>
