@@ -472,7 +472,6 @@ public class Queries {
    * Get the order of the teams as seeded in the performance rounds.
    *
    * @param connection connection to the database
-   * @param currentTournament the current tournament
    * @param divisionStr the division to generate brackets for, as a String
    * @param tournamentTeams keyed by team number
    * @return a List of team numbers as Integers

@@ -1,3 +1,8 @@
+2003-08-14  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/welcome.jsp: Welcome page for Minnesota tournaments.
+	(707859)
+
 2003-08-11  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/model/SubjectiveTableModel.java (SubjectiveTableModel):
