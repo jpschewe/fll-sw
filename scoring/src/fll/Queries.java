@@ -1115,7 +1115,7 @@ public final class Queries {
     
     PreparedStatement prep = null;
     try {
-      prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Region = ?, Division = ?, WHERE TeamNumber = ?");
+      prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Region = ?, Division = ? WHERE TeamNumber = ?");
       prep.setString(1, name);
       prep.setString(2, organization);
       prep.setString(3, region);
@@ -1218,13 +1218,13 @@ public final class Queries {
         } else {
           //enumerated
           //find value that matches value in DB
-          final String enum = rs.getString(goalName);
-          if(null != enum) {
+          final String enumVal = rs.getString(goalName);
+          if(null != enumVal) {
             boolean found = false;
             int score = -1;
             for(int v=0; v<values.getLength() && !found; v++) {
               final Element value = (Element)values.item(v);
-              if(value.getAttribute("value").equals(enum)) {
+              if(value.getAttribute("value").equals(enumVal)) {
                 score = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue() * multiplier;
                 found = true;
               }

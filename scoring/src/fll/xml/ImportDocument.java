@@ -31,7 +31,7 @@ public final class ImportDocument {
   
   public static void main(final String[] args) {
     final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-    final Document document = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-region-2003.xml"));
+    final Document document = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-region-2004.xml"));
     if(null == document) {
       throw new RuntimeException("Error parsing challenge.xml");
     }
@@ -39,7 +39,7 @@ public final class ImportDocument {
     PreparedStatement prep = null;
     Connection connection = null;
     try {
-      connection = Utilities.createDBConnection("netserver", "fll", "fll");
+      connection = Utilities.createDBConnection("129.235.71.45", "fll", "fll");
       prep = connection.prepareStatement("REPLACE INTO TournamentParameters (Param, Value, Description) VALUES ('ChallengeDocument', ?, 'The XML document describing the challenge')");
       
       //dump the document into a byte array so we can push it into the database
