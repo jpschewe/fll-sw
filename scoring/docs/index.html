@@ -350,7 +350,7 @@
             the server standalone, you'll need to do this each time you
             restart the machine.</li>
         </ul>
-        
+
       <li>When you're done for the day you'll want to shutdown the
         database by going to shutdown service or shutdown the server
         standalone, depending on how you started it.</li>
@@ -373,10 +373,21 @@ GRANT ALL PRIVILEGES ON mysql.* TO root@localhost WITH GRANT OPTION
           <ul>
             <li>The root username should be root, if you followed the instructions above for setting up MySQL</li>
             <li>The root password should be fll, if you followed the instructions above for setting up MySQL</li>
-            <li>You'll need to create an XML document that represents your competition or use one of the ones provided on the <a href="http://sourceforge.net/project/showfiles.php?group_id=76410">download</a> site.  If you're going to create your own, you should start with one of ours and tweak it for your needs.
+            <li>You'll need to create an XML document that represents your competition or use one of the ones provided on the <a href="http://sourceforge.net/project/showfiles.php?group_id=76410">download</a> site.  If you're going to create your own, you should start with one of ours and tweak it for your needs.</li>
           </ul>
         </li>
-        <li>Click initialize database and you should go back to the same page with a message at the top that the database was successfully initialized</li>
+        <li>Click initialize database and you should go back to the
+        same page with a message at the top that the database was
+        successfully initialized.  If this fails due to an error connecting
+        to the database, do the following:
+          <ul>
+            <li>Open a command prompt, <code>Start-&gt;Run-&gt;command</code></li>
+            <li>Change to the bin directory where MySQL is installed, <code>cd \packages\mysql\bin</code></li>
+            <li>Start mysql, <code>mysql</code></li>
+            <li>Execute <code>SET PASSWORD FOR root = PASSWORD('fll');</code></li>
+            <li>Go back to step 3 again.</li>
+          </ul>
+        </li>
         <li>Once that is done you can close the other web browser you opened</li>
       </ol>
     </li>
