@@ -1,11 +1,11 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Utilities" %>
-  
+
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.ResultSet" %>
-  
+
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
 %>
@@ -13,7 +13,7 @@ final Connection connection = (Connection)application.getAttribute("connection")
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-  <title><x:out select="$challengeDocument/fll/@title"/> (Select Team)</title>
+  <title>Edit Team [Select Team] - <x:out select="$challengeDocument/fll/@title"/></title>
 
   <!--<style type='text/css'>
    SELECT {line-height: 150%; font-size: 10pt; font-weight: bold; background-color: black }
@@ -28,7 +28,6 @@ final Connection connection = (Connection)application.getAttribute("connection")
 
   </head>
   <body>
-      
     <form action="editTeam.jsp" method="POST" name="selectTeam">
       <!-- top info bar -->
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
@@ -43,11 +42,6 @@ final Connection connection = (Connection)application.getAttribute("connection")
                         <font face="Arial" size="4"><x:out select="$challengeDocument/fll/@title"/></font>
                       </td>
                     </tr>
-                    <tr align="center">
-                      <td>
-                        <font face="Arial" size="4">Please Select Team:</font>
-                      </td>
-                    </tr>
                   </table>
                 </td>
               </tr>
@@ -57,18 +51,18 @@ final Connection connection = (Connection)application.getAttribute("connection")
       </table>
       <table>
         <tr align='left' valign='top'>
-          <!-- pick team from a list -->            
+          <!-- pick team from a list -->
           <td>
-            <br><br>
             <font face='arial' size='4'>Select Team to Edit From List:</font><br>
             <select size='20' name='TeamNumber'>
               <%
               final Statement stmt = connection.createStatement();
-              final ResultSet rs = stmt.executeQuery("SELECT TeamNumber,TeamName,Organization FROM Teams ORDER BY TeamNumber ASC");
+              final ResultSet rs = stmt.executeQuery("SELECT TeamNumber,TeamName,Organization,Division FROM Teams ORDER BY TeamNumber ASC");
               while(rs.next()) {
                 final int teamNumber = rs.getInt(1);
                 final String teamName = rs.getString(2);
                 final String organization = rs.getString(3);
+                final String division = rs.getString(4);
                 out.print("<option value=");
                 out.print(String.valueOf(teamNumber));
                 out.print(">");
@@ -77,6 +71,9 @@ final Connection connection = (Connection)application.getAttribute("connection")
                 out.print(teamName);
                 out.print("] ");
                 out.print(organization);
+                out.print(" (Div ");
+                out.print(division);
+                out.print(")");
                 out.print("</option>\n");
               }
               Utilities.closeResultSet(rs);
@@ -91,7 +88,6 @@ final Connection connection = (Connection)application.getAttribute("connection")
             <input type="submit" value="Submit">
           </td>
         </tr>
-        
       </table>
     </form>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
