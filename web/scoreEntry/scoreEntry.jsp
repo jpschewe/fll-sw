@@ -3,6 +3,7 @@
 <%@ page import="fll.Team" %>
 <%@ page import="fll.Queries" %>
 <%@ page import="fll.Utilities" %>
+<%@ page import="fll.web.playoff.Playoff" %>
 <%@ page import="fll.web.scoreEntry.ScoreEntry" %>
   
 <%@ page import="org.w3c.dom.Document" %>
@@ -54,8 +55,7 @@ if("1".equals(request.getParameter("EditFlag")) || null != request.getParameter(
     throw new RuntimeException("Please choose a run number when editing scores");
   }
   final int runNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumberStr).intValue();
-  //FIX need to get the list of runs that this team has completed and check that for the selected run number
-  if(null == request.getParameter("error") && runNumber >= nextRunNumber) {
+  if(null == request.getParameter("error") && !Playoff.performanceScoreExists(connection, teamNumber, runNumber)) {
     throw new RuntimeException("Team has not yet competed in run " + runNumber + ".  Please choose a valid run number.");
   }
   lRunNumber = runNumber;
@@ -67,8 +67,8 @@ final String minimumAllowedScoreStr = ((Element)challengeDocument.getDocumentEle
 final int minimumAllowedScore = NumberFormat.getInstance().parse(minimumAllowedScoreStr).intValue();
 
 //check if this is the last run a team has completed
-//FIX this also needs to be updated for non-consecutive runs
-pageContext.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == (nextRunNumber - 1)));
+final int maxRunCompleted = Queries.getMaxRunNumber(connection, teamNumber);
+pageContext.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == maxRunCompleted));
 %>
   
 <html>

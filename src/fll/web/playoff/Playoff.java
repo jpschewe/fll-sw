@@ -262,33 +262,46 @@ final public class Playoff {
   }
 
   /**
+   * If team is not null, calls performanceScoreExists(connection,
+   * team.getTeamNumber(), runNumber), otherwise returns false.
+   * 
+   * @see performanceScoreExists(Connection, int, int)
+   */
+  public static boolean performanceScoreExists(final Connection connection,
+                                               final Team team,
+                                               final int runNumber)
+    throws SQLException {
+    if(null == team) {
+      return false;
+    } else {
+      return performanceScoreExists(connection, team.getTeamNumber(), runNumber);
+    }
+  }
+  
+  /**
    * Test if a performance score exists for the given team, tournament and
    * run number
    *
    * @throws SQLException on a database error
    */
   public static boolean performanceScoreExists(final Connection connection,
-                                               final Team team,
+                                               final int teamNumber,
                                                final int runNumber)
     throws SQLException {
     final String tournament = Queries.getCurrentTournament(connection);
     
-    if(null == team) {
-      return false;
-    } else {
-      Statement stmt = null;
-      ResultSet rs = null;
-      try {
-        stmt = connection.createStatement();
-        rs = stmt.executeQuery("SELECT ComputedTotal FROM Performance"
-                               + " WHERE TeamNumber = " + team.getTeamNumber()
-                               + " AND Tournament = '" + tournament + "'"
-                               + " AND RunNumber = " + runNumber);
-        return rs.next();
-      } finally {
-        Utilities.closeResultSet(rs);
-        Utilities.closeStatement(stmt);
-      }
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT ComputedTotal FROM Performance"
+                             + " WHERE TeamNumber = " + teamNumber
+                             + " AND Tournament = '" + tournament + "'"
+                             + " AND RunNumber = " + runNumber);
+      return rs.next();
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closeStatement(stmt);
     }
   }
 
