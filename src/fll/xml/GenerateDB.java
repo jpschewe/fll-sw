@@ -151,7 +151,7 @@ final public class GenerateDB {
                          + "  Organization varchar(255),"
                          + "  Division varchar(32) NOT NULL default '1',"
                          + "  NumMedals integer,"
-                         + "  Region varchar(16) NOT NULL default 'DUMMY',"
+                         + "  Region varchar(255) NOT NULL default 'DUMMY',"
                          + "  PRIMARY KEY  (TeamNumber)"
                          + ")");
 

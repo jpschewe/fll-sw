@@ -85,7 +85,7 @@ if(null == errorMessage || "".equals(errorMessage)) {
 
         <tr>
           <td>Region</td>
-          <td>Text - 16 characters</td>
+          <td>Text - 255 characters</td>
           <td>
             <select name='Region'>
             <option value='' selected>None</option>

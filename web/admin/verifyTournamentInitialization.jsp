@@ -12,10 +12,10 @@ pageContext.setAttribute("regions", Queries.getRegions(connection));
   <c:forEach var="parameter" items="${paramValues}">
     <c:if test='${"nochange" != parameter.value[0] && "verified" != parameter.key && "submit" != parameter.key}'>
       <!-- need MySQL 4.0.2 or greater for this one! -->
-      <sql:update>
+      <sql:update dataSource="${datasource}">
         DELETE FROM TournamentTeams Using Teams, TournamentTeams WHERE TournamentTeams.TeamNumber = Teams.TeamNumber AND Teams.Region = '<c:out value="${parameter.key}"/>'
       </sql:update>
-      <sql:update>
+      <sql:update dataSource="${datasource}">
         INSERT INTO TournamentTeams (TeamNumber, Tournament) SELECT Teams.TeamNumber AS TeamNumber, '<c:out value="${parameter.value[0]}"/>' FROM Teams WHERE Teams.Region = '<c:out value="${parameter.key}"/>'
       </sql:update>
     </c:if>
@@ -41,7 +41,7 @@ pageContext.setAttribute("regions", Queries.getRegions(connection));
 
     <form name="verify" action="verifyTournamentInitialization.jsp" method="post">
       <table border='1'>
-        <tr><th>Team Number</th><th>Team Name</th></tr>
+        <tr><th>Team Number</th><th>Team Name</th><th>Region</th></tr>
               
         <c:forEach var="parameter" items="${paramValues}">
           <input type='hidden'
@@ -49,8 +49,8 @@ pageContext.setAttribute("regions", Queries.getRegions(connection));
                  value='<c:out value="${parameter.value[0]}" />'
                  />
           <c:if test='${"nochange" != parameter.value[0]}'>
-            <sql:query var="result">
-              SELECT DISTINCT Teams.TeamNumber AS TeamNumber, Teams.TeamName AS TeamName
+            <sql:query var="result" dataSource="${datasource}">
+              SELECT DISTINCT Teams.TeamNumber AS TeamNumber, Teams.TeamName AS TeamName, Teams.Region AS Region
                 FROM Teams,TournamentTeams
                 WHERE Teams.Region = '<c:out value="${parameter.key}"/>'
                 AND TournamentTeams.TeamNumber = Teams.TeamNumber
@@ -60,6 +60,7 @@ pageContext.setAttribute("regions", Queries.getRegions(connection));
               <tr>
                 <td><c:out value="${row.TeamNumber}" /></td>
                 <td><c:out value="${row.TeamName}" /></td>
+                <td><c:out value="${row.Region}" /></td>
               </tr>
             </c:forEach>
           </c:if>
