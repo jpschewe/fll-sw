@@ -1,5 +1,13 @@
 2003-10-04  Jon Schewe  <jpschewe@mtu.net>
 
+	* docs/index.html: Added instructions for using jar to uncompress
+	zip archives.  Perhaps we should just write a little Java tool
+	that has a nice GUI (707892).
+
+	* web/scoreEntry/select_team.jsp: Moved edit widgets around a bit
+	to make it more obvious that the checkbox and dropdown are tied
+	together (707865).
+
 	* src/fll/web/playoff/Playoff.java (getDisplayString): Check the
 	other team for a bye and don't show a score in that case (707872).
 
