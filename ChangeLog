@@ -1,3 +1,8 @@
+2003-10-27  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/Queries.java (updateScoreTotals): Handle rows with all
+	NULLs for scores.  This is a bug that Chuck Davis found as well.
+
 2003-10-25  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/Queries.java (updateScoreTotals): need different update
