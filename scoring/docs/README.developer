@@ -40,7 +40,10 @@ Tomcat is the web-server-lite/JSP (Java Server Page) engine.
 Cygwin adds UN*X like interfaces to Windows, in particular, ssh and cvs.
   [ you only need Cygwin if you are going to develop under Windows ]
 
-Read for JSP coding conventions
+Please follow the coding standards put forward at
+http://mtu.net/~jpschewe/java/CodingStandards.html.
+
+There are some good ideas for JSP coding conventions here as well.
 http://developer.java.sun.com/developer/technicalArticles/javaserverpages/code_convention/
 
 Pointers on JSTL:
