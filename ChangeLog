@@ -1,5 +1,10 @@
 2003-09-07  Jon Schewe  <jpschewe@mtu.net>
 
+	* web/scoreboard/top10.jsp: Now the top10 page uses session
+	variables instead of form parameters to keep track of which
+	division is being displayed.  This should keep the browsers
+	history from filling up with urls (707896).
+
 	* web/index.jsp: Figured out how to use the JSTL XML tags to get
 	information out of challengeDocument to remove some more
 	scriptlets.
