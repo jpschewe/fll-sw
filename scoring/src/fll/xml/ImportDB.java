@@ -97,7 +97,7 @@ public final class ImportDB {
       
       //judges
       stmt.executeUpdate("DELETE FROM Judges WHERE Tournament = '" + tournament + "'");
-      stmt.executeUpdate("INSERT INTO Judges (id, category, Tournament) SELECT id,category,Tournament FROM " + database + ".Judges WHERE Tournament = '" + tournament + "'");
+      stmt.executeUpdate("INSERT INTO Judges (id, category, Tournament, Division) SELECT id,category,Tournament,Division FROM " + database + ".Judges WHERE Tournament = '" + tournament + "'");
 
       //performance
       {

@@ -54,17 +54,17 @@ public final class XMLUtils {
   public static void main(final String[] args) {
     try {
       final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-      final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge.xml"));
+      final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-region-2003.xml"));
 
       if(null == challengeDocument) {
         throw new RuntimeException("Error parsing challenge.xml");
       }
-      final Connection connection = Utilities.createDBConnection("disk");
+      final Connection connection = Utilities.createDBConnection("netserver", "fll", "fll", "fllmaster");
       final Map teams = Queries.getTournamentTeams(connection);
       //final Document document = createTeamsDocument(teams.values());
       LOG.info("Teams: " + teams.values());
       
-      final Document document = createSubjectiveScoresDocument(challengeDocument, teams.values(), connection, "Washburn");
+      final Document document = createSubjectiveScoresDocument(challengeDocument, teams.values(), connection, "Centennial-Sun");
       final XMLWriter xmlwriter = new XMLWriter();
       xmlwriter.setOutput(System.out, null);
       xmlwriter.write(document);

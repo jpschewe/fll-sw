@@ -1,3 +1,13 @@
+2004-04-07  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/xml/ImportDB.java (importDatabase): Make sure that the
+	division column is imported from the Judges table.
+
+	* src/fll/model/SubjectiveTableModel.java: Modified
+	SubjectiveTableModel to ignore case.  Although this shouldn't come
+	up again much now that we don't have the language used column in
+	Programming. (913700)
+
 2004-04-05  Jon Schewe  <jpschewe@mtu.net>
 
 	* build.xml: Added checkstyle to build.

@@ -121,7 +121,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
                 final NodeList posValuesList = goal.getElementsByTagName("value");
                 for(int v=0; v<posValuesList.getLength() && !found; v++) {
                   final Element posValue = (Element)posValuesList.item(v);
-                  if(posValue.getAttribute("title").equals(value)) {
+                  if(posValue.getAttribute("title").equalsIgnoreCase(value)) {
                     score = Utilities.NUMBER_FORMAT_INSTANCE.parse(posValue.getAttribute("score")).intValue();
                     found = true;
                   }
@@ -198,7 +198,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
       final NodeList posValues = goalDescription.getElementsByTagName("value");
       for(int v=0; v<posValues.getLength() && !found; v++) {
         final Element posValue = (Element)posValues.item(v);
-        if(posValue.getAttribute("title").equals(value)) {
+        if(posValue.getAttribute("title").equalsIgnoreCase((String)value)) {
           //found it
           element.setAttribute(goalDescription.getAttribute("name"), value.toString());
           if(setModified) {
