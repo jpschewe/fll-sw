@@ -20,7 +20,7 @@ import org.w3c.dom.NodeList;
  * 
  * @version $Revision$
  */
-final public class Submit {
+public final class Submit {
       
   private Submit() {
     

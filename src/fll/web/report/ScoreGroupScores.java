@@ -31,7 +31,7 @@ import java.util.Iterator;
  *
  * @version $Revision$
  */
-final public class ScoreGroupScores {
+public final class ScoreGroupScores {
    
   private ScoreGroupScores() {
      

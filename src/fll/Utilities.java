@@ -7,19 +7,23 @@ package fll;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.PreparedStatement;
+
 import java.text.NumberFormat;
+import org.apache.log4j.Logger;
 
 /**
  * Some handy utilties.
  * 
  * @version $Revision$
  */
-public class Utilities {
+public final class Utilities {
 
+  private static final Logger LOG = Logger.getLogger(Utilities.class);
+  
   /**
    * Single instance of the default NumberFormat instance to save on overhead
    */
@@ -100,6 +104,7 @@ public class Utilities {
       }
     } catch(final SQLException sqle) {
       //ignore
+      LOG.debug(sqle);
     }
   }
 
@@ -114,6 +119,7 @@ public class Utilities {
       }
     } catch(final SQLException sqle) {
       //ignore
+      LOG.debug(sqle);
     }
   }
   
@@ -128,6 +134,7 @@ public class Utilities {
       }
     } catch(final SQLException sqle) {
       //ignore
+      LOG.debug(sqle);
     }
   }
 
@@ -142,6 +149,7 @@ public class Utilities {
       }
     } catch(final SQLException sqle) {
       //ignore
+      LOG.debug(sqle);
     }
   }
   

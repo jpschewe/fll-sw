@@ -23,10 +23,8 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +41,7 @@ import net.mtu.eggplant.util.CollectionUtils;
  *
  * @version $Revision$
  */
-final public class Judges {
+public final class Judges {
    
   private Judges() {
      

@@ -26,6 +26,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.log4j.Logger;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -33,7 +35,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-import org.apache.log4j.Logger;
 
 
 /**
@@ -41,7 +42,7 @@ import org.apache.log4j.Logger;
  * 
  * @version $Revision$
  */
-public class XMLUtils {
+public final class XMLUtils {
 
   private static final Logger LOG = Logger.getLogger(XMLUtils.class);
   
@@ -50,7 +51,7 @@ public class XMLUtils {
    *
    * @param args ignored
    */
-  public static void main(String args[]) {
+  public static void main(final String[] args) {
     try {
       final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
       final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge.xml"));
@@ -67,8 +68,7 @@ public class XMLUtils {
       final XMLWriter xmlwriter = new XMLWriter();
       xmlwriter.setOutput(System.out, null);
       xmlwriter.write(document);
-    }
-    catch(Exception e) {
+    } catch(Exception e) {
       e.printStackTrace();
     }
   }
@@ -80,7 +80,7 @@ public class XMLUtils {
    * Create an XML document that represents the data in teams
    */
   public static Document createTeamsDocument(final Collection teams) {
-    final Document document = _documentBuilder.newDocument();
+    final Document document = DOCUMENT_BUILDER.newDocument();
     final Element top = document.createElement("teams");
     document.appendChild(top);
     final Iterator iter = teams.iterator();
@@ -124,7 +124,7 @@ public class XMLUtils {
 
       final String currentTournament = Queries.getCurrentTournament(connection);
       
-      final Document document = _documentBuilder.newDocument();
+      final Document document = DOCUMENT_BUILDER.newDocument();
       final Element top = document.createElement("scores");
       document.appendChild(top);
     
@@ -180,15 +180,15 @@ public class XMLUtils {
   }
   
     
-  private static final DocumentBuilder _documentBuilder;
+  private static final DocumentBuilder DOCUMENT_BUILDER;
 
   //create basic document builder
   static  {
     try {
       final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setNamespaceAware(true);
-      _documentBuilder = factory.newDocumentBuilder();
-      _documentBuilder.setErrorHandler(new ErrorHandler() {
+      DOCUMENT_BUILDER = factory.newDocumentBuilder();
+      DOCUMENT_BUILDER.setErrorHandler(new ErrorHandler() {
         public void error(final SAXParseException spe) throws SAXParseException {
           throw spe;
         }

@@ -10,7 +10,7 @@ package fll;
  *
  * @version $Revision$
  */
-final public class Team {
+public final class Team {
   
   /**
    * Constant to represent the team number for a bye 
@@ -25,12 +25,12 @@ final public class Team {
   /**
    * Team that represents a BYE
    */
-  public final static Team BYE = new Team();
+  public static final Team BYE = new Team();
 
   /**
    * Team that represents a TIE.
    */
-  public final static Team TIE = new Team();
+  public static final Team TIE = new Team();
 
   static {
     BYE.setTeamNumber(BYE_TEAM_NUMBER);
@@ -72,6 +72,10 @@ final public class Team {
     }
   }
 
+  public int hashCode() {
+    return getTeamNumber();
+  }
+  
   public String toString() {
     return "[" + getTeamNumber() + " " + getTeamName() + "]";
   }

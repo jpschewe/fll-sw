@@ -5,7 +5,6 @@
  */
 package fll.web.admin;
 
-import fll.Queries;
 import fll.Utilities;
 
 import java.io.IOException;
@@ -16,14 +15,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import java.text.NumberFormat;
 import java.text.ParseException;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,16 +29,12 @@ import javax.servlet.jsp.JspWriter;
 
 import net.mtu.eggplant.util.CollectionUtils;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
 /**
  * Java code used in tournaments.jsp
  *
  * @version $Revision$
  */
-final public class Tournaments {
+public final class Tournaments {
    
   private Tournaments() {
      

@@ -31,7 +31,7 @@ import org.w3c.dom.NodeList;
  * 
  * @version $Revision$
  */
-final public class ScoreEntry {
+public final class ScoreEntry {
 
   private ScoreEntry() {
   }
