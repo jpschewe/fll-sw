@@ -17,7 +17,7 @@
     </goal>
 
     <goal name="serve_dinner"
-	  title="Tray, Bowl, All FOod on Table">
+	  title="Tray, Bowl, All Food on Table">
       <value score="45" title="Yes" value="full" />
       <value score="35" title="Partial" value="partial" />
       <value score="0" title="No" value="no" />
@@ -58,7 +58,7 @@
           multiplier="50" />
 
     <goal name="play_ball"
-	  title="Any Balls, Your SIde, In Baskey"
+	  title="Any Balls, Your Side, In Baskey"
           max="16"
           multiplier="5" />
 
