@@ -3,7 +3,7 @@
      xsi:noNamespaceSchemaLocation="fll.xsd"
      title="FLL 2003 Challenge: Mission Mars" >
 
-  <Performance weight="0.25">
+  <Performance weight="1.0">
 
     <goal name="exit_base"
 	  title="Exit the Tetrahedron Base"
@@ -116,7 +116,7 @@
 
   <subjectiveCategory name="RobustDesign"
                       title="Robust Design"
-                      weight="0.125"
+                      weight="0.5"
                       >
     <goal name="Structural"
           title="Structural Design"
@@ -143,7 +143,7 @@
 
   <subjectiveCategory name="ResearchPresentation"
                       title="Research Presentation"
-                      weight="0.25"
+                      weight="1.0"
                       >
     <goal name="Research"
           title="Research"
@@ -169,7 +169,7 @@
 
   <subjectiveCategory name="Programming"
                       title="Programming"
-                      weight="0.125"
+                      weight="0.5"
                       >
     <goal name="Language"
           title="Language used">
@@ -201,7 +201,7 @@
 
   <subjectiveCategory name="Teamwork"
                       title="Teamwork"
-                      weight="0.25"
+                      weight="1.0"
                       >
     <goal name="TeamIntegration"
           title="Team Integration"
