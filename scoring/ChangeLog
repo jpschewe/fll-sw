@@ -1,3 +1,8 @@
+2003-09-06  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/report/teamPerformanceReport.jsp: Added a report that
+	contains the performance scores for a team by run number (707861).
+
 2003-08-27  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/scoreboard/allteams.jsp: Got scrolling working in Mozilla and

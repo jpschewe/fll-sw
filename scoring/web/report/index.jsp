@@ -54,15 +54,27 @@ Utilities.closeStatement(stmt);
     <ul>
       <li>
         <form ACTION='performanceRunReport.jsp' METHOD='POST'>
-        Show reports for performance run <select name='RunNumber'>
+        Show scores for performance run <select name='RunNumber'>
 <% for(int i=0; i<maxRunNumber; i++) { %>
   <option value='<%=(i+1)%>'><%=(i+1)%></option>
 <% } %>
         </select>
-        <input type='submit' value='Generate report'>
+        <input type='submit' value='Show Scores'>
         </form>
       </li>
 
+      <li>
+        <form action='teamPerformanceReport.jsp' method='post'>
+          Show performance scores for team <select name='TeamNumber'>
+            <% pageContext.setAttribute("tournamentTeams", Queries.getTournamentTeams(connection).values()); %>
+            <c:forEach items="${tournamentTeams}" var="team">
+              <option value='<c:out value="${team.teamNumber}"/>'><c:out value="${team.teamNumber}"/> - <c:out value="${team.teamName}"/></option>
+            </c:forEach>
+          </select>
+          <input type='submit' value='Show Scores'/>
+        </form>
+      </li>
+        
     </ul>
 
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>

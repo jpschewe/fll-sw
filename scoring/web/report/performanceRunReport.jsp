@@ -1,6 +1,3 @@
-
-
-
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="org.w3c.dom.Document" %>

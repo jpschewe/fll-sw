@@ -164,4 +164,10 @@ Session variables:
 Useful websites:
    http://mtu.net/~jpschewe/JonsInfra/0.2/index.html - JonsInfra documentation
 
+When you're compiling with ant the target compile.jsp, called from compile,
+will use jspc to compile the jsps for error checking.  Unfortunatly the
+error reporting isn't so good.  Most times you just get a
+NullPointerException.  This means that there is an error on the page, not
+an error with jspc.
+
 -- eof README.developer
