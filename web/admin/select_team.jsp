@@ -1,5 +1,3 @@
-
-
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Utilities" %>
@@ -37,71 +35,68 @@ final Connection connection = (Connection)application.getAttribute("connection")
     <form action="editTeam.jsp" method="POST" name="selectTeam">
       <!-- top info bar -->
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
-      <tr>
-        <td align="center" valign="middle" bgcolor="#e0e0e0" colspan='3'>
-          <table border="1" cellpadding="0" cellspacing="0" width="100%">
-          <tr align="center" valign="middle"><td>
-      
-          <table border="0" cellpadding="5" cellspacing="0" width="90%">
-            <tr>
-              <td valign="middle" align="center">
-                <font face="Arial" size="4"><%=challengeDocument.getDocumentElement().getAttribute("title")%></font>
-              </td>
-            </tr>
-            <tr align="center">
-              <td>
-                <font face="Arial" size="4">Please Select Team:</font>
-              </td>
-            </tr>
-          </table>
-      
-            </td></tr>
+        <tr>
+          <td align="center" valign="middle" bgcolor="#e0e0e0" colspan='3'>
+            <table border="1" cellpadding="0" cellspacing="0" width="100%">
+              <tr align="center" valign="middle">
+                <td>
+                  <table border="0" cellpadding="5" cellspacing="0" width="90%">
+                    <tr>
+                      <td valign="middle" align="center">
+                        <font face="Arial" size="4"><%=challengeDocument.getDocumentElement().getAttribute("title")%></font>
+                      </td>
+                    </tr>
+                    <tr align="center">
+                      <td>
+                        <font face="Arial" size="4">Please Select Team:</font>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
             </table>
-        </td>
-      </tr>
+          </td>
+        </tr>
       </table>
-    
-        <table>
-          
-          <tr align='left' valign='top'>
-          
-            <!-- pick team from a list -->            
-            <td>
-              <br><br>
-              <font face='arial' size='4'>Select to Edit Team From List:</font><br>
-              <select size='20' name='teamNumber'>
-                <%
-                final Statement stmt = connection.createStatement();
-                final ResultSet rs = stmt.executeQuery("SELECT TeamNumber,TeamName,Organization FROM Teams ORDER BY TeamNumber ASC");
-                while(rs.next()) {
-                  final int teamNumber = rs.getInt(1);
-                  final String teamName = rs.getString(2);
-                  final String organization = rs.getString(3);
-                  out.print("<option value=");
-                  out.print(String.valueOf(teamNumber));
-                  out.print(">");
-                  out.print(String.valueOf(teamNumber));
-                  out.print(" &nbsp;&nbsp;&nbsp;[");
-                  out.print(teamName);
-                  out.print("] ");
-                  out.print(organization);
-                  out.print("</option>\n");
-                }
-                Utilities.closeResultSet(rs);
-                Utilities.closeStatement(stmt);
-                %>
-              </select>
-            </td>
-            </tr>
+      <table>
+        <tr align='left' valign='top'>
+          <!-- pick team from a list -->            
+          <td>
+            <br><br>
+            <font face='arial' size='4'>Select Team to Edit From List:</font><br>
+            <select size='20' name='TeamNumber'>
+              <%
+              final Statement stmt = connection.createStatement();
+              final ResultSet rs = stmt.executeQuery("SELECT TeamNumber,TeamName,Organization FROM Teams ORDER BY TeamNumber ASC");
+              while(rs.next()) {
+                final int teamNumber = rs.getInt(1);
+                final String teamName = rs.getString(2);
+                final String organization = rs.getString(3);
+                out.print("<option value=");
+                out.print(String.valueOf(teamNumber));
+                out.print(">");
+                out.print(String.valueOf(teamNumber));
+                out.print(" &nbsp;&nbsp;&nbsp;[");
+                out.print(teamName);
+                out.print("] ");
+                out.print(organization);
+                out.print("</option>\n");
+              }
+              Utilities.closeResultSet(rs);
+              Utilities.closeStatement(stmt);
+              %>
+            </select>
+          </td>
+        </tr>
 
-          <tr>
-            <td align='center'>
-              <input type="submit" value="Submit">
-            </td>
-          </tr>
-          
-        </table>
-      </form>
+        <tr>
+          <td align='center'>
+            <input type="submit" value="Submit">
+          </td>
+        </tr>
+        
+      </table>
+    </form>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>

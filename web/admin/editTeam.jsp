@@ -39,7 +39,7 @@ String nextTournament = null;
 %>
 <c:if test="${empty param.addTeam}">
 <%
-  teamNumber = NumberFormat.getInstance().parse(request.getParameter("teamNumber")).intValue();
+  teamNumber = NumberFormat.getInstance().parse(request.getParameter("TeamNumber")).intValue();
         
   currentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
   prevTournament = Queries.getTeamPrevTournament(connection, teamNumber, currentTournament);

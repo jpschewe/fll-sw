@@ -1,5 +1,3 @@
-
-
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Utilities" %>
@@ -16,9 +14,6 @@
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final String lEditFlag = request.getParameter("EditFlag");
-
-Queries.ensureTournamentTeamsPopulated(application);
-final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
 
 final Connection connection = (Connection)application.getAttribute("connection");
 final Statement stmt = connection.createStatement();
@@ -92,18 +87,16 @@ function editFlagBoxClicked() {
       </table>
     
         <table>
-          
           <tr align='left' valign='top'>
-          
             <!-- pick team from a list -->            
             <td rowspan='3'>
               <br><br>
               <font face='arial' size='4'>Select Team From List:</font><br>
               <select size='20' name='TeamNumber'>
                             <%
-                            final Iterator iter = tournamentTeams.keySet().iterator();
+                            final Iterator iter = Queries.getTournamentTeams(connection).values().iterator();
                             while(iter.hasNext()) {
-                              final Team team = (Team)tournamentTeams.get(iter.next());
+                              final Team team = (Team)iter.next();
                               out.print("<option value=");
                               out.print(String.valueOf(team.getTeamNumber()));
                               out.print(">");
