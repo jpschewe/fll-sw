@@ -16,7 +16,7 @@
   <c:remove var="challengeDocument" />
   <c:redirect url='index.jsp'>
     <c:param name="message">
-      <i>Changed database to <c:out value="${database}"/></i><br>
+      Changed database to <c:out value="${database}"/>
     </c:param>
   </c:redirect>
 
@@ -35,7 +35,7 @@
     don't know what you're doing, LEAVE THIS PAGE!</b></font></p>
 
     <c:if test="${not empty param.message}">
-      <p><c:out value="${param.message}"/></p>
+      <p><i><c:out value="${param.message}"/></i></p>
     </c:if>
             
     <ul>
