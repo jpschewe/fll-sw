@@ -53,14 +53,14 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
 
     <form name='remote' action='remoteControl.jsp' method='post'>
       <c:if test='${displayPage == "welcome"}'  var='welcomePage'>
-        Welcome <input type='radio' name='remotePage' value='welcome' checked/><br/>
+        Welcome <input type='radio' name='remotePage' value='welcome' checked='true' /><br/>
       </c:if>
       <c:if test='${not welcomePage}'>
         Welcome <input type='radio' name='remotePage' value='welcome' /><br/>
       </c:if>
 
       <c:if test='${displayPage == "scoreboard"}'  var='scoreboardPage'>
-        Scoreboard <input type='radio' name='remotePage' value='scoreboard' checked/><br/>
+        Scoreboard <input type='radio' name='remotePage' value='scoreboard' checked='true' /><br/>
       </c:if>
       <c:if test='${not scoreboardPage}'>
         Scoreboard <input type='radio' name='remotePage' value='scoreboard' /><br/>
@@ -68,7 +68,7 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
 
       
       <c:if test='${displayPage == "playoffs"}'  var='playoffsPage'>
-        Playoffs <input type='radio' name='remotePage' value='playoffs' checked/>
+        Playoffs <input type='radio' name='remotePage' value='playoffs' checked='true' />
       </c:if>
       <c:if test='${not playoffsPage}'>
         Playoffs <input type='radio' name='remotePage' value='playoffs' />
