@@ -140,8 +140,13 @@ for(int i=1; i<=10; i++) {
       </li>
 
       <li><a href='remoteControl.jsp'>Remote control of display</a></li>
-      
     </ol>
+
+    <p>After the tournament</p>
+    <ul>
+      <li><a href="advanceTeams.jsp">Advance teams</a></li>
+    </ul>
+          
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>
