@@ -5,32 +5,38 @@
  */
 package fll.web.admin;
 
-import fll.Utilities;
 import fll.Queries;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import fll.Utilities;
 
 import java.io.IOException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import java.text.NumberFormat;
 import java.text.ParseException;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspWriter;
 
 import net.mtu.eggplant.util.CollectionUtils;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  * Java code used in tournaments.jsp
@@ -59,7 +65,7 @@ final public class Tournaments {
       numRows = 0;
     } else {
       try {
-        numRows = NumberFormat.getInstance().parse(numRowsStr).intValue();
+        numRows = Utilities.NUMBER_FORMAT_INSTANCE.parse(numRowsStr).intValue();
       } catch(final ParseException nfe) {
         numRows = 0;
       }
@@ -70,8 +76,15 @@ final public class Tournaments {
     
     out.println("<form action='tournaments.jsp' method='POST' name='tournaments'>");
 
+    final boolean verified;
     if(null != request.getParameter("commit") && verifyData(out, request)) {
-      commitData(request, response, connection, application);
+      verified = true;
+    } else {
+      verified = false;
+    }
+
+    if(verified) {
+      commitData(request, response, connection, application, out);
     } else {
       out.println("<p><b>Tournament name's must be unique and next tournament must refer to the name of another tournament listed.  Tournaments can be removed by erasing the name and location.</b></p>");
       
@@ -197,26 +210,58 @@ final public class Tournaments {
     throws IOException {
     final Map tournamentNames = CollectionUtils.createHashMap(20);
     boolean retval = true;
-    int row = 0;
-    String name = request.getParameter("name" + row);
-    while(null != name) {
-      if(tournamentNames.containsKey(name)) {
-        out.println("<p><font color='red'>Row " + (row+1) + " contains duplicate name " + name + "</font></p>");
-        retval = false;
-      } else {
-        tournamentNames.put(name, name);
-      }
 
-      row++;
-      name = request.getParameter("name" + row);
+    { //build up info of what tournaments exist
+      int row = 0;
+      String name = request.getParameter("name" + row);
+      String next = request.getParameter("next" + row);
+      while(null != name) {
+        if(!"".equals(name)) {
+          if(tournamentNames.containsKey(name)) {
+            out.println("<p><font color='red'>Row " + (row+1) + " contains duplicate name " + name + "</font></p>");
+            retval = false;
+          } else {
+            if("".equals(next)) {
+              next = null;
+            }
+            tournamentNames.put(name, next);
+          }
+        }
+        row++;
+        name = request.getParameter("name" + row);
+        next = request.getParameter("next" + row);
+      }
     }
 
-    for(int i=0; i<row; i++) {
-      final String next = request.getParameter("next" + i);
-      if(null != next && !"".equals(next) && !tournamentNames.containsKey(next)) {
-        out.println("<p><font color='red'>Unknown tournament referenced as the next tournament for " + request.getParameter("name" + i) + ", row " + (i+1) + "</font></p>");
+    //loop over tournamentNames to find circularities and unknown tournaments
+    final Set visited = new HashSet();
+    final Iterator tournIter = tournamentNames.entrySet().iterator();
+    while(tournIter.hasNext()) {
+      final Map.Entry entry = (Map.Entry)tournIter.next();
+      final String current = (String)entry.getKey();
+      String next = (String)entry.getValue();
+      if(null != next && !tournamentNames.containsKey(next)) {
+        out.println("<p><font color='red'>Unknown tournament referenced as the next tournament for " + current + ", next: " + next + "</font></p>");
         retval = false;
       }
+      
+      final Set nextList = new HashSet();
+      while(null != next) {
+        if(nextList.contains(next)) {
+          out.println("<p><font color='red'>Circularity found starting with tournament: " + current + " containing tournaments: " + nextList + "</font></p>");
+          retval = false;
+          //error, stop now so we don't get too deep
+          next = null;
+        } else if(visited.contains(next)) {
+          //already followed this path, short circuit
+          next = null;
+        } else {
+          nextList.add(next);
+          next = (String)tournamentNames.get(next);
+        }
+      }
+      visited.addAll(nextList);
+      visited.add(current);
     }
     
     return retval;
@@ -229,14 +274,15 @@ final public class Tournaments {
   private static void commitData(final HttpServletRequest request,
                                  final HttpServletResponse response,
                                  final Connection connection,
-                                 final ServletContext application)
+                                 final ServletContext application,
+                                 final JspWriter out)
     throws SQLException, IOException {
     PreparedStatement updatePrep = null;
     PreparedStatement insertPrep = null;
     PreparedStatement deletePrep = null;
     try {
       //walk request parameters and insert data into database
-      insertPrep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location, NextTournament) VALUES(?, ?)");
+      insertPrep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location, NextTournament) VALUES(?, ?, ?)");
       updatePrep = connection.prepareStatement("UPDATE Tournaments SET Name = ?, Location = ?, NextTournament = ? WHERE Name = ?");
       deletePrep = connection.prepareStatement("DELETE FROM Tournaments WHERE Name = ?");
         
@@ -249,22 +295,23 @@ final public class Tournaments {
         if("new".equals(key) && !"".equals(name)) {
           //new tournament
           insertPrep.setString(1, name);
-          insertPrep.setString(2, name);
+          insertPrep.setString(2, location);
           insertPrep.setString(3, next);
           insertPrep.executeUpdate();
+          //out.println("DEBUG Adding a new tournament " + name + "<br/>");
+        } else if("".equals(name) && !"new".equals(key)) {
+          //delete if no name
+          deletePrep.setString(1, key);
+          deletePrep.executeUpdate();
+          //out.println("DEBUG Deleting a tournament " + key + "<br/>");
         } else {
-          if("".equals(name)) {
-            //delete if no name
-            deletePrep.setString(1, name);
-            deletePrep.executeUpdate();
-          } else {
-            //update with new values
-            updatePrep.setString(1, name);
-            updatePrep.setString(2, location);
-            updatePrep.setString(3, next);
-            updatePrep.setString(4, name);
-            updatePrep.executeUpdate();
-          }
+          //update with new values
+          updatePrep.setString(1, name);
+          updatePrep.setString(2, location);
+          updatePrep.setString(3, next);
+          updatePrep.setString(4, key);
+          updatePrep.executeUpdate();
+          //out.println("DEBUG Updating a tournament " + key + " to " + name + "<br/>");
         }
         row++;
         key = request.getParameter("key" + row);
@@ -283,6 +330,7 @@ final public class Tournaments {
     Queries.populateTournamentTeams(application);
     
     //finally redirect to index.jsp
+    //out.println("DEBUG: normally you'd be redirected to <a href='index.jsp'>here</a>");
     response.sendRedirect(response.encodeRedirectURL("index.jsp"));
   }
 }
