@@ -235,7 +235,7 @@
   unpacked directory hierarchy under "/WEB-INF/classes".
 
 -->
-<target name="compile" depends="prepare,compile.classes"
+<target name="compile" depends="prepare,compile.classes,compile.jsp"
    description="Compile Java sources">
 </target>
 
@@ -262,6 +262,7 @@
 
 </target>
 
+<!-- not perfect, but will work -->
 <target name="compile.jsp" depends="compile.classes"
     description="Compile JSP sources">
     
@@ -275,11 +276,22 @@
       </classpath>
     </jspc> -->
 
+    <java classname="org.apache.jasper.JspC"
+	  fork="yes"
+	  failonerror="true"
+	  taskname="jspc"
+	  dir="${basedir}">
+      <classpath refid="compile.classpath"/>
+      <arg line="-d ${tmp.home}" />
+      <arg line="-die9" />
+      <arg line="-webapp ${build.home}" />
+    </java>
+
     <javac srcdir="${tmp.home}"
-              destdir="${tmp.home}"
-               debug="${compile.debug}"
-         deprecation="${compile.deprecation}"
-            optimize="${compile.optimize}">
+           destdir="${tmp.home}"
+           debug="${compile.debug}"
+           deprecation="${compile.deprecation}"
+           optimize="${compile.optimize}">
     <classpath>
       <pathelement location="${build.home}/WEB-INF/classes" />
       <path refid="compile.classpath" />

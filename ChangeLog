@@ -1,3 +1,15 @@
+2003-04-04  Jon Schewe  <jpschewe@mtu.net>
+
+	* docs/README.developer: Added information about JSTL
+
+	* web/scoreboard_800/main.jsp: Merged common pieces of code
+	between the 800x600 scoreboard and the 1024x768 scoreboard.  
+
+	* build.xml: (707867) Added a direct Java call to JspC using the
+	-webapp option.  This handles directories correctly, however
+	doesn't keep track of timestamps, so all jsp files get recompiled
+	each time.
+
 2003-04-02  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/scoreboard/allteams.jsp: Started working on using JSTL in
