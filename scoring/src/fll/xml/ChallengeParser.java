@@ -41,8 +41,8 @@ final public class ChallengeParser {
   public static void main(final String[] args) {
     try {
       final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-      //final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-region-2003.xml"));
-      final Document challengeDocument = ChallengeParser.parse(new java.io.FileInputStream("/home/jpschewe/projects/fll-sw/code/scoring/src/resources/challenge-region-2003.xml"));
+      final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-region-2003.xml"));
+      //final Document challengeDocument = ChallengeParser.parse(new java.io.FileInputStream("/home/jpschewe/projects/fll-sw/code/scoring/src/resources/challenge-region-2003.xml"));
       if(null == challengeDocument) {
         throw new RuntimeException("Error parsing challenge.xml");
       }

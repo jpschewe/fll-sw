@@ -24,7 +24,7 @@ final Connection connection = (Connection)application.getAttribute("connection")
 
 
     <%-- save to database --%>
-    <%-- <c:choose>
+    <c:choose>
       <c:when test="${not empty param.delete}">
       <%pageContext.setAttribute("sql", Queries.deletePerformanceScore(connection, request));%>
       </c:when>
@@ -34,11 +34,11 @@ final Connection connection = (Connection)application.getAttribute("connection")
       <c:otherwise>
       <%pageContext.setAttribute("sql", Queries.insertPerformanceScore(challengeDocument, connection, request));%>
       </c:otherwise>
-    </c:choose> --%>
+    </c:choose>
 
     <h1>Restrictions</h1>
     <x:forEach select="$challengeDocument/fll/Performance/restriction" var="restriction">
-      <x:out select="$restriction//@message" /><br />
+      restriction message: <x:out select="$restriction//@message" /><br />
     </x:forEach>
       
     <h1>Submitted Scores</h1>
