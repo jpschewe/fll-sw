@@ -1,5 +1,6 @@
 <%@ page errorPage="errorHandler.jsp" %>
-<%@ include file="WEB-INF/jspf/initializeApplicationVars.jspf" %>
+  
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="org.w3c.dom.Document" %>
   
@@ -50,6 +51,6 @@ if(null != request.getParameter("ScorePageText")) {
       <li><a href="credits/credits.jsp">Credits</a></li>
         
     </ul>
-<%@ include file="WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>
