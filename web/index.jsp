@@ -37,7 +37,9 @@ final Connection connection = (Connection)application.getAttribute("connection")
       <li><a href="report/index.jsp">Tournament reporting</a></li>
         
       <li><a href="admin/index.jsp">Administration</a></li>
-        
+
+      <li><a href='display.jsp'>Big Screen Display</a>  Follow this link on the computer that's used to display scores with the projector.</li>
+              
       <li>
         <form action='index.jsp' method='post'>
           Score page text: 

@@ -21,7 +21,7 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
       
       <br />
       <br />
-      <img src='<c:url value="/images/logo.gif"/>' />
+      <img width='95%' align='center' src='<c:url value="/images/logo.gif"/>' /><br />
 
       <font face='arial' size='3'>
         <b><c:out value="${ScorePageText}" /></b>

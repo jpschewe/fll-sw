@@ -1,5 +1,3 @@
-
-  
 <%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="org.w3c.dom.Document" %>
@@ -18,8 +16,7 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
         
       <h2><a name='setup'>Setup of tournament</a></h2>
 
-      <p>All links in this section are also found on the <a
-      href="admin/index.jsp">administration page</a></p>
+      <p>All links in this section are also found on the <a href="admin/index.jsp">administration page</a></p>
       
       <ol>
         
@@ -31,18 +28,15 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
         <li>If the team data doesn't look quite right you can <a
         href="admin/select_team.jsp">edit it</a></li>
           
-        <li><b>Not required for Minnesota.</b>If you're going to run more than one tournament, <a
-        href="admin/tournaments.jsp">edit the tournament list</a>.  Otherwise
+        <li><b>Not required for Minnesota.</b>If you're going to run more than one tournament, <a href="admin/tournaments.jsp">edit the tournament list</a>.  Otherwise
         teams will just be in the DUMMY tournament</a></li>
 
-        <li>Set the current tournament on the <a
-        href="admin/index.jsp">administration page</a></li>
+        <li>Set the current tournament on the <a href="admin/index.jsp">administration page</a></li>
         
         <li>Now you'll need to <a href="admin/judges.jsp">assign judges</a>
         for each of the subjective categories</li>
 
-        <li>Download the subjective score entry datafile from the <a
-        href="admin/index.jsp">administration page</a> and copy it to all
+        <li>Download the subjective score entry datafile from the <a href="admin/index.jsp">administration page</a> and copy it to all
         machines that will be used for entering subjective data.</li>
           
       </ol>
@@ -53,7 +47,10 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
         <li>Enter scores for the performance rounds on the <a
         href="scoreEntry/select_team.jsp">score entry</a> page</li>
 
-        <li>Display the <a href="scoreboard/index.jsp">scoreboard</a></li>
+        <li>On the display computer bring up the <a href='display.jsp'>Big Screen Display</a>
+              page.  This will display the welcome page, the scoreboard and
+              the playoff brackets as needed.  This page is controlled by
+              the <a href='admin/remoteControl.jsp'>Remote Control</a></li>
 
         <li>Use the subjective score entry application to enter subjective
         scores.  Note that when the application comes up there will be a row
@@ -66,9 +63,10 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
         scores are in the correct rows.  I hope to have something better next
         year.</li>
 
-        <li>The scoreboard and brackets have a place at the top for text to be
-        displayed, this can be changed from the <a href="index.jsp">main
-        page</a>.  It's labeled Score Page Text.</li>
+        <li>The scoreboard, welcome page and playoff brackets have a place
+        at the top for text to be displayed, this can be changed from the
+        <a href="index.jsp">main page</a>.  It's labeled Score Page
+        Text.</li>
 
         <li>If a team does not show up you should not enter any scores for
         that team in the subjective score application and enter all no show
@@ -79,10 +77,6 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
         the brackets.  You will need to enter a dummy score for the team that
         competes against the no show team and a no show for the team that
         isn't there for the brackets to properly advance the team.</li>
-          
-        <li>The playoff page it pretty easy to run, just pick the division and
-        go.  After each round has completed and you want to show the next
-        round, click the next round button at the bottom of the page</li>
           
         <li>It is suggested that you by hand keep track of the brackets, in
         addition to showing them on the computer.  This makes it easier for
