@@ -45,6 +45,9 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
   <c:if test="${not empty param.remotePage}">
     <c:set var='displayPage' value='${param.remotePage}' scope='application'/>
   </c:if>
+  <c:if test="${not empty param.remoteURL}">
+    <c:set var='displayURL' value='${param.remoteURL}' scope='application'/>
+  </c:if>
           
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Display Controller)</h1>
@@ -74,7 +77,14 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
         Playoffs <input type='radio' name='remotePage' value='playoffs' />
       </c:if>
       <b>WARNING: Do not select brackets until all seeding runs have been recorded!</b><br/>
-            
+
+      <c:if test='${displayPage == "special"}'  var='specialPage'>
+        Specify page relative to /fll-sw <input type='radio' name='remotePage' value='special' checked='true' /> <input type='text' name='remoteURL' value='<c:out value="${displayURL}"/>'><br/>
+      </c:if>
+      <c:if test='${not specialPage}'>
+        Specify page relative to /fll-sw <input type='radio' name='remotePage' value='special' /> <input type='text' name='remoteURL' value='<c:out value="${displayURL}"/>'><br/>
+      </c:if>
+          
       <input type='submit' value='Change Display Page'/>
     </form>
 
