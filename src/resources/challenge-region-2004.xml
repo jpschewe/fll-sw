@@ -78,7 +78,7 @@
     <tiebreaker>
       <test goal="ball_center" winner="high" />
       <test goal="play_ball" winner="high" />
-      <test goal="bonus" winner="low" />
+      <test goal="bonus" winner="high" />
       <test goal="serve_dinner" winner="high" />
       <test goal="feed_pets" winner="high" />
       <test goal="read_sign" winner="high" />
