@@ -1,3 +1,8 @@
+2004-01-02  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/playoff/adminbrackets.jsp: Removed unneeded <br> from
+	Bracket number display on all playoff brackets.
+
 2003-12-28  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/scoreEntry/scoreEntry.jsp: Now one can edit scores that are
