@@ -253,7 +253,7 @@ final public class SubjectiveTableModel extends AbstractTableModel implements So
       } else {
         Arrays.sort(_scoreElements, _inverseComparator);
       }
-      fireTableStructureChanged();
+      fireTableDataChanged();
     }
   }
   
