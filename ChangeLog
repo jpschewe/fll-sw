@@ -1,3 +1,11 @@
+2003-11-19  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/resources/challenge-region-2003.xml: Added new tiebreaker
+	and removed interference goal.
+
+	* src/fll/web/playoff/Playoff.java (pickWinner): Fixed pickWinner
+	to handle enumerated goals (845319).
+
 2003-11-12  Jon Schewe  <jpschewe@mtu.net>
 
 	* Release version 2.0.  This is the version of the software I plan

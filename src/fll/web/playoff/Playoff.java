@@ -9,11 +9,15 @@ import fll.Queries;
 import fll.Team;
 import fll.Utilities;
 
+import fll.xml.ChallengeParser;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import java.text.ParseException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -22,10 +26,7 @@ import java.util.Map;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import fll.xml.ChallengeParser;
-
-import java.text.ParseException;
+import org.w3c.dom.NodeList;
 
 /**
  * Add class comment here!
@@ -42,28 +43,16 @@ final public class Playoff {
   public static void main(final String[] args) {
     try {
       final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-      final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge.xml"));
-
-      if(null == challengeDocument) {
-        throw new RuntimeException("Error parsing challenge.xml");
-      }
-      final Connection connection = Utilities.createDBConnection("disk", "fll", "fll", "fll");
-//       final Element performanceElement = (Element)challengeDocument.getDocumentElement().getElementsByTagName("Performance").item(0);
-//       final Element tiebreakerElement = (Element)performanceElement.getElementsByTagName("tiebreaker").item(0);
-//       Node child = tiebreakerElement.getFirstChild();
-//       while(null != child) {
-//         if(child instanceof Element) {
-//           final Element element = (Element)child;
-//           if("test".equals(element.getTagName())) {
-//             System.out.println("goal: " + element.getAttribute("goal"));
-//             System.out.println("winner: " + element.getAttribute("winner"));
-//           }
-//         }
-//         child = child.getNextSibling();
-//       }
-      System.out.println(buildInitialBracketOrder(connection,
-                                                  "1",
-                                                  Queries.getTournamentTeams(connection)));
+      final Connection connection = Utilities.createDBConnection("netserver", "fll", "fll", "fll");
+      final Document challengeDocument = Queries.getChallengeDocument(connection);
+      final Team a = new Team();
+      a.setTeamNumber(1);
+      final Team b = new Team();
+      b.setTeamNumber(3);
+      final int runNumber = 3;
+      final Team winner = pickWinner(connection, challengeDocument, a, b, runNumber);
+      System.out.println("winner: " + winner.getTeamNumber());
+      
     } catch(final Exception e) {
       e.printStackTrace();
     }
@@ -168,7 +157,8 @@ final public class Playoff {
           } else {
             final Element performanceElement = (Element)document.getDocumentElement().getElementsByTagName("Performance").item(0);
             final Element tiebreakerElement = (Element)performanceElement.getElementsByTagName("tiebreaker").item(0);
-
+            final NodeList goals = performanceElement.getElementsByTagName("goal");
+              
             Statement stmtA = null;
             Statement stmtB = null;
             ResultSet rsA = null;
@@ -180,14 +170,49 @@ final public class Playoff {
               rsB = stmtB.executeQuery("SELECT * FROM Performance WHERE Tournament = '" + tournament + "' AND RunNumber = " + runNumber + " and TeamNumber = " + teamB.getTeamNumber());
               if(rsA.next() && rsB.next()) {
                 //walk test elements in tiebreaker to decide who wins
-              
                 Node child = tiebreakerElement.getFirstChild();
                 while(null != child) {
                   if(child instanceof Element) {
                     final Element element = (Element)child;
                     if("test".equals(element.getTagName())) {
-                      final int valueA = rsA.getInt(element.getAttribute("goal"));
-                      final int valueB = rsB.getInt(element.getAttribute("goal"));
+                      final String goalName = element.getAttribute("goal");
+                      final Element goalDefinition = findGoalDefinition(goals, goalName);
+                      
+                      final int multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalDefinition.getAttribute("multiplier")).intValue();
+                      final NodeList values = goalDefinition.getElementsByTagName("value");
+                      int valueA = -1;
+                      int valueB = -1;
+                      if(values.getLength() == 0) {
+                        valueA = rsA.getInt(goalName);
+                        valueB = rsB.getInt(goalName);
+                      } else {
+                        //enumerated
+                        final String enumA = rsA.getString(goalName);
+                        final String enumB = rsB.getString(goalName);
+                        boolean foundA = false;
+                        boolean foundB = false;
+                        for(int v=0; v<values.getLength() && (!foundA || !foundB); v++) {
+                          final Element value = (Element)values.item(v);
+                          final String enumValue = value.getAttribute("value");
+                          final int enumScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue() * multiplier;
+                          if(enumValue.equals(enumA)) {
+                            valueA = enumScore;
+                            foundA = true;
+                          }
+                          if(enumValue.equals(enumB)) {
+                            valueB = enumScore;
+                            foundB = true;
+                          }
+                        }
+                        if(!foundA || !foundB) {
+                          throw new RuntimeException("Error, enum value in database for goal: " + goalName + " is not a valid value."
+                                                     + " foundA: " + foundA
+                                                     + " foundB: " + foundB
+                                                     );
+                        }
+                        
+                      }
+                      
                       final String highlow = element.getAttribute("winner");
                       if(valueA > valueB) {
                         return ("high".equals(highlow) ? teamA : teamB);
@@ -381,6 +406,22 @@ final public class Playoff {
     }
   }
 
+  /**
+   * Find a goal element with the given name in the list of goals.
+   *
+   * @return the element, null on error
+   */
+  private static Element findGoalDefinition(final NodeList goals,
+                                            final String name) {
+    for(int i=0; i<goals.getLength(); i++) {
+      final Element e = (Element)goals.item(i);
+      if(name.equals(e.getAttribute("name"))) {
+        return e;
+      }
+    }
+    return null;
+  }
+  
   /**
    * Array of indicies used to determine who plays who in a single elimination
    * playoff bracket system

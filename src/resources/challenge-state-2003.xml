@@ -10,37 +10,23 @@
 	  multiplier="39" />
 
     <goal name="launch_canister"
-	  title="Launch The Sample Canister">
+	  title="MAV Launcher">
       <value score="39" title="Canister Launched" value="launched" />
-      <value score="27" title="Launcher Actived Empty" value="empty" />
-      <value score="0" title="Canister Not Launched" value="zero" />
+      <value score="27" title="Empty Launch" value="empty" />
+      <value score="0" title="No Launch" value="zero" />
     </goal>
 
-    <goal name="clear_solar"
-	  title="Clear The Solar Panel">
-      <value score="43" title="Dust Completely Cleared" value="completely" />
-      <value score="31" title="Dust Partially Cleared" value="partially" />
-      <value score="0" title="Dust Not Cleared" value="zero" />
-    </goal>
+    <goal name="boulders_in_circle"
+	  title="Boulders in Launch Circle"
+          max="4"
+	  multiplier="14"
+          initialValue="2" />
 
-    <goal name="habitation_modules"
-	  title="Connect The 180 And 90 Habitation Modules">
-      <value score="49" title="V-Shaped Module Connection" value="v" />
-      <value score="31" title="Two Module Connections In Line" value="two" />
-      <value score="27" title="One Module Connection" value="one" />
-      <value score="0" title="Zero Module Connections" value="zero" />
-    </goal>
-
-    <goal name="alliance_habitation"
-	  title="Complete The Alliance Habitation Module"
-	  multiplier="43" />
-
-    <goal name="free_rover"
-	  title="Free the Rover">
-      <value score="43" title="Rover In Base" value="base" />
-      <value score="31" title="Rover Off Dune + On Wheels" value="wheels" />
-      <value score="0" title="Rover Not Freed" value="zero" />
-    </goal>
+    <goal name="boulders_outside_circle"
+	  title="Boulders On Field outside Circle"
+          max="4"
+	  multiplier="8"
+          initialValue="2" />
 
     <goal name="ice_core"
 	  title="Move Ice Cores to Base">
@@ -50,21 +36,35 @@
       <value score="0" title="0 Ice Cores In Base" value="zero" />
     </goal>
 
-    <goal name="boulders_outside_circle"
-	  title="Boulders On The Field Outside The Launch Circle"
-          max="4"
-	  multiplier="8"
-          initialValue="2" />
-
-    <goal name="boulders_in_circle"
-	  title="Boulders In The Launch Circle"
-          max="4"
-	  multiplier="14"
-          initialValue="2" />
-
     <goal name="vehicle"
 	  title="All Terrain Vehicle Test"
 	  multiplier="39" />
+
+    <goal name="free_rover"
+	  title="Free the Rover">
+      <value score="43" title="In Base" value="base" />
+      <value score="31" title="Off Dune and on Wheels" value="wheels" />
+      <value score="0" title="Not Freed Successfully" value="zero" />
+    </goal>
+
+    <goal name="alliance_habitation"
+	  title="Alliance Habitat Module"
+	  multiplier="43" />
+
+    <goal name="habitation_modules"
+	  title="180/90 Degree Habitat Modules">
+      <value score="49" title="V-Shape" value="v" />
+      <value score="31" title="Two Modules Connect" value="two" />
+      <value score="27" title="One Module Connect" value="one" />
+      <value score="0" title="Zero" value="zero" />
+    </goal>
+
+    <goal name="clear_solar"
+	  title="Clear the Solar Panel">
+      <value score="43" title="Complete" value="completely" />
+      <value score="31" title="Partial" value="partially" />
+      <value score="0" title="None" value="zero" />
+    </goal>
 
     <restriction lowerBound="0"
 		 upperBound="4"
@@ -74,12 +74,15 @@
       <term goal="boulders_outside_circle" />
     </restriction>
 
-    <goal name="Interference"
-	  title="Did the team deliberately interfere with the other team?"
-	  multiplier="0" />
-
     <tiebreaker>
-      <test goal="Interference" winner="low" />
+      <test goal="ice_core" winner="high" />
+      <test goal="free_rover" winner="high" />
+      <test goal="habitation_modules" winner="high" />
+      <test goal="clear_solar" winner="high" />
+      <test goal="launch_canister" winner="high" />
+      <test goal="exit_base" winner="high" />
+      <test goal="vehicle" winner="high" />
+      <test goal="boulders_in_circle" winner="high" />
     </tiebreaker>
 
   </Performance>

@@ -1265,4 +1265,5 @@ public class Queries {
       throw new RuntimeException("Internal error, cannot choose color");
     }
   }
+
 }
