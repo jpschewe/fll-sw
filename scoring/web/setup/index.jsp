@@ -1,7 +1,4 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
-  
 <%@ taglib uri="/WEB-INF/tld/taglib62.tld" prefix="up" %>
-
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
   
 <%@ page import="fll.xml.GenerateDB" %>

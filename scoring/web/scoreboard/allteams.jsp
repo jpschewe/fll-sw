@@ -1,5 +1,3 @@
-
-
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
   
 <%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
@@ -14,16 +12,6 @@
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
 final String currentTournament = Queries.getCurrentTournament(connection);
-final Statement stmt = connection.createStatement();
-final String countSQL = "SELECT COUNT(*)"
-  + " FROM Teams,Performance"
-  + " WHERE Performance.Tournament = '" + currentTournament + "'"
-  + " AND Teams.TeamNumber = Performance.TeamNumber"
-  + " ORDER BY Teams.Division, Teams.TeamNumber, Performance.RunNumber";
-ResultSet rs = stmt.executeQuery(countSQL);
-rs.next();
-final int numRecords = rs.getInt(1);
-Utilities.closeResultSet(rs);
 
 final String sql = "SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, Teams.Division, Performance.Tournament, Performance.RunNumber, Performance.Bye, Performance.NoShow, Performance.ComputedTotal"
   + " FROM Teams,Performance"
@@ -47,54 +35,42 @@ rs = stmt.executeQuery(sql);
 	TABLE.B {background-color:#0000d0 }
 </style>
 
-<script language="JavaScript">
-function myHeight() {
-  return (document.all.dummy.offsetHeight-300);
+<!-- stuff for automatic scrolling -->
+<script type="text/javascript">
+var scrollTimer;
+var scrollAmount = 2;    // scroll by 100 pixels each time
+var documentYposition = 0;
+          
+//http://www.evolt.org/article/document_body_doctype_switching_and_more/17/30655/index.html
+function getScrollPosition() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  } else if (document.documentElement && document.documentElement.scrollTop) {
+    return document.documentElement.scrollTop
+  } else if (document.body) {
+    return document.body.scrollTop
+  }
 }
 
 function myScroll() {
   documentYposition += scrollAmount;
-  window.scroll(0,documentYposition);
-  if (documentYposition > documentLength) {
-    window.clearInterval(IntervalRef);
+  window.scrollBy(0, scrollAmount);
+  if(getScrollPosition()+300 < documentYposition) { //wait 300 pixels until we refresh
+    window.clearInterval(scrollTimer);
+    window.scroll(0, 0); //scroll back to top and then refresh
     location.href='<c:out value="${thisURL}" />'
   }
 }
 
 function start() {
 <c:if test="${not empty param.scroll}">
-  documentLength = myHeight();
-  //myScroll();
-  <c:choose>
-    <c:when test="numRecords >= 4">
-  IntervalRef = window.setInterval('myScroll()',iInterval);
-    </c:when>
-    <c:otherwise>
-  window.setTimeout('location.href="<c:out value="${thisURL}" />"',30000);
-    </c:otherwise>
-  </c:choose>
+  scrollTimer = window.setInterval('myScroll()',30);
 </c:if>
 }
-
-<c:choose>
-  <c:when test="numRecords >= 4">
-var iInterval = 30;
-  </c:when>
-  <c:otherwise>
-var iInterval = 10000;
-  </c:otherwise>
-</c:choose>
-var IntervalRef;
-var documentLength;
-var scrollAmount = 2;    // scroll by 100 pixels each time
-var documentYposition = 0;
 </script>
-
-
 </head>
 
 <body bgcolor='#000080' onload='start()'>
-<div id="dummy" style="position:absolute">
 <br><br><br><br><br><br><br><br>
 
 <c:set var="colorStr" value="A" />
@@ -105,7 +81,7 @@ if(rs.next()) {
   while(!done) {
 %>
   <table border='0' cellpadding='0' cellspacing='0' width='99%' class='<c:out value="${colorStr}" />'>
-    <tr><td colspan='2'><img src='blank.gif' height='15' width='1'></td></tr>
+    <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' height='15' width='1'></td></tr>
     <tr align='left'>
 <%
     String divisionStr = rs.getString("Division");
@@ -141,9 +117,9 @@ if(rs.next()) {
 
     <table border='0' cellpadding='1' cellspacing='0'>
       <tr align='center'>
-        <td><img src='../images/blank.gif' height='1' width='60'></td>
+        <td><img src='<c:url value="/images/blank.gif"/>' height='1' width='60'></td>
         <td><font size='4'>Run #</font></td>
-        <td><img src='../images/blank.gif' width='20' height='1'></td>
+        <td><img src='<c:url value="/images/blank.gif"/>' width='20' height='1'></td>
           <td><font size='4'>Score</font></td>
         </tr>
         <%
@@ -151,9 +127,9 @@ if(rs.next()) {
         do {
         %>
         <tr align='right'>
-          <td><img src='blank.gif' height='1' width='60'></td>
+          <td><img src='<c:url value="/images/blank.gif"/>' height='1' width='60'></td>
           <td><font size='4'><%=rs.getInt("RunNumber")%></font></td>
-          <td><img src='blank.gif' width='20' height='1'></td>
+          <td><img src='<c:url value="/images/blank.gif"/>' width='20' height='1'></td>
           <td><font size='4'>
           <%if(rs.getBoolean("NoShow")) {%>
             No Show
@@ -172,7 +148,7 @@ if(rs.next()) {
       
     </td>
   </tr>
-  <tr><td colspan='2'><img src='../images/blank.gif' width='1' height='15'></td></tr>
+  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
 </table>
 
 <c:choose>
