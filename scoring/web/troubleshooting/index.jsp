@@ -14,11 +14,11 @@ if(null != request.getParameter("initializeTournamentTeams")) {
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument//@title"/> (Troubleshooting)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Troubleshooting)</title>
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument//@title"/> (Troubleshooting)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Troubleshooting)</h1>
 
     <p>Here's where you'll find various errors you might get and what to do
     about them.  First to remember is that just because you get a nasty error

@@ -12,11 +12,11 @@ pageContext.setAttribute("tournamentNames", Queries.getTournamentNames(connectio
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument//@title"/> (Tournament Initialization)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Tournament Initialization)</title>
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument//@title"/> (Tournament Initialization)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Tournament Initialization)</h1>
 
     <p>This page allows you to change the tournament for a group of teams
     based on the region that they're in.  Any previous tournament

@@ -9,7 +9,7 @@ if(null == divisionStr) {
 
 <html>
   <head>
-    <title><x:out select="$challengeDocument//@title"/> (Playoff Brackets) Division: <%=divisionStr%></title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Playoff Brackets) Division: <%=divisionStr%></title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
   <frameset rows="80,*" border='1' framespacing='0'>

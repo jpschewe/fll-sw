@@ -2,7 +2,7 @@
   
 <html>
   <head>
-    <title><x:out select="$challengeDocument//@title"/> (Playoff Brackets)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Playoff Brackets)</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
   <frameset rows="80,*" border='1' framespacing='0'>

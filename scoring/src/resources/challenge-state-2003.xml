@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fll xmlns="http://www.hightechkids.org"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://www.hightechkids.org fll.xsd"
-     title="FLL 2002 Challenge: City Sights" >
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="fll.xsd"
+     title="FLL 2003 Challenge: Mission Mars" >
 
   <Performance weight="0.25">
 
@@ -12,21 +11,24 @@
 
     <goal name="launch_canister"
 	  title="Launch the Sample Canister">
-      <value score="39">Canister Launched</value>
-      <value score="27">Launcher Actived Empty</value>
+      <value score="39" title="Canister Launched" value="launched" />
+      <value score="27" title="Launcher Actived Empty" value="empty" />
+      <value score="0" title="Canister Not Launched" value="zero" />
     </goal>
 
     <goal name="clear_solar"
 	  title="Clear the Solar Panel">
-      <value score="43">Dust Completly Cleared</value>
-      <value score="31">Dust Partially Cleared</value>
+      <value score="43" title="Dust Completly Cleared" value="completly" />
+      <value score="31" title="Dust Partially Cleared" value="partially" />
+      <value score="0" title="Dust Not Cleared" value="zero" />
     </goal>
 
     <goal name="habitation_modules"
 	  title="Connect the 180 and 90 Habitation Modules">
-      <value score="49">V-Shaped Module COnnection</value>
-      <value score="31">Two Module Connections In Line</value>
-      <value score="27">One Module Connection</value>
+      <value score="49" title="V-Shaped Module Connection" value="v" />
+      <value score="31" title="Two Module Connections In Line" value="two" />
+      <value score="27" title="One Module Connection" value="one" />
+      <value score="0" title="Zero Module Connections" value="zero" />
     </goal>
 
     <goal name="alliance_habitation"
@@ -35,38 +37,49 @@
 
     <goal name="free_rover"
 	  title="Free the Rover">
-      <value score="43">Rover In Base</value>
-      <value score="31">Rover Off Dune + On Wheels</value>
+      <value score="43" title="Rover In Base" value="base" />
+      <value score="31" title="Rover Off Dune + On Wheels" value="wheels" />
+      <value score="0" title="Rover not Freed" value="zero" />
     </goal>
 
     <goal name="ice_core"
 	  title="Move Ice Cores to Base">
-      <value score="49">3 Ice Cores in Base</value>
-      <value score="31">2 Ice Cores in Base</value>
-      <value score="27">1 Ice Cores in Base</value>
+      <value score="49" title="3 Ice Cores in Base" value="three" />
+      <value score="31" title="2 Ice Cores in Base" value="two" />
+      <value score="27" title="1 Ice Core in Base" value="one" />
+      <value score="0" title="0 Ice Cores in Base" value="zero" />
     </goal>
-
-    <goal name="boulders_in_circle"
-	  title="Boulders In The Launch Circle"
-          max="4"
-	  multiplier="14" />
 
     <goal name="boulders_outside_circle"
 	  title="Boulders On the Field Outside The Launch Circle"
           max="4"
-	  multiplier="8" />
+	  multiplier="8"
+          initialValue="2" />
+
+    <goal name="boulders_in_circle"
+	  title="Boulders In The Launch Circle"
+          max="4"
+	  multiplier="14"
+          initialValue="2" />
 
     <goal name="vehicle"
 	  title="All Terrain Vehicle Test"
 	  multiplier="39" />
 
     <restriction lowerBound="0"
-		 upperBound="4">
+		 upperBound="4"
+                 message="There are a maximum of 4 boulders on the table"
+                 >
       <term goal="boulders_in_circle" />
       <term goal="boulders_outside_circle" />
     </restriction>
 
+    <goal name="Interference"
+	  title="Did the team deliberately interfere with the other team?"
+	  multiplier="0" />
+
     <tiebreaker>
+      <test goal="Interference" winner="low" />
     </tiebreaker>
 
   </Performance>
@@ -168,9 +181,9 @@
                       >
     <goal name="Language"
           title="Language used">
-      <value>RIS</value>
-      <value>RoboLab</value>
-      <value>Unknown</value>
+      <value title="RIS"/>
+      <value title="RoboLab"/>
+      <value title="Unknown"/>
     </goal>
     <goal name="UseOfLanguage"
           title="Use of language"

@@ -10,16 +10,14 @@ import java.text.ParseException;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
+import net.mtu.eggplant.util.gui.SortableTableModel;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import net.mtu.eggplant.util.gui.SortableTableModel;
 
 /**
  * TableModel for entering subjective scores.
@@ -144,20 +142,16 @@ final public class SubjectiveTableModel extends AbstractTableModel implements So
     if(goalDescription.hasChildNodes()) {
       //enumerated
       boolean found = false;
-      Node posValue = goalDescription.getFirstChild();
-      while(null != posValue && !found) {
-        if("value".equals(posValue.getNodeName())) {
-          if(posValue.getFirstChild().getNodeValue().equals(value)) {
-            //found it
-            element.setAttribute(goalDescription.getAttribute("name"), value.toString());
-            if(setModified) {
-              element.setAttribute("modified", Boolean.TRUE.toString());
-            }
-            found = true;
+      final NodeList posValues = goalDescription.getElementsByTagName("value");
+      for(int v=0; v<posValues.getLength() && !found; v++) {
+        final Element posValue = (Element)posValues.item(v);
+        if(posValue.getAttribute("title").equals(value)) {
+          //found it
+          element.setAttribute(goalDescription.getAttribute("name"), value.toString());
+          if(setModified) {
+            element.setAttribute("modified", Boolean.TRUE.toString());
           }
-        }
-        if(!found) {
-          posValue = posValue.getNextSibling();
+          found = true;
         }
       }
       if(!found) {

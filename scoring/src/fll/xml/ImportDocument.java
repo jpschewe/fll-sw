@@ -31,7 +31,7 @@ public class ImportDocument {
   
   public static void main(final String[] args) {
     final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-    final Document document = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge.xml"));
+    final Document document = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-region-2003.xml"));
     if(null == document) {
       throw new RuntimeException("Error parsing challenge.xml");
     }

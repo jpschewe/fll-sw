@@ -4,14 +4,14 @@
   <head>
     <meta http-equiv='refresh' content='90' />
     
-    <title><x:out select="$challengeDocument//@title"/></title>
+    <title><x:out select="$challengeDocument/fll/@title"/></title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
   <body>
 
     <center>
-      <h1><x:out select="$challengeDocument//@title"/></h1>
+      <h1><x:out select="$challengeDocument/fll/@title"/></h1>
       
       <br />
       <br />

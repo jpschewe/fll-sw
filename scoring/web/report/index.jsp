@@ -23,11 +23,11 @@ Utilities.closeStatement(stmt);
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument//@title"/> (Reporting)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Reporting)</title>
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument//@title"/> (Reporting)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Reporting)</h1>
 
     <ol>
       <li><a href="summarizePhase1.jsp">Compute summarized scores</a>.  This

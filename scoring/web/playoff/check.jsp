@@ -19,11 +19,11 @@ final Connection connection = (Connection)application.getAttribute("connection")
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument//@title"/> (Team Playoff check)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Team Playoff check)</title>
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument//@title"/> (Team Playoff check)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Team Playoff check)</h1>
       
       <p>Teams with less runs than seeding rounds.  This will not show teams
       that have no runs.

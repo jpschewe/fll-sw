@@ -31,11 +31,11 @@ pageContext.setAttribute("regions", Queries.getRegions(connection));
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument//@title"/> (Verify Tournament Initialization)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Verify Tournament Initialization)</title>
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument//@title"/> (Verify Tournament Initialization)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Verify Tournament Initialization)</h1>
 
     <p>The following teams will have their tournament changed if you continue:</p>
 

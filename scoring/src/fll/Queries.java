@@ -232,7 +232,7 @@ public class Queries {
     values.append(teamNumber);
 
     columns.append(", Tournament");
-    values.append(", \"" + currentTournament + "\"");
+    values.append(", '" + currentTournament + "'");
     
     columns.append(", ComputedTotal");
     values.append(", " + request.getParameter("totalScore"));
@@ -265,7 +265,12 @@ public class Queries {
         throw new RuntimeException("Missing parameter: " + name);
       }
       columns.append(", " + name);
-      values.append(", " + value);
+      if(element.hasChildNodes()) {
+        //enumerated
+        values.append(", '" + value + "'");
+      } else {
+        values.append(", " + value);
+      }
     }
     
     final String sql = "INSERT INTO Performance"
@@ -738,7 +743,6 @@ public class Queries {
     
       final Element rootElement = document.getDocumentElement();
       final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
-      final int minimumPerformanceScore = NumberFormat.getInstance().parse(performanceElement.getAttribute("minimumScore")).intValue();
       final NodeList goals = performanceElement.getElementsByTagName("goal");
       boolean first = true;
       for(int i=0; i<goals.getLength(); i++) {
@@ -759,6 +763,7 @@ public class Queries {
 
       stmt.executeUpdate(sql.toString());
 
+      final int minimumPerformanceScore = NumberFormat.getInstance().parse(performanceElement.getAttribute("minimumScore")).intValue();
       stmt.executeUpdate("UPDATE Performance SET ComputedTotal = " + minimumPerformanceScore + " WHERE ComputedTotal < " + minimumPerformanceScore);
       
       //Subjective ---

@@ -19,12 +19,12 @@ if(null == errorMessage || "".equals(errorMessage)) {
 %>
 <html>
   <head>
-    <title><x:out select="$challengeDocument//@title"/> (Team Column Selection)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Team Column Selection)</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument//@title"/> (Team Column Selection)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Team Column Selection)</h1>
 
     <p>Do not use the forward and back buttons!  Use the supplied links/buttons.</p>
 

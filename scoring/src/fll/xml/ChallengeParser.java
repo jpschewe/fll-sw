@@ -41,7 +41,8 @@ final public class ChallengeParser {
   public static void main(final String[] args) {
     try {
       final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-      final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge.xml"));
+      //final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-region-2003.xml"));
+      final Document challengeDocument = ChallengeParser.parse(new java.io.FileInputStream("/home/jpschewe/projects/fll-sw/code/scoring/src/resources/challenge-region-2003.xml"));
       if(null == challengeDocument) {
         throw new RuntimeException("Error parsing challenge.xml");
       }
@@ -110,8 +111,7 @@ final public class ChallengeParser {
 
       final Document document = parser.parse(stream);
       final Element rootElement = document.getDocumentElement();
-      if(!"fll".equals(rootElement.getTagName())
-         || !FLL_NAMESPACE.equals(rootElement.getNamespaceURI())) {
+      if(!"fll".equals(rootElement.getTagName())) {
         throw new RuntimeException("Not a fll challenge description file");
       }
       return document;

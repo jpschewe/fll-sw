@@ -84,11 +84,11 @@ function confirmChangeTournament() {
 }
         
 </script>  
-    <title><x:out select="$challengeDocument//@title"/> (Edit Team)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Edit Team)</title>
   </head>
 
   <bodyonload='init()'>
-    <h1><x:out select="$challengeDocument//@title"/> (Edit Team)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Edit Team)</h1>
 
     <form action="commitTeam.jsp" method="post" name="editTeam">
     <c:if test="${not empty param.addTeam}">

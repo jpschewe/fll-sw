@@ -5,17 +5,19 @@
  */
 package fll.web.scoreEntry;
 
+import fll.Utilities;
+
 import java.io.IOException;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.NumberFormat;
+
 import java.text.ParseException;
+
 import javax.servlet.ServletContext;
 import javax.servlet.jsp.JspWriter;
-
-import fll.xml.ChallengeParser;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -54,9 +56,14 @@ final public class ScoreEntry {
       final String max = element.getAttribute("max");
       
       writer.println("  <!-- " + name + " -->");
-      writer.println("  if(gbl_" + name + " < " + min + " || gbl_" + name + " > " + max + ") {");
-      writer.println("    return false;");
-      writer.println("  }");
+      if(element.hasChildNodes()) {
+        //enumerated
+        writer.println("  <!-- nothing to check -->");
+      } else {
+        writer.println("  if(gbl_" + name + " < " + min + " || gbl_" + name + " > " + max + ") {");
+        writer.println("    return false;");
+        writer.println("  }");
+      }
       writer.println();
     }
 
@@ -115,7 +122,7 @@ final public class ScoreEntry {
       writer.println("<!-- " + name + " -->");
       writer.println("var gbl_" + name + ";");
 
-      if("0".equals(min) && "1".equals(max)) {
+      if(element.hasChildNodes() || ("0".equals(min) && "1".equals(max))) {
         writer.println("function set" + name + "(newValue) {");
         writer.println("  var temp = gbl_" + name + ";");
         writer.println("  gbl_" + name + " = newValue;");
@@ -141,7 +148,6 @@ final public class ScoreEntry {
 
   /**
    * Generate the body of the refresh function
-   *
    */
   public static void generateRefreshBody(final JspWriter writer,
                                          final Document document) throws ParseException, IOException {
@@ -160,9 +166,24 @@ final public class ScoreEntry {
       writer.println("score += score_" + name + ";");
 
       //set the score form element
-      writer.println("document.scoreEntry.score_" + name + ".value = score_" + name);
+      writer.println("document.scoreEntry.score_" + name + ".value = score_" + name + ";");
+
+      if(element.hasChildNodes()) {
+        //enumerated
+        final NodeList posValues = element.getElementsByTagName("value");
+        for(int v=0; v<posValues.getLength(); v++) {
+          final Element value = (Element)posValues.item(v);
         
-      if("0".equals(min) && "1".equals(max)) {
+          final int valueScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue();
+          if(v > 0) {
+            writer.print("} else ");
+          }
+          
+          writer.println("if(gbl_" + name + " == " + valueScore + ") {");
+          writer.println("  document.scoreEntry." + name + "[" + v + "].checked = true;");
+        }
+        writer.println("}");
+      } else if("0".equals(min) && "1".equals(max)) {
         //set the radio button to match the gbl variable
         writer.println("if(gbl_" + name + " == 0) {");
         writer.println("  document.scoreEntry." + name + "[1].checked = true");
@@ -214,8 +235,8 @@ final public class ScoreEntry {
       final String name = element.getAttribute("name");
       final String title = element.getAttribute("title");
       try {
-        final int min = NumberFormat.getInstance().parse(element.getAttribute("min")).intValue();
-        final int max = NumberFormat.getInstance().parse(element.getAttribute("max")).intValue();
+        final int min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).intValue();
+        final int max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).intValue();
         final int range = max - min;
         
         writer.println("<!-- " + name + " -->");
@@ -224,46 +245,54 @@ final public class ScoreEntry {
         writer.println("    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='3'><b>" + title + ":<b></font>");
         writer.println("  </td>");
 
-        //start inc/dec buttons
-        writer.println("  <td>");
-        writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='150'>");
-        writer.println("      <tr align='center'>");
-
-        if(0 == min && 1 == max) {
-          generateYesNoButtons(name, writer);
+        
+        if(element.hasChildNodes()) {
+          //enumerated
+          writer.println("  <td colspan='2'>");
+          generateEnumeratedGoalButtons(element, name, writer);
+          writer.println("  </td>");
         } else {
-          if(range >= 10) {
-            generateIncDecButton(name, 5, writer);
-          } else if(range >= 5) {
-            generateIncDecButton(name, 3, writer);
-          }
+          writer.println("  <td>");
+          //start inc/dec buttons
+          writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='150'>");
+          writer.println("      <tr align='center'>");
+
+          if(0 == min && 1 == max) {
+            generateYesNoButtons(name, writer);
+          } else {
+            if(range >= 10) {
+              generateIncDecButton(name, 5, writer);
+            } else if(range >= 5) {
+              generateIncDecButton(name, 3, writer);
+            }
           
-          //+1
-          generateIncDecButton(name, 1, writer);
+            //+1
+            generateIncDecButton(name, 1, writer);
 
-          //-1
-          generateIncDecButton(name, -1, writer);
+            //-1
+            generateIncDecButton(name, -1, writer);
 
-          if(range >= 10) {
-            generateIncDecButton(name, -5, writer);
-          } else if(range >= 5) {
-            generateIncDecButton(name, -3, writer);
+            if(range >= 10) {
+              generateIncDecButton(name, -5, writer);
+            } else if(range >= 5) {
+              generateIncDecButton(name, -3, writer);
+            }
           }
-        }
 
-        writer.println("       </tr>");
-        writer.println("    </table>");
-        writer.println("  </td>");
-        //end inc/dec buttons
+          writer.println("       </tr>");
+          writer.println("    </table>");
+          writer.println("  </td>");
+          //end inc/dec buttons
 
-        //count
-        writer.println("  <td align='right'>");
-        if(0 == min && 1 == max) {
-          writer.println("    <input type='text' name='" + name + "_radioValue' size='3' align='right' readonly>");
-        } else {
-          writer.println("    <input type='text' name='" + name + "' size='3' align='right' readonly>");
+          //count
+          writer.println("  <td align='right'>");
+          if(0 == min && 1 == max) {
+            writer.println("    <input type='text' name='" + name + "_radioValue' size='3' align='right' readonly>");
+          } else {
+            writer.println("    <input type='text' name='" + name + "' size='3' align='right' readonly>");
+          }
+          writer.println("  </td>");
         }
-        writer.println("  </td>");
 
         //score
         writer.println("  <td align='right'>");
@@ -301,10 +330,11 @@ final public class ScoreEntry {
                                            final JspWriter writer) throws IOException {
     //generate radio buttons with calls to set<name>
     writer.println("        <td>");
-    writer.println("          Yes");
     writer.println("          <input type='radio' name='" + name + "' value='1' onclick='set" + name + "(1)'>");
-    writer.println("          No");
+    writer.println("          Yes");
+    writer.println("          &nbsp;&nbsp;");
     writer.println("          <input type='radio' name='" + name + "' value='0' onclick='set" + name + "(0)'>");
+    writer.println("          No");
     writer.println("        </td>");
   }
 
@@ -345,5 +375,29 @@ final public class ScoreEntry {
       stmt.close();
     }
   }
-  
+
+  private static void generateEnumeratedGoalButtons(final Element goal,
+                                                    final String goalName,
+                                                    final JspWriter writer)
+    throws IOException, ParseException {
+    writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='100%'>");
+    
+    final NodeList posValues = goal.getElementsByTagName("value");
+    for(int v=0; v<posValues.getLength(); v++) {
+      final Element value = (Element)posValues.item(v);
+      final String valueTitle = value.getAttribute("title");
+      final String valueValue = value.getAttribute("value");
+      final int valueScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue();
+      writer.println("      <tr>");
+      writer.println("        <td>");
+      writer.println("          <input type='radio' name='" + goalName + "' value='" + valueValue + "' onclick='set" + goalName + "(" + valueScore + ")'>");
+      writer.println("        </td>");
+      writer.println("        <td>");
+      writer.println("          " + valueTitle);
+      writer.println("        </td>");
+      writer.println("      </tr>");
+    }
+
+    writer.println("        </table>");
+  }
 }

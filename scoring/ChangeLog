@@ -1,3 +1,15 @@
+2003-09-29  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/web/scoreEntry/ScoreEntry.java: Added support for
+	enumerated goals (707877).  Just need to fix the score computation
+	now.
+
+	* src/resources/fll.xsd: Removed namespace declaration from schema
+	since JSTL 1.0 doesn't know how to properly handle namespaces.
+	This also caused the web pages to be updated to properly reference
+	the challenge title, I was just getting lucky that it was the
+	first title attribute in the document.
+
 2003-09-20  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/web/report/FinalComputedScores.java (generateReport):

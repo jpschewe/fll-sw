@@ -23,11 +23,11 @@
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument//@title"/> (Developer Commands)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Developer Commands)</title>
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument//@title"/> (Developer Commands)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Developer Commands)</h1>
 
     <p><font color='red'><b>This page is indended for developers only.  If you
     don't know what you're doing, LEAVE THIS PAGE!</b></font></p>

@@ -34,7 +34,7 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
       
 <html>
   <head>
-    <title><x:out select="$challengeDocument//@title"/> (Display Controller)</title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Display Controller)</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
@@ -47,7 +47,7 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
   </c:if>
           
   <body>
-    <h1><x:out select="$challengeDocument//@title"/> (Display Controller)</h1>
+    <h1><x:out select="$challengeDocument/fll/@title"/> (Display Controller)</h1>
 
     <p>This page is used to control what page is currently visible on the display screen</p>
 

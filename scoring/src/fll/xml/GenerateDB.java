@@ -8,19 +8,21 @@ package fll.xml;
 import fll.Queries;
 import fll.Utilities;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.apache.log4j.Logger;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
 
 /**
  * Generate tables for fll tournament from XML document
@@ -28,7 +30,9 @@ import java.io.UnsupportedEncodingException;
  * @version $Revision$
  */
 final public class GenerateDB {
-   
+
+  private static final Logger LOG = Logger.getLogger(GenerateDB.class);
+  
   /**
    * Generate a new database
    *
@@ -41,7 +45,7 @@ final public class GenerateDB {
         System.exit(1);
       } else {
         final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-        final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge.xml"));
+        final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-region-2003.xml"));
         generateDB(challengeDocument, args[0], args[1], args[2], "fll");
 
         final Connection connection = Utilities.createDBConnection(args[0], "fll", "fll", "fll");
@@ -147,7 +151,7 @@ final public class GenerateDB {
                          + "  Organization varchar(255),"
                          + "  Division varchar(32) NOT NULL default '1',"
                          + "  NumMedals integer,"
-                         + "  Region varchar(16) NOT NULL default 'DUMMY'"
+                         + "  Region varchar(16) NOT NULL default 'DUMMY',"
                          + "  PRIMARY KEY  (TeamNumber)"
                          + ")");
 
@@ -277,25 +281,23 @@ final public class GenerateDB {
       //enumerated
       definition += " ENUM(";
 
-      boolean first = true;
-      Node posValue = goalElement.getFirstChild();
-      while(null != posValue) {
-        if("value".equals(posValue.getNodeName())) {
-          if(first) {
-            first = false;
-          } else {
-            definition += ", ";
-          }
-          
-          final String enumValue = posValue.getFirstChild().getNodeValue();
-          definition += "'" + enumValue + "'";
+      final NodeList posValues = goalElement.getElementsByTagName("value");
+      for(int v=0; v<posValues.getLength(); v++) {
+        final Element value = (Element)posValues.item(v);
+        final String valueName = value.getAttribute("value");
+        if(v > 0) {
+          definition += ", ";
         }
-        posValue = posValue.getNextSibling();
+          
+        definition += "'" + valueName + "'";
       }
       definition += ")";
     } else {
       definition += " INTEGER";
     }
+    
+    LOG.debug("GoalColumnDefinition: " + definition);
+    
     return definition;
   }
 
