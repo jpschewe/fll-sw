@@ -4,13 +4,14 @@
 
 <%@ page import="java.sql.Connection" %>
   
+<!-- query string <c:out value="${request.queryString}"/> -->
+  
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
 
 if(null == session.getAttribute("columnSelectOptions")) {
   throw new RuntimeException("Error columnSelectOptions not set.  Please start back at administration page and go forward.");
 }
-
 final String errorMessage = (String)session.getAttribute("errorMessage");
 if(null == errorMessage || "".equals(errorMessage)) {
   UploadTeams.copyFilteredTeams(connection, request);

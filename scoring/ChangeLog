@@ -1,3 +1,9 @@
+2003-09-08  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/admin/filterTeams.jsp: Remvoed javascript from submit button
+	in favor of using standard form parameters and server side
+	checking (707895).
+
 2003-09-07  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/scoreboard/top10.jsp: Now the top10 page uses session

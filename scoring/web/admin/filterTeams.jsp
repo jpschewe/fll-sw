@@ -3,6 +3,18 @@
 <%@ page import="fll.web.admin.UploadTeams" %>
 
 <%@ page import="java.sql.Connection" %>
+
+<c:if test="${not empty param.next}">
+  <%-- next button was clicked --%>
+  <c:redirect url="teamColumnSelection.jsp">
+    <c:forEach items="${paramValues}" var="parameter">
+      <c:forEach items="${parameter.value}" var="parameterValue">
+        <c:param name="${parameter.key}" value="${parameterValue}"/>
+        param: <c:out value="${parameter.key}"/> value: <c:out value="${parameterValue}"/>
+      </c:forEach>
+    </c:forEach>
+   </c:redirect>
+</c:if>
   
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
@@ -70,8 +82,8 @@ while(null != filterColumn) {
         </tr>
 
         <tr>
-          <td><input type='submit' value='Apply Changes'></td>
-          <td><input type='submit' value='Next' onclick='document.filterTeams.action="teamColumnSelection.jsp"'>  Click here when all appropriate filters have been applied.</td>
+          <td><input type='submit' name='apply' value='Apply Changes'></td>
+          <td><input type='submit' name='next' value='Next'>  Click here when all appropriate filters have been applied.</td>
       </table>
     </form>
 
