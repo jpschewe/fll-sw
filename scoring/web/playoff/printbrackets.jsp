@@ -63,6 +63,13 @@ while(tempRunNumber < runNumber) {
   tempRunNumber++;
 }
 final List currentRound = tempCurrentRound;
+pageContext.setAttribute("currentRoundSize", new Integer(currentRound.size()));
+
+int tempNumRuns = 1;
+while(Math.pow(2, tempNumRuns) < currentRound.size()) {
+  tempNumRuns++;
+}
+pageContext.setAttribute("numRuns", new Integer(tempNumRuns));
 %>
 
 <html>
@@ -82,159 +89,172 @@ final List currentRound = tempCurrentRound;
   </style>
 
   <body>
-
     <h2><x:out select="$challengeDocument/fll/@title"/> (Playoff Brackets Division: <%=divisionStr%> Run Number: <%=runNumber%>)</h2>
-      <form action='printbrackets.jsp' method='get'>
-        <input type='hidden' name='runNumber' value='<%=runNumber%>'>
-        <input type='hidden' name='division' value='<%=divisionStr%>'>
-        <input type='hidden' name='newRunNumber' value='<%=runNumber+1%>'>
-              
-<%if(currentRound.size() > 2) {%>
+        Number of runs needed to complete: <c:out value="${numRuns}"/><br />
+    <form action='printbrackets.jsp' method='get'>
+      <input type='hidden' name='runNumber' value='<%=runNumber%>'>
+      <input type='hidden' name='division' value='<%=divisionStr%>'>
+      <input type='hidden' name='newRunNumber' value='<%=runNumber+1%>'>
+      
+      <c:if test="${currentRoundSize > 2}">
         <input type='submit' name='nextRound' value='Next Round (<%=runNumber+1%>)'>
         <br><br>
-<%}%>
-                                          
+      </c:if>
+      
       <table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>
-<%
-if(currentRound.size() > 1) { //need at least 2 teams
-final Iterator currentIter = currentRound.iterator();
-for(int index=0; currentIter.hasNext(); index++) {
-  final boolean evenBracket = ( ( (index/2) * 2) == index );
-  final Team teamA = (Team)currentIter.next();
-  final Team teamB = (Team)currentIter.next();
-  final Team winner = Playoff.pickWinner(connection, challengeDocument, teamA, teamB, runNumber);
-%>
-        <tr> <!-- row 1 -->
-          <td class='Leaf' width='200'>
-            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamA, teamB, false)%>
-          </td>
+        <c:if test="${currentRoundSize > 1}"> <!-- need at least 2 teams -->
+          <%
+          final Iterator currentIter = currentRound.iterator();
+          for(int index=0; currentIter.hasNext(); index++) {
+            pageContext.setAttribute("evenBracket", Boolean.valueOf( ( (index/2) * 2) == index ));
+            final boolean evenBracket = ( ( (index/2) * 2) == index );
+            final Team teamA = (Team)currentIter.next();
+            final Team teamB = (Team)currentIter.next();
+            final Team winner = Playoff.pickWinner(connection, challengeDocument, teamA, teamB, runNumber);
+          %>
+          <tr> <!-- row 1 -->
+            <td class='Leaf' width='200'>
+              <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamA, teamB, false)%>
+            </td>
             
-          <!-- connect teamA and teamB -->
-          <td class='BridgeTop'>&nbsp;</td>
+            <!-- connect teamA and teamB -->
+            <td class='BridgeTop'>&nbsp;</td>
 
-          <td width='200'>&nbsp;</td>
-<%if(evenBracket) {%>
-          <td width='10'>&nbsp;</td>
-<%} else {%>
-          <!-- skip column for bracket-bracket bar -->
-<%}%>
-          <td width='200'>&nbsp;</td>
-        </tr>
-        
-        <tr> <!-- row 2 -->
-          <td width='200'>&nbsp;</td>
-          <td class='Bridge' rowspan='4'>&nbsp;</td>
-          <td width='200'>&nbsp;</td>
-<%if(evenBracket) {%>
-          <td width='10'>&nbsp;</td>
-<%} else {%>
-          <!-- skip column for bracket-bracket bar -->
-<%}%>
-          <td width='200'>&nbsp;</td>
-        </tr>
-        
-        <tr> <!-- row 3 -->
-          <td width='200'><font size='4'>Bracket <%=index+1%></font><br></td>
-          <!-- skip column for A-B bar -->
-          <td class='Leaf' width='200'>
-            <%=Playoff.getDisplayString(connection, currentTournament, (runNumber+1), winner, null, false)%>
-          </td>
-              
-<%if(evenBracket) {%>
-              
-          <td class='BridgeTop' width='10'>&nbsp;</td>
-              
-<%} else {%>
-          <!-- skip column for bracket-bracket bar -->
-<%}%>
+            <td width='200'>&nbsp;</td>
+            <c:if test="${evenBracket}">
+              <td width='10'>&nbsp;</td>
+            </c:if>
+            <c:if test="${not evenBracket}">
+              <!-- skip column for bracket-bracket bar -->
+            </c:if>
 
-          <td width='200'>&nbsp;</td>
-        </tr>
-        
-        <tr> <!-- row 4 -->
-          <td width='200'>&nbsp;</td>
-          <!-- skip column for A-B bar -->
-          <td width='200'>&nbsp;</td>
-<%if(evenBracket) {%>
-<%  if(currentRound.size() > 2) {%>
-          <!-- vertical bar down to next bracket -->
-          <td rowspan='8' class='Bridge'>&nbsp;</td>
-<%  } else {%>
-          <td rowspan='5'>&nbsp;</td>
-<%  }%>
-<%} else {%>
-          <td width='10'>&nbsp;</td>
-<%}%>
-          <td width='200'>&nbsp;</td>
-        </tr>
-        
-        <tr> <!-- row 5 -->
-          <td class='Leaf' width='200'>
-            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamB, teamA, false)%>
-          </td>
-          <!-- skip column for A-B bar -->
-          <td width='200'>&nbsp;</td>
-<%if(evenBracket) {%>
-          <!-- skip column for bracket-bracket bar -->
-<%} else {%>
-          <td width='10'>&nbsp;</td>
-<%}%>
-          <td width='200'>&nbsp;</td>
-        </tr>
+            <td width='200'>&nbsp;</td>
+          </tr>
+          
+          <tr> <!-- row 2 -->
+            <td width='200'>&nbsp;</td>
+            <td class='Bridge' rowspan='4'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
+            <c:if test="${evenBracket}">
+              <td width='10'>&nbsp;</td>
+            </c:if>
+            <c:if test="${not evenBracket}">
+              <!-- skip column for bracket-bracket bar -->
+            </c:if>
+            <td width='200'>&nbsp;</td>
+          </tr>
+          
+          <tr> <!-- row 3 -->
+            <td width='200'><font size='4'>Bracket <%=index+1%></font><br></td>
+            <!-- skip column for A-B bar -->
+            <td class='Leaf' width='200'>
+              <%=Playoff.getDisplayString(connection, currentTournament, (runNumber+1), winner, null, false)%>
+            </td>
+            
 
-        <tr> <!-- between row 1 -->
-          <td width='200'>&nbsp;</td>
-          <td width='10'>&nbsp;</td>
-          <td width='200'>&nbsp;</td>
-<%if(evenBracket) {%>
-          <!-- skip column for bracket-bracket bar -->
-<%} else {%>
-          <td width='10'>&nbsp;</td>
-<%}%>
-          <td width='200'>&nbsp;</td>
-        </tr>
+            
+            <c:if test="${evenBracket}">
+              <td class='BridgeTop' width='10'>&nbsp;</td>
+            </c:if>
+            <c:if test="${not evenBracket}">
+              <!-- skip column for bracket-bracket bar -->
+            </c:if>
 
-        <tr> <!-- between row 2 -->
-          <td width='200'>&nbsp;</td>
-          <td width='10'>&nbsp;</td>
-          <td width='200'>&nbsp;</td>
-<%if(evenBracket) {%>
-          <!-- skip column for bracket-bracket bar -->
+            <td width='200'>&nbsp;</td>
+          </tr>
+          
+          <tr> <!-- row 4 -->
+            <td width='200'>&nbsp;</td>
+            <!-- skip column for A-B bar -->
+            <td width='200'>&nbsp;</td>
+            
+            <c:if test="${evenBracket}">
+              <c:if test="${currentRoundSize > 2}">
+                <!-- vertical bar down to next bracket -->
+                <td rowspan='8' class='Bridge'>&nbsp;</td>
+              </c:if>
+              <c:if test="${currentRoundSize <= 2}">
+                <!-- just do a rowspan to fill out the table properly -->
+                <td rowspan='5'>&nbsp;</td>
+              </c:if>
+            </c:if>
+            <c:if test="${not evenBracket}">
+              <td width='10'>&nbsp;</td>
+            </c:if>
+            
+            <td width='200'>&nbsp;</td>
+          </tr>
+          
+          <tr> <!-- row 5 -->
+            <td class='Leaf' width='200'>
+              <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamB, teamA, false)%>
+            </td>
+            <!-- skip column for A-B bar -->
+            <td width='200'>&nbsp;</td>
+            <c:if test="${evenBracket}">
+              <!-- skip column for bracket-bracket bar -->
+            </c:if>
+            <c:if test="${not evenBracket}">
+              <td width='10'>&nbsp;</td>
+            </c:if>
+            <td width='200'>&nbsp;</td>
+          </tr>
+
+          <tr> <!-- between row 1 -->
+            <td width='200'>&nbsp;</td>
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
+            <c:if test="${evenBracket}">
+              <!-- skip column for bracket-bracket bar -->
+            </c:if>
+            <c:if test="${not evenBracket}">
+              <td width='10'>&nbsp;</td>
+            </c:if>
+            <td width='200'>&nbsp;</td>
+          </tr>
+
+          <tr> <!-- between row 2 -->
+            <td width='200'>&nbsp;</td>
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
+            <c:if test="${evenBracket}">
+              <!-- skip column for bracket-bracket bar -->
               
-<%  if(currentRound.size() > 2) {%>
-          <!-- winner of next bracket -->
-          <td class='Leaf' width='200'>&nbsp;</td>
-<%  } else {%>
-          <td width='200'>&nbsp;</td>
-<%  }%>
+              <c:if test="${currentRoundSize > 2}">
+                <!-- winner of next bracket -->
+                <td class='Leaf' width='200'>&nbsp;</td>
+              </c:if>
+              <c:if test="${currentRoundSize <= 2}">
+                <td width='200'>&nbsp;</td>
+              </c:if>
               
-<%} else {%>
-          <td width='10'>&nbsp;</td>
-          <td width='200'>&nbsp;</td>
-<%}%>
-        </tr>
+            </c:if>
+            <c:if test="${not evenBracket}">
+              <td width='10'>&nbsp;</td>
+              <td width='200'>&nbsp;</td>
+            </c:if>
+          </tr>
 
-        <tr> <!-- between row 3 -->
-          <td width='200'>&nbsp;</td>
-          <td width='10'>&nbsp;</td>
-          <td width='200'>&nbsp;</td>
-<%if(evenBracket) {%>
-          <!-- skip column for bracket-bracket bar -->
-<%} else {%>
-          <td width='10'>&nbsp;</td>
-<%}%>
-          <td width='200'>&nbsp;</td>
-        </tr>
-<%}%>
+          <tr> <!-- between row 3 -->
+            <td width='200'>&nbsp;</td>
+            <td width='10'>&nbsp;</td>
+            <td width='200'>&nbsp;</td>
+            <c:if test="${evenBracket}">
+              <!-- skip column for bracket-bracket bar -->
+            </c:if>
+            <c:if test="${not evenBracket}">
+              <td width='10'>&nbsp;</td>
+            </c:if>
+            <td width='200'>&nbsp;</td>
+          </tr>
+          <%}%> <!-- end for loop -->
       </table>
 
-<%if(currentRound.size() > 2) {%>
+      <c:if test="${currentRoundSize > 2}">
         <input type='submit' name='nextRound' value='Next Round (<%=runNumber+1%>)'>
-<%
-  }
-}//end if we have more than 2 teams
-%>
-      </form>
-      <%@ include file="/WEB-INF/jspf/footer.jspf" %>
-    </body>
-  </html>
+      </c:if>
+    </c:if> <!-- end if we have more than 2 teams -->
+    </form>
+    <%@ include file="/WEB-INF/jspf/footer.jspf" %>
+  </body>
+</html>
