@@ -1,5 +1,18 @@
 2003-11-08  Jon Schewe  <jpschewe@mtu.net>
 
+	* src/fll/web/scoreEntry/ScoreEntry.java
+	(generateInitForScoreEdit): Include the tournament when looking
+	for initial values for score edit (836264). 
+
+	* web/scoreboard/title.jsp: Change scoreboard text to be white so
+	that it's easier to read (836265).
+
+	* web/report/teamPerformanceReport.jsp: Display no show for no show
+	performance scores (836266).
+
+	* web/report/performanceRunReport.jsp: Display no show for no show
+	performance scores (836266).
+
 	* build.xml: Changed slashes in subjective.bat to work with win9x
 	as well as NT.
 

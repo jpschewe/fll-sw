@@ -5,6 +5,7 @@
  */
 package fll.web.scoreEntry;
 
+import fll.Queries;
 import fll.Utilities;
 
 import java.io.IOException;
@@ -366,10 +367,13 @@ final public class ScoreEntry {
                                               final int teamNumber,
                                               final int runNumber) throws SQLException, IOException {
     final Connection connection = (Connection)application.getAttribute("connection");
+    final String tournament = Queries.getCurrentTournament(connection);
     final Statement stmt = connection.createStatement();
     final ResultSet rs = stmt.executeQuery("SELECT * from Performance"
                                            + " WHERE TeamNumber = " + teamNumber
-                                           + " AND RunNumber = " + runNumber);
+                                           + " AND RunNumber = " + runNumber
+                                           + " AND Tournament = '" + tournament + "'"
+                                           );
     try {
       if(rs.next()) {
         writer.println("  gbl_NoShow = " + rs.getString("NoShow") + ";");
