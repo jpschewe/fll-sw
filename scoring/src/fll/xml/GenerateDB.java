@@ -143,8 +143,8 @@ final public class GenerateDB {
       stmt.executeUpdate("DROP TABLE IF EXISTS Teams");
       stmt.executeUpdate("CREATE TABLE Teams ("
                          + "  TeamNumber integer NOT NULL,"
-                         + "  TeamName varchar(256) NOT NULL default '',"
-                         + "  Organization varchar(256),"
+                         + "  TeamName varchar(255) NOT NULL default '',"
+                         + "  Organization varchar(255),"
                          + "  Division varchar(32) NOT NULL default '1',"
                          + "  NumMedals integer,"
                          + "  Region varchar(16) NOT NULL default 'DUMMY'"
