@@ -1,3 +1,9 @@
+2004-12-20  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/ScoreStandardization.java (ScoreStandardization): Fixed
+	computation of final scores so that scores from other tournaments
+	are not seen in the final report.
+
 2004-12-18  Jon Schewe  <jpschewe@mtu.net>
 
 	* prj.el: Updated the mysql database driver
