@@ -64,9 +64,14 @@ public class Queries {
 //       final String current = getTeamPrevTournament(connection, 666, "DUMMY");
 //       LOG.info("Previous tournament for team 666 is null?: " + (null == current));
       
-      LOG.info("Tournaments: " + getTournamentNames(connection));
+      //LOG.info("Tournaments: " + getTournamentNames(connection));
       //updateScoreTotals(challengeDocument, connection, "Monticello");
       //System.out.println(getDivisions(connection));
+
+      LOG.info("Before Tournaments: " + getTournamentNames(connection));
+      insertTournamentsForRegions(connection);
+      LOG.info("After Tournaments: " + getTournamentNames(connection));
+      
     } catch(final Exception e) {
       e.printStackTrace();
     }
@@ -1121,5 +1126,32 @@ public class Queries {
     } finally {
       Utilities.closePreparedStatement(prep);
     }
-  }  
+  }
+
+  /**
+   * Insert a tournament for each region found in the teams table, if it
+   * doesn't already exist.  Sets name and location equal to the region name.
+   */
+  public static void insertTournamentsForRegions(final Connection connection)
+    throws SQLException {
+    ResultSet rs = null;
+    Statement stmt = null;
+    PreparedStatement insertPrep = null;
+    try {
+      insertPrep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location) VALUES(?, ?)");
+      
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT Teams.Region FROM Teams LEFT JOIN Tournaments ON Teams.REgion = Tournaments.Name WHERE Tournaments.Name IS NULL");
+      while(rs.next()) {
+        final String region = rs.getString(1);
+        insertPrep.setString(1, region);
+        insertPrep.setString(2, region);
+        insertPrep.executeUpdate();
+      }
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closeStatement(stmt);
+      Utilities.closePreparedStatement(insertPrep);
+    }
+  }
 }
