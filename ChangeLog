@@ -1,3 +1,12 @@
+2003-04-22  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/web/admin/Tournaments.java (verifyData): Allow one to
+	specify the next tournament and do validation on the data input
+	before committing it to the database.
+
+	* build.xml: Force overwrite of web.xml when copying to ensure the
+	correct one is always deployed.  Cleaned up javadoc target.
+
 2003-04-20  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/web/admin/UploadTeams.java (verifyTeams): make sure that

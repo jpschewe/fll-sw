@@ -147,7 +147,7 @@ public class Queries {
    *
    * @param connection the database connection
    * @throws SQLException on a database error
-   * @see #getCurrentTournament(connection)
+   * @see #getCurrentTournament(Connection)
    */     
   public static void initializeTournamentTeams(final Connection connection)
     throws SQLException {
@@ -175,7 +175,7 @@ public class Queries {
    * @param connection the database connection
    * @return the List of divisions
    * @throws SQLException on a database error
-   * @see #getCurrentTournament(connection)
+   * @see #getCurrentTournament(Connection)
    */     
   public static List getDivisions(final Connection connection)
     throws SQLException {
