@@ -8,17 +8,26 @@
    '(jde-run-read-app-args t)
    '(jde-global-classpath (list
 			   (expand-file-name "build/WEB-INF/classes" project-root)
-			   (expand-file-name "build/library/classes" project-root)
 			   
-			   (expand-file-name "web/WEB-INF/lib/mm.mysql-2.0.14-bin.jar" project-root)
-			   (expand-file-name "web/WEB-INF/lib/JonsInfra-0.2.jar" project-root)
+			   (expand-file-name "lib/JonsInfra-0.2.jar" project-root)
+			   (expand-file-name "lib/junit-3.8.1.jar" project-root)
+			   (expand-file-name "lib/log4j-1.2.8.jar" project-root)
+			   (expand-file-name "lib/mm.mysql-2.0.14-bin.jar" project-root)
+			   (expand-file-name "lib/common-lib/xercesImpl.jar" project-root)
+			   (expand-file-name "lib/common-lib/xmlParserAPIs.jar" project-root)
 
-			   (expand-file-name "web/common-lib/xercesImpl.jar" project-root)
-			   (expand-file-name "web/common-lib/xmlParserAPIs.jar" project-root)
-			   
+			   ;; JSTL libraries
+			   (expand-file-name "lib/dom.jar" project-root)
+			   (expand-file-name "lib/jaxen-full.jar" project-root)
+			   (expand-file-name "lib/jaxp-api.jar" project-root)
+			   (expand-file-name "lib/jstl.jar" project-root)
+			   (expand-file-name "lib/sax.jar" project-root)
+			   (expand-file-name "lib/saxpath.jar" project-root)
+			   (expand-file-name "lib/standard.jar" project-root)
+			   (expand-file-name "lib/xalan.jar" project-root)
+
+			   ;; standard stuff
 			   (expand-file-name "common/lib/servlet.jar" catalina-home)
-			   (expand-file-name "common/lib/xercesImpl.jar" catalina-home)
-			   (expand-file-name "common/lib/xmlParserAPIs.jar" catalina-home)
 			   ))
    
    '(jde-compile-option-deprecation t)
