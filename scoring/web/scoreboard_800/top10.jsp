@@ -13,28 +13,23 @@
 final Connection connection = (Connection)application.getAttribute("connection");
 final String currentTournament = Queries.getCurrentTournament(connection);
 
-pageContext.setAttribute("divisions", Queries.getDivisions(connection));
+Integer divisionIndexObj = (Integer)session.getAttribute("divisionIndex");
+int divisionIndex;
+if(null == divisionIndexObj) {
+  divisionIndex = 0;
+} else {
+  divisionIndex = divisionIndexObj.intValue();
+}
+divisionIndex++;
+final List divisions = Queries.getDivisions(connection);
+if(divisionIndex >= divisions.size()) {
+  divisionIndex = 0;
+}
+pageContext.setAttribute("headerColor", Queries.getColorForDivisionIndex(divisionIndex));
+session.setAttribute("divisionIndex", new Integer(divisionIndex));
+pageContext.setAttribute("division", divisions.get(divisionIndex));
 %>
 
-<%-- HACK to get figuring out how to query size of list in JSTL --%>
-<c:set var="divisionSize" value="0" />
-<c:forEach items="${divisions}" varStatus="status">
-  <c:set var="divisionSize" value="${status.count}" />
-</c:forEach>
-<%-- end HACK --%>
-
-<c:set var="divisionIndex" value="${divisionIndex+1}" scope="session"/>
-<c:if test="${divisionIndex >= divisionSize}">
-  <c:set var="divisionIndex" value="0" scope="session"/>
-</c:if>
-<c:if test="${divisionIndex % 2 == 0}" var="divisionEven">
-  <c:set var="headerColor" value="#800000"/>
-</c:if>
-<c:if test="${not divisionEven}">
-  <c:set var="headerColor" value="#008000"/>
-</c:if>
-<c:set var="division" value="${divisions[divisionIndex]}"/>
-  
 <HTML>
 <head>
 <style>
@@ -79,7 +74,7 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
                   + " AND Teams.TeamNumber = Performance.TeamNumber"
                   + " AND Performance.RunNumber <= " + Queries.getNumSeedingRounds(connection)
                   + " AND Performance.NoShow = 0"
-                  + " AND Teams.Division = " + pageContext.getAttribute("division")
+                  + " AND Teams.Division = '" + pageContext.getAttribute("division") + "'"
                   + " GROUP BY Performance.TeamNumber"
                   + " ORDER BY MaxOfComputedScore DESC LIMIT 10";
                 final ResultSet rs = stmt.executeQuery(sql);

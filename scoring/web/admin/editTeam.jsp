@@ -87,7 +87,7 @@ function confirmChangeTournament() {
     <title><x:out select="$challengeDocument/fll/@title"/> (Edit Team)</title>
   </head>
 
-  <bodyonload='init()'>
+  <body onload='init()'>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Edit Team)</h1>
 
     <form action="commitTeam.jsp" method="post" name="editTeam">
@@ -135,7 +135,7 @@ function confirmChangeTournament() {
         <tr>
           <td>Current Tournament</td>
 
-          <td><!-- FIX something isn't working right here with JSTL and I'm too ticked off to keep trying, so I'm just doing it as a scriplet -->
+          <td>
           <%
           if(null == prevTournament) {
           %>
@@ -172,7 +172,12 @@ function confirmChangeTournament() {
       </c:if>
             
     </table>
-    <input type='submit' name='commit' value='Commit' onclick='return confirmChangeTournament()'>
+    <c:if test="${not empty param.addTeam}" var="addTeam">
+    <input type='submit' name='commit' value='Commit'>
+    </c:if>
+    <c:if test="${not addTeam}">
+      <input type='submit' name='commit' value='Commit' onclick='return confirmChangeTournament()'>
+    </c:if>
             
     <c:if test="${empty param.addTeam}">
     <%

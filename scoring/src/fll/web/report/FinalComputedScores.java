@@ -112,7 +112,7 @@ final public class FinalComputedScores {
                                          + " AND FinalScores.Tournament = '" + tournament + "'"
                                          + " AND Teams.TeamNumber = SummarizedScores.TeamNumber"
                                          + " AND SummarizedScores.Tournament = '" + tournament + "'"
-                                         + " AND Teams.Division = " + division
+                                         + " AND Teams.Division = '" + division + "'"
                                          + " GROUP BY TeamNumber ORDER BY FinalScores.OverallScore DESC, Teams.TeamNumber");
         while(teamsRS.next()) {
           final int teamNumber = teamsRS.getInt(3);

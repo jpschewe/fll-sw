@@ -1,5 +1,8 @@
 2003-10-04  Jon Schewe  <jpschewe@mtu.net>
 
+	* src/fll/Queries.java (getColorForDivisionIndex): Support
+	coloring more than just 2 divisions (766208).
+
 	* docs/index.html: Added instructions for using jar to uncompress
 	zip archives.  Perhaps we should just write a little Java tool
 	that has a nice GUI (707892).

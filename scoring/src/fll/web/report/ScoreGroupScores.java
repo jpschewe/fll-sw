@@ -99,7 +99,7 @@ final public class ScoreGroupScores {
                                        + " WHERE SummarizedScores.Tournament = '" + tournament + "'"
                                        + " AND Teams.TeamNumber = SummarizedScores.TeamNumber"
                                        + " AND SummarizedScores.Category = '" + categoryName + "'"
-                                       + " AND Teams.Division = " + division
+                                       + " AND Teams.Division = '" + division + "'"
                                        + " GROUP BY ScoreGroup");
       while(groupRS.next()) {
         final String scoreGroup = groupRS.getString(1);
@@ -120,7 +120,7 @@ final public class ScoreGroupScores {
                                  + " FROM SummarizedScores,Teams"
                                  + " WHERE Teams.TeamNumber = SummarizedScores.TeamNumber"
                                  + " AND SummarizedScores.Tournament = '" + tournament + "'"
-                                 + " AND Teams.Division = " + division
+                                 + " AND Teams.Division = '" + division + "'"
                                  + " AND SummarizedScores.Category = '" + categoryName + "'"
                                  + " AND SummarizedScores.ScoreGroup = '" + scoreGroup + "'"
                                  + " ORDER BY SummarizedScores.StandardizedScore DESC, Teams.TeamNumber");
