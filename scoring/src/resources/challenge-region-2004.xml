@@ -1,76 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:noNamespaceSchemaLocation="fll.xsd"
-     title="FLL 2004 Challenge: No Limits" >
+  xsi:noNamespaceSchemaLocation="fll.xsd"
+  title="FLL 2004 Challenge: No Limits" >
 
   <Performance weight="1.0">
 
-     <goal name="remove_glasses"
-           title="Remove the Glasses"
-           multiplier="40" />
+    <goal name="remove_glasses"
+      title="Remove the Glasses"
+      multiplier="40" />
 
     <goal name="cd"
-	  title="Put the CD Away">
+      title="Put the CD Away">
       <value score="40" title="Case" value="case" />
       <value score="35" title="Desktop" value="partial" />
       <value score="0" title="No" value="no" />
     </goal>
 
     <goal name="serve_dinner"
-	  title="Tray, Bowl, All Food on Table">
+      title="Tray, Bowl, All Food on Table">
       <value score="45" title="Yes" value="full" />
       <value score="35" title="Partial" value="partial" />
       <value score="0" title="No" value="no" />
     </goal>
 
     <goal name="push_chairs"
-	  title="Chairs, All Legs at Carpet"
-          max="3"
-          multiplier="10" />
+      title="Chairs, All Legs at Carpet"
+      max="3"
+      multiplier="10" />
 
     <goal name="read_sign"
-	  title="Bus Flags">
+      title="Bus Flags">
       <value score="35" title="White Only" value="white" />
       <value score="0" title="No" value="no" />
     </goal>
 
     <goal name="open_gate"
-	  title="Gate open">
+      title="Gate open">
       <value score="35" title="Open, Locked" value="full" />
       <value score="20" title="Opened, Not Locked" value="partial" />
       <value score="0" title="Not Opened" value="no" />
     </goal>
 
     <goal name="feed_pets"
-	  title="Pet Food at Patio"
-          max="3"
-          multiplier="15" />
+      title="Pet Food at Patio"
+      max="3"
+      multiplier="15" />
 
     <goal name="climb_stairs"
-	  title="Stairs">
+      title="Stairs">
       <value score="45" title="Top" value="full" />
       <value score="40" title="Steps" value="partial" />
       <value score="0" title="No" value="no" />
     </goal>
 
     <goal name="ball_center"
-          title="Your Ball, Center Ring"
-          multiplier="50" />
+      title="Your Ball, Center Ring"
+      multiplier="50" />
 
     <goal name="play_ball"
-	  title="Any Balls, Your Side, In Baskey"
-          max="16"
-          multiplier="5" />
+      title="Any Balls, Your Side, In Basket"
+      max="16"
+      multiplier="5" />
 
     <goal name="bonus"
-	  title="Any Balls, Your Side, on Mat"
-          max="16"
-          multiplier="2" />
+      title="Any Balls, Your Side, on Mat"
+      max="16"
+      multiplier="2" />
 
     <restriction lowerBound="0"
-		 upperBound="16"
-                 message="There are a maximum of 16 balls on the table"
-                 >
+      upperBound="16"
+      message="There are a maximum of 16 balls on the table"
+      >
       <term goal="play_ball" />
       <term goal="bonus" />
     </restriction>
@@ -82,109 +82,109 @@
   </Performance>
 
   <subjectiveCategory name="teamwork"
-                      title="Teamwork"
-                      weight="1.0"
-                      >
+    title="Teamwork"
+    weight="1.0"
+    >
     <goal name="roles"
-          title="Roles and Responsibilities"
-          min="1"
-          max="20" />
+      title="Roles and Responsibilities"
+      min="1"
+      max="20" />
     <goal name="professionalism"
-          title="Gracious Professionalism"
-          min="1"
-          max="20" />
+      title="Gracious Professionalism"
+      min="1"
+      max="20" />
     <goal name="dynamics"
-          title="Problem Solving &amp; Team Dynamics &amp; Communications"
-          min="1"
-          max="20" />
+      title="Problem Solving &amp; Team Dynamics &amp; Communications"
+      min="1"
+      max="20" />
     <goal name="confidence"
-          title="Confidence &amp; Enthusiasm"
-          min="1"
-          max="20" />
+      title="Confidence &amp; Enthusiasm"
+      min="1"
+      max="20" />
     <goal name="fll_values"
-          title="FLL Values"
-          min="1"
-          max="20" />
+      title="FLL Values"
+      min="1"
+      max="20" />
   </subjectiveCategory>
 
   
   <subjectiveCategory name="robustdesign"
-                      title="Robust Design"
-                      weight="0.5"
-                      >
+    title="Robust Design"
+    weight="0.5"
+    >
     <goal name="structural"
-          title="Structural Design"
-          min="1"
-          max="20" />
+      title="Structural Design"
+      min="1"
+      max="20" />
     <goal name="locomotion"
-          title="Locomotion"
-          min="1"
-          max="20" />
+      title="Locomotion"
+      min="1"
+      max="20" />
     <goal name="manipulation"
-          title="Manipulation"
-          min="1"
-          max="20" />
+      title="Manipulation"
+      min="1"
+      max="20" />
     <goal name="navigation"
-          title="Navigation"
-          min="1"
-          max="20" />
+      title="Navigation"
+      min="1"
+      max="20" />
     <goal name="overall_design"
-          title="Overall Design"
-          min="1"
-          max="20" />
+      title="Overall Design"
+      min="1"
+      max="20" />
   </subjectiveCategory>
 
 
   <subjectiveCategory name="programming"
-                      title="Robust Programming"
-                      weight="0.5"
-                      >
+    title="Robust Programming"
+    weight="0.5"
+    >
     <goal name="useoflanguage"
-          title="Use of Language"
-          min="1"
-          max="20" />
+      title="Use of Language"
+      min="1"
+      max="20" />
     <goal name="modularity"
-          title="Modularity/Abstraction"
-          min="1"
-          max="20" />
+      title="Modularity/Abstraction"
+      min="1"
+      max="20" />
     <goal name="sensorcontrol"
-          title="Sensor Control"
-          min="1"
-          max="20" />
+      title="Sensor Control"
+      min="1"
+      max="20" />
     <goal name="design"
-          title="Design"
-          min="1"
-          max="20" />
+      title="Design"
+      min="1"
+      max="20" />
     <goal name="programmingingeneral"
-          title="In General"
-          min="1"
-          max="20" />
+      title="In General"
+      min="1"
+      max="20" />
   </subjectiveCategory>
 
   <subjectiveCategory name="research"
-                      title="Research Project Assessment"
-                      weight="1.0"
-                      >
+    title="Research Project Assessment"
+    weight="1.0"
+    >
     <goal name="questions"
-          title="Questions, Language Use"
-          min="1"
-          max="20" />
+      title="Questions, Language Use"
+      min="1"
+      max="20" />
     <goal name="completeness"
-          title="Completeness, Teamwork"
-          min="1"
-          max="20" />
+      title="Completeness, Teamwork"
+      min="1"
+      max="20" />
     <goal name="background"
-          title="Background, Data, and Graphics"
-          min="1"
-          max="20" />
+      title="Background, Data, and Graphics"
+      min="1"
+      max="20" />
     <goal name="analysis"
-          title="Analysis and Conclusions"
-          min="1"
-          max="20" />
+      title="Analysis and Conclusions"
+      min="1"
+      max="20" />
     <goal name="style"
-          title="Style"
-          min="1"
-          max="20" />
+      title="Style"
+      min="1"
+      max="20" />
   </subjectiveCategory>
 
   
