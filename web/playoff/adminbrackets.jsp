@@ -140,16 +140,11 @@ for(int index=0; currentIter.hasNext(); index++) {
           <td width='200'><font size='4'>Bracket <%=index+1%></font><br></td>
           <!-- skip column for A-B bar -->
           <td class='Leaf' width='200'>
-<%if(currentRound.size() > 2) {%>
   <%if(currentRound.size() > 4) {%>
             <%=Playoff.getDisplayString(connection, currentTournament, (runNumber+1), winner, null, true)%>
   <%} else {%>
             <%=Playoff.getDisplayString(connection, currentTournament, (runNumber+1), winner, null, false)%>
   <%}%>
-<%} else {%>
-                <!-- don't show winner -->
-                &nbsp;
-<%}%>
           </td>
               
 <%if(evenBracket) {%>
