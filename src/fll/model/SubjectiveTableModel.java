@@ -5,6 +5,8 @@
  */
 package fll.model;
 
+import fll.Utilities;
+
 import java.text.NumberFormat;
 import java.text.ParseException;
 
@@ -34,7 +36,14 @@ final public class SubjectiveTableModel extends AbstractTableModel implements So
   public SubjectiveTableModel(final Document scoreDocument,
                               final Element subjectiveElement) {
     _scoreDocument = scoreDocument;
-    setSubjectiveElement(subjectiveElement);
+    _goals = subjectiveElement.getElementsByTagName("goal");
+    final Element categoryScoreElement = (Element)((Element)_scoreDocument.getDocumentElement()).getElementsByTagName(subjectiveElement.getAttribute("name")).item(0);
+    final NodeList scoreElements = categoryScoreElement.getElementsByTagName("score");
+    _scoreElements = new Element[scoreElements.getLength()];
+    for(int i=0; i<scoreElements.getLength(); i++) {
+      _scoreElements[i] = (Element)scoreElements.item(i);
+    }
+    
     //by default sort by team number
     _sortedColumn = 0;
     _ascending = true;
@@ -42,21 +51,30 @@ final public class SubjectiveTableModel extends AbstractTableModel implements So
   }
 
   public String getColumnName(final int column) {
-    if(0 == column) {
+    switch(column) {
+    case 0:
       return "TeamNumber";
-    } else if(1 == column) {
+    case 1:
       return "TeamName";
-    } else if(2 == column) {
+    case 2:
       return "Division";
-    } else if(3 == column) {
+    case 3:
       return "Judge";
-    } else {
-      return getGoalDescription(column - 4).getAttribute("title");
+    default:
+      if(column >= getNumGoals() + 4) {
+        return "Total Score";
+      } else {
+        return getGoalDescription(column - 4).getAttribute("title");
+      }
     }
   }
 
   public Class getColumnClass(final int column) {
-    return String.class;
+    if(column >= getNumGoals() + 4) {
+      return Integer.class;
+    } else {
+      return String.class;
+    }
   }
 
   public int getRowCount() {
@@ -64,36 +82,71 @@ final public class SubjectiveTableModel extends AbstractTableModel implements So
   }
 
   public int getColumnCount() {
-    return 4 + _subjectiveElement.getElementsByTagName("goal").getLength();
+    return 5 + getNumGoals();
   }
 
   public Object getValueAt(final int row,
                            final int column) {
-    final Element element = getScoreElement(row);
-    switch(column) {
-    case 0:
-      if(element.hasAttribute("teamNumber")) {
-        return element.getAttribute("teamNumber");
-      } else {
-        return "";
+    try {
+      final Element element = getScoreElement(row);
+      switch(column) {
+      case 0:
+        if(element.hasAttribute("teamNumber")) {
+          return element.getAttribute("teamNumber");
+        } else {
+          return "";
+        }
+      case 1:
+        if(element.hasAttribute("teamName")) {
+          return element.getAttribute("teamName");
+        } else {
+          return "";
+        }
+      case 2:
+        return element.getAttribute("division");
+      case 3:
+        return element.getAttribute("judge");
+      default:
+        if(column >= getNumGoals() + 4) {
+          //compute total score
+          int totalScore = 0;
+          for(int g=0; g<getNumGoals(); g++) {
+            final Element goal = getGoalDescription(g);
+            final String goalName = goal.getAttribute("name");
+            final String value = element.getAttribute(goalName);
+            if(null != value && !"".equals(value)) {
+              int score = -1;
+              if(goal.hasChildNodes()) {
+                boolean found = false;
+                final NodeList posValuesList = goal.getElementsByTagName("value");
+                for(int v=0; v<posValuesList.getLength() && !found; v++) {
+                  final Element posValue = (Element)posValuesList.item(v);
+                  if(posValue.getAttribute("title").equals(value)) {
+                    score = Utilities.NUMBER_FORMAT_INSTANCE.parse(posValue.getAttribute("score")).intValue();
+                    found = true;
+                  }
+                }
+                if(!found) {
+                  throw new RuntimeException("Fatal error!  Value set doesn't match any enum in document");
+                }
+              } else {
+                score = Utilities.NUMBER_FORMAT_INSTANCE.parse(value).intValue();
+              }
+              totalScore += score;
+            }
+          }
+          return new Integer(totalScore);
+        } else {
+          final String goalName = getGoalDescription(column - 4).getAttribute("name");
+          if(element.hasAttribute(goalName)) {
+            return element.getAttribute(goalName);
+          } else {
+            return "";
+          }
+        }
       }
-    case 1:
-      if(element.hasAttribute("teamName")) {
-        return element.getAttribute("teamName");
-      } else {
-        return "";
-      }
-    case 2:
-      return element.getAttribute("division");
-    case 3:
-      return element.getAttribute("judge");
-    default:
-      final String goalName = getGoalDescription(column - 4).getAttribute("name");
-      if(element.hasAttribute(goalName)) {
-        return element.getAttribute(goalName);
-      } else {
-        return "";
-      }
+    } catch(final ParseException pe) {
+      throw new RuntimeException("Error in challenge.xml!!! Unparsable number", pe);
     }
   }
   
@@ -106,7 +159,11 @@ final public class SubjectiveTableModel extends AbstractTableModel implements So
     case 3:
       return false;
     default:
-      return true;
+      if(column >= getNumGoals() + 4) {
+        return false;
+      } else {
+        return true;
+      }
     }
   }
 
@@ -190,11 +247,16 @@ final public class SubjectiveTableModel extends AbstractTableModel implements So
       setValueAt(getValueAt(row, column), row, column, false);
     } else {
       fireTableCellUpdated(row, column);
+      fireTableCellUpdated(row, getColumnCount()-1);
     }
   }
   
 
-  private Element[] _scoreElements;
+  /**
+   * The rows in the table.
+   */
+  private final Element[] _scoreElements;
+  
   /**
    * Get the score element at index
    */
@@ -206,28 +268,17 @@ final public class SubjectiveTableModel extends AbstractTableModel implements So
    * Get the description element for goal at index
    */
   private Element getGoalDescription(final int index) {
-    return (Element)_subjectiveElement.getElementsByTagName("goal").item(index);
+    return (Element)_goals.item(index);
+  }
+
+  /**
+   * Find out how many goals there are.
+   */
+  private int getNumGoals() {
+    return _goals.getLength();
   }
   
-  private Element _subjectiveElement;
-  /**
-   * Set the subjective element that represents the subjective category to
-   * edit.  If this element is already being displayed, this method is a nop.
-   *
-   * @param subjectiveElement describes the subjective category to edit
-   */
-  public void setSubjectiveElement(final Element subjectiveElement) {
-    if(!subjectiveElement.equals(_subjectiveElement)) {
-      _subjectiveElement = subjectiveElement;
-      final Element categoryScoreElement = (Element)((Element)_scoreDocument.getDocumentElement()).getElementsByTagName(subjectiveElement.getAttribute("name")).item(0);
-      final NodeList scoreElements = categoryScoreElement.getElementsByTagName("score");
-      _scoreElements = new Element[scoreElements.getLength()];
-      for(int i=0; i<scoreElements.getLength(); i++) {
-        _scoreElements[i] = (Element)scoreElements.item(i);
-      }
-      fireTableStructureChanged();
-    }
-  }
+  private final NodeList _goals;
 
   private int _sortedColumn = 0;
   public int getSortedColumn() {
@@ -254,11 +305,6 @@ final public class SubjectiveTableModel extends AbstractTableModel implements So
       fireTableDataChanged();
     }
   }
-  
-  /**
-   * Get the current subjective element.
-   */
-  public Element getSubjectiveElement() { return _subjectiveElement; }
   
   /**
    * The backing for the model
