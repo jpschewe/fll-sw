@@ -345,7 +345,6 @@ final public class Playoff {
    * @param team team to get display string for
    * @throws IllegalArgumentException if teamNumber is invalid
    * @throws SQLException on a database error
-   * @see fll.Queries#getTournamentTeams(Connection, String)
    */
   public static String getDisplayString(final Connection connection,
                                         final String currentTournament,

@@ -358,7 +358,10 @@
   </copy>
 
   <!-- get the correct web.xml file -->
-  <copy file="${web.home}/WEB-INF/${dist.web.config}" tofile="${build.home}/WEB-INF/web.xml" />
+  <copy file="${web.home}/WEB-INF/${dist.web.config}"
+        tofile="${build.home}/WEB-INF/web.xml"
+        overwrite="true"
+        />
 
 <!-- Create web application zip file -->
 <zip zipfile="${dist.home}/web.zip">
@@ -429,11 +432,12 @@
 
 -->
 
-<target name="javadoc" depends="compile"
+<target name="javadoc"
    description="Create Javadoc API documentation">
 
 <mkdir dir="${dist.home}/api"/>
 <javadoc sourcepath="src"
+         title="${app.name}"
          destdir="${dist.home}/api"
          packagenames="fll.*"
          use="true"
@@ -442,7 +446,7 @@
          >
   <classpath>
     <path refid="compile.classpath" />
-    <pathelement location="${build.home}/WEB-INF/classes" />
+    <pathelement location="${build.home}/src" />
   </classpath>
 
 </javadoc>
@@ -487,7 +491,10 @@
   </copy>
 
   <!-- get the correct web.xml file -->
-  <copy file="${web.home}/WEB-INF/${web.config}" tofile="${build.home}/WEB-INF/web.xml" />
+  <copy file="${web.home}/WEB-INF/${web.config}"
+        tofile="${build.home}/WEB-INF/web.xml"
+        overwrite="true"
+        />
 
 </target>
 

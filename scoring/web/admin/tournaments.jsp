@@ -17,14 +17,10 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
 
   <body background='<c:url value="/images/bricks1.gif"/>' bgcolor='#ffffff' topmargin='4'>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Edit Tournaments)</h1>
-
-<%
-final String unknownTournament = request.getParameter("unknownTournament");
-if(null != unknownTournament) {
-%>
-  <p><font color='red'>You specified an unknown tournament: <%=unknownTournament%><br>
-  Would you like to enter it?</p>
-<%}%>
+      <c:if test="${null != param.unknownTournament}">
+        <p><font color='red'>You specified an unknown tournament: <c:out value="${param.unknownTournament}"/><br>
+                Would you like to enter it?</font></p>
+      </c:if>
 
 <% Tournaments.generatePage(out, application, request, response); %>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
