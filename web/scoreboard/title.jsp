@@ -60,7 +60,7 @@ function fixTime(the_time) {
 <table border='0' cellpadding='0' cellspacing='0' width='98%'>
 <tr>
   <td align='left'>
-    <font face='arial' size='3'>
+    <font face='arial' size='3' color='#ffffff'>
       <b><c:out value="${ScorePageText}" /></b>
     </font>
   </td>

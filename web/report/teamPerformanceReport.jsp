@@ -16,7 +16,7 @@ pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection))
     <h1><x:out select="$challengeDocument/fll/@title"/> (Team <c:out value="${param.TeamNumber}"/> Performance Scores)</h1>
 
     <sql:query var="result" dataSource="${datasource}">
-      SELECT RunNumber, ComputedTotal
+      SELECT RunNumber, ComputedTotal, NoShow
         FROM Performance
         WHERE TeamNumber = <c:out value="${param.TeamNumber}"/>
           AND Performance.Tournament = '<c:out value="${tournament}"/>'
@@ -30,7 +30,12 @@ pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection))
       <c:forEach items="${result.rows}" var="row">
         <tr>
           <td><c:out value="${row.RunNumber}"/></td>
-          <td><c:out value="${row.ComputedTotal}"/></td>
+          <c:if test="${row.NoShow == 1}" var="test">
+            <td>No Show</td>
+          </c:if>
+          <c:if test="${row.NoShow != 1}">
+            <td><c:out value="${row.ComputedTotal}"/></td>
+          </c:if>
         </tr>
       </c:forEach>
     </table>
