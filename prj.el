@@ -1,7 +1,9 @@
 ;;This file assumes that the following variables and methods exist:
-(jde-set-project-name "fll-2002")
+;; catalina-home - points to tomcat install directory
+
+(jde-set-project-name "fll-sw")
 (let ((project-root (file-name-directory load-file-name))
-      (catalina-home "/opt/jakarta"))
+      )
   (jde-set-variables
    '(jde-run-working-directory (expand-file-name "build/" project-root))
    '(jde-compile-option-directory (expand-file-name "build/" project-root))
