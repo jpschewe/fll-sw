@@ -1,3 +1,5 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
+      
 <%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="org.w3c.dom.Document" %>
