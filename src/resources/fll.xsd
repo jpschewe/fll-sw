@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	    targetNamespace="http://www.hightechkids.org"
+            xmlns="http://www.hightechkids.org"
+            elementFormDefault="qualified" >
+  <xsd:element name="fll">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="Performance" />
+        <xsd:element ref="subjectiveCategory" minOccurs="0" maxOccurs="unbounded" />
+      </xsd:sequence>
+      <xsd:attribute name="title" type="xsd:string" use="required" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="Performance">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:sequence maxOccurs="unbounded">
+          <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+            <xsd:element ref="goal" maxOccurs="unbounded" />
+          </xsd:sequence>
+          <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+            <xsd:element ref="restriction" maxOccurs="unbounded" />
+          </xsd:sequence>
+          <xsd:element ref="tiebreaker" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:sequence>
+      <xsd:attribute name="minimumScore" type="xsd:integer" default="0">
+        <xsd:annotation>
+          <xsd:documentation>minimum score allowed in the performance scoring</xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+
+      <xsd:attribute name="weight" type="xsd:float" default="1.0">
+        <xsd:annotation>
+          <xsd:documentation>
+	    Weight this category has.  Should be a number between 0 and 1.
+	  </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="subjectiveCategory">
+    <xsd:complexType>
+      <xsd:sequence maxOccurs="unbounded">
+        <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+          <xsd:element ref="goal" maxOccurs="unbounded" />
+        </xsd:sequence>
+      </xsd:sequence>
+      <xsd:attribute name="name" type="databaseName" use="required" />
+
+      <xsd:attribute name="weight" type="xsd:float" default="1.0">
+        <xsd:annotation>
+          <xsd:documentation>
+	    Weight this category has.  Should be a number between 0 and 1.
+	  </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="goal">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="value" type="databaseName" minOccurs="0" maxOccurs="unbounded" />
+      </xsd:sequence>
+      <xsd:attribute name="name" type="databaseID" use="required" />
+
+      <xsd:attribute name="title" type="xsd:string" use="required" />
+
+      <xsd:attribute name="description" type="xsd:string" />
+
+      <xsd:attribute name="min" type="xsd:integer" default="0">
+        <xsd:annotation>
+	  <xsd:documentation>ignored if enumerated values exist</xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+
+      <xsd:attribute name="max" type="xsd:integer" default="1">
+        <xsd:annotation>
+	  <xsd:documentation>ignored if enumerated values exist</xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+
+      <xsd:attribute name="multiplier" type="xsd:integer" default="1">
+        <xsd:annotation>
+	  <xsd:documentation>ignored for subjective goals</xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+
+      <xsd:attribute name="initialValue" type="xsd:integer" default="0">
+        <xsd:annotation>
+	  <xsd:documentation>ignored for subjective goals</xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="restriction">
+    <xsd:annotation>
+      <xsd:documentation>lower bound and upper bound are inclusive</xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="term" maxOccurs="unbounded" />
+      </xsd:sequence>
+      <xsd:attribute name="lowerBound" type="xsd:integer" default="-512" />
+      <xsd:attribute name="upperBound" type="xsd:integer" default="512" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="term">
+    <xsd:complexType>
+      <xsd:attribute name="coefficient" type="xsd:integer" default="1" />
+      <xsd:attribute name="goal" type="xsd:IDREF" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="tiebreaker">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="test" maxOccurs="unbounded">
+          <xsd:complexType>
+            <xsd:attribute name="goal" type="xsd:IDREF" use="required" />
+            <xsd:attribute name="winner" type="highlow" use="required" />
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:simpleType name="databaseName">
+    <xsd:restriction base="xsd:string">
+      <xsd:pattern value="\p{L}[\p{L}\p{Nd}]*" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="databaseID">
+    <xsd:restriction base="xsd:ID">
+      <xsd:pattern value="\p{L}[\p{L}\p{Nd}]*" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="highlow">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="high" />
+      <xsd:enumeration value="low" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+</xsd:schema>

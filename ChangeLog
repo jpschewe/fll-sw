@@ -1,0 +1,300 @@
+2003-01-29  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/report/performanceRunReport.jsp: Queries.getDivisions()
+	requires a connection to be passed in.
+
+2003-01-25  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/web/report/ScoreGroupScores.java
+	(generateCategoryTable): Fixed query to only show teams from the
+	score group being displayed in the table as well as only showing
+	score groups for the appropriate division.
+
+2003-01-23  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/report/finalComputedScores.jsp: Shrink point size to try and
+	make sure everything prints on one page landscape.
+
+2003-01-19  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/playoff/adminbrackets.jsp: Split out the admin version of
+	the brackets into a separate page to make things easier to manage,
+	even though some code is duplicated
+
+	* web/playoff/remoteControlBrackets.jsp: Added another set of
+	brackets that are completly controlled through application
+	variables, so we don't have to keep hitting the next round button
+	on a scrolling display.
+
+2003-01-18  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/scoreboard/top10.jsp: Make sure that the top 10 ranks
+	are correct in the case of a tie
+
+	* web/scoreboard_800/top10.jsp: Make sure that the top 10 ranks
+	are correct in the case of a tie
+
+	* web/scoreEntry/scoreEntry.jsp: Changed confirm prompt when
+	editing scores to let the user know that only the changes will be
+	lost.
+
+	* build.xml: Fixed spelling error in name of directory that
+	subjective zip uses.
+
+	* src/fll/web/report/ScoreGroupScores.java
+	(generateCategoryTable): Added report that shows scores by
+	category and score group for finalist judging.
+
+2003-01-09  Jon Schewe  <jpschewe@mtu.net>
+
+	* Labeled fll_01_09_2003 and published
+
+2003-01-07  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/resources/challenge-highschool.xml: Added restriction to
+	ensure that rocks returned to base is never greater than rocks
+	removed from soccer field
+
+2002-12-28  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/Utilities.java (Utilities): Added Common NumberFormat
+	instance for other classes to use to try and lower the overhead of
+	getting an instance.
+
+	* web/scoreboard_800/top10.jsp: Added support for divisions other
+	than 1 and 2.
+
+	* web/scoreboard/top10.jsp: Added support for divisions other than
+	1 and 2.
+
+	* src/fll/xml/XMLUtils.java: Added division to the judges table.
+	Now a judge may judge a division or all divisions and then the xml
+	file sent to the subjective scoring app will only contain entries
+	for the appropriate judge based on this information.
+
+2002-12-27  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/setup/index.jsp: Now allow the database to be generated from
+	the web for the standard setup, rather than using a separate Java
+	application.  Also allows one to upload the challenge.xml
+	document.  Now challenge.xml document is stored in the database.
+
+2002-12-24  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/admin/index.jsp: Allow one to change the number of seeding
+	rounds from the web.
+
+	* web/scoreEntry/select_team.jsp: Only allow one to select run
+	numbers to edit that have been completed by some team. 
+
+	* web/scoreEntry/scoreEntry.jsp: Make sure that only the most
+	recently entered run can be deleted
+
+	* web/instructions.jsp: Added instructions on what to do if a team
+	doesn't show up.
+
+	* web/admin/verifyTeams.jsp: Fixed bug where tournament teams
+	application variables are not initialized after team upload.
+
+	* src/fll/web/admin/UploadTeams.java: Removed some debugging and
+	fixed error where the last column in the datafile was not
+	recognized.
+
+	* src/resources/challenge.xml: Removed reference to fll.css
+	because it cause me to not be able to look at the document
+	directly in IE at a region tournament.
+
+	* src/resources/fll.xsd: Added annotation elements so that XML
+	tools can properly display information about how the schema is to
+	be used.
+
+	* web/initializeApplicationVars.jsp: Put all code in it's own
+	scope so that this file may be included multiple times in the same
+	document (required for the developer page)
+
+	* web/footer.jsp: Added warning message when using a database
+	other than "fll"
+
+	* web/developer/index.jsp: Added page to do change databases and
+	to reinitialize the database from the XML document.  This is just
+	to make it easier to do development. 
+
+2002-12-18  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/admin/index.jsp: Sort regions by name of region in drop down
+	list
+
+	* src/fll/web/admin/UploadSubjectiveData.java
+	(saveSubjectiveData): Changed delete/insert into a replace
+	statement to minimize chance of transaction problems
+
+2002-12-17  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/web/report/FinalComputedScores.java: Sort by team number
+	in the case of a tie, just so we get the same report every time
+
+	* web/scoreboard/allteams.jsp (rs): Scroll the scoreboard on fewer
+	records
+
+	* src/fll/xml/ImportDB.java (importDatabase): Class for importing
+	score data from another database
+
+	* src/fll/web/admin/Judges.java (commitData): Added tournament
+	column to the Judges table, thus allowing me to merge all of the
+	tournament databases and still be able to compute scores for each
+	one.
+
+	* src/fll/web/admin/Tournaments.java: Fixed bug where tournaments
+	get deleted from the edit page (at least I think I got it)
+
+2002-12-15  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/xml/GenerateDB.java (generateDB): Fixed typo in
+	populating TournamentParameters
+
+2002-12-14  Jon Schewe  <jpschewe@mtu.net>
+
+	* Labeled fll_12_14_2002 and published
+
+	* web/scoreboard_800/allteams.jsp: Start scrolling the all teams
+	list after 2 scores.
+
+	* src/fll/web/playoff/Playoff.java (getDisplayString): Display "No
+	Show" in the playoff brackets for no show teams.  
+
+	* web/playoff/brackets.jsp: Make sure that admin brackets don't
+	scroll and the regular brackets do
+
+	* src/fll/web/admin/UploadSubjectiveData.java
+	(saveSubjectiveData): remove debugging output
+
+	* src/fll/xml/GenerateDB.java (generateDB): Populate Regions and
+	TournamentParameters with default values
+
+2002-12-13  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/xml/ChallengeParser.java: Handle case where reference to
+	xsd file does not end in a slash.  
+
+	* published to website with fix for score entry and yes/no
+	
+2002-12-12  Jon Schewe  <jpschewe@mtu.net>
+	* published to website
+	
+2002-12-10  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/playoff/brackets.jsp: Added ability to show brackets without
+	title and scrolling so one can print the brackets out.
+
+	* src/fll/web/scoreEntry/ScoreEntry.java: Show YES or NO in the
+	count column for yes/no goals.
+
+	* web/report/summarizePhase1.jsp: Added a column to show how many
+	teams were scored by each score group.  This should help catch
+	errors in data entry before one gets to the actual reports.
+
+2002-12-09  Jon Schewe  <jpschewe@mtu.net>
+
+	* build.xml: Added commands to create generatedb.zip, which is
+	used to generate a blank database off of the XML document.
+
+	* src/resources/challenge.xml: Fixed bug where one could enter
+	some number of penalty loops less than 4 and 0 loops in our market.
+
+	* src/fll/Queries.java: Pay attention to minimumScore in the
+	performance element
+
+	* src/fll/xml/GenerateDB.java (generateGoalColumnDefinition):
+	Allow all goal columns to be null.  This will allow one to delete
+	subjective scores.
+
+	* scoreboard_800: added scoreboard that works on an 800x600 screen
+	
+2002-12-08  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/xml/XMLWriter.java (write): Added indentation and
+	carriage returns to the output XML files. 
+
+	* build.xml: Add ALL source to src.zip when making a distribution
+
+	* src/resources/challenge.xml: Fixed naming of teamwork subcategories
+
+	* web/scoreEntry/select_team.jsp: Selecting run numbers greater
+	than 7 always returned the value 6.  This is now fixed.
+
+2002-12-05  Jon Schewe  <jpschewe@mtu.net>
+	* published to website
+	
+2002-11-30  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/playoff/brackets.jsp: Set the session variable currentRound
+	when switching rounds.  This should prevent byes being given in
+	later rounds like what happened at the New Hope tournament. 
+
+2002-11-26  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/report/summarizePhase1.jsp: split computing summarized
+	scores into two phases so that one can check the score groups
+	before it just blows up
+
+2002-11-25  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/footer.jsp: Setup so that can be installed in any context
+	and will break out of a frameset
+
+	* src/fll/web/report/FinalComputedScores.java (generateReport):
+	Fixed query for report that didn't check FinalScores.Tournament
+
+	* src/fll/Utilities.java (createDBConnection): Added ability to
+	create a connection to a database other than fll
+
+2002-11-24  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/errorHandler.jsp: provide a nicer page for errors
+
+	* web/scoreEntry/scoreEntry.jsp: Allow one to delete performance
+	scores from the web
+
+	* web/credits/credits.jsp: Added licenses for MySQL, Tomcat and Java
+
+	* web/troubleshooting/index.jsp: Added page for troubleshooting
+	errors
+
+	* web/admin/index.jsp: Make sure that TournamentTeams gets
+	reinitialized when the current tournament is changed via the web
+
+	* web/admin/commitTeam.jsp: Make sure TournamentTeams gets
+	reinitialized when a team is edited or added from the web
+
+	* web/admin/uploadTeams.jsp: Make sure TournamentTeams gets
+	reinitialized when teams are uploaded
+
+	* src/fll/web/admin/Tournaments.java: Make sure TournamentTeams
+	get reinitialized when a Tournament is edited
+
+	* web/scoreboard: modified scoreboard pages to use the scores from
+	current tournament, rather than just state.
+
+2002-11-23  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/web/report/CategoryScores.java: When generating the
+	tables for category scores, pay attention to the catgory.  Oops.
+
+	* src/fll/model/SubjectiveTableModel.java: Allow users to delete
+	scores in the subjective scoring app.
+
+	* web/scoreboard/allteams.jsp: Make sure to order by TeamNumber
+	after ordering by Organization so that all scores for a team are
+	grouped together.
+
+	* web/scoreboard/alldata.jsp: Make sure to order by TeamNumber
+	after ordering by Organization so that all scores for a team are
+	grouped together.
+
+	* web/scoreboard/allteams.jsp: Add some space to the top of
+	allteams.jsp so the first team doesn't scroll by so fast.
+	Decrease the number of entries required to determine when
+	scrolling of the scoreboard can start
+
+
+

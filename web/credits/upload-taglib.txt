@@ -1,0 +1,43 @@
+http://www.servletsuite.com/license.htm
+
+LICENSE
+
+    All products from this site are free for any non-commercial and non-goverment use.
+
+Versions you can download from our site are fully working versions (no time-bombs), but some of them may have small functional restrictions (extra © notice, restricted set of pages etc.). All exceptions from that will be directly marked on the relevant pages.
+
+    So, please contact with us in case you need commercial license (binary or source code) or maybe have some another  suggestions about our products.
+ 
+
+E-mail:Coldbeans Software
+
+SOFTWARE LICENSE AGREEMENT
+
+This Agreement is between Coldbeans Software and Licensee as each is defined below. By installing the Software Products, as defined below, or otherwise agreeing in writing, Coldbeans Software and Licensee agree to the following terms and conditions. Each subsequent installation of or order placed by Licensee for the Software Products or Technical Data will also be subject to these terms and conditions.
+
+"Software Products" shall mean the collection of Java components of the Coldbeans software products delivered by Coldbeans or Distributor to Licensee
+
+"Licensee" shall mean the entity or individual, either on the individual's behalf or on behalf of the entity that individual represents, who installs the Software Products or otherwise agrees to be bound by the terms and conditions contained in this Agreement. Further, each individual representing an entity represents and warrants that he/she has the authority to bind the entity to the terms and conditions of this Agreement.
+ 
+
+LICENSE GRANT
+
+Coldbeans Software grants to Licensee, and Licensee accepts from Coldbeans Software, a non-exclusive license, without right to sublicense to use the Software Products and Technical Data.
+
+Coldbeans Software products delivered by Coldbeans or Distributor to Licensee initially at no charge and Coldbeans grants to Licensee free use of software products in any non-commercial and non-goverment purposes.
+ 
+
+PROPRIETARY NOTICES
+
+Licensee shall not remove or alter Coldbeans Software or any third party's ownership, trademark, copyright, or other proprietary notices on the Software Products or Technical Data.
+
+USE RESTRICTIONS
+
+Licensee shall not reverse engineer, decompile or disassemble  the Software Products.
+ 
+
+WARRANTY DISCLAIMER, LIMITATION OF LIABILITY.
+
+ 1.   COLDBEANS SOFTWARE MAKES NO WARRANTY OR REPRESENTATION, EXPRESSED  OR IMPLIED, REGARDING THE MERCHANTABILITY, QUALITY,  FUNCTIONALITY, PERFORMANCE OR FITNESS OF THE SOFTWARE.
+
+ 2.   COLDBEANS WILL IN NO EVENT BE LIABLE FOR DIRECT, INDIRECT,  SPECIAL, CONSEQUENTIAL, OR INCIDENTAL DAMAGES RESULTING  FROM ANY DEFECT, ERROR OR OMISSION IN THE SOFTWARE OR  MANUAL OR FROM ANY OTHER EVENTS INCLUDING, BUT NOT  LIMITED TO ANY INTERRUPTION OF SERVICE, LOSS OF BUSINESS,  LOSS OF PROFITS OR GOOD WILL, LEGAL ACTION OR ANY OTHER CONSEQUENTIAL DAMAGES, EVEN IF COLDBEANS OR AN COLDBEANS   AUTHORIZED  REPRESENTATIVE HAS BEEN ADVISED OF THE   POSSIBILITY OF SUCH DAMAGES.

@@ -1,0 +1,181 @@
+--- HIGH ---
+
+- windows installer -> Eric 10/7/02
+
+- workflow documentation -> Bruce 10/2/02
+
+- fix admin brackets to allow refreshes to work.  Currently if one hits
+refresh after advancing, it advances again
+
+- make sure remote brackets always recompute the list of teams.  If the
+brackets go forward before a winner is decided, it'll never be displayed until
+the brackets go back a run and then forward to force a recompute
+
+- merge in changes to scoreboard pages that Trent made
+  - scoreboard*/top10.jsp -> changed red/green assignment for div1/div2
+  - scoreboard*/alldata.jsp -> changed SQL ORDER BY to Division, Team#
+
+- move software to SourceForge and put this list into the bug tracking.  This
+will also make it easier for others to subscribe to updates and to have
+discussions about features...
+
+
+--- MEDIUM ---
+
+- don't allow subjective datafile to be downloaded unless the judges are all
+correctly assigned
+
+- add success pages for changes that currently just go back to the same
+page that started them.  Example: standardize score
+
+- after sorting language used column doesn't work right in subjective scoring
+application
+
+- query to show judges and number of teams scored during compute summarized
+scores needs to handle the case where the same judge scores multiple
+categories.  Currently this just shows twice hte number of teams
+
+- no team name should be blank on webpages rather than 'null' or show the
+school
+
+- default sort in subjective score app should be by team number
+
+- Need to move off of a cell or hit enter to get score entered in subjective
+scoring app.  This is a real problem when switching categories because the
+last score doesn't get entered.  Figure out how to fix this.
+
+- make scrolling work in Mozilla
+
+- get all of the styles done with stylesheets, I'm getting tired of copying
+the same information into the body tags for the background images, etc.
+
+- write out XML in a more human readable form when writing out subjective XML
+files
+
+- control of all display pages via application variables
+
+- need a second PC back in the score room at state for doing computations,
+printing, etc. at state
+
+- need to display admin brackets full time in the performance area for
+announcer and refs at state 
+
+--- LOW ---
+
+- need welcome screen with logo
+
+- do a better job of figuring out how many runs to put in the drop down for
+controlling the brackets  
+
+- add report that shows all performance scores for a team
+
+- remove extra whitespace in the title of the brackets pages (both 1024 and 800)
+
+- add a total column to the subjective scoring app
+
+- +/- buttons on score entry page should max/min the score instead of refusing
+to change the score when close to a limit.  For example if the score is 3 and
+-5 is pressed the score should change to be 0.
+
+- make checkbox and choice box on score entry select team page obviously for
+score edit
+
+- allow one to specify styles in XML file so different sites can customize
+look and feel.  Maybe allow specification someowhere else.
+
+
+--- Next Year ---
+
+- add jspc to build and figure out how to get jspc to build directories
+properly
+
+- Use Java Standard Tag Library to minimize amount of Java code in our jsps.
+
+- make the edit tournaments page use update rather than wiping out the whole
+table?
+
+- figure out how to handle database permissions.  We can just have one user
+with all permissions or multiple users with different levels of permissions.
+We just need to make sure all of the code uses the correct user
+
+- move subjective score entry stuff to its own page
+
+- don't show scores in a bracket if a bye
+
+- add a required attribute to subjectiveCategory called title for displaing
+elements
+
+- rename Regions table to Tournaments and Regions column in that table to
+Name.  Also rename Teams.Region to Teams.tournament.
+
+- support hierarchical tournaments
+
+- support for enumerated goals - Queries.updateScoreTotals() needs to be
+modified - scoreEntry.jsp needs to be modified
+
+- need better error reporting in
+fll.ScoreStandardization.checkDataConsistency(Connection).  In the original VB
+a result set is queried as a table.  I'm not sure what's the best way to do
+this, so for now it just spits back an error.
+
+- Better interface on the subjective score app.  Rather than showing all
+possible rows, just show a few and when the user tabs off the bottom add a new
+row.
+
+- compute bracket order rather than using hard coded SEED_ARRAY in
+Playoff.java
+
+- merge common code between scoreboard and scoreboard_800
+
+- fix refresh of pages so we don't have to modify the browser settings to
+override the cache.  Use 'Pragma: no-cache' header?
+  1) Links to multiple cache sites: http://w6.metronet.com/~wjm/tomcat/2000/Dec/msg00249.html
+  2) patch Tomcat: http://www.javaclue.org/tomcat/patch32/dopatch.html#cachecontrol
+
+- make sorting/resizing in the subjective score application sticky when
+changing categories and back
+
+- button on the scoreboard to get back to the main index
+
+- button on the playoff brackets to get back to the main index
+
+- be consistent about Region vs Tournament
+
+- be consistent about where one passes in the current tournament and where one
+gets it from the database.  Just remove all places where it's passed in and
+always get it from the database.
+
+- make sure database connections get closed?  For now we just let Tomcat or
+MySQL take care of it
+
+- build app that will package up database and results to be sent back to us
+
+- put up a warning when there are question marks in the final reports
+
+- make some links open new window
+  - e.g. scoreboard and brackets.
+
+- need winzip on cd. or use jar in the instructions
+   - I had to resort to jar.exe to unzip the subjective app at Lino Lakes
+
+- add title to subjective cateogory elements and show them in the subjective
+score application
+
+- build new cvs tree for further development: remove 2002 from path, move
+ChangeLog up to top of tree, get rid of extra directories like implementation,
+put libaries in lib directory rather than inside WEB-INF.  Perhaps just put on
+SourceForge.
+
+- change division to be a text value, rather than a number?
+
+- allow one to change TournamentParameters table from the web.  Just need to
+add standardization params now.
+
+- remove javascript onclick actions from buttons that are used to change a
+hidden form variable to determine state.  Instead use named submit buttons and
+check for it's existance in the submitted request.  The judges page is an
+example of one that needs changing, as well as cancel on the score entry page.
+
+- use session variables on the scoreboard so that the URL doesn't change and
+cause the history to fill up.  The downside to this may be that the web
+browser won't properly reload the page.

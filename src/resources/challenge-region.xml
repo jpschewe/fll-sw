@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll xmlns="http://www.hightechkids.org"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.hightechkids.org fll.xsd"
+     title="FLL 2002 High School Challenge: City Sights" >
+
+  <Performance>
+
+    <goal name="Windmill"
+	  title="Windmill Spun"
+	  multiplier="32" />
+
+    <goal name="Barrels"
+	  title="Barrels at Base"
+	  max="4"
+	  multiplier="10" />
+
+    <goal name="Rocks"
+	  title="Soccer Rocks Off"
+	  max="4"
+	  multiplier="8" />
+
+    <goal name="LoopsOff"
+	  title="Loops Off"
+	  max="4"
+	  multiplier="8" />
+
+    <!-- just for tie breakers -->
+    <goal name="PenaltyLoops"
+	  title="Loops removed as penalties"
+	  max="4"
+	  multiplier="0" />
+
+    <!-- market -->
+    <goal name="MarketOurs"
+	  title="Market: Ours in ours"
+	  max="12"
+	  multiplier="4"
+	  initialValue="4" />
+
+    <goal name="MarketRecieved"
+	  title="Market: They gave us"
+	  max="8"
+	  multiplier="4" />
+
+    <goal name="MarketTheirs"
+	  title="Market: We gave them"
+	  max="8"
+	  multiplier="12" />
+
+    <restriction lowerBound="0"
+		 upperBound="8">
+      <term goal="MarketOurs" />
+      <term goal="MarketTheirs" />
+      <term goal="PenaltyLoops" />
+      <term coefficient="-1"
+	    goal="LoopsOff" />
+    </restriction>
+
+    <restriction lowerBound="4">
+      <term goal="MarketOurs" />
+      <term goal="PenaltyLoops" />
+    </restriction>
+
+    <goal name="BG"
+	  title="Bundles Ground"
+	  max="4"
+	  multiplier="6" />
+
+    <goal name="B1"
+	  title="Bundles 1st"
+	  max="4"
+	  multiplier="7" />
+
+    <goal name="B2"
+	  title="Bundles 2nd"
+	  max="4"
+	  multiplier="8" />
+
+    <goal name="B3"
+	  title="Bundles 3rd"
+	  max="4"
+	  multiplier="9" />
+
+    <goal name="B4"
+	  title="Bundles 4th"
+	  max="4"
+	  multiplier="10" />
+
+    <restriction lowerBound="0"
+		 upperBound="4">
+      <term goal="BG" />
+      <term goal="B1" />
+      <term goal="B2" />
+      <term goal="B3" />
+      <term goal="B4" />
+    </restriction>
+
+    <!-- houses -->
+    <goal name="HouseSingle"
+	  title="Red Houses: Single"
+	  max="3"
+	  multiplier="8" />
+
+    <goal name="HouseDouble"
+	  title="Red Houses: Double"
+	  multiplier="28" />
+
+    <goal name="HouseTriple"
+	  title="Red Houses: Triple"
+	  multiplier="40" />
+
+    <restriction lowerBound="0"
+		 upperBound="3">
+      <term goal="HouseSingle" />
+      <term coefficient="2"
+	    goal="HouseDouble" />
+      <term coefficient="3"
+	    goal="HouseTriple" />
+    </restriction>
+
+    <goal name="Bridge"
+	  title="Bridge Down"
+	  multiplier="32" />
+
+    <goal name="Bushes"
+	  title="Bushes/Trees Down"
+	  max="8"
+	  multiplier="-4" />
+
+    <goal name="Interference"
+	  title="Did the team deliberately interfere with the other team?"
+	  multiplier="0" />
+
+    <tiebreaker>
+      <test goal="Interference" winner="low" />
+      <test goal="PenaltyLoops" winner="low" />
+      <test goal="Bushes" winner="low" />
+      <test goal="MarketTheirs" winner="high" />
+      <test goal="Barrels" winner="high" />
+      <test goal="B4" winner="high" />
+      <test goal="B3" winner="high" />
+      <test goal="B2" winner="high" />
+      <test goal="B1" winner="high" />
+      <test goal="BG" winner="high" />
+      <test goal="MarketOurs" winner="high" />
+      <test goal="Windmill" winner="high" />
+      <test goal="HouseTriple" winner="high" />
+      <test goal="HouseDouble" winner="high" />
+      <test goal="HouseSingle" winner="high" />
+      <test goal="LoopsOff" winner="high" />
+      <test goal="Bridge" winner="high" />
+      <test goal="Rocks" winner="high" />
+    </tiebreaker>
+
+  </Performance>
+
+  <subjectiveCategory name="InnovativeDesign">
+    <goal name="inFunction"
+          title="Creativity in Function"
+          min="1"
+          max="20" />
+    <goal name="Uniqueness"
+          title="Uniqueness"
+          min="1"
+          max="20" />
+    <goal name="inDesignProcess"
+          title="Creativity in Design Process"
+          min="1"
+          max="20" />
+    <goal name="inDesignAndAppearance"
+          title="Creativity in Design and Appearance"
+          min="1"
+          max="20" />
+    <goal name="OverallCreativity"
+          title="Overall Design and Integration"
+          min="1"
+          max="20" />
+  </subjectiveCategory>
+
+  <subjectiveCategory name="RobustDesign">
+    <goal name="Structural"
+          title="Structural Design"
+          min="1"
+          max="20" />
+    <goal name="Locomotion"
+          title="Locomotion"
+          min="1"
+          max="20" />
+    <goal name="Manipulation"
+          title="Manipulation"
+          min="1"
+          max="20" />
+    <goal name="Navigation"
+          title="Navigation"
+          min="1"
+          max="20" />
+    <goal name="OverallDesign"
+          title="Overall Design and Integration"
+          min="1"
+          max="20" />
+  </subjectiveCategory>
+
+
+  <subjectiveCategory name="Presentation">
+    <goal name="Research"
+          title="Research"
+          min="1"
+          max="20" />
+    <goal name="Knowledge"
+          title="Knowldege"
+          min="1"
+          max="20" />
+    <goal name="ChallengeSpecific"
+          title="Challenge Specific"
+          min="1"
+          max="20" />
+    <goal name="Presentation"
+          title="Presentation"
+          min="1"
+          max="20" />
+    <goal name="PresentationInGeneral"
+          title="In General"
+          min="1"
+          max="20" />
+  </subjectiveCategory>
+
+  <subjectiveCategory name="Programming">
+    <goal name="Language"
+          title="Language used">
+      <value>RIS</value>
+      <value>RoboLab</value>
+      <value>Unknown</value>
+    </goal>
+    <goal name="UseOfLanguage"
+          title="Use of language"
+          min="1"
+          max="20" />
+    <goal name="Modularity"
+          title="Modularity/Absraction"
+          min="1"
+          max="20" />
+    <goal name="SensorControl"
+          title="Sensor Control"
+          min="1"
+          max="20" />
+    <goal name="Design"
+          title="Design"
+          min="1"
+          max="20" />
+    <goal name="ProgrammingInGeneral"
+          title="In General"
+          min="1"
+          max="20" />
+  </subjectiveCategory>
+
+  <subjectiveCategory name="Teamwork">
+    <goal name="TeamIntegration"
+          title="Team Integration"
+          min="1"
+          max="20" />
+    <goal name="Respect"
+          title="Respect"
+          min="1"
+          max="20" />
+    <goal name="FocusedEffort"
+          title="Focused Effort"
+          min="1"
+          max="20" />
+    <goal name="Consideration"
+          title="Participation"
+          min="1"
+          max="20" />
+    <goal name="DecisionSolving"
+          title="Decision Making and Problem Solving"
+          min="1"
+          max="20" />
+  </subjectiveCategory>
+
+</fll>
