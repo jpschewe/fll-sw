@@ -11,6 +11,8 @@ import fll.Utilities;
 
 import fll.xml.ChallengeParser;
 
+import java.io.IOException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,9 +21,13 @@ import java.sql.Statement;
 
 import java.text.ParseException;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.jsp.JspWriter;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -376,15 +382,14 @@ final public class Playoff {
   /**
    * Defaults showScore to true.
    * 
-   * @see #getDisplayString(Connection, String, int, Team, Team, boolean)
+   * @see #getDisplayString(Connection, String, int, Team, boolean)
    */
   public static String getDisplayString(final Connection connection,
                                         final String currentTournament,
                                         final int runNumber,
-                                        final Team team,
-                                        final Team otherTeam)
+                                        final Team team)
     throws IllegalArgumentException, SQLException {
-    return getDisplayString(connection, currentTournament, runNumber, team, otherTeam, true);
+    return getDisplayString(connection, currentTournament, runNumber, team, true);
   }
   
   /**
@@ -394,8 +399,6 @@ final public class Playoff {
    * @param currentTournament the current tournament
    * @param runNumber the current run, used to get the score
    * @param team team to get display string for
-   * @param otherTeam team on the other side of the table, used to check for
-   * BYE runs, may be null
    * @param showScore if the score should be shown
    * @throws IllegalArgumentException if teamNumber is invalid
    * @throws SQLException on a database error
@@ -404,7 +407,6 @@ final public class Playoff {
                                         final String currentTournament,
                                         final int runNumber,
                                         final Team team,
-                                        final Team otherTeam,
                                         final boolean showScore)
     throws IllegalArgumentException, SQLException {
     if(Team.BYE.equals(team)) {
@@ -425,11 +427,9 @@ final public class Playoff {
         if(isNoShow(connection, currentTournament, team, runNumber)) {
           sb.append("No Show");
         } else {
-          if(!Team.BYE.equals(otherTeam)) {
-            //only display score if it's not a bye
-            sb.append(getPerformanceScore(connection, currentTournament, team, runNumber));
-          }
-        }
+          //only display score if it's not a bye
+          sb.append(getPerformanceScore(connection, currentTournament, team, runNumber));
+        }          
         sb.append("</font>");
       }
       return sb.toString();
@@ -450,6 +450,153 @@ final public class Playoff {
       }
     }
     return null;
+  }
+
+  /**
+   * Output the table for the printable brackets to out
+   */
+  public static void displayPrintableBrackets(final Connection connection,
+                                              final Document challengeDocument,
+                                              final String division,
+                                              final JspWriter out)
+    throws IOException, SQLException, ParseException {
+  
+    final Map tournamentTeams = Queries.getTournamentTeams(connection);
+    final String currentTournament = Queries.getCurrentTournament(connection);
+  
+    final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
+  
+    //initialize currentRound to contain a full bracket setup
+    List tempCurrentRound = buildInitialBracketOrder(connection, division, tournamentTeams);
+    if(tempCurrentRound.size() > 1) {
+      out.println("<table align='center' width='100%' border='1' cellpadding='3' cellspacing='0'>");
+      
+      //compute number of runs needed to complete the playoffs
+      out.println("<tr>");
+      final int initialBracketSize = tempCurrentRound.size();
+      int numRuns = 1;
+      while(Math.pow(2, numRuns) < initialBracketSize) {
+        out.println("<th colspan='2'>Playoff Round " + numRuns + "</th>");
+        numRuns++;
+      }
+      out.println("<th colspan='2'>Playoff Round " + numRuns + "</th>");
+      numRuns++;
+      out.println("<th colspan='2'>Playoff Round " + numRuns + "</th>");
+      out.println("</tr>");
+
+      //the row at which the last team was displayed
+      int[] lastTeam = new int[numRuns];
+      Arrays.fill(lastTeam, 0);
+      //the teams for a given round
+      Iterator[] currentRoundTeams = new Iterator[numRuns];
+      //the bracket that will be displayed next
+      int[] bracketIndex = new int[numRuns];
+      Arrays.fill(bracketIndex, 1);
+      //the team that will be displayed next
+      int[] teamIndex = new int[numRuns];
+      Arrays.fill(teamIndex, 1);
+      
+      for(int tempRunNumber=0; tempRunNumber<numRuns; tempRunNumber++) {
+        //save off the team order for later 
+        currentRoundTeams[tempRunNumber] = tempCurrentRound.iterator();
+    
+        final List newCurrentRound = new LinkedList();
+        final Iterator prevIter = tempCurrentRound.iterator();
+        while(prevIter.hasNext()) {
+          final Team teamA = (Team)prevIter.next();
+          if(prevIter.hasNext()) {
+            final Team teamB = (Team)prevIter.next();
+            final Team winner = pickWinner(connection, challengeDocument, teamA, teamB, tempRunNumber+numSeedingRounds+1);
+            newCurrentRound.add(winner);
+          } else {
+            //handle finals
+            newCurrentRound.add(teamA);
+          }
+        }
+        tempCurrentRound = newCurrentRound;
+      }
+  
+      //Now create rows, 4 per initial bracket, two columns for each playoff round
+      //row is 1 based
+      //playoffRunNumber is 0 based for array indexing
+      for(int row=1; row<=initialBracketSize*4; row++) {
+        out.println("<tr>");
+        for(int playoffRunNumber=0; playoffRunNumber<numRuns; playoffRunNumber++) {
+          final boolean evenTeamIndex = (teamIndex[playoffRunNumber] % 2 == 0);
+          if( (0 == lastTeam[playoffRunNumber] //haven't seen a team yet
+               && ( (row == ((1 << (playoffRunNumber+2))/2)-1) // first team in a later bracket
+                    || (row ==1 && playoffRunNumber == 0) )) // first team first round
+              || ((row - lastTeam[playoffRunNumber]) == (1 << (playoffRunNumber+2))) ) { //later teams
+            
+            //keep track of where we last output a team
+            lastTeam[playoffRunNumber] = row;
+            //team information
+            final Team team = (Team)currentRoundTeams[playoffRunNumber].next();
+            out.println("<td class='Leaf' width='200'>");
+            out.println(getDisplayString(connection, currentTournament, (playoffRunNumber+numSeedingRounds+1), team, false));
+            
+            out.println("</td>");
+
+            if(evenTeamIndex) {
+              //skip for bridge
+              out.println("<!-- skip column for bridge -->");
+            } else {
+              //bridgetop
+              out.println("<td class='BridgeTop' width='10'>&nbsp;</td>");
+            }
+            
+            teamIndex[playoffRunNumber]++;
+          } else if( (row - lastTeam[playoffRunNumber]) == 1
+                     && 0 != lastTeam[playoffRunNumber]) {
+            //blank
+            out.println("<td width='200'>&nbsp;</td>");
+            if(!evenTeamIndex) {
+              //blank
+              out.println("<td width='10'>&nbsp;</td>");
+            } else {
+              if(playoffRunNumber != numRuns-1) {
+                //bridge of size 2^(playoffRunNumber+2) = 1<<(playoffRunNumber+2)
+                out.println("<td class='Bridge' rowspan='" + (1<<(playoffRunNumber+2)) + "'>&nbsp;</td>");
+              } else {
+                out.println("<td rowspan='" + (1<<(playoffRunNumber+2)) + "'>&nbsp;</td>");
+              }
+            }
+          } else if( (row - lastTeam[playoffRunNumber]) == (1 << (playoffRunNumber+2) )/2
+                     && 0 != lastTeam[playoffRunNumber] ) {
+            //bracket number
+            if(!evenTeamIndex) {
+              //blank
+              out.println("<td width='200'>&nbsp;</td>");
+              out.println("<td width='10'>&nbsp;</td>");
+            } else {
+              if(playoffRunNumber != numRuns-1) {
+                out.println("<td width='200'><font size='4'>Bracket " + bracketIndex[playoffRunNumber] + "</font><br /></td>");
+                bracketIndex[playoffRunNumber]++;
+              } else {
+                out.println("<td width='200'>&nbsp;</td>");
+              }
+              //skip for bridge
+              out.println("<!-- skip column for bridge -->");
+            }
+          } else {
+            //blank
+            out.println("<td width='200'>&nbsp;</td>");
+            if(!evenTeamIndex || 0 == lastTeam[playoffRunNumber]) {
+              //blank
+              out.println("<td width='10'>&nbsp;</td>");
+            } else {
+              //skip for bridge
+              out.println("<!-- skip column for bridge -->");
+            }
+          }
+        }
+        out.println("</tr>");
+      }
+
+      out.println("</table");
+    } else {
+      out.println("<p>Not enough teams for a playoff</p>");
+    }
   }
   
   /**

@@ -137,9 +137,9 @@ for(int index=0; currentIter.hasNext(); index++) {
         <tr> <!-- row 1 -->
           <td class='Leaf' width='200'>
 <%if(currentRound.size() > 2) {%>
-            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamA, teamB, true)%>
+            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamA, !Team.BYE.equals(teamB))%>
 <%} else {%>
-            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamA, teamB, false)%>
+            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamA, false)%>
 <%}%>
           </td>
             
@@ -173,9 +173,9 @@ for(int index=0; currentIter.hasNext(); index++) {
           <td class='Leaf' width='200'>
 <%if(currentRound.size() > 2) {%>
   <%if(currentRound.size() > 4) {%>
-            <%=Playoff.getDisplayString(connection, currentTournament, (runNumber+1), winner, null, true)%>
+            <%=Playoff.getDisplayString(connection, currentTournament, (runNumber+1), winner, true)%>
   <%} else {%>
-            <%=Playoff.getDisplayString(connection, currentTournament, (runNumber+1), winner, null, false)%>
+            <%=Playoff.getDisplayString(connection, currentTournament, (runNumber+1), winner, false)%>
   <%}%>
 <%} else {%>
                 <!-- don't show winner -->
@@ -214,9 +214,9 @@ for(int index=0; currentIter.hasNext(); index++) {
         <tr> <!-- row 5 -->
           <td class='Leaf' width='200'>
 <%if(currentRound.size() > 2) {%>
-            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamB, teamA, true)%>
+            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamB, !Team.BYE.equals(teamA))%>
 <%} else {%>
-            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamB, teamA, false)%>
+            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamB, false)%>
 <%}%>
           </td>
           <!-- skip column for A-B bar -->

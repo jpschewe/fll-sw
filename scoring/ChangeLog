@@ -1,3 +1,9 @@
+2004-01-04  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/web/playoff/Playoff.java (displayPrintableBrackets):
+	Changed admin brackets to show all playoff rounds and be nice for
+	printing (866161).
+
 2004-01-02  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/playoff/adminbrackets.jsp: Removed unneeded <br> from
