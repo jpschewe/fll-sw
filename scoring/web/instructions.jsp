@@ -11,7 +11,7 @@
         
       <h2><a name='setup'>Setup of tournament</a></h2>
 
-      <p>All links in this section are also found on the <a href="admin/index.jsp">administration page</a></p>
+      <p>Links in this section are also found on the <a href="admin/index.jsp">administration page</a></p>
       
       <ol>
         
@@ -43,24 +43,29 @@
       <h2><a name='tournament_day'>Tournament day</a></h2>
       <ul>
 
-        <li>Enter scores for the performance rounds on the <a
-        href="scoreEntry/select_team.jsp">score entry</a> page</li>
+        <li>On the display computer bring up the <a href='display.jsp'>Big
+        Screen Display</a> page.  This will display the welcome page, the
+        scoreboard and the playoff brackets as needed.  This page is
+        controlled by the <a href='admin/remoteControl.jsp'>Remote
+        Control Page</a> found under administration.</li>
 
-        <li>On the display computer bring up the <a href='display.jsp'>Big Screen Display</a>
-              page.  This will display the welcome page, the scoreboard and
-              the playoff brackets as needed.  This page is controlled by
-              the <a href='admin/remoteControl.jsp'>Remote Control</a></li>
+        <li>Enter scores for the performance rounds on the <a
+        href="scoreEntry/select_team.jsp">score entry</a> page.  I suggest
+        at least two people entering scores.  One person enteres the scores
+        and the second person goes back and checks the scores using the
+        score edit feature.  This has caught many data entry errors in
+        previous tournaments.</li>
 
         <li>Use the subjective score entry application to enter subjective
-        scores.  Note that when the application comes up there will be a row
-        for each judge per team, regardless of if that judge is definitely
-        scoring that team.  So this means there will be extra rows and you'll
-        just have to watch closely to make sure all teams are scored properly.
-        For instance if KH and KL are judging Programming, each will only
-        judge roughly have of the teams, however for each team there will be
-        two rows, on for KH and one for KL.  It's up to you to make sure
-        scores are in the correct rows.  I hope to have something better next
-        year.</li>
+        scores.  Note that when the application comes up there will be a
+        row for each judge per team in a same division, regardless of if
+        that judge is definitely scoring that team.  So this means there
+        will be extra rows and you'll just have to watch closely to make
+        sure all teams are scored properly.  For instance if KH and KL are
+        judging Programming for division 1, each will only judge roughly
+        half of the teams in division 1, however for each team there will
+        be two rows, on for KH and one for KL.  It's up to you to make sure
+        scores are in the correct rows.</li>
 
         <li>The scoreboard, welcome page and playoff brackets have a place
         at the top for text to be displayed, this can be changed from the
@@ -79,28 +84,26 @@
           
         <li>It is suggested that you by hand keep track of the brackets, in
         addition to showing them on the computer.  This makes it easier for
-        the announcer, especially when switching between divisions and it it
-        allows for a backup plan if they don't quite display right, which
-        happened at New Hope.  The way to do this is to goto the playoff page
-        for each division once all of the seeding rounds are done and fill in
-        a blank bracket on paper with the bracket order that it comes up with.
-        Be careful to write down the order correctly, otherwise you'll end up
-        matching the wrong teams against each other.  This seeding hasn't
-        shown any problems, so this should work just fine.  It's when the
-        brackets for subsequent rounds are displayed that there are sometimes
-        some problems.</li>
+        the announcer, especially when switching between divisions.  The
+        way to do this is to goto the admin playoff page (under the
+        Playoffs link on the main page) for each division once all of the
+        seeding rounds are done and fill in a blank bracket on paper with
+        the bracket order that it comes up with.  Be careful to write down
+        the order correctly, otherwise you'll end up matching the wrong
+        teams against each other.  This seeding hasn't shown any problems,
+        so this should work just fine.</li>
 
         <li>You can also print out the brackets by going to the
-        admin/printable bracket page for each division and printing that
-        out.</li>
+        admin/printable bracket page, under the Playoffs link on the main
+        index, for each division and printing that out.</li>
 
         <li>If there is a tie during playoffs the software will attempt to
         break it with the standard tie breaker defined in the software.
-        However if this is not possible TIE will be shown as the winner of a
-        round.  This means that these two teams need to compete again and
-        their scores edited, using the score entry page with the edit checkbox
-        checked, to represent the second run's score.  Then the brackets page
-        will display the new scores as it updates.</li>
+        However if this is not possible TIE will be shown as the winner of
+        a round.  This means that these two teams need to compete again and
+        their scores edited, using the score entry page with the edit
+        checkbox checked, to represent the second run's score.  Then the
+        brackets page will display the new scores as it updates.</li>
         
         <li>If you are not using the software to actually display the brackets
         then you'll have to do the tiebreakers by hand, below is the
@@ -121,7 +124,7 @@
 
         <li>Make sure you upload all data from the subjective scoring
         computers via the <a href="admin/index.jsp">administration
-        page</a></li>
+        page.</a></li>
 
         <li>Follow the compute summarized scores link on the <a
         href="report/index.jsp">reporting page</a> to summarize the scores.
