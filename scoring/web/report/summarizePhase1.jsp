@@ -1,5 +1,6 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="fll.ScoreStandardization" %>
 <%@ page import="fll.Queries" %>
@@ -18,8 +19,8 @@ Queries.ensureTournamentTeamsPopulated(application);
       
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
-final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
 final String currentTournament = Queries.getCurrentTournament(connection);
+final Map tournamentTeams = Queries.getTournamentTeams(connection);
   
 Queries.updateScoreTotals(challengeDocument, connection);
 ScoreStandardization.setSubjectiveScoreGroups(connection, challengeDocument, tournamentTeams.values());
@@ -39,7 +40,7 @@ final ResultSet rs = stmt.executeQuery("SELECT ScoreGroup,Category,COUNT(RawScor
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Summarize Scores)</title>
   </head>
 
-  <body background="../images/bricks1.gif" bgcolor="#ffffff" topmargin='4'>
+  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" topmargin='4'>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Summarize Scores)</h1>
 
     <p>Below is a list of score groups found and what categories they scored.
@@ -75,6 +76,6 @@ Utilities.closeStatement(stmt);
     the second phase of computing the scores.  This page will return you to
     the reporting menu if everything is ok.</p>
         
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>

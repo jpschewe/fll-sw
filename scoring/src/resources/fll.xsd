@@ -51,6 +51,7 @@
         </xsd:sequence>
       </xsd:sequence>
       <xsd:attribute name="name" type="databaseName" use="required" />
+      <xsd:attribute name="title" type="xsd:string" use="required" />
 
       <xsd:attribute name="weight" type="xsd:float" default="1.0">
         <xsd:annotation>

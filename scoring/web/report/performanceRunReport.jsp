@@ -1,5 +1,6 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="org.w3c.dom.Document" %>
 
@@ -33,7 +34,7 @@ final Iterator divisionIter = Queries.getDivisions(connection).iterator();
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Performance Run <%=runNumber%>)</title>
   </head>
 
-  <body background="../images/bricks1.gif" bgcolor="#ffffff" topmargin='4'>
+  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" topmargin='4'>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Performance Run <%=runNumber%>)</h1>
 
 <%
@@ -72,6 +73,6 @@ final Iterator divisionIter = Queries.getDivisions(connection).iterator();
   Utilities.closeStatement(stmt);
 %>
       
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>
