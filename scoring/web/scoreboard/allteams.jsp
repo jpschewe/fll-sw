@@ -1,6 +1,6 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
+
   
-<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Utilities" %>
 <%@ page import="fll.Queries" %>
@@ -18,7 +18,8 @@ final String sql = "SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName,
   + " WHERE Performance.Tournament = '" + currentTournament + "'"
   + " AND Teams.TeamNumber = Performance.TeamNumber"
   + " ORDER BY Teams.Organization, Teams.TeamNumber, Performance.RunNumber";
-rs = stmt.executeQuery(sql);
+final Statement stmt = connection.createStatement();
+final ResultSet rs = stmt.executeQuery(sql);
 %>
 
 <c:set var="thisURL">

@@ -1,6 +1,6 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 
-<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
+
+<%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ taglib uri="/WEB-INF/tld/taglib62.tld" prefix="up" %>
 

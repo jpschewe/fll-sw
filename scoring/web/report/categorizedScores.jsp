@@ -1,4 +1,4 @@
-<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.web.report.CategoryScores" %>
 <%@ page import="fll.Queries" %>

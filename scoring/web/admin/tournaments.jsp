@@ -1,8 +1,8 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
+
   
 <%@ page import="fll.web.admin.Tournaments" %>
   
-<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/init.jspf" %>
   
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");

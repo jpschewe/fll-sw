@@ -130,13 +130,17 @@ to be properly input into our database.
 
 ----------
 MISC:
+I've put all of the JSTL declarations at the top of init.jspf so it's not
+required on any other jsp file.  I would like it to be only in the files
+that need it, however then I sometimes end up including them twice because
+init.jspf depends on some.  This does have the side benefit of ensuring
+they're always available.  I'm not sure what this does to the overhead.
 
 Application variables we have defined in the jsp's and how to get them initialized:
-- If you add <%@ include file="initializeApplicationVars.jsp" %> to your jsp
-file you'll get the following variables.  You may have to adjust the file
-attribute to point get to the file, it's at the root of our web project.
+- <%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %> Should
+be at the top of every jsp file.  This initializes the application/session
+variables normally used:
   - "connection" (java.sql.Connection) a connection to the database with username 'fll'
-  - "adminConnection" (java.sql.Connection) a connection to the database with username 'fll_admin'
   - "challengeDocument" (org.w3c.dom.Document) the challenge.xml document
     already parsed
   - "ScorePageText" (java.lang.String) holds the text displayed at the top

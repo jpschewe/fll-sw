@@ -1,11 +1,12 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 
-<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
+
+<%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="org.w3c.dom.Document" %>
 
 <%@ page import="fll.Utilities" %>
-  
+<%@ page import="fll.Queries" %>
+
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.ResultSet" %>
 <%@ page import="java.sql.Connection" %>
@@ -15,7 +16,7 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
 
 final Connection connection = (Connection)application.getAttribute("connection");
 final Statement stmt = connection.createStatement();
-final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance");
+final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = '" + Queries.getCurrentTournament(connection) + "'");
 final int maxRunNumber;
 if(rs.next()) {
   maxRunNumber = rs.getInt(1);
@@ -44,18 +45,25 @@ Utilities.closeStatement(stmt);
       <li><a href="categorizedScores.jsp">Categorized Scores</a></li>
 
       <li><a href="scoreGroupScores.jsp">Categorized Scores by score group</a></li>
-        
+
+    </ol>
+
+    <p>Some reports that are handy for intermediate reporting and
+    checking of the current tournament state.</p>
+      
+    <ul>
       <li>
-          <form ACTION='performanceRunReport.jsp' METHOD='POST'>
-          Show reports for performance run <select name='RunNumber'>
+        <form ACTION='performanceRunReport.jsp' METHOD='POST'>
+        Show reports for performance run <select name='RunNumber'>
 <% for(int i=0; i<maxRunNumber; i++) { %>
   <option value='<%=(i+1)%>'><%=(i+1)%></option>
 <% } %>
-          </select>
-          <input type='submit' value='Generate report'>
-          </form>
-       </li>
-    </ol>
+        </select>
+        <input type='submit' value='Generate report'>
+        </form>
+      </li>
+
+    </ul>
 
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>

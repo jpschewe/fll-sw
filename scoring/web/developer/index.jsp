@@ -1,6 +1,4 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
-  
-<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.xml.GenerateDB" %>
   
@@ -10,32 +8,24 @@
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 %>
 
-<%
-final StringBuffer message = new StringBuffer();
+<c:if test="${not empty param.changeDatabase || not empty param.resetDatabase}">
+  <c:if test="${not empty param.changeDatabase}" var="test">
+    <c:set var="database" value="${param.changeDatabase}" scope="application" />
+  </c:if>
+  <c:if test="${not test}">
+    <c:set var="database" value="fll" scope="application" />
+  </c:if>
 
-if(null != request.getParameter("changeDatabase")
-   || null != request.getParameter("resetDatabase")) {
-  final String newDatabase;
-  if(null != request.getParameter("changeDatabase")) {
-    newDatabase = request.getParameter("database");
-  } else {
-    newDatabase = "fll";
-  }
-  application.setAttribute("database", newDatabase);
-  
-  //remove application variables that depend on the database connection
-  application.removeAttribute("connection");
-  application.removeAttribute("tournamentTeams");
-  
-  message.append("<i>Changed database to " + newDatabase + "</i><br>");
-}
+  <%-- just remove the database connections and they'll get recreated on the next page --%>
+  <c:remove var="tournamentTeams" />
+  <c:remove var="connection" />
+  <c:remove var="datasource" />
 
-%>
-
-<%-- include a second time in case we need to reconnect to the database --%>
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
-
-  
+  <c:set var="message">
+    <i>Changed database to <c:out value="${database}"/></i><br>
+  </c:set>
+</c:if>
+            
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
@@ -48,18 +38,18 @@ if(null != request.getParameter("changeDatabase")
     <p><font color='red'><b>This page is indended for developers only.  If you
     don't know what you're doing, LEAVE THIS PAGE!</b></font></p>
 
-    <p><%=message.toString()%></p>
+    <p><c:out value="${message}"/></p>
             
     <ul>
         
-      <li>Current database is <%=application.getAttribute("database")%><br>
+      <li>Current database is <c:out value="${database}"/><br>
           <form action='index.jsp' method='post'><input type='text' name='database'>
           <input type='submit' name='changeDatabase' value='Change Database''>
           <input type='submit' name='resetDatabase' value='Reset to standard database'>
           </form>
       </li>
 
-      <li><a href="../setup">Go to database setup</a></li>
+      <li><a href="<c:url value='/setup'/>">Go to database setup</a></li>
         
     </ul>
 

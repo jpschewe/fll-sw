@@ -1,3 +1,8 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
+<%@ taglib prefix="sql" uri="http://java.sun.com/jstl/sql" %>
+<%@ taglib prefix="x" uri="http://java.sun.com/jstl/xml" %>
+<%@ taglib prefix="f" uri="http://java.sun.com/jstl/fmt" %>
+
 <%@ page import="fll.Utilities" %>
 <%@ page import="fll.Queries" %>
   
@@ -43,3 +48,16 @@ response.setHeader("Cache-Control","no-store"); // HTTP 1.1
 response.setHeader("Pragma","no-cache"); // HTTP 1.0
 response.setDateHeader ("Expires", 0); // prevents caching at the proxy server
 %>
+
+<c:if test="${empty datasource}">
+  <c:set var='url'>
+    jdbc:mysql://<c:out value="${initParam.database_host}"/>/<c:out value="${database}"/>?autoReconnect=true
+  </c:set>
+  <sql:setDataSource driver="org.gjt.mm.mysql.Driver"
+                     url="${url}"
+                     user="fll"
+                     password="fll"
+                     scope="session"
+                     var="datasource"
+                     />
+</c:if>

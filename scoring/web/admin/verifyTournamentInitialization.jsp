@@ -1,7 +1,7 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
-<%@ taglib prefix="sql" uri="http://java.sun.com/jstl/sql" %>
+
+
       
-<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/init.jspf" %>
       
 <%@ page import="fll.Queries" %>
 <%@ page import="org.w3c.dom.Document" %>
@@ -13,16 +13,6 @@ final Connection connection = (Connection)application.getAttribute("connection")
 pageContext.setAttribute("regions", Queries.getRegions(connection));
 %>
 
-<c:set var='url'>
-  jdbc:mysql://<c:out value="${initParam.database_host}"/>/<c:out value="${database}"/>?autoReconnect=true
-</c:set>
-<sql:setDataSource driver="org.gjt.mm.mysql.Driver"
-                   url="${url}"
-                   user="fll"
-                   password="fll"
-                   />
-        
-        
 <c:if test='${"true" == param.verified}'>
   <c:forEach var="parameter" items="${paramValues}">
     <c:if test='${"nochange" != parameter.value[0] && "verified" != parameter.key && "submit" != parameter.key}'>
