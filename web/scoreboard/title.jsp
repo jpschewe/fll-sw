@@ -1,5 +1,4 @@
-
-<%@ include file="../WEB-INF/jspf/init.jspf" %>
+<%@ include file="/WEB-INF/jspf/init.jspf" %>
   
 <html>
 <head>

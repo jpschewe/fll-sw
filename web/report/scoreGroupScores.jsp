@@ -21,7 +21,7 @@ if(tournamentReq == null) {
 
 <html>
   <head>
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Categorized Scores)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Categorized Scores)</title>
   </head>
 
   <body>

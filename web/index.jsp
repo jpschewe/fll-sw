@@ -1,29 +1,23 @@
-
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="org.w3c.dom.Document" %>
-  
 <%@ page import="java.sql.Connection" %>
-  
+
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-
-if(null != request.getParameter("ScorePageText")) {
-  application.setAttribute("ScorePageText", request.getParameter("ScorePageText"));
-}
-
 final Connection connection = (Connection)application.getAttribute("connection");
 %>
-      
+
+<c:if test="${not empty param.ScorePageText}">
+  <c:set var="ScorePageText" value="${param.ScorePageText}" scope="application"/>
+</c:if>
+
 <html>
   <head>
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%></title>
+    <title><x:out select="$challengeDocument//@title"/></title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
   <body>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%></h1>
-
+    <h1><x:out select="$challengeDocument//@title"/></h1>
     <ul>
         
       <li>Current Tournament -> <%=Queries.getCurrentTournament(connection)%></li>
@@ -45,7 +39,7 @@ final Connection connection = (Connection)application.getAttribute("connection")
       <li>
         <form action='index.jsp' method='post'>
           Score page text: 
-          <input type='text' name='ScorePageText' value='<%=application.getAttribute("ScorePageText")%>'>
+          <input type='text' name='ScorePageText' value='<c:out value="${ScorePageText}"/>'>
           <input type='submit' value='Change text'>
         </form>
       </li>

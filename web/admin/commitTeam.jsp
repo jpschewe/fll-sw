@@ -3,8 +3,6 @@
   addTeam is set when this page is being used to add a team.
   --%>
   
-
-  
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
   
 <%@ page import="fll.Utilities" %>
@@ -23,12 +21,12 @@ final Connection connection = (Connection)application.getAttribute("connection")
   
 <html>
   <head>
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Commit Team)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Commit Team)</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
   <body>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Commit Team)</h1>
+    <h1><x:out select="$challengeDocument//@title"/> (Commit Team)</h1>
                   
 <%
 //parse the numbers first so that we don't get a partial commit

@@ -1,11 +1,7 @@
-
-  
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
   
 <%@ page import="fll.Queries" %>
   
-<%@ page import="org.w3c.dom.Document" %>
-
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.ResultSet" %>
@@ -13,7 +9,6 @@
 <%@ page import="java.text.NumberFormat" %>
   
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
 final StringBuffer message = new StringBuffer();
 final String messageReq = request.getParameter("message");
@@ -52,12 +47,12 @@ final String currentTournament = Queries.getCurrentTournament(connection);
       
 <html>
   <head>
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Administration)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Administration)</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
   <body>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Administration)</h1>
+    <h1><x:out select="$challengeDocument//@title"/> (Administration)</h1>
 
     <p><%=message.toString()%></p>
         

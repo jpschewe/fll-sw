@@ -1,21 +1,13 @@
-
-      
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
-
-<%@ page import="org.w3c.dom.Document" %>
-  
-<%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-%>
 
 <html>
   <head>
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Instructions)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Instructions)</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
   <body>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Instructions)</h1>
+    <h1><x:out select="$challengeDocument//@title"/> (Instructions)</h1>
         
       <h2><a name='setup'>Setup of tournament</a></h2>
 

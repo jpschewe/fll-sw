@@ -1,3 +1,9 @@
+2003-09-07  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/index.jsp: Figured out how to use the JSTL XML tags to get
+	information out of challengeDocument to remove some more
+	scriptlets.
+
 2003-09-06  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/report/teamPerformanceReport.jsp: Added a report that

@@ -1,8 +1,5 @@
-
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="org.w3c.dom.Document" %>
-      
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Iterator" %>
 <%@ page import="java.util.Map" %>
@@ -11,7 +8,6 @@
 <%@ page import="fll.Queries" %>
       
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
       
 final List divisions = Queries.getDivisions(connection);
@@ -38,7 +34,7 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
       
 <html>
   <head>
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Display Controller)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Display Controller)</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
@@ -51,7 +47,7 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
   </c:if>
           
   <body>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Display Controller)</h1>
+    <h1><x:out select="$challengeDocument//@title"/> (Display Controller)</h1>
 
     <p>This page is used to control what page is currently visible on the display screen</p>
 

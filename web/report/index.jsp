@@ -1,8 +1,4 @@
-
-
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
-
-<%@ page import="org.w3c.dom.Document" %>
 
 <%@ page import="fll.Utilities" %>
 <%@ page import="fll.Queries" %>
@@ -12,8 +8,6 @@
 <%@ page import="java.sql.Connection" %>
   
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-
 final Connection connection = (Connection)application.getAttribute("connection");
 final Statement stmt = connection.createStatement();
 final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = '" + Queries.getCurrentTournament(connection) + "'");
@@ -29,11 +23,11 @@ Utilities.closeStatement(stmt);
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Reporting)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Reporting)</title>
   </head>
 
   <body>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Reporting)</h1>
+    <h1><x:out select="$challengeDocument//@title"/> (Reporting)</h1>
 
     <ol>
       <li><a href="summarizePhase1.jsp">Compute summarized scores</a>.  This

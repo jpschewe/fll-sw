@@ -1,15 +1,8 @@
-
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
   
-<%@ page import="org.w3c.dom.Document" %>
-
-<%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-%>
-
 <html>
   <head>
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Playoff Brackets)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Playoff Brackets)</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
   <frameset rows="80,*" border='1' framespacing='0'>

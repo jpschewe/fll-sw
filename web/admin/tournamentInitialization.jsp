@@ -1,11 +1,8 @@
-
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
       
 <%@ page import="fll.Queries" %>
-<%@ page import="org.w3c.dom.Document" %>
-
+      
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
 
 pageContext.setAttribute("regions", Queries.getRegions(connection));
@@ -15,11 +12,11 @@ pageContext.setAttribute("tournamentNames", Queries.getTournamentNames(connectio
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Tournament Initialization)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Tournament Initialization)</title>
   </head>
 
   <body>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Tournament Initialization)</h1>
+    <h1><x:out select="$challengeDocument//@title"/> (Tournament Initialization)</h1>
 
     <p>This page allows you to change the tournament for a group of teams
     based on the region that they're in.  Any previous tournament

@@ -1,13 +1,10 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="org.w3c.dom.Document" %>
-
 <%@ page import="fll.Queries" %>
   
 <%@ page import="java.sql.Connection" %>
   
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
 pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection));
 pageContext.setAttribute("divisions", Queries.getDivisions(connection)); 
@@ -16,11 +13,11 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Performance Run <c:out value="${param.RunNumber}"/>)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Performance Run <c:out value="${param.RunNumber}"/>)</title>
   </head>
 
   <body>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Performance Run <c:out value="${param.RunNumber}"/>)</h1>
+    <h1><x:out select="$challengeDocument//@title"/> (Performance Run <c:out value="${param.RunNumber}"/>)</h1>
 
     <c:if test="${empty param.RunNumber}">
       <font color='red'>You must specify a run number!</font>

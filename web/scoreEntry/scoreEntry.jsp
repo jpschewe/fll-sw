@@ -1,5 +1,5 @@
-
-  
+<%@ include file="/WEB-INF/jspf/init.jspf" %>
+      
 <%@ page import="fll.Team" %>
 <%@ page import="fll.Queries" %>
 <%@ page import="fll.web.scoreEntry.ScoreEntry" %>
@@ -13,8 +13,6 @@
 
 <%@ page import="java.sql.Connection" %>
   
-<%@ include file="../WEB-INF/jspf/init.jspf" %>
-
 <%
 final String yesColor = "#a0ffa0";
 final String noColor = "#ffa0a0";
@@ -77,9 +75,9 @@ final boolean isLastRun = (lRunNumber == (nextRunNumber - 1));
 <html>
   <head>
     <%if("1".equals(lEditFlag)) {%>
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Score Edit)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Score Edit)</title>
     <%} else {%>
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Score Entry)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Score Entry)</title>
     <%}%>
       
     <style type='text/css'>
@@ -181,9 +179,9 @@ function CancelClicked() {
                     <tr>
                       <td valign="middle" align="center">
                         <%if("1".equals(lEditFlag)) {%>
-                        <font face="Arial" size="4"><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Score Edit)</font>
+                        <font face="Arial" size="4"><x:out select="$challengeDocument//@title"/> (Score Edit)</font>
                         <%} else {%>
-                        <font face="Arial" size="4"><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Score Entry)</font>
+                        <font face="Arial" size="4"><x:out select="$challengeDocument//@title"/> (Score Entry)</font>
                         <%}%>
                       </td>
                     </tr>

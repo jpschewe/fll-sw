@@ -1,5 +1,3 @@
-
-
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Queries" %>
@@ -11,24 +9,21 @@
 
 <%@ page import="java.sql.Connection" %>
   
-<%@ page import="org.w3c.dom.Document" %>
-  
 <%
 Queries.ensureTournamentTeamsPopulated(application);
 
 final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
 %>
   
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Team Playoff check)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Team Playoff check)</title>
   </head>
 
   <body>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Team Playoff check)</h1>
+    <h1><x:out select="$challengeDocument//@title"/> (Team Playoff check)</h1>
       
       <p>Teams with less runs than seeding rounds.  This will not show teams
       that have no runs.

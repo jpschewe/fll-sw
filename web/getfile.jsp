@@ -1,4 +1,3 @@
-
 <%@ page import="fll.web.GetFile" %>
 
 <%@ include file="/WEB-INF/jspf/init.jspf" %>

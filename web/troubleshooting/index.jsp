@@ -1,14 +1,9 @@
-
-
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
-
-<%@ page import="org.w3c.dom.Document" %>
 
 <%@ page import="fll.Queries" %>
 
 <%@ page import="java.sql.Connection" %>
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
   
 if(null != request.getParameter("initializeTournamentTeams")) {
@@ -19,11 +14,11 @@ if(null != request.getParameter("initializeTournamentTeams")) {
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Troubleshooting)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Troubleshooting)</title>
   </head>
 
   <body>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Troubleshooting)</h1>
+    <h1><x:out select="$challengeDocument//@title"/> (Troubleshooting)</h1>
 
     <p>Here's where you'll find various errors you might get and what to do
     about them.  First to remember is that just because you get a nasty error
