@@ -76,6 +76,9 @@
 
   web.config            What file to use as web.xml.  Default is web-default.xml
 
+  dist.web.config       What file to use as web.xml when building a
+                        distribution.  Default is web-default.xml
+
 -->
 
 <property name="app.name"      value="fll-sw"/>
@@ -89,7 +92,7 @@
 <property name="src.home"       value="src" />
 <property name="tmp.home"       value="tmp" />
 <property name="web.config" value="web-default.xml" />
-
+<property name="dist.web.config" value="web-default.xml" />
 
 <!--  ==================== Compilation Control Options ==================== -->
 
@@ -321,59 +324,22 @@
 <target name="dist" depends="compile,javadoc"
         description="Create distribution">
 
+  <!-- copy docs -->
+  <copy todir="${dist.home}">
+    <fileset dir="${basedir}/docs" />
+  </copy>
+
+  <!-- get the correct web.xml file -->
+  <copy file="${web.home}/WEB-INF/${dist.web.config}" tofile="${build.home}/WEB-INF/web.xml" />
+
 <!-- Create web application zip file -->
 <zip zipfile="${dist.home}/web.zip">
   <zipfileset dir="${build.home}" prefix="fll-sw" />
 </zip>
 
-<copy todir="${dist.home}">
-  <fileset dir="../doc">
-    <include name="README.developer" />
-    <include name="INSTALL.linux" />
-    <include name="index.html" />
-  </fileset>
-</copy>
-
-
-<!-- stuff needed for generatedb -->
-<mkdir dir="${tmp.home}/generatedb" />
-
-<copy todir="${tmp.home}/generatedb">
-  <fileset dir="${web.home}/WEB-INF/common-lib">
-    <include name="xercesImpl.jar" />
-    <include name="xmlParserAPIs.jar" />
-  </fileset>
-  <fileset dir="${build.home}/WEB-INF/lib">
-    <include name="JonsInfra-0.2.jar" />
-    <include name="mm.mysql-2.0.14-bin.jar" />
-  </fileset>
-</copy>
-
-<jar destfile="${tmp.home}/generatedb/generatedb.jar"
-     basedir="${build.home}/WEB-INF/classes" />
-
-<echo file="${tmp.home}/generatedb/generatedb.bat"
-      message="%JAVA_HOME%/bin/java -classpath JonsInfra-0.2.jar;mm.mysql-2.0.14-bin.jar;generatedb.jar;xercesImpl.jar;xmlParserAPIs.jar fll.xml.GenerateDB %1 %2 %3"
-      />
-
-<echo file="${tmp.home}/generatedb/generatedb.sh"
-      message="java -classpath JonsInfra-0.2.jar:mm.mysql-2.0.14-bin.jar:generatedb.jar:xercesImpl.jar:xmlParserAPIs.jar fll.xml.GenerateDB $*"
-      />
-
-<zip zipfile="${dist.home}/generatedb.zip">
-  <zipfileset prefix="generatedb" dir="${tmp.home}/generatedb" />
-</zip>
-
-
-<copy todir="${dist.home}">
-  <fileset dir="../mysql">
-    <include name="create.sql" />
-  </fileset>
-</copy>
-
 
 <zip zipfile="${dist.home}/common-lib.zip">
-  <zipfileset dir="${web.home}/WEB-INF/common-lib"/>
+  <zipfileset dir="${lib.home}/common-lib"/>
 </zip>
 
 
@@ -404,7 +370,7 @@
   <zipfileset dir="${basedir}">
     <include name="${web.home}/**" />
     <include name="${src.home}/**" />
-    <include name="${dist.home}/api/**" />
+    <include name="docs/**" />
     <include name="prj.el" />
     <include name="build.xml" />
     <include name="ChangeLog" />
