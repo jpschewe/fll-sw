@@ -1,3 +1,11 @@
+2003-06-11  Jon Schewe  <jpschewe@mtu.net>
+
+	* build.xml: Upgraded to Tomcat 4.1.x (4.1.18)
+
+2003-04-27  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/admin/editTeam.jsp: Convert null values to "" for editing.
+
 2003-04-24  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/gui/SubjectiveFrame.java (SubjectiveFrame): When
