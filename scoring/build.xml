@@ -419,7 +419,7 @@
   </zipfileset>
 </zip>
 
-<zip zipfile="${app.name}.zip">
+<zip zipfile="${app.name}-{app.version}.zip">
   <zipfileset dir="${dist.home}" prefix="fll" />
 </zip>
 
