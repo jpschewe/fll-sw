@@ -26,8 +26,8 @@ public class ImportDB {
    
   /**
    * Import a database, both databases are assumed to be on the same machine.
-   * The challenge document from the destination database is used to determine
-   * the categories and goals.
+   * The challenge document from the destination (master) database is used to
+   * determine the categories and goals.
    *
    * @param args 
    */
@@ -106,14 +106,16 @@ public class ImportDB {
         columns.append(" Tournament,");
         columns.append(" RunNumber,");
         columns.append(" TimeStamp,");
-        columns.append(" NoShow,");
-        columns.append(" Bye,");
         final NodeList goals = performanceElement.getElementsByTagName("goal");
         for(int i=0; i<goals.getLength(); i++) {
           final Element element = (Element)goals.item(i);
           columns.append(" " + element.getAttribute("name") + ",");
         }
-        stmt.executeUpdate("INSERT INTO " + tableName + " (" + columns.toString() + ") SELECT " + columns.toString() + " FROM " + database + "." + tableName + " WHERE Tournament = '" + tournament + "'");
+        columns.append(" NoShow,");
+        columns.append(" Bye");
+        
+        final String sql = "INSERT INTO " + tableName + " (" + columns.toString() + ") SELECT " + columns.toString() + " FROM " + database + "." + tableName + " WHERE Tournament = '" + tournament + "'";
+        stmt.executeUpdate(sql);
       }
       
       //loop over each subjective category
@@ -134,8 +136,9 @@ public class ImportDB {
           columns.append(" " + element.getAttribute("name") + ",");
         }
         columns.append(" Judge");
-        
-        stmt.executeUpdate("INSERT INTO " + tableName + " (" + columns.toString() + ") SELECT " + columns.toString() + " FROM " + database + "." + tableName + " WHERE Tournament = '" + tournament + "'");
+
+        final String sql = "INSERT INTO " + tableName + " (" + columns.toString() + ") SELECT " + columns.toString() + " FROM " + database + "." + tableName + " WHERE Tournament = '" + tournament + "'";
+        stmt.executeUpdate(sql);
       }
       
     } finally {
