@@ -42,6 +42,13 @@ Cygwin adds UN*X like interfaces to Windows, in particular, ssh and cvs.
 
 Read for JSP coding conventions
 http://developer.java.sun.com/developer/technicalArticles/javaserverpages/code_convention/
+
+Pointers on JSTL:
+- http://java.sun.com/products/jsp/jstl/ - the main page at Sun
+- http://www.manning.com/bayern/appendixA.pdf - good reference
+- Also if you grab the implementation from Jakarta, there are some very nice
+examples included.
+
 ----------
 Setup of each package:
 
