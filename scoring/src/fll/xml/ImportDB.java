@@ -5,6 +5,7 @@
  */
 package fll.xml;
 
+import fll.Queries;
 import fll.Utilities;
 
 import java.sql.Connection;
@@ -24,9 +25,11 @@ import org.w3c.dom.NodeList;
 public class ImportDB {
    
   /**
-   * Import a database
+   * Import a database, both databases are assumed to be on the same machine.
+   * The challenge document from the destination database is used to determine
+   * the categories and goals.
    *
-   * @param args 0 -> host, 1 -> user, 2 -> password
+   * @param args 
    */
   public static void main(final String[] args) {
     try {
@@ -35,7 +38,6 @@ public class ImportDB {
         System.exit(1);
       } else {
         final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-        final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge.xml"));
 
         final String host = args[0];
         final String user = args[1];
@@ -56,6 +58,7 @@ public class ImportDB {
         
         System.out.println("Importing data for " + tournament + " from " + source + " to " + destination);
         final Connection connection = Utilities.createDBConnection(host, user, password, destination);
+        final Document challengeDocument = Queries.getChallengeDocument(connection);
         importDatabase(connection, source, tournament, challengeDocument);
       }
     } catch(final Exception e) {
@@ -89,9 +92,8 @@ public class ImportDB {
       final Element rootElement = document.getDocumentElement();
       
       //judges
-      //FIX assumes tournament column is missing in source database
       stmt.executeUpdate("DELETE FROM Judges WHERE Tournament = '" + tournament + "'");
-      stmt.executeUpdate("INSERT INTO Judges (id, category, Tournament) SELECT id,category,'" + tournament + "' FROM " + database + ".Judges");
+      stmt.executeUpdate("INSERT INTO Judges (id, category, Tournament) SELECT id,category,Tournament FROM " + database + ".Judges WHERE Tournament = '" + tournament + "'");
 
       //performance
       {
@@ -111,9 +113,6 @@ public class ImportDB {
           final Element element = (Element)goals.item(i);
           columns.append(" " + element.getAttribute("name") + ",");
         }
-        columns.append(" Verified,");
-        columns.append(" Corrected ");
-
         stmt.executeUpdate("INSERT INTO " + tableName + " (" + columns.toString() + ") SELECT " + columns.toString() + " FROM " + database + "." + tableName + " WHERE Tournament = '" + tournament + "'");
       }
       
