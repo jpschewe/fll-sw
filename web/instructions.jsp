@@ -1,5 +1,6 @@
 <%@ page errorPage="errorHandler.jsp" %>
-<%@ include file="WEB-INF/jspf/initializeApplicationVars.jspf" %>
+  
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="org.w3c.dom.Document" %>
   
@@ -165,6 +166,6 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
       be something descriptive like "Not enough teams to compute standardized
       score" followed by a bunch of filenames and line numbers.</p>
       
-<%@ include file="WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>

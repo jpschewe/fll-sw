@@ -1,4 +1,5 @@
 <%@ page errorPage="../errorHandler.jsp" %>
+  
 <html>
   <head>
     <title>Credits</title>
@@ -40,6 +41,6 @@
         <a href="">License</a></li>
     </ul>
 
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>
