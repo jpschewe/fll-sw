@@ -1,3 +1,9 @@
+2004-12-13  Jon Schewe  <jpschewe@mtu.net>
+
+	* build.xml: Cleaned up some variable naemes.  NOTE: changed
+	catalina.home to dir.tomcat!  Please update your build.properties
+	files.  Added building of the scripts to regular compile.
+
 2004-12-09  Jon Schewe  <jpschewe@mtu.net>
 
 	* build.xml: Do a better job of rewriting the library path when

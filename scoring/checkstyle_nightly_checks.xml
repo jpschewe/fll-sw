@@ -46,7 +46,7 @@
 
 
   <module name="TreeWalker">
-    <property name="cacheFile" value="${basedir}/${build.home}/checkstyle.nightly.cache" />
+    <property name="cacheFile" value="${basedir}/${dir.build}/checkstyle.nightly.cache" />
 
     <!-- Checks for Javadoc comments.           -->
     <!-- See http://checkstyle.sf.net/config_javadoc.html -->
