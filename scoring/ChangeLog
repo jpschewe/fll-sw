@@ -1,3 +1,8 @@
+2003-10-03  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/web/admin/Tournaments.java (verifyData): Check for
+	circularities in tournaments (766563).
+
 2003-10-02  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/web/scoreEntry/Submit.java: Added support for
