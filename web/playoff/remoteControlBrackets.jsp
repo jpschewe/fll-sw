@@ -80,6 +80,8 @@ final List currentRound = tempCurrentRound;
 var scrollTimer;
 var scrollAmount = 2;    // scroll by 100 pixels each time
 var documentYposition = 0;
+var scrollPause = 100; // amount of time, in milliseconds, to pause between scrolls
+        
 //http://www.evolt.org/article/document_body_doctype_switching_and_more/17/30655/index.html
 function getScrollPosition() {
   if (window.pageYOffset) {
@@ -99,13 +101,12 @@ function myScroll() {
 <%
   final String reloadURL = response.encodeURL("remoteControlBrackets.jsp");
 %>
-      
     location.href='<%=reloadURL%>';
   }
 }
 
 function start() {
-    scrollTimer = window.setInterval('myScroll()',30);
+    scrollTimer = window.setInterval('myScroll()',scrollPause);
 }
 </script>
 <!-- end stuff for automatic scrolling -->

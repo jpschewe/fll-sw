@@ -43,6 +43,7 @@ final List divisions = Queries.getDivisions(connection);
 var scrollTimer;
 var scrollAmount = 2;    // scroll by 100 pixels each time
 var documentYposition = 0;
+var scrollPause = 100; // amount of time, in milliseconds, to pause between scrolls
           
 //http://www.evolt.org/article/document_body_doctype_switching_and_more/17/30655/index.html
 function getScrollPosition() {
@@ -67,7 +68,7 @@ function myScroll() {
 
 function start() {
 <c:if test="${not empty param.scroll}">
-  scrollTimer = window.setInterval('myScroll()',30);
+  scrollTimer = window.setInterval('myScroll()',scrollPause);
 </c:if>
 }
 </script>

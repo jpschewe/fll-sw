@@ -1,5 +1,8 @@
 2003-12-06  Jon Schewe  <jpschewe@mtu.net>
 
+	* web/playoff/index.jsp: Removed old links to brackets, only use
+	the remote control and admin ones now.
+
 	* src/fll/web/report/CategoryScores.java (generateCategoryTable):
 	Added quotes around division to handle when it's a string.  This
 	was a problem at the Crosswinds tournament today where the

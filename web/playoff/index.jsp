@@ -51,26 +51,6 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
 
         <li>
           <B>WARNING: Do not select brackets until all seeding runs have been recorded!</b><br>
-          <form action='main.jsp' method='get'>
-            Go to the bracket page for division <select name='division'>
-<%
-{
-final Iterator divisionIter = divisions.iterator();
-while(divisionIter.hasNext()) {
-  final String div = (String)divisionIter.next();
-%>
-<option value='<%=div%>'><%=div%></option>
-<%
-}
-}
-%>
-            </select>
-            <input type='submit' value='Go to Playoffs'>
-              (requires Internet Explorer)
-          </form>               
-        </li>
-
-        <li>
           <form action='adminbrackets.jsp' method='get'>
             Go to the admin/printable bracket page for division <select name='division'>
 <%
@@ -89,41 +69,10 @@ while(divisionIter.hasNext()) {
           </form>               
         </li>
 
-        <li><a href="remoteMain.jsp">Go to remotely controlled brackets</a></li>
-
         <li>
-          <form action='index.jsp' method='post'>
-            Select the division and run number to display in the remote brackets.
-            Division: <select name='division'> 
-<%
-{
-final Iterator divisionIter = divisions.iterator();
-while(divisionIter.hasNext()) {
-  final String div = (String)divisionIter.next();
-  out.print("<option value='" + div + "'");
-  if(playoffDivision.equals(div)) {
-    out.print(" selected");
-  }
-  out.println(">" + div + "</option>");
-}
-}
-%>
-            </select>
-            Run number (playoff round): <select name='runNumber'>
-<%
-final int numTeams = tournamentTeams.size();
-for(int numRounds = 1; /*numTeams > Math.pow(2, numRounds)*/ numRounds < 10; numRounds++) {
-  out.print("<option value='" + (numRounds + numSeedingRounds) + "'");
-  if(playoffRunNumber == (numRounds + numSeedingRounds)) {
-    out.print(" selected");
-  }
-  out.println(">" + (numRounds + numSeedingRounds) + " (" + numRounds + ")</option>");
-}
-%>
-            </select>
-
-            <input type='submit' value='Change values'>
-          </form>
+          <B>WARNING: Do not select brackets until all seeding runs have been recorded!</b><br>
+          <a href="remoteMain.jsp">Go to remotely controlled brackets</a>
+          These brackets can be controlled from the admin page.
         </li>
       </ol>
     </p>
