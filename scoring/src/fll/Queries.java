@@ -719,7 +719,11 @@ public class Queries {
       while(rs.next()) {
         if(!rs.getBoolean("Bye")) {
           final int computedTotal = computeTotalScore(rs, goals);
-          updatePrep.setInt(1, Math.max(computedTotal, minimumPerformanceScore));
+          if(Integer.MIN_VALUE != computedTotal) {
+            updatePrep.setInt(1, Math.max(computedTotal, minimumPerformanceScore));
+          } else {
+            updatePrep.setNull(1, Types.INTEGER);
+          }
           updatePrep.setInt(2, rs.getInt("TeamNumber"));
           updatePrep.setInt(4, rs.getInt("RunNumber"));
           updatePrep.executeUpdate();
@@ -744,9 +748,13 @@ public class Queries {
         rs = selectPrep.executeQuery();
         while(rs.next()) {
           final int computedTotal = computeTotalScore(rs, subjectiveGoals);
-          final String judge = rs.getString("Judge");
-          updatePrep.setInt(1, Math.max(computedTotal, minimumPerformanceScore));
+          if(Integer.MIN_VALUE != computedTotal) {
+            updatePrep.setInt(1, Math.max(computedTotal, minimumPerformanceScore));
+          } else {
+            updatePrep.setNull(1, Types.INTEGER);
+          }
           updatePrep.setInt(2, rs.getInt("TeamNumber"));
+          final String judge = rs.getString("Judge");
           updatePrep.setString(4, judge);
           updatePrep.executeUpdate();
         }
@@ -1179,12 +1187,14 @@ public class Queries {
    * Compute total score for values in current row of rs based on goals from
    * challenge document.
    *
-   * @return the score, 0 on a bye
+   * @return the score, 0 on a bye, Integer.MIN_VALUE if all scores in a row
+   * are null (indicating that this row should not be ignored)
    */
   private static int computeTotalScore(final ResultSet rs,
                                        final NodeList goals)
     throws ParseException, SQLException {
     int computedTotal = 0;
+    boolean rowHasScores = false;
     for(int i=0; i<goals.getLength(); i++) {
       final Element goal = (Element)goals.item(i);
       final String goalName = goal.getAttribute("name");
@@ -1192,7 +1202,10 @@ public class Queries {
       final NodeList values = goal.getElementsByTagName("value");
       if(values.getLength() == 0) {
         final int score = rs.getInt(goalName);
-        computedTotal += multiplier * score;
+        if(!rs.wasNull()) {
+          computedTotal += multiplier * score;
+          rowHasScores = true;
+        }
       } else {
         //enumerated
         //find value that matches value in DB
@@ -1209,12 +1222,18 @@ public class Queries {
           }
           if(!found) {
             throw new RuntimeException("Error, enum value in database for goal: " + goalName + " is not a valid value");
+          } else {
+            rowHasScores = true;
           }
           computedTotal += score;
         }
       }
     }
-    return computedTotal;
+    if(!rowHasScores) {
+      return Integer.MIN_VALUE;
+    } else {
+      return computedTotal;
+    }
   }
 
   /**
