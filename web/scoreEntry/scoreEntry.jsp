@@ -13,7 +13,7 @@
 
 <%@ page import="java.sql.Connection" %>
   
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="../WEB-INF/jspf/init.jspf" %>
 
 <%
 final String yesColor = "#a0ffa0";

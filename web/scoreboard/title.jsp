@@ -1,5 +1,5 @@
 
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="../WEB-INF/jspf/init.jspf" %>
   
 <html>
 <head>

@@ -7,7 +7,7 @@
   
 <%@ page import="org.w3c.dom.Document" %>
     
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="../WEB-INF/jspf/init.jspf" %>
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
  
