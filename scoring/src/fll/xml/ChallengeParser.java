@@ -67,7 +67,7 @@ public final class ChallengeParser {
    */
   public static Document parse(final InputStream stream) {
     try {
-      final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
+      final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
       
       final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setValidating(true);
