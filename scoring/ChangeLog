@@ -1,7 +1,12 @@
 2003-10-24  Jon Schewe  <jpschewe@mtu.net>
 
+	* web/admin/commitTeam.jsp: Report an error on attempting to enter
+	a duplicate team number.
+
 	* src/fll/Queries.java (updateScoreTotals): Only check for Bye
 	column on performance scores (bug from Chuck, didn't make it to SF).
+	(updateScoreTotals): Fixed another bug from Chuck where all
+	subjective scores were 0.
 
 2003-10-22  Jon Schewe  <jpschewe@mtu.net>
 	

@@ -42,21 +42,15 @@ final public class ScoreStandardization {
    */
   public static void main(final String[] args) {
     try {
-      final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-      final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge.xml"));
-
-      if(null == challengeDocument) {
-        throw new RuntimeException("Error parsing challenge.xml");
-      }
-
-      final Connection connection = Utilities.createDBConnection("disk");
-      final Map teams = Queries.getTournamentTeams(connection);
-      Queries.updateScoreTotals(challengeDocument, connection);
-      setSubjectiveScoreGroups(connection, challengeDocument, teams.values());
-      summarizeSubjectiveScores(connection, challengeDocument, "STATE");
-      summarizePerformanceScores(connection, "STATE");
-      standardizeScores(connection, challengeDocument, "STATE");
-      updateTeamTotalScores(connection, "STATE");      
+      final Connection connection = Utilities.createDBConnection("netserver");
+      final Document challengeDocument = Queries.getChallengeDocument(connection);
+//       final Map teams = Queries.getTournamentTeams(connection);
+//       Queries.updateScoreTotals(challengeDocument, connection);
+//       setSubjectiveScoreGroups(connection, challengeDocument, teams.values());
+//       summarizeSubjectiveScores(connection, challengeDocument, "test");
+//       summarizePerformanceScores(connection, "test");
+      standardizeScores(connection, challengeDocument, "test");
+      updateTeamTotalScores(connection, "test");      
       System.out.println("data consistency error: " + checkDataConsistency(connection));
     } catch(final Exception e) {
       e.printStackTrace();

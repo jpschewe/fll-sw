@@ -86,18 +86,18 @@ if(null != numMedalsStr && !"".equals(numMedalsStr) && !"null".equals(numMedalsS
     <c:if test="${not empty param.addTeam}" var="addingTeam">
                 added a team
 <%
-      String dup = Queries.addTeam(connection,
+      pageContext.setAttribute("dup", Queries.addTeam(connection,
                                    teamNumber,
                                    request.getParameter("teamName"),
                                    request.getParameter("organization"),
                                    request.getParameter("region"),
                                    division,
-                                   numMedals);
+                                   numMedals));
 %>
       <c:if test="${null != dup}">
         <c:redirect url='index.jsp'>
           <c:param name='message'>
-            <font color='red'>Error, team number <%=teamNumber%> is already assigned to <%=dup%>.</font>
+            <font color='red'>Error, team number <%=teamNumber%> is already assigned to <c:out value="${dup}"/>.</font>
           </c:param>
         </c:redirect>
       </c:if>
