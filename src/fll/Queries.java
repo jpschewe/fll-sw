@@ -1195,51 +1195,57 @@ public final class Queries {
    * challenge document.
    *
    * @return the score, 0 on a bye, Integer.MIN_VALUE if all scores in a row
-   * are null (indicating that this row should be ignored)
+   * are null or an exception occurred talking to the database (indicating
+   * that this row should be ignored)
    */
   private static int computeTotalScore(final ResultSet rs,
                                        final NodeList goals)
-    throws ParseException, SQLException {
-    int computedTotal = 0;
-    boolean rowHasScores = false;
-    for(int i=0; i<goals.getLength(); i++) {
-      final Element goal = (Element)goals.item(i);
-      final String goalName = goal.getAttribute("name");
-      final int multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goal.getAttribute("multiplier")).intValue();
-      final NodeList values = goal.getElementsByTagName("value");
-      if(values.getLength() == 0) {
-        final int score = rs.getInt(goalName);
-        if(!rs.wasNull()) {
-          computedTotal += multiplier * score;
-          rowHasScores = true;
-        }
-      } else {
-        //enumerated
-        //find value that matches value in DB
-        final String enum = rs.getString(goalName);
-        if(null != enum) {
-          boolean found = false;
-          int score = -1;
-          for(int v=0; v<values.getLength() && !found; v++) {
-            final Element value = (Element)values.item(v);
-            if(value.getAttribute("value").equals(enum)) {
-              score = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue() * multiplier;
-              found = true;
-            }
-          }
-          if(!found) {
-            throw new RuntimeException("Error, enum value in database for goal: " + goalName + " is not a valid value");
-          } else {
+    throws ParseException {
+    try {
+      int computedTotal = 0;
+      boolean rowHasScores = false;
+      for(int i=0; i<goals.getLength(); i++) {
+        final Element goal = (Element)goals.item(i);
+        final String goalName = goal.getAttribute("name");
+        final int multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goal.getAttribute("multiplier")).intValue();
+        final NodeList values = goal.getElementsByTagName("value");
+        if(values.getLength() == 0) {
+          final int score = rs.getInt(goalName);
+          if(!rs.wasNull()) {
+            computedTotal += multiplier * score;
             rowHasScores = true;
           }
-          computedTotal += score;
+        } else {
+          //enumerated
+          //find value that matches value in DB
+          final String enum = rs.getString(goalName);
+          if(null != enum) {
+            boolean found = false;
+            int score = -1;
+            for(int v=0; v<values.getLength() && !found; v++) {
+              final Element value = (Element)values.item(v);
+              if(value.getAttribute("value").equals(enum)) {
+                score = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue() * multiplier;
+                found = true;
+              }
+            }
+            if(!found) {
+              throw new RuntimeException("Error, enum value in database for goal: " + goalName + " is not a valid value");
+            } else {
+              rowHasScores = true;
+            }
+            computedTotal += score;
+          }
         }
       }
-    }
-    if(!rowHasScores) {
+      if(!rowHasScores) {
+        return Integer.MIN_VALUE;
+      } else {
+        return computedTotal;
+      }
+    } catch(final SQLException sqle) {
+      LOG.warn("Caught an SQLException computing total score, skipping row");
       return Integer.MIN_VALUE;
-    } else {
-      return computedTotal;
     }
   }
 
