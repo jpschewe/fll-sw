@@ -112,7 +112,7 @@ final public class CategoryScores {
                                + " FROM SummarizedScores,Teams"
                                + " WHERE Teams.TeamNumber = SummarizedScores.TeamNumber"
                                + " AND SummarizedScores.Tournament = '" + tournament + "'"
-                               + " AND Teams.Division = " + division
+                               + " AND Teams.Division = '" + division + "'"
                                + " AND SummarizedScores.Category = '" + categoryName + "'"
                                + " ORDER BY SummarizedScores.StandardizedScore DESC, Teams.TeamNumber");
       while(teamsRS.next()) {
