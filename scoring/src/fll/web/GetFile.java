@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @version $Revision$
  */
-final public class GetFile {
+public final class GetFile {
    
   private GetFile() {
      

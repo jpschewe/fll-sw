@@ -11,6 +11,8 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 
+import org.apache.log4j.Logger;
+
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentType;
@@ -25,6 +27,8 @@ import org.w3c.dom.Node;
  */
 public class XMLWriter {
 
+  private static final Logger LOG = Logger.getLogger(XMLWriter.class);
+  
   public XMLWriter() {
   }
 
@@ -32,11 +36,13 @@ public class XMLWriter {
    * Set the output writer, if encoding is null, use UTF8.
    */
   public void setOutput(final OutputStream stream,
-                        String encoding) throws UnsupportedEncodingException {
+                        final String encoding) throws UnsupportedEncodingException {
+    final Writer writer;
     if(encoding == null) {
-      encoding = "UTF8";
+      writer = new OutputStreamWriter(stream, "UTF8");
+    } else {
+      writer = new OutputStreamWriter(stream, encoding);
     }
-    final Writer writer = new OutputStreamWriter(stream, encoding);
     _output = new PrintWriter(writer);
   }
 
@@ -97,7 +103,7 @@ public class XMLWriter {
       indent();
       _output.print('<');
       _output.print(node.getNodeName());
-      final Attr attrs[] = sortAttributes(node.getAttributes());
+      final Attr[] attrs = sortAttributes(node.getAttributes());
       for(int i = 0; i < attrs.length; i++) {
         final Attr attr = attrs[i];
         _output.print(' ');
@@ -158,6 +164,8 @@ public class XMLWriter {
       _output.flush();
       break;
     }
+    default:
+      LOG.debug("Skipping node type: " + type);
     }
     if (type == Node.ELEMENT_NODE) {
       _indent -= INDENT_OFFSET;
@@ -173,9 +181,9 @@ public class XMLWriter {
     }
   }
 
-  private Attr[] sortAttributes(NamedNodeMap attrs) {
+  private Attr[] sortAttributes(final NamedNodeMap attrs) {
     final int len = attrs == null ? 0 : attrs.getLength();
-    final Attr array[] = new Attr[len];
+    final Attr[] array = new Attr[len];
     for(int i = 0; i < len; i++) {
       array[i] = (Attr)attrs.item(i);
     }
@@ -201,7 +209,7 @@ public class XMLWriter {
     return array;
   }
 
-  private void normalizeAndPrint(String s) {
+  private void normalizeAndPrint(final String s) {
     int len = s == null ? 0 : s.length();
     for(int i = 0; i < len; i++) {
       normalizeAndPrint(s.charAt(i));
@@ -209,7 +217,7 @@ public class XMLWriter {
 
   }
 
-  private void normalizeAndPrint(char c) {
+  private void normalizeAndPrint(final char c) {
     switch(c) {
     case '<': {
       _output.print("&lt;");

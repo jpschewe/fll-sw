@@ -31,7 +31,7 @@ import java.util.Iterator;
  *
  * @version $Revision$
  */
-final public class CategoryScores {
+public final class CategoryScores {
    
   private CategoryScores() {
      

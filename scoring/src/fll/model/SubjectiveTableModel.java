@@ -26,7 +26,7 @@ import org.w3c.dom.NodeList;
  *
  * @version $Revision$
  */
-final public class SubjectiveTableModel extends AbstractTableModel implements SortableTableModel {
+public final class SubjectiveTableModel extends AbstractTableModel implements SortableTableModel {
 
   /**
    * @param scoreDocument XML document that represents the teams that are
@@ -159,11 +159,7 @@ final public class SubjectiveTableModel extends AbstractTableModel implements So
     case 3:
       return false;
     default:
-      if(column >= getNumGoals() + 4) {
-        return false;
-      } else {
-        return true;
-      }
+      return (column >= getNumGoals() + 4);
     }
   }
 

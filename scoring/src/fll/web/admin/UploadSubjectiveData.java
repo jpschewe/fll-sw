@@ -43,7 +43,7 @@ import org.w3c.dom.Node;
  *
  * @version $Revision$
  */
-final public class UploadSubjectiveData {
+public final class UploadSubjectiveData {
 
   private static final Logger LOG = Logger.getLogger(UploadSubjectiveData.class);
   

@@ -25,8 +25,8 @@ import org.w3c.dom.Document;
  *
  * @version $Revision$
  */
-public class ImportDocument {
-  
+public final class ImportDocument {
+
   private static final Logger LOG = Logger.getLogger(ImportDocument.class);
   
   public static void main(final String[] args) {
@@ -63,4 +63,7 @@ public class ImportDocument {
     }
     System.exit(0);
   }
+
+  private ImportDocument() {}
+  
 }

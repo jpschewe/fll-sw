@@ -5,7 +5,6 @@
  */
 package fll;
 
-import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 
 import java.sql.Connection;
@@ -15,22 +14,18 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 
-import java.text.NumberFormat;
 import java.text.ParseException;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
@@ -43,7 +38,7 @@ import org.w3c.dom.NodeList;
  *
  * @version $Revision$
  */
-public class Queries {
+public final class Queries {
 
   private static final Logger LOG = Logger.getLogger(Queries.class);
   

@@ -26,7 +26,7 @@ import org.xml.sax.SAXParseException;
  * 
  * @version $Revision$
  */
-final public class ChallengeParser {
+public final class ChallengeParser {
 
   /**
    * The expected namespace for FLL documents
@@ -102,7 +102,7 @@ final public class ChallengeParser {
           if(systemID.endsWith("fll.xsd")) {
             //just use the one we store internally
             //final int slashidx = systemID.lastIndexOf("/") + 1;
-            return new InputSource(classLoader.getResourceAsStream("resources/fll.xsd"));// + systemID.substring(slashidx)));
+            return new InputSource(classLoader.getResourceAsStream("resources/fll.xsd")); // + systemID.substring(slashidx)));
           } else {
             return null;
           }

@@ -51,7 +51,6 @@ import net.mtu.eggplant.util.gui.SortableTable;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
@@ -59,7 +58,7 @@ import org.w3c.dom.NodeList;
  *
  * @version $Revision$
  */
-final public class SubjectiveFrame extends JFrame {
+public final class SubjectiveFrame extends JFrame {
 
   public static void main(final String[] args) {
     try {
@@ -262,6 +261,9 @@ final public class SubjectiveFrame extends JFrame {
   private final Document _scoreDocument;
   
   // -------- Inner classes only below here -----------
+  /**
+   * List model used for the comboboxes that is backed by an XML document.
+   */
   private static final class SubjectiveListModel extends DefaultComboBoxModel {
     public SubjectiveListModel(final Document document) {
       _subjectiveCategories = document.getDocumentElement().getElementsByTagName("subjectiveCategory");

@@ -40,7 +40,7 @@ import javax.servlet.jsp.JspWriter;
  *
  * @version $Revision$
  */
-final public class UploadTeams {
+public final class UploadTeams {
 
   /**
    * For debugging only
@@ -50,8 +50,6 @@ final public class UploadTeams {
       final File file = new File("/home/jpschewe/projects/fll/code/2002/results/teams-20021023.csv");
       final Connection connection = Utilities.createDBConnection("netserver", "fll", "fll");
       parseFile(file, connection, new DebugHttpSession());
-//       final String line = "team #	State	Tournament	Div #	School/Organization	Team Name	Girls	Boys	Minority	Num Medals	Paid	Coach	E-mail	Phone #";
-//       System.out.println(splitLine(line));
     } catch(final Exception e) {
       e.printStackTrace();
     }
@@ -148,7 +146,7 @@ final public class UploadTeams {
           insertPrep.setString(column, value);
           column++;
         }
-        for(;column <= columnNamesSeen.size(); column++) {
+        for(; column <= columnNamesSeen.size(); column++) {
           insertPrep.setString(column, null);
         }
         
@@ -394,7 +392,7 @@ final public class UploadTeams {
    */
   private static String sanitizeColumnName(final String str) {
     if(null == str || "".equals(str)) {
-      return "EMPTYHEADER" + EMPTY_HEADER_COUNT++;
+      return "EMPTYHEADER" + _emptyHeaderCount++;
     } else if("constraint".equalsIgnoreCase(str)) {
       return "CONSTRAINT_";
     } else {
@@ -406,7 +404,7 @@ final public class UploadTeams {
     }
   }
 
-  private static int EMPTY_HEADER_COUNT = 0;
+  private static int _emptyHeaderCount = 0;
   private static final Pattern ILLEGAL_CHAR_PATTERN = Pattern.compile("[ #?/-]");
   
 }

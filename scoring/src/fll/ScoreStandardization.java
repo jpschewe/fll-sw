@@ -11,21 +11,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
+
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
-import fll.Queries;
-import fll.Team;
-import fll.Utilities;
-
-import fll.xml.ChallengeParser;
-import java.text.NumberFormat;
-import java.text.ParseException;
 
 
 /**
@@ -33,7 +27,7 @@ import java.text.ParseException;
  *
  * @version $Revision$
  */
-final public class ScoreStandardization {
+public final class ScoreStandardization {
 
   /**
    * For debugging
@@ -284,12 +278,12 @@ final public class ScoreStandardization {
       rs = selectPrep.executeQuery();
       while(rs.next()) {
         final String group = rs.getString("ScoreGroup");
-        final int sg_count = rs.getInt("sg_count");
-        if(sg_count > 1) {
-          final double sg_mean = rs.getDouble("sg_mean");
-          final double sg_stdev = rs.getDouble("sg_stdev");
-          updatePrep.setDouble(1, sg_mean);
-          updatePrep.setDouble(2, sg_stdev);
+        final int sgCount = rs.getInt("sg_count");
+        if(sgCount > 1) {
+          final double sgMean = rs.getDouble("sg_mean");
+          final double sgStdev = rs.getDouble("sg_stdev");
+          updatePrep.setDouble(1, sgMean);
+          updatePrep.setDouble(2, sgStdev);
           updatePrep.setString(3, group);
           updatePrep.executeUpdate();
         } else {
@@ -315,12 +309,12 @@ final public class ScoreStandardization {
         rs = selectPrep.executeQuery();
         while(rs.next()) {
           final String group = rs.getString("ScoreGroup");
-          final int sg_count = rs.getInt("sg_count");
-          if(sg_count > 1) {
-            final double sg_mean = rs.getDouble("sg_mean");
-            final double sg_stdev = rs.getDouble("sg_stdev");
-            updatePrep.setDouble(1, sg_mean);
-            updatePrep.setDouble(2, sg_stdev);
+          final int sgCount = rs.getInt("sg_count");
+          if(sgCount > 1) {
+            final double sgMean = rs.getDouble("sg_mean");
+            final double sgStdev = rs.getDouble("sg_stdev");
+            updatePrep.setDouble(1, sgMean);
+            updatePrep.setDouble(2, sgStdev);
             updatePrep.setString(3, group);
             updatePrep.executeUpdate();
           } else {

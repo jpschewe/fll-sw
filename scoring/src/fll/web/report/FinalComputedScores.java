@@ -34,7 +34,7 @@ import org.w3c.dom.NodeList;
  *
  * @version $Revision$
  */
-final public class FinalComputedScores {
+public final class FinalComputedScores {
 
   /**
    * For debugging
@@ -53,8 +53,7 @@ final public class FinalComputedScores {
       final fll.web.debug.DebugJspWriter out = new fll.web.debug.DebugJspWriter(new java.io.PrintWriter(System.out));
       generateReport("STATE", challengeDocument, connection, out);
       out.flush();
-    }
-    catch(final Exception e) {
+    } catch(final Exception e) {
       e.printStackTrace();
     }
   }
