@@ -1,5 +1,6 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
   
 <%@ page import="fll.web.admin.UploadTeams" %>
 
@@ -23,9 +24,10 @@ if(null == errorMessage || "".equals(errorMessage)) {
 <html>
   <head>
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Team Column Selection)</title>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
-  <body background='../images/bricks1.gif' bgcolor='#ffffff' topmargin='4'>
+  <body>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Team Column Selection)</h1>
 
     <p>Do not use the forward and back buttons!  Use the supplied links/buttons.</p>
@@ -36,7 +38,7 @@ if(null == errorMessage || "".equals(errorMessage)) {
     <b>If a number is expected and you specify a column with text that doesn't
     convert to a number it will be converted to 0.</b></p>
 
-<%@ include file="sanitizeRules.jsp" %>
+<%@ include file="/WEB-INF/jspf/sanitizeRules.jspf" %>
       
     <% if(null != errorMessage && !"".equals(errorMessage)) { %>
     <p><font color='red'><%=errorMessage%></font></p>
@@ -125,6 +127,6 @@ if(null == errorMessage || "".equals(errorMessage)) {
       </table> 
     </form>
 
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>

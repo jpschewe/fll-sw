@@ -39,6 +39,7 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
 <html>
   <head>
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Display Controller)</title>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
   <c:if test="${empty displayPage}">
@@ -49,7 +50,7 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
     <c:set var='displayPage' value='${param.remotePage}' scope='application'/>
   </c:if>
           
-  <body background='<c:url value="/images/bricks1.gif"/>' bgcolor="#ffffff" topmargin='4'>
+  <body>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Display Controller)</h1>
 
     <p>This page is used to control what page is currently visible on the display screen</p>

@@ -31,10 +31,11 @@ final Iterator divisionIter = Queries.getDivisions(connection).iterator();
 %>
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Performance Run <%=runNumber%>)</title>
   </head>
 
-  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" topmargin='4'>
+  <body>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Performance Run <%=runNumber%>)</h1>
 
 <%

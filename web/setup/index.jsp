@@ -1,4 +1,4 @@
-
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
   
 <%@ taglib uri="/WEB-INF/tld/taglib62.tld" prefix="up" %>
 
@@ -20,10 +20,11 @@ File xmlfile = null;
 
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     <title>FLL (Database setup)</title>
   </head>
 
-  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" topmargin='4'>
+  <body>
     <h1>FLL (Database setup)</h1>
       
 <%if("POST".equals(request.getMethod())) {%>

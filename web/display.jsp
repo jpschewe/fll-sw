@@ -8,6 +8,7 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
 <html>
   <head>
     <meta http-equiv='refresh' content='60' />
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%></title>
           
@@ -32,7 +33,7 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
     </script>
   </head>
 
-  <body background='<c:url value="/images/bricks1.gif"/>' bgcolor="#ffffff">
+  <body>
       
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%></h1>
     

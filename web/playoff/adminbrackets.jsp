@@ -1,5 +1,6 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="org.w3c.dom.Document" %>
 
@@ -70,6 +71,7 @@ final List currentRound = tempCurrentRound;
 
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Playoff Brackets) Division: <%=divisionStr%> Run Number: <%=runNumber%></title>
   </head>
   <style type='text/css'>
@@ -82,7 +84,7 @@ final List currentRound = tempCurrentRound;
       FONT.TIE {color:#ff0000;font-weight:bold}
   </style>
 
-  <body background="../images/bricks1.gif" bgcolor="#ffffff" topmargin='4'>
+  <body>
 
     <h2><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Playoff Brackets Division: <%=divisionStr%> Run Number: <%=runNumber%>)</h2>
       <form action='adminbrackets.jsp' method='get'>
@@ -240,6 +242,6 @@ for(int index=0; currentIter.hasNext(); index++) {
 }//end if we have more than 2 teams
 %>
       </form>
-      <%@ include file="../WEB-INF/jspf/footer.jspf" %>
+      <%@ include file="/WEB-INF/jspf/footer.jspf" %>
     </body>
   </html>

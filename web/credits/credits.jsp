@@ -1,11 +1,12 @@
-
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
   
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     <title>Credits</title>
   </head>
 
-  <body background="../images/bricks1.gif" bgcolor="#ffffff" topmargin='4'>
+  <body>
     <h1>Credits</h1>
 
     <p>This software is licensed by INSciTE under the <a

@@ -1,5 +1,6 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="fll.Utilities" %>
   
@@ -16,6 +17,7 @@ final Connection connection = (Connection)application.getAttribute("connection")
 
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Select Team)</title>
 
   <!--<style type='text/css'>
@@ -30,9 +32,7 @@ final Connection connection = (Connection)application.getAttribute("connection")
   </style>
 
   </head>
-  <body background="../images/bricks1.gif"
-        bgcolor="#ffffff"
-        >
+  <body>
       
     <form action="editTeam.jsp" method="POST" name="selectTeam">
       <!-- top info bar -->
@@ -102,6 +102,6 @@ final Connection connection = (Connection)application.getAttribute("connection")
           
         </table>
       </form>
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>

@@ -1,6 +1,6 @@
-
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
   
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="fll.xml.GenerateDB" %>
   
@@ -38,10 +38,11 @@ if(null != request.getParameter("changeDatabase")
   
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Developer Commands)</title>
   </head>
 
-  <body background="../images/bricks1.gif" bgcolor="#ffffff" topmargin='4'>
+  <body>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Developer Commands)</h1>
 
     <p><font color='red'><b>This page is indended for developers only.  If you
@@ -62,6 +63,6 @@ if(null != request.getParameter("changeDatabase")
         
     </ul>
 
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>

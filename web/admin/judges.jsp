@@ -13,9 +13,10 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
 <html>
   <head>
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Judge Assignments)</title>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
-  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" topmargin='4'>
+  <body>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Judge Assignments)</h1>
 <% Judges.generatePage(out, application, request, response); %>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>

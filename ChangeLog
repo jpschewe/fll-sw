@@ -1,5 +1,11 @@
 2003-08-25  Jon Schewe  <jpschewe@mtu.net>
 
+	* web/style/style.jsp: Started on using stylesheets everywhere.
+	Use a jsp file as a stylesheet so that parameters such as images
+	can be done via JSTL.  In this case make sure that all files use
+	the appropriate background image and color without having to put
+	it in all of the body tags (707854).
+
 	* src/fll/gui/SubjectiveFrame.java: Display title attribute rather
 	than name attribute from subjective categories, also changed in
 	the report generation classes (707873).

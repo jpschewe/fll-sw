@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 <%@ include file="WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="org.w3c.dom.Document" %>
@@ -11,9 +12,10 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
 <html>
   <head>
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (An error has occured)</title>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
-  <body topmargin='4'>
+  <body>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (An error has occured)</h1>
 
     <p><font color="red">An error has occurred!</font>  Error messages:</p>
