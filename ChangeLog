@@ -1,3 +1,8 @@
+2003-09-16  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/xml/GenerateDB.java (generateDB): Make sure no team name
+	is blank by defaulting it to '<No Name>' in the database (707849).
+
 2003-09-08  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/admin/filterTeams.jsp: Remvoed javascript from submit button
