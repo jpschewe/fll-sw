@@ -319,7 +319,12 @@ public class Queries {
       if(null == value) {
         throw new RuntimeException("Missing parameter: " + name);
       }
-      sql.append(", " + name + " = " + value);
+      if(element.hasChildNodes()) {
+        //enumerated
+        sql.append(", " + name + " = '" + value + "'");
+      } else {
+        sql.append(", " + name + " = " + value);
+      }
     }
 
     //TeamNumber has to exist too
@@ -1209,9 +1214,9 @@ public class Queries {
     for(int i=0; i<goals.getLength(); i++) {
       final Element goal = (Element)goals.item(i);
       final String goalName = goal.getAttribute("name");
+      final int multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goal.getAttribute("multiplier")).intValue();
       final NodeList values = goal.getElementsByTagName("value");
       if(values.getLength() == 0) {
-        final int multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goal.getAttribute("multiplier")).intValue();
         final int score = rs.getInt(goalName);
         computedTotal += multiplier * score;
       } else {
@@ -1223,7 +1228,7 @@ public class Queries {
         for(int v=0; v<values.getLength() && !found; v++) {
           final Element value = (Element)values.item(v);
           if(value.getAttribute("value").equals(enum)) {
-            score = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue();
+            score = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue() * multiplier;
             found = true;
           }
         }

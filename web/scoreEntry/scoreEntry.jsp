@@ -49,13 +49,13 @@ final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumbe
   
 //what run number we're going to edit/enter  
 final int lRunNumber;
-if("1".equals(request.getParameter("EditFlag"))) {
+if("1".equals(request.getParameter("EditFlag")) || null != request.getParameter("error")) {
   final String runNumberStr = request.getParameter("RunNumber");
   if(null == runNumberStr) {
     throw new RuntimeException("Please choose a run number when editing scores");
   }
   final int runNumber = NumberFormat.getInstance().parse(runNumberStr).intValue();
-  if(runNumber >= nextRunNumber) {
+  if(null == request.getParameter("error") && runNumber >= nextRunNumber) {
     throw new RuntimeException("Team has not yet competed in run " + runNumber + ".  Please choose a valid run number.");
   }
   lRunNumber = runNumber;
@@ -96,14 +96,34 @@ function init() {
   // disable text selection
   document.onselectstart=new Function ("return false")
 
-  <c:if test="${editFlag}">
-  <%
-    ScoreEntry.generateInitForScoreEdit(out, application, challengeDocument, team.getTeamNumber(), lRunNumber);
-  %>
+  <%-- if there's an error, populate from the request parameters --%>
+  <c:if test="${param.error}">
+    <x:forEach select="$challengeDocument/fll/Performance/goal">
+      <x:set select="string(./@name)" var="goalName"/>
+      <x:if select="./value" var="enumerated">
+        <%-- enumerated --%>
+        <x:forEach select="./value">
+          <x:set var="value" select="string(./@value)" />
+          <c:if test="${value eq paramValues[goalName][0]}">
+            gbl_<c:out value="${goalName}"/> = <x:out select="./@score" />;
+          </c:if>
+        </x:forEach>
+      </x:if>
+      <c:if test="${not enumerated}">
+        gbl_<c:out value="${goalName}"/> = <c:out value="${paramValues[goalName][0]}"/>;
+      </c:if>
+    </x:forEach>
   </c:if>
-  <c:if test="${not editFlag}">
-    gbl_NoShow = 0;
-    reset();
+  <c:if test="${not param.error}">
+    <c:if test="${editFlag}">
+    <%
+      ScoreEntry.generateInitForScoreEdit(out, application, challengeDocument, team.getTeamNumber(), lRunNumber);
+    %>
+    </c:if>
+    <c:if test="${not editFlag}">
+      gbl_NoShow = 0;
+      reset();
+    </c:if>
   </c:if>
       
   refresh();
@@ -165,7 +185,7 @@ function CancelClicked() {
       </c:if>
       <input type='hidden' name='RunNumber' value='<%=lRunNumber%>' readonly>
       <input type='hidden' name='TeamNumber' value='<%=team.getTeamNumber()%>' readonly>
-          
+
       <table width='600' border="0" cellpadding="0" cellspacing="0">
         <!-- top info bar (team name etc) -->
         <tr>
@@ -201,26 +221,36 @@ function CancelClicked() {
           </td></tr>
       </table>
     </td>
+      
+    <c:if test="${param.error}">
+      <b><font color="red">You have been returned to this page because there is an error on this form.  See the goals marked in red for errors. </font></b>
+    </c:if>
+      
     </tr>
 
       <!-- score entry -->
       <tr>
         <td align="center" valign="middle">
 
-          <table border='1' cellpadding='3' cellspacing='0' width='600' bordercolor='#808080'>
+          <table border='1' cellpadding='3' cellspacing='0' bordercolor='#808080'>
             <tr>
               <td colspan='2'>
-                <font size='4'><u>Goals:</u></font>
+                <font size='4'><u>Goal</u></font>
               </td>
               <td align='right'>
-                <font size='4'><u>Count:</u></font>
+                <font size='4'><u>Count</u></font>
               </td>
               <td align='right'>
-                <font size='4'><u>Totals:</u></font>
+                <font size='4'><u>Score</u></font>
               </td>
+              <c:if test="${param.error}">
+              <td align='center'>
+                <font size='4'><u>Error Message</u></font>
+              </td>
+              </c:if>
             </tr>
 
-<%ScoreEntry.generateScoreEntry(out, challengeDocument);%>
+<%ScoreEntry.generateScoreEntry(out, challengeDocument, request);%>
               
             <!-- Total Score -->
             <tr>
@@ -230,6 +260,7 @@ function CancelClicked() {
               <td align='right'>
                 <input type='text' name='totalScore' size='3' readonly>
               </td>
+              <td>&nbsp;</td>
             </tr>
             <tr>
               <td>
@@ -250,6 +281,9 @@ function CancelClicked() {
               </td>
               <td>&nbsp</td>
               <td>&nbsp</td>
+              <c:if test="${param.error}">
+              <td>&nbsp;</td>
+              </c:if>
             </tr>
             <tr>
               <td colspan='3' align='right'>
@@ -262,6 +296,9 @@ function CancelClicked() {
               <td align='right'>
                 &nbsp;
               </td>
+              <c:if test="${param.error}">
+              <td>&nbsp;</td>
+              </c:if>
             </tr>
           </table>
 

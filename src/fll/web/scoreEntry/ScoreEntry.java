@@ -17,6 +17,7 @@ import java.sql.Statement;
 import java.text.ParseException;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspWriter;
 
 import org.w3c.dom.Document;
@@ -68,36 +69,36 @@ final public class ScoreEntry {
     }
 
     //check all restrictions
-    writer.println("  <!-- check restrictions -->");
-    final NodeList restrictions = performanceElement.getElementsByTagName("restriction");
-    for(int i=0; i<restrictions.getLength(); i++) {
-      final Element element = (Element)restrictions.item(i);
-      final String lowerBound = element.getAttribute("lowerBound");
-      final String upperBound = element.getAttribute("upperBound");
+//     writer.println("  <!-- check restrictions -->");
+//     final NodeList restrictions = performanceElement.getElementsByTagName("restriction");
+//     for(int i=0; i<restrictions.getLength(); i++) {
+//       final Element element = (Element)restrictions.item(i);
+//       final String lowerBound = element.getAttribute("lowerBound");
+//       final String upperBound = element.getAttribute("upperBound");
 
-      writer.print("  restrictionSum = ");
-      final NodeList terms = element.getElementsByTagName("term");
-      for(int t=0; t<terms.getLength(); t++) {
-        if(t > 0) {
-          writer.print(" + ");
-        }
+//       writer.print("  restrictionSum = ");
+//       final NodeList terms = element.getElementsByTagName("term");
+//       for(int t=0; t<terms.getLength(); t++) {
+//         if(t > 0) {
+//           writer.print(" + ");
+//         }
         
-        final Element term = (Element)terms.item(t);
-        final String coefficient = term.getAttribute("coefficient");
-        if(term.hasAttribute("goal")) {
-          final String goal = term.getAttribute("goal");
-          writer.print(coefficient + " * gbl_" + goal);
-        } else {
-          writer.print(coefficient);
-        }
-      }
-      writer.println(";");
+//         final Element term = (Element)terms.item(t);
+//         final String coefficient = term.getAttribute("coefficient");
+//         if(term.hasAttribute("goal")) {
+//           final String goal = term.getAttribute("goal");
+//           writer.print(coefficient + " * gbl_" + goal);
+//         } else {
+//           writer.print(coefficient);
+//         }
+//       }
+//       writer.println(";");
 
-      writer.println("  if(restrictionSum < " + lowerBound + " || restrictionSum > " + upperBound + ") {");
-      writer.println("    return false;");
-      writer.println("  }");
-      writer.newLine();
-    }
+//       writer.println("  if(restrictionSum < " + lowerBound + " || restrictionSum > " + upperBound + ") {");
+//       writer.println("    return false;");
+//       writer.println("  }");
+//       writer.newLine();
+//     }
     
     writer.println("  return true;");
     writer.println("}");
@@ -226,7 +227,9 @@ final public class ScoreEntry {
    * Generate the score entry form for document.
    */
   public static void generateScoreEntry(final JspWriter writer,
-                                        final Document document) throws IOException {
+                                        final Document document,
+                                        final HttpServletRequest request)
+    throws IOException {
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
     final NodeList goals = performanceElement.getElementsByTagName("goal");
@@ -241,10 +244,13 @@ final public class ScoreEntry {
         
         writer.println("<!-- " + name + " -->");
         writer.println("<tr>");
-        writer.println("  <td nowrap>");
+        if(null != request.getParameter(name + "_error")) {
+          writer.println("  <td nowrap bgcolor='red'>");
+        } else {
+          writer.println("  <td nowrap>");
+        }
         writer.println("    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='3'><b>" + title + ":<b></font>");
         writer.println("  </td>");
-
         
         if(element.hasChildNodes()) {
           //enumerated
@@ -298,6 +304,18 @@ final public class ScoreEntry {
         writer.println("  <td align='right'>");
         writer.println("    <input type='text' name='score_" + name + "' size='3' align='right' readonly>");
         writer.println("  </td>");
+
+        //error message
+        if(null != request.getParameter("error")) {
+          if(null != request.getParameter(name + "_error")) {
+            writer.println("  <td bgcolor='red'>");
+            writer.println(request.getParameter(name + "_error"));
+            writer.println("</td>");
+          } else {
+            writer.println("  <td>&nbsp;</td>");
+          }
+        }
+        
         writer.println("</tr>");
         writer.println("<!-- end " + name + " -->");
         writer.newLine();
@@ -362,8 +380,24 @@ final public class ScoreEntry {
         for(int i=0; i<goals.getLength(); i++) {
           final Element element = (Element)goals.item(i);
           final String name = element.getAttribute("name");
-
-          writer.println("  gbl_" + name + " = " + rs.getString(name) + ";");
+          if(element.hasChildNodes()) {
+            //enumerated
+            final String storedValue = rs.getString(name);
+            boolean found = false;
+            final NodeList values = element.getElementsByTagName("value");
+            for(int v=0; v<values.getLength(); v++) {
+              final Element valueElement = (Element)values.item(v);
+              if(valueElement.getAttribute("value").equals(storedValue)) {
+                writer.println("  gbl_" + name + " = " + valueElement.getAttribute("score") + ";");
+                found = true;
+              }
+            }
+            if(!found) {
+              throw new RuntimeException("Found enumerated value in the database that's not in the XML document, goal: " + name + " value: " + storedValue);
+            }
+          } else {
+            writer.println("  gbl_" + name + " = " + rs.getString(name) + ";");
+          }
         }
       } else {
         throw new RuntimeException("Cannot find TeamNumber and RunNumber in Performance table"
