@@ -195,15 +195,15 @@
 </path>
 
 
-  <target name="init">
-    <tstamp />
+<target name="init">
+  <tstamp />
 
-    <uptodate property="jsp.notRequired"
-              targetfile="${tmp.home}/.tstamp"
-              >
-      <srcfiles dir="${basedir}/${web.home}" includes="**" />
-    </uptodate>
-  </target>
+  <uptodate property="jsp.notRequired"
+            targetfile="${tmp.home}/.tstamp"
+            >
+    <srcfiles dir="${basedir}/${web.home}" includes="**" />
+  </uptodate>
+</target>
 
 
 <!-- ==================== Clean Target ==================================== -->
@@ -241,23 +241,23 @@
 <target name="compile.classes" depends="prepare"
    description="Compile Java sources">
 
-<!-- Compile Java classes as necessary -->
-<mkdir    dir="${build.home}/WEB-INF/classes"/>
-<javac srcdir="src"
-          destdir="${build.home}/WEB-INF/classes"
-           debug="${compile.debug}"
-     deprecation="${compile.deprecation}"
-        optimize="${compile.optimize}">
-<classpath refid="compile.classpath"/>
-
-</javac>
-
-<!-- Copy associated resource files -->
-<copy  todir="${build.home}/WEB-INF/classes">
-  <fileset dir="src">
-    <exclude name="**/*.java" />
-  </fileset>
-</copy>
+  <!-- Compile Java classes as necessary -->
+  <mkdir    dir="${build.home}/WEB-INF/classes"/>
+  <javac srcdir="src"
+            destdir="${build.home}/WEB-INF/classes"
+             debug="${compile.debug}"
+       deprecation="${compile.deprecation}"
+          optimize="${compile.optimize}">
+  <classpath refid="compile.classpath"/>
+  
+  </javac>
+  
+  <!-- Copy associated resource files -->
+  <copy  todir="${build.home}/WEB-INF/classes">
+    <fileset dir="src">
+      <exclude name="**/*.java" />
+    </fileset>
+  </copy>
 
 </target>
 
@@ -327,11 +327,11 @@
     </fileset>
   </delete>
 
-<!-- Copy the contents of the build directory -->
-<mkdir     dir="${deploy.home}"/>
-<copy    todir="${deploy.home}">
-<fileset dir="${build.home}"/>
-</copy>
+  <!-- Copy the contents of the build directory -->
+  <mkdir     dir="${deploy.home}"/>
+  <copy    todir="${deploy.home}">
+    <fileset dir="${build.home}"/>
+  </copy>
 
 </target>
 
@@ -355,7 +355,8 @@
         description="Create distribution">
 
   <!-- copy docs -->
-  <copy todir="${dist.home}">
+  <mkdir dir="${dist.home}/docs" />
+  <copy todir="${dist.home}/docs">
     <fileset dir="${basedir}/docs" />
   </copy>
 
@@ -365,24 +366,24 @@
         overwrite="true"
         />
 
-<!-- Create web application zip file -->
-<zip zipfile="${dist.home}/web.zip">
-  <zipfileset dir="${build.home}" prefix="fll-sw" />
-</zip>
-
-
-<zip zipfile="${dist.home}/common-lib.zip">
-  <zipfileset dir="${lib.home}/common-lib"/>
-</zip>
-
-
-<!-- stuff for subjective scoring app -->
-<mkdir dir="${tmp.home}/subjective" />
-<jar destfile="${tmp.home}/subjective/subjective.jar"
-     basedir="${build.home}/WEB-INF/classes" />
-<copy todir="${tmp.home}/subjective">
-  <fileset dir="${lib.home}" />
-</copy>
+  <!-- Create web application zip file -->
+  <zip zipfile="${dist.home}/web.zip">
+    <zipfileset dir="${build.home}" prefix="fll-sw" />
+  </zip>
+  
+  
+  <zip zipfile="${dist.home}/common-lib.zip">
+    <zipfileset dir="${lib.home}/common-lib"/>
+  </zip>
+  
+  
+  <!-- stuff for subjective scoring app -->
+  <mkdir dir="${tmp.home}/subjective" />
+  <jar destfile="${tmp.home}/subjective/subjective.jar"
+       basedir="${build.home}/WEB-INF/classes" />
+  <copy todir="${tmp.home}/subjective">
+    <fileset dir="${lib.home}" />
+  </copy>
 
   <path id="subjective.dist.classpath">
     <path refid="application.classpath" />
@@ -400,32 +401,32 @@
   </pathconvert>
 
 
-<echo file="${tmp.home}/subjective/subjective.bat">%JAVA_HOME%\bin\java -classpath "${subjective.windows.classpath}" fll.gui.SubjectiveFrame</echo>
-
-<echo file="${tmp.home}/subjective/subjective.sh">java -classpath "${subjective.unix.classpath}" fll.gui.SubjectiveFrame</echo>
-
-<zip zipfile="${dist.home}/subjective.zip">
-  <zipfileset prefix="subjective" dir="${tmp.home}/subjective" />
-</zip>
-
-<zip zipfile="${dist.home}/src.zip">
-  <zipfileset dir="${basedir}">
-    <include name="${web.home}/**" />
-    <include name="${src.home}/**" />
-    <include name="docs/**" />
-    <include name="prj.el" />
-    <include name="build.xml" />
-    <include name="ChangeLog" />
-  </zipfileset>
-</zip>
-
-<zip zipfile="${app.name}-${app.version}.zip">
-  <zipfileset dir="${dist.home}" prefix="fll" />
-</zip>
-
-<delete dir="${tmp.home}" />
-
-<echo message="The distribution file is ${app.name}.zip" />
+  <echo file="${tmp.home}/subjective/subjective.bat">%JAVA_HOME%\bin\java -classpath "${subjective.windows.classpath}" fll.gui.SubjectiveFrame</echo>
+  
+  <echo file="${tmp.home}/subjective/subjective.sh">java -classpath "${subjective.unix.classpath}" fll.gui.SubjectiveFrame</echo>
+  
+  <zip zipfile="${dist.home}/subjective.zip">
+    <zipfileset prefix="subjective" dir="${tmp.home}/subjective" />
+  </zip>
+  
+  <zip zipfile="${dist.home}/src.zip">
+    <zipfileset dir="${basedir}">
+      <include name="${web.home}/**" />
+      <include name="${src.home}/**" />
+      <include name="docs/**" />
+      <include name="prj.el" />
+      <include name="build.xml" />
+      <include name="ChangeLog" />
+    </zipfileset>
+  </zip>
+  
+  <zip zipfile="${app.name}-${app.version}.zip">
+    <zipfileset dir="${dist.home}" prefix="fll" />
+  </zip>
+  
+  <delete dir="${tmp.home}" />
+  
+  <echo message="The distribution file is ${app.name}.zip" />
  
 </target>
 
@@ -445,21 +446,21 @@
 <target name="javadoc"
    description="Create Javadoc API documentation">
 
-<mkdir dir="${dist.home}/api"/>
-<javadoc sourcepath="src"
-         windowtitle="${app.name}"
-         destdir="${dist.home}/api"
-         packagenames="fll.*"
-         use="true"
-         splitindex="true"
-         additionalparam="-tag beaninfo:a:BeanInfo -tag valid:a:Validity -tag feasible:a:Feasibility -tag test:a:Tests -tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator"
-         >
-  <classpath>
-    <path refid="compile.classpath" />
-    <pathelement location="${build.home}/src" />
-  </classpath>
-
-</javadoc>
+  <mkdir dir="${dist.home}/api"/>
+  <javadoc sourcepath="src"
+           windowtitle="${app.name}"
+           destdir="${dist.home}/api"
+           packagenames="fll.*"
+           use="true"
+           splitindex="true"
+           additionalparam="-tag beaninfo:a:BeanInfo -tag valid:a:Validity -tag feasible:a:Feasibility -tag test:a:Tests -tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator"
+           >
+    <classpath>
+      <path refid="compile.classpath" />
+      <pathelement location="${build.home}/src" />
+    </classpath>
+  
+  </javadoc>
 
 </target>
 
