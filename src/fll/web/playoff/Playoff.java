@@ -265,7 +265,7 @@ final public class Playoff {
    * If team is not null, calls performanceScoreExists(connection,
    * team.getTeamNumber(), runNumber), otherwise returns false.
    * 
-   * @see performanceScoreExists(Connection, int, int)
+   * @see #performanceScoreExists(Connection, int, int)
    */
   public static boolean performanceScoreExists(final Connection connection,
                                                final Team team,
