@@ -12,19 +12,22 @@
       var height = screen.height-10;
       var newWindow = null;
       var str = 'height='+height+',width='+width+',toolbar=0,menubar=0,scrollbars=0,location=0,directories=0,status=0,resizable=0,fullscreen=1,left=0,screenX=0,top=0,screenY=0';
-      newWindow = window.open('welcome.jsp', 'displayWindow', str);
 
-      <c:choose>
-        <c:when test='${displayPage == "scoreboard"}'>
-          newWindow.location.href = '<c:url value="/scoreboard/main.jsp"/>';
-        </c:when>
-        <c:when test='${displayPage == "playoffs"}'>
-          newWindow.location.href = '<c:url value="/playoff/remoteMain.jsp"/>';
-        </c:when>
-        <c:otherwise>
-          newWindow.location.href = '<c:url value="/welcome.jsp"/>';
-        </c:otherwise>
-      </c:choose>
+      <c:if test="${displayPage != sessionDisplayPage}">
+        <c:choose>
+          <c:when test='${displayPage == "scoreboard"}'>
+            newWindow = window.open('<c:url value="/scoreboard/main.jsp"/>', 'displayWindow', str);
+          </c:when>
+          <c:when test='${displayPage == "playoffs"}'>
+            newWindow = window.open('<c:url value="/playoff/remoteMain.jsp"/>', 'displayWindow', str);
+          </c:when>
+          <c:otherwise>
+            newWindow = window.open('<c:url value="/welcome.jsp"/>', 'displayWindow', str);
+          </c:otherwise>
+        </c:choose>
+        <c:set var="sessionDisplayPage" value="${displayPage}" scope="session"/>
+      </c:if>
+      
     </script>
   </head>
 
