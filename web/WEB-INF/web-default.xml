@@ -33,4 +33,9 @@
     <location>/errorHandler.jsp</location>
   </error-page>
 
+  <taglib>
+    <taglib-uri>http://jakarta.apache.org/taglibs/string-1.0.1</taglib-uri>
+    <taglib-location>/WEB-INF/tld/taglibs-string.tld</taglib-location>
+  </taglib>
+
 </web-app>

@@ -165,6 +165,8 @@
   <!-- Include all JAR files that will be included in /WEB-INF/lib -->
   <path refid="application.classpath" />
 
+  <pathelement location="${lib.home}/commons-lang-2.0.jar" />
+  <pathelement location="${lib.home}/taglibs-string.jar" />
   <pathelement location="${lib.home}/uptag.jar"/>
 
   <!-- JSTL libraries -->

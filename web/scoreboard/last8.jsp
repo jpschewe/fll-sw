@@ -1,11 +1,9 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
-
-<%@ page import="fll.Utilities" %>
+<%@ taglib uri="http://jakarta.apache.org/taglibs/string-1.0.1" prefix="str" %>
+      
 <%@ page import="fll.Queries" %>
   
 <%@ page import="java.sql.Connection" %>
-<%@ page import="java.sql.Statement" %>
-<%@ page import="java.sql.ResultSet" %>
 
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
@@ -14,9 +12,9 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
   
 <HTML>
 <head>
-<style>
+  <style>
         FONT {color: #ffffff; font-family: "Arial"}
-</style>
+  </style>
 <script language=javascript>
   window.setInterval("location.href='last8.jsp'",30000);
 </script>
@@ -58,26 +56,12 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
                 </td>
                 <td width='28%'>
                   <font size='3'>
-                    <c:set var="teamName" value="${row.TeamName}"/>
-                    <%
-                    if(null != pageContext.getAttribute("teamName") && ((String)pageContext.getAttribute("teamName")).length() > 20) {
-                      out.println(((String)pageContext.getAttribute("teamName")).substring(0, 20) + "&nbsp;");
-                    } else {
-                      out.println(pageContext.getAttribute("teamName") + "&nbsp;");
-                    }
-                    %>
+                    <str:substring start="0" end="20"><c:out value="${row.TeamName}"/></str:substring>&nbsp;
                   </font>
                 </td>
                 <td>
                   <font size='3'>
-                    <c:set var="organization" value="${row.Organization}"/>
-                    <%
-                    if(null != pageContext.getAttribute("organization") && ((String)pageContext.getAttribute("organization")).length() > 35) {
-                      out.println(((String)pageContext.getAttribute("organization")).substring(0, 35) + "&nbsp;");
-                    } else {
-                      out.println(pageContext.getAttribute("organization") + "&nbsp;");
-                    }
-                    %>
+                    <str:substring start="0" end="35"><c:out value="${row.Organization}"/></str:substring>&nbsp;
                   </font>
                 </td>
                 <td width='5%' align='right'>
