@@ -17,7 +17,6 @@ Queries.ensureTournamentTeamsPopulated(application);
 
 final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-final String currentTournament = (String)application.getAttribute("currentTournament");
 final Connection connection = (Connection)application.getAttribute("connection");
 %>
   
@@ -33,7 +32,7 @@ final Connection connection = (Connection)application.getAttribute("connection")
       that have no runs.
         <ul>
 <%
-final List less = Queries.getTeamsNeedingSeedingRuns(connection, currentTournament, tournamentTeams);
+final List less = Queries.getTeamsNeedingSeedingRuns(connection, tournamentTeams);
 final Iterator lessIter = less.iterator();
 while(lessIter.hasNext()) {
   final Team team = (Team)lessIter.next();
@@ -46,7 +45,7 @@ while(lessIter.hasNext()) {
       <p>Teams with more runs than seeding rounds:
         <ul>
 <%
-final List more = Queries.getTeamsWithExtraRuns(connection, currentTournament, tournamentTeams);
+final List more = Queries.getTeamsWithExtraRuns(connection, tournamentTeams);
 final Iterator moreIter = more.iterator();
 while(moreIter.hasNext()) {
   final Team team = (Team)moreIter.next();

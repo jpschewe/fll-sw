@@ -19,10 +19,10 @@ Queries.ensureTournamentTeamsPopulated(application);
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
 final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
-final String currentTournament = (String)application.getAttribute("currentTournament");
+final String currentTournament = Queries.getCurrentTournament(connection);
   
-Queries.updateScoreTotals(challengeDocument, connection, currentTournament);
-ScoreStandardization.setSubjectiveScoreGroups(connection, challengeDocument, currentTournament, tournamentTeams.values());
+Queries.updateScoreTotals(challengeDocument, connection);
+ScoreStandardization.setSubjectiveScoreGroups(connection, challengeDocument, tournamentTeams.values());
 ScoreStandardization.summarizeSubjectiveScores(connection, challengeDocument, currentTournament);
 ScoreStandardization.summarizePerformanceScores(connection, currentTournament);
 

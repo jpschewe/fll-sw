@@ -265,7 +265,7 @@
 
 </target>
 
-<!-- not perfect, but will work - Broken again :( -->
+<!-- not perfect, but will work -->
 <target name="compile.jsp" depends="compile.classes"
     description="Compile JSP sources">
     
@@ -283,7 +283,8 @@
 	  fork="yes"
 	  failonerror="true"
 	  taskname="jspc"
-	  dir="${basedir}">
+	  dir="${basedir}"
+          >
       <classpath>
         <pathelement location="${build.home}/WEB-INF/classes" />
         <path refid="compile.classpath" />
@@ -491,6 +492,7 @@
   <copy todir="${build.home}/WEB-INF/lib">
     <fileset dir="${lib.home}">
       <include name="**/*.jar" />
+      <exclude name="**/common-lib/**" />
     </fileset>
   </copy>
 

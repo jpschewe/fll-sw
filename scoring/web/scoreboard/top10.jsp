@@ -14,7 +14,7 @@
   
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
-final String currentTournament = (String)application.getAttribute("currentTournament");
+final String currentTournament = Queries.getCurrentTournament(connection);
 
 final List divisions = Queries.getDivisions(connection);
   

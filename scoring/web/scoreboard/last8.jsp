@@ -2,6 +2,7 @@
 <%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="fll.Utilities" %>
+<%@ page import="fll.Queries" %>
   
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.Statement" %>
@@ -9,7 +10,7 @@
 
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
-final String currentTournament = (String)application.getAttribute("currentTournament");
+final String currentTournament = Queries.getCurrentTournament(connection);
 final Statement stmt = connection.createStatement();
 final String sql = "SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, Teams.Division, Performance.Tournament, Performance.RunNumber, Performance.Bye, Performance.NoShow, Performance.TimeStamp, Performance.ComputedTotal"
   + " FROM Teams,Performance"

@@ -2,6 +2,7 @@
 <%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="fll.ScoreStandardization" %>
+<%@ page import="fll.Queries" %>
       
 <%@ page import="org.w3c.dom.Document" %>
 
@@ -10,7 +11,7 @@ Queries.ensureTournamentTeamsPopulated(application);
       
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
-final String currentTournament = (String)application.getAttribute("currentTournament");
+final String currentTournament = Queries.getCurrentTournament(connection);
   
 ScoreStandardization.standardizeScores(connection, challengeDocument, currentTournament);
 ScoreStandardization.updateTeamTotalScores(connection, currentTournament);

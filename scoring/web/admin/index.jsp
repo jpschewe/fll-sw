@@ -17,6 +17,7 @@
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
+final String currentTournament = Queries.getCurrentTournament(connection);
 final StringBuffer message = new StringBuffer();
 final String messageReq = request.getParameter("message");
 if(null != messageReq) {
@@ -30,7 +31,6 @@ if(null != currentTournamentParam && !"".equals(currentTournamentParam)) {
   if(!Queries.setCurrentTournament(connection, currentTournamentParam)) {
     response.sendRedirect(response.encodeRedirectURL("tournaments.jsp?unknownTournament=" + currentTournamentParam));
   } else {
-    application.setAttribute("currentTournament", currentTournamentParam);
     Queries.populateTournamentTeams(application);
     message.append("<i>Tournament changed to " + currentTournamentParam + "</i><br>");
   }
@@ -75,7 +75,7 @@ final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
                 final String tournament = rs.getString(1);
                 final String location = rs.getString(2);
                 out.print("<option value='" + tournament + "'");
-                if(application.getAttribute("currentTournament").equals(tournament)) {
+                if(currentTournament.equals(tournament)) {
                   out.print(" selected");
                 }
                 out.println(">" + location + " [ " + tournament + " ]</option>");

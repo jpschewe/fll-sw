@@ -22,9 +22,9 @@ if(null == runNumberStr) {
 }
 final int runNumber = NumberFormat.getNumberInstance().parse(runNumberStr).intValue();
   
-final String tournament = (String)application.getAttribute("currentTournament");
   
 final Connection connection = (Connection)application.getAttribute("connection");
+final String tournament = Queries.getCurrentTournament(connection);
 final Statement stmt = connection.createStatement();
 final Iterator divisionIter = Queries.getDivisions(connection).iterator();
 %>

@@ -17,7 +17,6 @@
   if(null == application.getAttribute("connection")) {
     final Connection connection = Utilities.createDBConnection(application.getInitParameter("database.host"), "fll", "fll", database);
     application.setAttribute("connection", connection);
-    application.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
   }
     
   if(null == application.getAttribute("challengeDocument")) {  

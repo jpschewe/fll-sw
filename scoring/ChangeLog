@@ -1,4 +1,18 @@
+2003-07-21  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/web/playoff/Playoff.java (insertBye): 
+	Always use the tournament from the database. (707887)
+
+	* src/fll/ScoreStandardization.java (setSubjectiveScoreGroups):
+	Always use the tournament from the database. (707887)
+
 2003-07-20  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/Queries.java (getNextRunNumber): Always use the
+	tournament from the database. (707887)
+
+	* web/scoreEntry/scoreEntry.jsp: Always use the tournament from
+	the database. (707887)
 
 	* web/admin/index.jsp: Added link to add tournaments for each
 	region in the teams table. (766898)

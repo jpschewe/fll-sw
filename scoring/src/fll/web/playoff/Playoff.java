@@ -62,7 +62,6 @@ final public class Playoff {
 //         child = child.getNextSibling();
 //       }
       System.out.println(buildInitialBracketOrder(connection,
-                                                  Queries.getCurrentTournament(connection),
                                                   "1",
                                                   Queries.getTournamentTeams(connection)));
     } catch(final Exception e) {
@@ -79,19 +78,17 @@ final public class Playoff {
    * elimination bracket.
    *
    * @param connection connection to the database
-   * @param currentTournament the current tournament
    * @param divisionStr the division to generate brackets for, as a String
    * @param tournamentTeams keyed by team number
    * @return a List of teams
    * @throws SQLException on a database error
    */
   public static List buildInitialBracketOrder(final Connection connection,
-                                              final String currentTournament,
                                               final String divisionStr,
                                               final Map tournamentTeams)
     throws SQLException {
 
-    final List seedingOrder = Queries.getPlayoffSeedingOrder(connection, currentTournament, divisionStr, tournamentTeams);
+    final List seedingOrder = Queries.getPlayoffSeedingOrder(connection, divisionStr, tournamentTeams);
     if(seedingOrder.size() > 128) {
       //TODO one of these days I need to compute this rather than using an array
       throw new RuntimeException("More than 128 teams sent to playoff brackets!  System overload");
@@ -119,42 +116,42 @@ final public class Playoff {
    *
    * @param connection database connection with write access to Performance table
    * @param document XML document description of tournament
-   * @param tournament current tournament
    * @param teamA first team to check
    * @param teamB second team to check
    * @param runNumber what run to compare scores for
    * @return the team that is the winner.  Team.TIE is returned in the case of a
    * tie and null when the scores have not yet been entered
    * @see Team#TIE
-   * @see fll.Queries#updateScoreTotals(Document, Connection, String)
+   * @see fll.Queries#updateScoreTotals(Document, Connection)
    * @throws SQLException on a database error
    * @throws ParseException if the XML document is invalid
    */
   public static Team pickWinner(final Connection connection,
                                 final Document document,
-                                final String tournament,
                                 final Team teamA,
                                 final Team teamB,
                                 final int runNumber)
     throws SQLException, ParseException {
+    final String tournament = Queries.getCurrentTournament(connection);
+    
     if(Team.BYE.equals(teamA)) {
-      if(!performanceScoreExists(connection, tournament, teamB, runNumber)) {
-        insertBye(connection, tournament, teamB, runNumber);
+      if(!performanceScoreExists(connection, teamB, runNumber)) {
+        insertBye(connection, teamB, runNumber);
       }
       return teamB;
     } else if(Team.BYE.equals(teamB)) {
-      if(!performanceScoreExists(connection, tournament, teamA, runNumber)) {
-        insertBye(connection, tournament, teamA, runNumber);
+      if(!performanceScoreExists(connection, teamA, runNumber)) {
+        insertBye(connection, teamA, runNumber);
       }
       return teamA;
     } else if(Team.TIE.equals(teamA) || Team.TIE.equals(teamB)) {
       return null;
     } else {
       //make sure scores are up to date
-      Queries.updateScoreTotals(document, connection, tournament);
+      Queries.updateScoreTotals(document, connection);
       
-      if(performanceScoreExists(connection, tournament, teamA, runNumber)
-         && performanceScoreExists(connection, tournament, teamB, runNumber)) {
+      if(performanceScoreExists(connection, teamA, runNumber)
+         && performanceScoreExists(connection, teamB, runNumber)) {
         final boolean noshowA = isNoShow(connection, tournament, teamA, runNumber);
         final boolean noshowB = isNoShow(connection, tournament, teamB, runNumber);
         if(noshowA && !noshowB) {
@@ -226,10 +223,10 @@ final public class Playoff {
    * @throws SQLException on a database error
    */
   public static void insertBye(final Connection connection,
-                               final String tournament,
                                final Team team,
                                final int runNumber)
     throws SQLException {
+    final String tournament = Queries.getCurrentTournament(connection);
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
@@ -246,10 +243,11 @@ final public class Playoff {
    * @throws SQLException on a database error
    */
   public static boolean performanceScoreExists(final Connection connection,
-                                               final String tournament,
                                                final Team team,
                                                final int runNumber)
     throws SQLException {
+    final String tournament = Queries.getCurrentTournament(connection);
+    
     if(null == team) {
       return false;
     } else {
@@ -364,7 +362,7 @@ final public class Playoff {
       sb.append("</font>&nbsp;<font class='TeamName'>");
       sb.append(team.getTeamName());
       sb.append("</font>");
-      if(performanceScoreExists(connection, currentTournament, team, runNumber)) {
+      if(performanceScoreExists(connection, team, runNumber)) {
         sb.append("<font class='TeamScore'>&nbsp;Score: ");
         if(isNoShow(connection, currentTournament, team, runNumber)) {
           sb.append("No Show");

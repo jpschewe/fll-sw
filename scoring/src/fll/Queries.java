@@ -65,7 +65,7 @@ public class Queries {
 //       LOG.info("Previous tournament for team 666 is null?: " + (null == current));
       
       //LOG.info("Tournaments: " + getTournamentNames(connection));
-      //updateScoreTotals(challengeDocument, connection, "Monticello");
+      //updateScoreTotals(challengeDocument, connection);
       //System.out.println(getDivisions(connection));
 
       LOG.info("Before Tournaments: " + getTournamentNames(connection));
@@ -186,13 +186,13 @@ public class Queries {
   /**
    * Figure out the next run number for teamNumber.
    */
-  public static int getNextRunNumber(final ServletContext application,
+  public static int getNextRunNumber(final Connection connection,
                                      final int teamNumber) throws SQLException {
-    final String currentTournament = (String)application.getAttribute("currentTournament");
+    final String currentTournament = getCurrentTournament(connection);
     Statement stmt = null;
     ResultSet rs = null;
     try {
-      stmt = ((Connection)application.getAttribute("connection")).createStatement();
+      stmt = connection.createStatement();
 
       rs = stmt.executeQuery("SELECT COUNT(TeamNumber) FROM Performance WHERE Tournament = \"" + currentTournament + "\" AND TeamNumber = " + teamNumber);
       final int runNumber;
@@ -216,9 +216,10 @@ public class Queries {
    * @throws RuntimeException if a parameter is missing
    */
   public static String insertPerformanceScore(final Document document,
-                                              final ServletContext application,
-                                              final HttpServletRequest request) throws SQLException, RuntimeException {
-    final String currentTournament = (String)application.getAttribute("currentTournament");
+                                              final Connection connection,
+                                              final HttpServletRequest request)
+    throws SQLException, RuntimeException {
+    final String currentTournament = getCurrentTournament(connection);
     final StringBuffer columns = new StringBuffer();
     final StringBuffer values = new StringBuffer();
 
@@ -270,7 +271,6 @@ public class Queries {
     final String sql = "INSERT INTO Performance"
       + " ( " + columns.toString() + ") "
       + "VALUES ( " + values.toString() + ")";
-    final Connection connection = (Connection)application.getAttribute("connection");
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
@@ -290,9 +290,10 @@ public class Queries {
    * @throws RuntimeException if a parameter is missing
    */
   public static String updatePerformanceScore(final Document document,
-                                              final ServletContext application,
-                                              final HttpServletRequest request) throws SQLException, RuntimeException {
-    final String currentTournament = (String)application.getAttribute("currentTournament");
+                                              final Connection connection,
+                                              final HttpServletRequest request)
+    throws SQLException, RuntimeException {
+    final String currentTournament = getCurrentTournament(connection);
     
     final StringBuffer sql = new StringBuffer();
     sql.append("UPDATE Performance SET ");
@@ -336,7 +337,6 @@ public class Queries {
     
     sql.append(" AND Tournament = \"" + currentTournament + "\"");
     
-    final Connection connection = (Connection)application.getAttribute("connection");
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
@@ -355,10 +355,10 @@ public class Queries {
    * @return the SQL executed
    * @throws RuntimeException if a parameter is missing
    */
-  public static String deletePerformanceScore(final ServletContext application,
+  public static String deletePerformanceScore(final Connection connection,
                                               final HttpServletRequest request)
     throws SQLException, RuntimeException {
-    final String currentTournament = (String)application.getAttribute("currentTournament");
+    final String currentTournament = getCurrentTournament(connection);
     
     final StringBuffer sql = new StringBuffer();
     sql.append("DELETE FROM Performance ");
@@ -378,7 +378,6 @@ public class Queries {
     
     sql.append(" AND Tournament = '" + currentTournament + "'");
     
-    final Connection connection = (Connection)application.getAttribute("connection");
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
@@ -394,16 +393,15 @@ public class Queries {
    * Get a list of team numbers that have less runs than seeding rounds
    *
    * @param connection connection to the database
-   * @param currentTournament the current tournament
    * @param tournamentTeams keyed by team number
    * @return a List of Team objects
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
   public static List getTeamsNeedingSeedingRuns(final Connection connection,
-                                                final String currentTournament,
                                                 final Map tournamentTeams)
     throws SQLException, RuntimeException {
+    final String currentTournament = getCurrentTournament(connection);
     final String sql = "SELECT TeamNumber,Count(*) AS count FROM Performance"
       + " WHERE Tournament = '" + currentTournament + "'"
       + " GROUP BY TeamNumber"
@@ -434,16 +432,15 @@ public class Queries {
    * Get a list of team numbers that have more runs than seeding rounds
    *
    * @param connection connection to the database
-   * @param currentTournament the current tournament
    * @param tournamentTeams keyed by team number
    * @return a List of team numbers as Integers
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
   public static List getTeamsWithExtraRuns(final Connection connection,
-                                           final String currentTournament,
                                            final Map tournamentTeams)
     throws SQLException, RuntimeException {
+    final String currentTournament = getCurrentTournament(connection);
     final String sql = "SELECT TeamNumber,Count(*) AS count FROM Performance"
       + " WHERE Tournament = '" + currentTournament + "'"
       + " GROUP BY TeamNumber"
@@ -483,10 +480,10 @@ public class Queries {
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
   public static List getPlayoffSeedingOrder(final Connection connection,
-                                            final String currentTournament,
                                             final String divisionStr,
                                             final Map tournamentTeams)
     throws SQLException, RuntimeException {
+    final String currentTournament = getCurrentTournament(connection);
     final String sql = "SELECT Performance.TeamNumber,MAX(Performance.ComputedTotal) AS Score FROM Performance,Teams"
       + " WHERE Performance.RunNumber <= " + getNumSeedingRounds(connection)
       + " AND Performance.Tournament = '" + currentTournament + "'"
@@ -699,14 +696,14 @@ public class Queries {
    *
    * @param document the challenge document
    * @param connection connection to database, needs write privileges
-   * @param tournament the current tournament
    * @throws SQLException if an error occurs
    * @throws NumberFormantException if document has invalid numbers
    */
   public static void updateScoreTotals(final Document document,
-                                       final Connection connection,
-                                       final String tournament)
+                                       final Connection connection)
     throws SQLException, ParseException {
+    final String tournament = getCurrentTournament(connection);
+    
     Statement stmt = null;
     try {
       stmt = connection.createStatement();

@@ -4,12 +4,16 @@
 
 <%@ page import="org.w3c.dom.Document" %>
   
+<%@ page import="java.sql.Connection" %>
+  
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 
 if(null != request.getParameter("ScorePageText")) {
   application.setAttribute("ScorePageText", request.getParameter("ScorePageText"));
 }
+
+final Connection connection = (Connection)application.getAttribute("connection");
 %>
       
 <html>
@@ -22,7 +26,7 @@ if(null != request.getParameter("ScorePageText")) {
 
     <ul>
         
-      <li>Current Tournament -> <%=application.getAttribute("currentTournament")%></li>
+      <li>Current Tournament -> <%=Queries.getCurrentTournament(connection)%></li>
       
       <li><a href="instructions.jsp">Instructions</a></li>
         
