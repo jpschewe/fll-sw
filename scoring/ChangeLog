@@ -1,3 +1,8 @@
+2003-10-02  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/web/scoreEntry/Submit.java: Added support for
+	enumerations and checking restrictions on the server side (707877).
+
 2003-10-01  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/Queries.java (updateScoreTotals): Added support for
