@@ -93,7 +93,6 @@ if(null != numMedalsStr && !"".equals(numMedalsStr) && !"null".equals(numMedalsS
                                    request.getParameter("region"),
                                    division,
                                    numMedals);
-      Queries.populateTournamentTeams(application);
 %>
       <c:if test="${null != dup}">
         <c:redirect url='index.jsp'>
@@ -103,7 +102,6 @@ if(null != numMedalsStr && !"".equals(numMedalsStr) && !"null".equals(numMedalsS
         </c:redirect>
       </c:if>
 
-      <c:remove var="tournamentTeams" />
       <a href="index.jsp">Normally you'd be redirected here</a>
       <c:redirect url='index.jsp' />
     </c:if>
@@ -116,7 +114,6 @@ if(null != numMedalsStr && !"".equals(numMedalsStr) && !"null".equals(numMedalsS
                          request.getParameter("region"),
                          division,
                          numMedals);
-      Queries.populateTournamentTeams(application);
 %>
       <c:if test="${not empty param.currentTournament}">
 <%

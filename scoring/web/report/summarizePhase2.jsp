@@ -6,8 +6,6 @@
 <%@ page import="org.w3c.dom.Document" %>
 
 <%
-Queries.ensureTournamentTeamsPopulated(application);
-      
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
 final String currentTournament = Queries.getCurrentTournament(connection);

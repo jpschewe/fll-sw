@@ -676,8 +676,6 @@ public class Queries {
       //delete from SummarizedScores
       stmt.executeUpdate("DELETE FROM SummarizedScores WHERE TeamNumber = " + teamNumber);
       
-      application.removeAttribute("tournamentTeams");
-        
     } finally {
       Utilities.closeStatement(stmt);
     }

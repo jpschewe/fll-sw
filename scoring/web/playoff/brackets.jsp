@@ -15,11 +15,9 @@
 <%@ page import="java.sql.Connection" %>
   
 <%
-Queries.ensureTournamentTeamsPopulated(application);
-
-final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
+final Map tournamentTeams = Queries.getTournamentTeams(connection);
+final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final String currentTournament = Queries.getCurrentTournament(connection);
 
 

@@ -52,7 +52,6 @@ File xmlfile = null;
     
     //remove application variables that depend on the database
     application.removeAttribute("connection");
-    application.removeAttribute("tournamentTeams");
     application.removeAttribute("challengeDocument");
   
     message.append("<i>Successfully initialized database</i><br>");

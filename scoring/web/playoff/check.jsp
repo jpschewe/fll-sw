@@ -10,10 +10,8 @@
 <%@ page import="java.sql.Connection" %>
   
 <%
-Queries.ensureTournamentTeamsPopulated(application);
-
-final Map tournamentTeams = (Map)application.getAttribute("tournamentTeams");
 final Connection connection = (Connection)application.getAttribute("connection");
+final Map tournamentTeams = Queries.getTournamentTeams(connection);
 %>
   
 <html>
