@@ -104,7 +104,7 @@
   
   <subjectiveCategory name="RobustDesign"
                       title="Robust Design"
-                      weight="1.0"
+                      weight="0.5"
                       >
     <goal name="structural"
           title="Structural Design"
@@ -131,7 +131,7 @@
 
   <subjectiveCategory name="Programming"
                       title="Robust Programming"
-                      weight="1.0"
+                      weight="0.5"
                       >
     <goal name="UseOfLanguage"
           title="Use of Language"
@@ -155,8 +155,8 @@
           max="20" />
   </subjectiveCategory>
 
-  <subjectiveCategory name="project_assessment"
-                      title="Project Assessment"
+  <subjectiveCategory name="research"
+                      title="Research Project Assessment"
                       weight="1.0"
                       >
     <goal name="questions"
