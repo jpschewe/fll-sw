@@ -469,7 +469,7 @@ final public class Playoff {
     //initialize currentRound to contain a full bracket setup
     List tempCurrentRound = buildInitialBracketOrder(connection, division, tournamentTeams);
     if(tempCurrentRound.size() > 1) {
-      out.println("<table align='center' width='100%' border='1' cellpadding='3' cellspacing='0'>");
+      out.println("<table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>");
       
       //compute number of runs needed to complete the playoffs
       out.println("<tr>");
