@@ -238,7 +238,7 @@
   unpacked directory hierarchy under "/WEB-INF/classes".
 
 -->
-<target name="compile" depends="prepare,compile.classes,compile.jsp"
+<target name="compile" depends="prepare,compile.classes"
    description="Compile Java sources">
 </target>
 
@@ -265,7 +265,7 @@
 
 </target>
 
-<!-- not perfect, but will work -->
+<!-- not perfect, but will work - Broken again :( -->
 <target name="compile.jsp" depends="compile.classes"
     description="Compile JSP sources">
     
@@ -473,15 +473,16 @@
 
 <target name="prepare">
 
-<!-- Create build directory and copy static content -->
-<mkdir  dir="${build.home}"/>
-<copy todir="${build.home}">
-<fileset dir="${web.home}">
-  <exclude name="**/*.java" />
-</fileset>
-</copy>
-
-<!-- Copy static files from external dependencies as needed -->
+  <!-- Create build directory and copy static content -->
+  <mkdir  dir="${build.home}"/>
+  <copy todir="${build.home}">
+    <fileset dir="${web.home}">
+      <exclude name="**/*.java" />
+      <exclude name="**/common-lib" />
+    </fileset>
+  </copy>
+  
+  <!-- Copy static files from external dependencies as needed -->
   <copy todir="${build.home}/WEB-INF/classes">
     <fileset dir="${src.home}">
       <exclude name="**/*.java" />

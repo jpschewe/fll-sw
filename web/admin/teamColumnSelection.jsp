@@ -1,4 +1,4 @@
-<%@ page errorPage="../errorHandler.jsp" %>
+
 <%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
   
 <%@ page import="fll.web.admin.UploadTeams" %>
@@ -86,55 +86,10 @@ if(null == errorMessage || "".equals(errorMessage)) {
         </tr>
 
         <tr>
-          <td>Coach</td>
+          <td>Region</td>
           <td>Text</td>
           <td>
-            <select name='Coach'>
-            <option value='' selected>None</option>
-            <%=session.getAttribute("columnSelectOptions")%>
-            </select>
-          </td>
-        </tr>
-
-        <tr>
-          <td>Email Address</td>
-          <td>Text</td>
-          <td>
-            <select name='Email'>
-            <option value='' selected>None</option>
-            <%=session.getAttribute("columnSelectOptions")%>
-            </select>
-          </td>
-        </tr>
-          
-        <tr>
-          <td>Phone</td>
-          <td>Text</td>
-          <td>
-            <select name='Phone'>
-            <option value='' selected>None</option>
-            <%=session.getAttribute("columnSelectOptions")%>
-            </select>
-          </td>
-        </tr>
-
-        <tr>
-          <td>City</td>
-          <td>Text</td>
-          <td>
-            <select name='Phone'>
-            <option value='' selected>None</option>
-            <%=session.getAttribute("columnSelectOptions")%>
-            </select>
-          </td>
-        </tr>
-
-        <tr>
-          <td>Entry Tournament (This is the tournament that the team will
-              first show up in)</td>
-          <td>Text</td>
-          <td>
-            <select name='EntryTournament'>
+            <select name='Region'>
             <option value='' selected>None</option>
             <%=session.getAttribute("columnSelectOptions")%>
             </select>
@@ -143,7 +98,7 @@ if(null == errorMessage || "".equals(errorMessage)) {
 
         <tr>
           <td>Division</td>
-          <td>Number</td>
+          <td>Text</td>
           <td>
             <select name='Division'>
             <option value='' selected>None</option>
@@ -152,28 +107,6 @@ if(null == errorMessage || "".equals(errorMessage)) {
           </td>
         </tr>
           
-        <tr>
-          <td>Number of boys</td>
-          <td>Number</td>
-          <td>
-            <select name='NumBoys'>
-            <option value='' selected>None</option>
-            <%=session.getAttribute("columnSelectOptions")%>
-            </select>
-          </td>
-        </tr>
-
-        <tr>
-          <td>Number of girls</td>
-          <td>Number</td>
-          <td>
-            <select name='NumGirls'>
-            <option value='' selected>None</option>
-            <%=session.getAttribute("columnSelectOptions")%>
-            </select>
-          </td>
-        </tr>
-
         <tr>
           <td>Number of medals needed</td>
           <td>Number</td>
@@ -184,18 +117,7 @@ if(null == errorMessage || "".equals(errorMessage)) {
             </select>
           </td>
         </tr>
-
-        <tr>
-          <td>How the team found out about FLL</td>
-          <td>Text</td>
-          <td>
-            <select name='HowFoundOut'>
-            <option value='' selected>None</option>
-            <%=session.getAttribute("columnSelectOptions")%>
-            </select>
-          </td>
-        </tr>
-
+              
         <tr>
           <td colspan='2'><input type='submit' value='Next'></td>
         </tr>

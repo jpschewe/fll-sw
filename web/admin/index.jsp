@@ -1,6 +1,9 @@
-<%@ page errorPage="../errorHandler.jsp" %>
-<%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
+  
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
+  
+<%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
+  
 <%@ page import="fll.Queries" %>
   
 <%@ page import="org.w3c.dom.Document" %>
@@ -28,7 +31,6 @@ if(null != currentTournamentParam && !"".equals(currentTournamentParam)) {
     response.sendRedirect(response.encodeRedirectURL("tournaments.jsp?unknownTournament=" + currentTournamentParam));
   } else {
     application.setAttribute("currentTournament", currentTournamentParam);
-    Queries.initializeTournamentTeams(connection);
     Queries.populateTournamentTeams(application);
     message.append("<i>Tournament changed to " + currentTournamentParam + "</i><br>");
   }
@@ -49,18 +51,17 @@ final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Administration)</title>
   </head>
 
-  <body background='../images/bricks1.gif' bgcolor='#ffffff' topmargin='4'>
+  <body background="<c:url value="/images/bricks1.gif" />" bgcolor="#ffffff" topmargin='4'>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Administration)</h1>
 
     <p><%=message.toString()%></p>
         
     <p>Before tournament day:</p>
     <ol>
-      <li><a href="tournaments.jsp">Edit Tournaments</a></li>
-
+      <li><a href='<c:url value="tournaments.jsp"/>'>Edit Tournaments</a></li>
 
       <li>
-        <form action="index.jsp" method="post">
+        <form action='<c:url value="index.jsp"/>' method="post">
           Current Tournament: <select name='currentTournament'>
               <%
               final Statement stmt = connection.createStatement();
@@ -83,7 +84,7 @@ final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
       </li>
 
       <li>
-        <form ACTION="uploadTeams.jsp" METHOD="POST" ENCTYPE="multipart/form-data">
+        <form ACTION='<c:url value="uploadTeams.jsp"/>' METHOD="POST" ENCTYPE="multipart/form-data">
           Upload the datafile for teams.  The filter functionality provided
           here is very basic and has very limited feedback.  It's suggested
           that you edit the input file before upload to contain only the teams
@@ -93,9 +94,9 @@ final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
         </form>
       </li>
           
-      <li><a href="judges.jsp">Assign Judges</a></li>
+      <li><a href='<c:url value="judges.jsp"/>'>Assign Judges</a></li>
 
-      <li><form action='index.jsp' method='post'>Select the number of seeding runs.
+      <li><form action='<c:url value="index.jsp"/>' method='post'>Select the number of seeding runs.
           <select name='seedingRounds'>
 <%
 for(int i=1; i<=10; i++) {
@@ -115,13 +116,17 @@ for(int i=1; i<=10; i++) {
 
     <p>Tournament day:<?p>
     <ol>
-      <li><a href="editTeam.jsp?addTeam=1">Add a team</a></li>
+      <li><a href='<c:url value="editTeam.jsp">
+                     <c:param name="addTeam" value="1"/>
+                   </c:url>'>Add a team</a></li>
           
-      <li><a href="select_team.jsp">Edit team data</a></li>
+      <li><a href='<c:url value="select_team.jsp"/>'>Edit team data</a></li>
             
-      <li><a href="../getfile.jsp?filename=subjective.zip">Download the datafile for subjective score entry.</a>  Should be downloaded after each subjective score upload to lessen chance of data loss due to overwrite. </li>
+      <li><a href='<c:url value="/getfile.jsp">
+                     <c:param name="filename" value="subjective.zip"/>
+                   </c:url>'>Download the datafile for subjective score entry.</a>  Should be downloaded after each subjective score upload to lessen chance of data loss due to overwrite. </li>
       <li>
-        <form ACTION="uploadSubjectiveData.jsp" METHOD="POST" ENCTYPE="multipart/form-data">
+        <form ACTION='<c:url value="uploadSubjectiveData.jsp"/>' METHOD="POST" ENCTYPE="multipart/form-data">
           Upload the datafile for subjective scores.
           <input type="file" size="32" name="file1">
           <input type="submit" value="Upload">
@@ -129,6 +134,6 @@ for(int i=1; i<=10; i++) {
       </li>
             
     </ol>
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>

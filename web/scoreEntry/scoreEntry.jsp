@@ -1,4 +1,4 @@
-<%@ page errorPage="../errorHandler.jsp" %>
+
   
 <%@ page import="fll.Team" %>
 <%@ page import="fll.Queries" %>

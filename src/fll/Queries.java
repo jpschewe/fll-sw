@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2000-2002 INSciTE.  All rights reserved
  * INSciTE is on the web at: http://www.hightechkids.org
@@ -10,17 +9,22 @@ import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -33,7 +37,6 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
 
 /**
  * Does all of our queries.
@@ -52,17 +55,18 @@ public class Queries {
   public static void main(final String[] args) {
     try {
       final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-      final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge.xml"));
+      //final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge.xml"));
+      //
+      //if(null == challengeDocument) {
+      //  throw new RuntimeException("Error parsing challenge.xml");
+      //}
+      final Connection connection = Utilities.createDBConnection("netserver");
+//       final String current = getTeamPrevTournament(connection, 666, "DUMMY");
+//       LOG.info("Previous tournament for team 666 is null?: " + (null == current));
       
-      if(null == challengeDocument) {
-        throw new RuntimeException("Error parsing challenge.xml");
-      }
-      final Connection connection = Utilities.createDBConnection("disk");
-
-      //initializeTournamentTeams(connection);
-      //System.out.println(getTournamentTeams(connection));
+      LOG.info("Tournaments: " + getTournamentNames(connection));
       //updateScoreTotals(challengeDocument, connection, "Monticello");
-      System.out.println(getDivisions(connection));
+      //System.out.println(getDivisions(connection));
     } catch(final Exception e) {
       e.printStackTrace();
     }
@@ -112,24 +116,26 @@ public class Queries {
    * table TournamentTeams to determine which teams should be included.
    */     
   public static Map getTournamentTeams(final Connection connection) throws SQLException {
-    final SortedMap tournamentTeams = new TreeMap();
+    final String currentTournament = getCurrentTournament(connection);
     
+    final SortedMap tournamentTeams = new TreeMap();
     Statement stmt = null;
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
 
-      final String sql = "SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, Teams.EntryTournament, Teams.Division"
+      final String sql = "SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, Teams.Region, Teams.Division"
         + " FROM Teams, TournamentTeams"
-        + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber";
+        + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber"
+        + " AND TournamentTeams.Tournament = '" + currentTournament + "'";
       rs = stmt.executeQuery(sql);
       while(rs.next()) {
         final Team team = new Team();
         team.setTeamNumber(rs.getInt("TeamNumber"));
         team.setOrganization(rs.getString("Organization"));
         team.setTeamName(rs.getString("TeamName"));
-        team.setEntryTournament(rs.getString("EntryTournament"));
-        team.setDivision(rs.getInt("Division"));
+        team.setRegion(rs.getString("Region"));
+        team.setDivision(rs.getString("Division"));
         tournamentTeams.put(new Integer(team.getTeamNumber()), team);
       }
     } finally {
@@ -140,40 +146,11 @@ public class Queries {
   }
 
   /**
-   * Populate the TournamentTeams table with the team numbers of the teams for
-   * this tournament.  This will delete whatever is in TournamentTeams.  The
-   * current tournament is pulled from the TournamentParameters table with
-   * getCurrentTournament()
-   *
-   * @param connection the database connection
-   * @throws SQLException on a database error
-   * @see #getCurrentTournament(Connection)
-   */     
-  public static void initializeTournamentTeams(final Connection connection)
-    throws SQLException {
-    final String currentTournament = getCurrentTournament(connection);
-    
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
-
-      stmt.executeUpdate("DELETE FROM TournamentTeams");
-      
-      final String sql = "SELECT Teams.TeamNumber,Teams.EntryTournament FROM Teams WHERE Teams.CurrentTournament = '" + currentTournament + "'";
-
-      stmt.executeUpdate("INSERT INTO TournamentTeams (TeamNumber, EntryTournament) " + sql);
-    } finally {
-      Utilities.closeStatement(stmt);
-    }
-  }
-  
-
-  /**
    * Get the list of divisions at this tournament as a List of Strings.  Uses
    * getCurrentTournament to determine the tournament.
    *
    * @param connection the database connection
-   * @return the List of divisions
+   * @return the List of divisions.  List of strings.
    * @throws SQLException on a database error
    * @see #getCurrentTournament(Connection)
    */     
@@ -187,8 +164,8 @@ public class Queries {
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
-      
-      final String sql = "SELECT Division FROM Teams WHERE Teams.CurrentTournament = '" + currentTournament + "' GROUP BY Division ORDER BY Division";
+
+      final String sql = "SELECT Teams.Division FROM Teams, TournamentTeams WHERE Teams.TeamNumber = TournamentTeams.TeamNumber AND  TournamentTeams.Tournament = '" + currentTournament + "' GROUP BY Division ORDER BY Division";
       rs = stmt.executeQuery(sql);
       while(rs.next()) {
         final String division = rs.getString(1);
@@ -692,6 +669,15 @@ public class Queries {
       //delete from Teams
       stmt.executeUpdate("DELETE FROM Teams WHERE TeamNumber = " + teamNumber);
 
+      //delete from TournamentTeams
+      stmt.executeUpdate("DELETE FROM TournamentTeams WHERE TeamNumber = " + teamNumber);
+
+      //delete from FinalScores
+      stmt.executeUpdate("DELETE FROM FinalScores WHERE TeamNumber = " + teamNumber);
+
+      //delete from SummarizedScores
+      stmt.executeUpdate("DELETE FROM SummarizedScores WHERE TeamNumber = " + teamNumber);
+      
       application.removeAttribute("tournamentTeams");
         
     } finally {
@@ -814,4 +800,326 @@ public class Queries {
       Utilities.closeStatement(stmt);
     }
   }
+
+  /**
+   * Advance a team to the next tournament.
+   *
+   * @param connection the database connection
+   * @param teamNumber the team to advance
+   * @return true on success.  Failure indicates that no next tournament
+   * exists
+   */
+  public static boolean advanceTeam(final Connection connection,
+                                    final int teamNumber)
+    throws SQLException {
+
+    final String currentTournament = getTeamCurrentTournament(connection, teamNumber);
+    final String nextTournament = getNextTournament(connection, currentTournament);
+    if(null == nextTournament) {
+      LOG.info("advanceTeam - No next tournament exists for tournament: " + currentTournament + " team: " + teamNumber);
+      return false;
+    } else {
+      PreparedStatement prep = null;
+      try {
+        prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament) VALUES (?, ?)");
+        prep.setInt(1, teamNumber);
+        prep.setString(2, nextTournament);
+        prep.executeUpdate();
+
+        return true;
+      } finally {
+        Utilities.closePreparedStatement(prep);
+      }
+    }
+  }
+
+  /**
+   * Get the current tournament that this team is at.  
+   */
+  public static String getTeamCurrentTournament(final Connection connection,
+                                                final int teamNumber)
+    throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT Tournaments.Name, Tournaments.NextTournament"
+                                         + " FROM TournamentTeams, Tournaments"
+                                         + " WHERE TournamentTeams.TeamNumber = ?"
+                                         + " AND TournamentTeams.Tournament = Tournaments.Name");
+      prep.setInt(1, teamNumber);
+      rs = prep.executeQuery();
+      final List tournamentNames = new LinkedList();
+      final List nextTournaments = new LinkedList();
+      while(rs.next()) {
+        tournamentNames.add(rs.getString(1));
+        nextTournaments.add(rs.getString(2));
+      }
+
+
+      final Iterator iter = nextTournaments.iterator();
+      for(int i=0; iter.hasNext(); i++) {
+        final String nextTournament = (String)iter.next();
+        if(null == nextTournament) {
+          //if no next tournament then this must be the current one since a
+          //team can't advance any further.
+          return (String)tournamentNames.get(i);
+        } else if(!tournamentNames.contains(nextTournament)) {
+          //team hasn't advanced past this tournament yet
+          return (String)tournamentNames.get(i);
+        }
+      }
+      
+      throw new RuntimeException("Internal Error: getTeamCurrentTournament - Cannot determine current tournament for team: " + teamNumber
+                                 + " tournamentNames: " + tournamentNames
+                                 + " nextTournaments: " + nextTournaments);
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closePreparedStatement(prep);
+    }
+  }
+
+  /**
+   * Change the current tournament for a team.  This will delete all scores
+   * for the team in it's current tournament.
+   *
+   * @param connection db connection
+   * @param document the description of the tournament, used to determine what
+   * tables scores exist in
+   * @param teamNumber the team
+   * @param newTournament the new current tournament for this team
+   */
+  public static void changeTeamCurrentTournament(final Connection connection,
+                                                 final Document document,
+                                                 final int teamNumber,
+                                                 final String newTournament)
+    throws SQLException {
+
+    final String currentTournament = getTeamCurrentTournament(connection, teamNumber);
+    
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+      
+      //delete from subjective categories
+      final NodeList subjectiveCategories = document.getDocumentElement().getElementsByTagName("subjectiveCategory");
+      for(int i=0; i<subjectiveCategories.getLength(); i++) {
+        final Element category = (Element)subjectiveCategories.item(i);
+        final String name = category.getAttribute("name");
+        stmt.executeUpdate("DELETE FROM " + name + " WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + currentTournament + "'");
+      }
+
+      //delete from Performance
+      stmt.executeUpdate("DELETE FROM Performance WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + currentTournament + "'");
+
+      //delete from TournamentTeams
+      stmt.executeUpdate("DELETE FROM TournamentTeams WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + currentTournament + "'");
+      
+      //delete from FinalScores
+      stmt.executeUpdate("DELETE FROM FinalScores WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + currentTournament + "'");
+
+      //delete from SummarizedScores
+      stmt.executeUpdate("DELETE FROM SummarizedScores WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + currentTournament + "'");
+
+      //set new tournament
+      stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber) VALUES('" + newTournament + "', " + teamNumber + ")");
+      
+    } finally {
+      Utilities.closeStatement(stmt);
+    }
+  }
+
+  /**
+   * Demote the team to it's previous tournament.  This will delete all scores
+   * for the team in it's current tournament.
+   *
+   * @param connection db connection
+   * @param document the description of the tournament, used to determine what
+   * tables scores exist in
+   * @param teamNumber the team
+   */
+  public static void demoteTeam(final Connection connection,
+                                final Document document,
+                                final int teamNumber)
+    throws SQLException {
+
+    final String currentTournament = getTeamCurrentTournament(connection, teamNumber);
+    
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+      
+      //delete from subjective categories
+      final NodeList subjectiveCategories = document.getDocumentElement().getElementsByTagName("subjectiveCategory");
+      for(int i=0; i<subjectiveCategories.getLength(); i++) {
+        final Element category = (Element)subjectiveCategories.item(i);
+        final String name = category.getAttribute("name");
+        stmt.executeUpdate("DELETE FROM " + name + " WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + currentTournament + "'");
+      }
+
+      //delete from Performance
+      stmt.executeUpdate("DELETE FROM Performance WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + currentTournament + "'");
+
+      //delete from TournamentTeams
+      stmt.executeUpdate("DELETE FROM TournamentTeams WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + currentTournament + "'");
+      
+      //delete from FinalScores
+      stmt.executeUpdate("DELETE FROM FinalScores WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + currentTournament + "'");
+
+      //delete from SummarizedScores
+      stmt.executeUpdate("DELETE FROM SummarizedScores WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + currentTournament + "'");
+
+    } finally {
+      Utilities.closeStatement(stmt);
+    }
+  }
+  
+  /**
+   * Get the previous tournament for this team, given the current tournament.
+   *
+   * @param connection the database connection
+   * @param teamNumber the team number
+   * @param currentTournament the current tournament to use to find the
+   * previous tournament, generally this is the return value of
+   * getTeamCurrentTournament
+   * @return the tournament, or null if no such tournament exists
+   * @see #getTeamCurrentTournament(Connection, int)
+   */
+  public static String getTeamPrevTournament(final Connection connection,
+                                             final int teamNumber,
+                                             final String currentTournament)
+    throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT Tournaments.Name"
+                                         + " FROM TournamentTeams, Tournaments"
+                                         + " WHERE TournamentTeams.TeamNumber = ?"
+                                         + " AND TournamentTeams.Tournament = Tournaments.Name"
+                                         + " AND Tournaments.NextTournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setString(2, currentTournament);
+      rs = prep.executeQuery();
+      if(rs.next()) {
+        return rs.getString(1);
+      } else {
+        return null;
+      }
+
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closePreparedStatement(prep);
+    }
+      
+  }
+  
+  /**
+   * Get the next tournament for the given tournament.
+   *
+   * @param connection the database connection
+   * @param tournament the tournament to find the next tournament for
+   * @return the next tournament or null if no such tournament exists
+   */
+  public static String getNextTournament(final Connection connection,
+                                         final String tournament)
+    throws SQLException {
+    ResultSet rs = null;
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("SELECT NextTournament FROM Tournaments WHERE Name = ?");
+      prep.setString(1, tournament);
+      rs = prep.executeQuery();
+      if(rs.next()) {
+        return rs.getString(1);
+      } else {
+        return null;
+      }
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closePreparedStatement(prep);
+    }
+  }
+
+  /**
+   * Add a team to the database
+   *
+   * @return null on success, the name of the other team with the same team
+   * number on an error
+   */
+  public static String addTeam(final Connection connection,
+                               final int number,
+                               final String name,
+                               final String organization,
+                               final String region,
+                               final String division,
+                               final int numMedals)
+    throws SQLException {
+    Statement stmt = null;
+    ResultSet rs = null;
+    PreparedStatement prep = null;
+    try {
+      //need to check for duplicate teamNumber
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT TeamName FROM Teams WHERE TeamNumber = " + number);
+      if(rs.next()) {
+        prep = null;
+        final String dup = rs.getString(1);
+        return dup;
+      } else {
+        Utilities.closeResultSet(rs);
+        rs = null;
+      }
+
+      prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Region, Division, NumMedals, TeamNumber) VALUES (?, ?, ?, ?, ?, ?)");
+      prep.setString(1, name);
+      prep.setString(2, organization);
+      prep.setString(3, region);
+      prep.setString(4, division);
+      if(-1 == numMedals) {
+        prep.setNull(5, Types.INTEGER);
+      } else {
+        prep.setInt(5, numMedals);
+      }
+      prep.setInt(6, number);
+      prep.executeUpdate();
+
+      stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber) VALUES('DUMMY', " + number + ")");
+      
+      return null;
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closeStatement(stmt);
+      Utilities.closePreparedStatement(prep);
+    }
+  }
+
+  /**
+   * Update a team in the database
+   */
+  public static void updateTeam(final Connection connection,
+                                final int number,
+                                final String name,
+                                final String organization,
+                                final String region,
+                                final String division,
+                                final int numMedals)
+    throws SQLException {
+    
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Region = ?, Division = ?, NumMedals = ? WHERE TeamNumber = ?");
+      prep.setString(1, name);
+      prep.setString(2, organization);
+      prep.setString(3, region);
+      prep.setString(4, division);
+      if(-1 == numMedals) {
+        prep.setNull(5, Types.INTEGER);
+      } else {
+        prep.setInt(5, numMedals);
+      }
+      prep.setInt(6, number);
+      prep.executeUpdate();
+    } finally {
+      Utilities.closePreparedStatement(prep);
+    }
+  }  
 }

@@ -288,15 +288,9 @@ final public class SubjectiveTableModel extends AbstractTableModel implements So
           final String name2 = e2.getAttribute("teamName");
           return name1.compareTo(name2);
         case 2:
-          final int division1 = NumberFormat.getInstance().parse(e1.getAttribute("division")).intValue();
-          final int division2 = NumberFormat.getInstance().parse(e2.getAttribute("division")).intValue();
-          if(division1 == division2) {
-            return 0;
-          } else if(division1 < division2) {
-            return -1;
-          } else {
-            return 1;
-          }
+          final String division1 = e1.getAttribute("division");
+          final String division2 = e2.getAttribute("division");
+          return division1.compareTo(division2);
         case 3:
           final String judge1 = e1.getAttribute("judge");
           final String judge2 = e2.getAttribute("judge");

@@ -1,3 +1,23 @@
+2003-07-06  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/xml/GenerateDB.java (generateDB): Make division a string
+	rather than a number (707893)
+
+	* build.xml: the compile.jsp task is broken again, so I've taken
+	it out of the build.  Gonna have to fix it again later.
+
+	* web/admin/editTeam.jsp: Added support for moving teams from one
+	tournament to the next (707876).  
+	Continued cleanup by adding JSTL tags.
+
+	* scripts/convertTournaments.sql:  I think I've got all of the
+	table changes in now for hierarchial tournaments (707876), along
+	with some cleanups to table fields.
+
+	* src/fll/xml/GenerateDB.java (generateDB): More work on
+	hierarchial tournaments (707876).  Cleaned up the tables by
+	removing extra columns that aren't used.
+
 2003-07-02  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/model/SubjectiveTableModel.java (SubjectiveTableModel):

@@ -1,4 +1,4 @@
-<%@ page errorPage="../errorHandler.jsp" %>
+
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
   
@@ -61,7 +61,7 @@ function myScroll() {
 }
 
 function start() {
-<c:if test="${param.scroll}">
+<c:if test="${not empty param.scroll}">
   documentLength = myHeight();
   //myScroll();
   <c:choose>
@@ -99,30 +99,28 @@ var documentYposition = 0;
 <c:set var="colorStr" value="A" />
                             
 <% 	
-String divisionStr;
-      
-      
 if(rs.next()) {
   boolean done = false;
   while(!done) {
 %>
-  <table border='0' cellpadding='0' cellspacing='0' width='99%'
-                              class='<c:out value="${colorStr}" />'>
+  <table border='0' cellpadding='0' cellspacing='0' width='99%' class='<c:out value="${colorStr}" />'>
     <tr><td colspan='2'><img src='blank.gif' height='15' width='1'></td></tr>
     <tr align='left'>
 <%
-  if(rs.getInt("Division") == 1) {
-    divisionStr = "#800000";
-  } else {
-    divisionStr = "#008000";
-  }
+    String divisionStr = rs.getString("Division");
+    final String headerColor;
+    if("1".equals(divisionStr)) {
+      headerColor = "#800000";
+    } else {
+      headerColor = "#008000";
+    }
 %>
-      <td width='25%' bgcolor='<%=divisionStr%>'>
-        <font size='2'><b>&nbsp;&nbsp;Division:&nbsp;<%=rs.getInt("Division")%>&nbsp;&nbsp;</b></font>
+      <td width='25%' bgcolor='<%=headerColor%>'>
+        <font size='2'><b>&nbsp;&nbsp;Division:&nbsp;<%=divisionStr%>&nbsp;&nbsp;</b></font>
      </td>
      <td align='right'>
        <font size='2'><b>Team&nbsp;#:&nbsp;<%=rs.getInt("TeamNumber")%>&nbsp;&nbsp;</b></font>
-    </td>
+     </td>
   </tr>
   <tr align='left'>
     <td colspan='2'>

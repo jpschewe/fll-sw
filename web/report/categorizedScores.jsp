@@ -1,4 +1,4 @@
-<%@ page errorPage="../errorHandler.jsp" %>
+
 <%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="fll.web.report.CategoryScores" %>

@@ -1,4 +1,4 @@
-<%@ page errorPage="../errorHandler.jsp" %>
+
 <%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
   
 <%@ taglib uri="/WEB-INF/tld/taglib62.tld" prefix="up" %>

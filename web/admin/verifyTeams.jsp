@@ -1,4 +1,4 @@
-<%@ page errorPage="../errorHandler.jsp" %>
+
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
   
@@ -33,7 +33,6 @@ if(null == session.getAttribute("columnSelectOptions")) {
     <% } %>
 
 <%
-Queries.initializeTournamentTeams(connection);
 Queries.populateTournamentTeams(application);
 %>
       

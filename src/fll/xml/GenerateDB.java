@@ -119,7 +119,7 @@ final public class GenerateDB {
       //Table structure for table 'SummarizedScores'
       stmt.executeUpdate("DROP TABLE IF EXISTS SummarizedScores");
       stmt.executeUpdate("CREATE TABLE SummarizedScores ("
-                         + "TeamNumber int(11) NOT NULL,"
+                         + "TeamNumber integer NOT NULL,"
                          + "Tournament varchar(64) NOT NULL,"
                          + "Category varchar(32) NOT NULL,"
                          + "RawScore float default NULL,"
@@ -142,30 +142,22 @@ final public class GenerateDB {
       // Table structure for table 'Teams'
       stmt.executeUpdate("DROP TABLE IF EXISTS Teams");
       stmt.executeUpdate("CREATE TABLE Teams ("
-                         + "  TeamNumber int(11) NOT NULL,"
-                         + "  TeamName varchar(255) NOT NULL default '',"
-                         + "  Organization varchar(255),"
-                         + "  EntryTournament varchar(16) NOT NULL default 'DUMMY'," //the tournament that the team started at
-                         + "  CurrentTournament varchar(16) NOT NULL default 'DUMMY'," //tournament the team currently always at                         
-                         + "  Division int NOT NULL default 1,"
-                         + "  Coach varchar(255),"
-                         + "  Email varchar(255),"
-                         + "  Phone varchar(50),"
-                         + "  City varchar(255),"
-                         + "  NumBoys INT,"
-                         + "  NumGirls INT,"
-                         + "  NumMedals INT,"
-                         + "  HowFoundOut text,"
-                         + "  ToState BOOL NOT NULL,"
+                         + "  TeamNumber integer NOT NULL,"
+                         + "  TeamName varchar(256) NOT NULL default '',"
+                         + "  Organization varchar(256),"
+                         + "  Division varchar(32) NOT NULL default '1',"
+                         + "  NumMedals integer,"
+                         + "  Region varchar(16) NOT NULL default 'DUMMY'"
                          + "  PRIMARY KEY  (TeamNumber)"
                          + ")");
 
       // table to hold team numbers of teams in this tournament
       stmt.executeUpdate("DROP TABLE IF EXISTS TournamentTeams");
       stmt.executeUpdate("CREATE TABLE TournamentTeams ("
-                         + "  TeamNumber int(11) NOT NULL,"
-                         + "  EntryTournament varchar(16) NOT NULL default 'DUMMY',"
-                         + "  PRIMARY KEY (TeamNumber)"
+                         + "  TeamNumber integer NOT NULL,"
+                         + "  Tournament varchar(16) NOT NULL,"
+                         + "  advanced bool NOT NULL default 0,"
+                         + "  PRIMARY KEY (TeamNumber, Tournament)"
                          + ")");
 
       // Table structure for table 'TournamentParameters'
@@ -227,8 +219,6 @@ final public class GenerateDB {
           final String columnDefinition = generateGoalColumnDefinition(element);
           createStatement.append(" " + columnDefinition + ",");
         }
-        createStatement.append(" Verified INTEGER DEFAULT 0 NOT NULL,");
-        createStatement.append(" Corrected INTEGER DEFAULT 0 NOT NULL,");
         createStatement.append(" ComputedTotal INTEGER DEFAULT NULL,");
         createStatement.append(" PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
         createStatement.append(");");
@@ -260,6 +250,8 @@ final public class GenerateDB {
         createStatement.append(");");
         stmt.executeUpdate(createStatement.toString());
       }
+
+      //FIX add foreign key constraints
       
     } finally {
       Utilities.closeStatement(stmt);
