@@ -1,3 +1,10 @@
+2004-12-14  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/xml/ChallengeParser.java (ChallengeParser): Removed
+	requirement to put xerces in the common/lib directory on tomcat by
+	referencing the xerces DOMParser directly.  Now can live up in the
+	regular lib directory.
+
 2004-12-13  Jon Schewe  <jpschewe@mtu.net>
 
 	* build.xml: Cleaned up some variable naemes.  NOTE: changed

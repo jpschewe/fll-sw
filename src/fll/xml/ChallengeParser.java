@@ -8,9 +8,7 @@ package fll.xml;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import org.apache.xerces.parsers.DOMParser;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -69,16 +67,12 @@ public final class ChallengeParser {
     try {
       final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
       
-      final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      factory.setValidating(true);
-      factory.setNamespaceAware(true);
-      factory.setIgnoringComments(true);
-      factory.setIgnoringElementContentWhitespace(true);
+      final DOMParser parser = new DOMParser();
+      parser.setFeature("http://xml.org/sax/features/validation", true);
+      parser.setFeature("http://apache.org/xml/features/validation/schema", true);
       
-      factory.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema");
-
+      parser.setFeature("http://xml.org/sax/features/namespaces", true);
       
-      final DocumentBuilder parser = factory.newDocumentBuilder();
       parser.setErrorHandler(new ErrorHandler() {
         public void error(final SAXParseException spe) throws SAXParseException {
           throw spe;
@@ -109,14 +103,13 @@ public final class ChallengeParser {
         }
       });
 
-      final Document document = parser.parse(stream);
+      parser.parse(new InputSource(stream));
+      final Document document = parser.getDocument();
       final Element rootElement = document.getDocumentElement();
       if(!"fll".equals(rootElement.getTagName())) {
         throw new RuntimeException("Not a fll challenge description file");
       }
       return document;
-    } catch(final ParserConfigurationException pce) {
-      throw new RuntimeException(pce);
     } catch(final SAXException se) {
       throw new RuntimeException(se);
     } catch(final IOException ioe) {
