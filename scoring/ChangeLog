@@ -1,3 +1,8 @@
+2003-09-17  Jon Schewe  <jpschewe@mtu.net>
+
+	* docs/index.html: Updated with information about computers
+	required for a tournament (707857).
+
 2003-09-16  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/xml/GenerateDB.java (generateDB): Make sure no team name
