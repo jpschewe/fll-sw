@@ -8,9 +8,9 @@
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Scoreboard)</h1>
     <ul>
-      <li><a href='<c:url value="main.jsp" />'>Primary Scoreboard (1024x768)</a> (requires Internet Explorer)</li>
+      <li><a href='<c:url value="main.jsp" />'>Primary Scoreboard (1024x768)</a></li>
       <li><a href='<c:url value="/scoreboard_800/main.jsp" />'>Primary Scoreboard
-            (800x600)</a> (requires Internet Explorer)</li>
+            (800x600)</a></li>
         
       <li><a href='<c:url value="allteams.jsp"><c:param name="scroll" value="false"/></c:url>'>All Teams, All Runs (primarily for internal use)</a></li>
         
