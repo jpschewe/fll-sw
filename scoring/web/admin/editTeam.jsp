@@ -115,7 +115,7 @@ function confirmChangeTournament() {
         <td><input type='text' name='teamName' size='64'></td>
       </tr>
       <tr>
-        <td>Organziation</td>
+        <td>Organization</td>
         <td><input type='text' name='organization' size='64'></td>
       </tr>
       <tr>

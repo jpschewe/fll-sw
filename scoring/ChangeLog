@@ -1,3 +1,24 @@
+2003-10-22  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/scoreEntry/scoreEntry.jsp: Made background yellow instead of
+	grey on edit.  Also changed changed submit prompt for score edit
+	(827928).
+
+	* src/resources/challenge-region-2003.xml: Consistency in
+	capitalization (827924).
+
+	* web/WEB-INF/web-default.xml: Changed instances of 2002 to be
+	2003 (827935).
+
+	* src/fll/web/admin/Tournaments.java (generatePage): Make sure
+	that when rows are added keep the key field as new for rows not
+	committed to the database (827926).
+
+2003-10-22  Jon Schewe  <jpschewe@mtu.net>
+
+	* docs/index.html: Added information for database permissions for
+	Linux (824072).
+
 2003-10-21  Jon Schewe  <jpschewe@mtu.net>
 
 	* docs/README.developer: Removed tournamentTeams application

@@ -333,6 +333,13 @@
       <li>When you're done for the day you'll want to shutdown the
         database by going to shutdown service or shutdown the server
         standalone, depending on how you started it.</li>
+
+      <li>When running under Linux you'll need to startup MySQL and execute the following to enable the setup to work properly:
+        <pre>
+GRANT ALL PRIVILEGES ON mysql.* TO root@localhost WITH GRANT OPTION
+        </pre>
+      </li>
+          
     </ol>
   </li>
 

@@ -170,7 +170,7 @@ function CancelClicked() {
   </head>
 
   <c:if test="${editFlag}">
-    <body bgcolor="#666666" onload="init()">
+    <body bgcolor="yellow" onload="init()">
   </c:if>
   <c:if test="${not editFlag}">
     <body onload="init()">
@@ -189,7 +189,12 @@ function CancelClicked() {
         <tr>
           <td align="center" valign="middle">
 <%if(lRunNumber <= Queries.getNumSeedingRounds(connection)) {%>
-            <table border="1" cellpadding="0" cellspacing="0" width="100%" bgcolor='#e0e0e0'>
+            <c:if test="${editFlag}">
+              <table border="1" cellpadding="0" cellspacing="0" width="100%" bgcolor='yellow'>
+            </c:if>
+            <c:if test="${not editFlag}">
+              <table border="1" cellpadding="0" cellspacing="0" width="100%" bgcolor='#e0e0e0'>
+            </c:if>
 <%} else {%>
             <table border="1" cellpadding="0" cellspacing="0" width="100%" bgcolor='red'>
 <%}%>
@@ -285,7 +290,12 @@ function CancelClicked() {
             </tr>
             <tr>
               <td colspan='3' align='right'>
-                <input type='submit' value='Submit Score' onclick='return confirm("Submit Data -- Are you sure?")'>
+                <c:if test="${editFlag}">
+                  <input type='submit' value='Submit Score' onclick='return confirm("You are changing a score -- Are you sure?")'>
+                </c:if>
+                <c:if test="${not editFlag}">
+                  <input type='submit' value='Submit Score' onclick='return confirm("Submit Data -- Are you sure?")'>
+                </c:if>
                 <input type='button' value='Cancel' onclick='CancelClicked()'>
                 <c:if test="${editFlag and isLastRun}">
                   <input type='submit' value='Delete Score' name='delete' onclick='return confirm("Are you sure you want to delete this score?")'>

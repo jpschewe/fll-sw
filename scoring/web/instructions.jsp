@@ -15,7 +15,7 @@
       
       <ol>
         
-        <li><b>Not required for Minnesota.</b>Goto the <a href="admin/index.jsp">administration page</a> and
+        <li><b>Not required for Minnesota.</b>Go to the <a href="admin/index.jsp">administration page</a> and
         upload the team datafile.  This takes in a tab delimited file and uses
         that information to determine what teams will exist in the
         database.</li>
@@ -49,7 +49,7 @@
 
         <li>Use the subjective score entry application to enter subjective
         scores.  Note that when the application comes up there will be a row
-        for each judge per team, reguardless of if that judge is definatly
+        for each judge per team, regardless of if that judge is definitely
         scoring that team.  So this means there will be extra rows and you'll
         just have to watch closely to make sure all teams are scored properly.
         For instance if KH and KL are judging Programming, each will only
