@@ -1,3 +1,9 @@
+2003-08-16  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/WEB-INF/jspf/initializeApplicationVars.jspf: Added cache
+	control headers.  This should keep all pages from being cached in
+	browser and proxy caches.  (707883)
+
 2003-08-14  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/welcome.jsp: Welcome page for Minnesota tournaments.
