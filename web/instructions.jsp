@@ -49,7 +49,9 @@
         controlled by the <a href='admin/remoteControl.jsp'>Remote Control
         Page</a> found under administration. <b>Important note</b>: Do not
         close the background window that launched the fullscreen window.
-        This background window actually controls the fullscreen window.</li>
+        This background window actually controls the fullscreen window.
+        Note that when the scorboard comes up the All Teams column will be
+        blank until any scores are entered.</li>
 
         <li>Enter scores for the performance rounds on the <a
         href="scoreEntry/select_team.jsp">score entry</a> page.  I suggest

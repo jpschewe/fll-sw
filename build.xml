@@ -80,7 +80,7 @@
 -->
 
 <property name="app.name"      value="fll-sw"/>
-<property name="app.version"   value="2.4"/>
+<property name="app.version"   value="2.5"/>
 <property name="build.home"    value="build"/>
 <property name="catalina.home" value="foo"/>
 <property name="deploy.home"   value="${catalina.home}/webapps/${app.name}"/>
@@ -248,7 +248,9 @@
             destdir="${build.home}/WEB-INF/classes"
              debug="${compile.debug}"
        deprecation="${compile.deprecation}"
-          optimize="${compile.optimize}">
+          optimize="${compile.optimize}"
+      source="1.4"
+      target="1.4">
   <classpath refid="compile.classpath"/>
   </javac>
   
@@ -297,7 +299,9 @@
            destdir="${tmp.home}"
            debug="${compile.debug}"
            deprecation="${compile.deprecation}"
-           optimize="${compile.optimize}">
+           optimize="${compile.optimize}"
+          source="1.4"
+      target="1.4">
     <classpath>
       <pathelement location="${build.home}/WEB-INF/classes" />
       <path refid="compile.classpath" />
@@ -541,6 +545,9 @@
       <exclude name="**/*.java" />
       <exclude name="**/common-lib" />
     </fileset>
+    <filterset>
+      <filter token="APP-VERSION" value="${app.version}" />
+    </filterset>
   </copy>
   
   <!-- Copy static files from external dependencies as needed -->
