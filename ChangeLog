@@ -1,3 +1,13 @@
+2004-05-11  Jon Schewe  <>
+
+	* src/fll/xml/GenerateDB.java (generateDB): factored out the sql
+	datatype for tournaments to the top to make it easy to change the
+	size of the column.
+
+	* src/fll/web/report/FinalComputedScores.java (generateReport):
+	Removed SummarizedScores table from the teamsRS query.  It was
+	completly unused and would just slow down the join (836268). 
+
 2004-04-07  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/xml/ImportDB.java (importDatabase): Make sure that the

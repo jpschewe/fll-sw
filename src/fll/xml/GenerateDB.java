@@ -31,7 +31,13 @@ import org.w3c.dom.NodeList;
 public final class GenerateDB {
 
   private static final Logger LOG = Logger.getLogger(GenerateDB.class);
-  
+  /**
+   * sql datatype for tournament columns.  Until we change the tournament
+   * references to be all integers, let's just use a constant to make it easy
+   * to change the size.
+   */
+  private static final String TOURNAMENT_DATATYPE = "varchar(128)";
+    
   /**
    * Generate a new database
    *
@@ -110,9 +116,9 @@ public final class GenerateDB {
       //Table structure for table 'Tournaments'
       stmt.executeUpdate("DROP TABLE IF EXISTS Tournaments");
       stmt.executeUpdate("CREATE TABLE Tournaments ("
-                         + "Name varchar(16) NOT NULL,"
+                         + "Name " + TOURNAMENT_DATATYPE + " NOT NULL,"
                          + "Location mediumtext,"
-                         + "NextTournament varchar(16) default NULL," //Tournament that teams may advance to from this one
+                         + "NextTournament " + TOURNAMENT_DATATYPE + " default NULL," //Tournament that teams may advance to from this one
                          + "PRIMARY KEY (Name)"
                          +")");
       stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DUMMY', 'Default dummy tournament')");
@@ -123,7 +129,7 @@ public final class GenerateDB {
       stmt.executeUpdate("DROP TABLE IF EXISTS SummarizedScores");
       stmt.executeUpdate("CREATE TABLE SummarizedScores ("
                          + "TeamNumber integer NOT NULL,"
-                         + "Tournament varchar(64) NOT NULL,"
+                         + "Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
                          + "Category varchar(32) NOT NULL,"
                          + "RawScore float default NULL,"
                          + "StandardizedScore float default NULL,"
@@ -137,7 +143,7 @@ public final class GenerateDB {
       stmt.executeUpdate("DROP TABLE IF EXISTS FinalScores");
       stmt.executeUpdate("CREATE TABLE FinalScores ("
                          + "  TeamNumber integer NOT NULL,"
-                         + "  Tournament varchar(64) NOT NULL,"
+                         + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
                          + "  OverallScore float,"
                          + "  PRIMARY KEY (TeamNumber, Tournament)"
                          + ")");
@@ -157,7 +163,7 @@ public final class GenerateDB {
       stmt.executeUpdate("DROP TABLE IF EXISTS TournamentTeams");
       stmt.executeUpdate("CREATE TABLE TournamentTeams ("
                          + "  TeamNumber integer NOT NULL,"
-                         + "  Tournament varchar(16) NOT NULL,"
+                         + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
                          + "  advanced bool NOT NULL default 0,"
                          + "  PRIMARY KEY (TeamNumber, Tournament)"
                          + ")");
@@ -194,7 +200,7 @@ public final class GenerateDB {
       stmt.executeUpdate("CREATE TABLE Judges ("
                          + "  id varchar(64) NOT NULL,"
                          + "  category varchar(64) NOT NULL,"
-                         + "  Tournament varchar(64) NOT NULL,"
+                         + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
                          + "  Division varchar(32) NOT NULL,"
                          + "  PRIMARY KEY  (id,category,Tournament,Division)"
                          + ")");
@@ -210,11 +216,11 @@ public final class GenerateDB {
         stmt.executeUpdate("DROP TABLE IF EXISTS " + tableName);
         createStatement.append("CREATE TABLE " + tableName + " (");
         createStatement.append(" TeamNumber INTEGER NOT NULL,");
-        createStatement.append(" Tournament varchar(64) NOT NULL,");
+        createStatement.append(" Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,");
         createStatement.append(" RunNumber INTEGER NOT NULL,");
         createStatement.append(" TimeStamp TIMESTAMP NOT NULL,");
-        createStatement.append(" NoShow INTEGER DEFAULT 0 NOT NULL,");
-        createStatement.append(" Bye INTEGER DEFAULT 0 NOT NULL,");
+        createStatement.append(" NoShow bool DEFAULT 0 NOT NULL,");
+        createStatement.append(" Bye bool DEFAULT 0 NOT NULL,");
         final NodeList goals = performanceElement.getElementsByTagName("goal");
         for(int i=0; i<goals.getLength(); i++) {
           final Element element = (Element)goals.item(i);
@@ -238,7 +244,7 @@ public final class GenerateDB {
         stmt.executeUpdate("DROP TABLE IF EXISTS " + tableName);
         createStatement.append("CREATE TABLE " + tableName + " (");
         createStatement.append(" TeamNumber INTEGER NOT NULL,");
-        createStatement.append(" Tournament varchar(64) NOT NULL,");
+        createStatement.append(" Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,");
         createStatement.append(" Judge VARCHAR(64) NOT NULL,");
         final NodeList goals = categoryElement.getElementsByTagName("goal");
         for(int i=0; i<goals.getLength(); i++) {
