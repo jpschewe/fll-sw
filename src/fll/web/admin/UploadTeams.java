@@ -142,10 +142,16 @@ final public class UploadTeams {
       String line = reader.readLine();
       for(int lineCounter=0; null != line; line = reader.readLine(), lineCounter++) {
         final Iterator valueIter = splitLine(line).iterator();
-        for(int column=1; valueIter.hasNext(); column++) {
+        int column = 1;
+        while(valueIter.hasNext()) {
           final String value = (String)valueIter.next();
           insertPrep.setString(column, value);
+          column++;
         }
+        for(;column <= columnNamesSeen.size(); column++) {
+          insertPrep.setString(column, null);
+        }
+        
         insertPrep.executeUpdate();
       }
     } finally {
