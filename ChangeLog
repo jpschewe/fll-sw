@@ -1,3 +1,8 @@
+2003-10-01  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/Queries.java (updateScoreTotals): Added support for
+	totaling of scores with enumerated goals (707877).
+
 2003-09-29  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/web/scoreEntry/ScoreEntry.java: Added support for

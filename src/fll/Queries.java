@@ -54,23 +54,18 @@ public class Queries {
    */
   public static void main(final String[] args) {
     try {
-      final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-      //final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge.xml"));
-      //
-      //if(null == challengeDocument) {
-      //  throw new RuntimeException("Error parsing challenge.xml");
-      //}
-      final Connection connection = Utilities.createDBConnection("netserver");
-//       final String current = getTeamPrevTournament(connection, 666, "DUMMY");
-//       LOG.info("Previous tournament for team 666 is null?: " + (null == current));
+      final ClassLoader classLoader = Queries.class.getClassLoader();
+      final Connection connection = Utilities.createDBConnection("localhost");
+      
+      final Document challengeDocument = getChallengeDocument(connection);
       
       //LOG.info("Tournaments: " + getTournamentNames(connection));
-      //updateScoreTotals(challengeDocument, connection);
+      updateScoreTotals(challengeDocument, connection);
       //System.out.println(getDivisions(connection));
 
-      LOG.info("Before Tournaments: " + getTournamentNames(connection));
-      insertTournamentsForRegions(connection);
-      LOG.info("After Tournaments: " + getTournamentNames(connection));
+      //LOG.info("Before Tournaments: " + getTournamentNames(connection));
+      //insertTournamentsForRegions(connection);
+      //LOG.info("After Tournaments: " + getTournamentNames(connection));
       
     } catch(final Exception e) {
       e.printStackTrace();
@@ -730,74 +725,62 @@ public class Queries {
                                        final Connection connection)
     throws SQLException, ParseException {
     final String tournament = getCurrentTournament(connection);
+    final Element rootElement = document.getDocumentElement();
     
-    Statement stmt = null;
+    PreparedStatement updatePrep = null;
+    PreparedStatement selectPrep = null;
+    ResultSet rs = null;
     try {
-      stmt = connection.createStatement();
-      
       //Performance ---
-    
-      //build up the SQL command
-      final StringBuffer sql = new StringBuffer();
-      sql.append("UPDATE Performance SET ComputedTotal = ");
-    
-      final Element rootElement = document.getDocumentElement();
+
+      //build up the SQL
+      updatePrep = connection.prepareStatement("UPDATE Performance SET ComputedTotal = ? WHERE TeamNumber = ? AND Tournament = ? AND RunNumber = ?");
+      selectPrep = connection.prepareStatement("SELECT * FROM Performance WHERE Tournament = ?");
+      selectPrep.setString(1, tournament);
+      updatePrep.setString(3, tournament);
+
       final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
+      final int minimumPerformanceScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(performanceElement.getAttribute("minimumScore")).intValue();
       final NodeList goals = performanceElement.getElementsByTagName("goal");
-      boolean first = true;
-      for(int i=0; i<goals.getLength(); i++) {
-        final Element goal = (Element)goals.item(i);
-        final NodeList values = goal.getElementsByTagName("value");
-        if(values.getLength() == 0) {
-          final String goalName = goal.getAttribute("name");
-          final String multiplier = goal.getAttribute("multiplier");
-          if(first) {
-            first = false;
-          } else {
-            sql.append(" + ");
-          }
-          sql.append(multiplier + " * " + goalName);
-        }
+      rs = selectPrep.executeQuery();
+      while(rs.next()) {
+        final int computedTotal = computeTotalScore(rs, goals);
+        updatePrep.setInt(1, Math.max(computedTotal, minimumPerformanceScore));
+        updatePrep.setInt(2, rs.getInt("TeamNumber"));
+        updatePrep.setInt(4, rs.getInt("RunNumber"));
+        updatePrep.executeUpdate();
       }
-      sql.append(" WHERE Tournament = \"" + tournament + "\"");
-
-      stmt.executeUpdate(sql.toString());
-
-      final int minimumPerformanceScore = NumberFormat.getInstance().parse(performanceElement.getAttribute("minimumScore")).intValue();
-      stmt.executeUpdate("UPDATE Performance SET ComputedTotal = " + minimumPerformanceScore + " WHERE ComputedTotal < " + minimumPerformanceScore);
+      rs.close();
+      updatePrep.close();
+      selectPrep.close();
       
       //Subjective ---
       final NodeList subjectiveCategories = rootElement.getElementsByTagName("subjectiveCategory");
       for(int catIndex=0; catIndex<subjectiveCategories.getLength(); catIndex++) {
         final Element subjectiveElement = (Element)subjectiveCategories.item(catIndex);
         final String categoryName = subjectiveElement.getAttribute("name");
-
-        sql.setLength(0);
-        sql.append("UPDATE " + categoryName + " SET ComputedTotal = ");
-      
         final NodeList subjectiveGoals = subjectiveElement.getElementsByTagName("goal");
-        first = true;
-        for(int goalIndex=0; goalIndex<subjectiveGoals.getLength(); goalIndex++) {
-          final Element goalElement = (Element)subjectiveGoals.item(goalIndex);
-          final NodeList values = goalElement.getElementsByTagName("value");
-          if(values.getLength() == 0) {
-            //not enumerated
-            final String goalName = goalElement.getAttribute("name");
-            final String multiplier = goalElement.getAttribute("multiplier");
-            if(first) {
-              first = false;
-            } else {
-              sql.append(" + ");
-            }
-            sql.append(multiplier + " * " + goalName);
-          }
+
+        //build up the SQL
+        updatePrep = connection.prepareStatement("UPDATE " + categoryName + " SET ComputedTotal = ? WHERE TeamNumber = ? AND Tournament = ?");
+        selectPrep = connection.prepareStatement("SELECT * FROM " + categoryName + " WHERE Tournament = ?");
+        selectPrep.setString(1, tournament);
+        updatePrep.setString(3, tournament);
+        rs = selectPrep.executeQuery();
+        while(rs.next()) {
+          final int computedTotal = computeTotalScore(rs, subjectiveGoals);
+          updatePrep.setInt(1, Math.min(computedTotal, minimumPerformanceScore));
+          updatePrep.setInt(2, rs.getInt("TeamNumber"));
+          updatePrep.executeUpdate();
         }
-        sql.append(" WHERE Tournament = \"" + tournament + "\"");
-      
-        stmt.executeUpdate(sql.toString());
+        rs.close();
+        updatePrep.close();
+        selectPrep.close();
       }
     } finally {
-      Utilities.closeStatement(stmt);
+      Utilities.closeResultSet(rs);
+      Utilities.closePreparedStatement(updatePrep);
+      Utilities.closePreparedStatement(selectPrep);
     }
   }
 
@@ -1214,5 +1197,42 @@ public class Queries {
       Utilities.closePreparedStatement(prep);
     }
   }
-  
+
+  /**
+   * Compute total score for values in current row of rs based on goals from
+   * challenge document.
+   */
+  private static int computeTotalScore(final ResultSet rs,
+                                       final NodeList goals)
+    throws ParseException, SQLException {
+    int computedTotal = 0;
+    for(int i=0; i<goals.getLength(); i++) {
+      final Element goal = (Element)goals.item(i);
+      final String goalName = goal.getAttribute("name");
+      final NodeList values = goal.getElementsByTagName("value");
+      if(values.getLength() == 0) {
+        final int multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goal.getAttribute("multiplier")).intValue();
+        final int score = rs.getInt(goalName);
+        computedTotal += multiplier * score;
+      } else {
+        //enumerated
+        //find value that matches value in DB
+        final String enum = rs.getString(goalName);
+        boolean found = false;
+        int score = -1;
+        for(int v=0; v<values.getLength() && !found; v++) {
+          final Element value = (Element)values.item(v);
+          if(value.getAttribute("value").equals(enum)) {
+            score = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue();
+            found = true;
+          }
+        }
+        if(!found) {
+          throw new RuntimeException("Error, enum value in database for goal: " + goalName + " is not a valid value");
+        }
+        computedTotal += score;
+      }
+    }
+    return computedTotal;
+  }
 }
