@@ -52,7 +52,9 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Display Controller)</h1>
 
-    <p>This page is used to control what page is currently visible on the display screen</p>
+    <p>This page is used to control what page is currently visible on the
+    display screen.  Note that it takes some time for the display to
+    change, up to 2 minutes.</p>
 
     <form name='remote' action='remoteControl.jsp' method='post'>
       <c:if test='${displayPage == "welcome"}'  var='welcomePage'>
@@ -63,7 +65,9 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
       </c:if>
 
       <c:if test='${displayPage == "scoreboard"}'  var='scoreboardPage'>
-        Scoreboard <input type='radio' name='remotePage' value='scoreboard' checked='true' /><br/>
+        Scoreboard <input type='radio' name='remotePage' value='scoreboard'
+        checked='true' /> Note that when the scorboard comes up the All
+        Teams column will be blank until any scores are entered<br/>
       </c:if>
       <c:if test='${not scoreboardPage}'>
         Scoreboard <input type='radio' name='remotePage' value='scoreboard' /><br/>

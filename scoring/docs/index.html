@@ -351,9 +351,13 @@
             restart the machine.</li>
         </ul>
 
-      <li>When you're done for the day you'll want to shutdown the
-        database by going to shutdown service or shutdown the server
-        standalone, depending on how you started it.</li>
+      <li>When you're done for the day you should make a copy of the database for the head of your state.
+      <pre>
+On Windows change to the directory c:\packages\mysql\bin, on Linux it should be in your path.
+> mysqldump --opt -u fll -pfll fll > fll-dump.sql
+        </pre>
+        Then send fll-dump.sql to the head of your state.
+      </li>
 
       <li>When running under Linux you'll need to startup MySQL and execute the following to enable the setup to work properly:
         <pre>
@@ -381,13 +385,23 @@ GRANT ALL PRIVILEGES ON mysql.* TO root IDENTIFIED BY 'fll' WITH GRANT OPTION
         same page with a message at the top that the database was
         successfully initialized.  If this fails due to an error connecting
         to the database, do the following:
-          <ul>
+          <ol>
             <li>Open a command prompt, <code>Start-&gt;Run-&gt;command</code></li>
             <li>Change to the bin directory where MySQL is installed, <code>cd \packages\mysql\bin</code></li>
             <li>Start mysql, <code>mysql</code></li>
             <li>Execute <code>SET PASSWORD FOR root = PASSWORD('fll');</code></li>
             <li>Go back to step 3 again.</li>
-          </ul>
+          </ol>
+          If that doesn't work try this:
+          <ol>
+            <li>Open a command prompt, <code>Start-&gt;Run-&gt;command</code></li>
+            <li>Change to the bin directory where MySQL is installed, <code>cd \packages\mysql\bin</code></li>
+            <li>Start mysql, <code>mysql -u root mysql</code></li>
+
+<li>Execute <code>GRANT ALL PRIVILEGES ON mysql.* TO root@localhost IDENTIFIED BY 'fll' WITH GRANT OPTION</code></li>
+<li>Execute <code>GRANT ALL PRIVILEGES ON mysql.* TO root IDENTIFIED BY 'fll' WITH GRANT OPTION</code></li>
+            <li>Go back to step 3 again.</li>
+          </ol>
         </li>
         <li>Once that is done you can close the other web browser you opened</li>
       </ol>

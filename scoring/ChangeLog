@@ -1,3 +1,13 @@
+2004-11-23  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/WEB-INF/jspf/footer.jspf: Added sw version to the footer page.
+
+	* web/instructions.jsp: Not about all teams being blank until
+	scores are entered.
+
+	* web/admin/remoteControl.jsp: Added note that it takes time for
+	the big screen display to change.
+
 2004-11-21  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/instructions.jsp: Remind users to not close the control

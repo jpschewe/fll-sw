@@ -6,10 +6,12 @@ if(null != databaseAttr
   out.println("<font color='red'><i>Warning using non-standard database " + databaseAttr + "</i></font>");
 }
 %>
+
     
 <table>
   <tr>
     <td><a href="<%=request.getContextPath()%>/index.jsp" target='_top'>Main Index</a></td>
     <td><a href="<%=request.getContextPath()%>/admin/index.jsp" target='_top'>Admin Index</a></td>
   </tr>
+  <tr><td>Software version: @APP-VERSION@</td></tr>
 </table>
