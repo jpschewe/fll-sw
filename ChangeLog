@@ -1,3 +1,12 @@
+2003-12-28  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/scoreEntry/scoreEntry.jsp: Now one can edit scores that are
+	non-consecutive, for those times when someone goes to the playoff
+	brackets too soon (860145).
+
+	* src/fll/Queries.java (isBye): Added support to score entry/edit
+	page to handle editing bye runs (866851).
+
 2003-12-27  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/playoff/remoteControlBrackets.jsp: Don't show final scores
