@@ -1,3 +1,8 @@
+2003-07-27  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/web/GetFile.java (getFile): Make score.xml human
+	readable (707855).
+
 2003-07-25  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/gui/SubjectiveFrame.java (SubjectiveFrame): Gave each

@@ -70,6 +70,7 @@ final public class GetFile {
       response.setContentType("text/xml");
       response.setHeader("Content-Disposition", "filename=score.xml");
       xmlwriter.setOutput(response.getOutputStream(), null);
+      xmlwriter.setNeedsIndent(true);
       xmlwriter.write(scoreDocument);
     } else if("subjective.zip".equals(filename)) {
       Queries.ensureTournamentTeamsPopulated(application);
@@ -94,7 +95,7 @@ final public class GetFile {
       xmlwriter.write(challengeDocument);
       zipOut.closeEntry();
       zipOut.putNextEntry(new ZipEntry("score.xml"));
-      //xmlwriter.setNeedsIndent(true);
+      xmlwriter.setNeedsIndent(true);
       xmlwriter.write(scoreDocument);
       zipOut.closeEntry();
       
