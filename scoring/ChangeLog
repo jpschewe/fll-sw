@@ -1,7 +1,7 @@
 2003-12-17  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/admin/advanceTeams.jsp: Added page to do batch advancement
-	of teams.
+	of teams (853008).
 
 2003-12-14  Jon Schewe  <jpschewe@mtu.net>
 
