@@ -1,3 +1,10 @@
+2003-07-25  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/gui/SubjectiveFrame.java (SubjectiveFrame): Gave each
+	category it's own table and put them in a tabbed pane.  This makes
+	sure that a table doesn't loose it's size and sort settings when
+	switching categories. (707885)
+
 2003-07-21  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/web/playoff/Playoff.java (insertBye): 
