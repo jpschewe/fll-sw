@@ -16,29 +16,30 @@
    '(jde-run-working-directory (expand-file-name "build/" project-root))
    '(jde-compile-option-directory (expand-file-name "build/" project-root))
    '(jde-run-read-app-args t)
-   '(jde-global-classpath (list
-			   (expand-file-name "build/WEB-INF/classes" project-root)
+   '(jde-global-classpath
+     (list
+      (expand-file-name "build/web/WEB-INF/classes" project-root)
 			   
-			   (expand-file-name "lib/JonsInfra-0.2.jar" project-root)
-			   (expand-file-name "lib/junit-3.8.1.jar" project-root)
-			   (expand-file-name "lib/log4j-1.2.8.jar" project-root)
-			   (expand-file-name "lib/mysql-connector-java-3.0.8-stable-bin.jar" project-root)
-			   (expand-file-name "lib/common-lib/xercesImpl.jar" project-root)
-			   (expand-file-name "lib/common-lib/xmlParserAPIs.jar" project-root)
+      (expand-file-name "lib/JonsInfra-0.2.jar" project-root)
+      (expand-file-name "lib/junit-3.8.1.jar" project-root)
+      (expand-file-name "lib/log4j-1.2.8.jar" project-root)
+      (expand-file-name "lib/mysql-connector-java-3.0.8-stable-bin.jar" project-root)
+      (expand-file-name "lib/common-lib/xercesImpl.jar" project-root)
+      (expand-file-name "lib/common-lib/xmlParserAPIs.jar" project-root)
 
-			   ;; JSTL libraries
-			   (expand-file-name "lib/dom.jar" project-root)
-			   (expand-file-name "lib/jaxen-full.jar" project-root)
-			   (expand-file-name "lib/jaxp-api.jar" project-root)
-			   (expand-file-name "lib/jstl.jar" project-root)
-			   (expand-file-name "lib/sax.jar" project-root)
-			   (expand-file-name "lib/saxpath.jar" project-root)
-			   (expand-file-name "lib/standard.jar" project-root)
-			   (expand-file-name "lib/xalan.jar" project-root)
+      ;; JSTL libraries
+      (expand-file-name "lib/dom.jar" project-root)
+      (expand-file-name "lib/jaxen-full.jar" project-root)
+      (expand-file-name "lib/jaxp-api.jar" project-root)
+      (expand-file-name "lib/jstl.jar" project-root)
+      (expand-file-name "lib/sax.jar" project-root)
+      (expand-file-name "lib/saxpath.jar" project-root)
+      (expand-file-name "lib/standard.jar" project-root)
+      (expand-file-name "lib/xalan.jar" project-root)
 
-			   ;; standard stuff
-			   (expand-file-name "common/lib/servlet.jar" catalina-home)
-			   ))
+      ;; standard stuff
+      (expand-file-name "common/lib/servlet.jar" catalina-home)
+      ))
    
    '(jde-compile-option-deprecation t)
    '(jde-build-function 		'(jde-ant-build))
