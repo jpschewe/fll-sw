@@ -1,3 +1,8 @@
+2003-10-04  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/web/playoff/Playoff.java (getDisplayString): Check the
+	other team for a bye and don't show a score in that case (707872).
+
 2003-10-03  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/model/SubjectiveTableModel.java (SubjectiveTableModel):

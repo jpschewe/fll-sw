@@ -56,7 +56,7 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
         </td>
 </tr>
 <!-- <tr>
-  <td colspan='5'><img src='../images/blank.gif' width='1' height='4'></td>
+  <td colspan='5'><img src='<c:url value="/images/blank.gif"/>' width='1' height='4'></td>
 </tr> -->
 <tr align='center' valign='middle'>
   <td width='7%'><font size='2'><b>Rank</b></font></td>
