@@ -1,5 +1,3 @@
-
-  
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
   
 <%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
@@ -103,7 +101,9 @@ final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
                      <c:param name="addTournamentsForRegions" value="1" />
                    </c:url>'>
           Add tournaments for all Regions</a></li>
-              
+
+      <li><a href='<c:url value="tournamentInitialization.jsp"/>'>Initialize tournament teams by region</a></li>
+          
       <li><a href='<c:url value="judges.jsp"/>'>Assign Judges</a></li>
 
       <li><form action='<c:url value="index.jsp"/>' method='post'>Select the number of seeding runs.
