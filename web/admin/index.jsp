@@ -42,7 +42,12 @@ if(null != request.getParameter("changeSeedingRounds")) {
   Queries.setNumSeedingRounds(connection, newSeedingRounds);
   message.append("<i>Changed number of seeding arounds to " + newSeedingRounds + "</i><br>");
 }
-    
+
+if(null != request.getParameter("addTournamentsForRegions")) {
+  Queries.insertTournamentsForRegions(connection);
+  message.append("<i>Successfully added tournaments for regions</i>");
+}
+        
 final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
 %>
       
@@ -93,7 +98,12 @@ final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
           <input type="submit" value="Upload">
         </form>
       </li>
-          
+
+      <li><a href='<c:url value="index.jsp">
+                     <c:param name="addTournamentsForRegions" value="1" />
+                   </c:url>'>
+          Add tournaments for all Regions</a></li>
+              
       <li><a href='<c:url value="judges.jsp"/>'>Assign Judges</a></li>
 
       <li><form action='<c:url value="index.jsp"/>' method='post'>Select the number of seeding runs.
