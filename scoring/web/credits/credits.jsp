@@ -22,7 +22,7 @@
       <li><a href="http://mtu.net/~engstrom">Eric Engstrom</a></li>
       <li>Bruce Mueller</li>
     </ul>
-    
+      
     <p>The following software packages are used in the application:</p>
     <ul>
       <li><a href="http://mtu.net/~jpschewe/JonsInfra/index.html">JonsInfra</a> -
@@ -35,11 +35,18 @@
         <a href="tomcat-license.txt">License</a></li>
 
       <li><a href="http://www.mysql.com">MySQL</a> - <a
-      href="LICENSE.txt">License</a> (more information can be found <a
+      href="mysql-license.txt">License</a> (more information can be found <a
       href="http://www.mysql.com/support/arrangements.html">here</a></li>
 
       <li><a href="http://java.sun.com/">Java Development Kit</a> -
-        <a href="">License</a></li>
+        <a href="jdk-license.txt">License</a></li>
+
+      <li><a href="http://java.sun.com/">Jakarta Commons Lang</a> -
+        <a href="commons-lang-LICENSE.txt">License</a></li>
+
+      <li><a href="http://jakarta.apache.org/taglibs/doc/string-doc/string-1.0.1/index.html">String Tag library</a> -
+        <a href="taglib-string-LICENSE.txt">License</a></li>
+        
     </ul>
 
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
