@@ -50,7 +50,7 @@ public final class GenerateDB {
         System.exit(1);
       } else {
         final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-        final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-region-2003.xml"));
+        final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-region-2004.xml"));
         generateDB(challengeDocument, args[0], args[1], args[2], "fll");
 
         final Connection connection = Utilities.createDBConnection(args[0], "fll", "fll", "fll");

@@ -4,7 +4,7 @@
 
 use strict;
 
-foreach my $file qw(AllTeams FilteredTeams TestTeams FinalScores InnovativeDesign Judges Performance ResearchPresentation Programming Regions RobustDesign SummarizedScores Teams Teamwork TournamentParameters TournamentTeams Tournaments) {
+foreach my $file qw(AllTeams FilteredTeams TestTeams FinalScores Judges Performance SummarizedScores Teams TournamentParameters TournamentTeams Tournaments) {
   my $filelc = lc $file;
   foreach my $ext qw(MYD MYI frm) {
     my $old = $filelc . '.' . $ext;
