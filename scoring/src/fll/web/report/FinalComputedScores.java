@@ -5,11 +5,12 @@
  */
 package fll.web.report;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import fll.Queries;
+import fll.Utilities;
 
-import javax.servlet.jsp.JspWriter;
+import fll.xml.ChallengeParser;
+
+import java.io.IOException;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -17,15 +18,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.text.NumberFormat;
-
-import fll.Queries;
-import fll.Utilities;
-
-import java.io.IOException;
-
-import fll.xml.ChallengeParser;
+import java.text.ParseException;
 
 import java.util.Iterator;
+
+import javax.servlet.jsp.JspWriter;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 
 /**
@@ -92,9 +93,12 @@ final public class FinalComputedScores {
         out.println("    <th>&nbsp;</th>");
         for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
           final Element catElement = (Element)subjectiveCategories.item(cat);
-          final String catTitle = catElement.getAttribute("title");
+          final double catWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(catElement.getAttribute("weight")).doubleValue();
+          if(catWeight > 0.0) {
+            final String catTitle = catElement.getAttribute("title");
 
-          out.println("    <th>" + catTitle + "</th>");
+            out.println("    <th>" + catTitle + "</th>");
+          }
         }
 
         out.println("    <th>Performance</th>");
@@ -131,21 +135,24 @@ final public class FinalComputedScores {
           //subjective categories
           for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
             final Element catElement = (Element)subjectiveCategories.item(cat);
-            final String catName = catElement.getAttribute("name");
-            rawScoreRS = stmt.executeQuery("SELECT RawScore FROM SummarizedScores WHERE TeamNumber = " + teamNumber + " AND Category = '" + catName + "' AND Tournament = '" + tournament + "'");
-            final double rawScore;
-            if(rawScoreRS.next()) {
-              final double v = rawScoreRS.getDouble(1);
-              if(rawScoreRS.wasNull()) {
-                rawScore = Double.NaN;
+            final double catWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(catElement.getAttribute("weight")).doubleValue();
+            if(catWeight > 0.0) {
+              final String catName = catElement.getAttribute("name");
+              rawScoreRS = stmt.executeQuery("SELECT RawScore FROM SummarizedScores WHERE TeamNumber = " + teamNumber + " AND Category = '" + catName + "' AND Tournament = '" + tournament + "'");
+              final double rawScore;
+              if(rawScoreRS.next()) {
+                final double v = rawScoreRS.getDouble(1);
+                if(rawScoreRS.wasNull()) {
+                  rawScore = Double.NaN;
+                } else {
+                  rawScore = v;
+                }
               } else {
-                rawScore = v;
+                rawScore = Double.NaN;
               }
-            } else {
-              rawScore = Double.NaN;
+              out.println("    <td" + (Double.isNaN(rawScore) ? " class=warn>No Score" : ">" + SCORE_FORMAT.format(rawScore)) + "</td>");
+              rawScoreRS.close();
             }
-            out.println("    <td" + (Double.isNaN(rawScore) ? "class=warn>No Score" : ">" + SCORE_FORMAT.format(rawScore)) + "</td>");
-            rawScoreRS.close();
           }
 
           //performance
@@ -161,7 +168,7 @@ final public class FinalComputedScores {
           } else {
             rawScore = Double.NaN;
           }
-          out.println("    <td" + (Double.isNaN(rawScore) ? "class=warn>No Score" : ">" + SCORE_FORMAT.format(rawScore)) + "</td>");
+          out.println("    <td" + (Double.isNaN(rawScore) ? " class=warn>No Score" : ">" + SCORE_FORMAT.format(rawScore)) + "</td>");
           rawScoreRS.close();
           out.println("    <td>&nbsp;</td>");
           out.println("  </tr>");
@@ -174,23 +181,26 @@ final public class FinalComputedScores {
           //subjective categories
           for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
             final Element catElement = (Element)subjectiveCategories.item(cat);
-            final String catName = catElement.getAttribute("name");
-            scaledScoreRS = stmt.executeQuery("SELECT StandardizedScore FROM SummarizedScores WHERE TeamNumber = " + teamNumber + " AND Category = '" + catName + "' AND Tournament = '" + tournament + "'");
-            final double scaledScore;
-            if(scaledScoreRS.next()) {
-              final double v = scaledScoreRS.getDouble(1);
-              if(scaledScoreRS.wasNull()) {
-                scaledScore = Double.NaN;
+            final double catWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(catElement.getAttribute("weight")).doubleValue();
+            if(catWeight > 0.0) {
+              final String catName = catElement.getAttribute("name");
+              scaledScoreRS = stmt.executeQuery("SELECT StandardizedScore FROM SummarizedScores WHERE TeamNumber = " + teamNumber + " AND Category = '" + catName + "' AND Tournament = '" + tournament + "'");
+              final double scaledScore;
+              if(scaledScoreRS.next()) {
+                final double v = scaledScoreRS.getDouble(1);
+                if(scaledScoreRS.wasNull()) {
+                  scaledScore = Double.NaN;
+                } else {
+                  scaledScore = v;
+                }
               } else {
-                scaledScore = v;
+                scaledScore = Double.NaN;
               }
-            } else {
-              scaledScore = Double.NaN;
+
+              out.println("    <td" + (Double.isNaN(scaledScore) ? " class=warn>No Score" : ">" + SCORE_FORMAT.format(scaledScore)) + "</td>");
+
+              scaledScoreRS.close();
             }
-
-            out.println("    <td" + (Double.isNaN(scaledScore) ? "class=warn>No Score" : ">" + SCORE_FORMAT.format(scaledScore)) + "</td>");
-
-            scaledScoreRS.close();
           }
 
           //performance
@@ -208,13 +218,13 @@ final public class FinalComputedScores {
               scaledScore = Double.NaN;
             }
 
-            out.println("    <td" + (Double.isNaN(scaledScore) ? "class=warn>No Score" :  ">" + SCORE_FORMAT.format(scaledScore)) + "</td>");
+            out.println("    <td" + (Double.isNaN(scaledScore) ? " class=warn>No Score" :  ">" + SCORE_FORMAT.format(scaledScore)) + "</td>");
           }
           
           scaledScoreRS.close();
 
           //total score
-          out.println("    <td" + (Double.isNaN(totalScore) ? "class=warn>No Score" : ">" + SCORE_FORMAT.format(totalScore)) + "</td>");
+          out.println("    <td" + (Double.isNaN(totalScore) ? " class=warn>No Score" : ">" + SCORE_FORMAT.format(totalScore)) + "</td>");
 
           out.println("  <tr><td colspan='" + (subjectiveCategories.getLength() + 4) + "'><hr></td></tr>");
         }
@@ -223,9 +233,11 @@ final public class FinalComputedScores {
         teamsRS.close();
 
         //FIX need page break here
-        
+
       } //end while(divisionIter.next())
-      
+
+    } catch(final ParseException pe) {
+      throw new RuntimeException("Error parsing category weight!", pe);
     } finally {
       Utilities.closeResultSet(rawScoreRS);
       Utilities.closeResultSet(teamsRS);

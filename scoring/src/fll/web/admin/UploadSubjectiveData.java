@@ -5,34 +5,37 @@
  */
 package fll.web.admin;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
+import fll.Utilities;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import fll.web.debug.DebugJspWriter;
 
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 
-import javax.servlet.jsp.JspWriter;
-
-import java.text.NumberFormat;
-import java.text.ParseException;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import fll.Utilities;
+import java.text.NumberFormat;
+import java.text.ParseException;
 
-import fll.web.debug.DebugJspWriter;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import javax.servlet.jsp.JspWriter;
+
+import org.apache.log4j.Logger;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
 
 
 /**
@@ -42,6 +45,8 @@ import fll.web.debug.DebugJspWriter;
  */
 final public class UploadSubjectiveData {
 
+  private static final Logger LOG = Logger.getLogger(UploadSubjectiveData.class);
+  
   /**
    * Just for debugging
    *
@@ -50,8 +55,8 @@ final public class UploadSubjectiveData {
   public static void main(final String[] args) {
     try {
       final JspWriter out = new DebugJspWriter(new OutputStreamWriter(System.out));
-      final File file = new File("/home/jpschewe/download/subjective-bad.zip");
-      final String currentTournament = "NewHope";
+      final File file = new File("/home/jpschewe/download/subjective.zip");
+      final String currentTournament = "Washburn";
       final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
       final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge.xml"));
 
@@ -93,66 +98,73 @@ final public class UploadSubjectiveData {
     zipfile.close();
 
     final Element scoresElement = scoreDocument.getDocumentElement();
-    Element scoreCategoryElement = (Element)scoresElement.getFirstChild();
-    while(null != scoreCategoryElement) {
-      final String categoryName = scoreCategoryElement.getNodeName();
-      final Element categoryElement = XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
-      final NodeList goalDescriptions = categoryElement.getElementsByTagName("goal");
+    LOG.debug("first element: " + scoresElement);
+    Node scoreCategoryNode = scoresElement.getFirstChild();
+    while(null != scoreCategoryNode) {
+      if(scoreCategoryNode instanceof Element) {
+        LOG.debug("An element: " + scoreCategoryNode);
+        final Element scoreCategoryElement = (Element)scoreCategoryNode;
+        final String categoryName = scoreCategoryElement.getNodeName();
+        final Element categoryElement = XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
+        final NodeList goalDescriptions = categoryElement.getElementsByTagName("goal");
       
-      if(null == categoryElement) {
-        throw new RuntimeException("Cannot find subjective category description for category in score document: " + categoryElement.getNodeName());
-      } else {
+        if(null == categoryElement) {
+          throw new RuntimeException("Cannot find subjective category description for category in score document: " + categoryElement.getNodeName());
+        } else {
 
-        PreparedStatement insertPrep = null;
-        try {
-          //prepare statements for delete and insert
-          final StringBuffer insertSQLColumns = new StringBuffer();
-          insertSQLColumns.append("REPLACE " + categoryName + " (TeamNumber, Tournament, Judge");
-          final StringBuffer insertSQLValues = new StringBuffer();
-          insertSQLValues.append(") VALUES ( ?, ?, ?");
-          for(int goalIndex=0; goalIndex<goalDescriptions.getLength(); goalIndex++) {
-            final Element goalDescription = (Element)goalDescriptions.item(goalIndex);
-            insertSQLColumns.append(", " + goalDescription.getAttribute("name"));
-            insertSQLValues.append(", ?");
-          }
-          insertPrep = connection.prepareStatement(insertSQLColumns.toString()
-                                                   + insertSQLValues.toString() + ")");
-          //initialze the tournament
-          insertPrep.setString(2, currentTournament);
-            
-          final NodeList scores = scoreCategoryElement.getElementsByTagName("score");
-          for(int scoreIndex=0; scoreIndex<scores.getLength(); scoreIndex++) {
-            final Element scoreElement = (Element)scores.item(scoreIndex);
-            
-            if(scoreElement.hasAttribute("modified")
-               && "true".equalsIgnoreCase(scoreElement.getAttribute("modified"))) {
-              final int teamNumber = NumberFormat.getInstance().parse(scoreElement.getAttribute("teamNumber")).intValue();
-              final String judge = scoreElement.getAttribute("judge");
-
-              insertPrep.setInt(1, teamNumber);
-              insertPrep.setString(3, judge);
-              
-              for(int goalIndex=0; goalIndex<goalDescriptions.getLength(); goalIndex++) {
-                final Element goalDescription = (Element)goalDescriptions.item(goalIndex);
-                final String goalName = goalDescription.getAttribute("name");
-                final String value = scoreElement.getAttribute(goalName);
-                if(null != value && !"".equals(value.trim())) {
-                  insertPrep.setString(goalIndex+4, value.trim());
-                } else {
-                  insertPrep.setNull(goalIndex+4, Types.INTEGER);
-                }
-              }
-            
-              //execute sql here
-              insertPrep.executeUpdate();
+          PreparedStatement insertPrep = null;
+          try {
+            //prepare statements for delete and insert
+            final StringBuffer insertSQLColumns = new StringBuffer();
+            insertSQLColumns.append("REPLACE " + categoryName + " (TeamNumber, Tournament, Judge");
+            final StringBuffer insertSQLValues = new StringBuffer();
+            insertSQLValues.append(") VALUES ( ?, ?, ?");
+            for(int goalIndex=0; goalIndex<goalDescriptions.getLength(); goalIndex++) {
+              final Element goalDescription = (Element)goalDescriptions.item(goalIndex);
+              insertSQLColumns.append(", " + goalDescription.getAttribute("name"));
+              insertSQLValues.append(", ?");
             }
-          }
+            insertPrep = connection.prepareStatement(insertSQLColumns.toString()
+                                                     + insertSQLValues.toString() + ")");
+            //initialze the tournament
+            insertPrep.setString(2, currentTournament);
+            
+            final NodeList scores = scoreCategoryElement.getElementsByTagName("score");
+            for(int scoreIndex=0; scoreIndex<scores.getLength(); scoreIndex++) {
+              final Element scoreElement = (Element)scores.item(scoreIndex);
+            
+              if(scoreElement.hasAttribute("modified")
+                 && "true".equalsIgnoreCase(scoreElement.getAttribute("modified"))) {
+                final int teamNumber = NumberFormat.getInstance().parse(scoreElement.getAttribute("teamNumber")).intValue();
+                final String judge = scoreElement.getAttribute("judge");
 
-        } finally {
-          Utilities.closePreparedStatement(insertPrep);
+                insertPrep.setInt(1, teamNumber);
+                insertPrep.setString(3, judge);
+              
+                for(int goalIndex=0; goalIndex<goalDescriptions.getLength(); goalIndex++) {
+                  final Element goalDescription = (Element)goalDescriptions.item(goalIndex);
+                  final String goalName = goalDescription.getAttribute("name");
+                  final String value = scoreElement.getAttribute(goalName);
+                  if(null != value && !"".equals(value.trim())) {
+                    insertPrep.setString(goalIndex+4, value.trim());
+                  } else {
+                    insertPrep.setNull(goalIndex+4, Types.INTEGER);
+                  }
+                }
+            
+                //execute sql here
+                insertPrep.executeUpdate();
+              }
+            }
+
+          } finally {
+            Utilities.closePreparedStatement(insertPrep);
+          }
         }
+      } else {
+        LOG.debug("Not an element: " + scoreCategoryNode);
       }
-      scoreCategoryElement = (Element)scoreCategoryElement.getNextSibling();
+      scoreCategoryNode = (Node)scoreCategoryNode.getNextSibling();
     }
   }
 

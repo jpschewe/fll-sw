@@ -1,3 +1,13 @@
+2003-09-20  Jon Schewe  <jpschewe@mtu.net>
+
+	* src/fll/web/report/FinalComputedScores.java (generateReport):
+	Don't show scores from subjective categories that have 0 weight
+	(809035).
+
+	* src/fll/web/admin/UploadSubjectiveData.java
+	(saveSubjectiveData): Now handle carriage returns in score.xml
+	properly.
+
 2003-09-17  Jon Schewe  <jpschewe@mtu.net>
 
 	* docs/index.html: Updated with information about computers
