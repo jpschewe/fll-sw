@@ -19,7 +19,7 @@
     message of the exception.  If it's one that I cause intentionaly it'll
     have a, hopefully, understandable message.  Either way, look through the
     things in the following list to see if the messages match anything listed
-    here.  If all else fails, call me (Jon Schewe): 612-210-8818.
+    here.  If all else fails, email me (Jon Schewe): jpschewe@users.sourceforge.net.
     </p>
 
     <ul>
