@@ -31,32 +31,30 @@ Utilities.closeStatement(stmt);
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-  <title><x:out select="$challengeDocument/fll/@title"/> (Select Team)</title>
+  <title>Score Entry [Select Team] - <x:out select="$challengeDocument/fll/@title"/></title>
 
-  <!--<style type='text/css'>
-   SELECT {line-height: 150%; font-size: 10pt; font-weight: bold; background-color: black }
-   OPTION {color: #e0e0e0;}
-   INPUT  {font-size: 10pt; font-weight: bold; background-color: black;color:#e0e0e0 }
-  </style>-->
-  <style type='text/css'>
+  <style title='local_style' type='text/css'>
    SELECT {line-height:150%; font-size:10pt; font-weight:bold; background:black; color:#e0e0e0; }
    OPTION {color:#e0e0e0; }
-   INPUT  {font-size:10pt; font-weight:bold; background-color:black; color:#e0e0e0; }
+   .dark_bg  {font-size:10pt; font-weight:bold; background-color:black; color:#e0e0e0; }
   </style>
 
 <script language='javascript'>
 
 function editFlagBoxClicked() {
+  var text = document.getElementById('select_number_text');
   if(document.selectTeam.EditFlag.checked) {
     document.selectTeam.RunNumber.disabled=false;
+		text.style.color = "black";
   } else {
     document.selectTeam.RunNumber.disabled=true;
+		text.style.color = "gray";
   }        
 }
 
 </script>
   </head>
-  <body>
+  <body onload="editFlagBoxClicked()">
       
     <form action="scoreEntry.jsp" method="POST" name="selectTeam">
         
@@ -70,12 +68,8 @@ function editFlagBoxClicked() {
             <table border="0" cellpadding="5" cellspacing="0" width="90%">
               <tr>
                 <td valign="middle" align="center">
-                  <font face="Arial" size="4"><x:out select="$challengeDocument/fll/@title"/></font>
-                </td>
-              </tr>
-              <tr align="center">
-                <td>
-                  <font face="Arial" size="4">Please Select Team:</font>
+                  <font face="Arial" size="4"><x:out select="$challengeDocument/fll/@title"/></font><br>
+									<font face="Arial" size="2">Score Card Entry and Review Page</font>
                 </td>
               </tr>
             </table>
@@ -90,8 +84,8 @@ function editFlagBoxClicked() {
         <tr align='left' valign='top'>
           <!-- pick team from a list -->            
           <td>
-            <br><br>
-            <font face='arial' size='4'>Select Team From List:</font><br>
+            <br>
+            <font face='arial' size='4'>Select team for this scorecard:</font><br>
             <select size='20' name='TeamNumber'>
               <%
               final Iterator iter = Queries.getTournamentTeams(connection).values().iterator();
@@ -119,18 +113,19 @@ function editFlagBoxClicked() {
                    name='EditFlag'
                    value="1"
                    onclick="editFlagBoxClicked()" />
-            <b>Edit Scores?</b>
+            <b>Correct or double-check this score</b>
           </td>
         </tr>
         <tr>
            <!-- pick run number -->
           <td align='left'>
             <select name='RunNumber' disabled='true'>
+							<option value='0'>Last Run</option>
               <% for(int i=0; i<maxRunNumber; i++) { %>
                 <option value='<%=(i+1)%>'><%=(i+1)%></option>
               <% } %>
             </select>
-            <b>Select Run Number for editing</b>
+            <b><span id='select_number_text'>Select Run Number for editing</span></b>
           </td>
         </tr>
         </td></tr></table>
@@ -138,7 +133,7 @@ function editFlagBoxClicked() {
           <!-- submit button -->            
           <td align='left'>
             <!--<font face='arial' size='4'><b>Submit</b></font>-->
-            <input type="submit" value="Submit">
+            <input class='dark_bg' type="submit" value="Submit">
           </td>
         </tr>
         
