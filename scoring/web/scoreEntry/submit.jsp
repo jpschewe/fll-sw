@@ -10,57 +10,59 @@
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
  
-final String lDeleteFlag = request.getParameter("delete");
-final String lEditFlag = request.getParameter("EditFlag");
-
-//insert into database here
 final Connection connection = (Connection)application.getAttribute("connection");
-final String sql;
-if(null != lDeleteFlag) {
-  sql = Queries.deletePerformanceScore(connection, request);
-} else if("1".equals(lEditFlag)) {      
-  sql = Queries.updatePerformanceScore(challengeDocument, connection, request);
-} else {
-  sql = Queries.insertPerformanceScore(challengeDocument, connection, request);
-}
 %>
+
+<%-- save to database --%>
+<c:choose>
+  <c:when test="${not empty param.delete}">
+  <%pageContext.setAttribute("sql", Queries.deletePerformanceScore(connection, request));%>
+  </c:when>
+  <c:when test="${not empty param.EditFlag}">
+  <%pageContext.setAttribute("sql", Queries.updatePerformanceScore(challengeDocument, connection, request));%>
+  </c:when>
+  <c:otherwise>
+  <%pageContext.setAttribute("sql", Queries.insertPerformanceScore(challengeDocument, connection, request));%>
+  </c:otherwise>
+</c:choose>
   
     
 <html>
   <head>
     <title><x:out select="$challengeDocument//@title"/> (Submit Scores)</title>
+    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
   <body>
-    <p>SQL executed: <br>&nbsp;&nbsp;<%=sql%></p>
+    <p>SQL executed: <br>&nbsp;&nbsp;<c:out value="${sql}"/></p>
       
     <h1>Submit Scores</h1>
       <table border='1'>          
          <tr>
            <td>Team Number</td>
-           <td><%=request.getParameter("TeamNumber")%></td>
+           <td><c:out value="${param.TeamNumber}"/></td>
          </tr>
          <tr>
            <td>Run Number</td>
-           <td><%=request.getParameter("RunNumber")%></td>
+           <td><c:out value="${param.RunNumber}"/></td>
          </tr>                
          <tr>
            <td>NoShow</td>
-           <td><%=request.getParameter("NoShow")%></td>
+           <td><c:out value="${param.NoShow}"/></td>
          </tr>
          <tr>
            <td>Edit?</td>
-           <td><%=lEditFlag%></td>
+           <td><c:out value="${param.EditFlag}"/></td>
          </tr>
           <tr>
             <td>Delete?</td>
-            <td><%=lDeleteFlag%></td>
+            <td><c:out value="${param.delete}"/></td>
           </tr>
          <%Submit.generateParameterTableRows(out, challengeDocument, request);%>
        </table>
 
        <a href="select_team.jsp">Normally you'd be redirected here</a>
-      <% response.sendRedirect(response.encodeRedirectURL("select_team.jsp")); %>
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>
+       <c:redirect url="select_team.jsp"/>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>

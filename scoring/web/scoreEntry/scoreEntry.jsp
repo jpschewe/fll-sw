@@ -22,8 +22,6 @@ Queries.ensureTournamentTeamsPopulated(application);
 
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 
-final String lEditFlag = (null == request.getParameter("EditFlag") ? "0" : request.getParameter("EditFlag"));
-
 final String lTeamNum = request.getParameter("TeamNumber");
 if(null == lTeamNum) {
   //FIX error, redirect to error page
@@ -51,7 +49,7 @@ final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumbe
   
 //what run number we're going to edit/enter  
 final int lRunNumber;
-if("1".equals(lEditFlag)) {
+if("1".equals(request.getParameter("EditFlag"))) {
   final String runNumberStr = request.getParameter("RunNumber");
   if(null == runNumberStr) {
     throw new RuntimeException("Please choose a run number when editing scores");
@@ -69,16 +67,18 @@ final String minimumAllowedScoreStr = ((Element)challengeDocument.getDocumentEle
 final int minimumAllowedScore = NumberFormat.getInstance().parse(minimumAllowedScoreStr).intValue();
 
 //check if this is the last run a team has completed
-final boolean isLastRun = (lRunNumber == (nextRunNumber - 1));
+pageContext.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == (nextRunNumber - 1)));
 %>
   
 <html>
   <head>
-    <%if("1".equals(lEditFlag)) {%>
-    <title><x:out select="$challengeDocument//@title"/> (Score Edit)</title>
-    <%} else {%>
-    <title><x:out select="$challengeDocument//@title"/> (Score Entry)</title>
-    <%}%>
+    <c:if test="${not empty param.EditFlag}" var="editFlag">
+      <title><x:out select="$challengeDocument//@title"/> (Score Edit)</title>
+    </c:if>
+    <c:if test="${not editFlag}">
+      <title><x:out select="$challengeDocument//@title"/> (Score Entry)</title>
+      <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
+    </c:if>
       
     <style type='text/css'>
       TD {font-family='arial'}
@@ -96,15 +96,16 @@ function init() {
   // disable text selection
   document.onselectstart=new Function ("return false")
 
+  <c:if test="${editFlag}">
   <%
-  if("1".equals(lEditFlag)) {
     ScoreEntry.generateInitForScoreEdit(out, application, challengeDocument, team.getTeamNumber(), lRunNumber);
-  } else {
   %>
-  gbl_NoShow = 0;
-  reset();
-  <%}%>
-        
+  </c:if>
+  <c:if test="${not editFlag}">
+    gbl_NoShow = 0;
+    reset();
+  </c:if>
+      
   refresh();
 }
 
@@ -134,11 +135,12 @@ function refresh() {
 <%ScoreEntry.generateIsConsistent(out, challengeDocument);%>
     
 function CancelClicked() {
-  <%if("1".equals(lEditFlag)) {%>
+  <c:if test="${editFlag}">
   if (confirm("Cancel and lose changes?") == true) {
-  <%} else {%>
+  </c:if>
+  <c:if test="${not editFlag}">
   if (confirm("Cancel and lose data?") == true) {
-  <%}%>
+  </c:if>
     window.location.href= "select_team.jsp";
   }
 }
@@ -149,18 +151,18 @@ function CancelClicked() {
 
   </head>
 
-  <body
-        <%if("1".equals(lEditFlag)) {%>
-        bgcolor="#666666"
-        <%} else {%>
-        background="../images/bricks1.gif"
-        bgcolor="#ffffff"
-        <%}%>
-        onload="init()"
-        topmargin='4'>
+  <c:if test="${editFlag}">
+    <body bgcolor="#666666" onload="init()">
+  </c:if>
+  <c:if test="${not editFlag}">
+    <body onload="init()">
+  </c:if>
+    
     <form action="submit.jsp" method="POST" name="scoreEntry">
 
-      <input type='hidden' name='EditFlag' value='<%=lEditFlag%>' readonly>
+      <c:if test="${editFlag}">
+        <input type='hidden' name='EditFlag' value='1' readonly>
+      </c:if>
       <input type='hidden' name='RunNumber' value='<%=lRunNumber%>' readonly>
       <input type='hidden' name='TeamNumber' value='<%=team.getTeamNumber()%>' readonly>
           
@@ -178,11 +180,12 @@ function CancelClicked() {
                   <table border="0" cellpadding="5" cellspacing="0" width="90%">
                     <tr>
                       <td valign="middle" align="center">
-                        <%if("1".equals(lEditFlag)) {%>
-                        <font face="Arial" size="4"><x:out select="$challengeDocument//@title"/> (Score Edit)</font>
-                        <%} else {%>
-                        <font face="Arial" size="4"><x:out select="$challengeDocument//@title"/> (Score Entry)</font>
-                        <%}%>
+                        <c:if test="${editFlag}">
+                          <font face="Arial" size="4"><x:out select="$challengeDocument//@title"/> (Score Edit)</font>
+                        </c:if>
+                        <c:if test="${not editFlag}">
+                          <font face="Arial" size="4"><x:out select="$challengeDocument//@title"/> (Score Entry)</font>
+                        </c:if>
                       </td>
                     </tr>
                     <tr align="center">
@@ -251,9 +254,9 @@ function CancelClicked() {
               <td colspan='3' align='right'>
                 <input type='submit' value='Submit Score' onclick='return confirm("Submit Data -- Are you sure?")'>
                 <input type='button' value='Cancel' onclick='CancelClicked()'>
-<%if("1".equals(lEditFlag) && isLastRun) {%>
-                <input type='submit' value='Delete Score' name='delete' onclick='return confirm("Are you sure you want to delete this score?")'>
-<%}%>
+                <c:if test="${editFlag and isLastRun}">
+                  <input type='submit' value='Delete Score' name='delete' onclick='return confirm("Are you sure you want to delete this score?")'>
+                </c:if>
               </td>
               <td align='right'>
                 &nbsp;
@@ -265,6 +268,6 @@ function CancelClicked() {
       </tr>
     </table>
     </form>
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>
