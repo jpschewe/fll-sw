@@ -75,6 +75,8 @@
     </restriction>
 
     <tiebreaker>
+      <test goal="boulders_in_circle" winner="high" />
+      <test goal="boulders_outside_circle" winner="high" />
       <test goal="ice_core" winner="high" />
       <test goal="free_rover" winner="high" />
       <test goal="habitation_modules" winner="high" />
@@ -82,7 +84,6 @@
       <test goal="launch_canister" winner="high" />
       <test goal="exit_base" winner="high" />
       <test goal="vehicle" winner="high" />
-      <test goal="boulders_in_circle" winner="high" />
     </tiebreaker>
 
   </Performance>
