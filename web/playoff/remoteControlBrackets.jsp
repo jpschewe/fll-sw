@@ -80,16 +80,26 @@ final List currentRound = tempCurrentRound;
   </style>
 
 <!-- stuff for automatic scrolling -->
-<script language="JavaScript">
-function myHeight() {
-  return (document.all.dummy.offsetHeight-300);
+<script type="text/javascript">
+var scrollTimer;
+var scrollAmount = 2;    // scroll by 100 pixels each time
+var documentYposition = 0;
+//http://www.evolt.org/article/document_body_doctype_switching_and_more/17/30655/index.html
+function getScrollPosition() {
+  if (window.pageYOffset) {
+    return window.pageYOffset
+  } else if (document.documentElement && document.documentElement.scrollTop) {
+    return document.documentElement.scrollTop
+  } else if (document.body) {
+    return document.body.scrollTop
+  }
 }
-
 function myScroll() {
   documentYposition += scrollAmount;
-  window.scroll(0,documentYposition);
-  if (documentYposition > documentLength) {
-    window.clearInterval(IntervalRef);
+  window.scrollBy(0, scrollAmount);
+  if(getScrollPosition()+300 < documentYposition) { //wait 300 pixels until we refresh
+    window.clearInterval(scrollTimer);
+    window.scroll(0, 0); //scroll back to top and then refresh
 <%
   final String reloadURL = response.encodeURL("remoteControlBrackets.jsp");
 %>
@@ -99,16 +109,8 @@ function myScroll() {
 }
 
 function start() {
-    documentLength = myHeight();
-    //myScroll();
-    IntervalRef = window.setInterval('myScroll()',iInterval);
+    scrollTimer = window.setInterval('myScroll()',30);
 }
-
-var iInterval = 30;
-var IntervalRef;
-var documentLength;
-var scrollAmount = 2;    // scroll by 100 pixels each time
-var documentYposition = 0;
 </script>
 <!-- end stuff for automatic scrolling -->
     
