@@ -1,5 +1,4 @@
-
-<%@ include file="../WEB-INF/jspf/init.jspf" %>
+<%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Utilities" %>
 <%@ page import="fll.Queries" %>
@@ -36,13 +35,9 @@ final ResultSet rs = stmt.executeQuery(sql);
 <tr align='center'>
   <td colspan='6'><font size='3'><b>Most Recent Performance Scores</b></font></td>
 </tr>
-<!--<tr>
-  <td colspan='6'><img src='../images/blank.gif' width='1' height='4'></td>
-</tr>-->
 <tr align='center' valign='middle'>
   <td width='10%'><font size='2'><b>Team&nbsp;Num.</b></font></td>
   <td width='28%'><font size='2'><b>Team&nbsp;Name</b></font></td>
-<!--  <td><font size='2'><b><br>Organization</b></font></td> -->
   <td width='5%'><font size='2'><b>Div.</b></font></td>
   <td width='5%'><font size='2'><b>Run</b></font></td>
   <td width='8%'><font size='2'><b>Score</b></font></td>
@@ -72,17 +67,6 @@ while(rs.next()) {
               %>
 	      </font>
 	    </td>
-<!--	    <td>
-	      <font size='3'>
-	      <%
-              String organization = rs.getString("Organization");
-              if(null != organization && organization.length() > 35) {
-                organization = organization.substring(0, 35);
-              }
-              out.println(organization + "&nbsp;");
-              %>
-	      </font>
-	    </td> -->
 	    <td width='5%' align='right'>
 	      <font size='3'>
 	      <%=rs.getString("Division")%>

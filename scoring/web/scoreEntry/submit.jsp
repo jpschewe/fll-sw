@@ -1,5 +1,5 @@
-
-  
+<%@ include file="/WEB-INF/jspf/init.jspf" %>
+      
 <%@ page import="fll.Queries" %>
 <%@ page import="fll.web.scoreEntry.Submit" %>
 
@@ -7,7 +7,6 @@
   
 <%@ page import="org.w3c.dom.Document" %>
     
-<%@ include file="../WEB-INF/jspf/init.jspf" %>
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
  
@@ -29,7 +28,7 @@ if(null != lDeleteFlag) {
     
 <html>
   <head>
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Submit Scores)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Submit Scores)</title>
   </head>
 
   <body>

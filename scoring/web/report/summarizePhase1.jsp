@@ -1,5 +1,3 @@
-
-
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.ScoreStandardization" %>
@@ -38,11 +36,11 @@ final ResultSet rs = stmt.executeQuery("SELECT ScoreGroup,Category,COUNT(RawScor
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Summarize Scores)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Summarize Scores)</title>
   </head>
 
   <body>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Summarize Scores)</h1>
+    <h1><x:out select="$challengeDocument//@title"/> (Summarize Scores)</h1>
 
     <p>Below is a list of score groups found and what categories they scored.
     Remember that score group names are created by joining together the ids of

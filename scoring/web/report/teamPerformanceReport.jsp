@@ -1,7 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
 pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection));
 %>
@@ -10,11 +9,11 @@ pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection))
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Team <c:out value="${param.TeamNumber}"/> Performance Scores)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Team <c:out value="${param.TeamNumber}"/> Performance Scores)</title>
   </head>
 
   <body>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Team <c:out value="${param.TeamNumber}"/> Performance Scores)</h1>
+    <h1><x:out select="$challengeDocument//@title"/> (Team <c:out value="${param.TeamNumber}"/> Performance Scores)</h1>
 
     <sql:query var="result" dataSource="${datasource}">
       SELECT RunNumber, ComputedTotal

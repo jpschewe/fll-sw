@@ -3,8 +3,6 @@
   addTeam is set when this page is being used to add a team.
   --%>
   
-
-  
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Utilities" %>
@@ -13,8 +11,6 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Iterator" %>
   
-<%@ page import="org.w3c.dom.Document" %>
-
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.ResultSet" %>
@@ -27,7 +23,6 @@
 <script language='javascript'>
 function init() {  
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
         
 final List tournamentNames = Queries.getTournamentNames(connection);
@@ -89,11 +84,11 @@ function confirmChangeTournament() {
 }
         
 </script>  
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Edit Team)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Edit Team)</title>
   </head>
 
   <bodyonload='init()'>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Edit Team)</h1>
+    <h1><x:out select="$challengeDocument//@title"/> (Edit Team)</h1>
 
     <form action="commitTeam.jsp" method="post" name="editTeam">
     <c:if test="${not empty param.addTeam}">

@@ -6,8 +6,6 @@
   
 <%@ page import="java.io.File" %>
 
-<%@ page import="org.w3c.dom.Document" %>
-
 <%@ page import="java.sql.Connection" %>
   
 <html>

@@ -1,13 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.xml.GenerateDB" %>
-  
-<%@ page import="org.w3c.dom.Document" %>
-  
-<%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-%>
-
+      
 <c:if test="${not empty param.changeDatabase || not empty param.resetDatabase}">
   <c:if test="${not empty param.changeDatabase}" var="test">
     <c:set var="database" value="${param.changeDatabase}" scope="application" />
@@ -29,11 +23,11 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Developer Commands)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Developer Commands)</title>
   </head>
 
   <body>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Developer Commands)</h1>
+    <h1><x:out select="$challengeDocument//@title"/> (Developer Commands)</h1>
 
     <p><font color='red'><b>This page is indended for developers only.  If you
     don't know what you're doing, LEAVE THIS PAGE!</b></font></p>

@@ -1,5 +1,3 @@
-
-
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ taglib uri="/WEB-INF/tld/taglib62.tld" prefix="up" %>
@@ -9,23 +7,20 @@
 
 <%@ page import="java.io.File" %>
 
-<%@ page import="org.w3c.dom.Document" %>
-  
 <%@ page import="java.sql.Connection" %>
   
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
 %>
   
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Upload Teams)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Upload Teams)</title>
   </head>
 
   <body>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Upload Teams)</h1>
+    <h1><x:out select="$challengeDocument//@title"/> (Upload Teams)</h1>
       <up:parse id="numFiles">
 <% final File file = File.createTempFile("fll", null); %>
         <up:saveFile path="<%=file.getAbsolutePath()%>"/>

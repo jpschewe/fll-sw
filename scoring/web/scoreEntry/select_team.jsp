@@ -12,7 +12,6 @@
 <%@ page import="java.sql.Connection" %>
   
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final String lEditFlag = request.getParameter("EditFlag");
 
 final Connection connection = (Connection)application.getAttribute("connection");
@@ -32,7 +31,7 @@ Utilities.closeStatement(stmt);
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-  <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Select Team)</title>
+  <title><x:out select="$challengeDocument//@title"/> (Select Team)</title>
 
   <!--<style type='text/css'>
    SELECT {line-height: 150%; font-size: 10pt; font-weight: bold; background-color: black }
@@ -70,7 +69,7 @@ function editFlagBoxClicked() {
           <table border="0" cellpadding="5" cellspacing="0" width="90%">
             <tr>
               <td valign="middle" align="center">
-                <font face="Arial" size="4"><%=challengeDocument.getDocumentElement().getAttribute("title")%></font>
+                <font face="Arial" size="4"><x:out select="$challengeDocument//@title"/></font>
               </td>
             </tr>
             <tr align="center">

@@ -1,5 +1,3 @@
-
-
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="org.w3c.dom.Document" %>
@@ -68,7 +66,7 @@ if(null == runNumberStr) {
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Playoff Brackets) Division: <%=divisionStr%> Run Number: <%=runNumber%></title>
+    <title><x:out select="$challengeDocument//@title"/> (Playoff Brackets) Division: <%=divisionStr%> Run Number: <%=runNumber%></title>
   </head>
   <style type='text/css'>
       TD.Leaf {color:#ffffff;font-family:Arial;background-color:#000000}
@@ -120,7 +118,7 @@ function start() {
   <body onload='start()'>
 <br><br><br><br><br><br><br><br><br><br><br><br><br>
 
-    <h2><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Playoff Brackets Division: <%=divisionStr%> Run Number: <%=runNumber%>)</h2>
+    <h2><x:out select="$challengeDocument//@title"/> (Playoff Brackets Division: <%=divisionStr%> Run Number: <%=runNumber%>)</h2>
       <form action='brackets.jsp' method='get'>
         <input type='hidden' name='runNumber' value='<%=runNumber%>'>
         <input type='hidden' name='division' value='<%=divisionStr%>'>

@@ -1,21 +1,12 @@
-
-  
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
-
-  
-<%@ page import="org.w3c.dom.Document" %>
-
-<%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-%>
   
 <HTML>
   <HEAD>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Scoreboard)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Scoreboard)</title>
   </HEAD>
   <body>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Scoreboard)</h1>
+    <h1><x:out select="$challengeDocument//@title"/> (Scoreboard)</h1>
     <ul>
       <li><a href='<c:url value="main.jsp" />'>Primary Scoreboard (1024x768)</a> (requires Internet Explorer)</li>
       <li><a href='<c:url value="/scoreboard_800/main.jsp" />'>Primary Scoreboard

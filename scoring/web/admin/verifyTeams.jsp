@@ -1,15 +1,10 @@
-
-  
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
   
 <%@ page import="fll.web.admin.UploadTeams" %>
 
-<%@ page import="org.w3c.dom.Document" %>
-  
 <%@ page import="java.sql.Connection" %>
 
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
 
 if(null == session.getAttribute("columnSelectOptions")) {
@@ -20,11 +15,11 @@ if(null == session.getAttribute("columnSelectOptions")) {
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Verify Teams)</title>
+    <title><x:out select="$challengeDocument//@title"/> (Verify Teams)</title>
   </head>
 
   <body>
-    <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Verify Teams)</h1>
+    <h1><x:out select="$challengeDocument//@title"/> (Verify Teams)</h1>
 
     <% if(UploadTeams.verifyTeams(connection, request, response, session, out)) { %>
     <p>Apparently everything uploaded ok.  You probably want to go back to the
