@@ -136,7 +136,7 @@ for(int index=0; currentIter.hasNext(); index++) {
 %>
         <tr> <!-- row 1 -->
           <td class='Leaf' width='200'>
-            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamA)%>
+            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamA, teamB)%>
           </td>
             
           <!-- connect teamA and teamB -->
@@ -168,7 +168,7 @@ for(int index=0; currentIter.hasNext(); index++) {
           <!-- skip column for A-B bar -->
           <td class='Leaf' width='200'>
 <%if(currentRound.size() > 2) {%>
-            <%=Playoff.getDisplayString(connection, currentTournament, (runNumber+1), winner)%>
+            <%=Playoff.getDisplayString(connection, currentTournament, (runNumber+1), winner, null)%>
 <%} else {%>
                 &nbsp;
 <%}%>
@@ -204,7 +204,7 @@ for(int index=0; currentIter.hasNext(); index++) {
         
         <tr> <!-- row 5 -->
           <td class='Leaf' width='200'>
-            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamB)%>
+            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamB, teamA)%>
           </td>
           <!-- skip column for A-B bar -->
           <td width='200'>&nbsp;</td>
@@ -269,6 +269,6 @@ for(int index=0; currentIter.hasNext(); index++) {
 }
 %>
       </form>
-      <%@ include file="../WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
     </body>
   </html>

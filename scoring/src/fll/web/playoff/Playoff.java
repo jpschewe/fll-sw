@@ -341,13 +341,16 @@ final public class Playoff {
    * @param currentTournament the current tournament
    * @param runNumber the current run, used to get the score
    * @param team team to get display string for
+   * @param otherTeam team on the other side of the table, used to check for
+   * BYE runs, may be null
    * @throws IllegalArgumentException if teamNumber is invalid
    * @throws SQLException on a database error
    */
   public static String getDisplayString(final Connection connection,
                                         final String currentTournament,
                                         final int runNumber,
-                                        final Team team)
+                                        final Team team,
+                                        final Team otherTeam)
     throws IllegalArgumentException, SQLException {
     if(Team.BYE.equals(team)) {
       return "<font class='TeamName'>BYE</font>";
@@ -367,7 +370,10 @@ final public class Playoff {
         if(isNoShow(connection, currentTournament, team, runNumber)) {
           sb.append("No Show");
         } else {
-          sb.append(getPerformanceScore(connection, currentTournament, team, runNumber));
+          if(!Team.BYE.equals(otherTeam)) {
+            //only display score if it's not a bye
+            sb.append(getPerformanceScore(connection, currentTournament, team, runNumber));
+          }
         }
         sb.append("</font>");
       }
