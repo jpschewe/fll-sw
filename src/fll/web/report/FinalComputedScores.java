@@ -71,6 +71,10 @@ final public class FinalComputedScores {
                                     final Connection connection,
                                     final JspWriter out) throws SQLException, IOException {
 
+    out.println("<h1>FLL Final Scores for " + tournament + "</h1>");
+
+    out.println("<hr>");
+    
     Statement stmt = null;
     Statement teamsStmt = null;
     ResultSet rawScoreRS = null;
