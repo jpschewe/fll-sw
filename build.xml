@@ -379,7 +379,9 @@
   <!-- stuff for subjective scoring app -->
   <mkdir dir="${tmp.home}/subjective" />
   <jar destfile="${tmp.home}/subjective/subjective.jar"
-       basedir="${build.home}/WEB-INF/classes" />
+       basedir="${build.home}/WEB-INF/classes"
+       index="true"
+       />
   <copy todir="${tmp.home}/subjective">
     <fileset dir="${lib.home}" />
   </copy>
@@ -535,7 +537,7 @@
     </checkstyle>
   </target>
 
-  <target name="checkstyle.nightly"
+  <target name="checkstyle.full"
           description="Check for code convention violations (more aggressive)"
           >
     <mkdir dir="${build.home}/classes" />
