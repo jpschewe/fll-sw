@@ -174,6 +174,33 @@ public class Queries {
   }
 
   /**
+   * Figure out the highest run number a team has completed.  This should be
+   * the same as next run number -1, but sometimes we get non-consecutive runs
+   * in and this just finds the max run number.
+   */
+  public static int getMaxRunNumber(final Connection connection,
+                                    final int teamNumber) throws SQLException {
+    final String currentTournament = getCurrentTournament(connection);
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+
+      rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = \"" + currentTournament + "\" AND TeamNumber = " + teamNumber);
+      final int runNumber;
+      if(rs.next()) {
+        runNumber = rs.getInt(1);
+      } else {
+        runNumber = 0;
+      }
+      return runNumber;
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closeStatement(stmt);
+    }
+  }
+  
+  /**
    * Insert a performance score into the database.  All of the values are
    * expected to be in request.
    *
