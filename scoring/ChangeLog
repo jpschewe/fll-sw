@@ -1,3 +1,8 @@
+2003-11-08  Jon Schewe  <jpschewe@mtu.net>
+
+	* build.xml: Changed slashes in subjective.bat to work with win9x
+	as well as NT.
+
 2003-10-27  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/Queries.java (updateScoreTotals): Handle rows with all

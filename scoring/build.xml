@@ -400,7 +400,7 @@
   </pathconvert>
 
 
-<echo file="${tmp.home}/subjective/subjective.bat">%JAVA_HOME%/bin/java -classpath "${subjective.windows.classpath}" fll.gui.SubjectiveFrame</echo>
+<echo file="${tmp.home}/subjective/subjective.bat">%JAVA_HOME%\bin\java -classpath "${subjective.windows.classpath}" fll.gui.SubjectiveFrame</echo>
 
 <echo file="${tmp.home}/subjective/subjective.sh">java -classpath "${subjective.unix.classpath}" fll.gui.SubjectiveFrame</echo>
 
