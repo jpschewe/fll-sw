@@ -1,3 +1,8 @@
+2003-11-29  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/playoff/index.jsp: Updated to handle the situation where
+	this page is visited and no teams are in the database.
+
 2003-11-22  Jon Schewe  <jpschewe@mtu.net>
 
 	* web/display.jsp: Fixed big screen display to only refresh the
