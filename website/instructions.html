@@ -1,20 +1,23 @@
 <html>
   <head>
-    <title>FLL (Instructions)</title>
-    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
+    <title>FLL 2004 Challenge: No Limits (Instructions)</title>
+    <link rel="stylesheet" type="text/css" href="/fll-sw/style/style.jsp" />
   </head>
 
   <body>
-      <p>Here's the instructions from the software.  The links will be
+    <h1>FLL 2004 Challenge: No Limits (Instructions)</h1>
+
+      <p>Here's the instructions from the software. The links will be
       broken, but you can get an idea of how a tournament is run.</p>
-        
+
+      
       <h2><a name='setup'>Setup of tournament</a></h2>
 
       <p>Links in this section are also found on the <a href="admin/index.jsp">administration page</a></p>
       
       <ol>
         
-        <li>Go to the <a
+        <li><b>Not required for Minnesota.</b>Go to the <a
         href="admin/index.jsp">administration page</a> and upload the team
         datafile.  This takes in a tab delimited file and uses that
         information to determine what teams will exist in the database.
@@ -26,7 +29,7 @@
         <li>If the team data doesn't look quite right you can <a
         href="admin/select_team.jsp">edit it</a></li>
           
-        <li>If you're going to run more than one tournament, <a href="admin/tournaments.jsp">edit the tournament list</a>.  Otherwise
+        <li><b>Not required for Minnesota.</b>If you're going to run more than one tournament, <a href="admin/tournaments.jsp">edit the tournament list</a>.  Otherwise
         teams will just be in the DUMMY tournament</a></li>
 
         <li>Set the current tournament on the <a href="admin/index.jsp">administration page</a></li>
@@ -45,8 +48,12 @@
         <li>On the display computer bring up the <a href='display.jsp'>Big
         Screen Display</a> page.  This will display the welcome page, the
         scoreboard and the playoff brackets as needed.  This page is
-        controlled by the <a href='admin/remoteControl.jsp'>Remote
-        Control Page</a> found under administration.</li>
+        controlled by the <a href='admin/remoteControl.jsp'>Remote Control
+        Page</a> found under administration. <b>Important note</b>: Do not
+        close the background window that launched the fullscreen window.
+        This background window actually controls the fullscreen window.
+        Note that when the scorboard comes up the All Teams column will be
+        blank until any scores are entered.</li>
 
         <li>Enter scores for the performance rounds on the <a
         href="scoreEntry/select_team.jsp">score entry</a> page.  I suggest
@@ -108,9 +115,29 @@
         then you'll have to do the tiebreakers by hand, below is the
         tiebreaker order:
           <ol>
-            <x:forEach select="$challengeDocument/fll/Performance/tiebreaker/test">
-              <li><x:out select="./@goal" /> - <x:out select="./@winner"/> score wins</li>
-            </x:forEach>
+            
+              <li>ball_center - high score wins</li>
+            
+              <li>play_ball - high score wins</li>
+            
+              <li>bonus - high score wins</li>
+            
+              <li>serve_dinner - high score wins</li>
+            
+              <li>feed_pets - high score wins</li>
+            
+              <li>read_sign - high score wins</li>
+            
+              <li>climb_stairs - high score wins</li>
+            
+              <li>open_gate - high score wins</li>
+            
+              <li>push_chairs - high score wins</li>
+            
+              <li>remove_glasses - high score wins</li>
+            
+              <li>cd - high score wins</li>
+            
           </ol>
         </li>
         
@@ -146,6 +173,17 @@
       be something descriptive like "Not enough teams to compute standardized
       score" followed by a bunch of filenames and line numbers.</p>
       
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+<hr />
+
+
+    
+<table>
+  <tr>
+    <td><a href="/fll-sw/index.jsp" target='_top'>Main Index</a></td>
+    <td><a href="/fll-sw/admin/index.jsp" target='_top'>Admin Index</a></td>
+  </tr>
+  <tr><td>Software version: 2.5</td></tr>
+</table>
+
   </body>
 </html>
