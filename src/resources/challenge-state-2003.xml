@@ -186,9 +186,9 @@
                       >
     <goal name="Language"
           title="Language used">
-      <value title="RIS"/>
-      <value title="RoboLab"/>
-      <value title="Unknown"/>
+      <value title="RIS" value="ris" />
+      <value title="RoboLab" value="robolab" />
+      <value title="Unknown" value="unknown" />
     </goal>
     <goal name="UseOfLanguage"
           title="Use of Language"

@@ -79,7 +79,7 @@ final public class Judges {
       state = "edit";
     }
       
-    out.println("<form action='judges.jsp' method='GET' name='judges'>");
+    out.println("<form action='judges.jsp' method='POST' name='judges'>");
     out.println("<input type='hidden' name='state' value='edit'>");
     out.println("<input type='hidden' name='numRows'>");
 

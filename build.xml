@@ -249,7 +249,6 @@
        deprecation="${compile.deprecation}"
           optimize="${compile.optimize}">
   <classpath refid="compile.classpath"/>
-  
   </javac>
   
   <!-- Copy associated resource files -->
