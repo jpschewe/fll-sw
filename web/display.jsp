@@ -16,14 +16,21 @@
       <c:if test="${empty sessionDisplayPage}">
         <c:set var="sessionDisplayPage" value="none" scope="session"/>
       </c:if>
-          
-      <c:if test="${displayPage != sessionDisplayPage}">
+      <c:if test="${empty sessionDisplayURL}">
+        <c:set var="sessionDisplayURL" value="none" scope="session" />
+      </c:if>
+        
+      <c:if test='${displayPage != sessionDisplayPage || (displayPage == "special" && displayURL != sessionDisplayURL)}'>
         <c:choose>
           <c:when test='${displayPage == "scoreboard"}'>
             newWindow = window.open('<c:url value="/scoreboard/main.jsp"/>', 'displayWindow', str);
           </c:when>
           <c:when test='${displayPage == "playoffs"}'>
             newWindow = window.open('<c:url value="/playoff/remoteMain.jsp"/>', 'displayWindow', str);
+          </c:when>
+          <c:when test='${displayPage == "special"}'>
+            newWindow = window.open('<c:url value="${displayURL}"/>', 'displayWindow', str);
+            <c:set var="sessionDisplayURL" value="${displayURL}" scope="session" />
           </c:when>
           <c:otherwise>
             newWindow = window.open('<c:url value="/welcome.jsp"/>', 'displayWindow', str);

@@ -1,3 +1,9 @@
+2004-01-10  Jon Schewe  <jpschewe@mtu.net>
+
+	* web/display.jsp: Added ability to specify any URL relative to
+	/fll-sw, for display on the main display.  This will allow us to
+	display Fred's schedules and whatever else he comes up with.
+
 2004-01-04  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/web/playoff/Playoff.java (displayPrintableBrackets):
