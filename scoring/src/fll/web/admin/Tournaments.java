@@ -280,7 +280,6 @@ final public class Tournaments {
     }
 
     //reinitialize the TournamentTeams table
-    Queries.initializeTournamentTeams(connection);
     Queries.populateTournamentTeams(application);
     
     //finally redirect to index.jsp

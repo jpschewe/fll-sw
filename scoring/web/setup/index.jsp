@@ -1,4 +1,4 @@
-<%@ page errorPage="../errorHandler.jsp" %>
+
   
 <%@ taglib uri="/WEB-INF/tld/taglib62.tld" prefix="up" %>
 

@@ -1,4 +1,4 @@
-<%@ page errorPage="../errorHandler.jsp" %>
+
 <%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="fll.Utilities" %>
@@ -84,7 +84,7 @@ while(rs.next()) {
 	    </td>
 	    <td width='5%' align='right'>
 	      <font size='3'>
-	      <%=rs.getInt("Division")%>
+	      <%=rs.getString("Division")%>
 	      </font>
 	    </td>
 	    <td width='5%' align='right'>

@@ -1,4 +1,4 @@
-<%@ page errorPage="../errorHandler.jsp" %>
+
   
 <%@ page import="fll.Queries" %>
 <%@ page import="fll.web.scoreEntry.Submit" %>

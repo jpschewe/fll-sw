@@ -1,5 +1,8 @@
-<%@ page errorPage="../errorHandler.jsp" %>
-
+<%--
+  This page is used for commiting actions of editTeam.jsp.  The request parameter
+  addTeam is set when this page is being used to add a team.
+  --%>
+  
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
   
 <%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
@@ -10,10 +13,6 @@
 <%@ page import="org.w3c.dom.Document" %>
 
 <%@ page import="java.sql.Connection" %>
-<%@ page import="java.sql.PreparedStatement" %>
-<%@ page import="java.sql.ResultSet" %>
-<%@ page import="java.sql.Statement" %>
-<%@ page import="java.sql.Types" %>
 
 <%@ page import="java.text.NumberFormat" %>
   
@@ -29,17 +28,11 @@ final Connection connection = (Connection)application.getAttribute("connection")
 
   <body background='<c:url value="/images/bricks1.gif"/>' bgcolor='#ffffff' topmargin='4'>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Commit Team)</h1>
-
+                  
 <%
 //parse the numbers first so that we don't get a partial commit
 final int teamNumber = NumberFormat.getInstance().parse(request.getParameter("teamNumber")).intValue();
-final String divisionStr = request.getParameter("division");
-final int division;
-if(null != divisionStr && !"".equals(divisionStr)) {
-  division = NumberFormat.getInstance().parse(divisionStr).intValue();
-} else {
-  division = -1;
-}
+final String division = request.getParameter("division");
 final String numBoysStr = request.getParameter("numBoys");
 final int numBoys;
 if(null != numBoysStr && !"".equals(numBoysStr) && !"null".equals(numBoysStr)) {
@@ -61,107 +54,87 @@ if(null != numMedalsStr && !"".equals(numMedalsStr) && !"null".equals(numMedalsS
 } else {
   numMedals = -1;
 }
+%>
 
-if("1".equals(request.getParameter("deleteTeam"))) { //check for the delete flag
-  //check for reallyDelete
-  if("1".equals(request.getParameter("reallyDelete"))) {
-    //delete
-    Queries.deleteTeam(teamNumber, challengeDocument, connection, application);
-%>
+<%-- check which button was pushed --%> 
+<c:choose>
+  <c:when test='${not empty param.delete}'>
+    <%Queries.deleteTeam(teamNumber, challengeDocument, connection, application);%>
     <a href="select_team.jsp">Normally you'd be redirected here</a>
-    <% response.sendRedirect(response.encodeRedirectURL("select_team.jsp")); %>
-<%
-  } else {
-    //create hidden form
-%>
-  <form action='commitTeam.jsp' method='post'>
-  <p>Are you sure you want to delete team <%=teamNumber%>?  Any data associated with that team will be removed from the database, including any scores that have been entered.  You also need to download the files for subjective score entry again.  It is not advisable to do this while a tournament is running.</p>
-  <input type='hidden' name='teamNumber' value='<%=teamNumber%>'>
-  <input type='hidden' name='division' value='<%=division%>'>
-  <input type='hidden' name='numBoys' value='<%=numBoys%>'>
-  <input type='hidden' name='numGirls' value='<%=numGirls%>'>
-  <input type='hidden' name='numMedals' value='<%=numMedals%>'>
-  <input type='hidden' name='teamName' value='<%=request.getParameter("teamName")%>'>
-  <input type='hidden' name='organization' value='<%=request.getParameter("organization")%>'>
-  <input type='hidden' name='coach' value='<%=request.getParameter("coach")%>'>
-  <input type='hidden' name='email' value='<%=request.getParameter("email")%>'>
-  <input type='hidden' name='phone' value='<%=request.getParameter("phone")%>'>
-  <input type='hidden' name='city' value='<%=request.getParameter("city")%>'>
-  <input type='hidden' name='entryTournament' value='<%=request.getParameter("entryTournament")%>'>
-  <input type='hidden' name='currentTournament' value='<%=request.getParameter("currentTournament")%>'>
-  <input type='hidden' name='reallyDelete' value='1'>
-  <input type='hidden' name='deleteTeam' value='1'>
-  <input type='submit' value='Delete'>
-  </form>
-<%
-  }
-} else {
-  final PreparedStatement prep;
-  //check for addTeam flag
-  if("1".equals(request.getParameter("addTeam"))) {
-    //need to check for duplicate teamNumber
-    final Statement stmt = connection.createStatement();
-    final ResultSet rs = stmt.executeQuery("Select TeamName FROM Teams Where TeamNumber = " + teamNumber);
-    if(rs.next()) {
-      prep = null;
-%>
-      <p>Error, team number <%=teamNumber%> is already assigned to <%=rs.getString(1)%>.
-      <a href="index.jsp">Return to the admin menu.</a></p>
-<%
+    <c:redirect url='select_team.jsp' />
+  </c:when> <%-- end delete --%>
+  <c:when test='${not empty param.advance}'>
+    <%
+    final boolean result = Queries.advanceTeam(connection, teamNumber);
+    if(result) {
+    %>
+      <a href="select_team.jsp">Normally you'd be redirected here</a>
+      <c:redirect url='select_team.jsp' />
+    <%
     } else {
-      prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Coach, Email, Phone, City, EntryTournament, Division, NumBoys, NumGirls, NumMedals, HowFoundOut, CurrentTournament, TeamNumber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    %>
+        <font color='red'>Error advancing team</font>
+    <%
     }
-  } else {
-    prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Coach = ?, Email = ?, Phone = ?, City = ?, EntryTournament = ?, Division = ?, NumBoys = ?, NumGirls = ?, NumMedals = ?, HowFoundOut = ?, CurrentTournament = ? WHERE TeamNumber = ?");
-  }
-      
-  prep.setString(1, request.getParameter("teamName"));
-  prep.setString(2, request.getParameter("organization"));
-  prep.setString(3, request.getParameter("coach"));
-  prep.setString(4, request.getParameter("email"));
-  prep.setString(5, request.getParameter("phone"));
-  prep.setString(6, request.getParameter("city"));
-  prep.setString(7, request.getParameter("entryTournament"));
-  if(-1 == division) {
-    prep.setNull(8, Types.INTEGER);
-  } else {
-    prep.setInt(8, division);
-  }
-  if(-1 == numBoys) {
-    prep.setNull(9, Types.INTEGER);
-  } else {
-    prep.setInt(9, numBoys);
-  }
-  if(-1 == numGirls) {
-    prep.setNull(10, Types.INTEGER);
-  } else {
-    prep.setInt(10, numGirls);
-  }
-  if(-1 == numMedals) {
-    prep.setNull(11, Types.INTEGER);
-  } else {
-    prep.setInt(11, numMedals);
-  }
-  prep.setString(12, request.getParameter("howFoundOut"));
-  prep.setString(13, request.getParameter("currentTournament"));
-  prep.setInt(14, teamNumber);
-  prep.executeUpdate();
-  Utilities.closePreparedStatement(prep);
-
-  Queries.initializeTournamentTeams(connection);
-  Queries.populateTournamentTeams(application);
-%>
-
-<%if("1".equals(request.getParameter("addTeam"))) {%>
-    application.removeAttribute("tournamentTeams");
-    <a href="index.jsp">Normally you'd be redirected here</a>
-    <% response.sendRedirect(response.encodeRedirectURL("index.jsp")); %>
-<%} else {%>
+    %>
+  </c:when> <%-- end advance --%>
+  <c:when test='${not empty param.demote}'>
+    <%Queries.demoteTeam(connection, challengeDocument, teamNumber);%>
     <a href="select_team.jsp">Normally you'd be redirected here</a>
-    <% response.sendRedirect(response.encodeRedirectURL("select_team.jsp")); %>
-<%}%>
-<%}%>
+    <c:redirect url='select_team.jsp' />
+  </c:when>
+  <c:when test='${not empty param.commit}'>
+    <c:if test="${not empty param.addTeam}" var="addingTeam">
+                added a team
+<%
+      String dup = Queries.addTeam(connection,
+                                   teamNumber,
+                                   request.getParameter("teamName"),
+                                   request.getParameter("organization"),
+                                   request.getParameter("region"),
+                                   division,
+                                   numMedals);
+      Queries.populateTournamentTeams(application);
+%>
+      <c:if test="${null != dup}">
+        <c:redirect url='index.jsp'>
+          <c:param name='message'>
+            <font color='red'>Error, team number <%=teamNumber%> is already assigned to <%=dup%>.</font>
+          </c:param>
+        </c:redirect>
+      </c:if>
+
+      <c:remove var="tournamentTeams" />
+      <a href="index.jsp">Normally you'd be redirected here</a>
+      <c:redirect url='index.jsp' />
+    </c:if>
+    <c:if test="${not addingTeam}">
+<%
+      Queries.updateTeam(connection,
+                         teamNumber,
+                         request.getParameter("teamName"),
+                         request.getParameter("organization"),
+                         request.getParameter("region"),
+                         division,
+                         numMedals);
+      Queries.populateTournamentTeams(application);
+%>
+      <c:if test="${not empty param.currentTournament}">
+<%
+        Queries.changeTeamCurrentTournament(connection, challengeDocument, teamNumber, request.getParameter("currentTournament"));
+%>
+      </c:if>
+                      
+      <a href="select_team.jsp">Normally you'd be redirected here</a>
+      <c:redirect url='select_team.jsp' />
+    </c:if>
+                    
+  </c:when> <%-- end commit --%>
+  <c:otherwise>
+    <p>Internal error, cannot not figure out what editTeam.jsp did!</p>
+  </c:otherwise>
+</c:choose> <%-- end checking which button --%>
       
-<%@ include file="../WEB-INF/jspf/footer.jspf" %>    
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>    
   </body>
 </html>

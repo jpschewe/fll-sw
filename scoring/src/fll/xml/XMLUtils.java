@@ -89,9 +89,9 @@ public class XMLUtils {
       final Element teamElement = document.createElement("team");
       teamElement.setAttribute("teamName", team.getTeamName());
       teamElement.setAttribute("teamNumber", String.valueOf(team.getTeamNumber()));
-      teamElement.setAttribute("division", String.valueOf(team.getDivision()));
+      teamElement.setAttribute("division", team.getDivision());
       teamElement.setAttribute("organization", team.getOrganization());
-      teamElement.setAttribute("entryTournament", team.getEntryTournament());
+      teamElement.setAttribute("region", team.getRegion());
       top.appendChild(teamElement);
     }
 
@@ -144,15 +144,14 @@ public class XMLUtils {
           final Iterator teamIter = teams.iterator();
           while(teamIter.hasNext()) {
             final Team team = (Team)teamIter.next();
-            //HACK when we make divisions be strings this will go away
-            final String teamDiv = String.valueOf(team.getDivision());
+            final String teamDiv = team.getDivision();
             if("All".equals(division) || division.equals(teamDiv)) {
               final Element scoreElement = document.createElement("score");
               categoryElement.appendChild(scoreElement);
             
               scoreElement.setAttribute("teamName", team.getTeamName());
               scoreElement.setAttribute("teamNumber", String.valueOf(team.getTeamNumber()));
-              scoreElement.setAttribute("division", String.valueOf(team.getDivision()));
+              scoreElement.setAttribute("division", team.getDivision());
               scoreElement.setAttribute("organization", team.getOrganization());
               scoreElement.setAttribute("judge", judge);
             

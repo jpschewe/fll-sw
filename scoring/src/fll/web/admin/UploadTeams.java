@@ -48,7 +48,7 @@ final public class UploadTeams {
   public static void main(final String[] args) {
     try {
       final File file = new File("/home/jpschewe/projects/fll/code/2002/results/teams-20021023.csv");
-      final Connection connection = Utilities.createDBConnection("disk", "fll", "fll");
+      final Connection connection = Utilities.createDBConnection("netserver", "fll", "fll");
       parseFile(file, connection, new DebugHttpSession());
 //       final String line = "team #	State	Tournament	Div #	School/Organization	Team Name	Girls	Boys	Minority	Num Medals	Paid	Coach	E-mail	Phone #";
 //       System.out.println(splitLine(line));
@@ -349,7 +349,11 @@ final public class UploadTeams {
       stmt.executeUpdate("DELETE FROM Teams");
       final String copySQL = "INSERT INTO Teams (" + dbColumns.toString() + ") SELECT " + dataColumns.toString() + " FROM FilteredTeams";
       final int numRowsInserted = stmt.executeUpdate(copySQL);
-      
+
+      //put all teams in the DUMMY tournament by default
+      stmt.executeUpdate("DELETE FROM TournamentTeams");
+      stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber) SELECT 'DUMMY', " + teamNumberColumn + " FROM FilteredTeams");
+
       if(numRowsInserted != numRowsInFiltered) {
         //Error
         out.println("<font color='red'>Error, row counts do not match.<br>");
@@ -361,9 +365,6 @@ final public class UploadTeams {
         return false;
       }
 
-      //make sure that CurrentTournament = EntryTournament
-      stmt.executeUpdate("UPDATE Teams SET CurrentTournament = EntryTournament");
-      
       return true;
     } finally {
       Utilities.closeStatement(stmt);

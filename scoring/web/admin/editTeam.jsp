@@ -1,5 +1,8 @@
-<%@ page errorPage="../errorHandler.jsp" %>
-
+<%--
+  This page is used for editing and adding teams.  The request parameter
+  addTeam is set when this page is being used to add a team.
+  --%>
+  
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
   
 <%@ include file="/WEB-INF/jspf/initializeApplicationVars.jspf" %>
@@ -25,54 +28,65 @@ function init() {
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
+        
 final List tournamentNames = Queries.getTournamentNames(connection);
 
-  
-final String addTeam = request.getParameter("addTeam");
-final String currentTournament;
-final String entryTournament;
-final String howFoundOut;
-final int teamNumber;
-if(!"1".equals(addTeam)) {
+int teamNumber = -1;
+String currentTournament = null;
+String prevTournament = null;
+String nextTournament = null;
+%>
+<c:if test="${empty param.addTeam}">
+<%
   teamNumber = NumberFormat.getInstance().parse(request.getParameter("teamNumber")).intValue();
+        
+  currentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
+  prevTournament = Queries.getTeamPrevTournament(connection, teamNumber, currentTournament);
+  nextTournament = Queries.getNextTournament(connection, currentTournament);
+          
   final Statement stmt = connection.createStatement();
-  final ResultSet rs = stmt.executeQuery("SELECT TeamNumber,TeamName,Organization,Coach,Email,Phone,City,EntryTournament,Division,NumBoys,NumGirls,NumMedals,HowFoundOut,CurrentTournament FROM Teams WHERE TeamNumber = " + teamNumber);
+  final ResultSet rs = stmt.executeQuery("SELECT TeamNumber,TeamName,Organization,Region,Division,NumMedals FROM Teams WHERE TeamNumber = " + teamNumber);
   rs.next();
   final String teamName = rs.getString(2);
   final String organization = rs.getString(3);
-  final String coach = rs.getString(4);
-  final String email = rs.getString(5);
-  final String phone = rs.getString(6);
-  final String city = rs.getString(7);
-  entryTournament = rs.getString(8);
-  final String division = rs.getString(9);
-  final String numBoys = rs.getString(10);
-  final String numGirls = rs.getString(11);
-  final String numMedals = rs.getString(12);
-  howFoundOut = rs.getString(13);
-  currentTournament = rs.getString(14);
+  final String region = rs.getString(4);
+  final String division = rs.getString(5);
+  final String numMedals = rs.getString(6);
   Utilities.closeResultSet(rs);
   Utilities.closeStatement(stmt);
 %>
-  document.editTeam.teamName.value = "<%=teamName%>";
-  document.editTeam.organization.value = "<%=organization%>";
-  document.editTeam.coach.value = "<%=coach%>";
-  document.editTeam.email.value = "<%=email%>";
-  document.editTeam.phone.value = "<%=phone%>";
-  document.editTeam.city.value = "<%=city%>";
-  document.editTeam.division.value = "<%=division%>";
-  document.editTeam.numBoys.value = "<%=numBoys%>";
-  document.editTeam.numGirls.value = "<%=numGirls%>";
-  document.editTeam.numMedals.value = "<%=numMedals%>";
-<%
-} else {
-  teamNumber = -1;
-  currentTournament = "";
-  entryTournament = "";
-  howFoundOut = "";
+  document.editTeam.teamName.value = "<%= teamName %>";
+  document.editTeam.organization.value = "<%= organization == null ? "" : organization %>";
+  document.editTeam.region.value = "<%= region == null ? "" : region %>";
+  document.editTeam.division.value = "<%= division == null ? "" : division %>";
+  document.editTeam.numMedals.value = "<%= numMedals == null ? "" : numMedals %>";
+</c:if>
+} //end init
+
+//confirm deleting a team
+function confirmDeleteTeam() {
+  return confirm("Are you sure you want to delete team <%=teamNumber%>?  Any data associated with that team will be removed from the database, including any scores that have been entered.  You also need to download the files for subjective score entry again.  It is not advisable to do this while the tournament that the team is in is running.");
 }
-%>
+        
+//confirm demoting a team
+function confirmDemoteTeam() {
+  return confirm("Are you sure you want to demote team <%=teamNumber%>?  Any data associated with that team and for the current tournament (<%=currentTournament%>) will be removed from the database, including any scores that have been entered.  You also need to download the files for subjective score entry again.  It is not advisable to do this while the tournament that the team is in is running.");
 }
+
+//confirm changing the current tournament
+function confirmChangeTournament() {
+  <c:if test="${null == prevTournament}" var="test">
+    if(document.editTeam.currentTournament.value != "<%=currentTournament%>") {
+      return confirm("Are you sure you want to change the tournament for team <%=teamNumber%>?  Any data associated with that team and for the current tournament (<%=currentTournament%>) will be removed from the database, including any scores that have been entered.  You also need to download the files for subjective score entry again.  It is not advisable to do this while the tournament that the team is in is running.");
+    } else {
+      return true;
+    }
+  </c:if>
+  <c:if test="${not test}">
+    return true;
+  </c:if>
+}
+        
 </script>  
     <title><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Edit Team)</title>
   </head>
@@ -80,108 +94,116 @@ if(!"1".equals(addTeam)) {
   <body background='<c:url value="/images/bricks1.gif"/>' bgcolor='#ffffff' topmargin='4' onload='init()'>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Edit Team)</h1>
 
-    <form action="commitTeam.jsp" method="POST" name="editTeam">
-    <input type='hidden' name='addTeam' value='<%=addTeam%>'>
+    <form action="commitTeam.jsp" method="post" name="editTeam">
+    <c:if test="${not empty param.addTeam}">
+      <input type='hidden' name='addTeam' value='<c:out value="${param.addTeam}" />'>
+    </c:if>
+        
     <table border='1'>
+          
       <tr>
         <td>Team Number (required)</td>
-<%if(!"1".equals(addTeam)) {%>
-        <td><input type='hidden' name='teamNumber' value='<%=teamNumber%>'><%=teamNumber%></td>
-<%} else {%>
-        <td><input type='text' name='teamNumber'></td>
-<%}%>
+            
+        <c:choose>
+          <c:when test="${empty param.addTeam}">
+            <td><input type='hidden' name='teamNumber' value='<%=teamNumber%>'><%=teamNumber%></td>
+          </c:when>
+          <c:otherwise>
+            <td><input type='text' name='teamNumber'></td>
+          </c:otherwise>
+        </c:choose>
       </tr>
+          
       <tr>
         <td>Team Name</td>
-        <td><input type='text' name='teamName'></td>
+        <td><input type='text' name='teamName' size='64'></td>
       </tr>
       <tr>
         <td>Organziation</td>
-        <td><input type='text' name='organization'></td>
+        <td><input type='text' name='organization' size='64'></td>
       </tr>
       <tr>
-        <td>Coach</td>
-        <td><input type='text' name='coach'></td>
-      </tr>
-      <tr>
-        <td>Email</td>
-        <td><input type='text' name='email'></td>
-      </tr>
-      <tr>
-        <td>Phone</td>
-        <td><input type='text' name='phone'></td>
-      </tr>
-      <tr>
-        <td>City</td>
-        <td><input type='text' name='city'></td>
-      </tr>
-      <tr>
-        <td>Entry Tournament (required)</td>
-        <td>
-          <select name='entryTournament'>
-          <%
-          Iterator tournamentsIter = tournamentNames.iterator();
-          while(tournamentsIter.hasNext()) {
-            final String tournamentName = (String)tournamentsIter.next();
-            out.print("<option value='" + tournamentName + "'");
-            if(entryTournament.equals(tournamentName)) {
-              out.print(" selected");
-            }
-            out.println(">" + tournamentName + "</option>");
-          }
-          %>
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <td>Current Tournament (required)</td>
-        <td>
-          <select name='currentTournament'>
-          <%
-          tournamentsIter = tournamentNames.iterator();
-          while(tournamentsIter.hasNext()) {
-            final String tournamentName = (String)tournamentsIter.next();
-            out.print("<option value='" + tournamentName + "'");
-            if(currentTournament.equals(tournamentName)) {
-              out.print(" selected");
-            }
-            out.println(">" + tournamentName + "</option>");
-          }
-          %>
-          </select>
-        </td>
+        <td>Region</td>
+        <td><input type='text' name='region'></td>
       </tr>
       <tr>
         <td>Division (required)</td>
         <td><input type='text' name='division'></td>
       </tr>
       <tr>
-        <td>Number of Boys</td>
-        <td><input type='text' name='numBoys'></td>
-      </tr>
-      <tr>
-        <td>Number of Girls</td>
-        <td><input type='text' name='numGirls'></td>
-      </tr>
-      <tr>
         <td>Number of Medals</td>
         <td><input type='text' name='numMedals'></td>
       </tr>
-      <tr>
-        <td>How found out about FLL</td>
-        <td><textarea name='howFoundOut' cols='20' rows='3'><%=howFoundOut%></textarea></td>
-      </tr>
-<%if(!"1".equals(addTeam)) {%>
-      <tr>
-        <td>Delete team</td>
-        <td><input type='checkbox' name='deleteTeam' value='1'></td>
-      </tr>
-<%}%>
+
+      <c:if test="${empty param.addTeam}">
+        <tr>
+          <td>Current Tournament</td>
+
+          <td><!-- FIX something isn't working right here with JSTL and I'm too ticked off to keep trying, so I'm just doing it as a scriplet -->
+          <%
+          if(null == prevTournament) {
+          %>
+            <select name='currentTournament'>
+              <%
+              final Iterator iter = tournamentNames.iterator();
+              while(iter.hasNext()) {
+              final String tournamentName = (String)iter.next();
+              if(tournamentName.equals(currentTournament)) {
+              %>
+                  <option value='<%=tournamentName%>' selected>
+              <%
+              } else {
+              %>
+                  <option value='<%=tournamentName%>'>
+              <%
+              }//end else
+              out.println(tournamentName);
+              %>
+                </option>
+              <%
+              }//end while
+              %>
+            </select>
+          <%
+          } else {
+          %>
+            <%=currentTournament%>
+          <%
+          }
+          %>
+          </td>
+        </tr>
+      </c:if>
+            
     </table>
-    <input type='submit' value='Commit'>
+    <input type='submit' name='commit' value='Commit' onclick='return confirmChangeTournament()'>
+            
+    <c:if test="${empty param.addTeam}">
+    <%
+    if(null != nextTournament) {
+    %>
+      <input type='submit' name='advance' value='Advance Team To Next Tournament'>
+    <%
+    }
+    %>
+    </c:if>
+
+    <%
+    if(null != prevTournament) {
+    %>
+      <input type='submit' name='demote' value='Demote Team To Previous Tournament' onclick='return confirmDemoteTeam()'>
+    <%
+    }
+    %>
+                
+    <c:if test="${empty param.addTeam}">
+      <input type='submit' name='delete' value='Delete Team' onclick='return confirmDeleteTeam()'>
+    </c:if>
+
     </form>
+      
     <form action="index.jsp" method='post'>
-    <input type='submit' value='Cancel'>
+      <input type='submit' value='Cancel'>
     </form>
       
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>    

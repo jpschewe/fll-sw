@@ -1,4 +1,4 @@
-<%@ page errorPage="../errorHandler.jsp" %>
+
 <%@ include file="../WEB-INF/jspf/initializeApplicationVars.jspf" %>
 
 <%@ page import="org.w3c.dom.Document" %>
@@ -11,7 +11,6 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
 final Connection connection = (Connection)application.getAttribute("connection");
   
 if(null != request.getParameter("initializeTournamentTeams")) {
-  Queries.initializeTournamentTeams(connection);
   Queries.ensureTournamentTeamsPopulated(application);
 }
 %>

@@ -1,4 +1,4 @@
-<%@ page errorPage="../errorHandler.jsp" %>
+
   
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
   
@@ -17,7 +17,7 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
 
   <body background='<c:url value="/images/bricks1.gif"/>' bgcolor='#ffffff' topmargin='4'>
     <h1><%=challengeDocument.getDocumentElement().getAttribute("title")%> (Edit Tournaments)</h1>
-      <c:if test="${null != param.unknownTournament}">
+      <c:if test="${not empty param.unknownTournament}">
         <p><font color='red'>You specified an unknown tournament: <c:out value="${param.unknownTournament}"/><br>
                 Would you like to enter it?</font></p>
       </c:if>

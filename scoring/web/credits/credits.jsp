@@ -1,4 +1,4 @@
-<%@ page errorPage="../errorHandler.jsp" %>
+
   
 <html>
   <head>
