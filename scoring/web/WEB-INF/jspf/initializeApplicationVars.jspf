@@ -4,7 +4,9 @@
 <%@ page import="java.sql.Connection" %>
   
 <%@ page import="org.w3c.dom.Document" %>
-  
+
+<%-- initialize some application variables --%>
+
 <%
 { // put this in it's own scope so it can be included multiple times
   if(null == application.getAttribute("database")) {
@@ -15,7 +17,7 @@
     
   //Initialize the connection
   if(null == application.getAttribute("connection")) {
-    final Connection connection = Utilities.createDBConnection(application.getInitParameter("database.host"), "fll", "fll", database);
+    final Connection connection = Utilities.createDBConnection(application.getInitParameter("database_host"), "fll", "fll", database);
     application.setAttribute("connection", connection);
   }
     
@@ -32,3 +34,5 @@
   }
 }
 %>
+
+<!-- TODO working on moving these to session variables --!>

@@ -9,8 +9,6 @@
 
 <project name="My Project" default="compile" basedir=".">
 
-
-
 <!-- ===================== Property Definitions =========================== -->
 
 <!--
@@ -195,19 +193,15 @@
 </path>
 
 
+  <target name="init">
+    <tstamp />
 
-<!-- ==================== All Target ====================================== -->
-
-<!--
-
-  The "all" target is a shortcut for running the "clean" target followed
-  by the "compile" target, to force a complete recompile.
-
--->
-
-<target name="all" depends="clean,compile"
-   description="Clean build and dist, then compile"/>
-
+    <uptodate property="jsp.notRequired"
+              targetfile="${tmp.home}/.tstamp"
+              >
+      <srcfiles dir="${basedir}/${web.home}" includes="**" />
+    </uptodate>
+  </target>
 
 
 <!-- ==================== Clean Target ==================================== -->
@@ -238,7 +232,7 @@
   unpacked directory hierarchy under "/WEB-INF/classes".
 
 -->
-<target name="compile" depends="prepare,compile.classes"
+<target name="compile" depends="prepare,compile.classes,compile.jsp"
    description="Compile Java sources">
 </target>
 
@@ -267,7 +261,9 @@
 
 <!-- not perfect, but will work -->
 <target name="compile.jsp" depends="compile.classes"
-    description="Compile JSP sources">
+    description="Compile JSP sources"
+    unless="jsp.notRequired"
+    >
     
     <mkdir    dir="${tmp.home}" />
 <!--    <jspc srcdir="${web.home}"
@@ -472,7 +468,7 @@
 
 -->
 
-<target name="prepare">
+<target name="prepare" depends="init">
 
   <!-- Create build directory and copy static content -->
   <mkdir  dir="${build.home}"/>

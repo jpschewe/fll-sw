@@ -46,7 +46,7 @@ File xmlfile = null;
     }
     final Document document = ChallengeParser.parse(xmlstream);
     xmlstream.close();
-    GenerateDB.generateDB(document, application.getInitParameter("database.host"), rootUser, rootPassword, "fll");
+    GenerateDB.generateDB(document, application.getInitParameter("database_host"), rootUser, rootPassword, "fll");
   
     if(null != xmlfile) {
       xmlfile.delete();

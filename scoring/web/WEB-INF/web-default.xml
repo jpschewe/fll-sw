@@ -10,7 +10,7 @@
   </description>
 
   <context-param>
-    <param-name>database.host</param-name>
+    <param-name>database_host</param-name>
     <param-value>localhost</param-value>
     <description>
       Machine that the databse is running on.  

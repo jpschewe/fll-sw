@@ -616,7 +616,7 @@ public class Queries {
   }
 
   /**
-   * Get a list of tournament names in the DB.
+   * Get a list of tournament names in the DB ordered by name.
    *
    * @return list of tournament names as strings
    */
@@ -626,7 +626,7 @@ public class Queries {
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Name FROM Tournaments");
+      rs = stmt.executeQuery("SELECT Name FROM Tournaments ORDER BY Name");
       while(rs.next()) {
         final String tournamentName = rs.getString(1);
         retval.add(tournamentName);
@@ -638,6 +638,29 @@ public class Queries {
     return retval;
   }
 
+  /**
+   * Get a list of regions in the DB ordered by region.
+   *
+   * @return list of regions as strings
+   */
+  public static List getRegions(final Connection connection) throws SQLException {
+    final List retval = new LinkedList();
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT DISTINCT Region FROM Teams ORDER BY Region");
+      while(rs.next()) {
+        final String region = rs.getString(1);
+        retval.add(region);
+      }
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closeStatement(stmt);
+    }
+    return retval;
+  }
+  
   /**
    * Delete a team from the database.  This clears team from the Teams table
    * and all tables specified by the challengeDocument.  It is not an error if
