@@ -37,6 +37,10 @@ final public class SubjectiveTableModel extends AbstractTableModel implements So
                               final Element subjectiveElement) {
     _scoreDocument = scoreDocument;
     setSubjectiveElement(subjectiveElement);
+    //by default sort by team number
+    _sortedColumn = 0;
+    _ascending = true;
+    Arrays.sort(_scoreElements, _comparator);
   }
 
   public String getColumnName(final int column) {
