@@ -2,7 +2,7 @@ Read this if you plan to do development or extension of the FLL software.
 
 First, all of the code is currently Copyrighted by INSciTE.
 Please make sure anything you add has the following sort of header:
-  * Copyright (c) 2000-2002 INSciTE.  All rights reserved
+  * Copyright (c) 2000-2004 INSciTE.  All rights reserved
   * INSciTE is on the web at: http://www.hightechkids.org
   * This code is released under GPL; see LICENSE.txt for details.
 
@@ -26,7 +26,7 @@ and test things (newer versions should be fine):
 
   jdk-1.4.x	(http://java.sun.com/)
   ant-1.4.1	(http://jakarta.apache.org/ant/)
-  mysql-4.02+	(http://www.mysql.com/)
+  mysql-4.0.2+	(http://www.mysql.com/)
   tomcat-4.1.x	(http://jakarta.apache.org/tomcat/)
   cygwin-1.3.x  (http://www.cygwin.com)
   jdee          (http://jdee.sunsite.dk)
@@ -140,13 +140,15 @@ attribute to point get to the file, it's at the root of our web project.
   - "currentTournament" (java.lang.String) holds the current tournament name (aka region)
   - "challengeDocument" (org.w3c.dom.Document) the challenge.xml document
     already parsed
-  - "ScorePageText" (java.lang.String) holds the text displayed at the top of various pages
-  - "database" (java.lang.String) the name of the database that we're currently connected to.
-This should be 'fll' unless things are under development.
+  - "ScorePageText" (java.lang.String) holds the text displayed at the top
+  of various pages
+  - "database" (java.lang.String) the name of the database that we're
+  currently connected to.  This should be 'fll' unless things are under
+  development.
   - "playoffDivision" (java.lang.String) keeps track of the division of the
-brackets being displayed when using the remotely controlled brackets
+  brackets being displayed when using the remotely controlled brackets
   - "playoffRunNumber" (java.lang.Number) keeps track of the current run
-number for the remotely controlled brackets
+  number for the remotely controlled brackets
 
 - call fll.Queries.populateTournamentTeams
   - "tournamentTeams" (java.util.Map) holds the current tournament's teams

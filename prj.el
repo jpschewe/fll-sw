@@ -12,7 +12,7 @@
 			   (expand-file-name "lib/JonsInfra-0.2.jar" project-root)
 			   (expand-file-name "lib/junit-3.8.1.jar" project-root)
 			   (expand-file-name "lib/log4j-1.2.8.jar" project-root)
-			   (expand-file-name "lib/mm.mysql-2.0.14-bin.jar" project-root)
+			   (expand-file-name "lib/mysql-connector-java-3.0.8-stable-bin.jar" project-root)
 			   (expand-file-name "lib/common-lib/xercesImpl.jar" project-root)
 			   (expand-file-name "lib/common-lib/xmlParserAPIs.jar" project-root)
 
@@ -34,7 +34,7 @@
    '(jde-run-option-vm-args '("-DASSERT_BEHAVIOR=CONTINUE "))
  '(jde-gen-buffer-boilerplate (quote (
 				      "/*"
-				      " * Copyright (c) 2000-2002 INSciTE.  All rights reserved"
+				      " * Copyright (c) 2000-2003 INSciTE.  All rights reserved"
 				      " * INSciTE is on the web at: http://www.hightechkids.org"
 				      " * This code is released under GPL; see LICENSE.txt for details."
 				      " */"
