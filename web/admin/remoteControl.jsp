@@ -21,7 +21,7 @@ if(null != request.getParameter("runNumber")) {
   application.setAttribute("playoffRunNumber", Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("runNumber")));
 }
   
-if(null == application.getAttribute("playoffDivision")) {
+if(null == application.getAttribute("playoffDivision") && !divisions.isEmpty()) {
   application.setAttribute("playoffDivision", divisions.get(0));
 }
 if(null == application.getAttribute("playoffRunNumber")) {
