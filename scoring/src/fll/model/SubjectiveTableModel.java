@@ -186,7 +186,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
     }
     
     final NodeList posValues = goalDescription.getElementsByTagName("value");
-    if(posValuesList > 0) {
+    if(posValues.getLength() > 0) {
       //enumerated
       boolean found = false;
       for(int v=0; v<posValues.getLength() && !found; v++) {
