@@ -205,22 +205,23 @@ public final class ImportDB {
       }
 
       //check tournaments
-      sql = "SELECT " + destination + ".Teams.TeamNumber, " + destination + ".TournamentTeams.Tournament, " + source + ".TournamentTeams.Tournament"
-        + " FROM " + destination + ".Teams, " + destination + ".TournamentTeams, " + source + ".TournamentTeams"
-        + " WHERE " + destination + ".TournamentTeams.TeamNumber = " + source + ".TournamentTeams.TeamNumber"
-        + " AND " + destination + ".TournamentTeams.Tournament <> " + source + ".TournamentTeams.Tournament"
-        + " AND " + source + ".TournamentTeams.Tournament = '" + tournament + "'"
-        + " AND " + destination + ".Teams.TeamNumber = " + source + ".TournamentTeams.TeamNumber";
+      //FIX this dosn't work with tournament advancement
+//       sql = "SELECT " + destination + ".Teams.TeamNumber, " + destination + ".TournamentTeams.Tournament, " + source + ".TournamentTeams.Tournament"
+//         + " FROM " + destination + ".Teams, " + destination + ".TournamentTeams, " + source + ".TournamentTeams"
+//         + " WHERE " + destination + ".TournamentTeams.TeamNumber = " + source + ".TournamentTeams.TeamNumber"
+//         + " AND " + destination + ".TournamentTeams.Tournament <> " + source + ".TournamentTeams.Tournament"
+//         + " AND " + source + ".TournamentTeams.Tournament = '" + tournament + "'"
+//         + " AND " + destination + ".Teams.TeamNumber = " + source + ".TournamentTeams.TeamNumber";
       
-      rs = stmt.executeQuery(sql);
-      if(rs.next()) {
-        retval = true;
-        System.out.println("There are teams from tournament " + source + " with a different tournament than the destination database (" + destination + ")");
-        do {
-          System.out.println(rs.getInt(1) + ": " + rs.getString(2) + " -> " + rs.getString(3));
-        } while(rs.next());
-        Utilities.closeResultSet(rs);
-      }      
+//       rs = stmt.executeQuery(sql);
+//       if(rs.next()) {
+//         retval = true;
+//         System.out.println("There are teams from tournament " + source + " with a different tournament than the destination database (" + destination + ")");
+//         do {
+//           System.out.println(rs.getInt(1) + ": " + rs.getString(2) + " -> " + rs.getString(3));
+//         } while(rs.next());
+//         Utilities.closeResultSet(rs);
+//       }      
       
     } finally {
       Utilities.closeResultSet(rs);

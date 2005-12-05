@@ -149,11 +149,11 @@ public final class SubjectiveFrame extends JFrame {
       final NodeList goals = subjectiveElement.getElementsByTagName("goal");
       for(int g=0; g<goals.getLength(); g++) {
         final Element goalDescription = (Element)goals.item(g);
-        if(goalDescription.hasChildNodes()) {
+        final NodeList posValuesList = goalDescription.getElementsByTagName("value");
+        if(posValuesList.getLength() > 0) {
           //enumerated
           final Vector posValues = new Vector();
           posValues.add("");
-          final NodeList posValuesList = goalDescription.getElementsByTagName("value");
           for(int v=0; v<posValuesList.getLength(); v++) {
             final Element posValue = (Element)posValuesList.item(v);
             posValues.add(posValue.getAttribute("title"));

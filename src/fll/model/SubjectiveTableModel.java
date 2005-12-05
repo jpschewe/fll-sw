@@ -116,9 +116,9 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
             final String value = element.getAttribute(goalName);
             if(null != value && !"".equals(value)) {
               int score = -1;
-              if(goal.hasChildNodes()) {
+              final NodeList posValuesList = goal.getElementsByTagName("value");
+              if(posValuesList.getLength() > 0) {
                 boolean found = false;
-                final NodeList posValuesList = goal.getElementsByTagName("value");
                 for(int v=0; v<posValuesList.getLength() && !found; v++) {
                   final Element posValue = (Element)posValuesList.item(v);
                   if(posValue.getAttribute("title").equalsIgnoreCase(value)) {
@@ -185,10 +185,10 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
       return;
     }
     
-    if(goalDescription.hasChildNodes()) {
+    final NodeList posValues = goalDescription.getElementsByTagName("value");
+    if(posValuesList > 0) {
       //enumerated
       boolean found = false;
-      final NodeList posValues = goalDescription.getElementsByTagName("value");
       for(int v=0; v<posValues.getLength() && !found; v++) {
         final Element posValue = (Element)posValues.item(v);
         if(posValue.getAttribute("title").equalsIgnoreCase((String)value)) {

@@ -58,7 +58,7 @@ public final class ScoreEntry {
       final String max = element.getAttribute("max");
       
       writer.println("  <!-- " + name + " -->");
-      if(element.hasChildNodes()) {
+      if(element.goalDescription.getElementsByTagName("value").getLength() > 0) {
         //enumerated
         writer.println("  <!-- nothing to check -->");
       } else {
@@ -92,7 +92,8 @@ public final class ScoreEntry {
       writer.println("<!-- " + name + " -->");
       writer.println("var gbl_" + name + ";");
 
-      if(element.hasChildNodes() || ("0".equals(min) && "1".equals(max))) {
+      if(element.goalDescription.getElementsByTagName("value").getLength() > 0
+         || ("0".equals(min) && "1".equals(max))) {
         writer.println("function set" + name + "(newValue) {");
         writer.println("  var temp = gbl_" + name + ";");
         writer.println("  gbl_" + name + " = newValue;");
@@ -138,9 +139,9 @@ public final class ScoreEntry {
       //set the score form element
       writer.println("document.scoreEntry.score_" + name + ".value = score_" + name + ";");
 
-      if(element.hasChildNodes()) {
+      final NodeList posValues = element.getElementsByTagName("value");
+      if(posValues.getLength() > 0) {
         //enumerated
-        final NodeList posValues = element.getElementsByTagName("value");
         for(int v=0; v<posValues.getLength(); v++) {
           final Element value = (Element)posValues.item(v);
         
@@ -221,7 +222,7 @@ public final class ScoreEntry {
         writer.println("    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='3'><b>" + title + ":<b></font>");
         writer.println("  </td>");
         
-        if(element.hasChildNodes()) {
+        if(element.element.getElementsByTagName("value").getLength() > 0) {
           //enumerated
           writer.println("  <td colspan='2'>");
           generateEnumeratedGoalButtons(element, name, writer);
@@ -352,11 +353,11 @@ public final class ScoreEntry {
         for(int i=0; i<goals.getLength(); i++) {
           final Element element = (Element)goals.item(i);
           final String name = element.getAttribute("name");
-          if(element.hasChildNodes()) {
+          final NodeList values = element.getElementsByTagName("value");
+          if(values.getLength() > 0) {
             //enumerated
             final String storedValue = rs.getString(name);
             boolean found = false;
-            final NodeList values = element.getElementsByTagName("value");
             for(int v=0; v<values.getLength(); v++) {
               final Element valueElement = (Element)values.item(v);
               if(valueElement.getAttribute("value").equals(storedValue)) {

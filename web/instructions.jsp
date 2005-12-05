@@ -15,7 +15,7 @@
       
       <ol>
         
-        <li><b>Not required for Minnesota.</b>Go to the <a
+        <li>Go to the <a
         href="admin/index.jsp">administration page</a> and upload the team
         datafile.  This takes in a tab delimited file and uses that
         information to determine what teams will exist in the database.
@@ -27,7 +27,7 @@
         <li>If the team data doesn't look quite right you can <a
         href="admin/select_team.jsp">edit it</a></li>
           
-        <li><b>Not required for Minnesota.</b>If you're going to run more than one tournament, <a href="admin/tournaments.jsp">edit the tournament list</a>.  Otherwise
+        <li>If you're going to run more than one tournament, <a href="admin/tournaments.jsp">edit the tournament list</a>.  Otherwise
         teams will just be in the DUMMY tournament</a></li>
 
         <li>Set the current tournament on the <a href="admin/index.jsp">administration page</a></li>
