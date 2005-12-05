@@ -1,3 +1,11 @@
+2005-12-05  Jon Schewe  <jpschewe@mtu.net>
+
+	* Release version 2.5
+	
+2005-01  Dan Churchill
+
+	* web/scoreEntry/select_team.jsp: Added logic for Last Run when editing scores
+
 2004-12-20  Jon Schewe  <jpschewe@mtu.net>
 
 	* src/fll/ScoreStandardization.java (ScoreStandardization): Fixed

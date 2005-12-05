@@ -9,7 +9,7 @@
 
 
   <property name="app.name"        value="${ant.project.name}"/>
-  <property name="app.version"     value="2.5"/>
+  <property name="app.version"     value="2.6"/>
                                    
   <property name="dir.build"       value="build"/>
   <property name="dir.tomcat"      value="unspecified"/>
