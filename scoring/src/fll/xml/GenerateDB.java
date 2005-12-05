@@ -281,11 +281,11 @@ public final class GenerateDB {
     //check if there are any subelements to determine if this goal is enumerated or not
 
     String definition = goalName;
-    if(goalElement.hasChildNodes()) {
+    final NodeList posValues = goalElement.getElementsByTagName("value");
+    if(posValues.getLength() > 0) {
       //enumerated
       definition += " ENUM(";
 
-      final NodeList posValues = goalElement.getElementsByTagName("value");
       for(int v=0; v<posValues.getLength(); v++) {
         final Element value = (Element)posValues.item(v);
         final String valueName = value.getAttribute("value");
@@ -300,7 +300,7 @@ public final class GenerateDB {
       definition += " INTEGER";
     }
     
-    LOG.debug("GoalColumnDefinition: " + definition);
+    LOG.info("GoalColumnDefinition: " + definition);
     
     return definition;
   }

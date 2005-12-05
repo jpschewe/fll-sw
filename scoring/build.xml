@@ -188,7 +188,7 @@
     </copy>
   </target>
 
-  <target name="compile.classes" depends="prepare,checkstyle"
+  <target name="compile.classes" depends="prepare"
     description="Compile Java sources">
 
     <!-- Compile Java classes as necessary -->
@@ -539,13 +539,13 @@
   <!-- ===================== Checkstyle =================== -->
   <taskdef resource="checkstyletask.properties">
     <classpath>
-      <pathelement location="lib/ant/antlr.jar" />
-      <pathelement location="lib/ant/checkstyle-3.3.jar" />
-      <pathelement location="lib/ant/commons-beanutils.jar" />
-      <pathelement location="lib/ant/commons-cli-1.0.jar" />
-      <pathelement location="lib/ant/commons-collections.jar" />
-      <pathelement location="lib/ant/commons-logging.jar" />
-      <pathelement location="lib/ant/jakarta-regexp-1.3.jar" />
+      <pathelement location="${dir.lib}/ant/antlr-2.7.4.jar" />
+      <pathelement location="${dir.lib}/ant/checkstyle-3.5.jar" />
+      <pathelement location="${dir.lib}/ant/commons-beanutils.jar" />
+      <pathelement location="${dir.lib}/ant/commons-cli-1.0.jar" />
+      <pathelement location="${dir.lib}/ant/commons-collections.jar" />
+      <pathelement location="${dir.lib}/ant/commons-logging.jar" />
+      <pathelement location="${dir.lib}/ant/jakarta-regexp-1.3.jar" />
     </classpath>
   </taskdef>
 
