@@ -58,7 +58,7 @@ public final class ScoreEntry {
       final String max = element.getAttribute("max");
       
       writer.println("  <!-- " + name + " -->");
-      if(element.goalDescription.getElementsByTagName("value").getLength() > 0) {
+      if(element.getElementsByTagName("value").getLength() > 0) {
         //enumerated
         writer.println("  <!-- nothing to check -->");
       } else {
@@ -92,7 +92,7 @@ public final class ScoreEntry {
       writer.println("<!-- " + name + " -->");
       writer.println("var gbl_" + name + ";");
 
-      if(element.goalDescription.getElementsByTagName("value").getLength() > 0
+      if(element.getElementsByTagName("value").getLength() > 0
          || ("0".equals(min) && "1".equals(max))) {
         writer.println("function set" + name + "(newValue) {");
         writer.println("  var temp = gbl_" + name + ";");
@@ -222,7 +222,7 @@ public final class ScoreEntry {
         writer.println("    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='3'><b>" + title + ":<b></font>");
         writer.println("  </td>");
         
-        if(element.element.getElementsByTagName("value").getLength() > 0) {
+        if(element.getElementsByTagName("value").getLength() > 0) {
           //enumerated
           writer.println("  <td colspan='2'>");
           generateEnumeratedGoalButtons(element, name, writer);
