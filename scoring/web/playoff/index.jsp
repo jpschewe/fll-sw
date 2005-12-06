@@ -50,7 +50,7 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
         to try and fix that first.</li>
 
         <li>
-          <B>WARNING: Do not select brackets until all seeding runs have been recorded!</b><br>
+          <B>WARNING: Do not select brackets until all seeding runs for that division have been recorded!</b><br>
           <form action='adminbrackets.jsp' method='get'>
             Go to the admin/printable bracket page for division <select name='division'>
 <%
