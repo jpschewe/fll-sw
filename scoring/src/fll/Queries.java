@@ -252,7 +252,8 @@ public final class Queries {
         throw new RuntimeException("Missing parameter: " + name);
       }
       columns.append(", " + name);
-      if(element.hasChildNodes()) {
+      final NodeList valueChildren = element.getElementsByTagName("value");
+      if(valueChildren.getLength() > 0) {
         //enumerated
         values.append(", '" + value + "'");
       } else {
@@ -311,7 +312,8 @@ public final class Queries {
       if(null == value) {
         throw new RuntimeException("Missing parameter: " + name);
       }
-      if(element.hasChildNodes()) {
+      final NodeList valueChildren = element.getElementsByTagName("value");
+      if(valueChildren.getLength() > 0) {
         //enumerated
         sql.append(", " + name + " = '" + value + "'");
       } else {
