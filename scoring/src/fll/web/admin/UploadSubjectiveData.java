@@ -113,21 +113,33 @@ public final class UploadSubjectiveData {
         } else {
 
           PreparedStatement insertPrep = null;
+          PreparedStatement updatePrep = null;
           try {
             //prepare statements for delete and insert
+            
+            final StringBuffer updateStmt = new StringBuffer();
             final StringBuffer insertSQLColumns = new StringBuffer();
-            insertSQLColumns.append("REPLACE " + categoryName + " (TeamNumber, Tournament, Judge");
+            insertSQLColumns.append("INSERT INTO " + categoryName + " (TeamNumber, Tournament, Judge");
             final StringBuffer insertSQLValues = new StringBuffer();
             insertSQLValues.append(") VALUES ( ?, ?, ?");
-            for(int goalIndex=0; goalIndex<goalDescriptions.getLength(); goalIndex++) {
+            updateStmt.append("UPDATE " + categoryName + " SET ");
+            final int numGoals = goalDescriptions.getLength();
+            for(int goalIndex=0; goalIndex<numGoals; goalIndex++) {
               final Element goalDescription = (Element)goalDescriptions.item(goalIndex);
               insertSQLColumns.append(", " + goalDescription.getAttribute("name"));
               insertSQLValues.append(", ?");
+              if(goalIndex > 0) {
+                updateStmt.append(", ");
+              }
+              updateStmt.append(goalDescription.getAttribute("name") + " = ?");
             }
+            updateStmt.append(" WHERE TeamNumber = ? AND Tournament = ? AND Judge = ?");
+            updatePrep = connection.prepareStatement(updateStmt.toString());
             insertPrep = connection.prepareStatement(insertSQLColumns.toString()
                                                      + insertSQLValues.toString() + ")");
             //initialze the tournament
             insertPrep.setString(2, currentTournament);
+            updatePrep.setString(numGoals+2, currentTournament);
             
             final NodeList scores = scoreCategoryElement.getElementsByTagName("score");
             for(int scoreIndex=0; scoreIndex<scores.getLength(); scoreIndex++) {
@@ -139,21 +151,29 @@ public final class UploadSubjectiveData {
                 final String judge = scoreElement.getAttribute("judge");
 
                 insertPrep.setInt(1, teamNumber);
+                updatePrep.setInt(numGoals+1, teamNumber);
                 insertPrep.setString(3, judge);
+                updatePrep.setString(numGoals+3, judge);
               
-                for(int goalIndex=0; goalIndex<goalDescriptions.getLength(); goalIndex++) {
+                for(int goalIndex=0; goalIndex<numGoals; goalIndex++) {
                   final Element goalDescription = (Element)goalDescriptions.item(goalIndex);
                   final String goalName = goalDescription.getAttribute("name");
                   final String value = scoreElement.getAttribute(goalName);
                   if(null != value && !"".equals(value.trim())) {
                     insertPrep.setString(goalIndex+4, value.trim());
+                    updatePrep.setString(goalIndex+1, value.trim());
                   } else {
                     insertPrep.setNull(goalIndex+4, Types.INTEGER);
+                    updatePrep.setNull(goalIndex+1, Types.INTEGER);
                   }
                 }
             
-                //execute sql here
-                insertPrep.executeUpdate();
+                // attempt the update first
+                final int modifiedRows = updatePrep.executeUpdate();
+                if(modifiedRows < 1) {
+                  // do insert
+                  insertPrep.executeUpdate();
+                }
               }
             }
 

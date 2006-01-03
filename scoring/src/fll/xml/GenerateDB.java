@@ -37,6 +37,31 @@ public final class GenerateDB {
    * to change the size.
    */
   private static final String TOURNAMENT_DATATYPE = "varchar(128)";
+
+  private static final String LOCATION_DATATYPE;
+  private static final String SCOREGROUP_DATATYPE;
+  private static final String BOOLEAN_DATATYPE;
+  private static final String PARAM_VALUE_DATATYPE;
+  public static final String TEXT_DATATYPE;
+
+  public static final boolean USING_HSQLDB = false;
+  static {
+    if(USING_HSQLDB) {
+      TEXT_DATATYPE = "longvarchar";
+      LOCATION_DATATYPE = TEXT_DATATYPE;
+      SCOREGROUP_DATATYPE = TEXT_DATATYPE;
+      BOOLEAN_DATATYPE = "boolean";
+      PARAM_VALUE_DATATYPE = TEXT_DATATYPE;
+    } else {
+      // assuming MySQL
+      TEXT_DATATYPE = "text";
+      LOCATION_DATATYPE = "mediumtext";
+      SCOREGROUP_DATATYPE = TEXT_DATATYPE;
+      BOOLEAN_DATATYPE = "bool";
+      PARAM_VALUE_DATATYPE = TEXT_DATATYPE;
+    }
+
+  }
     
   /**
    * Generate a new database
@@ -50,7 +75,7 @@ public final class GenerateDB {
         System.exit(1);
       } else {
         final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-        final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-region-2004.xml"));
+        final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-region-2005.xml"));
         generateDB(challengeDocument, args[0], args[1], args[2], "fll");
 
         final Connection connection = Utilities.createDBConnection(args[0], "fll", "fll", "fll");
@@ -86,25 +111,27 @@ public final class GenerateDB {
 
     Connection connection = null;
     Statement stmt = null;
-    try {
-      //first create the database
-      connection = Utilities.createDBConnection(host, user, password, "mysql");
+    if(!USING_HSQLDB) {
+      try {
+        //first create the database
+        connection = Utilities.createDBConnection(host, user, password, "mysql");
       
-      stmt = connection.createStatement();
+        stmt = connection.createStatement();
 
-      //delete the old database
-      stmt.executeUpdate("DROP DATABASE IF EXISTS " + database);
+        //delete the old database
+        stmt.executeUpdate("DROP DATABASE IF EXISTS " + database);
       
-      //create the database
-      stmt.executeUpdate("CREATE DATABASE " + database);
+        //create the database
+        stmt.executeUpdate("CREATE DATABASE " + database);
 
-      //give fll full privileges and use password fll
-      stmt.execute("GRANT ALL PRIVILEGES ON " + database + ".* TO fll IDENTIFIED BY 'fll'");
-      stmt.execute("GRANT ALL PRIVILEGES ON " + database + ".* TO fll@localhost IDENTIFIED BY 'fll'");
+        //give fll full privileges and use password fll
+        stmt.execute("GRANT ALL PRIVILEGES ON " + database + ".* TO fll IDENTIFIED BY 'fll'");
+        stmt.execute("GRANT ALL PRIVILEGES ON " + database + ".* TO fll@localhost IDENTIFIED BY 'fll'");
 
-    } finally {
-      Utilities.closeStatement(stmt);
-      Utilities.closeConnection(connection);
+      } finally {
+        Utilities.closeStatement(stmt);
+        Utilities.closeConnection(connection);
+      }
     }
 
     PreparedStatement prep = null;
@@ -117,7 +144,7 @@ public final class GenerateDB {
       stmt.executeUpdate("DROP TABLE IF EXISTS Tournaments");
       stmt.executeUpdate("CREATE TABLE Tournaments ("
                          + "Name " + TOURNAMENT_DATATYPE + " NOT NULL,"
-                         + "Location mediumtext,"
+                         + "Location " + LOCATION_DATATYPE + ","
                          + "NextTournament " + TOURNAMENT_DATATYPE + " default NULL," //Tournament that teams may advance to from this one
                          + "PRIMARY KEY (Name)"
                          +")");
@@ -133,7 +160,7 @@ public final class GenerateDB {
                          + "Category varchar(32) NOT NULL,"
                          + "RawScore float default NULL,"
                          + "StandardizedScore float default NULL,"
-                         + "ScoreGroup text default NULL,"
+                         + "ScoreGroup " + SCOREGROUP_DATATYPE + " default NULL,"
                          + "WeightedScore float default NULL,"
                          + "PRIMARY KEY (TeamNumber, Tournament, Category)"
                          + ")");
@@ -152,10 +179,10 @@ public final class GenerateDB {
       stmt.executeUpdate("DROP TABLE IF EXISTS Teams");
       stmt.executeUpdate("CREATE TABLE Teams ("
                          + "  TeamNumber integer NOT NULL,"
-                         + "  TeamName varchar(255) NOT NULL default '<No Name>',"
+                         + "  TeamName varchar(255) default '<No Name>' NOT NULL,"
                          + "  Organization varchar(255),"
-                         + "  Division varchar(32) NOT NULL default '1',"
-                         + "  Region varchar(255) NOT NULL default 'DUMMY',"
+                         + "  Division varchar(32) default '1' NOT NULL,"
+                         + "  Region varchar(255) default 'DUMMY' NOT NULL,"
                          + "  PRIMARY KEY  (TeamNumber)"
                          + ")");
 
@@ -164,7 +191,7 @@ public final class GenerateDB {
       stmt.executeUpdate("CREATE TABLE TournamentTeams ("
                          + "  TeamNumber integer NOT NULL,"
                          + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
-                         + "  advanced bool NOT NULL default 0,"
+                         + "  advanced " + BOOLEAN_DATATYPE + " default 0 NOT NULL,"
                          + "  PRIMARY KEY (TeamNumber, Tournament)"
                          + ")");
 
@@ -172,7 +199,7 @@ public final class GenerateDB {
       stmt.executeUpdate("DROP TABLE IF EXISTS TournamentParameters");
       stmt.executeUpdate("CREATE TABLE TournamentParameters ("
                          + "  Param varchar(64) NOT NULL,"
-                         + "  Value TEXT NOT NULL,"
+                         + "  Value " + PARAM_VALUE_DATATYPE + " NOT NULL,"
                          + "  Description varchar(255) default NULL,"
                          + "  PRIMARY KEY  (Param)"
                          + ")");
@@ -218,9 +245,9 @@ public final class GenerateDB {
         createStatement.append(" TeamNumber INTEGER NOT NULL,");
         createStatement.append(" Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,");
         createStatement.append(" RunNumber INTEGER NOT NULL,");
-        createStatement.append(" TimeStamp TIMESTAMP NOT NULL,");
-        createStatement.append(" NoShow bool DEFAULT 0 NOT NULL,");
-        createStatement.append(" Bye bool DEFAULT 0 NOT NULL,");
+        createStatement.append(" TimeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,");
+        createStatement.append(" NoShow " + BOOLEAN_DATATYPE + " DEFAULT 0 NOT NULL,");
+        createStatement.append(" Bye " + BOOLEAN_DATATYPE + " DEFAULT 0 NOT NULL,");
         final NodeList goals = performanceElement.getElementsByTagName("goal");
         for(int i=0; i<goals.getLength(); i++) {
           final Element element = (Element)goals.item(i);
@@ -253,7 +280,7 @@ public final class GenerateDB {
           createStatement.append(" " + columnDefinition + ",");
         }
         createStatement.append(" ComputedTotal INTEGER DEFAULT NULL,");
-        createStatement.append(" ScoreGroup TEXT DEFAULT NULL,");
+        createStatement.append(" ScoreGroup " + SCOREGROUP_DATATYPE + " DEFAULT NULL,");
         createStatement.append(" PRIMARY KEY (TeamNumber, Tournament, Judge)");
         createStatement.append(");");
         stmt.executeUpdate(createStatement.toString());
@@ -284,18 +311,23 @@ public final class GenerateDB {
     final NodeList posValues = goalElement.getElementsByTagName("value");
     if(posValues.getLength() > 0) {
       //enumerated
-      definition += " ENUM(";
+      if(USING_HSQLDB) {
+        //HSQLDB doesn't support enum
+        definition += " longvarchar";
+      } else {
+        definition += " ENUM(";
 
-      for(int v=0; v<posValues.getLength(); v++) {
-        final Element value = (Element)posValues.item(v);
-        final String valueName = value.getAttribute("value");
-        if(v > 0) {
-          definition += ", ";
-        }
+        for(int v=0; v<posValues.getLength(); v++) {
+          final Element value = (Element)posValues.item(v);
+          final String valueName = value.getAttribute("value");
+          if(v > 0) {
+            definition += ", ";
+          }
           
-        definition += "'" + valueName + "'";
+          definition += "'" + valueName + "'";
+        }
+        definition += ")";
       }
-      definition += ")";
     } else {
       definition += " INTEGER";
     }

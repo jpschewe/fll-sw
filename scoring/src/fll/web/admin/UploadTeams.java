@@ -114,8 +114,8 @@ public final class UploadTeams {
         createFilteredTable.append(", ");
         insertPrepSQL.append(", ");
       }
-      createTable.append(columnName + " TEXT");
-      createFilteredTable.append(columnName + " TEXT");
+      createTable.append(columnName + " " + fll.xml.GenerateDB.TEXT_DATATYPE);
+      createFilteredTable.append(columnName + " " + fll.xml.GenerateDB.TEXT_DATATYPE);
       insertPrepSQL.append("?");
       selectOptions.append("<option value='" + columnName + "'>" + columnName + "</option>");
     }

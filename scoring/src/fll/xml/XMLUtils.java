@@ -155,7 +155,7 @@ public final class XMLUtils {
               scoreElement.setAttribute("organization", team.getOrganization());
               scoreElement.setAttribute("judge", judge);
             
-              rs2 = stmt.executeQuery("SELECT * FROM " + categoryName + " WHERE TeamNumber = " + team.getTeamNumber() + " AND Tournament = \"" + currentTournament + "\" AND Judge = \"" + judge + "\"");
+              rs2 = stmt.executeQuery("SELECT * FROM " + categoryName + " WHERE TeamNumber = " + team.getTeamNumber() + " AND Tournament = '" + currentTournament + "' AND Judge = '" + judge + "'");
               if(rs2.next()) {
                 final NodeList goals = categoryDescription.getElementsByTagName("goal");
                 for(int i=0; i<goals.getLength(); i++) {

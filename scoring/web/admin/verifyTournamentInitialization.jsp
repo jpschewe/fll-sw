@@ -11,10 +11,16 @@ pageContext.setAttribute("regions", Queries.getRegions(connection));
 <c:if test='${"true" == param.verified}'>
   <c:forEach var="parameter" items="${paramValues}">
     <c:if test='${"nochange" != parameter.value[0] && "verified" != parameter.key && "submit" != parameter.key}'>
-      <!-- need MySQL 4.0.2 or greater for this one! -->
-      <sql:update dataSource="${datasource}">
-        DELETE FROM TournamentTeams Using Teams, TournamentTeams WHERE TournamentTeams.TeamNumber = Teams.TeamNumber AND Teams.Region = '<c:out value="${parameter.key}"/>'
-      </sql:update>
+      <% if(fll.xml.GenerateDB.USING_HSQLDB) { %>
+        <sql:update dataSource="${datasource}">
+          DELETE FROM TournamentTeams WHERE TeamNumber IN ( SELECT TeamNumber FROM Teams WHERE Region = '<c:out value="${parameter.key}"/>' )
+        </sql:update>
+      <% } else { %>
+        <!-- need MySQL 4.0.2 or greater for this one! -->
+        <sql:update dataSource="${datasource}">
+          DELETE FROM TournamentTeams Using Teams, TournamentTeams WHERE TournamentTeams.TeamNumber = Teams.TeamNumber AND Teams.Region = '<c:out value="${parameter.key}"/>'
+        </sql:update>
+      <% } %>
       <sql:update dataSource="${datasource}">
         INSERT INTO TournamentTeams (TeamNumber, Tournament) SELECT Teams.TeamNumber AS TeamNumber, '<c:out value="${parameter.value[0]}"/>' FROM Teams WHERE Teams.Region = '<c:out value="${parameter.key}"/>'
       </sql:update>
