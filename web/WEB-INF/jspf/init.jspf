@@ -50,14 +50,27 @@ response.setDateHeader ("Expires", 0); // prevents caching at the proxy server
 %>
 
 <c:if test="${empty datasource}">
-  <c:set var='url'>
-    jdbc:mysql://<c:out value="${initParam.database_host}"/>/<c:out value="${database}"/>?autoReconnect=true
-  </c:set>
-  <sql:setDataSource driver="org.gjt.mm.mysql.Driver"
-                     url="${url}"
-                     user="fll"
-                     password="fll"
-                     scope="session"
-                     var="datasource"
-                     />
+  <% if(fll.xml.GenerateDB.USING_HSQLDB) { %>
+      <c:set var='url'>
+        jdbc:hsqldb:file:/tmp/flldb
+      </c:set>
+      <sql:setDataSource scope="session"
+                         var="datasource"
+                         url="${url}"
+                         driver="org.hsqldb.jdbcDriver"
+                         />
+      <sql:update sql="SET WRITE_DELAY 100 MILLIS"/>
+      <!-- HSQL -->
+  <% } else { %>
+      <c:set var='url'>
+        jdbc:mysql://<c:out value="${initParam.database_host}"/>/<c:out value="${database}"/>?autoReconnect=true
+      </c:set>
+      <sql:setDataSource scope="session"
+                         var="datasource"
+                         url="${url}"
+                         driver="org.gjt.mm.mysql.Driver"
+                         />
+      <!-- MySQL -->
+  <% } %>
+  </c:choose>
 </c:if>

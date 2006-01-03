@@ -35,12 +35,12 @@ public final class ImportDocument {
     if(null == document) {
       throw new RuntimeException("Error parsing challenge.xml");
     }
-      
+
     PreparedStatement prep = null;
     Connection connection = null;
     try {
       connection = Utilities.createDBConnection("129.235.71.45", "fll", "fll");
-      prep = connection.prepareStatement("REPLACE INTO TournamentParameters (Param, Value, Description) VALUES ('ChallengeDocument', ?, 'The XML document describing the challenge')");
+      prep = connection.prepareStatement("UPDATE TournamentParameters SET Value = ? WHERE Param = 'ChallengeDocument')");
       
       //dump the document into a byte array so we can push it into the database
       final XMLWriter xmlwriter = new XMLWriter();

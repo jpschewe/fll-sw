@@ -71,17 +71,26 @@ public final class Utilities {
     //create connection to database and puke if anything goes wrong
     //register the driver
     try{
-      Class.forName("org.gjt.mm.mysql.Driver").newInstance();
+      if(fll.xml.GenerateDB.USING_HSQLDB) {
+        Class.forName("org.hsqldb.jdbcDriver").newInstance();
+      } else {
+        Class.forName("org.gjt.mm.mysql.Driver").newInstance();
+      }
     } catch(final ClassNotFoundException e){
-      throw new RuntimeException("Unable to load driver.");
+      throw new RuntimeException("Unable to load driver.", e);
     } catch(final InstantiationException ie) {
-      throw new RuntimeException("Unable to load driver.");
+      throw new RuntimeException("Unable to load driver.", ie);
     } catch(final IllegalAccessException iae) {
-      throw new RuntimeException("Unable to load driver.");
+      throw new RuntimeException("Unable to load driver.", iae);
     }
 
     Connection connection = null;
-    final String myURL = "jdbc:mysql://" + hostname + "/" + database + "?user=" + username + "&password=" + password + "&autoReconnect=true";
+    final String myURL;
+    if(fll.xml.GenerateDB.USING_HSQLDB) {
+      myURL = "jdbc:hsqldb:file:/tmp/flldb";
+    } else {
+      myURL = "jdbc:mysql://" + hostname + "/" + database + "?user=" + username + "&password=" + password + "&autoReconnect=true";
+    }
     try {
       connection = DriverManager.getConnection(myURL);
     } catch(final SQLException sqle) {

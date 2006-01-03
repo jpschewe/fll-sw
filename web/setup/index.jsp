@@ -73,6 +73,16 @@ File xmlfile = null;
         <input type='submit' name='reinitializeDatabase' value='Initialize Database' onclick='return confirm("This will erase ALL data in the database fll (if it already exists), are you sure?")'>
       </form>
     </p>
+
+    <hr />
+
+  <table>
+    <tr>
+      <td><a href="<%=request.getContextPath()%>/index.jsp" target='_top'>Main Index</a></td>
+      <td><a href="<%=request.getContextPath()%>/admin/index.jsp" target='_top'>Admin Index</a></td>
+    </tr>
+    <tr><td>Software version: @APP-VERSION@</td></tr>
+  </table>
         
   </body>
 </html>

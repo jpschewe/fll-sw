@@ -154,7 +154,7 @@ public final class Queries {
     try {
       stmt = connection.createStatement();
 
-      rs = stmt.executeQuery("SELECT COUNT(TeamNumber) FROM Performance WHERE Tournament = \"" + currentTournament + "\" AND TeamNumber = " + teamNumber);
+      rs = stmt.executeQuery("SELECT COUNT(TeamNumber) FROM Performance WHERE Tournament = '" + currentTournament + "' AND TeamNumber = " + teamNumber);
       final int runNumber;
       if(rs.next()) {
         runNumber = rs.getInt(1);
@@ -181,7 +181,7 @@ public final class Queries {
     try {
       stmt = connection.createStatement();
 
-      rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = \"" + currentTournament + "\" AND TeamNumber = " + teamNumber);
+      rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = '" + currentTournament + "' AND TeamNumber = " + teamNumber);
       final int runNumber;
       if(rs.next()) {
         runNumber = rs.getInt(1);
@@ -334,7 +334,7 @@ public final class Queries {
     }
     sql.append(" AND RunNumber = " + runNumber);
     
-    sql.append(" AND Tournament = \"" + currentTournament + "\"");
+    sql.append(" AND Tournament = '" + currentTournament + "'");
     
     Statement stmt = null;
     try {
@@ -552,7 +552,7 @@ public final class Queries {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
-      stmt.executeUpdate("REPLACE TournamentParameters (Param, Value, Description) VALUES ('SeedingRounds', " + newSeedingRounds + ", 'Number of seeding rounds before elimination round - used to downselect top performance scores in queries')");
+      stmt.executeUpdate("UPDATE TournamentParameters SET Value = " + newSeedingRounds + " WHERE Param = 'SeedingRounds'");
     } finally {
       Utilities.closeStatement(stmt);
     }
