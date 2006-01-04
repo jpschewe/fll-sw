@@ -44,6 +44,8 @@ final Connection connection = (Connection)application.getAttribute("connection")
         </form>
       </li>
 
+      <li><a href="subjective.zip">Subjective Scoring Application</a></li>
+
       <li><a href="developer/index.jsp">Developer page</a></li>
       
       <li><a href="troubleshooting/index.jsp">Troubleshooting</a></li>

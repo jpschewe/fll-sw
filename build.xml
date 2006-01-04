@@ -169,8 +169,37 @@
   -->
   <target name="compile" depends="prepare,compile.classes,compile.jsp"
     description="Compile Java sources">
-    
+
+    <!-- stuff for subjective scoring app -->
+    <mkdir dir="${dir.tmp}/subjective" />
+    <mkdir dir="${dir.tmp}/subjective/lib" />
+    <jar destfile="${dir.tmp}/subjective/lib/subjective.jar"
+      basedir="${dir.web}/WEB-INF/classes"
+      index="true"
+      />
+    <copy todir="${dir.tmp}/subjective/lib">
+      <fileset dir="${dir.lib}" />
+    </copy>
+    <path id="subjective.dist.classpath">
+      <path refid="application.classpath" />
+      <pathelement location="${dir.lib}/subjective.jar" />
+    </path>
+
     <!-- build scripts -->
+    <antcall target="-buildscripts">
+      <param name="app.name" value="subjective" />
+      <param name="class.main" value="fll.gui.SubjectiveFrame" />
+      <param name="-scripts.dir" value="${dir.tmp}/subjective" />
+      <param name="-scripts.root" value="." />
+      <reference torefid="-scripts.path" refid="subjective.dist.classpath" />
+    </antcall>
+    
+    <zip zipfile="${dir.web}/subjective.zip">
+      <zipfileset prefix="subjective" dir="${dir.tmp}/subjective" />
+    </zip>
+    
+    
+    <!-- build subjective scripts for testing -->
     <path id="subjective.build.classpath">
       <path refid="application.classpath" />
       <pathelement location="${basedir}/web/WEB-INF/classes" />
@@ -182,10 +211,12 @@
       <param name="-scripts.root" value=".." />
       <reference torefid="-scripts.path" refid="subjective.build.classpath" />
     </antcall>
-    
+
+    <!-- copy libraries over -->
     <copy todir="${dir.build}/lib">
       <fileset dir="${dir.lib}" />
     </copy>
+
   </target>
 
   <target name="compile.classes" depends="prepare"
@@ -375,51 +406,11 @@
       <zipfileset dir="${dir.web}" prefix="${app.name}" />
     </zip>
     
-    
-    <!-- stuff for subjective scoring app -->
-    <mkdir dir="${dir.tmp}/subjective" />
-    <mkdir dir="${dir.tmp}/subjective/lib" />
-    <jar destfile="${dir.tmp}/subjective/lib/subjective.jar"
-      basedir="${dir.web}/WEB-INF/classes"
-      index="true"
-      />
-    <copy todir="${dir.tmp}/subjective/lib">
-      <fileset dir="${dir.lib}" />
-    </copy>
-    <path id="subjective.dist.classpath">
-      <path refid="application.classpath" />
-      <pathelement location="${dir.lib}/subjective.jar" />
-    </path>
-<!--
-    <pathconvert targetos="windows"
-      property="subjective.windows.classpath"
-      refid="subjective.dist.classpath">
-      <map from="${basedir}" to="." />
-    </pathconvert>
-    <pathconvert targetos="unix"
-      property="subjective.unix.classpath"
-      refid="subjective.dist.classpath">
-      <map from="${basedir}" to="." />
-    </pathconvert>
+    <copy tofile="${dir.dist}/subjective.zip"
+      file="${dir.web}/subjective.zip"/>
 
-    <echo file="${dir.tmp}/subjective/subjective.bat">java -classpath "${subjective.windows.classpath}" fll.gui.SubjectiveFrame</echo>
-    
-    <echo file="${dir.tmp}/subjective/subjective.sh">java -classpath "${subjective.unix.classpath}" fll.gui.SubjectiveFrame</echo>
-    -->
-
-    <!-- build scripts -->
-    <antcall target="-buildscripts">
-      <param name="app.name" value="subjective" />
-      <param name="class.main" value="fll.gui.SubjectiveFrame" />
-      <param name="-scripts.dir" value="${dir.tmp}/subjective" />
-      <param name="-scripts.root" value="." />
-      <reference torefid="-scripts.path" refid="subjective.dist.classpath" />
-    </antcall>
-    
-    <zip zipfile="${dir.dist}/subjective.zip">
-      <zipfileset prefix="subjective" dir="${dir.tmp}/subjective" />
-    </zip>
-
+      
+    <!-- src zip file -->
     <zip zipfile="${dir.dist}/src.zip">
       <zipfileset dir="${basedir}">
         <include name="web/**" />
@@ -489,7 +480,6 @@
   Normally, this task is executed indirectly when needed.
 
   -->
-
   <target name="prepare" depends="init">
 
     <!-- Create build directory and copy static content -->
