@@ -52,7 +52,7 @@ response.setDateHeader ("Expires", 0); // prevents caching at the proxy server
 <c:if test="${empty datasource}">
   <% if(fll.xml.GenerateDB.USING_HSQLDB) { %>
       <c:set var='url'>
-        jdbc:hsqldb:file:/tmp/flldb
+        jdbc:hsqldb:file:/tmp/flldb;shutdown=true
       </c:set>
       <sql:setDataSource scope="session"
                          var="datasource"

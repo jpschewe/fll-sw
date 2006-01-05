@@ -87,7 +87,7 @@ public final class Utilities {
     Connection connection = null;
     final String myURL;
     if(fll.xml.GenerateDB.USING_HSQLDB) {
-      myURL = "jdbc:hsqldb:file:/tmp/flldb";
+      myURL = "jdbc:hsqldb:file:/tmp/flldb;shutdown=true";
     } else {
       myURL = "jdbc:mysql://" + hostname + "/" + database + "?user=" + username + "&password=" + password + "&autoReconnect=true";
     }
