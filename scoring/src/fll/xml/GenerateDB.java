@@ -139,6 +139,10 @@ public final class GenerateDB {
       connection = Utilities.createDBConnection(host, "fll", "fll", database);
       
       stmt = connection.createStatement();
+
+      if(USING_HSQLDB) {
+        stmt.executeUpdate("SET WRITE_DELAY 100 MILLIS");
+      }
       
       //Table structure for table 'Tournaments'
       stmt.executeUpdate("DROP TABLE IF EXISTS Tournaments");
