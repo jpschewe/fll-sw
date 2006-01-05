@@ -44,10 +44,10 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
             <tr>
               <td><c:out value="${row.TeamNumber}"/></td>
               <td><c:out value="${row.TeamName}"/></td>
-              <c:if test="${row.NoShow == 1}" var="test">
+              <c:if test="${row.NoShow == True}" var="test">
                 <td>No Show</td>
               </c:if>
-              <c:if test="${row.NoShow != 1}">
+              <c:if test="${row.NoShow != True}">
                 <td><c:out value="${row.ComputedTotal}"/></td>
               </c:if>
             </tr>
