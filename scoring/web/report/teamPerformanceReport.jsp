@@ -30,10 +30,10 @@ pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection))
       <c:forEach items="${result.rows}" var="row">
         <tr>
           <td><c:out value="${row.RunNumber}"/></td>
-          <c:if test="${row.NoShow == 1}" var="test">
+          <c:if test="${row.NoShow == True}" var="test">
             <td>No Show</td>
           </c:if>
-          <c:if test="${row.NoShow != 1}">
+          <c:if test="${row.NoShow != True}">
             <td><c:out value="${row.ComputedTotal}"/></td>
           </c:if>
         </tr>
