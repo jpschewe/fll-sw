@@ -74,15 +74,7 @@ File xmlfile = null;
       </form>
     </p>
 
-    <hr />
-
-  <table>
-    <tr>
-      <td><a href="<%=request.getContextPath()%>/index.jsp" target='_top'>Main Index</a></td>
-      <td><a href="<%=request.getContextPath()%>/admin/index.jsp" target='_top'>Admin Index</a></td>
-    </tr>
-    <tr><td>Software version: @APP-VERSION@</td></tr>
-  </table>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
         
   </body>
 </html>
