@@ -161,5 +161,18 @@ public final class Utilities {
       LOG.debug(sqle);
     }
   }
-  
+
+  /**
+   * Equals call that handles null without a NullPointerException.
+   */
+  public static boolean safeEquals(final Object o1,
+                                   final Object o2) {
+    if(o1 == o2) {
+      return true;
+    } else if(null == o1 && null != o2) {
+      return false;
+    } else {
+      return o1.equals(o2);
+    }
+  }
 }
