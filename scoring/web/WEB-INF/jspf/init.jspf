@@ -69,6 +69,8 @@ response.setDateHeader ("Expires", 0); // prevents caching at the proxy server
                          var="datasource"
                          url="${url}"
                          driver="org.gjt.mm.mysql.Driver"
+                         user="fll"
+                         password="fll"
                          />
       <!-- MySQL -->
   <% } %>
