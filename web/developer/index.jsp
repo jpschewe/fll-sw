@@ -50,7 +50,6 @@
         <li><a href="query.jsp">Do SQL queries and updates</a></li>
         
       <li><a href="<c:url value='/setup'/>">Go to database setup</a></li>
-        
     </ul>
 
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>

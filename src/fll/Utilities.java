@@ -5,14 +5,15 @@
  */
 package fll;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.text.NumberFormat;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -32,6 +33,69 @@ public final class Utilities {
   private Utilities() {
   }
 
+  /**
+   * Check to see if the database files can be written to.  Will check each of
+   * the files that HSQLDB uses for the database and ensure they're all
+   * readable and writable.  If there are any problems an exception will be
+   * thrown.
+   */
+  public static void testHSQLDB(final String baseFilename) {
+    final File baseFile = new File(baseFilename);
+    final File dir = baseFile.getParentFile();
+    if(!dir.isDirectory()) {
+      throw new RuntimeException("Database directory " + dir.getAbsolutePath() + " is not a directory");
+    }
+    if(!dir.canWrite()) {
+      throw new RuntimeException("Database directory " + dir.getAbsolutePath() + " is not writable");
+    }
+    if(!dir.canRead()) {
+      throw new RuntimeException("Database directory " + dir.getAbsolutePath() + " is not readable");
+    }      
+    
+    final String[] extensions = new String[] {
+      ".properties",
+      ".script",
+      ".log",
+      ".data",
+      ".backup",
+    };
+    for(String extension : extensions) {
+      final File file = new File(baseFilename + extension);
+      if(file.exists() && !file.canWrite()) {
+        throw new RuntimeException("Database file " + file.getAbsolutePath() + " exists and is not writable");
+      }
+      if(file.exists() && !file.canRead()) {
+        throw new RuntimeException("Database file " + file.getAbsolutePath() + " exists and is not readable");
+      }
+    }
+    
+  }
+
+  /**
+   * @return the URL to use to connect to the database.
+   */
+  public static String getDBURLString(final String hostname,
+                                      final String database) {
+    if(fll.xml.GenerateDB.USING_HSQLDB) {
+      // do this when getting the URL so it gets called from the JSP's as well
+      testHSQLDB(database);
+      return "jdbc:hsqldb:file:" + database + ";shutdown=true";
+    } else {
+      return "jdbc:mysql://" + hostname + "/" + database + "?user=fll&password=fll&autoReconnect=true";
+    }
+  }
+
+  /**
+   * Get the name of the database driver class.
+   */
+  public static String getDBDriverName() {
+    if(fll.xml.GenerateDB.USING_HSQLDB) {
+      return "org.hsqldb.jdbcDriver";
+    } else {
+      return "org.gjt.mm.mysql.Driver";
+    }
+  }
+  
   /**
    * Calls createDBConnection with fll as username and password
    *
@@ -71,11 +135,7 @@ public final class Utilities {
     //create connection to database and puke if anything goes wrong
     //register the driver
     try{
-      if(fll.xml.GenerateDB.USING_HSQLDB) {
-        Class.forName("org.hsqldb.jdbcDriver").newInstance();
-      } else {
-        Class.forName("org.gjt.mm.mysql.Driver").newInstance();
-      }
+      Class.forName(getDBDriverName()).newInstance();
     } catch(final ClassNotFoundException e){
       throw new RuntimeException("Unable to load driver.", e);
     } catch(final InstantiationException ie) {
@@ -87,7 +147,7 @@ public final class Utilities {
     Connection connection = null;
     final String myURL;
     if(fll.xml.GenerateDB.USING_HSQLDB) {
-      myURL = "jdbc:hsqldb:file:/tmp/flldb;shutdown=true";
+      myURL = "jdbc:hsqldb:file:" + database + ";shutdown=true";
     } else {
       myURL = "jdbc:mysql://" + hostname + "/" + database + "?user=" + username + "&password=" + password + "&autoReconnect=true";
     }
