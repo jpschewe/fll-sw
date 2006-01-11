@@ -95,12 +95,11 @@ public final class ScoreGroupScores {
       stmt = connection.createStatement();
       groupStmt = connection.createStatement();
 
-      groupRS = groupStmt.executeQuery("SELECT ScoreGroup FROM SummarizedScores,Teams"
+      groupRS = groupStmt.executeQuery("SELECT DISTINCT ScoreGroup FROM SummarizedScores,Teams"
                                        + " WHERE SummarizedScores.Tournament = '" + tournament + "'"
                                        + " AND Teams.TeamNumber = SummarizedScores.TeamNumber"
                                        + " AND SummarizedScores.Category = '" + categoryName + "'"
-                                       + " AND Teams.Division = '" + division + "'"
-                                       + " GROUP BY ScoreGroup");
+                                       + " AND Teams.Division = '" + division + "'");
       while(groupRS.next()) {
         final String scoreGroup = groupRS.getString(1);
         
