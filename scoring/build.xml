@@ -229,8 +229,7 @@
       debug="${compile.debug}"
       deprecation="${compile.deprecation}"
       optimize="${compile.optimize}"
-      source="1.4"
-      target="1.4">
+>
       <classpath refid="compile.classpath"/>
     </javac>
     
@@ -280,8 +279,7 @@
     debug="${compile.debug}"
     deprecation="${compile.deprecation}"
     optimize="${compile.optimize}"
-    source="1.4"
-    target="1.4">
+>
     <classpath>
     <pathelement location="${dir.web}/WEB-INF/classes" />
     <path refid="compile.classpath" />

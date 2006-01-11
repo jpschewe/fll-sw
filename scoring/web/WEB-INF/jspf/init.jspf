@@ -13,14 +13,45 @@
 <%-- TODO working on moving these to session variables --%>
 <%-- initialize some application variables --%>
 
+<c:if test="${empty database}">
+  <%
+    if(fll.xml.GenerateDB.USING_HSQLDB) {
+      Utilities.testHSQLDB(config.getServletContext().getRealPath("/WEB-INF/flldb"));
+  %>
+    <!-- HSQL -->
+    <c:set var="database" scope="application">
+      config.getServletContext().getRealPath("/WEB-INF/flldb")
+    </c:set>
+  <% } else { %>
+    <!-- MySQL -->
+    <c:set var="database" scope="application" value="fll" />
+  <% } %>
+</c:if>
+
+<c:if test="${empty datasource}">
+  <%
+    pageContext.setAttribute("url", Utilities.getDBURLString((String)application.getInitParameter("database_host"), (String)application.getAttribute("database")));
+    pageContext.setAttribute("driverName", Utilities.getDBDriverName());
+  %>
+
+  <sql:setDataSource scope="session"
+                     var="datasource"
+                     url="${url}"
+                     driver="${driverName}"
+                     />
+
+  <%
+    if(fll.xml.GenerateDB.USING_HSQLDB) {
+  %>
+      <!-- HSQL -->
+      <sql:update sql="SET WRITE_DELAY 100 MILLIS"/>
+  <% } %>
+
+</c:if>
+
 <%
 { // put this in it's own scope so it can be included multiple times
-  if(null == application.getAttribute("database")) {
-    application.setAttribute("database", "fll");
-  }
-  
   final String database = (String)application.getAttribute("database");
-    
   //Initialize the connection
   if(null == application.getAttribute("connection")) {
     final Connection connection = Utilities.createDBConnection(application.getInitParameter("database_host"), "fll", "fll", database);
@@ -49,30 +80,3 @@ response.setHeader("Pragma","no-cache"); // HTTP 1.0
 response.setDateHeader ("Expires", 0); // prevents caching at the proxy server
 %>
 
-<c:if test="${empty datasource}">
-  <% if(fll.xml.GenerateDB.USING_HSQLDB) { %>
-      <c:set var='url'>
-        jdbc:hsqldb:file:/tmp/flldb;shutdown=true
-      </c:set>
-      <sql:setDataSource scope="session"
-                         var="datasource"
-                         url="${url}"
-                         driver="org.hsqldb.jdbcDriver"
-                         />
-      <sql:update sql="SET WRITE_DELAY 100 MILLIS"/>
-      <!-- HSQL -->
-  <% } else { %>
-      <c:set var='url'>
-        jdbc:mysql://<c:out value="${initParam.database_host}"/>/<c:out value="${database}"/>?autoReconnect=true
-      </c:set>
-      <sql:setDataSource scope="session"
-                         var="datasource"
-                         url="${url}"
-                         driver="org.gjt.mm.mysql.Driver"
-                         user="fll"
-                         password="fll"
-                         />
-      <!-- MySQL -->
-  <% } %>
-  </c:choose>
-</c:if>

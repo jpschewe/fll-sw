@@ -74,6 +74,8 @@ File xmlfile = null;
       </form>
     </p>
 
+    <p>realpath: <%= config.getServletContext().getRealPath("/WEB-INF/testdb") %></p>
+
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
         
   </body>
