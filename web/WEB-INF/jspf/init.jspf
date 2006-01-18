@@ -20,7 +20,7 @@
   %>
     <!-- HSQL -->
     <c:set var="database" scope="application">
-      config.getServletContext().getRealPath("/WEB-INF/flldb")
+      <%= config.getServletContext().getRealPath("/WEB-INF/flldb") %>
     </c:set>
   <% } else { %>
     <!-- MySQL -->
@@ -44,7 +44,7 @@
     if(fll.xml.GenerateDB.USING_HSQLDB) {
   %>
       <!-- HSQL -->
-      <sql:update sql="SET WRITE_DELAY 100 MILLIS"/>
+      <sql:update dataSource="${datasource}" sql="SET WRITE_DELAY 100 MILLIS"/>
   <% } %>
 
 </c:if>
