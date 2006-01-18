@@ -63,12 +63,13 @@ pageContext.setAttribute("division", divisions.get(divisionIndex));
         
             <%
             final Statement stmt = connection.createStatement();
-            final String sql = "SELECT Teams.TeamName, Teams.Organization, Performance.TeamNumber, MAX(Performance.ComputedTotal) AS MaxOfComputedScore, Performance.NoShow, Performance.Bye"
+            final String sql = "SELECT Teams.TeamName, Teams.Organization, Performance.TeamNumber, MAX(Performance.ComputedTotal) AS MaxOfComputedScore"
               + " FROM Teams,Performance"
               + " WHERE Performance.Tournament = '" + currentTournament + "'"
               + " AND Teams.TeamNumber = Performance.TeamNumber"
               + " AND Performance.RunNumber <= " + Queries.getNumSeedingRounds(connection)
               + " AND Performance.NoShow = 0"
+              + " AND Performance.Bye = 0"
               + " AND Teams.Division = '" + pageContext.getAttribute("division") + "'"
               + " GROUP BY Performance.TeamNumber"
               + " ORDER BY MaxOfComputedScore DESC LIMIT 10";
@@ -118,14 +119,7 @@ pageContext.setAttribute("division", divisions.get(divisionIndex));
               </td>
               <td width='8%' align='right'>
                 <font size='3'>
-                <%if(rs.getBoolean("NoShow")) {%>
-                  No Show
-                <%} else if(rs.getBoolean("Bye")) {%>
-                  Bye
-                <%} else {
-                    out.println(score);
-                  }
-                %>
+                <% out.println(score); %>
                 </font>
               </td>
             </tr>
