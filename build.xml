@@ -12,11 +12,13 @@
   <property name="app.version"     value="2.6"/>
                                    
   <property name="dir.build"       value="build"/>
-  <property name="dir.tomcat"      value="unspecified"/>
+  <property name="tomcat"     value="jakarta-tomcat-4.1.27-LE-jdk14"/>
+  <property name="dir.tomcat"      value="${dir.build}/${tomcat}"/>
   <property name="dir.deploy"      value="${dir.tomcat}/webapps/${app.name}"/>
   
   <property name="dir.dist"        value="dist"/>
-  <property name="dir.web"         value="${dir.build}/web" />
+  <!--property name="dir.web"         value="${dir.build}/web" /-->
+  <property name="dir.web"         value="${dir.build}/tomcat/webapps/${app.name}"/>
   <property name="dir.bin"         value="${dir.build}/bin" />
   <property name="dir.lib"         value="lib" />
   <property name="dir.src"         value="src" />
@@ -112,16 +114,16 @@
     <pathelement location="${dir.lib}/xalan.jar" />
 
     <!-- Include all elements that Tomcat exposes to applications -->
-    <pathelement location="${dir.tomcat}/common/classes"/>
-    <fileset dir="${dir.tomcat}/common/endorsed">
+    <pathelement location="${dir.build}/tomcat/common/classes"/>
+    <fileset dir="${dir.build}/tomcat/common/endorsed">
       <include name="*.jar"/>
     </fileset>
 
-    <fileset dir="${dir.tomcat}/common/lib">
+    <fileset dir="${dir.build}/tomcat/common/lib">
       <include name="*.jar"/>
     </fileset>
-    <pathelement location="${dir.tomcat}/shared/classes"/>
-    <fileset dir="${dir.tomcat}/shared/lib">
+    <pathelement location="${dir.build}/tomcat/shared/classes"/>
+    <fileset dir="${dir.build}/tomcat/shared/lib">
       <include name="*.jar"/>
     </fileset>
 
@@ -229,17 +231,10 @@
       debug="${compile.debug}"
       deprecation="${compile.deprecation}"
       optimize="${compile.optimize}"
->
+      >
       <classpath refid="compile.classpath"/>
     </javac>
     
-    <!-- Copy associated resource files -->
-    <copy  todir="${dir.web}/WEB-INF/classes">
-      <fileset dir="src">
-        <exclude name="**/*.java" />
-      </fileset>
-    </copy>
-
   </target>
 
   <!-- not perfect, but will work -->
@@ -339,36 +334,28 @@
   </target>  
 
 
-  <!-- ==================== Deploy Target =================================== -->
-
-  <!--
-
-  The "deploy" target copies the contents of the build directory into a
-  location required by our servlet container, and picks up any external
-  dependencies along the way.  AFter restarting the servlet container, you
-  can now test your web application.
-
-  -->
-
-  <target name="deploy" depends="compile"
-    description="Deploy application to servlet container">
-
-    <!-- first clean out the old files -->
-    <delete>
-      <fileset dir="${dir.deploy}">
-        <include name="**" />
-      </fileset>
-    </delete>
-
-    <!-- Copy the contents of the build directory -->
-    <mkdir     dir="${dir.deploy}"/>
-    <copy    todir="${dir.deploy}">
-      <fileset dir="${dir.web}"/>
-    </copy>
-
+  <!-- ==================== Expand Tomcat Target =================================== -->
+  <target name="-tomcat.check">
+    <available property="tomcat.uptodate" file="${dir.build}/${tomcat}/bin/startup.sh" />
   </target>
 
-
+  <target name="tomcat.expand"
+    depends="-tomcat.check"
+    unless="tomcat.uptodate">
+    <untar src="${tomcat}.tar.bz2"
+      dest="${dir.build}"
+      compression="bzip2"
+      />
+    <move todir="${dir.build}/tomcat">
+      <fileset dir="${dir.build}/${tomcat}"/>
+    </move>
+    <chmod perm="+x">
+      <fileset dir="${dir.build}/tomcat/bin">
+        <include name="*.sh"/>
+      </fileset>
+    </chmod>
+  </target>
+  
 
   <!-- ==================== Dist Target ===================================== -->
 
@@ -377,10 +364,6 @@
 
   The "dist" target creates a binary distribution of your application
   in a directory structure ready to be archived in a tar.gz or zip file.
-  Note that this target depends on two others:
-  * "deploy" so that the entire web application (including external
-  dependencies) will have been assembled
-  * "javadoc" so that the application Javadocs will have been created
 
   -->
 
@@ -478,7 +461,8 @@
   Normally, this task is executed indirectly when needed.
 
   -->
-  <target name="prepare" depends="init">
+  <target name="prepare"
+    depends="init,tomcat.expand">
 
     <!-- Create build directory and copy static content -->
     <mkdir  dir="${dir.web}"/>
