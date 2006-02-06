@@ -17,7 +17,7 @@ final Connection connection = (Connection)application.getAttribute("connection")
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument/fll/@title"/></h1>      
+    <h1><x:out select="$challengeDocument/fll/@title"/></h1>
     <ul>
 
       <li>Current Tournament -> <%=Queries.getCurrentTournament(connection)%></li>

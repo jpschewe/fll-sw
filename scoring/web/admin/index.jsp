@@ -101,6 +101,8 @@ final String currentTournament = Queries.getCurrentTournament(connection);
       <li><a href='<c:url value="tournamentInitialization.jsp"/>'>Initialize tournament teams by region</a></li>
           
       <li><a href='<c:url value="judges.jsp"/>'>Assign Judges</a></li>
+      
+      <li><a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a> (for scoresheet printing during playoffs)</li>
 
       <li><form action='<c:url value="index.jsp"/>' method='post'>Select the number of seeding runs.
           <select name='seedingRounds'>

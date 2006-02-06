@@ -207,6 +207,15 @@ public final class GenerateDB {
                          + "  Description varchar(255) default NULL,"
                          + "  PRIMARY KEY  (Param)"
                          + ")");
+      
+      // Table structure for table 'tablenames'
+      stmt.executeUpdate("DROP TABLE IF EXISTS tablenames");
+      stmt.executeUpdate("CREATE TABLE tablenames ("
+                         + "  Tournament varchar(64) NOT NULL,"
+                         + "  SideA varchar(64) NOT NULL,"
+                         + "  SideB varchar(64) NOT NULL,"
+                         + "  PRIMARY KEY (Tournament,SideA,SideB)"
+                         + ")");
 
       //populate tournament parameters with default values
       stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('CurrentTournament', 'DUMMY', 'This is the currently running tournament name - see Tournaments table')");

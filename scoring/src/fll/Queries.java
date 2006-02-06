@@ -109,6 +109,32 @@ public final class Queries {
     }
     return tournamentTeams;
   }
+  
+  public static List getTournamentTables(final Connection connection) throws SQLException {
+    final String currentTournament = getCurrentTournament(connection);
+    
+    Statement stmt = null;
+    ResultSet rs = null;
+    List tableList = new LinkedList();
+    try {
+      stmt = connection.createStatement();
+      
+      rs = stmt.executeQuery("SELECT SideA,SideB FROM tablenames WHERE Tournament = '" + currentTournament + "'");
+      
+      while(rs.next())
+      {
+        final String[] labels = new String[2];
+        labels[0] = rs.getString("SideA");
+        labels[1] = rs.getString("SideB");
+        tableList.add(labels);
+      }
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closeStatement(stmt);
+    }
+    
+    return tableList;
+  }
 
   /**
    * Get the list of divisions at this tournament as a List of Strings.  Uses
