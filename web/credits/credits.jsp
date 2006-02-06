@@ -35,7 +35,7 @@
 
       <li><a href="http://www.mysql.com">MySQL</a> - <a
       href="mysql-license.txt">License</a> (more information can be found <a
-      href="http://www.mysql.com/support/arrangements.html">here</a></li>
+      href="http://www.mysql.com/support/arrangements.html">here</a>)</li>
 
       <li><a href="http://java.sun.com/">Java Development Kit</a> -
         <a href="jdk-license.txt">License</a></li>
@@ -45,6 +45,9 @@
 
       <li><a href="http://jakarta.apache.org/taglibs/doc/string-doc/string-1.0.1/index.html">String Tag library</a> -
         <a href="taglib-string-LICENSE.txt">License</a></li>
+        
+      <li><a href="http://www.lowagie.com/iText/">iText (PDF generation library)</a> -
+        <a href="http://www.lowagie.com/iText/faq.html#free">License Information</a></li>
         
     </ul>
 

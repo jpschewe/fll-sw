@@ -71,6 +71,26 @@ while(divisionIter.hasNext()) {
 
         <li>
           <B>WARNING: Do not select brackets until all seeding runs have been recorded!</b><br>
+          <form action='scoregenbrackets.jsp' method='get'>
+            <B>EXPERIMENTAL!</B> Go to the scoresheet generation/admin/printable bracket page for division <select name='division'>
+<%
+{
+final Iterator divisionIter = divisions.iterator();
+while(divisionIter.hasNext()) {
+  final String div = (String)divisionIter.next();
+%>
+<option value='<%=div%>'><%=div%></option>
+<%
+}
+}
+%>
+            </select>
+            <input type='submit' value='Go to Playoffs'>
+          </form>
+        </li>
+
+        <li>
+          <B>WARNING: Do not select brackets until all seeding runs have been recorded!</b><br>
           <a href="remoteMain.jsp">Go to remotely controlled brackets</a>
           These brackets can be controlled from the admin page.
         </li>

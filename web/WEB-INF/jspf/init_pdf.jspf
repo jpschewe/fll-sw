@@ -1,0 +1,38 @@
+<%@ page import="fll.Utilities"
+%><%@ page import="fll.Queries"
+%><%@ page import="java.sql.Connection"
+%><%@ page import="org.w3c.dom.Document"
+%><%
+// TODO working on moving these to session variables
+// initialize some application variables
+{ // put this in it's own scope so it can be included multiple times
+  if(null == application.getAttribute("database")) {
+    application.setAttribute("database", "fll");
+  }
+  
+  final String database = (String)application.getAttribute("database");
+    
+  //Initialize the connection
+  if(null == application.getAttribute("connection")) {
+    final Connection connection = Utilities.createDBConnection(application.getInitParameter("database_host"), "fll", "fll", database);
+    application.setAttribute("connection", connection);
+  }
+    
+  if(null == application.getAttribute("challengeDocument")) {  
+    final Document document = Queries.getChallengeDocument((Connection)application.getAttribute("connection"));
+    if(null == document) {
+      throw new RuntimeException("Could not find xml challenge description in the database!");
+    }
+    application.setAttribute("challengeDocument", document);
+  }
+  
+  if(null == application.getAttribute("ScorePageText")) {
+    application.setAttribute("ScorePageText", "FLL");
+  }
+}
+//keep browser from caching any content
+response.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
+response.setHeader ("Expires", "0"); // prevents caching at the proxy server
+//set content type so we're writing a PDF file...
+response.setContentType("application/pdf");
+%>

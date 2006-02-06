@@ -598,6 +598,268 @@ public final class Playoff {
     }
   }
   
+  private static void genScoresheetForm(
+      final JspWriter out,
+      Team teamA,
+      Team teamB,
+      String tableA,
+      String tableB,
+      List tables,
+      String round) throws IOException
+  {
+    final String formName = "genScoresheet_" + teamA.getTeamNumber() + "_" + teamB.getTeamNumber();
+    out.println("<form name='" + formName + "' action='../scoresheets/generateScoresheet.jsp' method='POST' target='_new'>");
+    
+    out.println("  <input type='hidden' name='numTeams' value='2'>");
+
+    out.println("  <input type='hidden' name='TeamName1' value='" + teamA.getTeamName() + "'>");
+    out.println("  <input type='hidden' name='TeamName2' value='" + teamB.getTeamName() + "'>");
+
+    out.println("  <input type='hidden' name='TeamNumber1' value='" + teamA.getTeamNumber() + "'>");
+    out.println("  <input type='hidden' name='TeamNumber2' value='" + teamB.getTeamNumber() + "'>");
+
+    out.println("  1st side:<select name='Table1'>");
+    Iterator i = tables.iterator();
+    while(i.hasNext())
+    {
+      final String[] t = (String[])i.next();
+      
+      out.print("    <option value='" + t[0] + "'");
+      if(t[0].equals(tableA)) {
+        out.print(" selected");
+      }
+      out.println(">" + t[0] + "</option>");
+      out.print("    <option value='" + t[1] + "'");
+      if(t[1].equals(tableA)) {
+        out.print(" selected>");
+      }
+      out.println(">" + t[1] + "</option>");
+    }
+    out.println("  </select><br/>");
+    
+    out.println("  2nd side:<select name='Table2'>");
+    i = tables.iterator();
+    while(i.hasNext())
+    {
+      final String[] t = (String[])i.next();
+      
+      out.print("    <option value='" + t[0] + "'");
+      if(t[0].equals(tableB)) {
+        out.print(" selected");
+      }
+      out.println(">" + t[0] + "</option>");
+      
+      out.print("    <option value='" + t[1] + "'");
+      if(t[1].equals(tableB)) {
+        out.print(" selected");
+      }
+      out.println(">" + t[1] + "</option>");
+    }
+    out.println("  </select><br/>");
+    
+    out.println("  <input type='hidden' name='RoundNumber1' value='" + round + "'>");
+    out.println("  <input type='hidden' name='RoundNumber2' value='" + round + "'>");
+    
+    out.println("  <input type='submit' value='Get Scoresheets'>");
+    
+    out.println("</form>");
+  }
+  
+  /**
+   * Output the table for the printable brackets to out
+   */
+  public static void displayScoresheetGenerationBrackets(
+      final Connection connection, final Document challengeDocument,
+      final String division, final JspWriter out) throws IOException,
+      SQLException, ParseException {
+
+    final Map tournamentTeams = Queries.getTournamentTeams(connection);
+    final String currentTournament = Queries.getCurrentTournament(connection);
+    final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
+    final List tournamentTables = Queries.getTournamentTables(connection);
+    if(tournamentTables.size() == 0)
+      tournamentTables.add(new String[] {"",""});
+
+    // initialize currentRound to contain a full bracket setup
+    List tempCurrentRound = buildInitialBracketOrder(connection, division,
+        tournamentTeams);
+    if (tempCurrentRound.size() > 1) {
+      out.println("<table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>");
+
+      // compute number of runs needed to complete the playoffs
+      out.println("<tr><th></th>");
+      final int initialBracketSize = tempCurrentRound.size();
+      int numRuns = 1;
+      while (Math.pow(2, numRuns) < initialBracketSize) {
+        out.println("<th colspan='2'>Playoff Round " + numRuns + "</th>");
+        numRuns++;
+      }
+      out.println("<th colspan='2'>Playoff Round " + numRuns + "</th>");
+      numRuns++;
+      out.println("<th colspan='2'>Playoff Round " + numRuns + "</th>");
+      out.println("</tr>");
+
+      // the row at which the last team was displayed
+      int[] lastTeam = new int[numRuns];
+      Arrays.fill(lastTeam, 0);
+      // the teams for a given round
+      Iterator[] currentRoundTeams = new Iterator[numRuns];
+      // the bracket that will be displayed next
+      int[] bracketIndex = new int[numRuns];
+      Arrays.fill(bracketIndex, 1);
+      // the team that will be displayed next
+      int[] teamIndex = new int[numRuns];
+      Arrays.fill(teamIndex, 1);
+      // the table that will be assigned next
+      Iterator[] currentRoundTable = new Iterator[numRuns];
+      // team iterator for scoresheet generation form
+      Iterator[] scoreGenTeams = new Iterator[numRuns];
+      // match counts per round
+      int[] matchCounts = new int[numRuns];
+      Arrays.fill(matchCounts, 0);
+
+      for (int tempRunNumber = 0; tempRunNumber < numRuns; tempRunNumber++) {
+        // save off the team order for later
+        currentRoundTeams[tempRunNumber] = tempCurrentRound.iterator();
+        scoreGenTeams[tempRunNumber] = tempCurrentRound.iterator();
+        if(tempRunNumber > 0) {
+          matchCounts[tempRunNumber] = matchCounts[tempRunNumber-1];
+        }
+
+        final List newCurrentRound = new LinkedList();
+        final Iterator prevIter = tempCurrentRound.iterator();
+        while (prevIter.hasNext()) {
+          final Team teamA = (Team) prevIter.next();
+          if (prevIter.hasNext()) {
+            final Team teamB = (Team) prevIter.next();
+            final Team winner = pickWinner(connection, challengeDocument,
+                teamA, teamB, tempRunNumber + numSeedingRounds + 1);
+            newCurrentRound.add(winner);
+            if( !( (teamA != null && teamA.equals(Team.BYE)) || (teamB != null && teamB.equals(Team.BYE)) ) ) {
+              matchCounts[tempRunNumber] += 1;
+            }
+          } else {
+            // handle finals
+            newCurrentRound.add(teamA);
+          }
+        }
+        currentRoundTable[tempRunNumber] = tournamentTables.iterator();
+        if(tempRunNumber > 0) {
+          final int iters = matchCounts[tempRunNumber-1] % tournamentTables.size();
+          for(int j=0; j < iters; j++)
+          {
+            currentRoundTable[tempRunNumber].next();
+          }
+        }
+        tempCurrentRound = newCurrentRound;
+      }
+
+      // Now create rows, 4 per initial bracket, two columns for each playoff
+      // round
+      // row is 1 based
+      // playoffRunNumber is 0 based for array indexing
+      // (1 << (playoffRunNumber+2)) == number of rows per bracket for the given
+      // run
+      for (int row = 1; row <= initialBracketSize * 4; row++) {
+        out.println("<tr><td width='1' cellpadding='0'>&nbsp;</td>");
+        for (int playoffRunNumber = 0; playoffRunNumber < numRuns; playoffRunNumber++) {
+          final boolean evenTeamIndex = (teamIndex[playoffRunNumber] % 2 == 0);
+          if ((0 == lastTeam[playoffRunNumber] // haven't seen a team yet
+              && ((row == ((1 << (playoffRunNumber + 2)) / 2) - 1) // first
+                                                                    // team in a
+                                                                    // later
+                                                                    // bracket
+              || (row == 1 && playoffRunNumber == 0))) // first team first
+                                                        // round
+              || ((row - lastTeam[playoffRunNumber]) == (1 << (playoffRunNumber + 2)))) { // later
+                                                                                          // teams
+
+            // keep track of where we last output a team
+            lastTeam[playoffRunNumber] = row;
+            // team information
+            final Team team = (Team) currentRoundTeams[playoffRunNumber].next();
+            out.println("<td class='Leaf' width='200'>");
+            out.println(getDisplayString(connection, currentTournament,
+                (playoffRunNumber + numSeedingRounds + 1), team, false));
+
+            out.println("</td>");
+
+            if (evenTeamIndex) {
+              // skip for bridge
+              out.println("<!-- skip column for bridge -->");
+            } else {
+              // bridgetop
+              out.println("<td class='BridgeTop' width='10'>&nbsp;</td>");
+            }
+
+            teamIndex[playoffRunNumber]++;
+          } else if ((row - lastTeam[playoffRunNumber]) == 1
+              && 0 != lastTeam[playoffRunNumber]) {
+            // bracket number
+            if (!evenTeamIndex) {
+              out.println("<td width='200'>&nbsp;</td>");
+              out.println("<td width='10'>&nbsp;</td>");
+            } else {
+              if (playoffRunNumber != numRuns - 1) {
+                out.println("<td width='200' valign='middle' rowspan='"
+                    + ((1 << (playoffRunNumber + 2)) - 1)
+                    + "'><font size='4'>Bracket "
+                    + bracketIndex[playoffRunNumber] + "</font><br />");
+                // TODO: Test that this section isn't broken when only some scores are entered.
+                final Team teamA = (Team) scoreGenTeams[playoffRunNumber].next();
+                final Team teamB = (Team) scoreGenTeams[playoffRunNumber].next();
+                if (teamA != null && teamB != null
+                    && !( teamA.equals(Team.BYE) || teamB.equals(Team.BYE) ) ) {
+                  if (!currentRoundTable[playoffRunNumber].hasNext()) {
+                    currentRoundTable[playoffRunNumber] = tournamentTables.iterator();
+                  }
+                  final String[] tables = (String[]) currentRoundTable[playoffRunNumber].next();
+                  genScoresheetForm(out, teamA, teamB, tables[0], tables[1], tournamentTables,
+                      "Playoff Round " + (playoffRunNumber + 1));
+                } else if(teamA == null || teamB == null) {
+                  if (!currentRoundTable[playoffRunNumber].hasNext()) {
+                    currentRoundTable[playoffRunNumber] = tournamentTables.iterator();
+                  }
+                  currentRoundTable[playoffRunNumber].next();
+                }
+                out.println("</td>");
+                bracketIndex[playoffRunNumber]++;
+              } else {
+                out.println("<td rowspan='" + (1 << (playoffRunNumber + 2))
+                    + "width='200'>&nbsp;</td>");
+              }
+              // skip for bridge
+              out.println("<!-- skip column for bridge -->");
+
+              if (playoffRunNumber != numRuns - 1) {
+                // bridge of size 2^(playoffRunNumber+2) =
+                // 1<<(playoffRunNumber+2)
+                out.println("<td class='Bridge' rowspan='"
+                    + (1 << (playoffRunNumber + 2)) + "'>&nbsp;</td>");
+              } else {
+                out.println("<td rowspan='" + (1 << (playoffRunNumber + 2))
+                    + "'>&nbsp;</td>");
+              }
+            }
+          } else {
+            if (!evenTeamIndex || 0 == lastTeam[playoffRunNumber]) {
+              // blank
+              out.println("<td width='200'>&nbsp;</td>");
+              out.println("<td width='10'>&nbsp;</td>");
+            } else {
+              // skip for bridge
+              out.println("<!-- skip column for bridge -->");
+            }
+          }
+        }
+        out.println("</tr>");
+      }
+      out.println("</table");
+    } else {
+      out.println("<p>Not enough teams for a playoff</p>");
+    }
+  }
+  
   /**
    * Array of indicies used to determine who plays who in a single elimination
    * playoff bracket system
