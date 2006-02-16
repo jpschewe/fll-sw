@@ -44,7 +44,13 @@ File xmlfile = null;
     }
     final Document document = ChallengeParser.parse(xmlstream);
     xmlstream.close();
-    GenerateDB.generateDB(document, application.getInitParameter("database_host"), rootUser, rootPassword, "fll");
+    final String db;
+    if(GenerateDB.USING_HSQLDB) {
+      db = config.getServletContext().getRealPath("/WEB-INF/flldb");
+    } else {
+      db = "fll";
+    }
+    GenerateDB.generateDB(document, application.getInitParameter("database_host"), rootUser, rootPassword, db);
   
     if(null != xmlfile) {
       xmlfile.delete();
@@ -73,8 +79,6 @@ File xmlfile = null;
         <input type='submit' name='reinitializeDatabase' value='Initialize Database' onclick='return confirm("This will erase ALL data in the database fll (if it already exists), are you sure?")'>
       </form>
     </p>
-
-    <p>realpath: <%= config.getServletContext().getRealPath("/WEB-INF/testdb") %></p>
 
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
         

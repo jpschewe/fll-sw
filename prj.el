@@ -18,7 +18,7 @@
    '(jde-run-read-app-args t)
    '(jde-global-classpath
      (list
-      (expand-file-name "build/web/WEB-INF/classes" project-root)
+      (expand-file-name "build/tomcat/webapps/fll-sw/WEB-INF/classes" project-root)
 			   
       (expand-file-name "lib/JonsInfra-0.2.jar" project-root)
       (expand-file-name "lib/junit-3.8.1.jar" project-root)
@@ -53,6 +53,15 @@
    '(jde-ant-complete-target 		nil) ;; don't parse the build file for me
    '(jde-ant-invocation-method  	'("Java"))
    '(jde-run-option-vm-args '("-DASSERT_BEHAVIOR=CONTINUE "))
+   '(jde-import-sorted-groups 		'asc)
+   '(jde-import-excluded-packages
+     '("\\(bsh.*\\|sched-infra.*\\|com.sun.*\\|sunw.*\\|sun.*\\)"))
+   '(jde-import-group-of-rules
+     (quote
+      (
+       ;;("^javax?\\.")
+       ("^\\([^.]+\\([.][^.]+[.]\\)*\\)" . 1)
+       )))   
  '(jde-gen-buffer-boilerplate (quote (
 				      "/*"
 				      " * Copyright (c) 2000-2003 INSciTE.  All rights reserved"

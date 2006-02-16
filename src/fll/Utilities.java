@@ -79,6 +79,7 @@ public final class Utilities {
     if(fll.xml.GenerateDB.USING_HSQLDB) {
       // do this when getting the URL so it gets called from the JSP's as well
       testHSQLDB(database);
+      LOG.debug("URL: jdbc:hsqldb:file:" + database + ";shutdown=true");
       return "jdbc:hsqldb:file:" + database + ";shutdown=true";
     } else {
       return "jdbc:mysql://" + hostname + "/" + database + "?user=fll&password=fll&autoReconnect=true";
@@ -151,6 +152,7 @@ public final class Utilities {
     } else {
       myURL = "jdbc:mysql://" + hostname + "/" + database + "?user=" + username + "&password=" + password + "&autoReconnect=true";
     }
+    LOG.debug("myURL: " + myURL);
     try {
       connection = DriverManager.getConnection(myURL);
     } catch(final SQLException sqle) {

@@ -51,7 +51,8 @@ final Connection connection = (Connection)application.getAttribute("connection")
       <li><a href="troubleshooting/index.jsp">Troubleshooting</a></li>
         
       <li><a href="credits/credits.jsp">Credits</a></li>
-        
+
+      <li>Using database: <c:out value="${database}"/></li>
     </ul>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>

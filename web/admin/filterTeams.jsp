@@ -33,7 +33,7 @@ if(null == session.getAttribute("columnSelectOptions")) {
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Filter Teams)</h1>
 
-    <p>There are <%=UploadTeams.applyFilters(connection, request)%> currently
+    <p>There are <%=UploadTeams.applyFilters(connection, request)%> teams currently
     selected.  Do not use the forward and back buttons!  Use the supplied
     links/buttons.</p>
 

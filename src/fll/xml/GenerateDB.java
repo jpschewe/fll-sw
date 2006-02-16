@@ -75,10 +75,11 @@ public final class GenerateDB {
         System.exit(1);
       } else {
         final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-        final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-region-2005.xml"));
-        generateDB(challengeDocument, args[0], args[1], args[2], "fll");
+        final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-hsr-2005.xml"));
+        final String db = "tomcat/webapps/fll-sw/WEB-INF/fll";
+        generateDB(challengeDocument, args[0], args[1], args[2], db);
 
-        final Connection connection = Utilities.createDBConnection(args[0], "fll", "fll", "fll");
+        final Connection connection = Utilities.createDBConnection(args[0], "fll", "fll", db);
         final Document document = Queries.getChallengeDocument(connection);
         System.out.println("Title: " + document.getDocumentElement().getAttribute("title"));
         connection.close();
@@ -345,7 +346,7 @@ public final class GenerateDB {
       definition += " INTEGER";
     }
     
-    LOG.info("GoalColumnDefinition: " + definition);
+    LOG.debug("GoalColumnDefinition: " + definition);
     
     return definition;
   }
