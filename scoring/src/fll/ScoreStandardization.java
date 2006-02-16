@@ -5,6 +5,8 @@
  */
 package fll;
 
+import fll.xml.GenerateDB;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -227,14 +229,25 @@ public final class ScoreStandardization {
       Utilities.closeResultSet(rs);
 
       // 1 - category
-      selectPrep = connection.prepareStatement("SELECT ScoreGroup,"
-                                               + " Avg(RawScore) AS sg_mean,"
-                                               + " Count(RawScore) AS sg_count,"
-                                               + " STD(RawScore) AS sg_stdev"
-                                               + " FROM SummarizedScores"
-                                               + " WHERE Tournament = '" + tournament + "'"
-                                               + " AND Category = ?"
-                                               + " GROUP BY ScoreGroup");
+      if(GenerateDB.USING_HSQLDB) {
+        selectPrep = connection.prepareStatement("SELECT ScoreGroup,"
+                                                 + " Avg(RawScore) AS sg_mean,"
+                                                 + " Count(RawScore) AS sg_count,"
+                                                 + " stddev(RawScore) AS sg_stdev"
+                                                 + " FROM SummarizedScores"
+                                                 + " WHERE Tournament = '" + tournament + "'"
+                                                 + " AND Category = ?"
+                                                 + " GROUP BY ScoreGroup");
+      } else {
+        selectPrep = connection.prepareStatement("SELECT ScoreGroup,"
+                                                 + " Avg(RawScore) AS sg_mean,"
+                                                 + " Count(RawScore) AS sg_count,"
+                                                 + " STD(RawScore) AS sg_stdev"
+                                                 + " FROM SummarizedScores"
+                                                 + " WHERE Tournament = '" + tournament + "'"
+                                                 + " AND Category = ?"
+                                                 + " GROUP BY ScoreGroup");
+      }
       /*
         Update StandardizedScore for each team in the ScoreGroup
         formula: SS = Std_Mean + (Z-Score-of-ComputedTotal * Std_Sigma)
