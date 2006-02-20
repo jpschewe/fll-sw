@@ -74,8 +74,8 @@ pageContext.setAttribute("division", divisions.get(divisionIndex));
                   + " WHERE Performance.Tournament = '" + currentTournament + "'"
                   + " AND Teams.TeamNumber = Performance.TeamNumber"
                   + " AND Performance.RunNumber <= " + Queries.getNumSeedingRounds(connection)
-                  + " AND Performance.NoShow = 0"
-                  + " AND Performance.Bye = 0"
+                  + " AND Performance.NoShow = False"
+                  + " AND Performance.Bye = False"
                   + " AND Teams.Division = '" + pageContext.getAttribute("division") + "'"
                   + " GROUP BY Performance.TeamNumber"
                   + " ORDER BY MaxOfComputedScore DESC LIMIT 10";
