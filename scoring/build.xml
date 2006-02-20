@@ -191,7 +191,7 @@
     <copy todir="${dir.build}/lib">
       <fileset dir="${dir.lib}" />
     </copy>
-
+    
   </target>
 
   <target name="compile.classes" depends="prepare"

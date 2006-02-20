@@ -44,7 +44,7 @@ public final class GenerateDB {
   private static final String PARAM_VALUE_DATATYPE;
   public static final String TEXT_DATATYPE;
 
-  public static final boolean USING_HSQLDB = false;
+  public static final boolean USING_HSQLDB = true;
   static {
     if(USING_HSQLDB) {
       TEXT_DATATYPE = "longvarchar";

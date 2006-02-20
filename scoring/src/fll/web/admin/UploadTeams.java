@@ -139,18 +139,20 @@ public final class UploadTeams {
       //loop over the rest of the rows and insert them into the temporary table
       String line = reader.readLine();
       for(int lineCounter=0; null != line; line = reader.readLine(), lineCounter++) {
-        final Iterator valueIter = splitLine(line).iterator();
-        int column = 1;
-        while(valueIter.hasNext()) {
-          final String value = (String)valueIter.next();
-          insertPrep.setString(column, value);
-          column++;
-        }
-        for(; column <= columnNamesSeen.size(); column++) {
-          insertPrep.setString(column, null);
-        }
+        if(!"".equals(line.trim())) { // skip empty lines
+          final Iterator valueIter = splitLine(line).iterator();
+          int column = 1;
+          while(valueIter.hasNext()) {
+            final String value = (String)valueIter.next();
+            insertPrep.setString(column, value);
+            column++;
+          }
+          for(; column <= columnNamesSeen.size(); column++) {
+            insertPrep.setString(column, null);
+          }
         
-        insertPrep.executeUpdate();
+          insertPrep.executeUpdate();
+        }
       }
     } finally {
       Utilities.closePreparedStatement(insertPrep);
@@ -288,7 +290,6 @@ public final class UploadTeams {
    * <ul>
    *   <li>Make sure that the column for TeamNumber is specified</li>
    *   <li>Make sure that the TeamNumbers are unique - just use count</li>
-   *   <li>TODO: Generate the tournaments table off of the Tournaments column?</li>
    *   <li>Delete all rows from the Teams table</li>
    *   <li>Copy the teams into the Teams table</li>
    * </ul>
@@ -312,17 +313,12 @@ public final class UploadTeams {
     throws SQLException, IOException {
     Statement stmt = null;
     ResultSet rs = null;
+    PreparedStatement prep = null;
     try {
-      stmt = connection.createStatement();
-
-      rs = stmt.executeQuery("SELECT COUNT(*) FROM FilteredTeams");
-      rs.next();
-      final int numRowsInFiltered = rs.getInt(1);
-      rs.close();
-      
       final StringBuffer dbColumns = new StringBuffer();
       final StringBuffer dataColumns = new StringBuffer();
-
+      final StringBuffer values = new StringBuffer();
+      
       final String teamNumberColumn = request.getParameter("TeamNumber");
       if(null == teamNumberColumn || "".equals(teamNumberColumn)) {
         //Error, redirect back to teamColumnSelection.jsp with error message
@@ -334,6 +330,8 @@ public final class UploadTeams {
       //always have TeamNumber
       dbColumns.append("TeamNumber");
       dataColumns.append(teamNumberColumn);
+      values.append("?");
+      int numValues = 1;
       
       final Enumeration paramIter = request.getParameterNames();
       while(paramIter.hasMoreElements()) {
@@ -345,34 +343,52 @@ public final class UploadTeams {
           if(null != value && !"".equals(value)) {
             dbColumns.append(", " + parameter);
             dataColumns.append(", " + value);
+            values.append(",?");
+            numValues++;
           }
         }
       }
 
       //clean out Teams table first
+      stmt = connection.createStatement();
       stmt.executeUpdate("DELETE FROM Teams");
+
+
+      // now copy the data over converting the team number to an integer
+      final String selectSQL = "SELECT " + dataColumns.toString() + " FROM FilteredTeams";
+      final String insertSQL = "INSERT INTO Teams (" + dbColumns.toString() + ") VALUES(" + values.toString() + ")";
+      prep = connection.prepareStatement(insertSQL); 
+
+      rs = stmt.executeQuery(selectSQL);
+      while(rs.next()) {
+        // convert TeamNumber to an integer
+        final String teamNumStr = rs.getString(1);
+        try {
+          final int teamNum = Integer.parseInt(teamNumStr);
+          prep.setInt(1, teamNum);
+        } catch(final NumberFormatException nfe) {
+          out.println("<font color='red'>Error, " + teamNumStr + " is not numeric.<br/>");
+          out.println("Go back and check your input file for errors.<br/></font>");
+          return false;
+        }
+        
+        for(int i=1; i<numValues; i++) { //skip TeamNumber
+          prep.setString(i+1, rs.getString(i+1));
+        }
+        prep.executeUpdate();
+      }
+      
       final String copySQL = "INSERT INTO Teams (" + dbColumns.toString() + ") SELECT " + dataColumns.toString() + " FROM FilteredTeams";
-      final int numRowsInserted = stmt.executeUpdate(copySQL);
 
       //put all teams in the DUMMY tournament by default
       stmt.executeUpdate("DELETE FROM TournamentTeams");
       stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber) SELECT 'DUMMY', " + teamNumberColumn + " FROM FilteredTeams");
 
-      if(numRowsInserted != numRowsInFiltered) {
-        //Error
-        out.println("<font color='red'>Error, row counts do not match.<br>");
-        out.println("Rows after applying filters: " + numRowsInFiltered + "<br>");
-        out.println("Rows in the teams table after inserting data: " + numRowsInserted + "<br>");
-        out.println("This probably means that the column you specified as the TeamNumber column is not unique.<br>");
-        out.println("Use the back button in your browser to correct this.<br>");
-        out.println("Or go back and check your input file for errors.<br></font>");
-        return false;
-      }
-
       return true;
     } finally {
       Utilities.closeStatement(stmt);
       Utilities.closeResultSet(rs);
+      Utilities.closePreparedStatement(prep);
     }
   }
 
