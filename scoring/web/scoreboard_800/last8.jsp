@@ -64,10 +64,10 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
                 <td width='8%' align='right'>
                   <font size='3'>
                     <c:choose>
-                      <c:when test="${row.NoShow == False}">
+                      <c:when test="${row.NoShow == True}">
                         No Show
                       </c:when>
-                      <c:when test="${row.Bye == False}">
+                      <c:when test="${row.Bye == True}">
                         Bye
                       </c:when>
                       <c:otherwise>
