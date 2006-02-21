@@ -5,6 +5,9 @@
  */
 package fll.xml;
 
+import fll.Queries;
+import fll.Utilities;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,8 +15,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import fll.Queries;
-import fll.Utilities;
+import org.apache.log4j.Logger;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -26,7 +29,9 @@ import org.w3c.dom.NodeList;
  * @version $Revision$
  */
 public final class ImportDB {
-   
+
+  private static final Logger LOG = Logger.getLogger(ImportDB.class);
+  
   public static void main(final String[] args) {
     try {
       if(args.length != 3) {
@@ -61,6 +66,25 @@ public final class ImportDB {
         
         final Connection sourceConnection = DriverManager.getConnection(sourceURI);
         final Connection destinationConnection = DriverManager.getConnection(destinationURI);
+        Statement stmt1 = null;
+        Statement stmt2 = null;
+        try {
+          try {
+            stmt1 = sourceConnection.createStatement();
+            stmt1.executeUpdate("SET WRITE_DELAY 1 MILLIS");
+          } catch(final SQLException sqle) {
+            LOG.info("Source either isn't HSQLDB or there is a problem", sqle);
+          }
+          try {
+            stmt2 = destinationConnection.createStatement();
+            stmt2.executeUpdate("SET WRITE_DELAY 1 MILLIS");
+          } catch(final SQLException sqle) {
+            LOG.info("Destination either isn't HSQLDB or there is a problem", sqle);
+          }          
+        } finally {
+          Utilities.closeStatement(stmt1);
+          Utilities.closeStatement(stmt2);
+        }
 
         
         final boolean differences = checkForDifferences(sourceConnection, destinationConnection, tournament);
@@ -71,6 +95,25 @@ public final class ImportDB {
         } else {
           System.out.println("Import aborted due to differences in databases");
         }
+
+        try {
+          try {
+            stmt1 = sourceConnection.createStatement();
+            stmt1.executeUpdate("SHUTDOWN COMPACT");
+          } catch(final SQLException sqle) {
+            LOG.info("Source either isn't HSQLDB or there is a problem", sqle);
+          }
+          try {
+            stmt2 = destinationConnection.createStatement();
+            stmt2.executeUpdate("SHUTDOWN COMPACT");
+          } catch(final SQLException sqle) {
+            LOG.info("Destination either isn't HSQLDB or there is a problem", sqle);
+          }          
+        } finally {
+          Utilities.closeStatement(stmt1);
+          Utilities.closeStatement(stmt2);
+        }
+        
       }
     } catch(final Exception e) {
       e.printStackTrace();
