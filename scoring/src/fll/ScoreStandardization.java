@@ -233,7 +233,7 @@ public final class ScoreStandardization {
         selectPrep = connection.prepareStatement("SELECT ScoreGroup,"
                                                  + " Avg(RawScore) AS sg_mean,"
                                                  + " Count(RawScore) AS sg_count,"
-                                                 + " stddev(RawScore) AS sg_stdev"
+                                                 + " stddev_samp(RawScore) AS sg_stdev"
                                                  + " FROM SummarizedScores"
                                                  + " WHERE Tournament = '" + tournament + "'"
                                                  + " AND Category = ?"
@@ -370,7 +370,7 @@ public final class ScoreStandardization {
                          + " WHERE Tournament = '" + tournament + "'");
 
       stmt.executeUpdate("INSERT INTO FinalScores (TeamNumber,Tournament,OverallScore)"
-                         + " SELECT TeamNumber,Tournament,Sum(WeightedScore) AS OverallScore FROM SummarizedScores"
+                         + " SELECT TeamNumber,'State',Sum(WeightedScore) AS OverallScore FROM SummarizedScores"
                          + " WHERE Tournament = '" + tournament + "'"
                          + " GROUP BY TeamNumber");
       
