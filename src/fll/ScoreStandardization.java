@@ -233,7 +233,7 @@ public final class ScoreStandardization {
         selectPrep = connection.prepareStatement("SELECT ScoreGroup,"
                                                  + " Avg(RawScore) AS sg_mean,"
                                                  + " Count(RawScore) AS sg_count,"
-                                                 + " stddev_samp(RawScore) AS sg_stdev"
+                                                 + " stddev_pop(RawScore) AS sg_stdev"
                                                  + " FROM SummarizedScores"
                                                  + " WHERE Tournament = '" + tournament + "'"
                                                  + " AND Category = ?"
