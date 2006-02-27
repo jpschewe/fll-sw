@@ -24,12 +24,11 @@ merging changes, and JavaDOC is almost a requirement.
 Before getting started, you'll need the following apps/tools to build
 and test things (newer versions should be fine):
 
-  jdk-1.4.x	(http://java.sun.com/)
-  ant-1.4.1	(http://jakarta.apache.org/ant/)
-  mysql-4.0.2+	(http://www.mysql.com/)
-  tomcat-4.1.x	(http://jakarta.apache.org/tomcat/)
-  cygwin-1.3.x  (http://www.cygwin.com)
-  jdee          (http://jdee.sunsite.dk)
+  jdk-1.5.x	(http://java.sun.com/)
+  ant-1.6.5+	(http://jakarta.apache.org/ant/)
+  mysql-4.1+	(http://www.mysql.com/)
+  cygwin-1.3.x  (http://www.cygwin.com) -- optional
+  jdee          (http://jdee.sunsite.dk) -- optional
 
 JDEE is a mode for [X]Emacs that makes Java development much easier, should
   come with XEmacs. 
@@ -65,28 +64,11 @@ JDK:
 
 ANT: 
   
-Tomcat:
-  Download the appropriate version from the tomcat web site.
-
-  Look at the file webapps/tomcat-docs/index.html in the 
-
-To do builds and such you really should read the Tomcat documentation to
-learn the structure of things and how the build file works, since we just use
-theirs.  However here's a quick setup:
-
-- create a file in the same directory as build.xml called build.properties
-with the following (use the top level directory of your tomcat install):
-  catalina.home=/opt/jakarta   (to the install directory of tomcat install - C:\packages\tomcat - DO NOT QUOTE IT.)
 - compile with 'ant compile'
-- deploy with 'ant deploy'
-- after you deloy, restart tomcat
 
-- goto http://localhost:8080/fll-2002/index.jsp
+- start tomcat with startup in build/tomcat/bin
 
-copy xerxesimpl.jar and xercesapi.jar to tomcatinstalldir/common/lib
-
-run starttomcat-script (on programs menu) 
-  (dos box)
+- goto http://localhost:9080/fll-sw/index.jsp
 
 mySQL:
 
@@ -127,11 +109,7 @@ administration pages, specifically the uploading of team data
 
 - The team upload page assumes that the file is tab delimited.  It allows
 basic filtering to occur, but that should be done externally because it's very
-basic with little feedback.  Also note that when columns cannot be merged or
-manipulated by the java.  For example Coach_LastName and Coach_FirstName need
-to be merged externally to be put in the Coach column in our database.  Also
-columns like num_members need to be broken out into boys/girls/medals required
-to be properly input into our database.
+basic with little feedback.
 
 
 ----------
@@ -170,7 +148,7 @@ Session variables:
   - "datasource" (jsp datasource) database connection for SQL jsp tags.
 
 Useful websites:
-   http://mtu.net/~jpschewe/JonsInfra/0.2/index.html - JonsInfra documentation
+   http://mtu.net/~jpschewe/JonsInfra/index.html - JonsInfra documentation
 
 When you're compiling with ant the target compile.jsp, called from compile,
 will use jspc to compile the jsps for error checking.  Unfortunatly the
