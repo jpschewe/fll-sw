@@ -148,13 +148,13 @@ public final class ScoreStandardization {
         stmt.executeUpdate("INSERT INTO SummarizedScores"
                            + " ( TeamNumber, Tournament, ScoreGroup, Category, RawScore )"
                            + " SELECT TeamNumber,"
-                           + " Tournament,"
+                           + " '" + tournament + "',"
                            + " ScoreGroup, '" + catName + "' AS Category,"
                            + " Avg(ComputedTotal) AS RawScore"
                            + " FROM " + catName
                            + " WHERE Tournament = '" + tournament + "'"
                            + " AND ComputedTotal IS NOT NULL"
-                           + " GROUP BY TeamNumber, Tournament, ScoreGroup");
+                           + " GROUP BY TeamNumber, ScoreGroup");
       }
     } finally {
       Utilities.closeStatement(stmt);
@@ -181,12 +181,12 @@ public final class ScoreStandardization {
       //insert rows for the current tournament
       stmt.executeUpdate("INSERT INTO SummarizedScores"
                          + " ( TeamNumber, Tournament, ScoreGroup, Category, RawScore )"
-                         + " SELECT TeamNumber, Tournament, 'Performance' AS ScoreGroup,"
+                         + " SELECT TeamNumber, '" + tournament + "', 'Performance' AS ScoreGroup,"
                          + " 'Performance' AS Category, Max(ComputedTotal) AS RawScore"
                          + " FROM Performance"
                          + " WHERE Tournament = '" + tournament + "' AND NoShow = 0"
                          + " AND RunNumber <= " + seedingRounds
-                         + " GROUP BY TeamNumber, Tournament");
+                         + " GROUP BY TeamNumber");
       
     } finally {
       Utilities.closeStatement(stmt);

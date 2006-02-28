@@ -4,42 +4,26 @@ taglib prefix="sql" uri="http://java.sun.com/jstl/sql"
 %><%@ page import="fll.Queries"
 %><%@ page import="java.sql.Connection"
 %><%@ page import="org.w3c.dom.Document"
-%>
-<c:if test="${empty database}">
+%><c:if test="${empty database}">
   <%
     if(fll.xml.GenerateDB.USING_HSQLDB) {
       Utilities.testHSQLDB(config.getServletContext().getRealPath("/WEB-INF/flldb"));
-  %>
-    <!-- HSQL -->
-    <c:set var="database" scope="application">
+  %><c:set var="database" scope="application">
       <%= config.getServletContext().getRealPath("/WEB-INF/flldb") %>
-    </c:set>
-  <% } else { %>
-    <!-- MySQL -->
-    <c:set var="database" scope="application" value="fll" />
-  <% } %>
-</c:if>
-
-<c:if test="${empty datasource}">
-  <%
+    </c:set><%
+    } else {
+  %><c:set var="database" scope="application" value="fll" /><%
+    } %></c:if><c:if test="${empty datasource}"><%
     pageContext.setAttribute("url", Utilities.getDBURLString((String)application.getInitParameter("database_host"), (String)application.getAttribute("database")));
     pageContext.setAttribute("driverName", Utilities.getDBDriverName());
-  %>
-
-  <sql:setDataSource scope="session"
+  %><sql:setDataSource scope="session"
                      var="datasource"
                      url="${url}"
                      driver="${driverName}"
-                     />
-
-  <%
+                     /><%
     if(fll.xml.GenerateDB.USING_HSQLDB) {
-  %>
-      <!-- HSQL -->
-      <sql:update dataSource="${datasource}" sql="SET WRITE_DELAY 100 MILLIS"/>
-  <% } %>
-
-</c:if><%
+  %><sql:update dataSource="${datasource}" sql="SET WRITE_DELAY 100 MILLIS"/><%
+    } %></c:if><%
 { // put this in it's own scope so it can be included multiple times
   final String database = (String)application.getAttribute("database");
   //Initialize the connection
@@ -60,7 +44,7 @@ taglib prefix="sql" uri="http://java.sun.com/jstl/sql"
     application.setAttribute("ScorePageText", "FLL");
   }
 }
-%>
+%><%
 //keep browser from caching any content
 response.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
 response.setHeader ("Expires", "0"); // prevents caching at the proxy server
