@@ -35,6 +35,7 @@ File xmlfile = null;
   if(null != request.getAttribute("reinitializeDatabase")) {
     final String rootUser = (String)request.getAttribute("rootUser");
     final String rootPassword = (String)request.getAttribute("rootPassword");
+    final boolean forceRebuild = "1".equals(request.getAttribute("force_rebuild"));
     final InputStream xmlstream;
     if(null == xmlfile) {
       final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
@@ -50,7 +51,7 @@ File xmlfile = null;
     } else {
       db = "fll";
     }
-    GenerateDB.generateDB(document, application.getInitParameter("database_host"), rootUser, rootPassword, db);
+    GenerateDB.generateDB(document, application.getInitParameter("database_host"), rootUser, rootPassword, db, forceRebuild);
   
     if(null != xmlfile) {
       xmlfile.delete();
@@ -73,10 +74,14 @@ File xmlfile = null;
       This will create a database called fll.<br>
           
       <form action='index.jsp' method='post' enctype="multipart/form-data">
-        Root username <input type='text' name='rootUser'><br>
-        Root password <input type='password' name='rootPassword'><br>
-        XML description document (leave blank to use the default tournament description) <input type="file" size=32" name="xmldocument">
-        <input type='submit' name='reinitializeDatabase' value='Initialize Database' onclick='return confirm("This will erase ALL data in the database fll (if it already exists), are you sure?")'>
+        Root username <input type='text' name='rootUser'><br/>
+        Root password <input type='password' name='rootPassword'><br/>
+        XML description document (leave blank to use the default tournament description) <input type="file" size=32" name="xmldocument"><br/>
+          <input type="checkbox"
+            name='force_rebuild'
+            value="1"/> Rebuild the whole database, including team data?<br/>
+          
+        <input type='submit' name='reinitializeDatabase' value='Initialize Database' onclick='return confirm("This will erase ALL scores in the database fll (if it already exists), are you sure?")'>
       </form>
     </p>
 
