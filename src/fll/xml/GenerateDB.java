@@ -13,9 +13,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import java.util.Collection;
+import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
 
@@ -77,7 +82,7 @@ public final class GenerateDB {
         final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
         final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-hsr-2005.xml"));
         final String db = "tomcat/webapps/fll-sw/WEB-INF/fll";
-        generateDB(challengeDocument, args[0], args[1], args[2], db);
+        generateDB(challengeDocument, args[0], args[1], args[2], db, true);
 
         final Connection connection = Utilities.createDBConnection(args[0], "fll", "fll", db);
         final Document document = Queries.getChallengeDocument(connection);
@@ -101,15 +106,17 @@ public final class GenerateDB {
    * @param host database host
    * @param user root user that has full control
    * @param password password of root user
-   * @param database name for the database to generate 
+   * @param database name for the database to generate
+   * @param forceRebuild recreate all tables from scratch, if false don't
+   * recreate the tables that hold team information
    */
   public static void generateDB(final Document document,
                                 final String host,
                                 final String user,
                                 final String password,
-                                final String database)
+                                final String database,
+                                final boolean forceRebuild)
     throws SQLException, UnsupportedEncodingException {
-
     Connection connection = null;
     Statement stmt = null;
     if(!USING_HSQLDB) {
@@ -136,6 +143,7 @@ public final class GenerateDB {
     }
 
     PreparedStatement prep = null;
+    ResultSet rs = null;
     try {
       connection = Utilities.createDBConnection(host, "fll", "fll", database);
       
@@ -144,18 +152,34 @@ public final class GenerateDB {
       if(USING_HSQLDB) {
         stmt.executeUpdate("SET WRITE_DELAY 100 MILLIS");
       }
+
+      // get list of tables that already exist
+      final DatabaseMetaData metadata = connection.getMetaData();
+      rs = metadata.getTables(null, null, "%", null);
+      final Collection<String> tables = new LinkedList<String>();
+      while(rs.next()) {
+        tables.add(rs.getString(3).toLowerCase());
+      }
+      rs.close();
+      if(LOG.isDebugEnabled()) {
+        LOG.debug("Tables:" + tables);
+      }
       
       //Table structure for table 'Tournaments'
-      stmt.executeUpdate("DROP TABLE IF EXISTS Tournaments");
-      stmt.executeUpdate("CREATE TABLE Tournaments ("
-                         + "Name " + TOURNAMENT_DATATYPE + " NOT NULL,"
-                         + "Location " + LOCATION_DATATYPE + ","
-                         + "NextTournament " + TOURNAMENT_DATATYPE + " default NULL," //Tournament that teams may advance to from this one
-                         + "PRIMARY KEY (Name)"
-                         +")");
-      stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DUMMY', 'Default dummy tournament')");
-      stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DROP', 'Dummy tournament for teams that drop out')");
+      if(forceRebuild) {
+        stmt.executeUpdate("DROP TABLE IF EXISTS Tournaments");
+      }
 
+      if(forceRebuild || !tables.contains("Tournaments".toLowerCase())) {
+        stmt.executeUpdate("CREATE TABLE Tournaments ("
+                           + "Name " + TOURNAMENT_DATATYPE + " NOT NULL,"
+                           + "Location " + LOCATION_DATATYPE + ","
+                           + "NextTournament " + TOURNAMENT_DATATYPE + " default NULL," //Tournament that teams may advance to from this one
+                           + "PRIMARY KEY (Name)"
+                           +")");
+        stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DUMMY', 'Default dummy tournament')");
+        stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DROP', 'Dummy tournament for teams that drop out')");
+      }
       
       //Table structure for table 'SummarizedScores'
       stmt.executeUpdate("DROP TABLE IF EXISTS SummarizedScores");
@@ -181,50 +205,55 @@ public final class GenerateDB {
                          + ")");
 
       // Table structure for table 'Teams'
-      stmt.executeUpdate("DROP TABLE IF EXISTS Teams");
-      stmt.executeUpdate("CREATE TABLE Teams ("
-                         + "  TeamNumber integer NOT NULL,"
-                         + "  TeamName varchar(255) default '<No Name>' NOT NULL,"
-                         + "  Organization varchar(255),"
-                         + "  Division varchar(32) default '1' NOT NULL,"
-                         + "  Region varchar(255) default 'DUMMY' NOT NULL,"
-                         + "  PRIMARY KEY  (TeamNumber)"
-                         + ")");
+      if(forceRebuild) {
+        stmt.executeUpdate("DROP TABLE IF EXISTS Teams");
+      }
+      if(forceRebuild || !tables.contains("Teams".toLowerCase())) {
+        stmt.executeUpdate("CREATE TABLE Teams ("
+                           + "  TeamNumber integer NOT NULL,"
+                           + "  TeamName varchar(255) default '<No Name>' NOT NULL,"
+                           + "  Organization varchar(255),"
+                           + "  Division varchar(32) default '1' NOT NULL,"
+                           + "  Region varchar(255) default 'DUMMY' NOT NULL,"
+                           + "  PRIMARY KEY  (TeamNumber)"
+                           + ")");
+      }
 
       // table to hold team numbers of teams in this tournament
-      stmt.executeUpdate("DROP TABLE IF EXISTS TournamentTeams");
-      stmt.executeUpdate("CREATE TABLE TournamentTeams ("
-                         + "  TeamNumber integer NOT NULL,"
-                         + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
-                         + "  advanced " + BOOLEAN_DATATYPE + " default 0 NOT NULL,"
-                         + "  PRIMARY KEY (TeamNumber, Tournament)"
-                         + ")");
+      if(forceRebuild) {
+        stmt.executeUpdate("DROP TABLE IF EXISTS TournamentTeams");
+      }
+      if(forceRebuild || !tables.contains("TournamentTeams".toLowerCase())) {
+        stmt.executeUpdate("CREATE TABLE TournamentTeams ("
+                           + "  TeamNumber integer NOT NULL,"
+                           + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
+                           + "  advanced " + BOOLEAN_DATATYPE + " default 0 NOT NULL,"
+                           + "  PRIMARY KEY (TeamNumber, Tournament)"
+                           + ")");
+      }
 
       // Table structure for table 'TournamentParameters'
-      stmt.executeUpdate("DROP TABLE IF EXISTS TournamentParameters");
-      stmt.executeUpdate("CREATE TABLE TournamentParameters ("
-                         + "  Param varchar(64) NOT NULL,"
-                         + "  Value " + PARAM_VALUE_DATATYPE + " NOT NULL,"
-                         + "  Description varchar(255) default NULL,"
-                         + "  PRIMARY KEY  (Param)"
-                         + ")");
-      
-      // Table structure for table 'tablenames'
-      stmt.executeUpdate("DROP TABLE IF EXISTS tablenames");
-      stmt.executeUpdate("CREATE TABLE tablenames ("
-                         + "  Tournament varchar(64) NOT NULL,"
-                         + "  SideA varchar(64) NOT NULL,"
-                         + "  SideB varchar(64) NOT NULL,"
-                         + "  PRIMARY KEY (Tournament,SideA,SideB)"
-                         + ")");
+      if(forceRebuild) {
+        stmt.executeUpdate("DROP TABLE IF EXISTS TournamentParameters");
+      }
+      if(forceRebuild || !tables.contains("TournamentParameters".toLowerCase())) {
+        stmt.executeUpdate("CREATE TABLE TournamentParameters ("
+                           + "  Param varchar(64) NOT NULL,"
+                           + "  Value " + PARAM_VALUE_DATATYPE + " NOT NULL,"
+                           + "  Description varchar(255) default NULL,"
+                           + "  PRIMARY KEY  (Param)"
+                           + ")");
+        
+        //populate tournament parameters with default values
+        stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('CurrentTournament', 'DUMMY', 'This is the currently running tournament name - see Tournaments table')");
+        stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('SeedingRounds', 3, 'Number of seeding rounds before elimination round - used to downselect top performance scores in queries')");
+        stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('StandardizedMean', 100, 'Standard mean for computing the standardized scores')");
+        stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('StandardizedSigma', 20, 'Standard deviation for computing the standardized scores')");
 
-      //populate tournament parameters with default values
-      stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('CurrentTournament', 'DUMMY', 'This is the currently running tournament name - see Tournaments table')");
-      stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('SeedingRounds', 3, 'Number of seeding rounds before elimination round - used to downselect top performance scores in queries')");
-      stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('StandardizedMean', 100, 'Standard mean for computing the standardized scores')");
-      stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('StandardizedSigma', 20, 'Standard deviation for computing the standardized scores')");
-
-      prep = connection.prepareStatement("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('ChallengeDocument', ?, 'The XML document describing the challenge')");
+        prep = connection.prepareStatement("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('ChallengeDocument', ?, 'The XML document describing the challenge')");
+      } else {
+        prep = connection.prepareStatement("UPDATE TournamentParameters SET Value = ? WHERE Param = 'ChallengeDocument'");
+      }        
       
       //dump the document into a byte array so we can push it into the database
       final XMLWriter xmlwriter = new XMLWriter();
@@ -245,9 +274,19 @@ public final class GenerateDB {
                          + "  Division varchar(32) NOT NULL,"
                          + "  PRIMARY KEY  (id,category,Tournament,Division)"
                          + ")");
+
+      
+      // Table structure for table 'tablenames'
+      stmt.executeUpdate("DROP TABLE IF EXISTS tablenames");
+      stmt.executeUpdate("CREATE TABLE tablenames ("
+                         + "  Tournament varchar(64) NOT NULL,"
+                         + "  SideA varchar(64) NOT NULL,"
+                         + "  SideB varchar(64) NOT NULL,"
+                         + "  PRIMARY KEY (Tournament,SideA,SideB)"
+                         + ")");
+
       
       final Element rootElement = document.getDocumentElement();
-      
       final StringBuffer createStatement = new StringBuffer();
       
       //performance
