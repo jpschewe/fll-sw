@@ -370,7 +370,7 @@ public final class ScoreStandardization {
                          + " WHERE Tournament = '" + tournament + "'");
 
       stmt.executeUpdate("INSERT INTO FinalScores (TeamNumber,Tournament,OverallScore)"
-                         + " SELECT TeamNumber,'State',Sum(WeightedScore) AS OverallScore FROM SummarizedScores"
+                         + " SELECT TeamNumber,'" + tournament + "',Sum(WeightedScore) AS OverallScore FROM SummarizedScores"
                          + " WHERE Tournament = '" + tournament + "'"
                          + " GROUP BY TeamNumber");
       
