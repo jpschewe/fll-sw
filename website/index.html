@@ -23,7 +23,11 @@
     <ul>
       <li>Here are the <a href="setup.html">setup instructions</a>.  This includes the hardware and software for tournaments of different sizes.</li>
 
-      <li>You can also get a look at the <a href="instructions.html">instructions for running the software</a>.  Most of the links on this page are dead because this page is really just one of the pages from the actual software install, but you can get a good idea of how things are to run from it.</li>
+      <li>You can also get a look at the <a
+      href="instructions.html">instructions for running the software</a>.
+      Most of the links on this page are dead because this page is really
+      just one of the pages from the actual software install, but you can
+      get a good idea of how things are to run from it.</li>
 
       <li>The SourceForge project page is <a
       href="https://sourceforge.net/projects/fll-sw">here</a>.  You can
@@ -33,17 +37,67 @@
       <li>For an explanation of how the scores are totaled up read <a
       href="ScoreExplaination.pdf">this document</a></li>
 
-      <li>You can see some screenshots of the system <a href="http://sourceforge.net/project/screenshots.php?group_id=76410">here</a></li>
+      <li>You can see some screenshots of the system <a
+      href="http://sourceforge.net/project/screenshots.php?group_id=76410">here</a></li>
 
       <li>Features:
         <ul>
           <li>Open Source Software</li>
+          
           <li>Freely distributable</li>
+          
           <li>Platform Independent (written in Java)</li>
-          <li>Scalable - Successfully used in tournaments with 16 to 80 teams</li>
+          
+          <li>Scalable - Successfully used in tournaments with 16 to 80
+          teams</li>
+          
           <li>Easy to use web interface</li>
-          <li>Allows hierarchical tournament structure to do tournament advancement from regional tournaments to state and beyond</li>
-          <li>Easy to configure for different tournaments with a simple XML file, no code changes required</li>
+          
+          <li>Allows hierarchical tournament structure to do tournament
+          advancement from regional tournaments to state and beyond</li>
+          
+          <li>Easy to configure for different tournaments with a simple XML
+          file, no code changes required</li>
+          
+        </ul>
+      </li>
+
+      <li>Descriptions of the design
+        <ul>
+          <li>Why is the subjective scoring application a separate app
+          rather than a web pased app?  This is done because at many of our
+          tournaments in the beginning we entered the subjective scores
+          down at the location of the subjective judging and the network is
+          in the performance area which is not close enough to network to
+          the subjective judging area.  We still run our state tournament
+          this way, although most of our regionals aren't run this
+          way.</li>
+          
+          <li>We used Java when writing the application because it is a
+          language that we're familiar with and a number of other people
+          know as well to help develop.  We also needed a language that is
+          capable of doing SQL processing and a fair amount of math.  We
+          also wanted a language that is platform independent so we can run
+          on both Windows and Linux.</li>
+          
+          <li>We made the application web-based as it's mostly just a bunch
+          of forms without much need for user interaction and this makes it
+          easy to use other devices for clients to enter scores in the
+          future.</li>
+          
+          <li>The software is web-based, but not internet-based because
+          most of our sites do not have a readily accessible internet
+          connection.</li>
+          
+          <li>We are using the database <a
+          href='http://www.hsqldb.org'>HSQL</a> because it is a pure Java
+          SQL database that can be run in memory.  This makes it easier to
+          install the software as another installer doesn't need to be run.
+          We started with Access and moved off of that because it's
+          Microsoft only and we wanted a database that is more robust.
+          MySQL was used after that as it runs on Windows and Linux,
+          however it still needs a separate installer.</li>
+            
         </ul>
       </li>
 
