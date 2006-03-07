@@ -15,17 +15,12 @@
 
 <c:if test="${empty database}">
   <%
-    if(fll.xml.GenerateDB.USING_HSQLDB) {
-      Utilities.testHSQLDB(config.getServletContext().getRealPath("/WEB-INF/flldb"));
+    Utilities.testHSQLDB(config.getServletContext().getRealPath("/WEB-INF/flldb"));
   %>
-    <!-- HSQL -->
-    <c:set var="database" scope="application">
-      <%= config.getServletContext().getRealPath("/WEB-INF/flldb") %>
-    </c:set>
-  <% } else { %>
-    <!-- MySQL -->
-    <c:set var="database" scope="application" value="fll" />
-  <% } %>
+  <!-- HSQL -->
+  <c:set var="database" scope="application">
+    <%= config.getServletContext().getRealPath("/WEB-INF/flldb") %>
+  </c:set>
 </c:if>
 
 <c:if test="${empty datasource}">
@@ -40,12 +35,7 @@
                      driver="${driverName}"
                      />
 
-  <%
-    if(fll.xml.GenerateDB.USING_HSQLDB) {
-  %>
-      <!-- HSQL -->
-      <sql:update dataSource="${datasource}" sql="SET WRITE_DELAY 100 MILLIS"/>
-  <% } %>
+  <sql:update dataSource="${datasource}" sql="SET WRITE_DELAY 100 MILLIS"/>
 
 </c:if>
 

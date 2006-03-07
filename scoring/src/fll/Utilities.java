@@ -76,25 +76,17 @@ public final class Utilities {
    */
   public static String getDBURLString(final String hostname,
                                       final String database) {
-    if(fll.xml.GenerateDB.USING_HSQLDB) {
-      // do this when getting the URL so it gets called from the JSP's as well
-      testHSQLDB(database);
-      LOG.debug("URL: jdbc:hsqldb:file:" + database + ";shutdown=true");
-      return "jdbc:hsqldb:file:" + database + ";shutdown=true";
-    } else {
-      return "jdbc:mysql://" + hostname + "/" + database + "?user=fll&password=fll&autoReconnect=true";
-    }
+    // do this when getting the URL so it gets called from the JSP's as well
+    testHSQLDB(database);
+    LOG.debug("URL: jdbc:hsqldb:file:" + database + ";shutdown=true");
+    return "jdbc:hsqldb:file:" + database + ";shutdown=true";
   }
 
   /**
    * Get the name of the database driver class.
    */
   public static String getDBDriverName() {
-    if(fll.xml.GenerateDB.USING_HSQLDB) {
-      return "org.hsqldb.jdbcDriver";
-    } else {
-      return "org.gjt.mm.mysql.Driver";
-    }
+    return "org.hsqldb.jdbcDriver";
   }
   
   /**
@@ -146,12 +138,7 @@ public final class Utilities {
     }
 
     Connection connection = null;
-    final String myURL;
-    if(fll.xml.GenerateDB.USING_HSQLDB) {
-      myURL = "jdbc:hsqldb:file:" + database + ";shutdown=true";
-    } else {
-      myURL = "jdbc:mysql://" + hostname + "/" + database + "?user=" + username + "&password=" + password + "&autoReconnect=true";
-    }
+    final String myURL = "jdbc:hsqldb:file:" + database + ";shutdown=true";
     LOG.debug("myURL: " + myURL);
     try {
       connection = DriverManager.getConnection(myURL);

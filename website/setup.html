@@ -28,7 +28,6 @@
           <li><a href="#java">Java</a></li>
           <li><a href="#tomcat">Apache Tomcat</a></li>
           <li><a href="#server">Server software</a></li>
-          <li><a href="#mysql">MySQL</a></li>
           <li><a href="#database">Database</a></li>
         </ol>
       </li>
@@ -297,98 +296,14 @@
         </ol>
       </li>
       
-      <li><b><a name='mysql' href="http://www.mysql.com/downloads/mysql-4.0.html">Install MySQL 4.0.14 or higher</a></b> (the database server), this is found on the cd in apps/mysql.
-        <ol>
-          <li>Unzip the file (mysql-4.0.14b-win.zip) to somewhere</li>
-
-          <li>In the directory created run setup.exe (the one with the
-            computer symbol next to it, not the pointer one)</li>
-
-          <li>Click Next</li>
-          <li>Click Next</li>
-
-          <li>Select browse and type in c:\packages\mysql, click yes if it
-            asks you about creating the directory</li>
-          
-          <li>Select Typical and Next</li>
-
-          <li>Run c:\packages\mysql\bin\winmysqladmin.exe</li>
-
-          <li>Put in root as the username and fll for the password (you will
-            not be prompted for this if you have installed MySQL before, it will
-            use your previous username and password, if you don't remember what
-            it is, delete c:\winnt\my.ini and try do the previous step
-            again)</li>
-
-          <li>Right click on the stoplight in the system try and goto
-            WinNT->Install the service (you may not be given this option if
-            MySQL already installed itself as a service, this typically happens
-            when you have already installed MySQL in the past)</li>
-
-          <li>Right click on the stoplight in the system try and goto
-            WinNT->Start the service and click ok.  If this fails do the
-            following:</li>
-        <ul>
-          <li>Right click on the stoplight in the system try and goto Start
-            the server standalone, you'll need to do this each time you
-            restart the machine.</li>
-        </ul>
-
       <li>When you're done for the day you should make a copy of the database for the head of your state.
-      <pre>
-On Windows change to the directory c:\packages\mysql\bin, on Linux it should be in your path.
-> mysqldump --opt -u fll -pfll fll > fll-dump.sql
-        </pre>
-        Then send fll-dump.sql to the head of your state.
+        <ol>
+          <li>Shut down tomcat</li>
+          <li>Send a copy of tomcat/webapps/fll-sw/WEB-INF/flldb.* to the head of your tournaments</li>
+        </ol>
       </li>
-
-      <li>When running under Linux you'll need to startup MySQL and execute the following to enable the setup to work properly:
-        <pre>
-GRANT ALL PRIVILEGES ON mysql.* TO root@localhost IDENTIFIED BY 'fll' WITH GRANT OPTION
-GRANT ALL PRIVILEGES ON mysql.* TO root IDENTIFIED BY 'fll' WITH GRANT OPTION
-        </pre>
-      </li>
-          
     </ol>
   </li>
-
-    <li><a name='database'>Install the actual database</a>
-      <ol>
-        <li>You should already have MySQL running from the previous step, if
-          not, start it.</li>
-        <li>Start up Tomcat: Goto Start->Programs(All Programs on XP)->Apache Tomcat->Start Tomcat, this will cause a command window to come up, don't close it, you can minimize it though.  Server errors will show up here.</li>
-        <li>Open another web browser to <a href="http://localhost:8080/fll-sw/setup">http://localhost:8080/fll-sw/setup</a>
-          <ul>
-            <li>The root username should be root, if you followed the instructions above for setting up MySQL</li>
-            <li>The root password should be fll, if you followed the instructions above for setting up MySQL</li>
-            <li>You'll need to create an XML document that represents your competition or use one of the ones provided on the <a href="http://sourceforge.net/project/showfiles.php?group_id=76410">download</a> site.  If you're going to create your own, you should start with one of ours and tweak it for your needs.</li>
-          </ul>
-        </li>
-        <li>Click initialize database and you should go back to the
-        same page with a message at the top that the database was
-        successfully initialized.  If this fails due to an error connecting
-        to the database, do the following:
-          <ol>
-            <li>Open a command prompt, <code>Start-&gt;Run-&gt;command</code></li>
-            <li>Change to the bin directory where MySQL is installed, <code>cd \packages\mysql\bin</code></li>
-            <li>Start mysql, <code>mysql</code></li>
-            <li>Execute <code>SET PASSWORD FOR root = PASSWORD('fll');</code></li>
-            <li>Go back to step 3 again.</li>
-          </ol>
-          If that doesn't work try this:
-          <ol>
-            <li>Open a command prompt, <code>Start-&gt;Run-&gt;command</code></li>
-            <li>Change to the bin directory where MySQL is installed, <code>cd \packages\mysql\bin</code></li>
-            <li>Start mysql, <code>mysql -u root mysql</code></li>
-
-<li>Execute <code>GRANT ALL PRIVILEGES ON mysql.* TO root@localhost IDENTIFIED BY 'fll' WITH GRANT OPTION</code></li>
-<li>Execute <code>GRANT ALL PRIVILEGES ON mysql.* TO root IDENTIFIED BY 'fll' WITH GRANT OPTION</code></li>
-            <li>Go back to step 3 again.</li>
-          </ol>
-        </li>
-        <li>Once that is done you can close the other web browser you opened</li>
-      </ol>
-    </li>
 
     <li>Test the server.
       <ol>
@@ -421,8 +336,6 @@ GRANT ALL PRIVILEGES ON mysql.* TO root IDENTIFIED BY 'fll' WITH GRANT OPTION
       </ol>
     </li>
 
-    <li>Send me the data after the tournament is over by zipping up c:\packages\mysql\data\fll and sending it to <a href="mailto:jpschewe@mtu.net">me, jpschewe@mtu.net</a>  Before you zip up this directory please stop the mysql database, otherwise some data might be missing.</li>
-
     <li>For those interested in looking at the source and possibly making
     changes the source can be found <a
     href="http://sf.net/projects/fll-sw">here</a>.  Developers please look
@@ -437,14 +350,6 @@ GRANT ALL PRIVILEGES ON mysql.* TO root IDENTIFIED BY 'fll' WITH GRANT OPTION
       everything.  This can be accomplished by deleting the JAVA_HOME environment
       variable.  Then uninstalling all of the applications.</p>
 
-    <p>Things to note:
-    <ul>
-      
-      <li>Developers on widnows might find the tool MySQLCC handy for
-        messing with the database directly.  I've put it in the apps directory
-        on the cd.</li>
-      
-    </ul>
   </p>
 
     <hr>
