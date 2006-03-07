@@ -45,12 +45,7 @@ File xmlfile = null;
     }
     final Document document = ChallengeParser.parse(xmlstream);
     xmlstream.close();
-    final String db;
-    if(GenerateDB.USING_HSQLDB) {
-      db = config.getServletContext().getRealPath("/WEB-INF/flldb");
-    } else {
-      db = "fll";
-    }
+    final String db = config.getServletContext().getRealPath("/WEB-INF/flldb");
     GenerateDB.generateDB(document, application.getInitParameter("database_host"), rootUser, rootPassword, db, forceRebuild);
   
     if(null != xmlfile) {

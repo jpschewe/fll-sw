@@ -70,32 +70,18 @@ pageContext.setAttribute("division", divisions.get(divisionIndex));
                     // See top10 for regular scoreboard
   
                 final Statement stmt = connection.createStatement();
-                final String sql;
-                if(GenerateDB.USING_HSQLDB) {
-                  sql = "SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore"
+                final String sql = "SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore"
                   + " FROM"
-                    + " (SELECT TeamNumber, MAX(ComputedTotal) AS MaxOfComputedScore"
-                    + " FROM Performance"
-                    + " WHERE Tournament = '" + currentTournament + "'"
-                    + " AND RunNumber <= " + Queries.getNumSeedingRounds(connection)
-                    + " AND NoShow = False"
-                    + " AND Bye = False"
-                    + " GROUP BY TeamNumber)"
+                  + " (SELECT TeamNumber, MAX(ComputedTotal) AS MaxOfComputedScore"
+                  + " FROM Performance"
+                  + " WHERE Tournament = '" + currentTournament + "'"
+                  + " AND RunNumber <= " + Queries.getNumSeedingRounds(connection)
+                  + " AND NoShow = False"
+                  + " AND Bye = False"
+                  + " GROUP BY TeamNumber)"
                   + "  T2 JOIN Teams ON Teams.TeamNumber = T2.TeamNumber"
                   + " WHERE Teams.Division = '" + pageContext.getAttribute("division") + "'"
                   + " ORDER BY T2.MaxOfComputedScore DESC LIMIT 10";
-                } else {
-                  sql = "SELECT Teams.TeamName, Teams.Organization, Performance.TeamNumber, MAX(Performance.ComputedTotal) AS MaxOfComputedScore"
-                  + " FROM Teams,Performance"
-                  + " WHERE Performance.Tournament = '" + currentTournament + "'"
-                  + " AND Teams.TeamNumber = Performance.TeamNumber"
-                  + " AND Performance.RunNumber <= " + Queries.getNumSeedingRounds(connection)
-                  + " AND Performance.NoShow = False"
-                  + " AND Performance.Bye = False"
-                  + " AND Teams.Division = '" + pageContext.getAttribute("division") + "'"
-                  + " GROUP BY Performance.TeamNumber"
-                  + " ORDER BY MaxOfComputedScore DESC LIMIT 10";
-                }
                 final ResultSet rs = stmt.executeQuery(sql);
 
                 int prevScore = -1;

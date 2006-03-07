@@ -49,23 +49,12 @@ public final class GenerateDB {
   private static final String PARAM_VALUE_DATATYPE;
   public static final String TEXT_DATATYPE;
 
-  public static final boolean USING_HSQLDB = true;
   static {
-    if(USING_HSQLDB) {
-      TEXT_DATATYPE = "longvarchar";
-      LOCATION_DATATYPE = TEXT_DATATYPE;
-      SCOREGROUP_DATATYPE = TEXT_DATATYPE;
-      BOOLEAN_DATATYPE = "boolean";
-      PARAM_VALUE_DATATYPE = TEXT_DATATYPE;
-    } else {
-      // assuming MySQL
-      TEXT_DATATYPE = "text";
-      LOCATION_DATATYPE = "mediumtext";
-      SCOREGROUP_DATATYPE = TEXT_DATATYPE;
-      BOOLEAN_DATATYPE = "bool";
-      PARAM_VALUE_DATATYPE = TEXT_DATATYPE;
-    }
-
+    TEXT_DATATYPE = "longvarchar";
+    LOCATION_DATATYPE = TEXT_DATATYPE;
+    SCOREGROUP_DATATYPE = TEXT_DATATYPE;
+    BOOLEAN_DATATYPE = "boolean";
+    PARAM_VALUE_DATATYPE = TEXT_DATATYPE;
   }
     
   /**
@@ -119,29 +108,6 @@ public final class GenerateDB {
     throws SQLException, UnsupportedEncodingException {
     Connection connection = null;
     Statement stmt = null;
-    if(!USING_HSQLDB) {
-      try {
-        //first create the database
-        connection = Utilities.createDBConnection(host, user, password, "mysql");
-      
-        stmt = connection.createStatement();
-
-        //delete the old database
-        stmt.executeUpdate("DROP DATABASE IF EXISTS " + database);
-      
-        //create the database
-        stmt.executeUpdate("CREATE DATABASE " + database);
-
-        //give fll full privileges and use password fll
-        stmt.execute("GRANT ALL PRIVILEGES ON " + database + ".* TO fll IDENTIFIED BY 'fll'");
-        stmt.execute("GRANT ALL PRIVILEGES ON " + database + ".* TO fll@localhost IDENTIFIED BY 'fll'");
-
-      } finally {
-        Utilities.closeStatement(stmt);
-        Utilities.closeConnection(connection);
-      }
-    }
-
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -149,9 +115,7 @@ public final class GenerateDB {
       
       stmt = connection.createStatement();
 
-      if(USING_HSQLDB) {
-        stmt.executeUpdate("SET WRITE_DELAY 100 MILLIS");
-      }
+      stmt.executeUpdate("SET WRITE_DELAY 100 MILLIS");
 
       // get list of tables that already exist
       final DatabaseMetaData metadata = connection.getMetaData();
@@ -364,23 +328,8 @@ public final class GenerateDB {
     final NodeList posValues = goalElement.getElementsByTagName("value");
     if(posValues.getLength() > 0) {
       //enumerated
-      if(USING_HSQLDB) {
-        //HSQLDB doesn't support enum
-        definition += " longvarchar";
-      } else {
-        definition += " ENUM(";
-
-        for(int v=0; v<posValues.getLength(); v++) {
-          final Element value = (Element)posValues.item(v);
-          final String valueName = value.getAttribute("value");
-          if(v > 0) {
-            definition += ", ";
-          }
-          
-          definition += "'" + valueName + "'";
-        }
-        definition += ")";
-      }
+      //HSQLDB doesn't support enum
+      definition += " longvarchar";
     } else {
       definition += " INTEGER";
     }
