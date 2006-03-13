@@ -28,7 +28,7 @@
         for this machine.
         <ol>
           <li><a href="#java">Java</a></li> <li><a href="#server">Server
-          software</a></li>
+              software</a></li>
         </ol>
       </li>
 
@@ -228,7 +228,7 @@
     <h1>Install Instructions</h1>
 
     <p>These instructions are geared towards Windows 2K and XP, if
-    installing
+      installing
       on Linux the instructions are mostly the same, with the exception of
       getting prompted for installation locations.  In these instructions
       locations are given for all installs, these are not hard coded into
@@ -241,9 +241,9 @@
       server.</p>
 
     <p>You can download the current version of the software <a
-    href="https://sourceforge.net/project/showfiles.php?group_id=76410">here</a>.
-    Unzipping this file will create a directory called fll-sw that contains
-    the various zip files referenced here.</p>
+        href="https://sourceforge.net/project/showfiles.php?group_id=76410">here</a>.
+      Unzipping this file will create a directory called fll-sw that contains
+      the various zip files referenced here.</p>
 
     <p>If you do not have a zip tool to open up the archives you can use
       the jar tool that comes with Java and follow the instructions below.</p>
@@ -251,136 +251,133 @@
       <li><a href="#java">Install Java</a></li>
 
       <li>Copy the zip file to the directory you want to uncompress it
-      in</li>
+        in</li>
 
       <li>Open a command prompt, on windows use Start->Run->command
-      return</li>
+        return</li>
 
       <li>Change to the directory you put the zip file in, on windows cd
-      &lt;path to zip file&gt;</li>
+        &lt;path to zip file&gt;</li>
       
       <li>Execute jar -xf zipfile</li>
 
       <li>You should now have the files uncompressed in a directory and you
-      can move them around as needed.</li>
+        can move them around as needed.</li>
     </ol>
   </p>
     
     <p>Links in <b>bold</b> are external links to sites where the
-    applications can be found.</p>
+      applications can be found.</p>
     
     <ol>
       <li><b><a name='java'
-      href="http://java.sun.com/j2se/1.5.0/download.jsp">Install Java (the
-      SDK) 1.5 or higher</a></b> (the language everything is written in),
-      this is found
+            href="http://java.sun.com/j2se/1.5.0/download.jsp">Install Java (the
+            SDK) 1.5 or higher</a></b> (the language everything is written in),
+        this is found
         on the cd in apps/java.  This needs to be done on the server and on
         any machines that will be used to enter subjective scores.
         <ul>
           <li>When prompted for where to install it choose
-          c:\packages\jdk-1.5.0</li>
+            c:\packages\jdk-1.5.0</li>
         </ul>
       </li>
 
-      <li><a name='server'>Install the server software</a>
+      <li>Test the server.
         <ol>
+          <li>Open an explorer window to the directory you you unzipped
+            install file into.  It should be called something like
+            fll-sw-&lt;version&gt;</li>
           <li>Unzip the install file to a location that you want to run from.</li>
 
-          <li>If you want to use a different welcome logo than the one
-            provided, replace webapps\fll-sw\images\logo.gif with the image
-            that you'd like to use.  The provided one should be just fine
-            for Minnesota competitions.</li>
+          <li>Now goto tomcat/bin and run startup.bat, this will cause a
+            command window to come up, don't close it, you can minimize it
+            though.  Server errors will show up here.</li> <li>Open up a web
+            browser to <a
+              href="http://localhost:9080/fll-sw">http://localhost:9080/fll-sw</a></li>
           
-          <li>Open up an explorer window to c:\packages\tomcat\work</li>
+          <li>You should see the main index</li>
 
-          <li>Delete any files in there, if the directory exists</li>
+          <li>Goto the Instructions page for information on using these
+            pages</li>
+
+          <li>From the score entry computers and scoreboard computers make
+            sure you can also get to this page, replacing localhost with the
+            IP address of the server</li>
+
+          <li>When done for the day shutdown tomcat by going to tomcat/bin
+            and running shutdown.bat.</li>
           
         </ol>
       </li>
-      
+
+      <li><a name='subjective'>Install the subjective score entry app on the
+          computers (I suggest one, unless you have a tournament that's
+          really big or are really short on time, in which case you need
+          more) that will be used to enter this data</a>
+        <ol>
+          <li><a href="#java">Follow the instructions above for installing
+              Java</a></li>
+          
+          <li>Unzip subjective.zip to a location on the computer</li>
+          
+          <li>Goto a computer that's connected to the server and goto the
+            main page, then Administration then Download the datafile for
+            subjective score entry</li>
+
+          <li>Save this file somewhere on the computer used for subjective
+            score entry, this can be copied around with a floppy</li>
+          
+          <li>Run subjective.bat from the location you unzipped
+            subjective.zip and when prompted give it the location of the
+            subjective.zip file that was downloaded from the server</li>
+          
+          <li>Enter scores for teams by selecting the category tab at the top
+            then entering the scores under each subcategory</li> <li>Save
+            often</li>
+
+          <li>When done, quit the application and copy the file back to a
+            computer that has access to the server</li> <li>Goto Adminstration
+            and click on the Browse button next to Upload the datafile for
+            subjective scores</li>
+
+          <li>Select the file you just copied</li>
+          
+          <li>Click upload and if all is well you'll be returned to the
+            Adminstration page again</li>
+        </ol>
+      </li>
+
       <li>When you're done for the day you should make a copy of the
-      database for the head of your state.
+        database for the head of your state.
         <ol>
           <li>Shut down tomcat</li> <li>Send a copy of
-          tomcat/webapps/fll-sw/WEB-INF/flldb.* to the head of your
-          tournaments</li>
+            tomcat/webapps/fll-sw/WEB-INF/flldb.* to the head of your
+            tournaments</li>
         </ol>
       </li>
+
+      
+      <li>For those interested in looking at the source and possibly making
+        changes the source can be found <a
+          href="http://sf.net/projects/fll-sw">here</a>.  Developers please look
+        at README.developer.  Any changes that you do make need to be sent back
+        to me under the terms of the GPL.  I look forward to any fixes you
+        make.  Please follow the coding standards listed <a
+          href="http://mtu.net/~jpschewe/java/CodingStandards.html">here</a>.</li>
+      
+
+      <li>Once you're done with the tournament you might want to uninstall
+        everything.  This can be accomplished by deleting the JAVA_HOME
+        environment variable.  Then uninstalling the JDK from the control
+        panel.</li>
+
     </ol>
-  </li>
-
-    <li>Test the server.
-      <ol>
-        <li>Goto Start->Programs(All Programs on XP)->Apache Tomcat->Start
-        Tomcat, this will cause a command window to come up, don't close
-        it, you can minimize it though.  Server errors will show up
-        here.</li> <li>Open up a web browser to <a
-        href="http://localhost:9080/fll-sw">http://localhost:9080/fll-sw</a></li>
-        <li>You should see the main index</li> <li>Goto the Instructions
-        page for information on using these pages</li> <li>From the score
-        entry computers and scoreboard computers make sure you can also get
-        to this page, replacing localhost with the IP address of the
-        server</li> <li>When done for the day you'll want to Goto
-        Start->Programs(All Programs on XP)->Apache Tomcat->Stop
-        Tomcat.</li>
-      </ol>
-    </li>
-
-    <li><a name='subjective'>Install the subjective score entry app on the
-    computers (I suggest 1 unless you have a tournament that's really big
-    or are really short on time) that will be used to enter this data</a>
-      <ol>
-        <li><a href="#java">Follow the instructions above for installing
-        Java</a></li>
-        
-        <li>Unzip subjective.zip to a location on the computer</li>
-        
-        <li>Goto a computer that's connected to the server and goto the
-        main page, then Administration then Download the datafile for
-        subjective score entry</li>
-
-        <li>Save this file somewhere on the computer used for subjective
-        score entry, this can be copied around with a floppy</li>
-        
-        <li>Run subjective.bat from the location you unzipped
-        subjective.zip and when prompted give it the location of the
-        subjective.zip file that was downloaded from the server</li>
-        
-        <li>Enter scores for teams by selecting the category tab at the top
-        then entering the scores under each sub-category</li> <li>Save
-        often</li>
-
-        <li>When done, quit the application and copy the file back to a
-        computer that has access to the server</li> <li>Goto Administration
-        and click on the Browse button next to Upload the datafile for
-        subjective scores</li>
-
-        <li>Select the file you just copied</li>
-        
-        <li>Click upload and if all is well you'll be returned to the
-        Administration page again</li>
-      </ol>
-    </li>
-
-    <li>For those interested in looking at the source and possibly making
-    changes the source can be found <a
-    href="http://sf.net/projects/fll-sw">here</a>.  Developers please look
-    at README.developer.  Any changes that you do make need to be sent back
-    to me under the terms of the GPL.  I look forward to any fixes you
-    make.  Please follow the coding standards listed <a
-    href="http://mtu.net/~jpschewe/java/CodingStandards.html">here</a>.</li>
     
-  </ol>
-
-    <p>Once you're done with the tournament you might want to uninstall
-      everything.  This can be accomplished by deleting the JAVA_HOME
-      environment variable.  Then uninstalling all of the applications.</p>
-
     <hr> <p>
       Hosted by sourceforge.net<br /> <A href="http://sourceforge.net">
-      <IMG
-      src="http://sourceforge.net/sflogo.php?group_id=76410&amp;type=5"
-      width="210" height="62" border="0" alt="SourceForge.net Logo" /></A>
+        <IMG
+          src="http://sourceforge.net/sflogo.php?group_id=76410&amp;type=5"
+          width="210" height="62" border="0" alt="SourceForge.net Logo" /></A>
     </p>
     <hr>
     <address><a href="mailto:jpschewe@mtu.net">Jon Schewe</a></address>
