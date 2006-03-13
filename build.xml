@@ -46,18 +46,6 @@
 
 
   <!-- ==================== Compilation Classpath =========================== -->
-
-  <!--
-
-  Rather than relying on the CLASSPATH environment variable, Ant includes
-  features that makes it easy to dynamically construct the classpath you
-  need for each compilation.  The example below constructs the compile
-  classpath to include the servlet.jar file, as well as the other components
-  that Tomcat makes available to web applications automatically, plus anything
-  that you explicitly added.
-
-  -->
-
   <path id="application.classpath">
     <pathelement location="${dir.lib}/JonsInfra-0.2.jar"/>
     <pathelement location="${dir.lib}/junit-3.8.1.jar"/>
@@ -115,14 +103,6 @@
 
 
   <!-- ==================== Clean Target ==================================== -->
-
-  <!--
-
-  The "clean" target deletes any previous "build" and "dist" directory,
-  so that you can be ensured the application can be built from scratch.
-
-  -->
-
   <target name="clean"
     description="Delete old build and dist directories">
     <delete dir="${dir.build}"/>
@@ -133,15 +113,6 @@
 
 
   <!-- ==================== Compile Target ================================== -->
-
-  <!--
-
-  The "compile" target transforms source files (from your "src" directory)
-  into object files in the appropriate location in the build directory.
-  This example assumes that you will be including your classes in an
-  unpacked directory hierarchy under "/WEB-INF/classes".
-
-  -->
   <target name="compile" depends="prepare,compile.classes,compile.jsp"
     description="Compile Java sources">
 
@@ -177,7 +148,7 @@
     <!-- build subjective scripts for testing -->
     <path id="subjective.build.classpath">
       <path refid="application.classpath" />
-      <pathelement location="${basedir}/web/WEB-INF/classes" />
+      <pathelement location="${basedir}/tomcat/webapps/${app.name}/WEB-INF/classes" />
     </path>
     <antcall target="-buildscripts">
       <param name="app.name" value="subjective" />
@@ -331,15 +302,6 @@
   
 
   <!-- ==================== Dist Target ===================================== -->
-
-
-  <!--
-
-  The "dist" target creates a binary distribution of your application
-  in a directory structure ready to be archived in a tar.gz or zip file.
-
-  -->
-
   <target name="dist" depends="compile,javadoc"
     description="Create distribution">
 
@@ -355,10 +317,12 @@
       overwrite="true"
       />
 
-    <!-- Create web application zip file -->
-    <zip zipfile="${dir.dist}/web.zip">
-      <zipfileset dir="${dir.web}" prefix="${app.name}" />
-    </zip>
+    <!-- copy web stuff -->
+    <copy todir="${dir.dist}">
+      <fileset dir="${dir.build}">
+        <include name="tomcat/**"/>
+      </fileset>
+    </copy>
     
     <copy tofile="${dir.dist}/subjective.zip"
       file="${dir.web}/subjective.zip"/>
@@ -371,16 +335,16 @@
         <include name="${dir.src}/**" />
         <include name="docs/**" />
         <include name="prj.el" />
-        <include name="build.xml" />
+        <include name="*.xml" />
         <include name="ChangeLog" />
+        <include name="${tomcat}" />
+        <include name="*.t"/>
       </zipfileset>
     </zip>
     
     <zip zipfile="${app.name}-${app.version}.zip">
       <zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version}" />
     </zip>
-    
-    <delete dir="${dir.tmp}" />
     
     <echo message="The distribution file is ${app.name}-${app.version}.zip" />
     
@@ -389,23 +353,14 @@
 
 
   <!-- ==================== Javadoc Target ================================== -->
-
-  <!--
-
-  The "javadoc" target creates Javadoc API documentation for the Java
-  classes included in your application.  Normally, this is only required
-  when preparing a distribution release, but is available as a separate
-  target in case the developer wants to create Javadocs independently.
-
-  -->
-
   <target name="javadoc"
     description="Create Javadoc API documentation">
 
-    <mkdir dir="${dir.dist}/api"/>
+    <mkdir dir="${dir.dist}/docs"/>
+    <mkdir dir="${dir.dist}/docs/api"/>
     <javadoc sourcepath="src"
       windowtitle="${app.name}"
-      destdir="${dir.dist}/api"
+      destdir="${dir.dist}/docs/api"
       packagenames="fll.*"
       use="true"
       splitindex="true"
@@ -423,17 +378,6 @@
 
 
   <!-- ==================== Prepare Target ================================== -->
-
-  <!--
-
-  The "prepare" target is used to create the "build" destination directory,
-  and copy the static contents of your web application to it.  If you need
-  to copy static files from external dependencies, you can customize the
-  contents of this task.
-
-  Normally, this task is executed indirectly when needed.
-
-  -->
   <target name="prepare"
     depends="init,tomcat.expand">
 
