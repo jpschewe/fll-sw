@@ -10,8 +10,7 @@ final Document challengeDocument = (Document)application.getAttribute("challenge
 final Connection connection = (Connection)application.getAttribute("connection");
 final String currentTournament = Queries.getCurrentTournament(connection);
   
-ScoreStandardization.standardizeScores(connection, challengeDocument, currentTournament);
-ScoreStandardization.updateTeamTotalScores(connection, currentTournament);
+ScoreStandardization.updateTeamTotalScores(connection, challengeDocument, currentTournament);
 final String errorMsg = ScoreStandardization.checkDataConsistency(connection);
 
 %>

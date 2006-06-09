@@ -44,15 +44,13 @@ public final class GenerateDB {
   private static final String TOURNAMENT_DATATYPE = "varchar(128)";
 
   private static final String LOCATION_DATATYPE;
-  private static final String SCOREGROUP_DATATYPE;
   private static final String BOOLEAN_DATATYPE;
   private static final String PARAM_VALUE_DATATYPE;
   public static final String TEXT_DATATYPE;
-
+  
   static {
     TEXT_DATATYPE = "longvarchar";
     LOCATION_DATATYPE = TEXT_DATATYPE;
-    SCOREGROUP_DATATYPE = TEXT_DATATYPE;
     BOOLEAN_DATATYPE = "boolean";
     PARAM_VALUE_DATATYPE = TEXT_DATATYPE;
   }
@@ -69,8 +67,9 @@ public final class GenerateDB {
         System.exit(1);
       } else {
         final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-        final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-hsr-2005.xml"));
-        final String db = "tomcat/webapps/fll-sw/WEB-INF/fll";
+        final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-state-2005.xml"));
+        //final String db = "tomcat/webapps/fll-sw/WEB-INF/fll";
+        final String db = "fll";
         generateDB(challengeDocument, args[0], args[1], args[2], db, true);
 
         final Connection connection = Utilities.createDBConnection(args[0], "fll", "fll", db);
@@ -145,29 +144,6 @@ public final class GenerateDB {
         stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DROP', 'Dummy tournament for teams that drop out')");
       }
       
-      //Table structure for table 'SummarizedScores'
-      stmt.executeUpdate("DROP TABLE IF EXISTS SummarizedScores");
-      stmt.executeUpdate("CREATE TABLE SummarizedScores ("
-                         + "TeamNumber integer NOT NULL,"
-                         + "Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
-                         + "Category varchar(32) NOT NULL,"
-                         + "RawScore float default NULL,"
-                         + "StandardizedScore float default NULL,"
-                         + "ScoreGroup " + SCOREGROUP_DATATYPE + " default NULL,"
-                         + "WeightedScore float default NULL,"
-                         + "PRIMARY KEY (TeamNumber, Tournament, Category)"
-                         + ")");
-
-
-      // Table for final scores
-      stmt.executeUpdate("DROP TABLE IF EXISTS FinalScores");
-      stmt.executeUpdate("CREATE TABLE FinalScores ("
-                         + "  TeamNumber integer NOT NULL,"
-                         + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
-                         + "  OverallScore float,"
-                         + "  PRIMARY KEY (TeamNumber, Tournament)"
-                         + ")");
-
       // Table structure for table 'Teams'
       if(forceRebuild) {
         stmt.executeUpdate("DROP TABLE IF EXISTS Teams");
@@ -251,7 +227,7 @@ public final class GenerateDB {
 
       
       final Element rootElement = document.getDocumentElement();
-      final StringBuffer createStatement = new StringBuffer();
+      final StringBuilder createStatement = new StringBuilder();
       
       //performance
       {
@@ -272,12 +248,20 @@ public final class GenerateDB {
           createStatement.append(" " + columnDefinition + ",");
         }
         createStatement.append(" ComputedTotal INTEGER DEFAULT NULL,");
+        createStatement.append(" StandardizedScore float default NULL,");
         createStatement.append(" PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
         createStatement.append(");");
         stmt.executeUpdate(createStatement.toString());
+
+        // create view for max seeding round score
+        stmt.executeUpdate("CREATE VIEW performance_seeding_max AS SELECT TeamNumber, Tournament, Max(ComputedTotal) As Score FROM Performance WHERE NoShow = 0 AND RunNumber <= (SELECT Value FROM TournamentParameters WHERE TournamentParameters.Param = 'SeedingRounds') GROUP BY TeamNumber, Tournament");
       }
       
       //loop over each subjective category
+      final StringBuilder finalScores = new StringBuilder();
+      finalScores.append("CREATE TABLE FinalScores (");
+      finalScores.append("TeamNumber integer NOT NULL,");
+      finalScores.append("Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,");
       final NodeList subjectiveCategories = rootElement.getElementsByTagName("subjectiveCategory");
       for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
         createStatement.setLength(0);
@@ -297,11 +281,23 @@ public final class GenerateDB {
           createStatement.append(" " + columnDefinition + ",");
         }
         createStatement.append(" ComputedTotal INTEGER DEFAULT NULL,");
-        createStatement.append(" ScoreGroup " + SCOREGROUP_DATATYPE + " DEFAULT NULL,");
+        createStatement.append(" StandardizedScore float default NULL,");
         createStatement.append(" PRIMARY KEY (TeamNumber, Tournament, Judge)");
         createStatement.append(");");
         stmt.executeUpdate(createStatement.toString());
+
+        finalScores.append(tableName + " float default NULL,");
       }
+
+      //Table structure for table 'FinalScores'
+      finalScores.append(" performance float default NULL,");
+      finalScores.append(" OverallScore float,");
+      finalScores.append("PRIMARY KEY (TeamNumber, Tournament)");
+      finalScores.append(")");
+      stmt.executeUpdate("DROP TABLE IF EXISTS FinalScores");
+      LOG.info(finalScores.toString());
+      stmt.executeUpdate(finalScores.toString());
+
 
       //FIX add foreign key constraints
       

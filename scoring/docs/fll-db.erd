@@ -1,9 +1,8 @@
 # DoME 7.0-dev model; type: Database Diagram
 [ProtoDoMEGraph
   modelTypeName: 'Database Diagram'!
-  specFile: 'h:\projects\fll-sw\code\scoring\docs\database\specs\database-diagram.met'!
+  specFile: 'c:\Documents and Settings\jpschewe\projects\fll-sw\working-dir\scoring\docs\database\specs\database-diagram.met'!
   savedSeparate: true!
-  changeColor: #Red!
   nodes: [OrderedCollection
     [GraphParentLabel
       position: [Point 110 42]
@@ -12,7 +11,7 @@
 
     [ProtoDoMENode
       name: 'Tournaments'!
-      position: [Point 147 227]
+      position: [Point 408 377]
       components: [PartitionedCollection
 	key: #elements!
 	value: [PartitionedCollection
@@ -53,7 +52,7 @@
 		]
 
 		key: #type!
-		value: 'mediumtext'!
+		value: 'longvarchar'!
 	      ]
 
 	    ]
@@ -95,166 +94,8 @@
     ]
 
     [ProtoDoMENode
-      name: 'SummarizedScores'!
-      position: [Point 768 90]
-      components: [PartitionedCollection
-	key: #elements!
-	value: [PartitionedCollection
-	  key: #primaryKeys!
-	  value: [SortedCollection
-	    [ProtoDoMEElement
-	      name: 'Category'!
-	      position: [Point -59 -39]
-	      nameEmphasis: [RunArray #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal!]
-	      id: 211990651994121!
-	      properties: [GrapEPropertyDictionary
-		key: #specClass!
-		value: 210641986322436!
-		key: #managerRef!
-		value: [GrapEThingAddress
-		  id: 211990651994121!
-		]
-
-		key: #type!
-		value: 'varchar(32)'!
-	      ]
-
-	    ]
-
-	    [ProtoDoMEElement
-	      name: 'TeamNumber'!
-	      position: [Point -59 -26]
-	      nameEmphasis: [RunArray #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal!]
-	      id: 211990651994122!
-	      properties: [GrapEPropertyDictionary
-		key: #specClass!
-		value: 210641986322436!
-		key: #managerRef!
-		value: [GrapEThingAddress
-		  id: 211990651994122!
-		]
-
-		key: #type!
-		value: 'integer'!
-	      ]
-
-	    ]
-
-	    [ProtoDoMEElement
-	      name: 'Tournament'!
-	      position: [Point -59 -13]
-	      nameEmphasis: [RunArray #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal!]
-	      id: 211990651994123!
-	      properties: [GrapEPropertyDictionary
-		key: #specClass!
-		value: 210641986322436!
-		key: #managerRef!
-		value: [GrapEThingAddress
-		  id: 211990651994123!
-		]
-
-		key: #type!
-		value: 'varchar(128)'!
-	      ]
-
-	    ]
-
-	  ]
-	  key: #columns!
-	  value: [SortedCollection
-	    [ProtoDoMEElement
-	      name: 'RawScore'!
-	      position: [Point -59 8]
-	      id: 211990651994124!
-	      properties: [GrapEPropertyDictionary
-		key: #specClass!
-		value: 210629740724230!
-		key: #managerRef!
-		value: [GrapEThingAddress
-		  id: 211990651994124!
-		]
-
-		key: #type!
-		value: 'float'!
-	      ]
-
-	    ]
-
-	    [ProtoDoMEElement
-	      name: 'ScoreGroup'!
-	      position: [Point -59 21]
-	      id: 211990651994125!
-	      properties: [GrapEPropertyDictionary
-		key: #specClass!
-		value: 210629740724230!
-		key: #managerRef!
-		value: [GrapEThingAddress
-		  id: 211990651994125!
-		]
-
-		key: #type!
-		value: 'text'!
-	      ]
-
-	    ]
-
-	    [ProtoDoMEElement
-	      name: 'StandardizedScore'!
-	      position: [Point -59 34]
-	      id: 211990651994126!
-	      properties: [GrapEPropertyDictionary
-		key: #specClass!
-		value: 210629740724230!
-		key: #managerRef!
-		value: [GrapEThingAddress
-		  id: 211990651994126!
-		]
-
-		key: #type!
-		value: 'float'!
-	      ]
-
-	    ]
-
-	    [ProtoDoMEElement
-	      name: 'WeightedScore'!
-	      position: [Point -59 47]
-	      id: 211990651994127!
-	      properties: [GrapEPropertyDictionary
-		key: #specClass!
-		value: 210629740724230!
-		key: #managerRef!
-		value: [GrapEThingAddress
-		  id: 211990651994127!
-		]
-
-		key: #type!
-		value: 'float'!
-	      ]
-
-	    ]
-
-	  ]
-	]
-
-      ]
-
-      id: 211990651994120!
-      properties: [GrapEPropertyDictionary
-	key: #specClass!
-	value: 210629740724233!
-	key: #managerRef!
-	value: [GrapEThingAddress
-	  id: 211990651994120!
-	]
-
-      ]
-
-    ]
-
-    [ProtoDoMENode
       name: 'FinalScores'!
-      position: [Point 788 224]
+      position: [Point 807 244]
       components: [PartitionedCollection
 	key: #elements!
 	value: [PartitionedCollection
@@ -262,7 +103,7 @@
 	  value: [SortedCollection
 	    [ProtoDoMEElement
 	      name: 'TeamNumber'!
-	      position: [Point -58 -13]
+	      position: [Point -106 -26]
 	      nameEmphasis: [RunArray #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal!]
 	      id: 211990651994129!
 	      properties: [GrapEPropertyDictionary
@@ -281,7 +122,7 @@
 
 	    [ProtoDoMEElement
 	      name: 'Tournament'!
-	      position: [Point -58 0]
+	      position: [Point -106 -13]
 	      nameEmphasis: [RunArray #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal!]
 	      id: 211990651994130!
 	      properties: [GrapEPropertyDictionary
@@ -302,8 +143,26 @@
 	  key: #columns!
 	  value: [SortedCollection
 	    [ProtoDoMEElement
+	      name: '<column for each subjective category>'!
+	      position: [Point -106 8]
+	      id: 211990651994126!
+	      properties: [GrapEPropertyDictionary
+		key: #specClass!
+		value: 210629740724230!
+		key: #managerRef!
+		value: [GrapEThingAddress
+		  id: 211990651994126!
+		]
+
+		key: #type!
+		value: 'float'!
+	      ]
+
+	    ]
+
+	    [ProtoDoMEElement
 	      name: 'OverallScore'!
-	      position: [Point -58 21]
+	      position: [Point -106 21]
 	      id: 211990651994131!
 	      properties: [GrapEPropertyDictionary
 		key: #specClass!
@@ -311,6 +170,24 @@
 		key: #managerRef!
 		value: [GrapEThingAddress
 		  id: 211990651994131!
+		]
+
+		key: #type!
+		value: 'float'!
+	      ]
+
+	    ]
+
+	    [ProtoDoMEElement
+	      name: 'performance'!
+	      position: [Point -106 34]
+	      id: 218054314819594!
+	      properties: [GrapEPropertyDictionary
+		key: #specClass!
+		value: 210629740724230!
+		key: #managerRef!
+		value: [GrapEThingAddress
+		  id: 218054314819594!
 		]
 
 		key: #type!
@@ -471,7 +348,7 @@
 
     [ProtoDoMENode
       name: 'TournamentTeams'!
-      position: [Point 396 282]
+      position: [Point 401 221]
       components: [PartitionedCollection
 	key: #elements!
 	value: [PartitionedCollection
@@ -502,11 +379,6 @@
 	      nameEmphasis: [RunArray #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal!]
 	      id: 211991182901324!
 	      properties: [GrapEPropertyDictionary
-		key: #description!
-		value: [GrapEHyperText
-		  textWithLinks: [OrderedCollection]
-		]
-
 		key: #specClass!
 		value: 210641986322436!
 		key: #managerRef!
@@ -516,6 +388,11 @@
 
 		key: #defaultValue!
 		value: '''DUMMY'''!
+		key: #description!
+		value: [GrapEHyperText
+		  textWithLinks: [OrderedCollection]
+		]
+
 		key: #type!
 		value: 'varchar(128)'!
 	      ]
@@ -542,7 +419,7 @@
 		key: #defaultValue!
 		value: 'false'!
 		key: #type!
-		value: 'bool'!
+		value: 'boolean'!
 	      ]
 
 	    ]
@@ -550,12 +427,6 @@
 	    [ProtoDoMEElement
 	      name: 'event_division'!
 	      position: [Point -65 28]
-	      color: [ColorValue
-		red: 1.0!
-		green: 0.0!
-		blue: 0.0!
-	      ]
-
 	      id: 212879930097667!
 	      properties: [GrapEPropertyDictionary
 		key: #canbeNull!
@@ -600,7 +471,7 @@
 
     [ProtoDoMENode
       name: 'TournamentParameters'!
-      position: [Point 781 381]
+      position: [Point 165 180]
       components: [PartitionedCollection
 	key: #elements!
 	value: [PartitionedCollection
@@ -661,7 +532,7 @@
 		key: #canbeNull!
 		value: false!
 		key: #type!
-		value: 'text'!
+		value: 'longvarchar'!
 	      ]
 
 	    ]
@@ -686,7 +557,7 @@
 
     [ProtoDoMENode
       name: 'Judges'!
-      position: [Point 388 411]
+      position: [Point 834 479]
       components: [PartitionedCollection
 	key: #elements!
 	value: [PartitionedCollection
@@ -714,12 +585,6 @@
 	    [ProtoDoMEElement
 	      name: 'event_division'!
 	      position: [Point -61 -10]
-	      color: [ColorValue
-		red: 1.0!
-		green: 0.0!
-		blue: 0.0!
-	      ]
-
 	      nameEmphasis: [RunArray #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal!]
 	      id: 212907706744834!
 	      properties: [GrapEPropertyDictionary
@@ -796,7 +661,7 @@
 
     [ProtoDoMENode
       name: 'Performance'!
-      position: [Point 166 553]
+      position: [Point 142 546]
       components: [PartitionedCollection
 	key: #elements!
 	value: [PartitionedCollection
@@ -804,7 +669,7 @@
 	  value: [SortedCollection
 	    [ProtoDoMEElement
 	      name: 'RunNumber'!
-	      position: [Point -91 -45]
+	      position: [Point -91 -52]
 	      nameEmphasis: [RunArray #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal!]
 	      id: 211990717857841!
 	      properties: [GrapEPropertyDictionary
@@ -823,7 +688,7 @@
 
 	    [ProtoDoMEElement
 	      name: 'TeamNumber'!
-	      position: [Point -91 -32]
+	      position: [Point -91 -39]
 	      nameEmphasis: [RunArray #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal!]
 	      id: 211990717857842!
 	      properties: [GrapEPropertyDictionary
@@ -842,7 +707,7 @@
 
 	    [ProtoDoMEElement
 	      name: 'Tournament'!
-	      position: [Point -91 -19]
+	      position: [Point -91 -26]
 	      nameEmphasis: [RunArray #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal!]
 	      id: 211990717857843!
 	      properties: [GrapEPropertyDictionary
@@ -864,7 +729,7 @@
 	  value: [SortedCollection
 	    [ProtoDoMEElement
 	      name: '<column for each goal>'!
-	      position: [Point -91 2]
+	      position: [Point -91 -5]
 	      id: 211990717857844!
 	      properties: [GrapEPropertyDictionary
 		key: #specClass!
@@ -882,7 +747,7 @@
 
 	    [ProtoDoMEElement
 	      name: 'Bye'!
-	      position: [Point -91 15]
+	      position: [Point -91 8]
 	      id: 211990717857845!
 	      properties: [GrapEPropertyDictionary
 		key: #canbeNull!
@@ -897,14 +762,14 @@
 		key: #defaultValue!
 		value: '0'!
 		key: #type!
-		value: 'bool'!
+		value: 'boolean'!
 	      ]
 
 	    ]
 
 	    [ProtoDoMEElement
 	      name: 'ComputedTotal'!
-	      position: [Point -91 28]
+	      position: [Point -91 21]
 	      id: 211990717857846!
 	      properties: [GrapEPropertyDictionary
 		key: #specClass!
@@ -922,7 +787,7 @@
 
 	    [ProtoDoMEElement
 	      name: 'NoShow'!
-	      position: [Point -91 41]
+	      position: [Point -91 34]
 	      id: 211990717857848!
 	      properties: [GrapEPropertyDictionary
 		key: #specClass!
@@ -935,14 +800,32 @@
 		key: #defaultValue!
 		value: 'false'!
 		key: #type!
-		value: 'bool'!
+		value: 'boolean'!
+	      ]
+
+	    ]
+
+	    [ProtoDoMEElement
+	      name: 'StandardizedScore'!
+	      position: [Point -91 47]
+	      id: 218049182498818!
+	      properties: [GrapEPropertyDictionary
+		key: #specClass!
+		value: 210629740724230!
+		key: #managerRef!
+		value: [GrapEThingAddress
+		  id: 218049182498818!
+		]
+
+		key: #type!
+		value: 'float'!
 	      ]
 
 	    ]
 
 	    [ProtoDoMEElement
 	      name: 'TimeStamp'!
-	      position: [Point -91 54]
+	      position: [Point -91 60]
 	      id: 211990717857849!
 	      properties: [GrapEPropertyDictionary
 		key: #specClass!
@@ -1067,12 +950,6 @@
 	    [ProtoDoMEElement
 	      name: 'Bye'!
 	      position: [Point -91 21]
-	      color: [ColorValue
-		red: 1.0!
-		green: 0.0!
-		blue: 0.0!
-	      ]
-
 	      id: 213576331362306!
 	      properties: [GrapEPropertyDictionary
 		key: #specClass!
@@ -1083,7 +960,7 @@
 		]
 
 		key: #type!
-		value: 'bool'!
+		value: 'boolean'!
 	      ]
 
 	    ]
@@ -1107,19 +984,19 @@
 	    ]
 
 	    [ProtoDoMEElement
-	      name: 'ScoreGroup'!
+	      name: 'StandardizedScore'!
 	      position: [Point -91 47]
-	      id: 211990717857857!
+	      id: 218049182498819!
 	      properties: [GrapEPropertyDictionary
 		key: #specClass!
 		value: 210629740724230!
 		key: #managerRef!
 		value: [GrapEThingAddress
-		  id: 211990717857857!
+		  id: 218049182498819!
 		]
 
 		key: #type!
-		value: 'text'!
+		value: 'float'!
 	      ]
 
 	    ]
@@ -1143,7 +1020,7 @@
     ]
 
     [NetNote
-      name: 'Since we''re using MySQL the foreign key constraints are not enforced and the Java code that creates the database does not add them.'!
+      name: 'Since we were using MySQL the foreign key constraints are not enforced and the Java code that creates the database does not add them.'!
       position: [Point 411 707]
       id: 211991224057934!
     ]
@@ -1160,7 +1037,7 @@
       ]
 
       route: [OrderedCollection
-	[Point 21 527]
+	[Point 21 513]
 	[Point 21 75]
       ]
       id: 211990730899522!
@@ -1186,8 +1063,8 @@
       ]
 
       route: [OrderedCollection
-	[Point 466 541]
-	[Point 466 420]
+	[Point 730 541]
+	[Point 730 489]
       ]
       id: 211990730899524!
       properties: [GrapEPropertyDictionary
@@ -1238,10 +1115,10 @@
       ]
 
       route: [OrderedCollection
-	[Point 695 216]
-	[Point 695 181]
-	[Point 507 181]
-	[Point 507 75]
+	[Point 675 224]
+	[Point 675 181]
+	[Point 508 181]
+	[Point 508 75]
       ]
       id: 211990730899527!
       properties: [GrapEPropertyDictionary
@@ -1266,7 +1143,7 @@
       ]
 
       route: [OrderedCollection
-	[Point 508 269]
+	[Point 508 208]
 	[Point 508 75]
       ]
       id: 211990730899529!
@@ -1284,20 +1161,128 @@
 
     [ProtoDoMEArc
       indexedOrigin: [GrapEThingAddress
-	id: 211990651994122!
+	id: 211991182901324!
       ]
 
       indexedDestination: [GrapEThingAddress
-	id: 211990658809876!
+	id: 211990651994117!
       ]
 
-      id: 211990730899530!
+      route: [OrderedCollection
+	[Point 315 221]
+	[Point 315 370]
+      ]
+      id: 218049192525828!
       properties: [GrapEPropertyDictionary
 	key: #specClass!
 	value: 210629740724229!
 	key: #managerRef!
 	value: [GrapEThingAddress
-	  id: 211990730899530!
+	  id: 218049192525828!
+	]
+
+      ]
+
+    ]
+
+    [ProtoDoMEArc
+      indexedOrigin: [GrapEThingAddress
+	id: 211990717857843!
+      ]
+
+      indexedDestination: [GrapEThingAddress
+	id: 211990651994117!
+      ]
+
+      route: [OrderedCollection
+	[Point 281 526]
+	[Point 281 370]
+      ]
+      id: 218049192525829!
+      properties: [GrapEPropertyDictionary
+	key: #specClass!
+	value: 210629740724229!
+	key: #managerRef!
+	value: [GrapEThingAddress
+	  id: 218049192525829!
+	]
+
+      ]
+
+    ]
+
+    [ProtoDoMEArc
+      indexedOrigin: [GrapEThingAddress
+	id: 211990717857854!
+      ]
+
+      indexedDestination: [GrapEThingAddress
+	id: 211990651994117!
+      ]
+
+      route: [OrderedCollection
+	[Point 497 566]
+	[Point 497 370]
+      ]
+      id: 218049195212806!
+      properties: [GrapEPropertyDictionary
+	key: #specClass!
+	value: 210629740724229!
+	key: #managerRef!
+	value: [GrapEThingAddress
+	  id: 218049195212806!
+	]
+
+      ]
+
+    ]
+
+    [ProtoDoMEArc
+      indexedOrigin: [GrapEThingAddress
+	id: 211990651994130!
+      ]
+
+      indexedDestination: [GrapEThingAddress
+	id: 211990651994117!
+      ]
+
+      route: [OrderedCollection
+	[Point 587 237]
+	[Point 587 370]
+      ]
+      id: 218049203273736!
+      properties: [GrapEPropertyDictionary
+	key: #specClass!
+	value: 210629740724229!
+	key: #managerRef!
+	value: [GrapEThingAddress
+	  id: 218049203273736!
+	]
+
+      ]
+
+    ]
+
+    [ProtoDoMEArc
+      indexedOrigin: [GrapEThingAddress
+	id: 212907706744835!
+      ]
+
+      indexedDestination: [GrapEThingAddress
+	id: 211990651994117!
+      ]
+
+      route: [OrderedCollection
+	[Point 713 502]
+	[Point 713 370]
+      ]
+      id: 218049203273737!
+      properties: [GrapEPropertyDictionary
+	key: #specClass!
+	value: 210629740724229!
+	key: #managerRef!
+	value: [GrapEThingAddress
+	  id: 218049203273737!
 	]
 
       ]
@@ -1317,8 +1302,8 @@
     value: 'fll-db.erd.ps'!
     key: #windowBounds!
     value: [Rectangle
-      origin: [Point 10 35]
-      corner: [Point 1069 937]
+      origin: [Point 377 100]
+      corner: [Point 1391 940]
     ]
 
     key: #printLandscape!

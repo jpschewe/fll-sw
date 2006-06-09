@@ -42,36 +42,6 @@ public final class Queries {
 
   private static final Logger LOG = Logger.getLogger(Queries.class);
   
-  /**
-   * For debugging
-   *
-   * @param args ignored
-   */
-  public static void main(final String[] args) {
-    try {
-      final ClassLoader classLoader = Queries.class.getClassLoader();
-      final Connection connection = Utilities.createDBConnection("netserver");
-      
-      final Document challengeDocument = getChallengeDocument(connection);
-      
-      //LOG.info("Tournaments: " + getTournamentNames(connection));
-      //updateScoreTotals(challengeDocument, connection);
-      //System.out.println(getDivisions(connection));
-
-      //LOG.info("Before Tournaments: " + getTournamentNames(connection));
-      //insertTournamentsForRegions(connection);
-      //LOG.info("After Tournaments: " + getTournamentNames(connection));
-      ScoreStandardization.standardizeScores(connection, challengeDocument, "test");
-      
-//       for(int i=0; i<10; i++) {
-//         LOG.info(i + " " + getColorForDivisionIndex(i));
-//       }
-    } catch(final Exception e) {
-      e.printStackTrace();
-    }
-
-  }
-  
   private Queries() {
     //no instances
   }
@@ -724,9 +694,6 @@ public final class Queries {
       //delete from FinalScores
       stmt.executeUpdate("DELETE FROM FinalScores WHERE TeamNumber = " + teamNumber);
 
-      //delete from SummarizedScores
-      stmt.executeUpdate("DELETE FROM SummarizedScores WHERE TeamNumber = " + teamNumber);
-      
     } finally {
       Utilities.closeStatement(stmt);
     }
@@ -961,9 +928,6 @@ public final class Queries {
       //delete from FinalScores
       stmt.executeUpdate("DELETE FROM FinalScores WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + currentTournament + "'");
 
-      //delete from SummarizedScores
-      stmt.executeUpdate("DELETE FROM SummarizedScores WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + currentTournament + "'");
-
       //set new tournament
       stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber) VALUES('" + newTournament + "', " + teamNumber + ")");
       
@@ -1008,9 +972,6 @@ public final class Queries {
       
       //delete from FinalScores
       stmt.executeUpdate("DELETE FROM FinalScores WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + currentTournament + "'");
-
-      //delete from SummarizedScores
-      stmt.executeUpdate("DELETE FROM SummarizedScores WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + currentTournament + "'");
 
     } finally {
       Utilities.closeStatement(stmt);
