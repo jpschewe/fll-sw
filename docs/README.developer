@@ -52,6 +52,9 @@ Pointers on JSTL:
 - Also if you grab the implementation from Jakarta, there are some very nice
 examples included.
 
+Pointers on HSQLdb:
+- http://www.hsqldb.org/web/hsqlDocsFrame.html
+
 ----------
 Setup of each package:
 

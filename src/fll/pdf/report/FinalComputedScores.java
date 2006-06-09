@@ -44,7 +44,7 @@ import com.lowagie.text.pdf.PdfWriter;
 
 
 /**
- * Code for finalComputedScores.jsp
+ * Code for finalComputedScores_pdf.jsp
  *
  * @version $Revision$
  */
