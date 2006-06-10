@@ -119,6 +119,7 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
               SELECT score
                 FROM performance_seeding_max
                 WHERE teamnumber = <c:out value="${scoreRow[2]}"/>
+                AND Tournament = '<c:out value="${currentTournament}"/>'
             </sql:query>
             <c:set var="rawPerformance" value="${performanceRows.rowsByIndex[0][0]}"/>
             <c:choose>
