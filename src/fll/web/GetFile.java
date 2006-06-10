@@ -5,12 +5,15 @@
  */
 package fll.web;
 
+import com.lowagie.text.DocumentException;
+
 import fll.Queries;
+
+import fll.pdf.report.FinalComputedScores;
+import fll.pdf.scoreEntry.ScoresheetGenerator;
 
 import fll.xml.XMLUtils;
 import fll.xml.XMLWriter;
-
-import org.w3c.dom.Document;
 
 import java.io.IOException;
 
@@ -26,6 +29,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.w3c.dom.Document;
+
 
 /**
  * Used to generate various files for download.  Called from getfile.jsp.
@@ -38,9 +43,13 @@ public final class GetFile {
      
   }
 
+  /**
+   * Get a file.  Use the parameter "filename" to determine which file.
+   */
   public static void getFile(final ServletContext application,
                              final HttpServletRequest request,
-                             final HttpServletResponse response) throws SQLException, IOException {
+                             final HttpServletResponse response)
+    throws SQLException, IOException, DocumentException {
     final String filename = request.getParameter("filename");
     if("teams.xml".equals(filename)) {
       final Connection connection = (Connection)application.getAttribute("connection");
@@ -113,7 +122,29 @@ public final class GetFile {
         final ServletOutputStream os = response.getOutputStream();
         os.println("Judges are not properly assigned, please go back to the administration page and assign judges");
       }
-      
+
+    } else if("finalComputedScores.pdf".equals(filename)) {
+      final Connection connection = (Connection)application.getAttribute("connection");
+      final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
+      final String tournament = Queries.getCurrentTournament(connection);
+      response.reset();
+      response.setContentType("application/pdf");
+      response.setHeader("Content-Disposition", "filename=finalComputedScores.pdf");
+      final FinalComputedScores fcs = new FinalComputedScores(challengeDocument, tournament);
+      fcs.generateReport(connection, response.getOutputStream());
+    } else if("scoreSheet.pdf".equals(filename)) {
+      final Connection connection = (Connection)application.getAttribute("connection");
+      final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
+      final String tournament = Queries.getCurrentTournament(connection);
+      response.reset();
+      response.setContentType("application/pdf");
+      response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
+
+      // Create the scoresheet generator - must provide correct number of scoresheets
+      final ScoresheetGenerator scoresheetGen = new ScoresheetGenerator(request.getParameterMap(), challengeDocument);
+
+      // Write the scoresheets to the browser - content-type: application/pdf
+      scoresheetGen.writeFile(response.getOutputStream());
     } else {
       response.reset();
       response.setContentType("text/plain");

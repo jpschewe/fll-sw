@@ -51,18 +51,17 @@ import org.w3c.dom.NodeList;
  */
 public final class FinalComputedScores extends PdfPageEventHelper {
   
-  private FinalComputedScores() {
-     
-  }
-  
-  private String _tournament;
-  private String _challengeTitle;
+  private final String _tournament;
+  private final String _challengeTitle;
   private String _division;
   private PdfPTable _header;
   private PdfTemplate _tpl;
   private BaseFont _headerFooterFont;
-  
-  public FinalComputedScores(org.w3c.dom.Document challengeDoc, String tournament) {
+  private final org.w3c.dom.Document _challengeDocument;
+
+  public FinalComputedScores(final org.w3c.dom.Document challengeDoc,
+                             final String tournament) {
+    _challengeDocument = challengeDoc;
     Element root = challengeDoc.getDocumentElement();
     _challengeTitle = root.getAttribute("title");
     _tournament = tournament;
@@ -137,8 +136,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
   /**
    * Generate the actual report.
    */
-  public void generateReport(final org.w3c.dom.Document document,
-                             final Connection connection,
+  public void generateReport(final Connection connection,
                              final OutputStream out)
     throws SQLException, IOException {
 
@@ -156,7 +154,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
       pdfDoc.setMargins(0.5f * 72, 0.5f * 72, 0.5f * 72, 0.5f * 72);
       pdfDoc.open();
 
-      final Element rootElement = document.getDocumentElement();
+      final Element rootElement = _challengeDocument.getDocumentElement();
 
       final NodeList subjectiveCategories = rootElement.getElementsByTagName("subjectiveCategory");
       stmt = connection.createStatement();
