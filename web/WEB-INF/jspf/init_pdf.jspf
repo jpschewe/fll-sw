@@ -9,8 +9,7 @@ taglib prefix="sql" uri="http://java.sun.com/jstl/sql"
       Utilities.testHSQLDB(config.getServletContext().getRealPath("/WEB-INF/flldb"));
   %><c:set var="database" scope="application">
       <%= config.getServletContext().getRealPath("/WEB-INF/flldb") %>
-    </c:set><%
-</c:if><c:if test="${empty datasource}"><%
+    </c:set></c:if><c:if test="${empty datasource}"><%
     pageContext.setAttribute("url", Utilities.getDBURLString((String)application.getInitParameter("database_host"), (String)application.getAttribute("database")));
     pageContext.setAttribute("driverName", Utilities.getDBDriverName());
   %><sql:setDataSource scope="session"
