@@ -55,6 +55,11 @@ examples included.
 Pointers on HSQLdb:
 - http://www.hsqldb.org/web/hsqlDocsFrame.html
 
+Documentation on iText (PDF library)
+- Homepage http://www.lowagie.com/iText/
+- docs http://www.lowagie.com/iText/docs.html
+- API http://itextdocs.lowagie.com/docs/
+
 ----------
 Setup of each package:
 
