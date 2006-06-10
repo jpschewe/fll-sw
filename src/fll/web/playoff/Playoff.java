@@ -608,8 +608,9 @@ public final class Playoff {
       String round) throws IOException
   {
     final String formName = "genScoresheet_" + teamA.getTeamNumber() + "_" + teamB.getTeamNumber();
-    out.println("<form name='" + formName + "' action='../scoresheets/generateScoresheet.jsp' method='POST' target='_new'>");
-    
+    out.println("<form name='" + formName + "' action='../getfile.jsp' method='POST' target='_new'>");
+
+    out.println("  <input type='hidden' name='filename' value='scoreSheet.pdf'>");
     out.println("  <input type='hidden' name='numTeams' value='2'>");
 
     out.println("  <input type='hidden' name='TeamName1' value='" + teamA.getTeamName() + "'>");
