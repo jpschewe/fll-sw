@@ -15,9 +15,11 @@
     <p>Developers:</p>
     <ul>
       <li><a href="http://mtu.net/~jpschewe">Jon Schewe</a></li>
+      <li><a href="http://mtu.net/~engstrom">Eric Engstrom</a></li>
+      <li>Dan Churchill</li>
     </ul>
 
-    <p>Testers:</p>
+    <p>Testers (besides the developers):</p>
     <ul>
       <li>Chuck Davis</li>
     </ul>
@@ -33,21 +35,17 @@
       <li><a href="http://jakarta.apache.org/tomcat/index.html">Apache Tomcat</a> -
         <a href="tomcat-license.txt">License</a></li>
 
-      <li><a href="http://www.mysql.com">MySQL</a> - <a
-      href="mysql-license.txt">License</a> (more information can be found <a
-      href="http://www.mysql.com/support/arrangements.html">here</a>)</li>
-
       <li><a href="http://java.sun.com/">Java Development Kit</a> -
         <a href="jdk-license.txt">License</a></li>
 
-      <li><a href="http://java.sun.com/">Jakarta Commons Lang</a> -
+      <li><a href="http://jakarta.apache.org/commons/lang/">Jakarta Commons Lang</a> -
         <a href="commons-lang-LICENSE.txt">License</a></li>
 
       <li><a href="http://jakarta.apache.org/taglibs/doc/string-doc/string-1.0.1/index.html">String Tag library</a> -
         <a href="taglib-string-LICENSE.txt">License</a></li>
         
       <li><a href="http://www.lowagie.com/iText/">iText (PDF generation library)</a> -
-        <a href="http://www.lowagie.com/iText/faq.html#free">License Information</a></li>
+        <a href="iText-license.txt">License Information</a></li>
         
     </ul>
 
