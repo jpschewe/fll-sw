@@ -6,16 +6,8 @@
   <display-name>FLL 2003</display-name>
 
   <description>
-    This is the web application for First Lego League 2003
+    This is the web application for First Lego League
   </description>
-
-  <context-param>
-    <param-name>database_host</param-name>
-    <param-value>127.0.0.1</param-value>
-    <description>
-      Machine that the databse is running on.  
-    </description>
-  </context-param>
 
   <session-config>
     <session-timeout>30</session-timeout> <!-- 30 minutes -->

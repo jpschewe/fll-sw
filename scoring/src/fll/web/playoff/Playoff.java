@@ -48,7 +48,7 @@ public final class Playoff {
   public static void main(final String[] args) {
     try {
       final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-      final Connection connection = Utilities.createDBConnection("netserver", "fll", "fll", "fll");
+      final Connection connection = Utilities.createDBConnection("fll", "fll", "fll");
       final Document challengeDocument = Queries.getChallengeDocument(connection);
       final Team a = new Team();
       a.setTeamNumber(1);

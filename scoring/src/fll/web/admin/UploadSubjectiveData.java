@@ -50,7 +50,7 @@ public final class UploadSubjectiveData {
   /**
    * Just for debugging
    *
-   * @param args [0] - database host
+   * @param args ignored
    */
   public static void main(final String[] args) {
     try {
@@ -60,7 +60,7 @@ public final class UploadSubjectiveData {
       final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
       final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge.xml"));
 
-      final Connection connection = Utilities.createDBConnection(args[0]);
+      final Connection connection = Utilities.createDBConnection();
       saveSubjectiveData(out, file, currentTournament, challengeDocument, connection);
     } catch(final Exception e) {
       e.printStackTrace();

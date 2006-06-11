@@ -25,7 +25,7 @@
 
 <c:if test="${empty datasource}">
   <%
-    pageContext.setAttribute("url", Utilities.getDBURLString((String)application.getInitParameter("database_host"), (String)application.getAttribute("database")));
+    pageContext.setAttribute("url", Utilities.getDBURLString((String)application.getAttribute("database")));
     pageContext.setAttribute("driverName", Utilities.getDBDriverName());
   %>
 
@@ -44,7 +44,7 @@
   final String database = (String)application.getAttribute("database");
   //Initialize the connection
   if(null == application.getAttribute("connection")) {
-    final Connection connection = Utilities.createDBConnection(application.getInitParameter("database_host"), "fll", "fll", database);
+    final Connection connection = Utilities.createDBConnection("fll", "fll", database);
     application.setAttribute("connection", connection);
   }
     
