@@ -18,7 +18,6 @@
   <property name="dir.dist"        value="dist"/>
   <!--property name="dir.web"         value="${dir.build}/web" /-->
   <property name="dir.web"         value="${dir.build}/tomcat/webapps/${app.name}"/>
-  <property name="dir.bin"         value="${dir.build}/bin" />
   <property name="dir.lib"         value="lib" />
   <property name="dir.src"         value="src" />
   <property name="dir.tmp"         value="tmp" />
@@ -129,8 +128,8 @@
     <path id="subjective.dist.classpath">
       <path refid="application.classpath" />
       <pathelement location="${dir.lib}/subjective.jar" />
-    </path>
-
+    </path>      
+    
     <!-- build scripts -->
     <antcall target="-buildscripts">
       <param name="app.name" value="subjective" />
@@ -139,6 +138,16 @@
       <param name="-scripts.root" value="." />
       <reference torefid="-scripts.path" refid="subjective.dist.classpath" />
     </antcall>
+
+    <!-- copy scripts -->
+    <copy todir="${dir.build}/bin">
+      <fileset dir="bin"/>
+    </copy>
+    <chmod perm="+x">
+      <fileset dir="${dir.build}/bin">
+        <include name="*.sh"/>
+      </fileset>
+    </chmod>
     
     <zip zipfile="${dir.web}/subjective.zip">
       <zipfileset prefix="subjective" dir="${dir.tmp}/subjective" />
@@ -153,7 +162,7 @@
     <antcall target="-buildscripts">
       <param name="app.name" value="subjective" />
       <param name="class.main" value="fll.gui.SubjectiveFrame" />
-      <param name="-scripts.dir" value="${dir.bin}" />
+      <param name="-scripts.dir" value="${dir.build}/bin" />
       <param name="-scripts.root" value=".." />
       <reference torefid="-scripts.path" refid="subjective.build.classpath" />
     </antcall>
@@ -280,7 +289,7 @@
 
   <!-- ==================== Expand Tomcat Target =================================== -->
   <target name="-tomcat.check">
-    <available property="tomcat.uptodate" file="${dir.build}/${tomcat}/bin/startup.sh" />
+    <available property="tomcat.uptodate" file="${dir.build}/tomcat/bin/startup.sh" />
   </target>
 
   <target name="tomcat.expand"
@@ -311,6 +320,17 @@
       <fileset dir="${basedir}/docs" />
     </copy>
 
+    <!-- copy scripts -->
+    <mkdir dir="${dir.dist}/bin" />
+    <copy todir="${dir.dist}/bin">
+      <fileset dir="bin"/>
+    </copy>
+    <chmod perm="+x">
+      <fileset dir="${dir.dist}/bin">
+        <include name="*.sh"/>
+      </fileset>
+    </chmod>
+    
     <!-- get the correct web.xml file -->
     <copy file="web/WEB-INF/${dist.web.config}"
       tofile="${dir.web}/WEB-INF/web.xml"
@@ -323,6 +343,11 @@
         <include name="tomcat/**"/>
       </fileset>
     </copy>
+    <chmod perm="+x">
+      <fileset dir="${dir.dist}/tomcat/bin">
+        <include name="*.sh"/>
+      </fileset>
+    </chmod>
     
     <copy tofile="${dir.dist}/subjective.zip"
       file="${dir.web}/subjective.zip"/>
@@ -345,12 +370,47 @@
     <zip zipfile="${app.name}-${app.version}.zip">
       <zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version}" />
     </zip>
+
+
+    <!-- create a Windows distribution -->
+    <!--
+    <mkdir dir="${dir.dist}/tools"/>
+    <untar src="jdk-windows.tar.bz2"
+      dest="${dir.dist}/tools"
+      compression="bzip2"
+      />
+    <zip zipfile="${app.name}-${app.version}-windows.zip">
+      <zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version}" />
+    </zip>
+    <delete dir="${dir.dist}/tools/jdk-windows"/>
+    -->
+    <!-- create a Linux distribution -->
+    <mkdir dir="${dir.dist}/tools"/>
+    <untar src="jdk-linux.tar.bz2"
+      dest="${dir.dist}/tools"
+      compression="bzip2"
+      />
+    <tar destfile="${app.name}-${app.version}-linux.tar.bz2"
+      compression="bzip2">
+      <tarfileset dir="${dir.dist}" prefix="${app.name}-${app.version}" mode="755">
+        <include name="**/*.sh"/>
+        <include name="**/bin/*"/>
+        <include name="**/*.so"/>
+      </tarfileset>
+      <tarfileset dir="${dir.dist}" prefix="${app.name}-${app.version}">
+        <include name="**"/>
+        <exclude name="**/*.sh"/>
+        <exclude name="**/bin/*"/>
+        <exclude name="**/*.so"/>
+      </tarfileset>
+    </tar>
+    <delete dir="${dir.dist}/tools/jdk-linux"/>
     
     <echo message="The distribution file is ${app.name}-${app.version}.zip" />
+    <echo message="The Windows distribution file is ${app.name}-${app.version}-windows.zip" />
+    <echo message="The Linux distribution file is ${app.name}-${app.version}-linux.tar.bz2" />
     
   </target>
-
-
 
   <!-- ==================== Javadoc Target ================================== -->
   <target name="javadoc"
