@@ -59,7 +59,7 @@ public final class XMLUtils {
       if(null == challengeDocument) {
         throw new RuntimeException("Error parsing challenge.xml");
       }
-      final Connection connection = Utilities.createDBConnection("netserver", "fll", "fll", "fllmaster");
+      final Connection connection = Utilities.createDBConnection("fll", "fll", "fllmaster");
       final Map teams = Queries.getTournamentTeams(connection);
       //final Document document = createTeamsDocument(teams.values());
       LOG.info("Teams: " + teams.values());

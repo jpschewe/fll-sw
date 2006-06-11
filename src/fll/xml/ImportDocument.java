@@ -39,7 +39,7 @@ public final class ImportDocument {
     PreparedStatement prep = null;
     Connection connection = null;
     try {
-      connection = Utilities.createDBConnection("129.235.71.45", "fll", "fll");
+      connection = Utilities.createDBConnection("fll", "fll");
       prep = connection.prepareStatement("UPDATE TournamentParameters SET Value = ? WHERE Param = 'ChallengeDocument')");
       
       //dump the document into a byte array so we can push it into the database

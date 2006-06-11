@@ -58,7 +58,7 @@ public final class GenerateDB {
   /**
    * Generate a new database
    *
-   * @param args 0 -> host, 1 -> root user, 2 -> root password
+   * @param args ignored
    */
   public static void main(final String[] args) {
     try {
@@ -70,9 +70,9 @@ public final class GenerateDB {
         final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-state-2005.xml"));
         //final String db = "tomcat/webapps/fll-sw/WEB-INF/fll";
         final String db = "fll";
-        generateDB(challengeDocument, args[0], args[1], args[2], db, true);
+        generateDB(challengeDocument, db, true);
 
-        final Connection connection = Utilities.createDBConnection(args[0], "fll", "fll", db);
+        final Connection connection = Utilities.createDBConnection("fll", "fll", db);
         final Document document = Queries.getChallengeDocument(connection);
         System.out.println("Title: " + document.getDocumentElement().getAttribute("title"));
         connection.close();
@@ -91,17 +91,11 @@ public final class GenerateDB {
    * in the database for later use.
    *
    * @param document and XML document that describes a tournament
-   * @param host database host
-   * @param user root user that has full control
-   * @param password password of root user
    * @param database name for the database to generate
    * @param forceRebuild recreate all tables from scratch, if false don't
    * recreate the tables that hold team information
    */
   public static void generateDB(final Document document,
-                                final String host,
-                                final String user,
-                                final String password,
                                 final String database,
                                 final boolean forceRebuild)
     throws SQLException, UnsupportedEncodingException {
@@ -110,7 +104,7 @@ public final class GenerateDB {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      connection = Utilities.createDBConnection(host, "fll", "fll", database);
+      connection = Utilities.createDBConnection("fll", "fll", database);
       
       stmt = connection.createStatement();
 

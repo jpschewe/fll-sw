@@ -48,7 +48,7 @@ public final class UploadTeams {
   public static void main(final String[] args) {
     try {
       final File file = new File("/home/jpschewe/projects/fll/code/2002/results/teams-20021023.csv");
-      final Connection connection = Utilities.createDBConnection("netserver", "fll", "fll");
+      final Connection connection = Utilities.createDBConnection("fll", "fll");
       parseFile(file, connection, new DebugHttpSession());
     } catch(final Exception e) {
       e.printStackTrace();

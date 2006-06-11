@@ -74,8 +74,7 @@ public final class Utilities {
   /**
    * @return the URL to use to connect to the database.
    */
-  public static String getDBURLString(final String hostname,
-                                      final String database) {
+  public static String getDBURLString(final String database) {
     // do this when getting the URL so it gets called from the JSP's as well
     testHSQLDB(database);
     LOG.debug("URL: jdbc:hsqldb:file:" + database + ";shutdown=true");
@@ -92,36 +91,33 @@ public final class Utilities {
   /**
    * Calls createDBConnection with fll as username and password
    *
-   * @see #createDBConnection(String, String, String)
+   * @see #createDBConnection(String, String)
    */
-  public static Connection createDBConnection(final String hostname) throws RuntimeException {
-    return createDBConnection(hostname, "fll", "fll");
+  public static Connection createDBConnection() throws RuntimeException {
+    return createDBConnection("fll", "fll");
   }
   
   /**
    * Calls createDBConnection with fll as the database
    *
-   * @see #createDBConnection(String, String, String, String)
+   * @see #createDBConnection(String, String, String)
    * @throws RuntimeException on an error
    */
-  public static Connection createDBConnection(final String hostname,
-                                              final String username,
+  public static Connection createDBConnection(final String username,
                                               final String password)
     throws RuntimeException {
-    return createDBConnection(hostname, username, password, "fll");
+    return createDBConnection(username, password, "fll");
   }
   
   /**
    * Creates a database connection.
    *
-   * @param hostname name of machine to connect to
    * @param username username to use
    * @param password password to use
    * @param database name of the database to connect to
    * @throws RuntimeException on an error
    */
-  public static Connection createDBConnection(final String hostname,
-                                              final String username,
+  public static Connection createDBConnection(final String username,
                                               final String password,
                                               final String database)
     throws RuntimeException {
@@ -144,7 +140,6 @@ public final class Utilities {
       connection = DriverManager.getConnection(myURL);
     } catch(final SQLException sqle) {
       throw new RuntimeException("Unable to create connection: " + sqle.getMessage()
-                                 + " host: " + hostname
                                  + " database: " + database
                                  + " user: " + username);
     }

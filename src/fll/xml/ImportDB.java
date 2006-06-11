@@ -24,7 +24,7 @@ import org.w3c.dom.NodeList;
 /**
  * Import scores from a tournament database into a master score database.
  *
- * <p>Example arguments: jdbc:mysql://localhost/centennial_10?autoReconnect=true&user=root&password=rootpw "Centennial Dec10" jdbc:hsqldb:file:/tmp/flldb;shutdown=true
+ * <p>Example arguments: jdbc:hsqldb:file:/tmp/centennial/flldb;shutdown=true "Centennial Dec10" jdbc:hsqldb:file:/tmp/flldb;shutdown=true
  *
  * @version $Revision$
  */
@@ -55,7 +55,6 @@ public final class ImportDB {
 
         try {
           Class.forName("org.hsqldb.jdbcDriver").newInstance();
-          Class.forName("org.gjt.mm.mysql.Driver").newInstance();
         } catch(final ClassNotFoundException e){
           throw new RuntimeException("Unable to load driver.", e);
         } catch(final InstantiationException ie) {
