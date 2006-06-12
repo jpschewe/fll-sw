@@ -5,6 +5,11 @@
  */
 package fll;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 /**
  * Represents a team.
  *
@@ -23,6 +28,11 @@ public final class Team {
   public static final int TIE_TEAM_NUMBER = -2;
   
   /**
+   * Constant to represent a NULL team entry in the playoff data table
+   */
+  public static final int NULL_TEAM_NUMBER = -3;
+  
+  /**
    * Team that represents a BYE
    */
   public static final Team BYE = new Team();
@@ -32,15 +42,65 @@ public final class Team {
    */
   public static final Team TIE = new Team();
 
+  /**
+   * NULL Team.
+   */
+  public static final Team NULL = new Team();
+
   static {
     BYE.setTeamNumber(BYE_TEAM_NUMBER);
     BYE.setTeamName("BYE");
     TIE.setTeamNumber(TIE_TEAM_NUMBER);
     TIE.setTeamName("TIE");
+    NULL.setTeamNumber(NULL_TEAM_NUMBER);
+    NULL.setTeamName("NULL");
   }
   
   public Team() {
      
+  }
+
+  /**
+   * Builds a team object from its database info given the team number.
+   * 
+   * @param connection
+   *          Database connection.
+   * @param teamNumber
+   *          Number of the team for which to build an object.
+   * @return The new Team object or null if the team was not found in the
+   *         database.
+   * @throws SQLException
+   *           on a database access error.
+   */
+  public static Team getTeamFromDatabase(final Connection connection, final int teamNumber)
+  throws SQLException
+  {
+    // First, handle known non-database team numbers...
+    if(teamNumber == NULL_TEAM_NUMBER) return NULL;
+    if(teamNumber == TIE_TEAM_NUMBER) return TIE;
+    if(teamNumber == BYE_TEAM_NUMBER) return BYE;
+
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT Division, Organization, Region, TeamName FROM Teams"
+          + " WHERE TeamNumber = " + teamNumber);
+      if(rs.next()) {
+        Team x = new Team();
+        x._division = rs.getString(1);
+        x._organization = rs.getString(2);
+        x._region = rs.getString(3);
+        x._teamName = rs.getString(4);
+        x._teamNumber = teamNumber;
+        return x;
+      } else {
+        return null;
+      }
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closeStatement(stmt);
+    }
   }
 
   private int _teamNumber;

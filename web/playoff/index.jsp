@@ -16,23 +16,7 @@ final Map tournamentTeams = Queries.getTournamentTeams(connection);
 final String currentTournament = Queries.getCurrentTournament(connection);
 final List divisions = Queries.getDivisions(connection);
 final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
-  
-if(null != request.getParameter("division")) {
-  application.setAttribute("playoffDivision", request.getParameter("division"));
-}
-if(null != request.getParameter("runNumber")) {
-  application.setAttribute("playoffRunNumber", Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("runNumber")));
-}
-  
-if(null == application.getAttribute("playoffDivision") && !divisions.isEmpty()) {
-  application.setAttribute("playoffDivision", divisions.get(0));
-}
-if(null == application.getAttribute("playoffRunNumber")) {
-  application.setAttribute("playoffRunNumber", new Integer(numSeedingRounds + 1));
-}
 
-final String playoffDivision = (String)application.getAttribute("playoffDivision");
-final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber")).intValue();
 %>
   
 <html>
@@ -44,13 +28,52 @@ final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Playoff menu)</h1>
       <ol>
-        <li>First you should check to make sure all of the teams have the
-        correct number of rounds.  You can use <a href="check.jsp">this
-        page</a> to check that.  If any teams show up on this page you'll want
-        to try and fix that first.</li>
+        <li>If using the automatic table assignment feature for scoresheet generation, make
+        certain to set up labels for each of your tables, available from the Admin page or by
+        clicking <a href='/fll-sw/admin/tables.jsp'>here</a>.
+
+        <li>Check to make sure all teams have scores entered for each seeding round.<br/>
+          <form action='check.jsp' method='get'>
+          Select a division and check seeding rounds
+          <select name='division'>
+          <option value='__all__' selected>All</option>
+<%
+{
+final Iterator divisionIter = divisions.iterator();
+while(divisionIter.hasNext()) {
+  final String div = (String)divisionIter.next();
+%>
+          <option value='<%=div%>'><%=div%></option>
+<%
+}
+}
+%>
+          </select>
+          <input type='submit' value='Check Seeding Rounds'/>
+          </form>
 
         <li>
-          <B>WARNING: Do not select brackets until all seeding runs for that division have been recorded!</b><br>
+          <b>WARNING: Do not initialize playoff brackets for a division until all seeding
+          runs for that division have been recorded!</b><br>
+          <form action='initializebrackets.jsp' method='post'>
+          <select name='division'>
+<%
+{
+final Iterator divisionIter = divisions.iterator();
+while(divisionIter.hasNext()) {
+  final String div = (String)divisionIter.next();
+%>
+          <option value='<%=div%>'><%=div%></option>
+<%
+}
+}
+%>
+          </select><br>
+          <input type='checkbox' name='enableThird' value='yes'/>Check to enable 3rd/4th place brackets<br>
+          <input type='submit' value='Initialize Brackets'/>
+          </form>
+
+        <li>
           <form action='adminbrackets.jsp' method='get'>
             Go to the admin/printable bracket page for division <select name='division'>
 <%

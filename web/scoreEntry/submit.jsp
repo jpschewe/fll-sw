@@ -1,6 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
       
 <%@ page import="fll.Queries" %>
+<%@ page import="fll.web.playoff.Playoff" %>
 <%@ page import="fll.web.scoreEntry.Submit" %>
 
 <%@ page import="java.sql.Connection" %>
@@ -27,7 +28,7 @@ final Connection connection = (Connection)application.getAttribute("connection")
       <c:forEach items="${paramValues}" var="parameter">
         <c:forEach items="${parameter.value}" var="parameterValue">
           <c:param name="${parameter.key}" value="${parameterValue}"/>
-       </c:forEach>
+      	</c:forEach>
       </c:forEach>
       <x:forEach select="$challengeDocument/fll/Performance/restriction">
         <x:set select="string(./@message)" var="message" />
@@ -63,20 +64,26 @@ final Connection connection = (Connection)application.getAttribute("connection")
       <c:redirect url="${url}"/>
     </c:if>
     <c:if test="${not error}">
-    <%-- save to database --%>
-    <c:choose>
-      <c:when test="${not empty param.delete}">
-      <%pageContext.setAttribute("sql", Queries.deletePerformanceScore(connection, request));%>
-      </c:when>
-      <c:when test="${not empty param.EditFlag}">
-      <%pageContext.setAttribute("sql", Queries.updatePerformanceScore(challengeDocument, connection, request));%>
-      </c:when>
-      <c:otherwise>
-      <%pageContext.setAttribute("sql", Queries.insertPerformanceScore(challengeDocument, connection, request));%>
-      </c:otherwise>
-    </c:choose>
+      <%-- save to database --%>
+      <c:choose>
+        <c:when test="${not empty param.delete}">
+        <%pageContext.setAttribute("sql", Queries.deletePerformanceScore(connection, request));%>
+        </c:when>
+        <c:when test="${not empty param.EditFlag}">
+        <%pageContext.setAttribute("sql", Queries.updatePerformanceScore(challengeDocument, connection, request));%>
+        </c:when>
+        <c:otherwise>
+        <%pageContext.setAttribute("sql", Queries.insertPerformanceScore(challengeDocument, connection, request));%>
+        </c:otherwise>
+      </c:choose>
+  
+      <%-- Update the playoff data --%>
+      <%pageContext.setAttribute("numSeedingRounds", Queries.getNumSeedingRounds(connection));%>
+      <c:if test="${param.RunNumber > numSeedingRounds}">
+        <%pageContext.setAttribute("sql", (String)pageContext.getAttribute("sql") + ";<br/>" +
+            Playoff.updatePlayoffData(challengeDocument, connection, request));%>
+      </c:if>
 
-                    
       <h1>Submitted Scores</h1>
       
       <p>SQL executed: <br>&nbsp;&nbsp;<c:out value="${sql}"/></p>

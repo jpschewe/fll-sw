@@ -67,6 +67,17 @@ if("1".equals(request.getParameter("EditFlag")) || null != request.getParameter(
     lRunNumber = runNumber;
   }
 } else {
+    if(nextRunNumber > Queries.getNumSeedingRounds(connection))
+	{
+      if(!Queries.isPlayoffDataInitialized(connection, Queries.getDivisionOfTeam(connection, lTeamNum)))
+      {
+        throw new RuntimeException("Selected team has completed its seeding runs. The playoff brackets"
+            + " must be initialized from the playoff page"
+            + " before any more scores may be entered for this team (#" + teamNumber + ")."
+            + " If you were intending to double check a score, you probably just forgot to check the box for doing so.");
+            
+      }
+	}
   lRunNumber = nextRunNumber;
 }
 

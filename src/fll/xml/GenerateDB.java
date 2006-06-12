@@ -6,6 +6,7 @@
 package fll.xml;
 
 import fll.Queries;
+import fll.Team;
 import fll.Utilities;
 
 import java.io.ByteArrayInputStream;
@@ -138,6 +139,18 @@ public final class GenerateDB {
         stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DROP', 'Dummy tournament for teams that drop out')");
       }
       
+      // table to hold head-to-head playoff meta-data
+      stmt.executeUpdate("DROP TABLE IF EXISTS PlayoffData");
+      stmt.executeUpdate("CREATE TABLE PlayoffData (" +
+            " Division varchar(32) NOT NULL," +
+            " Tournament " + TOURNAMENT_DATATYPE + " NOT NULL," +
+            " PlayoffRound integer NOT NULL," +
+            " LineNumber integer NOT NULL," +
+            " Team integer default " + Team.NULL_TEAM_NUMBER + "," +
+            " AssignedTable varchar(64) default NULL," +
+            " PRIMARY KEY (Division, Tournament, PlayoffRound, LineNumber)" +
+            ")");
+
       // Table structure for table 'Teams'
       if(forceRebuild) {
         stmt.executeUpdate("DROP TABLE IF EXISTS Teams");
