@@ -11,25 +11,25 @@
 final Connection connection = (Connection)application.getAttribute("connection");
       
 final List divisions = Queries.getDivisions(connection);
-final Map tournamentTeams = (Map)Queries.getTournamentTeams(connection);
-final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
 
 if(null != request.getParameter("division")) {
   application.setAttribute("playoffDivision", request.getParameter("division"));
 }
-if(null != request.getParameter("runNumber")) {
-  application.setAttribute("playoffRunNumber", Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("runNumber")));
+if(null != request.getParameter("playoffRoundNumber")) {
+  application.setAttribute("playoffRoundNumber", Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("playoffRoundNumber")));
 }
   
 if(null == application.getAttribute("playoffDivision") && !divisions.isEmpty()) {
   application.setAttribute("playoffDivision", divisions.get(0));
 }
-if(null == application.getAttribute("playoffRunNumber")) {
-  application.setAttribute("playoffRunNumber", new Integer(numSeedingRounds + 1));
+if(null == application.getAttribute("playoffRoundNumber")) {
+  application.setAttribute("playoffRoundNumber", new Integer(1));
 }
 
 final String playoffDivision = (String)application.getAttribute("playoffDivision");
-final int playoffRunNumber = ((Number)application.getAttribute("playoffRunNumber")).intValue();
+final int playoffRunNumber = ((Number)application.getAttribute("playoffRoundNumber")).intValue();
+final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection,playoffDivision);
+
 %>
       
 <html>
@@ -109,15 +109,14 @@ while(divisionIter.hasNext()) {
 }
 %>
             </select>
-            Run number (playoff round): <select name='runNumber'>
+            Playoff Round: <select name='playoffRoundNumber'>
 <%
-final int numTeams = tournamentTeams.size();
-for(int numRounds = 1; /*numTeams > Math.pow(2, numRounds)*/ numRounds < 10; numRounds++) {
-  out.print("<option value='" + (numRounds + numSeedingRounds) + "'");
-  if(playoffRunNumber == (numRounds + numSeedingRounds)) {
+for(int numRounds = 1; numRounds <= numPlayoffRounds; numRounds++) {
+  out.print("<option value='" + numRounds + "'");
+  if(playoffRunNumber == numRounds) {
     out.print(" selected");
   }
-  out.println(">" + (numRounds + numSeedingRounds) + " (" + numRounds + ")</option>");
+  out.println(">" + numRounds + "</option>");
 }
 %>
             </select>

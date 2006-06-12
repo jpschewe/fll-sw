@@ -14,6 +14,7 @@ import fll.xml.ChallengeParser;
 import java.io.IOException;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -26,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspWriter;
 
 import org.w3c.dom.Document;
@@ -77,14 +79,14 @@ public final class Playoff {
    * @return a List of teams
    * @throws SQLException on a database error
    */
-  public static List buildInitialBracketOrder(final Connection connection,
+  public static List<Team> buildInitialBracketOrder(final Connection connection,
                                               final String divisionStr,
                                               final Map tournamentTeams)
     throws SQLException {
 
     final List seedingOrder = Queries.getPlayoffSeedingOrder(connection, divisionStr, tournamentTeams);
     if(seedingOrder.size() > 128) {
-      //TODO one of these days I need to compute this rather than using an array
+      // TODO one of these days I need to compute this rather than using an array
       throw new RuntimeException("More than 128 teams sent to playoff brackets!  System overload");
     }
     int bracketIndex = 0;
@@ -92,7 +94,7 @@ public final class Playoff {
       bracketIndex++;
     }
     
-    final List list = new LinkedList();
+    final List<Team> list = new LinkedList<Team>();
     for(int i=0; i<SEED_ARRAY[bracketIndex].length; i++) {
       if(SEED_ARRAY[bracketIndex][i] > seedingOrder.size()) {
         list.add(Team.BYE);
@@ -104,6 +106,164 @@ public final class Playoff {
     return list;
   }
   
+  /**
+   * Decide who is the winner between teamA's score for the provided runNumber
+   * and the score data contained in the request object. Calls
+   * Queries.updateScoreTotals() to ensure the ComputedScore column is up to
+   * date.
+   * 
+   * @param connection
+   *          Database connection with write access to Performance table.
+   * @param document
+   *          XML document description of tournament.
+   * @param teamA
+   *          First team to check.
+   * @param request
+   *          The servlet request object containing the form data from a
+   *          scoresheet which is to be tested against the score for teamA and
+   *          the given runNumber in the database.
+   * @param runNumber
+   *          The run number to use for teamA's score.
+   * @return The team that is the winner. Team.TIE is returned in the case of a
+   *         tie and null when the score for teamA has not yet been entered.
+   * @see Team#TIE
+   * @see Team#NULL
+   * @see fll.Queries#updateScoreTotals(Document, Connection)
+   * @throws SQLException
+   *           on a database error.
+   * @throws ParseException
+   *           if the XML document is invalid.
+   * @throws RuntimeException
+   *           if database contains no data for teamA for runNumber.
+   */
+  public static Team pickWinner(final Connection connection,
+                                final Document document,
+                                final Team teamA,
+                                final HttpServletRequest request,
+                                final int runNumber)
+    throws SQLException, ParseException {
+    final String tournament = Queries.getCurrentTournament(connection);
+    
+    final Team teamB = Team.getTeamFromDatabase(connection,
+        Integer.parseInt(request.getParameter("TeamNumber")));
+    
+    // teamA can actually be a bye here in the degenerate case of a 3-team
+    // tournament with 3rd/4th place brackets enabled...
+    if(Team.BYE.equals(teamA)) {
+      return teamB;
+    } else if(Team.TIE.equals(teamA) || Team.TIE.equals(teamB)) {
+      return null;
+    } else {
+      //make sure scores are up to date
+      Queries.updateScoreTotals(document, connection);
+      
+      if(performanceScoreExists(connection, teamA, runNumber)) {
+        final boolean noshowA = isNoShow(connection, tournament, teamA, runNumber);
+        final String noShow = request.getParameter("NoShow");
+        if(null == noShow) {
+          throw new RuntimeException("Missing parameter: NoShow");
+        }
+        final boolean noshowB = noShow.equalsIgnoreCase("true") ||
+          noShow.equalsIgnoreCase("t") || noShow.equals("1");
+        if(noshowA && !noshowB) {
+          return teamB;
+        } else if(!noshowA && noshowB) {
+          return teamA;
+        } else {
+          final int scoreA = getPerformanceScore(connection, tournament, teamA, runNumber);
+          final int scoreB = Integer.parseInt(request.getParameter("totalScore"));
+          if(scoreA < scoreB)
+          {
+            return teamB;
+          }
+          else if(scoreB < scoreA)
+          {
+            return teamA;
+          }
+          else
+          {
+            final Element performanceElement = (Element)document.getDocumentElement().getElementsByTagName("Performance").item(0);
+            final Element tiebreakerElement = (Element)performanceElement.getElementsByTagName("tiebreaker").item(0);
+            final NodeList goals = performanceElement.getElementsByTagName("goal");
+              
+            Statement stmtA = null;
+            ResultSet rsA = null;
+            try {
+              stmtA = connection.createStatement();
+              rsA = stmtA.executeQuery("SELECT * FROM Performance WHERE Tournament = '" + tournament
+                  + "' AND RunNumber = " + runNumber + " and TeamNumber = " + teamA.getTeamNumber());
+              if(rsA.next())
+              {
+                //walk test elements in tiebreaker to decide who wins
+                Node child = tiebreakerElement.getFirstChild();
+                while(null != child) {
+                  if(child instanceof Element) {
+                    final Element element = (Element)child;
+                    if("test".equals(element.getTagName())) {
+                      final String goalName = element.getAttribute("goal");
+                      final Element goalDefinition = findGoalDefinition(goals, goalName);
+                      
+                      final int multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalDefinition.getAttribute("multiplier")).intValue();
+                      final NodeList values = goalDefinition.getElementsByTagName("value");
+                      int valueA = -1;
+                      int valueB = -1;
+                      if(values.getLength() == 0) {
+                        valueA = rsA.getInt(goalName);
+                        valueB = Integer.parseInt(request.getParameter(goalName));
+                      } else {
+                        //enumerated
+                        final String enumA = rsA.getString(goalName);
+                        final String enumB = request.getParameter(goalName);
+                        boolean foundA = false;
+                        boolean foundB = false;
+                        for(int v=0; v<values.getLength() && (!foundA || !foundB); v++) {
+                          final Element value = (Element)values.item(v);
+                          final String enumValue = value.getAttribute("value");
+                          final int enumScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue() * multiplier;
+                          if(enumValue.equals(enumA)) {
+                            valueA = enumScore;
+                            foundA = true;
+                          }
+                          if(enumValue.equals(enumB)) {
+                            valueB = enumScore;
+                            foundB = true;
+                          }
+                        }
+                        if(!foundA || !foundB) {
+                          throw new RuntimeException("Error, enum value in database for goal: " + goalName + " is not a valid value."
+                                                     + " foundA: " + foundA
+                                                     + " foundB: " + foundB
+                                                     );
+                        }
+                        
+                      }
+                      
+                      final String highlow = element.getAttribute("winner");
+                      if(valueA > valueB) {
+                        return ("high".equals(highlow) ? teamA : teamB);
+                      } else if(valueA < valueB) {
+                        return ("high".equals(highlow) ? teamB : teamA);
+                      }
+                    }
+                  }
+                  child = child.getNextSibling();
+                }
+              } else {
+                throw new RuntimeException("Missing performance scores for teams: " + teamA.getTeamNumber() + " for run: " + runNumber + " tournament: " + tournament);
+              }
+            } finally {
+              Utilities.closeResultSet(rsA);
+              Utilities.closeStatement(stmtA);
+            }
+            return Team.TIE;
+          }
+        }
+      } else {
+        return null;
+      }
+    }
+  }  
+
   /**
    * Decide who is the winner of runNumber.  Calls Queries.updateScoreTotals()
    * to ensure the ComputedScore column is up to date
@@ -129,14 +289,8 @@ public final class Playoff {
     final String tournament = Queries.getCurrentTournament(connection);
     
     if(Team.BYE.equals(teamA)) {
-      if(!performanceScoreExists(connection, teamB, runNumber)) {
-        insertBye(connection, teamB, runNumber);
-      }
       return teamB;
     } else if(Team.BYE.equals(teamB)) {
-      if(!performanceScoreExists(connection, teamA, runNumber)) {
-        insertBye(connection, teamA, runNumber);
-      }
       return teamA;
     } else if(Team.TIE.equals(teamA) || Team.TIE.equals(teamB)) {
       return null;
@@ -260,7 +414,8 @@ public final class Playoff {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
-      stmt.executeUpdate("INSERT INTO Performance(TeamNumber, Tournament, RunNumber, Bye) VALUES( " + team.getTeamNumber() + ", '" + tournament + "', " + runNumber + ", 1)");
+      stmt.executeUpdate("INSERT INTO Performance(TeamNumber, Tournament, RunNumber, Bye)" +
+          " VALUES( " + team.getTeamNumber() + ", '" + tournament + "', " + runNumber + ", 1)");
     } finally {
       Utilities.closeStatement(stmt);
     }
@@ -379,61 +534,38 @@ public final class Playoff {
   }
 
   /**
-   * Defaults showScore to true.
-   * 
-   * @see #getDisplayString(Connection, String, int, Team, boolean)
-   */
-  public static String getDisplayString(final Connection connection,
-                                        final String currentTournament,
-                                        final int runNumber,
-                                        final Team team)
-    throws IllegalArgumentException, SQLException {
-    return getDisplayString(connection, currentTournament, runNumber, team, true);
-  }
-  
-  /**
-   * What to display given a team number, handles TIE, null and BYE
+   * Get the value of Bye for the given team, tournament and run number
    *
-   * @param connection connection to the database
-   * @param currentTournament the current tournament
-   * @param runNumber the current run, used to get the score
-   * @param team team to get display string for
-   * @param showScore if the score should be shown
-   * @throws IllegalArgumentException if teamNumber is invalid
    * @throws SQLException on a database error
+   * @throws IllegalArgumentException if no score exists
    */
-  public static String getDisplayString(final Connection connection,
-                                        final String currentTournament,
-                                        final int runNumber,
-                                        final Team team,
-                                        final boolean showScore)
-    throws IllegalArgumentException, SQLException {
-    if(Team.BYE.equals(team)) {
-      return "<font class='TeamName'>BYE</font>";
-    } else if(Team.TIE.equals(team)) {
-      return "<font class='TIE'>TIE</font>";
-    } else if(null == team) {
-      return "&nbsp;";
-    } else {
-      final StringBuffer sb = new StringBuffer();
-      sb.append("<font class='TeamNumber'>#");
-      sb.append(team.getTeamNumber());
-      sb.append("</font>&nbsp;<font class='TeamName'>");
-      sb.append(team.getTeamName());
-      sb.append("</font>");
-      if(showScore && performanceScoreExists(connection, team, runNumber)) {
-        sb.append("<font class='TeamScore'>&nbsp;Score: ");
-        if(isNoShow(connection, currentTournament, team, runNumber)) {
-          sb.append("No Show");
-        } else {
-          //only display score if it's not a bye
-          sb.append(getPerformanceScore(connection, currentTournament, team, runNumber));
-        }          
-        sb.append("</font>");
+  public static boolean isBye(final Connection connection,
+                              final String tournament,
+                              final Team team,
+                              final int runNumber)
+  throws SQLException, IllegalArgumentException
+  {
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT Bye FROM Performance"
+                             + " WHERE TeamNumber = " + team.getTeamNumber()
+                             + " AND Tournament = '" + tournament + "'"
+                             + " AND RunNumber = " + runNumber);
+      if(rs.next()) {
+        return rs.getBoolean(1);
+      } else {
+        throw new RuntimeException("No score exists for tournament: " + tournament
+                                   + " teamNumber: " + team.getTeamNumber()
+                                   + " runNumber: " + runNumber);
       }
-      return sb.toString();
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closeStatement(stmt);
     }
   }
+
 
   /**
    * Find a goal element with the given name in the list of goals.
@@ -532,7 +664,7 @@ public final class Playoff {
             //team information
             final Team team = (Team)currentRoundTeams[playoffRunNumber].next();
             out.println("<td class='Leaf' width='200'>");
-            out.println(getDisplayString(connection, currentTournament, (playoffRunNumber+numSeedingRounds+1), team, false));
+            out.println(BracketData.getDisplayString(connection, currentTournament, (playoffRunNumber+numSeedingRounds+1), team, false));
             
             out.println("</td>");
 
@@ -780,7 +912,7 @@ public final class Playoff {
             // team information
             final Team team = (Team) currentRoundTeams[playoffRunNumber].next();
             out.println("<td class='Leaf' width='200'>");
-            out.println(getDisplayString(connection, currentTournament,
+            out.println(BracketData.getDisplayString(connection, currentTournament,
                 (playoffRunNumber + numSeedingRounds + 1), team, false));
 
             out.println("</td>");
@@ -860,7 +992,179 @@ public final class Playoff {
       out.println("<p>Not enough teams for a playoff</p>");
     }
   }
-  
+  public static void initializeBrackets(final Connection connection,
+                                        final Document challengeDocument,
+                                        final String division,
+                                        final boolean enableThird,
+                                        final JspWriter out)
+    throws IOException, SQLException, ParseException
+  {
+
+    final Map tournamentTeams = Queries.getTournamentTeams(connection);
+    final String currentTournament = Queries.getCurrentTournament(connection);
+    final List<String[]> tournamentTables = Queries.getTournamentTables(connection);
+    
+    // Work-around for if they didn't initialize tournament table labels.
+    if(tournamentTables.size() == 0)
+      tournamentTables.add(new String[] {"",""});
+
+    // Iterator over table name pairs.
+    Iterator<String[]> tableIt = tournamentTables.iterator();
+
+    // Initialize currentRound to contain a full bracket setup (i.e. playoff round 1 teams)
+    // Note: Our math will rely on the length of the list returned by
+    // buildInitialBracketOrder to be a power of 2. It always should be.
+    List<Team> firstRound = buildInitialBracketOrder(connection, division, tournamentTeams);
+    
+    // Insert those teams into the database.
+    // At this time we let the table assignment field default to NULL.
+    Iterator<Team> it = firstRound.iterator();
+    PreparedStatement stmt = null;
+    try
+    {
+      stmt = connection.prepareStatement("INSERT INTO PlayoffData" +
+          " (Tournament, Division, PlayoffRound, LineNumber, Team)" +
+          " VALUES ('" + currentTournament + "', '" + division + "', 1, ?, ?)");
+      int lineNbr = 1;
+      while(it.hasNext())
+      {
+        stmt.setInt(1, lineNbr);
+        stmt.setInt(2, it.next().getTeamNumber());
+        stmt.executeUpdate();
+        
+        lineNbr++;
+      }
+    } finally {
+      Utilities.closePreparedStatement(stmt);
+    }
+
+    // Create the remaining entries for the playoff data table using default team
+    int currentRoundSize = firstRound.size()/2;
+    int roundNumber = 2;
+    try {
+      stmt = connection.prepareStatement("INSERT INTO PlayoffData" +
+          " (Tournament, Division, PlayoffRound, LineNumber) VALUES ('" +
+          currentTournament + "', '" + division + "', ?, ?)");
+      while(currentRoundSize > 0)
+      {
+        stmt.setInt(1, roundNumber);
+        int lineNbr = currentRoundSize;
+        if(enableThird && currentRoundSize <= 2)
+          lineNbr = lineNbr * 2;
+        while(lineNbr >= 1)
+        {
+          stmt.setInt(2, lineNbr);
+          stmt.executeUpdate();
+          lineNbr--;
+        }
+        roundNumber++;
+        currentRoundSize = currentRoundSize/2;
+      }
+    } finally {
+      Utilities.closePreparedStatement(stmt);
+    }
+
+    // Now get all entries, ordered by PlayoffRound and LineNumber, and do table
+    // assignments in order of their occurrence in the database. Additionally, for
+    // any byes in the first round, populate the "winner" in the second round, and
+    // enter a BYE in the Performance table (I think score entry depends on a "score"
+    // being present for every round.)
+    Statement selStmt = null;
+    ResultSet rs = null;
+    // Number of rounds is the log base 2 of the number of teams in round1 (including "bye" teams) 
+    final int numPlayoffRounds = (int)Math.round(Math.log(firstRound.size())/Math.log(2));
+    final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
+    try {
+      final String sql = "SELECT PlayoffRound,LineNumber,Team FROM PlayoffData"
+        + " WHERE Tournament='" + currentTournament + "'"
+        + " AND Division='" + division + "'"
+        + " ORDER BY PlayoffRound,LineNumber";
+      selStmt = connection.createStatement();
+      rs = selStmt.executeQuery(sql);
+      // Condition must look at roundnumber because we don't need to assign anything
+      // to the rightmost "round" where the winning team numbers will reside, which
+      // exist because I'm lazy and don't want to add special checks to the update/insert
+      // methods to see if they shouldn't write that last winning team entry because they
+      // are on the last round that has scores associated with it.
+      while(rs.next() && numPlayoffRounds-rs.getInt(1) >= 0) {
+        // Obtain the data for both teams in a match
+        final int round1 = rs.getInt(1);
+        final int line1 = rs.getInt(2);
+        final int team1 = rs.getInt(3);
+        if(!rs.next()) {
+          throw new RuntimeException("Error initializing brackets: uneven number" +
+              " of slots in playoff round " + round1);
+        }
+        final int round2 = rs.getInt(1);
+        final int line2 = rs.getInt(2);
+        final int team2 = rs.getInt(3);
+        
+        // Basic sanity checks...
+        if(round1 != round2) {
+          throw new RuntimeException("Error initializing brackets. Round number" +
+              " mismatch between teams expected to be in the same match");
+        }
+        if(line1+1 != line2) {
+          throw new RuntimeException("Error initializing brackets. Line numbers" +
+              " are not consecutive");
+        }
+
+        // Advance teams if one of them is a bye...
+        if(team1 == Team.BYE_TEAM_NUMBER || team2 == Team.BYE_TEAM_NUMBER) {
+          final int teamToAdvance = (team1==Team.BYE_TEAM_NUMBER ? team2 : team1);
+
+          insertBye(connection, Team.getTeamFromDatabase(connection, teamToAdvance), numSeedingRounds+1);
+          
+          try {
+            stmt = connection.prepareStatement("UPDATE PlayoffData SET Team=?"
+                + " WHERE Tournament='" + currentTournament + "'"
+                + " AND Division='" + division + "'"
+                + " AND PlayoffRound=" + (round1 + 1)
+                + " AND LineNumber=?");
+            stmt.setInt(1, teamToAdvance);
+            stmt.setInt(2, line2/2); // technically (line2+1)/2 but we know line2 is always the even team so this is the same...
+            stmt.execute();
+            // Degenerate case of BYE team advancing to the loser's bracket
+            // (i.e. a 3-team tournament with 3rd/4th place bracket enabled...)
+            if(enableThird && (numPlayoffRounds-round1) == 1) {
+              stmt.setInt(1, Team.BYE_TEAM_NUMBER);
+              stmt.setInt(2, line2/2 + 2);
+            }
+          } finally {
+            Utilities.closePreparedStatement(stmt);
+          }
+        } else {
+          // Assign tables and update database
+          try {
+            stmt = connection.prepareStatement("UPDATE PlayoffData SET AssignedTable=?"
+                + " WHERE Tournament='" + currentTournament + "'"
+                + " AND Division='" + division + "'"
+                + " AND PlayoffRound=" + round1
+                + " AND LineNumber=?");
+
+            if(!tableIt.hasNext()) {
+              tableIt = tournamentTables.iterator();
+            }
+            final String[] tblNames = tableIt.next();
+
+            stmt.setString(1, tblNames[0]);
+            stmt.setInt(2, line1);
+            stmt.execute();
+            
+            stmt.setString(1, tblNames[1]);
+            stmt.setInt(2, line2);
+            stmt.execute();
+          } finally {
+            Utilities.closePreparedStatement(stmt);
+          }
+        }
+      }
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closeStatement(selStmt);
+    }
+  }
+
   /**
    * Array of indicies used to determine who plays who in a single elimination
    * playoff bracket system

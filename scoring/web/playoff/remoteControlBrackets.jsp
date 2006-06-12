@@ -6,6 +6,7 @@
 <%@ page import="fll.Utilities" %>
 <%@ page import="fll.Queries" %>
 <%@ page import="fll.web.playoff.Playoff" %>
+<%@ page import="fll.web.playoff.BracketData" %>
   
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.List" %>
@@ -18,52 +19,40 @@
 /*
   application parameters
   playoffDivision - String for the division
-  playoffRunNumber - int for the run number, counted since the very first performance round
+  playoffRoundNumber - Integer for the playoff round number, counted from the 1st playoff round
 */
-  
+
 final Connection connection = (Connection)application.getAttribute("connection");
-final Map tournamentTeams = Queries.getTournamentTeams(connection);
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final String currentTournament = Queries.getCurrentTournament(connection);
 
 if(null == application.getAttribute("playoffDivision")) {
   throw new RuntimeException("No division specified, please go back to the <a href='index.jsp'>playoff main page</a> and start again.");
 }
-final String divisionStr = (String)application.getAttribute("playoffDivision");
+final String division = (String)application.getAttribute("playoffDivision");
 
 final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
-final int runNumber;  
-//check application for runNumber
-if(null == application.getAttribute("playoffRunNumber")) {
-  //use seeding round + 1
-  runNumber = numSeedingRounds + 1;
+final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection,division);
+
+final int playoffRoundNumber;  
+//check application for playoffRoundNumber
+if(null == application.getAttribute("playoffRoundNumber")) {
+  playoffRoundNumber = 1;
 } else {
-  runNumber = ((Number)application.getAttribute("playoffRunNumber")).intValue();
+  playoffRoundNumber = ((Number)application.getAttribute("playoffRoundNumber")).intValue();
 }
 
-int tempRunNumber = numSeedingRounds + 1;
-List tempCurrentRound = Playoff.buildInitialBracketOrder(connection, divisionStr, tournamentTeams);
+final BracketData bracketInfo =
+  new BracketData(connection, division, playoffRoundNumber, playoffRoundNumber+2, 4, false);
 
-while(tempRunNumber < runNumber) {
-  final List newCurrentRound = new LinkedList();
-  final Iterator prevIter = tempCurrentRound.iterator();
-  while(prevIter.hasNext()) {
-    final Team teamA = (Team)prevIter.next();
-    final Team teamB = (Team)prevIter.next();
-    final Team winner = Playoff.pickWinner(connection, challengeDocument, teamA, teamB, tempRunNumber);
-    newCurrentRound.add(winner);
-  }
-  tempCurrentRound = newCurrentRound;
-  tempRunNumber++;
-}
-final List currentRound = tempCurrentRound;
+bracketInfo.addBracketLabels(playoffRoundNumber);
 
 %>
 
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument/fll/@title"/> (Playoff Brackets) Division: <%=divisionStr%> Run Number: <%=runNumber%></title>
+    <title><x:out select="$challengeDocument/fll/@title"/> (Playoff Round <%=playoffRoundNumber%>, Division <%=division%>)</title>
   </head>
   <style type='text/css'>
       TD.Leaf {color:#ffffff;font-family:Arial;background-color:#000000}
@@ -81,7 +70,7 @@ var scrollTimer;
 var scrollAmount = 2;    // scroll by 100 pixels each time
 var documentYposition = 0;
 var scrollPause = 100; // amount of time, in milliseconds, to pause between scrolls
-        
+
 //http://www.evolt.org/article/document_body_doctype_switching_and_more/17/30655/index.html
 function getScrollPosition() {
   if (window.pageYOffset) {
@@ -110,175 +99,39 @@ function start() {
 }
 </script>
 <!-- end stuff for automatic scrolling -->
-    
+
   <body onload='start()'>
     <!-- dummy tag and some blank lines for scolling -->
     <div id="dummy" style="position:absolute"><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
-    <h2><x:out select="$challengeDocument/fll/@title"/> (Playoff Brackets Division: <%=divisionStr%> Run Number: <%=runNumber%>)</h2>
+    <h2><x:out select="$challengeDocument/fll/@title"/> (Playoff Round <%=playoffRoundNumber%>, Division <%=division%>)</h2>
       <form action='brackets.jsp' method='get'>
-        <input type='hidden' name='runNumber' value='<%=runNumber%>'>
-        <input type='hidden' name='division' value='<%=divisionStr%>'>
+        <input type='hidden' name='playoffRoundNumber' value='<%=playoffRoundNumber%>'>
+        <input type='hidden' name='division' value='<%=division%>'>
 
-<%if(currentRound.size() > 2) {%>
-        <input type='submit' name='nextRound' value='Next Round (<%=runNumber+1%>)'><br><br>
-<%}%>
-                                          
       <table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>
 <%
-if(currentRound.size() > 1) { //need at least 2 teams
-final Iterator currentIter = currentRound.iterator();
-for(int index=0; currentIter.hasNext(); index++) {
-  final boolean evenBracket = ( ( (index/2) * 2) == index );
-  final Team teamA = (Team)currentIter.next();
-  final Team teamB = (Team)currentIter.next();
-  final Team winner = Playoff.pickWinner(connection, challengeDocument, teamA, teamB, runNumber);
+if(playoffRoundNumber <= numPlayoffRounds) {
+
+
+for(int rowIndex = 1; rowIndex <= bracketInfo.getNumRows(); rowIndex++)
+{
 %>
-        <tr> <!-- row 1 -->
-          <td class='Leaf' width='200'>
-<%if(currentRound.size() > 2) {%>
-            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamA, !Team.BYE.equals(teamB))%>
-<%} else {%>
-            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamA, false)%>
-<%}%>
-          </td>
-            
-          <!-- connect teamA and teamB -->
-          <td class='Bridge' rowspan='5' width='10'>&nbsp;</td>
-
-          <td width='200'>&nbsp;</td>
-<%if(evenBracket) {%>
-          <td width='10'>&nbsp;</td>
-<%} else {%>
-          <!-- skip column for bracket-bracket bar -->
-<%}%>
-          <td width='200'>&nbsp;</td>
-        </tr>
-        
-        <tr> <!-- row 2 -->
-          <td width='200'>&nbsp;</td>
-          <!-- skip column for A-B bar -->
-          <td width='200'>&nbsp;</td>
-<%if(evenBracket) {%>
-          <td width='10'>&nbsp;</td>
-<%} else {%>
-          <!-- skip column for bracket-bracket bar -->
-<%}%>
-          <td width='200'>&nbsp;</td>
-        </tr>
-        
-        <tr> <!-- row 3 -->
-          <td width='200'><font size='4'>Bracket <%=index+1%></font></td>
-          <!-- skip column for A-B bar -->
-          <td class='Leaf' width='200'>
-<%if(currentRound.size() > 2) {%>
-  <%if(currentRound.size() > 4) {%>
-            <%=Playoff.getDisplayString(connection, currentTournament, (runNumber+1), winner, true)%>
-  <%} else {%>
-            <%=Playoff.getDisplayString(connection, currentTournament, (runNumber+1), winner, false)%>
-  <%}%>
-<%} else {%>
-                <!-- don't show winner -->
-                &nbsp;
-<%}%>
-          </td>
-              
-<%if(evenBracket) {%>
-              
-<%  if(currentRound.size() > 2) {%>
-          <!-- vertical bar down to next bracket -->
-          <td rowspan='9' class='Bridge' width='10'>&nbsp;</td>
-<%  } else {%>
-          <td rowspan='6' width='10'>&nbsp;</td>
-<%  }%>
-              
-<%} else {%>
-          <!-- skip column for bracket-bracket bar -->
-<%}%>
-
-          <td width='200'>&nbsp;</td>
-        </tr>
-        
-        <tr> <!-- row 4 -->
-          <td width='200'>&nbsp;</td>
-          <!-- skip column for A-B bar -->
-          <td width='200'>&nbsp;</td>
-<%if(evenBracket) {%>
-          <!-- skip column for bracket-bracket bar -->
-<%} else {%>
-          <td width='10'>&nbsp;</td>
-<%}%>
-          <td width='200'>&nbsp;</td>
-        </tr>
-        
-        <tr> <!-- row 5 -->
-          <td class='Leaf' width='200'>
-<%if(currentRound.size() > 2) {%>
-            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamB, !Team.BYE.equals(teamA))%>
-<%} else {%>
-            <%=Playoff.getDisplayString(connection, currentTournament, runNumber, teamB, false)%>
-<%}%>
-          </td>
-          <!-- skip column for A-B bar -->
-          <td width='200'>&nbsp;</td>
-<%if(evenBracket) {%>
-          <!-- skip column for bracket-bracket bar -->
-<%} else {%>
-          <td width='10'>&nbsp;</td>
-<%}%>
-          <td width='200'>&nbsp;</td>
-        </tr>
-
-        <tr> <!-- between row 1 -->
-          <td width='200'>&nbsp;</td>
-          <td width='10'>&nbsp;</td>
-          <td width='200'>&nbsp;</td>
-<%if(evenBracket) {%>
-          <!-- skip column for bracket-bracket bar -->
-<%} else {%>
-          <td width='10'>&nbsp;</td>
-<%}%>
-          <td width='200'>&nbsp;</td>
-        </tr>
-
-        <tr> <!-- between row 2 -->
-          <td width='200'>&nbsp;</td>
-          <td width='10'>&nbsp;</td>
-          <td width='200'>&nbsp;</td>
-<%if(evenBracket) {%>
-          <!-- skip column for bracket-bracket bar -->
-              
-<%  if(currentRound.size() > 2) {%>
-          <!-- winner of next bracket -->
-          <td class='Leaf' width='200'>&nbsp;</td>
-<%  } else {%>
-          <td width='200'>&nbsp;</td>
-<%  }%>
-              
-<%} else {%>
-          <td width='10'>&nbsp;</td>
-          <td width='200'>&nbsp;</td>
-<%}%>
-        </tr>
-
-        <tr> <!-- between row 3 -->
-          <td width='200'>&nbsp;</td>
-          <td width='10'>&nbsp;</td>
-          <td width='200'>&nbsp;</td>
-<%if(evenBracket) {%>
-          <!-- skip column for bracket-bracket bar -->
-<%} else {%>
-          <td width='10'>&nbsp;</td>
-<%}%>
-          <td width='200'>&nbsp;</td>
-        </tr>
-<%}%>
-      </table>
-
-<%if(currentRound.size() > 2) {%>
-        <input type='submit' name='nextRound' value='Next Round (<%=runNumber+1%>)'>
+        <tr>
+<%
+  // Get each cell. Insert bridge cells between columns.
+  for(int i = bracketInfo.getFirstRound(); i < bracketInfo.getLastRound(); i++)
+  {
+%>
+          <%=bracketInfo.getHtmlCell(connection, currentTournament, rowIndex, i)%>
+          <%=bracketInfo.getHtmlBridgeCell(rowIndex,i,BracketData.TopRightCornerStyle.MEET_TOP_OF_CELL)%>
 <%
   }
+%>
+          <%=bracketInfo.getHtmlCell(connection, currentTournament, rowIndex, bracketInfo.getLastRound())%>
+        </tr>
+<%
+}
 }//end if we have more than 2 teams
 %>
       </form>
