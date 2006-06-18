@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
+import java.util.prefs.Preferences;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -46,7 +47,6 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 
 import net.mtu.eggplant.util.BasicFileFilter;
-
 import net.mtu.eggplant.util.gui.SortableTable;
 
 import org.w3c.dom.Document;
@@ -62,7 +62,8 @@ public final class SubjectiveFrame extends JFrame {
 
   public static void main(final String[] args) {
     try {
-      final JFileChooser fileChooser = new JFileChooser();
+      final File initialDirectory = getInitialDirectory();
+      final JFileChooser fileChooser = new JFileChooser(initialDirectory);
       fileChooser.setDialogTitle("Please choose the subjective data file");
       //NOTE: Should get JonsInfra fixed for this
       fileChooser.setFileFilter(new BasicFileFilter("Zip files", "zip") {
@@ -78,6 +79,7 @@ public final class SubjectiveFrame extends JFrame {
       if(JFileChooser.APPROVE_OPTION == state) {
         final File file = fileChooser.getSelectedFile();
         final SubjectiveFrame frame = new SubjectiveFrame(file);
+        setInitialDirectory(file);
         frame.pack();
         frame.setVisible(true);
       } else {
@@ -281,5 +283,48 @@ public final class SubjectiveFrame extends JFrame {
     
   }
 
+  /**
+   * Set the initial directory preference. This supports opening new file
+   * dialogs to a (hopefully) better default in the user's next session.
+   * 
+   * @param dir the File for the directory in which file dialogs should open 
+   */
+  private static void setInitialDirectory(final File dir) {
+    //Store only directories
+    final File directory;
+    if(dir.isDirectory()) {
+      directory = dir;
+    } else {
+      directory = dir.getParentFile();
+    }
+    
+    final Preferences preferences = Preferences.userNodeForPackage(SubjectiveFrame.class);
+    final String previousPath = preferences.get(INITIAL_DIRECTORY_PREFERENCE_KEY, null);
+    
+    if(!directory.toString().equals(previousPath)) {
+      preferences.put(INITIAL_DIRECTORY_PREFERENCE_KEY, directory.toString());
+    }
+  }
+  
+  /**
+   * Get the initial directory to which file dialogs should open. This supports
+   * opening to a better directory across sessions.
+   * 
+   * @return the File for the initial directory
+   */
+  private static File getInitialDirectory() {
+    final Preferences preferences = Preferences.userNodeForPackage(SubjectiveFrame.class);
+    final String path = preferences.get(INITIAL_DIRECTORY_PREFERENCE_KEY, null);
+    
+    File dir = null;
+    if(null != path) { dir = new File(path); }
+    return dir;
+  }
+  
+  /**
+   * Preferences key for file dialog initial directory
+   */
+  private static final String INITIAL_DIRECTORY_PREFERENCE_KEY = "InitialDirectory";
+  
   private List<JTable> _tables = new LinkedList<JTable>();
 }

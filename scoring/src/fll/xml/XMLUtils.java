@@ -154,6 +154,7 @@ public final class XMLUtils {
               scoreElement.setAttribute("division", team.getDivision());
               scoreElement.setAttribute("organization", team.getOrganization());
               scoreElement.setAttribute("judge", judge);
+              scoreElement.setAttribute("NoShow", "false");
             
               rs2 = stmt.executeQuery("SELECT * FROM " + categoryName + " WHERE TeamNumber = " + team.getTeamNumber() + " AND Tournament = '" + currentTournament + "' AND Judge = '" + judge + "'");
               if(rs2.next()) {
@@ -166,6 +167,7 @@ public final class XMLUtils {
                     scoreElement.setAttribute(goalName, value);
                   } 
                 }
+                scoreElement.setAttribute("NoShow", rs2.getString("NoShow"));
               }
             }
           }

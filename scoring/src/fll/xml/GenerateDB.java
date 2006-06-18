@@ -281,6 +281,7 @@ public final class GenerateDB {
         createStatement.append(" TeamNumber INTEGER NOT NULL,");
         createStatement.append(" Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,");
         createStatement.append(" Judge VARCHAR(64) NOT NULL,");
+        createStatement.append(" NoShow " + BOOLEAN_DATATYPE + " DEFAULT 0 NOT NULL,");
         final NodeList goals = categoryElement.getElementsByTagName("goal");
         for(int i=0; i<goals.getLength(); i++) {
           final Element element = (Element)goals.item(i);
