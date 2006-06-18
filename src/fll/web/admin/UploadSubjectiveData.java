@@ -97,27 +97,25 @@ public final class UploadSubjectiveData {
             
             final StringBuffer updateStmt = new StringBuffer();
             final StringBuffer insertSQLColumns = new StringBuffer();
-            insertSQLColumns.append("INSERT INTO " + categoryName + " (TeamNumber, Tournament, Judge");
+            insertSQLColumns.append("INSERT INTO " + categoryName + " (TeamNumber, Tournament, Judge, NoShow");
             final StringBuffer insertSQLValues = new StringBuffer();
-            insertSQLValues.append(") VALUES ( ?, ?, ?");
-            updateStmt.append("UPDATE " + categoryName + " SET ");
+            insertSQLValues.append(") VALUES ( ?, ?, ?, ?");
+            updateStmt.append("UPDATE " + categoryName + " SET NoShow = ? ");
             final int numGoals = goalDescriptions.getLength();
             for(int goalIndex=0; goalIndex<numGoals; goalIndex++) {
               final Element goalDescription = (Element)goalDescriptions.item(goalIndex);
               insertSQLColumns.append(", " + goalDescription.getAttribute("name"));
               insertSQLValues.append(", ?");
-              if(goalIndex > 0) {
-                updateStmt.append(", ");
-              }
-              updateStmt.append(goalDescription.getAttribute("name") + " = ?");
+              updateStmt.append(", " + goalDescription.getAttribute("name") + " = ?");
             }
+            
             updateStmt.append(" WHERE TeamNumber = ? AND Tournament = ? AND Judge = ?");
             updatePrep = connection.prepareStatement(updateStmt.toString());
             insertPrep = connection.prepareStatement(insertSQLColumns.toString()
                                                      + insertSQLValues.toString() + ")");
             //initialze the tournament
             insertPrep.setString(2, currentTournament);
-            updatePrep.setString(numGoals+2, currentTournament);
+            updatePrep.setString(numGoals+3, currentTournament);
             
             final NodeList scores = scoreCategoryElement.getElementsByTagName("score");
             for(int scoreIndex=0; scoreIndex<scores.getLength(); scoreIndex++) {
@@ -127,22 +125,25 @@ public final class UploadSubjectiveData {
                  && "true".equalsIgnoreCase(scoreElement.getAttribute("modified"))) {
                 final int teamNumber = NumberFormat.getInstance().parse(scoreElement.getAttribute("teamNumber")).intValue();
                 final String judge = scoreElement.getAttribute("judge");
-
+                final boolean noShow = Boolean.parseBoolean(scoreElement.getAttribute("NoShow"));
+                updatePrep.setBoolean(1, noShow);
+                insertPrep.setBoolean(4, noShow);
+                
                 insertPrep.setInt(1, teamNumber);
-                updatePrep.setInt(numGoals+1, teamNumber);
+                updatePrep.setInt(numGoals+2, teamNumber);
                 insertPrep.setString(3, judge);
-                updatePrep.setString(numGoals+3, judge);
+                updatePrep.setString(numGoals+4, judge);
               
                 for(int goalIndex=0; goalIndex<numGoals; goalIndex++) {
                   final Element goalDescription = (Element)goalDescriptions.item(goalIndex);
                   final String goalName = goalDescription.getAttribute("name");
                   final String value = scoreElement.getAttribute(goalName);
                   if(null != value && !"".equals(value.trim())) {
-                    insertPrep.setString(goalIndex+4, value.trim());
-                    updatePrep.setString(goalIndex+1, value.trim());
+                    insertPrep.setString(goalIndex+5, value.trim());
+                    updatePrep.setString(goalIndex+2, value.trim());
                   } else {
-                    insertPrep.setNull(goalIndex+4, Types.INTEGER);
-                    updatePrep.setNull(goalIndex+1, Types.INTEGER);
+                    insertPrep.setNull(goalIndex+5, Types.INTEGER);
+                    updatePrep.setNull(goalIndex+2, Types.INTEGER);
                   }
                 }
             

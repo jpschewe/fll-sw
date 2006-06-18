@@ -17,6 +17,8 @@ import javax.swing.table.AbstractTableModel;
 
 import net.mtu.eggplant.util.gui.SortableTableModel;
 
+import org.apache.log4j.Logger;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -28,6 +30,8 @@ import org.w3c.dom.NodeList;
  */
 public final class SubjectiveTableModel extends AbstractTableModel implements SortableTableModel {
 
+  private static final Logger LOG = Logger.getLogger(SubjectiveTableModel.class);
+  
   /**
    * @param scoreDocument XML document that represents the teams that are
    * being scored alnog with the judges and the current set of scores
@@ -61,7 +65,9 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
     case 3:
       return "Judge";
     default:
-      if(column >= getNumGoals() + 4) {
+      if(column == getNumGoals() + 4) {
+        return "No Show";
+      } else if(column == getNumGoals() + 5) {
         return "Total Score";
       } else {
         return getGoalDescription(column - 4).getAttribute("title");
@@ -70,7 +76,9 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
   }
 
   public Class getColumnClass(final int column) {
-    if(column >= getNumGoals() + 4) {
+    if(column == getNumGoals() + 4) {
+      return Boolean.class;
+    } else if(column == getNumGoals() + 5) {
       return Integer.class;
     } else {
       return String.class;
@@ -82,7 +90,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
   }
 
   public int getColumnCount() {
-    return 5 + getNumGoals();
+    return 6 + getNumGoals();
   }
 
   public Object getValueAt(final int row,
@@ -107,7 +115,9 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
       case 3:
         return element.getAttribute("judge");
       default:
-        if(column >= getNumGoals() + 4) {
+        if(column == getNumGoals() + 4) {
+          return Boolean.valueOf(element.getAttribute("NoShow"));
+        } else if(column == getNumGoals() + 5) {
           //compute total score
           int totalScore = 0;
           for(int g=0; g<getNumGoals(); g++) {
@@ -152,8 +162,30 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
   
   public boolean isCellEditable(final int row,
                                 final int column) {
-    return ( (column >= 4) &&
-             (column <  4 + getNumGoals()) );
+    switch(column) {
+    case 0:
+      // TeamNumber
+      return false;
+    case 1:
+      // TeamName
+      return false;
+    case 2:
+      // Division
+      return false;
+    case 3:
+      // Judge
+      return false;
+    default:
+      if(column == getNumGoals() + 4) {
+        // No Show
+        return true;
+      } else if(column == getNumGoals() + 5) {
+        // Total Score
+        return false;
+      } else {
+        return true;
+      }
+    }
   }
 
   public void setValueAt(final Object value,
@@ -170,64 +202,88 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
                           final int row,
                           final int column,
                           final boolean setModified) {
-
     boolean error = false;
     final Element element = getScoreElement(row);
-    final Element goalDescription = getGoalDescription(column - 4);
 
-    //support deleting a value
-    if(null == value || "".equals(value)) {
-      //remove value
-      element.setAttribute(goalDescription.getAttribute("name"), "");
-      if(setModified) {
-        element.setAttribute("modified", Boolean.TRUE.toString());
-      }
-      return;
-    }
-    
-    final NodeList posValues = goalDescription.getElementsByTagName("value");
-    if(posValues.getLength() > 0) {
-      //enumerated
-      boolean found = false;
-      for(int v=0; v<posValues.getLength() && !found; v++) {
-        final Element posValue = (Element)posValues.item(v);
-        if(posValue.getAttribute("title").equalsIgnoreCase((String)value)) {
-          //found it
-          element.setAttribute(goalDescription.getAttribute("name"), value.toString());
-          if(setModified) {
-            element.setAttribute("modified", Boolean.TRUE.toString());
-          }
-          found = true;
+    if(column == getNumGoals() + 4) {
+      // No Show
+      if(value instanceof Boolean) {
+        element.setAttribute("NoShow", value.toString());
+        if(setModified) {
+          element.setAttribute("modified", Boolean.TRUE.toString());
         }
-      }
-      if(!found) {
+        
+        final Boolean b = (Boolean)value;
+        if(b) {
+          // delete all scores for that team
+          for(int i=0; i<getNumGoals(); i++) {
+            setValueAt(null, row, i+4);
+          }
+        }
+      } else {
         error = true;
       }
+    } else if(value != null
+              && !"".equals(value)
+              && Boolean.parseBoolean(element.getAttribute("NoShow"))) {
+      // don't allow changes to rows with NoShow set to true, but allow the
+      // scores to be set to null
+      error = true;
     } else {
-      //numeric
-        
-      int min = 0;
-      int max = 1;
-      try {
-        min = NumberFormat.getInstance().parse(goalDescription.getAttribute("min")).intValue();
-        max = NumberFormat.getInstance().parse(goalDescription.getAttribute("max")).intValue();
-          
-      } catch(final ParseException pe) {
-        throw new RuntimeException("Error in challenge.xml!!! min or max unparseable for goal: " + goalDescription.getAttribute("name"));
-      }
-        
-      try {
-        final int intValue = NumberFormat.getInstance().parse(value.toString()).intValue();
-        if(intValue > max || intValue < min) {
-          error = true;
+      final Element goalDescription = getGoalDescription(column - 4);
+      //support deleting a value
+      if(null == value || "".equals(value)) {
+        //remove value
+        element.setAttribute(goalDescription.getAttribute("name"), "");
+        if(setModified) {
+          element.setAttribute("modified", Boolean.TRUE.toString());
+        }
+      } else {
+        final NodeList posValues = goalDescription.getElementsByTagName("value");
+        if(posValues.getLength() > 0) {
+          //enumerated
+          boolean found = false;
+          for(int v=0; v<posValues.getLength() && !found; v++) {
+            final Element posValue = (Element)posValues.item(v);
+            if(posValue.getAttribute("title").equalsIgnoreCase((String)value)) {
+              //found it
+              element.setAttribute(goalDescription.getAttribute("name"), value.toString());
+              if(setModified) {
+                element.setAttribute("modified", Boolean.TRUE.toString());
+              }
+              found = true;
+            }
+          }
+          if(!found) {
+            error = true;
+          }
         } else {
-          element.setAttribute(goalDescription.getAttribute("name"), String.valueOf(intValue));
-          if(setModified) {
-            element.setAttribute("modified", Boolean.TRUE.toString());
+          //numeric
+        
+          int min = 0;
+          int max = 1;
+          try {
+            min = NumberFormat.getInstance().parse(goalDescription.getAttribute("min")).intValue();
+            max = NumberFormat.getInstance().parse(goalDescription.getAttribute("max")).intValue();
+          
+          } catch(final ParseException pe) {
+            throw new RuntimeException("Error in challenge.xml!!! min or max unparseable for goal: " + goalDescription.getAttribute("name"));
+          }
+        
+          try {
+            final int intValue = NumberFormat.getInstance().parse(value.toString()).intValue();
+            if(intValue > max || intValue < min) {
+              error = true;
+            } else {
+              element.setAttribute(goalDescription.getAttribute("name"), String.valueOf(intValue));
+              if(setModified) {
+                element.setAttribute("modified", Boolean.TRUE.toString());
+              }
+            }
+          } catch(final ParseException pe) {
+            error = true;
           }
         }
-      } catch(final ParseException pe) {
-        error = true;
       }
     }
     
@@ -236,7 +292,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
       setValueAt(getValueAt(row, column), row, column, false);
     } else {
       fireTableCellUpdated(row, column);
-      fireTableCellUpdated(row, getColumnCount()-1);
+      fireTableCellUpdated(row, getColumnCount()-1); // upadte the total score
     }
   }
   
