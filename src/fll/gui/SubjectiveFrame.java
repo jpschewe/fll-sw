@@ -79,7 +79,7 @@ public final class SubjectiveFrame extends JFrame {
         final File file = fileChooser.getSelectedFile();
         final SubjectiveFrame frame = new SubjectiveFrame(file);
         frame.pack();
-        frame.show();
+        frame.setVisible(true);
       } else {
         System.exit(0);
       }
@@ -152,7 +152,7 @@ public final class SubjectiveFrame extends JFrame {
         final NodeList posValuesList = goalDescription.getElementsByTagName("value");
         if(posValuesList.getLength() > 0) {
           //enumerated
-          final Vector posValues = new Vector();
+          final Vector<String> posValues = new Vector<String>();
           posValues.add("");
           for(int v=0; v<posValuesList.getLength(); v++) {
             final Element posValue = (Element)posValuesList.item(v);
@@ -222,9 +222,9 @@ public final class SubjectiveFrame extends JFrame {
   private void save() {
     try {
       //stop editing of all tables
-      final Iterator iter = _tables.iterator();
+      final Iterator<JTable> iter = _tables.iterator();
       while(iter.hasNext()) {
-        final JTable table = (JTable)iter.next();
+        final JTable table = iter.next();
         final int editingColumn = table.getEditingColumn();
         final int editingRow = table.getEditingRow();
         if(editingColumn > -1) {
@@ -281,5 +281,5 @@ public final class SubjectiveFrame extends JFrame {
     
   }
 
-  private List _tables = new LinkedList();
+  private List<JTable> _tables = new LinkedList<JTable>();
 }

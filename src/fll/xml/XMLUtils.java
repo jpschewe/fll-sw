@@ -60,7 +60,7 @@ public final class XMLUtils {
         throw new RuntimeException("Error parsing challenge.xml");
       }
       final Connection connection = Utilities.createDBConnection("fll", "fll", "fllmaster");
-      final Map teams = Queries.getTournamentTeams(connection);
+      final Map<Integer, Team> teams = Queries.getTournamentTeams(connection);
       //final Document document = createTeamsDocument(teams.values());
       LOG.info("Teams: " + teams.values());
       
@@ -110,7 +110,7 @@ public final class XMLUtils {
    * @return the document
    */
   public static Document createSubjectiveScoresDocument(final Document challengeDocument,
-                                                        final Collection teams,
+                                                        final Collection<Team> teams,
                                                         final Connection connection,
                                                         final String tournament)
     throws SQLException {

@@ -7,8 +7,6 @@ package fll.web.admin;
 
 import fll.Utilities;
 
-import fll.web.debug.DebugJspWriter;
-
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 
@@ -46,26 +44,6 @@ import org.w3c.dom.Node;
 public final class UploadSubjectiveData {
 
   private static final Logger LOG = Logger.getLogger(UploadSubjectiveData.class);
-  
-  /**
-   * Just for debugging
-   *
-   * @param args ignored
-   */
-  public static void main(final String[] args) {
-    try {
-      final JspWriter out = new DebugJspWriter(new OutputStreamWriter(System.out));
-      final File file = new File("/home/jpschewe/download/subjective.zip");
-      final String currentTournament = "Washburn";
-      final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-      final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge.xml"));
-
-      final Connection connection = Utilities.createDBConnection();
-      saveSubjectiveData(out, file, currentTournament, challengeDocument, connection);
-    } catch(final Exception e) {
-      e.printStackTrace();
-    }
-  }
   
   private UploadSubjectiveData() {
      
