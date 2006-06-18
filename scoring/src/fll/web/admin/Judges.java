@@ -8,10 +8,6 @@ package fll.web.admin;
 import fll.Queries;
 import fll.Utilities;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
 import java.io.IOException;
 
 import java.sql.Connection;
@@ -23,6 +19,7 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -35,6 +32,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspWriter;
 
 import net.mtu.eggplant.util.CollectionUtils;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  * Java code used in judges.jsp
@@ -94,7 +95,7 @@ public final class Judges {
       }
 
       //get list of divisions and add "All" as a possible value 
-      final List divisions = Queries.getDivisions(connection);
+      final List<String> divisions = Queries.getDivisions(connection);
       divisions.add(0, "All");
       
       out.println("<p>Judges ID's must be unique.  They can be just the name of the judge.  Keep in mind that this ID needs to be entered on the judging forms.  There must be at least 1 judge for each category.</p>");
@@ -223,13 +224,13 @@ public final class Judges {
     final StringBuffer error = new StringBuffer();
 
     // keep track of which categories have judges
-    final Map hash = CollectionUtils.createHashMap(subjectiveCategories.getLength());
+    final Map<String, Set<String>> hash = new HashMap<String, Set<String>>();
     
     //populate a hash where key is category name and value is an empty
     //Set.  Use set so there are no duplicates
     for(int i=0; i<subjectiveCategories.getLength(); i++) {
       final String categoryName = ((Element)subjectiveCategories.item(i)).getAttribute("name");
-      hash.put(categoryName, new HashSet());
+      hash.put(categoryName, new HashSet<String>());
     }
     
     //walk request and push judge id into the Set, if not null or empty,
@@ -242,7 +243,7 @@ public final class Judges {
         id = id.trim();
         id = id.toUpperCase();
         if(id.length() > 0) {
-          final Set set = (Set)hash.get(category);
+          final Set<String> set = hash.get(category);
           set.add(id);
         }
       }

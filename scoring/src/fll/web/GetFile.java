@@ -8,6 +8,7 @@ package fll.web;
 import com.lowagie.text.DocumentException;
 
 import fll.Queries;
+import fll.Team;
 
 import fll.pdf.report.FinalComputedScores;
 import fll.pdf.scoreEntry.ScoresheetGenerator;
@@ -53,7 +54,7 @@ public final class GetFile {
     final String filename = request.getParameter("filename");
     if("teams.xml".equals(filename)) {
       final Connection connection = (Connection)application.getAttribute("connection");
-      final Map tournamentTeams = Queries.getTournamentTeams(connection);
+      final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
       final Document teamsDocument = XMLUtils.createTeamsDocument(tournamentTeams.values());
       final XMLWriter xmlwriter = new XMLWriter();
 
@@ -66,7 +67,7 @@ public final class GetFile {
       final Connection connection = (Connection)application.getAttribute("connection");
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
       if(Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
-        final Map tournamentTeams = Queries.getTournamentTeams(connection);
+        final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
         final String tournament = Queries.getCurrentTournament(connection);
       
         final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument,
@@ -92,7 +93,7 @@ public final class GetFile {
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
       if(Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
       
-        final Map tournamentTeams = Queries.getTournamentTeams(connection);
+        final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
         final String tournament = Queries.getCurrentTournament(connection);
       
         final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument,

@@ -300,11 +300,9 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
    */
   private final Document _scoreDocument;
 
-  private final Comparator _comparator = new Comparator() {
-    public int compare(final Object o1, final Object o2) {
+  private final Comparator<Element> _comparator = new Comparator<Element>() {
+    public int compare(final Element e1, final Element e2) {
       try {
-        final Element e1 = (Element)o1;
-        final Element e2 = (Element)o2;
         switch(getSortedColumn()) {
         case 0:
           final int team1 = NumberFormat.getInstance().parse(e1.getAttribute("teamNumber")).intValue();
@@ -338,8 +336,8 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
     }
   };
 
-  private final Comparator _inverseComparator = new Comparator() {
-    public int compare(final Object o1, final Object o2) {
+  private final Comparator<Element> _inverseComparator = new Comparator<Element>() {
+    public int compare(final Element o1, final Element o2) {
       return -1 * _comparator.compare(o1, o2);
     }
   };

@@ -186,6 +186,7 @@
       optimize="${compile.optimize}"
       >
       <classpath refid="compile.classpath"/>
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
     
   </target>

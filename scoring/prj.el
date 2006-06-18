@@ -1,5 +1,4 @@
 ;;This file assumes that the following variables and methods exist:
-;; catalina-home - points to tomcat install directory
 
 (jde-set-project-name "fll-sw")
 (let ((project-root (file-name-directory load-file-name))
@@ -13,8 +12,8 @@
       (setq tag-table-alist (list tag-cons))))
   ;; JDE customizations
   (jde-set-variables
-   '(jde-run-working-directory (expand-file-name "build/" project-root))
-   '(jde-compile-option-directory (expand-file-name "build/" project-root))
+   '(jde-run-working-directory (expand-file-name "build/tomcat/webapps/fll-sw/WEB-INF/classes" project-root))
+   '(jde-compile-option-directory (expand-file-name "build/tomcat/webapps/fll-sw/WEB-INF/classes" project-root))
    '(jde-run-read-app-args t)
    '(jde-global-classpath
      (list
@@ -39,7 +38,7 @@
       (expand-file-name "lib/xalan.jar" project-root)
 
       ;; standard stuff
-      (expand-file-name "common/lib/servlet.jar" catalina-home)
+      (expand-file-name "build/tomcat/common/lib/servlet.jar" project-root)
 
       ;; HSQL
       (expand-file-name "lib/hsqldb-1.8.0.2.jar" project-root)
@@ -47,6 +46,7 @@
       ))
    
    '(jde-compile-option-deprecation t)
+   '(jde-compile-option-command-line-args '("-Xlint:unchecked"))
    '(jde-build-function 		'(jde-ant-build))
    '(jde-ant-working-directory		project-root)
    '(jde-ant-read-target 		t) ;; prompt for the target name

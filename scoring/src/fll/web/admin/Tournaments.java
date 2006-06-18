@@ -17,6 +17,7 @@ import java.sql.Statement;
 
 import java.text.ParseException;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -202,7 +203,7 @@ public final class Tournaments {
   private static boolean verifyData(final JspWriter out,
                                     final HttpServletRequest request)
     throws IOException {
-    final Map tournamentNames = CollectionUtils.createHashMap(20);
+    final Map<String, String> tournamentNames = new HashMap<String, String>();
     boolean retval = true;
 
     { //build up info of what tournaments exist
@@ -228,18 +229,18 @@ public final class Tournaments {
     }
 
     //loop over tournamentNames to find circularities and unknown tournaments
-    final Set visited = new HashSet();
-    final Iterator tournIter = tournamentNames.entrySet().iterator();
+    final Set<String> visited = new HashSet<String>();
+    final Iterator<Map.Entry<String, String>> tournIter = tournamentNames.entrySet().iterator();
     while(tournIter.hasNext()) {
-      final Map.Entry entry = (Map.Entry)tournIter.next();
-      final String current = (String)entry.getKey();
-      String next = (String)entry.getValue();
+      final Map.Entry<String, String> entry = tournIter.next();
+      final String current = entry.getKey();
+      String next = entry.getValue();
       if(null != next && !tournamentNames.containsKey(next)) {
         out.println("<p><font color='red'>Unknown tournament referenced as the next tournament for " + current + ", next: " + next + "</font></p>");
         retval = false;
       }
       
-      final Set nextList = new HashSet();
+      final Set<String> nextList = new HashSet<String>();
       while(null != next) {
         if(nextList.contains(next)) {
           out.println("<p><font color='red'>Circularity found starting with tournament: " + current + " containing tournaments: " + nextList + "</font></p>");
@@ -251,7 +252,7 @@ public final class Tournaments {
           next = null;
         } else {
           nextList.add(next);
-          next = (String)tournamentNames.get(next);
+          next = tournamentNames.get(next);
         }
       }
       visited.addAll(nextList);

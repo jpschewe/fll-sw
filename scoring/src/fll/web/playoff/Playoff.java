@@ -598,7 +598,7 @@ public final class Playoff {
     final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
   
     //initialize currentRound to contain a full bracket setup
-    List tempCurrentRound = buildInitialBracketOrder(connection, division, tournamentTeams);
+    List<Team> tempCurrentRound = buildInitialBracketOrder(connection, division, tournamentTeams);
     if(tempCurrentRound.size() > 1) {
       out.println("<table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>");
       
@@ -619,7 +619,8 @@ public final class Playoff {
       int[] lastTeam = new int[numRuns];
       Arrays.fill(lastTeam, 0);
       //the teams for a given round
-      Iterator[] currentRoundTeams = new Iterator[numRuns];
+      @SuppressWarnings("unchecked") // until generic array creation is allowed
+      Iterator<Team>[] currentRoundTeams = new Iterator[numRuns];
       //the bracket that will be displayed next
       int[] bracketIndex = new int[numRuns];
       Arrays.fill(bracketIndex, 1);
@@ -631,12 +632,12 @@ public final class Playoff {
         //save off the team order for later 
         currentRoundTeams[tempRunNumber] = tempCurrentRound.iterator();
     
-        final List newCurrentRound = new LinkedList();
-        final Iterator prevIter = tempCurrentRound.iterator();
+        final List<Team> newCurrentRound = new LinkedList<Team>();
+        final Iterator<Team> prevIter = tempCurrentRound.iterator();
         while(prevIter.hasNext()) {
-          final Team teamA = (Team)prevIter.next();
+          final Team teamA = prevIter.next();
           if(prevIter.hasNext()) {
-            final Team teamB = (Team)prevIter.next();
+            final Team teamB = prevIter.next();
             final Team winner = pickWinner(connection, challengeDocument, teamA, teamB, tempRunNumber+numSeedingRounds+1);
             newCurrentRound.add(winner);
           } else {
@@ -662,7 +663,7 @@ public final class Playoff {
             //keep track of where we last output a team
             lastTeam[playoffRunNumber] = row;
             //team information
-            final Team team = (Team)currentRoundTeams[playoffRunNumber].next();
+            final Team team = currentRoundTeams[playoffRunNumber].next();
             out.println("<td class='Leaf' width='200'>");
             out.println(BracketData.getDisplayString(connection, currentTournament, (playoffRunNumber+numSeedingRounds+1), team, false));
             
@@ -806,15 +807,15 @@ public final class Playoff {
       final String division, final JspWriter out) throws IOException,
       SQLException, ParseException {
 
-    final Map tournamentTeams = Queries.getTournamentTeams(connection);
+    final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
     final String currentTournament = Queries.getCurrentTournament(connection);
     final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
-    final List tournamentTables = Queries.getTournamentTables(connection);
+    final List<String[]> tournamentTables = Queries.getTournamentTables(connection);
     if(tournamentTables.size() == 0)
       tournamentTables.add(new String[] {"",""});
 
     // initialize currentRound to contain a full bracket setup
-    List tempCurrentRound = buildInitialBracketOrder(connection, division,
+    List<Team> tempCurrentRound = buildInitialBracketOrder(connection, division,
         tournamentTeams);
     if (tempCurrentRound.size() > 1) {
       out.println("<table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>");
@@ -859,7 +860,7 @@ public final class Playoff {
           matchCounts[tempRunNumber] = matchCounts[tempRunNumber-1];
         }
 
-        final List newCurrentRound = new LinkedList();
+        final List<Team> newCurrentRound = new LinkedList<Team>();
         final Iterator prevIter = tempCurrentRound.iterator();
         while (prevIter.hasNext()) {
           final Team teamA = (Team) prevIter.next();

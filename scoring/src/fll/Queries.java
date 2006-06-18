@@ -51,10 +51,10 @@ public final class Queries {
    * Get a map of teams for this tournament keyed on team number.  Uses the
    * table TournamentTeams to determine which teams should be included.
    */     
-  public static Map getTournamentTeams(final Connection connection) throws SQLException {
+  public static Map<Integer, Team> getTournamentTeams(final Connection connection) throws SQLException {
     final String currentTournament = getCurrentTournament(connection);
     
-    final SortedMap tournamentTeams = new TreeMap();
+    final SortedMap<Integer, Team> tournamentTeams = new TreeMap<Integer, Team>();
     Statement stmt = null;
     ResultSet rs = null;
     try {
@@ -116,11 +116,11 @@ public final class Queries {
    * @throws SQLException on a database error
    * @see #getCurrentTournament(Connection)
    */     
-  public static List getDivisions(final Connection connection)
+  public static List<String> getDivisions(final Connection connection)
     throws SQLException {
     final String currentTournament = getCurrentTournament(connection);
 
-    final List list = new LinkedList();
+    final List<String> list = new LinkedList<String>();
     
     Statement stmt = null;
     ResultSet rs = null;
@@ -717,8 +717,8 @@ public final class Queries {
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
-  public static List getTeamsNeedingSeedingRuns(final Connection connection,
-                                                final Map tournamentTeams,
+  public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection,
+                                                      final Map<Integer, Team> tournamentTeams,
                                                 final String division)
     throws SQLException, RuntimeException {
     final String currentTournament = getCurrentTournament(connection);
@@ -745,10 +745,10 @@ public final class Queries {
     try {
       stmt = connection.createStatement();
       rs = stmt.executeQuery(sql.toString());
-      final List list = new LinkedList();
+      final List<Team> list = new LinkedList<Team>();
       while(rs.next()) {
         final int teamNumber = rs.getInt(1);
-        final Team team = (Team)tournamentTeams.get(new Integer(teamNumber));
+        final Team team = tournamentTeams.get(teamNumber);
         if(null == team) {
           throw new RuntimeException("Couldn't find team number " + teamNumber + " in the list of tournament teams!");
         }
@@ -766,13 +766,13 @@ public final class Queries {
    *
    * @param connection connection to the database
    * @param tournamentTeams keyed by team number
-   * @return a List of team numbers as Integers
+   * @return a List of Team objects
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
-  public static List getTeamsWithExtraRuns(final Connection connection,
-                                           final Map tournamentTeams,
-                                           final String division)
+  public static List<Team> getTeamsWithExtraRuns(final Connection connection,
+                                                    final Map<Integer, Team> tournamentTeams,
+                                                    final String division)
     throws SQLException, RuntimeException {
     final String currentTournament = getCurrentTournament(connection);
     final StringBuffer sql = new StringBuffer();
@@ -798,10 +798,10 @@ public final class Queries {
     try {
       stmt = connection.createStatement();
       rs = stmt.executeQuery(sql.toString());
-      final List list = new LinkedList();
+      final List<Team> list = new LinkedList<Team>();
       while(rs.next()) {
         final int teamNumber = rs.getInt(1);
-        final Team team = (Team)tournamentTeams.get(new Integer(teamNumber));
+        final Team team = tournamentTeams.get(teamNumber);
         if(null == team) {
           throw new RuntimeException("Couldn't find team number " + teamNumber + " in the list of tournament teams!");
         }
@@ -966,8 +966,8 @@ public final class Queries {
    *
    * @return list of tournament names as strings
    */
-  public static List getTournamentNames(final Connection connection) throws SQLException {
-    final List retval = new LinkedList();
+  public static List<String> getTournamentNames(final Connection connection) throws SQLException {
+    final List<String> retval = new LinkedList<String>();
     Statement stmt = null;
     ResultSet rs = null;
     try {
@@ -989,8 +989,8 @@ public final class Queries {
    *
    * @return list of regions as strings
    */
-  public static List getRegions(final Connection connection) throws SQLException {
-    final List retval = new LinkedList();
+  public static List<String> getRegions(final Connection connection) throws SQLException {
+    final List<String> retval = new LinkedList<String>();
     Statement stmt = null;
     ResultSet rs = null;
     try {
@@ -1211,24 +1211,24 @@ public final class Queries {
                                          + " AND TournamentTeams.Tournament = Tournaments.Name");
       prep.setInt(1, teamNumber);
       rs = prep.executeQuery();
-      final List tournamentNames = new LinkedList();
-      final List nextTournaments = new LinkedList();
+      final List<String> tournamentNames = new LinkedList<String>();
+      final List<String> nextTournaments = new LinkedList<String>();
       while(rs.next()) {
         tournamentNames.add(rs.getString(1));
         nextTournaments.add(rs.getString(2));
       }
 
 
-      final Iterator iter = nextTournaments.iterator();
+      final Iterator<String> iter = nextTournaments.iterator();
       for(int i=0; iter.hasNext(); i++) {
-        final String nextTournament = (String)iter.next();
+        final String nextTournament = iter.next();
         if(null == nextTournament) {
           //if no next tournament then this must be the current one since a
           //team can't advance any further.
-          return (String)tournamentNames.get(i);
+          return tournamentNames.get(i);
         } else if(!tournamentNames.contains(nextTournament)) {
           //team hasn't advanced past this tournament yet
-          return (String)tournamentNames.get(i);
+          return tournamentNames.get(i);
         }
       }
       

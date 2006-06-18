@@ -5,6 +5,19 @@
  */
 package fll.web.admin;
 
+import fll.Utilities;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -12,21 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-
-import fll.Utilities;
-
-import fll.web.debug.DebugHttpSession;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,19 +40,6 @@ import javax.servlet.jsp.JspWriter;
  */
 public final class UploadTeams {
 
-  /**
-   * For debugging only
-   */
-  public static void main(final String[] args) {
-    try {
-      final File file = new File("/home/jpschewe/projects/fll/code/2002/results/teams-20021023.csv");
-      final Connection connection = Utilities.createDBConnection("fll", "fll");
-      parseFile(file, connection, new DebugHttpSession());
-    } catch(final Exception e) {
-      e.printStackTrace();
-    }
-  }
-  
   private UploadTeams() {
      
   }
@@ -94,7 +79,7 @@ public final class UploadTeams {
 
     //iterate over each column name and append to appropriate buffers
     boolean first = true;
-    final List columnNamesSeen = new LinkedList();
+    final List<String> columnNamesSeen = new LinkedList<String>();
     final Iterator headerIter = columnNames.iterator();
     while(headerIter.hasNext()) {
       final String header = (String)headerIter.next();
@@ -169,8 +154,8 @@ public final class UploadTeams {
    *
    * @return List of columns in line as Strings
    */
-  private static List splitLine(final String line) {
-    final List retval = new ArrayList();
+  private static List<String> splitLine(final String line) {
+    final List<String> retval = new ArrayList<String>();
     final StringBuffer field = new StringBuffer();
     for(int position=0; position < line.length(); position++) {
       if(line.charAt(position) ==  '\t') {
