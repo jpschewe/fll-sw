@@ -12,6 +12,7 @@ import fll.xml.XMLUtils;
 import fll.xml.XMLWriter;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,9 +24,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.prefs.Preferences;
 import java.util.zip.ZipEntry;
@@ -36,6 +42,7 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -43,8 +50,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextPane;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.StyledDocument;
 
 import net.mtu.eggplant.util.BasicFileFilter;
 import net.mtu.eggplant.util.gui.SortableTable;
@@ -135,6 +148,32 @@ public final class SubjectiveFrame extends JFrame {
       }
     });
 
+    final JButton summaryButton = new JButton("Summary");
+    topPanel.add(summaryButton);
+    summaryButton.addActionListener(new ActionListener() {
+      public void actionPerformed(final ActionEvent ae) {
+        final TableModel model = buildTableModelForSummary();
+        final JTable table = new JTable(model);
+        final JScrollPane tableScroller = new JScrollPane(table);
+        final JDialog dialog = new JDialog();
+        final Container cpane = dialog.getContentPane();
+        cpane.setLayout(new BorderLayout());
+        cpane.add(tableScroller, BorderLayout.CENTER);
+
+        final JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(new ActionListener() {
+          public void actionPerformed(final ActionEvent ae) {
+            dialog.setVisible(false);
+            dialog.dispose();
+          }
+        });
+        cpane.add(closeButton, BorderLayout.SOUTH);
+        
+        dialog.pack();
+        dialog.setVisible(true);
+      }
+    });
+    
     final JTabbedPane tabbedPane = new JTabbedPane();
     getContentPane().add(tabbedPane, BorderLayout.CENTER);
                          
@@ -175,6 +214,69 @@ public final class SubjectiveFrame extends JFrame {
     setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
   }
 
+  private TableModel buildTableModelForSummary() {
+    final Map<Integer, Integer[]> data = new HashMap<Integer, Integer[]>();
+
+    final Vector<String> columnNames = new Vector<String>();
+    columnNames.add("TeamNumber");
+
+    final NodeList subjectiveCategories = _challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
+    for(int i=0; i<subjectiveCategories.getLength(); i++) {
+      final Element subjectiveElement = (Element)subjectiveCategories.item(i);
+      final String category = subjectiveElement.getAttribute("name");
+      final String categoryTitle = subjectiveElement.getAttribute("title");
+      columnNames.add(categoryTitle);
+      
+      final NodeList goals = subjectiveElement.getElementsByTagName("goal");
+      final Element categoryElement = (Element)_scoreDocument.getDocumentElement().getElementsByTagName(category).item(0);
+      final NodeList scores = categoryElement.getElementsByTagName("score");
+      for(int scoreIdx=0; scoreIdx<scores.getLength(); scoreIdx++) {
+        int numValues = 0;
+        final Element scoreElement = (Element)scores.item(scoreIdx);
+        for(int goalIdx=0; goalIdx<goals.getLength(); goalIdx++) {
+          final Element goalElement = (Element)goals.item(goalIdx);
+          final String goalName = goalElement.getAttribute("name");
+          final String value = scoreElement.getAttribute(goalName);
+          if(null != value
+             && !"".equals(value)) {
+            numValues++;
+            break;
+          }
+        }
+
+        if(numValues > 0
+           || Boolean.parseBoolean(scoreElement.getAttribute("NoShow"))) {
+          final int teamNumber = Integer.parseInt(scoreElement.getAttribute("teamNumber"));
+          if(!data.containsKey(teamNumber)) {
+            final Integer[] counts = new Integer[subjectiveCategories.getLength()];
+            Arrays.fill(counts, 0);
+            data.put(teamNumber, counts);
+          }
+
+          // if there is a score or a No Show, then increment counter for this
+          // team/category combination
+          data.get(teamNumber)[i]++;
+        }
+      }
+    }
+
+    final Vector<Vector<Integer>> tableData = new Vector<Vector<Integer>>();
+    final List<Integer> teamNumbers = new ArrayList<Integer>(data.keySet());
+    Collections.sort(teamNumbers);
+    for(Integer teamNumber : teamNumbers) {
+      final Integer[] counts = data.get(teamNumber);
+      final Vector<Integer> row = new Vector<Integer>();
+      row.add(teamNumber);
+      for(Integer value : counts) {
+        row.add(value);
+      }
+      tableData.add(row);
+    }
+    
+    return new DefaultTableModel(tableData, columnNames);
+
+  }
+
   /**
    * Prompt the user with yes/no/cancel.  Yes exits and saves, no exits
    * without saving and cancel doesn't quit.
@@ -201,7 +303,7 @@ public final class SubjectiveFrame extends JFrame {
 
   /**
    * Make sure the data in the table is valid.  This checks to make sure that
-   * for all rows all columns that contain numeric data are actually set, or
+   * for all rows, all columns that contain numeric data are actually set, or
    * none of these columns are set in a row.  This avoids the case of partial
    * data.  This method is fail fast in that it will display a dialog box on
    * the first error it finds.
@@ -209,13 +311,84 @@ public final class SubjectiveFrame extends JFrame {
    * @return true if everything is ok
    */
   private boolean validateData() {
+    stopCellEditors();
+      
+    final List<String> warnings = new LinkedList<String>();
     final NodeList subjectiveCategories = _challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
     for(int i=0; i<subjectiveCategories.getLength(); i++) {
       final Element subjectiveElement = (Element)subjectiveCategories.item(i);
-      //final NodeList
-      //FIX finish this
+      final String category = subjectiveElement.getAttribute("name");
+      final String categoryTitle = subjectiveElement.getAttribute("title");
+      
+      final NodeList goals = subjectiveElement.getElementsByTagName("goal");
+      final Element categoryElement = (Element)_scoreDocument.getDocumentElement().getElementsByTagName(category).item(0);
+      final NodeList scores = categoryElement.getElementsByTagName("score");
+      for(int scoreIdx=0; scoreIdx<scores.getLength(); scoreIdx++) {
+        int numValues = 0;
+        final Element scoreElement = (Element)scores.item(scoreIdx);
+        for(int goalIdx=0; goalIdx<goals.getLength(); goalIdx++) {
+          final Element goalElement = (Element)goals.item(goalIdx);
+          final String goalName = goalElement.getAttribute("name");
+          final String value = scoreElement.getAttribute(goalName);
+          if(null != value
+             && !"".equals(value)) {
+            numValues++;
+          }
+        }
+        if(numValues != goals.getLength()
+           && numValues != 0) {
+          warnings.add(categoryTitle + ": " + scoreElement.getAttribute("teamNumber") + " has too few scores (needs all or none): " + numValues);
+        }
+        
+      }
     }
-    return true;
+
+    if(!warnings.isEmpty()) {
+      // join the warnings with carriage returns and display them
+      final StyledDocument doc = new DefaultStyledDocument();
+      for(String warning : warnings) {
+        try {
+          doc.insertString(doc.getLength(), warning + "\n", null);
+        } catch(final BadLocationException ble) {
+          throw new RuntimeException(ble);
+        }
+      }
+      final JDialog dialog = new JDialog(this, "Warnings");
+      final Container cpane = dialog.getContentPane();
+      cpane.setLayout(new BorderLayout());
+      final JButton okButton = new JButton("Ok");
+      cpane.add(okButton, BorderLayout.SOUTH);
+      okButton.addActionListener(new ActionListener() {
+        public void actionPerformed(final ActionEvent ae) {
+          dialog.setVisible(false);
+          dialog.dispose();
+        }
+      });
+      cpane.add(new JTextPane(doc), BorderLayout.CENTER);
+      dialog.pack();
+      dialog.setVisible(true);
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  /**
+   * Stop the cell editors to ensure data is flushed
+   */
+  private void stopCellEditors() {
+    final Iterator<JTable> iter = _tables.iterator();
+    while(iter.hasNext()) {
+      final JTable table = iter.next();
+      final int editingColumn = table.getEditingColumn();
+      final int editingRow = table.getEditingRow();
+      if(editingColumn > -1) {
+        final TableCellEditor cellEditor = table.getCellEditor(editingRow, editingColumn);
+        if(null != cellEditor) {
+          cellEditor.stopCellEditing();
+        }
+      }
+    }
   }
   
   /**
@@ -223,19 +396,7 @@ public final class SubjectiveFrame extends JFrame {
    */
   private void save() {
     try {
-      //stop editing of all tables
-      final Iterator<JTable> iter = _tables.iterator();
-      while(iter.hasNext()) {
-        final JTable table = iter.next();
-        final int editingColumn = table.getEditingColumn();
-        final int editingRow = table.getEditingRow();
-        if(editingColumn > -1) {
-          final TableCellEditor cellEditor = table.getCellEditor(editingRow, editingColumn);
-          if(null != cellEditor) {
-            cellEditor.stopCellEditing();
-          }
-        }
-      }
+      stopCellEditors();
       
       final XMLWriter xmlwriter = new XMLWriter();
       
