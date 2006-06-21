@@ -40,7 +40,7 @@ pageContext.setAttribute("regions", Queries.getRegions(connection));
 
     <form name="verify" action="verifyTournamentInitialization.jsp" method="post">
       <table border='1'>
-        <tr><th>Team Number</th><th>Team Name</th><th>New Tournament</th></tr>
+        <tr><th>Team Number</th><th>Team Name</th><th>Region</th><th>New Tournament</th></tr>
               
         <c:forEach var="parameter" items="${paramValues}">
           <input type='hidden'
@@ -59,6 +59,7 @@ pageContext.setAttribute("regions", Queries.getRegions(connection));
               <tr>
                 <td><c:out value="${row.TeamNumber}" /></td>
                 <td><c:out value="${row.TeamName}" /></td>
+                <td><c:out value="${row.Region}" /></td>
                 <td><c:out value="${param[row.Region]}"/></td>
               </tr>
             </c:forEach>
