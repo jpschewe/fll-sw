@@ -123,7 +123,7 @@
       2 computers.  The configuration looks like this:</p>
     <ul>
       <li>1 computer that is used for a <a href='#server_pc'>server</a>, <a
-      href='#performance_pc'>performance score entry</a>, and
+          href='#performance_pc'>performance score entry</a>, and
         <a href='#subjective_pc'>subjective score entry</a>, if these tasks
         are doubled up I would suggest a Pentium 233Mhz with 128MB RAM or
         more.</li>
@@ -170,10 +170,10 @@
         tables and therefore 4 of these computers.</li>
 
       <li><a href='#display_pc'>1 Display computer</a>, and a nice AV guy
-      that that send the display to all of the LCD projectors.  At this
-      point you should really have a computer and LCD projector combination
-      that is capable of 1024x768 and big screens.  Ours are about 10 feet
-      on a side.</li>
+        that that send the display to all of the LCD projectors.  At this
+        point you should really have a computer and LCD projector combination
+        that is capable of 1024x768 and big screens.  Ours are about 10 feet
+        on a side.</li>
 
       <li><a href='#subjective_pc'>4 subjective score entry computers</a>.
         You may think this is overkill, but I have each of the 4 major
@@ -185,9 +185,9 @@
         scores come in and need to be checked.</li>
 
       <li>Extra computer for the refs and MC to look at that displays score
-      data, especially useful during the playoffs and can also be used to
-      print scoresheets.</li>
-        
+        data, especially useful during the playoffs and can also be used to
+        print scoresheets.</li>
+      
     </ul>
 
     <h3>Extra computers that are nice to have</h3>
@@ -228,12 +228,11 @@
     <h1>Install Instructions</h1>
 
     <p>These instructions are geared towards Windows 2K and XP, if
-      installing
-      on Linux the instructions are mostly the same, with the exception of
-      getting prompted for installation locations.  In these instructions
-      locations are given for all installs, these are not hard coded into
-      the software anywhere, but it'll make things a lot easier for me to
-      debug over the phone if you use the same directories.</p>
+      installing on Linux the instructions are mostly the same, with the
+      exception of getting prompted for installation locations.  In these
+      instructions locations are given for all installs, these are not hard
+      coded into the software anywhere, but it'll make things a lot easier
+      for me to debug over the phone if you use the same directories.</p>
 
     <p>It is assumed that you have the computers used for the server,
       scoreboard display and performance score entry are already networked
@@ -264,18 +263,18 @@
       <li>You should now have the files uncompressed in a directory and you
         can move them around as needed.</li>
     </ol>
-  </p>
     
     <p>Links in <b>bold</b> are external links to sites where the
       applications can be found.</p>
     
     <ol>
       <li><b><a name='java'
-            href="http://java.sun.com/j2se/1.5.0/download.jsp">Install Java (the
-            SDK) 1.5 or higher</a></b> (the language everything is written in),
-        this is found
-        on the cd in apps/java.  This needs to be done on the server and on
-        any machines that will be used to enter subjective scores.
+            href="http://java.sun.com/j2se/1.5.0/download.jsp">Install Java
+            (the SDK) 1.5 or higher</a></b> (the language everything is
+            written in).  If you downloaded a version of the software is
+            the JDK bundled in, then you can skip this step for the server.
+            This needs to be done on the server and on any machines that
+            will be used to enter subjective scores.
         <ul>
           <li>When prompted for where to install it choose
             c:\packages\jdk-1.5.0</li>
@@ -289,9 +288,13 @@
             fll-sw-&lt;version&gt;</li>
           <li>Unzip the install file to a location that you want to run from.</li>
 
-          <li>Now goto tomcat/bin and run startup.bat, this will cause a
+          <li>Now goto bin and run start-tomcat.bat, this will cause a
             command window to come up, don't close it, you can minimize it
-            though.  Server errors will show up here.</li> <li>Open up a web
+            though.  Server errors will show up here.  If you are running Windows XP, you may get prompted by the firewall dialog asking if Java has permission to use the network, you need to click Unlock otherwise clients won't be able to connect</li>
+
+          <li>Open a web browser to <a href="http://localhost:9080/fll-sw/setup/index.jsp">http://localhost:9080/fll-sw/setup/index.jsp</a> and enter the path to your challenge descriptor file.  This will initialize the database</li>
+            
+          <li>Now open up a web
             browser to <a
               href="http://localhost:9080/fll-sw">http://localhost:9080/fll-sw</a></li>
           
@@ -304,8 +307,8 @@
             sure you can also get to this page, replacing localhost with the
             IP address of the server</li>
 
-          <li>When done for the day shutdown tomcat by going to tomcat/bin
-            and running shutdown.bat.</li>
+          <li>When done for the day shutdown tomcat by going to bin
+            and running stop-tomcat.bat.</li>
           
         </ol>
       </li>
