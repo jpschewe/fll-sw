@@ -121,7 +121,8 @@
 
 
   <!-- ==================== Compile Target ================================== -->
-  <target name="compile" depends="prepare,compile.classes,compile.jsp"
+  <target name="compile"
+    depends="prepare,compile.classes,compile.jsp,checkstyle"
     description="Compile Java sources">
 
     <!-- stuff for subjective scoring app -->
