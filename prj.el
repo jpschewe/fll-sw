@@ -12,6 +12,10 @@
       (setq tag-table-alist (list tag-cons))))
   ;; JDE customizations
   (jde-set-variables
+   '(jde-sourcepath			(list
+					 (expand-file-name "src" project-root)
+					 (expand-file-name "test" project-root)
+					 ))
    '(jde-run-working-directory (expand-file-name "build/tomcat/webapps/fll-sw/WEB-INF/classes" project-root))
    '(jde-compile-option-directory (expand-file-name "build/tomcat/webapps/fll-sw/WEB-INF/classes" project-root))
    '(jde-run-read-app-args t)
@@ -21,7 +25,6 @@
 			   
       (expand-file-name "lib/JonsInfra-0.2.jar" project-root)
       (expand-file-name "lib/itext-1.3.jar" project-root)
-      (expand-file-name "lib/junit-3.8.1.jar" project-root)
       (expand-file-name "lib/log4j-1.2.8.jar" project-root)
       (expand-file-name "lib/mysql-connector-java-3.0.16-ga-bin.jar" project-root)
       (expand-file-name "lib/xercesImpl.jar" project-root)
@@ -42,6 +45,13 @@
 
       ;; HSQL
       (expand-file-name "lib/hsqldb-1.8.0.2.jar" project-root)
+
+      ;; jars for tests
+      (expand-file-name "lib/test/Tidy.jar" project-root)
+      (expand-file-name "lib/test/httpunit.jar" project-root)
+      (expand-file-name "lib/test/js.jar" project-root)
+      (expand-file-name "lib/test/junit-3.8.1.jar" project-root)
+      (expand-file-name "lib/test/nekohtml.jar" project-root)
       
       ))
    
@@ -53,6 +63,23 @@
    '(jde-ant-enable-find 		t) ;; make jde-ant look for the build file
    '(jde-ant-complete-target 		nil) ;; don't parse the build file for me
    '(jde-ant-invocation-method  	'("Java"))
+   '(jde-ant-user-jar-files
+     (list
+      (jde-convert-cygwin-path (expand-file-name "lib/ant/antlr-2.7.6.jar" project-root))
+      (jde-convert-cygwin-path (expand-file-name "lib/ant/checkstyle-4.2.jar" project-root))
+      (jde-convert-cygwin-path (expand-file-name "lib/ant/commons-beanutils-core.jar" project-root))
+      (jde-convert-cygwin-path (expand-file-name "lib/ant/commons-cli-1.0.jar" project-root))
+      (jde-convert-cygwin-path (expand-file-name "lib/ant/commons-collections.jar" project-root))
+      (jde-convert-cygwin-path (expand-file-name "lib/ant/commons-logging.jar" project-root))
+
+      (jde-convert-cygwin-path (expand-file-name "lib/test/Tidy.jar" project-root))
+      (jde-convert-cygwin-path (expand-file-name "lib/test/httpunit.jar" project-root))
+      (jde-convert-cygwin-path (expand-file-name "lib/test/js.jar" project-root))
+      (jde-convert-cygwin-path (expand-file-name "lib/test/junit-3.8.1.jar" project-root))
+      (jde-convert-cygwin-path (expand-file-name "lib/test/nekohtml.jar" project-root))
+      
+      ))
+   
    '(jde-run-option-vm-args '("-DASSERT_BEHAVIOR=CONTINUE "))
    '(jde-import-sorted-groups 		'asc)
    '(jde-import-excluded-packages
