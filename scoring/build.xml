@@ -20,6 +20,7 @@
   <property name="dir.web"         value="${dir.build}/tomcat/webapps/${app.name}"/>
   <property name="dir.lib"         value="lib" />
   <property name="dir.src"         value="src" />
+  <property name="dir.test"         value="test" />
   <property name="dir.tmp"         value="tmp" />
   <property name="web.config"      value="web-default.xml" />
   <property name="dist.web.config" value="web-default.xml" />
@@ -47,7 +48,6 @@
   <!-- ==================== Compilation Classpath =========================== -->
   <path id="application.classpath">
     <pathelement location="${dir.lib}/JonsInfra-0.2.jar"/>
-    <pathelement location="${dir.lib}/junit-3.8.1.jar"/>
     <pathelement location="${dir.lib}/log4j-1.2.8.jar"/>
     <pathelement location="${dir.lib}/mysql-connector-java-3.0.16-ga-bin.jar"/>
     <pathelement location="${dir.lib}/xercesImpl.jar"/>
@@ -89,7 +89,16 @@
 
   </path>
 
+  <path id="test.classpath">
+    <path refid="compile.classpath"/>
 
+    <pathelement location="${dir.lib}/test/Tidy.jar"/>
+    <pathelement location="${dir.lib}/test/httpunit.jar"/>
+    <pathelement location="${dir.lib}/test/js.jar"/>
+    <pathelement location="${dir.lib}/test/junit-3.8.1.jar"/>
+    <pathelement location="${dir.lib}/test/nekohtml.jar"/>
+  </path>
+  
   <target name="init">
     <tstamp />
 
@@ -191,6 +200,21 @@
     
   </target>
 
+  <target name="compile.test" depends="prepare,compile"
+    description="Compile Java sources">
+
+    <!-- Compile Java classes as necessary -->
+    <javac srcdir="test"
+      destdir="${dir.web}/WEB-INF/classes"
+      debug="${compile.debug}"
+      deprecation="${compile.deprecation}"
+      optimize="${compile.optimize}"
+      >
+      <classpath refid="test.classpath"/>
+      <compilerarg value="-Xlint:unchecked"/>
+    </javac>
+  </target>
+  
   <!-- not perfect, but will work -->
   <target name="compile.jsp" depends="compile.classes"
     description="Compile JSP sources"
@@ -288,7 +312,7 @@
   </target>  
 
 
-  <!-- ==================== Expand Tomcat Target =================================== -->
+  <!-- ==================== Tomcat Targets =================================== -->
   <target name="-tomcat.check">
     <available property="tomcat.uptodate" file="${dir.build}/tomcat/bin/startup.sh" />
   </target>
@@ -308,6 +332,49 @@
         <include name="*.sh"/>
       </fileset>
     </chmod>
+  </target>
+
+  <target name="tomcat.start"
+    depends="tomcat.expand"
+    description="start up tomcat"
+    >
+    <echo message="Starting tomcat"/>
+    <antcall target="-tomcat.run">
+      <param name="operation" value="start" />
+      <param name="spawn" value="true"/>
+    </antcall>
+  </target>
+
+  <target name="tomcat.stop"
+    depends="tomcat.expand"
+    description="shut down tomcat"
+    >
+    <echo message="Shutting down tomcat"/>
+    <antcall target="-tomcat.run">
+      <param name="operation" value="stop" />
+      <param name="spawn" value="false"/>
+    </antcall>
+  </target>
+  
+  <target name="-tomcat.run"
+      >
+    <java classname="org.apache.catalina.startup.Bootstrap"
+      fork="true"
+      spawn="${spawn}"
+      taskname="tomcat"
+      >
+      <classpath>
+        <!-- include two tries to find tools.jar depending on if java.home expands to jre directory -->
+        <pathelement location="${java.home}/lib/tools.jar"/>
+        <pathelement location="${java.home}/../lib/tools.jar"/>
+        <pathelement location="${dir.build}/tomcat/bin/bootstrap.jar"/>
+      </classpath>
+      <sysproperty key="java.endorsed.dirs" file="${dir.build}/tomcat/common/endorsed"/>
+      <sysproperty key="catalina.base" file="${dir.build}/tomcat"/>
+      <sysproperty key="catalina.home" file="${dir.build}/tomcat"/>
+      <sysproperty key="java.io.tmpdir" file="${dir.build}/tomcat/temp"/>
+      <arg line="${operation}" />
+    </java>
   </target>
   
 
@@ -480,22 +547,43 @@
   </target>
 
   <target name="test"
-    depends="compile,checkstyle.full"
+    depends="compile,compile.test,checkstyle.full"
     description="Run any unit tests and the full checkstyle"
     >
-    <!-- no unit tests yet -->
+    <antcall target="tomcat.start"/>
+    <echo message="Waiting for tomcat to startup"/>
+    <sleep seconds="30"/>
+
+    <mkdir dir="${dir.build}/test-results"/>
+    <junit fork="yes"
+      haltonfailure="true"
+      dir="${dir.build}"
+      showoutput="true"
+      >
+      <classpath>
+        <path refid="test.classpath"/>
+        
+        <pathelement location="${dir.web}/WEB-INF/classes"/>
+      </classpath>
+      <formatter type="brief" usefile="false" />
+      <batchtest todir="${dir.build}/test-results">
+        <fileset dir="${dir.test}" includes="**/*Test.java"/>
+      </batchtest>
+    </junit>
+    
+    
+    <antcall target="tomcat.stop"/>
   </target>
 
   <!-- ===================== Checkstyle =================== -->
   <taskdef resource="checkstyletask.properties">
     <classpath>
-      <pathelement location="${dir.lib}/ant/antlr-2.7.4.jar" />
-      <pathelement location="${dir.lib}/ant/checkstyle-3.5.jar" />
-      <pathelement location="${dir.lib}/ant/commons-beanutils.jar" />
+      <pathelement location="${dir.lib}/ant/antlr-2.7.6.jar" />
+      <pathelement location="${dir.lib}/ant/checkstyle-4.2.jar" />
+      <pathelement location="${dir.lib}/ant/commons-beanutils-core.jar" />
       <pathelement location="${dir.lib}/ant/commons-cli-1.0.jar" />
       <pathelement location="${dir.lib}/ant/commons-collections.jar" />
       <pathelement location="${dir.lib}/ant/commons-logging.jar" />
-      <pathelement location="${dir.lib}/ant/jakarta-regexp-1.3.jar" />
     </classpath>
   </taskdef>
 
