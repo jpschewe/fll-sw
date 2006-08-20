@@ -41,7 +41,7 @@
       (expand-file-name "lib/xalan.jar" project-root)
 
       ;; standard stuff
-      (expand-file-name "build/tomcat/common/lib/servlet.jar" project-root)
+      ;;(expand-file-name "build/tomcat/common/lib/servlet.jar" project-root)
 
       ;; HSQL
       (expand-file-name "lib/hsqldb-1.8.0.2.jar" project-root)

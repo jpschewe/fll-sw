@@ -7,13 +7,11 @@ package fll.web.admin;
 
 import fll.Utilities;
 
-import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

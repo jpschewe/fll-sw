@@ -31,29 +31,40 @@ import fll.Utilities;
  * @author Dan Churchill
  * 
  */
-public class BracketData
-{
-  public static class BracketDataType
-  { }
+public class BracketData {
 
-  public static class TeamBracketCell extends BracketDataType
-  {
-    public Team team;
-    public String table;
-    public int dbLine;
+  /**
+   * Data type for brackets.
+   */
+  public static class BracketDataType { }
+
+  /**
+   * Team backet cells.
+   */
+  public static class TeamBracketCell extends BracketDataType {
+    private Team _team;
+    public Team getTeam() { return _team; }
+    public void setTeam(final Team t) { _team = t; }
+    private String _table;
+    public String getTable() { return _table; }
+    public void setTable(final String t) { _table = t; }
+    private int _dbLine;
+    public int getDBLine() { return _dbLine; }
+    public void setDBLine(final int v) { _dbLine = v; }
   }
 
-  public static class BracketLabelCell extends BracketDataType
-  {
-    public BracketLabelCell(final int num)
-    {
-      label = "Bracket " + num;
+  /**
+   * Cell for bracket labels.
+   */
+  public static class BracketLabelCell extends BracketDataType {
+    public BracketLabelCell(final int num) {
+      _label = "Bracket " + num;
     }
-    public BracketLabelCell(final String lbl)
-    {
-      label = lbl;
+    public BracketLabelCell(final String lbl) {
+      _label = lbl;
     }
-    public String label;
+    private final String _label;
+    public String getLabel() { return _label; }
   }
 
   /**
@@ -68,27 +79,26 @@ public class BracketData
     MEET_TOP_OF_CELL(0),
     MEET_BOTTOM_OF_CELL(1);
 
-    private int moduloMinimum;
-    TopRightCornerStyle(int moduloMin) {
-      moduloMinimum = moduloMin;
+    private int _moduloMinimum;
+    /*package*/ TopRightCornerStyle(final int moduloMin) {
+      _moduloMinimum = moduloMin;
     }
-    public int getModuloMinimum()
-    {
-      return moduloMinimum;
+    public int getModuloMinimum() {
+      return _moduloMinimum;
     }
   }
 
   // Map of round number to map of line number to playoff meta data for that
   // round number and line number.
-  private Map<Integer, SortedMap<Integer,BracketDataType>> bracketData;
-  private int firstRound;
-  private int lastRound;
-  private int firstRoundSize;
-  private int rowsPerTeam;
-  private int numSeedingRounds;
-  private int semiFinalsRound;
-  private int finalsRound;
-  private boolean showFinalScores;
+  private Map<Integer, SortedMap<Integer, BracketDataType>> _bracketData;
+  private int _firstRound;
+  private int _lastRound;
+  private int _firstRoundSize;
+  private int _rowsPerTeam;
+  private int _numSeedingRounds;
+  private int _semiFinalsRound;
+  private int _finalsRound;
+  private boolean _showFinalScores;
 
   // No public default constructor available
   private BracketData() {}
@@ -103,7 +113,7 @@ public class BracketData
    * @param firstRound
    *          The first playoff round of interest (1st playoff round is 1, not
    *          the number of seeding rounds + 1)
-   * @param lastRound
+   * @param _lastRound
    *          The last playoff round of interest.
    * @param rowPerTeam
    *          A positive, even number defining how many rows will be allocated
@@ -116,36 +126,34 @@ public class BracketData
                      final int pFirstRound,
                      final int pLastRound,
                      final int pRowsPerTeam)
-  throws SQLException
-  {
+  throws SQLException {
     super();
-    if(pRowsPerTeam % 2 != 0 || pRowsPerTeam < 2)
-    {
+    if(pRowsPerTeam % 2 != 0 || pRowsPerTeam < 2) {
       throw new RuntimeException("Error building BracketData structure:" +
           " Illegal rows-per-team value specified." +
           " Value must be a multiple of 2 greater than 0.");
     }
 
-    rowsPerTeam = pRowsPerTeam;
-    firstRoundSize = Queries.getFirstPlayoffRoundSize(connection, division);
-    numSeedingRounds = Queries.getNumSeedingRounds(connection);
+    _rowsPerTeam = pRowsPerTeam;
+    _firstRoundSize = Queries.getFirstPlayoffRoundSize(connection, division);
+    _numSeedingRounds = Queries.getNumSeedingRounds(connection);
     
-    showFinalScores = true;
+    _showFinalScores = true;
     
-    if(pFirstRound < 1)
-      firstRound = 1;
-    else
-      firstRound = pFirstRound;
+    if(pFirstRound < 1) {
+      _firstRound = 1;
+    } else {
+      _firstRound = pFirstRound;
+    }
 
-    lastRound = pLastRound;
+    _lastRound = pLastRound;
     
-    finalsRound = Queries.getNumPlayoffRounds(connection,division);
-    semiFinalsRound = finalsRound - 1;
+    _finalsRound = Queries.getNumPlayoffRounds(connection, division);
+    _semiFinalsRound = _finalsRound - 1;
     
-    bracketData = new TreeMap<Integer, SortedMap<Integer,BracketDataType>>();
-    for(int i=firstRound; i<=lastRound; i++)
-    {
-      bracketData.put(new Integer(i),new TreeMap<Integer,BracketDataType>());
+    _bracketData = new TreeMap<Integer, SortedMap<Integer, BracketDataType>>();
+    for(int i=_firstRound; i<=_lastRound; i++) {
+      _bracketData.put(new Integer(i), new TreeMap<Integer, BracketDataType>());
     }
 
     final String tournament = Queries.getCurrentTournament(connection);
@@ -159,36 +167,34 @@ public class BracketData
           + " FROM PlayoffData"
           + " WHERE Tournament='" + tournament + "'"
           + " AND Division='" + division + "'"
-          + " AND PlayoffRound>=" + firstRound
-          + " AND PlayoffRound<=" + lastRound);
-      while(rs.next())
-      {
+          + " AND PlayoffRound>=" + _firstRound
+          + " AND PlayoffRound<=" + _lastRound);
+      while(rs.next()) {
         final Integer round = new Integer(rs.getInt(1));
         final Integer line = new Integer(rs.getInt(2));
         final int team = rs.getInt(3);
         final String table = rs.getString(4);
         
-        SortedMap<Integer,BracketDataType> roundData = bracketData.get(round);
+        SortedMap<Integer, BracketDataType> roundData = _bracketData.get(round);
         
         final TeamBracketCell d = new TeamBracketCell();
-        d.table = table;
-        d.team = Team.getTeamFromDatabase(connection,team);
-        d.dbLine = line;
+        d.setTable(table);
+        d.setTeam(Team.getTeamFromDatabase(connection, team));
+        d.setDBLine(line);
         // Very brief explaination of the math:
-        // Let y = target output row in the table (this is the key value of the inner Map elements of bracketData)
-        // Let x = the number of rows per team (variable 'rowsPerTeam') in the left-most column of the output table
+        // Let y = target output row in the table (this is the key value of the inner Map elements of _bracketData)
+        // Let x = the number of rows per team (variable '_rowsPerTeam') in the left-most column of the output table
         //  (Given: x is a positive, even value. The math would work for other values, but it's meaningless when we
         //   can't have fractional table rows...)
         // Let r = the round index (variable 'adjustedRound') starting at 0 in the left-most column
         // Let n = the row number (variable 'line') as obtained from the database: 1,2,3,...
         // Then y = n * x * 2^r - (x * 2^(r-1) + 0.5 * x - 1)
         // The rounding operation is purely to negate any possible floating point inaccuracies introduced by Math.pow, etc.
-        int adjustedRound = round-firstRound;
-        final int row = (int)Math.round(line*rowsPerTeam*(Math.pow(2,adjustedRound))
-            - (rowsPerTeam*Math.pow(2,adjustedRound-1) + 0.5*rowsPerTeam - 1));
-        System.out.print("Putting team " + d.team + " with dbLine " + d.dbLine + " to row " + row + " of output table\n");
-        if(roundData.put(row, d) != null)
-        {
+        int adjustedRound = round-_firstRound;
+        final int row = (int)Math.round(line*_rowsPerTeam*(Math.pow(2, adjustedRound))
+            - (_rowsPerTeam*Math.pow(2, adjustedRound-1) + 0.5*_rowsPerTeam - 1));
+        System.out.print("Putting team " + d.getTeam() + " with dbLine " + d.getDBLine() + " to row " + row + " of output table\n");
+        if(roundData.put(row, d) != null) {
           throw new RuntimeException("Error - Map keys were not unique - PlayoffData " +
               "might be inconsistent (you should verify that there are not multiple teams" +
               " occupying the same round and row for tournament:'" + tournament + "' and" +
@@ -216,10 +222,9 @@ public class BracketData
       final int pLastRound,
       final int pRowsPerTeam,
       final boolean pShowFinals)
-  throws SQLException
-  {
+  throws SQLException {
     this(connection, division, pFirstRound, pLastRound, pRowsPerTeam);
-    showFinalScores = pShowFinals;
+    _showFinalScores = pShowFinals;
   }
 
   /**
@@ -233,9 +238,8 @@ public class BracketData
    * @return The BracketDataType for the given cell, or null if there is no data
    *         at that cell.
    */
-  public BracketDataType getData(int round, int row)
-  {
-    return bracketData.get(new Integer(round)).get(new Integer(row));
+  public BracketDataType getData(final int round, final int row) {
+    return _bracketData.get(new Integer(round)).get(new Integer(row));
   }
 
   /**
@@ -246,35 +250,29 @@ public class BracketData
    * @return Row number of the last row in that round, or 0 if there are no rows
    *         in it.
    */
-  public int getNumRows()
-  {
-    if(firstRound == semiFinalsRound && lastRound >= finalsRound)
-    {
-      final int sfr = bracketData.get(new Integer(semiFinalsRound)).lastKey().intValue();
-      final int fr = bracketData.get(new Integer(finalsRound)).lastKey().intValue();
+  public int getNumRows() {
+    if(_firstRound == _semiFinalsRound && _lastRound >= _finalsRound) {
+      final int sfr = _bracketData.get(new Integer(_semiFinalsRound)).lastKey().intValue();
+      final int fr = _bracketData.get(new Integer(_finalsRound)).lastKey().intValue();
       return sfr > fr ? sfr : fr;
     }
-    return bracketData.get(new Integer(firstRound)).lastKey().intValue();
+    return _bracketData.get(new Integer(_firstRound)).lastKey().intValue();
   }
   
-  public int getFirstRound()
-  {
-    return firstRound;
+  public int getFirstRound() {
+    return _firstRound;
   }
   
-  public int getLastRound()
-  {
-    return lastRound;
+  public int getLastRound() {
+    return _lastRound;
   }
   
-  public int getFirstRoundSize()
-  {
-    return firstRoundSize;
+  public int getFirstRoundSize() {
+    return _firstRoundSize;
   }
 
-  public int getRowsPerTeam()
-  {
-    return rowsPerTeam;
+  public int getRowsPerTeam() {
+    return _rowsPerTeam;
   }
 
   /**
@@ -301,29 +299,29 @@ public class BracketData
                             final String tournament,
                             final int row,
                             final int round)
-  throws SQLException
-  {
-    final SortedMap<Integer,BracketDataType> roundData = bracketData.get(new Integer(round));
-    if(roundData == null) return "<td>ERROR: No data for round " + round + ".</td>";
+  throws SQLException {
+    final SortedMap<Integer, BracketDataType> roundData = _bracketData.get(new Integer(round));
+    if(roundData == null) {
+      return "<td>ERROR: No data for round " + round + ".</td>";
+    }
     final StringBuffer sb = new StringBuffer();
     sb.append("<td width='200'");
     final BracketDataType d = roundData.get(new Integer(row));
     if(d == null) {
       sb.append(">&nbsp;");
-    } else if(d.getClass().equals(TeamBracketCell.class)) {
+    } else if(d instanceof TeamBracketCell) {
       sb.append(" class='Leaf'>");
-      if(round == finalsRound)
-        sb.append(getDisplayString(connection,tournament,
-            round+numSeedingRounds,((TeamBracketCell)d).team, showFinalScores));
-      else if(round == finalsRound+1)
-        ; // do nothing more
-      else
-        sb.append(getDisplayString(connection,tournament,
-            round+numSeedingRounds,((TeamBracketCell)d).team));
+      if(round == _finalsRound) {
+        sb.append(getDisplayString(connection, tournament,
+                                   round+_numSeedingRounds, ((TeamBracketCell)d).getTeam(), _showFinalScores));
+      } else if(round != _finalsRound+1) {
+        sb.append(getDisplayString(connection, tournament,
+                                   round+_numSeedingRounds, ((TeamBracketCell)d).getTeam()));
+      }
       
-    } else if(d.getClass().equals(BracketLabelCell.class)) {
+    } else if(d instanceof BracketLabelCell) {
       sb.append("><font size='4'>");
-      sb.append(((BracketLabelCell)d).label + "</font>");
+      sb.append(((BracketLabelCell)d).getLabel() + "</font>");
     }
     sb.append("</td>");
     
@@ -348,13 +346,12 @@ public class BracketData
    */
   public String getHtmlBridgeCell(final int row,
                                   final int round,
-                                  final TopRightCornerStyle cs)
-  {
+                                  final TopRightCornerStyle cs) {
     final StringBuffer sb = new StringBuffer();
-    final int ar = round-firstRound;
+    final int ar = round-_firstRound;
     // Very brief explaination of the math:
-    // Let y = row (this is the key value of the inner Map elements of bracketData)
-    // Let x = the number of rows per team (variable 'rowsPerTeam') in the left-most column of the output table
+    // Let y = row (this is the key value of the inner Map elements of _bracketData)
+    // Let x = the number of rows per team (variable '_rowsPerTeam') in the left-most column of the output table
     //  (Given: x is a positive, even value. The math would work for other values, but it's meaningless when we
     //   can't have fractional table rows...)
     // Let r = the round index (variable 'ar') starting at 0 in the left-most column
@@ -366,33 +363,28 @@ public class BracketData
     // will simply be empty. The rounding operation is purely to negate any possible floating
     // point inaccuracies introduced by Math.pow, etc.
     final int modVal = (int)(
-      Math.round((row + rowsPerTeam*Math.pow(2,ar+1) - rowsPerTeam*Math.pow(2,ar-1) + rowsPerTeam/2 - 1))
+      Math.round((row + _rowsPerTeam*Math.pow(2, ar+1) - _rowsPerTeam*Math.pow(2, ar-1) + _rowsPerTeam/2 - 1))
                                              %
-                           Math.round((rowsPerTeam*Math.pow(2,ar+1))));
+                           Math.round((_rowsPerTeam*Math.pow(2, ar+1))));
 
     if(modVal >= cs.getModuloMinimum() &&
-        modVal <= Math.round(rowsPerTeam*Math.pow(2,ar)) &&
-        round <= finalsRound)
-    {
+        modVal <= Math.round(_rowsPerTeam*Math.pow(2, ar)) &&
+        round <= _finalsRound) {
       // In a bridge
-      if(round == semiFinalsRound &&
-        ( (Math.round((row + rowsPerTeam*Math.pow(2,ar+1) - rowsPerTeam*Math.pow(2,ar-1) + rowsPerTeam/2 - 1)))
+      if(round == _semiFinalsRound &&
+        ( (Math.round((row + _rowsPerTeam*Math.pow(2, ar+1) - _rowsPerTeam*Math.pow(2, ar-1) + _rowsPerTeam/2 - 1)))
                                                 /
-                        (Math.round((rowsPerTeam*Math.pow(2,ar+1))))
-        ) > 2 )
-      {
+                        (Math.round((_rowsPerTeam*Math.pow(2, ar+1))))
+        ) > 2 ) {
         // This is the bridge cell before the 3rd/4th place brackets - it's just a blank cell
         sb.append("<td width='10'>&nbsp;</td>");
-      }
-      // If we are on the first line of the bridge, emit a rowspan'd td cell
-      else if(cs.equals(TopRightCornerStyle.MEET_BOTTOM_OF_CELL) && modVal == 1) {
-        sb.append("<td width='10' class='Bridge' rowspan='" + rowsPerTeam + "'>&nbsp;</td>");
-      }
-      else if(cs.equals(TopRightCornerStyle.MEET_TOP_OF_CELL) && modVal == 0) {
+      } else if(cs.equals(TopRightCornerStyle.MEET_BOTTOM_OF_CELL) && modVal == 1) {
+        // If we are on the first line of the bridge, emit a rowspan'd td cell
+        sb.append("<td width='10' class='Bridge' rowspan='" + _rowsPerTeam + "'>&nbsp;</td>");
+      } else if(cs.equals(TopRightCornerStyle.MEET_TOP_OF_CELL) && modVal == 0) {
         sb.append("<td width='10' class='Bridge' rowspan='"
-            + (rowsPerTeam*(int)Math.round(Math.pow(2,ar))+1) + "'>&nbsp;</td>");
-      }
-      else {
+            + (_rowsPerTeam*(int)Math.round(Math.pow(2, ar))+1) + "'>&nbsp;</td>");
+      } else {
         sb.append("<!-- skip column for bridge -->");
       }
     } else {
@@ -407,36 +399,32 @@ public class BracketData
    * 
    * @param roundNumber
    */
-  public void addBracketLabels(final int roundNumber)
-  {
-    SortedMap<Integer,BracketDataType> roundData =
-      bracketData.get(new Integer(roundNumber));
-    if(roundData != null)
-    {
+  public void addBracketLabels(final int roundNumber) {
+    SortedMap<Integer, BracketDataType> roundData =
+      _bracketData.get(new Integer(roundNumber));
+    if(roundData != null) {
       Vector<Integer> rows = new Vector<Integer>();
       Iterator<Integer> it = roundData.keySet().iterator();
-      while(it.hasNext())
-      {
+      while(it.hasNext()) {
         final int firstTeamRow = it.next().intValue();
-        if(!it.hasNext()) return;
+        if(!it.hasNext()) {
+          return;
+        }
         final int secondTeamRow = it.next().intValue();
         rows.add(firstTeamRow + (secondTeamRow-firstTeamRow)/2);
       }
 
-      if(roundNumber == finalsRound)
-      {
+      if(roundNumber == _finalsRound) {
         it = rows.iterator();
-        roundData.put(it.next(),new BracketLabelCell("1st/2nd Place"));
-        if(it.hasNext())
+        roundData.put(it.next(), new BracketLabelCell("1st/2nd Place"));
+        if(it.hasNext()) {
           roundData.put(it.next(), new BracketLabelCell("3rd/4th Place"));
-      }
-      else
-      {
+        }
+      } else {
         int bracketNumber = 1;
         it = rows.iterator();
-        while(it.hasNext())
-        {
-          roundData.put(it.next(),new BracketLabelCell(bracketNumber++));
+        while(it.hasNext()) {
+          roundData.put(it.next(), new BracketLabelCell(bracketNumber++));
         }
       }
     }
@@ -471,8 +459,7 @@ public class BracketData
                                         final int runNumber,
                                         final Team team,
                                         final boolean showScore)
-  throws IllegalArgumentException, SQLException
-  {
+  throws IllegalArgumentException, SQLException {
     if(Team.BYE.equals(team)) {
       return "<font class='TeamName'>BYE</font>";
     } else if(Team.TIE.equals(team)) {

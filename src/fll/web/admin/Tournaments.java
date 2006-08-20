@@ -28,8 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspWriter;
 
-import net.mtu.eggplant.util.CollectionUtils;
-
 /**
  * Java code used in tournaments.jsp
  *

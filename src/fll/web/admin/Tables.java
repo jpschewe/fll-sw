@@ -19,18 +19,10 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspWriter;
-
-import net.mtu.eggplant.util.CollectionUtils;
 
 /**
  * Java code used in judges.jsp
@@ -122,7 +114,9 @@ public final class Tables {
         }
       }
 
-      if(numRows == 0) numRows = 1;
+      if(numRows == 0) {
+        numRows = 1;
+      }
       final int tableRows = Math.max(numRows, row);
       for(; row < tableRows; row++) {
         generateRow(out, row, null, null, null);
@@ -208,8 +202,7 @@ public final class Tables {
             prep.executeUpdate();
           }
         }
-        if(null != delete)
-        {
+        if(null != delete) {
           x = x + "val=\"" + delete + "\" ";
         }
           

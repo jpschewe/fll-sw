@@ -67,16 +67,16 @@ public final class FinalComputedScores extends PdfPageEventHelper {
     _tournament = tournament;
   }
 
-  private void updateHeader(PdfWriter writer, Document document) {
+  private void updateHeader(final PdfWriter writer, final Document document) {
     // initialization of the header table
     _header = new PdfPTable(2);
     Phrase p = new Phrase();
-    Chunk ck = new Chunk(_challengeTitle + "\nFinal Computed Scores", times12ptNormal);
+    Chunk ck = new Chunk(_challengeTitle + "\nFinal Computed Scores", TIMES_12PT_NORMAL);
     p.add(ck);
     _header.getDefaultCell().setBorderWidth(0);
     _header.addCell(p);
     _header.getDefaultCell().setHorizontalAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
-    _header.addCell(new Phrase(new Chunk("Tournament: " + _tournament + "\nDivision: " + _division, times12ptNormal)));
+    _header.addCell(new Phrase(new Chunk("Tournament: " + _tournament + "\nDivision: " + _division, TIMES_12PT_NORMAL)));
     PdfPCell blankCell = new PdfPCell();
     blankCell.setBorder(0);
     blankCell.setBorderWidthTop(1.0f);
@@ -84,15 +84,15 @@ public final class FinalComputedScores extends PdfPageEventHelper {
     _header.addCell(blankCell);
   }
   
-  public void onOpenDocument(PdfWriter writer, Document document) {
-    _headerFooterFont = times12ptNormal.getBaseFont();
+  public void onOpenDocument(final PdfWriter writer, final Document document) {
+    _headerFooterFont = TIMES_12PT_NORMAL.getBaseFont();
 
     // initialization of the footer template
     _tpl = writer.getDirectContent().createTemplate(100, 100);
     _tpl.setBoundingBox(new Rectangle(-20, -20, 100, 100));
   }
   
-  public void onEndPage(PdfWriter writer, Document document) {
+  public void onEndPage(final PdfWriter writer, final Document document) {
     PdfContentByte cb = writer.getDirectContent();
     cb.saveState();
     // write the headertable
@@ -116,7 +116,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
     cb.restoreState();
   }
 
-  public void onCloseDocument(PdfWriter writer, Document document) {
+  public void onCloseDocument(final PdfWriter writer, final Document document) {
     _tpl.beginText();
     _tpl.setFontAndSize(_headerFooterFont, 12);
     _tpl.setTextMatrix(0, 0);
@@ -124,14 +124,13 @@ public final class FinalComputedScores extends PdfPageEventHelper {
     _tpl.endText();
   }
 
-  private static final Font arial8ptBold = FontFactory.getFont(
-      FontFactory.HELVETICA, 8, Font.BOLD);
-  private static final Font arial8ptNormal = FontFactory.getFont(
-      FontFactory.HELVETICA, 8, Font.NORMAL);
-  private static final Font arial8ptNormalRed = FontFactory.getFont(
-      FontFactory.HELVETICA, 8, Font.NORMAL,Color.RED);
-  private static final Font times12ptNormal = FontFactory.getFont(
-      FontFactory.TIMES, 12, Font.NORMAL);
+  private static final Font ARIAL_8PT_BOLD = FontFactory.getFont(
+                                                                 FontFactory.HELVETICA, 8, Font.BOLD);
+  private static final Font ARIAL_8PT_NORMAL = FontFactory.getFont(
+                                                                   FontFactory.HELVETICA, 8, Font.NORMAL);
+  private static final Font ARIAL_8PT_NORMAL_RED = FontFactory.getFont(
+                                                                       FontFactory.HELVETICA, 8, Font.NORMAL, Color.RED);
+  private static final Font TIMES_12PT_NORMAL = FontFactory.getFont(FontFactory.TIMES, 12, Font.NORMAL);
 
   /**
    * Generate the actual report.
@@ -192,278 +191,280 @@ public final class FinalComputedScores extends PdfPageEventHelper {
         divTable.setWidthPercentage(100);
 
         ///////////////////////////////////////////////////////////////////////
-        // Write the table column headers
-        ///////////////////////////////////////////////////////////////////////
-        PdfPCell teamCell = new PdfPCell(new Phrase("Organization / Team # / Team Name", arial8ptBold));
-        teamCell.setBorder(0);
-        teamCell.setVerticalAlignment(com.lowagie.text.Element.ALIGN_MIDDLE);
-        divTable.addCell(teamCell);
-        divTable.addCell("");
+          // Write the table column headers
+          ///////////////////////////////////////////////////////////////////////
+          PdfPCell teamCell = new PdfPCell(new Phrase("Organization / Team # / Team Name", ARIAL_8PT_BOLD));
+          teamCell.setBorder(0);
+          teamCell.setVerticalAlignment(com.lowagie.text.Element.ALIGN_MIDDLE);
+          divTable.addCell(teamCell);
+          divTable.addCell("");
 
-        PdfPCell[] catCells = new PdfPCell[subjectiveCategories.getLength()];
-        Paragraph[] catPars = new Paragraph[subjectiveCategories.getLength()];
-        for(int cat=0; cat<catElements.length; cat++) {
-          if(weights[cat] > 0.0) {
-            final String catTitle = catElements[cat].getAttribute("title");
+          PdfPCell[] catCells = new PdfPCell[subjectiveCategories.getLength()];
+          Paragraph[] catPars = new Paragraph[subjectiveCategories.getLength()];
+          for(int cat=0; cat<catElements.length; cat++) {
+            if(weights[cat] > 0.0) {
+              final String catTitle = catElements[cat].getAttribute("title");
 
-            catPars[cat] = new Paragraph(catTitle, arial8ptBold);
-            catCells[cat] = new PdfPCell(catPars[cat]);
-            catCells[cat].setBorder(0);
-            catCells[cat].setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-            catCells[cat].setVerticalAlignment(com.lowagie.text.Element.ALIGN_MIDDLE);
-            divTable.addCell(catCells[cat]);
-          }
-        }
-
-        Paragraph perfPar = new Paragraph("Performance", arial8ptBold);
-        PdfPCell perfCell = new PdfPCell(perfPar);
-        perfCell.setBorder(0);
-        perfCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-        perfCell.setVerticalAlignment(com.lowagie.text.Element.ALIGN_MIDDLE);
-        divTable.addCell(perfCell);
-
-        Paragraph overallScore = new Paragraph("Overall\nScore", arial8ptBold);
-        PdfPCell osCell = new PdfPCell(overallScore);
-        osCell.setBorder(0);
-        osCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-        osCell.setVerticalAlignment(com.lowagie.text.Element.ALIGN_MIDDLE);
-        divTable.addCell(osCell);
-
-        ///////////////////////////////////////////////////////////////////////
-        // Write a table row with the relative weights of the subjective scores
-        ///////////////////////////////////////////////////////////////////////
-
-        Paragraph wPar = new Paragraph("Weight:", arial8ptNormal);
-        PdfPCell wCell = new PdfPCell(wPar);
-        wCell.setColspan(2);
-        wCell.setBorder(0);
-        wCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
-        divTable.addCell(wCell);
-
-        PdfPCell[] wCells = new PdfPCell[subjectiveCategories.getLength()];
-        Paragraph[] wPars = new Paragraph[subjectiveCategories.getLength()];
-        for(int cat=0; cat<catElements.length; cat++) {
-          if(weights[cat] > 0.0) {
-            wPars[cat] = new Paragraph(Double.toString(weights[cat]), arial8ptNormal);
-            wCells[cat] = new PdfPCell(wPars[cat]);
-            wCells[cat].setBorder(0);
-            wCells[cat].setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-            divTable.addCell(wCells[cat]);
-          }
-        }
-
-        final Element performanceElement = (Element) rootElement
-            .getElementsByTagName("Performance").item(0);
-        final double perfWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(
-            performanceElement.getAttribute("weight")).doubleValue();
-        Paragraph perfWeightPar = new Paragraph(Double.toString(perfWeight),
-            arial8ptNormal);
-        PdfPCell perfWeightCell = new PdfPCell(perfWeightPar);
-        perfWeightCell
-            .setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-        perfWeightCell.setBorder(0);
-        divTable.addCell(perfWeightCell);
-        
-        divTable.addCell("");
-
-        PdfPCell blankCell = new PdfPCell();
-        blankCell.setBorder(0);
-        blankCell.setBorderWidthBottom(1.0f);
-        blankCell.setColspan(4 + nonZeroWeights);
-        divTable.addCell(blankCell);
-
-        divTable.setHeaderRows(3); // Cause the first 3 rows to be repeated on
-                                    // each page - 2 rows text headers and 1 for
-                                    // the horizontal line.
-
-        final StringBuilder query = new StringBuilder();
-        query.append("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,FinalScores.OverallScore,FinalScores.performance");
-        for(int cat=0; cat<catElements.length; cat++) {
-          if(weights[cat] > 0.0) {
-            final String catName = catElements[cat].getAttribute("name");
-            query.append(",FinalScores." + catName);
-          }
-        }
-        query.append(" FROM Teams,FinalScores");
-        query.append(" WHERE FinalScores.TeamNumber = Teams.TeamNumber");
-        query.append(" AND FinalScores.Tournament = '" + _tournament + "'");
-        query.append(" AND Teams.Division = '" + _division + "'");
-        query.append(" ORDER BY FinalScores.OverallScore DESC, Teams.TeamNumber");
-        teamsRS = stmt.executeQuery(query.toString());
-        while(teamsRS.next()) {
-          final int teamNumber = teamsRS.getInt(3);
-          final String organization = teamsRS.getString(1);
-          final String teamName = teamsRS.getString(2);
-
-          final double totalScore;
-          final double ts = teamsRS.getDouble(4);
-          if(teamsRS.wasNull()) {
-            totalScore = Double.NaN;
-          } else {
-            totalScore = ts;
+              catPars[cat] = new Paragraph(catTitle, ARIAL_8PT_BOLD);
+              catCells[cat] = new PdfPCell(catPars[cat]);
+              catCells[cat].setBorder(0);
+              catCells[cat].setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+              catCells[cat].setVerticalAlignment(com.lowagie.text.Element.ALIGN_MIDDLE);
+              divTable.addCell(catCells[cat]);
+            }
           }
 
-          /////////////////////////////////////////////////////////////////////
-          // Build a table of data for this team
-          /////////////////////////////////////////////////////////////////////
-          final PdfPTable curteam = new PdfPTable(relativeWidths);
-          curteam.getDefaultCell().setBorder(0);
+          Paragraph perfPar = new Paragraph("Performance", ARIAL_8PT_BOLD);
+          PdfPCell perfCell = new PdfPCell(perfPar);
+          perfCell.setBorder(0);
+          perfCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+          perfCell.setVerticalAlignment(com.lowagie.text.Element.ALIGN_MIDDLE);
+          divTable.addCell(perfCell);
 
-          // The first row of the team table...
-          // First column is organization name
-          PdfPCell teamCol = new PdfPCell(new Phrase(organization, arial8ptNormal));
-          teamCol.setBorder(0);
-          teamCol.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_LEFT);
-          curteam.addCell(teamCol);
-          curteam.getDefaultCell().setHorizontalAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
-          
-          // Second column is "Raw:"
-          curteam.addCell(new Phrase("Raw:", arial8ptNormal));
+          Paragraph overallScore = new Paragraph("Overall\nScore", ARIAL_8PT_BOLD);
+          PdfPCell osCell = new PdfPCell(overallScore);
+          osCell.setBorder(0);
+          osCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+          osCell.setVerticalAlignment(com.lowagie.text.Element.ALIGN_MIDDLE);
+          divTable.addCell(osCell);
 
-          // Next, one column containing the raw score for each subjective category with weight > 0
-          for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
-            final Element catElement = (Element)subjectiveCategories.item(cat);
-            final double catWeight = weights[cat];
-            if(catWeight > 0.0) {
-              final String catName = catElement.getAttribute("name");
-              rawScoreRS =
-                stmt.executeQuery("SELECT ComputedTotal"
-                                  + " FROM " + catName
-                                  + " WHERE TeamNumber = " + teamNumber
-                                  + " AND Tournament = '" + _tournament + "'"
-                                  + " ORDER BY ComputedTotal DESC");
-              final double rawScore;
-              if(rawScoreRS.next()) {
-                final double v = rawScoreRS.getDouble(1);
-                if(rawScoreRS.wasNull()) {
-                  rawScore = Double.NaN;
-                } else {
-                  rawScore = v;
-                }
-              } else {
-                rawScore = Double.NaN;
+          ///////////////////////////////////////////////////////////////////////
+            // Write a table row with the relative weights of the subjective scores
+            ///////////////////////////////////////////////////////////////////////
+
+            Paragraph wPar = new Paragraph("Weight:", ARIAL_8PT_NORMAL);
+            PdfPCell wCell = new PdfPCell(wPar);
+            wCell.setColspan(2);
+            wCell.setBorder(0);
+            wCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
+            divTable.addCell(wCell);
+
+            PdfPCell[] wCells = new PdfPCell[subjectiveCategories.getLength()];
+            Paragraph[] wPars = new Paragraph[subjectiveCategories.getLength()];
+            for(int cat=0; cat<catElements.length; cat++) {
+              if(weights[cat] > 0.0) {
+                wPars[cat] = new Paragraph(Double.toString(weights[cat]), ARIAL_8PT_NORMAL);
+                wCells[cat] = new PdfPCell(wPars[cat]);
+                wCells[cat].setBorder(0);
+                wCells[cat].setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+                divTable.addCell(wCells[cat]);
               }
-              PdfPCell subjCell = new PdfPCell(
-                  (Double.isNaN(rawScore) ?
-                      new Phrase("No Score", arial8ptNormalRed) :
-                      new Phrase(SCORE_FORMAT.format(rawScore), arial8ptNormal)));
-              subjCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-              subjCell.setBorder(0);
-              curteam.addCell(subjCell);
-              rawScoreRS.close();
             }
-          }
 
-          // Column for the highest performance score of the first 3 rounds
-          rawScoreRS = stmt.executeQuery("SELECT score FROM performance_seeding_max"
-                                         + " WHERE TeamNumber = " + teamNumber
-                                         + " AND Tournament = '" + _tournament + "'");
-          final double rawScore;
-          if(rawScoreRS.next()) {
-            final double v = rawScoreRS.getDouble(1);
-            if(rawScoreRS.wasNull()) {
-              rawScore = Double.NaN;
-            } else {
-              rawScore = v;
+            final Element performanceElement = (Element) rootElement
+              .getElementsByTagName("Performance").item(0);
+            final double perfWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(
+                                                                             performanceElement.getAttribute("weight")).doubleValue();
+            Paragraph perfWeightPar = new Paragraph(Double.toString(perfWeight),
+                                                    ARIAL_8PT_NORMAL);
+            PdfPCell perfWeightCell = new PdfPCell(perfWeightPar);
+            perfWeightCell
+              .setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+            perfWeightCell.setBorder(0);
+            divTable.addCell(perfWeightCell);
+        
+            divTable.addCell("");
+
+            PdfPCell blankCell = new PdfPCell();
+            blankCell.setBorder(0);
+            blankCell.setBorderWidthBottom(1.0f);
+            blankCell.setColspan(4 + nonZeroWeights);
+            divTable.addCell(blankCell);
+
+            divTable.setHeaderRows(3); // Cause the first 3 rows to be repeated on
+            // each page - 2 rows text headers and 1 for
+            // the horizontal line.
+
+            final StringBuilder query = new StringBuilder();
+            query.append("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,FinalScores.OverallScore,FinalScores.performance");
+            for(int cat=0; cat<catElements.length; cat++) {
+              if(weights[cat] > 0.0) {
+                final String catName = catElements[cat].getAttribute("name");
+                query.append(",FinalScores." + catName);
+              }
             }
-          } else {
-            rawScore = Double.NaN;
-          }
-          PdfPCell pCell = new PdfPCell(
-              (Double.isNaN(rawScore) ?
-                  new Phrase("No Score", arial8ptNormalRed) :
-                  new Phrase(SCORE_FORMAT.format(rawScore), arial8ptNormal)));
-          pCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-          pCell.setBorder(0);
-          curteam.addCell(pCell);
-          rawScoreRS.close();
-          
-          // The "Overall score" column is not filled in for raw scores
-          curteam.addCell("");
+            query.append(" FROM Teams,FinalScores");
+            query.append(" WHERE FinalScores.TeamNumber = Teams.TeamNumber");
+            query.append(" AND FinalScores.Tournament = '" + _tournament + "'");
+            query.append(" AND Teams.Division = '" + _division + "'");
+            query.append(" ORDER BY FinalScores.OverallScore DESC, Teams.TeamNumber");
+            teamsRS = stmt.executeQuery(query.toString());
+            while(teamsRS.next()) {
+              final int teamNumber = teamsRS.getInt(3);
+              final String organization = teamsRS.getString(1);
+              final String teamName = teamsRS.getString(2);
 
-          // The second row of the team table...
-          // First column contains the team # and name
-          PdfPCell teamNameCol = new PdfPCell(new Phrase(Integer.toString(teamNumber) + " " + teamName, arial8ptNormal));
-          teamNameCol.setBorder(0);
-          teamNameCol.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_LEFT);
-          curteam.addCell(teamNameCol);
-          
-          // Second column contains "Scaled:"
-          curteam.getDefaultCell().setHorizontalAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
-          curteam.addCell(new Phrase("Scaled:", arial8ptNormal));
-
-          // Next, one column containing the scaled score for each subjective category with weight > 0
-          for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
-            final double catWeight = weights[cat];
-            if(catWeight > 0.0) {
-              final double scaledScore;
-              final double v = teamsRS.getDouble(5 + cat + 1);
+              final double totalScore;
+              final double ts = teamsRS.getDouble(4);
               if(teamsRS.wasNull()) {
-                scaledScore = Double.NaN;
+                totalScore = Double.NaN;
               } else {
-                scaledScore = v;
+                totalScore = ts;
               }
 
-              PdfPCell subjCell = new PdfPCell(
-                  (Double.isNaN(scaledScore) ?
-                      new Phrase("No Score", arial8ptNormalRed) :
-                      new Phrase(SCORE_FORMAT.format(scaledScore), arial8ptNormal)));
-              subjCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-              subjCell.setBorder(0);
-              curteam.addCell(subjCell);
-            }
-          }
+              /////////////////////////////////////////////////////////////////////
+                // Build a table of data for this team
+                /////////////////////////////////////////////////////////////////////
+                final PdfPTable curteam = new PdfPTable(relativeWidths);
+                curteam.getDefaultCell().setBorder(0);
 
-          // 2nd to last column has the scaled performance score
-          {
-            final double scaledScore;
-            final double v = teamsRS.getDouble(5);
-            if(teamsRS.wasNull()) {
-              scaledScore = Double.NaN;
-            } else {
-              scaledScore = v;
-            }
-
-            pCell = new PdfPCell((Double.isNaN(scaledScore) ? new Phrase(
-                "No Score", arial8ptNormalRed) : new Phrase(SCORE_FORMAT
-                .format(scaledScore), arial8ptNormal)));
-            pCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-            pCell.setBorder(0);
-            curteam.addCell(pCell);
-          }
+                // The first row of the team table...
+                // First column is organization name
+                PdfPCell teamCol = new PdfPCell(new Phrase(organization, ARIAL_8PT_NORMAL));
+                teamCol.setBorder(0);
+                teamCol.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_LEFT);
+                curteam.addCell(teamCol);
+                curteam.getDefaultCell().setHorizontalAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
           
-          // Last column contains the overall scaled score
-          pCell = new PdfPCell((Double.isNaN(totalScore) ? new Phrase(
-              "No Score", arial8ptNormalRed) : new Phrase(SCORE_FORMAT
-              .format(totalScore), arial8ptNormal)));
-          pCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-          pCell.setBorder(0);
-          curteam.addCell(pCell);
+                // Second column is "Raw:"
+                curteam.addCell(new Phrase("Raw:", ARIAL_8PT_NORMAL));
 
-          // This is an empty row in the team table that is added to put a
-          // horizontal rule under the team's score in the display
-          blankCell = new PdfPCell();
-          blankCell.setBorder(0);
-          blankCell.setBorderWidthBottom(0.5f);
-          blankCell.setBorderColorBottom(Color.GRAY);
-          blankCell.setColspan(4 + nonZeroWeights);
-          curteam.addCell(blankCell);
+                // Next, one column containing the raw score for each subjective category with weight > 0
+                for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
+                  final Element catElement = (Element)subjectiveCategories.item(cat);
+                  final double catWeight = weights[cat];
+                  if(catWeight > 0.0) {
+                    final String catName = catElement.getAttribute("name");
+                    rawScoreRS =
+                      stmt.executeQuery("SELECT ComputedTotal"
+                                        + " FROM " + catName
+                                        + " WHERE TeamNumber = " + teamNumber
+                                        + " AND Tournament = '" + _tournament + "'"
+                                        + " ORDER BY ComputedTotal DESC");
+                    final double rawScore;
+                    if(rawScoreRS.next()) {
+                      final double v = rawScoreRS.getDouble(1);
+                      if(rawScoreRS.wasNull()) {
+                        rawScore = Double.NaN;
+                      } else {
+                        rawScore = v;
+                      }
+                    } else {
+                      rawScore = Double.NaN;
+                    }
+                    PdfPCell subjCell = new PdfPCell(
+                                                     (Double.isNaN(rawScore) ?
+                                                      new Phrase("No Score", ARIAL_8PT_NORMAL_RED) :
+                                                      new Phrase(SCORE_FORMAT.format(rawScore), ARIAL_8PT_NORMAL)));
+                    subjCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+                    subjCell.setBorder(0);
+                    curteam.addCell(subjCell);
+                    rawScoreRS.close();
+                  }
+                }
 
-          // Create a new cell and add it to the division table - this cell will
-          // contain the entire team table we just built above
-          PdfPCell curteamCell = new PdfPCell(curteam);
-          curteamCell.setBorder(0);
-          curteamCell.setColspan(relativeWidths.length);
-          divTable.addCell(curteamCell);
-        }
+                // Column for the highest performance score of the first 3 rounds
+                rawScoreRS = stmt.executeQuery("SELECT score FROM performance_seeding_max"
+                                               + " WHERE TeamNumber = " + teamNumber
+                                               + " AND Tournament = '" + _tournament + "'");
+                final double rawScore;
+                if(rawScoreRS.next()) {
+                  final double v = rawScoreRS.getDouble(1);
+                  if(rawScoreRS.wasNull()) {
+                    rawScore = Double.NaN;
+                  } else {
+                    rawScore = v;
+                  }
+                } else {
+                  rawScore = Double.NaN;
+                }
+                PdfPCell pCell = new PdfPCell(
+                                              (Double.isNaN(rawScore) ?
+                                               new Phrase("No Score", ARIAL_8PT_NORMAL_RED) :
+                                               new Phrase(SCORE_FORMAT.format(rawScore), ARIAL_8PT_NORMAL)));
+                pCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+                pCell.setBorder(0);
+                curteam.addCell(pCell);
+                rawScoreRS.close();
+          
+                // The "Overall score" column is not filled in for raw scores
+                curteam.addCell("");
 
-        teamsRS.close();
+                // The second row of the team table...
+                // First column contains the team # and name
+                PdfPCell teamNameCol = new PdfPCell(new Phrase(Integer.toString(teamNumber) + " " + teamName, ARIAL_8PT_NORMAL));
+                teamNameCol.setBorder(0);
+                teamNameCol.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_LEFT);
+                curteam.addCell(teamNameCol);
+          
+                // Second column contains "Scaled:"
+                curteam.getDefaultCell().setHorizontalAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
+                curteam.addCell(new Phrase("Scaled:", ARIAL_8PT_NORMAL));
 
-        // Add the division table to the document
-        pdfDoc.add(divTable);
+                // Next, one column containing the scaled score for each subjective category with weight > 0
+                for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
+                  final double catWeight = weights[cat];
+                  if(catWeight > 0.0) {
+                    final double scaledScore;
+                    final double v = teamsRS.getDouble(5 + cat + 1);
+                    if(teamsRS.wasNull()) {
+                      scaledScore = Double.NaN;
+                    } else {
+                      scaledScore = v;
+                    }
+
+                    PdfPCell subjCell = new PdfPCell(
+                                                     (Double.isNaN(scaledScore) ?
+                                                      new Phrase("No Score", ARIAL_8PT_NORMAL_RED) :
+                                                      new Phrase(SCORE_FORMAT.format(scaledScore), ARIAL_8PT_NORMAL)));
+                    subjCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+                    subjCell.setBorder(0);
+                    curteam.addCell(subjCell);
+                  }
+                }
+
+                // 2nd to last column has the scaled performance score
+                {
+                  final double scaledScore;
+                  final double v = teamsRS.getDouble(5);
+                  if(teamsRS.wasNull()) {
+                    scaledScore = Double.NaN;
+                  } else {
+                    scaledScore = v;
+                  }
+
+                  pCell = new PdfPCell((Double.isNaN(scaledScore) ? new Phrase(
+                                                                               "No Score", ARIAL_8PT_NORMAL_RED) : new Phrase(SCORE_FORMAT
+                                                                                                                              .format(scaledScore), ARIAL_8PT_NORMAL)));
+                  pCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+                  pCell.setBorder(0);
+                  curteam.addCell(pCell);
+                }
+          
+                // Last column contains the overall scaled score
+                pCell = new PdfPCell((Double.isNaN(totalScore) ? new Phrase(
+                                                                            "No Score", ARIAL_8PT_NORMAL_RED) : new Phrase(SCORE_FORMAT
+                                                                                                                           .format(totalScore), ARIAL_8PT_NORMAL)));
+                pCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+                pCell.setBorder(0);
+                curteam.addCell(pCell);
+
+                // This is an empty row in the team table that is added to put a
+                // horizontal rule under the team's score in the display
+                blankCell = new PdfPCell();
+                blankCell.setBorder(0);
+                blankCell.setBorderWidthBottom(0.5f);
+                blankCell.setBorderColorBottom(Color.GRAY);
+                blankCell.setColspan(4 + nonZeroWeights);
+                curteam.addCell(blankCell);
+
+                // Create a new cell and add it to the division table - this cell will
+                // contain the entire team table we just built above
+                PdfPCell curteamCell = new PdfPCell(curteam);
+                curteamCell.setBorder(0);
+                curteamCell.setColspan(relativeWidths.length);
+                divTable.addCell(curteamCell);
+            }
+
+            teamsRS.close();
+
+            // Add the division table to the document
+            pdfDoc.add(divTable);
         
-        // If there is another division to process, start it on a new page
-        if(divisionIter.hasNext()) pdfDoc.newPage();
+            // If there is another division to process, start it on a new page
+            if(divisionIter.hasNext()) {
+              pdfDoc.newPage();
+            }
 
       } //end while(divisionIter.next())
 
