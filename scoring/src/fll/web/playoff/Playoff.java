@@ -172,16 +172,11 @@ public final class Playoff {
         } else {
           final int scoreA = getPerformanceScore(connection, tournament, teamA, runNumber);
           final int scoreB = Integer.parseInt(request.getParameter("totalScore"));
-          if(scoreA < scoreB)
-          {
+          if(scoreA < scoreB) {
             return teamB;
-          }
-          else if(scoreB < scoreA)
-          {
+          } else if(scoreB < scoreA) {
             return teamA;
-          }
-          else
-          {
+          } else {
             final Element performanceElement = (Element)document.getDocumentElement().getElementsByTagName("Performance").item(0);
             final Element tiebreakerElement = (Element)performanceElement.getElementsByTagName("tiebreaker").item(0);
             final NodeList goals = performanceElement.getElementsByTagName("goal");
@@ -192,8 +187,7 @@ public final class Playoff {
               stmtA = connection.createStatement();
               rsA = stmtA.executeQuery("SELECT * FROM Performance WHERE Tournament = '" + tournament
                   + "' AND RunNumber = " + runNumber + " and TeamNumber = " + teamA.getTeamNumber());
-              if(rsA.next())
-              {
+              if(rsA.next()) {
                 //walk test elements in tiebreaker to decide who wins
                 Node child = tiebreakerElement.getFirstChild();
                 while(null != child) {
@@ -543,8 +537,7 @@ public final class Playoff {
                               final String tournament,
                               final Team team,
                               final int runNumber)
-  throws SQLException, IllegalArgumentException
-  {
+  throws SQLException, IllegalArgumentException {
     Statement stmt = null;
     ResultSet rs = null;
     try {
@@ -733,13 +726,12 @@ public final class Playoff {
   
   private static void genScoresheetForm(
       final JspWriter out,
-      Team teamA,
-      Team teamB,
-      String tableA,
-      String tableB,
-      List tables,
-      String round) throws IOException
-  {
+      final Team teamA,
+      final Team teamB,
+      final String tableA,
+      final String tableB,
+      final List tables,
+      final String round) throws IOException {
     final String formName = "genScoresheet_" + teamA.getTeamNumber() + "_" + teamB.getTeamNumber();
     out.println("<form name='" + formName + "' action='../getfile.jsp' method='POST' target='_new'>");
 
@@ -754,8 +746,7 @@ public final class Playoff {
 
     out.println("  1st side:<select name='Table1'>");
     Iterator i = tables.iterator();
-    while(i.hasNext())
-    {
+    while(i.hasNext()) {
       final String[] t = (String[])i.next();
       
       out.print("    <option value='" + t[0] + "'");
@@ -773,8 +764,7 @@ public final class Playoff {
     
     out.println("  2nd side:<select name='Table2'>");
     i = tables.iterator();
-    while(i.hasNext())
-    {
+    while(i.hasNext()) {
       final String[] t = (String[])i.next();
       
       out.print("    <option value='" + t[0] + "'");
@@ -811,8 +801,9 @@ public final class Playoff {
     final String currentTournament = Queries.getCurrentTournament(connection);
     final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
     final List<String[]> tournamentTables = Queries.getTournamentTables(connection);
-    if(tournamentTables.size() == 0)
-      tournamentTables.add(new String[] {"",""});
+    if(tournamentTables.size() == 0) {
+      tournamentTables.add(new String[] {"", ""});
+    }
 
     // initialize currentRound to contain a full bracket setup
     List<Team> tempCurrentRound = buildInitialBracketOrder(connection, division,
@@ -880,8 +871,7 @@ public final class Playoff {
         currentRoundTable[tempRunNumber] = tournamentTables.iterator();
         if(tempRunNumber > 0) {
           final int iters = matchCounts[tempRunNumber-1] % tournamentTables.size();
-          for(int j=0; j < iters; j++)
-          {
+          for(int j=0; j < iters; j++) {
             currentRoundTable[tempRunNumber].next();
           }
         }
@@ -998,16 +988,16 @@ public final class Playoff {
                                         final String division,
                                         final boolean enableThird,
                                         final JspWriter out)
-    throws IOException, SQLException, ParseException
-  {
+    throws IOException, SQLException, ParseException {
 
     final Map tournamentTeams = Queries.getTournamentTeams(connection);
     final String currentTournament = Queries.getCurrentTournament(connection);
     final List<String[]> tournamentTables = Queries.getTournamentTables(connection);
     
     // Work-around for if they didn't initialize tournament table labels.
-    if(tournamentTables.size() == 0)
-      tournamentTables.add(new String[] {"",""});
+    if(tournamentTables.size() == 0) {
+      tournamentTables.add(new String[] {"", ""});
+    }
 
     // Iterator over table name pairs.
     Iterator<String[]> tableIt = tournamentTables.iterator();
@@ -1021,14 +1011,12 @@ public final class Playoff {
     // At this time we let the table assignment field default to NULL.
     Iterator<Team> it = firstRound.iterator();
     PreparedStatement stmt = null;
-    try
-    {
+    try {
       stmt = connection.prepareStatement("INSERT INTO PlayoffData" +
           " (Tournament, Division, PlayoffRound, LineNumber, Team)" +
           " VALUES ('" + currentTournament + "', '" + division + "', 1, ?, ?)");
       int lineNbr = 1;
-      while(it.hasNext())
-      {
+      while(it.hasNext()) {
         stmt.setInt(1, lineNbr);
         stmt.setInt(2, it.next().getTeamNumber());
         stmt.executeUpdate();
@@ -1046,14 +1034,13 @@ public final class Playoff {
       stmt = connection.prepareStatement("INSERT INTO PlayoffData" +
           " (Tournament, Division, PlayoffRound, LineNumber) VALUES ('" +
           currentTournament + "', '" + division + "', ?, ?)");
-      while(currentRoundSize > 0)
-      {
+      while(currentRoundSize > 0) {
         stmt.setInt(1, roundNumber);
         int lineNbr = currentRoundSize;
-        if(enableThird && currentRoundSize <= 2)
+        if(enableThird && currentRoundSize <= 2) {
           lineNbr = lineNbr * 2;
-        while(lineNbr >= 1)
-        {
+        }
+        while(lineNbr >= 1) {
           stmt.setInt(2, lineNbr);
           stmt.executeUpdate();
           lineNbr--;

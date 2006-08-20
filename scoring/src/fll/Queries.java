@@ -92,8 +92,7 @@ public final class Queries {
       
       rs = stmt.executeQuery("SELECT SideA,SideB FROM tablenames WHERE Tournament = '" + currentTournament + "'");
       
-      while(rs.next())
-      {
+      while(rs.next()) {
         final String[] labels = new String[2];
         labels[0] = rs.getString("SideA");
         labels[1] = rs.getString("SideB");
@@ -207,8 +206,7 @@ public final class Queries {
   public static String insertPerformanceScore(final Document document,
                                               final Connection connection,
                                               final HttpServletRequest request)
-    throws SQLException, ParseException, RuntimeException
-  {
+    throws SQLException, ParseException, RuntimeException {
     final String currentTournament = getCurrentTournament(connection);
 
     final String teamNumber = request.getParameter("TeamNumber");
@@ -231,8 +229,7 @@ public final class Queries {
     final int numSeedingRounds = getNumSeedingRounds(connection);
 
     // Perform updates to the playoff data table if in playoff rounds.
-    if(irunNumber > numSeedingRounds)
-    {
+    if(irunNumber > numSeedingRounds) {
       final int playoffRun = irunNumber - numSeedingRounds;
       final int ptLine = getPlayoffTableLineNumber(
           connection, currentTournament, teamNumber, playoffRun);
@@ -244,13 +241,11 @@ public final class Queries {
 
         // If sibling team is the NULL team, then no playoff meta data needs updating,
         // since we are still waiting for an earlier round to be entered.
-        if(Team.NULL_TEAM_NUMBER != siblingTeam)
-        {
+        if(Team.NULL_TEAM_NUMBER != siblingTeam) {
           final Team opponent = Team.getTeamFromDatabase(connection, siblingTeam);
           final Team winner = Playoff.pickWinner(connection, document, opponent, request, irunNumber);
 
-          if(winner != null)
-          {
+          if(winner != null) {
             StringBuffer sql = new StringBuffer();
             // update the playoff data table with the winning team...
             sql.append("UPDATE PlayoffData SET Team = " + winner.getTeamNumber());
@@ -270,10 +265,11 @@ public final class Queries {
             if(playoffRun == semiFinalRound && isThirdPlaceEnabled(connection, division))
             {
               final int newLoser;
-              if(winner.getTeamNumber() == Integer.parseInt(teamNumber))
+              if(winner.getTeamNumber() == Integer.parseInt(teamNumber)) {
                 newLoser = opponent.getTeamNumber();
-              else
+              } else { 
                 newLoser = Integer.parseInt(teamNumber);
+              }
               try {
                 stmt = connection.createStatement();
                 sql.append("UPDATE PlayoffData SET Team = " + newLoser);
@@ -289,9 +285,7 @@ public final class Queries {
             }
           }
         }
-      }
-      else
-      {
+      } else {
         throw new RuntimeException("Unable to find team " + teamNumber + " in the playoff brackets for playoff round "
             + playoffRun + ". Maybe someone deleted their score from the previous run?");
       }
@@ -352,9 +346,8 @@ public final class Queries {
   }
   
   public static boolean isThirdPlaceEnabled(final Connection connection, final String division)
-  throws SQLException
-  {
-    final int finalRound = getNumPlayoffRounds(connection,division);
+  throws SQLException {
+    final int finalRound = getNumPlayoffRounds(connection, division);
 
     final String tournament = getCurrentTournament(connection);
 
@@ -392,8 +385,7 @@ public final class Queries {
   public static String updatePerformanceScore(final Document document,
                                               final Connection connection,
                                               final HttpServletRequest request)
-  throws SQLException, ParseException, RuntimeException
-  {
+  throws SQLException, ParseException, RuntimeException {
     final String currentTournament = getCurrentTournament(connection);
 
     final String teamNumber = request.getParameter("TeamNumber");
@@ -418,8 +410,7 @@ public final class Queries {
     final StringBuffer sql = new StringBuffer();
 
     // Check if we need to update the PlayoffData table
-    if(irunNumber > numSeedingRounds)
-    {
+    if(irunNumber > numSeedingRounds) {
       final int playoffRun = irunNumber - numSeedingRounds;
       final int ptLine = getPlayoffTableLineNumber(
           connection, currentTournament, teamNumber, playoffRun);
@@ -430,54 +421,53 @@ public final class Queries {
             (ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1), playoffRun);
 
         // If sibling team is the NULL team, then updating this score is okay, and no playoff meta data needs updating.
-        if(Team.NULL_TEAM_NUMBER != siblingTeam)
-        {
+        if(Team.NULL_TEAM_NUMBER != siblingTeam) {
           // Sibling team is not null so we have to check if update can happen anyway
 
           // See if the modification affects the result of the playoff match
           final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(teamNumber));
           final Team teamB = Team.getTeamFromDatabase(connection, siblingTeam);
-          if(teamA == null || teamB == null)
+          if(teamA == null || teamB == null) {
             throw new RuntimeException("Unable to find one of these team numbers in the database: " + teamNumber + " and " + siblingTeam );
+          }
           final Team oldWinner = Playoff.pickWinner(connection, document, teamA, teamB, irunNumber);
-          final Team newWinner = Playoff.pickWinner(connection,document, teamB, request, irunNumber);
-          if(oldWinner != null && newWinner != null && !oldWinner.equals(newWinner))
-          {
+          final Team newWinner = Playoff.pickWinner(connection, document, teamB, request, irunNumber);
+          if(oldWinner != null && newWinner != null && !oldWinner.equals(newWinner)) {
             // This score update changes the result of the match, so make sure no
             // other scores exist in later round for either of these 2 teams.
             Statement stmt = null;
             ResultSet rs = null;
-            if(getPlayoffTableLineNumber(connection,currentTournament,teamNumber,playoffRun+1) > 0)
-            {
+            if(getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun+1) > 0) {
               try {
                 stmt = connection.createStatement();
                 rs = stmt.executeQuery("SELECT TeamNumber FROM Performance"
                     + " WHERE TeamNumber = " + teamNumber
                     + " AND RunNumber > " + irunNumber
                     + " AND Tournament = '" + currentTournament + "'");
-                if(rs.next())
+                if(rs.next()) {
                   throw new RuntimeException("Unable to update score for team number " + teamNumber
                     + " in playoff round " + playoffRun + " because that team "
                     + " has scores entered in subsequent rounds which would become inconsistent. "
                     + "Delete those scores and then you may update this score.");
+                }
               } finally {
                 Utilities.closeResultSet(rs);
                 Utilities.closeStatement(stmt);
               }
             }
-            if(getPlayoffTableLineNumber(connection,currentTournament,Integer.toString(siblingTeam),playoffRun+1) > 0)
-            {
+            if(getPlayoffTableLineNumber(connection, currentTournament, Integer.toString(siblingTeam), playoffRun+1) > 0) {
               try {
                 stmt = connection.createStatement();
                 rs = stmt.executeQuery("SELECT TeamNumber FROM Performance"
                     + " WHERE TeamNumber = " + siblingTeam
                     + " AND RunNumber > " + irunNumber
                     + " AND Tournament = '" + currentTournament + "'");
-                if(rs.next())
+                if(rs.next()) {
                   throw new RuntimeException("Unable to update score for team number " + teamNumber
                       + " in playoff round " + playoffRun + " because opponent team " + siblingTeam
                       + " has scores in subsequent rounds which would become inconsistent. "
                       + "Delete those scores and then you may update this score.");
+                }
               } finally {
                 Utilities.closeResultSet(rs);
                 Utilities.closeStatement(stmt);
@@ -501,10 +491,11 @@ public final class Queries {
             if(playoffRun == semiFinalRound && isThirdPlaceEnabled(connection, division))
             {
               final Team newLoser;
-              if(newWinner.equals(teamA))
+              if(newWinner.equals(teamA)) {
                 newLoser = teamB;
-              else
+              } else {
                 newLoser = teamA;
+              }
               try {
                 stmt = connection.createStatement();
                 sql.append("UPDATE PlayoffData SET Team = " + newLoser.getTeamNumber());
@@ -520,9 +511,7 @@ public final class Queries {
             }
           }
         }
-      }
-      else
-      {
+      } else {
         throw new RuntimeException("Team " + teamNumber + " could not be found in the playoff table for playoff round " + playoffRun);
       }
     }
@@ -583,28 +572,24 @@ public final class Queries {
    */
   public static String deletePerformanceScore(final Connection connection,
                                               final HttpServletRequest request)
-    throws SQLException, RuntimeException
-  {
+    throws SQLException, RuntimeException {
     final String currentTournament = getCurrentTournament(connection);
     final StringBuffer sql = new StringBuffer();
 
     final String teamNumber = request.getParameter("TeamNumber");
-    if(null == teamNumber)
-    {
+    if(null == teamNumber) {
       throw new RuntimeException("Missing parameter: TeamNumber");
     }
 
     final int numSeedingRounds = getNumSeedingRounds(connection);
     final String runNumber = request.getParameter("RunNumber");
-    if(null == runNumber)
-    {
+    if(null == runNumber) {
       throw new RuntimeException("Missing parameter: RunNumber");
     }
     final int irunNumber = Integer.parseInt(runNumber);
 
     // Check if we need to update the PlayoffData table
-    if(irunNumber > numSeedingRounds)
-    {
+    if(irunNumber > numSeedingRounds) {
       final int playoffRun = irunNumber - numSeedingRounds;
       final int ptLine = getPlayoffTableLineNumber(
           connection, currentTournament, teamNumber, playoffRun);
@@ -614,42 +599,41 @@ public final class Queries {
             connection, currentTournament, division,
             (ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1), playoffRun);
 
-        if(siblingTeam != Team.NULL_TEAM_NUMBER)
-        {
+        if(siblingTeam != Team.NULL_TEAM_NUMBER) {
           Statement stmt = null;
           ResultSet rs = null;
           // See if either teamNumber or siblingTeam has a score entered in subsequent rounds
-          if(getPlayoffTableLineNumber(connection,currentTournament,teamNumber,playoffRun+1) > 0)
-          {
+          if(getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun+1) > 0) {
             try {
               stmt = connection.createStatement();
               rs = stmt.executeQuery("SELECT TeamNumber FROM Performance"
                   + " WHERE TeamNumber = " + teamNumber
                   + " AND RunNumber > " + irunNumber
                   + " AND Tournament = '" + currentTournament + "'");
-              if(rs.next())
+              if(rs.next()) {
                 throw new RuntimeException("Unable to delete score for team number " + teamNumber
                   + " in playoff round " + playoffRun + " because that team "
                   + " has scores in subsequent rounds which would become inconsistent. "
                   + "Delete those scores and then you may delete this score.");
+              }
             } finally {
               Utilities.closeResultSet(rs);
               Utilities.closeStatement(stmt);
             }
           }
-          if(getPlayoffTableLineNumber(connection,currentTournament,Integer.toString(siblingTeam),playoffRun+1) > 0)
-          {
+          if(getPlayoffTableLineNumber(connection, currentTournament, Integer.toString(siblingTeam), playoffRun+1) > 0) {
             try {
               stmt = connection.createStatement();
               rs = stmt.executeQuery("SELECT TeamNumber FROM Performance"
                   + " WHERE TeamNumber = " + siblingTeam
                   + " AND RunNumber > " + irunNumber
                   + " AND Tournament = '" + currentTournament + "'");
-              if(rs.next())
+              if(rs.next()) {
                 throw new RuntimeException("Unable to delete score for team number " + teamNumber
                     + " in playoff round " + playoffRun + " because opposing team " + siblingTeam
                     + " has scores in subsequent rounds which would become inconsistent. "
                     + "Delete those scores and then you may delete this score.");
+              }
             } finally {
               Utilities.closeResultSet(rs);
               Utilities.closeStatement(stmt);
@@ -686,9 +670,7 @@ public final class Queries {
             }
           }
         } // End if(siblingTeam != Team.NULL_TEAM_NUMBER.
-      }
-      else
-      {
+      } else {
         throw new RuntimeException("Team " + teamNumber + " could not be found in the playoff table for playoff round " + playoffRun);
       }
     }
@@ -723,15 +705,12 @@ public final class Queries {
     throws SQLException, RuntimeException {
     final String currentTournament = getCurrentTournament(connection);
     final StringBuffer sql = new StringBuffer();
-    if("__all__".equals(division))
-    {
+    if("__all__".equals(division)) {
       sql.append("SELECT TeamNumber,Count(*) FROM Performance"
         + " WHERE Tournament = '" + currentTournament + "'"
         + " GROUP BY TeamNumber"
         + " HAVING Count(*) < " + getNumSeedingRounds(connection));
-    }
-    else
-    {
+    } else {
       sql.append("SELECT Performance.TeamNumber,Count(*) FROM Performance,Teams");
       sql.append(" WHERE Performance.TeamNumber = Teams.TeamNumber");
       sql.append(" AND Teams.Division = '" + division + "'");
@@ -776,15 +755,12 @@ public final class Queries {
     throws SQLException, RuntimeException {
     final String currentTournament = getCurrentTournament(connection);
     final StringBuffer sql = new StringBuffer();
-    if("__all__".equals(division))
-    {
+    if("__all__".equals(division)) {
       sql.append("SELECT TeamNumber,Count(*) FROM Performance"
           + " WHERE Tournament = '" + currentTournament + "'"
           + " GROUP BY TeamNumber"
           + " HAVING Count(*) > " + getNumSeedingRounds(connection));
-    }
-    else
-    {
+    } else {
       sql.append("SELECT Performance.TeamNumber,Count(*) FROM Performance,Teams");
       sql.append(" WHERE Performance.TeamNumber = Teams.TeamNumber");
       sql.append(" AND Teams.Division = '" + division + "'");
@@ -1549,8 +1525,7 @@ public final class Queries {
    */
   public static boolean isPlayoffDataInitialized(final Connection connection,
                                                  final String division)
-  throws SQLException, RuntimeException
-  {
+  throws SQLException, RuntimeException {
     final String curTourney = getCurrentTournament(connection);
     
     final String sql = "SELECT Count(*) FROM PlayoffData"
@@ -1715,8 +1690,7 @@ public final class Queries {
                                               final String tournament,
                                               final String teamNumber,
                                               final int playoffRunNumber)
-    throws SQLException
-  {
+    throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
     try {
@@ -1760,8 +1734,7 @@ public final class Queries {
                                                final String division,
                                                final int lineNumber,
                                                final int playoffRunNumber)
-    throws SQLException
-  {
+    throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
     try {
@@ -1773,10 +1746,11 @@ public final class Queries {
                              + " AND PlayoffRound = " + playoffRunNumber);
       if(rs.next()) {
         final int retVal = rs.getInt(1);
-        if(rs.wasNull())
+        if(rs.wasNull()) {
           return Team.NULL_TEAM_NUMBER;
-        else
+        } else {
           return retVal;
+        }
       }
     } finally {
       Utilities.closeResultSet(rs);
@@ -1795,8 +1769,7 @@ public final class Queries {
    */
   public static String getDivisionOfTeam(final Connection connection,
                                          final String teamNumber)
-  throws SQLException, RuntimeException
-  {
+  throws SQLException, RuntimeException {
     Statement stmt = null;
     ResultSet rs = null;
     try {
@@ -1829,13 +1802,13 @@ public final class Queries {
    */
   public static int getNumPlayoffRounds(final Connection connection,
                                         final String division)
-  throws SQLException
-  {
+  throws SQLException {
     final int x = getFirstPlayoffRoundSize(connection, division);
-    if (x > 0)
+    if (x > 0) {
       return (int) Math.round(Math.log(x) / Math.log(2));
-    else
+    } else {
       return 0;
+    }
   }
 
   /**
@@ -1852,8 +1825,7 @@ public final class Queries {
    *           on database error.
    */
   public static int getFirstPlayoffRoundSize(final Connection connection, final String division)
-  throws SQLException
-  {
+  throws SQLException {
     final String tournament = getCurrentTournament(connection);
     Statement stmt = null;
     ResultSet rs = null;

@@ -73,12 +73,17 @@ public final class Team {
    *           on a database access error.
    */
   public static Team getTeamFromDatabase(final Connection connection, final int teamNumber)
-  throws SQLException
-  {
+  throws SQLException {
     // First, handle known non-database team numbers...
-    if(teamNumber == NULL_TEAM_NUMBER) return NULL;
-    if(teamNumber == TIE_TEAM_NUMBER) return TIE;
-    if(teamNumber == BYE_TEAM_NUMBER) return BYE;
+    if(teamNumber == NULL_TEAM_NUMBER) {
+      return NULL;
+    }
+    if(teamNumber == TIE_TEAM_NUMBER) {
+      return TIE;
+    }
+    if(teamNumber == BYE_TEAM_NUMBER) {
+      return BYE;
+    }
 
     Statement stmt = null;
     ResultSet rs = null;

@@ -5,8 +5,6 @@
  */
 package fll;
 
-import fll.xml.GenerateDB;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,8 +14,6 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
-import java.util.Collection;
-import java.util.Iterator;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
