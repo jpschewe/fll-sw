@@ -3,12 +3,14 @@
  * INSciTE is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.web;
+package fll.web.admin;
 
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+
+import fll.web.WebTestUtils;
 
 import java.io.IOException;
 
@@ -36,15 +38,17 @@ public class WebTest extends TestCase {
     throws SAXException, MalformedURLException, IOException {
     final String[] pages = new String[] {
       "",
-      "display.jsp",
       "index.jsp",
-      "instructions.jsp",
-      "welcome.jsp",
-
+      "tournaments.jsp",
+      "judges.jsp",
+      "tables.jsp",
+      "select_team.jsp",
+      //"remoteControl.jsp",
+      "advanceTeams.jsp",
     };
     final WebConversation conversation = new WebConversation();
     for(int i=0; i<pages.length; i++) {
-      final WebRequest request = new GetMethodWebRequest(WebTestUtils.URL_ROOT + pages[i]);
+      final WebRequest request = new GetMethodWebRequest(WebTestUtils.URL_ROOT + "admin/" + pages[i]);
       final WebResponse response = conversation.getResponse(request);
     }
   }
