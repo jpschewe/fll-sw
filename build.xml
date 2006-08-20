@@ -547,19 +547,45 @@
 
   </target>
 
+  <!-- ==================== Tests using JUnit ==================== -->
   <target name="test"
-    depends="compile,compile.test,checkstyle.full"
-    description="Run any unit tests and the full checkstyle"
+          depends="-junit,checkstyle.full"
+          description="Run the unit tests">
+    <condition property="test.halt">
+      <and>
+        <isset property="test.failed" />
+        <!-- isset property="test.halt-if-failed" / -->
+      </and>
+    </condition>
+    <fail if="test.halt" message="JUnit tests failed">
+ ** One or more JUnit tests failed.
+    </fail>
+  </target>
+  
+  <target name="-junit"
+    depends="compile,compile.test"
     >
+    <!-- save current database -->
+    <mkdir dir="${dir.build}/db-save"/>
+    <move todir="${dir.build}/db-save">
+      <fileset dir="${dir.web}/WEB-INF">
+        <include name="flldb.*"/>
+      </fileset>
+    </move>
+
+    <!-- copy in test database -->
+    <antcall target="install.testdb"/>
+    
     <antcall target="tomcat.start"/>
     <echo message="Waiting for tomcat to startup"/>
     <sleep seconds="30"/>
 
     <mkdir dir="${dir.build}/test-results"/>
     <junit fork="yes"
-      haltonfailure="true"
+      haltonfailure="false"
       dir="${dir.build}"
       showoutput="true"
+      failureproperty="test.failed"
       >
       <classpath>
         <path refid="test.classpath"/>
@@ -572,10 +598,33 @@
       </batchtest>
     </junit>
     
-    
     <antcall target="tomcat.stop"/>
+    
+    <!-- restore database -->
+    <move todir="${dir.web}/WEB-INF">
+      <fileset dir="${dir.build}/db-save">
+        <include name="flldb.*"/>
+      </fileset>
+    </move>
+    <delete dir="${dir.build}/db-save"/>
+    
   </target>
 
+  <target name="install.testdb"
+    description="install the test database"
+    depends="compile"
+    >
+    <copy todir="${dir.web}/WEB-INF">
+      <fileset dir="${basedir}/test-data">
+        <include name="testdb.*"/>
+      </fileset>
+      <mapper type="glob"
+        from="testdb.*"
+        to="flldb.*"
+        />
+    </copy>
+  </target>
+    
   <!-- ===================== Checkstyle =================== -->
   <taskdef resource="checkstyletask.properties">
     <classpath>
