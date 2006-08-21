@@ -6,6 +6,7 @@
 <%@ page import="fll.Utilities" %>
 <%@ page import="fll.Queries" %>
 <%@ page import="fll.web.playoff.Playoff" %>
+<%@ page import="fll.web.playoff.BracketData" %>
   
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.List" %>
@@ -22,11 +23,22 @@
   
 final Connection connection = (Connection)application.getAttribute("connection");
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
+final String currentTournament = Queries.getCurrentTournament(connection);
 
 final String divisionStr = request.getParameter("division");
 if(null == divisionStr) {
   throw new RuntimeException("No division specified, please go back to the <a href='index.jsp'>playoff main page</a> and start again.");
 }
+
+final int lastColumn = 1 + Queries.getNumPlayoffRounds(connection, divisionStr);
+
+final BracketData bracketInfo =
+  new BracketData(connection, divisionStr, 1, lastColumn, 4);
+
+for(int i = 1; i < lastColumn; i++) {
+  bracketInfo.addBracketLabels(i);
+}
+
 %>
 
 <html>
@@ -47,7 +59,20 @@ if(null == divisionStr) {
 
   <body>
     <h2><x:out select="$challengeDocument/fll/@title"/> (Playoff Brackets Division: <%=divisionStr%>)</h2>
-    <% Playoff.displayPrintableBrackets(connection, challengeDocument, divisionStr, out); %>
+    <table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>
+<%  for(int rowIndex = 1; rowIndex <= bracketInfo.getNumRows(); rowIndex++) { %>
+        <tr>
+
+<%    // Get each cell. Insert bridge cells between columns.
+      for(int i = bracketInfo.getFirstRound(); i < bracketInfo.getLastRound(); i++) { %>
+          <%=bracketInfo.getHtmlCell(connection, currentTournament, rowIndex, i)%>
+          <%=bracketInfo.getHtmlBridgeCell(rowIndex,i,BracketData.TopRightCornerStyle.MEET_BOTTOM_OF_CELL)%>
+<%    } %>
+          <%=bracketInfo.getHtmlCell(connection, currentTournament, rowIndex, bracketInfo.getLastRound())%>
+        </tr>
+<%  } %>
+    </table>
+    <!--  % Playoff.displayPrintableBrackets(connection, challengeDocument, divisionStr, out); % -->
     <%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>

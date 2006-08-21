@@ -46,6 +46,8 @@ else
     <h1><x:out select="$challengeDocument/fll/@title"/></h1>
     <h2>Initialize Brackets Results, Division <%=divisionStr%>:</h2>
     <% Playoff.initializeBrackets(connection, challengeDocument, divisionStr, enableThird, out); %>
+    Playoff table has been successfully initialized for division <%=divisionStr%>.<br/>
+    <a href="index.jsp">Return to the Playoff page</a> to view brackets.
     <%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>
