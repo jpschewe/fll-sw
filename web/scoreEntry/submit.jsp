@@ -76,13 +76,6 @@ final Connection connection = (Connection)application.getAttribute("connection")
         <%pageContext.setAttribute("sql", Queries.insertPerformanceScore(challengeDocument, connection, request));%>
         </c:otherwise>
       </c:choose>
-  
-      <%-- Update the playoff data --%>
-      <%pageContext.setAttribute("numSeedingRounds", Queries.getNumSeedingRounds(connection));%>
-      <c:if test="${param.RunNumber > numSeedingRounds}">
-        <%pageContext.setAttribute("sql", (String)pageContext.getAttribute("sql") + ";<br/>" +
-            Playoff.updatePlayoffData(challengeDocument, connection, request));%>
-      </c:if>
 
       <h1>Submitted Scores</h1>
       
