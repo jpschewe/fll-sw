@@ -106,9 +106,9 @@ public class BracketData {
   /**
    * Constructs a bracket data object with playoff data from the database.
    * 
-   * @param connection
+   * @param pConnection
    *          Database connection to use.
-   * @param division
+   * @param pDivision
    *          Divsion from which to look up playoff data.
    * @param firstRound
    *          The first playoff round of interest (1st playoff round is 1, not
@@ -121,8 +121,8 @@ public class BracketData {
    *          for the entire table. Recommended value: 4.
    * @throws SQLException
    */
-  public BracketData(final Connection connection,
-                     final String division,
+  public BracketData(final Connection pConnection,
+                     final String pDivision,
                      final int pFirstRound,
                      final int pLastRound,
                      final int pRowsPerTeam)
@@ -135,8 +135,8 @@ public class BracketData {
     }
 
     _rowsPerTeam = pRowsPerTeam;
-    _firstRoundSize = Queries.getFirstPlayoffRoundSize(connection, division);
-    _numSeedingRounds = Queries.getNumSeedingRounds(connection);
+    _firstRoundSize = Queries.getFirstPlayoffRoundSize(pConnection, pDivision);
+    _numSeedingRounds = Queries.getNumSeedingRounds(pConnection);
     
     _showFinalScores = true;
     
@@ -148,7 +148,7 @@ public class BracketData {
 
     _lastRound = pLastRound;
     
-    _finalsRound = Queries.getNumPlayoffRounds(connection, division);
+    _finalsRound = Queries.getNumPlayoffRounds(pConnection, pDivision);
     _semiFinalsRound = _finalsRound - 1;
     
     _bracketData = new TreeMap<Integer, SortedMap<Integer, BracketDataType>>();
@@ -156,17 +156,17 @@ public class BracketData {
       _bracketData.put(new Integer(i), new TreeMap<Integer, BracketDataType>());
     }
 
-    final String tournament = Queries.getCurrentTournament(connection);
+    final String tournament = Queries.getCurrentTournament(pConnection);
 
     Statement stmt = null;
     ResultSet rs = null;
     try {
-      stmt = connection.createStatement();
+      stmt = pConnection.createStatement();
       rs = stmt.executeQuery(
           "SELECT PlayoffRound,LineNumber,Team,AssignedTable"
           + " FROM PlayoffData"
           + " WHERE Tournament='" + tournament + "'"
-          + " AND Division='" + division + "'"
+          + " AND Division='" + pDivision + "'"
           + " AND PlayoffRound>=" + _firstRound
           + " AND PlayoffRound<=" + _lastRound);
       while(rs.next()) {
@@ -179,7 +179,7 @@ public class BracketData {
         
         final TeamBracketCell d = new TeamBracketCell();
         d.setTable(table);
-        d.setTeam(Team.getTeamFromDatabase(connection, team));
+        d.setTeam(Team.getTeamFromDatabase(pConnection, team));
         d.setDBLine(line);
         // Very brief explaination of the math:
         // Let y = target output row in the table (this is the key value of the inner Map elements of _bracketData)
@@ -191,14 +191,23 @@ public class BracketData {
         // Then y = n * x * 2^r - (x * 2^(r-1) + 0.5 * x - 1)
         // The rounding operation is purely to negate any possible floating point inaccuracies introduced by Math.pow, etc.
         int adjustedRound = round-_firstRound;
-        final int row = (int)Math.round(line*_rowsPerTeam*(Math.pow(2, adjustedRound))
-            - (_rowsPerTeam*Math.pow(2, adjustedRound-1) + 0.5*_rowsPerTeam - 1));
-        System.out.print("Putting team " + d.getTeam() + " with dbLine " + d.getDBLine() + " to row " + row + " of output table\n");
+        final int row;
+        if(_firstRound < _finalsRound && round == _finalsRound && line == 3) {
+          row = topRowOfConsolationBracket();
+        } else if(_firstRound < _finalsRound && round == _finalsRound && line == 4) {
+          row = topRowOfConsolationBracket() + _rowsPerTeam;
+        } else if(_firstRound < _finalsRound && round == _finalsRound+1 && line == 2) {
+          row = topRowOfConsolationBracket() + _rowsPerTeam/2;
+        } else {
+          row = (int)Math.round(line*_rowsPerTeam*(Math.pow(2, adjustedRound))
+              - (_rowsPerTeam*Math.pow(2, adjustedRound-1) + 0.5*_rowsPerTeam - 1));
+        }
+//        System.out.print("Putting team " + d.getTeam() + " with dbLine " + d.getDBLine() + " to row " + row + " of output table\n");
         if(roundData.put(row, d) != null) {
           throw new RuntimeException("Error - Map keys were not unique - PlayoffData " +
               "might be inconsistent (you should verify that there are not multiple teams" +
               " occupying the same round and row for tournament:'" + tournament + "' and" +
-              " division:'" + division + "')");
+              " division:'" + pDivision + "')");
         }
       }
       
@@ -245,15 +254,13 @@ public class BracketData {
   /**
    * Returns the number of rows in the specified round number.
    * 
-   * @param round
-   *          Playoff round number, starting at 1.
-   * @return Row number of the last row in that round, or 0 if there are no rows
-   *         in it.
+   * @return Html table row number of the last row for the rounds stored in the
+   *         instance of BracketData, or 0 if there are no rows in it.
    */
   public int getNumRows() {
-    if(_firstRound == _semiFinalsRound && _lastRound >= _finalsRound) {
-      final int sfr = _bracketData.get(new Integer(_semiFinalsRound)).lastKey().intValue();
-      final int fr = _bracketData.get(new Integer(_finalsRound)).lastKey().intValue();
+    if(_firstRound < _finalsRound && _lastRound >= _finalsRound) {
+      final int sfr = _bracketData.get(new Integer(_finalsRound)).lastKey().intValue();
+      final int fr = _bracketData.get(new Integer(_firstRound)).lastKey().intValue();
       return sfr > fr ? sfr : fr;
     }
     return _bracketData.get(new Integer(_firstRound)).lastKey().intValue();
@@ -314,7 +321,7 @@ public class BracketData {
       if(round == _finalsRound) {
         sb.append(getDisplayString(connection, tournament,
                                    round+_numSeedingRounds, ((TeamBracketCell)d).getTeam(), _showFinalScores));
-      } else if(round != _finalsRound+1) {
+      } else if(_showFinalScores || round != _finalsRound+1) {
         sb.append(getDisplayString(connection, tournament,
                                    round+_numSeedingRounds, ((TeamBracketCell)d).getTeam()));
       }
@@ -349,49 +356,94 @@ public class BracketData {
                                   final TopRightCornerStyle cs) {
     final StringBuffer sb = new StringBuffer();
     final int ar = round-_firstRound;
-    // Very brief explaination of the math:
-    // Let y = row (this is the key value of the inner Map elements of _bracketData)
-    // Let x = the number of rows per team (variable '_rowsPerTeam') in the left-most column of the output table
-    //  (Given: x is a positive, even value. The math would work for other values, but it's meaningless when we
-    //   can't have fractional table rows...)
-    // Let r = the round index (variable 'ar') starting at 0 in the left-most column
-    // Then a normalized modulo function that assigns the index of 0 to the top row of each bracket
-    // is (y + x * 2^(r+1) - (x * 2^(r-1) - x/2 + 1)) % (x * 2^(r+1))
-    // If the resulting value is 0, then row y is the top of a bracket in that round.
-    // If the resulting value is x * 2^r, then row y is the bottom of a bracket in that round.
-    // And all rows in between will have the 'Bridge' style applied to the cells. All other rows
-    // will simply be empty. The rounding operation is purely to negate any possible floating
-    // point inaccuracies introduced by Math.pow, etc.
-    final int modVal = (int)(
-      Math.round((row + _rowsPerTeam*Math.pow(2, ar+1) - _rowsPerTeam*Math.pow(2, ar-1) + _rowsPerTeam/2 - 1))
-                                             %
-                           Math.round((_rowsPerTeam*Math.pow(2, ar+1))));
-
-    if(modVal >= cs.getModuloMinimum() &&
-        modVal <= Math.round(_rowsPerTeam*Math.pow(2, ar)) &&
-        round <= _finalsRound) {
-      // In a bridge
-      if(round == _semiFinalsRound &&
-        ( (Math.round((row + _rowsPerTeam*Math.pow(2, ar+1) - _rowsPerTeam*Math.pow(2, ar-1) + _rowsPerTeam/2 - 1)))
-                                                /
-                        (Math.round((_rowsPerTeam*Math.pow(2, ar+1))))
-        ) > 2 ) {
-        // This is the bridge cell before the 3rd/4th place brackets - it's just a blank cell
+    if(_firstRound < _finalsRound && rowIsInConsolationBracket(row)) {
+      if(round != _finalsRound) {
+        // This is a bridge cell before (or after!) the 3rd/4th place brackets - it's just a blank cell
         sb.append("<td width='10'>&nbsp;</td>");
-      } else if(cs.equals(TopRightCornerStyle.MEET_BOTTOM_OF_CELL) && modVal == 1) {
-        // If we are on the first line of the bridge, emit a rowspan'd td cell
-        sb.append("<td width='10' class='Bridge' rowspan='" + _rowsPerTeam + "'>&nbsp;</td>");
-      } else if(cs.equals(TopRightCornerStyle.MEET_TOP_OF_CELL) && modVal == 0) {
-        sb.append("<td width='10' class='Bridge' rowspan='"
-            + (_rowsPerTeam*(int)Math.round(Math.pow(2, ar))+1) + "'>&nbsp;</td>");
       } else {
-        sb.append("<!-- skip column for bridge -->");
+        if(row == topRowOfConsolationBracket()) {
+          // top of the 3rd/4th place bracket
+          if(cs.equals(TopRightCornerStyle.MEET_BOTTOM_OF_CELL)) {
+            sb.append("<td width='10' class='Leaf'>&nbsp;</td>");
+          } else if(cs.equals(TopRightCornerStyle.MEET_TOP_OF_CELL)) {
+            sb.append("<td width='10' class='Bridge' rowspan='"
+                + (_rowsPerTeam + 1) + "'>&nbsp;</td>");
+          } else {
+            throw new RuntimeException("Unknown value for TopRightCornerStyle");
+          }
+        } else if(row > topRowOfConsolationBracket()
+            && row <= topRowOfConsolationBracket()+_rowsPerTeam) {
+          if(cs.equals(TopRightCornerStyle.MEET_BOTTOM_OF_CELL)
+              && row == topRowOfConsolationBracket()+1) {
+            sb.append("<td width='10' class='Bridge' rowspan='"
+                + _rowsPerTeam + "'>&nbsp;</td>");
+          } else {
+            sb.append("<!-- skip column for bridge -->");
+          }
+        } else {
+          sb.append("<td width='10'>&nbsp;</td>");
+        }
       }
     } else {
-      // Outside of a bridge
-      sb.append("<td width='10'>&nbsp;</td>");
+      // Very brief explaination of the math:
+      // Let y = row (this is the key value of the inner Map elements of _bracketData)
+      // Let x = the number of rows per team (variable '_rowsPerTeam') in the left-most column of the output table
+      //  (Given: x is a positive, even value. The math would work for other values, but it's meaningless when we
+      //   can't have fractional table rows...)
+      // Let r = the round index (variable 'ar') starting at 0 in the left-most column
+      // Then a normalized modulo function that assigns the index of 0 to the top row of each bracket
+      // is (y + x * 2^(r+1) - (x * 2^(r-1) - x/2 + 1)) % (x * 2^(r+1))
+      // If the resulting value is 0, then row y is the top of a bracket in that round.
+      // If the resulting value is x * 2^r, then row y is the bottom of a bracket in that round.
+      // And all rows in between will have the 'Bridge' style applied to the cells. All other rows
+      // will simply be empty. The rounding operation is purely to negate any possible floating
+      // point inaccuracies introduced by Math.pow, etc.
+      // modVal is an index that indicates the table row number within the current bracket of the current line.
+      // modVal 0 is the row in which the top team name of a bracket occurs, modVal 1 is first row below the top
+      // bracket line, etc. The number of the lines in the bracket varies based on the round (later rounds have
+      // more rows between bracket lines) and on the _rowsPerTeam value.
+      final int modVal = (int)(
+        Math.round((row + _rowsPerTeam*Math.pow(2, ar+1) - _rowsPerTeam*Math.pow(2, ar-1) + _rowsPerTeam/2 - 1))
+                                               %
+                             Math.round((_rowsPerTeam*Math.pow(2, ar+1))));
+  
+      if( modVal <= Math.round(_rowsPerTeam*Math.pow(2, ar)) &&
+          round <= _finalsRound) {
+        if(cs.equals(TopRightCornerStyle.MEET_BOTTOM_OF_CELL) && modVal == 1) {
+          // If we are on the first line of the bridge, emit a rowspan'd td cell
+          sb.append("<td width='10' class='Bridge' rowspan='"
+              + (_rowsPerTeam*(int)Math.round(Math.pow(2, ar))) + "'>&nbsp;</td>");
+        } else if(cs.equals(TopRightCornerStyle.MEET_BOTTOM_OF_CELL) && modVal == 0) {
+          // If we are on the first line of the bridge, emit a Leaf cell to get its bottom border
+          sb.append("<td width='10' class='Leaf'>&nbsp;</td>");
+        } else if(cs.equals(TopRightCornerStyle.MEET_TOP_OF_CELL) && modVal == 0) {
+          sb.append("<td width='10' class='Bridge' rowspan='"
+              + (_rowsPerTeam*(int)Math.round(Math.pow(2, ar))+1) + "'>&nbsp;</td>");
+        } else {
+          sb.append("<!-- skip column for bridge -->");
+        }
+      } else {
+        // Outside of a bridge
+        sb.append("<td width='10'>&nbsp;</td>");
+      }
     }
     return sb.toString();
+  }
+  
+  /**
+   * 
+   * @param row
+   * @return true if row is below (numerically greater than) the bottom-most
+   *         teamname of the first displayed round.
+   */
+  private boolean rowIsInConsolationBracket(final int row) {
+    final int firstDisplayedRoundSize = (getFirstRoundSize()/((int)Math.round(Math.pow(2, _firstRound-1))));
+    return row > ( 1 + (firstDisplayedRoundSize-1)*getRowsPerTeam() );
+  }
+  
+  private int topRowOfConsolationBracket() {
+    final int firstDisplayedRoundSize = (getFirstRoundSize()/((int)Math.round(Math.pow(2, _firstRound-1))));
+    return 3 + (firstDisplayedRoundSize-1)*getRowsPerTeam();
   }
 
   /**
