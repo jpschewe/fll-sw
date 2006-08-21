@@ -86,7 +86,7 @@ function editFlagBoxClicked() {
           <td>
             <br>
             <font face='arial' size='4'>Select team for this scorecard:</font><br>
-            <select size='20' name='TeamNumber'>
+            <select size='20' name='TeamNumber' ondblclick='selectTeam.submit()'>
               <%
               final Iterator iter = Queries.getTournamentTeams(connection).values().iterator();
               while(iter.hasNext()) {
