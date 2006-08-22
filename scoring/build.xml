@@ -344,6 +344,9 @@
       <param name="operation" value="start" />
       <param name="spawn" value="true"/>
     </antcall>
+
+    <echo message="Waiting for tomcat to startup"/>
+    <sleep seconds="30"/>
   </target>
 
   <target name="tomcat.stop"
@@ -355,6 +358,9 @@
       <param name="operation" value="stop" />
       <param name="spawn" value="false"/>
     </antcall>
+
+    <echo message="Waiting for tomcat to shutdown"/>
+    <sleep seconds="30"/>
   </target>
   
   <target name="-tomcat.run"
@@ -577,8 +583,6 @@
     <antcall target="install.testdb"/>
     
     <antcall target="tomcat.start"/>
-    <echo message="Waiting for tomcat to startup"/>
-    <sleep seconds="30"/>
 
     <mkdir dir="${dir.build}/test-results"/>
     <junit fork="yes"
@@ -599,7 +603,14 @@
     </junit>
     
     <antcall target="tomcat.stop"/>
-    
+
+    <!-- delete test database -->
+    <delete>
+      <fileset dir="${dir.web}/WEB-INF">
+        <include name="flldb.*"/>
+      </fileset>
+    </delete>
+      
     <!-- restore database -->
     <move todir="${dir.web}/WEB-INF">
       <fileset dir="${dir.build}/db-save">
