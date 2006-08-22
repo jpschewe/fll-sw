@@ -6,6 +6,7 @@
 package fll.web.admin;
 
 import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -51,6 +52,21 @@ public class WebTest extends TestCase {
       final WebRequest request = new GetMethodWebRequest(WebTestUtils.URL_ROOT + "admin/" + pages[i]);
       final WebResponse response = conversation.getResponse(request);
     }
+  }
+
+  /**
+   * Test changing tournaments to DUMMY and then back to State.
+   */
+  public void testChangeTournament()
+    throws MalformedURLException, IOException, SAXException {
+    final WebConversation conversation = new WebConversation();
+    final WebRequest request = new PostMethodWebRequest(WebTestUtils.URL_ROOT + "admin/index.jsp");
+    request.setParameter("currentTournament", "DUMMY");
+    conversation.getResponse(request);
+
+    request.setParameter("currentTournament", "State");
+    conversation.getResponse(request);
+    
   }
   
 }
