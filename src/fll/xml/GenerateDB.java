@@ -148,6 +148,7 @@ public final class GenerateDB {
             " LineNumber integer NOT NULL," +
             " Team integer default " + Team.NULL_TEAM_NUMBER + "," +
             " AssignedTable varchar(64) default NULL," +
+            " Printed " + BOOLEAN_DATATYPE + " default FALSE," +
             " PRIMARY KEY (Division, Tournament, PlayoffRound, LineNumber)" +
             ")");
 
