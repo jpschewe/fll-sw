@@ -241,6 +241,7 @@ public final class GenerateDB {
       {
         final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
         final String tableName = "Performance";
+        stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
         stmt.executeUpdate("DROP TABLE IF EXISTS " + tableName);
         createStatement.append("CREATE TABLE " + tableName + " (");
         createStatement.append(" TeamNumber INTEGER NOT NULL,");
