@@ -5,9 +5,6 @@
   <!-- load build specific properties first -->
   <property file="build.properties" />
 
-  <property file="build.properties" />
-
-
   <property name="app.name"        value="${ant.project.name}"/>
   <property name="app.version"     value="2.6"/>
                                    
@@ -48,8 +45,8 @@
   <!-- ==================== Compilation Classpath =========================== -->
   <path id="application.classpath">
     <pathelement location="${dir.lib}/JonsInfra-0.2.jar"/>
+    <pathelement location="${dir.lib}/hsqldb-1.8.0.2.jar"/>
     <pathelement location="${dir.lib}/log4j-1.2.8.jar"/>
-    <pathelement location="${dir.lib}/mysql-connector-java-3.0.16-ga-bin.jar"/>
     <pathelement location="${dir.lib}/xercesImpl.jar"/>
     <pathelement location="${dir.lib}/xmlParserAPIs.jar"/>
   </path>
@@ -204,6 +201,13 @@
   <target name="compile.test" depends="prepare,compile"
     description="Compile Java sources">
 
+    <!-- Copy static files from external dependencies as needed -->
+    <copy todir="${dir.web}/WEB-INF/classes">
+      <fileset dir="${dir.test}">
+        <exclude name="**/*.java" />
+      </fileset>
+    </copy>
+    
     <!-- Compile Java classes as necessary -->
     <javac srcdir="test"
       destdir="${dir.web}/WEB-INF/classes"
@@ -567,10 +571,22 @@
  ** One or more JUnit tests failed.
     </fail>
   </target>
+
+  <target name="test.single"
+          depends="-junit.single,checkstyle.full"
+          description="Run the unit tests">
+    <condition property="test.halt">
+      <and>
+        <isset property="test.failed" />
+        <!-- isset property="test.halt-if-failed" / -->
+      </and>
+    </condition>
+    <fail if="test.halt" message="JUnit tests failed">
+ ** One or more JUnit tests failed.
+    </fail>
+  </target>
   
-  <target name="-junit"
-    depends="compile,compile.test"
-    >
+  <target name="-junit.setup">
     <!-- save current database -->
     <mkdir dir="${dir.build}/db-save"/>
     <move todir="${dir.build}/db-save">
@@ -585,23 +601,9 @@
     <antcall target="tomcat.start"/>
 
     <mkdir dir="${dir.build}/test-results"/>
-    <junit fork="yes"
-      haltonfailure="false"
-      dir="${dir.build}"
-      showoutput="true"
-      failureproperty="test.failed"
-      >
-      <classpath>
-        <path refid="test.classpath"/>
-        
-        <pathelement location="${dir.web}/WEB-INF/classes"/>
-      </classpath>
-      <formatter type="brief" usefile="false" />
-      <batchtest todir="${dir.build}/test-results">
-        <fileset dir="${dir.test}" includes="**/*Test.java"/>
-      </batchtest>
-    </junit>
-    
+  </target>
+
+  <target name="-junit.teardown">
     <antcall target="tomcat.stop"/>
 
     <!-- delete test database -->
@@ -618,9 +620,53 @@
       </fileset>
     </move>
     <delete dir="${dir.build}/db-save"/>
-    
+  </target>
+  
+  <target name="-junit"
+    depends="compile,compile.test"
+    >
+    <antcall target="-junit.setup"/>
+    <junit fork="yes"
+      haltonfailure="false"
+      dir="${dir.build}"
+      showoutput="true"
+      failureproperty="test.failed"
+      >
+      <classpath>
+        <path refid="test.classpath"/>
+        
+        <pathelement location="${dir.web}/WEB-INF/classes"/>
+      </classpath>
+      <formatter type="brief" usefile="false" />
+      <batchtest todir="${dir.build}/test-results">
+        <fileset dir="${dir.test}" includes="**/*Test.java"/>
+      </batchtest>
+    </junit>
+    <antcall target="-junit.teardown"/>
   </target>
 
+  <target name="-junit.single"
+    depends="compile,compile.test"
+    >
+    <antcall target="-junit.setup"/>
+    <junit fork="yes"
+      haltonfailure="false"
+      dir="${dir.build}"
+      showoutput="true"
+      failureproperty="test.failed"
+      >
+      <classpath>
+        <path refid="test.classpath"/>
+        
+        <pathelement location="${dir.web}/WEB-INF/classes"/>
+      </classpath>
+      <formatter type="brief" usefile="false" />
+      <test name="${junit.test.class}" if="junit.test.class"
+            todir="${dir.build}/test-results" />
+    </junit>
+    <antcall target="-junit.teardown"/>
+  </target>
+  
   <target name="install.testdb"
     description="install the test database"
     depends="compile"
