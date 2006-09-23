@@ -99,11 +99,11 @@ public class ScoresheetGenerator {
           m_table[j] = SHORT_BLANK;
         }
       }
-    
+
     setChallengeInfo(document);
   }
 
-  public ScoresheetGenerator(final int numTeams) {
+  public ScoresheetGenerator(final int numTeams, final org.w3c.dom.Document document) {
     m_numTeams = numTeams;
     initializeArrays();
 
@@ -114,6 +114,7 @@ public class ScoresheetGenerator {
         m_round[i] = SHORT_BLANK;
         m_number[i] = SHORT_BLANK;
       }
+    setChallengeInfo(document);
   }
         
   /**
