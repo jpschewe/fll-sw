@@ -20,22 +20,22 @@ final Connection connection = (Connection)application.getAttribute("connection")
     <h1><x:out select="$challengeDocument/fll/@title"/></h1>
     <ul>
 
-      <li>Current Tournament -> <%=Queries.getCurrentTournament(connection)%></li>
-      
+      <li>Current Tournament -&gt; <%=Queries.getCurrentTournament(connection)%></li>
+
       <li><a href="instructions.jsp">Instructions</a></li>
-        
+
       <li><a href="scoreEntry/select_team.jsp">Score Entry</a></li>
-        
+
       <li><a href='scoreboard/index.jsp'>Scoreboard</a></li>
-        
+
       <li><a href="playoff/index.jsp">Playoffs</a></li>
-        
+
       <li><a href="report/index.jsp">Tournament reporting</a></li>
-        
+
       <li><a href="admin/index.jsp">Administration</a></li>
 
       <li><a href='display.jsp'>Big Screen Display</a>  Follow this link on the computer that's used to display scores with the projector.</li>
-              
+
       <li>
         <form action='index.jsp' method='post'>
           Score page text: 
@@ -46,10 +46,12 @@ final Connection connection = (Connection)application.getAttribute("connection")
 
       <li><a href="subjective.zip">Subjective Scoring Application</a></li>
 
+      <li><a href="getfile.jsp?filename=blankScoreSheet.pdf" target="_new">Blank scoresheet for printing (PDF format)</a></li>
+
       <li><a href="developer/index.jsp">Developer page</a></li>
-      
+
       <li><a href="troubleshooting/index.jsp">Troubleshooting</a></li>
-        
+
       <li><a href="credits/credits.jsp">Credits</a></li>
 
       <li>Using database: <c:out value="${database}"/></li>
