@@ -215,9 +215,9 @@ public final class ScoreEntry {
         writer.println("<!-- " + name + " -->");
         writer.println("<tr>");
         if(null != request.getParameter(name + "_error")) {
-          writer.println("  <td nowrap bgcolor='red'>");
+          writer.println("  <td bgcolor='red'>");
         } else {
-          writer.println("  <td nowrap>");
+          writer.println("  <td>");
         }
         writer.println("    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='3'><b>" + title + ":<b></font>");
         writer.println("  </td>");
