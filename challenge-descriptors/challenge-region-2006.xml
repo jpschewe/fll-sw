@@ -14,12 +14,15 @@
       max="2"
       multiplier="5"
       />
-      
     <goal name="smell_head" title="Molecules on Head or Neck"
       min="0"
       max="2"
-      multiplier="10"
+      multiplier="15"
       />
+    <restriction lowerBound="0" upperBound="2" message="There are a maximum of 2 molecules on the table">
+      <term coefficient="1" goal="smell_off_plate"/>
+      <term coefficient="1" goal="smell_head"/>
+    </restriction>
 
     <goal name="dirt_trap" title="Dirt Trap on Mark"
       multiplier="15"
