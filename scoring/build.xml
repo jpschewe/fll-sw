@@ -199,7 +199,7 @@
   </target>
 
   <target name="compile.test" depends="prepare,compile"
-    description="Compile Java sources">
+    description="Compile Java test sources">
 
     <!-- Copy static files from external dependencies as needed -->
     <copy todir="${dir.web}/WEB-INF/classes">
