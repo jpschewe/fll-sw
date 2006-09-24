@@ -73,6 +73,9 @@
         by multiplying the count, in the range min to max, by the
         multiplier.  If there are child elements, the score is the score
         associated with the choosen child element times the multiplier.
+
+        The order of the goals in the XML document specifies the order of
+        the goals on the score sheet.
       </xsd:documentation>
     </xsd:annotation>
     <xsd:complexType>
@@ -129,7 +132,7 @@
 
       <xsd:attribute name="initialValue" type="xsd:integer" default="0">
         <xsd:annotation>
-	  <xsd:documentation>ignored for subjective goals</xsd:documentation>
+	  <xsd:documentation>Used to initialize the counters in the score entry web page.  Ignored for subjective goals.</xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
 
