@@ -216,7 +216,7 @@ function CancelClicked() {
       <input type='hidden' name='RunNumber' value='<%=lRunNumber%>' readonly>
       <input type='hidden' name='TeamNumber' value='<%=team.getTeamNumber()%>' readonly>
 
-      <table width='600' border="0" cellpadding="0" cellspacing="0">
+      <table width='600' border="0" cellpadding="0" cellspacing="0" align="center">
         <!-- top info bar (team name etc) -->
         <tr>
           <td align="center" valign="middle">
