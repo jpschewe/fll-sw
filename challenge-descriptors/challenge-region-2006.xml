@@ -34,12 +34,12 @@
 
     <goal name="dirt_in_trap" title="Dirt in Dirt Trap"
       multiplier="5"
-      max="3"
+      max="8"
       />
 
     <goal name="dirt_elsewhere" title="Dirt Elsewhere"
       multiplier="3"
-      max="3"
+      max="8"
       />
     <restriction lowerBound="0" upperBound="3" message="There are a maximum of 3 dirt pieces on the table">
       <term coefficient="1" goal="dirt_in_trap"/>
