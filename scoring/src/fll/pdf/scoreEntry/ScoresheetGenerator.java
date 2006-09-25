@@ -172,13 +172,13 @@ public class ScoresheetGenerator {
     Phrase ji = new Phrase("Judge's Initials _______", ARIAL_8PT_NORMAL);
     PdfPCell jiC = new PdfPCell(ji);
     jiC.setBorder(0);
-    jiC.setPaddingTop(18);
+    jiC.setPaddingTop(9);
     jiC.setPaddingRight(36);
     jiC.setHorizontalAlignment(Element.ALIGN_RIGHT);
     Phrase des = new Phrase("Data Entry Score _______", ARIAL_8PT_NORMAL);
     PdfPCell desC = new PdfPCell(des);
     desC.setBorder(0);
-    desC.setPaddingTop(18);
+    desC.setPaddingTop(9);
     desC.setPaddingRight(36);
     desC.setHorizontalAlignment(Element.ALIGN_RIGHT);
     Phrase tci = new Phrase("Team Check Inititals _______", ARIAL_8PT_NORMAL);
@@ -265,7 +265,7 @@ public class ScoresheetGenerator {
       PdfPCell blankRow = new PdfPCell(new Phrase(""));
       blankRow.setColspan(2);
       blankRow.setBorder(0);
-      blankRow.setMinimumHeight(18);
+      blankRow.setMinimumHeight(0);
       team[i].addCell(blankRow);
 
       for (int j = 0; j < m_goalLabel.length; j++) {

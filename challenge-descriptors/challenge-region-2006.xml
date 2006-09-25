@@ -4,8 +4,8 @@
   <Performance minimumScore="0" weight="1.0">
 
     <goal name="move_atoms" title="Individual Atom Manipulation">
-      <value score="40" title="8 red, 5 or less white" value="atoms_high"/>
-      <value score="30" title="8 red, 7 or 6 white" value="atoms_low"/>
+      <value score="40" title="5 or less white" value="atoms_high"/>
+      <value score="30" title="7 or 6 white" value="atoms_low"/>
       <value score="0" title="Less than 8 red" value="atoms_none"/>
     </goal>
 
@@ -59,7 +59,7 @@
       />
 
     <goal name="nanotube_strength" title="Nanotube Strength">
-      <value score="40" title="Truck and Frame Supported by Cable" value="supported_by_cable"/>
+      <value score="40" title="Supported by Cable" value="supported_by_cable"/>
       <value score="20" title="Truck on Frame" value="truck_on_frame"/>
       <value score="0" title="None" value="none"/>
     </goal>
