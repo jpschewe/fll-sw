@@ -296,7 +296,6 @@ function CancelClicked() {
                 <td align='right'>
                   <input type='text' name='totalScore' size='3' readonly>
                 </td>
-                <td>&nbsp;</td>
               </tr>
               <tr>
                 <td>
