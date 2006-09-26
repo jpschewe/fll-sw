@@ -149,7 +149,7 @@ public class ScoresheetGenerator {
 
     // Measurements are always in points (72 per inch) - This sets up 1/2 inch
     // margins
-    pdfDoc.setMargins(0.5f * 72, 0.5f * 72, 0.5f * 72, 0.5f * 72);
+    pdfDoc.setMargins(0.5f * 72, 0.5f * 72, 0.25f * 72, 0.5f * 72);
     pdfDoc.open();
 
     // Header cell with challenge title to add to both scoresheets
@@ -265,7 +265,7 @@ public class ScoresheetGenerator {
       PdfPCell blankRow = new PdfPCell(new Phrase(""));
       blankRow.setColspan(2);
       blankRow.setBorder(0);
-      blankRow.setMinimumHeight(0);
+      blankRow.setMinimumHeight(9);
       team[i].addCell(blankRow);
 
       for (int j = 0; j < m_goalLabel.length; j++) {
