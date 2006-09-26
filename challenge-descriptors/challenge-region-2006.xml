@@ -4,9 +4,9 @@
   <Performance minimumScore="0" weight="1.0">
 
     <goal name="move_atoms" title="Individual Atom Manipulation">
-      <value score="40" title="5 or less white" value="atoms_high"/>
-      <value score="30" title="7 or 6 white" value="atoms_low"/>
-      <value score="0" title="Less than 8 red" value="atoms_none"/>
+      <value score="40" title="8 red &amp; 0 to 5 white" value="atoms_high"/>
+      <value score="30" title="8 red &amp; 6 to 7 white" value="atoms_low"/>
+      <value score="0" title="Fewer than 8 red" value="atoms_none"/>
     </goal>
 
     <goal name="smell_off_plate" title="Molecules off Paper Plate"
@@ -72,7 +72,7 @@
       multiplier="40"
       />
 
-    <goal name="fairness" title="Fairness Bonus - RCX completes 3 missions, NXT completes 6 missions"
+    <goal name="fairness" title="Fairness Bonus: RCX completes 3 missions, NXT completes 6"
       multiplier="20"
       />
 
