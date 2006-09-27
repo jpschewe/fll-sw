@@ -77,7 +77,9 @@ public final class Utilities {
   public static String getDBURLString(final String database) {
     // do this when getting the URL so it gets called from the JSP's as well
     testHSQLDB(database);
-    LOG.debug("URL: jdbc:hsqldb:file:" + database + ";shutdown=true");
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("URL: jdbc:hsqldb:file:" + database + ";shutdown=true");
+    }
     return "jdbc:hsqldb:file:" + database + ";shutdown=true";
   }
 
@@ -121,9 +123,10 @@ public final class Utilities {
                                               final String password,
                                               final String database)
     throws RuntimeException {
-    //create connection to database and puke if anything goes wrong
-    //register the driver
+    // create connection to database and puke if anything goes wrong
+
     try{
+      // register the driver
       Class.forName(getDBDriverName()).newInstance();
     } catch(final ClassNotFoundException e){
       throw new RuntimeException("Unable to load driver.", e);
@@ -143,8 +146,30 @@ public final class Utilities {
                                  + " database: " + database
                                  + " user: " + username);
     }
+
+    if(Boolean.getBoolean("inside.test")) {
+      if(!_testServerStarted) {
+        if(LOG.isDebugEnabled()) {
+          LOG.debug("Starting database server for testing");
+        }
+        new Thread(new Runnable() {
+          public void run() {
+            org.hsqldb.Server.main(new String[] {
+                                     "-database.0", database,
+                                     "-dbname.0", "fll",
+                                     "-no_system_exit", "true",
+                                   });
+          }}).start();
+        _testServerStarted = true;
+      }
+    }
+    
     return connection;
   }
+  /**
+   * Ensure that we only start the test database server once
+   */
+  private static boolean _testServerStarted = false;
 
   /**
    * Close stmt and ignore SQLExceptions.  This is useful in a finally so that

@@ -350,7 +350,17 @@
     </antcall>
 
     <echo message="Waiting for tomcat to startup"/>
-    <sleep seconds="30"/>
+    <java classname="fll.web.WaitForTomcatStart"
+      fork="yes"
+      taskname="Wait for Tomcat Start"
+      >
+      <classpath>
+        <path refid="test.classpath"/>
+        
+        <pathelement location="${dir.web}/WEB-INF/classes"/>
+      </classpath>
+    </java>
+
   </target>
 
   <target name="tomcat.stop"
@@ -364,7 +374,17 @@
     </antcall>
 
     <echo message="Waiting for tomcat to shutdown"/>
-    <sleep seconds="30"/>
+    <java classname="fll.web.WaitForTomcatStop"
+      fork="yes"
+      taskname="Wait for Tomcat Stop"
+      >
+      <classpath>
+        <path refid="test.classpath"/>
+        
+        <pathelement location="${dir.web}/WEB-INF/classes"/>
+      </classpath>
+    </java>
+    
   </target>
   
   <target name="-tomcat.run"
@@ -384,6 +404,10 @@
       <sysproperty key="catalina.base" file="${dir.build}/tomcat"/>
       <sysproperty key="catalina.home" file="${dir.build}/tomcat"/>
       <sysproperty key="java.io.tmpdir" file="${dir.build}/tomcat/temp"/>
+
+      <!-- only defined when called from the unit tests, will end up empty otherwise -->
+      <sysproperty key="inside.test" value="${inside.test}"/>
+      
       <arg line="${operation}" />
     </java>
   </target>
@@ -598,7 +622,9 @@
     <!-- copy in test database -->
     <antcall target="install.testdb"/>
     
-    <antcall target="tomcat.start"/>
+    <antcall target="tomcat.start">
+      <param name="inside.test" value="true"/>
+    </antcall>
 
     <mkdir dir="${dir.build}/test-results"/>
   </target>

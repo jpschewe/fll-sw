@@ -5,6 +5,10 @@
  */
 package fll.web;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -24,4 +28,42 @@ public class WebTestUtils {
   private WebTestUtils() {
     // no instances
   }
+
+  /**
+   * Creates a database connection to the test database started on localhost.
+   *
+   * @param username username to use
+   * @param password password to use
+   * @throws RuntimeException on an error
+   */
+  public static Connection createDBConnection(final String username,
+                                              final String password)
+    throws RuntimeException {
+    //create connection to database and puke if anything goes wrong
+    //register the driver
+    try{
+      Class.forName("org.hsqldb.jdbcDriver").newInstance();
+    } catch(final ClassNotFoundException e){
+      throw new RuntimeException("Unable to load driver.", e);
+    } catch(final InstantiationException ie) {
+      throw new RuntimeException("Unable to load driver.", ie);
+    } catch(final IllegalAccessException iae) {
+      throw new RuntimeException("Unable to load driver.", iae);
+    }
+
+    Connection connection = null;
+    final String myURL = "jdbc:hsqldb:hsql://localhost/fll";
+    LOG.debug("myURL: " + myURL);
+    try {
+      connection = DriverManager.getConnection(myURL);
+    } catch(final SQLException sqle) {
+      throw new RuntimeException("Unable to create connection: " + sqle.getMessage()
+                                 + " URL: " + myURL
+                                 + " user: " + username);
+    }
+    
+    return connection;
+  }
+
+  
 }

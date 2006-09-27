@@ -305,7 +305,9 @@ public final class GenerateDB {
       finalScores.append("PRIMARY KEY (TeamNumber, Tournament)");
       finalScores.append(")");
       stmt.executeUpdate("DROP TABLE IF EXISTS FinalScores");
-      LOG.info(finalScores.toString());
+      if(LOG.isDebugEnabled()) {
+        LOG.debug(finalScores.toString());
+      }
       stmt.executeUpdate(finalScores.toString());
 
 
