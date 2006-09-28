@@ -5,6 +5,10 @@ package fll.pdf.scoreEntry;
 
 import java.awt.Color;
 import java.io.OutputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Map;
 
@@ -22,7 +26,9 @@ import com.lowagie.text.Phrase;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
+import com.sun.org.apache.xpath.internal.operations.Div;
 
+import fll.Team;
 import fll.Utilities;
 
 /**
@@ -37,68 +43,103 @@ public class ScoresheetGenerator {
   /**
    * Create a new ScoresheetGenerator object populated with form header data
    * provided in the given Map. The map should contain String[] objects, each of
-   * length 1, keyed by these String objects (this matches the expected format
-   * of the Map returned by javax.servlet.ServletRequest.getParameterMap):
+   * length 1, keyed by the String objects listed below (this matches the
+   * expected format of the Map returned by
+   * javax.servlet.ServletRequest.getParameterMap):
    * <ul>
-   * <li><b>"numTeams"</b> - The number of scoresheets that will be created
-   * (defaults to 2 if not specified).
-   * <li><b>"TeamNameX"</b> - For X = 1, 2, ... numTeams. Team name for
-   * scoresheet X.
-   * <li><b>"TeamNumberX"</b> - For X = 1, 2, ... numTeams. Team number for
-   * scoresheet X.
-   * <li><b>"RoundNumberX"</b> - For X = 1, 2, ... numTeams. Round number for
-   * scoresheet X.
-   * <li><b>"TableX"</b> - For X = 1, 2, ... numTeams. Table assignment for
-   * scoresheet X.
+   * <li><b>"numMatches"</b> - The number of matches in the form.
+   * <li><b>"checkX"</b> - Present only for matches that should be printed.
+   * <li><b>"roundX"</b> - For X = 1, 2, ... numMatches. Playoff round number
+   * for scoresheet X.
+   * <li><b>"teamAX"</b> - For X = 1, 2, ... numMatches. Team number of team
+   * on table A for match X.
+   * <li><b>"tableAX"</b> - For X = 1, 2, ... numTeams. Table assignment for
+   * table A on match X.
+   * <li><b>"teamBX"</b> - For X = 1, 2, ... numMatches. Team number of team
+   * on table B for match X.
+   * <li><b>"tableBX"</b> - For X = 1, 2, ... numTeams. Table assignment for
+   * table B on match X.
    * </ul>
    * If any of the above objects don't exist in the Map, blank lines will be
    * placed in the generated form for that field.
    * 
+   * This also updates the PlayoffData table in the assumption that the created
+   * scoresheet will be printed, so table assignments are stored into the
+   * database and the match is marked as printed. It is very questionable
+   * whether this is where this should happen, but I don't feel like breaking it
+   * out.
+   * 
    * @param formParms
    *          java.util.Map object containing objects as described above.
+   * @param connection
+   *          java.sql.Connection object with open connection to the database.
    * @param document
    *          DOM document containing the challenge info used to generate the
    *          scoresheet.
    */
-  public ScoresheetGenerator(final Map formParms, final org.w3c.dom.Document document) {
-    try {
-      m_numTeams = Integer.parseInt(((String[])formParms.get(new String("numTeams")))[0] );
-    } catch (RuntimeException e) {
-      m_numTeams = 2;
+  public ScoresheetGenerator(final Map formParms, final Connection connection, final String tournament, final org.w3c.dom.Document document)
+  throws SQLException {
+    final int numMatches = Integer.parseInt(((String[])formParms.get(new String("numMatches")))[0]);
+    final boolean[] checkedMatches = new boolean[numMatches+1]; // ignore slot index 0
+    int checkedMatchCount = 0;
+    // Build array of out how many matches we are printing
+    for(int i = 1; i <= numMatches; i++) {
+      String checkX = "print" + i;
+      checkedMatches[i] = null != formParms.get(checkX);
+      if(checkedMatches[i]) {
+        checkedMatchCount++;
+      }
     }
+    
+    m_numTeams = checkedMatchCount * 2;
+
     initializeArrays();
     m_pageTitle = "";
-                
-    String parm;
-    int j;
-    for(int i = 1; i <= m_numTeams; i++) {
-        j = i - 1; // convenience index
-
-        parm = "TeamName" + i;
-        try {
-          m_name[j] = ((String[])formParms.get(parm))[0];
-        } catch (RuntimeException e) {
-          m_name[j] = LONG_BLANK;
-        }
-        parm = "TeamNumber" + i;
-        try {
-          m_number[j] = ((String[])formParms.get(parm))[0];
-        } catch (RuntimeException e) {
-          m_number[j] = SHORT_BLANK;
-        }
-        parm = "RoundNumber" + i;
-        try {
-          m_round[j] = ((String[])formParms.get(parm))[0];
-        } catch (RuntimeException e) {
-          m_round[j] = SHORT_BLANK;
-        }
-        parm = "Table" + i;
-        try {
-          m_table[j] = ((String[])formParms.get(parm))[0];
-        } catch (RuntimeException e) {
-          m_table[j] = SHORT_BLANK;
+    
+    // Loop through checked matches, populate data, and update database to track
+    // printed status and remember assigned tables.
+    PreparedStatement updatePrep = null;
+    try {
+      //build up the SQL
+      updatePrep = connection.prepareStatement("UPDATE PlayoffData SET Printed=true, AssignedTable=?" +
+          " WHERE Division=? AND Tournament=? AND PlayoffRound=? AND Team=?");
+      // could do division here, too, but since getting it from Team object, will defer to same place as other
+      updatePrep.setString(3, tournament);
+      
+      int j = 0;
+      for(int i = 1; i <= numMatches; i++) {
+        if(checkedMatches[i]) {
+          final String round = ((String[])formParms.get("round" + i))[0];
+          final int iRound = Integer.parseInt(round);
+          // Get teamA info
+          final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(((String[])formParms.get(new String("teamA"+i)))[0]));
+          m_name[j] = teamA.getTeamName();
+          m_number[j] = Integer.toString(teamA.getTeamNumber());
+          m_round[j] = "Playoff Round " + round;
+          m_table[j] = ((String[])formParms.get(new String("tableA" + i)))[0];
+          updatePrep.setString(1, m_table[j]);
+          updatePrep.setString(2, teamA.getDivision());
+          updatePrep.setInt(4, iRound);
+          updatePrep.setInt(5, teamA.getTeamNumber());
+          updatePrep.executeUpdate();
+          j++;
+          // Get teamB info
+          final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(((String[])formParms.get(new String("teamB"+i)))[0]));
+          m_name[j] = teamB.getTeamName();
+          m_number[j] = Integer.toString(teamB.getTeamNumber());
+          m_round[j] = "Playoff Round " + round;
+          m_table[j] = ((String[])formParms.get(new String("tableB" + i)))[0];
+          updatePrep.setString(1, m_table[j]);
+          updatePrep.setString(2, teamB.getDivision());
+          updatePrep.setInt(4, iRound);
+          updatePrep.setInt(5, teamB.getTeamNumber());
+          updatePrep.executeUpdate();
+          j++;
         }
       }
+    } finally {
+      Utilities.closePreparedStatement(updatePrep);
+    }
 
     setChallengeInfo(document);
   }
@@ -149,7 +190,7 @@ public class ScoresheetGenerator {
 
     // Measurements are always in points (72 per inch) - This sets up 1/2 inch
     // margins
-    pdfDoc.setMargins(0.5f * 72, 0.5f * 72, 0.25f * 72, 0.5f * 72);
+    pdfDoc.setMargins(0.5f * 72, 0.5f * 72, 0.35f * 72, 0.35f * 72);
     pdfDoc.open();
 
     // Header cell with challenge title to add to both scoresheets

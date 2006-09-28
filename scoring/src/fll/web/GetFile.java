@@ -134,13 +134,15 @@ public final class GetFile {
       final FinalComputedScores fcs = new FinalComputedScores(challengeDocument, tournament);
       fcs.generateReport(connection, response.getOutputStream());
     } else if("scoreSheet.pdf".equals(filename)) {
+      final Connection connection = (Connection)application.getAttribute("connection");
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
+      final String tournament = Queries.getCurrentTournament(connection);
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
 
       // Create the scoresheet generator - must provide correct number of scoresheets
-      final ScoresheetGenerator scoresheetGen = new ScoresheetGenerator(request.getParameterMap(), challengeDocument);
+      final ScoresheetGenerator scoresheetGen = new ScoresheetGenerator(request.getParameterMap(), connection, tournament, challengeDocument);
 
       // Write the scoresheets to the browser - content-type: application/pdf
       scoresheetGen.writeFile(response.getOutputStream());
