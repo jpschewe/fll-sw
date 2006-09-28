@@ -1121,7 +1121,9 @@ public final class Playoff {
           } finally {
             Utilities.closePreparedStatement(stmt);
           }
-        } else {
+        }/* Don't assign tables at initialization anymore - now we'll do this on the fly 
+          * and only put the table assignments in the DB at the time we mark the scoresheet "Printed"
+        else {
           // Assign tables and update database
           try {
             stmt = connection.prepareStatement("UPDATE PlayoffData SET AssignedTable=?"
@@ -1145,7 +1147,7 @@ public final class Playoff {
           } finally {
             Utilities.closePreparedStatement(stmt);
           }
-        }
+        }*/
       }
     } finally {
       Utilities.closeResultSet(rs);

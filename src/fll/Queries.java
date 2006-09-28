@@ -1845,4 +1845,27 @@ public final class Queries {
       Utilities.closeStatement(stmt);
     }
   }
+
+  public static int getTableAssignmentCount(final Connection connection,
+                                              final String tournament,
+                                              final String division) 
+  throws SQLException {
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT count(*) FROM PlayoffData"
+          + " WHERE Tournament='" + tournament + "'"
+          + " AND Division='" + division + "'"
+          + " AND AssignedTable IS NOT NULL");
+      if(rs.next()) {
+        return rs.getInt(1);
+      } else {
+        return 0;
+      }
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closeStatement(stmt);
+    }
+  }
 }
