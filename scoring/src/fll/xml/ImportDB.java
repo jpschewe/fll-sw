@@ -5,9 +5,6 @@
  */
 package fll.xml;
 
-import fll.Queries;
-import fll.Utilities;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -16,10 +13,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.apache.log4j.Logger;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import fll.Queries;
+import fll.Utilities;
 
 /**
  * Import scores from a tournament database into a master score database.
@@ -277,7 +276,61 @@ public final class ImportDB {
         Utilities.closePreparedStatement(destPrep);
         System.out.println();
       }
-      
+
+      // PlayoffData
+      {
+        System.out.print("Importing PlayoffData");
+        destPrep = destinationConnection.prepareStatement("DELETE FROM PlayoffData WHERE Tournament = ?");
+        destPrep.setString(1, tournament);
+        destPrep.executeUpdate();
+        Utilities.closePreparedStatement(destPrep);
+
+        sourcePrep = sourceConnection.prepareStatement("SELECT Division, Tournament, PlayoffRound, LineNumber, Team, AssignedTable, Printed " +
+            "FROM PlayoffData WHERE Tournament=?");
+        sourcePrep.setString(1, tournament);
+        destPrep = destinationConnection.prepareStatement("INSERT INTO PlayoffData (Division, Tournament, PlayoffRound," +
+            "LineNumber, Team, AssignedTable, Printed) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        sourceRS = sourcePrep.executeQuery();
+        while(sourceRS.next()) {
+          for(int i = 1; i < 8; i++) {
+            destPrep.setObject(i, sourceRS.getObject(i));
+          }
+          destPrep.executeUpdate();
+          System.out.print(".");
+        }
+        Utilities.closeResultSet(sourceRS);
+        Utilities.closePreparedStatement(sourcePrep);
+        Utilities.closePreparedStatement(destPrep);
+        System.out.println();
+      }
+
+      // TableNames
+      {
+        System.out.print("Importing tablenames");
+        destPrep = destinationConnection.prepareStatement("DELETE FROM tablenames WHERE Tournament = ?");
+        destPrep.setString(1, tournament);
+        destPrep.executeUpdate();
+        Utilities.closePreparedStatement(destPrep);
+
+        sourcePrep = sourceConnection.prepareStatement("SELECT Tournament, SideA, SideB " +
+            "FROM tablenames WHERE Tournament=?");
+        sourcePrep.setString(1, tournament);
+        destPrep = destinationConnection.prepareStatement("INSERT INTO tablenames (Tournament, SideA, SideB) " +
+            "VALUES (?, ?, ?)");
+        sourceRS = sourcePrep.executeQuery();
+        while(sourceRS.next()) {
+          for(int i = 1; i < 4; i++) {
+            destPrep.setObject(i, sourceRS.getObject(i));
+          }
+          destPrep.executeUpdate();
+          System.out.print(".");
+        }
+        Utilities.closeResultSet(sourceRS);
+        Utilities.closePreparedStatement(sourcePrep);
+        Utilities.closePreparedStatement(destPrep);
+        System.out.println();
+      }
+
     } finally {
       Utilities.closeResultSet(sourceRS);
       Utilities.closePreparedStatement(sourcePrep);
