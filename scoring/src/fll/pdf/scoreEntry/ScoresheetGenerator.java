@@ -7,7 +7,6 @@ import java.awt.Color;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Map;
@@ -26,7 +25,6 @@ import com.lowagie.text.Phrase;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-import com.sun.org.apache.xpath.internal.operations.Div;
 
 import fll.Team;
 import fll.Utilities;
