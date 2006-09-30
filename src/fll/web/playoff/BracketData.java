@@ -11,10 +11,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import javax.servlet.http.HttpSession;
-
-import fll.Team;
 import fll.Queries;
+import fll.Team;
 import fll.Utilities;
 
 /**
@@ -417,8 +415,7 @@ public class BracketData {
   public String getHtmlCell(final Connection connection,
                             final String tournament,
                             final int row,
-                            final int round,
-                            final int[] tableAssignmentIndex)
+                            final int round)
   throws SQLException {
     final SortedMap<Integer, BracketDataType> roundData = _bracketData.get(new Integer(round));
     if(roundData == null) {
@@ -450,11 +447,6 @@ public class BracketData {
       sb.append("</td>");
     } else if(d instanceof ScoreSheetFormBracketCell) {
       ScoreSheetFormBracketCell myD = (ScoreSheetFormBracketCell)d;
-      Iterator<String> tAssignIt = myD.getAllTables().iterator();
-      if(null != tableAssignmentIndex) {
-        int assignCount = tableAssignmentIndex[0] % myD.getAllTables().size();
-        while(assignCount-- > 0) { tAssignIt.next(); }
-      }
       sb.append("<td width='200' valign='middle'");
       if(myD.getTeamA().getTeamNumber() > 0 && myD.getTeamB().getTeamNumber() > 0) {
         sb.append(" rowspan='" + myD.getRowsSpanned() + "'>");
@@ -475,37 +467,21 @@ public class BracketData {
         sb.append("</td>");
         sb.append("<td align='right'>Table A: </td>");
         sb.append("<td align='left'><select name='tableA" + myD.getMatchNum() + "' size='1'>");
-        final String tableA;
-        if(myD.getAllTables().contains(myD.getTableA())) {
-          tableA = myD.getTableA();
-        } else {
-          if(!tAssignIt.hasNext()) { tAssignIt = myD.getAllTables().iterator(); }
-          tableA = tAssignIt.next();
-          tableAssignmentIndex[0]++;
-        }
         Iterator<String> myit = myD.getAllTables().iterator();
         while(myit.hasNext()) {
           String optStr = myit.next();
           sb.append("<option");
-          if(optStr.equals(tableA)) { sb.append(" selected"); }
+          if(optStr.equals(myD.getTableA())) { sb.append(" selected"); }
           sb.append(">" + optStr + "</option>");
         }
         sb.append("</select></td></tr>");
         sb.append("<tr><td align='right'>Table B: </td>");
         sb.append("<td align='left'><select name='tableB" + myD.getMatchNum() + "' size='1'>");
-        final String tableB;
-        if(myD.getAllTables().contains(myD.getTableB())) {
-          tableB = myD.getTableB();
-        } else {
-          if(!tAssignIt.hasNext()) { tAssignIt = myD.getAllTables().iterator(); }
-          tableB = tAssignIt.next();
-          tableAssignmentIndex[0]++;
-        }
         myit = myD.getAllTables().iterator();
         while(myit.hasNext()) {
           String optStr = myit.next();
           sb.append("<option");
-          if(optStr.equals(tableB)) { sb.append(" selected"); }
+          if(optStr.equals(myD.getTableB())) { sb.append(" selected"); }
           sb.append(">" + optStr + "</option>");
         }
         sb.append("</select></td></tr></table></td>");
@@ -523,23 +499,6 @@ public class BracketData {
     }
     
     return sb.toString();
-  }
-  
-  /**
-   * Version that defaults the table assignment index to null.
-   * @see getHtmlCell(final Connection connection,
-   *                  final String tournament,
-   *                  final int row,
-   *                  final int round,
-   *                  final int[] tableAssignmentIndex)
-   * @throws SQLException
-   */
-  public String getHtmlCell(final Connection connection,
-      final String tournament,
-      final int row,
-      final int round)
-  throws SQLException {
-    return getHtmlCell(connection, tournament, row, round, null);
   }
 
   /**
@@ -712,7 +671,7 @@ public class BracketData {
    * @throws SQLException if database connection is broken.
    * @throws RuntimeException if playoffData table has mismatched teams in the brackets.
    */
-  public int addBracketLabelsAndScoreGenFormElements(final Connection pConnection)
+  public int addBracketLabelsAndScoreGenFormElements(final Connection pConnection, final String tournament, final String division)
   throws SQLException {
     // Get the list of tournament tables
     final List<String[]> tournamentTables = Queries.getTournamentTables(pConnection);
@@ -723,7 +682,18 @@ public class BracketData {
       tables.add(tt[0]);
       tables.add(tt[1]);
     }
+    // Prevent divide by 0 errors if no tables were set in the database.
+    if(tables.isEmpty()) {
+      tables.add("Table 1");
+      tables.add("Table 2");
+    }
     
+    Iterator<String> tAssignIt = tables.iterator();
+    int assignCount = Queries.getTableAssignmentCount(pConnection, tournament, division) % tables.size();
+    while(assignCount-- > 0) {
+      tAssignIt.next();
+    }
+
     // Build the cells...
     int matchNum = 1;
     for(int i = _firstRound; i < _lastRound; i++) {
@@ -741,90 +711,56 @@ public class BracketData {
           rows.add(new Integer[]{firstTeamRow, secondTeamRow});
         }
 
-        if(i == _finalsRound) {
-          // In the finals round, the vector contains at most 2 entries, and
-          // they each get special names...
-          Iterator<Integer[]> rit = rows.iterator();
-          Integer[] curArray = rit.next();
-          // Build the cell
+        int bracketNumber = 1;
+        Iterator<Integer[]> rit = rows.iterator();
+        Integer[] curArray;
+        String bracketLabel;
+        while(rit.hasNext()) {
+          if(i == _finalsRound && bracketNumber == 1) {
+            bracketLabel = "1st/2nd Place";
+          } else if(i == _finalsRound && bracketNumber == 2) {
+            bracketLabel = "3rd/4th Place";
+          } else {
+            bracketLabel = "Bracket " + bracketNumber;
+          }
+          curArray = rit.next();
+          // Build the cell - if both teams are not present, just do a normal bracket label cell
           if(((TeamBracketCell)roundData.get(curArray[0])).getTeam().getTeamNumber() > 0 &&
-             ((TeamBracketCell)roundData.get(curArray[1])).getTeam().getTeamNumber() > 0) {
+              ((TeamBracketCell)roundData.get(curArray[1])).getTeam().getTeamNumber() > 0) {
+
+            String tableA = ((TeamBracketCell)roundData.get(curArray[0])).getTable();
+            if(null == tableA || tableA.length()==0) {
+              if(!tAssignIt.hasNext()) { tAssignIt = tables.iterator(); }
+              tableA = tAssignIt.next();
+            }
+            String tableB = ((TeamBracketCell)roundData.get(curArray[1])).getTable();
+            if(null == tableB || tableB.length()==0) {
+              if(!tAssignIt.hasNext()) { tAssignIt = tables.iterator(); }
+              tableB = tAssignIt.next();
+            }
+
             roundData.put(new Integer(curArray[0].intValue()+1), new ScoreSheetFormBracketCell(
                 tables,
-                "1st/2nd Place",
+                bracketLabel,
                 matchNum++,
                 ((TeamBracketCell)roundData.get(curArray[0])).getPrinted(), // technically should && curArray[0] and [1] but they should always be the same...
-                ((TeamBracketCell)roundData.get(curArray[0])).getTable(),
-                ((TeamBracketCell)roundData.get(curArray[1])).getTable(),
+                tableA,
+                tableB,
                 ((TeamBracketCell)roundData.get(curArray[0])).getTeam(),
                 ((TeamBracketCell)roundData.get(curArray[1])).getTeam(),
                 curArray[1].intValue()-curArray[0].intValue()-1));
+            // Put placeholders for the rows that are to be spanned over
             for(int j = curArray[0].intValue()+2; j < curArray[1].intValue(); j++) {
               roundData.put(new Integer(j), new SpannedOverBracketCell("spanned row"+j));
             }
-            if(rit.hasNext()) {
-              curArray = rit.next();
-              // Build the cell 
-              roundData.put(new Integer(curArray[0].intValue()+1), new ScoreSheetFormBracketCell(
-                  tables,
-                  "3rd/4th Place",
-                  matchNum++,
-                  ((TeamBracketCell)roundData.get(curArray[0])).getPrinted(), // technically should && curArray[0] and [1] but they should always be the same...
-                  ((TeamBracketCell)roundData.get(curArray[0])).getTable(),
-                  ((TeamBracketCell)roundData.get(curArray[1])).getTable(),
-                  ((TeamBracketCell)roundData.get(curArray[0])).getTeam(),
-                  ((TeamBracketCell)roundData.get(curArray[1])).getTeam(),
-                  curArray[1].intValue()-curArray[0].intValue()-1));
-              // Put placeholders for the rows that are to be spanned over
-              for(int j = curArray[0].intValue()+2; j < curArray[1].intValue(); j++) {
-                roundData.put(new Integer(j), new SpannedOverBracketCell("spanned row"+j));
-              }
-            } else {
-              int firstRow = curArray[0].intValue();
-              int lastRow = curArray[1].intValue();
-              Integer line = new Integer(firstRow + (lastRow-firstRow)/2);
+          } else {
+            final int firstRow = curArray[0].intValue();
+            final int lastRow = curArray[1].intValue();
+            final Integer line = new Integer(firstRow + (lastRow-firstRow)/2);
 
-              roundData.put(line, new BracketLabelCell("1st/2nd Place"));
-              if(rit.hasNext()) {
-                curArray = rit.next();
-                firstRow = curArray[0].intValue();
-                lastRow = curArray[1].intValue();
-                line = new Integer(firstRow + (lastRow-firstRow)/2);
-                roundData.put(line, new BracketLabelCell("3rd/4th Place"));
-              }
-            }
+            roundData.put(line, new BracketLabelCell(bracketLabel));
           }
-        } else {
-          int bracketNumber = 1;
-          Iterator<Integer[]> rit = rows.iterator();
-          Integer[] curArray;
-          while(rit.hasNext()) {
-            curArray = rit.next();
-            // Build the cell - if both teams are not present, just do a normal bracket label cell
-            if(((TeamBracketCell)roundData.get(curArray[0])).getTeam().getTeamNumber() > 0 &&
-                ((TeamBracketCell)roundData.get(curArray[1])).getTeam().getTeamNumber() > 0) {
-              roundData.put(new Integer(curArray[0].intValue()+1), new ScoreSheetFormBracketCell(
-                  tables,
-                  "Bracket " + bracketNumber++,
-                  matchNum++,
-                  ((TeamBracketCell)roundData.get(curArray[0])).getPrinted(), // technically should && curArray[0] and [1] but they should always be the same...
-                  ((TeamBracketCell)roundData.get(curArray[0])).getTable(),
-                  ((TeamBracketCell)roundData.get(curArray[1])).getTable(),
-                  ((TeamBracketCell)roundData.get(curArray[0])).getTeam(),
-                  ((TeamBracketCell)roundData.get(curArray[1])).getTeam(),
-                  curArray[1].intValue()-curArray[0].intValue()-1));
-              // Put placeholders for the rows that are to be spanned over
-              for(int j = curArray[0].intValue()+2; j < curArray[1].intValue(); j++) {
-                roundData.put(new Integer(j), new SpannedOverBracketCell("spanned row"+j));
-              }
-            } else {
-              final int firstRow = curArray[0].intValue();
-              final int lastRow = curArray[1].intValue();
-              final Integer line = new Integer(firstRow + (lastRow-firstRow)/2);
-
-              roundData.put(line, new BracketLabelCell(bracketNumber++));
-            }
-          }
+          bracketNumber++;
         }
       }
     }

@@ -34,9 +34,7 @@
   final BracketData bracketInfo =
     new BracketData(connection, divisionStr, 1, lastColumn, 4);
 
-  final int numMatches = bracketInfo.addBracketLabelsAndScoreGenFormElements(connection);
-
-  final int[] tableAssignmentIndex = new int[]{Queries.getTableAssignmentCount(connection, currentTournament, divisionStr)};
+  final int numMatches = bracketInfo.addBracketLabelsAndScoreGenFormElements(connection, currentTournament, divisionStr);
 %>
 
 <html>
@@ -68,10 +66,10 @@
 
 <%    // Get each cell. Insert bridge cells between columns.
       for(int i = bracketInfo.getFirstRound(); i < bracketInfo.getLastRound(); i++) { %>
-          <%=bracketInfo.getHtmlCell(connection, currentTournament, rowIndex, i, tableAssignmentIndex)%>
+          <%=bracketInfo.getHtmlCell(connection, currentTournament, rowIndex, i)%>
           <%=bracketInfo.getHtmlBridgeCell(rowIndex,i,BracketData.TopRightCornerStyle.MEET_BOTTOM_OF_CELL)%>
 <%    } %>
-          <%=bracketInfo.getHtmlCell(connection, currentTournament, rowIndex, bracketInfo.getLastRound(), tableAssignmentIndex)%>
+          <%=bracketInfo.getHtmlCell(connection, currentTournament, rowIndex, bracketInfo.getLastRound())%>
         </tr>
 <%  } %>
     </table>
