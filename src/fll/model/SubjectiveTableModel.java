@@ -75,7 +75,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
     }
   }
 
-  public Class getColumnClass(final int column) {
+  public Class<?> getColumnClass(final int column) {
     if(column == getNumGoals() + 4) {
       return Boolean.class;
     } else if(column == getNumGoals() + 5) {

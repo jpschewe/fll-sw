@@ -11,12 +11,13 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 
-import fll.web.WebTestUtils;
+import fll.TestUtils;
 
 import java.io.IOException;
 
 import java.net.MalformedURLException;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
@@ -49,8 +50,9 @@ public class WebTest extends TestCase {
     };
     final WebConversation conversation = new WebConversation();
     for(int i=0; i<pages.length; i++) {
-      final WebRequest request = new GetMethodWebRequest(WebTestUtils.URL_ROOT + "admin/" + pages[i]);
+      final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "admin/" + pages[i]);
       final WebResponse response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
     }
   }
 
@@ -60,7 +62,7 @@ public class WebTest extends TestCase {
   public void testChangeTournament()
     throws MalformedURLException, IOException, SAXException {
     final WebConversation conversation = new WebConversation();
-    final WebRequest request = new PostMethodWebRequest(WebTestUtils.URL_ROOT + "admin/index.jsp");
+    final WebRequest request = new PostMethodWebRequest(TestUtils.URL_ROOT + "admin/index.jsp");
     request.setParameter("currentTournament", "DUMMY");
     conversation.getResponse(request);
 

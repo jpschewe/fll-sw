@@ -363,8 +363,6 @@ public final class UploadTeams {
         prep.executeUpdate();
       }
       
-      final String copySQL = "INSERT INTO Teams (" + dbColumns.toString() + ") SELECT " + dataColumns.toString() + " FROM FilteredTeams";
-
       //put all teams in the DUMMY tournament by default
       stmt.executeUpdate("DELETE FROM TournamentTeams");
       stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber) SELECT 'DUMMY', " + teamNumberColumn + " FROM FilteredTeams");

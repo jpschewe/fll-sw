@@ -10,6 +10,8 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 
+import fll.TestUtils;
+
 import java.io.IOException;
 
 import java.net.MalformedURLException;
@@ -44,9 +46,11 @@ public final class WaitForTomcatStart {
       try {
         // need to request a page to get the database server up and running
         final WebConversation conversation = new WebConversation();
-        final WebRequest request = new GetMethodWebRequest(WebTestUtils.URL_ROOT);
+        final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT);
         final WebResponse response = conversation.getResponse(request);
-        done = true;
+        if(response.isHTML()) {
+          done = true;
+        }
       } catch(final MalformedURLException mue) {
         throw new RuntimeException("Coding error with url", mue);
       } catch(final IOException e) {

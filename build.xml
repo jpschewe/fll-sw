@@ -3,7 +3,7 @@
   <!-- ===================== Property Definitions =========================== -->
 
   <!-- load build specific properties first -->
-  <property file="build.properties" />
+  <property file="override.properties" />
 
   <property name="app.name"        value="${ant.project.name}"/>
   <property name="app.version"     value="2.6"/>
@@ -71,16 +71,7 @@
     <pathelement location="${dir.lib}/xalan.jar" />
 
     <!-- Include all elements that Tomcat exposes to applications -->
-    <pathelement location="${dir.build}/tomcat/common/classes"/>
-    <fileset dir="${dir.build}/tomcat/common/endorsed">
-      <include name="*.jar"/>
-    </fileset>
-
     <fileset dir="${dir.build}/tomcat/common/lib">
-      <include name="*.jar"/>
-    </fileset>
-    <pathelement location="${dir.build}/tomcat/shared/classes"/>
-    <fileset dir="${dir.build}/tomcat/shared/lib">
       <include name="*.jar"/>
     </fileset>
 
