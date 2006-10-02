@@ -149,8 +149,8 @@ public final class Utilities {
 
     if(Boolean.getBoolean("inside.test")) {
       if(!_testServerStarted) {
-        if(LOG.isDebugEnabled()) {
-          LOG.debug("Starting database server for testing");
+        if(LOG.isInfoEnabled()) {
+          LOG.info("Starting database server for testing");
         }
         new Thread(new Runnable() {
           public void run() {

@@ -37,8 +37,7 @@ public final class ImportDB {
         System.err.println("You must specify <source uri> <tournament> <destination uri>");
         System.exit(1);
       } else {
-        final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-
+        
         final String sourceURI = args[0];
         //remove quotes from tournament if they exist
         int substringStart = 0;

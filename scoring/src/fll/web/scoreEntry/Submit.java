@@ -35,7 +35,6 @@ public final class Submit {
                                                 final HttpServletRequest request) throws IOException {
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
-    final StringBuffer retval = new StringBuffer();
     //check all goal min and max values
     final NodeList goals = performanceElement.getElementsByTagName("goal");
     for(int i=0; i<goals.getLength(); i++) {

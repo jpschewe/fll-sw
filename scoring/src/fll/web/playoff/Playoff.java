@@ -9,8 +9,6 @@ import fll.Queries;
 import fll.Team;
 import fll.Utilities;
 
-import fll.xml.ChallengeParser;
-
 import java.io.IOException;
 
 import java.sql.Connection;
@@ -49,7 +47,6 @@ public final class Playoff {
    */
   public static void main(final String[] args) {
     try {
-      final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
       final Connection connection = Utilities.createDBConnection("fll", "fll", "fll");
       final Document challengeDocument = Queries.getChallengeDocument(connection);
       final Team a = new Team();
@@ -1000,7 +997,7 @@ public final class Playoff {
     }
 
     // Iterator over table name pairs.
-    Iterator<String[]> tableIt = tournamentTables.iterator();
+//    Iterator<String[]> tableIt = tournamentTables.iterator();
 
     // Initialize currentRound to contain a full bracket setup (i.e. playoff round 1 teams)
     // Note: Our math will rely on the length of the list returned by
