@@ -54,7 +54,7 @@ File xmlfile = null;
     application.removeAttribute("connection");
     application.removeAttribute("challengeDocument");
   
-    message.append("<i>Successfully initialized database</i><br>");
+    message.append("<p id='success'><i>Successfully initialized database</i></p>");
   } else {
     message.append("reinitializeDatabase attribute not set? " + request.getAttribute("rootUser"));
   }
