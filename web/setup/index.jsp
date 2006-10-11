@@ -66,7 +66,7 @@ File xmlfile = null;
 
       This will create a database called fll.<br>
           
-      <form action='index.jsp' method='post' enctype="multipart/form-data">
+      <form id='setup' action='index.jsp' method='post' enctype="multipart/form-data">
         XML description document (leave blank to use the default tournament description) <input type="file" size=32" name="xmldocument"><br/>
           <input type="checkbox"
             name='force_rebuild'

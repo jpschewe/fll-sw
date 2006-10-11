@@ -22,7 +22,7 @@ if(null == session.getAttribute("columnSelectOptions")) {
     <h1><x:out select="$challengeDocument/fll/@title"/> (Verify Teams)</h1>
 
     <% if(UploadTeams.verifyTeams(connection, request, response, session, out)) { %>
-    <p>Apparently everything uploaded ok.  You probably want to go back to the
+    <p id='success'>Apparently everything uploaded ok.  You probably want to go back to the
     <a href="index.jsp">administration menu</a> now.</p>
     <% } %>
 
