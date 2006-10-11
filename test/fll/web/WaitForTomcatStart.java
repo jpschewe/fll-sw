@@ -46,7 +46,7 @@ public final class WaitForTomcatStart {
       try {
         // need to request a page to get the database server up and running
         final WebConversation conversation = new WebConversation();
-        final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT);
+        final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "/setup");
         final WebResponse response = conversation.getResponse(request);
         if(response.isHTML()) {
           done = true;
