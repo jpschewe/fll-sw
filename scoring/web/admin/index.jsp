@@ -23,7 +23,7 @@ if(null != currentTournamentParam && !"".equals(currentTournamentParam)) {
   if(!Queries.setCurrentTournament(connection, currentTournamentParam)) {
     response.sendRedirect(response.encodeRedirectURL("tournaments.jsp?unknownTournament=" + currentTournamentParam));
   } else {
-    message.append("<i>Tournament changed to " + currentTournamentParam + "</i><br>");
+    message.append("<i id='success'>Tournament changed to " + currentTournamentParam + "</i><br>");
   }
 }
 
@@ -31,12 +31,12 @@ if(null != request.getParameter("changeSeedingRounds")) {
   final String newSeedingRoundsStr = request.getParameter("seedingRounds");
   final int newSeedingRounds = NumberFormat.getInstance().parse(newSeedingRoundsStr).intValue();
   Queries.setNumSeedingRounds(connection, newSeedingRounds);
-  message.append("<i>Changed number of seeding arounds to " + newSeedingRounds + "</i><br>");
+  message.append("<i id='success'>Changed number of seeding arounds to " + newSeedingRounds + "</i><br>");
 }
 
 if(null != request.getParameter("addTournamentsForRegions")) {
   Queries.insertTournamentsForRegions(connection);
-  message.append("<i>Successfully added tournaments for regions</i>");
+  message.append("<i id='success'>Successfully added tournaments for regions</i>");
 }
         
 final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
@@ -60,7 +60,7 @@ final String currentTournament = Queries.getCurrentTournament(connection);
       <li><a href='<c:url value="tournaments.jsp"/>'>Edit Tournaments</a></li>
 
       <li>
-        <form action='<c:url value="index.jsp"/>' method="post">
+        <form id='currentTournament' action='<c:url value="index.jsp"/>' method="post">
           Current Tournament: <select name='currentTournament'>
               <%
               final Statement stmt = connection.createStatement();
@@ -83,7 +83,7 @@ final String currentTournament = Queries.getCurrentTournament(connection);
       </li>
 
       <li>
-        <form ACTION='<c:url value="uploadTeams.jsp"/>' METHOD="POST" ENCTYPE="multipart/form-data">
+        <form id='uploadTeams' ACTION='<c:url value="uploadTeams.jsp"/>' METHOD="POST" ENCTYPE="multipart/form-data">
           Upload the datafile for teams.  The filter functionality provided
           here is very basic and has very limited feedback.  It's suggested
           that you edit the input file before upload to contain only the teams
@@ -104,7 +104,7 @@ final String currentTournament = Queries.getCurrentTournament(connection);
       
       <li><a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a> (for scoresheet printing during playoffs)</li>
 
-      <li><form action='<c:url value="index.jsp"/>' method='post'>Select the number of seeding runs.
+      <li><form id='changeSeedingRounds' action='<c:url value="index.jsp"/>' method='post'>Select the number of seeding runs.
           <select name='seedingRounds'>
 <%
 for(int i=1; i<=10; i++) {
@@ -122,7 +122,7 @@ for(int i=1; i<=10; i++) {
           
     </ol>
 
-    <p>Tournament day:<?p>
+    <p>Tournament day:</p>
     <ol>
       <li><a href='<c:url value="editTeam.jsp">
                      <c:param name="addTeam" value="1"/>
