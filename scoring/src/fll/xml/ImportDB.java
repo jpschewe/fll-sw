@@ -60,6 +60,16 @@ public final class ImportDB {
         } catch(final IllegalAccessException iae) {
           throw new RuntimeException("Unable to load driver.", iae);
         }
+
+        try {
+          Class.forName("com.mysql.jdbc.Driver").newInstance();
+        } catch(final ClassNotFoundException e){
+          LOG.warn("Unable to load driver.", e);
+        } catch(final InstantiationException ie) {
+          LOG.warn("Unable to load driver.", ie);
+        } catch(final IllegalAccessException iae) {
+          LOG.warn("Unable to load driver.", iae);
+        }
         
         final Connection sourceConnection = DriverManager.getConnection(sourceURI);
         final Connection destinationConnection = DriverManager.getConnection(destinationURI);
