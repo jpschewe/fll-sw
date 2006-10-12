@@ -16,7 +16,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import java.text.NumberFormat;
 import java.text.ParseException;
 
 import java.util.HashMap;
@@ -57,39 +56,35 @@ public final class Judges {
     final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
     final Connection connection = (Connection)application.getAttribute("connection");
     final String tournament = Queries.getCurrentTournament(connection);
+    final String submitButton = request.getParameter("submit");
 
     final NodeList subjectiveCategories = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
 
-    final String numRowsStr = request.getParameter("numRows");
-    int numRows;      
-    if(null == numRowsStr) {
-      numRows = 0;
-    } else {
-      try {
-        numRows = NumberFormat.getInstance().parse(numRowsStr).intValue();
-      } catch(final ParseException nfe) {
-        numRows = 0;
-      }
+    // count the number of rows present
+    int rowIndex= 0;
+    while(null != request.getParameter("cat" + (rowIndex+1))) {
+      ++rowIndex;
+      out.println("<!-- found a row " + rowIndex+ "-->");
     }
-    String state = request.getParameter("state");
-    if(null == state) {
-      state = "edit";
+    if("Add Row".equals(submitButton)) {
+      out.println("<!-- adding another row to " + rowIndex+ "-->");
+      ++rowIndex;
     }
-      
+    out.println("<!-- final count of rows is " + rowIndex + "-->");
+    final int numRows = rowIndex + 1;
     out.println("<form action='judges.jsp' method='POST' name='judges'>");
-    out.println("<input type='hidden' name='state' value='edit'>");
     out.println("<input type='hidden' name='numRows'>");
 
     String errorString = null;
-    if("verify".equals(state)) {
+    if("Finished".equals(submitButton)) {
       errorString = generateVerifyTable(out, subjectiveCategories, request);
-    } else if("commit".equals(state)) {
+    } else if("Commit".equals(submitButton)) {
       commitData(subjectiveCategories, request, response, connection, Queries.getCurrentTournament(connection));
     }
 
-    if("edit".equals(state) || null != errorString) {
+    if(null == submitButton || "Cancel".equals(submitButton) || "Add Row".equals(submitButton) || null != errorString) {
       if(null != errorString) {
-        out.println("<p><font color='red'>" + errorString + "</font></p>");
+        out.println("<p id='error'><font color='red'>" + errorString + "</font></p>");
       }
 
       //get list of divisions and add "All" as a possible value 
@@ -145,8 +140,8 @@ public final class Judges {
       }
 
       out.println("</table>");
-      out.println("<input type='submit' value='Add Row' onclick='document.judges.numRows.value=\"" + (tableRows + 1) + "\"'>");
-      out.println("<input type='submit' value='Finished' onclick='document.judges.state.value=\"verify\"'>");
+      out.println("<input type='submit' name='submit' value='Add Row'>");
+      out.println("<input type='submit' name='submit' value='Finished'>");
     }
     
     out.println("</form>");
@@ -298,8 +293,8 @@ public final class Judges {
 
       
       out.println("</table>");
-      out.println("<input type='submit' value='Commit' onclick='document.judges.state.value=\"commit\"'>");
-      out.println("<input type='submit' value='Cancel' onclick='document.judges.state.value=\"edit\"'>");
+      out.println("<input type='submit' name='submit' value='Commit'>");
+      out.println("<input type='submit' name='submit' value='Cancel'>");
       
       return null;
     }
@@ -349,7 +344,7 @@ public final class Judges {
     }
     
     //finally redirect to index.jsp 
-    response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+    response.sendRedirect(response.encodeRedirectURL("index.jsp?message=Successfully+assigned+judges."));
   }
 
 }
