@@ -73,7 +73,6 @@ public final class Judges {
     out.println("<!-- final count of rows is " + rowIndex + "-->");
     final int numRows = rowIndex + 1;
     out.println("<form action='judges.jsp' method='POST' name='judges'>");
-    out.println("<input type='hidden' name='numRows'>");
 
     String errorString = null;
     if("Finished".equals(submitButton)) {

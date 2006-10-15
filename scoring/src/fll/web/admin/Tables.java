@@ -16,7 +16,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import java.text.NumberFormat;
 import java.text.ParseException;
 
 import javax.servlet.ServletContext;
@@ -45,33 +44,29 @@ public final class Tables {
     throws SQLException, IOException, ParseException {
     final Connection connection = (Connection)application.getAttribute("connection");
     final String tournament = Queries.getCurrentTournament(connection);
+    final String submitButton = request.getParameter("submit");
 
-    final String numRowsStr = request.getParameter("numRows");
-    int numRows;      
-    if(null == numRowsStr) {
-      numRows = 0;
-    } else {
-      try {
-        numRows = NumberFormat.getInstance().parse(numRowsStr).intValue();
-      } catch(final ParseException nfe) {
-        numRows = 0;
-      }
+    int rowIndex= 0;
+    while(null != request.getParameter("SideA" + (rowIndex+1))) {
+      ++rowIndex;
+      out.println("<!-- found a row " + rowIndex+ "-->");
     }
-    String state = request.getParameter("state");
-    if(null == state) {
-      state = "edit";
+    if("Add Row".equals(submitButton)) {
+      out.println("<!-- adding another row to " + rowIndex+ "-->");
+      ++rowIndex;
     }
-      
+    out.println("<!-- final count of rows is " + rowIndex + "-->");
+    final int numRows = rowIndex + 1;
+    
+
     out.println("<form action='tables.jsp' method='POST' name='tables'>");
-    out.println("<input type='hidden' name='state' value='edit'>");
-    out.println("<input type='hidden' name='numRows'>");
 
     String errorString = null;
-    if("commit".equals(state)) {
+    if("Finished".equals(submitButton)) {
       errorString = commitData(request, response, connection, Queries.getCurrentTournament(connection));
     }
 
-    if("edit".equals(state) || null != errorString) {
+    if(null == submitButton || "Add Row".equals(submitButton) || null != errorString) {
       if(null != errorString) {
         out.println("<p><font color='red'>" + errorString + "</font></p>");
       }
@@ -114,17 +109,14 @@ public final class Tables {
         }
       }
 
-      if(numRows == 0) {
-        numRows = 1;
-      }
       final int tableRows = Math.max(numRows, row);
       for(; row < tableRows; row++) {
         generateRow(out, row, null, null, null);
       }
       
       out.println("</table>");
-      out.println("<input type='submit' value='Add Row' onclick='document.tables.numRows.value=\"" + (tableRows + 1) + "\"'>");
-      out.println("<input type='submit' value='Finished' onclick='document.tables.state.value=\"commit\"'>");
+      out.println("<input type='submit' name='submit' value='Add Row'>");
+      out.println("<input type='submit' name='submit' value='Finished'>");
     }
     
     out.println("</form>");
