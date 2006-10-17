@@ -57,6 +57,24 @@ final String currentTournament = Queries.getCurrentTournament(connection);
         
     <p>Before tournament day:</p>
     <ol>
+      <li>
+        <form id='uploadTeams' ACTION='<c:url value="uploadTeams.jsp"/>' METHOD="POST" ENCTYPE="multipart/form-data">
+          Upload the datafile for teams.  The filter functionality provided
+          here is very basic and has very limited feedback.  It's suggested
+          that you edit the input file before upload to contain only the teams
+          for your tournament(s).
+          <input type="file" size="32" name="file1">
+          <input type="submit" value="Upload">
+        </form>
+      </li>
+
+      <li><a href='<c:url value="index.jsp">
+                     <c:param name="addTournamentsForRegions" value="1" />
+                   </c:url>'>
+          Add tournaments for all Regions</a></li>
+
+      <li><a href='<c:url value="tournamentInitialization.jsp"/>'>Initialize tournament teams by region</a></li>
+
       <li><a href='<c:url value="tournaments.jsp"/>'>Edit Tournaments</a></li>
 
       <li>
@@ -81,24 +99,6 @@ final String currentTournament = Queries.getCurrentTournament(connection);
           <input type='submit' value='Change tournament'>
         </form>
       </li>
-
-      <li>
-        <form id='uploadTeams' ACTION='<c:url value="uploadTeams.jsp"/>' METHOD="POST" ENCTYPE="multipart/form-data">
-          Upload the datafile for teams.  The filter functionality provided
-          here is very basic and has very limited feedback.  It's suggested
-          that you edit the input file before upload to contain only the teams
-          for your tournament(s).
-          <input type="file" size="32" name="file1">
-          <input type="submit" value="Upload">
-        </form>
-      </li>
-
-      <li><a href='<c:url value="index.jsp">
-                     <c:param name="addTournamentsForRegions" value="1" />
-                   </c:url>'>
-          Add tournaments for all Regions</a></li>
-
-      <li><a href='<c:url value="tournamentInitialization.jsp"/>'>Initialize tournament teams by region</a></li>
           
       <li><a href='<c:url value="judges.jsp"/>'>Assign Judges</a></li>
       

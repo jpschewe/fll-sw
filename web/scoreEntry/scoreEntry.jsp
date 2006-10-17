@@ -331,15 +331,15 @@ function CancelClicked() {
               <td colspan='3' align='right'>
                 <c:if test="${not isBye}">
                   <c:if test="${editFlag}">
-                    <input type='submit' value='Submit Score' onclick='return confirm("You are changing a score -- Are you sure?")'>
+                    <input type='submit' name='submit' value='Submit Score' onclick='return confirm("You are changing a score -- Are you sure?")'>
                   </c:if>
                   <c:if test="${not editFlag}">
-                    <input type='submit' value='Submit Score' onclick='return confirm("Submit Data -- Are you sure?")'>
+                    <input type='submit' name='submit' value='Submit Score' onclick='return confirm("Submit Data -- Are you sure?")'>
                   </c:if>
                 </c:if>
                 <input type='button' value='Cancel' onclick='CancelClicked()'>
                 <c:if test="${editFlag and isLastRun}">
-                  <input type='submit' value='Delete Score' name='delete' onclick='return confirm("Are you sure you want to delete this score?")'>
+                  <input type='submit' name='delete' value='Delete Score' onclick='return confirm("Are you sure you want to delete this score?")'>
                 </c:if>
               </td>
               <td align='right'>
