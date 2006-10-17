@@ -68,7 +68,7 @@ public final class Tables {
 
     if(null == submitButton || "Add Row".equals(submitButton) || null != errorString) {
       if(null != errorString) {
-        out.println("<p><font color='red'>" + errorString + "</font></p>");
+        out.println("<p id='error'><font color='red'>" + errorString + "</font></p>");
       }
       
       out.println("<p>Table labels should be unique. These labels must occur in pairs, where a label refers to a single side of a table. E.g. If the skirt of a table was red on one side and green on the other, the labels could be Red and Green, but if the table was red all around they could be Red1 and Red2.</p>");
@@ -170,7 +170,6 @@ public final class Tables {
                                  final Connection connection,
                                  final String tournament)
     throws SQLException, IOException {
-    String x = "";
     Statement stmt = null;
     PreparedStatement prep = null;
     try {
@@ -194,9 +193,6 @@ public final class Tables {
             prep.executeUpdate();
           }
         }
-        if(null != delete) {
-          x = x + "val=\"" + delete + "\" ";
-        }
           
         row++;
         sideA = request.getParameter("SideA" + row);
@@ -210,7 +206,7 @@ public final class Tables {
     }
     
     //finally redirect to index.jsp 
-    response.sendRedirect(response.encodeRedirectURL("index.jsp?" + x));
+    response.sendRedirect(response.encodeRedirectURL("index.jsp?message=Successfully+assigned+tables."));
     return null;
   }
 

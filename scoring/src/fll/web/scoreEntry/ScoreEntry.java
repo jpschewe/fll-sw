@@ -215,7 +215,7 @@ public final class ScoreEntry {
         writer.println("<!-- " + name + " -->");
         writer.println("<tr>");
         if(null != request.getParameter(name + "_error")) {
-          writer.println("  <td bgcolor='red'>");
+          writer.println("  <td name='error' bgcolor='red'>");
         } else {
           writer.println("  <td>");
         }
@@ -306,8 +306,9 @@ public final class ScoreEntry {
                                            final JspWriter writer) throws IOException {
     //generate buttons with calls to increment<name>
     final String buttonName = (increment < 0 ? "" : "+") + String.valueOf(increment);
+    final String incdec = (increment < 0 ? "dec" : "inc");
     writer.println("        <td>");
-    writer.println("          <input type='button' value='" + buttonName + "' onclick='increment" + name + "(" + increment + ")'>");
+    writer.println("          <input id='" + incdec + "_" + name + "_" + String.valueOf(increment) + "' type='button' value='" + buttonName + "' onclick='increment" + name + "(" + increment + ")'>");
     writer.println("        </td>");
   }
 
