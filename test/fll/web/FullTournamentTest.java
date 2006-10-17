@@ -335,6 +335,7 @@ public class FullTournamentTest extends TestCase {
       // upload scores
       // compute final scores
       // generate reports
+      
     } finally {
       Utilities.closeResultSet(rs);
       Utilities.closeStatement(stmt);
