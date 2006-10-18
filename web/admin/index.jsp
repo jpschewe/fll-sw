@@ -134,7 +134,7 @@ for(int i=1; i<=10; i++) {
                      <c:param name="filename" value="subjective.zip"/>
                    </c:url>'>Download the datafile for subjective score entry.</a>  Should be downloaded after each subjective score upload to lessen chance of data loss due to overwrite. </li>
       <li>
-        <form ACTION='<c:url value="uploadSubjectiveData.jsp"/>' METHOD="POST" ENCTYPE="multipart/form-data">
+        <form name='uploadSubjective' ACTION='<c:url value="uploadSubjectiveData.jsp"/>' METHOD="POST" ENCTYPE="multipart/form-data">
           Upload the datafile for subjective scores.
           <input type="file" size="32" name="file1">
           <input type="submit" value="Upload">

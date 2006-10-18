@@ -144,7 +144,15 @@ public final class SubjectiveFrame extends JFrame {
     topPanel.add(saveButton);
     saveButton.addActionListener(new ActionListener() {
       public void actionPerformed(final ActionEvent ae) {
-        save();
+        try {
+          save();
+        } catch(final IOException ioe) {
+          JOptionPane.showMessageDialog(null,
+                                        "Error writing to data file: " + ioe.getMessage(),
+                                        "Error",
+                                        JOptionPane.ERROR_MESSAGE);
+        }
+
       }
     });
 
@@ -182,10 +190,11 @@ public final class SubjectiveFrame extends JFrame {
       final Element subjectiveElement = (Element)subjectiveCategories.item(i);
       final SubjectiveTableModel tableModel = new SubjectiveTableModel(_scoreDocument, subjectiveElement);
       final JTable table = new SortableTable(tableModel);
-      _tables.add(table);
+      final String title = subjectiveElement.getAttribute("title");
+      _tables.put(title, table);
       final JScrollPane tableScroller = new JScrollPane(table);
       tableScroller.setPreferredSize(new Dimension(640, 480));
-      tabbedPane.addTab(subjectiveElement.getAttribute("title"), tableScroller);
+      tabbedPane.addTab(title, tableScroller);
 
       final NodeList goals = subjectiveElement.getElementsByTagName("goal");
       for(int g=0; g<goals.getLength(); g++) {
@@ -289,9 +298,17 @@ public final class SubjectiveFrame extends JFrame {
                                                       "Exit",
                                                       JOptionPane.YES_NO_CANCEL_OPTION);
       if(JOptionPane.YES_OPTION == state) {
-        save();
-        setVisible(false);
-        dispose();
+        try {
+          save();
+          setVisible(false);
+          dispose();
+        } catch(final IOException ioe) {
+          JOptionPane.showMessageDialog(null,
+                                        "Error writing to data file: " + ioe.getMessage(),
+                                        "Error",
+                                        JOptionPane.ERROR_MESSAGE);
+        }
+        
         System.exit(0);
       } else if(JOptionPane.NO_OPTION == state) {
         setVisible(false);
@@ -377,7 +394,7 @@ public final class SubjectiveFrame extends JFrame {
    * Stop the cell editors to ensure data is flushed
    */
   private void stopCellEditors() {
-    final Iterator<JTable> iter = _tables.iterator();
+    final Iterator<JTable> iter = _tables.values().iterator();
     while(iter.hasNext()) {
       final JTable table = iter.next();
       final int editingColumn = table.getEditingColumn();
@@ -393,55 +410,25 @@ public final class SubjectiveFrame extends JFrame {
   
   /**
    * Save out to the same file that things were read in.
+   * 
+   * @throws IOException if an error occurs writing to the file
    */
-  private void save() {
-    try {
-      stopCellEditors();
-      
-      final XMLWriter xmlwriter = new XMLWriter();
-      
-      final ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(_file));
-      xmlwriter.setOutput(zipOut, "UTF8");
-      
-      zipOut.putNextEntry(new ZipEntry("challenge.xml"));
-      xmlwriter.write(_challengeDocument);
-      zipOut.closeEntry();
-      zipOut.putNextEntry(new ZipEntry("score.xml"));
-      xmlwriter.write(_scoreDocument);
-      zipOut.closeEntry();
-      
-      zipOut.close();
-    } catch(final IOException ioe) {
-      JOptionPane.showMessageDialog(null,
-                                    "Error writing to data file: " + ioe.getMessage(),
-                                    "Error",
-                                    JOptionPane.ERROR_MESSAGE);
-    }
-  }
-
-  private final File _file;
-  private final Document _challengeDocument;
-  private final Document _scoreDocument;
-  
-  // -------- Inner classes only below here -----------
-  /**
-   * List model used for the comboboxes that is backed by an XML document.
-   */
-  private static final class SubjectiveListModel extends DefaultComboBoxModel {
-    public SubjectiveListModel(final Document document) {
-      _subjectiveCategories = document.getDocumentElement().getElementsByTagName("subjectiveCategory");
-    }
-
-    public Object getElementAt(final int index) {
-      return _subjectiveCategories.item(index);
-    }
-
-    public int getSize() {
-      return _subjectiveCategories.getLength();
-    }
-
-    private final NodeList _subjectiveCategories;
+  public void save() throws IOException {
+    stopCellEditors();
     
+    final XMLWriter xmlwriter = new XMLWriter();
+    
+    final ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(_file));
+    xmlwriter.setOutput(zipOut, "UTF8");
+    
+    zipOut.putNextEntry(new ZipEntry("challenge.xml"));
+    xmlwriter.write(_challengeDocument);
+    zipOut.closeEntry();
+    zipOut.putNextEntry(new ZipEntry("score.xml"));
+    xmlwriter.write(_scoreDocument);
+    zipOut.closeEntry();
+    
+    zipOut.close();
   }
 
   /**
@@ -487,5 +474,44 @@ public final class SubjectiveFrame extends JFrame {
    */
   private static final String INITIAL_DIRECTORY_PREFERENCE_KEY = "InitialDirectory";
   
-  private List<JTable> _tables = new LinkedList<JTable>();
+  private Map<String, JTable> _tables = new HashMap<String, JTable>();
+  /**
+   * Get the table model for a given subjective title.  Mostly for testing.
+   * 
+   * @return the table model or null if the specified title is not present
+   */
+  public TableModel getTableModelForTitle(final String title) {
+    final JTable table = _tables.get(title);
+    if(null == table) {
+      return null;
+    } else {
+      return table.getModel();
+    }
+  }
+  
+  private final File _file;
+  private final Document _challengeDocument;
+  private final Document _scoreDocument;
+  
+  // -------- Inner classes only below here -----------
+  /**
+   * List model used for the comboboxes that is backed by an XML document.
+   */
+  private static final class SubjectiveListModel extends DefaultComboBoxModel {
+    public SubjectiveListModel(final Document document) {
+      _subjectiveCategories = document.getDocumentElement().getElementsByTagName("subjectiveCategory");
+    }
+
+    public Object getElementAt(final int index) {
+      return _subjectiveCategories.item(index);
+    }
+
+    public int getSize() {
+      return _subjectiveCategories.getLength();
+    }
+
+    private final NodeList _subjectiveCategories;
+    
+  }
+  
 }
