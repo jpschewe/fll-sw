@@ -8,6 +8,14 @@
 <%@ page import="java.sql.Connection" %>
   
 <%
+final StringBuffer message = new StringBuffer();
+final String messageReq = request.getParameter("message");
+if(null != messageReq) {
+  message.append("<i>");
+  message.append(messageReq);
+  message.append("</i><br>");
+}
+
 final Connection connection = (Connection)application.getAttribute("connection");
 final Statement stmt = connection.createStatement();
 final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = '" + Queries.getCurrentTournament(connection) + "'");
@@ -28,6 +36,8 @@ Utilities.closeStatement(stmt);
 
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Reporting)</h1>
+
+    <p><%=message.toString()%></p>
 
     <ol>
       <li><a href="summarizePhase1.jsp">Compute summarized scores</a>.  This

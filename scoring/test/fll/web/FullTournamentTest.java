@@ -5,6 +5,8 @@
  */
 package fll.web;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -15,6 +17,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
+
+import javax.swing.table.TableModel;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -37,6 +41,7 @@ import com.meterware.httpunit.WebResponse;
 
 import fll.TestUtils;
 import fll.Utilities;
+import fll.gui.SubjectiveFrame;
 import fll.xml.ChallengeParser;
 
 /**
@@ -125,6 +130,7 @@ public class FullTournamentTest extends TestCase {
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull("Error loading teams: " + response.getText(), response.getElementWithID("success"));
 
+      
       // create tournaments for all regions
       request = new GetMethodWebRequest(TestUtils.URL_ROOT + "admin/index.jsp");
       request.setParameter("addTournamentsForRegions", "1");
@@ -265,8 +271,8 @@ public class FullTournamentTest extends TestCase {
         
         while(rs.next()) {
           final int teamNumber = rs.getInt("TeamNumber");
-          if(LOG.isDebugEnabled()) {
-            LOG.debug("Setting score for " + teamNumber + " run: " + runNumber);
+          if(LOG.isInfoEnabled()) {
+            LOG.info("Setting score for " + teamNumber + " run: " + runNumber);
           }
           // need to get the score entry form
           request = new GetMethodWebRequest(TestUtils.URL_ROOT + "scoreEntry/select_team.jsp");
@@ -326,15 +332,102 @@ public class FullTournamentTest extends TestCase {
         }
       }
       
-      
-      // final Connection connection = TestUtils.createDBConnection("fll", "fll");
-      // Assert.assertNotNull("Could not create test database connection",
-      // connection);
+
       // download subjective zip
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "getfile.jsp");
+      request.setParameter("filename", "subjective.zip");
+      response = conversation.getResponse(request);
+      Assert.assertEquals("application/zip", response.getContentType());
+      final InputStream zipStream = response.getInputStream();
+      final File subjectiveZip = File.createTempFile("fll", "zip");
+      subjectiveZip.deleteOnExit();
+      final FileOutputStream outputStream = new FileOutputStream(subjectiveZip);
+      final byte[] buffer = new byte[512];
+      int bytesRead = 0;
+      while(-1 != (bytesRead = zipStream.read(buffer))) {
+        outputStream.write(buffer, 0, bytesRead);
+      }
+      outputStream.close();
+      zipStream.close();
+      final SubjectiveFrame subjective = new SubjectiveFrame(subjectiveZip);
+
       // insert scores into zip
+      final NodeList subjectiveCategories = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
+      for(int i=0; i<subjectiveCategories.getLength(); i++) {
+        final Element subjectiveElement = (Element)subjectiveCategories.item(i);
+        final String category = subjectiveElement.getAttribute("name");
+        final String title = subjectiveElement.getAttribute("title");
+        // find appropriate table model
+        final TableModel tableModel = subjective.getTableModelForTitle(title);
+                
+        final NodeList goals = subjectiveElement.getElementsByTagName("goal");
+        prep = testDataConn.prepareStatement("SELECT * FROM " + category + " WHERE Tournament = ?");
+        prep.setString(1, testTournament);
+        rs = prep.executeQuery();
+        while(rs.next()) {
+          final String teamNumber = rs.getString("TeamNumber");
+          // find row number in table
+          final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
+          Assert.assertTrue("Can't find TeamNumber column in subjective table model", teamNumberColumn >= 0);
+          int rowIndex = -1;
+          for(int rowIdx=0; rowIdx<tableModel.getRowCount() && rowIndex == -1; ++rowIdx) {
+            final String value = (String)tableModel.getValueAt(rowIdx, teamNumberColumn);
+            if(value.equals(teamNumber)) {
+              rowIndex = rowIdx;
+            }
+          }
+          Assert.assertTrue("Can't find team " + teamNumber + " in subjective table model", rowIndex >= 0);
+
+          
+          if(rs.getBoolean("NoShow")) {
+            // find column for no show
+            final int columnIndex = findColumnByName(tableModel, "No Show");
+            Assert.assertTrue("Can't find No Show column in subjective table model", columnIndex >= 0);
+            tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);            
+          } else {
+            for(int goalIdx=0; goalIdx<goals.getLength(); ++goalIdx) {
+              final Element goalElement = (Element)goals.item(goalIdx);
+              final String goalName = goalElement.getAttribute("name");
+              final String goalTitle = goalElement.getAttribute("title");
+              
+              // find column index for goal and call set
+              final int columnIndex = findColumnByName(tableModel, goalTitle); 
+              Assert.assertTrue("Can't find " + goalTitle + " column in subjective table model", columnIndex >= 0);
+              final int value = rs.getInt(goalName);
+              tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
+            }
+          }
+        }
+      }
+      subjective.save();
+      
+      
       // upload scores
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "admin/index.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      form = response.getFormWithName("uploadSubjective");
+      request = form.getRequest();
+      final UploadFileSpec subjectiveUpload = new UploadFileSpec(subjectiveZip);
+      form.setParameter("file1", new UploadFileSpec[] { subjectiveUpload });
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Subjective data uploaded successfully"));
+      
+      
       // compute final scores
-      // generate reports
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/summarizePhase1.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/summarizePhase2.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully summarized scores"));
+      
+      // FIX generate reports
+      // FIX check ranking, scores?
+      // final Connection connection = TestUtils.createDBConnection("fll", "fll");
+      // Assert.assertNotNull("Could not create test database connection", connection);
       
     } finally {
       Utilities.closeResultSet(rs);
@@ -342,6 +435,20 @@ public class FullTournamentTest extends TestCase {
       Utilities.closePreparedStatement(prep);
       Utilities.closeConnection(testDataConn);
     }
+  }
+  
+  /**
+   * Find a column index in a table model by name.  
+   * 
+   * @return -1 if not found
+   */
+  private static int findColumnByName(final TableModel tableModel, final String name) {
+    for(int i=0; i<tableModel.getColumnCount(); ++i) {
+      if(name.equals(tableModel.getColumnName(i))) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   private static final HTMLElementPredicate MATCH_TEXT = new HTMLElementPredicate() {

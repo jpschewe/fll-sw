@@ -2,7 +2,7 @@
 
 <%@ page import="fll.ScoreStandardization" %>
 <%@ page import="fll.Queries" %>
-      
+<%@ page import="java.sql.Connection" %>
 <%@ page import="org.w3c.dom.Document" %>
 
 <%
@@ -26,7 +26,7 @@ final String errorMsg = ScoreStandardization.checkDataConsistency(connection);
 
 <%if(null == errorMsg) {%>
   <a href="index.jsp">Normally you'd be redirected here</a>
-  <% response.sendRedirect(response.encodeRedirectURL("index.jsp")); %>
+  <% response.sendRedirect(response.encodeRedirectURL("index.jsp?message=Successfully+summarized+scores")); %>
 <%} else {%>
 <p><font color='red'><%=errorMsg%></font></p>
 <%}%>
