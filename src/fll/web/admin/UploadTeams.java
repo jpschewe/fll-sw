@@ -99,8 +99,8 @@ public final class UploadTeams {
         createFilteredTable.append(", ");
         insertPrepSQL.append(", ");
       }
-      createTable.append(columnName + " " + fll.xml.GenerateDB.TEXT_DATATYPE);
-      createFilteredTable.append(columnName + " " + fll.xml.GenerateDB.TEXT_DATATYPE);
+      createTable.append(columnName + " longvarchar");
+      createFilteredTable.append(columnName + " longvarchar");
       insertPrepSQL.append("?");
       selectOptions.append("<option value='" + columnName + "'>" + columnName + "</option>");
     }

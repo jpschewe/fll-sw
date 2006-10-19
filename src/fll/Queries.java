@@ -1155,7 +1155,9 @@ public final class Queries {
     final String currentTournament = getTeamCurrentTournament(connection, teamNumber);
     final String nextTournament = getNextTournament(connection, currentTournament);
     if(null == nextTournament) {
-      LOG.info("advanceTeam - No next tournament exists for tournament: " + currentTournament + " team: " + teamNumber);
+      if(LOG.isInfoEnabled()) {
+        LOG.info("advanceTeam - No next tournament exists for tournament: " + currentTournament + " team: " + teamNumber);
+      }
       return false;
     } else {
       PreparedStatement prep = null;
