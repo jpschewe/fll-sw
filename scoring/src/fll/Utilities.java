@@ -6,6 +6,7 @@
 package fll;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -15,6 +16,7 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 
 import org.apache.log4j.Logger;
+import org.hsqldb.Server;
 
 /**
  * Some handy utilties.
@@ -138,7 +140,9 @@ public final class Utilities {
 
     Connection connection = null;
     final String myURL = "jdbc:hsqldb:file:" + database + ";shutdown=true";
-    LOG.debug("myURL: " + myURL);
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("myURL: " + myURL);
+    }
     try {
       connection = DriverManager.getConnection(myURL);
     } catch(final SQLException sqle) {
@@ -152,14 +156,28 @@ public final class Utilities {
         if(LOG.isInfoEnabled()) {
           LOG.info("Starting database server for testing");
         }
-        new Thread(new Runnable() {
-          public void run() {
-            org.hsqldb.Server.main(new String[] {
-                                     "-database.0", database,
-                                     "-dbname.0", "fll",
-                                     "-no_system_exit", "true",
-                                   });
-          }}).start();
+        // TODO This still isn't working quite right when run from inside Eclipse, when run from the commandline forcing the parameter it's fine
+        final Server server = new Server();
+        server.setPort(9042);
+        server.setDatabasePath(0, database);
+        server.setDatabaseName(0, "fll");
+        server.setNoSystemExit(true);
+        final PrintWriter output = new PrintWriter(System.out);
+        server.setErrWriter(output);
+        server.setLogWriter(output);
+        server.setTrace(true);
+        server.start();
+//        final Thread dbThread = new Thread(new Runnable() {
+//          public void run() {
+//            org.hsqldb.Server.main(new String[] {
+//                "-port", "9042",
+//                "-database.0", database,
+//                "-dbname.0", "fll",
+//                "-no_system_exit", "true",
+//            });
+//          }});
+//        dbThread.setDaemon(true);
+//        dbThread.start();
         _testServerStarted = true;
       }
     }
@@ -170,6 +188,7 @@ public final class Utilities {
    * Ensure that we only start the test database server once
    */
   private static boolean _testServerStarted = false;
+  public static boolean isTestServerStarted() { return _testServerStarted; } 
 
   /**
    * Close stmt and ignore SQLExceptions.  This is useful in a finally so that

@@ -85,8 +85,7 @@ public final class TestUtils {
    * @param password password to use
    * @throws RuntimeException on an error
    */
-  public static Connection createDBConnection(final String username,
-                                              final String password)
+  public static Connection createDBConnection()
     throws RuntimeException {
     //create connection to database and puke if anything goes wrong
     //register the driver
@@ -101,14 +100,15 @@ public final class TestUtils {
     }
 
     Connection connection = null;
-    final String myURL = "jdbc:hsqldb:hsql://localhost/fll";
-    LOG.debug("myURL: " + myURL);
+    final String myURL = "jdbc:hsqldb:hsql://localhost:9042/fll";
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("created test database connection myURL: " + myURL);
+    }
     try {
       connection = DriverManager.getConnection(myURL);
     } catch(final SQLException sqle) {
       throw new RuntimeException("Unable to create connection: " + sqle.getMessage()
-                                 + " URL: " + myURL
-                                 + " user: " + username);
+                                 + " URL: " + myURL);
     }
     
     return connection;
