@@ -41,11 +41,12 @@
   <property name="compile.deprecation" value="true"/>
   <property name="compile.optimize"    value="false"/>
 
+	<property name="inside.test" value="false"/>
 
   <!-- ==================== Compilation Classpath =========================== -->
   <path id="application.classpath">
     <pathelement location="${dir.lib}/JonsInfra-0.2.jar"/>
-    <pathelement location="${dir.lib}/hsqldb-1.8.0.2.jar"/>
+    <pathelement location="${dir.lib}/hsqldb-1.8.0.7.jar"/>
     <pathelement location="${dir.lib}/log4j-1.2.8.jar"/>
     <pathelement location="${dir.lib}/xercesImpl.jar"/>
     <pathelement location="${dir.lib}/xmlParserAPIs.jar"/>

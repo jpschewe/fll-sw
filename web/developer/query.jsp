@@ -21,7 +21,7 @@
       <c:if test="${not empty param.query}">
         <sql:query dataSource="${datasource}" var="query_result" scope="page" sql="${param.query}"/>
         <p>Results</p>
-        <table border='1'>
+        <table id='queryResult' border='1'>
           <tr>
             <c:forEach var="columnName" items="${query_result.columnNames}">
               <th><c:out value="${columnName}"/></th>

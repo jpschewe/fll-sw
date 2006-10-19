@@ -125,7 +125,7 @@ public final class GenerateDB {
       
       //Table structure for table 'Tournaments'
       if(forceRebuild) {
-        stmt.executeUpdate("DROP TABLE IF EXISTS Tournaments");
+        stmt.executeUpdate("DROP TABLE IF EXISTS Tournaments CASCADE");
       }
 
       if(forceRebuild || !tables.contains("Tournaments".toLowerCase())) {
@@ -140,7 +140,7 @@ public final class GenerateDB {
       }
       
       // table to hold head-to-head playoff meta-data
-      stmt.executeUpdate("DROP TABLE IF EXISTS PlayoffData");
+      stmt.executeUpdate("DROP TABLE IF EXISTS PlayoffData CASCADE");
       stmt.executeUpdate("CREATE TABLE PlayoffData (" +
             " Division varchar(32) NOT NULL," +
             " Tournament " + TOURNAMENT_DATATYPE + " NOT NULL," +
@@ -154,7 +154,7 @@ public final class GenerateDB {
 
       // Table structure for table 'Teams'
       if(forceRebuild) {
-        stmt.executeUpdate("DROP TABLE IF EXISTS Teams");
+        stmt.executeUpdate("DROP TABLE IF EXISTS Teams CASCADE");
       }
       if(forceRebuild || !tables.contains("Teams".toLowerCase())) {
         stmt.executeUpdate("CREATE TABLE Teams ("
@@ -169,7 +169,7 @@ public final class GenerateDB {
 
       // table to hold team numbers of teams in this tournament
       if(forceRebuild) {
-        stmt.executeUpdate("DROP TABLE IF EXISTS TournamentTeams");
+        stmt.executeUpdate("DROP TABLE IF EXISTS TournamentTeams CASCADE");
       }
       if(forceRebuild || !tables.contains("TournamentTeams".toLowerCase())) {
         stmt.executeUpdate("CREATE TABLE TournamentTeams ("
@@ -182,7 +182,7 @@ public final class GenerateDB {
 
       // Table structure for table 'TournamentParameters'
       if(forceRebuild) {
-        stmt.executeUpdate("DROP TABLE IF EXISTS TournamentParameters");
+        stmt.executeUpdate("DROP TABLE IF EXISTS TournamentParameters CASCADE");
       }
       if(forceRebuild || !tables.contains("TournamentParameters".toLowerCase())) {
         stmt.executeUpdate("CREATE TABLE TournamentParameters ("
@@ -214,7 +214,7 @@ public final class GenerateDB {
       prep.executeUpdate();
       
       // Table structure for table 'Judges'
-      stmt.executeUpdate("DROP TABLE IF EXISTS Judges");
+      stmt.executeUpdate("DROP TABLE IF EXISTS Judges CASCADE");
       stmt.executeUpdate("CREATE TABLE Judges ("
                          + "  id varchar(64) NOT NULL,"
                          + "  category varchar(64) NOT NULL,"
@@ -225,7 +225,7 @@ public final class GenerateDB {
 
       
       // Table structure for table 'tablenames'
-      stmt.executeUpdate("DROP TABLE IF EXISTS tablenames");
+      stmt.executeUpdate("DROP TABLE IF EXISTS tablenames CASCADE");
       stmt.executeUpdate("CREATE TABLE tablenames ("
                          + "  Tournament varchar(64) NOT NULL,"
                          + "  SideA varchar(64) NOT NULL,"
@@ -241,8 +241,8 @@ public final class GenerateDB {
       {
         final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
         final String tableName = "Performance";
-        stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
-        stmt.executeUpdate("DROP TABLE IF EXISTS " + tableName);
+        stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max CASCADE");
+        stmt.executeUpdate("DROP TABLE IF EXISTS " + tableName + " CASCADE");
         createStatement.append("CREATE TABLE " + tableName + " (");
         createStatement.append(" TeamNumber INTEGER NOT NULL,");
         createStatement.append(" Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,");
@@ -278,7 +278,7 @@ public final class GenerateDB {
         final Element categoryElement = (Element)subjectiveCategories.item(cat);
         final String tableName = categoryElement.getAttribute("name");
 
-        stmt.executeUpdate("DROP TABLE IF EXISTS " + tableName);
+        stmt.executeUpdate("DROP TABLE IF EXISTS " + tableName + " CASCADE");
         createStatement.append("CREATE TABLE " + tableName + " (");
         createStatement.append(" TeamNumber INTEGER NOT NULL,");
         createStatement.append(" Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,");
@@ -304,7 +304,7 @@ public final class GenerateDB {
       finalScores.append(" OverallScore float,");
       finalScores.append("PRIMARY KEY (TeamNumber, Tournament)");
       finalScores.append(")");
-      stmt.executeUpdate("DROP TABLE IF EXISTS FinalScores");
+      stmt.executeUpdate("DROP TABLE IF EXISTS FinalScores CASCADE");
       if(LOG.isDebugEnabled()) {
         LOG.debug(finalScores.toString());
       }

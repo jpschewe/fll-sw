@@ -38,6 +38,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebForm;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.meterware.httpunit.WebTable;
 
 import fll.TestUtils;
 import fll.Utilities;
@@ -399,6 +400,8 @@ public class FullTournamentTest extends TestCase {
           }
         }
       }
+      Utilities.closeResultSet(rs);
+      Utilities.closePreparedStatement(prep);
       subjective.save();
       
       
@@ -424,16 +427,93 @@ public class FullTournamentTest extends TestCase {
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully summarized scores"));
       
-      // FIX generate reports
-      // FIX check ranking, scores?
-      // final Connection connection = TestUtils.createDBConnection("fll", "fll");
-      // Assert.assertNotNull("Could not create test database connection", connection);
+      
+      // generate reports
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/finalComputedScores.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/categorizedScores.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/scoreGroupScores.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      
+      // PDF reports
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "getfile.jsp");
+      request.setParameter("filename", "finalComputedScores.pdf");
+      response = conversation.getResponse(request);
+      Assert.assertEquals("application/pdf", response.getContentType());
+
+      
+      // check ranking
+//      final Connection connection = TestUtils.createDBConnection();
+//      Assert.assertNotNull("Could not create test database connection", connection);
+      
+      final int[] division1ExpectedRank = {2636, 3127, 3439, 4462, 3125, 2116, 2104, 2113};
+      final int[] division2ExpectedRank = {3208, 3061, 2863, 2110, 3063,  353, 2043, 3129};
+      
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "developer/query.jsp");
+      request.setParameter("query", "SELECT FinalScores.TeamNumber"
+          + " FROM FinalScores, Teams"
+          + " WHERE FinalScores.TeamNumber = Teams.TeamNumber"
+          + " AND FinalScores.Tournament = '" + testTournament + "'"
+          + " AND Teams.Division = 'DivI/Gr4-6'"
+          + " ORDER BY FinalScores.OverallScore DESC");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      WebTable table = response.getTableWithID("queryResult");
+      for(int rank=0; rank<division1ExpectedRank.length; ++rank) {
+        final String expectedTeamNumberStr = String.valueOf(division1ExpectedRank[rank]);
+        Assert.assertEquals("Ranking is incorrect", expectedTeamNumberStr, table.getCellAsText(rank+1, 0));
+      }
+
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "developer/query.jsp");
+      request.setParameter("query", "SELECT FinalScores.TeamNumber"
+          + " FROM FinalScores, Teams"
+          + " WHERE FinalScores.TeamNumber = Teams.TeamNumber"
+          + " AND FinalScores.Tournament = '" + testTournament + "'"
+          + " AND Teams.Division = 'DivII/Gr7-9'"
+          + " ORDER BY FinalScores.OverallScore DESC");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      table = response.getTableWithID("queryResult");
+      for(int rank=0; rank<division2ExpectedRank.length; ++rank) {
+        final String expectedTeamNumberStr = String.valueOf(division2ExpectedRank[rank]);
+        Assert.assertEquals("Ranking is incorrect", expectedTeamNumberStr, table.getCellAsText(rank+1, 0));
+      }
+      
+/*      prep = connection.prepareStatement("SELECT FinalScores.TeamNumber FROM FinalScores, Teams WHERE FinalScores.TeamNumber = Teams.TeamNumber AND FinalScores.Tournament = ? AND Teams.Division = ? ORDER BY FinalScores.OverallScore DESC");
+      prep.setString(1, testTournament);
+      // division 1
+      prep.setString(2, "DivI/Gr4-6");
+      rs = prep.executeQuery();
+      int rank = 0;
+      while(rs.next()) {
+        final int teamNumber = rs.getInt(1);
+        Assert.assertEquals("Ranking is incorrect", division1ExpectedRank[rank], teamNumber);
+      }
+      Utilities.closeResultSet(rs);
+      // division2
+      prep.setString(2, "DivII/Gr7-9");
+      rs = prep.executeQuery();
+      rank = 0;
+      while(rs.next()) {
+        final int teamNumber = rs.getInt(1);
+        Assert.assertEquals("Ranking is incorrect", division2ExpectedRank[rank], teamNumber);
+      }
+      Utilities.closeResultSet(rs);
+      Utilities.closePreparedStatement(prep);
+      */
+      
+      // TODO check scores?
       
     } finally {
       Utilities.closeResultSet(rs);
       Utilities.closeStatement(stmt);
       Utilities.closePreparedStatement(prep);
       Utilities.closeConnection(testDataConn);
+//      Utilities.closeConnection(connection);
     }
   }
   
