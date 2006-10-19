@@ -1,7 +1,8 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
       
 <%@ page import="fll.Queries" %>
-      
+<%@ page import="java.sql.Connection" %>      
+
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
 

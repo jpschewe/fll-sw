@@ -44,17 +44,6 @@ public final class GenerateDB {
    */
   private static final String TOURNAMENT_DATATYPE = "varchar(128)";
 
-  private static final String LOCATION_DATATYPE;
-  private static final String BOOLEAN_DATATYPE;
-  private static final String PARAM_VALUE_DATATYPE;
-  public static final String TEXT_DATATYPE;
-  
-  static {
-    TEXT_DATATYPE = "longvarchar";
-    LOCATION_DATATYPE = TEXT_DATATYPE;
-    BOOLEAN_DATATYPE = "boolean";
-    PARAM_VALUE_DATATYPE = TEXT_DATATYPE;
-  }
     
   /**
    * Generate a new database
@@ -131,7 +120,7 @@ public final class GenerateDB {
       if(forceRebuild || !tables.contains("Tournaments".toLowerCase())) {
         stmt.executeUpdate("CREATE TABLE Tournaments ("
                            + "Name " + TOURNAMENT_DATATYPE + " NOT NULL,"
-                           + "Location " + LOCATION_DATATYPE + ","
+                           + "Location longvarchar,"
                            + "NextTournament " + TOURNAMENT_DATATYPE + " default NULL," //Tournament that teams may advance to from this one
                            + "PRIMARY KEY (Name)"
                            +")");
@@ -148,7 +137,7 @@ public final class GenerateDB {
             " LineNumber integer NOT NULL," +
             " Team integer default " + Team.NULL_TEAM_NUMBER + "," +
             " AssignedTable varchar(64) default NULL," +
-            " Printed " + BOOLEAN_DATATYPE + " default FALSE," +
+            " Printed boolean default FALSE," +
             " PRIMARY KEY (Division, Tournament, PlayoffRound, LineNumber)" +
             ")");
 
@@ -175,7 +164,7 @@ public final class GenerateDB {
         stmt.executeUpdate("CREATE TABLE TournamentTeams ("
                            + "  TeamNumber integer NOT NULL,"
                            + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
-                           + "  advanced " + BOOLEAN_DATATYPE + " default 0 NOT NULL,"
+                           + "  advanced boolean default FALSE NOT NULL,"
                            + "  PRIMARY KEY (TeamNumber, Tournament)"
                            + ")");
       }
@@ -187,7 +176,7 @@ public final class GenerateDB {
       if(forceRebuild || !tables.contains("TournamentParameters".toLowerCase())) {
         stmt.executeUpdate("CREATE TABLE TournamentParameters ("
                            + "  Param varchar(64) NOT NULL,"
-                           + "  Value " + PARAM_VALUE_DATATYPE + " NOT NULL,"
+                           + "  Value longvarchar NOT NULL,"
                            + "  Description varchar(255) default NULL,"
                            + "  PRIMARY KEY  (Param)"
                            + ")");
@@ -227,7 +216,7 @@ public final class GenerateDB {
       // Table structure for table 'tablenames'
       stmt.executeUpdate("DROP TABLE IF EXISTS tablenames CASCADE");
       stmt.executeUpdate("CREATE TABLE tablenames ("
-                         + "  Tournament varchar(64) NOT NULL,"
+                         + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
                          + "  SideA varchar(64) NOT NULL,"
                          + "  SideB varchar(64) NOT NULL,"
                          + "  PRIMARY KEY (Tournament,SideA,SideB)"
@@ -248,8 +237,8 @@ public final class GenerateDB {
         createStatement.append(" Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,");
         createStatement.append(" RunNumber INTEGER NOT NULL,");
         createStatement.append(" TimeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,");
-        createStatement.append(" NoShow " + BOOLEAN_DATATYPE + " DEFAULT 0 NOT NULL,");
-        createStatement.append(" Bye " + BOOLEAN_DATATYPE + " DEFAULT 0 NOT NULL,");
+        createStatement.append(" NoShow boolean DEFAULT FALSE NOT NULL,");
+        createStatement.append(" Bye boolean DEFAULT FALSE NOT NULL,");
         final NodeList goals = performanceElement.getElementsByTagName("goal");
         for(int i=0; i<goals.getLength(); i++) {
           final Element element = (Element)goals.item(i);
@@ -283,7 +272,7 @@ public final class GenerateDB {
         createStatement.append(" TeamNumber INTEGER NOT NULL,");
         createStatement.append(" Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,");
         createStatement.append(" Judge VARCHAR(64) NOT NULL,");
-        createStatement.append(" NoShow " + BOOLEAN_DATATYPE + " DEFAULT 0 NOT NULL,");
+        createStatement.append(" NoShow boolean DEFAULT FALSE NOT NULL,");
         final NodeList goals = categoryElement.getElementsByTagName("goal");
         for(int i=0; i<goals.getLength(); i++) {
           final Element element = (Element)goals.item(i);
