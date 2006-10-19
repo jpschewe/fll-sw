@@ -85,6 +85,12 @@
         the brackets.  You will need to enter a dummy score for the team that
         competes against the no show team and a no show for the team that
         isn't there for the brackets to properly advance the team.</li>
+
+        <li>When it comes time to do the playoffs, make sure you intialize
+        the brackets on the <a href="playoff/index.jsp">playoff page</a> before entering scores.  If you
+        attempt to enter playoff scores before initializing the brackets,
+        you will get an error message.  Don't worry, nothing is broken, you
+        just need to initialize the brackets first.</li>
           
         <li>It is suggested that you by hand keep track of the brackets, in
         addition to showing them on the computer.  This makes it easier for
