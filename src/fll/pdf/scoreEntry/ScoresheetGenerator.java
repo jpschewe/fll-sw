@@ -497,7 +497,7 @@ public class ScoresheetGenerator {
    * @param i
    *            The 0-based index of the scoresheet to which to assign this
    *            team number.
-   * @param name
+   * @param number
    *            A string with the team number for the specified scoresheet.
    * @throws IllegalArgumentException
    *             Thrown if the index is out of valid range.
@@ -518,7 +518,7 @@ public class ScoresheetGenerator {
    * @param i
    *            The 0-based index of the scoresheet to which to assign this
    *            round number.
-   * @param name
+   * @param round
    *            A string with the round number descriptor for the specified
    *            scoresheet.
    * @throws IllegalArgumentException

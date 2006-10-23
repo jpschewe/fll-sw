@@ -1,3 +1,18 @@
+Release 2.6
+
+* include Sun's JDK for Linux and Windows distributions so that Java doesn't need to be installed
+
+* Switched databases from MySQL to HSQL to make installation easier.  Now the only thing that needs to be installed for the software to run is Java.
+
+* included the Tomcat install as part of the software
+
+* added PDF forms for the final scores document
+
+* added PDF forms for the scoresheets
+
+* added summary dialog for the subjective scoring application to allow one to see how many scores had been entered for each team in a category
+
+
 2005-12-05  Jon Schewe  <jpschewe@mtu.net>
 
 	* Release version 2.5

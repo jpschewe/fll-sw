@@ -215,12 +215,12 @@ public class BracketData {
    *          Database connection to use.
    * @param pDivision
    *          Divsion from which to look up playoff data.
-   * @param firstRound
+   * @param pFirstRound
    *          The first playoff round of interest (1st playoff round is 1, not
    *          the number of seeding rounds + 1)
-   * @param _lastRound
+   * @param pLastRound
    *          The last playoff round of interest.
-   * @param rowPerTeam
+   * @param pRowsPerTeam
    *          A positive, even number defining how many rows will be allocated
    *          for each team in the first round. This determines overall spacing
    *          for the entire table. Recommended value: 4.
@@ -345,7 +345,7 @@ public class BracketData {
   /**
    * Returns the playoff meta data for a specified location in the brackets.
    * 
-   * @param col
+   * @param round
    *          The column of the playoff data table, otherwise known as the round
    *          number.
    * @param row
@@ -404,10 +404,6 @@ public class BracketData {
    *          Row number of the bracket data we are displaying.
    * @param round
    *          Round number (column) of data we are displaying.
-   * @param tableAssignmentIndex
-   *          Array containing single int value with the index into the list of
-   *          tournament tables from which to begin table assignment. If null,
-   *          table assignment will start at 0.
    * @return Properly formed \<td\> element.
    * @throws SQLException
    *           If database access fails.
@@ -527,7 +523,7 @@ public class BracketData {
    * @param cs
    *          The corner style that determines how the top right corner cells
    *          meet.
-   * @see #TopRightCornerStyle
+   * @see TopRightCornerStyle
    * @return Properly formatted HTML \<td\> element for a bridge cell.
    */
   public String getHtmlBridgeCell(final int row,
