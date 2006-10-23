@@ -55,11 +55,42 @@ public class FullTournamentTest extends TestCase {
   private static final Logger LOG = Logger.getLogger(FullTournamentTest.class);
 
   /**
-   * Test a full tournament.
+   * Test a full tournament as a single thread.  This tests to make sure everything works normally.
    */
-  public void test0() throws MalformedURLException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException, ParseException,
+  public void testSerial() throws MalformedURLException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException, ParseException,
       SQLException {
-
+    if(LOG.isInfoEnabled()) {
+      LOG.info("Starting test " + getName());
+    }
+    doFullTournament(false);
+  }
+  
+  /**
+   * Test a full tournament as multiple threads.  This is a more of a stress test.
+   */
+  public void testParallel() throws MalformedURLException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException, ParseException,
+      SQLException {
+    if(LOG.isInfoEnabled()) {
+      LOG.info("Starting test " + getName());
+    }
+    doFullTournament(true);
+  }
+    
+  /**
+   * Run a full tournament.
+   * 
+   * @param parallel if true run many of the tasks in parallel
+   * @throws MalformedURLException
+   * @throws IOException
+   * @throws SAXException
+   * @throws ClassNotFoundException
+   * @throws InstantiationException
+   * @throws IllegalAccessException
+   * @throws ParseException
+   * @throws SQLException
+   */
+  private void doFullTournament(final boolean parallel) throws MalformedURLException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException, ParseException,
+  SQLException { 
     final int numSeedingRounds = 3;
     
     // create connection to database with test data
@@ -72,7 +103,9 @@ public class FullTournamentTest extends TestCase {
       testDataConn = DriverManager.getConnection("jdbc:hsqldb:res:/fll/web/data/flldb-ft");
       final String testTournament = "Field";
       Assert.assertNotNull("Error connecting to test data database", testDataConn);
-
+      
+      stmt = testDataConn.createStatement();
+      
       // --- initialize database ---
       final WebConversation conversation = new WebConversation();
       WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "setup/");
@@ -175,12 +208,28 @@ public class FullTournamentTest extends TestCase {
       form = response.getFormWithName("judges");
       Assert.assertNotNull(form);
       
-      //TODO: need to add rows to form if test database has more judges than categories
+      // need to add rows to form if test database has more judges than categories
+      prep = testDataConn.prepareStatement("SELECT COUNT(id) FROM Judges WHERE Tournament = ?");
+      rs = prep.executeQuery(testTournament);
+      Assert.assertTrue("Could not find judges information in test data", rs.next());
+      final int numJudges = rs.getInt(1);
+      Utilities.closeResultSet(rs);
+      Utilities.closePreparedStatement(prep);
+      while(null != form.getParameterValue("id" + String.valueOf(numJudges-1))) {
+        if(LOG.isDebugEnabled()) {
+          LOG.debug("Adding a row to the judges entry form");
+        }
+        request = form.getRequest("submit", "Add Row");
+        response = conversation.getResponse(request);
+        Assert.assertTrue(response.isHTML());
+        form = response.getFormWithName("judges");
+        Assert.assertNotNull(form);
+      }
       
       // assign judges from database
       int judgeIndex = 0;
-      stmt = testDataConn.createStatement();
-      rs = stmt.executeQuery("SELECT id, category, Division FROM Judges");
+      prep = testDataConn.prepareStatement("SELECT id, category, Division FROM Judges WHERE Tournament = ?");
+      rs = prep.executeQuery(testTournament);
       while(rs.next()) {
         final String id = rs.getString(1);
         final String category = rs.getString(2);
@@ -191,6 +240,7 @@ public class FullTournamentTest extends TestCase {
         ++judgeIndex;
       }
       Utilities.closeResultSet(rs);
+      Utilities.closePreparedStatement(prep);
       
       // submit those values
       request = form.getRequest("submit", "Finished");
@@ -240,10 +290,10 @@ public class FullTournamentTest extends TestCase {
       final Element rootElement = challengeDocument.getDocumentElement();
       final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
       
-      prep = testDataConn.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ?");
+      prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?");
       boolean initializedPlayoff = false;
       prep.setString(1, testTournament);
-      // TODO should try this in parallel with threads
+      final ScoreEntryQueue scoreEntryQueue = new ScoreEntryQueue(parallel ? 4 : 1, testDataConn, performanceElement, testTournament);
       for(int runNumber=1; runNumber<=maxRuns; ++runNumber) {
         if(!initializedPlayoff && runNumber > numSeedingRounds) {
           // TODO make sure to check the result of checking the seeding rounds
@@ -265,158 +315,23 @@ public class FullTournamentTest extends TestCase {
             Assert.assertTrue(response.isHTML());
           }
           initializedPlayoff = true;
+
         }
         
         prep.setInt(2, runNumber);
         rs = prep.executeQuery();
-        
+
+        // for each score in a run
         while(rs.next()) {
-          final int teamNumber = rs.getInt("TeamNumber");
-          if(LOG.isInfoEnabled()) {
-            LOG.info("Setting score for " + teamNumber + " run: " + runNumber);
-          }
-          // need to get the score entry form
-          request = new GetMethodWebRequest(TestUtils.URL_ROOT + "scoreEntry/select_team.jsp");
-          response = conversation.getResponse(request);
-          Assert.assertTrue(response.isHTML());
-          form = response.getFormWithName("selectTeam");
-          Assert.assertNotNull(form);
-          form.setParameter("TeamNumber", String.valueOf(teamNumber));
-          request = form.getRequest();
-          response = conversation.getResponse(request);
-          Assert.assertTrue(response.isHTML());
-          
-          form = response.getFormWithName("scoreEntry");
-          
-          if(rs.getBoolean("NoShow")) {
-            form.setParameter("NoShow", "1");
-          } else {
-            // walk over challenge descriptor to get all element names and then use the values from rs
-            final NodeList goals = performanceElement.getElementsByTagName("goal");
-            for(int i=0; i<goals.getLength(); i++) {
-              final Element element = (Element)goals.item(i);
-              final String name = element.getAttribute("name");
-              final int min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).intValue();
-              final int max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).intValue();
-              if(LOG.isDebugEnabled()) {
-                LOG.debug("Setting form parameter: " + name + " min: " + min + " max: " + max + " readonly: " + form.isReadOnlyParameter(name));
-              }
-              if(form.isReadOnlyParameter(name)) {
-                final int value = rs.getInt(name);
-                final int defaultValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(form.getParameterValue(name)).intValue();
-                final int difference = value - defaultValue;
-                if(LOG.isDebugEnabled()) {
-                  LOG.debug("Need to increment/decrement " + name + " " + difference);
-                }
-                final Button button;
-                if(difference < 0) {
-                  button = form.getButtonWithID("inc_" + name + "_1");
-                } else {
-                  button = form.getButtonWithID("dec_" + name + "_-1");
-                }
-                Assert.assertNotNull("Cannot find button for increment/decrement of " + name, button);
-                for(int val=0; val<Math.abs(difference); ++val) {
-                  button.click();
-                }
-              } else {
-                final String value = rs.getString(name);
-                form.setParameter(name, value);
-              }
-            }
-          }
-          
-          // submit score
-          request = form.getRequest("submit");
-          response = conversation.getResponse(request);
-          Assert.assertTrue(response.isHTML());
-          Assert.assertEquals("Errors: " + response.getText(), 0, response.getElementsWithName("error").length);
+          final int teamNumber = rs.getInt(1);
+          enterPerformanceScore(testDataConn, performanceElement, testTournament, runNumber, teamNumber);
         }
+        LOG.info("Waiting for queue to finish");
+        scoreEntryQueue.waitForQueueToFinish();        
       }
+      scoreEntryQueue.shutdown();
       
-
-      // download subjective zip
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "getfile.jsp");
-      request.setParameter("filename", "subjective.zip");
-      response = conversation.getResponse(request);
-      Assert.assertEquals("application/zip", response.getContentType());
-      final InputStream zipStream = response.getInputStream();
-      final File subjectiveZip = File.createTempFile("fll", "zip");
-      subjectiveZip.deleteOnExit();
-      final FileOutputStream outputStream = new FileOutputStream(subjectiveZip);
-      final byte[] buffer = new byte[512];
-      int bytesRead = 0;
-      while(-1 != (bytesRead = zipStream.read(buffer))) {
-        outputStream.write(buffer, 0, bytesRead);
-      }
-      outputStream.close();
-      zipStream.close();
-      final SubjectiveFrame subjective = new SubjectiveFrame(subjectiveZip);
-
-      // insert scores into zip
-      final NodeList subjectiveCategories = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
-      for(int i=0; i<subjectiveCategories.getLength(); i++) {
-        final Element subjectiveElement = (Element)subjectiveCategories.item(i);
-        final String category = subjectiveElement.getAttribute("name");
-        final String title = subjectiveElement.getAttribute("title");
-        // find appropriate table model
-        final TableModel tableModel = subjective.getTableModelForTitle(title);
-                
-        final NodeList goals = subjectiveElement.getElementsByTagName("goal");
-        prep = testDataConn.prepareStatement("SELECT * FROM " + category + " WHERE Tournament = ?");
-        prep.setString(1, testTournament);
-        rs = prep.executeQuery();
-        while(rs.next()) {
-          final String teamNumber = rs.getString("TeamNumber");
-          // find row number in table
-          final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
-          Assert.assertTrue("Can't find TeamNumber column in subjective table model", teamNumberColumn >= 0);
-          int rowIndex = -1;
-          for(int rowIdx=0; rowIdx<tableModel.getRowCount() && rowIndex == -1; ++rowIdx) {
-            final String value = (String)tableModel.getValueAt(rowIdx, teamNumberColumn);
-            if(value.equals(teamNumber)) {
-              rowIndex = rowIdx;
-            }
-          }
-          Assert.assertTrue("Can't find team " + teamNumber + " in subjective table model", rowIndex >= 0);
-
-          
-          if(rs.getBoolean("NoShow")) {
-            // find column for no show
-            final int columnIndex = findColumnByName(tableModel, "No Show");
-            Assert.assertTrue("Can't find No Show column in subjective table model", columnIndex >= 0);
-            tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);            
-          } else {
-            for(int goalIdx=0; goalIdx<goals.getLength(); ++goalIdx) {
-              final Element goalElement = (Element)goals.item(goalIdx);
-              final String goalName = goalElement.getAttribute("name");
-              final String goalTitle = goalElement.getAttribute("title");
-              
-              // find column index for goal and call set
-              final int columnIndex = findColumnByName(tableModel, goalTitle); 
-              Assert.assertTrue("Can't find " + goalTitle + " column in subjective table model", columnIndex >= 0);
-              final int value = rs.getInt(goalName);
-              tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
-            }
-          }
-        }
-      }
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
-      subjective.save();
-      
-      
-      // upload scores
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "admin/index.jsp");
-      response = conversation.getResponse(request);
-      Assert.assertTrue(response.isHTML());
-      form = response.getFormWithName("uploadSubjective");
-      request = form.getRequest();
-      final UploadFileSpec subjectiveUpload = new UploadFileSpec(subjectiveZip);
-      form.setParameter("file1", new UploadFileSpec[] { subjectiveUpload });
-      response = conversation.getResponse(request);
-      Assert.assertTrue(response.isHTML());
-      Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Subjective data uploaded successfully"));
-      
+      enterSubjectiveScores(testDataConn, challengeDocument, testTournament);
       
       // compute final scores
       request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/summarizePhase1.jsp");
@@ -516,7 +431,210 @@ public class FullTournamentTest extends TestCase {
 //      Utilities.closeConnection(connection);
     }
   }
-  
+
+  /**
+   * Simulate entering subjective scores by pulling them out of testDataConn.
+   * 
+   * @param testDataConn Where to get the test data from
+   * @param challengeDocument the challenge descriptor
+   * @param testTournament the name of the tournament to enter scores for
+   * @throws SQLException
+   */
+  private void enterSubjectiveScores(final Connection testDataConn,
+      final Document challengeDocument,
+      final String testTournament) throws SQLException, IOException, MalformedURLException, SAXException {
+
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      final WebConversation conversation = new WebConversation();
+
+      // download subjective zip
+      WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "getfile.jsp");
+      request.setParameter("filename", "subjective.zip");
+      WebResponse response = conversation.getResponse(request);
+      Assert.assertEquals("application/zip", response.getContentType());
+      final InputStream zipStream = response.getInputStream();
+      final File subjectiveZip = File.createTempFile("fll", "zip");
+      subjectiveZip.deleteOnExit();
+      final FileOutputStream outputStream = new FileOutputStream(subjectiveZip);
+      final byte[] buffer = new byte[512];
+      int bytesRead = 0;
+      while(-1 != (bytesRead = zipStream.read(buffer))) {
+        outputStream.write(buffer, 0, bytesRead);
+      }
+      outputStream.close();
+      zipStream.close();
+      final SubjectiveFrame subjective = new SubjectiveFrame(subjectiveZip);
+
+      // insert scores into zip
+      final NodeList subjectiveCategories = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
+      for(int i=0; i<subjectiveCategories.getLength(); i++) {
+        final Element subjectiveElement = (Element)subjectiveCategories.item(i);
+        final String category = subjectiveElement.getAttribute("name");
+        final String title = subjectiveElement.getAttribute("title");
+        // find appropriate table model
+        final TableModel tableModel = subjective.getTableModelForTitle(title);
+
+        final NodeList goals = subjectiveElement.getElementsByTagName("goal");
+        prep = testDataConn.prepareStatement("SELECT * FROM " + category + " WHERE Tournament = ?");
+        prep.setString(1, testTournament);
+        rs = prep.executeQuery();
+        while(rs.next()) {
+          final String teamNumber = rs.getString("TeamNumber");
+          // find row number in table
+          final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
+          Assert.assertTrue("Can't find TeamNumber column in subjective table model", teamNumberColumn >= 0);
+          int rowIndex = -1;
+          for(int rowIdx=0; rowIdx<tableModel.getRowCount() && rowIndex == -1; ++rowIdx) {
+            final String value = (String)tableModel.getValueAt(rowIdx, teamNumberColumn);
+            if(value.equals(teamNumber)) {
+              rowIndex = rowIdx;
+            }
+          }
+          Assert.assertTrue("Can't find team " + teamNumber + " in subjective table model", rowIndex >= 0);
+
+
+          if(rs.getBoolean("NoShow")) {
+            // find column for no show
+            final int columnIndex = findColumnByName(tableModel, "No Show");
+            Assert.assertTrue("Can't find No Show column in subjective table model", columnIndex >= 0);
+            tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);            
+          } else {
+            for(int goalIdx=0; goalIdx<goals.getLength(); ++goalIdx) {
+              final Element goalElement = (Element)goals.item(goalIdx);
+              final String goalName = goalElement.getAttribute("name");
+              final String goalTitle = goalElement.getAttribute("title");
+
+              // find column index for goal and call set
+              final int columnIndex = findColumnByName(tableModel, goalTitle); 
+              Assert.assertTrue("Can't find " + goalTitle + " column in subjective table model", columnIndex >= 0);
+              final int value = rs.getInt(goalName);
+              tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
+            }
+          }
+        }
+      }
+      Utilities.closeResultSet(rs);
+      Utilities.closePreparedStatement(prep);
+      subjective.save();
+
+
+      // upload scores
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "admin/index.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      WebForm form = response.getFormWithName("uploadSubjective");
+      request = form.getRequest();
+      final UploadFileSpec subjectiveUpload = new UploadFileSpec(subjectiveZip);
+      form.setParameter("file1", new UploadFileSpec[] { subjectiveUpload });
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Subjective data uploaded successfully"));
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closePreparedStatement(prep);
+    }
+  }
+
+  /**
+   * Enter a teams performance score.  Data is pulled from testDataConn and pushed to the website.
+   * 
+   * @param testDataConn where to get the test data from
+   * @param performanceElement the challenge description
+   * @param testTournament the name of the tournament to enter data for
+   * @param runNumber the run to enter data for
+   * @param teamNumber the team to enter data for
+   * @throws SQLException
+   * @throws IOException
+   * @throws SAXException
+   * @throws MalformedURLException
+   * @throws ParseException
+   */
+  /*package*/ static void enterPerformanceScore(final Connection testDataConn,
+      final Element performanceElement,
+      final String testTournament,
+      final int runNumber, 
+      final int teamNumber) throws SQLException, IOException, SAXException, MalformedURLException, ParseException {
+    ResultSet rs = null;
+    PreparedStatement prep = null;
+    try {
+
+      if(LOG.isInfoEnabled()) {
+        LOG.info("Setting score for " + teamNumber + " run: " + runNumber);
+      }
+      final WebConversation conversation = new WebConversation();
+
+      prep = testDataConn.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?");
+      prep.setString(1, testTournament);
+      prep.setInt(2, runNumber);
+      prep.setInt(3, teamNumber);
+      rs = prep.executeQuery();
+      if(rs.next()) {
+        // need to get the score entry form
+        WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "scoreEntry/select_team.jsp");
+        WebResponse response = conversation.getResponse(request);
+        Assert.assertTrue(response.isHTML());
+        WebForm form = response.getFormWithName("selectTeam");
+        Assert.assertNotNull(form);
+        form.setParameter("TeamNumber", String.valueOf(teamNumber));
+        request = form.getRequest();
+        response = conversation.getResponse(request);
+        Assert.assertTrue(response.isHTML());
+
+        form = response.getFormWithName("scoreEntry");
+
+        if(rs.getBoolean("NoShow")) {
+          form.setParameter("NoShow", "1");
+        } else {
+          // walk over challenge descriptor to get all element names and then use the values from rs
+          final NodeList goals = performanceElement.getElementsByTagName("goal");
+          for(int i=0; i<goals.getLength(); i++) {
+            final Element element = (Element)goals.item(i);
+            final String name = element.getAttribute("name");
+            final int min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).intValue();
+            final int max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).intValue();
+            if(LOG.isDebugEnabled()) {
+              LOG.debug("Setting form parameter: " + name + " min: " + min + " max: " + max + " readonly: " + form.isReadOnlyParameter(name));
+            }
+            if(form.isReadOnlyParameter(name)) {
+              final int value = rs.getInt(name);
+              final int defaultValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(form.getParameterValue(name)).intValue();
+              final int difference = value - defaultValue;
+              if(LOG.isDebugEnabled()) {
+                LOG.debug("Need to increment/decrement " + name + " " + difference);
+              }
+              final Button button;
+              if(difference < 0) {
+                button = form.getButtonWithID("inc_" + name + "_1");
+              } else {
+                button = form.getButtonWithID("dec_" + name + "_-1");
+              }
+              Assert.assertNotNull("Cannot find button for increment/decrement of " + name, button);
+              for(int val=0; val<Math.abs(difference); ++val) {
+                button.click();
+              }
+            } else {
+              final String value = rs.getString(name);
+              form.setParameter(name, value);
+            }
+          }
+        }
+
+        // submit score
+        request = form.getRequest("submit");
+        response = conversation.getResponse(request);
+        Assert.assertTrue(response.isHTML());
+        Assert.assertEquals("Errors: " + response.getText(), 0, response.getElementsWithName("error").length);
+      } else {
+        Assert.fail("Cannot find scores for " + teamNumber + " run " + runNumber);
+      }
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closePreparedStatement(prep);
+    }
+
+  }
   /**
    * Find a column index in a table model by name.  
    * 
