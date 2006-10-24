@@ -3,12 +3,6 @@
 
   <Performance minimumScore="0" weight="1.0">
 
-    <goal name="move_atoms" title="Individual Atom Manipulation">
-      <value score="40" title="8 red &amp; 0 to 5 white" value="atoms_high"/>
-      <value score="30" title="8 red &amp; 6 to 7 white" value="atoms_low"/>
-      <value score="0" title="Fewer than 8 red" value="atoms_none"/>
-    </goal>
-
     <goal name="smell_off_plate" title="Molecules off Paper Plate"
       min="0"
       max="2"
@@ -24,6 +18,28 @@
       <term coefficient="1" goal="smell_head"/>
     </restriction>
 
+    <goal name="smart_medicine" title="Buckyball in the Red/Yellow Channel"
+      multiplier="50"
+      />
+
+    <goal name="atomic_force" title="Free the Probe's Nanotip"
+      multiplier="40"
+      />
+
+    <goal name="move_atoms" title="Individual Atom Manipulation">
+      <value score="40" title="8 red &amp; 0 to 5 white" value="atoms_high"/>
+      <value score="30" title="8 red &amp; 6 to 7 white" value="atoms_low"/>
+      <value score="0" title="Fewer than 8 red" value="atoms_none"/>
+    </goal>
+
+    <goal name="self_assembly" title="Self-alignment of Atoms"
+      multiplier="30"
+      />
+
+    <goal name="molecular_motor" title="Deliver ATP molecule"
+      multiplier="40"
+      />
+    
     <goal name="dirt_trap" title="Dirt Trap on Mark"
       multiplier="15"
       />
@@ -46,16 +62,8 @@
       <term coefficient="1" goal="dirt_elsewhere"/>
     </restriction>
 
-    <goal name="atomic_force" title="Free the Probe's Nanotip"
+    <goal name="space_elevator" title="Operate Space Elevator"
       multiplier="40"
-      />
-
-    <goal name="self_assembly" title="Self-alignment of Atoms"
-      multiplier="30"
-      />
-
-    <goal name="smart_medicine" title="Buckyball in the Red/Yellow Channel"
-      multiplier="50"
       />
 
     <goal name="nanotube_strength" title="Nanotube Strength">
@@ -64,17 +72,16 @@
       <value score="0" title="None" value="none"/>
     </goal>
 
-    <goal name="molecular_motor" title="Deliver ATP molecule"
-      multiplier="40"
-      />
-
-    <goal name="space_elevator" title="Operate Space Elevator"
-      multiplier="40"
-      />
-
     <goal name="fairness" title="Fairness Bonus: RCX completes 3 missions, NXT completes 6"
       multiplier="20"
       />
+    
+    <!-- want to know the type of robot, but can't change the score, so set the multiplier to 0 -->
+    <goal name="robot_type" title="Robot Type"
+      multiplier="0">
+      <value score="1" title="RCX" value="rcx"/>
+      <value score="2" title="NXT" value="nxt"/>
+    </goal>
 
     <tiebreaker>
       <test goal="fairness" winner="high"></test> 
