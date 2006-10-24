@@ -210,12 +210,13 @@ public class FullTournamentTest extends TestCase {
       
       // need to add rows to form if test database has more judges than categories
       prep = testDataConn.prepareStatement("SELECT COUNT(id) FROM Judges WHERE Tournament = ?");
-      rs = prep.executeQuery(testTournament);
+      prep.setString(1, testTournament);
+      rs = prep.executeQuery();
       Assert.assertTrue("Could not find judges information in test data", rs.next());
       final int numJudges = rs.getInt(1);
       Utilities.closeResultSet(rs);
       Utilities.closePreparedStatement(prep);
-      while(null != form.getParameterValue("id" + String.valueOf(numJudges-1))) {
+      while(!form.hasParameterNamed("id" + String.valueOf(numJudges-1))) {
         if(LOG.isDebugEnabled()) {
           LOG.debug("Adding a row to the judges entry form");
         }
@@ -229,7 +230,8 @@ public class FullTournamentTest extends TestCase {
       // assign judges from database
       int judgeIndex = 0;
       prep = testDataConn.prepareStatement("SELECT id, category, Division FROM Judges WHERE Tournament = ?");
-      rs = prep.executeQuery(testTournament);
+      prep.setString(1, testTournament);
+      rs = prep.executeQuery();
       while(rs.next()) {
         final String id = rs.getString(1);
         final String category = rs.getString(2);
