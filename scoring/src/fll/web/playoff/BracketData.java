@@ -270,7 +270,7 @@ public class BracketData {
           "SELECT PlayoffRound,LineNumber,Team,AssignedTable,Printed"
           + " FROM PlayoffData"
           + " WHERE Tournament='" + tournament + "'"
-          + " AND Division='" + pDivision + "'"
+          + " AND event_division='" + pDivision + "'"
           + " AND PlayoffRound>=" + _firstRound
           + " AND PlayoffRound<=" + _lastRound);
       while(rs.next()) {

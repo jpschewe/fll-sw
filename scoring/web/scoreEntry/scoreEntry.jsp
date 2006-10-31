@@ -69,7 +69,7 @@ if("1".equals(request.getParameter("EditFlag")) || null != request.getParameter(
 } else {
     if(nextRunNumber > Queries.getNumSeedingRounds(connection))
 	{
-      if(!Queries.isPlayoffDataInitialized(connection, Queries.getDivisionOfTeam(connection, lTeamNum)))
+      if(!Queries.isPlayoffDataInitialized(connection, Queries.getDivisionOfTeam(connection, teamNumber)))
       {
         throw new RuntimeException("Selected team has completed its seeding runs. The playoff brackets"
             + " must be initialized from the playoff page"

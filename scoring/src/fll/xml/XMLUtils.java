@@ -20,7 +20,6 @@ import java.sql.Statement;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -45,33 +44,6 @@ import org.xml.sax.SAXParseException;
 public final class XMLUtils {
 
   private static final Logger LOG = Logger.getLogger(XMLUtils.class);
-  
-  /**
-   * Just for debugging.
-   *
-   * @param args ignored
-   */
-  public static void main(final String[] args) {
-    try {
-      final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-      final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-region-2003.xml"));
-
-      if(null == challengeDocument) {
-        throw new RuntimeException("Error parsing challenge.xml");
-      }
-      final Connection connection = Utilities.createDBConnection("fll", "fll", "fllmaster");
-      final Map<Integer, Team> teams = Queries.getTournamentTeams(connection);
-      //final Document document = createTeamsDocument(teams.values());
-      LOG.info("Teams: " + teams.values());
-      
-      final Document document = createSubjectiveScoresDocument(challengeDocument, teams.values(), connection, "Centennial-Sun");
-      final XMLWriter xmlwriter = new XMLWriter();
-      xmlwriter.setOutput(System.out, null);
-      xmlwriter.write(document);
-    } catch(Exception e) {
-      e.printStackTrace();
-    }
-  }
   
   private XMLUtils() {
   }

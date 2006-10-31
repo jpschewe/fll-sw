@@ -363,10 +363,10 @@ public final class UploadTeams {
         prep.executeUpdate();
       }
       
-      //put all teams in the DUMMY tournament by default
+      //put all teams in the DUMMY tournament by default and make the event division the same as the team division
       stmt.executeUpdate("DELETE FROM TournamentTeams");
-      stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber) SELECT 'DUMMY', " + teamNumberColumn + " FROM FilteredTeams");
-
+      stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) SELECT 'DUMMY', Teams.TeamNumber, Teams.Division  FROM FilteredTeams, Teams WHERE Teams.TeamNumber = FilteredTeams." + teamNumberColumn);
+      
       return true;
     } finally {
       Utilities.closeStatement(stmt);
@@ -391,7 +391,7 @@ public final class UploadTeams {
    */
   private static String sanitizeColumnName(final String str) {
     if(null == str || "".equals(str)) {
-      return "EMPTYHEADER" + _emptyHeaderCount++;
+      return "EMPTYHEADER_" + _emptyHeaderCount++;
     } else if("constraint".equalsIgnoreCase(str)) {
       return "CONSTRAINT_";
     } else {

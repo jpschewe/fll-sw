@@ -1010,7 +1010,7 @@ public final class Playoff {
     PreparedStatement stmt = null;
     try {
       stmt = connection.prepareStatement("INSERT INTO PlayoffData" +
-          " (Tournament, Division, PlayoffRound, LineNumber, Team)" +
+          " (Tournament, event_division, PlayoffRound, LineNumber, Team)" +
           " VALUES ('" + currentTournament + "', '" + division + "', 1, ?, ?)");
       int lineNbr = 1;
       while(it.hasNext()) {
@@ -1029,7 +1029,7 @@ public final class Playoff {
     int roundNumber = 2;
     try {
       stmt = connection.prepareStatement("INSERT INTO PlayoffData" +
-          " (Tournament, Division, PlayoffRound, LineNumber) VALUES ('" +
+          " (Tournament, event_division, PlayoffRound, LineNumber) VALUES ('" +
           currentTournament + "', '" + division + "', ?, ?)");
       while(currentRoundSize > 0) {
         stmt.setInt(1, roundNumber);
@@ -1062,7 +1062,7 @@ public final class Playoff {
     try {
       final String sql = "SELECT PlayoffRound,LineNumber,Team FROM PlayoffData"
         + " WHERE Tournament='" + currentTournament + "'"
-        + " AND Division='" + division + "'"
+        + " AND event_division='" + division + "'"
         + " ORDER BY PlayoffRound,LineNumber";
       selStmt = connection.createStatement();
       rs = selStmt.executeQuery(sql);
@@ -1103,7 +1103,7 @@ public final class Playoff {
           try {
             stmt = connection.prepareStatement("UPDATE PlayoffData SET Team=?"
                 + " WHERE Tournament='" + currentTournament + "'"
-                + " AND Division='" + division + "'"
+                + " AND event_division='" + division + "'"
                 + " AND PlayoffRound=" + (round1 + 1)
                 + " AND LineNumber=?");
             stmt.setInt(1, teamToAdvance);
@@ -1125,7 +1125,7 @@ public final class Playoff {
           try {
             stmt = connection.prepareStatement("UPDATE PlayoffData SET AssignedTable=?"
                 + " WHERE Tournament='" + currentTournament + "'"
-                + " AND Division='" + division + "'"
+                + " AND event_division='" + division + "'"
                 + " AND PlayoffRound=" + round1
                 + " AND LineNumber=?");
 

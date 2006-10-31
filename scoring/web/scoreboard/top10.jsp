@@ -5,7 +5,7 @@
 <%@ page import="fll.xml.GenerateDB" %>
   
 <%@ page import="java.sql.Connection" %>
-<%@ page import="java.sql.Statement" %>
+<%@ page import="java.sql.PreparedStatement" %>
 <%@ page import="java.sql.ResultSet" %>
 
 <%@ page import="java.util.List" %>
@@ -63,20 +63,15 @@ pageContext.setAttribute("division", divisions.get(divisionIndex));
           <table border='1' bordercolor='#aaaaaa' cellpadding='4' cellspacing='0' width='100%'>
         
             <%
-            final Statement stmt = connection.createStatement();
-            final String sql = "SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore"
-              + " FROM"
-              + " (SELECT TeamNumber, MAX(ComputedTotal) AS MaxOfComputedScore"
-              + " FROM Performance"
-              + " WHERE Tournament = '" + currentTournament + "'"
-              + " AND RunNumber <= " + Queries.getNumSeedingRounds(connection)
-              + " AND NoShow = False"
-              + " AND Bye = False"
-              + " GROUP BY TeamNumber)"
-              + "  T2 JOIN Teams ON Teams.TeamNumber = T2.TeamNumber"
-              + " WHERE Teams.Division = '" + pageContext.getAttribute("division") + "'"
-              + " ORDER BY T2.MaxOfComputedScore DESC LIMIT 10";
-            final ResultSet rs = stmt.executeQuery(sql);
+            final PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore FROM"
+                + " (SELECT TeamNumber, MAX(ComputedTotal) AS MaxOfComputedScore FROM Performance WHERE Tournament = ? "
+                + " AND RunNumber <= ? AND NoShow = False AND Bye = False GROUP BY TeamNumber) AS T2"
+                + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, TournamentTeams WHERE Teams.TeamNumber = TournamentTeams.TeamNumber AND TournamentTeams.event_division = ?"
+                + " ORDER BY T2.MaxOfComputedScore DESC LIMIT 10");
+            prep.setString(1, currentTournament);
+            prep.setInt(2, Queries.getNumSeedingRounds(connection));
+            prep.setString(3, (String) pageContext.getAttribute("division"));
+            final ResultSet rs = prep.executeQuery();
                 
             int prevScore = -1;
             int i = 1;
@@ -140,7 +135,7 @@ pageContext.setAttribute("division", divisions.get(divisionIndex));
 </body>
 <%
 Utilities.closeResultSet(rs);
-Utilities.closeStatement(stmt);
+Utilities.closePreparedStatement();
 %>
 
 </HTML>
