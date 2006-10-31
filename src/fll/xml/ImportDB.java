@@ -294,10 +294,10 @@ public final class ImportDB {
         destPrep.executeUpdate();
         Utilities.closePreparedStatement(destPrep);
 
-        sourcePrep = sourceConnection.prepareStatement("SELECT Division, Tournament, PlayoffRound, LineNumber, Team, AssignedTable, Printed " +
+        sourcePrep = sourceConnection.prepareStatement("SELECT event_division, Tournament, PlayoffRound, LineNumber, Team, AssignedTable, Printed " +
             "FROM PlayoffData WHERE Tournament=?");
         sourcePrep.setString(1, tournament);
-        destPrep = destinationConnection.prepareStatement("INSERT INTO PlayoffData (Division, Tournament, PlayoffRound," +
+        destPrep = destinationConnection.prepareStatement("INSERT INTO PlayoffData (event_division, Tournament, PlayoffRound," +
             "LineNumber, Team, AssignedTable, Printed) VALUES (?, ?, ?, ?, ?, ?, ?)");
         sourceRS = sourcePrep.executeQuery();
         while(sourceRS.next()) {

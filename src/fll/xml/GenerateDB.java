@@ -131,14 +131,14 @@ public final class GenerateDB {
       // table to hold head-to-head playoff meta-data
       stmt.executeUpdate("DROP TABLE IF EXISTS PlayoffData CASCADE");
       stmt.executeUpdate("CREATE TABLE PlayoffData (" +
-            " Division varchar(32) NOT NULL," +
+            " event_division varchar(32) NOT NULL," +
             " Tournament " + TOURNAMENT_DATATYPE + " NOT NULL," +
             " PlayoffRound integer NOT NULL," +
             " LineNumber integer NOT NULL," +
             " Team integer default " + Team.NULL_TEAM_NUMBER + "," +
             " AssignedTable varchar(64) default NULL," +
             " Printed boolean default FALSE," +
-            " PRIMARY KEY (Division, Tournament, PlayoffRound, LineNumber)" +
+            " PRIMARY KEY (event_division, Tournament, PlayoffRound, LineNumber)" +
             ")");
 
       // Table structure for table 'Teams'
@@ -164,6 +164,7 @@ public final class GenerateDB {
         stmt.executeUpdate("CREATE TABLE TournamentTeams ("
                            + "  TeamNumber integer NOT NULL,"
                            + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
+                           + "  event_division varchar(32) default '1' NOT NULL,"
                            + "  advanced boolean default FALSE NOT NULL,"
                            + "  PRIMARY KEY (TeamNumber, Tournament)"
                            + ")");

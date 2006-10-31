@@ -1,35 +1,34 @@
-<%@ include file="/WEB-INF/jspf/init.jspf" %>
+<%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.Utilities" %>
-<%@ page import="fll.Queries" %>
-  
-<%@ page import="java.sql.Connection" %>
-<%@ page import="java.sql.Statement" %>
-<%@ page import="java.sql.ResultSet" %>
+<%@ page import="fll.Utilities"%>
+<%@ page import="fll.Queries"%>
 
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.Iterator" %>
-      
+<%@ page import="java.sql.Connection"%>
+<%@ page import="java.sql.PreparedStatement"%>
+<%@ page import="java.sql.ResultSet"%>
+
+<%@ page import="java.util.List"%>
+<%@ page import="java.util.Iterator"%>
+
 <%
-final Connection connection = (Connection)application.getAttribute("connection");
-final String currentTournament = Queries.getCurrentTournament(connection);
+      final Connection connection = (Connection) application.getAttribute("connection");
+      final String currentTournament = Queries.getCurrentTournament(connection);
 
-final String sql = "SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, Teams.Division, Performance.Tournament, Performance.RunNumber, Performance.Bye, Performance.NoShow, Performance.ComputedTotal"
-  + " FROM Teams,Performance"
-  + " WHERE Performance.Tournament = '" + currentTournament + "'"
-  + " AND Teams.TeamNumber = Performance.TeamNumber"
-  + " ORDER BY Teams.Organization, Teams.TeamNumber, Performance.RunNumber";
-final Statement stmt = connection.createStatement();
-final ResultSet rs = stmt.executeQuery(sql);
-final List divisions = Queries.getDivisions(connection);
+      final PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, TournamentTeams.event_division,"
+          + " Performance.Tournament, Performance.RunNumber, Performance.Bye, Performance.NoShow, Performance.ComputedTotal FROM Teams,Performance,TournamentTeams"
+          + " WHERE Performance.Tournament = ? AND TournamentTeams.TeamNumber = Teams.TeamNumber"
+          + " AND Teams.TeamNumber = Performance.TeamNumber ORDER BY Teams.Organization, Teams.TeamNumber, Performance.RunNumber");
+      prep.setString(1, currentTournament);
+      final ResultSet rs = prep.executeQuery();
+      final List divisions = Queries.getDivisions(connection);
 %>
 
 <c:set var="thisURL">
-  <c:url value="${pageContext.request.servletPath}">
-    <c:param name="scroll" value="${param.scroll}" />
-  </c:url>
+ <c:url value="${pageContext.request.servletPath}">
+  <c:param name="scroll" value="${param.scroll}" />
+ </c:url>
 </c:set>
-    
+
 <HTML>
 <head>
 <style>
@@ -77,139 +76,222 @@ function start() {
 </head>
 
 <body bgcolor='#000080' onload='start()'>
-<br><br><br><br><br><br><br><br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
 
 <c:set var="colorStr" value="A" />
-                            
-<% 	
-if(rs.next()) {
-  boolean done = false;
-  while(!done) {
-%>
-  <table border='0' cellpadding='0' cellspacing='0' width='99%' class='<c:out value="${colorStr}" />'>
-    <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' height='15' width='1'></td></tr>
-    <tr align='left'>
+
 <%
-    final String divisionStr = rs.getString("Division");
-    final Iterator divisionIter = divisions.iterator();
-    boolean found = false;
-    int index = 0;
-    while(divisionIter.hasNext() && !found) {
-      final String div = (String)divisionIter.next();
-      if(divisionStr.equals(div)) {
-        found = true;
-      } else {
-        index++;
-      }
-    }
-    final String headerColor = Queries.getColorForDivisionIndex(index);
+        if (rs.next()) {
+        boolean done = false;
+        while (!done) {
 %>
-      <td width='25%' bgcolor='<%=headerColor%>'>
-        <font size='2'><b>&nbsp;&nbsp;Division:&nbsp;<%=divisionStr%>&nbsp;&nbsp;</b></font>
-     </td>
-     <td align='right'>
-       <font size='2'><b>Team&nbsp;#:&nbsp;<%=rs.getInt("TeamNumber")%>&nbsp;&nbsp;</b></font>
-     </td>
-  </tr>
-  <tr align='left'>
-    <td colspan='2'>
-      <font size='4'>&nbsp;&nbsp;<%=rs.getString("Organization")%></font>
-    </td>
-  </tr>
-  <tr align='left'>
-    <td colspan='2'>
-      <font size='4'>&nbsp;&nbsp;<%=rs.getString("TeamName")%></font>
-    </td>
-  </tr>
-  <tr>
-    <td colspan='2'><hr color='#ffffff' width='96%'></td>
-  </tr>
-  <tr>
+<table border='0' cellpadding='0' cellspacing='0' width='99%'
+ class='<c:out value="${colorStr}" />'>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   height='15' width='1'></td>
+ </tr>
+ <tr align='left'>
+  <%
+            final String divisionStr = rs.getString("event_division");
+            final Iterator divisionIter = divisions.iterator();
+            boolean found = false;
+            int index = 0;
+            while (divisionIter.hasNext() && !found) {
+              final String div = (String) divisionIter.next();
+              if (divisionStr.equals(div)) {
+                found = true;
+              } else {
+                index++;
+              }
+            }
+            final String headerColor = Queries.getColorForDivisionIndex(index);
+  %>
+  <td width='25%' bgcolor='<%=headerColor%>'><font size='2'><b>&nbsp;&nbsp;Division:&nbsp;<%=divisionStr%>&nbsp;&nbsp;</b></font>
+  </td>
+  <td align='right'><font size='2'><b>Team&nbsp;#:&nbsp;<%=rs.getInt("TeamNumber")%>&nbsp;&nbsp;</b></font>
+  </td>
+ </tr>
+ <tr align='left'>
+  <td colspan='2'><font size='4'>&nbsp;&nbsp;<%=rs.getString("Organization")%></font>
+  </td>
+ </tr>
+ <tr align='left'>
+  <td colspan='2'><font size='4'>&nbsp;&nbsp;<%=rs.getString("TeamName")%></font>
+  </td>
+ </tr>
+ <tr>
+  <td colspan='2'>
+  <hr color='#ffffff' width='96%'>
+  </td>
+ </tr>
+ <tr>
   <td colspan='2'>
 
-    <table border='0' cellpadding='1' cellspacing='0'>
-      <tr align='center'>
-        <td><img src='<c:url value="/images/blank.gif"/>' height='1' width='60'></td>
-        <td><font size='4'>Run #</font></td>
-        <td><img src='<c:url value="/images/blank.gif"/>' width='20' height='1'></td>
-          <td><font size='4'>Score</font></td>
-        </tr>
-        <%
-        int prevNum = rs.getInt("TeamNumber");
-        do {
-        %>
-        <tr align='right'>
-          <td><img src='<c:url value="/images/blank.gif"/>' height='1' width='60'></td>
-          <td><font size='4'><%=rs.getInt("RunNumber")%></font></td>
-          <td><img src='<c:url value="/images/blank.gif"/>' width='20' height='1'></td>
-          <td><font size='4'>
-          <%if(rs.getBoolean("NoShow")) {%>
-            No Show
-          <%} else if(rs.getBoolean("Bye")) {%>
-            Bye
-          <%} else {
-              out.println(rs.getInt("ComputedTotal"));
-            }
-            if(!rs.next()) {
-              done = true;
-            }
-           } while(!done && prevNum == rs.getInt("TeamNumber"));
-          %>
-          </font></td>
-      </table>
-      
-    </td>
-  </tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
+  <table border='0' cellpadding='1' cellspacing='0'>
+   <tr align='center'>
+    <td><img src='<c:url value="/images/blank.gif"/>' height='1'
+     width='60'></td>
+    <td><font size='4'>Run #</font></td>
+    <td><img src='<c:url value="/images/blank.gif"/>' width='20'
+     height='1'></td>
+    <td><font size='4'>Score</font></td>
+   </tr>
+   <%
+             int prevNum = rs.getInt("TeamNumber");
+             do {
+   %>
+   <tr align='right'>
+    <td><img src='<c:url value="/images/blank.gif"/>' height='1'
+     width='60'></td>
+    <td><font size='4'><%=rs.getInt("RunNumber")%></font></td>
+    <td><img src='<c:url value="/images/blank.gif"/>' width='20'
+     height='1'></td>
+    <td><font size='4'> <%
+ if (rs.getBoolean("NoShow")) {
+ %> No Show <%
+ } else if (rs.getBoolean("Bye")) {
+ %> Bye <%
+               } else {
+               out.println(rs.getInt("ComputedTotal"));
+             }
+             if (!rs.next()) {
+               done = true;
+             }
+           } while (!done && prevNum == rs.getInt("TeamNumber"));
+ %> </font></td>
+  </table>
+
+  </td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
 </table>
 
 <c:choose>
-  <c:when test="${'A' == colorStr}">
-    <c:set var="colorStr" value="B" />
-  </c:when>
-  <c:otherwise>
-    <c:set var="colorStr" value="A" />
-  </c:otherwise>
+ <c:when test="${'A' == colorStr}">
+  <c:set var="colorStr" value="B" />
+ </c:when>
+ <c:otherwise>
+  <c:set var="colorStr" value="A" />
+ </c:otherwise>
 </c:choose>
 
 <%
-  } //end while(!done)
-}//end if
-
+      } //end while(!done)
+      }//end if
 %>
 
-  <table border='0' cellpadding='0' cellspacing='0' width='99%' />
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-  <tr><td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'></td></tr>
-      </table>
-      
-          
-          
+<table border='0' cellpadding='0' cellspacing='0' width='99%' />
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+ <tr>
+  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
+   width='1' height='15'></td>
+ </tr>
+</table>
+
+
+
 </div>
 </body>
 <%
-  Utilities.closeResultSet(rs);
-  Utilities.closeStatement(stmt);
+      Utilities.closeResultSet(rs);
+      Utilities.closePreparedStatement(prep);
 %>
 </HTML>

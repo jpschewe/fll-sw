@@ -16,7 +16,7 @@ pageContext.setAttribute("regions", Queries.getRegions(connection));
         DELETE FROM TournamentTeams WHERE TeamNumber IN ( SELECT TeamNumber FROM Teams WHERE Region = '<c:out value="${parameter.key}"/>' )
       </sql:update>
       <sql:update dataSource="${datasource}">
-        INSERT INTO TournamentTeams (TeamNumber, Tournament) SELECT Teams.TeamNumber AS TeamNumber, '<c:out value="${parameter.value[0]}"/>' FROM Teams WHERE Teams.Region = '<c:out value="${parameter.key}"/>'
+        INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division) SELECT Teams.TeamNumber, '<c:out value="${parameter.value[0]}"/>', Teams.Division FROM Teams WHERE Teams.Region = '<c:out value="${parameter.key}"/>'
       </sql:update>
     </c:if>
   </c:forEach>

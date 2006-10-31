@@ -100,7 +100,7 @@ public class ScoresheetGenerator {
     try {
       //build up the SQL
       updatePrep = connection.prepareStatement("UPDATE PlayoffData SET Printed=true, AssignedTable=?" +
-          " WHERE Division=? AND Tournament=? AND PlayoffRound=? AND Team=?");
+          " WHERE event_division=? AND Tournament=? AND PlayoffRound=? AND Team=?");
       // could do division here, too, but since getting it from Team object, will defer to same place as other
       updatePrep.setString(3, tournament);
       
