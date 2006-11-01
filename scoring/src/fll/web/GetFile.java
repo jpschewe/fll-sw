@@ -55,7 +55,7 @@ public final class GetFile {
     if("teams.xml".equals(filename)) {
       final Connection connection = (Connection)application.getAttribute("connection");
       final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-      final Document teamsDocument = XMLUtils.createTeamsDocument(tournamentTeams.values());
+      final Document teamsDocument = XMLUtils.createTeamsDocument(connection, tournamentTeams.values());
       final XMLWriter xmlwriter = new XMLWriter();
 
       response.reset();

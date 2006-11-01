@@ -45,6 +45,7 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
               WHERE Performance.Tournament = '<c:out value="${currentTournament}"/>'
                 AND Teams.TeamNumber = Performance.TeamNumber
                 AND Teams.TeamNumber = TournamentTeams.TeamNumber
+                AND Performance.Bye = False
               ORDER BY Performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 8
           </sql:query>
                     

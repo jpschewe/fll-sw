@@ -209,8 +209,8 @@ public final class GenerateDB {
                          + "  id varchar(64) NOT NULL,"
                          + "  category varchar(64) NOT NULL,"
                          + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
-                         + "  Division varchar(32) NOT NULL,"
-                         + "  PRIMARY KEY  (id,category,Tournament,Division)"
+                         + "  event_division varchar(32) NOT NULL,"
+                         + "  PRIMARY KEY  (id,category,Tournament,event_division)"
                          + ")");
 
       
