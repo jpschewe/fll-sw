@@ -103,7 +103,7 @@ public final class Judges {
         Statement stmt = null;
         try {
           stmt = connection.createStatement();
-          rs = stmt.executeQuery("SELECT id, category, Division FROM Judges WHERE Tournament = '" + tournament + "'");
+          rs = stmt.executeQuery("SELECT id, category, event_division FROM Judges WHERE Tournament = '" + tournament + "'");
           for(row=0; rs.next(); row++) {
             final String id = rs.getString(1);
             final String category = rs.getString(2);
@@ -320,7 +320,8 @@ public final class Judges {
       stmt.executeUpdate("DELETE FROM Judges where Tournament = '" + tournament + "'");
       
       //walk request parameters and insert data into database
-      prep = connection.prepareStatement("INSERT INTO Judges (id, category, Division, Tournament) VALUES(?, ?, ?, '" + tournament + "')");
+      prep = connection.prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES(?, ?, ?, ?)");
+      prep.setString(4, tournament);
       int row = 0;
       String id = request.getParameter("id" + row);
       String category= request.getParameter("cat" + row);

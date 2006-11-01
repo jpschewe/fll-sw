@@ -159,7 +159,7 @@ public final class ImportDB {
       destPrep.executeUpdate();
       Utilities.closePreparedStatement(destPrep);
 
-      destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, Division, Tournament) VALUES (?, ?, ?, ?)");
+      destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES (?, ?, ?, ?)");
       destPrep.setString(4, tournament);
 
       sourcePrep = sourceConnection.prepareStatement("SELECT id, category, Division FROM Judges WHERE Tournament = ?");

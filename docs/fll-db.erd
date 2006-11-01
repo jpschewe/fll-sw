@@ -586,12 +586,6 @@
 	    [ProtoDoMEElement
 	      name: 'event_division'!
 	      position: [Point -77 -11]
-	      color: [ColorValue
-		red: 1.0!
-		green: 0.0!
-		blue: 0.0!
-	      ]
-
 	      nameEmphasis: [RunArray #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #italic! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal! #normal!]
 	      id: 212907706744834!
 	      properties: [GrapEPropertyDictionary
