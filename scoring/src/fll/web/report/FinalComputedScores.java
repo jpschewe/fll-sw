@@ -11,6 +11,7 @@ import fll.Utilities;
 import java.io.IOException;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -30,7 +31,7 @@ import org.w3c.dom.NodeList;
 /**
  * Code for finalComputedScores.jsp
  *
- * @version $Revision$
+ * @version $Revision:300 $
  */
 public final class FinalComputedScores {
 
@@ -51,16 +52,15 @@ public final class FinalComputedScores {
     out.println("<hr>");
     
     Statement stmt = null;
-    Statement teamsStmt = null;
     ResultSet rawScoreRS = null;
     ResultSet teamsRS = null;
     ResultSet scaledScoreRS = null;
+    PreparedStatement prep = null;
     try {
       final Element rootElement = document.getDocumentElement();
       final NodeList subjectiveCategories = rootElement.getElementsByTagName("subjectiveCategory");
       stmt = connection.createStatement();
-      teamsStmt = connection.createStatement();
-
+      
       final Iterator divisionIter = Queries.getDivisions(connection).iterator();
       while(divisionIter.hasNext()) {
         final String division = (String)divisionIter.next();
@@ -88,12 +88,17 @@ public final class FinalComputedScores {
         out.println("    <th align='center'>Overall Score</th>");
         out.println("  </tr>");
         out.println("  <tr><td colspan='" + (subjectiveCategories.getLength() + 4) + "'><hr></td></tr>");
-        teamsRS = teamsStmt.executeQuery("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,FinalScores.OverallScore"
-                                         + " FROM Teams,FinalScores"
+        
+        prep = connection.prepareStatement("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,FinalScores.OverallScore"
+                                         + " FROM Teams,FinalScores,TournamentTeams"
                                          + " WHERE FinalScores.TeamNumber = Teams.TeamNumber"
-                                         + " AND FinalScores.Tournament = '" + tournament + "'"
-                                         + " AND Teams.Division = '" + division + "'"
+                                         + " AND TournamentTeams.TeamNumber = Teams.TeamNumber"
+                                         + " AND FinalScores.Tournament = ?"
+                                         + " AND TournamentTeams.event_division = ?"
                                          + " ORDER BY FinalScores.OverallScore DESC, Teams.TeamNumber");
+        prep.setString(1, tournament);
+        prep.setString(2, division);
+        teamsRS = prep.executeQuery();
         while(teamsRS.next()) {
           final int teamNumber = teamsRS.getInt(3);
           final String organization = teamsRS.getString(1);
@@ -224,7 +229,6 @@ public final class FinalComputedScores {
       Utilities.closeResultSet(scaledScoreRS);
       
       Utilities.closeStatement(stmt);
-      Utilities.closeStatement(teamsStmt);
     }
   }
 

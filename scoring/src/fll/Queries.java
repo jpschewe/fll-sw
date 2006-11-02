@@ -815,9 +815,9 @@ public final class Queries {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT Performance.TeamNumber,MAX(Performance.ComputedTotal) AS Score FROM Performance,Teams WHERE Performance.RunNumber <= ?"
-      + " AND Performance.Tournament = ? AND Teams.TeamNumber = Performance.TeamNumber"
-      + " AND Teams.Division = ? GROUP BY Performance.TeamNumber ORDER BY Score DESC, Performance.TeamNumber");
+      prep = connection.prepareStatement("SELECT Performance.TeamNumber,MAX(Performance.ComputedTotal) AS Score FROM Performance,Teams, TournamentTeams WHERE Performance.RunNumber <= ?"
+      + " AND Performance.Tournament = ? AND Teams.TeamNumber = Performance.TeamNumber AND Teams.TeamNumber = TournamentTeams.TeamNumber"
+      + " AND TournamentTeams.event_division = ? GROUP BY Performance.TeamNumber ORDER BY Score DESC, Performance.TeamNumber");
       prep.setInt(1, getNumSeedingRounds(connection));
       prep.setString(2, currentTournament);
       prep.setString(3, divisionStr);

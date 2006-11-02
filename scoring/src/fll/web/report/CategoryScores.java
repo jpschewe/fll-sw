@@ -8,9 +8,9 @@ package fll.web.report;
 import javax.servlet.jsp.JspWriter;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -87,13 +87,10 @@ public final class CategoryScores {
                                             final String division)
     throws SQLException, IOException {
     
-    Statement teamsStmt = null;
     ResultSet teamsRS = null;
-    Statement stmt = null;
     ResultSet scoreRS = null;
+    PreparedStatement prep = null;
     try {
-      teamsStmt = connection.createStatement();
-      stmt = connection.createStatement();
 
       out.println("<h3>" + categoryTitle + " Division: " + division + "</h3>");
           
@@ -107,14 +104,18 @@ public final class CategoryScores {
       out.println("  <tr><td colspan='5'><hr></td></tr>");
           
       //display all team scores
-      teamsRS =
-        teamsStmt.executeQuery("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,SummarizedScores.RawScore,SummarizedScores.StandardizedScore"
-                               + " FROM SummarizedScores,Teams"
+      prep = connection.prepareStatement("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,SummarizedScores.RawScore,SummarizedScores.StandardizedScore"
+                               + " FROM SummarizedScores,Teams,TournamentTeams"
                                + " WHERE Teams.TeamNumber = SummarizedScores.TeamNumber"
-                               + " AND SummarizedScores.Tournament = '" + tournament + "'"
-                               + " AND Teams.Division = '" + division + "'"
-                               + " AND SummarizedScores.Category = '" + categoryName + "'"
+                               + " AND TournamentTeams.TeamNumber = Teams.TeamNumber"
+                               + " AND SummarizedScores.Tournament = ?"
+                               + " AND TournamentTeams.event_division = ?"
+                               + " AND SummarizedScores.Category = ?"
                                + " ORDER BY SummarizedScores.StandardizedScore DESC, Teams.TeamNumber");
+      prep.setString(1, tournament);
+      prep.setString(2, division);
+      prep.setString(3, categoryName);
+      teamsRS = prep.executeQuery();
       while(teamsRS.next()) {
         final int teamNumber = teamsRS.getInt(3);
         final String organization = teamsRS.getString(1);
@@ -142,13 +143,9 @@ public final class CategoryScores {
         out.println("    <td>" + organization + "</td>");
         out.println("    <td>" + teamName + "</td>");
             
-        //scoreRS = stmt.executeQuery("SELECT RawScore FROM SummarizedScores WHERE TeamNumber = " + teamNumber + " AND Category = '" + categoryName + "' AND Tournament = '" + tournament + "'");
-
         out.println("    <td>" + SCORE_FORMAT.format(rawScore) + "</td>");
 
         //scoreRS.close();
-
-        //scoreRS = stmt.executeQuery("SELECT StandardizedScore FROM SummarizedScores WHERE TeamNumber = " + teamNumber + " AND Category = '" + categoryName + "' AND Tournament = '" + tournament + "'");
 
         out.println("    <td>" + SCORE_FORMAT.format(scaledScore) + "</td>");
 
@@ -163,9 +160,7 @@ public final class CategoryScores {
     } finally {
       Utilities.closeResultSet(teamsRS);
       Utilities.closeResultSet(scoreRS);
-      Utilities.closeStatement(teamsStmt);
-      Utilities.closeStatement(stmt);
-
+      Utilities.closePreparedStatement(prep);
     }
   }
   

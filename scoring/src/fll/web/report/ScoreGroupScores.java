@@ -8,9 +8,9 @@ package fll.web.report;
 import javax.servlet.jsp.JspWriter;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -84,22 +84,20 @@ public final class ScoreGroupScores {
                                             final String division)
     throws SQLException, IOException {
     
-    Statement teamsStmt = null;
     ResultSet teamsRS = null;
-    Statement stmt = null;
-    ResultSet scoreRS = null;
-    Statement groupStmt = null;
     ResultSet groupRS = null;
+    PreparedStatement prep = null;
+    PreparedStatement prep2 = null;
     try {
-      teamsStmt = connection.createStatement();
-      stmt = connection.createStatement();
-      groupStmt = connection.createStatement();
-
-      groupRS = groupStmt.executeQuery("SELECT DISTINCT ScoreGroup FROM SummarizedScores,Teams"
-                                       + " WHERE SummarizedScores.Tournament = '" + tournament + "'"
+      prep = connection.prepareStatement("SELECT DISTINCT ScoreGroup FROM SummarizedScores,Teams"
+                                       + " WHERE SummarizedScores.Tournament = ?"
                                        + " AND Teams.TeamNumber = SummarizedScores.TeamNumber"
-                                       + " AND SummarizedScores.Category = '" + categoryName + "'"
-                                       + " AND Teams.Division = '" + division + "'");
+                                       + " AND SummarizedScores.Category = ?"
+                                       + " AND TournamentTeams.event_division = ?");
+      prep.setString(1, tournament);
+      prep.setString(2, categoryName);
+      prep.setString(3, division);
+      groupRS = prep.executeQuery();
       while(groupRS.next()) {
         final String scoreGroup = groupRS.getString(1);
         
@@ -114,15 +112,20 @@ public final class ScoreGroupScores {
         out.println("  <tr><td colspan='4'><hr></td></tr>");
           
         //display all team scores
-        teamsRS =
-          teamsStmt.executeQuery("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,SummarizedScores.StandardizedScore"
-                                 + " FROM SummarizedScores,Teams"
+        prep2 = connection.prepareStatement("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,SummarizedScores.StandardizedScore"
+                                 + " FROM SummarizedScores,Teams,TournamentTeams"
                                  + " WHERE Teams.TeamNumber = SummarizedScores.TeamNumber"
-                                 + " AND SummarizedScores.Tournament = '" + tournament + "'"
-                                 + " AND Teams.Division = '" + division + "'"
-                                 + " AND SummarizedScores.Category = '" + categoryName + "'"
-                                 + " AND SummarizedScores.ScoreGroup = '" + scoreGroup + "'"
+                                 + " AND TournamentTeams.TeamNumber = Teams.TeamNumber"
+                                 + " AND SummarizedScores.Tournament = ?"
+                                 + " AND TournamentTeams.event_division = ?"
+                                 + " AND SummarizedScores.Category = ?"
+                                 + " AND SummarizedScores.ScoreGroup = ?"
                                  + " ORDER BY SummarizedScores.StandardizedScore DESC, Teams.TeamNumber");
+        prep2.setString(1, tournament);
+        prep2.setString(2, division);
+        prep2.setString(3, categoryName);
+        prep2.setString(4, scoreGroup);
+        teamsRS = prep2.executeQuery();
         while(teamsRS.next()) {
           final int teamNumber = teamsRS.getInt(3);
           final String organization = teamsRS.getString(1);
@@ -156,11 +159,9 @@ public final class ScoreGroupScores {
       
     } finally {
       Utilities.closeResultSet(teamsRS);
-      Utilities.closeResultSet(scoreRS);
       Utilities.closeResultSet(groupRS);
-      Utilities.closeStatement(teamsStmt);
-      Utilities.closeStatement(stmt);
-      Utilities.closeStatement(groupStmt);
+      Utilities.closePreparedStatement(prep);
+      Utilities.closePreparedStatement(prep2);
     }
   }
   
