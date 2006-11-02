@@ -78,10 +78,11 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
             <x:forEach select="$challengeDocument/fll/subjectiveCategory">
               ,FinalScores.<x:out select="./@name"/>
             </x:forEach>
-            FROM Teams,FinalScores
+            FROM Teams,FinalScores,TournamentTeams
             WHERE FinalScores.TeamNumber = Teams.TeamNumber
+            AND TournamentTeams.TeamNumber = Teams.TeamNumber
             AND FinalScores.Tournament = '<c:out value="${currentTournament}"/>'
-            AND Teams.Division = '<c:out value="${division}"/>'
+            AND TournamentTeams.event_division = '<c:out value="${division}"/>'
             ORDER BY FinalScores.OverallScore DESC, Teams.TeamNumber
         </sql:query>
         <c:forEach items="${scoreRows.rowsByIndex}" var="scoreRow">

@@ -14,8 +14,8 @@ import java.sql.Statement;
  * The static state of a team. This does not include information about the team
  * at a given tournament. Note that the {@link #getDivision() division}
  * attribute represents the division the team is entered in, which may not be
- * the same division that the team is competing in at a tournament (called event
- * division).
+ * the same division that the team is competing in at a tournament (called
+ * {@link Queries#getEventDivision(Connection, int) event division}).
  * 
  * @version $Revision$
  */

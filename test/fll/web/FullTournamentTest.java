@@ -363,6 +363,8 @@ public class FullTournamentTest extends TestCase {
       Assert.assertEquals("application/pdf", response.getContentType());
 
       
+      // TODO should ask for the HTML reports too 
+      
       // check ranking
 //      final Connection connection = TestUtils.createDBConnection();
 //      Assert.assertNotNull("Could not create test database connection", connection);
@@ -372,10 +374,10 @@ public class FullTournamentTest extends TestCase {
       
       request = new GetMethodWebRequest(TestUtils.URL_ROOT + "developer/query.jsp");
       request.setParameter("query", "SELECT FinalScores.TeamNumber"
-          + " FROM FinalScores, Teams"
-          + " WHERE FinalScores.TeamNumber = Teams.TeamNumber"
+          + " FROM FinalScores, TournamentTeams"
+          + " WHERE FinalScores.TeamNumber = TournamentTeams.TeamNumber"
           + " AND FinalScores.Tournament = '" + testTournament + "'"
-          + " AND Teams.Division = 'DivI/Gr4-6'"
+          + " AND TournamentTeams.event_division = 'DivI/Gr4-6'"
           + " ORDER BY FinalScores.OverallScore DESC");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
@@ -387,10 +389,10 @@ public class FullTournamentTest extends TestCase {
 
       request = new GetMethodWebRequest(TestUtils.URL_ROOT + "developer/query.jsp");
       request.setParameter("query", "SELECT FinalScores.TeamNumber"
-          + " FROM FinalScores, Teams"
-          + " WHERE FinalScores.TeamNumber = Teams.TeamNumber"
+          + " FROM FinalScores, TournamentTeams"
+          + " WHERE FinalScores.TeamNumber = TournamentTeams.TeamNumber"
           + " AND FinalScores.Tournament = '" + testTournament + "'"
-          + " AND Teams.Division = 'DivII/Gr7-9'"
+          + " AND TournamentTeams.event_division = 'DivII/Gr7-9'"
           + " ORDER BY FinalScores.OverallScore DESC");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
@@ -400,7 +402,7 @@ public class FullTournamentTest extends TestCase {
         Assert.assertEquals("Ranking is incorrect", expectedTeamNumberStr, table.getCellAsText(rank+1, 0));
       }
       
-/*      prep = connection.prepareStatement("SELECT FinalScores.TeamNumber FROM FinalScores, Teams WHERE FinalScores.TeamNumber = Teams.TeamNumber AND FinalScores.Tournament = ? AND Teams.Division = ? ORDER BY FinalScores.OverallScore DESC");
+/*      prep = connection.prepareStatement("SELECT FinalScores.TeamNumber FROM FinalScores, TournamentTeams WHERE FinalScores.TeamNumber = TournamentTeams.TeamNumber AND FinalScores.Tournament = ? AND TournamentTeams.event_division = ? ORDER BY FinalScores.OverallScore DESC");
       prep.setString(1, testTournament);
       // division 1
       prep.setString(2, "DivI/Gr4-6");

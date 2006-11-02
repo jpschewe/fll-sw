@@ -26,6 +26,7 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 
+import fll.Queries;
 import fll.Team;
 import fll.Utilities;
 
@@ -116,7 +117,7 @@ public class ScoresheetGenerator {
           m_round[j] = "Playoff Round " + round;
           m_table[j] = ((String[])formParms.get(new String("tableA" + i)))[0];
           updatePrep.setString(1, m_table[j]);
-          updatePrep.setString(2, teamA.getDivision());
+          updatePrep.setString(2, Queries.getEventDivision(connection, teamA.getTeamNumber()));
           updatePrep.setInt(4, iRound);
           updatePrep.setInt(5, teamA.getTeamNumber());
           updatePrep.executeUpdate();
@@ -128,7 +129,7 @@ public class ScoresheetGenerator {
           m_round[j] = "Playoff Round " + round;
           m_table[j] = ((String[])formParms.get(new String("tableB" + i)))[0];
           updatePrep.setString(1, m_table[j]);
-          updatePrep.setString(2, teamB.getDivision());
+          updatePrep.setString(2, Queries.getEventDivision(connection, teamB.getTeamNumber()));
           updatePrep.setInt(4, iRound);
           updatePrep.setInt(5, teamB.getTeamNumber());
           updatePrep.executeUpdate();

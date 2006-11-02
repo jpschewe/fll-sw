@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -143,6 +144,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
     Statement teamsStmt = null;
     ResultSet rawScoreRS = null;
     ResultSet teamsRS = null;
+    PreparedStatement prep = null;
     try {
       // This creates our new PDF document and declares it to be in landscape orientation
       Document pdfDoc = new Document(PageSize.LETTER);
@@ -283,12 +285,15 @@ public final class FinalComputedScores extends PdfPageEventHelper {
                 query.append(",FinalScores." + catName);
               }
             }
-            query.append(" FROM Teams,FinalScores");
+            query.append(" FROM Teams,FinalScores,TournamentTeams");
             query.append(" WHERE FinalScores.TeamNumber = Teams.TeamNumber");
             query.append(" AND FinalScores.Tournament = '" + _tournament + "'");
-            query.append(" AND Teams.Division = '" + _division + "'");
+            query.append(" AND TournamentTeams.event_division = ?");
+            query.append(" AND TournamentTeams.TeamNumber = Teams.TeamNumber");
             query.append(" ORDER BY FinalScores.OverallScore DESC, Teams.TeamNumber");
-            teamsRS = stmt.executeQuery(query.toString());
+            prep = connection.prepareStatement(query.toString());
+            prep.setString(1, _division);
+            teamsRS = prep.executeQuery(); 
             while(teamsRS.next()) {
               final int teamNumber = teamsRS.getInt(3);
               final String organization = teamsRS.getString(1);
@@ -479,6 +484,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
       
       Utilities.closeStatement(stmt);
       Utilities.closeStatement(teamsStmt);
+      Utilities.closePreparedStatement(prep);
     }
   }
 
