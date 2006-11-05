@@ -41,6 +41,7 @@ public class WebTest extends TestCase {
     final String[] pages = new String[] {
       "",
       "index.jsp",
+      "edit_event_division.jsp",
       "tournaments.jsp",
       "judges.jsp",
       "tables.jsp",

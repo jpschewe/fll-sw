@@ -46,7 +46,7 @@ assignments for the selected teams will be removed</p>
    </select></td>
   </tr>
  </c:forEach>
-</table border='1'>
+</table>
 
 <input type='submit' value='Submit' /></form>
 
