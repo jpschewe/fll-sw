@@ -16,10 +16,6 @@
 <%@ page import="java.sql.Connection" %>
   
 <%
-final String yesColor = "#a0ffa0";
-final String noColor = "#ffa0a0";
-final String blankColor = "#a0a0a0";
-
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 
 final String lTeamNum = request.getParameter("TeamNumber");
