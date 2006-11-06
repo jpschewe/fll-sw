@@ -135,7 +135,7 @@ pageContext.setAttribute("division", divisions.get(divisionIndex));
 </body>
 <%
 Utilities.closeResultSet(rs);
-Utilities.closePreparedStatement();
+Utilities.closePreparedStatement(prep);
 %>
 
 </HTML>
