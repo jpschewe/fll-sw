@@ -539,7 +539,7 @@ public class BracketData {
         if(row == topRowOfConsolationBracket()) {
           // top of the 3rd/4th place bracket
           if(cs.equals(TopRightCornerStyle.MEET_BOTTOM_OF_CELL)) {
-            sb.append("<td width='10' class='Leaf'>&nbsp;</td>");
+            sb.append("<td width='10' class='BridgeTop'>&nbsp;</td>");
           } else if(cs.equals(TopRightCornerStyle.MEET_TOP_OF_CELL)) {
             sb.append("<td width='10' class='Bridge' rowspan='"
                 + (_rowsPerTeam + 1) + "'>&nbsp;</td>");
@@ -548,12 +548,12 @@ public class BracketData {
           }
         } else if(row > topRowOfConsolationBracket()
             && row <= topRowOfConsolationBracket()+_rowsPerTeam) {
-          if(cs.equals(TopRightCornerStyle.MEET_BOTTOM_OF_CELL)
-              && row == topRowOfConsolationBracket()+1) {
-            sb.append("<td width='10' class='Bridge' rowspan='"
-                + _rowsPerTeam + "'>&nbsp;</td>");
-          } else {
+          if(cs.equals(TopRightCornerStyle.MEET_TOP_OF_CELL)) {
             sb.append("<!-- skip column for bridge -->");
+          } else if( row < topRowOfConsolationBracket()+_rowsPerTeam ) {
+            sb.append("<td width='10' class='BridgeMiddle'>&nbsp;</td>");
+          } else if(row == topRowOfConsolationBracket()+_rowsPerTeam) {
+            sb.append("<td width='10' class='BridgeBottom'>&nbsp;</td>");
           }
         } else {
           sb.append("<td width='10'>&nbsp;</td>");
@@ -584,14 +584,19 @@ public class BracketData {
   
       if( modVal <= Math.round(_rowsPerTeam*Math.pow(2, ar)) &&
           round <= _finalsRound) {
-        if(cs.equals(TopRightCornerStyle.MEET_BOTTOM_OF_CELL) && modVal == 1) {
-          // If we are on the first line of the bridge, emit a rowspan'd td cell
-          sb.append("<td width='10' class='Bridge' rowspan='"
-              + (_rowsPerTeam*(int)Math.round(Math.pow(2, ar))) + "'>&nbsp;</td>");
-        } else if(cs.equals(TopRightCornerStyle.MEET_BOTTOM_OF_CELL) && modVal == 0) {
-          // If we are on the first line of the bridge, emit a Leaf cell to get its bottom border
-          sb.append("<td width='10' class='Leaf'>&nbsp;</td>");
-        } else if(cs.equals(TopRightCornerStyle.MEET_TOP_OF_CELL) && modVal == 0) {
+        if(cs.equals(TopRightCornerStyle.MEET_BOTTOM_OF_CELL)) {
+          if (modVal >= 1 && modVal < (_rowsPerTeam*(int)Math.round(Math.pow(2, ar)))) {
+            // If we are in the middle a bridge use the BridgeMiddle class
+            sb.append("<td width='10' class='BridgeMiddle" /* rowspan='"
+                + (_rowsPerTeam*(int)Math.round(Math.pow(2, ar))) */ + "'>&nbsp;</td>");
+          } else if(modVal == 0) {
+            // If we are on the first line of the bridge, use the BridgeTop class
+            sb.append("<td width='10' class='BridgeTop'>&nbsp;</td>");
+          } else if(modVal == (_rowsPerTeam*(int)Math.round(Math.pow(2, ar)))) {
+            // If we are on the last line of the bridge, use the BridgeBottom class
+            sb.append("<td width='10' class='BridgeBottom'>&nbsp;</td>");
+          }
+        }else if(cs.equals(TopRightCornerStyle.MEET_TOP_OF_CELL) && modVal == 0) {
           sb.append("<td width='10' class='Bridge' rowspan='"
               + (_rowsPerTeam*(int)Math.round(Math.pow(2, ar))+1) + "'>&nbsp;</td>");
         } else {

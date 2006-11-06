@@ -48,7 +48,8 @@ for(int i = 1; i < lastColumn; i++) {
   </head>
   <style type='text/css'>
       TD.Leaf {font-family:Arial;border-bottom: solid}
-      TD.Bridge {border-left: solid; border-right: solid; border-bottom: solid}
+      TD.BridgeBottom {border-left: solid; border-right: solid; border-bottom: solid}
+      TD.BridgeMiddle {border-left: solid; border-right: solid}
       TD.BridgeTop {border-bottom: solid}
       FONT {font-family:Arial}
       FONT.TeamNumber {font-weight:bold}
