@@ -8,6 +8,13 @@
       Connection connection = (Connection) application.getAttribute("connection");
       pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
 %>
+<%-- check for form submission --%>
+<c:if test="${param.submit == 'Cancel'}">
+ <!--  redirect to index.jsp -->
+ <c:redirect url="index.jsp">
+  <c:param name="message">Canceled changes to event divisions</c:param>
+ </c:redirect>
+</c:if>
 <c:if test="${param.submit == 'Commit'}">
  <%--  form submission --%>
  <sql:query var="result" dataSource="${datasource}">
@@ -63,6 +70,15 @@
 <h1><x:out select="$challengeDocument/fll/@title" /> (Edit Event
 Division)</h1>
 
+<p>This page allows you to assign event divisions to each team.
+Normally teams are just in the divisions they are registered in. However
+at some tournaments the teams are in different divisions to allow one to
+run effectively two tournaments at the same location. Below are the
+teams at the current tournament and what event division they are in. You
+can either select one of the existing divisions or select the text field
+and enter a new division name. Once you've entered a new division name
+you may press commit at the bottom and this division name will be added
+to the radio buttons.</p>
 
 <sql:query var="result" dataSource="${datasource}">
 SELECT Teams.TeamNumber, Teams.TeamName, TournamentTeams.event_division 
@@ -71,7 +87,6 @@ SELECT Teams.TeamNumber, Teams.TeamName, TournamentTeams.event_division
   AND Tournament = '<c:out value="${currentTournament}" />'
   ORDER BY Teams.TeamNumber
 </sql:query>
-
 <form name='edit_event_divisions' action='edit_event_division.jsp'
  method='post'>
 <table id='data' border='1'>
