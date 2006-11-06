@@ -49,6 +49,11 @@
 (Administration)</title>
 <link rel="stylesheet" type="text/css"
  href="<c:url value='/style/style.jsp'/>" />
+<link rel="stylesheet" type="text/css" href="<c:url value='/style/bt.jsp'/>"/>
+<script type="text/javascript" src="<c:url value='/BubbleTooltips.js'/>"></script>
+<script type="text/javascript">
+window.onload=function(){enableTooltips()};
+</script>
 </head>
 
 <body>
@@ -69,22 +74,26 @@
   value="Upload"></form>
  </li>
 
- <li><a
-  href='<c:url value="index.jsp">
-                     <c:param name="addTournamentsForRegions" value="1" />
-                   </c:url>'>
- Add tournaments for all Regions</a></li>
+ <li><a href='<c:url value="index.jsp">
+        <c:param name="addTournamentsForRegions" value="1" />
+        </c:url>'>Add tournaments for all Regions</a>
+     <a tooltip="Click here to automatically create a tournament for each unique region name from the imported team data file.
+     If you choose not to use this link, you must manually create tournaments through the &ldquo;Edit Tournaments&rdquo;
+     interface, below.">[help]</a>
+ </li>
 
- <li><a href='<c:url value="tournamentInitialization.jsp"/>'>Initialize
- tournament teams by region</a></li>
+ <li>
+   <a href='<c:url value="tournamentInitialization.jsp"/>'>
+     Initialize tournament teams by region</a>
+   <a tooltip="Teams are initially assigned to the DUMMY tournament. Click here to automatically assign each team to the tournament
+    with the exact same name as the region to which the team is assigned.">[help]</a>
+ </li>
 
- <li>If the tournament that you are running has division names
- other than the divisions that the teams were registered in, you should
- edit the <a href='<c:url value="edit_event_division.jsp"/>'>event
- divisions of the teams</a>.</li>
-
- <li><a href='<c:url value="tournaments.jsp"/>'>Edit
- Tournaments</a></li>
+ <li><a href='<c:url value="tournaments.jsp"/>'>Edit Tournaments</a>
+   <a tooltip="This is an optional step. Use this page to modify the tournaments created by the &ldquo;Add tournaments for all Regions&rdquo;
+   step above, to assign tournament advancement (e.g. teams may advance from regional tournaments to the state tournament), or to create new
+   tournaments.">[help]</a>
+ </li>
 
  <li>
  <form id='currentTournament' action='<c:url value="index.jsp"/>'
@@ -106,6 +115,14 @@
         stmt.close();
   %>
  </select> <input type='submit' value='Change tournament'></form>
+ </li>
+ 
+ <li><a href='<c:url value="edit_event_division.jsp"/>'>
+   Assign event divisions to teams in current tournament</a>.
+   <a tooltip="Typical tournaments have 2 groups of teams competing against each other, one for division 1 and one for division 2.
+   If your tournament team groupings are not based solely on the divsion of the teams, e.g. you have 2 groups of teams that are all
+   division 1, use this page to assign &ldquo;event divsions&rdquo; to divide your tournament&rsquo;s teams into the groups in
+   which they will be competing.">[help]</a>
  </li>
 
  <li><a href='<c:url value="judges.jsp"/>'>Assign Judges</a></li>
