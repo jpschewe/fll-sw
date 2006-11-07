@@ -1,0 +1,28 @@
+Notes on scoring redesign.
+
+A tournament has categories
+
+A category has missions
+A category has a name
+A category has a title
+
+A mission has goals
+A mission has a title
+A mission is completed or not completed
+  This is computed based on it's goals and other missions
+A mission may has a point value (default 0, use the goals instead)
+  The point value of the mission is added in if the mission is completed
+
+A goal has a title
+A goal has a name
+A goal has a multiplier (default 1)
+A goal has a score
+
+An enumerated goal has enum values
+Each enum value has a score (may not be unique within the goal)
+
+A simple goal has a min and a max
+
+
+The computation of the score needs to be modularized so that it's only
+written once inside the code.
