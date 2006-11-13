@@ -3,12 +3,12 @@
 
   <Performance minimumScore="0" weight="1.0">
 
-    <goal name="smell_off_plate" title="Molecules off Paper Plate"
+    <goal name="smell_off_plate" title="Smell (Off Paper Plate)"
       min="0"
       max="2"
       multiplier="5"
       />
-    <goal name="smell_head" title="Molecules on Head or Neck"
+    <goal name="smell_head" title="Smell (Head or Neck)"
       min="0"
       max="2"
       multiplier="15"
@@ -36,7 +36,7 @@
       multiplier="30"
       />
 
-    <goal name="molecular_motor" title="Deliver ATP molecule"
+    <goal name="molecular_motor" title="Molecular Motor"
       multiplier="40"
       />
     
@@ -84,7 +84,18 @@
     </goal>
 
     <tiebreaker>
-      <test goal="fairness" winner="high"></test> 
+      <test goal="dirt_in_trap" winner="high"/>
+      <test goal="dirt_elsewhere" winner="high"/>
+      <test goal="molecular_motor" winner="high"/>
+      <test goal="move_atoms" winner="high"/>
+      <test goal="smart_medicine" winner="high"/>
+      <test goal="atomic_force" winner="high"/>
+      <test goal="dumper" winner="high"/>
+      <test goal="dirt_trap" winner="high"/>
+      <test goal="self_assembly" winner="high"/>
+      <test goal="smell_head" winner="high"/>
+      <test goal="smell_off_plate" winner="high"/>
+      <test goal="nanotube_strength" winner="high"/>
     </tiebreaker>
 
   </Performance>
