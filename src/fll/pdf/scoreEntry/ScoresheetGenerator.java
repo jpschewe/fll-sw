@@ -366,14 +366,14 @@ public class ScoresheetGenerator {
         final String name = element.getAttribute("name");
 
         // This is the text for the left hand "label" cell
-        final String title = element.getAttribute("title");
+        final String title = "_ " + element.getAttribute("title");
         Paragraph p = new Paragraph(title, ARIAL_10PT_NORMAL);
         p.setAlignment(Element.ALIGN_RIGHT);
         m_goalLabel[i] = new PdfPCell();
         m_goalLabel[i].setBorder(0);
         m_goalLabel[i].setPaddingRight(9);
         m_goalLabel[i].addElement(p);
-        m_goalLabel[i].setVerticalAlignment(Element.ALIGN_MIDDLE);
+        m_goalLabel[i].setVerticalAlignment(Element.ALIGN_TOP);
         try {
             final int min = Utilities.NUMBER_FORMAT_INSTANCE.parse(
                                                                    element.getAttribute("min")).intValue();
