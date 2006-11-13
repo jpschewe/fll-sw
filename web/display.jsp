@@ -25,6 +25,9 @@
           <c:when test='${displayPage == "scoreboard"}'>
             newWindow = window.open('<c:url value="/scoreboard/main.jsp"/>', 'displayWindow', str);
           </c:when>
+          <c:when test='${displayPage == "slideshow"}'>
+            newWindow = window.open('<c:url value="/slideshow/index.jsp"/>', 'displayWindow', str);
+          </c:when>
           <c:when test='${displayPage == "playoffs"}'>
             newWindow = window.open('<c:url value="/playoff/remoteMain.jsp"/>', 'displayWindow', str);
           </c:when>
