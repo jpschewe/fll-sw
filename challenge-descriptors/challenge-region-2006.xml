@@ -44,7 +44,7 @@
       multiplier="15"
       />
 
-    <goal name="dumper" title="Dirt Dumper Empty"
+    <goal name="dumper" title="Robot Emptied Dirt Dumper"
       multiplier="15"
       />
 
