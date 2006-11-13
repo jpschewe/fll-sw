@@ -18,12 +18,23 @@ if(null != request.getParameter("division")) {
 if(null != request.getParameter("playoffRoundNumber")) {
   application.setAttribute("playoffRoundNumber", Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("playoffRoundNumber")));
 }
+if(null != request.getParameter("changeSlideInterval")) {
+  // guarantee a minimum interval of 1 second
+  int newInterval = Integer.parseInt(request.getParameter("slideInterval"));
+  if(newInterval < 1) {
+    newInterval = 1;
+  }
+  application.setAttribute("slideShowInterval", new Integer(1000 * newInterval));
+}
   
 if(null == application.getAttribute("playoffDivision") && !divisions.isEmpty()) {
   application.setAttribute("playoffDivision", divisions.get(0));
 }
 if(null == application.getAttribute("playoffRoundNumber")) {
   application.setAttribute("playoffRoundNumber", new Integer(1));
+}
+if(null == application.getAttribute("slideShowInterval")) {
+  application.setAttribute("slideShowInterval",new Integer(10000));
 }
 
 final String playoffDivision = (String)application.getAttribute("playoffDivision");
@@ -48,6 +59,14 @@ final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection,playoffDivis
   <c:if test="${not empty param.remoteURL}">
     <c:set var='displayURL' value='${param.remoteURL}' scope='application'/>
   </c:if>
+  <c:choose>
+    <c:when test="${empty param.slideInterval}">
+      <c:set var='slideInterval' value='10'/>
+    </c:when>
+    <c:otherwise>
+      <c:set var='slideInterval' value='${param.slideInterval}'/>
+    </c:otherwise>
+  </c:choose>
           
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Display Controller)</h1>
@@ -58,7 +77,7 @@ final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection,playoffDivis
 
     <form name='remote' action='remoteControl.jsp' method='post'>
       <c:if test='${displayPage == "welcome"}'  var='welcomePage'>
-        Welcome <input type='radio' name='remotePage' value='welcome' checked='true' /><br/>
+        Welcome <input type='radio' name='remotePage' value='welcome' checked /><br/>
       </c:if>
       <c:if test='${not welcomePage}'>
         Welcome <input type='radio' name='remotePage' value='welcome' /><br/>
@@ -73,6 +92,15 @@ final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection,playoffDivis
         Scoreboard <input type='radio' name='remotePage' value='scoreboard' /><br/>
       </c:if>
 
+      <c:if test='${displayPage eq "slideshow"}' var='slideshowPage'>
+        Slide show <input type='radio' name='remotePage' value='slideshow' checked />
+      </c:if>
+      <c:if test='${not slideshowPage}'>
+        Slide show <input type='radio' name='remotePage' value='slideshow' />
+      </c:if>
+      <input type='text' name='slideInterval' value='<c:out value="${slideInterval}"/>' size='3'/>
+      Seconds to show a slide: <input type='submit' name='changeSlideInterval' value='Update Slide Interval'/><br/>
+      <br/>
       
       <c:if test='${displayPage == "playoffs"}'  var='playoffsPage'>
         Playoffs <input type='radio' name='remotePage' value='playoffs' checked='true' />
@@ -83,7 +111,7 @@ final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection,playoffDivis
       <b>WARNING: Do not select brackets until all seeding runs have been recorded!</b><br/>
 
       <c:if test='${displayPage == "special"}'  var='specialPage'>
-        Specify page relative to /fll-sw <input type='radio' name='remotePage' value='special' checked='true' /> <input type='text' name='remoteURL' value='<c:out value="${displayURL}"/>'><br/>
+        Specify page relative to /fll-sw <input type='radio' name='remotePage' value='special' checked /> <input type='text' name='remoteURL' value='<c:out value="${displayURL}"/>'><br/>
       </c:if>
       <c:if test='${not specialPage}'>
         Specify page relative to /fll-sw <input type='radio' name='remotePage' value='special' /> <input type='text' name='remoteURL' value='<c:out value="${displayURL}"/>'><br/>

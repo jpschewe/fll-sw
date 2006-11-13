@@ -6,6 +6,8 @@
 package fll;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -14,6 +16,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.Vector;
 
 import org.apache.log4j.Logger;
 import org.hsqldb.Server;
@@ -262,5 +266,59 @@ public final class Utilities {
     } else {
       return o1.equals(o2);
     }
+  }
+
+  /**
+   * Filter used to select only graphics files
+   */
+  private static final FilenameFilter FILTER = new FilenameFilter() {
+    public boolean accept(final File dir, final String name) {
+        if(    name.endsWith(".png")
+            || name.endsWith(".jpg")
+            || name.endsWith(".jpeg")) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+  };
+
+  /**
+   * Filter used to select only directories
+   */
+  private static final FileFilter DIRFILTER = new FileFilter() {
+    public boolean accept(final File f) {
+      if(f.isDirectory()) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  };
+  
+  public static void buildGraphicFileList(final String p, final File[] d, final Vector<String> f) {
+    //System.out.println("buildGraphicFileList("+p+","+Arrays.toString(d)+","+f.toString()+")");
+    for(int i = 0; i < d.length; i++) {
+      String np = (p.length()==0 ? p : p + "/") + d[i].getName();
+      String[] files = d[i].list(FILTER);
+      if(files != null) {
+        //System.out.println("files: " + Arrays.toString(files));
+        java.util.Arrays.sort(files);
+        for(int j = 0; j < files.length; j++) {
+          f.addElement(np + "/" + files[j]);
+        }
+      } else {
+        //System.out.println("files: null");
+      }
+      File[] dirs = d[i].listFiles(DIRFILTER);
+      if(dirs != null) {
+        //System.out.println("dirs: "+Arrays.toString(dirs));
+        java.util.Arrays.sort(dirs);
+        buildGraphicFileList(np, dirs, f);
+      } else {
+        //System.out.println("dirs: null");
+      }
+    }
+    //System.out.println("f: " + f.toString());
   }
 }
