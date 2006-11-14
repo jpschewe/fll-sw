@@ -3,12 +3,12 @@
 
   <Performance minimumScore="0" weight="1.0">
 
-    <goal name="smell_off_plate" title="Smell (Off Paper Plate)"
+    <goal name="smell_off_plate" title="_ Smell (Off Paper Plate)"
       min="0"
       max="2"
       multiplier="5"
       />
-    <goal name="smell_head" title="Smell (Head or Neck)"
+    <goal name="smell_head" title=" (On Head or Neck)"
       min="0"
       max="2"
       multiplier="15"
@@ -18,36 +18,37 @@
       <term coefficient="1" goal="smell_head"/>
     </restriction>
 
-    <goal name="smart_medicine" title="Buckyball in the Red/Yellow Channel"
+    <goal name="smart_medicine" title="_ Deliver Buckyball"
       multiplier="50"
       />
 
-    <goal name="atomic_force" title="Free the Probe's Nanotip"
+    <goal name="atomic_force" title="_ Free the Probe's Nanotip"
       multiplier="40"
       />
 
-    <goal name="move_atoms" title="Individual Atom Manipulation">
-      <value score="40" title="8 red &amp; 0 to 5 white" value="atoms_high"/>
-      <value score="30" title="8 red &amp; 6 to 7 white" value="atoms_low"/>
-      <value score="0" title="Fewer than 8 red" value="atoms_none"/>
+    <goal name="move_atoms" title="_ Individual Atom Manipulation">
+      <value score="40" title="0 to 5 white" value="atoms_high"/>
+      <value score="30" title="6 or 7 white" value="atoms_low"/>
+      <value score="0" title="&lt; 8 red/not done" value="atoms_none"/>
     </goal>
 
-    <goal name="self_assembly" title="Self-alignment of Atoms"
+    <goal name="self_assembly" title="_ Self-alignment of Atoms"
       multiplier="30"
       />
 
-    <goal name="molecular_motor" title="Molecular Motor"
+    <goal name="molecular_motor" title="_ Molecular Motor"
       multiplier="40"
       />
     
+    <goal name="dumper" title="_ Robot Emptied Dirt Dumper"
+      multiplier="15"
+      />
+
     <goal name="dirt_trap" title="Dirt Trap on Mark"
       multiplier="15"
       />
 
-    <goal name="dumper" title="Robot Emptied Dirt Dumper"
-      multiplier="15"
-      />
-
+    
     <goal name="dirt_in_trap" title="Dirt in Dirt Trap"
       multiplier="5"
       max="8"
@@ -62,11 +63,11 @@
       <term coefficient="1" goal="dirt_elsewhere"/>
     </restriction>
 
-    <goal name="space_elevator" title="Operate Space Elevator"
+    <goal name="space_elevator" title="_ Operate Space Elevator"
       multiplier="40"
       />
 
-    <goal name="nanotube_strength" title="Nanotube Strength">
+    <goal name="nanotube_strength" title="_ Nanotube Strength">
       <value score="40" title="Supported by Cable" value="supported_by_cable"/>
       <value score="20" title="Truck on Frame" value="truck_on_frame"/>
       <value score="0" title="None" value="none"/>
