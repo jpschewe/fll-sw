@@ -16,7 +16,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
-import java.util.Arrays;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -308,7 +307,7 @@ public final class Utilities {
           f.addElement(np + "/" + files[j]);
         }
       } else {
-        //System.out.println("files: null");
+        LOG.debug("files: null");
       }
       File[] dirs = d[i].listFiles(DIRFILTER);
       if(dirs != null) {
@@ -316,7 +315,7 @@ public final class Utilities {
         java.util.Arrays.sort(dirs);
         buildGraphicFileList(np, dirs, f);
       } else {
-        //System.out.println("dirs: null");
+        LOG.debug("dirs: null");
       }
     }
     //System.out.println("f: " + f.toString());

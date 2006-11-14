@@ -319,7 +319,7 @@
 		</antcall>
 	</target>
 
-	<target name="tomcat.start" depends="tomcat.expand" description="start up tomcat">
+	<target name="tomcat.start" depends="tomcat.expand,compile.test" description="start up tomcat">
 		<echo message="Starting tomcat" />
 		<antcall target="-tomcat.run">
 			<param name="operation" value="start" />

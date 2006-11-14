@@ -156,7 +156,7 @@
   <xsd:element name="term">
     <xsd:complexType>
       <xsd:attribute name="coefficient" type="xsd:integer" default="1" />
-      <xsd:attribute name="goal" type="xsd:IDREF" />
+      <xsd:attribute name="goal" type="xsd:IDREF" use="required" />
     </xsd:complexType>
   </xsd:element>
 
@@ -165,7 +165,9 @@
       <xsd:sequence>
         <xsd:element name="test" maxOccurs="unbounded">
           <xsd:complexType>
-            <xsd:attribute name="goal" type="xsd:IDREF" use="required" />
+            <xsd:sequence>
+              <xsd:element ref="term" maxOccurs="unbounded"/>
+            </xsd:sequence>
             <xsd:attribute name="winner" type="highlow" use="required" />
           </xsd:complexType>
         </xsd:element>
