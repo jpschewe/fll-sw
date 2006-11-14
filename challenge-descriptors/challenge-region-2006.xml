@@ -57,7 +57,7 @@
       multiplier="3"
       max="8"
       />
-    <restriction lowerBound="0" upperBound="3" message="There are a maximum of 3 dirt pieces on the table">
+    <restriction lowerBound="0" upperBound="8" message="There are a maximum of 3 dirt pieces on the table">
       <term coefficient="1" goal="dirt_in_trap"/>
       <term coefficient="1" goal="dirt_elsewhere"/>
     </restriction>
@@ -84,18 +84,40 @@
     </goal>
 
     <tiebreaker>
-      <test goal="dirt_in_trap" winner="high"/>
-      <test goal="dirt_elsewhere" winner="high"/>
-      <test goal="molecular_motor" winner="high"/>
-      <test goal="move_atoms" winner="high"/>
-      <test goal="smart_medicine" winner="high"/>
-      <test goal="atomic_force" winner="high"/>
-      <test goal="dumper" winner="high"/>
-      <test goal="dirt_trap" winner="high"/>
-      <test goal="self_assembly" winner="high"/>
-      <test goal="smell_head" winner="high"/>
-      <test goal="smell_off_plate" winner="high"/>
-      <test goal="nanotube_strength" winner="high"/>
+      <test winner="high">
+        <term goal="dirt_in_trap" />
+        <term goal="dirt_elsewhere" />
+      </test>
+      <test winner="high">
+        <term goal="molecular_motor" />
+      </test>
+      <test winner="high">
+        <term goal="move_atoms" />
+      </test>
+      <test winner="high">
+        <term goal="smart_medicine" />
+      </test>
+      <test winner="high">
+        <term goal="atomic_force" />
+      </test>
+      <test winner="high">
+        <term goal="dumper" />
+      </test>
+      <test winner="high">
+        <term goal="dirt_trap" />
+      </test>
+      <test winner="high">
+        <term goal="self_assembly" />
+      </test>
+      <test winner="high">
+        <term goal="smell_head" />
+      </test>
+      <test winner="high">
+        <term goal="smell_off_plate" />
+      </test>
+      <test winner="high">
+        <term goal="nanotube_strength" />
+      </test>
     </tiebreaker>
 
   </Performance>
