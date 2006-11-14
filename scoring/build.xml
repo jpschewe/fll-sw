@@ -424,7 +424,7 @@
 
 
 		<!-- src zip file -->
-		<zip zipfile="${dir.dist}/${app.name}-${app.version}-src.zip">
+		<zip zipfile="${app.name}-${app.version}-src.zip">
 			<zipfileset dir="${basedir}">
 				<include name="web/**" />
 				<include name="${dir.src}/**" />
@@ -437,6 +437,7 @@
 			</zipfileset>
 		</zip>
 
+                <!-- release without jdk -->
 		<zip zipfile="${app.name}-${app.version}.zip">
 			<zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version}" />
 		</zip>
