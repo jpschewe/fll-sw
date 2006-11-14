@@ -366,7 +366,7 @@ public class ScoresheetGenerator {
         final String name = element.getAttribute("name");
 
         // This is the text for the left hand "label" cell
-        final String title = "_ " + element.getAttribute("title");
+        final String title = element.getAttribute("title");
         Paragraph p = new Paragraph(title, ARIAL_10PT_NORMAL);
         p.setAlignment(Element.ALIGN_RIGHT);
         m_goalLabel[i] = new PdfPCell();
