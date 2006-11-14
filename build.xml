@@ -424,7 +424,7 @@
 
 
 		<!-- src zip file -->
-		<zip zipfile="${dir.dist}/src.zip">
+		<zip zipfile="${dir.dist}/${app.name}-${app.version}-src.zip">
 			<zipfileset dir="${basedir}">
 				<include name="web/**" />
 				<include name="${dir.src}/**" />
