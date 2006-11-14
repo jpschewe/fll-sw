@@ -1,3 +1,10 @@
+Release 2.7
+* Added the ability for tiebreakers to have sums (and coefficients on the goals)
+
+* added help text to the admin pages
+
+* added underscores to the front of the goal titles in the PDF scoresheet to allow the refs to check them off
+
 Release 2.6
 
 * include Sun's JDK for Linux and Windows distributions so that Java doesn't need to be installed
