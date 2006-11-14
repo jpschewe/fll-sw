@@ -133,8 +133,13 @@ helps to prepare as much as you can the first few tournaments you do.</p>
  tiebreaker order:
  <ol>
   <x:forEach select="$challengeDocument/fll/Performance/tiebreaker/test">
-   <li><x:out select="./@goal" /> - <x:out select="./@winner" />
-   score wins</li>
+   <li>Sum of
+   <ul>
+    <x:forEach select="./term">
+     <li><x:out select="./@goal" /></li>
+    </x:forEach>
+   </ul>
+   <x:out select="./@winner" /> score wins</li>
   </x:forEach>
  </ol>
  </li>

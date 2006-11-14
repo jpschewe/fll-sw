@@ -43,18 +43,42 @@
     </restriction>
 
     <tiebreaker>
-      <test goal="crates_base" winner="high"></test> 
-      <test goal="crates" winner="high"></test> 
-      <test goal="dolphin" winner="high"></test> 
-      <test goal="flags_rows" winner="high"></test> 
-      <test goal="flags" winner="high"></test> 
-      <test goal="submarine" winner="high"></test> 
-      <test goal="archaeological" winner="high"></test> 
-      <test goal="shipping_container" winner="high"></test> 
-      <test goal="pump_station" winner="high"></test> 
-      <test goal="pipeline" winner="high"></test>
-      <test goal="sample_species" winner="high"></test>
-      <test goal="artifical_reef" winner="high"></test>
+      <test winner="high">
+        <term goal="crates_base"/>
+      </test> 
+      <test winner="high">
+        <term goal="crates" />
+      </test> 
+      <test winner="high">
+        <term goal="dolphin" />
+      </test>
+      <test winner="high">
+        <term goal="flags_rows" />
+      </test> 
+      <test winner="high">
+        <term goal="flags"/>
+      </test> 
+      <test winner="high">
+        <term goal="submarine" />
+      </test> 
+      <test winner="high">
+        <term goal="archaeological" />
+      </test> 
+      <test winner="high">
+        <term goal="shipping_container" />
+      </test> 
+      <test winner="high">
+        <term goal="pump_station" />
+      </test> 
+      <test winner="high">
+        <term goal="pipeline" />
+      </test>
+      <test winner="high">
+        <term goal="sample_species" />
+      </test>
+      <test winner="high">
+        <term goal="artifical_reef" />
+      </test>
     </tiebreaker>
 
   </Performance>
