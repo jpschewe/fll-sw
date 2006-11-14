@@ -6,7 +6,7 @@
 	<property file="override.properties" />
 
 	<property name="app.name" value="${ant.project.name}" />
-	<property name="app.version" value="2.7" />
+	<property name="app.version" value="2.8" />
 
 	<property name="dir.build" value="build" />
 	<property name="tomcat" value="jakarta-tomcat-4.1.27-LE-jdk14" />
