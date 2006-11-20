@@ -143,6 +143,12 @@ public class ScoresheetGenerator {
     setChallengeInfo(document);
   }
 
+  /**
+   * Print blank scoresheets.
+   * 
+   * @param numTeams number of scoresheets to print
+   * @param document the challenge document
+   */
   public ScoresheetGenerator(final int numTeams, final org.w3c.dom.Document document) {
     m_numTeams = numTeams;
     initializeArrays();
@@ -155,6 +161,27 @@ public class ScoresheetGenerator {
         m_number[i] = SHORT_BLANK;
       }
     setChallengeInfo(document);
+  }
+  
+  /**
+   * Print a single scoresheet for a team.
+   *  
+   * @param teamNumber the team to print the scoresheet for
+   * @param document the challenge document
+   * @param connection the database connection
+   */
+  public ScoresheetGenerator(final int teamNumber, final org.w3c.dom.Document document, final Connection connection) throws SQLException {
+    m_numTeams = 1;
+    initializeArrays();
+
+    final Team teamA = Team.getTeamFromDatabase(connection, teamNumber);
+    
+    m_pageTitle = "";
+    m_table[0] = SHORT_BLANK;
+    m_name[0] = teamA.getTeamName();
+    m_round[0] = SHORT_BLANK;
+    m_number[0] = Integer.toString(teamA.getTeamNumber());
+    setChallengeInfo(document);    
   }
         
   /**
