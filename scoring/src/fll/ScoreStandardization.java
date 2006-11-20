@@ -114,7 +114,7 @@ public final class ScoreStandardization {
       if(rs.next()) {
         final int sgCount = rs.getInt(2);
         if(sgCount > 1) {
-          final double sgMean = rs.getDouble(2);
+          final double sgMean = rs.getDouble(1);
           final double sgStdev = rs.getDouble(3);
           
           prep.setDouble(1, sgMean);
@@ -200,12 +200,7 @@ public final class ScoreStandardization {
           ( (  (ComputedTotal - ScoreGroup_Mean)  )
           SS = Standard_Mean + ( (  ---------------------------------  ) * Standard_StandardDeviation )
           ( (     ScoreGroup_StandardDeviation    )
-
-
-      
-
-
-        */
+         */
         // 1 - sg_mean
         // 2 - sg_stdev
         // 3 - judge
