@@ -9,6 +9,7 @@ import com.lowagie.text.DocumentException;
 
 import fll.Queries;
 import fll.Team;
+import fll.Utilities;
 
 import fll.pdf.report.FinalComputedScores;
 import fll.pdf.scoreEntry.ScoresheetGenerator;
@@ -20,6 +21,7 @@ import java.io.IOException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.ParseException;
 
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -50,7 +52,7 @@ public final class GetFile {
   public static void getFile(final ServletContext application,
                              final HttpServletRequest request,
                              final HttpServletResponse response)
-    throws SQLException, IOException, DocumentException {
+    throws SQLException, IOException, DocumentException, ParseException {
     final String filename = request.getParameter("filename");
     if("teams.xml".equals(filename)) {
       final Connection connection = (Connection)application.getAttribute("connection");
@@ -133,6 +135,18 @@ public final class GetFile {
       response.setHeader("Content-Disposition", "filename=finalComputedScores.pdf");
       final FinalComputedScores fcs = new FinalComputedScores(challengeDocument, tournament);
       fcs.generateReport(connection, response.getOutputStream());
+    } else if("teamScoreSheet.pdf".equals(filename)) {
+      final Connection connection = (Connection)application.getAttribute("connection");
+      final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
+      response.reset();
+      response.setContentType("application/pdf");
+      response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
+      final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("teamNumber")).intValue();
+      // Create the scoresheet generator - must provide correct number of scoresheets
+      final ScoresheetGenerator scoresheetGen = new ScoresheetGenerator(teamNumber, challengeDocument, connection);
+
+      // Write the scoresheets to the browser - content-type: application/pdf
+      scoresheetGen.writeFile(response.getOutputStream());
     } else if("scoreSheet.pdf".equals(filename)) {
       final Connection connection = (Connection)application.getAttribute("connection");
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
