@@ -42,9 +42,12 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
               ,Teams.Organization
               ,Teams.TeamName
               ,FinalScores.<x:out select="./@name"/>
-              FROM Teams, FinalScores
+              FROM Teams, FinalScores, TournamentTeams
               WHERE Teams.TeamNumber = FinalScores.TeamNumber
-              AND Tournament = '<c:out value="${currentTournament}"/>'
+              AND TournamentTeams.TeamNumber = Teams.TeamNumber
+              AND TournamentTeams.Tournament = FinalScores.Tournament
+              AND TournamentTeams.event_division = '<c:out value="${division}"/>'
+              AND FinalScores.Tournament = '<c:out value="${currentTournament}"/>'
               ORDER BY FinalScores.<x:out select="./@name"/> DESC
           </sql:query>
           <c:forEach var="row" items="${scores.rowsByIndex}">
