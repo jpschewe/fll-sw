@@ -336,21 +336,23 @@ public final class FinalComputedScores extends PdfPageEventHelper {
                                         + " WHERE TeamNumber = " + teamNumber
                                         + " AND Tournament = '" + _tournament + "'"
                                         + " ORDER BY ComputedTotal DESC");
-                    final double rawScore;
-                    if(rawScoreRS.next()) {
+                    boolean scoreSeen = false;
+                    String rawScoreText = "";
+                    while(rawScoreRS.next()) {
                       final double v = rawScoreRS.getDouble(1);
-                      if(rawScoreRS.wasNull()) {
-                        rawScore = Double.NaN;
-                      } else {
-                        rawScore = v;
+                      if(!rawScoreRS.wasNull()) {
+                        if(scoreSeen) {
+                          rawScoreText += ", ";
+                        } else {
+                          scoreSeen = true;
+                        }
+                        rawScoreText += SCORE_FORMAT.format(v);
                       }
-                    } else {
-                      rawScore = Double.NaN;
                     }
                     PdfPCell subjCell = new PdfPCell(
-                                                     (Double.isNaN(rawScore) ?
+                                                     (!scoreSeen ?
                                                       new Phrase("No Score", ARIAL_8PT_NORMAL_RED) :
-                                                      new Phrase(SCORE_FORMAT.format(rawScore), ARIAL_8PT_NORMAL)));
+                                                      new Phrase(rawScoreText, ARIAL_8PT_NORMAL)));
                     subjCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
                     subjCell.setBorder(0);
                     curteam.addCell(subjCell);
