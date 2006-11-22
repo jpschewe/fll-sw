@@ -1834,6 +1834,28 @@ public final class Queries {
       return 0;
     }
   }
+  
+  /**
+   * Returns the max number of playoff rounds all divisions. Depends on
+   * the PlayoffData table having been initialized for that division.
+   * 
+   * @param connection
+   *          The database connection.
+   * @return The maximum number of playoff rounds in all divisions, or 0 if
+   *         brackets have not been initialized.
+   * @throws SQLException
+   *           on database errors.
+   */
+  public static int getNumPlayoffRounds(final Connection connection) throws SQLException {
+    int numRounds = 0;
+    for(String division : getDivisions(connection)) {
+      final int x = getFirstPlayoffRoundSize(connection, division);
+      if (x > 0) {
+        numRounds = Math.max((int) Math.round(Math.log(x) / Math.log(2)), numRounds);
+      } 
+    }
+    return numRounds;
+  }
 
   /**
    * Get size of first playoff round.
