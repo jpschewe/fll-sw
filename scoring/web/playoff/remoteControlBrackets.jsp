@@ -31,7 +31,6 @@ if(null == application.getAttribute("playoffDivision")) {
 }
 final String division = (String)application.getAttribute("playoffDivision");
 
-final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
 final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection,division);
 
 final int playoffRoundNumber;  
