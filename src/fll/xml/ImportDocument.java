@@ -15,6 +15,8 @@ import fll.Utilities;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import org.w3c.dom.Document;
@@ -29,9 +31,9 @@ public final class ImportDocument {
 
   private static final Logger LOG = Logger.getLogger(ImportDocument.class);
   
-  public static void main(final String[] args) {
+  public static void main(final String[] args) throws IOException {
     final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-    final Document document = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-region-2004.xml"));
+    final Document document = ChallengeParser.parse(new FileInputStream("/home/jpschewe/projects/fll-sw/working-dir/challenge-descriptors/challenge-region-2006.xml"));
     if(null == document) {
       throw new RuntimeException("Error parsing challenge.xml");
     }
@@ -39,8 +41,8 @@ public final class ImportDocument {
     PreparedStatement prep = null;
     Connection connection = null;
     try {
-      connection = Utilities.createDBConnection("fll", "fll");
-      prep = connection.prepareStatement("UPDATE TournamentParameters SET Value = ? WHERE Param = 'ChallengeDocument')");
+      connection = Utilities.createDBConnection("fll", "fll", "/home/jpschewe/projects/fll-sw/working-dir/scoring/build/tomcat/webapps/fll-sw/WEB-INF/flldb");
+      prep = connection.prepareStatement("UPDATE TournamentParameters SET Value = ? WHERE Param = 'ChallengeDocument'");
       
       //dump the document into a byte array so we can push it into the database
       final XMLWriter xmlwriter = new XMLWriter();
