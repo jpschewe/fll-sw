@@ -11,11 +11,11 @@
     <goal name="smell_head" title=" (On Head or Neck)"
       min="0"
       max="2"
-      multiplier="15"
+      multiplier="10"
       />
-    <restriction lowerBound="0" upperBound="2" message="There are a maximum of 2 molecules on the table">
+    <restriction lowerBound="0" upperBound="2" message="There cannot be more molecules on the head than off the plate">
       <term coefficient="1" goal="smell_off_plate"/>
-      <term coefficient="1" goal="smell_head"/>
+      <term coefficient="-1" goal="smell_head"/>
     </restriction>
 
     <goal name="smart_medicine" title="_ Deliver Buckyball"
@@ -124,37 +124,37 @@
   </Performance>
 
   <subjectiveCategory name="teamwork" title="Teamwork" weight="1.0">
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="roles" title="Roles and Responsibilities"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="professionalism" title="Gracious Professionalism"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="dynamics" title="Problem Solving &amp; Team Dynamics &amp; Communications"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="confidence" title="Confidence &amp; Enthusiasm"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="fll_values" title="FLL Values"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="roles" title="Roles and Responsibilities"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="professionalism" title="Gracious Professionalism"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="dynamics" title="Problem Solving &amp; Team Dynamics &amp; Communications"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="confidence" title="Confidence &amp; Enthusiasm"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="fll_values" title="FLL Values"></goal>
   </subjectiveCategory>
 
   
   <subjectiveCategory name="robustdesign" title="Robust Design" weight="0.5">
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="strategy" title="Strategy, Process, Problem Solving"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="locomotion" title="Locomotion and Navigation"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="design_kids" title="Kids Did the Work"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="structural" title="Structural"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="overall_design" title="Overall Design"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="strategy" title="Strategy, Process, Problem Solving"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="locomotion" title="Locomotion and Navigation"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="design_kids" title="Kids Did the Work"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="structural" title="Structural"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="overall_design" title="Overall Design"></goal>
   </subjectiveCategory>
 
 
   <subjectiveCategory name="programming" title="Robust Programming" weight="0.5">
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="useoflanguage" title="Use of Language"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="modularity" title="Modularity/Abstraction"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="sensorcontrol" title="Sensor Control"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="design" title="Design"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="programming_kids" title="Kids Did the Work"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="useoflanguage" title="Use of Language"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="modularity" title="Modularity/Abstraction"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="sensorcontrol" title="Sensor Control"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="design" title="Design"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="programming_kids" title="Kids Did the Work"></goal>
   </subjectiveCategory>
 
   <subjectiveCategory name="research" title="Research Project Assessment" weight="1.0">
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="questions" title="Questions, Language Use"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="completeness" title="Completeness, Teamwork"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="background" title="Background, Data, and Graphics"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="analysis" title="Analysis and Conclusions"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="style" title="Style"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="questions" title="Questions, Language Use"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="completeness" title="Completeness, Teamwork"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="background" title="Background, Data, and Graphics"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="analysis" title="Analysis and Conclusions"></goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="style" title="Style"></goal>
   </subjectiveCategory>
 
   
