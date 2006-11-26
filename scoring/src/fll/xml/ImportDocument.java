@@ -32,7 +32,6 @@ public final class ImportDocument {
   private static final Logger LOG = Logger.getLogger(ImportDocument.class);
   
   public static void main(final String[] args) throws IOException {
-    final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
     final Document document = ChallengeParser.parse(new FileInputStream("/home/jpschewe/projects/fll-sw/working-dir/challenge-descriptors/challenge-region-2006.xml"));
     if(null == document) {
       throw new RuntimeException("Error parsing challenge.xml");

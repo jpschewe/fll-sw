@@ -1,4 +1,9 @@
 Release 2.8
+* fixed categorized score report to show by division (1599044)
+
+* Remote control for the scoreboard now uses all divisions to determine how many rounds are possible (1599039)
+
+* PDF reports now show all raw scores, just like the HTML reports (1599786)
 
 Release 2.7
 * Added the ability for tiebreakers to have sums (and coefficients on the goals)
