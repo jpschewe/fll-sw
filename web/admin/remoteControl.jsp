@@ -39,6 +39,7 @@ if(null == application.getAttribute("slideShowInterval")) {
   application.setAttribute("slideShowInterval",new Integer(10000));
 }
 
+final String playoffDivision = (String)application.getAttribute("playoffDivision");
 final int playoffRunNumber = ((Number)application.getAttribute("playoffRoundNumber")).intValue();
 final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
 
