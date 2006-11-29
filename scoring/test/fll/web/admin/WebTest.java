@@ -46,7 +46,7 @@ public class WebTest extends TestCase {
       "judges.jsp",
       "tables.jsp",
       "select_team.jsp",
-      //"remoteControl.jsp",
+      "remoteControl.jsp",
       "advanceTeams.jsp",
     };
     final WebConversation conversation = new WebConversation();
