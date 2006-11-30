@@ -88,7 +88,7 @@ while(divisionIter.hasNext()) {
         <li>
           <B>WARNING: Do not select brackets until all seeding runs have been recorded!</b><br>
           <form name='printable' action='scoregenbrackets.jsp' method='get'>
-            <B>EXPERIMENTAL!</B> Go to the scoresheet generation/admin/printable bracket page for division <select name='division'>
+            Go to the scoresheet generation/admin/printable bracket page for division <select name='division'>
 <%
 {
 final Iterator divisionIter = divisions.iterator();
