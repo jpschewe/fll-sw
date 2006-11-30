@@ -1,6 +1,6 @@
 <project name="fll-sw" default="compile">
 
-	<!-- ===================== Property Definitions =========================== -->
+  <!-- ===================== Property Definitions =========================== -->
 
 	<!-- load build specific properties first -->
 	<property file="override.properties" />
