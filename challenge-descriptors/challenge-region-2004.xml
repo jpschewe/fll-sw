@@ -3,6 +3,8 @@
   xsi:noNamespaceSchemaLocation="fll.xsd"
   title="FLL 2004 Challenge: No Limits" >
 
+  <!-- $Rev:$ -->
+
   <Performance weight="1.0">
 
     <goal name="remove_glasses"

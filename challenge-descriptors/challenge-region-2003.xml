@@ -3,6 +3,8 @@
      xsi:noNamespaceSchemaLocation="fll.xsd"
      title="FLL 2003 Challenge: Mission Mars" >
 
+  <!-- $Rev:$ -->
+
   <Performance weight="1.0">
 
     <goal name="exit_base"
