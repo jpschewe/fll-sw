@@ -7,4 +7,6 @@ set fll_java=%BATPATH%\..\tools\jdk-windows
 if not exist "%fll_java%" goto end
 set JAVA_HOME=%fll_java%
 
+set PATH=%JAVA_HOME%\bin;%PATH%
+
 :end
