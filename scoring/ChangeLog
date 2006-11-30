@@ -1,3 +1,9 @@
+Release 2.10
+
+* remove experimental warning from PDF brackets (1605785)
+
+* Set path in setenv.bat (1605786)
+
 Release 2.9
 * fixed compilation error in remoteControl.jsp and added unit test to watch for it
 
