@@ -1,3 +1,5 @@
+* fixed score entry check for initialized playoff brackets to use event division instead of team division.
+
 Release 2.10
 
 * remove experimental warning from PDF brackets (1605785)
