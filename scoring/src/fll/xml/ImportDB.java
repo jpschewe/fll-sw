@@ -381,6 +381,14 @@ public final class ImportDB {
         return true;
       }
       Utilities.closePreparedStatement(destPrep);
+
+      sourcePrep = sourceConnection.prepareStatement("SELECT Name FROM Tournaments WHERE Name = ?");
+      sourcePrep.setString(1, tournament);
+      if(!sourcePrep.executeQuery().next()) {
+        LOG.error("Tournament: " + tournament + " doesn't exist in the source database!");
+        return true;
+      }
+      Utilities.closePreparedStatement(sourcePrep);
       
       // check names and regions and make sure that each team in the source
       // tournament is in the destination tournament
