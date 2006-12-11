@@ -46,7 +46,7 @@ developers only. If you don't know what you're doing, LEAVE THIS PAGE!</b></font
 
  <li>Current database is <c:out value="${database}" /><br>
  <form action='index.jsp' method='post'><input type='text'
-  name='database'> <input type='submit' name='changeDatabase'
+  name='database' size='50'> <input type='submit' name='changeDatabase'
   value='Change Database''> <input type='submit'
   name='resetDatabase' value='Reset to standard database'></form>
  </li>
