@@ -392,11 +392,11 @@ public final class ImportDB {
       
       // check names and regions and make sure that each team in the source
       // tournament is in the destination tournament
-      destPrep = destinationConnection.prepareStatement("SELECT Teams.TeamName, Teams.Region, Teams.Division"
+      destPrep = destinationConnection.prepareStatement("SELECT Teams.TeamName, Teams.Region, Teams.Division, Teams.Organization"
            + " FROM Teams"
            + " WHERE Teams.TeamNumber = ?");
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Region, Teams.Division"
+      sourcePrep = sourceConnection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Region, Teams.Division, Teams.Organization"
           + " FROM Teams, TournamentTeams"
           + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber"
           + " AND TournamentTeams.Tournament = ?");
@@ -408,6 +408,7 @@ public final class ImportDB {
         final String sourceName = sourceRS.getString(2);
         final String sourceRegion = sourceRS.getString(3);
         final String sourceDivision= sourceRS.getString(4);
+        final String sourceOrganization = sourceRS.getString(5);
         destPrep.setInt(1, num);
         destRS = destPrep.executeQuery();
         if(destRS.next()) {
@@ -426,6 +427,12 @@ public final class ImportDB {
             differencesFound = true;
             LOG.error("There is a team with a different division in the source database that in the destination database.  Number: " + num + " source division: " + sourceDivision + " dest division: " + destDivision);
           }
+          final String destOrganization = destRS.getString(4);
+          if(!Utilities.safeEquals(destOrganization, sourceOrganization)) {
+            differencesFound = true;
+            LOG.error("There is a team with a different organization in the source database that in the destination database.  Number: " + num + " source organization: " + sourceOrganization+ " dest organization: " + destOrganization);
+          }
+
         } else {
           differencesFound = true;
           LOG.error("There is a team in the source database that isn't in the destination database. Number: " + num + " name: " + sourceName);
