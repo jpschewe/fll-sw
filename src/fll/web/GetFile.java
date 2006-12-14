@@ -11,6 +11,7 @@ import fll.Queries;
 import fll.Team;
 import fll.Utilities;
 
+import fll.db.DumpDB;
 import fll.pdf.report.FinalComputedScores;
 import fll.pdf.scoreEntry.ScoresheetGenerator;
 
@@ -98,23 +99,26 @@ public final class GetFile {
         final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
         final String tournament = Queries.getCurrentTournament(connection);
       
-        final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument,
-                                                                               tournamentTeams.values(),
-                                                                               connection,
-                                                                               tournament);
-        final XMLWriter xmlwriter = new XMLWriter();
-      
+        
         response.reset();
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", "filename=subjective.zip");
+        
+        final XMLWriter xmlwriter = new XMLWriter();
+        
         final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
         xmlwriter.setOutput(zipOut, "UTF8");
       
         zipOut.putNextEntry(new ZipEntry("challenge.xml"));
         xmlwriter.write(challengeDocument);
         zipOut.closeEntry();
+        
         zipOut.putNextEntry(new ZipEntry("score.xml"));
         xmlwriter.setNeedsIndent(true);
+        final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument,
+            tournamentTeams.values(),
+            connection,
+            tournament);
         xmlwriter.write(scoreDocument);
         zipOut.closeEntry();
       
@@ -125,7 +129,17 @@ public final class GetFile {
         final ServletOutputStream os = response.getOutputStream();
         os.println("Judges are not properly assigned, please go back to the administration page and assign judges");
       }
-
+    } else if("database.zip".equals(filename)) {
+      final Connection connection = (Connection)application.getAttribute("connection");
+      final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
+      
+      response.reset();
+      response.setContentType("application/zip");
+      response.setHeader("Content-Disposition", "filename=database.zip");
+      
+      final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
+      DumpDB.dumpDatabase(zipOut, connection, challengeDocument);
+      zipOut.close();
     } else if("finalComputedScores.pdf".equals(filename)) {
       final Connection connection = (Connection)application.getAttribute("connection");
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
