@@ -10,6 +10,7 @@
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
 final List divisions = Queries.getDivisions(connection);
+final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
 %>
   
 <html>
@@ -23,11 +24,11 @@ final List divisions = Queries.getDivisions(connection);
       <ol>
         <li>If using the automatic table assignment feature for scoresheet generation, make
         certain to set up labels for each of your tables, available from the Admin page or by
-        clicking <a href='/fll-sw/admin/tables.jsp'>here</a>.
+        clicking <a href='/fll-sw/admin/tables.jsp'>here</a>.</li><br/>
 
         <li>Check to make sure all teams have scores entered for each seeding round.<br/>
           <form name='check' action='check.jsp' method='get'>
-          Select a division and check seeding rounds
+          Select Division:
           <select name='division'>
           <option value='__all__' selected>All</option>
 <%
@@ -49,7 +50,7 @@ while(divisionIter.hasNext()) {
           <b>WARNING: Do not initialize playoff brackets for a division until all seeding
           runs for that division have been recorded!</b><br>
           <form name='initialize' action='initializebrackets.jsp' method='post'>
-          <select name='division'>
+          Select Division: <select name='division'>
 <%
 {
 final Iterator divisionIter = divisions.iterator();
@@ -68,7 +69,8 @@ while(divisionIter.hasNext()) {
 
         <li>
           <form name='admin' action='adminbrackets.jsp' method='get'>
-            Go to the admin/printable bracket page for division <select name='division'>
+            <b>Printable Brackets</b><br/>
+            Select Division: <select name='division'>
 <%
 {
 final Iterator divisionIter = divisions.iterator();
@@ -81,14 +83,35 @@ while(divisionIter.hasNext()) {
 }
 %>
             </select>
-            <input type='submit' value='Go to Playoffs'>
+            from round <select name='firstRound'>
+<%
+for(int numRounds = 1; numRounds <= numPlayoffRounds; numRounds++) {
+  out.print("<option value='" + numRounds + "'");
+  if(numRounds == 1) {
+    out.print(" selected");
+  }
+  out.println(">" + numRounds + "</option>");
+}
+%>
+            </select> to <select name='lastRound'>
+<%
+// numPlayoffRounds+1 == the column in which the 1st place winner is displayed
+for(int numRounds = 2; numRounds <= numPlayoffRounds+1; numRounds++) {
+  out.print("<option value='" + numRounds + "'");
+  if(numRounds == numPlayoffRounds+1) {
+    out.print(" selected");
+  }
+  out.println(">" + numRounds + "</option>");
+}
+%>
+            <input type='submit' value='Display Brackets'>
           </form>               
         </li>
 
         <li>
-          <B>WARNING: Do not select brackets until all seeding runs have been recorded!</b><br>
           <form name='printable' action='scoregenbrackets.jsp' method='get'>
-            Go to the scoresheet generation/admin/printable bracket page for division <select name='division'>
+            <b>Scoresheet Generation Brackets</b><br/>
+            Select Division: <select name='division'>
 <%
 {
 final Iterator divisionIter = divisions.iterator();
@@ -101,14 +124,38 @@ while(divisionIter.hasNext()) {
 }
 %>
             </select>
-            <input type='submit' value='Go to Playoffs'>
+            from round <select name='firstRound'>
+<%
+for(int numRounds = 1; numRounds <= numPlayoffRounds; numRounds++) {
+  out.print("<option value='" + numRounds + "'");
+  if(numRounds == 1) {
+    out.print(" selected");
+  }
+  out.println(">" + numRounds + "</option>");
+}
+%>
+            </select> to <select name='lastRound'>
+<%
+// numPlayoffRounds+1 == the column in which the 1st place winner is displayed
+for(int numRounds = 2; numRounds <= numPlayoffRounds+1; numRounds++) {
+  out.print("<option value='" + numRounds + "'");
+  if(numRounds == numPlayoffRounds+1) {
+    out.print(" selected");
+  }
+  out.println(">" + numRounds + "</option>");
+}
+%>
+            </select>
+            <input type='submit' value='Display Brackets'>
           </form>
         </li>
 
         <li>
-          <B>WARNING: Do not select brackets until all seeding runs have been recorded!</b><br>
-          <a href="remoteMain.jsp">Go to remotely controlled brackets</a>
-          These brackets can be controlled from the admin page.
+          <b>Scrolling Brackets</b> (as on big screen display)<br/>
+          <a href="remoteMain.jsp">Display brackets</a><br/>
+          Division and round must be selected from the big screen display
+          <a href="<c:url value='/admin/remoteControl.jsp'/>"/>remote
+          control</a> page.
         </li>
       </ol>
     </p>

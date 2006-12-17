@@ -49,6 +49,7 @@
 		<pathelement location="${dir.lib}/log4j-1.2.8.jar" />
 		<pathelement location="${dir.lib}/xercesImpl.jar" />
 		<pathelement location="${dir.lib}/xmlParserAPIs.jar" />
+		<pathelement location="${dir.lib}/opencsv-1.7-jps.jar" />
 	</path>
 
 	<path id="compile.classpath">

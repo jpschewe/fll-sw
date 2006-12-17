@@ -29,10 +29,41 @@
     throw new RuntimeException("No division specified, please go back to the <a href='index.jsp'>playoff main page</a> and start again.");
   }
 
+  final String specifiedFirstRound = request.getParameter("firstRound");
+  final String specifiedLastRound = request.getParameter("lastRound");
+  int firstRound;
+  try {
+    firstRound = Integer.parseInt(specifiedFirstRound);
+  } catch(NumberFormatException nfe) {
+    firstRound = 1;
+  }
+
   final int lastColumn = 1 + Queries.getNumPlayoffRounds(connection, divisionStr);
 
+  int lastRound;
+  try {
+    lastRound = Integer.parseInt(specifiedLastRound);
+  } catch(NumberFormatException nfe) {
+    lastRound = lastColumn;
+  }
+
+  // Sanity check that the last round is valid
+  if(lastRound < 2) {
+    lastRound = 2;
+  }
+  if(lastRound > lastColumn) {
+    lastRound = lastColumn;
+  }
+  // Sanity check that the first round is valid
+  if(firstRound < 1) {
+    firstRound = 1;
+  }
+  if(firstRound > 1 && firstRound >= lastRound) {
+    firstRound = lastRound-1; // force the display of at least 2 rounds
+  }
+
   final BracketData bracketInfo =
-    new BracketData(connection, divisionStr, 1, lastColumn, 4);
+    new BracketData(connection, divisionStr, firstRound, lastRound, 4);
 
   final int numMatches = bracketInfo.addBracketLabelsAndScoreGenFormElements(connection, currentTournament, divisionStr);
 %>
@@ -56,6 +87,7 @@
 
   <body>
     <h2><x:out select="$challengeDocument/fll/@title"/> (Playoff Brackets Division: <%=divisionStr%>)</h2>
+    <p><a href="index.jsp">Return to Playoff menu</a></p>
       <form name='printScoreSheets' method='post' action='../getfile.jsp' target='_new'>
       <input type='hidden' name='numMatches' value='<%=numMatches %>'/>
       <input type='submit' value='Print scoresheets'/>
@@ -74,6 +106,7 @@
         </tr>
 <%  } %>
     </table>
+    <p><a href="index.jsp">Return to Playoff menu</a></p>
     </form>
     <%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
