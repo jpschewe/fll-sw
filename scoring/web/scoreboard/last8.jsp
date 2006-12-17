@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 <%@ taglib uri="http://jakarta.apache.org/taglibs/string-1.0.1" prefix="str" %>
       
-<%@ page import="fll.Queries" %>
+<%@ page import="fll.db.Queries" %>
   
 <%@ page import="java.sql.Connection" %>
 

@@ -1,7 +1,7 @@
 <%@ taglib uri="/WEB-INF/tld/taglib62.tld" prefix="up" %>
 
   
-<%@ page import="fll.xml.GenerateDB" %>
+<%@ page import="fll.db.GenerateDB" %>
 <%@ page import="fll.xml.ChallengeParser" %>
 
 <%@ page import="java.io.File" %>

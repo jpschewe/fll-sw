@@ -22,7 +22,7 @@ import com.lowagie.text.pdf.PdfPageEventHelper;
 import com.lowagie.text.pdf.PdfTemplate;
 import com.lowagie.text.pdf.PdfWriter;
 
-import fll.Queries;
+import fll.db.Queries;
 import fll.Utilities;
 
 import java.awt.Color;

@@ -5,7 +5,7 @@
  */
 package fll.web.playoff;
 
-import fll.Queries;
+import fll.db.Queries;
 import fll.Team;
 import fll.Utilities;
 

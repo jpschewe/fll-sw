@@ -4,7 +4,7 @@
 
 <%@ page import="fll.Team" %>
 <%@ page import="fll.Utilities" %>
-<%@ page import="fll.Queries" %>
+<%@ page import="fll.db.Queries" %>
 <%@ page import="fll.web.playoff.Playoff" %>
 <%@ page import="fll.web.playoff.BracketData" %>
   

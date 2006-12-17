@@ -1,7 +1,5 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.xml.GenerateDB"%>
-
 <c:if
  test="${not empty param.changeDatabase || not empty param.resetDatabase}">
  <c:if test="${not empty param.changeDatabase}" var="test">

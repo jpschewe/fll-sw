@@ -5,7 +5,7 @@
  */
 package fll.web.report;
 
-import fll.Queries;
+import fll.db.Queries;
 import fll.Utilities;
 
 import java.io.IOException;

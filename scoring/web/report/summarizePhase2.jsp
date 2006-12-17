@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.ScoreStandardization" %>
-<%@ page import="fll.Queries" %>
+<%@ page import="fll.db.Queries" %>
 <%@ page import="java.sql.Connection" %>
 <%@ page import="org.w3c.dom.Document" %>
 

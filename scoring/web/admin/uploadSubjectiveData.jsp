@@ -7,7 +7,8 @@
 <%@ page import="java.io.File" %>
 
 <%@ page import="java.sql.Connection" %>
-  
+<%@ page import="fll.db.Queries" %>  
+<%@ page import="org.w3c.dom.Document" %>
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />

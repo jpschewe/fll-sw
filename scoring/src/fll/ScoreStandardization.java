@@ -19,6 +19,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import fll.db.Queries;
+
 
 /**
  * Does score standardization routines from the web.

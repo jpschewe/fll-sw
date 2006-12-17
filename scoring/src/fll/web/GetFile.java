@@ -7,7 +7,7 @@ package fll.web;
 
 import com.lowagie.text.DocumentException;
 
-import fll.Queries;
+import fll.db.Queries;
 import fll.Team;
 import fll.Utilities;
 

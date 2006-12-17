@@ -3,7 +3,7 @@
  * INSciTE is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.xml;
+package fll.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,7 +17,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import fll.Queries;
 import fll.Utilities;
 
 /**

@@ -1,3 +1,5 @@
+* added the ability to dump the database as a zip file containing CSV files and the challenge descriptor.
+
 * fixed score entry check for initialized playoff brackets to use event division instead of team division.
 
 * added ability to choose what rounds are displayed in the printable and scoresheet generation brackets
@@ -7,8 +9,6 @@
 * modified playoff menu page choices to use consistent language for all bracket page links; removed warnings on bracket page links, as it is no longer harmful to load any of the bracket pages before playoff initialization - the bracket pages will just come up with a title and nothing else
 
 * improved output of the playoff/check.jsp page to explicitly state that no teams were found with fewer or more scores than seeding rounds
-
-Release 2.10
 
 * remove experimental warning from PDF brackets (1605785)
 

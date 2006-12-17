@@ -1,17 +1,11 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Utilities" %>
-<%@ page import="fll.Queries" %>
-<%@ page import="fll.xml.GenerateDB" %>
   
-<%@ page import="java.sql.Connection" %>
-<%@ page import="java.sql.PreparedStatement" %>
-<%@ page import="java.sql.ResultSet" %>
 <%@ page import="java.io.File" %>
-<%@ page import="java.io.FileFilter" %>
-<%@ page import="java.io.FilenameFilter" %>
 
-<%@ page import="java.util.Vector" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
       
 <%
 // All images shall be located under slideshow/images in the fll web folder.
@@ -25,7 +19,7 @@ if(null != session.getAttribute("slideShowLastImage")) {
 }
 
 File[] directories = {new  File(imagePath)};
-Vector<String> files = new Vector<String>();
+List<String> files = new ArrayList<String>();
 Utilities.buildGraphicFileList("", directories, files);
 
 if(files.size() == 0) {
@@ -34,9 +28,9 @@ if(files.size() == 0) {
 else {
   int oldFileIdx = files.indexOf(lastImage);
   if(oldFileIdx < 0 || oldFileIdx == files.size()-1)
-    lastImage = files.elementAt(0);
+    lastImage = files.get(0);
   else
-    lastImage = files.elementAt(oldFileIdx+1);
+    lastImage = files.get(oldFileIdx+1);
 }
 session.setAttribute("slideShowLastImage",lastImage);
 

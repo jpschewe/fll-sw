@@ -3,8 +3,10 @@
  * INSciTE is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll;
+package fll.db;
 
+import fll.Team;
+import fll.Utilities;
 import fll.web.playoff.Playoff;
 import fll.xml.XMLUtils;
 

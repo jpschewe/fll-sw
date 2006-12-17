@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
       
 <%@ page import="fll.Team" %>
-<%@ page import="fll.Queries" %>
+<%@ page import="fll.db.Queries" %>
 <%@ page import="fll.Utilities" %>
 <%@ page import="fll.web.playoff.Playoff" %>
 <%@ page import="fll.web.scoreEntry.ScoreEntry" %>
