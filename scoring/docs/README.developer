@@ -70,11 +70,16 @@ JDK:
 
 ANT: 
   
-- compile with 'ant compile'
+- compile with 'ant -lib lib/ant -lib lib/test compile'
 
 - start tomcat with startup in build/tomcat/bin
 
 - goto http://localhost:9080/fll-sw/index.jsp
+
+----------
+Eclipse can be used for development as well.
+
+- make sure you tell eclipse that ant needs the jar files in lib/ant and lib/test to execute
 
 ----------
 SVN notes:
