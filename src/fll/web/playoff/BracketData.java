@@ -7,6 +7,7 @@ import java.sql.Statement;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -364,12 +365,16 @@ public class BracketData {
    *         instance of BracketData, or 0 if there are no rows in it.
    */
   public int getNumRows() {
-    if(_firstRound < _finalsRound && _lastRound >= _finalsRound) {
-      final int sfr = _bracketData.get(new Integer(_finalsRound)).lastKey().intValue();
-      final int fr = _bracketData.get(new Integer(_firstRound)).lastKey().intValue();
-      return sfr > fr ? sfr : fr;
+    try {
+      if(_firstRound < _finalsRound && _lastRound >= _finalsRound) {
+        final int sfr = _bracketData.get(new Integer(_finalsRound)).lastKey().intValue();
+        final int fr = _bracketData.get(new Integer(_firstRound)).lastKey().intValue();
+        return sfr > fr ? sfr : fr;
+      }
+      return _bracketData.get(new Integer(_firstRound)).lastKey().intValue();
+    } catch(NoSuchElementException e) {
+      return 0;
     }
-    return _bracketData.get(new Integer(_firstRound)).lastKey().intValue();
   }
   
   public int getFirstRound() {
@@ -503,7 +508,7 @@ public class BracketData {
    */
   public String getHtmlHeaderRow() {
     StringBuffer sb = new StringBuffer("<tr>\n");
-    for(int i=_firstRound; i < _lastRound; i++) {
+    for(int i=_firstRound; i <= _lastRound && i <= _finalsRound; i++) {
       sb.append("  <th colspan='2'>Playoff Round " + i + "</th>\n");
     }
     sb.append("</tr>\n");
@@ -697,7 +702,7 @@ public class BracketData {
 
     // Build the cells...
     int matchNum = 1;
-    for(int i = _firstRound; i < _lastRound; i++) {
+    for(int i = _firstRound; i <= _lastRound && i <= _finalsRound; i++) {
       SortedMap<Integer, BracketDataType> roundData =
         _bracketData.get(new Integer(i));
       if(roundData != null) {

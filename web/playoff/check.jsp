@@ -29,15 +29,18 @@ final String division = request.getParameter("division");
     <%} else {%>
       [Division: <%=division%>
     <%} %></h2>
-      <p>Teams with less runs than seeding rounds. This will not show teams
-      that have no runs.
+      <p>Teams with fewer runs than seeding rounds. Teams with no runs are excluded from this check.
         <ul>
 <%
 final List less = Queries.getTeamsNeedingSeedingRuns(connection, tournamentTeams, division);
 final Iterator lessIter = less.iterator();
-while(lessIter.hasNext()) {
-  final Team team = (Team)lessIter.next();
-  out.println("<li>" + team.getTeamName() + "(" + team.getTeamNumber() + ")</li>");
+if(lessIter.hasNext()) {
+  while(lessIter.hasNext()) {
+    final Team team = (Team)lessIter.next();
+    out.println("<li>" + team.getTeamName() + "(" + team.getTeamNumber() + ")</li>");
+  }
+} else {
+  out.println("<i>No teams have fewer runs than seeding rounds.</i>");
 }
 %>
         </ul>
@@ -48,9 +51,13 @@ while(lessIter.hasNext()) {
 <%
 final List more = Queries.getTeamsWithExtraRuns(connection, tournamentTeams, division);
 final Iterator moreIter = more.iterator();
-while(moreIter.hasNext()) {
-  final Team team = (Team)moreIter.next();
-  out.println("<li>" + team.getTeamName() + "(" + team.getTeamNumber() + ")</li>");
+if(moreIter.hasNext()) {
+  while(moreIter.hasNext()) {
+    final Team team = (Team)moreIter.next();
+    out.println("<li>" + team.getTeamName() + "(" + team.getTeamNumber() + ")</li>");
+  }
+} else {
+  out.println("<i>No teams have more runs than seeding rounds.</i>");
 }
 %>
         </ul>
