@@ -4,7 +4,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jstl/fmt" %>
 
 <%@ page import="fll.Utilities" %>
-<%@ page import="fll.Queries" %>
+<%@ page import="fll.db.Queries" %>
   
 <%@ page import="java.sql.Connection" %>
   

@@ -2,17 +2,9 @@
 
 <%@ page import="org.w3c.dom.Document" %>
 
-<%@ page import="fll.Team" %>
-<%@ page import="fll.Utilities" %>
-<%@ page import="fll.Queries" %>
-<%@ page import="fll.web.playoff.Playoff" %>
+<%@ page import="fll.db.Queries" %>
 <%@ page import="fll.web.playoff.BracketData" %>
   
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.LinkedList" %>
-<%@ page import="java.util.Iterator" %>
-
 <%@ page import="java.sql.Connection" %>
   
 <%

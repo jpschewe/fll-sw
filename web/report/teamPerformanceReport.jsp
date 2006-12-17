@@ -1,11 +1,13 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
+<%@ page import="fll.db.Queries" %>
+<%@ page import="java.sql.Connection" %>
+
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
 pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection));
 %>
 
-<%@ page import="org.w3c.dom.Document" %>
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />

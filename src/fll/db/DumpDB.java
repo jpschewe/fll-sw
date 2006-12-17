@@ -29,9 +29,13 @@ import fll.xml.XMLWriter;
  * @version $Revision$
  *
  */
-public class DumpDB {
+public final class DumpDB {
 
   private static final Logger LOG = Logger.getLogger(DumpDB.class);
+
+  private DumpDB() {
+    // no instances
+  }
   
   /**
    * Dump the database to a zip file.
@@ -130,6 +134,15 @@ public class DumpDB {
       output.putNextEntry(new ZipEntry("tablenames.csv"));
       csvwriter = new CSVWriter(outputWriter);
       rs = stmt.executeQuery("SELECT * FROM tablenames");
+      csvwriter.writeAll(rs, true);
+      csvwriter.flush();
+      Utilities.closeResultSet(rs);
+      output.closeEntry();
+
+      // FinalScores
+      output.putNextEntry(new ZipEntry("FinalScores.csv"));
+      csvwriter = new CSVWriter(outputWriter);
+      rs = stmt.executeQuery("SELECT * FROM FinalScores");
       csvwriter.writeAll(rs, true);
       csvwriter.flush();
       Utilities.closeResultSet(rs);

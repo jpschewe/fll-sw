@@ -3,11 +3,12 @@
  * INSciTE is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.xml;
+package fll.db;
 
-import fll.Queries;
 import fll.Team;
 import fll.Utilities;
+import fll.xml.ChallengeParser;
+import fll.xml.XMLWriter;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

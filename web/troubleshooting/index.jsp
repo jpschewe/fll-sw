@@ -1,7 +1,5 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="fll.Queries" %>
-
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />

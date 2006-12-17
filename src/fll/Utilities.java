@@ -16,7 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
-import java.util.Vector;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hsqldb.Server;
@@ -295,7 +295,7 @@ public final class Utilities {
     }
   };
   
-  public static void buildGraphicFileList(final String p, final File[] d, final Vector<String> f) {
+  public static void buildGraphicFileList(final String p, final File[] d, final List<String> f) {
     //System.out.println("buildGraphicFileList("+p+","+Arrays.toString(d)+","+f.toString()+")");
     for(int i = 0; i < d.length; i++) {
       String np = (p.length()==0 ? p : p + "/") + d[i].getName();
@@ -304,7 +304,7 @@ public final class Utilities {
         //System.out.println("files: " + Arrays.toString(files));
         java.util.Arrays.sort(files);
         for(int j = 0; j < files.length; j++) {
-          f.addElement(np + "/" + files[j]);
+          f.add(np + "/" + files[j]);
         }
       } else {
         LOG.debug("files: null");

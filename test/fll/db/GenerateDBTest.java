@@ -3,7 +3,7 @@
  * INSciTE is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.xml;
+package fll.db;
 
 import java.io.File;
 
@@ -14,6 +14,9 @@ import junit.framework.TestCase;
 import org.apache.log4j.Logger;
 
 import org.w3c.dom.Document;
+
+import fll.xml.ChallengeParser;
+
 import java.io.UnsupportedEncodingException;
 import java.io.InputStream;
 import junit.framework.Assert;

@@ -2,7 +2,7 @@
 
 <%@ taglib uri="/WEB-INF/tld/taglib62.tld" prefix="up" %>
 
-<%@ page import="fll.Queries" %>
+<%@ page import="fll.db.Queries" %>
 <%@ page import="fll.web.admin.UploadTeams" %>
 
 <%@ page import="java.io.File" %>

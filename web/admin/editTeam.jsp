@@ -6,7 +6,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Utilities" %>
-<%@ page import="fll.Queries" %>
+<%@ page import="fll.db.Queries" %>
 
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Iterator" %>

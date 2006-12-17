@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.web.report.ScoreGroupScores" %>
-<%@ page import="fll.Queries" %>
+<%@ page import="fll.db.Queries" %>
       
 <%@ page import="java.sql.Connection" %>
 

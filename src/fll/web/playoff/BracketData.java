@@ -12,7 +12,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import fll.Queries;
+import fll.db.Queries;
 import fll.Team;
 import fll.Utilities;
 

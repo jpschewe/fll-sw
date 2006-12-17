@@ -26,7 +26,7 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 
-import fll.Queries;
+import fll.db.Queries;
 import fll.Team;
 import fll.Utilities;
 

@@ -1,6 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="fll.Queries" %>
+<%@ page import="fll.db.Queries" %>
 <%@ page import="fll.Utilities" %>
       
 <%@ page import="java.sql.Statement" %>
