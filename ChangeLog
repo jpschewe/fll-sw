@@ -1,3 +1,4 @@
+Release 2.10
 * added the ability to dump the database as a zip file containing CSV files and the challenge descriptor.
 
 * fixed score entry check for initialized playoff brackets to use event division instead of team division.
