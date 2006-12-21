@@ -43,8 +43,7 @@ public final class Playoff {
   /**
    * Just for debugging.
    * 
-   * @param args
-   *          ignored
+   * @param args ignored
    */
   public static void main(final String[] args) {
     try {
@@ -71,15 +70,11 @@ public final class Playoff {
    * Build the list of teams ordered from top to bottom (visually) of a single
    * elimination bracket.
    * 
-   * @param connection
-   *          connection to the database
-   * @param divisionStr
-   *          the division to generate brackets for, as a String
-   * @param tournamentTeams
-   *          keyed by team number
+   * @param connection connection to the database
+   * @param divisionStr the division to generate brackets for, as a String
+   * @param tournamentTeams keyed by team number
    * @return a List of teams
-   * @throws SQLException
-   *           on a database error
+   * @throws SQLException on a database error
    */
   public static List<Team> buildInitialBracketOrder(final Connection connection, final String divisionStr, final Map tournamentTeams) throws SQLException {
 
@@ -112,36 +107,74 @@ public final class Playoff {
    * Queries.updateScoreTotals() to ensure the ComputedScore column is up to
    * date.
    * 
-   * @param connection
-   *          Database connection with write access to Performance table.
-   * @param document
-   *          XML document description of tournament.
-   * @param teamA
-   *          First team to check.
-   * @param request
-   *          The servlet request object containing the form data from a
+   * @param connection Database connection with write access to Performance
+   *          table.
+   * @param document XML document description of tournament.
+   * @param teamA First team to check.
+   * @param request The servlet request object containing the form data from a
    *          scoresheet which is to be tested against the score for teamA and
    *          the given runNumber in the database.
-   * @param runNumber
-   *          The run number to use for teamA's score.
+   * @param runNumber The run number to use for teamA's score.
    * @return The team that is the winner. Team.TIE is returned in the case of a
    *         tie and null when the score for teamA has not yet been entered.
    * @see Team#TIE
    * @see Team#NULL
    * @see fll.Queries#updateScoreTotals(Document, Connection)
-   * @throws SQLException
-   *           on a database error.
-   * @throws ParseException
-   *           if the XML document is invalid.
-   * @throws RuntimeException
-   *           if database contains no data for teamA for runNumber.
+   * @throws SQLException on a database error.
+   * @throws ParseException if the XML document is invalid.
+   * @throws RuntimeException if database contains no data for teamA for
+   *           runNumber.
    */
   public static Team pickWinner(final Connection connection, final Document document, final Team teamA, final HttpServletRequest request, final int runNumber)
       throws SQLException, ParseException {
-    final String tournament = Queries.getCurrentTournament(connection);
-
+    final TeamScore teamAScore = new DatabaseTeamScore(connection, document, teamA, runNumber);
     final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("TeamNumber")));
+    final TeamScore teamBScore = new HttpTeamScore(request, teamB, runNumber);
+    final Team retval = pickWinner(document, teamAScore, teamBScore);
+    teamAScore.cleanup();
+    teamBScore.cleanup();
+    return retval;
+  }
 
+  /**
+   * Decide who is the winner of runNumber. Calls Queries.updateScoreTotals() to
+   * ensure the ComputedScore column is up to date
+   * 
+   * @param connection database connection with write access to Performance
+   *          table
+   * @param document XML document description of tournament
+   * @param teamA first team to check
+   * @param teamB second team to check
+   * @param runNumber what run to compare scores for
+   * @return the team that is the winner. Team.TIE is returned in the case of a
+   *         tie and null when the scores have not yet been entered
+   * @see Team#TIE
+   * @see fll.Queries#updateScoreTotals(Document, Connection)
+   * @throws SQLException on a database error
+   * @throws ParseException if the XML document is invalid
+   */
+  public static Team pickWinner(final Connection connection, final Document document, final Team teamA, final Team teamB, final int runNumber)
+      throws SQLException, ParseException {
+    final TeamScore teamAScore = new DatabaseTeamScore(connection, document, teamA, runNumber);
+    final TeamScore teamBScore = new DatabaseTeamScore(connection, document, teamA, runNumber);
+    final Team retval = pickWinner(document, teamAScore, teamBScore);
+    teamAScore.cleanup();
+    teamBScore.cleanup();
+    return retval;
+  }
+
+  /**
+   * Pick the winner between the scores of two teams
+   * 
+   * @param document the challenge document
+   * @param teamAScore the score for team A
+   * @param teamBScore the score for team B
+   * @return the winner, null on a tie or a missing score
+   */
+  public static Team pickWinner(final Document document, final TeamScore teamAScore, final TeamScore teamBScore) throws ParseException {
+
+    final Team teamA = teamAScore.getTeam();
+    final Team teamB = teamBScore.getTeam();
     // teamA can actually be a bye here in the degenerate case of a 3-team
     // tournament with 3rd/4th place brackets enabled...
     if (Team.BYE.equals(teamA)) {
@@ -149,23 +182,16 @@ public final class Playoff {
     } else if (Team.TIE.equals(teamA) || Team.TIE.equals(teamB)) {
       return null;
     } else {
-      // make sure scores are up to date
-      Queries.updateScoreTotals(document, connection);
-
-      if (performanceScoreExists(connection, teamA, runNumber)) {
-        final boolean noshowA = isNoShow(connection, tournament, teamA, runNumber);
-        final String noShow = request.getParameter("NoShow");
-        if (null == noShow) {
-          throw new RuntimeException("Missing parameter: NoShow");
-        }
-        final boolean noshowB = noShow.equalsIgnoreCase("true") || noShow.equalsIgnoreCase("t") || noShow.equals("1");
+      if (teamAScore.scoreExists() && teamBScore.scoreExists()) {
+        final boolean noshowA = teamAScore.isNoShow();
+        final boolean noshowB = teamBScore.isNoShow();
         if (noshowA && !noshowB) {
           return teamB;
         } else if (!noshowA && noshowB) {
           return teamA;
         } else {
-          final int scoreA = getPerformanceScore(connection, tournament, teamA, runNumber);
-          final int scoreB = Integer.parseInt(request.getParameter("totalScore"));
+          final int scoreA = teamAScore.getTotalScore();
+          final int scoreB = teamBScore.getTotalScore();
           if (scoreA < scoreB) {
             return teamB;
           } else if (scoreB < scoreA) {
@@ -175,235 +201,69 @@ public final class Playoff {
             final Element tiebreakerElement = (Element) performanceElement.getElementsByTagName("tiebreaker").item(0);
             final NodeList goals = performanceElement.getElementsByTagName("goal");
 
-            Statement stmtA = null;
-            ResultSet rsA = null;
-            try {
-              stmtA = connection.createStatement();
-              rsA = stmtA.executeQuery("SELECT * FROM Performance WHERE Tournament = '" + tournament + "' AND RunNumber = " + runNumber + " and TeamNumber = "
-                  + teamA.getTeamNumber());
-              if (rsA.next()) {
-                // walk test elements in tiebreaker to decide who wins
-                Node child = tiebreakerElement.getFirstChild();
-                while (null != child) {
-                  if (child instanceof Element) {
-                    final Element testElement = (Element) child;
-                    if ("test".equals(testElement.getTagName())) {
-                      int sumA = 0;
-                      int sumB = 0;
-                      Node testChild = testElement.getFirstChild();
-                      while (null != testChild) {
-                        if (testChild instanceof Element) {
-                          final Element termElement = (Element) testChild;
-                          final String goalName = termElement.getAttribute("goal");
-                          final Element goalDefinition = findGoalDefinition(goals, goalName);
+            // walk test elements in tiebreaker to decide who wins
+            Node child = tiebreakerElement.getFirstChild();
+            while (null != child) {
+              if (child instanceof Element) {
+                final Element testElement = (Element) child;
+                if ("test".equals(testElement.getTagName())) {
+                  int sumA = 0;
+                  int sumB = 0;
+                  Node testChild = testElement.getFirstChild();
+                  while (null != testChild) {
+                    if (testChild instanceof Element) {
+                      final Element termElement = (Element) testChild;
+                      final String goalName = termElement.getAttribute("goal");
+                      final Element goalDefinition = findGoalDefinition(goals, goalName);
 
-                          final NodeList values = goalDefinition.getElementsByTagName("value");
-                          int valueA = -1;
-                          int valueB = -1;
-                          if (values.getLength() == 0) {
-                            valueA = rsA.getInt(goalName);
-                            valueB = Integer.parseInt(request.getParameter(goalName));
-                          } else {
-                            // enumerated
-                            final int multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalDefinition.getAttribute("multiplier")).intValue();
-                            final String enumA = rsA.getString(goalName);
-                            final String enumB = request.getParameter(goalName);
-                            boolean foundA = false;
-                            boolean foundB = false;
-                            for (int v = 0; v < values.getLength() && (!foundA || !foundB); v++) {
-                              final Element value = (Element) values.item(v);
-                              final String enumValue = value.getAttribute("value");
-                              final int enumScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue() * multiplier;
-                              if (enumValue.equals(enumA)) {
-                                valueA = enumScore;
-                                foundA = true;
-                              }
-                              if (enumValue.equals(enumB)) {
-                                valueB = enumScore;
-                                foundB = true;
-                              }
-                            }
-                            if (!foundA || !foundB) {
-                              throw new RuntimeException("Error, enum value in database for goal: " + goalName + " is not a valid value." + " foundA: "
-                                  + foundA + " foundB: " + foundB);
-                            }
+                      final NodeList values = goalDefinition.getElementsByTagName("value");
+                      int valueA = -1;
+                      int valueB = -1;
+                      if (values.getLength() == 0) {
+                        valueA = teamAScore.getIntScore(goalName);
+                        valueB = teamBScore.getIntScore(goalName);
+                      } else {
+                        // enumerated
+                        final int multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalDefinition.getAttribute("multiplier")).intValue();
+                        final String enumA = teamAScore.getEnumScore(goalName);
+                        final String enumB = teamBScore.getEnumScore(goalName);
+                        boolean foundA = false;
+                        boolean foundB = false;
+                        for (int v = 0; v < values.getLength() && (!foundA || !foundB); v++) {
+                          final Element value = (Element) values.item(v);
+                          final String enumValue = value.getAttribute("value");
+                          final int enumScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue() * multiplier;
+                          if (enumValue.equals(enumA)) {
+                            valueA = enumScore;
+                            foundA = true;
                           }
-
-                          final int coefficient = Utilities.NUMBER_FORMAT_INSTANCE.parse(termElement.getAttribute("coefficient")).intValue();
-                          sumA += valueA * coefficient;
-                          sumB += valueB * coefficient;
-                        }
-                        testChild = testChild.getNextSibling();
-                      }
-
-                      final String highlow = testElement.getAttribute("winner");
-                      if (sumA > sumB) {
-                        return ("high".equals(highlow) ? teamA : teamB);
-                      } else if (sumA < sumB) {
-                        return ("high".equals(highlow) ? teamB : teamA);
-                      }
-                    }
-                  }
-                  child = child.getNextSibling();
-                }
-              } else {
-                throw new RuntimeException("Missing performance scores for teams: " + teamA.getTeamNumber() + " for run: " + runNumber + " tournament: "
-                    + tournament);
-              }
-            } finally {
-              Utilities.closeResultSet(rsA);
-              Utilities.closeStatement(stmtA);
-            }
-            return Team.TIE;
-          }
-        }
-      } else {
-        return null;
-      }
-    }
-  }
-
-  /**
-   * Decide who is the winner of runNumber. Calls Queries.updateScoreTotals() to
-   * ensure the ComputedScore column is up to date
-   * 
-   * @param connection
-   *          database connection with write access to Performance table
-   * @param document
-   *          XML document description of tournament
-   * @param teamA
-   *          first team to check
-   * @param teamB
-   *          second team to check
-   * @param runNumber
-   *          what run to compare scores for
-   * @return the team that is the winner. Team.TIE is returned in the case of a
-   *         tie and null when the scores have not yet been entered
-   * @see Team#TIE
-   * @see fll.Queries#updateScoreTotals(Document, Connection)
-   * @throws SQLException
-   *           on a database error
-   * @throws ParseException
-   *           if the XML document is invalid
-   */
-  public static Team pickWinner(final Connection connection, final Document document, final Team teamA, final Team teamB, final int runNumber)
-      throws SQLException, ParseException {
-    final String tournament = Queries.getCurrentTournament(connection);
-
-    if (Team.BYE.equals(teamA)) {
-      return teamB;
-    } else if (Team.BYE.equals(teamB)) {
-      return teamA;
-    } else if (Team.TIE.equals(teamA) || Team.TIE.equals(teamB)) {
-      return null;
-    } else {
-      // make sure scores are up to date
-      Queries.updateScoreTotals(document, connection);
-
-      if (performanceScoreExists(connection, teamA, runNumber) && performanceScoreExists(connection, teamB, runNumber)) {
-        final boolean noshowA = isNoShow(connection, tournament, teamA, runNumber);
-        final boolean noshowB = isNoShow(connection, tournament, teamB, runNumber);
-        if (noshowA && !noshowB) {
-          return teamB;
-        } else if (!noshowA && noshowB) {
-          return teamA;
-        } else {
-          final int scoreA = getPerformanceScore(connection, tournament, teamA, runNumber);
-          final int scoreB = getPerformanceScore(connection, tournament, teamB, runNumber);
-          if (scoreA < scoreB) {
-            return teamB;
-          } else if (scoreB < scoreA) {
-            return teamA;
-          } else {
-            final Element performanceElement = (Element) document.getDocumentElement().getElementsByTagName("Performance").item(0);
-            final Element tiebreakerElement = (Element) performanceElement.getElementsByTagName("tiebreaker").item(0);
-            final NodeList goals = performanceElement.getElementsByTagName("goal");
-
-            Statement stmtA = null;
-            Statement stmtB = null;
-            ResultSet rsA = null;
-            ResultSet rsB = null;
-            try {
-              stmtA = connection.createStatement();
-              stmtB = connection.createStatement();
-              rsA = stmtA.executeQuery("SELECT * FROM Performance WHERE Tournament = '" + tournament + "' AND RunNumber = " + runNumber + " and TeamNumber = "
-                  + teamA.getTeamNumber());
-              rsB = stmtB.executeQuery("SELECT * FROM Performance WHERE Tournament = '" + tournament + "' AND RunNumber = " + runNumber + " and TeamNumber = "
-                  + teamB.getTeamNumber());
-              if (rsA.next() && rsB.next()) {
-                // walk test elements in tiebreaker to decide who wins
-                Node child = tiebreakerElement.getFirstChild();
-                while (null != child) {
-                  if (child instanceof Element) {
-                    final Element testElement = (Element) child;
-                    if ("test".equals(testElement.getTagName())) {
-                      final String goalName = testElement.getAttribute("goal");
-                      int sumA = 0;
-                      int sumB = 0;
-                      Node testChild = testElement.getFirstChild();
-                      while (null != testChild) {
-                        if (testChild instanceof Element) {
-                          final Element termElement = (Element) testChild;
-                          final Element goalDefinition = findGoalDefinition(goals, goalName);
-
-                          final NodeList values = goalDefinition.getElementsByTagName("value");
-                          int valueA = -1;
-                          int valueB = -1;
-                          if (values.getLength() == 0) {
-                            valueA = rsA.getInt(goalName);
-                            valueB = rsB.getInt(goalName);
-                          } else {
-                            // enumerated
-                            final int multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalDefinition.getAttribute("multiplier")).intValue();
-                            final String enumA = rsA.getString(goalName);
-                            final String enumB = rsB.getString(goalName);
-                            boolean foundA = false;
-                            boolean foundB = false;
-                            for (int v = 0; v < values.getLength() && (!foundA || !foundB); v++) {
-                              final Element value = (Element) values.item(v);
-                              final String enumValue = value.getAttribute("value");
-                              final int enumScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).intValue() * multiplier;
-                              if (enumValue.equals(enumA)) {
-                                valueA = enumScore;
-                                foundA = true;
-                              }
-                              if (enumValue.equals(enumB)) {
-                                valueB = enumScore;
-                                foundB = true;
-                              }
-                            }
-
-                            if (!foundA || !foundB) {
-                              throw new RuntimeException("Error, enum value in database for goal: " + goalName + " is not a valid value." + " foundA: "
-                                  + foundA + " foundB: " + foundB);
-                            }
+                          if (enumValue.equals(enumB)) {
+                            valueB = enumScore;
+                            foundB = true;
                           }
-                          final int coefficient = Utilities.NUMBER_FORMAT_INSTANCE.parse(termElement.getAttribute("coefficient")).intValue();
-                          sumA += valueA * coefficient;
-                          sumB += valueB * coefficient;
                         }
-                        testChild = testChild.getNextSibling();
+                        if (!foundA || !foundB) {
+                          throw new RuntimeException("Error, enum value in database for goal: " + goalName + " is not a valid value." + " foundA: " + foundA
+                              + " foundB: " + foundB);
+                        }
                       }
 
-                      final String highlow = testElement.getAttribute("winner");
-                      if (sumA > sumB) {
-                        return ("high".equals(highlow) ? teamA : teamB);
-                      } else if (sumA < sumB) {
-                        return ("high".equals(highlow) ? teamB : teamA);
-                      }
+                      final int coefficient = Utilities.NUMBER_FORMAT_INSTANCE.parse(termElement.getAttribute("coefficient")).intValue();
+                      sumA += valueA * coefficient;
+                      sumB += valueB * coefficient;
                     }
+                    testChild = testChild.getNextSibling();
                   }
-                  child = child.getNextSibling();
+
+                  final String highlow = testElement.getAttribute("winner");
+                  if (sumA > sumB) {
+                    return ("high".equals(highlow) ? teamA : teamB);
+                  } else if (sumA < sumB) {
+                    return ("high".equals(highlow) ? teamB : teamA);
+                  }
                 }
-              } else {
-                throw new RuntimeException("Missing performance scores for teams: " + teamA.getTeamNumber() + " or " + teamB.getTeamNumber() + " for run: "
-                    + runNumber + " tournament: " + tournament);
               }
-            } finally {
-              Utilities.closeResultSet(rsA);
-              Utilities.closeResultSet(rsB);
-              Utilities.closeStatement(stmtA);
-              Utilities.closeStatement(stmtB);
+              child = child.getNextSibling();
             }
             return Team.TIE;
           }
@@ -418,8 +278,7 @@ public final class Playoff {
    * Insert a by run for a given team, tournament, run number in the performance
    * table.
    * 
-   * @throws SQLException
-   *           on a database error
+   * @throws SQLException on a database error
    */
   public static void insertBye(final Connection connection, final Team team, final int runNumber) throws SQLException {
     final String tournament = Queries.getCurrentTournament(connection);
@@ -451,8 +310,7 @@ public final class Playoff {
    * Test if a performance score exists for the given team, tournament and run
    * number
    * 
-   * @throws SQLException
-   *           on a database error
+   * @throws SQLException on a database error
    */
   public static boolean performanceScoreExists(final Connection connection, final int teamNumber, final int runNumber) throws SQLException {
     final String tournament = Queries.getCurrentTournament(connection);
@@ -473,10 +331,8 @@ public final class Playoff {
   /**
    * Get the performance score for the given team, tournament and run number
    * 
-   * @throws SQLException
-   *           on a database error
-   * @throws IllegalArgumentException
-   *           if no score exists
+   * @throws SQLException on a database error
+   * @throws IllegalArgumentException if no score exists
    */
   public static int getPerformanceScore(final Connection connection, final String tournament, final Team team, final int runNumber) throws SQLException,
       IllegalArgumentException {
@@ -505,10 +361,8 @@ public final class Playoff {
   /**
    * Get the value of NoShow for the given team, tournament and run number
    * 
-   * @throws SQLException
-   *           on a database error
-   * @throws IllegalArgumentException
-   *           if no score exists
+   * @throws SQLException on a database error
+   * @throws IllegalArgumentException if no score exists
    */
   public static boolean isNoShow(final Connection connection, final String tournament, final Team team, final int runNumber) throws SQLException,
       IllegalArgumentException {
@@ -532,10 +386,8 @@ public final class Playoff {
   /**
    * Get the value of Bye for the given team, tournament and run number
    * 
-   * @throws SQLException
-   *           on a database error
-   * @throws IllegalArgumentException
-   *           if no score exists
+   * @throws SQLException on a database error
+   * @throws IllegalArgumentException if no score exists
    */
   public static boolean isBye(final Connection connection, final String tournament, final Team team, final int runNumber) throws SQLException,
       IllegalArgumentException {
@@ -1108,13 +960,9 @@ public final class Playoff {
            * PlayoffData SET AssignedTable=?" + " WHERE Tournament='" +
            * currentTournament + "'" + " AND event_division='" + division + "'" + "
            * AND PlayoffRound=" + round1 + " AND LineNumber=?");
-           * 
            * if(!tableIt.hasNext()) { tableIt = tournamentTables.iterator(); }
-           * final String[] tblNames = tableIt.next();
-           * 
-           * stmt.setString(1, tblNames[0]); stmt.setInt(2, line1);
-           * stmt.execute();
-           * 
+           * final String[] tblNames = tableIt.next(); stmt.setString(1,
+           * tblNames[0]); stmt.setInt(2, line1); stmt.execute();
            * stmt.setString(1, tblNames[1]); stmt.setInt(2, line2);
            * stmt.execute(); } finally { Utilities.closePreparedStatement(stmt); } }
            */
