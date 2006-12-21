@@ -111,11 +111,9 @@ public final class Queries {
    * Get the list of divisions at this tournament as a List of Strings. Uses
    * getCurrentTournament to determine the tournament.
    * 
-   * @param connection
-   *          the database connection
+   * @param connection the database connection
    * @return the List of divisions. List of strings.
-   * @throws SQLException
-   *           on a database error
+   * @throws SQLException on a database error
    * @see #getCurrentTournament(Connection)
    */
   public static List<String> getDivisions(final Connection connection) throws SQLException {
@@ -195,12 +193,9 @@ public final class Queries {
    * expected to be in request.
    * 
    * @return the SQL executed
-   * @throws SQLException
-   *           on a database error.
-   * @throws RuntimeException
-   *           if a parameter is missing.
-   * @throws ParseException
-   *           if the XML document is invalid.
+   * @throws SQLException on a database error.
+   * @throws RuntimeException if a parameter is missing.
+   * @throws ParseException if the XML document is invalid.
    */
   public static String insertPerformanceScore(final Document document, final Connection connection, final HttpServletRequest request) throws SQLException,
       ParseException, RuntimeException {
@@ -364,12 +359,9 @@ public final class Queries {
    * to be in request.
    * 
    * @return the SQL executed
-   * @throws SQLException
-   *           on a database error.
-   * @throws ParseException
-   *           if the XML document is invalid.
-   * @throws RuntimeException
-   *           if a parameter is missing.
+   * @throws SQLException on a database error.
+   * @throws ParseException if the XML document is invalid.
+   * @throws RuntimeException if a parameter is missing.
    */
   public static String updatePerformanceScore(final Document document, final Connection connection, final HttpServletRequest request) throws SQLException,
       ParseException, RuntimeException {
@@ -546,11 +538,11 @@ public final class Queries {
    * to be in request.
    * 
    * @return the SQL executed
-   * @throws RuntimeException
-   *           if a parameter is missing or if the playoff meta data would
-   *           become inconsistent due to the deletion.
+   * @throws RuntimeException if a parameter is missing or if the playoff meta
+   *           data would become inconsistent due to the deletion.
    */
-  public static String deletePerformanceScore(final Connection connection, final HttpServletRequest request) throws SQLException, RuntimeException, ParseException {
+  public static String deletePerformanceScore(final Connection connection, final HttpServletRequest request) throws SQLException, RuntimeException,
+      ParseException {
     final String currentTournament = getCurrentTournament(connection);
     final StringBuffer sql = new StringBuffer();
 
@@ -661,13 +653,11 @@ public final class Queries {
   /**
    * Get the division that a team is in for the current tournament.
    * 
-   * @param teamNumber
-   *          the team's number
+   * @param teamNumber the team's number
    * @return the event division for the team
-   * @throws SQLException
-   *           on a database error
-   * @throws RuntimeException
-   *           if <code>teamNumber</code> cannot be found in TournamenTeams
+   * @throws SQLException on a database error
+   * @throws RuntimeException if <code>teamNumber</code> cannot be found in
+   *           TournamenTeams
    */
   public static String getEventDivision(final Connection connection, final int teamNumber) throws SQLException, RuntimeException {
     final String currentTournament = getCurrentTournament(connection);
@@ -692,15 +682,11 @@ public final class Queries {
   /**
    * Get a list of team numbers that have less runs than seeding rounds
    * 
-   * @param connection
-   *          connection to the database
-   * @param tournamentTeams
-   *          keyed by team number
+   * @param connection connection to the database
+   * @param tournamentTeams keyed by team number
    * @return a List of Team objects
-   * @throws SQLException
-   *           on a database error
-   * @throws RuntimeException
-   *           if a team can't be found in tournamentTeams
+   * @throws SQLException on a database error
+   * @throws RuntimeException if a team can't be found in tournamentTeams
    */
   public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection, final Map<Integer, Team> tournamentTeams, final String division)
       throws SQLException, RuntimeException {
@@ -709,17 +695,13 @@ public final class Queries {
     ResultSet rs = null;
     try {
       if ("__all__".equals(division)) {
-        prep = connection.prepareStatement("SELECT TeamNumber,Count(*) FROM Performance WHERE Tournament = ? GROUP BY TeamNumber"
-            + " HAVING Count(*) < ?");
+        prep = connection.prepareStatement("SELECT TeamNumber,Count(*) FROM Performance WHERE Tournament = ? GROUP BY TeamNumber" + " HAVING Count(*) < ?");
         prep.setString(1, currentTournament);
         prep.setInt(2, getNumSeedingRounds(connection));
       } else {
         prep = connection.prepareStatement("SELECT Performance.TeamNumber,Count(*) FROM Performance,TournamentTeams"
-        + " WHERE Performance.TeamNumber = TournamentTeams.TeamNumber"
-        + " AND TournamentTeams.event_division = ?"
-        + " AND Tournament = ?"
-        + " GROUP BY Performance.TeamNumber"
-        + " HAVING Count(*) < ?");
+            + " WHERE Performance.TeamNumber = TournamentTeams.TeamNumber" + " AND TournamentTeams.event_division = ?" + " AND Tournament = ?"
+            + " GROUP BY Performance.TeamNumber" + " HAVING Count(*) < ?");
         prep.setString(1, division);
         prep.setString(2, currentTournament);
         prep.setInt(3, getNumSeedingRounds(connection));
@@ -745,15 +727,11 @@ public final class Queries {
   /**
    * Get a list of team numbers that have more runs than seeding rounds
    * 
-   * @param connection
-   *          connection to the database
-   * @param tournamentTeams
-   *          keyed by team number
+   * @param connection connection to the database
+   * @param tournamentTeams keyed by team number
    * @return a List of Team objects
-   * @throws SQLException
-   *           on a database error
-   * @throws RuntimeException
-   *           if a team can't be found in tournamentTeams
+   * @throws SQLException on a database error
+   * @throws RuntimeException if a team can't be found in tournamentTeams
    */
   public static List<Team> getTeamsWithExtraRuns(final Connection connection, final Map<Integer, Team> tournamentTeams, final String division)
       throws SQLException, RuntimeException {
@@ -768,11 +746,8 @@ public final class Queries {
         prep.setInt(2, getNumSeedingRounds(connection));
       } else {
         prep = connection.prepareStatement("SELECT Performance.TeamNumber,Count(*) FROM Performance,TournamentTeams"
-        + " WHERE Performance.TeamNumber = TournamentTeams.TeamNumber"
-        + " AND TournamentTeams.event_division = ?"
-        + " AND Tournament = ?"
-        + " GROUP BY Performance.TeamNumber"
-        + " HAVING Count(*) > ?");
+            + " WHERE Performance.TeamNumber = TournamentTeams.TeamNumber" + " AND TournamentTeams.event_division = ?" + " AND Tournament = ?"
+            + " GROUP BY Performance.TeamNumber" + " HAVING Count(*) > ?");
         prep.setString(1, division);
         prep.setString(2, currentTournament);
         prep.setInt(3, getNumSeedingRounds(connection));
@@ -798,17 +773,12 @@ public final class Queries {
   /**
    * Get the order of the teams as seeded in the performance rounds.
    * 
-   * @param connection
-   *          connection to the database
-   * @param divisionStr
-   *          the division to generate brackets for, as a String
-   * @param tournamentTeams
-   *          keyed by team number
+   * @param connection connection to the database
+   * @param divisionStr the division to generate brackets for, as a String
+   * @param tournamentTeams keyed by team number
    * @return a List of team numbers as Integers
-   * @throws SQLException
-   *           on a database error
-   * @throws RuntimeException
-   *           if a team can't be found in tournamentTeams
+   * @throws SQLException on a database error
+   * @throws RuntimeException if a team can't be found in tournamentTeams
    */
   public static List<Team> getPlayoffSeedingOrder(final Connection connection, final String divisionStr, final Map tournamentTeams) throws SQLException,
       RuntimeException {
@@ -817,13 +787,14 @@ public final class Queries {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT Performance.TeamNumber,MAX(Performance.ComputedTotal) AS Score FROM Performance,Teams, TournamentTeams WHERE Performance.RunNumber <= ?"
-      + " AND Performance.Tournament = ? AND Teams.TeamNumber = Performance.TeamNumber AND Teams.TeamNumber = TournamentTeams.TeamNumber"
-      + " AND TournamentTeams.event_division = ? GROUP BY Performance.TeamNumber ORDER BY Score DESC, Performance.TeamNumber");
+      prep = connection
+          .prepareStatement("SELECT Performance.TeamNumber,MAX(Performance.ComputedTotal) AS Score FROM Performance,Teams, TournamentTeams WHERE Performance.RunNumber <= ?"
+              + " AND Performance.Tournament = ? AND Teams.TeamNumber = Performance.TeamNumber AND Teams.TeamNumber = TournamentTeams.TeamNumber"
+              + " AND TournamentTeams.event_division = ? GROUP BY Performance.TeamNumber ORDER BY Score DESC, Performance.TeamNumber");
       prep.setInt(1, getNumSeedingRounds(connection));
       prep.setString(2, currentTournament);
       prep.setString(3, divisionStr);
-      
+
       rs = prep.executeQuery();
       final List<Team> list = new ArrayList<Team>();
       while (rs.next()) {
@@ -847,8 +818,7 @@ public final class Queries {
    * value exists a value of 3 is inserted and then returned.
    * 
    * @return the number of seeding rounds
-   * @throws SQLException
-   *           on a database error
+   * @throws SQLException on a database error
    */
   public static int getNumSeedingRounds(final Connection connection) throws SQLException {
     ResultSet rs = null;
@@ -872,10 +842,8 @@ public final class Queries {
   /**
    * Set the number of seeding rounds.
    * 
-   * @param connection
-   *          the connection
-   * @param newSeedingRounds
-   *          the new value of seeding rounds
+   * @param connection the connection
+   * @param newSeedingRounds the new value of seeding rounds
    * @see #getNumSeedingRounds(Connection)
    */
   public static void setNumSeedingRounds(final Connection connection, final int newSeedingRounds) throws SQLException {
@@ -918,10 +886,8 @@ public final class Queries {
   /**
    * Set the current tournament in the database.
    * 
-   * @param connection
-   *          db connection
-   * @param currentTournament
-   *          the new value for the current tournament
+   * @param connection db connection
+   * @param currentTournament the new value for the current tournament
    * @return true if everything is fine, false if the value is not in the
    *         Tournaments table and therefore not set
    */
@@ -996,16 +962,11 @@ public final class Queries {
    * all tables specified by the challengeDocument. It is not an error if the
    * team doesn't exist.
    * 
-   * @param teamNumber
-   *          team to delete
-   * @param document
-   *          the challenge document
-   * @param connection
-   *          connection to database, needs delete privileges
-   * @param application
-   *          needed to remove cached team data
-   * @throws SQLException
-   *           on an error talking to the database
+   * @param teamNumber team to delete
+   * @param document the challenge document
+   * @param connection connection to database, needs delete privileges
+   * @param application needed to remove cached team data
+   * @throws SQLException on an error talking to the database
    */
   public static void deleteTeam(final int teamNumber, final Document document, final Connection connection, final ServletContext application)
       throws SQLException {
@@ -1042,14 +1003,10 @@ public final class Queries {
    * Total the scores in the database for tournament. Just totals each row for
    * tournament using document for the appropriate multipliers.
    * 
-   * @param document
-   *          the challenge document
-   * @param connection
-   *          connection to database, needs write privileges
-   * @throws SQLException
-   *           if an error occurs
-   * @throws NumberFormantException
-   *           if document has invalid numbers
+   * @param document the challenge document
+   * @param connection connection to database, needs write privileges
+   * @throws SQLException if an error occurs
+   * @throws NumberFormantException if document has invalid numbers
    */
   public static void updateScoreTotals(final Document document, final Connection connection) throws SQLException, ParseException {
     final String tournament = getCurrentTournament(connection);
@@ -1129,13 +1086,10 @@ public final class Queries {
    * validate the document, since it's assumed that the document was validated
    * before it was put in the database.
    * 
-   * @param connection
-   *          connection to the database
+   * @param connection connection to the database
    * @return the document
-   * @throws RuntimeException
-   *           if the document cannot be found
-   * @throws SQLException
-   *           on a database error
+   * @throws RuntimeException if the document cannot be found
+   * @throws SQLException on a database error
    */
   public static Document getChallengeDocument(final Connection connection) throws SQLException, RuntimeException {
 
@@ -1158,10 +1112,8 @@ public final class Queries {
   /**
    * Advance a team to the next tournament.
    * 
-   * @param connection
-   *          the database connection
-   * @param teamNumber
-   *          the team to advance
+   * @param connection the database connection
+   * @param teamNumber the team to advance
    * @return true on success. Failure indicates that no next tournament exists
    */
   public static boolean advanceTeam(final Connection connection, final int teamNumber) throws SQLException {
@@ -1232,15 +1184,11 @@ public final class Queries {
    * Change the current tournament for a team. This will delete all scores for
    * the team in it's current tournament.
    * 
-   * @param connection
-   *          db connection
-   * @param document
-   *          the description of the tournament, used to determine what tables
-   *          scores exist in
-   * @param teamNumber
-   *          the team
-   * @param newTournament
-   *          the new current tournament for this team
+   * @param connection db connection
+   * @param document the description of the tournament, used to determine what
+   *          tables scores exist in
+   * @param teamNumber the team
+   * @param newTournament the new current tournament for this team
    */
   public static void changeTeamCurrentTournament(final Connection connection, final Document document, final int teamNumber, final String newTournament)
       throws SQLException {
@@ -1268,7 +1216,7 @@ public final class Queries {
       prep.setString(2, currentTournament);
       prep.executeUpdate();
       Utilities.closePreparedStatement(prep);
-      
+
       // delete from TournamentTeams
       prep = connection.prepareStatement("DELETE FROM TournamentTeams WHERE TeamNumber = ? AND Tournament = ?");
       prep.setInt(1, teamNumber);
@@ -1290,7 +1238,7 @@ public final class Queries {
       prep.setString(3, getDivisionOfTeam(connection, teamNumber));
       prep.executeUpdate();
       Utilities.closePreparedStatement(prep);
-      
+
     } finally {
       Utilities.closePreparedStatement(prep);
     }
@@ -1300,13 +1248,10 @@ public final class Queries {
    * Demote the team to it's previous tournament. This will delete all scores
    * for the team in it's current tournament.
    * 
-   * @param connection
-   *          db connection
-   * @param document
-   *          the description of the tournament, used to determine what tables
-   *          scores exist in
-   * @param teamNumber
-   *          the team
+   * @param connection db connection
+   * @param document the description of the tournament, used to determine what
+   *          tables scores exist in
+   * @param teamNumber the team
    */
   public static void demoteTeam(final Connection connection, final Document document, final int teamNumber) throws SQLException {
 
@@ -1351,13 +1296,11 @@ public final class Queries {
   /**
    * Get the previous tournament for this team, given the current tournament.
    * 
-   * @param connection
-   *          the database connection
-   * @param teamNumber
-   *          the team number
-   * @param currentTournament
-   *          the current tournament to use to find the previous tournament,
-   *          generally this is the return value of getTeamCurrentTournament
+   * @param connection the database connection
+   * @param teamNumber the team number
+   * @param currentTournament the current tournament to use to find the previous
+   *          tournament, generally this is the return value of
+   *          getTeamCurrentTournament
    * @return the tournament, or null if no such tournament exists
    * @see #getTeamCurrentTournament(Connection, int)
    */
@@ -1386,10 +1329,8 @@ public final class Queries {
   /**
    * Get the next tournament for the given tournament.
    * 
-   * @param connection
-   *          the database connection
-   * @param tournament
-   *          the tournament to find the next tournament for
+   * @param connection the database connection
+   * @param tournament the tournament to find the next tournament for
    * @return the next tournament or null if no such tournament exists
    */
   public static String getNextTournament(final Connection connection, final String tournament) throws SQLException {
@@ -1509,10 +1450,8 @@ public final class Queries {
    * Make sure all of the judges are properly assigned for the current
    * tournament
    * 
-   * @param connection
-   *          the database connection
-   * @param document
-   *          XML document to describe the tournament
+   * @param connection the database connection
+   * @param document XML document to describe the tournament
    * @return true if everything is ok
    */
   public static boolean isJudgesProperlyAssigned(final Connection connection, final Document document) throws SQLException {
@@ -1547,16 +1486,12 @@ public final class Queries {
    * the specified division. Uses the current tournament value obtained from
    * getCurrentTournament().
    * 
-   * @param connection
-   *          The database connection to use.
-   * @param division
-   *          The division to check in the current tournament.
+   * @param connection The database connection to use.
+   * @param division The division to check in the current tournament.
    * @return A boolean, true if the PlayoffData table has been initialized,
    *         false if it has not.
-   * @throws SQLException
-   *           if database access fails.
-   * @throws RuntimeException
-   *           if query returns empty results.
+   * @throws SQLException if database access fails.
+   * @throws RuntimeException if query returns empty results.
    */
   public static boolean isPlayoffDataInitialized(final Connection connection, final String division) throws SQLException, RuntimeException {
     final String curTourney = getCurrentTournament(connection);
@@ -1657,8 +1592,7 @@ public final class Queries {
    * </tr>
    * </ol>
    * 
-   * @param index
-   *          the division index
+   * @param index the division index
    */
   public static String getColorForDivisionIndex(final int index) throws SQLException {
     final int idx = index % 4;
@@ -1681,8 +1615,7 @@ public final class Queries {
    * 
    * @return true if the score is a bye, false if it's not a bye or the score
    *         does not exist
-   * @throws SQLException
-   *           on a database error
+   * @throws SQLException on a database error
    */
   public static boolean isBye(final Connection connection, final String tournament, final int teamNumber, final int runNumber) throws SQLException,
       IllegalArgumentException {
@@ -1707,19 +1640,14 @@ public final class Queries {
    * Used to get the line number of a team from the playoff table for a specific
    * round of the playoff bracket.
    * 
-   * @param connection
-   *          Database connection to use.
-   * @param tournament
-   *          Tournament identifier.
-   * @param teamNumber
-   *          Team number for which to look.
-   * @param playoffRunNumber
-   *          Playoff round number to search. Based at 1.
+   * @param connection Database connection to use.
+   * @param tournament Tournament identifier.
+   * @param teamNumber Team number for which to look.
+   * @param playoffRunNumber Playoff round number to search. Based at 1.
    * @return The line number of the playoff bracket in which the team number is
    *         found, or a -1 if the team number was not found in the specified
    *         round of the PlayoffData table.
-   * @throws SQLException
-   *           on a database error.
+   * @throws SQLException on a database error.
    */
   public static int getPlayoffTableLineNumber(final Connection connection, final String tournament, final String teamNumber, final int playoffRunNumber)
       throws SQLException {
@@ -1744,20 +1672,14 @@ public final class Queries {
    * Gets the number of the team from the PlayoffData table given the
    * tournament, division, line number, and playoff round.
    * 
-   * @param connection
-   *          Database connection.
-   * @param tournament
-   *          Tournament identifier.
-   * @param division
-   *          Division string.
-   * @param lineNumber
-   *          Line number of the playoff bracket, based at 1.
-   * @param playoffRunNumber
-   *          Run number of the playoff bracket, based at 1.
+   * @param connection Database connection.
+   * @param tournament Tournament identifier.
+   * @param division Division string.
+   * @param lineNumber Line number of the playoff bracket, based at 1.
+   * @param playoffRunNumber Run number of the playoff bracket, based at 1.
    * @return The team number located at the specified location in the playoff
    *         bracket.
-   * @throws SQLException
-   *           if there is a database error.
+   * @throws SQLException if there is a database error.
    */
   public static int getTeamNumberByPlayoffLine(final Connection connection, final String tournament, final String division, final int lineNumber,
       final int playoffRunNumber) throws SQLException {
@@ -1788,15 +1710,12 @@ public final class Queries {
    * throughout the season.
    * 
    * 
-   * @param connection
-   *          Database connection.
-   * @param teamNumber
-   *          Number of the team from which to look up the division.
+   * @param connection Database connection.
+   * @param teamNumber Number of the team from which to look up the division.
    * @return String containing the division for the specified teams.
-   * @throws SQLException
-   *           on database errors.
-   * @throws RuntimeException
-   *           if the team number is not found in the Teams table.
+   * @throws SQLException on database errors.
+   * @throws RuntimeException if the team number is not found in the Teams
+   *           table.
    */
   public static String getDivisionOfTeam(final Connection connection, final int teamNumber) throws SQLException, RuntimeException {
     Statement stmt = null;
@@ -1819,14 +1738,11 @@ public final class Queries {
    * Returns the number of playoff rounds for the specified division. Depends on
    * the PlayoffData table having been initialized for that division.
    * 
-   * @param connection
-   *          The database connection.
-   * @param division
-   *          The division for which to get the number of playoff rounds.
+   * @param connection The database connection.
+   * @param division The division for which to get the number of playoff rounds.
    * @return The number of playoff rounds in the specified division, or 0 if
    *         brackets have not been initialized.
-   * @throws SQLException
-   *           on database errors.
+   * @throws SQLException on database errors.
    */
   public static int getNumPlayoffRounds(final Connection connection, final String division) throws SQLException {
     final int x = getFirstPlayoffRoundSize(connection, division);
@@ -1836,25 +1752,23 @@ public final class Queries {
       return 0;
     }
   }
-  
+
   /**
-   * Returns the max number of playoff rounds all divisions. Depends on
-   * the PlayoffData table having been initialized for that division.
+   * Returns the max number of playoff rounds all divisions. Depends on the
+   * PlayoffData table having been initialized for that division.
    * 
-   * @param connection
-   *          The database connection.
+   * @param connection The database connection.
    * @return The maximum number of playoff rounds in all divisions, or 0 if
    *         brackets have not been initialized.
-   * @throws SQLException
-   *           on database errors.
+   * @throws SQLException on database errors.
    */
   public static int getNumPlayoffRounds(final Connection connection) throws SQLException {
     int numRounds = 0;
-    for(String division : getDivisions(connection)) {
+    for (String division : getDivisions(connection)) {
       final int x = getFirstPlayoffRoundSize(connection, division);
       if (x > 0) {
         numRounds = Math.max((int) Math.round(Math.log(x) / Math.log(2)), numRounds);
-      } 
+      }
     }
     return numRounds;
   }
@@ -1862,15 +1776,12 @@ public final class Queries {
   /**
    * Get size of first playoff round.
    * 
-   * @param connection
-   *          Database connection to use.
-   * @param division
-   *          The division for which to look up round 1 size.
+   * @param connection Database connection to use.
+   * @param division The division for which to look up round 1 size.
    * @return The size of the first round of the playoffs. This is always a power
    *         of 2, and is greater than the number of teams in the tournament by
    *         the number of byes in the first round.
-   * @throws SQLException
-   *           on database error.
+   * @throws SQLException on database error.
    */
   public static int getFirstPlayoffRoundSize(final Connection connection, final String division) throws SQLException {
     final String tournament = getCurrentTournament(connection);
