@@ -37,7 +37,7 @@ if ("POST".equals(request.getMethod())) {
 </up:parse>
 
 <%
-        if (null != request.getAttribute("reinitializeDatabase")) {
+          if (null != request.getAttribute("reinitializeDatabase")) {
           final boolean forceRebuild = "1".equals(request.getAttribute("force_rebuild"));
           final InputStream xmlstream;
           if (null == xmlfile) {
@@ -58,25 +58,22 @@ if ("POST".equals(request.getMethod())) {
             message.append("<p id='success'><i>Successfully initialized database</i></p>");
           }
         } else {
-          message.append("reinitializeDatabase attribute not set? "
-              + request.getAttribute("rootUser"));
+          message.append("reinitializeDatabase attribute not set? " + request.getAttribute("rootUser"));
         } /* end if reinitializeDatabase */
       } /* end if POST */
 %>
 
 
-<p><%=message.toString()%> This will create a database called fll.<br>
-<form id='setup' action='index.jsp' method='post'
- enctype="multipart/form-data">XML description document <input
- type="file" size=32 " name="xmldocument"><br />
-<input type="checkbox" name='force_rebuild' value="1" /> Rebuild the
-whole database, including team data?<br />
+<p><%=message.toString()%> This will create a database called fll.</p>
+<form id='setup' action='index.jsp' method='post' enctype='multipart/form-data'>
 
-<input type='submit' name='reinitializeDatabase'
- value='Initialize Database'
- onclick='return confirm("This will erase ALL scores in the database fll (if it already exists), are you sure?")'>
+XML description document <input type='file' size='32' name='xmldocument'><br />
+
+<input type='checkbox' name='force_rebuild' value='1' /> Rebuild the whole database, including team data?<br />
+
+<input type='submit' name='reinitializeDatabase' value='Initialize Database' onclick='return confirm("This will erase ALL scores in the database fll (if it already exists), are you sure?")'>
+
 </form>
-</p>
 
 <%@ include file="/WEB-INF/jspf/footer.jspf"%>
 
