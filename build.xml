@@ -85,7 +85,7 @@
 		<pathelement location="${dir.lib}/test/Tidy.jar" />
 		<pathelement location="${dir.lib}/test/httpunit.jar" />
 		<pathelement location="${dir.lib}/test/js.jar" />
-		<pathelement location="${dir.lib}/test/junit-3.8.1.jar" />
+		<pathelement location="${dir.lib}/test/junit-4.1.jar" />
 		<pathelement location="${dir.lib}/test/nekohtml.jar" />
 	</path>
 

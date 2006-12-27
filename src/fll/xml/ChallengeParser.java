@@ -96,7 +96,7 @@ public final class ChallengeParser {
           if(systemID.endsWith("fll.xsd")) {
             //just use the one we store internally
             //final int slashidx = systemID.lastIndexOf("/") + 1;
-            return new InputSource(classLoader.getResourceAsStream("resources/fll.xsd")); // + systemID.substring(slashidx)));
+            return new InputSource(classLoader.getResourceAsStream("fll/resources/fll.xsd")); // + systemID.substring(slashidx)));
           } else {
             return null;
           }
