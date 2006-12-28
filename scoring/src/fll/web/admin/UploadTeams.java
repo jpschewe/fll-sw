@@ -5,19 +5,15 @@
  */
 package fll.web.admin;
 
-import fll.Utilities;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -31,6 +27,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
 
+import org.apache.log4j.Logger;
+
+import fll.Utilities;
+
 
 /**
  * Java code for uploading team data to the database.  Called from
@@ -40,8 +40,10 @@ import javax.servlet.jsp.JspWriter;
  */
 public final class UploadTeams {
 
+  private static final Logger LOG = Logger.getLogger(UploadTeams.class);
+  
   private UploadTeams() {
-     
+    // No instances
   }
 
   /**
@@ -84,8 +86,9 @@ public final class UploadTeams {
     while(headerIter.hasNext()) {
       final String header = (String)headerIter.next();
       final String columnName = sanitizeColumnName(header);
-      //System.out.println("header: " + header
-      //                   + " columnName: " + columnName);
+      if(LOG.isDebugEnabled()) {
+        LOG.debug("header: " + header + " columnName: " + columnName);
+      }
       if(columnNamesSeen.contains(columnName)) {
         throw new RuntimeException("Duplicate column name found: " + columnName);
       } else {
@@ -113,7 +116,9 @@ public final class UploadTeams {
     try {
       stmt = connection.createStatement();
       stmt.executeUpdate("DROP TABLE IF EXISTS AllTeams"); //make sure the table doesn't  yet exist
-      //System.out.println("creating table: " + createTable.toString());
+      if(LOG.isDebugEnabled()) {
+        LOG.debug("creating table: " + createTable.toString());
+      }
       stmt.executeUpdate(createTable.toString()); //create AllTeams
       
       stmt.executeUpdate("DROP TABLE IF EXISTS FilteredTeams"); //make sure the table doesn't  yet exist

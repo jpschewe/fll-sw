@@ -217,8 +217,6 @@ public final class FinalComputedScores {
         out.println("</table>");
         teamsRS.close();
 
-        //FIX need page break here
-
       } //end while(divisionIter.next())
 
     } catch(final ParseException pe) {

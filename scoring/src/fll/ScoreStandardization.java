@@ -10,11 +10,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.text.NumberFormat;
 import java.text.ParseException;
 
-
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -29,6 +28,8 @@ import fll.db.Queries;
  */
 public final class ScoreStandardization {
 
+  private static final Logger LOG = Logger.getLogger(ScoreStandardization.class);
+  
   /**
    * For debugging
    *
@@ -47,7 +48,7 @@ public final class ScoreStandardization {
       updateTeamTotalScores(connection, challengeDocument, tournament);
       final String error = checkDataConsistency(connection);
       if(null != error) {
-        System.out.println("data consistency error: " + error);
+        LOG.error("data consistency error: " + error);
       }
     } catch(final Exception e) {
       e.printStackTrace();

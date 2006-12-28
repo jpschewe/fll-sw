@@ -12,6 +12,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import fll.db.Queries;
 import fll.Team;
 import fll.Utilities;
@@ -35,6 +37,8 @@ import fll.Utilities;
  */
 public class BracketData {
 
+  private static final Logger LOG = Logger.getLogger(BracketData.class);
+  
   /**
    * Data type for brackets.
    */
@@ -309,7 +313,9 @@ public class BracketData {
           row = (int)Math.round(line*_rowsPerTeam*(Math.pow(2, adjustedRound))
               - (_rowsPerTeam*Math.pow(2, adjustedRound-1) + 0.5*_rowsPerTeam - 1));
         }
-//        System.out.print("Putting team " + d.getTeam() + " with dbLine " + d.getDBLine() + " to row " + row + " of output table\n");
+        if(LOG.isDebugEnabled()) {
+          LOG.debug("Putting team " + d.getTeam() + " with dbLine " + d.getDBLine() + " to row " + row + " of output table\n");
+        }
         if(roundData.put(row, d) != null) {
           throw new RuntimeException("Error - Map keys were not unique - PlayoffData " +
               "might be inconsistent (you should verify that there are not multiple teams" +

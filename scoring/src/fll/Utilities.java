@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -296,12 +297,16 @@ public final class Utilities {
   };
   
   public static void buildGraphicFileList(final String p, final File[] d, final List<String> f) {
-    //System.out.println("buildGraphicFileList("+p+","+Arrays.toString(d)+","+f.toString()+")");
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("buildGraphicFileList("+p+","+Arrays.toString(d)+","+f.toString()+")");
+    }
     for(int i = 0; i < d.length; i++) {
       String np = (p.length()==0 ? p : p + "/") + d[i].getName();
       String[] files = d[i].list(FILTER);
       if(files != null) {
-        //System.out.println("files: " + Arrays.toString(files));
+        if(LOG.isDebugEnabled()) {
+          LOG.debug("files: " + Arrays.toString(files));
+        }
         java.util.Arrays.sort(files);
         for(int j = 0; j < files.length; j++) {
           f.add(np + "/" + files[j]);
@@ -311,13 +316,17 @@ public final class Utilities {
       }
       File[] dirs = d[i].listFiles(DIRFILTER);
       if(dirs != null) {
-        //System.out.println("dirs: "+Arrays.toString(dirs));
+        if(LOG.isDebugEnabled()) {
+          LOG.debug("dirs: "+Arrays.toString(dirs));
+        }
         java.util.Arrays.sort(dirs);
         buildGraphicFileList(np, dirs, f);
       } else {
         LOG.debug("dirs: null");
       }
     }
-    //System.out.println("f: " + f.toString());
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("f: " + f.toString());
+    }
   }
 }

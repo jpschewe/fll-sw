@@ -65,7 +65,7 @@ public final class GenerateDB {
 
         final Connection connection = Utilities.createDBConnection("fll", "fll", db);
         final Document document = Queries.getChallengeDocument(connection);
-        System.out.println("Title: " + document.getDocumentElement().getAttribute("title"));
+        LOG.info("Title: " + document.getDocumentElement().getAttribute("title"));
         connection.close();
       }
     } catch(final Exception e) {

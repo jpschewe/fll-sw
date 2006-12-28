@@ -69,7 +69,6 @@ public final class ScoreGroupScores {
         generateCategoryTable(tournament, connection, out, catName, catTitle, division);
       }
 
-      //FIX need page break here
     }
   }
 

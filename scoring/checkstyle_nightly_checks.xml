@@ -159,11 +159,19 @@
     <!-- See http://checkstyle.sf.net/config_misc.html -->
     <module name="ArrayTypeStyle"/>
     <module name="FinalParameters"/>
-    <!--<module name="GenericIllegalRegexp">
-      <property name="format" value="\s+$"/>
-      <property name="message" value="Line has trailing spaces."/>
-    </module>-->
-    <!--<module name="TodoComment"/>-->
+    <module name="GenericIllegalRegexp">
+      <property name="format" value="System\.out\.print"/>
+      <property name="message" value="Use Log4j."/>
+    </module>
+    <module name="TodoComment">
+      <property name="format" value="TODO"/>
+    </module>
+    <module name="TodoComment">
+      <property name="format" value="HACK"/>
+    </module>
+    <module name="TodoComment">
+      <property name="format" value="FIX"/>
+    </module>
     <module name="UpperEll"/>
 
   </module>

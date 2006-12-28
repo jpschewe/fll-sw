@@ -29,7 +29,12 @@ import fll.Utilities;
 public final class ImportDB {
 
   private static final Logger LOG = Logger.getLogger(ImportDB.class);
-  
+
+  /**
+   * Import tournament data from one database to another database
+   * 
+   * @param args source tournament destination
+   */
   public static void main(final String[] args) {
     try {
       if(args.length != 3) {
@@ -363,7 +368,7 @@ public final class ImportDB {
    * @return true if there are differences
    */
   public static boolean checkForDifferences(final Connection sourceConnection,
-                                            final Connection destinationConnection,
+                                            final Connection destConnection,
                                             final String tournament)
     throws SQLException {
     PreparedStatement sourcePrep = null;
@@ -373,7 +378,7 @@ public final class ImportDB {
     boolean differencesFound = false;
     try {
       // check that the tournament exists
-      destPrep = destinationConnection.prepareStatement("SELECT Name FROM Tournaments WHERE Name = ?");
+      destPrep = destConnection.prepareStatement("SELECT Name FROM Tournaments WHERE Name = ?");
       destPrep.setString(1, tournament);
       if(!destPrep.executeQuery().next()) {
         LOG.error("Tournament: " + tournament + " doesn't exist in the destination database!");
@@ -391,7 +396,7 @@ public final class ImportDB {
       
       // check names and regions and make sure that each team in the source
       // tournament is in the destination tournament
-      destPrep = destinationConnection.prepareStatement("SELECT Teams.TeamName, Teams.Region, Teams.Division, Teams.Organization"
+      destPrep = destConnection.prepareStatement("SELECT Teams.TeamName, Teams.Region, Teams.Division, Teams.Organization"
            + " FROM Teams"
            + " WHERE Teams.TeamNumber = ?");
 
@@ -442,7 +447,57 @@ public final class ImportDB {
       Utilities.closeResultSet(sourceRS);
       Utilities.closePreparedStatement(destPrep);
       Utilities.closePreparedStatement(sourcePrep);
-      
+    
+      // check that the source database has the same teams in TournamentTeams (for the given tournament) as destination database
+      destPrep = destConnection.prepareStatement("SELECT Tournament FROM TournamentTeams WHERE TeamNumber = ?");
+      sourcePrep = sourceConnection.prepareStatement("SELECT TeamNumber FROM TournamentTeams WHERE Tournament = ?");
+      sourcePrep.setString(1, tournament);
+      sourceRS = sourcePrep.executeQuery();
+      while(sourceRS.next()) {
+        final int teamNumber = sourceRS.getInt(1);
+        boolean found = false;
+        destPrep.setInt(1, teamNumber);
+        destRS = destPrep.executeQuery();
+        while(!found && destRS.next()) {
+          if(tournament.equals(destRS.getString(1))) {
+            found = true;
+          }
+        }
+        Utilities.closeResultSet(destRS);
+        if(!found) {
+          LOG.error("Team " + teamNumber + " is in tournament " + tournament + " in the source database, but not in the destination database.");
+          differencesFound = true;
+        }
+      }
+      Utilities.closeResultSet(sourceRS);
+      Utilities.closePreparedStatement(destPrep);
+      Utilities.closePreparedStatement(sourcePrep);
+  
+      // check that the destination database has the same teams in TournamentTeams (for the given tournament) as the source database
+      sourcePrep = sourceConnection.prepareStatement("SELECT Tournament FROM TournamentTeams WHERE TeamNumber = ?");
+      destPrep = destConnection.prepareStatement("SELECT TeamNumber FROM TournamentTeams WHERE Tournament = ?");
+      destPrep.setString(1, tournament);
+      destRS = destPrep.executeQuery();
+      while(destRS.next()) {
+        final int teamNumber = destRS.getInt(1);
+        boolean found = false;
+        sourcePrep.setInt(1, teamNumber);
+        sourceRS = sourcePrep.executeQuery();
+        while(!found && sourceRS.next()) {
+          if(tournament.equals(sourceRS.getString(1))) {
+            found = true;
+          }
+        }
+        Utilities.closeResultSet(sourceRS);
+        if(!found) {
+          LOG.error("Team " + teamNumber + " is in tournament " + tournament + " in the destination database, but not in the source database.");
+          differencesFound = true;
+        }
+      }
+      Utilities.closeResultSet(destRS);
+      Utilities.closePreparedStatement(destPrep);
+      Utilities.closePreparedStatement(sourcePrep);
+        
       //FIX check documents
       
     } finally {
