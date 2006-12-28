@@ -28,6 +28,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspWriter;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -40,6 +41,8 @@ import org.w3c.dom.NodeList;
  */
 public final class Playoff {
 
+  private static final Logger LOG = Logger.getLogger(Playoff.class);
+  
   /**
    * Just for debugging.
    * 
@@ -55,7 +58,7 @@ public final class Playoff {
       b.setTeamNumber(3);
       final int runNumber = 3;
       final Team winner = pickWinner(connection, challengeDocument, a, b, runNumber);
-      System.out.println("winner: " + winner.getTeamNumber());
+      LOG.info("winner: " + winner.getTeamNumber());
 
     } catch (final Exception e) {
       e.printStackTrace();
@@ -765,7 +768,7 @@ public final class Playoff {
               if (playoffRunNumber != numRuns - 1) {
                 out.println("<td width='200' valign='middle' rowspan='" + ((1 << (playoffRunNumber + 2)) - 1) + "'><font size='4'>Bracket "
                     + bracketIndex[playoffRunNumber] + "</font><br />");
-                // TODO: Test that this section isn't broken when only some
+                // TODO Test that this section isn't broken when only some
                 // scores are entered.
                 final Team teamA = (Team) scoreGenTeams[playoffRunNumber].next();
                 final Team teamB = (Team) scoreGenTeams[playoffRunNumber].next();

@@ -72,7 +72,6 @@ public final class CategoryScores {
       //performance
       generateCategoryTable(tournament, connection, out, "Performance", "Performance", division);
         
-      //FIX need page break here
     }
   }
 

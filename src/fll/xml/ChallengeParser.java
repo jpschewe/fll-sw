@@ -8,6 +8,7 @@ package fll.xml;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.log4j.Logger;
 import org.apache.xerces.parsers.DOMParser;
 
 import org.w3c.dom.Document;
@@ -31,6 +32,8 @@ public final class ChallengeParser {
    */
   public static final String FLL_NAMESPACE = "http://www.hightechkids.org";
 
+  private static final Logger LOG = Logger.getLogger(ChallengeParser.class);
+  
   /**
    * Just for debugging.
    *
@@ -45,7 +48,7 @@ public final class ChallengeParser {
         throw new RuntimeException("Error parsing challenge.xml");
       }
 
-      System.out.println("Title: " + challengeDocument.getDocumentElement().getAttribute("title"));
+      LOG.info("Title: " + challengeDocument.getDocumentElement().getAttribute("title"));
       
     } catch(final Exception e) {
       e.printStackTrace();
@@ -89,10 +92,10 @@ public final class ChallengeParser {
       parser.setEntityResolver(new EntityResolver() {
         public InputSource resolveEntity(final String publicID,
                                          final String systemID)
-          throws SAXException, IOException {
-//           System.out.println("resolveEntity(" + publicID + ", " + systemID + ")"
-//                              + " packageName: " + packageName
-//                              );
+        throws SAXException, IOException {
+          if(LOG.isDebugEnabled()) {
+            LOG.debug("resolveEntity(" + publicID + ", " + systemID + ")");
+          }
           if(systemID.endsWith("fll.xsd")) {
             //just use the one we store internally
             //final int slashidx = systemID.lastIndexOf("/") + 1;
