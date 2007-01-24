@@ -108,7 +108,7 @@
 
 
 	<!-- ==================== Compile Target ================================== -->
-	<target name="compile" depends="prepare,compile.classes,compile.jsp,checkstyle" description="Compile Java sources">
+	<target name="compile" depends="prepare,compile.classes,compile.jsp" description="Compile Java sources">
 
 		<!-- stuff for subjective scoring app -->
 		<mkdir dir="${dir.tmp}/subjective" />
