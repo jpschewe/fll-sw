@@ -147,9 +147,29 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
           }
           return new Integer(totalScore);
         } else {
-          final String goalName = getGoalDescription(column - 4).getAttribute("name");
+          final Element goalDescription = getGoalDescription(column - 4);
+          final String goalName = goalDescription.getAttribute("name");
           if(element.hasAttribute(goalName)) {
-            return element.getAttribute(goalName);
+            final String value = element.getAttribute(goalName);
+            
+            final NodeList posValues = goalDescription.getElementsByTagName("value");
+            if(posValues.getLength() > 0) {
+              String title = "";
+              boolean found = false;
+              //enumerated, convert from value to title
+              for(int v=0; v<posValues.getLength() && !found; v++) {
+                final Element posValue = (Element)posValues.item(v);
+                if(posValue.getAttribute("value").equalsIgnoreCase((String)value)) {
+                  //found it
+                  title = posValue.getAttribute("title");
+                  found = true;
+                }
+              }
+              return title;
+            } else {
+              // standard goal
+              return value;
+            }
           } else {
             return "";
           }
@@ -241,13 +261,13 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
       } else {
         final NodeList posValues = goalDescription.getElementsByTagName("value");
         if(posValues.getLength() > 0) {
-          //enumerated
+          //enumerated, convert from title to value
           boolean found = false;
           for(int v=0; v<posValues.getLength() && !found; v++) {
             final Element posValue = (Element)posValues.item(v);
             if(posValue.getAttribute("title").equalsIgnoreCase((String)value)) {
               //found it
-              element.setAttribute(goalDescription.getAttribute("name"), value.toString());
+              element.setAttribute(goalDescription.getAttribute("name"), posValue.getAttribute("value")); 
               if(setModified) {
                 element.setAttribute("modified", Boolean.TRUE.toString());
               }
