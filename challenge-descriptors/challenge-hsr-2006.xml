@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="FLL 2006 HSR Challenge: Nano Quest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="fll.xsd">
+
+  <!-- $Rev: 351 $ -->
+  
+  <Performance minimumScore="0" weight="1.0">
+
+    <goal name="pizza_off_pant_leg" title="Pizza Molecule Off Pant Leg"
+      min="0"
+      max="2"
+      multiplier="10"
+      />
+    <goal name="pizza_in_dirt_trap" title="Pizza Molecule In Dirt Trap"
+      min="0"
+      max="2"
+      multiplier="50"
+      />
+    <restriction lowerBound="0" upperBound="2" message="There cannot be more molecules in the dirt trap than off the pants">
+      <term coefficient="1" goal="pizza_off_pant_leg"/>
+      <term coefficient="-1" goal="pizza_in_dirt_trap"/>
+    </restriction>
+
+    <goal name="smart_medicine" title="Deliver Buckyball"
+      multiplier="50"
+      />
+
+    <goal name="smart_medicine_retrieve" title="Retrieve Buckyball"
+      multiplier="40"
+      />
+
+    <restriction lowerBound="0" upperBound="1" message="One must first retrieve buckyballs before they can be delivered">
+      <term coefficient="-1" goal="smart_medicine"/>
+      <term coefficient="1" goal="smart_medicine_retrieve"/>
+    </restriction>
+    
+    <goal name="atomic_force" title="Free the Probe's Nanotip"
+      multiplier="40"
+      />
+
+    <goal name="move_atoms_white" title="Scoring white atoms"
+      min="0"
+      max="8"
+      multiplier="12" />
+
+    <goal name="self_assembly" title="Self-alignment of Atoms"
+      multiplier="25"
+      />
+
+    <goal name="atp_base" title="ATP molecules returned to base"
+      multiplier="25"
+      max="2"/>
+
+    <goal name="atp_frame" title="ATP molecules delivered"
+      multiplier="20"
+      max="2"/>
+
+    <restriction lowerBound="0" upperBound="2" message="One must first return the ATP molecules to the base before they can be delivered">
+      <term coefficient="1" goal="atp_base"/>
+      <term coefficient="-1" goal="atp_frame"/>
+    </restriction>
+    
+    <goal name="dumper" title="Robot Emptied Dirt Dumper"
+      multiplier="15"
+      />
+
+    <goal name="dirt_trap" title="Dirt Trap on Mark"
+      multiplier="15"
+      />
+    
+    <goal name="dirt_in_trap" title="Dirt in Dirt Trap"
+      multiplier="7"
+      max="8"
+      />
+
+    <goal name="dirt_elsewhere" title="Dirt Elsewhere"
+      multiplier="3"
+      max="8"
+      />
+
+    <restriction lowerBound="0" upperBound="8" message="There are a maximum of 8 dirt pieces on the table">
+      <term coefficient="1" goal="dirt_in_trap"/>
+      <term coefficient="1" goal="dirt_elsewhere"/>
+    </restriction>
+
+    <restriction lowerBound="0" upperBound="8" message="There are a maximum of 8 dirt pieces on the table">
+    <term coefficient="1" goal="dirt_in_base"/>
+    <term coefficient="1" goal="dirt_elsewhere"/>
+  </restriction>
+    
+    <goal name="dirt_in_base" title="Dirt in Trap at Base"
+      multiplier="5"
+      max="8"
+      />
+
+    <restriction lowerBound="0" upperBound="8" message="If the dirt trap is at base, then the dirt in the trap counts for both Dirt in Dirt Trap and Dirt in Trap at Base">
+      <term coefficient="1" goal="dirt_in_trap"/>
+      <term coefficient="-1" goal="dirt_in_base"/>
+    </restriction>
+    
+    <goal name="space_elevator" title="Operate Space Elevator"
+      multiplier="40"
+      />
+
+    <goal name="nanotube_strength" title="Nanotube Strength">
+      <value score="40" title="Supported by Cable" value="supported_by_cable"/>
+      <value score="20" title="Truck on Frame" value="truck_on_frame"/>
+      <value score="0" title="None" value="none"/>
+    </goal>
+
+    <goal name="robot_type" title="Robot Type"
+      multiplier="0">
+      <value score="1" title="RCX" value="rcx"/>
+      <value score="2" title="NXT" value="nxt"/>
+    </goal>
+    
+    <tiebreaker>
+      <test winner="high">
+        <term goal="dirt_in_trap" />
+        <term goal="dirt_elsewhere" />
+        <term goal="dirt_in_base" />
+      </test>
+      <test winner="high">
+        <term goal="pizza_in_dirt_trap"/>
+      </test>
+      <test winner="high">
+        <term goal="pizza_off_pant_leg"/>
+      </test>
+      <test winner="high">
+        <term goal="move_atoms_white" />
+      </test>
+      <test winner="high">
+        <term goal="smart_medicine" />
+      </test>
+      <test winner="high">
+        <term goal="atp_frame" />
+      </test>
+      <test winner="high">
+        <term goal="smart_medicine_retrieve" />
+      </test>
+      <test winner="high">
+        <term goal="atp_base" />
+      </test>
+      <test winner="high">
+        <term goal="atomic_force" />
+      </test>
+      <test winner="high">
+        <term goal="dumper" />
+      </test>
+      <test winner="high">
+        <term goal="dirt_trap" />
+      </test>
+      <test winner="high">
+        <term goal="self_assembly" />
+      </test>
+      <test winner="high">
+        <term goal="nanotube_strength" />
+      </test>
+    </tiebreaker>
+
+  </Performance>
+
+  <subjectiveCategory name="head2head" title="Head to Head" weight="5.5">
+    <goal initialValue="0" max="700" min="0" multiplier="1" name="score" title="Score"></goal>
+    <goal initialValue="0" max="50" min="0" multiplier="1" name="bonus" title="Bonus"></goal>
+  </subjectiveCategory>
+  
+  <subjectiveCategory name="teamwork" title="Team Management" weight="1.0">
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="dynamics" title="Team Dynamics - Decision Making and Problem Solving"></goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="management" title="Team Management - Time, Task, and Project Management"></goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="structure" title="Team Structure - Roles and Participation"></goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="communication" title="Team Communication - Respect, Team Interaction and Confidence"></goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="general" title="Team Management General"></goal>
+  </subjectiveCategory>
+
+  <subjectiveCategory name="research" title="Research Presentation" weight="2.5">
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="definition" title="Problem Definition"></goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="design" title="Design of Solution"></goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="evaluation" title="Evaluation of Solution"></goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="innovation" title="Innovation"></goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="communications" title="Communications"></goal>
+    <goal name="submitted" title="Documents Submitted Prior to Competition">
+      <value score="33" value="yes" title="Yes"/>
+      <value score="0" value="no" title="No"/>
+    </goal>
+  </subjectiveCategory>
+
+  
+</fll>
