@@ -2,12 +2,15 @@
 
 <c:if
  test="${not empty param.changeDatabase || not empty param.resetDatabase}">
- <c:if test="${not empty param.changeDatabase}" var="test">
-  <c:set var="database" value="${param.database}" scope="application" />
- </c:if>
- <c:if test="${not test}">
-  <c:set var="database" value="fll" scope="application" />
- </c:if>
+ <c:choose>
+  <c:when test="${not empty param.changeDatabase}">
+   <c:set var="database" value="${param.database}" scope="application" />
+  </c:when>
+  <c:otherwise>
+   <%-- just remove the database variable and it'll get recreated on the redirect --%>
+   <c:remove var="database" scope="application" />
+  </c:otherwise>
+ </c:choose>
 
  <%-- just remove the database connections and they'll get recreated on the redirect --%>
  <c:remove var="connection" />
@@ -20,6 +23,7 @@
  </c:redirect>
 
 </c:if>
+<%-- if a form submssion --%>
 
 <html>
 <head>
@@ -44,17 +48,18 @@ developers only. If you don't know what you're doing, LEAVE THIS PAGE!</b></font
 
  <li>Current database is <c:out value="${database}" /><br>
  <form action='index.jsp' method='post'><input type='text'
-  name='database' size='50'> <input type='submit' name='changeDatabase'
-  value='Change Database''> <input type='submit'
-  name='resetDatabase' value='Reset to standard database'></form>
+  name='database' size='50'> <input type='submit'
+  name='changeDatabase' value='Change Database''> <input
+  type='submit' name='resetDatabase' value='Reset to standard database'></form>
  </li>
 
  <li><a href="query.jsp">Do SQL queries and updates</a></li>
 
  <li><a href="<c:url value='/setup'/>">Go to database setup</a></li>
- 
- <li>inside.test: <%=System.getProperty("inside.test") %> -- <%= Boolean.getBoolean("inside.test") %></li>
- <li>Test server started: <%= fll.Utilities.isTestServerStarted() %> </li>
+
+ <li>inside.test: <%=System.getProperty("inside.test")%> -- <%=Boolean.getBoolean("inside.test")%></li>
+ <li>Test server started: <%=fll.Utilities.isTestServerStarted()%>
+ </li>
 </ul>
 
 <%@ include file="/WEB-INF/jspf/footer.jspf"%>
