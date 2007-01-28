@@ -371,9 +371,9 @@ public class FullTournamentTest extends TestCase {
       final int[] division2ExpectedRank = { 3208, 3061, 2863, 2110, 3063, 353, 2043, 3129 };
 
       request = new GetMethodWebRequest(TestUtils.URL_ROOT + "developer/query.jsp");
-      request.setParameter("query", "SELECT FinalScores.TeamNumber" + " FROM FinalScores, TournamentTeams"
-          + " WHERE FinalScores.TeamNumber = TournamentTeams.TeamNumber" + " AND FinalScores.Tournament = '" + testTournament + "'"
-          + " AND TournamentTeams.event_division = 'DivI/Gr4-6'" + " ORDER BY FinalScores.OverallScore DESC");
+      request.setParameter("query", "SELECT FinalScores.TeamNumber" + " FROM FinalScores, current_tournament_teams"
+          + " WHERE FinalScores.TeamNumber = current_tournament_teams.TeamNumber" + " AND FinalScores.Tournament = '" + testTournament + "'"
+          + " AND current_tournament_teams.event_division = 'DivI/Gr4-6'" + " ORDER BY FinalScores.OverallScore DESC");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
       WebTable table = response.getTableWithID("queryResult");
@@ -383,9 +383,9 @@ public class FullTournamentTest extends TestCase {
       }
 
       request = new GetMethodWebRequest(TestUtils.URL_ROOT + "developer/query.jsp");
-      request.setParameter("query", "SELECT FinalScores.TeamNumber" + " FROM FinalScores, TournamentTeams"
-          + " WHERE FinalScores.TeamNumber = TournamentTeams.TeamNumber" + " AND FinalScores.Tournament = '" + testTournament + "'"
-          + " AND TournamentTeams.event_division = 'DivII/Gr7-9'" + " ORDER BY FinalScores.OverallScore DESC");
+      request.setParameter("query", "SELECT FinalScores.TeamNumber" + " FROM FinalScores, current_tournament_teams"
+          + " WHERE FinalScores.TeamNumber = current_tournament_teams.TeamNumber" + " AND FinalScores.Tournament = '" + testTournament + "'"
+          + " AND current_tournament_teams.event_division = 'DivII/Gr7-9'" + " ORDER BY FinalScores.OverallScore DESC");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
       table = response.getTableWithID("queryResult");
@@ -396,9 +396,9 @@ public class FullTournamentTest extends TestCase {
 
       /*
        * prep = connection.prepareStatement("SELECT FinalScores.TeamNumber FROM
-       * FinalScores, TournamentTeams WHERE FinalScores.TeamNumber =
-       * TournamentTeams.TeamNumber AND FinalScores.Tournament = ? AND
-       * TournamentTeams.event_division = ? ORDER BY FinalScores.OverallScore
+       * FinalScores, current_tournament_teams WHERE FinalScores.TeamNumber =
+       * current_tournament_teams.TeamNumber AND FinalScores.Tournament = ? AND
+       * current_tournament_teams.event_division = ? ORDER BY FinalScores.OverallScore
        * DESC"); prep.setString(1, testTournament); // division 1
        * prep.setString(2, "DivI/Gr4-6"); rs = prep.executeQuery(); int rank =
        * 0; while(rs.next()) { final int teamNumber = rs.getInt(1);

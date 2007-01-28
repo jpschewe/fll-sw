@@ -532,7 +532,7 @@
 	</target>
 
 	<!-- ==================== Tests using JUnit ==================== -->
-	<target name="test" depends="-junit,checkstyle.full" description="Run the unit tests">
+	<target name="test" depends="-junit" description="Run the unit tests">
 		<condition property="test.halt">
 			<and>
 				<isset property="test.failed" />

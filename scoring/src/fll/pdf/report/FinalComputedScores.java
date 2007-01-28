@@ -285,11 +285,11 @@ public final class FinalComputedScores extends PdfPageEventHelper {
                 query.append(",FinalScores." + catName);
               }
             }
-            query.append(" FROM Teams,FinalScores,TournamentTeams");
+            query.append(" FROM Teams,FinalScores,current_tournament_teams");
             query.append(" WHERE FinalScores.TeamNumber = Teams.TeamNumber");
             query.append(" AND FinalScores.Tournament = '" + _tournament + "'");
-            query.append(" AND TournamentTeams.event_division = ?");
-            query.append(" AND TournamentTeams.TeamNumber = Teams.TeamNumber");
+            query.append(" AND current_tournament_teams.event_division = ?");
+            query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
             query.append(" ORDER BY FinalScores.OverallScore DESC, Teams.TeamNumber");
             prep = connection.prepareStatement(query.toString());
             prep.setString(1, _division);

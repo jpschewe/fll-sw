@@ -104,11 +104,11 @@ public final class CategoryScores {
           
       //display all team scores
       prep = connection.prepareStatement("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,SummarizedScores.RawScore,SummarizedScores.StandardizedScore"
-                               + " FROM SummarizedScores,Teams,TournamentTeams"
+                               + " FROM SummarizedScores,Teams,current_tournament_teams"
                                + " WHERE Teams.TeamNumber = SummarizedScores.TeamNumber"
-                               + " AND TournamentTeams.TeamNumber = Teams.TeamNumber"
+                               + " AND current_tournament_teams.TeamNumber = Teams.TeamNumber"
                                + " AND SummarizedScores.Tournament = ?"
-                               + " AND TournamentTeams.event_division = ?"
+                               + " AND current_tournament_teams.event_division = ?"
                                + " AND SummarizedScores.Category = ?"
                                + " ORDER BY SummarizedScores.StandardizedScore DESC, Teams.TeamNumber");
       prep.setString(1, tournament);
