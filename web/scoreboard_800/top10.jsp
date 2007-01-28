@@ -69,7 +69,7 @@
          final PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore FROM"
              + " (SELECT TeamNumber, MAX(ComputedTotal) AS MaxOfComputedScore FROM Performance WHERE Tournament = ? "
              + " AND RunNumber <= ? AND NoShow = False AND Bye = False GROUP BY TeamNumber) AS T2"
-             + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, TournamentTeams WHERE Teams.TeamNumber = TournamentTeams.TeamNumber AND TournamentTeams.event_division = ?"
+             + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber AND current_tournament_teams.event_division = ?"
              + " ORDER BY T2.MaxOfComputedScore DESC LIMIT 10");
          prep.setString(1, currentTournament);
          prep.setInt(2, Queries.getNumSeedingRounds(connection));

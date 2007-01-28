@@ -55,18 +55,15 @@ public final class Queries {
    */
   public static Map<Integer, Team> getTournamentTeams(final Connection connection)
       throws SQLException {
-    final String currentTournament = getCurrentTournament(connection);
-
     final SortedMap<Integer, Team> tournamentTeams = new TreeMap<Integer, Team>();
     Statement stmt = null;
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
 
-      final String sql = "SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, Teams.Region, Teams.Division, TournamentTeams.event_division"
-          + " FROM Teams, TournamentTeams"
-          + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber"
-          + " AND TournamentTeams.Tournament = '" + currentTournament + "'";
+      final String sql = "SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, Teams.Region, Teams.Division, current_tournament_teams.event_division"
+          + " FROM Teams, current_tournament_teams"
+          + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber";
       rs = stmt.executeQuery(sql);
       while (rs.next()) {
         final Team team = new Team();
@@ -120,16 +117,13 @@ public final class Queries {
    * @see #getCurrentTournament(Connection)
    */
   public static List<String> getDivisions(final Connection connection) throws SQLException {
-    final String currentTournament = getCurrentTournament(connection);
-
     final List<String> list = new LinkedList<String>();
 
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
       prep = connection
-          .prepareStatement("SELECT DISTINCT event_division FROM TournamentTeams WHERE Tournament = ? ORDER BY event_division");
-      prep.setString(1, currentTournament);
+          .prepareStatement("SELECT DISTINCT event_division FROM current_tournament_teams ORDER BY event_division");
       rs = prep.executeQuery();
       while (rs.next()) {
         final String division = rs.getString(1);
@@ -707,14 +701,12 @@ public final class Queries {
    */
   public static String getEventDivision(final Connection connection, final int teamNumber)
       throws SQLException, RuntimeException {
-    final String currentTournament = getCurrentTournament(connection);
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
       prep = connection
-          .prepareStatement("SELECT event_division FROM TournamentTeams WHERE TeamNumber = ? AND Tournament = ?");
+          .prepareStatement("SELECT event_division FROM current_tournament_teams WHERE TeamNumber = ?");
       prep.setInt(1, teamNumber);
-      prep.setString(2, currentTournament);
       rs = prep.executeQuery();
       if (rs.next()) {
         return rs.getString(1);
@@ -752,10 +744,10 @@ public final class Queries {
         prep.setInt(2, getNumSeedingRounds(connection));
       } else {
         prep = connection
-            .prepareStatement("SELECT Performance.TeamNumber,Count(*) FROM Performance,TournamentTeams"
-                + " WHERE Performance.TeamNumber = TournamentTeams.TeamNumber"
-                + " AND TournamentTeams.event_division = ?"
-                + " AND Tournament = ?"
+            .prepareStatement("SELECT Performance.TeamNumber,Count(*) FROM Performance,current_tournament_teams"
+                + " WHERE Performance.TeamNumber = current_tournament_teams.TeamNumber"
+                + " AND current_tournament_teams.event_division = ?"
+                + " AND Performance.Tournament = ?"
                 + " GROUP BY Performance.TeamNumber" + " HAVING Count(*) < ?");
         prep.setString(1, division);
         prep.setString(2, currentTournament);
@@ -803,10 +795,10 @@ public final class Queries {
         prep.setInt(2, getNumSeedingRounds(connection));
       } else {
         prep = connection
-            .prepareStatement("SELECT Performance.TeamNumber,Count(*) FROM Performance,TournamentTeams"
-                + " WHERE Performance.TeamNumber = TournamentTeams.TeamNumber"
-                + " AND TournamentTeams.event_division = ?"
-                + " AND Tournament = ?"
+            .prepareStatement("SELECT Performance.TeamNumber,Count(*) FROM Performance,current_ournament_teams"
+                + " WHERE Performance.TeamNumber = current_tournament_teams.TeamNumber"
+                + " AND current_tournament_teams.event_division = ?"
+                + " AND Performance.Tournament = ?"
                 + " GROUP BY Performance.TeamNumber" + " HAVING Count(*) > ?");
         prep.setString(1, division);
         prep.setString(2, currentTournament);
@@ -849,9 +841,9 @@ public final class Queries {
     ResultSet rs = null;
     try {
       prep = connection
-          .prepareStatement("SELECT Performance.TeamNumber,MAX(Performance.ComputedTotal) AS Score FROM Performance,Teams, TournamentTeams WHERE Performance.RunNumber <= ?"
-              + " AND Performance.Tournament = ? AND Teams.TeamNumber = Performance.TeamNumber AND Teams.TeamNumber = TournamentTeams.TeamNumber"
-              + " AND TournamentTeams.event_division = ? GROUP BY Performance.TeamNumber ORDER BY Score DESC, Performance.TeamNumber");
+          .prepareStatement("SELECT Performance.TeamNumber,MAX(Performance.ComputedTotal) AS Score FROM Performance,Teams, current_tournament_teams WHERE Performance.RunNumber <= ?"
+              + " AND Performance.Tournament = ? AND Teams.TeamNumber = Performance.TeamNumber AND Teams.TeamNumber = current_tournament_teams.TeamNumber"
+              + " AND current_tournament_teams.event_division = ? GROUP BY Performance.TeamNumber ORDER BY Score DESC, Performance.TeamNumber");
       prep.setInt(1, getNumSeedingRounds(connection));
       prep.setString(2, currentTournament);
       prep.setString(3, divisionStr);

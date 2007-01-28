@@ -14,9 +14,9 @@
       final Connection connection = (Connection) application.getAttribute("connection");
       final String currentTournament = Queries.getCurrentTournament(connection);
 
-      final PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, TournamentTeams.event_division,"
-          + " Performance.Tournament, Performance.RunNumber, Performance.Bye, Performance.NoShow, Performance.ComputedTotal FROM Teams,Performance,TournamentTeams"
-          + " WHERE Performance.Tournament = ? AND TournamentTeams.TeamNumber = Teams.TeamNumber"
+      final PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, current_tournament_teams.event_division,"
+          + " Performance.Tournament, Performance.RunNumber, Performance.Bye, Performance.NoShow, Performance.ComputedTotal FROM Teams,Performance,current_tournament_teams"
+          + " WHERE Performance.Tournament = ? AND current_tournament_teams.TeamNumber = Teams.TeamNumber"
           + " AND Teams.TeamNumber = Performance.TeamNumber ORDER BY Teams.Organization, Teams.TeamNumber, Performance.RunNumber");
       prep.setString(1, currentTournament);
       final ResultSet rs = prep.executeQuery();

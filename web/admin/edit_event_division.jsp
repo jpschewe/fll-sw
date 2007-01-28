@@ -19,8 +19,7 @@
  <%--  form submission --%>
  <sql:query var="result" dataSource="${datasource}">
   SELECT TeamNumber
-    FROM TournamentTeams
-    WHERE Tournament = '<c:out value="${currentTournament}" />'
+    FROM current_tournament_teams
 </sql:query>
  <c:forEach items="${result.rows}" var="row">
   <c:set var="teamNumber" scope="page">
@@ -81,10 +80,9 @@ you may press commit at the bottom and this division name will be added
 to the radio buttons.</p>
 
 <sql:query var="result" dataSource="${datasource}">
-SELECT Teams.TeamNumber, Teams.TeamName, TournamentTeams.event_division 
-  FROM TournamentTeams, Teams 
-  WHERE TournamentTeams.TeamNumber = Teams.TeamNumber 
-  AND Tournament = '<c:out value="${currentTournament}" />'
+SELECT Teams.TeamNumber, Teams.TeamName, current_tournament_teams.event_division 
+  FROM current_tournament_teams, Teams 
+  WHERE current_tournament_teams.TeamNumber = Teams.TeamNumber 
   ORDER BY Teams.TeamNumber
 </sql:query>
 <form name='edit_event_divisions' action='edit_event_division.jsp'

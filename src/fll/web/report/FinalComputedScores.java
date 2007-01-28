@@ -90,11 +90,11 @@ public final class FinalComputedScores {
         out.println("  <tr><td colspan='" + (subjectiveCategories.getLength() + 4) + "'><hr></td></tr>");
         
         prep = connection.prepareStatement("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,FinalScores.OverallScore"
-                                         + " FROM Teams,FinalScores,TournamentTeams"
+                                         + " FROM Teams,FinalScores,current_tournament_teams"
                                          + " WHERE FinalScores.TeamNumber = Teams.TeamNumber"
-                                         + " AND TournamentTeams.TeamNumber = Teams.TeamNumber"
+                                         + " AND current_tournament_teams.TeamNumber = Teams.TeamNumber"
                                          + " AND FinalScores.Tournament = ?"
-                                         + " AND TournamentTeams.event_division = ?"
+                                         + " AND current_tournament_teams.event_division = ?"
                                          + " ORDER BY FinalScores.OverallScore DESC, Teams.TeamNumber");
         prep.setString(1, tournament);
         prep.setString(2, division);

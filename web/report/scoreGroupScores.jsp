@@ -35,10 +35,10 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
     <c:forEach items="${divisions}" var="division">
       <x:forEach select="$challengeDocument/fll/subjectiveCategory">
         <sql:query var="judges" dataSource="${datasource}">
-          SELECT DISTINCT <x:out select="./@name"/>.Judge FROM <x:out select="./@name"/>, TournamentTeams
-            WHERE <x:out select="./@name"/>.TeamNumber = TournamentTeams.TeamNumber
-            AND Tournament = '<c:out value="${currentTournament}"/>'
-            AND TournamentTeams.event_division = '<c:out value="${division}"/>'
+          SELECT DISTINCT <x:out select="./@name"/>.Judge FROM <x:out select="./@name"/>, current_tournament_teams
+            WHERE <x:out select="./@name"/>.TeamNumber = current_tournament_teams.TeamNumber
+            AND <x:out select="./@name"/>.Tournament = '<c:out value="${currentTournament}"/>'
+            AND current_tournament_teams.event_division = '<c:out value="${division}"/>'
         </sql:query>
         <c:forEach var="judgeRow" items="${judges.rows}">
           <h3><x:out select="./@title"/> Division: <c:out value="${division}"/> Score Group: <c:out value="${judgeRow.Judge}"/></h3>

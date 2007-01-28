@@ -253,8 +253,6 @@ public final class GenerateDB {
         createStatement.append(");");
         stmt.executeUpdate(createStatement.toString());
 
-        // create view for max seeding round score
-        stmt.executeUpdate("CREATE VIEW performance_seeding_max AS SELECT TeamNumber, Tournament, Max(ComputedTotal) As Score FROM Performance WHERE NoShow = 0 AND RunNumber <= (SELECT Value FROM TournamentParameters WHERE TournamentParameters.Param = 'SeedingRounds') GROUP BY TeamNumber, Tournament");
       }
       
       //loop over each subjective category
@@ -301,6 +299,16 @@ public final class GenerateDB {
       }
       stmt.executeUpdate(finalScores.toString());
 
+
+      // create views
+      
+      // max seeding round score
+      stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
+      stmt.executeUpdate("CREATE VIEW performance_seeding_max AS SELECT TeamNumber, Tournament, Max(ComputedTotal) As Score FROM Performance WHERE NoShow = 0 AND RunNumber <= (SELECT Value FROM TournamentParameters WHERE TournamentParameters.Param = 'SeedingRounds') GROUP BY TeamNumber, Tournament");
+
+      // current tournament teams
+      stmt.executeUpdate("DROP VIEW IF EXISTS current_tournament_teams");
+      stmt.executeUpdate("CREATE VIEW current_tournament_teams AS SELECT * FROM TournamentTeams WHERE Tournament IN (SELECT Value FROM TournamentParameters WHERE Param = 'CurrentTournament')");
 
       //FIX add foreign key constraints
       

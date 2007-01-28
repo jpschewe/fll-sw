@@ -36,11 +36,11 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
       <tr>
         <td colspan='6' align='center'>
           <sql:query var="result" dataSource="${datasource}">
-            SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, TournamentTeams.event_division, Performance.Tournament, Performance.RunNumber, Performance.Bye, Performance.NoShow, Performance.TimeStamp, Performance.ComputedTotal
-              FROM Teams,Performance, TournamentTeams
+            SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, current_tournament_teams.event_division, Performance.Tournament, Performance.RunNumber, Performance.Bye, Performance.NoShow, Performance.TimeStamp, Performance.ComputedTotal
+              FROM Teams,Performance, current_tournament_teams
               WHERE Performance.Tournament = '<c:out value="${currentTournament}"/>'
                 AND Teams.TeamNumber = Performance.TeamNumber
-                AND Teams.TeamNumber = TournamentTeams.TeamNumber
+                AND Teams.TeamNumber = current_tournament_teams.TeamNumber
                 AND Performance.Bye = False
               ORDER BY Performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 8
           </sql:query>

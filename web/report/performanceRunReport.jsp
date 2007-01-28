@@ -33,12 +33,12 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
           </tr>
           <sql:query var="result" dataSource="${datasource}">
             SELECT Teams.TeamNumber,Teams.TeamName,Performance.ComputedTotal,Performance.NoShow
-                     FROM Teams,Performance,TournamentTeams
+                     FROM Teams,Performance,current_tournament_teams
                      WHERE Performance.RunNumber = <c:out value="${param.RunNumber}"/>
                        AND Teams.TeamNumber = Performance.TeamNumber
-                       AND TournamentTeams.TeamNumber = Teams.TeamNumber
+                       AND current_tournament_teams.TeamNumber = Teams.TeamNumber
                        AND Performance.Tournament = '<c:out value="${tournament}"/>'
-                       AND TournamentTeams.event_division  = '<c:out value="${division}"/>'
+                       AND current_tournament_teams.event_division  = '<c:out value="${division}"/>'
                        ORDER BY ComputedTotal DESC
           </sql:query>
           <c:forEach items="${result.rows}" var="row">
