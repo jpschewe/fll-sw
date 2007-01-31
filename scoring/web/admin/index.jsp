@@ -73,7 +73,7 @@
  for teams. The filter functionality provided here is very basic and has
  very limited feedback. It's suggested that you edit the input file
  before upload to contain only the teams for your tournament(s). <input
-  type="file" size="32" name="file1"> <input type="submit"
+  type="file" size="32" name="teamsFile"> <input type="submit"
   value="Upload"></form>
  </li>
 
@@ -192,7 +192,7 @@
  <form name='uploadSubjective'
   ACTION='<c:url value="uploadSubjectiveData.jsp"/>' METHOD="POST"
   ENCTYPE="multipart/form-data">Upload the datafile for
- subjective scores. <input type="file" size="32" name="file1"> <input
+ subjective scores. <input type="file" size="32" name="subjectiveFile"> <input
   type="submit" value="Upload"></form>
  </li>
 

@@ -12,6 +12,7 @@ import fll.xml.XMLWriter;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
 import java.sql.Connection;
@@ -58,7 +59,7 @@ public final class GenerateDB {
         System.exit(1);
       } else {
         final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-        final Document challengeDocument = ChallengeParser.parse(classLoader.getResourceAsStream("resources/challenge-state-2005.xml"));
+        final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(classLoader.getResourceAsStream("resources/challenge-state-2005.xml")));
         //final String db = "tomcat/webapps/fll-sw/WEB-INF/fll";
         final String db = "fll";
         generateDB(challengeDocument, db, true);

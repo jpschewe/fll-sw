@@ -5,21 +5,19 @@
  */
 package fll.xml;
 
-import org.apache.log4j.Logger;
-
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import fll.Utilities;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
+
+import fll.Utilities;
 
 /**
  * Push an XML document into the database without recreating the database.
@@ -32,7 +30,7 @@ public final class ImportDocument {
   private static final Logger LOG = Logger.getLogger(ImportDocument.class);
   
   public static void main(final String[] args) throws IOException {
-    final Document document = ChallengeParser.parse(new FileInputStream("/home/jpschewe/projects/fll-sw/working-dir/challenge-descriptors/challenge-region-2006.xml"));
+    final Document document = ChallengeParser.parse(new FileReader("/home/jpschewe/projects/fll-sw/working-dir/challenge-descriptors/challenge-region-2006.xml"));
     if(null == document) {
       throw new RuntimeException("Error parsing challenge.xml");
     }

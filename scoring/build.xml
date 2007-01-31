@@ -1,15 +1,15 @@
 <project name="fll-sw" default="compile">
 
-  <!-- ===================== Property Definitions =========================== -->
+	<!-- ===================== Property Definitions =========================== -->
 
 	<!-- load build specific properties first -->
 	<property file="override.properties" />
 
 	<property name="app.name" value="${ant.project.name}" />
-	<property name="app.version" value="2.10" />
+	<property name="app.version" value="3.0" />
 
 	<property name="dir.build" value="build" />
-	<property name="tomcat" value="jakarta-tomcat-4.1.27-LE-jdk14" />
+	<property name="tomcat" value="apache-tomcat-5.5.20" />
 	<property name="dir.tomcat" value="${dir.build}/${tomcat}" />
 
 	<property name="dir.dist" value="dist" />
@@ -59,18 +59,20 @@
 		<pathelement location="${dir.lib}/commons-lang-2.0.jar" />
 		<pathelement location="${dir.lib}/opencsv-1.7-jps.jar" />
 		<pathelement location="${dir.lib}/taglibs-string.jar" />
-		<pathelement location="${dir.lib}/uptag.jar" />
 		<pathelement location="${dir.lib}/itext-1.3.jar" />
 
+		<!-- file upload -->
+		<pathelement location="${dir.lib}/commons-io-1.3.jar" />
+		<pathelement location="${dir.lib}/commons-fileupload-1.1.1.jar" />
+
 		<!-- JSTL libraries -->
-		<pathelement location="${dir.lib}/dom.jar" />
-		<pathelement location="${dir.lib}/jaxen-full.jar" />
-		<pathelement location="${dir.lib}/jaxp-api.jar" />
 		<pathelement location="${dir.lib}/jstl.jar" />
-		<pathelement location="${dir.lib}/sax.jar" />
-		<pathelement location="${dir.lib}/saxpath.jar" />
 		<pathelement location="${dir.lib}/standard.jar" />
+		<pathelement location="${dir.lib}/serializer.jar" />
 		<pathelement location="${dir.lib}/xalan.jar" />
+		<pathelement location="${dir.lib}/xercesImpl.jar" />
+		<pathelement location="${dir.lib}/xml-apis.jar" />
+
 
 		<!-- Include all elements that Tomcat exposes to applications -->
 		<fileset dir="${dir.build}/tomcat/common/lib">
@@ -439,7 +441,7 @@
 			</zipfileset>
 		</zip>
 
-                <!-- release without jdk -->
+		<!-- release without jdk -->
 		<zip zipfile="${app.name}-${app.version}.zip">
 			<zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version}" />
 		</zip>

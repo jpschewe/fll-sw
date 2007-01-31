@@ -1,3 +1,9 @@
+* switched upload libraries from uptag to commons-fileupload
+
+* upgraded to JSTL 1.1
+
+* upgraded tomcat to 5.5.20
+
 * Upgraded to junit 4.1
 
 * Found bug in database setup form that causes some HTML parsers to choke (missing quote).  Firefox seems to handle it ok though.
