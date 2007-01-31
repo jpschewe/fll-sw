@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="lib" path="lib/ant/antlr-2.7.6.jar"/>
+	<classpathentry kind="lib" path="lib/ant/checkstyle-4.2.jar"/>
+	<classpathentry kind="lib" path="lib/ant/commons-beanutils-core.jar"/>
+	<classpathentry kind="lib" path="lib/ant/commons-cli-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/ant/commons-collections.jar"/>
+	<classpathentry kind="lib" path="lib/ant/commons-logging.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang-2.0.jar"/>
+	<classpathentry kind="lib" path="lib/itext-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/JonsInfra-0.2.jar"/>
+	<classpathentry kind="lib" path="lib/jstl.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.8.jar"/>
+	<classpathentry kind="lib" path="lib/standard.jar"/>
+	<classpathentry kind="lib" path="lib/taglibs-string.jar"/>
+	<classpathentry kind="lib" path="lib/test/httpunit.jar"/>
+	<classpathentry kind="lib" path="lib/test/js.jar"/>
+	<classpathentry kind="lib" path="lib/test/nekohtml.jar"/>
+	<classpathentry kind="lib" path="lib/test/Tidy.jar"/>
+	<classpathentry kind="lib" path="lib/uptag.jar"/>
+	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="lib/xmlParserAPIs.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/hsqldb-1.8.0.7.jar"/>
+	<classpathentry kind="lib" path="lib/mysql-connector-java-3.0.16-ga-bin.jar"/>
+	<classpathentry kind="lib" path="lib/opencsv-1.7-jps.jar"/>
+	<classpathentry kind="lib" path="lib/test/junit-4.1.jar"/>
+	<classpathentry kind="lib" path="build/tomcat/common/lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/commons-fileupload-1.1.1.jar"/>
+	<classpathentry kind="output" path="build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
+</classpath>
