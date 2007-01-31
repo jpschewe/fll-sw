@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -286,7 +287,7 @@ public class FullTournamentTest extends TestCase {
       Utilities.closeResultSet(rs);
       Utilities.closePreparedStatement(prep);
 
-      final Document challengeDocument = ChallengeParser.parse(FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml"));
+      final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
       Assert.assertNotNull(challengeDocument);
       final Element rootElement = challengeDocument.getDocumentElement();
       final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);

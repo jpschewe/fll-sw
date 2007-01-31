@@ -17,6 +17,7 @@ import org.w3c.dom.Document;
 
 import fll.xml.ChallengeParser;
 
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.io.InputStream;
 import junit.framework.Assert;
@@ -38,7 +39,7 @@ public class GenerateDBTest extends TestCase {
     throws SQLException, UnsupportedEncodingException {
     final InputStream stream = GenerateDBTest.class.getResourceAsStream("data/challenge-test.xml");
     Assert.assertNotNull(stream);
-    final Document document = ChallengeParser.parse(stream);
+    final Document document = ChallengeParser.parse(new InputStreamReader(stream));
     Assert.assertNotNull(document);
 
     final String database = "testdb";

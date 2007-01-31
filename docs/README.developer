@@ -2,7 +2,7 @@ Read this if you plan to do development or extension of the FLL software.
 
 First, all of the code is currently Copyrighted by INSciTE.
 Please make sure anything you add has the following sort of header:
-  * Copyright (c) 2000-2006 INSciTE.  All rights reserved
+  * Copyright (c) 2000-2007 INSciTE.  All rights reserved
   * INSciTE is on the web at: http://www.hightechkids.org
   * This code is released under GPL; see LICENSE.txt for details.
 
@@ -28,6 +28,7 @@ and test things (newer versions should be fine):
   ant-1.6.5+	(http://jakarta.apache.org/ant/)
   cygwin-1.3.x  (http://www.cygwin.com) -- optional
   jdee          (http://jdee.sunsite.dk) -- optional
+  eclipse       (http://www.eclipse.org) -- optional
 
 JDEE is a mode for [X]Emacs that makes Java development much easier, should
   come with XEmacs. 
@@ -47,6 +48,7 @@ There are some good ideas for JSP coding conventions here as well.
 http://developer.java.sun.com/developer/technicalArticles/javaserverpages/code_convention/
 
 Pointers on JSTL:
+- http://java.sun.com/products/jsp/syntax/2.0/syntaxref20.html - we are now using Tomcat 5.5, so the 2.0 JSP spec is supported
 - http://java.sun.com/products/jsp/jstl/ - the main page at Sun
 - http://www.manning.com/bayern/appendixA.pdf - good reference
 - Also if you grab the implementation from Jakarta, there are some very nice

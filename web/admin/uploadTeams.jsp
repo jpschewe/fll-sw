@@ -1,10 +1,9 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ taglib uri="/WEB-INF/tld/taglib62.tld" prefix="up" %>
-
-<%@ page import="fll.db.Queries" %>
+<%@ page import="java.sql.Connection" %>
 <%@ page import="fll.web.admin.UploadTeams" %>
-
+<%@ page import="fll.web.UploadProcessor"%>
+<%@ page import="org.apache.commons.fileupload.FileItem"%>
 <%@ page import="java.io.File" %>
 
 <%@ page import="java.sql.Connection" %>
@@ -21,18 +20,17 @@ final Connection connection = (Connection)application.getAttribute("connection")
 
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Upload Teams)</h1>
-      <up:parse id="numFiles">
-<% final File file = File.createTempFile("fll", null); %>
-        <up:saveFile path="<%=file.getAbsolutePath()%>"/>
-<%
+<% 
+UploadProcessor.processUpload(request);
+final FileItem teamsFileItem = (FileItem) request.getAttribute("teamsFile");
+final File file = File.createTempFile("fll", null);
+teamsFileItem.write(file);
 UploadTeams.parseFile(file, connection, session);
 file.delete();
 %>
-      </up:parse>
 
       <p>
         <ul>
-          <li><%=numFiles%> file(s) successfully uploaded.</li>
           <li>Normally you'd be redirected <a href="<%=response.encodeRedirectURL("filterTeams.jsp")%>">here.</a></li>
         </ul>
       </p>
