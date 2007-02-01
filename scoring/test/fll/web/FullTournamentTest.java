@@ -140,7 +140,7 @@ public class FullTournamentTest extends TestCase {
       final InputStream teamsIS = FullTournamentTest.class.getResourceAsStream("data/teams-ft.csv");
       Assert.assertNotNull(teamsIS);
       final UploadFileSpec teamsUpload = new UploadFileSpec("teams.csv", teamsIS, "text/plain");
-      form.setParameter("file1", new UploadFileSpec[] { teamsUpload });
+      form.setParameter("teamsFile", new UploadFileSpec[] { teamsUpload });
       request = form.getRequest();
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
@@ -514,7 +514,7 @@ public class FullTournamentTest extends TestCase {
       WebForm form = response.getFormWithName("uploadSubjective");
       request = form.getRequest();
       final UploadFileSpec subjectiveUpload = new UploadFileSpec(subjectiveZip);
-      form.setParameter("file1", new UploadFileSpec[] { subjectiveUpload });
+      form.setParameter("subjectiveFile", new UploadFileSpec[] { subjectiveUpload });
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Subjective data uploaded successfully"));

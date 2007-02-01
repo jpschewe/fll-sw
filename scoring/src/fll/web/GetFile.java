@@ -182,7 +182,6 @@ public final class GetFile {
 
       // Create the scoresheet generator - must provide correct number of scoresheets
       final ScoresheetGenerator scoresheetGen = new ScoresheetGenerator(2, challengeDocument);
-
       // Write the scoresheets to the browser - content-type: application/pdf
       scoresheetGen.writeFile(response.getOutputStream());
       

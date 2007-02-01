@@ -5,20 +5,14 @@
  */
 package fll.db;
 
-import fll.Team;
-import fll.Utilities;
-import fll.web.playoff.Playoff;
-import fll.xml.XMLUtils;
-
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-
 import java.text.ParseException;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -31,10 +25,14 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import fll.Team;
+import fll.Utilities;
+import fll.web.playoff.Playoff;
+import fll.xml.ChallengeParser;
 
 /**
  * Does all of our queries.
@@ -744,11 +742,11 @@ public final class Queries {
         prep.setInt(2, getNumSeedingRounds(connection));
       } else {
         prep = connection
-            .prepareStatement("SELECT Performance.TeamNumber,Count(*) FROM Performance,current_tournament_teams"
+            .prepareStatement("SELECT Performance.TeamNumber,Count(Performance.TeamNumber) FROM Performance,current_tournament_teams"
                 + " WHERE Performance.TeamNumber = current_tournament_teams.TeamNumber"
                 + " AND current_tournament_teams.event_division = ?"
                 + " AND Performance.Tournament = ?"
-                + " GROUP BY Performance.TeamNumber" + " HAVING Count(*) < ?");
+                + " GROUP BY Performance.TeamNumber" + " HAVING Count(Performance.TeamNumber) < ?");
         prep.setString(1, division);
         prep.setString(2, currentTournament);
         prep.setInt(3, getNumSeedingRounds(connection));
@@ -795,11 +793,11 @@ public final class Queries {
         prep.setInt(2, getNumSeedingRounds(connection));
       } else {
         prep = connection
-            .prepareStatement("SELECT Performance.TeamNumber,Count(*) FROM Performance,current_ournament_teams"
+            .prepareStatement("SELECT Performance.TeamNumber,Count(Performance.TeamNumber) FROM Performance,current_ournament_teams"
                 + " WHERE Performance.TeamNumber = current_tournament_teams.TeamNumber"
                 + " AND current_tournament_teams.event_division = ?"
                 + " AND Performance.Tournament = ?"
-                + " GROUP BY Performance.TeamNumber" + " HAVING Count(*) > ?");
+                + " GROUP BY Performance.TeamNumber" + " HAVING Count(Performance.TeamNumber) > ?");
         prep.setString(1, division);
         prep.setString(2, currentTournament);
         prep.setInt(3, getNumSeedingRounds(connection));
@@ -1169,7 +1167,7 @@ public final class Queries {
       rs = stmt
           .executeQuery("SELECT Value FROM TournamentParameters WHERE Param = 'ChallengeDocument'");
       if (rs.next()) {
-        return XMLUtils.parseXMLDocument(rs.getAsciiStream(1));
+        return ChallengeParser.parse(new InputStreamReader(rs.getAsciiStream(1)));
       } else {
         throw new RuntimeException("Could not find challenge document in database");
       }

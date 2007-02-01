@@ -58,8 +58,9 @@
 
 		<pathelement location="${dir.lib}/commons-lang-2.0.jar" />
 		<pathelement location="${dir.lib}/opencsv-1.7-jps.jar" />
-		<pathelement location="${dir.lib}/taglibs-string.jar" />
-		<pathelement location="${dir.lib}/itext-1.3.jar" />
+
+		<!-- pdf library -->
+		<pathelement location="${dir.lib}/itext-1.4.8.jar" />
 
 		<!-- file upload -->
 		<pathelement location="${dir.lib}/commons-io-1.3.jar" />
@@ -74,10 +75,9 @@
 		<pathelement location="${dir.lib}/xml-apis.jar" />
 
 
-		<!-- Include all elements that Tomcat exposes to applications -->
-		<fileset dir="${dir.build}/tomcat/common/lib">
-			<include name="*.jar" />
-		</fileset>
+		<!-- tomcat libraries -->
+		<pathelement location="${dir.lib}/tomcat/servlet-api.jar" />
+		<pathelement location="${dir.lib}/tomcat/jsp-api.jar" />
 
 	</path>
 
@@ -341,7 +341,7 @@
 
 	</target>
 
-	<target name="tomcat.stop" depends="tomcat.expand" description="shut down tomcat">
+	<target name="tomcat.stop" depends="tomcat.expand,compile.test" description="shut down tomcat">
 		<echo message="Shutting down tomcat" />
 		<antcall target="-tomcat.run">
 			<param name="operation" value="stop" />
@@ -546,7 +546,7 @@
     </fail>
 	</target>
 
-	<target name="test.single" depends="-junit.single,checkstyle.full" description="Run the unit tests">
+	<target name="test.single" depends="-junit.single" description="Run the unit tests">
 		<condition property="test.halt">
 			<and>
 				<isset property="test.failed" />

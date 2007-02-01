@@ -38,9 +38,6 @@
       <li><a href="http://jakarta.apache.org/commons/lang/">Jakarta Commons Lang</a> -
         <a href="commons-lang-LICENSE.txt">License</a></li>
 
-      <li><a href="http://jakarta.apache.org/taglibs/doc/string-doc/string-1.0.1/index.html">String Tag library</a> -
-        <a href="taglib-string-LICENSE.txt">License</a></li>
-        
       <li><a href="http://www.lowagie.com/iText/">iText (PDF generation library)</a> -
         <a href="iText-license.txt">License Information</a></li>
         
