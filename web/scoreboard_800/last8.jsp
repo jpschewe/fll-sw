@@ -1,5 +1,4 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
-<%@ taglib uri="http://jakarta.apache.org/taglibs/string-1.0.1" prefix="str" %>
 
 <%@ page import="fll.db.Queries" %>
   
@@ -54,7 +53,7 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
                 </td>
                 <td width='28%'>
                   <font size='3'>
-                    <str:substring start="0" end="20"><c:out value="${row.TeamName}"/></str:substring>&nbsp;
+                  <c:out value="${fn:substring(row.TeamName, 0, 20)}"/>&nbsp;
                   </font>
                 </td>
                 <td width='5%' align='right'>

@@ -15,11 +15,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -62,6 +60,15 @@ public final class ChallengeParser {
       }
 
       LOG.info("Title: " + challengeDocument.getDocumentElement().getAttribute("title"));
+      final org.w3c.dom.Element rootElement = challengeDocument.getDocumentElement();
+      final org.w3c.dom.Element performanceElement = (org.w3c.dom.Element) rootElement
+      .getElementsByTagName("Performance").item(0);
+      final org.w3c.dom.NodeList goals = performanceElement.getElementsByTagName("goal");
+      for (int i = 0; i < goals.getLength(); i++) {
+        final Element element = (org.w3c.dom.Element) goals .item(i);
+        final String name = element.getAttribute("name");
+        LOG.info("The min value for goal " + name + " is " + element.getAttribute("min"));
+      }
 
     } catch (final Exception e) {
       e.printStackTrace();
@@ -83,16 +90,14 @@ public final class ChallengeParser {
     try {
       final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-      // final DOMParser parser = new DOMParser();
+      final SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+      final Source schemaFile = new StreamSource(classLoader.getResourceAsStream("fll/resources/fll.xsd"));
+      final Schema schema = factory.newSchema(schemaFile);
+
       final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
       builderFactory.setNamespaceAware(true);
+      builderFactory.setSchema(schema);
       final DocumentBuilder parser = builderFactory.newDocumentBuilder();
-      
-      // parser.setFeature("http://xml.org/sax/features/validation", true);
-      // parser.setFeature("http://apache.org/xml/features/validation/schema",
-      // true);
-
-      // parser.setFeature("http://xml.org/sax/features/namespaces", true);
 
       parser.setErrorHandler(new ErrorHandler() {
         public void error(final SAXParseException spe) throws SAXParseException {
@@ -132,27 +137,9 @@ public final class ChallengeParser {
         writer.write(buffer, 0, bytesRead);
       }
 
-      /*
-       * parser.parse(new InputSource(new StringReader(writer.toString())));
-       * final Document document = parser.getDocument();
-       */
-
-      // final Document document = parser.parse(new InputSource(stream));
+      
       final Document document = parser.parse(new InputSource(new StringReader(writer.toString())));
-
-      final SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-      final Source schemaFile = new StreamSource(classLoader.getResourceAsStream("fll/resources/fll.xsd"));
-      final Schema schema = factory.newSchema(schemaFile);
-
-      final Validator validator = schema.newValidator();
-
-      // validate the DOM tree
-      try {
-        validator.validate(new DOMSource(document));
-      } catch (final SAXException e) {
-        throw new RuntimeException(e);
-      }
-
+      
       final Element rootElement = document.getDocumentElement();
       if (!"fll".equals(rootElement.getTagName())) {
         throw new RuntimeException("Not a fll challenge description file");

@@ -39,7 +39,7 @@ public class WebTest extends TestCase {
     throws SAXException, MalformedURLException, IOException {
     final String[] pages = new String[] {
       "index.jsp",
-      "check.jsp",
+      "check.jsp?division=__all__",
       //"remoteMain.jsp",
     };
     final WebConversation conversation = new WebConversation();

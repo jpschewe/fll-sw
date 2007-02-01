@@ -130,7 +130,6 @@ public final class Utilities {
                                               final String database)
     throws RuntimeException {
     // create connection to database and puke if anything goes wrong
-
     try{
       // register the driver
       Class.forName(getDBDriverName()).newInstance();

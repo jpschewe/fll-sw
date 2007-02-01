@@ -1,3 +1,7 @@
+* Upgraded to iText 1.4.7
+
+* removed jakarta string taglib and used the functions built into JSTL 1.1
+
 * switched upload libraries from uptag to commons-fileupload
 
 * upgraded to JSTL 1.1

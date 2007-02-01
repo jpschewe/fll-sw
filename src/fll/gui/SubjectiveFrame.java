@@ -8,6 +8,7 @@ package fll.gui;
 
 import fll.model.SubjectiveTableModel;
 
+import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 import fll.xml.XMLWriter;
 
@@ -23,6 +24,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -120,7 +122,7 @@ public final class SubjectiveFrame extends JFrame {
 
     final ZipFile zipfile = new ZipFile(file);
     final InputStream challengeStream = zipfile.getInputStream(zipfile.getEntry("challenge.xml"));
-    _challengeDocument = XMLUtils.parseXMLDocument(challengeStream);
+    _challengeDocument = ChallengeParser.parse(new InputStreamReader(challengeStream));
     challengeStream.close();
     
     final InputStream scoreStream = zipfile.getInputStream(zipfile.getEntry("score.xml"));
