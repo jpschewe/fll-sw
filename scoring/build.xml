@@ -627,6 +627,11 @@
 	</target>
 
 	<target name="install.testdb" description="install the test database" depends="compile">
+		<delete>
+			<fileset dir="${dir.web}/WEB-INF">
+				<include name="flldb.*" />
+			</fileset>
+		</delete>
 		<copy todir="${dir.web}/WEB-INF">
 			<fileset dir="${basedir}/test-data">
 				<include name="testdb.*" />
