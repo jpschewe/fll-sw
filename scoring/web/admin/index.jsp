@@ -182,7 +182,7 @@
  <li><a href='<c:url value="select_team.jsp"/>'>Edit team data</a></li>
 
  <li><a
-  href='<c:url value="/getfile.jsp">
+  href='<c:url value="/GetFile">
                      <c:param name="filename" value="subjective.zip"/>
                    </c:url>'>Download
  the datafile for subjective score entry.</a> Should be downloaded after
@@ -202,7 +202,7 @@
 <p>After the tournament</p>
 <ul>
  <li><a
-  href='<c:url value="/getfile.jsp"><c:param name="filename" value="database.zip"/></c:url>'>Download
+  href='<c:url value="/GetFile"><c:param name="filename" value="database.zip"/></c:url>'>Download
  database</a></li>
  <li><a href="advanceTeams.jsp">Advance teams</a></li>
 </ul>
