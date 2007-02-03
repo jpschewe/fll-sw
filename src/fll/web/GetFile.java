@@ -29,7 +29,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,16 +39,29 @@ import org.w3c.dom.Document;
 
 
 /**
- * Used to generate various files for download.  Called from getfile.jsp.
+ * Used to generate various files for download.
  *
  * @version $Revision$
  */
-public final class GetFile {
+public final class GetFile extends HttpServlet {
    
-  private GetFile() {
+  public GetFile() {
      
   }
 
+  @Override
+  public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+    try {
+      GetFile.getFile(getServletContext(), request, response);
+    } catch(final ParseException pe) {
+      throw new RuntimeException(pe);
+    } catch(final DocumentException de) {
+      throw new RuntimeException(de);
+    } catch(final SQLException sqle) {
+      throw new RuntimeException(sqle);
+    }
+  }
+      
   /**
    * Get a file.  Use the parameter "filename" to determine which file.
    */

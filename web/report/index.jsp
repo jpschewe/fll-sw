@@ -45,7 +45,7 @@ Utilities.closeStatement(stmt);
       returned to this page if there are no errors summarizing scores.</li>
 
       <li><a href="finalComputedScores.jsp">Final Computed Scores</a>
-          <a href='<c:url value="/getfile.jsp">
+          <a href='<c:url value="/GetFile">
                      <c:param name="filename" value="finalComputedScores.pdf"/>
                    </c:url>' target='_new'>PDF version</a>
         </li>

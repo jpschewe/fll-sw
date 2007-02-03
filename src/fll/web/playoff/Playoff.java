@@ -580,7 +580,7 @@ public final class Playoff {
   private static void genScoresheetForm(final JspWriter out, final Team teamA, final Team teamB, final String tableA, final String tableB, final List tables,
       final String round) throws IOException {
     final String formName = "genScoresheet_" + teamA.getTeamNumber() + "_" + teamB.getTeamNumber();
-    out.println("<form name='" + formName + "' action='../getfile.jsp' method='POST' target='_new'>");
+    out.println("<form name='" + formName + "' action='../GetFile' method='POST' target='_new'>");
 
     out.println("  <input type='hidden' name='filename' value='scoreSheet.pdf'>");
     out.println("  <input type='hidden' name='numTeams' value='2'>");

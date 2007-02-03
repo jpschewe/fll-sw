@@ -356,7 +356,7 @@ public class FullTournamentTest extends TestCase {
       Assert.assertTrue(response.isHTML());
 
       // PDF reports
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "getfile.jsp");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "GetFile");
       request.setParameter("filename", "finalComputedScores.pdf");
       response = conversation.getResponse(request);
       Assert.assertEquals("application/pdf", response.getContentType());
@@ -439,7 +439,7 @@ public class FullTournamentTest extends TestCase {
       final WebConversation conversation = new WebConversation();
 
       // download subjective zip
-      WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "getfile.jsp");
+      WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "GetFile");
       request.setParameter("filename", "subjective.zip");
       WebResponse response = conversation.getResponse(request);
       Assert.assertEquals("application/zip", response.getContentType());

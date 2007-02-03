@@ -80,7 +80,7 @@
   <body>
     <h2><x:out select="$challengeDocument/fll/@title"/> (Playoff Brackets Division: <%=divisionStr%>)</h2>
     <p><a href="index.jsp">Return to Playoff menu</a></p>
-      <form name='printScoreSheets' method='post' action='../getfile.jsp' target='_new'>
+      <form name='printScoreSheets' method='post' action='<c:url value="/GetFile"/>' target='_new'>
       <input type='hidden' name='numMatches' value='<%=numMatches %>'/>
       <input type='submit' value='Print scoresheets'/>
       <input type='hidden' name='filename' value='scoreSheet.pdf'/>

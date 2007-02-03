@@ -24,9 +24,14 @@
     <location>/errorHandler.jsp</location>
   </error-page>
 
-  <taglib>
-    <taglib-uri>http://jakarta.apache.org/taglibs/string-1.0.1</taglib-uri>
-    <taglib-location>/WEB-INF/tld/taglibs-string.tld</taglib-location>
-  </taglib>
-
+  <servlet>
+    <servlet-name>GetFile</servlet-name>
+    <description>Get various binary files</description>
+    <servlet-class>fll.web.GetFile</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>GetFile</servlet-name>
+    <url-pattern>/GetFile</url-pattern>
+  </servlet-mapping>
+  
 </web-app>

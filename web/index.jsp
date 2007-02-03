@@ -47,7 +47,7 @@ final Connection connection = (Connection)application.getAttribute("connection")
 
       <li><a href="subjective.zip">Subjective Scoring Application</a></li>
 
-      <li><a href="getfile.jsp?filename=blankScoreSheet.pdf" target="_new">Blank scoresheet for printing (PDF format)</a></li>
+      <li><a href='<c:url value="GetFile"><c:param name="filename" value="blankScoreSheet.pdf"/></c:url>' target="_new">Blank scoresheet for printing (PDF format)</a></li>
 
       <li><a href="developer/index.jsp">Developer page</a></li>
 
