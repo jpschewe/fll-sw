@@ -50,7 +50,12 @@ public final class GetFile extends HttpServlet {
   }
 
   @Override
-  public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+    doGet(request, response);
+  }
+  
+  @Override
+  protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
     try {
       GetFile.getFile(getServletContext(), request, response);
     } catch(final ParseException pe) {

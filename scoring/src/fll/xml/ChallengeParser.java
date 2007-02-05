@@ -53,7 +53,7 @@ public final class ChallengeParser {
   public static void main(final String[] args) {
     try {
       // final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-      final java.io.FileReader input = new java.io.FileReader("/home/jpschewe/projects/fll-sw/working-dir/challenge-descriptors/challenge-hsr-2006.xml");
+      final java.io.FileReader input = new java.io.FileReader("c:/Documents and Settings/jpschewe/projects/fll-sw/working-dir/challenge-descriptors/challenge-hsr-2006.xml");
       final Document challengeDocument = ChallengeParser.parse(input);
       if (null == challengeDocument) {
         throw new RuntimeException("Error parsing challenge.xml");
@@ -70,6 +70,11 @@ public final class ChallengeParser {
         LOG.info("The min value for goal " + name + " is " + element.getAttribute("min"));
       }
 
+      LOG.info("Document");
+      final XMLWriter xmlwriter = new XMLWriter();
+      xmlwriter.setOutput(new java.io.PrintWriter(System.out));
+      xmlwriter.write(challengeDocument);
+      
     } catch (final Exception e) {
       e.printStackTrace();
     }

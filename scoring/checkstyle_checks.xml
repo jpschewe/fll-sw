@@ -163,15 +163,15 @@
       <property name="format" value="System\.out\.print"/>
       <property name="message" value="Use Log4j."/>
     </module>
-    <module name="TodoComment">
+    <!--module name="TodoComment">
       <property name="format" value="TODO"/>
-    </module>
-    <module name="TodoComment">
+    </module-->
+    <!--module name="TodoComment">
       <property name="format" value="HACK"/>
-    </module>
-    <module name="TodoComment">
+    </module-->
+    <!--module name="TodoComment">
       <property name="format" value="FIX"/>
-    </module>
+    </module-->
     <module name="UpperEll"/>
 
   </module>
