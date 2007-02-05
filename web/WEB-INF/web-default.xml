@@ -33,5 +33,15 @@
     <servlet-name>GetFile</servlet-name>
     <url-pattern>/GetFile</url-pattern>
   </servlet-mapping>
+
+  <servlet>
+    <servlet-name>ImportDB</servlet-name>
+    <description>Import databases</description>
+    <servlet-class>fll.db.ImportDB</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ImportDB</servlet-name>
+    <url-pattern>/setup/ImportDB</url-pattern>
+  </servlet-mapping>
   
 </web-app>

@@ -11,7 +11,6 @@
 	<classpathentry kind="lib" path="lib/commons-lang-2.0.jar"/>
 	<classpathentry kind="lib" path="lib/JonsInfra-0.2.jar"/>
 	<classpathentry kind="lib" path="lib/jstl.jar"/>
-	<classpathentry kind="lib" path="lib/log4j-1.2.8.jar"/>
 	<classpathentry kind="lib" path="lib/standard.jar"/>
 	<classpathentry kind="lib" path="lib/test/httpunit.jar"/>
 	<classpathentry kind="lib" path="lib/test/js.jar"/>
@@ -30,5 +29,6 @@
 	<classpathentry kind="lib" path="lib/xalan.jar"/>
 	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
 	<classpathentry kind="lib" path="lib/tomcat/jsp-api.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.14.jar"/>
 	<classpathentry kind="output" path="build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
