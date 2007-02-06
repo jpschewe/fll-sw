@@ -16,7 +16,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 
-import junit.framework.TestCase;
+import junit.framework.JUnit4TestAdapter;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
@@ -31,9 +31,16 @@ import au.com.bytecode.opencsv.CSVWriter;
  * @version $Revision$
  *
  */
-public class UtilitiesTest extends TestCase {
+public class UtilitiesTest {
 
   private static final Logger LOG = Logger.getLogger(UtilitiesTest.class);
+ 
+  /**
+   * To allow ant to find the unit tests 
+   */
+  public static junit.framework.Test suite() {
+    return new JUnit4TestAdapter(UtilitiesTest.class);
+  } 
   
   /**
    * Test loading a csv file.
@@ -56,16 +63,7 @@ public class UtilitiesTest extends TestCase {
       csvWriter.writeAll(Arrays.asList(data));
       csvWriter.close();
       
-      try {
-        // register the driver
-        Class.forName(Utilities.getDBDriverName()).newInstance();
-      } catch (final ClassNotFoundException e) {
-        throw new RuntimeException("Unable to load driver.", e);
-      } catch (final InstantiationException ie) {
-        throw new RuntimeException("Unable to load driver.", ie);
-      } catch (final IllegalAccessException iae) {
-        throw new RuntimeException("Unable to load driver.", iae);
-      }
+      Utilities.loadDBDriver();
       
       // create an in-memory database
       final String url = "jdbc:hsqldb:mem:loadCSVFileTest";

@@ -11,7 +11,7 @@ import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.zip.ZipInputStream;
 
-import junit.framework.TestCase;
+import junit.framework.JUnit4TestAdapter;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
@@ -22,9 +22,16 @@ import org.junit.Test;
  * @version $Revision$
  * 
  */
-public class ImportDBTest extends TestCase {
+public class ImportDBTest {
 
   private static final Logger LOG = Logger.getLogger(ImportDBTest.class);
+
+  /**
+   * To allow ant to find the unit tests
+   */
+  public static junit.framework.Test suite() {
+    return new JUnit4TestAdapter(ImportDBTest.class);
+  }
 
   /**
    * Test
@@ -39,7 +46,7 @@ public class ImportDBTest extends TestCase {
 
     final File tempFile = File.createTempFile("flltest", null);
     final String database = tempFile.getAbsolutePath();
-    
+
     ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), database);
 
   }
