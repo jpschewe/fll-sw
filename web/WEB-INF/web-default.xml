@@ -35,13 +35,13 @@
   </servlet-mapping>
 
   <servlet>
-    <servlet-name>ImportDB</servlet-name>
-    <description>Import databases</description>
-    <servlet-class>fll.db.ImportDB</servlet-class>
+    <servlet-name>CreateDB</servlet-name>
+    <description>Create databases</description>
+    <servlet-class>fll.web.setup.CreateDB</servlet-class>
   </servlet>
   <servlet-mapping>
-    <servlet-name>ImportDB</servlet-name>
-    <url-pattern>/setup/ImportDB</url-pattern>
+    <servlet-name>CreateDB</servlet-name>
+    <url-pattern>/setup/CreateDB</url-pattern>
   </servlet-mapping>
   
 </web-app>

@@ -181,6 +181,23 @@ public final class Utilities {
   }
 
   /**
+   * Load the database driver and throw a RuntimeException if there is an error.
+   *
+   */
+  public static void loadDBDriver() {
+    try {
+      // register the driver
+      Class.forName(Utilities.getDBDriverName()).newInstance();
+    } catch (final ClassNotFoundException e) {
+      throw new RuntimeException("Unable to load driver.", e);
+    } catch (final InstantiationException ie) {
+      throw new RuntimeException("Unable to load driver.", ie);
+    } catch (final IllegalAccessException iae) {
+      throw new RuntimeException("Unable to load driver.", iae);
+    }
+  }
+  
+  /**
    * Calls createDBConnection with fll as username and password
    * 
    * @see #createDBConnection(String, String)
@@ -217,16 +234,7 @@ public final class Utilities {
                                               final String password,
                                               final String database) throws RuntimeException {
     // create connection to database and puke if anything goes wrong
-    try {
-      // register the driver
-      Class.forName(getDBDriverName()).newInstance();
-    } catch (final ClassNotFoundException e) {
-      throw new RuntimeException("Unable to load driver.", e);
-    } catch (final InstantiationException ie) {
-      throw new RuntimeException("Unable to load driver.", ie);
-    } catch (final IllegalAccessException iae) {
-      throw new RuntimeException("Unable to load driver.", iae);
-    }
+    loadDBDriver();
 
     Connection connection = null;
     final String myURL = "jdbc:hsqldb:file:" + database + ";shutdown=true";

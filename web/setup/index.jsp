@@ -23,7 +23,7 @@ ${message}
 
 
 This will create a database called fll.</p>
-<form id='setup' action='ImportDB' method='post'
+<form id='setup' action='CreateDB' method='post'
  enctype='multipart/form-data'>XML description document <input
  type='file' size='32' name='xmldocument'><br />
 
@@ -36,7 +36,7 @@ whole database, including team data?<br />
 
 </form>
 
-<form id='import' action='ImportDB' method='post' enctype='multipart/form-data'>
+<form id='import' action='CreateDB' method='post' enctype='multipart/form-data'>
 
 <p>Import data from a database dump.</p>
 <input type='file' size='32' name='dbdump'>
