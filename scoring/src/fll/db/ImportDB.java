@@ -332,6 +332,7 @@ public final class ImportDB {
         destPrep.executeUpdate();
         Utilities.closePreparedStatement(destPrep);
 
+        // Note: If this list changes, then the hack below needs to be modified
         final StringBuffer columns = new StringBuffer();
         columns.append(" TeamNumber,");
         columns.append(" Tournament,");
