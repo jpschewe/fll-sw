@@ -29,20 +29,19 @@ import fll.xml.ChallengeParser;
 /**
  * @author jpschewe
  * @version $Revision$
- *
+ * 
  */
 public class CreateDB extends HttpServlet {
 
   private static final Logger LOG = Logger.getLogger(CreateDB.class);
-  
+
   /**
    * 
    * @param request
    * @param response
    */
   @Override
-  protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
-      throws IOException {
+  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
     final StringBuilder message = new StringBuilder();
     final ServletContext application = getServletContext();
     final HttpSession session = request.getSession();
@@ -58,8 +57,7 @@ public class CreateDB extends HttpServlet {
         if (null == xmlFileItem) {
           message.append("<p class='error'>XML description document not specified</p>");
         } else {
-          final Document document = ChallengeParser.parse(new InputStreamReader(xmlFileItem
-              .getInputStream()));
+          final Document document = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream()));
 
           final String db = getServletConfig().getServletContext().getRealPath("/WEB-INF/flldb");
           GenerateDB.generateDB(document, db, forceRebuild);
@@ -70,58 +68,29 @@ public class CreateDB extends HttpServlet {
 
           message.append("<p id='success'><i>Successfully initialized database</i></p>");
         }
-      } else if (null != request.getAttribute("importdb")) {
+      } else if (null != request.getAttribute("createdb")) {
         final FileItem dumpFileItem = (FileItem) request.getAttribute("dbdump");
 
-        final String database = getServletConfig().getServletContext()
-            .getRealPath("/WEB-INF/flldb");
+        final String database = getServletConfig().getServletContext().getRealPath("/WEB-INF/flldb");
 
         ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileItem.getInputStream()), database);
-//      } else if() {
-//        final String tournament = ; // get from request
-//        Connection destConnection = null;
-//        PreparedStatement destPrep = null;
-//        Connection memConnection = null;
-//        
-//        Utilities.loadDBDriver();
-//
-//        try {
-//          final String url = "jdbc:hsqldb:mem:dbimport" + String.valueOf(_importdbCount);
-//          memConnection = DriverManager.getConnection(url);
-//
-//          final Document challengeDocument = loadDatabaseDump(zipfile, memConnection);
-//
-//          destConnection = Utilities.createDBConnection("fll", "fll", database);
-//
-//          // import the specified tournament
-//          importDatabase(memConnection, destConnection, tournament, challengeDocument);
-//
-//        } finally {
-//          Utilities.closeConnection(memConnection);
-//
-//          Utilities.closeConnection(destConnection);
-//        }
       } else {
-        message.append("<p class='error'>Unknown form state, expected form fields not seen: "
-            + request + "</p>");
+        message.append("<p class='error'>Unknown form state, expected form fields not seen: " + request + "</p>");
       }
     } catch (final FileUploadException fue) {
-      message.append("<p class='error'>Error handling the file upload: " + fue.getMessage()
-          + "</p>");
+      message.append("<p class='error'>Error handling the file upload: " + fue.getMessage() + "</p>");
       LOG.error(fue);
     } catch (final IOException ioe) {
-      message.append("<p class='error'>Error reading challenge descriptor: " + ioe.getMessage()
-          + "</p>");
+      message.append("<p class='error'>Error reading challenge descriptor: " + ioe.getMessage() + "</p>");
       LOG.error(ioe);
     } catch (final SQLException sqle) {
-      message.append("<p class='error'>Error loading data into the database: " + sqle.getMessage()
-          + "</p>");
+      message.append("<p class='error'>Error loading data into the database: " + sqle.getMessage() + "</p>");
       LOG.error(sqle);
       throw new RuntimeException(sqle);
     }
+    
     session.setAttribute("message", message.toString());
-
-    response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+    response.sendRedirect(response.encodeRedirectURL((String)session.getAttribute("redirect_url")));
   }
-  
+
 }

@@ -1,4 +1,4 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
 <%@ page import="fll.db.GenerateDB"%>
 <%@ page import="fll.xml.ChallengeParser"%>
@@ -19,10 +19,15 @@
 <h1>FLL (Database setup)</h1>
 
 ${message}
- <c:remove var="message" /> <%-- clear out the message --%>
+<%-- clear out the message, so that we don't see it again --%>
+<c:remove var="message" />
 
+<c:set var="redirect_url" scope="session">
+ <c:url value="/setup/index.jsp" />
+</c:set>
 
-This will create a database called fll.</p>
+This will create a database called fll.
+</p>
 <form id='setup' action='CreateDB' method='post'
  enctype='multipart/form-data'>XML description document <input
  type='file' size='32' name='xmldocument'><br />
@@ -32,18 +37,16 @@ whole database, including team data?<br />
 
 <input type='submit' name='reinitializeDatabase'
  value='Initialize Database'
- onclick='return confirm("This will erase ALL scores in the database fll (if it already exists), are you sure?")'/>
+ onclick='return confirm("This will erase ALL scores in the database fll (if it already exists), are you sure?")' />
 
 </form>
 
-<form id='import' action='CreateDB' method='post' enctype='multipart/form-data'>
+<form id='import' action='CreateDB' method='post'
+ enctype='multipart/form-data'>
 
-<p>Import data from a database dump.</p>
-<input type='file' size='32' name='dbdump'>
-
-<input type='submit' name='importdb' value='Import Database'/>
-
-</form>
+<p>Create database from a database dump.</p>
+<input type='file' size='32' name='dbdump'> <input type='submit'
+ name='createdb' value='Create Database' /></form>
 
 <%@ include file="/WEB-INF/jspf/footer.jspf"%>
 
