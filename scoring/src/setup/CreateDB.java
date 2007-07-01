@@ -27,6 +27,8 @@ import fll.web.UploadProcessor;
 import fll.xml.ChallengeParser;
 
 /**
+ * Create a new database either from an xml descriptor or from a database dump.
+ * 
  * @author jpschewe
  * @version $Revision$
  * 
@@ -51,6 +53,7 @@ public class CreateDB extends HttpServlet {
       UploadProcessor.processUpload(request);
 
       if (null != request.getAttribute("reinitializeDatabase")) {
+        // create a new empty database from an XML descriptor
         final FileItem xmlFileItem = (FileItem) request.getAttribute("xmldocument");
 
         final boolean forceRebuild = "1".equals(request.getAttribute("force_rebuild"));
@@ -69,11 +72,19 @@ public class CreateDB extends HttpServlet {
           message.append("<p id='success'><i>Successfully initialized database</i></p>");
         }
       } else if (null != request.getAttribute("createdb")) {
+        // import a database from a dump
         final FileItem dumpFileItem = (FileItem) request.getAttribute("dbdump");
 
         final String database = getServletConfig().getServletContext().getRealPath("/WEB-INF/flldb");
 
         ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileItem.getInputStream()), database);
+
+        // remove application variables that depend on the database
+        application.removeAttribute("connection");
+        application.removeAttribute("challengeDocument");
+        application.removeAttribute("database");
+        
+        message.append("<p id='success'><i>Successfully initialized database from dump</i></p>");        
       } else {
         message.append("<p class='error'>Unknown form state, expected form fields not seen: " + request + "</p>");
       }

@@ -18,12 +18,12 @@
  <c:remove var="challengeDocument" />
  <c:redirect url='index.jsp'>
   <c:param name="message">
-      Changed database to <c:out value="${database}" />
+      <p><i>Changed database to <c:out value="${database}" /></i></p>
   </c:param>
  </c:redirect>
 
 </c:if>
-<%-- if a form submssion --%>
+<%-- end if a form submssion --%>
 
 <html>
 <head>
@@ -40,9 +40,14 @@ Commands)</h1>
 <p><font color='red'><b>This page is intended for
 developers only. If you don't know what you're doing, LEAVE THIS PAGE!</b></font></p>
 
-<c:if test="${not empty param.message}">
- <p><i><c:out value="${param.message}" /></i></p>
-</c:if>
+${message}
+
+<%-- clear out the message, so that we don't see it again --%>
+<c:remove var="message" />
+
+<c:set var="redirect_url" scope="session">
+ <c:url value="/developer/index.jsp" />
+</c:set>
 
 <ul>
 
@@ -56,6 +61,15 @@ developers only. If you don't know what you're doing, LEAVE THIS PAGE!</b></font
  <li><a href="query.jsp">Do SQL queries and updates</a></li>
 
  <li><a href="<c:url value='/setup'/>">Go to database setup</a></li>
+
+<li>
+ <form id='import' action='ImportDBDump' method='post'
+  enctype='multipart/form-data'>
+
+ <p>Import data from a database dump into the current database.</p>
+ <input type='file' size='32' name='dbdump'> <input
+  type='submit' name='importdb' value='Import Database' /></form>
+</li>
 
  <li>inside.test: <%=System.getProperty("inside.test")%> -- <%=Boolean.getBoolean("inside.test")%></li>
  <li>Test server started: <%=fll.Utilities.isTestServerStarted()%>
