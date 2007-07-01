@@ -65,8 +65,8 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
                 </sql:query>
                 <c:set var="first" value="true"/>
                 <c:forEach var="rawRow" items="${rawRows.rowsByIndex}">
-                  <c:if test="${rawRow[0] != null}">
                     <c:if test="${not first}">, </c:if>
+                  <c:if test="${rawRow[0] != null}">
                     <c:if test="${first}"><c:set var="first" value="false"/></c:if>
                     <c:out value="${rawRow[0]}"/>
                   </c:if>

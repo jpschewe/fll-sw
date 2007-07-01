@@ -44,4 +44,14 @@
     <url-pattern>/setup/CreateDB</url-pattern>
   </servlet-mapping>
   
+  <servlet>
+    <servlet-name>ImportDBDump</servlet-name>
+    <description>Import Database</description>
+    <servlet-class>fll.web.developer.ImportDBDump</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ImportDBDump</servlet-name>
+    <url-pattern>/developer/ImportDBDump</url-pattern>
+  </servlet-mapping>
+  
 </web-app>
