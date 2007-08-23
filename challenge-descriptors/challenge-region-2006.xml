@@ -80,7 +80,7 @@
       />
     
     <!-- want to know the type of robot, but can't change the score, so set the multiplier to 0 -->
-    <goal name="robot_type" title="Robot Type"
+    <goal name="robot_type" title="Robot Type" initialValue="1"
       multiplier="0">
       <value score="1" title="RCX" value="rcx"/>
       <value score="2" title="NXT" value="nxt"/>

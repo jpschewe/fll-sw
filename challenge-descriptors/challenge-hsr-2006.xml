@@ -108,7 +108,7 @@
     </goal>
 
     <goal name="robot_type" title="Robot Type"
-      multiplier="0">
+      multiplier="0" initialValue="1">
       <value score="1" title="RCX" value="rcx"/>
       <value score="2" title="NXT" value="nxt"/>
     </goal>
