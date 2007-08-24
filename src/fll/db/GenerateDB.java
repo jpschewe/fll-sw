@@ -248,7 +248,7 @@ public final class GenerateDB {
           final String columnDefinition = generateGoalColumnDefinition(element);
           createStatement.append(" " + columnDefinition + ",");
         }
-        createStatement.append(" ComputedTotal INTEGER DEFAULT NULL,");
+        createStatement.append(" ComputedTotal float DEFAULT NULL,");
         createStatement.append(" StandardizedScore float default NULL,");
         createStatement.append(" PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
         createStatement.append(");");
@@ -280,7 +280,7 @@ public final class GenerateDB {
           final String columnDefinition = generateGoalColumnDefinition(element);
           createStatement.append(" " + columnDefinition + ",");
         }
-        createStatement.append(" ComputedTotal INTEGER DEFAULT NULL,");
+        createStatement.append(" ComputedTotal float DEFAULT NULL,");
         createStatement.append(" StandardizedScore float default NULL,");
         createStatement.append(" PRIMARY KEY (TeamNumber, Tournament, Judge)");
         createStatement.append(");");
@@ -339,7 +339,7 @@ public final class GenerateDB {
       //HSQLDB doesn't support enum
       definition += " longvarchar";
     } else {
-      definition += " INTEGER";
+      definition += " float";
     }
     
     LOG.debug("GoalColumnDefinition: " + definition);

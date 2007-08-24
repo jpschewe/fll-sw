@@ -5,20 +5,13 @@
  */
 package fll.web.report;
 
-import fll.db.Queries;
-import fll.Utilities;
-
 import java.io.IOException;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import java.text.NumberFormat;
 import java.text.ParseException;
-
 import java.util.Iterator;
 
 import javax.servlet.jsp.JspWriter;
@@ -26,6 +19,9 @@ import javax.servlet.jsp.JspWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import fll.Utilities;
+import fll.db.Queries;
 
 
 /**
@@ -135,7 +131,7 @@ public final class FinalComputedScores {
               } else {
                 rawScore = Double.NaN;
               }
-              out.println("    <td align='center'" + (Double.isNaN(rawScore) ? " class=warn>No Score" : ">" + SCORE_FORMAT.format(rawScore)) + "</td>");
+              out.println("    <td align='center'" + (Double.isNaN(rawScore) ? " class=warn>No Score" : ">" + Utilities.NUMBER_FORMAT_INSTANCE.format(rawScore)) + "</td>");
               rawScoreRS.close();
             }
           }
@@ -153,7 +149,7 @@ public final class FinalComputedScores {
           } else {
             rawScore = Double.NaN;
           }
-          out.println("    <td align='center'" + (Double.isNaN(rawScore) ? " class=warn>No Score" : ">" + SCORE_FORMAT.format(rawScore)) + "</td>");
+          out.println("    <td align='center'" + (Double.isNaN(rawScore) ? " class=warn>No Score" : ">" + Utilities.NUMBER_FORMAT_INSTANCE.format(rawScore)) + "</td>");
           rawScoreRS.close();
           out.println("    <td>&nbsp;</td>");
           out.println("  </tr>");
@@ -182,7 +178,7 @@ public final class FinalComputedScores {
                 scaledScore = Double.NaN;
               }
 
-              out.println("    <td align='center'" + (Double.isNaN(scaledScore) ? " class=warn>No Score" : ">" + SCORE_FORMAT.format(scaledScore)) + "</td>");
+              out.println("    <td align='center'" + (Double.isNaN(scaledScore) ? " class=warn>No Score" : ">" + Utilities.NUMBER_FORMAT_INSTANCE.format(scaledScore)) + "</td>");
 
               scaledScoreRS.close();
             }
@@ -203,13 +199,13 @@ public final class FinalComputedScores {
               scaledScore = Double.NaN;
             }
 
-            out.println("    <td align='center'" + (Double.isNaN(scaledScore) ? " class=warn>No Score" :  ">" + SCORE_FORMAT.format(scaledScore)) + "</td>");
+            out.println("    <td align='center'" + (Double.isNaN(scaledScore) ? " class=warn>No Score" :  ">" + Utilities.NUMBER_FORMAT_INSTANCE.format(scaledScore)) + "</td>");
           }
           
           scaledScoreRS.close();
 
           //total score
-          out.println("    <td align='center'" + (Double.isNaN(totalScore) ? " class=warn>No Score" : ">" + SCORE_FORMAT.format(totalScore)) + "</td>");
+          out.println("    <td align='center'" + (Double.isNaN(totalScore) ? " class=warn>No Score" : ">" + Utilities.NUMBER_FORMAT_INSTANCE.format(totalScore)) + "</td>");
 
           out.println("  <tr><td colspan='" + (subjectiveCategories.getLength() + 4) + "'><hr></td></tr>");
         }
@@ -229,11 +225,4 @@ public final class FinalComputedScores {
       Utilities.closeStatement(stmt);
     }
   }
-
-  private static final NumberFormat SCORE_FORMAT = NumberFormat.getInstance();
-  static {
-    SCORE_FORMAT.setMaximumFractionDigits(2);
-    SCORE_FORMAT.setMinimumFractionDigits(2);
-  }    
-
 }

@@ -40,6 +40,11 @@ public final class Utilities {
    * Single instance of the default NumberFormat instance to save on overhead
    */
   public static final NumberFormat NUMBER_FORMAT_INSTANCE = NumberFormat.getInstance();
+  static {
+    // setup the number format instance to be 2 decimal places
+    NUMBER_FORMAT_INSTANCE.setMaximumFractionDigits(2);
+    NUMBER_FORMAT_INSTANCE.setMinimumFractionDigits(2);
+  }
 
   private Utilities() {
   }

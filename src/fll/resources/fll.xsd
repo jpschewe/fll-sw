@@ -18,6 +18,7 @@
         <xsd:sequence maxOccurs="unbounded">
           <xsd:sequence minOccurs="0" maxOccurs="unbounded">
             <xsd:element ref="goal" maxOccurs="unbounded" />
+            <xsd:element ref="computedGoal" minOccurs="0" maxOccurs="unbounded" />
           </xsd:sequence>
           <xsd:sequence minOccurs="0" maxOccurs="unbounded">
             <xsd:element ref="restriction" maxOccurs="unbounded" />
@@ -25,7 +26,7 @@
           <xsd:element ref="tiebreaker" minOccurs="0" maxOccurs="1" />
         </xsd:sequence>
       </xsd:sequence>
-      <xsd:attribute name="minimumScore" type="xsd:integer" default="0">
+      <xsd:attribute name="minimumScore" type="xsd:decimal" default="0">
         <xsd:annotation>
           <xsd:documentation>minimum score allowed in the performance scoring</xsd:documentation>
         </xsd:annotation>
@@ -40,6 +41,19 @@
       </xsd:attribute>
 
     </xsd:complexType>
+    <xsd:key name="performanceGoalKey">
+      <xsd:annotation>
+        <xsd:documentation>
+          All performance goal names must be unique.
+        </xsd:documentation>
+      </xsd:annotation>
+      <xsd:selector xpath="./goal|./computedGoal"/>
+      <xsd:field xpath="@name"/>
+    </xsd:key>
+    <xsd:keyref name="performanceGoalRef" refer="performanceGoalKey">
+      <xsd:selector xpath=".//term|.//goalRef"/>
+      <xsd:field xpath="@goal"/>
+    </xsd:keyref>
   </xsd:element>
 
   <xsd:element name="subjectiveCategory">
@@ -47,6 +61,7 @@
       <xsd:sequence maxOccurs="unbounded">
         <xsd:sequence minOccurs="0" maxOccurs="unbounded">
           <xsd:element ref="goal" maxOccurs="unbounded" />
+          <xsd:element ref="computedGoal" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
       </xsd:sequence>
       <xsd:attribute name="name" type="databaseName" use="required" />
@@ -56,11 +71,23 @@
         <xsd:annotation>
           <xsd:documentation>
 	    Weight this category has.  Should be a number between 0 and 1.
-	  </xsd:documentation>
+	      </xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
-
     </xsd:complexType>
+    <xsd:key name="subjectiveGoalKey">
+      <xsd:annotation>
+        <xsd:documentation>
+          All subjective goal names must be unique within a category.
+        </xsd:documentation>
+      </xsd:annotation>
+      <xsd:selector xpath="./goal|./computedGoal"/>
+      <xsd:field xpath="@name"/>
+    </xsd:key>
+    <xsd:keyref name="subjectiveGoalRef" refer="subjectiveGoalKey">
+      <xsd:selector xpath=".//term|.//goalRef"/>
+      <xsd:field xpath="@goal"/>
+    </xsd:keyref>
   </xsd:element>
 
   <xsd:element name="goal">
@@ -106,7 +133,7 @@
           </xsd:complexType>
         </xsd:element>
       </xsd:sequence>
-      <xsd:attribute name="name" type="databaseID" use="required" />
+      <xsd:attribute name="name" type="databaseName" use="required" />
 
       <xsd:attribute name="title" type="xsd:string" use="required" />
 
@@ -114,21 +141,17 @@
 
       <xsd:attribute name="min" type="xsd:integer" default="0">
         <xsd:annotation>
-	  <xsd:documentation>ignored if enumerated values exist</xsd:documentation>
+	  <xsd:documentation>The minimum raw score for this goal.  Ignored if enumerated values exist</xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
 
       <xsd:attribute name="max" type="xsd:integer" default="1">
         <xsd:annotation>
-	  <xsd:documentation>ignored if enumerated values exist</xsd:documentation>
+	  <xsd:documentation>The maximum raw score for this goal.  Ignored if enumerated values exist</xsd:documentation>
         </xsd:annotation>
       </xsd:attribute>
 
-      <xsd:attribute name="multiplier" type="xsd:integer" default="1">
-        <xsd:annotation>
-	  <xsd:documentation>ignored for subjective goals</xsd:documentation>
-        </xsd:annotation>
-      </xsd:attribute>
+      <xsd:attribute name="multiplier" type="xsd:decimal" default="1"/>
 
       <xsd:attribute name="initialValue" type="xsd:integer" default="0">
         <xsd:annotation>
@@ -138,51 +161,201 @@
 
     </xsd:complexType>
   </xsd:element>
-
+      
   <xsd:element name="restriction">
     <xsd:annotation>
-      <xsd:documentation>lower bound and upper bound are inclusive</xsd:documentation>
+      <xsd:documentation>A polynomial with an upper and lower
+      bound used to determine if the restriction is violated.
+      Lower bound and upper bound are inclusive.</xsd:documentation>
     </xsd:annotation>
     <xsd:complexType>
-      <xsd:sequence>
-        <xsd:element ref="term" maxOccurs="unbounded" />
-      </xsd:sequence>
-      <xsd:attribute name="lowerBound" type="xsd:integer" default="-512" />
-      <xsd:attribute name="upperBound" type="xsd:integer" default="512" />
-      <xsd:attribute name="message" type="xsd:string" use="required" />
+      <xsd:complexContent>
+        <xsd:extension base="polynomial">
+          <xsd:attribute name="lowerBound" type="xsd:decimal" default="-512" />
+          <xsd:attribute name="upperBound" type="xsd:decimal" default="512" />
+          <xsd:attribute name="message" type="xsd:string" use="required" />
+        </xsd:extension>
+      </xsd:complexContent>
     </xsd:complexType>
   </xsd:element>
 
   <xsd:element name="term">
     <xsd:complexType>
-      <xsd:attribute name="coefficient" type="xsd:integer" default="1" />
-      <xsd:attribute name="goal" type="xsd:IDREF" use="required" />
+      <xsd:attribute name="coefficient" type="xsd:decimal" default="1" />
+      <xsd:attribute name="goal" type="databaseName" use="required" />
+      <xsd:attribute name="scoreType" type="goalScoreType" default="computed">
+        <xsd:annotation><xsd:documentation>
+          What score from the goal should be used?  The 'raw' score or the 'computed' score.
+          Default is set to 'computed' to support backwards compatibility
+        </xsd:documentation></xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="floatingPoint" type="floatingPointType" default="truncate">
+        <xsd:annotation><xsd:documentation>
+          How floating point data should be handled for this term.  
+          If set to 'decimal', then just compute floating point values.  
+          If set to 'round', then round the value to the nearest integer.
+          If set to 'truncate', then truncate the value.
+          Default is set to 'truncate' for the standard usage for most tournaments.
+        </xsd:documentation></xsd:annotation>
+      </xsd:attribute>
     </xsd:complexType>
   </xsd:element>
+
+  <xsd:simpleType name="goalScoreType">
+    <xsd:restriction base="xsd:string">
+	  <xsd:enumeration value='computed'/>
+	  <xsd:enumeration value='raw'/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="floatingPointType">
+    <xsd:restriction base="xsd:string">
+	  <xsd:enumeration value='decimal'/>
+	  <xsd:enumeration value='round'/>
+	  <xsd:enumeration value='truncate'/>
+    </xsd:restriction>
+  </xsd:simpleType>
 
   <xsd:element name="tiebreaker">
     <xsd:complexType>
       <xsd:sequence>
         <xsd:element name="test" maxOccurs="unbounded">
           <xsd:complexType>
-            <xsd:sequence>
-              <xsd:element ref="term" maxOccurs="unbounded"/>
-            </xsd:sequence>
-            <xsd:attribute name="winner" type="highlow" use="required" />
+            <xsd:annotation><xsd:documentation>Need to add a 
+            winner attribute to the polynomial to be able to 
+            determine the winner of a tiebreaker.
+            </xsd:documentation></xsd:annotation>
+            <xsd:complexContent>
+              <xsd:extension base="polynomial">
+                <xsd:attribute name="winner" type="highlow" use="required" />
+              </xsd:extension>
+            </xsd:complexContent>
           </xsd:complexType>
         </xsd:element>
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
 
+  <xsd:complexType name="polynomial">
+    <xsd:annotation>
+      <xsd:documentation>A simple polynomial to be used in multiple
+      places.  Terms and constants are allowed in a polynomial.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+      <xsd:element ref="term" minOccurs="0" maxOccurs="unbounded" />
+      <xsd:element name="constant" minOccurs="0" maxOccurs="unbounded">
+        <xsd:complexType>
+          <xsd:attribute name="value" type="xsd:decimal"/>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>   
+
+  <xsd:element name="computedGoal">
+    <xsd:annotation>
+      <xsd:documentation>A computed goal is a switch statement</xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="switch"/>
+      </xsd:sequence>
+      <xsd:attribute name="name" type="databaseName" use="required" />
+      <xsd:attribute name="title" type="xsd:string" use="required" />
+      <xsd:attribute name="description" type="xsd:string" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="switch">
+    <xsd:annotation>
+      <xsd:documentation>A switch statement has 0 or more cases and a default</xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="case" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element name="default" type="polynomial"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+    
+  <xsd:element name="case">
+    <xsd:annotation>
+      <xsd:documentation>A case has a condition and a result 
+      or a switch</xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:choice>
+          <xsd:element ref="condition"/>
+          <xsd:element ref="enumCondition"/>
+        </xsd:choice>
+        <xsd:choice>
+          <xsd:element name="result" type="polynomial"/>
+          <xsd:element ref="switch"/>
+        </xsd:choice>
+      </xsd:sequence>
+    </xsd:complexType>    
+  </xsd:element>
+    
+  <xsd:element name="condition">
+    <xsd:annotation>
+      <xsd:documentation>The condition for a case in a switch.  A condition
+      represents an inequality test that evaluates to a boolean.  This
+      is a comparison of two numbers (represented as polynomials).
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="left" type="polynomial"/>
+        <xsd:choice>
+          <xsd:element name="less-than"/>
+          <xsd:element name="less-than-or-equal"/>
+          <xsd:element name="greater-than"/>
+          <xsd:element name="greater-than-or-equal"/>
+          <xsd:element name="equal-to"/>
+          <xsd:element name="not-equal-to"/>
+        </xsd:choice>
+        <xsd:element name="right" type="polynomial"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="enumCondition">
+    <xsd:annotation>
+      <xsd:documentation>A comparison of the value of an 
+      enumerated goal and a string</xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="left" type="stringOrGoalRef"/>
+        <xsd:choice>
+          <xsd:element name="equal-to"/>
+          <xsd:element name="not-equal-to"/>
+        </xsd:choice>
+        <xsd:element name="right" type="stringOrGoalRef"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:complexType name="stringOrGoalRef">
+    <xsd:sequence>
+      <xsd:choice>
+        <xsd:element name="goalRef">
+          <xsd:complexType>
+            <xsd:attribute name="goal" type="databaseName" use="required"/>
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:element name="stringConstant">
+          <xsd:complexType>
+            <xsd:attribute name="value" type="xsd:string" use="required"/>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:choice>
+    </xsd:sequence>
+  </xsd:complexType>
+  
   <xsd:simpleType name="databaseName">
     <xsd:restriction base="xsd:string">
-      <xsd:pattern value="\p{L}[\p{L}\p{Nd}_]*" />
-    </xsd:restriction>
-  </xsd:simpleType>
-
-  <xsd:simpleType name="databaseID">
-    <xsd:restriction base="xsd:ID">
       <xsd:pattern value="\p{L}[\p{L}\p{Nd}_]*" />
     </xsd:restriction>
   </xsd:simpleType>

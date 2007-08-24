@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Statement;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,7 +32,6 @@ public class CheckDifferences extends HttpServlet {
   @Override
   protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
     final StringBuilder message = new StringBuilder();
-    final ServletContext application = getServletContext();
     final HttpSession session = request.getSession();
 
     Connection memConnection = null;

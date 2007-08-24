@@ -5,9 +5,10 @@
  */
 package fll.web.playoff;
 
-import org.apache.log4j.Logger;
 import javax.servlet.http.HttpServletRequest;
-import fll.Team;
+
+import org.apache.log4j.Logger;
+import org.w3c.dom.Element;
 
 /**
  * A team score in an HTTP request.
@@ -19,36 +20,35 @@ import fll.Team;
 
   private static final Logger LOG = Logger.getLogger(HttpTeamScore.class);
 
-  public HttpTeamScore(final HttpServletRequest request, final Team team, final int runNumber) {
-    super(team, runNumber);
+  public HttpTeamScore(final Element categoryElement, final int teamNumber, final int runNumber, final HttpServletRequest request) {
+    super(categoryElement, teamNumber, runNumber);
     _request = request;
   }
 
   /**
-   * @see fll.web.playoff.TeamScore#getEnumScore(java.lang.String)
+   * @see fll.web.playoff.TeamScore#getEnumRawScore(java.lang.String)
    */
-  public String getEnumScore(final String goalName) {
+  @Override
+  public String getEnumRawScore(final String goalName) {
+    assertScoreExists();
     return _request.getParameter(goalName);
   }
 
   /**
-   * @see fll.web.playoff.TeamScore#getIntScore(java.lang.String)
+   * @see fll.web.playoff.TeamScore#getRawScore(java.lang.String)
    */
-  public int getIntScore(final String goalName) {
-    return Integer.parseInt(_request.getParameter(goalName));
+  @Override
+  public double getRawScore(final String goalName) {
+    assertScoreExists();
+    return Double.parseDouble(_request.getParameter(goalName));
   }
-
-  /**
-   * @see fll.web.playoff.TeamScore#getTotalScore()
-   */
-  public int getTotalScore() {
-    return Integer.parseInt(_request.getParameter("totalScore"));
-  }
-
+  
   /**
    * @see fll.web.playoff.TeamScore#isNoShow()
    */
+  @Override
   public boolean isNoShow() {
+    assertScoreExists();
     final String noShow = _request.getParameter("NoShow");
     if (null == noShow) {
       throw new RuntimeException("Missing parameter: NoShow");
@@ -59,6 +59,7 @@ import fll.Team;
   /*
    * @see fll.web.playoff.TeamScore#scoreExists()
    */
+  @Override
   public boolean scoreExists() {
     return true;
   }

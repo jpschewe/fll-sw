@@ -100,7 +100,7 @@ pageContext.setAttribute("isBye", Boolean.valueOf(Queries.isBye(connection, tour
     </c:if>
       
     <style type='text/css'>
-      TD {font-family='arial'}
+      TD {font-family: arial}
     </style>
 
 <script language="javascript">
@@ -174,8 +174,8 @@ function refresh() {
 
 <%ScoreEntry.generateIsConsistent(out, challengeDocument);%>
     
-<%ScoreEntry.generateIncrementMethods(out, challengeDocument);%>
 
+<%ScoreEntry.generateIncrementMethods(out, challengeDocument);%>
     </c:if> <!-- end check for bye -->
         
 function CancelClicked() {

@@ -5,6 +5,12 @@
  */
 package fll.web;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+
+import org.apache.log4j.Logger;
+import org.xml.sax.SAXException;
+
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -12,27 +18,19 @@ import com.meterware.httpunit.WebResponse;
 
 import fll.TestUtils;
 
-import java.io.IOException;
-
-import java.net.MalformedURLException;
-
-import org.apache.log4j.Logger;
-
-import org.xml.sax.SAXException;
-
 /**
  * Check if tomcat is running, don't exit until it is.
- *
+ * 
  * @version $Revision$
  */
 public final class WaitForTomcatStart {
-  
+
   private static final Logger LOG = Logger.getLogger(WaitForTomcatStart.class);
 
   private WaitForTomcatStart() {
     // no instances.
   }
-  
+
   public static void main(final String[] args) {
     waitForTomcatStart();
   }
@@ -61,5 +59,5 @@ public final class WaitForTomcatStart {
       }
     }
   }
-  
+
 }

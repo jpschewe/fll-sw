@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="Illegal Restriction" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="fll.xsd">
+
+  <Performance minimumScore="0" weight="1.0">
+
+    <goal initialValue="0" max="8" min="0" multiplier="5" name="crates_base" title="Crates in Base"></goal>
+
+    <goal initialValue="0" max="8" min="0" multiplier="2" name="crates" title="Crates Elsewhere on Table"></goal>
+    
+    <restriction lowerBound="0" message="There are a maximum of 8 crates on the table" upperBound="8">
+      <term coefficient="1" goal="crates_base"></term>
+      <term coefficient="1" goal="foo"></term>
+    </restriction>
+
+    <tiebreaker>
+      <test winner="high">
+        <term goal="crates_base" />
+      </test> 
+      <test winner="high">
+        <term goal="crates" />
+      </test> 
+    </tiebreaker>
+
+  </Performance>
+  
+</fll>

@@ -72,7 +72,7 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
                         Bye
                       </c:when>
                       <c:otherwise>
-                        <c:out value="${row.ComputedTotal}"/>
+                        <fmt:formatNumber value="${row.ComputedTotal}" minFractionDigits="2" maxFractionDigits="2"/>
                       </c:otherwise>
                     </c:choose>
                   </font>

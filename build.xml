@@ -555,7 +555,7 @@
 		</condition>
 		<fail if="test.halt" message="JUnit tests failed">
  ** One or more JUnit tests failed.
-    </fail>
+       </fail>
 	</target>
 
 	<target name="-junit.setup">

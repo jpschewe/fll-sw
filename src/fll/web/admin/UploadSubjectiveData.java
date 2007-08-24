@@ -26,6 +26,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import fll.Utilities;
+import fll.db.Queries;
 import fll.xml.XMLUtils;
 
 
@@ -43,7 +44,7 @@ public final class UploadSubjectiveData {
   }
 
   /**
-   * Save the data stored in file to the database.
+   * Save the data stored in file to the database and update the subjective score totals.
    *
    * @param out where to write any output, mostly for debugging
    * @param file the file to read the data from
@@ -135,8 +136,8 @@ public final class UploadSubjectiveData {
                     insertPrep.setString(goalIndex+5, value.trim());
                     updatePrep.setString(goalIndex+2, value.trim());
                   } else {
-                    insertPrep.setNull(goalIndex+5, Types.INTEGER);
-                    updatePrep.setNull(goalIndex+2, Types.INTEGER);
+                    insertPrep.setNull(goalIndex+5, Types.DOUBLE);
+                    updatePrep.setNull(goalIndex+2, Types.DOUBLE);
                   }
                 }
             
@@ -158,6 +159,8 @@ public final class UploadSubjectiveData {
       }
       scoreCategoryNode = (Node)scoreCategoryNode.getNextSibling();
     }
+    
+    Queries.updateSubjectiveScoreTotals(challengeDocument, connection);
   }
 
   

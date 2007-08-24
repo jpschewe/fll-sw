@@ -40,6 +40,10 @@ final Connection connection = (Connection)application.getAttribute("connection")
           <x:set select="number(./@coefficient)" var="coefficient" />
           <c:set var="restrictionSum" value="${coefficient * paramValues[goal][0] + restrictionSum}" />
         </x:forEach>
+        <x:forEach select="./constant">
+          <x:set select="number(./@value)" var="cvalue"/>
+          <c:set var="restrictionSum" value="${cvalue + restrictionSum}"/>
+        </x:forEach>
         <%--LowerBound <c:out value="${lowerBound}"/><br/>
         UpperBound <c:out value="${upperBound}"/><br/>
         RestrictionSum <c:out value="${restrictionSum}"/><br/>--%>

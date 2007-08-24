@@ -160,7 +160,7 @@ function start() {
  } else if (rs.getBoolean("Bye")) {
  %> Bye <%
                } else {
-               out.println(rs.getInt("ComputedTotal"));
+               out.println(Utilities.NUMBER_FORMAT_INSTANCE.format(rs.getDouble("ComputedTotal")));
              }
              if (!rs.next()) {
                done = true;

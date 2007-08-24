@@ -431,7 +431,7 @@ public class FullTournamentTest extends TestCase {
    * @throws SQLException
    */
   private void enterSubjectiveScores(final Connection testDataConn, final Document challengeDocument, final String testTournament) throws SQLException,
-      IOException, MalformedURLException, SAXException {
+      IOException, MalformedURLException, SAXException, ParseException {
 
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -470,14 +470,16 @@ public class FullTournamentTest extends TestCase {
         prep.setString(1, testTournament);
         rs = prep.executeQuery();
         while (rs.next()) {
-          final String teamNumber = rs.getString("TeamNumber");
+          final int teamNumber = rs.getInt("TeamNumber");
           // find row number in table
           final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
           Assert.assertTrue("Can't find TeamNumber column in subjective table model", teamNumberColumn >= 0);
           int rowIndex = -1;
           for (int rowIdx = 0; rowIdx < tableModel.getRowCount() && rowIndex == -1; ++rowIdx) {
-            final String value = (String) tableModel.getValueAt(rowIdx, teamNumberColumn);
-            if (value.equals(teamNumber)) {
+            final Object teamNumberRaw= tableModel.getValueAt(rowIdx, teamNumberColumn);
+            Assert.assertNotNull(teamNumberRaw);
+            final int value = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberRaw.toString()).intValue();
+            if (value == teamNumber) {
               rowIndex = rowIdx;
             }
           }
