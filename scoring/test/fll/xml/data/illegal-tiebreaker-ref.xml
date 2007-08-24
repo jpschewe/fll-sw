@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="Illegal tiebreaker ref" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="fll.xsd">
+
+  <Performance minimumScore="0" weight="1.0">
+
+    <goal initialValue="0" max="8" min="0" multiplier="5" name="crates_base" title="Crates in Base"></goal>
+
+    <goal initialValue="0" max="8" min="0" multiplier="2" name="crates" title="Crates Elsewhere on Table"></goal>
+    
+    <tiebreaker>
+      <test winner="high">
+        <term goal="crates_base" />
+      </test> 
+      <test winner="high">
+        <term goal="foo" />
+      </test> 
+    </tiebreaker>
+
+  </Performance>
+  
+</fll>

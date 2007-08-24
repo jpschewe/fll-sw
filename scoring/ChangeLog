@@ -1,3 +1,19 @@
+* Added support for computed goals.
+
+* Terms of polynomial score elements may now specify the floating point handling.  The default handling is to truncate decimals to integers at each term.
+
+* Raw value for an enum in the web page is now the enum value as a string, rather than the score.  This allows multiple enum values to have the same score (1583927)
+
+* Added the ability for multipliers on goals to be decimals
+
+* Finished support for multiplier in subjective goals (it was already started, but not finished)
+
+* Added support for total scores to be decimals
+
+* Allow coefficients of terms (restriction and tiebreaker) to be decimals
+
+* Added the ability to import a database dump into a blank database.
+
 * Upgraded to log4j 1.2.14
 
 * Upgraded to iText 1.4.7

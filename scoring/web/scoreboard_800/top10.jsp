@@ -77,11 +77,11 @@
 
          final ResultSet rs = prep.executeQuery();
 
-         int prevScore = -1;
+         double prevScore = -1;
          int i = 1;
          int rank = 0;
          while (rs.next() && i <= 10) {
-           final int score = rs.getInt("MaxOfComputedScore");
+           final double score = rs.getDouble("MaxOfComputedScore");
            if (score != prevScore) {
              rank = i;
            }
@@ -110,7 +110,7 @@
               </font>
             </td> -->
     <td width='8%' align='right'><font size='3'> <%
- out.println(score);
+ out.println(Utilities.NUMBER_FORMAT_INSTANCE.format(score));
  %> </font></td>
    </tr>
    <%

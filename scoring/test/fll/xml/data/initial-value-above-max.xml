@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="initial value is above max, should fail" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="fll.xsd">
+
+  <Performance minimumScore="0" weight="1.0">
+
+    <goal initialValue="10" max="5" min="2" multiplier="40" name="pump_station" title="Protect the Pump Station"></goal>
+
+    <goal initialValue="0" max="1" min="0" multiplier="30" name="flags" title="Transect Flags: Any Flags"></goal>
+
+    <goal initialValue="0" max="3" min="0" multiplier="15" name="flags_rows" title="Transect Flags: Number of Rows"></goal>
+
+    <!-- want to know the type of robot, but can't change the score, so set the multiplier to 0 -->
+    <goal name="robot_type" title="Robot Type"
+      multiplier="0">
+      <value score="1" title="RCX" value="rcx"/>
+      <value score="2" title="NXT" value="nxt"/>
+    </goal>
+    
+    <tiebreaker>
+      <test winner="high">
+        <term goal="flags_rows" />
+      </test> 
+      <test winner="high">
+        <term goal="flags" />
+      </test> 
+      <test winner="high">
+        <term goal="pump_station" />
+      </test> 
+    </tiebreaker>
+
+  </Performance>
+  
+</fll>

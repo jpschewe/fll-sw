@@ -23,7 +23,7 @@ import java.io.InputStream;
 import junit.framework.Assert;
 
 /**
- * Add class comment here!
+ * Test generating various databases.
  *
  * @version $Revision$
  */

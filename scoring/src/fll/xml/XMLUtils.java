@@ -240,4 +240,29 @@ public final class XMLUtils {
     return null;
   }
 
+  /**
+   * Check if an element describes an enumerated goal or not.
+   * 
+   * @param element the goal element
+   * @return if the element represents an enumerated goal
+   */
+  public static boolean isEnumeratedGoal(final Element element) {
+    if(!"goal".equals(element.getNodeName())) {
+      // not a goal element
+      return false;
+    }
+    
+    final NodeList values = element.getElementsByTagName("value");
+    return values.getLength() > 0;
+  }
+  
+  /**
+   * Check if an element describes a computed goal or not.
+   * 
+   * @param element the goal element
+   * @return if the element represents a computed goal
+   */
+  public static boolean isComputedGoal(final Element element) {
+    return "computedGoal".equals(element.getNodeName());
+  }  
 }

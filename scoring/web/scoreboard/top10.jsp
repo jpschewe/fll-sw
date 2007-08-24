@@ -72,11 +72,11 @@ pageContext.setAttribute("division", divisions.get(divisionIndex));
             prep.setString(3, (String) pageContext.getAttribute("division"));
             final ResultSet rs = prep.executeQuery();
                 
-            int prevScore = -1;
+            double prevScore = -1;
             int i = 1;
             int rank = 0;
             while(rs.next()) {
-              final int score = rs.getInt("MaxOfComputedScore");
+              final double score = rs.getDouble("MaxOfComputedScore");
               if(score != prevScore) {
                 rank = i;
               }
@@ -116,7 +116,7 @@ pageContext.setAttribute("division", divisions.get(divisionIndex));
               </td>
               <td width='8%' align='right'>
                 <font size='3'>
-                <% out.println(score); %>
+                <% out.println(Utilities.NUMBER_FORMAT_INSTANCE.format(score)); %>
                 </font>
               </td>
             </tr>

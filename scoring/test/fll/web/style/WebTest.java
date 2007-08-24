@@ -37,15 +37,10 @@ public class WebTest extends TestCase {
    */
   public void testPages()
     throws SAXException, MalformedURLException, IOException {
-    final String[] pages = new String[] {
-      "style.jsp",
-    };
     final WebConversation conversation = new WebConversation();
-    for(int i=0; i<pages.length; i++) {
-      final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "style/" + pages[i]);
-      final WebResponse response = conversation.getResponse(request);
-      Assert.assertTrue(response.isHTML());
-    }
+    final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "style/style.jsp");
+    final WebResponse response = conversation.getResponse(request);
+    "text/css".equals(response.getContentType());
   }
   
 }

@@ -6,86 +6,111 @@
 package fll.web.playoff;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
 
 /**
- * TeamScore implementation for a score in the database.
+ * TeamScore implementation for a performance score in the database.
  * 
  * @author jpschewe
  * @version $Revision$
  */
-/* package */class DatabaseTeamScore extends TeamScore {
+public class DatabaseTeamScore extends TeamScore {
 
   private static final Logger LOG = Logger.getLogger(DatabaseTeamScore.class);
 
   /**
-   * Create a database team score object. This method also updates the team
-   * score totals.
+   * Create a database team score object for a non-performance score, for use when
+   * the result set is already available.
    * 
-   * @param connection the connection to get the data from
-   * @param document the challenge document
-   * @param team the team the score is for
-   * @param runNumber the run the score is for
-   * @throws SQLException if an error occurs updating the team score totals
-   * @throws ParseException if an error occurs updating the team score totals
-   * @see Queries#updateScoreTotals(Document, Connection);
+   * @param categoryDescription
+   *          passed to superclass
+   * @param connection
+   *          the connection to get the data from
+   * @param teamNumber
+   *          passed to superclass
+   * @throws SQLException
+   *           if there is an error getting the current tournament
    */
-  public DatabaseTeamScore(final Connection connection, final Document document, final Team team, final int runNumber) throws SQLException, ParseException {
-    super(team, runNumber);
-    
-    // make sure scores are up to date
-    Queries.updateScoreTotals(document, connection);
+  public DatabaseTeamScore(final Element categoryDescription, final int teamNumber, final ResultSet rs) throws SQLException {
+    super(categoryDescription, teamNumber);
 
-    _connection = connection;
-    _tournament = Queries.getCurrentTournament(_connection);
+    _result = rs;
+    _scoreExists = true;
+  }
+  
+  /**
+   * Create a database team score object for a performance score.
+   * 
+   * @param categoryDescription
+   *          passed to superclass
+   * @param connection
+   *          the connection to get the data from
+   * @param teamNumber
+   *          passed to superclass
+   * @param runNumber
+   *          passed to superclass
+   * @throws SQLException
+   *           if there is an error getting the current tournament
+   */
+  public DatabaseTeamScore(final Element categoryDescription, final int teamNumber, final int runNumber, final Connection connection)
+      throws SQLException {
+    super(categoryDescription, teamNumber, runNumber);
+
+    final String tournament = Queries.getCurrentTournament(connection);
+    _result = createResultSet(connection, tournament);
+    _scoreExists = _result.next();
   }
 
   /**
-   * @see fll.web.playoff.TeamScore#getEnumScore(java.lang.String)
+   * Create a database team score object for a performance score, for use when
+   * the result set is already available.
+   * 
+   * @param categoryDescription
+   *          passed to superclass
+   * @param connection
+   *          the connection to get the data from
+   * @param teamNumber
+   *          passed to superclass
+   * @param runNumber
+   *          passed to superclass
+   * @throws SQLException
+   *           if there is an error getting the current tournament
    */
-  public String getEnumScore(final String goalName) {
-    if (null == _result) {
-      throw new RuntimeException("No score is present");
-    } else {
-      try {
-        return _result.getString(goalName);
-      } catch (final SQLException sqle) {
-        throw new RuntimeException(sqle);
-      }
-    }
+  public DatabaseTeamScore(final Element categoryDescription, final int teamNumber, final int runNumber, final ResultSet rs) throws SQLException {
+    super(categoryDescription, teamNumber, runNumber);
+
+    _result = rs;
+    _scoreExists = true;
   }
 
   /**
-   * @see fll.web.playoff.TeamScore#getIntScore(java.lang.String)
+   * @see fll.web.playoff.TeamScore#getEnumRawScore(java.lang.String)
    */
-  public int getIntScore(final String goalName) {
-    if (null == _result) {
-      throw new RuntimeException("No score is present");
-    } else {
-      try {
-        return _result.getInt(goalName);
-      } catch (final SQLException sqle) {
-        throw new RuntimeException(sqle);
-      }
-    }
-  }
-
-  /**
-   * @see fll.web.playoff.TeamScore#getTotalScore()
-   */
-  public int getTotalScore() {
+  @Override
+  public String getEnumRawScore(final String goalName) {
     try {
-      return Playoff.getPerformanceScore(_connection, _tournament, getTeam(), getRunNumber());
-    } catch (final SQLException sqle) {
+      return getResultSet().getString(goalName);
+    } catch(final SQLException sqle) {
+      throw new RuntimeException(sqle);
+    }
+  }
+
+  /**
+   * @see fll.web.playoff.TeamScore#getRawScore(java.lang.String)
+   */
+  @Override
+  public double getRawScore(final String goalName) {
+    try {
+      return getResultSet().getDouble(goalName);
+    } catch(final SQLException sqle) {
       throw new RuntimeException(sqle);
     }
   }
@@ -93,10 +118,11 @@ import fll.db.Queries;
   /**
    * @see fll.web.playoff.TeamScore#isNoShow()
    */
+  @Override
   public boolean isNoShow() {
     try {
-      return Playoff.isNoShow(_connection, _tournament, getTeam(), getRunNumber());
-    } catch (final SQLException sqle) {
+      return getResultSet().getBoolean("NoShow");
+    } catch(final SQLException sqle) {
       throw new RuntimeException(sqle);
     }
   }
@@ -104,19 +130,21 @@ import fll.db.Queries;
   /**
    * @see fll.web.playoff.TeamScore#scoreExists()
    */
+  @Override
   public boolean scoreExists() {
-    try {
-      return Playoff.performanceScoreExists(_connection, getTeam(), getRunNumber());
-    } catch (final SQLException sqle) {
-      throw new RuntimeException(sqle);
-    }
+    return _scoreExists;
   }
 
+  private final boolean _scoreExists;
+
+  @Override
   public void cleanup() {
-    Utilities.closeResultSet(_result);
-    _result = null;
+    // don't close the result set in case it was passed into the constructor,
+    // closing the prepared statement will take care of the one we create
+    Utilities.closePreparedStatement(_prep);
+    _prep = null;
   }
-  
+
   /**
    * Cleanup resources.
    */
@@ -125,9 +153,32 @@ import fll.db.Queries;
     cleanup();
   }
 
-  private final Connection _connection;
+  private final ResultSet _result;
 
-  private ResultSet _result = null;
+  private ResultSet getResultSet() {
+    return _result;
+  }
 
-  private final String _tournament;
+  private PreparedStatement _prep = null;
+
+  /**
+   * Create the result set.
+   * 
+   * @return
+   */
+  private ResultSet createResultSet(final Connection connection, final String tournament) throws SQLException {
+    ResultSet result;
+    final String categoryName = getCategoryName();
+    if(NON_PERFORMANCE_RUN_NUMBER == getRunNumber()) {
+      _prep = connection.prepareStatement("SELECT * FROM " + categoryName + " WHERE TeamNumber = ? AND Tournament = ?");
+    } else {
+      _prep = connection.prepareStatement("SELECT * FROM " + categoryName + " WHERE TeamNumber = ? AND Tournament = ? AND RunNumber = ?");
+      _prep.setInt(3, getRunNumber());
+    }
+    _prep.setInt(1, getTeamNumber());
+    _prep.setString(2, tournament);
+    result = _prep.executeQuery();
+    return result;
+  }
+
 }
