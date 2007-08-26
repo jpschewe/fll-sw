@@ -45,7 +45,7 @@ final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumbe
 
 //what run number we're going to edit/enter
 final int lRunNumber;
-if("1".equals(request.getParameter("EditFlag")) || null != request.getParameter("error")) {
+if("1".equals(request.getParameter("EditFlag"))) {
   final String runNumberStr = request.getParameter("RunNumber");
   if(null == runNumberStr) {
     throw new RuntimeException("Please choose a run number when editing scores");
@@ -57,7 +57,7 @@ if("1".equals(request.getParameter("EditFlag")) || null != request.getParameter(
       throw new RuntimeException("Selected team has no performance score for this tournament.");
     }
   } else {
-    if(null == request.getParameter("error") && !Playoff.performanceScoreExists(connection, teamNumber, runNumber)) {
+    if(!Playoff.performanceScoreExists(connection, teamNumber, runNumber)) {
       throw new RuntimeException("Team has not yet competed in run " + runNumber + ".  Please choose a valid run number.");
     }
     lRunNumber = runNumber;
@@ -116,34 +116,14 @@ function init() {
   // disable text selection
   document.onselectstart=new Function ("return false")
 
-  <%-- if there's an error, populate from the request parameters --%>
-  <c:if test="${param.error}">
-    <x:forEach select="$challengeDocument/fll/Performance/goal">
-      <x:set select="string(./@name)" var="goalName"/>
-      <x:if select="./value" var="enumerated">
-        <%-- enumerated --%>
-        <x:forEach select="./value">
-          <x:set var="value" select="string(./@value)" />
-          <c:if test="${value eq paramValues[goalName][0]}">
-            gbl_<c:out value="${goalName}"/> = <x:out select="./@score" />;
-          </c:if>
-        </x:forEach>
-      </x:if>
-      <c:if test="${not enumerated}">
-        gbl_<c:out value="${goalName}"/> = <c:out value="${paramValues[goalName][0]}"/>;
-      </c:if>
-    </x:forEach>
+  <c:if test="${editFlag}">
+  <%
+    ScoreEntry.generateInitForScoreEdit(out, application, challengeDocument, team.getTeamNumber(), lRunNumber);
+  %>
   </c:if>
-  <c:if test="${not param.error}">
-    <c:if test="${editFlag}">
-    <%
-      ScoreEntry.generateInitForScoreEdit(out, application, challengeDocument, team.getTeamNumber(), lRunNumber);
-    %>
-    </c:if>
-    <c:if test="${not editFlag}">
-      gbl_NoShow = 0;
-      reset();
-    </c:if>
+  <c:if test="${not editFlag}">
+    gbl_NoShow = 0;
+    reset();
   </c:if>
       
   refresh();
@@ -170,14 +150,45 @@ function refresh() {
   }
 
   document.scoreEntry.totalScore.value = score;
+  
+  check_restrictions();
 }
 
+function check_restrictions() {
+  var error_found = false;
+  
+<%ScoreEntry.generateCheckRestrictionsBody(out, challengeDocument);%>
+  
+  if(error_found) {
+    document.getElementById("submit").disabled = true;
+  } else {
+    document.getElementById("submit").disabled = false;
+  }
+}
+  
 <%ScoreEntry.generateIsConsistent(out, challengeDocument);%>
     
 
 <%ScoreEntry.generateIncrementMethods(out, challengeDocument);%>
-    </c:if> <!-- end check for bye -->
-        
+</c:if> <!-- end check for bye -->
+
+/**
+ * Used to replace text in an element by ID.
+ */        
+function replaceText(sId, sText) {
+  var el;
+  if(document.getElementById
+     && (el = document.getElementById(sId))) {
+    while (el.hasChildNodes()) {
+      el.removeChild(el.lastChild);
+    }
+    el.appendChild(document.createTextNode(sText));
+  }
+}
+
+/**
+ * Called when the cancel button is clicked.
+ */        
 function CancelClicked() {
   <c:if test="${editFlag}">
   if (confirm("Cancel and lose changes?") == true) {
@@ -212,10 +223,10 @@ function CancelClicked() {
       <input type='hidden' name='RunNumber' value='<%=lRunNumber%>' readonly>
       <input type='hidden' name='TeamNumber' value='<%=team.getTeamNumber()%>' readonly>
 
-      <table width='600' border="0" cellpadding="0" cellspacing="0" align="center">
-        <!-- top info bar (team name etc) -->
+      <table width='100%' border="0" cellpadding="0" cellspacing="0" align="center">
         <tr>
           <td align="center" valign="middle">
+          <!-- top info bar (team name etc) -->
 <%if(lRunNumber <= Queries.getNumSeedingRounds(connection)) {%>
             <c:if test="${editFlag}">
               <table border="1" cellpadding="0" cellspacing="0" width="100%" bgcolor='yellow'>
@@ -228,7 +239,7 @@ function CancelClicked() {
 <%}%>
               <tr align="center" valign="middle"><td>
 
-                  <table border="0" cellpadding="5" cellspacing="0" width="90%">
+                  <table border="0" cellpadding="5" cellspacing="0" width="90%"> <!--  inner box on title -->
                     <tr>
                       <td valign="middle" align="center">
                         <c:if test="${editFlag}">
@@ -244,26 +255,19 @@ function CancelClicked() {
                         <font face="Arial" size="4" color='#0000ff'>#<%=team.getTeamNumber()%>&nbsp;<%=team.getOrganization()%>&nbsp;<%=team.getTeamName()%>&nbsp;--&nbsp;Run Number:&nbsp;<%=lRunNumber%></font>
                       </td>
                     </tr>
-                  </table>
+                  </table> <!--  end inner box on title -->
 
                 </td></tr>
-            </table>
+            </table> <!--  end top info bar -->
 
           </td></tr>
-      </table>
-    </td>
       
-    <c:if test="${param.error}">
-      <b><font color="red">You have been returned to this page because there is an error on this form.  See the goals marked in red for errors. </font></b>
-    </c:if>
-      
-    </tr>
 
       <!-- score entry -->
       <tr>
         <td align="center" valign="middle">
 
-          <table border='1' cellpadding='3' cellspacing='0' bordercolor='#808080'>
+          <table border='1' cellpadding='3' cellspacing='0' bordercolor='#808080' width="100%">
             <tr>
               <td colspan='2'>
                 <font size='4'><u>Goal</u></font>
@@ -274,11 +278,9 @@ function CancelClicked() {
               <td align='right'>
                 <font size='4'><u>Score</u></font>
               </td>
-              <c:if test="${param.error}">
                 <td align='center'>
                   <font size='4'><u>Error Message</u></font>
                 </td>
-              </c:if>
             </tr>
 
             <c:if test="${not isBye}">
@@ -287,7 +289,7 @@ function CancelClicked() {
               <!-- Total Score -->
               <tr>
                 <td colspan='3'>
-                  <font size='4'></u>Total Score:</u></font>
+                  <font size='4'><u>Total Score:</u></font>
                 </td>
                 <td align='right'>
                   <input type='text' name='totalScore' size='3' readonly>
@@ -310,11 +312,9 @@ function CancelClicked() {
                     </tr>
                   </table>
                 </td>
-                <td>&nbsp</td>
-                <td>&nbsp</td>
-                <c:if test="${param.error}">
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
                   <td>&nbsp;</td>
-                </c:if>
               </tr>
             </c:if> <!-- end check for bye -->
             <c:if test="${isBye}">
@@ -327,10 +327,10 @@ function CancelClicked() {
               <td colspan='3' align='right'>
                 <c:if test="${not isBye}">
                   <c:if test="${editFlag}">
-                    <input type='submit' name='submit' value='Submit Score' onclick='return confirm("You are changing a score -- Are you sure?")'>
+                    <input type='submit' id='submit' name='submit' value='Submit Score' onclick='return confirm("You are changing a score -- Are you sure?")'>
                   </c:if>
                   <c:if test="${not editFlag}">
-                    <input type='submit' name='submit' value='Submit Score' onclick='return confirm("Submit Data -- Are you sure?")'>
+                    <input type='submit' id='submit' name='submit' value='Submit Score' onclick='return confirm("Submit Data -- Are you sure?")'>
                   </c:if>
                 </c:if>
                 <input type='button' value='Cancel' onclick='CancelClicked()'>
@@ -341,16 +341,14 @@ function CancelClicked() {
               <td align='right'>
                 &nbsp;
               </td>
-              <c:if test="${param.error}">
               <td>&nbsp;</td>
-              </c:if>
             </tr>
-          </table>
+          </table> <!-- end score entry table  -->
 
         </td>
       </tr>
-    </table>
-    </form>
+    </table> <!-- end table to center everything -->
+    </form> <!-- end score entry form -->
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>
 </html>

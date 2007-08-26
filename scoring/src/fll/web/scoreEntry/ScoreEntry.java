@@ -11,7 +11,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.Formatter;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -214,8 +218,79 @@ public final class ScoreEntry {
       writer.newLine();
     }
 
-    // FIX output calls to the restriction checks
+  }
 
+  /**
+   * Output the body for the check_restrictions method.
+   * 
+   * @param writer
+   *          where to write
+   * @param document
+   *          the challenge document
+   * @throws IOException
+   * @throws ParseException
+   */
+  public static void generateCheckRestrictionsBody(final JspWriter writer, final Document document) throws IOException, ParseException {
+    final Formatter formatter = new Formatter(writer);
+
+    final Element rootElement = document.getDocumentElement();
+    final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
+    
+    final Collection<String> goalsWithRestrictions = new LinkedList<String>();
+    final NodeList restrictions = performanceElement.getElementsByTagName("restriction");
+    
+    // find out which goals are involved in restrictions
+    for(int restrictIdx = 0; restrictIdx < restrictions.getLength(); ++restrictIdx) {
+      final Element restrictEle = (Element)restrictions.item(restrictIdx);
+      goalsWithRestrictions.addAll(getGoalsInRestriction(restrictEle));
+    }
+    
+    // output variable declaration for each goal
+    for(String goalName : goalsWithRestrictions) {
+      formatter.format("  var %s = \"\";%n", getElementIDForError(goalName));
+    }
+    
+    // output actual check of restriction
+    for(int restrictIdx=0; restrictIdx < restrictions.getLength(); ++restrictIdx) {
+      final Element restrictEle = (Element)restrictions.item(restrictIdx);
+      final double lowerBound = Utilities.NUMBER_FORMAT_INSTANCE.parse(restrictEle.getAttribute("lowerBound")).doubleValue();
+      final double upperBound = Utilities.NUMBER_FORMAT_INSTANCE.parse(restrictEle.getAttribute("upperBound")).doubleValue();
+      final String message = restrictEle.getAttribute("message");
+      
+      final String polyString = polyToString(restrictEle);
+      final String restrictValStr = String.format("restriction_%d_value", restrictIdx);
+      formatter.format("  var %s = %s;%n", restrictValStr, polyString);
+      formatter.format("  if(%s > %f || %s < %f) {%n", restrictValStr, upperBound, restrictValStr, lowerBound);
+      // append error text to each error cell if the restriction is violated
+      for(String goalName : getGoalsInRestriction(restrictEle)) {
+        final String errorId = getElementIDForError(goalName);
+        formatter.format("    %s = %s + \" \" + \"%s\";%n", errorId, errorId, message);
+      }
+      formatter.format("    error_found = true;%n");
+      formatter.format("  }%n");
+    }
+
+    // output text assignment for each goal involved in a restriction
+    for(String goalName : goalsWithRestrictions) {
+      final String errorId = getElementIDForError(goalName);
+      formatter.format("  replaceText(\"%s\", %s);%n", errorId, errorId);
+      formatter.format("  if(%s.length > 0) {%n", errorId);
+      formatter.format("    var el = document.getElementById(\"%s\");%n", errorId);
+      formatter.format("  }%n");
+      formatter.format("  replaceText(\"%s\", %s);%n", errorId, errorId);
+      formatter.format("%n");
+    }
+  }
+  
+  private static Set<String> getGoalsInRestriction(final Element restrictEle) {
+    final Set<String> goals = new HashSet<String>();
+    final NodeList terms = restrictEle.getElementsByTagName("term");
+    for(int termIdx=0; termIdx < terms.getLength(); ++termIdx) {
+      final Element termEle = (Element)terms.item(termIdx);
+      final String goalName = termEle.getAttribute("goal");
+      goals.add(goalName);
+    }
+    return goals;
   }
 
   /**
@@ -263,6 +338,8 @@ public final class ScoreEntry {
    * Generate the score entry form.
    */
   public static void generateScoreEntry(final JspWriter writer, final Document document, final HttpServletRequest request) throws IOException {
+    final Formatter formatter = new Formatter(writer);
+
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
     final NodeList goals = performanceElement.getChildNodes();
@@ -275,12 +352,8 @@ public final class ScoreEntry {
         try {
           writer.println("<!-- " + name + " -->");
           writer.println("<tr>");
-          if(null != request.getParameter(name + "_error")) {
-            writer.println("  <td name='error' bgcolor='red'>");
-          } else {
-            writer.println("  <td>");
-          }
-          writer.println("    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='3'><b>" + title + ":<b></font>");
+          writer.println("  <td>");
+          writer.println("    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='3'><b>" + title + ":</b></font>");
           writer.println("  </td>");
 
           if("computedGoal".equals(goalEleName)) {
@@ -335,8 +408,8 @@ public final class ScoreEntry {
                 writer.println("    <input type='text' name='" + name + "' size='3' align='right' readonly>");
               }
               writer.println("  </td>");
-            } // end simplegoal
-          }
+            } // end simple goal
+          } // goal
 
           // computed score
           writer.println("  <td align='right'>");
@@ -344,15 +417,7 @@ public final class ScoreEntry {
           writer.println("  </td>");
 
           // error message
-          if(null != request.getParameter("error")) {
-            if(null != request.getParameter(name + "_error")) {
-              writer.println("  <td bgcolor='red'>");
-              writer.println(request.getParameter(name + "_error"));
-              writer.println("</td>");
-            } else {
-              writer.println("  <td>&nbsp;</td>");
-            }
-          }
+          formatter.format("  <td class='error' id='error_%s'>&nbsp;</td>%n", name);
 
           writer.println("</tr>");
           writer.println("<!-- end " + name + " -->");
@@ -492,16 +557,32 @@ public final class ScoreEntry {
     return goalName + "_raw";
   }
 
+  /**
+   * The name of method that increments scores for the specified goal.
+   */
   private static String getIncrementMethodName(final String goalName) {
-    return "increment" + goalName;
+    return "increment_" + goalName;
   }
 
+  /**
+   * The name of the method that sets scores for the specified goal.
+   */
   private static String getSetMethodName(final String goalName) {
-    return "set" + goalName;
+    return "set_" + goalName;
   }
 
+  /**
+   * The name of the method that computes scores for the specified goal.
+   */
   private static String getComputedMethodName(final String goalName) {
-    return "compute" + goalName;
+    return "compute_" + goalName;
+  }
+
+  /**
+   * The ID of the element that holds errors for the specified goal.  This name is also used for the name of the variable that holds the error text for the goal in check_restrictions.
+   */
+  private static String getElementIDForError(final String goalName) {
+    return "error_" + goalName;
   }
 
   private static void generateComputedGoalFunction(final Formatter formatter, final Element ele) throws ParseException {
@@ -511,7 +592,8 @@ public final class ScoreEntry {
     final Element switchEle = (Element)ele.getFirstChild();
     generateSwitch(formatter, switchEle, goalName, INDENT_LEVEL);
 
-    formatter.format("%sdocument.scoreEntry.score_%s.value = %s;%n", generateIndentSpace(INDENT_LEVEL), goalName, getVarNameForComputedScore(goalName));
+    formatter.format("%sdocument.scoreEntry.score_%s.value = %s;%n", generateIndentSpace(INDENT_LEVEL), goalName,
+        getVarNameForComputedScore(goalName));
     formatter.format("}%n");
   }
 
@@ -569,7 +651,15 @@ public final class ScoreEntry {
         final String goal = childEle.getAttribute("goal");
         final double coefficient = Utilities.NUMBER_FORMAT_INSTANCE.parse(childEle.getAttribute("coefficient")).doubleValue();
         final String scoreType = childEle.getAttribute("scoreType");
-        formatter.format("%f * %s_%s", coefficient, goal, scoreType);
+        final String varName;
+        if("raw".equals(scoreType)) {
+          varName = getVarNameForRawScore(goal);
+        } else if("computed".equals(scoreType)) {
+          varName = getVarNameForComputedScore(goal);
+        } else {
+          throw new RuntimeException("Expected 'raw' or 'computed', but found: " + scoreType);
+        }
+        formatter.format("%f * %s", coefficient, varName);
       } else if("constant".equals(childEle.getNodeName())) {
         final double value = Utilities.NUMBER_FORMAT_INSTANCE.parse(childEle.getAttribute("value")).doubleValue();
         formatter.format("%f", value);
