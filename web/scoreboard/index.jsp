@@ -13,6 +13,8 @@
             (800x600)</a></li>
         
       <li><a href='<c:url value="allteams.jsp"/>'>All Teams, All Runs (primarily for internal use)</a></li>
+      <li><a href='<c:url value="last8.jsp"/>'>Last 8 scores</a></li>
+      <li><a href='<c:url value="top10.jsp"/>'>Top 10 scores</a></li>
         
     </ul>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>

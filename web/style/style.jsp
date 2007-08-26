@@ -17,4 +17,5 @@ BODY {
 
 .error {
   color: red;
+  font-weight: bold;
 }
