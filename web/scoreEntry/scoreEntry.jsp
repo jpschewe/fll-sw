@@ -179,10 +179,12 @@ function replaceText(sId, sText) {
   var el;
   if(document.getElementById
      && (el = document.getElementById(sId))) {
-    while (el.hasChildNodes()) {
-      el.removeChild(el.lastChild);
+     if(el.hasChildNodes) { // check for support for has child nodes, which isn't in httpunit, TODO figure out how to make this work for the unit tests as well
+      while (el.hasChildNodes()) {
+        el.removeChild(el.lastChild);
+      }
+      el.appendChild(document.createTextNode(sText));
     }
-    el.appendChild(document.createTextNode(sText));
   }
 }
 
