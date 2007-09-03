@@ -33,6 +33,13 @@
         Queries.setNumSeedingRounds(connection, newSeedingRounds);
         message.append("<i id='success'>Changed number of seeding arounds to " + newSeedingRounds + "</i><br>");
       }
+      
+      if (null != request.getParameter("changeScoresheetLayoutNUp")) {
+    	final String newNupStr = request.getParameter("scoresheetsPerPage");
+    	final int newNup = NumberFormat.getInstance().parse(newNupStr).intValue();
+    	Queries.setScoresheetLayoutNUp(connection, newNup);
+    	message.append("<i id='success'>Changed number of scoresheets per page to " + newNup + "</i><br>");
+      }
 
       if (null != request.getParameter("addTournamentsForRegions")) {
         Queries.insertTournamentsForRegions(connection);
@@ -40,6 +47,7 @@
       }
 
       final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
+      final int scoresheetsPerPage = Queries.getScoresheetLayoutNUp(connection);
       final String currentTournament = Queries.getCurrentTournament(connection);
 %>
 
@@ -151,6 +159,23 @@
 
  <li><a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a>
  (for scoresheet printing during playoffs)</li>
+ 
+ <li>
+ <form id='changeScoresheetLayoutNUp' action='<c:url value="index.jsp"/>'
+  method='post'>Select the number of scoresheets per printed page. <select
+  name='scoresheetsPerPage'>
+  <%
+          for (int i = 1; i <= 2; i++) {
+          out.print("<option value='" + i + "'");
+          if (scoresheetsPerPage == i) {
+            out.print(" selected");
+          }
+          out.println(">" + i + "</option>");
+        }
+  %>
+ </select> <input type='submit' name='changeScoresheetLayoutNUp' value='Commit'>
+ </form>
+ </li>
 
  <li>
  <form id='changeSeedingRounds' action='<c:url value="index.jsp"/>'

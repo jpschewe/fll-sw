@@ -180,7 +180,7 @@ public final class GetFile extends HttpServlet {
       final ScoresheetGenerator scoresheetGen = new ScoresheetGenerator(teamNumber, challengeDocument, connection);
 
       // Write the scoresheets to the browser - content-type: application/pdf
-      scoresheetGen.writeFile(response.getOutputStream());
+      scoresheetGen.writeFile(connection, response.getOutputStream());
     } else if("scoreSheet.pdf".equals(filename)) {
       final Connection connection = (Connection)application.getAttribute("connection");
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
@@ -193,17 +193,18 @@ public final class GetFile extends HttpServlet {
       final ScoresheetGenerator scoresheetGen = new ScoresheetGenerator(request.getParameterMap(), connection, tournament, challengeDocument);
 
       // Write the scoresheets to the browser - content-type: application/pdf
-      scoresheetGen.writeFile(response.getOutputStream());
+      scoresheetGen.writeFile(connection, response.getOutputStream());
     } else if("blankScoreSheet.pdf".equals(filename)) {
+      final Connection connection = (Connection)application.getAttribute("connection");
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
 
       // Create the scoresheet generator - must provide correct number of scoresheets
-      final ScoresheetGenerator scoresheetGen = new ScoresheetGenerator(2, challengeDocument);
+      final ScoresheetGenerator scoresheetGen = new ScoresheetGenerator(Queries.getScoresheetLayoutNUp(connection), challengeDocument);
       // Write the scoresheets to the browser - content-type: application/pdf
-      scoresheetGen.writeFile(response.getOutputStream());
+      scoresheetGen.writeFile(connection, response.getOutputStream());
       
     } else {
       response.reset();

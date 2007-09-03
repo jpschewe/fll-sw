@@ -209,21 +209,37 @@ public class ScoresheetGenerator {
   private static final Font COURIER_10PT_NORMAL = FontFactory.getFont(
                                                                     FontFactory.COURIER, 10, Font.NORMAL);
 
-  public void writeFile(final OutputStream out) throws DocumentException {
-    // This creates our new PDF document and declares it to be in landscape
-    // orientation
-    Document pdfDoc = new Document(PageSize.LETTER.rotate());
-    PdfWriter.getInstance(pdfDoc, out);
+  public void writeFile(final Connection connection, final OutputStream out) throws DocumentException,SQLException {
 
-    // Measurements are always in points (72 per inch) - This sets up 1/2 inch
-    // margins
+    final int nup = Queries.getScoresheetLayoutNUp(connection);
+    boolean orientationIsPortrait;
+
+    if(nup == 1) {
+      orientationIsPortrait = true;
+    } else if (nup == 2) {
+      orientationIsPortrait = false;
+    } else {
+      orientationIsPortrait = false;
+    }
+
+    // This creates our new PDF document and declares its orientation
+    Document pdfDoc;
+    if(orientationIsPortrait) {
+      pdfDoc = new Document(PageSize.LETTER); // portrait
+    } else {
+      pdfDoc = new Document(PageSize.LETTER.rotate()); // landscape
+    }
+    PdfWriter.getInstance(pdfDoc, out);
+    
+    // Measurements are always in points (72 per inch)
+    // This sets up 1/2 inch margins
     pdfDoc.setMargins(0.5f * 72, 0.5f * 72, 0.35f * 72, 0.35f * 72);
     pdfDoc.open();
-
+    
     // Header cell with challenge title to add to both scoresheets
     Paragraph p = new Paragraph();
     Chunk c = new Chunk(m_pageTitle, FontFactory.getFont(
-                                                         FontFactory.HELVETICA_BOLD, 14, Font.NORMAL, new Color(255, 255, 255)));
+        FontFactory.HELVETICA_BOLD, 14, Font.NORMAL, new Color(255, 255, 255)));
     p.setAlignment(Element.ALIGN_CENTER);
     p.add(c);
     PdfPCell head = new PdfPCell();
@@ -234,7 +250,7 @@ public class ScoresheetGenerator {
     head.setBackgroundColor(new Color(64, 64, 64));
     head.setVerticalAlignment(Element.ALIGN_TOP);
     head.addElement(p);
-
+    
     // Cells for judge initials, team initials, score field, and 2nd
     // check initials
     Phrase ji = new Phrase("Judge's Initials _______", ARIAL_8PT_NORMAL);
@@ -261,23 +277,38 @@ public class ScoresheetGenerator {
     sciC.setPaddingTop(9);
     sciC.setPaddingRight(36);
     sciC.setHorizontalAlignment(Element.ALIGN_RIGHT);
-
+    
     PdfPTable[] team = new PdfPTable[m_numTeams];
     PdfPCell[] cell = new PdfPCell[m_numTeams];
 
-    PdfPTable wholePage = new PdfPTable(2);
+    // Create a table with a grid cell for each scoresheet on the page
+    PdfPTable wholePage;
+    // TODO - break this if statement out into a private function
+    if(nup == 1) {
+      wholePage = new PdfPTable(1); // 1 column
+    } else if (nup == 2) {
+      wholePage = new PdfPTable(2); // 2 columns
+    } else {
+      wholePage = new PdfPTable(2); // default to 2 columns - should never get here
+    }
     wholePage.setWidthPercentage(100);
     for (int i = 0; i < m_numTeams; i++) {
-      if (i > 1 && (i % 2) == 0) {
+      if (i > 0 && (i % nup) == 0) {
         pdfDoc.newPage();
-        wholePage = new PdfPTable(2);
+        if(nup == 1) {
+          wholePage = new PdfPTable(1); // 1 column
+        } else if (nup == 2) {
+          wholePage = new PdfPTable(2); // 2 columns
+        } else {
+          wholePage = new PdfPTable(2); // default to 2 columns - should never get here
+        }
         wholePage.setWidthPercentage(100);
       }
       team[i] = new PdfPTable(2);
       team[i].getDefaultCell().setBorder(0);
-
+      
       team[i].addCell(head);
-
+      
       // Table label cell
       Paragraph tblP = new Paragraph("Table:", ARIAL_10PT_NORMAL);
       tblP.setAlignment(Element.ALIGN_RIGHT);
@@ -290,7 +321,7 @@ public class ScoresheetGenerator {
       PdfPCell tblVc = new PdfPCell(team[i].getDefaultCell());
       tblVc.addElement(tblV);
       team[i].addCell(tblVc);
-
+      
       // Round number label cell
       Paragraph rndP = new Paragraph("Round Number:", ARIAL_10PT_NORMAL);
       rndP.setAlignment(Element.ALIGN_RIGHT);
@@ -303,7 +334,7 @@ public class ScoresheetGenerator {
       PdfPCell rndVc = new PdfPCell(team[i].getDefaultCell());
       rndVc.addElement(rndV);
       team[i].addCell(rndVc);
-
+      
       // Team number label cell
       Paragraph nbrP = new Paragraph("Team Number:", ARIAL_10PT_NORMAL);
       nbrP.setAlignment(Element.ALIGN_RIGHT);
@@ -316,7 +347,7 @@ public class ScoresheetGenerator {
       PdfPCell nbrVc = new PdfPCell(team[i].getDefaultCell());
       nbrVc.addElement(nbrV);
       team[i].addCell(nbrVc);
-
+      
       // Team name label cell
       Paragraph nameP = new Paragraph("Team Name:", ARIAL_10PT_NORMAL);
       nameP.setAlignment(Element.ALIGN_RIGHT);
@@ -329,42 +360,53 @@ public class ScoresheetGenerator {
       PdfPCell nameVc = new PdfPCell(team[i].getDefaultCell());
       nameVc.addElement(nameV);
       team[i].addCell(nameVc);
-
+      
       PdfPCell blankRow = new PdfPCell(new Phrase(""));
       blankRow.setColspan(2);
       blankRow.setBorder(0);
       blankRow.setMinimumHeight(9);
       team[i].addCell(blankRow);
-
+      
       for (int j = 0; j < m_goalLabel.length; j++) {
         team[i].addCell(m_goalLabel[j]);
         team[i].addCell(m_goalValue[j]);
       }
-
+      
       team[i].addCell(jiC);
       team[i].addCell(desC);
       team[i].addCell(tciC);
       team[i].addCell(sciC);
-
+      
       cell[i] = new PdfPCell(team[i]);
       cell[i].setBorder(0);
       cell[i].setPadding(0);
-      if (i % 2 == 0) {
-        cell[i].setPaddingRight(36);
-      } else {
-        cell[i].setPaddingLeft(36);
+      
+      // Interior borders between scoresheets on a page
+      if(nup > 1) {
+        if (i % 2 == 0) {
+          cell[i].setPaddingRight(36);
+        } else {
+          cell[i].setPaddingLeft(36);
+        }
       }
+      
+      // Add the current scoresheet to the page
       wholePage.addCell(cell[i]);
-      if (i % 2 == 1) {
+      
+      // Add the current table of scoresheets to the document
+      if ( (i % nup) == (nup - 1) ) {
         pdfDoc.add(wholePage);
       }
     }
-    // When an odd number of teams, add a blank cell to complete the
-    // table of the last page
-    if (m_numTeams % 2 == 1) {
-      PdfPCell blank = new PdfPCell();
-      blank.setBorder(0);
-      wholePage.addCell(blank);
+
+    // Add a blank cells to complete the table of the last page
+    int num_blanks = (nup - (m_numTeams % nup)) % nup;
+    if(num_blanks > 0) {
+      for (int j = 0; j < num_blanks; j++) {
+        PdfPCell blank = new PdfPCell();
+        blank.setBorder(0);
+        wholePage.addCell(blank);
+      }
       pdfDoc.add(wholePage);
     }
 
