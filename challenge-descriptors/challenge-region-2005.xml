@@ -40,8 +40,8 @@
     <goal initialValue="0" max="8" min="0" multiplier="2" name="crates" title="Crates Elsewhere on Table"></goal>
     
     <restriction lowerBound="0" message="There are a maximum of 8 crates on the table" upperBound="8">
-      <term coefficient="1" goal="crates_base"></term>
-      <term coefficient="1" goal="crates"></term>
+      <term scoreType="raw" coefficient="1" goal="crates_base"></term>
+      <term scoreType="raw" coefficient="1" goal="crates"></term>
     </restriction>
 
     <tiebreaker>

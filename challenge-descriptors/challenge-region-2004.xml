@@ -73,8 +73,8 @@
       upperBound="16"
       message="There are a maximum of 16 balls on the table"
       >
-      <term goal="play_ball" />
-      <term goal="bonus" />
+      <term scoreType="raw" goal="play_ball" />
+      <term scoreType="raw" goal="bonus" />
     </restriction>
 
     <tiebreaker>

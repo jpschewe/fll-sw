@@ -16,8 +16,8 @@
       multiplier="50"
       />
     <restriction lowerBound="0" upperBound="2" message="There cannot be more molecules in the dirt trap than off the pants">
-      <term coefficient="1" goal="pizza_off_pant_leg"/>
-      <term coefficient="-1" goal="pizza_in_dirt_trap"/>
+      <term scoreType="raw" coefficient="1" goal="pizza_off_pant_leg"/>
+      <term scoreType="raw" coefficient="-1" goal="pizza_in_dirt_trap"/>
     </restriction>
 
     <goal name="smart_medicine" title="Deliver Buckyball"
@@ -29,8 +29,8 @@
       />
 
     <restriction lowerBound="0" upperBound="1" message="One must first retrieve buckyballs before they can be delivered">
-      <term coefficient="-1" goal="smart_medicine"/>
-      <term coefficient="1" goal="smart_medicine_retrieve"/>
+      <term scoreType="raw" coefficient="-1" goal="smart_medicine"/>
+      <term scoreType="raw" coefficient="1" goal="smart_medicine_retrieve"/>
     </restriction>
     
     <goal name="atomic_force" title="Free the Probe's Nanotip"
@@ -55,8 +55,8 @@
       max="2"/>
 
     <restriction lowerBound="0" upperBound="2" message="One must first return the ATP molecules to the base before they can be delivered">
-      <term coefficient="1" goal="atp_base"/>
-      <term coefficient="-1" goal="atp_frame"/>
+      <term scoreType="raw" coefficient="1" goal="atp_base"/>
+      <term scoreType="raw" coefficient="-1" goal="atp_frame"/>
     </restriction>
     
     <goal name="dumper" title="Robot Emptied Dirt Dumper"
@@ -78,13 +78,13 @@
       />
 
     <restriction lowerBound="0" upperBound="8" message="There are a maximum of 8 dirt pieces on the table">
-      <term coefficient="1" goal="dirt_in_trap"/>
-      <term coefficient="1" goal="dirt_elsewhere"/>
+      <term scoreType="raw" coefficient="1" goal="dirt_in_trap"/>
+      <term scoreType="raw" coefficient="1" goal="dirt_elsewhere"/>
     </restriction>
 
     <restriction lowerBound="0" upperBound="8" message="There are a maximum of 8 dirt pieces on the table">
-    <term coefficient="1" goal="dirt_in_base"/>
-    <term coefficient="1" goal="dirt_elsewhere"/>
+    <term scoreType="raw" coefficient="1" goal="dirt_in_base"/>
+    <term scoreType="raw" coefficient="1" goal="dirt_elsewhere"/>
   </restriction>
     
     <goal name="dirt_in_base" title="Dirt in Trap at Base"
@@ -93,8 +93,8 @@
       />
 
     <restriction lowerBound="0" upperBound="8" message="If the dirt trap is at base, then the dirt in the trap counts for both Dirt in Dirt Trap and Dirt in Trap at Base">
-      <term coefficient="1" goal="dirt_in_trap"/>
-      <term coefficient="-1" goal="dirt_in_base"/>
+      <term scoreType="raw" coefficient="1" goal="dirt_in_trap"/>
+      <term scoreType="raw" coefficient="-1" goal="dirt_in_base"/>
     </restriction>
     
     <goal name="space_elevator" title="Operate Space Elevator"

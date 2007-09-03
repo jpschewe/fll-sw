@@ -16,8 +16,8 @@
       multiplier="10"
       />
     <restriction lowerBound="0" upperBound="2" message="There cannot be more molecules on the head than off the plate">
-      <term coefficient="1" goal="smell_off_plate"/>
-      <term coefficient="-1" goal="smell_head"/>
+      <term scoreType="raw" coefficient="1" goal="smell_off_plate"/>
+      <term scoreType="raw" coefficient="-1" goal="smell_head"/>
     </restriction>
 
     <goal name="smart_medicine" title="_ Deliver Buckyball"
@@ -61,8 +61,8 @@
       max="8"
       />
     <restriction lowerBound="0" upperBound="8" message="There are a maximum of 3 dirt pieces on the table">
-      <term coefficient="1" goal="dirt_in_trap"/>
-      <term coefficient="1" goal="dirt_elsewhere"/>
+      <term scoreType="raw" coefficient="1" goal="dirt_in_trap"/>
+      <term scoreType="raw" coefficient="1" goal="dirt_elsewhere"/>
     </restriction>
 
     <goal name="space_elevator" title="_ Operate Space Elevator"

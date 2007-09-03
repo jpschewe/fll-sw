@@ -72,8 +72,8 @@
 		 upperBound="4"
                  message="There are a maximum of 4 boulders on the table"
                  >
-      <term goal="boulders_in_circle" />
-      <term goal="boulders_outside_circle" />
+      <term scoreType="raw" goal="boulders_in_circle" />
+      <term scoreType="raw" goal="boulders_outside_circle" />
     </restriction>
 
     <tiebreaker>
