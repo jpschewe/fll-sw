@@ -184,6 +184,30 @@ public final class Queries {
       Utilities.closeStatement(stmt);
     }
   }
+  
+  /**
+   * Get the number of scoresheets to print on a single sheet of paper. Returns
+   * an integer value as stored in TournamentParameters table for the
+   * ScoresheetLayoutNUp parameter. Possible values at this time are 1 and 2.
+   */
+  public static int getScoresheetLayoutNUp(final Connection connection) throws SQLException {
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT VALUE FROM TournamentParameters WHERE Param = 'ScoresheetLayoutNUp'");
+      final int nup;
+      if(rs.next()) {
+        nup = rs.getInt(1);
+      } else {
+        nup = 2; // Default to 2-up layout of parameter doesn't exist in DB
+      }
+      return nup;
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closeStatement(stmt);
+    }
+  }
 
   /**
    * Insert a performance score into the database. All of the values are
@@ -879,7 +903,22 @@ public final class Queries {
     } finally {
       Utilities.closeStatement(stmt);
     }
+  }
 
+  /**
+   * Set the number of scoresheets per printed page.
+   * @param connection The database connection.
+   * @param newNup The new number of scoresheets per printed page. Currently must be 1 or 2.
+   * @throws SQLException
+   */
+  public static void setScoresheetLayoutNUp(final Connection connection, final int newNup) throws SQLException {
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+      stmt.executeUpdate("UPDATE TournamentParameters SET Value = " + newNup + " WHERE Param = 'ScoresheetLayoutNUp'");
+    } finally {
+      Utilities.closeStatement(stmt);
+    }
   }
 
   /**
