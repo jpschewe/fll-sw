@@ -189,6 +189,7 @@ public final class GenerateDB {
         stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('SeedingRounds', 3, 'Number of seeding rounds before elimination round - used to downselect top performance scores in queries')");
         stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('StandardizedMean', 100, 'Standard mean for computing the standardized scores')");
         stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('StandardizedSigma', 20, 'Standard deviation for computing the standardized scores')");
+        stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('ScoresheetLayoutNUp', 2, 'Controls scoresheet layout by specifying number of scoresheets per page. Valid values are 1 or 2.')");
 
         prep = connection.prepareStatement("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('ChallengeDocument', ?, 'The XML document describing the challenge')");
       } else {
