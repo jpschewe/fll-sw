@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="FLL 2007 Challenge: Power Puzzle"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="fll.xsd">
+
+ <!-- $Rev: 351 $ -->
+
+ <Performance minimumScore="0" weight="1.0">
+
+  <goal name="roof_solar_panel" title="Roof Solar Panel"
+   multiplier="15" />
+  <goal name="personal_vehicle_choice"
+   title="Car at House &amp; Truck on Farm or Base" multiplier="25" />
+
+  <goal name="hydro_dam" title="Hydro-Dam" multiplier="25" />
+
+  <goal name="flood_house" title="Houses Damaged" multiplier="-10" />
+
+  <goal name="wind_turbines" title="Wind Turbines" multiplier="15"
+   max="2" />
+
+  <goal name="grid_connection" title="Grid Connection" multiplier="5"
+   max="3" />
+
+  <goal name="alt_fuel_community" title="Alternately Fueled Communities"
+   multiplier="5" max="3" />
+  <restriction lowerBound="0" upperBound="3"
+   message="You cannot have more communities with alternate fuel than communities connected to the grid.">
+   <term goal="grid_connection" scoreType="raw" />
+   <term coefficient="-1" goal="alt_fuel_community" scoreType="raw" />
+  </restriction>
+
+  <goal name="solar_power_satellite" title="Solar Power Satellite"
+   multiplier="15" />
+
+  <goal name="solar_power_satellite_bonus" title="First to Satellite"
+   multiplier="5" />
+
+  <goal name="wave_turbine" title="Wave Turbine" multiplier="25" />
+
+  <goal name="coal_mining" title="Coal Mining" multiplier="10" />
+
+  <goal name="oil_drilling" title="Oil Drilling" multiplier="10" />
+
+  <goal name="oil_at_farm" title="Oil at Farm" multiplier="0" />
+  <goal name="corn_harvest" title="Corn At Base" multiplier="25" />
+  <restriction lowerBound="-11" upperBound="11"
+   message="Oil must be at the farm for the corn to count">
+   <term coefficient="-12" goal="corn_harvest" scoreType="raw" />
+   <term coefficient="1" goal="oil_at_farm" scoreType="raw" />
+  </restriction>
+
+  <goal name="uranium_mining" title="Uranium Out Of Farm"
+   multiplier="15" />
+
+  <goal name="tree_planting" title="Tree Planting" multiplier="10"
+   max="4" />
+
+  <goal name="power_plant_supply_tree" title="Power Plant Supply (Tree)"
+   multiplier="10" max="2" />
+  <restriction lowerBound="0" upperBound="4"
+   message="There must be one tree planted for each used as fuel">
+   <term coefficient="1" goal="tree_planting" scoreType="raw" />
+   <term coefficient="-1" goal="power_plant_supply_tree"
+    scoreType="raw" />
+  </restriction>
+
+  <restriction lowerBound="0" upperBound="4"
+   message="There are only 4 trees on the field!">
+   <term coefficient="1" goal="tree_planting" scoreType="raw" />
+   <term coefficient="1" goal="power_plant_supply_tree" scoreType="raw" />
+  </restriction>
+
+  <goal name="power_plant_supply_coal"
+   title="Power Plant Supply (Black Coal) - at least 10 pieces"
+   multiplier="10" />
+
+  <goal name="power_plant_supply_uranium"
+   title="Power Plant Supply (Green Uranium)" multiplier="10" max="2" />
+
+  <goal name="power_plant_supply_oil"
+   title="Power Plant Supply (White Oil Barrels)" multiplier="5"
+   max="7" />
+
+  <goal name="red_fuel_at_power_plant" title="Red Fuel at Power Plant"
+   multiplier="0" />
+  <restriction lowerBound="0" upperBound="2"
+   message="You cannot score any power plant supply if there is red fuel at the power plant (tree)">
+   <term coefficient="2" goal="red_fuel_at_power_plant" scoreType="raw" />
+   <term coefficient="1" goal="power_plant_supply_tree" scoreType="raw" />
+  </restriction>
+
+  <restriction lowerBound="0" upperBound="1"
+   message="You cannot score any power plant supply if there is red fuel at the power plant (coal)">
+   <term coefficient="1" goal="red_fuel_at_power_plant" scoreType="raw" />
+   <term coefficient="1" goal="power_plant_supply_coal" scoreType="raw" />
+  </restriction>
+
+
+  <restriction lowerBound="0" upperBound="2"
+   message="You cannot score any power plant supply if there is red fuel at the power plant (uranium)">
+   <term coefficient="2" goal="red_fuel_at_power_plant" scoreType="raw" />
+   <term coefficient="1" goal="power_plant_supply_uranium"
+    scoreType="raw" />
+  </restriction>
+
+  <restriction lowerBound="0" upperBound="7"
+   message="You cannot score any power plant supply if there is red fuel at the power plant (oil)">
+   <term coefficient="7" goal="red_fuel_at_power_plant" scoreType="raw" />
+   <term coefficient="1" goal="power_plant_supply_oil" scoreType="raw" />
+  </restriction>
+
+  <goal name="oil_barrels_base"
+   title="Oil Barrels in parking lot or at base" multiplier="10"
+   max="11" />
+
+  <restriction lowerBound="0" upperBound="11"
+   message="There are only 11 oil barrels on the field">
+   <term coefficient="1" goal="oil_at_farm" scoreType="raw" />
+   <term coefficient="1" goal="power_plant_supply_oil" scoreType="raw" />
+   <term coefficient="1" goal="oil_barrels_base" scoreType="raw" />
+  </restriction>
+
+
+  <goal name="pollution_deduction" title="Pollution Deduction"
+   multiplier="-40" />
+
+  <!-- want to know the type of robot, but can't change the score, so set the multiplier to 0 -->
+  <goal name="robot_type" title="Robot Type" initialValue="1"
+   multiplier="0">
+   <value score="1" title="RCX" value="rcx" />
+   <value score="2" title="NXT" value="nxt" />
+  </goal>
+
+  <computedGoal name="fairness" title="Fairness Bonus">
+   <variable name="subtotal">
+    <term scoreType="computed" goal="roof_solar_panel" />
+    <term scoreType="computed" goal="personal_vehicle_choice" />
+    <term scoreType="computed" goal="hydro_dam" />
+    <term scoreType="computed" goal="flood_house" />
+    <term scoreType="computed" goal="wind_turbines" />
+    <term scoreType="computed" goal="grid_connection" />
+    <term scoreType="computed" goal="alt_fuel_community" />
+    <term scoreType="computed" goal="solar_power_satellite" />
+    <term scoreType="computed" goal="solar_power_satellite_bonus" />
+    <term scoreType="computed" goal="wave_turbine" />
+    <term scoreType="computed" goal="coal_mining" />
+    <term scoreType="computed" goal="oil_drilling" />
+    <term scoreType="computed" goal="corn_harvest" />
+    <term scoreType="computed" goal="uranium_mining" />
+    <term scoreType="computed" goal="tree_planting" />
+    <term scoreType="computed" goal="power_plant_supply_tree" />
+    <term scoreType="computed" goal="power_plant_supply_coal" />
+    <term scoreType="computed" goal="power_plant_supply_uranium" />
+    <term scoreType="computed" goal="power_plant_supply_oil" />
+    <term scoreType="computed" goal="oil_barrels_base" />
+    <term scoreType="computed" goal="pollution_deduction" />
+   </variable>
+   <switch>
+    <case>
+     <enumCondition>
+      <left>
+       <goalRef goal="robot_type" />
+      </left>
+      <equal-to />
+      <right>
+       <stringConstant value="rcx" />
+      </right>
+     </enumCondition>
+     <switch>
+      <!-- 
+       case subtotal < 105
+       bonus = (int)(subtotal / 5) * 3
+       case subtotal < 325
+       bonus = 60
+       case subtotal < 330
+       bonus = 385 - subtotal
+       case subtotal < 335
+       bonus = 386 - subtotal
+       case subtotal < 340
+       bonus = 387 - subtotal
+       case subtotal < 345
+       bonus = 388 - subtotal
+       case subtotal < 350
+       bonus = 389 - subtotal
+       case subtotal < 355
+       bonus = 390 - subtotal
+       case subtotal < 360
+       bonus = 391 - subtotal
+       case subtotal < 365
+       bonus = 392 - subtotal
+       case subtotal < 370
+       bonus = 393 - subtotal
+       case subtotal < 375
+       bonus = 394 - subtotal
+       case subtotal < 380
+       bonus = 395 - subtotal
+       case subtotal < 385
+       bonus = 396 - subtotal
+       case subtotal < 390
+       bonus = 397 - subtotal
+       case subtotal < 395
+       bonus = 398 - subtotal
+       case subtotal < 400
+       bonus = 399 - subtotal
+       default
+       bonus = 0
+      -->
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="105" />
+        </right>
+       </condition>
+       <result>
+        <!-- may want to expand this all out in case the math doesn't work... -->
+        <variableRef variable="subtotal" coefficient="0.6"
+         floatingPoint="truncate" />
+       </result>
+      </case>
+
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="325" />
+        </right>
+       </condition>
+       <result>
+        <constant value="60" />
+       </result>
+      </case>
+
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="330" />
+        </right>
+       </condition>
+       <result>
+        <constant value="385" />
+        <variableRef coefficient="-1" variable="subtotal" />
+       </result>
+      </case>
+
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="335" />
+        </right>
+       </condition>
+       <result>
+        <constant value="386" />
+        <variableRef coefficient="-1" variable="subtotal" />
+       </result>
+      </case>
+
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="340" />
+        </right>
+       </condition>
+       <result>
+        <constant value="387" />
+        <variableRef coefficient="-1" variable="subtotal" />
+       </result>
+      </case>
+
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="345" />
+        </right>
+       </condition>
+       <result>
+        <constant value="388" />
+        <variableRef coefficient="-1" variable="subtotal" />
+       </result>
+      </case>
+
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="350" />
+        </right>
+       </condition>
+       <result>
+        <constant value="389" />
+        <variableRef coefficient="-1" variable="subtotal" />
+       </result>
+      </case>
+
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="355" />
+        </right>
+       </condition>
+       <result>
+        <constant value="390" />
+        <variableRef coefficient="-1" variable="subtotal" />
+       </result>
+      </case>
+
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="360" />
+        </right>
+       </condition>
+       <result>
+        <constant value="391" />
+        <variableRef coefficient="-1" variable="subtotal" />
+       </result>
+      </case>
+
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="365" />
+        </right>
+       </condition>
+       <result>
+        <constant value="392" />
+        <variableRef coefficient="-1" variable="subtotal" />
+       </result>
+      </case>
+
+
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="370" />
+        </right>
+       </condition>
+       <result>
+        <constant value="393" />
+        <variableRef coefficient="-1" variable="subtotal" />
+       </result>
+      </case>
+
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="375" />
+        </right>
+       </condition>
+       <result>
+        <constant value="394" />
+        <variableRef coefficient="-1" variable="subtotal" />
+       </result>
+      </case>
+
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="380" />
+        </right>
+       </condition>
+       <result>
+        <constant value="395" />
+        <variableRef coefficient="-1" variable="subtotal" />
+       </result>
+      </case>
+
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="385" />
+        </right>
+       </condition>
+       <result>
+        <constant value="396" />
+        <variableRef coefficient="-1" variable="subtotal" />
+       </result>
+      </case>
+
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="390" />
+        </right>
+       </condition>
+       <result>
+        <constant value="397" />
+        <variableRef coefficient="-1" variable="subtotal" />
+       </result>
+      </case>
+
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="395" />
+        </right>
+       </condition>
+       <result>
+        <constant value="398" />
+        <variableRef coefficient="-1" variable="subtotal" />
+       </result>
+      </case>
+
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than />
+        <right>
+         <constant value="400" />
+        </right>
+       </condition>
+       <result>
+        <constant value="399" />
+        <variableRef coefficient="-1" variable="subtotal" />
+       </result>
+      </case>
+
+      <default>
+       <constant value="0" />
+      </default>
+
+     </switch>
+    </case>
+    <default>
+     <!-- NXT -->
+     <constant value="0" />
+    </default>
+   </switch>
+  </computedGoal>
+
+
+  <tiebreaker>
+   <!-- FIX need real tiebreaker -->
+   <test winner="high">
+    <term goal="robot_type" scoreType="computed"/>
+   </test>
+  </tiebreaker>
+
+ </Performance>
+
+ <subjectiveCategory name="teamwork" title="Teamwork" weight="1.0">
+  <goal initialValue="0" max="20" min="0" multiplier="1" name="roles"
+   title="Roles and Responsibilities">
+  </goal>
+  <goal initialValue="0" max="20" min="0" multiplier="1"
+   name="professionalism" title="Gracious Professionalism">
+  </goal>
+  <goal initialValue="0" max="20" min="0" multiplier="1" name="dynamics"
+   title="Problem Solving &amp; Team Dynamics &amp; Communications">
+  </goal>
+  <goal initialValue="0" max="20" min="0" multiplier="1"
+   name="confidence" title="Confidence &amp; Enthusiasm">
+  </goal>
+  <goal initialValue="0" max="20" min="0" multiplier="1"
+   name="fll_values" title="FLL Values">
+  </goal>
+ </subjectiveCategory>
+
+
+ <subjectiveCategory name="robustdesign" title="Robust Design"
+  weight="0.5">
+  <goal initialValue="0" max="20" min="0" multiplier="1" name="strategy"
+   title="Strategy, Process, Problem Solving">
+  </goal>
+  <goal initialValue="0" max="20" min="0" multiplier="1"
+   name="locomotion" title="Locomotion and Navigation">
+  </goal>
+  <goal initialValue="0" max="20" min="0" multiplier="1"
+   name="design_kids" title="Kids Did the Work">
+  </goal>
+  <goal initialValue="0" max="20" min="0" multiplier="1"
+   name="structural" title="Structural">
+  </goal>
+  <goal initialValue="0" max="20" min="0" multiplier="1"
+   name="overall_design" title="Overall Design">
+  </goal>
+ </subjectiveCategory>
+
+
+ <subjectiveCategory name="programming" title="Robust Programming"
+  weight="0.5">
+  <goal initialValue="0" max="20" min="0" multiplier="1"
+   name="useoflanguage" title="Use of Language">
+  </goal>
+  <goal initialValue="0" max="20" min="0" multiplier="1"
+   name="modularity" title="Modularity/Abstraction">
+  </goal>
+  <goal initialValue="0" max="20" min="0" multiplier="1"
+   name="sensorcontrol" title="Sensor Control">
+  </goal>
+  <goal initialValue="0" max="20" min="0" multiplier="1" name="design"
+   title="Design">
+  </goal>
+  <goal initialValue="0" max="20" min="0" multiplier="1"
+   name="programming_kids" title="Kids Did the Work">
+  </goal>
+ </subjectiveCategory>
+
+ <subjectiveCategory name="research" title="Research Project Assessment"
+  weight="1.0">
+  <goal initialValue="0" max="20" min="0" multiplier="1"
+   name="questions" title="Questions, Language Use">
+  </goal>
+  <goal initialValue="0" max="20" min="0" multiplier="1"
+   name="completeness" title="Completeness, Teamwork">
+  </goal>
+  <goal initialValue="0" max="20" min="0" multiplier="1"
+   name="background" title="Background, Data, and Graphics">
+  </goal>
+  <goal initialValue="0" max="20" min="0" multiplier="1" name="analysis"
+   title="Analysis and Conclusions">
+  </goal>
+  <goal initialValue="0" max="20" min="0" multiplier="1" name="style"
+   title="Style">
+  </goal>
+ </subjectiveCategory>
+
+
+</fll>
