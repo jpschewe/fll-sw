@@ -46,6 +46,20 @@
     
         
     <computedGoal name="computed" title="Test computed goal">
+      <variable name="subtotal">
+        <term goal="pump_station" scoreType="computed"/>
+        <term goal="flags" scoreType="computed"/>
+        <term goal="flags_rows" scoreType="computed"/>
+        <term goal="archaeological" scoreType="computed"/>
+        <term goal="dolphin" scoreType="computed"/>
+        <term goal="sample_species" scoreType="computed"/>
+        <term goal="submarine" scoreType="computed"/>
+        <term goal="artifical_reef" scoreType="computed"/>
+        <term goal="pipeline" scoreType="computed"/>
+        <term goal="shipping_container" scoreType="computed"/>
+        <term goal="crates_base" scoreType="computed"/>
+        <term goal="crates" scoreType="computed"/>
+      </variable>
       <switch>
         <case>
           <enumCondition>  
@@ -61,9 +75,7 @@
             <case>
               <condition>
                 <left>
-                  <term goal="pump_station" scoreType="computed"/>
-                  <term goal="flags" scoreType="computed"/>
-                  <term goal="flags_rows" scoreType="raw"/>
+                  <variableRef variable="subtotal"/>
                 </left>
                 <less-than/> <!-- any inequality -->
                 <right>
@@ -92,50 +104,50 @@
     </computedGoal>
     
     <restriction lowerBound="0" message="There are a maximum of 8 crates on the table" upperBound="8">
-      <term coefficient="1" goal="crates_base"/>
-      <term coefficient="1" goal="crates"/>
+      <term coefficient="1" goal="crates_base" scoreType="raw"/>
+      <term coefficient="1" goal="crates" scoreType="raw"/>
       <constant value="1"/>
     </restriction>
 
     <tiebreaker>
       <test winner="high">
-        <term goal="crates_base" />
+        <term goal="crates_base" scoreType="raw"/>
       </test> 
       <test winner="high">
-        <term goal="crates" />
+        <term goal="crates" scoreType="raw"/>
       </test> 
       <test winner="high">
-        <term goal="dolphin" />
+        <term goal="dolphin" scoreType="raw"/>
       </test> 
       <test winner="high">
-        <term goal="flags_rows" />
+        <term goal="flags_rows"  scoreType="raw"/>
       </test> 
       <test winner="high">
-        <term goal="flags" />
+        <term goal="flags"  scoreType="raw"/>
       </test> 
       <test winner="high">
-        <term goal="submarine" />
+        <term goal="submarine"  scoreType="computed"/>
       </test> 
       <test winner="high">
-        <term goal="archaeological" />
+        <term goal="archaeological"  scoreType="computed"/>
       </test> 
       <test winner="high">
-        <term goal="shipping_container" />
+        <term goal="shipping_container"  scoreType="raw"/>
       </test> 
       <test winner="high">
-        <term goal="pump_station" />
+        <term goal="pump_station"  scoreType="raw"/>
       </test> 
       <test winner="high">
-        <term goal="pipeline" />
+        <term goal="pipeline"  scoreType="raw"/>
       </test>
       <test winner="high">
-        <term goal="sample_species" />
+        <term goal="sample_species"  scoreType="raw"/>
       </test>
       <test winner="high">
-        <term goal="artifical_reef" />
+        <term goal="artifical_reef"  scoreType="raw"/>
       </test>
       <test winner="high">
-        <term goal="computed" />
+        <term goal="computed"  scoreType="computed"/>
         <constant value="10"/>
       </test>
     </tiebreaker>

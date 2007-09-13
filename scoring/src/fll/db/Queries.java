@@ -826,7 +826,7 @@ public final class Queries {
    * @throws RuntimeException
    *           if a team can't be found in tournamentTeams
    */
-  public static List<Team> getPlayoffSeedingOrder(final Connection connection, final String divisionStr, final Map tournamentTeams)
+  public static List<Team> getPlayoffSeedingOrder(final Connection connection, final String divisionStr, final Map<Integer, Team> tournamentTeams)
       throws SQLException, RuntimeException {
     final String currentTournament = getCurrentTournament(connection);
 

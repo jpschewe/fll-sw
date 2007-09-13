@@ -161,7 +161,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
       stmt = connection.createStatement();
       teamsStmt = connection.createStatement();
 
-      final Iterator divisionIter = Queries.getDivisions(connection).iterator();
+      final Iterator<String> divisionIter = Queries.getDivisions(connection).iterator();
       while(divisionIter.hasNext()) {
         _division = (String)divisionIter.next();
 

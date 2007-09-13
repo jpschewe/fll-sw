@@ -26,7 +26,7 @@ public class DummyTeamScore extends TeamScore {
 
   public DummyTeamScore(final Element categoryElement, final int teamNumber, final int runNumber, final Map<String, Double> simpleGoals, final Map<String, String> enumGoals) {
     super(categoryElement, teamNumber, runNumber);
-    _simpleGoals = new HashMap<String, Double>(simpleGoals);
+     _simpleGoals = new HashMap<String, Double>(simpleGoals);
     _enumGoals = new HashMap<String, String>(enumGoals);
   }
   

@@ -5,25 +5,21 @@
  */
 package fll.web.report;
 
-import javax.servlet.jsp.JspWriter;
-
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.NumberFormat;
+
+import javax.servlet.jsp.JspWriter;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import fll.db.Queries;
 import fll.Utilities;
-
-import java.text.NumberFormat;
-
-import java.io.IOException;
-
-import java.util.Iterator;
+import fll.db.Queries;
 
 
 /**
@@ -56,10 +52,7 @@ public final class CategoryScores {
 
       
     //get the list of divisions
-    final Iterator divisionIter = Queries.getDivisions(connection).iterator();
-    while(divisionIter.hasNext()) {
-      final String division = (String)divisionIter.next();
-
+    for(String division : Queries.getDivisions(connection)) {
       //foreach category
       for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
         final Element catElement = (Element)subjectiveCategories.item(cat);

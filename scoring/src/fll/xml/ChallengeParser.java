@@ -271,8 +271,8 @@ public final class ChallengeParser {
           final String referencedGoalName = termElement.getAttribute("goal");
           final Element referencedGoalElement = goals.get(referencedGoalName);
           // can't use the raw score of an enum inside a polynomial term
-          if("raw".equals(goalValueType) && XMLUtils.isEnumeratedGoal(referencedGoalElement)) {
-            throw new RuntimeException("Cannot use the raw score from an enumerated goal in a polynomial term.  Referenced goal '"
+          if("raw".equals(goalValueType) && (XMLUtils.isEnumeratedGoal(referencedGoalElement) || XMLUtils.isComputedGoal(referencedGoalElement))) {
+            throw new RuntimeException("Cannot use the raw score from an enumerated or computed goal in a polynomial term.  Referenced goal '"
                 + referencedGoalName + "'");
           }
         }

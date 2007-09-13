@@ -12,7 +12,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
-import java.util.Iterator;
 
 import javax.servlet.jsp.JspWriter;
 
@@ -57,10 +56,7 @@ public final class FinalComputedScores {
       final NodeList subjectiveCategories = rootElement.getElementsByTagName("subjectiveCategory");
       stmt = connection.createStatement();
       
-      final Iterator divisionIter = Queries.getDivisions(connection).iterator();
-      while(divisionIter.hasNext()) {
-        final String division = (String)divisionIter.next();
-      
+      for(String division: Queries.getDivisions(connection)) {
         out.println("<h2>Division: " + division + "</h2>");
       
         out.println("<table border='0'>");

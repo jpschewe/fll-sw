@@ -67,7 +67,7 @@ public final class UploadTeams {
     final StringBuffer selectOptions = new StringBuffer();
 
     //parse out the first line as the names of the columns
-    final List columnNames = splitLine(reader.readLine());
+    final List<String> columnNames = splitLine(reader.readLine());
 
     //build the SQL for inserting a row into the temporary table 
     final StringBuffer insertPrepSQL = new StringBuffer();
@@ -82,9 +82,7 @@ public final class UploadTeams {
     //iterate over each column name and append to appropriate buffers
     boolean first = true;
     final List<String> columnNamesSeen = new LinkedList<String>();
-    final Iterator headerIter = columnNames.iterator();
-    while(headerIter.hasNext()) {
-      final String header = (String)headerIter.next();
+    for(String header : columnNames) {
       final String columnName = sanitizeColumnName(header);
       if(LOG.isDebugEnabled()) {
         LOG.debug("header: " + header + " columnName: " + columnName);
@@ -130,7 +128,7 @@ public final class UploadTeams {
       String line = reader.readLine();
       for(int lineCounter=0; null != line; line = reader.readLine(), lineCounter++) {
         if(!"".equals(line.trim())) { // skip empty lines
-          final Iterator valueIter = splitLine(line).iterator();
+          final Iterator<String> valueIter = splitLine(line).iterator();
           int column = 1;
           while(valueIter.hasNext()) {
             final String value = (String)valueIter.next();
