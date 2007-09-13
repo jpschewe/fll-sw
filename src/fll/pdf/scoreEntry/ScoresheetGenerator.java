@@ -79,7 +79,7 @@ public class ScoresheetGenerator {
    */
   public ScoresheetGenerator(final Map formParms, final Connection connection, final String tournament, final org.w3c.dom.Document document)
   throws SQLException {
-    final int numMatches = Integer.parseInt(((String[])formParms.get(new String("numMatches")))[0]);
+    final int numMatches = Integer.parseInt(((String[])formParms.get("numMatches"))[0]);
     final boolean[] checkedMatches = new boolean[numMatches+1]; // ignore slot index 0
     int checkedMatchCount = 0;
     // Build array of out how many matches we are printing

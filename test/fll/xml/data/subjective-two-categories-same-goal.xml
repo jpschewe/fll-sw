@@ -18,13 +18,13 @@
     
     <tiebreaker>
       <test winner="high">
-        <term goal="flags_rows" />
+        <term goal="flags_rows"  scoreType="computed"/>
       </test> 
       <test winner="high">
-        <term goal="flags" />
+        <term goal="flags"  scoreType="computed"/>
       </test> 
       <test winner="high">
-        <term goal="pump_station" />
+        <term goal="pump_station"  scoreType="computed"/>
       </test> 
     </tiebreaker>
 

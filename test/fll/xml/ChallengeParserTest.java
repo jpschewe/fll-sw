@@ -317,5 +317,70 @@ public class ChallengeParserTest extends TestCase {
     }
     Assert.assertTrue("Expected a runtime exception due the initial value being set to something that doesn't match an enum value", exception);
   }
+
+  /**
+   * Check that a variable is not allowed to reference a computed goal. 
+   */
+  @Test
+  public void testVariableRefComputedGoal() {
+    boolean exception = false;
+    try {
+      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/variable-ref-computed-goal.xml");
+      Assert.assertNotNull(stream);
+      ChallengeParser.parse(new InputStreamReader(stream));
+    } catch(final RuntimeException e) {
+      exception = true;
+    }
+    Assert.assertTrue("Expected a runtime exception due to a variable referencing a computed goal", exception);
+  }
+  
+  /**
+   * Check that a variableRef is not allowed in a tiebreaker.
+   */
+  @Test
+  public void testVariableRefInTiebreaker() {
+    boolean exception = false;
+    try {
+      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/variableRef-in-tiebreaker.xml");
+      Assert.assertNotNull(stream);
+      ChallengeParser.parse(new InputStreamReader(stream));
+    } catch(final RuntimeException e) {
+      exception = true;
+    }
+    Assert.assertTrue("Expected a runtime exception due to a variableRef in a tiebreaker", exception);
+  }
+ 
+  /**
+   * Check that a variableRef is not allowed in a restriction.
+   */
+  @Test
+  public void testVariableRefInRestriction() {
+    boolean exception = false;
+    try {
+      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/variableRef-in-restriction.xml");
+      Assert.assertNotNull(stream);
+      ChallengeParser.parse(new InputStreamReader(stream));
+    } catch(final RuntimeException e) {
+      exception = true;
+    }
+    Assert.assertTrue("Expected a runtime exception due to a variableRef in a restriction", exception);
+  }
+
+
+  /**
+   * Check that a two variables in a computed goal may not have the same name.
+   */
+  @Test
+  public void testDuplicateVariable() {
+    boolean exception = false;
+    try {
+      final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/duplicate-variable.xml");
+      Assert.assertNotNull(stream);
+      ChallengeParser.parse(new InputStreamReader(stream));
+    } catch(final RuntimeException e) {
+      exception = true;
+    }
+    Assert.assertTrue("Expected a runtime exception due to two variables having the same name in a computed goal.", exception);
+  }
   
 }

@@ -17,6 +17,11 @@
     
 
     <computedGoal name="computed" title="Test computed goal">
+      <variable name="subtotal">
+        <term goal="pump_station" scoreType="computed"/>
+        <term goal="flags" scoreType="computed"/>
+        <term goal="flags_rows" scoreType="raw"/>
+      </variable>    
       <switch>
         <case>
           <enumCondition>  
@@ -32,27 +37,21 @@
             <case>
               <condition>
                 <left>
-                  <term goal="pump_station" scoreType="computed"/>
-                  <term goal="flags" scoreType="computed"/>
-                  <term goal="flags_rows" scoreType="raw"/>
+                  <variableRef variable="subtotal"/>
                 </left>
-                <less-than/> <!-- any inequality -->
+                <less-than/>
                 <right>
-                  <constant value="100"/>
+                  <constant value="72"/>
                 </right>
               </condition>
               <result>
-                <term goal="pump_station" scoreType="computed"/>
-                <term goal="flags" scoreType="computed"/>
-                <term goal="flags_rows" scoreType="computed"/>
                 <constant value="60"/>
+                <variableRef variable="subtotal"/>
               </result>
             </case>
-            <default> <!-- default case is required, the default just has a result -->
+            <default>
               <constant value="240"/>
-              <term coefficient="0.4" goal="pump_station" scoreType="computed"/>
-              <term coefficient="0.4" goal="flags" scoreType="computed"/>
-              <term coefficient="0.4" goal="flags_rows" scoreType="computed"/>
+              <variableRef coefficient="0.4" variable="subtotal"/>
             </default>
           </switch>
         </case>
