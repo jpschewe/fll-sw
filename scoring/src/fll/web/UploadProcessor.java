@@ -34,8 +34,8 @@ public class UploadProcessor {
    */
   public static void processUpload(final HttpServletRequest request) throws FileUploadException {
     // Parse the request
-    final List /* FileItem */items = UPLOAD.parseRequest(request);
-    final Iterator iter = items.iterator();
+    final List<?> items = UPLOAD.parseRequest(request);
+    final Iterator<?> iter = items.iterator();
     while (iter.hasNext()) {
       final FileItem item = (FileItem) iter.next();
       if (item.isFormField()) {
