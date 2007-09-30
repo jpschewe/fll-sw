@@ -321,7 +321,7 @@ public final class UploadTeams {
       values.append("?");
       int numValues = 1;
       
-      final Enumeration paramIter = request.getParameterNames();
+      final Enumeration<?> paramIter = request.getParameterNames();
       while(paramIter.hasMoreElements()) {
         final String parameter = (String)paramIter.nextElement();
         if(null != parameter

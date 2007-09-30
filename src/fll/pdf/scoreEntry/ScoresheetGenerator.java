@@ -77,7 +77,7 @@ public class ScoresheetGenerator {
    *          DOM document containing the challenge info used to generate the
    *          scoresheet.
    */
-  public ScoresheetGenerator(final Map formParms, final Connection connection, final String tournament, final org.w3c.dom.Document document)
+  public ScoresheetGenerator(final Map<?, ?> formParms, final Connection connection, final String tournament, final org.w3c.dom.Document document)
   throws SQLException {
     final int numMatches = Integer.parseInt(((String[])formParms.get("numMatches"))[0]);
     final boolean[] checkedMatches = new boolean[numMatches+1]; // ignore slot index 0

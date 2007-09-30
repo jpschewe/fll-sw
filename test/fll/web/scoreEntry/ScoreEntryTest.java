@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.text.ParseException;
 
+import junit.framework.TestCase;
+
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,7 +26,7 @@ import fll.xml.ChallengeParserTest;
  * @version $Revision$
  * 
  */
-public class ScoreEntryTest {
+public class ScoreEntryTest extends TestCase {
 
   private static final Logger LOG = Logger.getLogger(ScoreEntryTest.class);
 
