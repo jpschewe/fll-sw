@@ -168,7 +168,9 @@
       </right>
      </enumCondition>
      <switch>
-      <!-- 
+      <!--
+       case subtotal < 0
+       bonus = (int)0 
        case subtotal < 105
        bonus = (int)(subtotal / 5) * 3
        case subtotal < 325
@@ -206,6 +208,21 @@
        default
        bonus = 0
       -->
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <less-than-or-equal />
+        <right>
+         <constant value="0" />
+        </right>
+       </condition>
+       <result>
+         <constant value="0"/>
+       </result>
+      </case>
+      
       <case>
        <condition>
         <left>
@@ -479,8 +496,23 @@
        </result>
       </case>
 
+      <case>
+       <condition>
+        <left>
+         <variableRef variable="subtotal" />
+        </left>
+        <equal-to />
+        <right>
+         <constant value="400" />
+        </right>
+       </condition>
+       <result>
+        <constant value="0" />
+       </result>
+      </case>
+
       <default>
-       <constant value="0" />
+       <constant value="9999" /> <!--  error -->
       </default>
 
      </switch>
