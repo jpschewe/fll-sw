@@ -7,22 +7,22 @@
 
  <Performance minimumScore="0" weight="1.0">
 
-  <goal name="roof_solar_panel" title="Roof Solar Panel"
+  <goal name="roof_solar_panel" title="Solar Panel ON Roof"
    multiplier="15" />
   <goal name="personal_vehicle_choice"
-   title="Car at House &amp; Truck on Farm or Base" multiplier="25" />
+   title="Car TO House &amp; Truck TO Farm or Base" multiplier="25" />
 
-  <goal name="hydro_dam" title="Hydro-Dam" multiplier="25" />
+  <goal name="hydro_dam" title="Hydro-Dam TOUCHING banks" multiplier="25" />
 
-  <goal name="flood_house" title="Houses Damaged" multiplier="-10" />
+  <goal name="flood_house" title="Houses TOUCHED by Dam or Flood" multiplier="-10" />
 
-  <goal name="wind_turbines" title="Wind Turbines" multiplier="15"
+  <goal name="wind_turbines" title="Wind Turbines TOUCHING Communities" multiplier="15"
    max="2" />
 
-  <goal name="grid_connection" title="Grid Connection" multiplier="5"
+  <goal name="grid_connection" title="Grid Connection TOUCHING Communities" multiplier="5"
    max="3" />
 
-  <goal name="alt_fuel_community" title="Alternately Fueled Communities"
+  <goal name="alt_fuel_community" title="Communities with Grid AND (Dam or Windmill)"
    multiplier="5" max="3" />
   <restriction lowerBound="0" upperBound="3"
    message="You cannot have more communities with alternate fuel than communities connected to the grid.">
@@ -36,27 +36,27 @@
   <goal name="solar_power_satellite_bonus" title="First to Satellite"
    multiplier="5" />
 
-  <goal name="wave_turbine" title="Wave Turbine" multiplier="25" />
+  <goal name="wave_turbine" title="Wave Turbine TO Ocean" multiplier="25" />
 
-  <goal name="coal_mining" title="Coal Mining" multiplier="10" />
+  <goal name="coal_mining" title="Coal Car Retrieved to Base" multiplier="10" />
 
-  <goal name="oil_drilling" title="Oil Drilling" multiplier="10" />
+  <goal name="oil_drilling" title="Oil Barrels OFF platform" multiplier="10" />
 
-  <goal name="oil_at_farm" title="Oil at Farm" multiplier="0" />
-  <goal name="corn_harvest" title="Corn At Base" multiplier="25" />
+  <goal name="oil_at_farm" title="Oil Barrel TO Farm" multiplier="0" />
+  <goal name="corn_harvest" title="Corn TO Base" multiplier="25" />
   <restriction lowerBound="-11" upperBound="11"
    message="Oil must be at the farm for the corn to count">
    <term coefficient="-12" goal="corn_harvest" scoreType="raw" />
    <term coefficient="1" goal="oil_at_farm" scoreType="raw" />
   </restriction>
 
-  <goal name="uranium_mining" title="Uranium Out Of Farm"
+  <goal name="uranium_mining" title="Uranium OUT Of Farm"
    multiplier="15" />
 
-  <goal name="tree_planting" title="Tree Planting" multiplier="10"
+  <goal name="tree_planting" title="Tree TO North of river Planting" multiplier="10"
    max="4" />
 
-  <goal name="power_plant_supply_tree" title="Power Plant Supply (Tree)"
+  <goal name="power_plant_supply_tree" title="Trees TO Power Plant"
    multiplier="10" max="2" />
   <restriction lowerBound="0" upperBound="4"
    message="There must be one tree planted for each used as fuel">
@@ -72,17 +72,17 @@
   </restriction>
 
   <goal name="power_plant_supply_coal"
-   title="Power Plant Supply (Black Coal) - at least 10 pieces"
+   title="Black Coal TO Power Plant- at least 10 pieces"
    multiplier="10" />
 
   <goal name="power_plant_supply_uranium"
-   title="Power Plant Supply (Green Uranium)" multiplier="10" max="2" />
+   title="Green Uranium TO Power Plant" multiplier="10" max="2" />
 
   <goal name="power_plant_supply_oil"
-   title="Power Plant Supply (White Oil Barrels)" multiplier="5"
+   title="White Oil Barrels TO Power Plant" multiplier="5"
    max="7" />
 
-  <goal name="red_fuel_at_power_plant" title="Red Fuel at Power Plant"
+  <goal name="red_fuel_at_power_plant" title="Red Fuel IN Power Plant area"
    multiplier="0" />
   <restriction lowerBound="0" upperBound="2"
    message="You cannot score any power plant supply if there is red fuel at the power plant (tree)">
@@ -111,7 +111,7 @@
   </restriction>
 
   <goal name="oil_barrels_base"
-   title="Oil Barrels in parking lot or at base" multiplier="10"
+   title="Oil Barrels IN parking lot or base" multiplier="10"
    max="11" />
 
   <restriction lowerBound="0" upperBound="11"
@@ -122,7 +122,7 @@
   </restriction>
 
 
-  <goal name="pollution_deduction" title="Pollution Deduction"
+  <goal name="pollution_deduction" title="Oil Barrels TOUCHING Water or House Property"
    multiplier="-40" />
 
   <!-- want to know the type of robot, but can't change the score, so set the multiplier to 0 -->
@@ -527,9 +527,47 @@
 
   <tiebreaker>
    <!-- FIX need real tiebreaker -->
-   <test winner="high">
-    <term goal="robot_type" scoreType="computed"/>
+   <test winner='high'>
+     <term goal='solar_power_satellite_bonus' scoreType='computed'/>
    </test>
+   <test winner='high'>
+     <term goal='solar_power_satellite' scoreType='computed'/>
+   </test>
+   <test winner='low'>
+    <term goal='pollution_deduction' scoreType='computed'/>
+    </test>
+    <test winner='high'>
+    <term goal='roof_solar_panel' scoreType='computed'/>
+    </test>
+    <test winner='high'>
+    <term goal='personal_vehicle_choice' scoreType='computed'/>
+    </test>
+    <test winner='high'>
+    <term goal='tree_planting' scoreType='computed'/>
+    </test>
+    <test winner='high'>
+    <term goal='wind_turbines' scoreType='computed'/>
+    </test>
+    <test winner='high'>
+    <term goal='corn_harvest' scoreType='computed'/>
+    </test>
+    <test winner='high'>
+    <term goal='uranium_mining' scoreType='computed'/>
+    </test>
+    <test winner='high'>
+    <term goal='wave_turbine' scoreType='computed'/>
+    </test>
+    <test winner='high'>
+    <term goal='grid_connection' scoreType='computed'/>
+    </test>
+    <test winner='high'>
+    <term goal='hydro_dam' scoreType='computed'/>
+    </test>
+    <test winner='high'>
+    <term goal='oil_barrels_base' scoreType='computed'/>
+    </test>
+    
+
   </tiebreaker>
 
  </Performance>
@@ -553,7 +591,7 @@
  </subjectiveCategory>
 
 
- <subjectiveCategory name="robustdesign" title="Robust Design"
+ <subjectiveCategory name="robustdesign" title="Design"
   weight="0.5">
   <goal initialValue="0" max="20" min="0" multiplier="1" name="strategy"
    title="Strategy, Process, Problem Solving">
@@ -573,7 +611,7 @@
  </subjectiveCategory>
 
 
- <subjectiveCategory name="programming" title="Robust Programming"
+ <subjectiveCategory name="programming" title="Programming"
   weight="0.5">
   <goal initialValue="0" max="20" min="0" multiplier="1"
    name="useoflanguage" title="Use of Language">
