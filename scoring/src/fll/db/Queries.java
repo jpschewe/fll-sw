@@ -248,7 +248,7 @@ public final class Queries {
     if(irunNumber > numSeedingRounds) {
       final int playoffRun = irunNumber - numSeedingRounds;
       final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun);
-      final String division = getDivisionOfTeam(connection, Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumber).intValue());
+      final String division = getEventDivision(connection, Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumber).intValue());
       if(ptLine > 0) {
         final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1),
             playoffRun);
@@ -420,7 +420,7 @@ public final class Queries {
     if(irunNumber > numSeedingRounds) {
       final int playoffRun = irunNumber - numSeedingRounds;
       final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun);
-      final String division = getDivisionOfTeam(connection, Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumber).intValue());
+      final String division = getEventDivision(connection, Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumber).intValue());
       if(ptLine > 0) {
         final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1),
             playoffRun);
@@ -592,7 +592,7 @@ public final class Queries {
     if(irunNumber > numSeedingRounds) {
       final int playoffRun = irunNumber - numSeedingRounds;
       final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun);
-      final String division = getDivisionOfTeam(connection, Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumber).intValue());
+      final String division = getEventDivision(connection, Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumber).intValue());
       if(ptLine > 0) {
         final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1),
             playoffRun);
