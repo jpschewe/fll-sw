@@ -154,7 +154,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
           if(XMLUtils.isComputedGoal(goalDescription)) {
             return getTeamScore(row).getComputedScore(goalName);
           } else if(!scoreEle.hasAttribute(goalName)) {
-            return "";
+            return null;
           } else if(XMLUtils.isEnumeratedGoal(goalDescription)) {
             return getTeamScore(row).getEnumRawScore(goalName);
           } else {
