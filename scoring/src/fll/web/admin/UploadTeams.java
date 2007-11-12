@@ -340,7 +340,7 @@ public final class UploadTeams {
       //clean out Teams table first
       stmt = connection.createStatement();
       stmt.executeUpdate("DELETE FROM Teams");
-
+      
 
       // now copy the data over converting the team number to an integer
       final String selectSQL = "SELECT " + dataColumns.toString() + " FROM FilteredTeams";
@@ -351,6 +351,9 @@ public final class UploadTeams {
       while(rs.next()) {
         // convert TeamNumber to an integer
         final String teamNumStr = rs.getString(1);
+        if(LOG.isDebugEnabled()) {
+          LOG.debug("Inserting " + teamNumStr + " into Teams");
+        }
         try {
           final int teamNum = Integer.parseInt(teamNumStr);
           prep.setInt(1, teamNum);
@@ -363,7 +366,12 @@ public final class UploadTeams {
         for(int i=1; i<numValues; i++) { //skip TeamNumber
           prep.setString(i+1, rs.getString(i+1));
         }
-        prep.executeUpdate();
+        try {
+          prep.executeUpdate();
+        } catch(final SQLException sqle) {
+          LOG.error("Got error inserting teamNumber " + teamNumStr + " into Teams table");
+          throw sqle;
+        }
       }
       
       //put all teams in the DUMMY tournament by default and make the event division the same as the team division
@@ -386,6 +394,7 @@ public final class UploadTeams {
    *   <li>Replace ' ' with '_'</li>
    *   <li>Replace '/' with '_'</li>
    *   <li>Replace '-' with '_'</li>
+   *   <li>Replace ',' with '_'</li>
    *   <li>Replace null or empty string with EMPTYHEADER1 where number
    *   increments each time found</li>
    *   <li>Replace '?' with '_'</li>
@@ -407,6 +416,6 @@ public final class UploadTeams {
   }
 
   private static int _emptyHeaderCount = 0;
-  private static final Pattern ILLEGAL_CHAR_PATTERN = Pattern.compile("[ #?/-]");
+  private static final Pattern ILLEGAL_CHAR_PATTERN = Pattern.compile("[ #?/\\-,]");
   
 }
