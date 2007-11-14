@@ -44,7 +44,7 @@ Utilities.closeStatement(stmt);
       needs to be executed before any reports can be generated.  You will be
       returned to this page if there are no errors summarizing scores.</li>
 
-      <li><a href="finalComputedScores.jsp">Final Computed Scores</a>
+      <li>Final Computed Scores
           <a href='<c:url value="/GetFile">
                      <c:param name="filename" value="finalComputedScores.pdf"/>
                    </c:url>' target='_new'>PDF version</a>
