@@ -47,7 +47,7 @@ if(null == errorMessage || "".equals(errorMessage)) {
         <tr>
           <th>Database column</th>
           <th>Datatype - size</th>
-          <th>You column</th>
+          <th>Column from datafile</th>
         </tr>
           
         <tr bgcolor='yellow'>
