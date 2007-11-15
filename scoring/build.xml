@@ -310,6 +310,10 @@
 		<move todir="${dir.build}/tomcat">
 			<fileset dir="${dir.build}/${tomcat}" />
 		</move>
+		
+	    <!-- clean out tomcat work directory -->
+		<delete dir="${dir.build}/tomcat/work" />
+					
 		<chmod perm="+x">
 			<fileset dir="${dir.build}/tomcat/bin">
 				<include name="*.sh" />
