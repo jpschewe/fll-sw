@@ -35,6 +35,12 @@
 
   <goal name="solar_power_satellite_bonus" title="First to Satellite"
    multiplier="5" />
+  <restriction lowerBound="0" upperBound="1"
+   message="You cannot have the satellite bonus without having the satellite score">
+   <term coefficient="1" goal="solar_power_satellite" scoreType="raw" />
+   <term coefficient="-1" goal="solar_power_satellite_bonus" scoreType="raw" />
+  </restriction>   
+    
 
   <goal name="wave_turbine" title="Wave Turbine TO Ocean" multiplier="25" />
 
@@ -42,12 +48,10 @@
 
   <goal name="oil_drilling" title="Oil Barrels OFF platform" multiplier="10" />
 
-  <goal name="oil_at_farm" title="Oil Barrel TO Farm" multiplier="0" />
-  <goal name="corn_harvest" title="Corn TO Base" multiplier="25" />
+  <goal name="corn_harvest" title="Corn TO Base AND Oil TO Farm" multiplier="25" />
   <restriction lowerBound="-11" upperBound="11"
    message="Oil must be at the farm for the corn to count">
    <term coefficient="-12" goal="corn_harvest" scoreType="raw" />
-   <term coefficient="1" goal="oil_at_farm" scoreType="raw" />
   </restriction>
 
   <goal name="uranium_mining" title="Uranium OUT Of Farm"
@@ -56,7 +60,7 @@
   <goal name="tree_planting" title="Tree TO North of river Planting" multiplier="10"
    max="4" />
 
-  <goal name="power_plant_supply_tree" title="Trees TO Power Plant"
+  <goal name="power_plant_supply_tree" title="Trees TO Power Plant (Limit 1 per planted tree &amp; No Red Fuel)"
    multiplier="10" max="2" />
   <restriction lowerBound="0" upperBound="4"
    message="There must be one tree planted for each used as fuel">
@@ -76,39 +80,11 @@
    multiplier="10" />
 
   <goal name="power_plant_supply_uranium"
-   title="Green Uranium TO Power Plant" multiplier="10" max="2" />
+   title="Green Uranium TO Power Plant &amp; No Red Fuel" multiplier="10" max="2" />
 
   <goal name="power_plant_supply_oil"
-   title="White Oil Barrels TO Power Plant" multiplier="5"
+   title="White Oil Barrels TO Power Plant &amp; No Red Fuel" multiplier="5"
    max="7" />
-
-  <goal name="red_fuel_at_power_plant" title="Red Fuel IN Power Plant area"
-   multiplier="0" />
-  <restriction lowerBound="0" upperBound="2"
-   message="You cannot score any power plant supply if there is red fuel at the power plant (tree)">
-   <term coefficient="2" goal="red_fuel_at_power_plant" scoreType="raw" />
-   <term coefficient="1" goal="power_plant_supply_tree" scoreType="raw" />
-  </restriction>
-
-  <restriction lowerBound="0" upperBound="1"
-   message="You cannot score any power plant supply if there is red fuel at the power plant (coal)">
-   <term coefficient="1" goal="red_fuel_at_power_plant" scoreType="raw" />
-   <term coefficient="1" goal="power_plant_supply_coal" scoreType="raw" />
-  </restriction>
-
-
-  <restriction lowerBound="0" upperBound="2"
-   message="You cannot score any power plant supply if there is red fuel at the power plant (uranium)">
-   <term coefficient="2" goal="red_fuel_at_power_plant" scoreType="raw" />
-   <term coefficient="1" goal="power_plant_supply_uranium"
-    scoreType="raw" />
-  </restriction>
-
-  <restriction lowerBound="0" upperBound="7"
-   message="You cannot score any power plant supply if there is red fuel at the power plant (oil)">
-   <term coefficient="7" goal="red_fuel_at_power_plant" scoreType="raw" />
-   <term coefficient="1" goal="power_plant_supply_oil" scoreType="raw" />
-  </restriction>
 
   <goal name="oil_barrels_base"
    title="Oil Barrels IN parking lot or base" multiplier="10"
@@ -116,7 +92,6 @@
 
   <restriction lowerBound="0" upperBound="11"
    message="There are only 11 oil barrels on the field">
-   <term coefficient="1" goal="oil_at_farm" scoreType="raw" />
    <term coefficient="1" goal="power_plant_supply_oil" scoreType="raw" />
    <term coefficient="1" goal="oil_barrels_base" scoreType="raw" />
   </restriction>
