@@ -49,10 +49,6 @@
   <goal name="oil_drilling" title="Oil Barrels OFF platform" multiplier="10" />
 
   <goal name="corn_harvest" title="Corn TO Base AND Oil TO Farm" multiplier="25" />
-  <restriction lowerBound="-11" upperBound="11"
-   message="Oil must be at the farm for the corn to count">
-   <term coefficient="-12" goal="corn_harvest" scoreType="raw" />
-  </restriction>
 
   <goal name="uranium_mining" title="Uranium OUT Of Farm"
    multiplier="15" />
@@ -76,7 +72,7 @@
   </restriction>
 
   <goal name="power_plant_supply_coal"
-   title="Black Coal TO Power Plant- at least 10 pieces"
+   title="Black Coal TO Power Plant - at least 10 pieces &amp; No Red Fuel"
    multiplier="10" />
 
   <goal name="power_plant_supply_uranium"
