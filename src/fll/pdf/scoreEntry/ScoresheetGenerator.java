@@ -209,7 +209,7 @@ public class ScoresheetGenerator {
   private static final Font COURIER_10PT_NORMAL = FontFactory.getFont(
                                                                     FontFactory.COURIER, 10, Font.NORMAL);
 
-  public void writeFile(final Connection connection, final OutputStream out) throws DocumentException,SQLException {
+  public void writeFile(final Connection connection, final OutputStream out) throws DocumentException, SQLException {
 
     final int nup = Queries.getScoresheetLayoutNUp(connection);
     boolean orientationIsPortrait;
@@ -414,9 +414,9 @@ public class ScoresheetGenerator {
     }
 
     // Add a blank cells to complete the table of the last page
-    int num_blanks = (nup - (m_numTeams % nup)) % nup;
-    if(num_blanks > 0) {
-      for (int j = 0; j < num_blanks; j++) {
+    int numBlanks = (nup - (m_numTeams % nup)) % nup;
+    if(numBlanks > 0) {
+      for (int j = 0; j < numBlanks; j++) {
         PdfPCell blank = new PdfPCell();
         blank.setBorder(0);
         wholePage.addCell(blank);
@@ -445,7 +445,7 @@ public class ScoresheetGenerator {
     
     m_goalLabel = new PdfPCell[goals.getLength()+computedGoals.getLength()];
     m_goalValue = new PdfPCell[goals.getLength()+computedGoals.getLength()];
-    int real_i = 0;
+    int reali = 0;
     for (int i = 0; i < children.getLength(); i++) {
       if(children.item(i).getNodeType() == Node.ELEMENT_NODE) {
         final org.w3c.dom.Element element = (org.w3c.dom.Element) children.item(i);
@@ -456,16 +456,16 @@ public class ScoresheetGenerator {
           final String title = element.getAttribute("title");
           Paragraph p = new Paragraph(title, ARIAL_10PT_NORMAL);
           p.setAlignment(Element.ALIGN_RIGHT);
-          m_goalLabel[real_i] = new PdfPCell();
-          m_goalLabel[real_i].setBorder(0);
-          m_goalLabel[real_i].setPaddingRight(9);
-          m_goalLabel[real_i].addElement(p);
-          m_goalLabel[real_i].setVerticalAlignment(Element.ALIGN_TOP);
+          m_goalLabel[reali] = new PdfPCell();
+          m_goalLabel[reali].setBorder(0);
+          m_goalLabel[reali].setPaddingRight(9);
+          m_goalLabel[reali].addElement(p);
+          m_goalLabel[reali].setVerticalAlignment(Element.ALIGN_TOP);
           // If element is a computed goal, just put a blank on the right.
           if(element.getNodeName().equals("computedGoal")) {
             Paragraph q = new Paragraph(SHORT_BLANK, COURIER_10PT_NORMAL);
-            m_goalValue[real_i] = new PdfPCell();
-            m_goalValue[real_i].addElement(q);
+            m_goalValue[reali] = new PdfPCell();
+            m_goalValue[reali].addElement(q);
           } else {
             try {
               final int min = Utilities.NUMBER_FORMAT_INSTANCE.parse(
@@ -488,14 +488,14 @@ public class ScoresheetGenerator {
                 }
                 Chunk c = new Chunk("", COURIER_10PT_NORMAL);
                 c.append(choices.toUpperCase());
-                m_goalValue[real_i] = new PdfPCell();
-                m_goalValue[real_i].addElement(c);
+                m_goalValue[reali] = new PdfPCell();
+                m_goalValue[reali].addElement(c);
                 
               } else {
                 if (0 == min && 1 == max) {
                   Paragraph q = new Paragraph("YES / NO", COURIER_10PT_NORMAL);
-                  m_goalValue[real_i] = new PdfPCell();
-                  m_goalValue[real_i].addElement(q);
+                  m_goalValue[reali] = new PdfPCell();
+                  m_goalValue[reali].addElement(q);
                   
                 } else {
                   final String range = "(" + min + " - " + max + ")";
@@ -507,9 +507,9 @@ public class ScoresheetGenerator {
                   t.addCell(new PdfPCell(r));
                   Phrase q = new Phrase(range, ARIAL_8PT_NORMAL);
                   t.addCell(new PdfPCell(q));
-                  m_goalValue[real_i] = new PdfPCell();
-                  m_goalValue[real_i].setPaddingTop(9);
-                  m_goalValue[real_i].addElement(t);
+                  m_goalValue[reali] = new PdfPCell();
+                  m_goalValue[reali].setPaddingTop(9);
+                  m_goalValue[reali].addElement(t);
                 }
               }
             } catch (final ParseException pe) {
@@ -517,9 +517,9 @@ public class ScoresheetGenerator {
                   "FATAL: min/max not parsable for goal: " + name);
             }
           }
-          m_goalValue[real_i].setBorder(0);
-          m_goalValue[real_i].setVerticalAlignment(Element.ALIGN_MIDDLE);
-          real_i++;
+          m_goalValue[reali].setBorder(0);
+          m_goalValue[reali].setVerticalAlignment(Element.ALIGN_MIDDLE);
+          reali++;
         }
       }
     }

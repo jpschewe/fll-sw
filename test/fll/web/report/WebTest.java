@@ -39,7 +39,6 @@ public class WebTest extends TestCase {
     throws SAXException, MalformedURLException, IOException {
     final String[] pages = new String[] {
       "index.jsp",
-      //"finalComputedScores.jsp",
       //"categorizedScores.jsp",
       //"scoreGroupScores.jsp",
       
