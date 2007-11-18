@@ -345,9 +345,6 @@ public class FullTournamentTest extends TestCase {
       Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully summarized scores"));
 
       // generate reports
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/finalComputedScores.jsp");
-      response = conversation.getResponse(request);
-      Assert.assertTrue(response.isHTML());
       request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/categorizedScores.jsp");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
@@ -360,8 +357,6 @@ public class FullTournamentTest extends TestCase {
       request.setParameter("filename", "finalComputedScores.pdf");
       response = conversation.getResponse(request);
       Assert.assertEquals("application/pdf", response.getContentType());
-
-      // TODO should ask for the HTML reports too
 
       // check ranking
       // final Connection connection = TestUtils.createDBConnection();
