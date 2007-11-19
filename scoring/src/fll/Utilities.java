@@ -212,6 +212,16 @@ public final class Utilities {
   }
 
   /**
+   * Calls createDBConnection with fll as username and password.
+   * 
+   * @param database the database to use
+   * @see #createDBConnection(String, String)
+   */
+  public static Connection createDBConnection(final String database) throws RuntimeException {
+    return createDBConnection("fll", "fll", database);
+  }
+  
+  /**
    * Calls createDBConnection with fll as the database
    * 
    * @see #createDBConnection(String, String, String)

@@ -5,7 +5,6 @@
  */
 package fll.db;
 
-import java.io.File;
 
 import java.sql.SQLException;
 
@@ -15,6 +14,7 @@ import org.apache.log4j.Logger;
 
 import org.w3c.dom.Document;
 
+import fll.TestUtils;
 import fll.xml.ChallengeParser;
 
 import java.io.InputStreamReader;
@@ -47,28 +47,6 @@ public class GenerateDBTest extends TestCase {
 
     GenerateDB.generateDB(document, database, true);
     
-    cleanupDB(database);
-  }
-
-  /**
-   * Remove the files associated with the database.  This may mark them to be
-   * deleted on exit of the JVM if they cannot be deleted immediately.
-   */
-  private static void cleanupDB(final String database) {
-    final String[] extensions = new String[] {
-      "properties",
-      "script",
-      "data",
-      "backup",
-      "log",
-    };
-    for(int i=0; i<extensions.length; i++) {
-      final File file = new File(database + "." + extensions[i]);
-      if(file.exists()) {
-        if(!file.delete()) {
-          file.deleteOnExit();
-        }
-      }
-    }
+    TestUtils.cleanupDB(database);
   }
 }

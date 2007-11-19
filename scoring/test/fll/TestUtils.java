@@ -5,6 +5,7 @@
  */
 package fll;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -112,6 +113,28 @@ public final class TestUtils {
     }
     
     return connection;
+  }
+
+  /**
+   * Remove the files associated with the database.  This may mark them to be
+   * deleted on exit of the JVM if they cannot be deleted immediately.
+   */
+  public static void cleanupDB(final String database) {
+    final String[] extensions = new String[] {
+      "properties",
+      "script",
+      "data",
+      "backup",
+      "log",
+    };
+    for(int i=0; i<extensions.length; i++) {
+      final File file = new File(database + "." + extensions[i]);
+      if(file.exists()) {
+        if(!file.delete()) {
+          file.deleteOnExit();
+        }
+      }
+    }
   }
 
   

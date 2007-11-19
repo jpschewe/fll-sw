@@ -96,7 +96,7 @@ public final class GenerateDB {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      connection = Utilities.createDBConnection("fll", "fll", database);
+      connection = Utilities.createDBConnection(database);
       
       stmt = connection.createStatement();
 
