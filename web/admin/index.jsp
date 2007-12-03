@@ -72,6 +72,8 @@
 (Administration)</h1>
 
 <p><%=message.toString()%></p>
+<%-- clear out the message, so that we don't see it again --%>
+<c:remove var="message" />
 
 <p>Before tournament day:</p>
 <ol>

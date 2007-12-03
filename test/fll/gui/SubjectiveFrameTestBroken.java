@@ -6,14 +6,9 @@
 package fll.gui;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 import org.uispec4j.TabGroup;
@@ -24,15 +19,7 @@ import org.uispec4j.UISpecTestCase;
 import org.uispec4j.Window;
 import org.uispec4j.interception.FileChooserHandler;
 import org.uispec4j.interception.WindowInterceptor;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import fll.TestUtils;
-import fll.Utilities;
-import fll.db.GenerateDB;
-import fll.db.GenerateDBTest;
-import fll.web.GetFile;
-import fll.xml.ChallengeParser;
 
 /**
  * @author jpschewe
@@ -46,8 +33,6 @@ public class SubjectiveFrameTestBroken extends UISpecTestCase {
 //    FIX need to figure out how to fix this 
 //    UISpec4J.init();
   }
-
-  private static final Logger LOG = Logger.getLogger(SubjectiveFrameTestBroken.class);
 
   private Window _mainWindow;
 

@@ -14,13 +14,11 @@ import java.sql.Statement;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import au.com.bytecode.opencsv.CSVWriter;
-
 import fll.Utilities;
 import fll.xml.XMLWriter;
 
@@ -30,8 +28,6 @@ import fll.xml.XMLWriter;
  *
  */
 public final class DumpDB {
-
-  private static final Logger LOG = Logger.getLogger(DumpDB.class);
 
   private DumpDB() {
     // no instances

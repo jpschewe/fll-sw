@@ -33,7 +33,6 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import javax.swing.DefaultCellEditor;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -491,26 +490,5 @@ public final class SubjectiveFrame extends JFrame {
   private final File _file;
   private final Document _challengeDocument;
   private final Document _scoreDocument;
-  
-  // -------- Inner classes only below here -----------
-  /**
-   * List model used for the comboboxes that is backed by an XML document.
-   */
-  private static final class SubjectiveListModel extends DefaultComboBoxModel {
-    public SubjectiveListModel(final Document document) {
-      _subjectiveCategories = document.getDocumentElement().getElementsByTagName("subjectiveCategory");
-    }
-
-    public Object getElementAt(final int index) {
-      return _subjectiveCategories.item(index);
-    }
-
-    public int getSize() {
-      return _subjectiveCategories.getLength();
-    }
-
-    private final NodeList _subjectiveCategories;
-    
-  }
   
 }

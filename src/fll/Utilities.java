@@ -134,7 +134,9 @@ public final class Utilities {
   /**
    * Check to see if the database files can be written to. Will check each of
    * the files that HSQLDB uses for the database and ensure they're all readable
-   * and writable. If there are any problems an exception will be thrown.
+   * and writable. If there are any problems a {@link RuntimeException} will be thrown.
+   * 
+   * @throws RuntimeException on any error
    */
   public static void testHSQLDB(final String baseFilename) {
     final File baseFile = new File(baseFilename);

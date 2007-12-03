@@ -9,7 +9,6 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -24,8 +23,6 @@ import fll.web.playoff.TeamScore;
  * 
  */
 public class ScoreUtils {
-
-  private static final Logger LOG = Logger.getLogger(ScoreUtils.class);
 
   private ScoreUtils() {
     // no instances

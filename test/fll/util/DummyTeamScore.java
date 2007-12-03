@@ -8,7 +8,6 @@ package fll.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
 import fll.web.playoff.TeamScore;
@@ -21,8 +20,6 @@ import fll.web.playoff.TeamScore;
  *
  */
 public class DummyTeamScore extends TeamScore {
-
-  private static final Logger LOG = Logger.getLogger(DummyTeamScore.class);
 
   public DummyTeamScore(final Element categoryElement, final int teamNumber, final int runNumber, final Map<String, Double> simpleGoals, final Map<String, String> enumGoals) {
     super(categoryElement, teamNumber, runNumber);

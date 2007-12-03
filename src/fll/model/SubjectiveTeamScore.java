@@ -7,7 +7,6 @@ package fll.model;
 
 import java.text.ParseException;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
 import fll.Utilities;
@@ -22,8 +21,6 @@ import fll.web.playoff.TeamScore;
  * 
  */
 /* package */class SubjectiveTeamScore extends TeamScore {
-
-  private static final Logger LOG = Logger.getLogger(SubjectiveTeamScore.class);
 
   /**
    * @param categoryDescription

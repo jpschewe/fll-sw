@@ -9,8 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
-
 import fll.Utilities;
 
 /**
@@ -21,8 +19,6 @@ import fll.Utilities;
  * 
  */
 public class CheckDifferences extends HttpServlet {
-
-  private static final Logger LOG = Logger.getLogger(CheckDifferences.class);
 
   /**
    * 

@@ -11,7 +11,6 @@ import java.io.InputStreamReader;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,8 +25,6 @@ import org.w3c.dom.NodeList;
  * 
  */
 public class ChallengeParserTest extends TestCase {
-
-  private static final Logger LOG = Logger.getLogger(ChallengeParserTest.class);
 
   /**
    * Load illegal-restriction.xml and ensure an exception is thrown on the

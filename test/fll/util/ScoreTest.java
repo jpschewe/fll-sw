@@ -13,7 +13,6 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -29,8 +28,6 @@ import fll.xml.ChallengeParser;
  * 
  */
 public class ScoreTest extends TestCase {
-
-  private static final Logger LOG = Logger.getLogger(ScoreTest.class);
 
   /**
    * Test computed goals. Loads data/test-computed-goal.xml and uses a dummy

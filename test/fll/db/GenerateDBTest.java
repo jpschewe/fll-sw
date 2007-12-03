@@ -6,21 +6,18 @@
 package fll.db;
 
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
-
-import org.apache.log4j.Logger;
 
 import org.w3c.dom.Document;
 
 import fll.TestUtils;
 import fll.xml.ChallengeParser;
-
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.io.InputStream;
-import junit.framework.Assert;
 
 /**
  * Test generating various databases.
@@ -29,8 +26,6 @@ import junit.framework.Assert;
  */
 public class GenerateDBTest extends TestCase {
   
-  private static final Logger LOG = Logger.getLogger(GenerateDBTest.class);
-
   /**
    * Test creating a new database from scratch and creating over an existing
    * database.
