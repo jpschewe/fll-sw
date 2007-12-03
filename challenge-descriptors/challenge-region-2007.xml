@@ -9,8 +9,9 @@
 
   <goal name="roof_solar_panel" title="Solar Panel ON Roof"
    multiplier="15" />
+    
   <goal name="personal_vehicle_choice"
-   title="Car TO House &amp; Truck TO Farm or Base" multiplier="25" />
+   title="Car TO House &amp; Truck TO Farm or Parking Lot" multiplier="25" />
 
   <goal name="hydro_dam" title="Hydro-Dam TOUCHING banks" multiplier="25" />
 
@@ -83,7 +84,7 @@
    max="7" />
 
   <goal name="oil_barrels_base"
-   title="Oil Barrels IN parking lot or base" multiplier="10"
+   title="Oil Barrels IN base" multiplier="10"
    max="11" />
 
   <restriction lowerBound="0" upperBound="11"
