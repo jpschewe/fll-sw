@@ -36,7 +36,6 @@ import fll.Utilities;
  *
  */
 public class ScoresheetGenerator {
-  private ScoresheetGenerator() { }
   private static final String LONG_BLANK = "_________________________";
   private static final String SHORT_BLANK = "___________";
   

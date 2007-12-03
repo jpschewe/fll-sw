@@ -15,14 +15,11 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.log4j.Logger;
 
 /**
  * Process uploads from JSP pages.
  */
 public class UploadProcessor {
-
-  private static final Logger LOG = Logger.getLogger(UploadProcessor.class);
 
   /**
    * Processes <code>request</code> as a file upload and puts the results back

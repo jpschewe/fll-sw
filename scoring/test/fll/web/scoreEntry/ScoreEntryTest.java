@@ -13,7 +13,6 @@ import java.text.ParseException;
 
 import junit.framework.TestCase;
 
-import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -27,8 +26,6 @@ import fll.xml.ChallengeParserTest;
  * 
  */
 public class ScoreEntryTest extends TestCase {
-
-  private static final Logger LOG = Logger.getLogger(ScoreEntryTest.class);
 
   /**
    * Test method for

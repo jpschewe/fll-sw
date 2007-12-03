@@ -6,10 +6,7 @@
 package fll.web;
 
 import java.io.IOException;
-
 import java.net.ServerSocket;
-
-import org.apache.log4j.Logger;
 
 /**
  * Wait for tomcat to shut down.
@@ -17,8 +14,6 @@ import org.apache.log4j.Logger;
  * @version $Revision$
  */
 public final class WaitForTomcatStop {
-  
-  private static final Logger LOG = Logger.getLogger(WaitForTomcatStop.class);
   
   private WaitForTomcatStop() {
     // no instances

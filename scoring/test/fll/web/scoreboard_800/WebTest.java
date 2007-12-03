@@ -5,23 +5,20 @@
  */
 package fll.web.scoreboard_800;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+
+import junit.framework.Assert;
+import junit.framework.TestCase;
+
+import org.xml.sax.SAXException;
+
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 
 import fll.TestUtils;
-
-import java.io.IOException;
-
-import java.net.MalformedURLException;
-
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
-import org.apache.log4j.Logger;
-
-import org.xml.sax.SAXException;
 
 /**
  * Basic tests.
@@ -30,8 +27,6 @@ import org.xml.sax.SAXException;
  */
 public class WebTest extends TestCase {
   
-  private static final Logger LOG = Logger.getLogger(WebTest.class);
-
   /**
    * Basic load of the pages.
    */

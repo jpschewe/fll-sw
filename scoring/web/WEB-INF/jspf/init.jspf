@@ -14,10 +14,12 @@
 <%-- TODO working on moving these to session variables --%>
 <%-- initialize some application variables --%>
 
+<!--c:catch var="dbexception"-->
 <c:if test="${empty database}">
   <%
     Utilities.testHSQLDB(config.getServletContext().getRealPath("/WEB-INF/flldb"));
   %>
+  
   <!-- HSQL -->
   <c:set var="database" scope="application">
     <%= config.getServletContext().getRealPath("/WEB-INF/flldb") %>
@@ -62,7 +64,20 @@
   }
 }
 %>
-
+<!--/c:catch-->
+<%--
+<c:if test="${not empty dbexception}">
+  <c:set scope="session" var="message">
+    <p class='error'>
+    The database does not exist yet or there was an error. Please create the database.<br/>
+    Error: ${dbexception.message}<br/>
+    Full exception trace:<br/>
+    <%((Throwable)session.getAttribute("dbexception")).printStackTrace(new java.io.PrintWriter(out));%>
+    </p>
+  </c:set>
+  <c:redirect url="/setup" />
+</c:if>
+--%>
 
 <%-- keep browser from caching any content --%>
 <%

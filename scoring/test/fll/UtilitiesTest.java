@@ -18,7 +18,6 @@ import java.util.Arrays;
 
 import junit.framework.JUnit4TestAdapter;
 
-import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,8 +32,6 @@ import au.com.bytecode.opencsv.CSVWriter;
  */
 public class UtilitiesTest {
 
-  private static final Logger LOG = Logger.getLogger(UtilitiesTest.class);
- 
   /**
    * To allow ant to find the unit tests 
    */

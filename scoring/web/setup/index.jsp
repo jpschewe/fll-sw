@@ -18,7 +18,7 @@
 <body>
 <h1>FLL (Database setup)</h1>
 
-${message}
+<p>${message}</p>
 <%-- clear out the message, so that we don't see it again --%>
 <c:remove var="message" />
 

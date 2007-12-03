@@ -10,7 +10,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
 import fll.Utilities;
@@ -23,8 +22,6 @@ import fll.db.Queries;
  * @version $Revision$
  */
 public class DatabaseTeamScore extends TeamScore {
-
-  private static final Logger LOG = Logger.getLogger(DatabaseTeamScore.class);
 
   /**
    * Create a database team score object for a non-performance score, for use when

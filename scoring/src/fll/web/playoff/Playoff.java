@@ -26,7 +26,6 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import fll.Team;
 import fll.Utilities;
@@ -419,22 +418,7 @@ public final class Playoff {
       Utilities.closeStatement(stmt);
     }
   }
-
-  /**
-   * Find a goal element with the given name in the list of goals.
-   * 
-   * @return the element, null on error
-   */
-  private static Element findGoalDefinition(final NodeList goals, final String name) {
-    for(int i = 0; i < goals.getLength(); i++) {
-      final Element e = (Element)goals.item(i);
-      if(name.equals(e.getAttribute("name"))) {
-        return e;
-      }
-    }
-    return null;
-  }
-
+  
   /**
    * Output the table for the printable brackets to out
    */
