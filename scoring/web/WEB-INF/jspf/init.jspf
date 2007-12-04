@@ -14,11 +14,19 @@
 <%-- TODO working on moving these to session variables --%>
 <%-- initialize some application variables --%>
 
-<!--c:catch var="dbexception"-->
 <c:if test="${empty database}">
   <%
-    Utilities.testHSQLDB(config.getServletContext().getRealPath("/WEB-INF/flldb"));
+    pageContext.setAttribute("dbok", Utilities.testHSQLDB(config.getServletContext().getRealPath("/WEB-INF/flldb")));
   %>
+  
+  <c:if test="${not dbok}">
+    <c:set scope="session" var="message">
+      <p class='error'>
+      The database does not exist yet or there is a problem with the database files. Please create the database.<br/>
+      </p>
+    </c:set>
+    <c:redirect url="/setup" />
+  </c:if>
   
   <!-- HSQL -->
   <c:set var="database" scope="application">
@@ -50,6 +58,17 @@
     final Connection connection = Utilities.createDBConnection("fll", "fll", database);
     application.setAttribute("connection", connection);
   }
+  pageContext.setAttribute("dbinitialized", Utilities.testDatabaseInitialized((Connection)application.getAttribute("connection")));
+%>
+  <c:if test="${not dbinitialized}">
+    <c:set scope="session" var="message">
+      <p class='error'>
+      The database is not yet initialized. Please create the database.<br/>
+      </p>
+    </c:set>
+    <c:redirect url="/setup" />
+  </c:if>
+<%	    
     
   if(null == application.getAttribute("challengeDocument")) {  
     final Document document = Queries.getChallengeDocument((Connection)application.getAttribute("connection"));
@@ -64,20 +83,6 @@
   }
 }
 %>
-<!--/c:catch-->
-<%--
-<c:if test="${not empty dbexception}">
-  <c:set scope="session" var="message">
-    <p class='error'>
-    The database does not exist yet or there was an error. Please create the database.<br/>
-    Error: ${dbexception.message}<br/>
-    Full exception trace:<br/>
-    <%((Throwable)session.getAttribute("dbexception")).printStackTrace(new java.io.PrintWriter(out));%>
-    </p>
-  </c:set>
-  <c:redirect url="/setup" />
-</c:if>
---%>
 
 <%-- keep browser from caching any content --%>
 <%
