@@ -786,7 +786,7 @@ public final class Queries {
         prep.setString(1, currentTournament);
         prep.setInt(2, getNumSeedingRounds(connection));
       } else {
-        prep = connection.prepareStatement("SELECT Performance.TeamNumber,Count(Performance.TeamNumber) FROM Performance,current_ournament_teams"
+        prep = connection.prepareStatement("SELECT Performance.TeamNumber,Count(Performance.TeamNumber) FROM Performance,current_tournament_teams"
             + " WHERE Performance.TeamNumber = current_tournament_teams.TeamNumber" + " AND current_tournament_teams.event_division = ?"
             + " AND Performance.Tournament = ?" + " GROUP BY Performance.TeamNumber" + " HAVING Count(Performance.TeamNumber) > ?");
         prep.setString(1, division);
@@ -1123,10 +1123,10 @@ public final class Queries {
         while(rs.next()) {
           final int teamNumber = rs.getInt("TeamNumber");
           final double computedTotal = ScoreUtils.computeTotalScore(new DatabaseTeamScore(subjectiveElement, teamNumber, rs));
-          if(Double.NaN != computedTotal) {
-            updatePrep.setDouble(1, computedTotal);
-          } else {
+          if(Double.isNaN(computedTotal)) {
             updatePrep.setNull(1, Types.DOUBLE);
+          } else {
+            updatePrep.setDouble(1, computedTotal);
           }
           updatePrep.setInt(2, teamNumber);
           final String judge = rs.getString("Judge");

@@ -11,7 +11,7 @@
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (An error has occurred)</h1>
 
-    <p><font color="red">An error has occurred!</font>  Error messages:</p>
+    <p><font color="red">An error has occurred!</font><br/>  Error messages:</p>
     <ul>
 <%
 Throwable e = exception;
@@ -25,7 +25,22 @@ while(null != e) {
     </ul>
 
     <p>Full exception trace:</p>
-    <%exception.printStackTrace(new java.io.PrintWriter(out));%>
+    <ul>
+    <%
+    e = exception;
+    while(null != e) {
+      out.println("<li>");
+      out.println(e.getMessage());
+      out.println("<ul>");
+      StackTraceElement[] stack = e.getStackTrace();
+      for(StackTraceElement ele : stack) {
+        out.println("<li>" + ele.toString() + "</li>");      
+      }
+      out.println("</ul></li>");
+      e = e.getCause();
+    }
+    %>
+    </ul>
       
 
 

@@ -348,7 +348,10 @@ public class FullTournamentTest extends TestCase {
       request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/categorizedScores.jsp");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/scoreGroupScores.jsp");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/categoryScoresByJudge.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/categoryScoresByScoreGroup.jsp");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
 
@@ -435,7 +438,7 @@ public class FullTournamentTest extends TestCase {
 
       // download subjective zip
       WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "GetFile");
-      request.setParameter("filename", "subjective.zip");
+      request.setParameter("filename", "subjective-data.zip");
       WebResponse response = conversation.getResponse(request);
       Assert.assertEquals("application/zip", response.getContentType());
       final InputStream zipStream = response.getInputStream();

@@ -17,7 +17,9 @@
     </c:if>
 
     <form name='query' method='post'>
-      <p>Enter query <input type='text' size='60' name='query' value='<c:out value="${param.query}"/>'/></p>
+      <p>Enter query
+      <textarea name='query' rows='5' cols='60'><c:out value="${param.query}"/></textarea>
+      </p>
       <c:if test="${not empty param.query}">
         <sql:query dataSource="${datasource}" var="query_result" scope="page" sql="${param.query}"/>
         <p>Results</p>
@@ -40,7 +42,9 @@
     </form>
         
     <form name='update' method='post'>
-      <p>Enter update <input type='text' size='60' name='update' value='<c:out value="${param.update}"/>'/></p>
+      <p>Enter update
+             <textarea name='update' rows='5' cols='60'><c:out value="${param.update}"/></textarea>
+      </p>
       <c:if test="${not empty param.update}">
         <sql:update dataSource="${datasource}" var="update_result" scope="page" sql="${param.update}"/>
         <p>Modified rows: <c:out value="${update_result}"/></p>

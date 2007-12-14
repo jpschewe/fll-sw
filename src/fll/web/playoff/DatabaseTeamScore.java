@@ -104,9 +104,14 @@ public class DatabaseTeamScore extends TeamScore {
    * @see fll.web.playoff.TeamScore#getRawScore(java.lang.String)
    */
   @Override
-  public double getRawScore(final String goalName) {
+  public Double getRawScore(final String goalName) {
     try {
-      return getResultSet().getDouble(goalName);
+      final double val = getResultSet().getDouble(goalName);
+      if(getResultSet().wasNull()) {
+        return null;
+      } else {
+        return val;
+      }
     } catch(final SQLException sqle) {
       throw new RuntimeException(sqle);
     }

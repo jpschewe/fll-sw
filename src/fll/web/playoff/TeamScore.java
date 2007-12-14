@@ -7,6 +7,7 @@ package fll.web.playoff;
 
 import java.text.ParseException;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -25,6 +26,8 @@ import fll.xml.XMLUtils;
  */
 public abstract class TeamScore {
 
+  private static final Logger LOG = Logger.getLogger(TeamScore.class);
+  
   /**
    * Run number used for team scores that are not performance scores.
    */
@@ -82,9 +85,9 @@ public abstract class TeamScore {
    * 
    * @param goalName
    *          the goal to get the score for
-   * @return the score
+   * @return the score, null if there is no score for the specified name
    */
-  public abstract double getRawScore(String goalName);
+  public abstract Double getRawScore(String goalName);
 
   /**
    * The computed score for a particular goal. This handles both "goal" elements
@@ -92,9 +95,9 @@ public abstract class TeamScore {
    * 
    * @param goalName
    *          the goal to get the score for
-   * @return the score
+   * @return the score, null if there is no score for the specified goal or one it depends upon
    */
-  public final double getComputedScore(final String goalName) {
+  public final Double getComputedScore(final String goalName) {
     assertScoreExists();
     try {
       final Element goalDescription = getGoalDescription(goalName);
@@ -104,8 +107,12 @@ public abstract class TeamScore {
         final double multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalDescription.getAttribute("multiplier")).doubleValue();
         final NodeList values = goalDescription.getElementsByTagName("value");
         if(values.getLength() == 0) {
-          final double score = getRawScore(goalName);
-          return multiplier * score;
+          final Double score = getRawScore(goalName);
+          if(null == score) {
+            return null;
+          } else {
+            return multiplier * score;
+          }
         } else {
           // enumerated
           // find enum value that matches raw score value
@@ -125,8 +132,9 @@ public abstract class TeamScore {
             }
             return score * multiplier;
           } else {
-            throw new RuntimeException("Error, got null as value for enumerated goal: " + goalName + " team: " + getTeamNumber() + " run: "
+            LOG.warn("Error, got null as value for enumerated goal: " + goalName + " team: " + getTeamNumber() + " run: "
                 + getRunNumber() + " category: " + getCategoryDescription().getAttribute("name"));
+            return null;
           }
         }
       }

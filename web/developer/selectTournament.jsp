@@ -47,7 +47,8 @@ pageContext.setAttribute("driverName", Utilities.getDBDriverName());
  <option value="${row[0]}">${row[1]} [ ${row[0]} ]</option>
 </c:forEach>
 </select>
-
+	
+	<submit/>
 </form>
 
 

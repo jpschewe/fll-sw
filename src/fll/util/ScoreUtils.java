@@ -50,20 +50,36 @@ public class ScoreUtils {
     for(int i = 0; i < goals.getLength(); i++) {
       final Element goal = (Element)goals.item(i);
       final String goalName = goal.getAttribute("name");
-      computedTotal += teamScore.getComputedScore(goalName);
+      final Double val = teamScore.getComputedScore(goalName);
+      if(null == val) {
+        return Double.NaN;
+      }
+      computedTotal += val;
     }
 
     // do computed goals
     final NodeList computedGoals = categoryElement.getElementsByTagName("computedGoal");
     for(int i = 0; i < computedGoals.getLength(); ++i) {
       final Element computedGoalEle = (Element)computedGoals.item(i);
-      computedTotal += evalComputedGoal(computedGoalEle, teamScore);
+      final Double val = evalComputedGoal(computedGoalEle, teamScore);
+      if(null == val) {
+        return Double.NaN;
+      }
+      computedTotal += val;
     }
 
     return computedTotal;
   }
 
-  public static double evalComputedGoal(final Element computedGoalEle, final TeamScore teamScore) throws ParseException {
+  /**
+   * Evaluate a computed goal.
+   * 
+   * @param computedGoalEle
+   * @param teamScore
+   * @return the score, null if a score that it depends upon is missing
+   * @throws ParseException
+   */
+  public static Double evalComputedGoal(final Element computedGoalEle, final TeamScore teamScore) throws ParseException {
     final String computedGoalName = computedGoalEle.getAttribute("name");
     final Map<String, Double> variableValues = new HashMap<String, Double>();
 
@@ -72,7 +88,7 @@ public class ScoreUtils {
       final Element childElement = (Element)children.item(childIdx);
       if("variable".equals(childElement.getNodeName())) {
         final String variableName = childElement.getAttribute("name");
-        final double variableValue = evalPoly(childElement, teamScore, variableValues);
+        final Double variableValue = evalPoly(childElement, teamScore, variableValues);
         variableValues.put(variableName, variableValue);
       } else if("switch".equals(childElement.getNodeName())) {
         return evalSwitch(childElement, teamScore, variableValues);
@@ -96,7 +112,7 @@ public class ScoreUtils {
    * @return the value of the switch
    * @throws ParseException
    */
-  private static double evalSwitch(final Element switchElement, final TeamScore teamScore, final Map<String, Double> variableValues)
+  private static Double evalSwitch(final Element switchElement, final TeamScore teamScore, final Map<String, Double> variableValues)
       throws ParseException {
     final NodeList caseElements = switchElement.getChildNodes();
     for(int i = 0; i < caseElements.getLength(); ++i) {
@@ -132,8 +148,13 @@ public class ScoreUtils {
                                       final Element rightEle,
                                       final TeamScore teamScore,
                                       final Map<String, Double> variableValues) throws ParseException {
-    final double leftVal = evalPoly(leftEle, teamScore, variableValues);
-    final double rightVal = evalPoly(rightEle, teamScore, variableValues);
+    final Double leftVal = evalPoly(leftEle, teamScore, variableValues);
+    final Double rightVal = evalPoly(rightEle, teamScore, variableValues);
+    if(null == leftVal || null == rightVal) {
+      // missing score, return false
+      return false;
+    }
+    
     if("less-than".equals(ineqEle.getNodeName())) {
       return leftVal < rightVal;
     } else if("less-than-or-equal".equals(ineqEle.getNodeName())) {
@@ -220,11 +241,11 @@ public class ScoreUtils {
    *          the team score
    * @param variableValues
    *          the values of known variables
-   * @return the value of the polynomial
+   * @return the value of the polynomial, null if a score is missing
    * @throws ParseException
    *           if there is an error parsing the XML values
    */
-  public static double evalPoly(final Element ele, final TeamScore teamScore, final Map<String, Double> variableValues) throws ParseException {
+  public static Double evalPoly(final Element ele, final TeamScore teamScore, final Map<String, Double> variableValues) throws ParseException {
     double value = 0;
     final NodeList children = ele.getChildNodes();
     for(int i = 0; i < children.getLength(); ++i) {
@@ -234,7 +255,12 @@ public class ScoreUtils {
         final double val = Utilities.NUMBER_FORMAT_INSTANCE.parse(valueStr).doubleValue();
         value += val;
       } else if("term".equals(child.getNodeName())) {
-        value += evalTerm(child, teamScore);
+        final Double termVal = evalTerm(child, teamScore);
+        if(null == termVal) {
+          return null;
+        } else {
+          value += termVal;
+        }
       } else if("variableRef".equals(child.getNodeName())) {
         final double coefficient = Utilities.NUMBER_FORMAT_INSTANCE.parse(child.getAttribute("coefficient")).doubleValue();
         final String variable = child.getAttribute("variable");
@@ -242,7 +268,12 @@ public class ScoreUtils {
           throw new RuntimeException("Unknown variable '" + variable + "'" + " known variables: " + variableValues);
         }
         final String floatingPoint = child.getAttribute("floatingPoint");
-        value += applyFloatingPoint(coefficient * variableValues.get(variable), floatingPoint);
+        final Double val = variableValues.get(variable);
+        if(null == val) {
+          return null;
+        } else {
+          value += applyFloatingPoint(coefficient * val, floatingPoint);
+        }
       } else {
         throw new RuntimeException("Expected 'constant', 'term' or 'variableRef', but found '" + child.getNodeName() + "'");
       }
@@ -257,19 +288,29 @@ public class ScoreUtils {
    *          the term element
    * @param teamScore
    *          the team's score
-   * @return the value of the term
+   * @return the value of the term, null if a score is missing
    * @throws ParseException
    */
-  private static double evalTerm(final Element ele, final TeamScore teamScore) throws ParseException {
+  private static Double evalTerm(final Element ele, final TeamScore teamScore) throws ParseException {
     final String coefStr = ele.getAttribute("coefficient");
     final double coefficient = Utilities.NUMBER_FORMAT_INSTANCE.parse(coefStr).doubleValue();
     final String goal = ele.getAttribute("goal");
     final String scoreType = ele.getAttribute("scoreType");
     final double value;
     if("raw".equals(scoreType)) {
-      value = coefficient * teamScore.getRawScore(goal);
+      final Double rawScore = teamScore.getRawScore(goal);
+      if(null == rawScore) {
+        return null;
+      } else {
+        value = coefficient * rawScore;
+      }
     } else if("computed".equals(scoreType)) {
-      value = coefficient * teamScore.getComputedScore(goal);
+      final Double rawScore = teamScore.getComputedScore(goal);
+      if(null == rawScore) {
+        return null;
+      } else {
+        value = coefficient * rawScore;
+      }
     } else {
       throw new RuntimeException("Unexpected score type: " + scoreType);
     }
