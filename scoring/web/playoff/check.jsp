@@ -11,7 +11,7 @@
   
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
-final Map tournamentTeams = Queries.getTournamentTeams(connection);
+final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
 final String division = request.getParameter("division");
 %>
   
@@ -32,11 +32,11 @@ final String division = request.getParameter("division");
       <p>Teams with fewer runs than seeding rounds. Teams with no runs are excluded from this check.
         <ul>
 <%
-final List less = Queries.getTeamsNeedingSeedingRuns(connection, tournamentTeams, division);
-final Iterator lessIter = less.iterator();
+final List<Team> less = Queries.getTeamsNeedingSeedingRuns(connection, tournamentTeams, division);
+final Iterator<Team> lessIter = less.iterator();
 if(lessIter.hasNext()) {
   while(lessIter.hasNext()) {
-    final Team team = (Team)lessIter.next();
+    final Team team = lessIter.next();
     out.println("<li>" + team.getTeamName() + "(" + team.getTeamNumber() + ")</li>");
   }
 } else {
@@ -49,11 +49,11 @@ if(lessIter.hasNext()) {
       <p>Teams with more runs than seeding rounds:
         <ul>
 <%
-final List more = Queries.getTeamsWithExtraRuns(connection, tournamentTeams, division);
-final Iterator moreIter = more.iterator();
+final List<Team> more = Queries.getTeamsWithExtraRuns(connection, tournamentTeams, division);
+final Iterator<Team> moreIter = more.iterator();
 if(moreIter.hasNext()) {
   while(moreIter.hasNext()) {
-    final Team team = (Team)moreIter.next();
+    final Team team = moreIter.next();
     out.println("<li>" + team.getTeamName() + "(" + team.getTeamNumber() + ")</li>");
   }
 } else {

@@ -52,7 +52,9 @@ Utilities.closeStatement(stmt);
         
       <li><a href="categorizedScores.jsp">Categorized Scores</a></li>
 
-      <li><a href="scoreGroupScores.jsp">Categorized Scores by score group</a></li>
+      <li><a href="categoryScoresByJudge.jsp">Categorized Scores by judge</a></li>
+
+      <li><a href="categoryScoresByScoreGroup.jsp">Categorized Scores by Score Group</a>.  This displays the scaled scores for each category by score group (all judges that saw a team).</li>
 
     </ol>
 

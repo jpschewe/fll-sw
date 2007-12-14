@@ -5,16 +5,19 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.zip.ZipInputStream;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.log4j.Logger;
 
 import fll.Utilities;
+import fll.db.ImportDB;
 import fll.web.UploadProcessor;
 
 /**
@@ -55,17 +58,16 @@ public class ImportDBDump extends HttpServlet {
       UploadProcessor.processUpload(request);
 
       if(null != request.getAttribute("importdb")) {
-        
 
         final String url = "jdbc:hsqldb:mem:dbimport" + String.valueOf(_importdbCount++);
         memConnection = DriverManager.getConnection(url);
         memStmt = memConnection.createStatement();
 
         // import the database
-        //final FileItem dumpFileItem = (FileItem)request.getAttribute("dbdump");
-        //final ZipInputStream zipfile = new ZipInputStream(dumpFileItem.getInputStream());
-        //final Document challengeDocument = ImportDB.loadDatabaseDump(zipfile, memConnection);
-        //GenerateDB.generateDB(challengeDocument, database, true);
+        final FileItem dumpFileItem = (FileItem)request.getAttribute("dbdump");
+        final ZipInputStream zipfile = new ZipInputStream(dumpFileItem.getInputStream());
+        /*final Document challengeDocument = */ImportDB.loadDatabaseDump(zipfile, memConnection);
+//        GenerateDB.generateDB(challengeDocument, database, true);
 
         // let the jsp code know where to find the database
         session.setAttribute("dbimport_url", url);

@@ -210,7 +210,7 @@
 
  <li><a
   href='<c:url value="/GetFile">
-                     <c:param name="filename" value="subjective.zip"/>
+                     <c:param name="filename" value="subjective-data.zip"/>
                    </c:url>'>Download
  the datafile for subjective score entry.</a> Should be downloaded after
  each subjective score upload to lessen chance of data loss due to

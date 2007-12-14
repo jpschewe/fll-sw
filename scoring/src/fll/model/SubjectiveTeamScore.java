@@ -44,10 +44,10 @@ import fll.web.playoff.TeamScore;
   }
 
   @Override
-  public double getRawScore(final String goalName) {
+  public Double getRawScore(final String goalName) {
     final String value = _scoreEle.getAttribute(goalName);
     if(null == value || "".equals(value)) {
-      return 0;
+      return null;
     } else {
       try {
         return Utilities.NUMBER_FORMAT_INSTANCE.parse(value).doubleValue();

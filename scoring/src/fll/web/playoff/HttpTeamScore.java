@@ -35,7 +35,7 @@ import org.w3c.dom.Element;
    * @see fll.web.playoff.TeamScore#getRawScore(java.lang.String)
    */
   @Override
-  public double getRawScore(final String goalName) {
+  public Double getRawScore(final String goalName) {
     assertScoreExists();
     return Double.parseDouble(_request.getParameter(goalName));
   }

@@ -132,13 +132,13 @@ public final class GetFile extends HttpServlet {
         final ServletOutputStream os = response.getOutputStream();
         os.println("Judges are not properly assigned, please go back to the administration page and assign judges");
       }
-    } else if("subjective.zip".equals(filename)) {
+    } else if("subjective-data.zip".equals(filename)) {
       final Connection connection = (Connection)application.getAttribute("connection");
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
       if(Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
         response.reset();
         response.setContentType("application/zip");
-        response.setHeader("Content-Disposition", "filename=subjective.zip");
+        response.setHeader("Content-Disposition", "filename=subjective-data.zip");
         writeSubjectiveScores(connection, challengeDocument, response.getOutputStream());
       } else {
         response.reset();

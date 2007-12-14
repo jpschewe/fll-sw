@@ -43,11 +43,11 @@ public class DummyTeamScore extends TeamScore {
    * @see fll.web.playoff.TeamScore#getRawScore(java.lang.String)
    */
   @Override
-  public double getRawScore(final String goalName) {
+  public Double getRawScore(final String goalName) {
     if(_simpleGoals.containsKey(goalName)) {
       return _simpleGoals.get(goalName);
     } else {
-      return 0;
+      return null;
     }
   }
 

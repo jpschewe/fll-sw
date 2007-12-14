@@ -9,7 +9,7 @@
   
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
-final List divisions = Queries.getDivisions(connection);
+final List<String> divisions = Queries.getDivisions(connection);
 final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
 %>
   
@@ -33,9 +33,7 @@ final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
           <option value='__all__' selected>All</option>
 <%
 {
-final Iterator divisionIter = divisions.iterator();
-while(divisionIter.hasNext()) {
-  final String div = (String)divisionIter.next();
+for(String div : divisions) {
 %>
           <option value='<%=div%>'><%=div%></option>
 <%
@@ -53,9 +51,7 @@ while(divisionIter.hasNext()) {
           Select Division: <select name='division'>
 <%
 {
-final Iterator divisionIter = divisions.iterator();
-while(divisionIter.hasNext()) {
-  final String div = (String)divisionIter.next();
+for(String div : divisions) {
 %>
           <option value='<%=div%>'><%=div%></option>
 <%
@@ -73,9 +69,7 @@ while(divisionIter.hasNext()) {
             Select Division: <select name='division'>
 <%
 {
-final Iterator divisionIter = divisions.iterator();
-while(divisionIter.hasNext()) {
-  final String div = (String)divisionIter.next();
+for(String div : divisions) {
 %>
 <option value='<%=div%>'><%=div%></option>
 <%
@@ -114,9 +108,7 @@ for(int numRounds = 2; numRounds <= numPlayoffRounds+1; numRounds++) {
             Select Division: <select name='division'>
 <%
 {
-final Iterator divisionIter = divisions.iterator();
-while(divisionIter.hasNext()) {
-  final String div = (String)divisionIter.next();
+for(String div : divisions) {
 %>
 <option value='<%=div%>'><%=div%></option>
 <%

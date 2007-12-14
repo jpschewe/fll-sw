@@ -639,6 +639,7 @@ public final class Playoff {
   /**
    * Output the table for the printable brackets to out
    */
+  @SuppressWarnings("unchecked")
   public static void displayScoresheetGenerationBrackets(final Connection connection,
                                                          final Document challengeDocument,
                                                          final String division,
