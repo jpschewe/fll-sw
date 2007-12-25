@@ -12,6 +12,9 @@
   </c:otherwise>
  </c:choose>
 
+ <%-- shutdown the database --%>
+ <sql:update dataSource="${datasource}" sql="SHUTDOWN COMPACT"/>
+ 
  <%-- just remove the database connections and they'll get recreated on the redirect --%>
  <c:remove var="connection" />
  <c:remove var="datasource" />

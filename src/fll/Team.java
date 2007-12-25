@@ -186,6 +186,21 @@ public final class Team {
     _division = v;
   }
 
+  private String _eventDivision;
+  
+  /**
+   * The event division that a team is entered as.
+   * 
+   * @return division
+   */
+  public String getEventDivision() {
+    return _eventDivision;
+  }
+
+  public void setEventDivision(final String v) {
+    _eventDivision = v;
+  }
+  
   /**
    * Compares team numbers.
    */

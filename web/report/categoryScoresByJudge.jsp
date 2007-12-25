@@ -7,7 +7,6 @@
 <%@ page import="org.w3c.dom.Document" %>
   
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
 final String tournamentReq = request.getParameter("currentTournament");
 final String tournament;
@@ -28,7 +27,7 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
 
   <body>
 
-    <h1>FLL Categorized Score Summary by score group</h1>
+    <h1>FLL Categorized Score Summary by judge</h1>
     <hr/>
     <h2>Tournament: <c:out value="${currentTournament}"/></h2>
     <c:forEach items="${divisions}" var="division">

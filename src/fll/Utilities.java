@@ -143,6 +143,10 @@ public final class Utilities {
   public static boolean testHSQLDB(final String baseFilename) {
     final File baseFile = new File(baseFilename);
     final File dir = baseFile.getParentFile();
+    if(null == dir) {
+      LOG.warn("There is no parent file for " + baseFile.getAbsolutePath());
+      return false;
+    }
     if(!dir.isDirectory()) {
       LOG.warn("Database directory " + dir.getAbsolutePath() + " is not a directory");
       return false;
@@ -466,4 +470,5 @@ public final class Utilities {
       LOG.debug("f: " + f.toString());
     }
   }
+
 }
