@@ -351,7 +351,7 @@ public class FullTournamentTest extends TestCase {
       request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/categoryScoresByJudge.jsp");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/categoryScoresByScoreGroup.jsp");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/CategoryScoresByScoreGroup");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
 

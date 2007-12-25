@@ -53,5 +53,15 @@
     <servlet-name>ImportDBDump</servlet-name>
     <url-pattern>/developer/ImportDBDump</url-pattern>
   </servlet-mapping>
+
+  <servlet>
+    <servlet-name>CategoryScoresByScoreGroup</servlet-name>
+    <description>Score group scores</description>
+    <servlet-class>fll.web.report.CategoryScoresByScoreGroup</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>CategoryScoresByScoreGroup</servlet-name>
+    <url-pattern>/report/CategoryScoresByScoreGroup</url-pattern>
+  </servlet-mapping>
   
 </web-app>

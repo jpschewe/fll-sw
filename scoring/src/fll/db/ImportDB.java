@@ -51,6 +51,9 @@ public final class ImportDB {
     try {
       if(args.length != 3) {
         LOG.error("You must specify <source uri> <tournament> <destination uri>");
+        for(String arg : args) {
+          LOG.error("arg: " + arg);
+        }
         System.exit(1);
       } else {
 
@@ -67,25 +70,7 @@ public final class ImportDB {
         final String tournament = args[1].substring(substringStart, substringEnd);
         final String destinationURI = args[2];
 
-        try {
-          Class.forName("org.hsqldb.jdbcDriver").newInstance();
-        } catch(final ClassNotFoundException e) {
-          throw new RuntimeException("Unable to load driver.", e);
-        } catch(final InstantiationException ie) {
-          throw new RuntimeException("Unable to load driver.", ie);
-        } catch(final IllegalAccessException iae) {
-          throw new RuntimeException("Unable to load driver.", iae);
-        }
-
-        try {
-          Class.forName("com.mysql.jdbc.Driver").newInstance();
-        } catch(final ClassNotFoundException e) {
-          LOG.warn("Unable to load driver.", e);
-        } catch(final InstantiationException ie) {
-          LOG.warn("Unable to load driver.", ie);
-        } catch(final IllegalAccessException iae) {
-          LOG.warn("Unable to load driver.", iae);
-        }
+        Utilities.loadDBDriver();
 
         final Connection sourceConnection = DriverManager.getConnection(sourceURI);
         final Connection destinationConnection = DriverManager.getConnection(destinationURI);

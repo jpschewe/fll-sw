@@ -70,6 +70,7 @@ public final class Queries {
         team.setTeamName(rs.getString("TeamName"));
         team.setRegion(rs.getString("Region"));
         team.setDivision(rs.getString("Division"));
+        team.setEventDivision(rs.getString("event_division"));
         tournamentTeams.put(new Integer(team.getTeamNumber()), team);
       }
     } finally {
