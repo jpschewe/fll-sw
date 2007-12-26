@@ -72,6 +72,8 @@
 (Administration)</h1>
 
 <p><%=message.toString()%></p>
+<%-- clear out the message, so that we don't see it again --%>
+<c:remove var="message" />
 
 <p>Before tournament day:</p>
 <ol>
@@ -208,7 +210,7 @@
 
  <li><a
   href='<c:url value="/GetFile">
-                     <c:param name="filename" value="subjective.zip"/>
+                     <c:param name="filename" value="subjective-data.zip"/>
                    </c:url>'>Download
  the datafile for subjective score entry.</a> Should be downloaded after
  each subjective score upload to lessen chance of data loss due to

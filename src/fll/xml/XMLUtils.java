@@ -5,34 +5,28 @@
  */
 package fll.xml;
 
-import fll.db.Queries;
-import fll.Team;
-import fll.Utilities;
-
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import java.util.Collection;
-import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.log4j.Logger;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+
+import fll.Team;
+import fll.Utilities;
+import fll.db.Queries;
 
 /**
  * Generate some XML documents.
@@ -41,21 +35,17 @@ import org.xml.sax.SAXParseException;
  */
 public final class XMLUtils {
 
-  private static final Logger LOG = Logger.getLogger(XMLUtils.class);
-
   private XMLUtils() {
   }
 
   /**
    * Create an XML document that represents the data in teams
    */
-  public static Document createTeamsDocument(final Connection connection, final Collection teams) throws SQLException {
+  public static Document createTeamsDocument(final Connection connection, final Collection<Team> teams) throws SQLException {
     final Document document = DOCUMENT_BUILDER.newDocument();
     final Element top = document.createElement("teams");
     document.appendChild(top);
-    final Iterator iter = teams.iterator();
-    while (iter.hasNext()) {
-      final Team team = (Team) iter.next();
+    for(Team team : teams) {
       final Element teamElement = document.createElement("team");
       teamElement.setAttribute("teamName", team.getTeamName());
       teamElement.setAttribute("teamNumber", String.valueOf(team.getTeamNumber()));
@@ -112,9 +102,7 @@ public final class XMLUtils {
           final String judge = rs.getString(1);
           final String division = rs.getString(2);
 
-          final Iterator teamIter = teams.iterator();
-          while (teamIter.hasNext()) {
-            final Team team = (Team) teamIter.next();
+          for(Team team : teams) {
             final String teamDiv = Queries.getEventDivision(connection, team.getTeamNumber());
             if ("All".equals(division) || division.equals(teamDiv)) {
               final Element scoreElement = document.createElement("score");

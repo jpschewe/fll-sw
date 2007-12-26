@@ -8,7 +8,6 @@ package fll.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
 import fll.web.playoff.TeamScore;
@@ -22,11 +21,9 @@ import fll.web.playoff.TeamScore;
  */
 public class DummyTeamScore extends TeamScore {
 
-  private static final Logger LOG = Logger.getLogger(DummyTeamScore.class);
-
   public DummyTeamScore(final Element categoryElement, final int teamNumber, final int runNumber, final Map<String, Double> simpleGoals, final Map<String, String> enumGoals) {
     super(categoryElement, teamNumber, runNumber);
-    _simpleGoals = new HashMap<String, Double>(simpleGoals);
+     _simpleGoals = new HashMap<String, Double>(simpleGoals);
     _enumGoals = new HashMap<String, String>(enumGoals);
   }
   
@@ -46,11 +43,11 @@ public class DummyTeamScore extends TeamScore {
    * @see fll.web.playoff.TeamScore#getRawScore(java.lang.String)
    */
   @Override
-  public double getRawScore(final String goalName) {
+  public Double getRawScore(final String goalName) {
     if(_simpleGoals.containsKey(goalName)) {
       return _simpleGoals.get(goalName);
     } else {
-      return 0;
+      return null;
     }
   }
 

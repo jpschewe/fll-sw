@@ -70,6 +70,7 @@ public final class Queries {
         team.setTeamName(rs.getString("TeamName"));
         team.setRegion(rs.getString("Region"));
         team.setDivision(rs.getString("Division"));
+        team.setEventDivision(rs.getString("event_division"));
         tournamentTeams.put(new Integer(team.getTeamNumber()), team);
       }
     } finally {
@@ -248,7 +249,7 @@ public final class Queries {
     if(irunNumber > numSeedingRounds) {
       final int playoffRun = irunNumber - numSeedingRounds;
       final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun);
-      final String division = getDivisionOfTeam(connection, Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumber).intValue());
+      final String division = getEventDivision(connection, Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumber).intValue());
       if(ptLine > 0) {
         final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1),
             playoffRun);
@@ -420,7 +421,7 @@ public final class Queries {
     if(irunNumber > numSeedingRounds) {
       final int playoffRun = irunNumber - numSeedingRounds;
       final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun);
-      final String division = getDivisionOfTeam(connection, Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumber).intValue());
+      final String division = getEventDivision(connection, Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumber).intValue());
       if(ptLine > 0) {
         final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1),
             playoffRun);
@@ -592,7 +593,7 @@ public final class Queries {
     if(irunNumber > numSeedingRounds) {
       final int playoffRun = irunNumber - numSeedingRounds;
       final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun);
-      final String division = getDivisionOfTeam(connection, Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumber).intValue());
+      final String division = getEventDivision(connection, Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumber).intValue());
       if(ptLine > 0) {
         final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1),
             playoffRun);
@@ -786,7 +787,7 @@ public final class Queries {
         prep.setString(1, currentTournament);
         prep.setInt(2, getNumSeedingRounds(connection));
       } else {
-        prep = connection.prepareStatement("SELECT Performance.TeamNumber,Count(Performance.TeamNumber) FROM Performance,current_ournament_teams"
+        prep = connection.prepareStatement("SELECT Performance.TeamNumber,Count(Performance.TeamNumber) FROM Performance,current_tournament_teams"
             + " WHERE Performance.TeamNumber = current_tournament_teams.TeamNumber" + " AND current_tournament_teams.event_division = ?"
             + " AND Performance.Tournament = ?" + " GROUP BY Performance.TeamNumber" + " HAVING Count(Performance.TeamNumber) > ?");
         prep.setString(1, division);
@@ -826,7 +827,7 @@ public final class Queries {
    * @throws RuntimeException
    *           if a team can't be found in tournamentTeams
    */
-  public static List<Team> getPlayoffSeedingOrder(final Connection connection, final String divisionStr, final Map tournamentTeams)
+  public static List<Team> getPlayoffSeedingOrder(final Connection connection, final String divisionStr, final Map<Integer, Team> tournamentTeams)
       throws SQLException, RuntimeException {
     final String currentTournament = getCurrentTournament(connection);
 
@@ -1123,10 +1124,10 @@ public final class Queries {
         while(rs.next()) {
           final int teamNumber = rs.getInt("TeamNumber");
           final double computedTotal = ScoreUtils.computeTotalScore(new DatabaseTeamScore(subjectiveElement, teamNumber, rs));
-          if(Double.NaN != computedTotal) {
-            updatePrep.setDouble(1, computedTotal);
-          } else {
+          if(Double.isNaN(computedTotal)) {
             updatePrep.setNull(1, Types.DOUBLE);
+          } else {
+            updatePrep.setDouble(1, computedTotal);
           }
           updatePrep.setInt(2, teamNumber);
           final String judge = rs.getString("Judge");

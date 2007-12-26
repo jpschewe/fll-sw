@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,7 +26,6 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import fll.Team;
 import fll.Utilities;
@@ -88,10 +88,10 @@ public final class Playoff {
    * @throws SQLException
    *           on a database error
    */
-  public static List<Team> buildInitialBracketOrder(final Connection connection, final String divisionStr, final Map tournamentTeams)
+  public static List<Team> buildInitialBracketOrder(final Connection connection, final String divisionStr, final Map<Integer, Team> tournamentTeams)
       throws SQLException {
 
-    final List seedingOrder = Queries.getPlayoffSeedingOrder(connection, divisionStr, tournamentTeams);
+    final List<Team> seedingOrder = Queries.getPlayoffSeedingOrder(connection, divisionStr, tournamentTeams);
     if(seedingOrder.size() > 128) {
       // TODO one of these days I need to compute this rather than using an
       // array
@@ -259,8 +259,9 @@ public final class Playoff {
       if(child instanceof Element) {
         final Element testElement = (Element)child;
         if("test".equals(testElement.getTagName())) {
-          final double sumA = ScoreUtils.evalPoly(testElement, teamAScore);
-          final double sumB = ScoreUtils.evalPoly(testElement, teamBScore);
+          final Map<String, Double> variableValues = Collections.emptyMap();
+          final double sumA = ScoreUtils.evalPoly(testElement, teamAScore, variableValues);
+          final double sumB = ScoreUtils.evalPoly(testElement, teamBScore, variableValues);
           final String highlow = testElement.getAttribute("winner");
           if(sumA > sumB) {
             return ("high".equals(highlow) ? teamA : teamB);
@@ -417,22 +418,7 @@ public final class Playoff {
       Utilities.closeStatement(stmt);
     }
   }
-
-  /**
-   * Find a goal element with the given name in the list of goals.
-   * 
-   * @return the element, null on error
-   */
-  private static Element findGoalDefinition(final NodeList goals, final String name) {
-    for(int i = 0; i < goals.getLength(); i++) {
-      final Element e = (Element)goals.item(i);
-      if(name.equals(e.getAttribute("name"))) {
-        return e;
-      }
-    }
-    return null;
-  }
-
+  
   /**
    * Output the table for the printable brackets to out
    */
@@ -441,7 +427,7 @@ public final class Playoff {
                                               final String division,
                                               final JspWriter out) throws IOException, SQLException, ParseException {
 
-    final Map tournamentTeams = Queries.getTournamentTeams(connection);
+    final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
     final String currentTournament = Queries.getCurrentTournament(connection);
 
     final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
@@ -591,7 +577,7 @@ public final class Playoff {
                                         final Team teamB,
                                         final String tableA,
                                         final String tableB,
-                                        final List tables,
+                                        final List<String[]> tables,
                                         final String round) throws IOException {
     final String formName = "genScoresheet_" + teamA.getTeamNumber() + "_" + teamB.getTeamNumber();
     out.println("<form name='" + formName + "' action='../GetFile' method='POST' target='_new'>");
@@ -606,9 +592,9 @@ public final class Playoff {
     out.println("  <input type='hidden' name='TeamNumber2' value='" + teamB.getTeamNumber() + "'>");
 
     out.println("  1st side:<select name='Table1'>");
-    Iterator i = tables.iterator();
+    Iterator<String[]> i = tables.iterator();
     while(i.hasNext()) {
-      final String[] t = (String[])i.next();
+      final String[] t = i.next();
 
       out.print("    <option value='" + t[0] + "'");
       if(t[0].equals(tableA)) {
@@ -653,6 +639,7 @@ public final class Playoff {
   /**
    * Output the table for the printable brackets to out
    */
+  @SuppressWarnings("unchecked")
   public static void displayScoresheetGenerationBrackets(final Connection connection,
                                                          final Document challengeDocument,
                                                          final String division,
@@ -688,7 +675,7 @@ public final class Playoff {
       int[] lastTeam = new int[numRuns];
       Arrays.fill(lastTeam, 0);
       // the teams for a given round
-      Iterator[] currentRoundTeams = new Iterator[numRuns];
+      Iterator<Team>[] currentRoundTeams = new Iterator[numRuns];
       // the bracket that will be displayed next
       int[] bracketIndex = new int[numRuns];
       Arrays.fill(bracketIndex, 1);
@@ -696,9 +683,9 @@ public final class Playoff {
       int[] teamIndex = new int[numRuns];
       Arrays.fill(teamIndex, 1);
       // the table that will be assigned next
-      Iterator[] currentRoundTable = new Iterator[numRuns];
+      Iterator<String[]>[] currentRoundTable = new Iterator[numRuns];
       // team iterator for scoresheet generation form
-      Iterator[] scoreGenTeams = new Iterator[numRuns];
+      Iterator<Team>[] scoreGenTeams = new Iterator[numRuns];
       // match counts per round
       int[] matchCounts = new int[numRuns];
       Arrays.fill(matchCounts, 0);
@@ -712,7 +699,7 @@ public final class Playoff {
         }
 
         final List<Team> newCurrentRound = new LinkedList<Team>();
-        final Iterator prevIter = tempCurrentRound.iterator();
+        final Iterator<Team> prevIter = tempCurrentRound.iterator();
         while(prevIter.hasNext()) {
           final Team teamA = (Team)prevIter.next();
           if(prevIter.hasNext()) {
@@ -841,7 +828,7 @@ public final class Playoff {
                                         final boolean enableThird,
                                         final JspWriter out) throws IOException, SQLException, ParseException {
 
-    final Map tournamentTeams = Queries.getTournamentTeams(connection);
+    final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
     final String currentTournament = Queries.getCurrentTournament(connection);
     final List<String[]> tournamentTables = Queries.getTournamentTables(connection);
 

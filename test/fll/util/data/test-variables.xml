@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="Computed goal referencing a computed goal - should fail" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="fll.xsd">
+
+  <Performance minimumScore="0" weight="1.0">
+
+    <goal initialValue="0" max="1" min="0" multiplier="40" name="pump_station" title="Protect the Pump Station"></goal>
+
+    <goal initialValue="0" max="1" min="0" multiplier="30" name="flags" title="Transect Flags: Any Flags"></goal>
+
+    <goal initialValue="0" max="3" min="0" multiplier="15" name="flags_rows" title="Transect Flags: Number of Rows"></goal>
+
+    <goal name="robot_type" title="Robot Type"
+      multiplier="0" initialValue="1">
+      <value score="1" title="RCX" value="rcx"/>
+      <value score="2" title="NXT" value="nxt"/>
+    </goal>
+    
+
+    <computedGoal name="computed" title="Test computed goal">
+      <variable name="subtotal">
+        <term goal="pump_station" scoreType="computed"/>
+        <term goal="flags" scoreType="computed"/>
+        <term goal="flags_rows" scoreType="raw"/>
+      </variable>    
+      <switch>
+        <case>
+          <enumCondition>  
+            <left>
+              <goalRef goal="robot_type"/>
+            </left>
+            <equal-to/>
+            <right>
+              <stringConstant value="rcx"/>
+            </right>
+          </enumCondition>
+          <switch>
+            <case>
+              <condition>
+                <left>
+                  <variableRef variable="subtotal"/>
+                </left>
+                <less-than/>
+                <right>
+                  <constant value="72"/>
+                </right>
+              </condition>
+              <result>
+                <constant value="60"/>
+                <variableRef variable="subtotal"/>
+              </result>
+            </case>
+            <default>
+              <constant value="240"/>
+              <variableRef coefficient="0.4" variable="subtotal"/>
+            </default>
+          </switch>
+        </case>
+        <default>
+          <constant value="0"/>
+        </default>
+      </switch>
+    </computedGoal>
+    
+    <tiebreaker>
+      <test winner="high">
+        <term goal="flags_rows" scoreType="computed"/>
+      </test> 
+      <test winner="high">
+        <term goal="flags" scoreType="computed"/>
+      </test> 
+      <test winner="high">
+        <term goal="pump_station" scoreType="computed"/>
+      </test> 
+      <test winner="high">
+        <term goal="computed" scoreType="computed"/>
+        <constant value="10"/>
+      </test>
+    </tiebreaker>
+
+  </Performance>
+
+  <subjectiveCategory name="teamwork" title="Teamwork" weight="1.0">
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="roles" title="Roles and Responsibilities"></goal>
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="professionalism" title="Gracious Professionalism"></goal>
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="dynamics" title="Problem Solving &amp; Team Dynamics &amp; Communications"></goal>
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="confidence" title="Confidence &amp; Enthusiasm"></goal>
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="fll_values" title="FLL Values"></goal>
+    <computedGoal name="computed" title="Test computed goal">
+      <switch>
+        <case>
+          <condition>
+            <left>
+              <term goal="roles" scoreType="computed"/>
+              <term goal="dynamics" scoreType="raw"/>
+            </left>
+            <less-than/>
+            <right>
+              <constant value="30"/>
+            </right>
+          </condition>
+          <result>
+            <constant value="100"/>
+          </result>
+        </case>
+        <default>
+          <constant value="10"/>
+        </default>
+      </switch>
+    </computedGoal>
+    
+  </subjectiveCategory>
+
+  
+  <subjectiveCategory name="robustdesign" title="Robust Design" weight="0.5">
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="strategy" title="Strategy, Process, Problem Solving"></goal>
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="locomotion" title="Locomotion and Navigation"></goal>
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="design_kids" title="Kids Did the Work"></goal>
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="structural" title="Structural"></goal>
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="overall_design" title="Overall Design"></goal>
+  </subjectiveCategory>
+
+
+  <subjectiveCategory name="programming" title="Robust Programming" weight="0.5">
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="useoflanguage" title="Use of Language"></goal>
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="modularity" title="Modularity/Abstraction"></goal>
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="sensorcontrol" title="Sensor Control"></goal>
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="design" title="Design"></goal>
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="programming_kids" title="Kids Did the Work"></goal>
+  </subjectiveCategory>
+
+  <subjectiveCategory name="research" title="Research Project Assessment" weight="1.0">
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="questions" title="Questions, Language Use"></goal>
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="completeness" title="Completeness, Teamwork"></goal>
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="background" title="Background, Data, and Graphics"></goal>
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="analysis" title="Analysis and Conclusions"></goal>
+    <goal initialValue="0" max="20" min="1" multiplier="1" name="style" title="Style"></goal>
+  </subjectiveCategory>
+
+  
+</fll>

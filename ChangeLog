@@ -1,3 +1,4 @@
+Release 3.0
 * Restrictions are now checked on the client side instead of by the server and sending users back to the score entry page on an error.
 
 * Added support for computed goals.

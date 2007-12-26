@@ -6,6 +6,7 @@
 package fll.web.scoreEntry;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -89,7 +90,7 @@ public final class ScoreEntry {
    * 
    * @throws ParseException
    */
-  public static void generateIncrementMethods(final JspWriter writer, final Document document) throws IOException, ParseException {
+  public static void generateIncrementMethods(final Writer writer, final Document document) throws IOException, ParseException {
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
     final Formatter formatter = new Formatter(writer);
@@ -125,8 +126,7 @@ public final class ScoreEntry {
         formatter.format("}%n");
       }
 
-      writer.newLine();
-      writer.newLine();
+      formatter.format("%n%n");
     } // end for each goal
 
     // generate the methods to update the computed goal variables
@@ -143,7 +143,7 @@ public final class ScoreEntry {
   /**
    * Generate the body of the refresh function
    */
-  public static void generateRefreshBody(final JspWriter writer, final Document document) throws ParseException, IOException {
+  public static void generateRefreshBody(final Writer writer, final Document document) throws ParseException, IOException {
     final Formatter formatter = new Formatter(writer);
 
     final Element rootElement = document.getDocumentElement();
@@ -200,8 +200,7 @@ public final class ScoreEntry {
 
       // set the score form element
       formatter.format("document.scoreEntry.score_%s.value = %s;%n", name, computedVarName);
-
-      writer.newLine();
+      formatter.format("%n");
     } // end foreach goal
 
     // output calls to the computed goal methods
@@ -215,7 +214,7 @@ public final class ScoreEntry {
       // add to the total score
       formatter.format("score += %s;%n", computedVarName);
 
-      writer.newLine();
+      formatter.format("%n");
     }
 
   }
@@ -230,33 +229,33 @@ public final class ScoreEntry {
    * @throws IOException
    * @throws ParseException
    */
-  public static void generateCheckRestrictionsBody(final JspWriter writer, final Document document) throws IOException, ParseException {
+  public static void generateCheckRestrictionsBody(final Writer writer, final Document document) throws IOException, ParseException {
     final Formatter formatter = new Formatter(writer);
 
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
-    
+
     final Collection<String> goalsWithRestrictions = new LinkedList<String>();
     final NodeList restrictions = performanceElement.getElementsByTagName("restriction");
-    
+
     // find out which goals are involved in restrictions
     for(int restrictIdx = 0; restrictIdx < restrictions.getLength(); ++restrictIdx) {
       final Element restrictEle = (Element)restrictions.item(restrictIdx);
       goalsWithRestrictions.addAll(getGoalsInRestriction(restrictEle));
     }
-    
+
     // output variable declaration for each goal
     for(String goalName : goalsWithRestrictions) {
       formatter.format("  var %s = \"\";%n", getElementIDForError(goalName));
     }
-    
+
     // output actual check of restriction
-    for(int restrictIdx=0; restrictIdx < restrictions.getLength(); ++restrictIdx) {
+    for(int restrictIdx = 0; restrictIdx < restrictions.getLength(); ++restrictIdx) {
       final Element restrictEle = (Element)restrictions.item(restrictIdx);
       final double lowerBound = Utilities.NUMBER_FORMAT_INSTANCE.parse(restrictEle.getAttribute("lowerBound")).doubleValue();
       final double upperBound = Utilities.NUMBER_FORMAT_INSTANCE.parse(restrictEle.getAttribute("upperBound")).doubleValue();
       final String message = restrictEle.getAttribute("message");
-      
+
       final String polyString = polyToString(restrictEle);
       final String restrictValStr = String.format("restriction_%d_value", restrictIdx);
       formatter.format("  var %s = %s;%n", restrictValStr, polyString);
@@ -281,11 +280,11 @@ public final class ScoreEntry {
       formatter.format("%n");
     }
   }
-  
+
   private static Set<String> getGoalsInRestriction(final Element restrictEle) {
     final Set<String> goals = new HashSet<String>();
     final NodeList terms = restrictEle.getElementsByTagName("term");
-    for(int termIdx=0; termIdx < terms.getLength(); ++termIdx) {
+    for(int termIdx = 0; termIdx < terms.getLength(); ++termIdx) {
       final Element termEle = (Element)terms.item(termIdx);
       final String goalName = termEle.getAttribute("goal");
       goals.add(goalName);
@@ -579,7 +578,9 @@ public final class ScoreEntry {
   }
 
   /**
-   * The ID of the element that holds errors for the specified goal.  This name is also used for the name of the variable that holds the error text for the goal in check_restrictions.
+   * The ID of the element that holds errors for the specified goal. This name
+   * is also used for the name of the variable that holds the error text for the
+   * goal in check_restrictions.
    */
   private static String getElementIDForError(final String goalName) {
     return "error_" + goalName;
@@ -589,12 +590,32 @@ public final class ScoreEntry {
     final String goalName = ele.getAttribute("name");
 
     formatter.format("function %s() {%n", getComputedMethodName(goalName));
-    final Element switchEle = (Element)ele.getFirstChild();
-    generateSwitch(formatter, switchEle, goalName, INDENT_LEVEL);
+    final NodeList children = ele.getChildNodes();
+    for(int childIdx = 0; childIdx < children.getLength(); ++childIdx) {
+      final Element childEle = (Element)children.item(childIdx);
+      if("variable".equals(childEle.getNodeName())) {
+        final String varName = getComputedGoalLocalVarName(childEle.getAttribute("name"));
+        final String varValue = polyToString(childEle);
+        formatter.format("var %s = %s;%n", varName, varValue);
+      } else if("switch".equals(childEle.getNodeName())) {
+        generateSwitch(formatter, childEle, goalName, INDENT_LEVEL);
+      } else {
+        throw new RuntimeException("Unexpected element in computed goal.  Expected 'switch' or 'variable', but found '" + childEle.getNodeName()
+            + "'");
+      }
+    }
 
     formatter.format("%sdocument.scoreEntry.score_%s.value = %s;%n", generateIndentSpace(INDENT_LEVEL), goalName,
         getVarNameForComputedScore(goalName));
     formatter.format("}%n");
+  }
+
+  /**
+   * Get the name of a local variable inside a computed goal function that
+   * stores the specified variable value
+   */
+  private static String getComputedGoalLocalVarName(final String varName) {
+    return varName;
   }
 
   private static void generateSwitch(final Formatter formatter, final Element ele, final String goalName, final int indent) throws ParseException {
@@ -604,7 +625,13 @@ public final class ScoreEntry {
       final String childName = childEle.getNodeName();
       if("case".equals(childName)) {
         final Element conditionEle = (Element)childEle.getFirstChild();
-        generateCondition(formatter, conditionEle, indent);
+        final String ifPrefix;
+        if(childIdx > 0) {
+          ifPrefix = " else ";
+        } else {
+          ifPrefix = generateIndentSpace(indent);
+        }
+        generateCondition(formatter, ifPrefix, conditionEle);
         formatter.format(" {%n");
         final Element resultEle = (Element)conditionEle.getNextSibling();
         final String resultName = resultEle.getNodeName();
@@ -626,6 +653,11 @@ public final class ScoreEntry {
     }
   }
 
+  /**
+   * 
+   * @param ele either a "stringConstant" element or a "goalRef" element
+   * @return the string value
+   */
   private static String stringOrGoalToString(final Element ele) {
     if("stringConstant".equals(ele.getNodeName())) {
       return '"' + ele.getAttribute("value") + '"';
@@ -637,6 +669,14 @@ public final class ScoreEntry {
     }
   }
 
+  /**
+   * 
+   * @param ele
+   *          the element that is a polynomial, all of it's children are terms,
+   *          variableRefs and constants
+   * @return the string that represents the polynomial
+   * @throws ParseException
+   */
   private static String polyToString(final Element ele) throws ParseException {
     final Formatter formatter = new Formatter();
     final NodeList children = ele.getChildNodes();
@@ -659,7 +699,15 @@ public final class ScoreEntry {
         } else {
           throw new RuntimeException("Expected 'raw' or 'computed', but found: " + scoreType);
         }
-        formatter.format("%f * %s", coefficient, varName);
+        final String value = new Formatter().format("%f * %s", coefficient, varName).toString();
+        final String floatingPoint = childEle.getAttribute("floatingPoint");
+        formatter.format("%s", applyFloatingPoint(value, floatingPoint));
+      } else if("variableRef".equals(childEle.getNodeName())) {
+        final double coefficient = Utilities.NUMBER_FORMAT_INSTANCE.parse(childEle.getAttribute("coefficient")).doubleValue();
+        final String variable = getComputedGoalLocalVarName(childEle.getAttribute("variable"));
+        final String floatingPoint = childEle.getAttribute("floatingPoint");
+        final String value = new Formatter().format("%f * %s", coefficient, variable).toString();
+        formatter.format("%s", applyFloatingPoint(value, floatingPoint));
       } else if("constant".equals(childEle.getNodeName())) {
         final double value = Utilities.NUMBER_FORMAT_INSTANCE.parse(childEle.getAttribute("value")).doubleValue();
         formatter.format("%f", value);
@@ -668,6 +716,28 @@ public final class ScoreEntry {
       }
     }
     return formatter.toString();
+  }
+
+  /**
+   * Make the appropriate modifications to <code>value</code> to reflect the
+   * specified floating point handling
+   * 
+   * @param value
+   *          the expression
+   * @param floatingPoint
+   *          the floating point handling
+   * @return value with the floating point handling applied
+   */
+  private static String applyFloatingPoint(final String value, final String floatingPoint) {
+    if("decimal".equals(floatingPoint)) {
+      return value;
+    } else if("round".equals(floatingPoint)) {
+      return "Math.round(" + value + ")";
+    } else if("truncate".equals(floatingPoint)) {
+      return "parseInt(" + value + ")";
+    } else {
+      throw new RuntimeException("Unexpected floating point type: " + floatingPoint);
+    }
   }
 
   private static String ineqToString(final Element ele) {
@@ -689,8 +759,15 @@ public final class ScoreEntry {
     }
   }
 
-  private static void generateCondition(final Formatter formatter, final Element ele, final int indent) throws ParseException {
-    formatter.format("%sif(", generateIndentSpace(indent));
+  /**
+   * 
+   * @param formatter where to write
+   * @param ifPrefix what goes before "if", either spaces or "else"
+   * @param ele
+   * @throws ParseException
+   */
+  private static void generateCondition(final Formatter formatter, final String ifPrefix, final Element ele) throws ParseException {
+    formatter.format("%sif(", ifPrefix);
 
     final Element leftEle = (Element)ele.getFirstChild();
     final Element leftVal = (Element)leftEle.getFirstChild();
@@ -699,7 +776,7 @@ public final class ScoreEntry {
     final Element rightVal = (Element)rightEle.getFirstChild();
     final String nodeName = ele.getNodeName();
     if("condition".equals(nodeName)) {
-      formatter.format("%s %s %s", polyToString(leftVal), ineqToString(ineqEle), polyToString(rightVal));
+      formatter.format("%s %s %s", polyToString(leftEle), ineqToString(ineqEle), polyToString(rightEle));
     } else if("enumCondition".equals(nodeName)) {
       formatter.format("%s %s %s", stringOrGoalToString(leftVal), ineqToString(ineqEle), stringOrGoalToString(rightVal));
     } else {

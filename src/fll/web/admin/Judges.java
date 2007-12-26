@@ -5,22 +5,15 @@
  */
 package fll.web.admin;
 
-import fll.db.Queries;
-import fll.Utilities;
-
 import java.io.IOException;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.text.ParseException;
-
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +26,9 @@ import javax.servlet.jsp.JspWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import fll.Utilities;
+import fll.db.Queries;
 
 /**
  * Java code used in judges.jsp
@@ -162,7 +158,7 @@ public final class Judges {
    */
   private static void generateRow(final JspWriter out,
                                   final NodeList subjectiveCategories,
-                                  final List divisions,
+                                  final List<String> divisions,
                                   final int row,
                                   final String id,
                                   final String cat,
@@ -188,9 +184,7 @@ public final class Judges {
     out.println("  </select></td>");
 
     out.println("  <td><select name='div" + row + "'>");
-    final Iterator divisionIter = divisions.iterator();
-    while(divisionIter.hasNext()) {
-      final String div = (String)divisionIter.next();
+    for(String div : divisions) {
       out.print("  <option value='" + div + "'");
       if(div.equals(division)) {
         out.print(" selected");
@@ -248,10 +242,8 @@ public final class Judges {
     
     //now walk the keys of the hash and make sure that all values have a list
     //of size > 0, otherwise append an error to error.
-    final Iterator keyIter = hash.keySet().iterator();
-    while(keyIter.hasNext()) {
-      final String categoryName = (String)keyIter.next();
-      final Set set = (Set)hash.get(categoryName);
+    for(String categoryName : hash.keySet()) {
+      final Set<String> set = hash.get(categoryName);
       if(set.isEmpty()) {
         error.append("You must specify at least one judge for " + categoryName + "<br>");
       }

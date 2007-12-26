@@ -44,7 +44,7 @@ Utilities.closeStatement(stmt);
       needs to be executed before any reports can be generated.  You will be
       returned to this page if there are no errors summarizing scores.</li>
 
-      <li><a href="finalComputedScores.jsp">Final Computed Scores</a>
+      <li>Final Computed Scores
           <a href='<c:url value="/GetFile">
                      <c:param name="filename" value="finalComputedScores.pdf"/>
                    </c:url>' target='_new'>PDF version</a>
@@ -52,7 +52,9 @@ Utilities.closeStatement(stmt);
         
       <li><a href="categorizedScores.jsp">Categorized Scores</a></li>
 
-      <li><a href="scoreGroupScores.jsp">Categorized Scores by score group</a></li>
+      <li><a href="categoryScoresByJudge.jsp">Categorized Scores by judge</a></li>
+
+      <li><a href="CategoryScoresByScoreGroup">Categorized Scores by Score Group</a>.  This displays the scaled scores for each category by score group (all judges that saw a team).</li>
 
     </ol>
 

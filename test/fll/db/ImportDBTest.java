@@ -13,7 +13,6 @@ import java.util.zip.ZipInputStream;
 
 import junit.framework.JUnit4TestAdapter;
 
-import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -23,8 +22,6 @@ import org.junit.Test;
  * 
  */
 public class ImportDBTest {
-
-  private static final Logger LOG = Logger.getLogger(ImportDBTest.class);
 
   /**
    * To allow ant to find the unit tests

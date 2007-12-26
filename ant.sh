@@ -1,0 +1,1 @@
+ant --noconfig -lib lib -lib lib/ant -lib lib/test $*

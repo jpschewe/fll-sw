@@ -15,14 +15,11 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.log4j.Logger;
 
 /**
  * Process uploads from JSP pages.
  */
 public class UploadProcessor {
-
-  private static final Logger LOG = Logger.getLogger(UploadProcessor.class);
 
   /**
    * Processes <code>request</code> as a file upload and puts the results back
@@ -34,8 +31,8 @@ public class UploadProcessor {
    */
   public static void processUpload(final HttpServletRequest request) throws FileUploadException {
     // Parse the request
-    final List /* FileItem */items = UPLOAD.parseRequest(request);
-    final Iterator iter = items.iterator();
+    final List<?> items = UPLOAD.parseRequest(request);
+    final Iterator<?> iter = items.iterator();
     while (iter.hasNext()) {
       final FileItem item = (FileItem) iter.next();
       if (item.isFormField()) {

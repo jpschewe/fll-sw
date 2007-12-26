@@ -6,7 +6,7 @@
 	<property file="override.properties" />
 
 	<property name="app.name" value="${ant.project.name}" />
-	<property name="app.version" value="3.0" />
+	<property name="app.version" value="3.2" />
 
 	<property name="dir.build" value="build" />
 	<property name="tomcat" value="apache-tomcat-5.5.20" />
@@ -45,19 +45,22 @@
 	<!-- ==================== Compilation Classpath =========================== -->
 	<path id="application.classpath">
 		<pathelement location="${dir.lib}/JonsInfra-0.2.jar" />
-		<pathelement location="${dir.lib}/hsqldb-1.8.0.7.jar" />
 		<pathelement location="${dir.lib}/log4j-1.2.14.jar" />
-		<pathelement location="${dir.lib}/xercesImpl.jar" />
-		<pathelement location="${dir.lib}/xmlParserAPIs.jar" />
 		<pathelement location="${dir.lib}/opencsv-1.7-jps.jar" />
+
+		<pathelement location="${dir.lib}/commons-lang-2.0.jar" />
+		
+		<!-- database -->
+		<pathelement location="${dir.lib}/hsqldb-1.8.0.7.jar" />
+			
+    	<!-- xerces XML parser -->
+		<pathelement location="${dir.lib}/xercesImpl.jar" />
+		<pathelement location="${dir.lib}/xml-apis.jar" />
 	</path>
 
 	<path id="compile.classpath">
 		<!-- Include all JAR files that will be included in /WEB-INF/lib -->
 		<path refid="application.classpath" />
-
-		<pathelement location="${dir.lib}/commons-lang-2.0.jar" />
-		<pathelement location="${dir.lib}/opencsv-1.7-jps.jar" />
 
 		<!-- pdf library -->
 		<pathelement location="${dir.lib}/itext-1.4.8.jar" />
@@ -71,8 +74,6 @@
 		<pathelement location="${dir.lib}/standard.jar" />
 		<pathelement location="${dir.lib}/serializer.jar" />
 		<pathelement location="${dir.lib}/xalan.jar" />
-		<pathelement location="${dir.lib}/xercesImpl.jar" />
-		<pathelement location="${dir.lib}/xml-apis.jar" />
 
 
 		<!-- tomcat libraries -->
@@ -84,11 +85,18 @@
 	<path id="test.classpath">
 		<path refid="compile.classpath" />
 
+		<!-- http unit -->
 		<pathelement location="${dir.lib}/test/Tidy.jar" />
 		<pathelement location="${dir.lib}/test/httpunit.jar" />
 		<pathelement location="${dir.lib}/test/js.jar" />
 		<pathelement location="${dir.lib}/test/junit-4.1.jar" />
 		<pathelement location="${dir.lib}/test/nekohtml.jar" />
+		
+		<!-- uispec -->
+		<pathelement location="${dir.lib}/test/uispec4j-1.4.jar" />
+		
+		<pathelement location="${dir.web}/WEB-INF/classes" />
+		
 	</path>
 
 	<target name="init">
@@ -159,8 +167,8 @@
 		</zip>
 
 
-		<!-- build subjective scripts for testing -->
-		<path id="subjective.build.classpath">
+		<!-- build scripts for testing -->
+		<path id="application.build.classpath">
 			<path refid="application.classpath" />
 			<pathelement location="${basedir}/tomcat/webapps/${app.name}/WEB-INF/classes" />
 		</path>
@@ -169,7 +177,35 @@
 			<param name="class.main" value="fll.gui.SubjectiveFrame" />
 			<param name="-scripts.dir" value="${dir.build}/bin" />
 			<param name="-scripts.root" value=".." />
-			<reference torefid="-scripts.path" refid="subjective.build.classpath" />
+			<reference torefid="-scripts.path" refid="application.build.classpath" />
+		</antcall>
+		<antcall target="-buildscripts">
+			<param name="app.name" value="ImportDocument" />
+			<param name="class.main" value="fll.xml.ImportDocument" />
+			<param name="-scripts.dir" value="${dir.build}/bin" />
+			<param name="-scripts.root" value=".." />
+			<reference torefid="-scripts.path" refid="application.build.classpath" />
+		</antcall>
+		<antcall target="-buildscripts">
+			<param name="app.name" value="ExportDocument" />
+			<param name="class.main" value="fll.xml.ExportDocument" />
+			<param name="-scripts.dir" value="${dir.build}/bin" />
+			<param name="-scripts.root" value=".." />
+			<reference torefid="-scripts.path" refid="application.build.classpath" />
+		</antcall>
+		<antcall target="-buildscripts">
+			<param name="app.name" value="ImportDB" />
+			<param name="class.main" value="fll.db.ImportDB" />
+			<param name="-scripts.dir" value="${dir.build}/bin" />
+			<param name="-scripts.root" value=".." />
+			<reference torefid="-scripts.path" refid="application.build.classpath" />
+		</antcall>
+		<antcall target="-buildscripts">
+			<param name="app.name" value="ChallengeParser" />
+			<param name="class.main" value="fll.xml.ChallengeParser" />
+			<param name="-scripts.dir" value="${dir.build}/bin" />
+			<param name="-scripts.root" value=".." />
+			<reference torefid="-scripts.path" refid="application.build.classpath" />
 		</antcall>
 
 		<!-- copy libraries over -->
@@ -310,6 +346,10 @@
 		<move todir="${dir.build}/tomcat">
 			<fileset dir="${dir.build}/${tomcat}" />
 		</move>
+		
+	    <!-- clean out tomcat work directory -->
+		<delete dir="${dir.build}/tomcat/work" />
+					
 		<chmod perm="+x">
 			<fileset dir="${dir.build}/tomcat/bin">
 				<include name="*.sh" />
@@ -682,7 +722,6 @@
 	</target>
 
 	<target name="-buildscripts" depends="-buildscripts.check" unless="-scripts.uptodate">
-		<!-- JavaDOME  -->
 		<mkdir dir="${-scripts.dir}" />
 
 		<pathconvert targetos="unix" property="classpath.unix" refid="-scripts.path">
@@ -699,6 +738,11 @@
 				<filter token="JAVA_ARGS" value="" />
 			</filterset>
 		</copy>
+		<chmod perm="+x">
+			<fileset dir="${-scripts.dir}">
+				<include name="${app.name}.sh" />
+			</fileset>
+		</chmod>
 		<copy file="run.bat.t" tofile="${-scripts.dir}/${app.name}.bat" overwrite="true">
 			<filterset>
 				<filter token="CLASSPATH" value="${classpath.windows}" />

@@ -13,7 +13,6 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -29,8 +28,6 @@ import fll.xml.ChallengeParser;
  * 
  */
 public class ScoreTest extends TestCase {
-
-  private static final Logger LOG = Logger.getLogger(ScoreTest.class);
 
   /**
    * Test computed goals. Loads data/test-computed-goal.xml and uses a dummy
@@ -81,4 +78,58 @@ public class ScoreTest extends TestCase {
     score = ScoreUtils.computeTotalScore(dummyTeamScore);
     Assert.assertEquals(85, score, 0);
   }
+  
+  /**
+   * Test computed goals. Loads data/test-variables.xml and uses a dummy
+   * team score object.
+   */
+  @Test
+  public void testVariables() throws ParseException {
+    final InputStream stream = ScoreTest.class.getResourceAsStream("data/test-variables.xml");
+    Assert.assertNotNull(stream);
+    final Document document = ChallengeParser.parse(new InputStreamReader(stream));
+    Assert.assertNotNull(document);
+    final Element rootElement = document.getDocumentElement();
+    final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
+    Assert.assertNotNull(performanceElement);
+    
+    final Map<String, Double> simpleGoals = new HashMap<String, Double>();
+    final Map<String, String> enumGoals = new HashMap<String, String>();
+    
+    simpleGoals.put("pump_station", 1.0);
+    simpleGoals.put("flags", 1.0);
+    simpleGoals.put("flags_rows", 3.0);
+    enumGoals.put("robot_type", "rcx");
+    DummyTeamScore dummyTeamScore = new DummyTeamScore(performanceElement, 0, 1, simpleGoals, enumGoals);
+    Assert.assertEquals(269, dummyTeamScore.getComputedScore("computed"), 0);
+    double score = ScoreUtils.computeTotalScore(dummyTeamScore);
+    Assert.assertEquals(384, score, 0);
+    
+    simpleGoals.put("pump_station", 1.0);
+    simpleGoals.put("flags", 1.0);
+    simpleGoals.put("flags_rows", 3.0);
+    enumGoals.put("robot_type", "nxt");
+    dummyTeamScore = new DummyTeamScore(performanceElement, 1, 1, simpleGoals, enumGoals);
+    Assert.assertEquals(0, dummyTeamScore.getComputedScore("computed"), 0);
+    score = ScoreUtils.computeTotalScore(dummyTeamScore);
+    Assert.assertEquals(115, score, 0);
+
+    simpleGoals.put("pump_station", 1.0);
+    simpleGoals.put("flags", 1.0);
+    simpleGoals.put("flags_rows", 1.0);
+    enumGoals.put("robot_type", "rcx");
+    dummyTeamScore = new DummyTeamScore(performanceElement, 2, 1, simpleGoals, enumGoals);
+    Assert.assertEquals(131, dummyTeamScore.getComputedScore("computed"), 0);
+    score = ScoreUtils.computeTotalScore(dummyTeamScore);
+    Assert.assertEquals(216, score, 0);
+
+    simpleGoals.put("pump_station", 1.0);
+    simpleGoals.put("flags", 1.0);
+    simpleGoals.put("flags_rows", 1.0);
+    enumGoals.put("robot_type", "nxt");
+    dummyTeamScore = new DummyTeamScore(performanceElement, 3, 1, simpleGoals, enumGoals);
+    Assert.assertEquals(0, dummyTeamScore.getComputedScore("computed"), 0);
+    score = ScoreUtils.computeTotalScore(dummyTeamScore);
+    Assert.assertEquals(85, score, 0);
+  }  
 }

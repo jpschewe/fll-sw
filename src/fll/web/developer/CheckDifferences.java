@@ -9,8 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
-
 import fll.Utilities;
 
 /**
@@ -21,8 +19,6 @@ import fll.Utilities;
  * 
  */
 public class CheckDifferences extends HttpServlet {
-
-  private static final Logger LOG = Logger.getLogger(CheckDifferences.class);
 
   /**
    * 
@@ -39,8 +35,14 @@ public class CheckDifferences extends HttpServlet {
 
     Utilities.loadDBDriver();
     try {
-      
-      
+      final String tournament = request.getParameter("tournament");
+      if(null == tournament) {
+        message.append("You must select a tournament!");
+      } else {
+        // first check if the selected tournament exists in the destination database
+        
+
+      }
     } finally {
       Utilities.closeStatement(memStmt);
       Utilities.closeConnection(memConnection);
@@ -48,6 +50,5 @@ public class CheckDifferences extends HttpServlet {
 
     session.setAttribute("message", message.toString());
     response.sendRedirect(response.encodeRedirectURL((String)session.getAttribute("redirect_url")));
-
   }
 }

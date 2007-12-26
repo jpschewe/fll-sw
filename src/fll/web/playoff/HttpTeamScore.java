@@ -7,7 +7,6 @@ package fll.web.playoff;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
 /**
@@ -17,8 +16,6 @@ import org.w3c.dom.Element;
  * @version $Revision$
  */
 /* package */final class HttpTeamScore extends TeamScore {
-
-  private static final Logger LOG = Logger.getLogger(HttpTeamScore.class);
 
   public HttpTeamScore(final Element categoryElement, final int teamNumber, final int runNumber, final HttpServletRequest request) {
     super(categoryElement, teamNumber, runNumber);
@@ -38,7 +35,7 @@ import org.w3c.dom.Element;
    * @see fll.web.playoff.TeamScore#getRawScore(java.lang.String)
    */
   @Override
-  public double getRawScore(final String goalName) {
+  public Double getRawScore(final String goalName) {
     assertScoreExists();
     return Double.parseDouble(_request.getParameter(goalName));
   }

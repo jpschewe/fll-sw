@@ -7,26 +7,26 @@ package fll.model;
 
 import java.text.ParseException;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.web.playoff.TeamScore;
 
 /**
- * Represents a team score from a score element used inside the subjective table model. 
+ * Represents a team score from a score element used inside the subjective table
+ * model.
  * 
  * @author jpschewe
  * @version $Revision$
- *
+ * 
  */
-/*package*/ class SubjectiveTeamScore extends TeamScore {
-
-  private static final Logger LOG = Logger.getLogger(SubjectiveTeamScore.class);
+/* package */class SubjectiveTeamScore extends TeamScore {
 
   /**
-   * @param categoryDescription passed to superclass
-     * @param scoreElement the score element that describes the team score
+   * @param categoryDescription
+   *          passed to superclass
+   * @param scoreElement
+   *          the score element that describes the team score
    */
   public SubjectiveTeamScore(final Element categoryDescription, final Element scoreEle) throws ParseException {
     super(categoryDescription, Utilities.NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber")).intValue());
@@ -44,15 +44,16 @@ import fll.web.playoff.TeamScore;
   }
 
   @Override
-  public double getRawScore(final String goalName) {
+  public Double getRawScore(final String goalName) {
     final String value = _scoreEle.getAttribute(goalName);
     if(null == value || "".equals(value)) {
-      return 0;
-    }
-    try {
-      return Utilities.NUMBER_FORMAT_INSTANCE.parse(value).doubleValue();
-    } catch(final ParseException pe) {
-      throw new RuntimeException(pe);
+      return null;
+    } else {
+      try {
+        return Utilities.NUMBER_FORMAT_INSTANCE.parse(value).doubleValue();
+      } catch(final ParseException pe) {
+        throw new RuntimeException(pe);
+      }
     }
   }
 
@@ -65,6 +66,6 @@ import fll.web.playoff.TeamScore;
   public boolean scoreExists() {
     return true;
   }
-  
+
   private final Element _scoreEle;
 }

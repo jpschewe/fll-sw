@@ -16,8 +16,18 @@
 
 <c:if test="${empty database}">
   <%
-    Utilities.testHSQLDB(config.getServletContext().getRealPath("/WEB-INF/flldb"));
+    pageContext.setAttribute("dbok", Utilities.testHSQLDB(config.getServletContext().getRealPath("/WEB-INF/flldb")));
   %>
+  
+  <c:if test="${not dbok}">
+    <c:set scope="session" var="message">
+      <p class='error'>
+      The database does not exist yet or there is a problem with the database files. Please create the database.<br/>
+      </p>
+    </c:set>
+    <c:redirect url="/setup" />
+  </c:if>
+  
   <!-- HSQL -->
   <c:set var="database" scope="application">
     <%= config.getServletContext().getRealPath("/WEB-INF/flldb") %>
@@ -48,6 +58,17 @@
     final Connection connection = Utilities.createDBConnection("fll", "fll", database);
     application.setAttribute("connection", connection);
   }
+  pageContext.setAttribute("dbinitialized", Utilities.testDatabaseInitialized((Connection)application.getAttribute("connection")));
+%>
+  <c:if test="${not dbinitialized}">
+    <c:set scope="session" var="message">
+      <p class='error'>
+      The database is not yet initialized. Please create the database.<br/>
+      </p>
+    </c:set>
+    <c:redirect url="/setup" />
+  </c:if>
+<%	    
     
   if(null == application.getAttribute("challengeDocument")) {  
     final Document document = Queries.getChallengeDocument((Connection)application.getAttribute("connection"));
@@ -62,7 +83,6 @@
   }
 }
 %>
-
 
 <%-- keep browser from caching any content --%>
 <%

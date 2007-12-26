@@ -210,9 +210,6 @@ public class BracketData {
   private int _finalsRound;
   private boolean _showFinalScores;
 
-  // No public default constructor available
-  private BracketData() {}
-
   /**
    * Constructs a bracket data object with playoff data from the database.
    * 

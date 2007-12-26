@@ -5,6 +5,8 @@
  */
 package fll.xml;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -51,41 +53,51 @@ public final class ChallengeParser {
   private static final Logger LOG = Logger.getLogger(ChallengeParser.class);
 
   /**
-   * Just for debugging.
+   * Parse the specified XML document and report errors.
    * 
-   * @param args
-   *          ignored
-   */
-  /**
-   * @param args
+   * <ul>
+   *   <li>arg[0] - the location of the document to parse
+   * </ul>
    */
   public static void main(final String[] args) {
+    if(args.length < 1) {
+      LOG.fatal("Usage: ChallengeParser <xml file>");
+      System.exit(1);
+    }
+    final File challengeFile = new File(args[0]);
+    if(!challengeFile.exists()) {
+      LOG.fatal(challengeFile.getAbsolutePath() + " doesn't exist");
+      System.exit(1);
+    }
+    if(!challengeFile.canRead()) {
+      LOG.fatal(challengeFile.getAbsolutePath() + " is not readable");
+      System.exit(1);
+    }
+    if(!challengeFile.isFile()) {
+      LOG.fatal(challengeFile.getAbsolutePath() + " is not a file");
+      System.exit(1);
+    }
     try {
-      // final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-      final java.io.FileReader input = new java.io.FileReader(
-          "c:/Documents and Settings/jpschewe/projects/fll-sw/working-dir/challenge-descriptors/challenge-hsr-2006.xml");
+      final FileReader input = new FileReader(challengeFile);
       final Document challengeDocument = ChallengeParser.parse(input);
       if(null == challengeDocument) {
-        throw new RuntimeException("Error parsing challenge.xml");
+        LOG.fatal("Error parsing challenge descriptor");
+        System.exit(1);
       }
 
       LOG.info("Title: " + challengeDocument.getDocumentElement().getAttribute("title"));
       final org.w3c.dom.Element rootElement = challengeDocument.getDocumentElement();
       final org.w3c.dom.Element performanceElement = (org.w3c.dom.Element)rootElement.getElementsByTagName("Performance").item(0);
       final org.w3c.dom.NodeList goals = performanceElement.getElementsByTagName("goal");
+      LOG.info("The performance goals are");
       for(int i = 0; i < goals.getLength(); i++) {
         final Element element = (org.w3c.dom.Element)goals.item(i);
         final String name = element.getAttribute("name");
-        LOG.info("The min value for goal " + name + " is " + element.getAttribute("min"));
+        LOG.info(name);
       }
-
-      LOG.info("Document");
-      final XMLWriter xmlwriter = new XMLWriter();
-      xmlwriter.setOutput(new java.io.PrintWriter(System.out));
-      xmlwriter.write(challengeDocument);
-
     } catch(final Exception e) {
-      e.printStackTrace();
+      LOG.fatal(e, e);
+      System.exit(1);
     }
   }
 
@@ -271,8 +283,8 @@ public final class ChallengeParser {
           final String referencedGoalName = termElement.getAttribute("goal");
           final Element referencedGoalElement = goals.get(referencedGoalName);
           // can't use the raw score of an enum inside a polynomial term
-          if("raw".equals(goalValueType) && XMLUtils.isEnumeratedGoal(referencedGoalElement)) {
-            throw new RuntimeException("Cannot use the raw score from an enumerated goal in a polynomial term.  Referenced goal '"
+          if("raw".equals(goalValueType) && (XMLUtils.isEnumeratedGoal(referencedGoalElement) || XMLUtils.isComputedGoal(referencedGoalElement))) {
+            throw new RuntimeException("Cannot use the raw score from an enumerated or computed goal in a polynomial term.  Referenced goal '"
                 + referencedGoalName + "'");
           }
         }

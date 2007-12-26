@@ -38,5 +38,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/tomcat/jsp-api.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.14.jar"/>
+	<classpathentry kind="lib" path="lib/test/uispec4j-1.4.jar"/>
 	<classpathentry kind="output" path="build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>

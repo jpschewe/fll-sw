@@ -38,46 +38,46 @@
     <goal initialValue="0" max="8" min="0" multiplier="2" name="crates" title="Crates Elsewhere on Table"></goal>
     
     <restriction lowerBound="0" message="There are a maximum of 8 crates on the table" upperBound="8">
-      <term coefficient="1" goal="crates_base"></term>
-      <term coefficient="1" goal="crates"></term>
+      <term coefficient="1" goal="crates_base" scoreType="raw"></term>
+      <term coefficient="1" goal="crates" scoreType="raw"></term>
     </restriction>
 
     <tiebreaker>
       <test winner="high">
-        <term goal="crates_base"/>
+        <term goal="crates_base" scoreType="computed"/>
       </test> 
       <test winner="high">
-        <term goal="crates" />
+        <term goal="crates" scoreType="computed"/>
       </test> 
       <test winner="high">
-        <term goal="dolphin" />
+        <term goal="dolphin" scoreType="computed"/>
       </test>
       <test winner="high">
-        <term goal="flags_rows" />
+        <term goal="flags_rows" scoreType="computed"/>
       </test> 
       <test winner="high">
-        <term goal="flags"/>
+        <term goal="flags" scoreType="computed"/>
       </test> 
       <test winner="high">
-        <term goal="submarine" />
+        <term goal="submarine" scoreType="computed"/>
       </test> 
       <test winner="high">
-        <term goal="archaeological" />
+        <term goal="archaeological" scoreType="computed"/>
       </test> 
       <test winner="high">
-        <term goal="shipping_container" />
+        <term goal="shipping_container" scoreType="computed"/>
       </test> 
       <test winner="high">
-        <term goal="pump_station" />
+        <term goal="pump_station" scoreType="computed"/>
       </test> 
       <test winner="high">
-        <term goal="pipeline" />
+        <term goal="pipeline" scoreType="computed"/>
       </test>
       <test winner="high">
-        <term goal="sample_species" />
+        <term goal="sample_species" scoreType="computed"/>
       </test>
       <test winner="high">
-        <term goal="artifical_reef" />
+        <term goal="artifical_reef" scoreType="computed"/>
       </test>
     </tiebreaker>
 

@@ -5,22 +5,19 @@
  */
 package fll.db;
 
-import java.io.File;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
-
-import org.apache.log4j.Logger;
 
 import org.w3c.dom.Document;
 
+import fll.TestUtils;
 import fll.xml.ChallengeParser;
-
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.io.InputStream;
-import junit.framework.Assert;
 
 /**
  * Test generating various databases.
@@ -29,8 +26,6 @@ import junit.framework.Assert;
  */
 public class GenerateDBTest extends TestCase {
   
-  private static final Logger LOG = Logger.getLogger(GenerateDBTest.class);
-
   /**
    * Test creating a new database from scratch and creating over an existing
    * database.
@@ -47,28 +42,6 @@ public class GenerateDBTest extends TestCase {
 
     GenerateDB.generateDB(document, database, true);
     
-    cleanupDB(database);
-  }
-
-  /**
-   * Remove the files associated with the database.  This may mark them to be
-   * deleted on exit of the JVM if they cannot be deleted immediately.
-   */
-  private static void cleanupDB(final String database) {
-    final String[] extensions = new String[] {
-      "properties",
-      "script",
-      "data",
-      "backup",
-      "log",
-    };
-    for(int i=0; i<extensions.length; i++) {
-      final File file = new File(database + "." + extensions[i]);
-      if(file.exists()) {
-        if(!file.delete()) {
-          file.deleteOnExit();
-        }
-      }
-    }
+    TestUtils.cleanupDB(database);
   }
 }

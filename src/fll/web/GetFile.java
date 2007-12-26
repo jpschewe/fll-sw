@@ -5,25 +5,11 @@
  */
 package fll.web;
 
-import com.lowagie.text.DocumentException;
-
-import fll.db.Queries;
-import fll.Team;
-import fll.Utilities;
-
-import fll.db.DumpDB;
-import fll.pdf.report.FinalComputedScores;
-import fll.pdf.scoreEntry.ScoresheetGenerator;
-
-import fll.xml.XMLUtils;
-import fll.xml.XMLWriter;
-
 import java.io.IOException;
-
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
-
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -37,23 +23,33 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.w3c.dom.Document;
 
+import com.lowagie.text.DocumentException;
+
+import fll.Team;
+import fll.Utilities;
+import fll.db.DumpDB;
+import fll.db.Queries;
+import fll.pdf.report.FinalComputedScores;
+import fll.pdf.scoreEntry.ScoresheetGenerator;
+import fll.xml.XMLUtils;
+import fll.xml.XMLWriter;
 
 /**
  * Used to generate various files for download.
- *
+ * 
  * @version $Revision$
  */
 public final class GetFile extends HttpServlet {
-   
+
   public GetFile() {
-     
+
   }
 
   @Override
   protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
     doGet(request, response);
   }
-  
+
   @Override
   protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
     try {
@@ -66,14 +62,42 @@ public final class GetFile extends HttpServlet {
       throw new RuntimeException(sqle);
     }
   }
-      
+
   /**
-   * Get a file.  Use the parameter "filename" to determine which file.
+   * Write out the subjective scores data for the current tournament.
+   * 
+   * @param stream
+   *          where to write the scores file
+   * @throws IOException
    */
-  public static void getFile(final ServletContext application,
-                             final HttpServletRequest request,
-                             final HttpServletResponse response)
-    throws SQLException, IOException, DocumentException, ParseException {
+  public static void writeSubjectiveScores(final Connection connection, final Document challengeDocument, final OutputStream stream)
+      throws IOException, SQLException {
+    final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
+    final String tournament = Queries.getCurrentTournament(connection);
+
+    final XMLWriter xmlwriter = new XMLWriter();
+
+    final ZipOutputStream zipOut = new ZipOutputStream(stream);
+    xmlwriter.setOutput(zipOut, "UTF8");
+
+    zipOut.putNextEntry(new ZipEntry("challenge.xml"));
+    xmlwriter.write(challengeDocument);
+    zipOut.closeEntry();
+
+    zipOut.putNextEntry(new ZipEntry("score.xml"));
+    xmlwriter.setNeedsIndent(true);
+    final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument, tournamentTeams.values(), connection, tournament);
+    xmlwriter.write(scoreDocument);
+    zipOut.closeEntry();
+
+    zipOut.close();
+  }
+
+  /**
+   * Get a file. Use the parameter "filename" to determine which file.
+   */
+  public static void getFile(final ServletContext application, final HttpServletRequest request, final HttpServletResponse response)
+      throws SQLException, IOException, DocumentException, ParseException {
     final String filename = request.getParameter("filename");
     if("teams.xml".equals(filename)) {
       final Connection connection = (Connection)application.getAttribute("connection");
@@ -92,11 +116,8 @@ public final class GetFile extends HttpServlet {
       if(Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
         final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
         final String tournament = Queries.getCurrentTournament(connection);
-      
-        final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument,
-                                                                               tournamentTeams.values(),
-                                                                               connection,
-                                                                               tournament);
+
+        final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument, tournamentTeams.values(), connection, tournament);
         final XMLWriter xmlwriter = new XMLWriter();
 
         response.reset();
@@ -111,38 +132,14 @@ public final class GetFile extends HttpServlet {
         final ServletOutputStream os = response.getOutputStream();
         os.println("Judges are not properly assigned, please go back to the administration page and assign judges");
       }
-    } else if("subjective.zip".equals(filename)) {
+    } else if("subjective-data.zip".equals(filename)) {
       final Connection connection = (Connection)application.getAttribute("connection");
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
       if(Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
-      
-        final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-        final String tournament = Queries.getCurrentTournament(connection);
-      
-        
         response.reset();
         response.setContentType("application/zip");
-        response.setHeader("Content-Disposition", "filename=subjective.zip");
-        
-        final XMLWriter xmlwriter = new XMLWriter();
-        
-        final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
-        xmlwriter.setOutput(zipOut, "UTF8");
-      
-        zipOut.putNextEntry(new ZipEntry("challenge.xml"));
-        xmlwriter.write(challengeDocument);
-        zipOut.closeEntry();
-        
-        zipOut.putNextEntry(new ZipEntry("score.xml"));
-        xmlwriter.setNeedsIndent(true);
-        final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument,
-            tournamentTeams.values(),
-            connection,
-            tournament);
-        xmlwriter.write(scoreDocument);
-        zipOut.closeEntry();
-      
-        zipOut.close();
+        response.setHeader("Content-Disposition", "filename=subjective-data.zip");
+        writeSubjectiveScores(connection, challengeDocument, response.getOutputStream());
       } else {
         response.reset();
         response.setContentType("text/plain");
@@ -152,11 +149,11 @@ public final class GetFile extends HttpServlet {
     } else if("database.zip".equals(filename)) {
       final Connection connection = (Connection)application.getAttribute("connection");
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-      
+
       response.reset();
       response.setContentType("application/zip");
       response.setHeader("Content-Disposition", "filename=database.zip");
-      
+
       final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
       DumpDB.dumpDatabase(zipOut, connection, challengeDocument);
       zipOut.close();
@@ -176,7 +173,8 @@ public final class GetFile extends HttpServlet {
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
       final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("teamNumber")).intValue();
-      // Create the scoresheet generator - must provide correct number of scoresheets
+      // Create the scoresheet generator - must provide correct number of
+      // scoresheets
       final ScoresheetGenerator scoresheetGen = new ScoresheetGenerator(teamNumber, challengeDocument, connection);
 
       // Write the scoresheets to the browser - content-type: application/pdf
@@ -189,7 +187,8 @@ public final class GetFile extends HttpServlet {
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
 
-      // Create the scoresheet generator - must provide correct number of scoresheets
+      // Create the scoresheet generator - must provide correct number of
+      // scoresheets
       final ScoresheetGenerator scoresheetGen = new ScoresheetGenerator(request.getParameterMap(), connection, tournament, challengeDocument);
 
       // Write the scoresheets to the browser - content-type: application/pdf
@@ -201,29 +200,30 @@ public final class GetFile extends HttpServlet {
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
 
-      // Create the scoresheet generator - must provide correct number of scoresheets
+      // Create the scoresheet generator - must provide correct number of
+      // scoresheets
       final ScoresheetGenerator scoresheetGen = new ScoresheetGenerator(Queries.getScoresheetLayoutNUp(connection), challengeDocument);
       // Write the scoresheets to the browser - content-type: application/pdf
       scoresheetGen.writeFile(connection, response.getOutputStream());
-      
+
     } else {
       response.reset();
       response.setContentType("text/plain");
       final ServletOutputStream os = response.getOutputStream();
       os.println("Unknown filename: " + filename);
       os.println("content type: " + request.getContentType());
-//       final java.util.Map params = request.getParameterMap();
-//       final java.util.Iterator iter = params.keySet().iterator();
-//       while(iter.hasNext()) {
-//         final String key = (String)iter.next();
-//         final String[] values = (String[])params.get(key);
-//         response.getOutputStream().println("param: " + key);
-//         //for(int i=0; i<values.length; i++) {
-//         //  response.getOutputStream().println("  value: " + values[i]);
-//         //}
-//       }
+      // final java.util.Map params = request.getParameterMap();
+      // final java.util.Iterator iter = params.keySet().iterator();
+      // while(iter.hasNext()) {
+      // final String key = (String)iter.next();
+      // final String[] values = (String[])params.get(key);
+      // response.getOutputStream().println("param: " + key);
+      // //for(int i=0; i<values.length; i++) {
+      // // response.getOutputStream().println(" value: " + values[i]);
+      // //}
+      // }
     }
     response.flushBuffer();
-  }                             
+  }
 
 }

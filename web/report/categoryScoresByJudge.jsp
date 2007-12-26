@@ -1,6 +1,5 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="fll.web.report.ScoreGroupScores" %>
 <%@ page import="fll.db.Queries" %>
       
 <%@ page import="java.sql.Connection" %>
@@ -8,7 +7,6 @@
 <%@ page import="org.w3c.dom.Document" %>
   
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
 final String tournamentReq = request.getParameter("currentTournament");
 final String tournament;
@@ -29,15 +27,16 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
 
   <body>
 
-    <h1>FLL Categorized Score Summary by score group</h1>
+    <h1>FLL Categorized Score Summary by judge</h1>
     <hr/>
     <h2>Tournament: <c:out value="${currentTournament}"/></h2>
     <c:forEach items="${divisions}" var="division">
       <x:forEach select="$challengeDocument/fll/subjectiveCategory">
+        <x:set var="category" select="string(./@name)"/>
         <sql:query var="judges" dataSource="${datasource}">
-          SELECT DISTINCT <x:out select="./@name"/>.Judge FROM <x:out select="./@name"/>, current_tournament_teams
-            WHERE <x:out select="./@name"/>.TeamNumber = current_tournament_teams.TeamNumber
-            AND <x:out select="./@name"/>.Tournament = '<c:out value="${currentTournament}"/>'
+          SELECT DISTINCT ${category}.Judge FROM ${category}, current_tournament_teams
+            WHERE ${category}.TeamNumber = current_tournament_teams.TeamNumber
+            AND ${category}.Tournament = '<c:out value="${currentTournament}"/>'
             AND current_tournament_teams.event_division = '<c:out value="${division}"/>'
         </sql:query>
         <c:forEach var="judgeRow" items="${judges.rows}">
@@ -49,13 +48,14 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
                  Teams.TeamNumber
                 ,Teams.Organization
                 ,Teams.TeamName
-                ,<x:out select="./@name"/>.ComputedTotal
-                ,<x:out select="./@name"/>.StandardizedScore
-                FROM Teams, <x:out select="./@name"/>
-                WHERE Teams.TeamNumber = <x:out select="./@name"/>.TeamNumber
+                ,${category}.ComputedTotal
+                ,${category}.StandardizedScore
+                FROM Teams, ${category}
+                WHERE Teams.TeamNumber = ${category}.TeamNumber
                 AND Tournament = '<c:out value="${currentTournament}"/>'
                 AND Judge = '<c:out value="${judgeRow.Judge}"/>'
-                ORDER BY <x:out select="./@name"/>.ComputedTotal DESC
+                AND ${category}.ComputedTotal IS NOT NULL
+                ORDER BY ${category}.ComputedTotal DESC
             </sql:query>
             <c:forEach var="row" items="${scores.rowsByIndex}">
               <tr>

@@ -345,13 +345,13 @@ public class FullTournamentTest extends TestCase {
       Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully summarized scores"));
 
       // generate reports
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/finalComputedScores.jsp");
-      response = conversation.getResponse(request);
-      Assert.assertTrue(response.isHTML());
       request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/categorizedScores.jsp");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/scoreGroupScores.jsp");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/categoryScoresByJudge.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/CategoryScoresByScoreGroup");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
 
@@ -360,8 +360,6 @@ public class FullTournamentTest extends TestCase {
       request.setParameter("filename", "finalComputedScores.pdf");
       response = conversation.getResponse(request);
       Assert.assertEquals("application/pdf", response.getContentType());
-
-      // TODO should ask for the HTML reports too
 
       // check ranking
       // final Connection connection = TestUtils.createDBConnection();
@@ -440,7 +438,7 @@ public class FullTournamentTest extends TestCase {
 
       // download subjective zip
       WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "GetFile");
-      request.setParameter("filename", "subjective.zip");
+      request.setParameter("filename", "subjective-data.zip");
       WebResponse response = conversation.getResponse(request);
       Assert.assertEquals("application/zip", response.getContentType());
       final InputStream zipStream = response.getInputStream();
