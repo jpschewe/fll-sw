@@ -165,7 +165,7 @@ public final class ImportDB {
       final Document challengeDocument = loadDatabaseDump(zipfile, memConnection);
       GenerateDB.generateDB(challengeDocument, database, true);
 
-      destConnection = Utilities.createDBConnection("fll", "fll", database);
+      destConnection = Utilities.createDBConnection(database);
 
       // load the teams table into the destination database
       destStmt = destConnection.createStatement();

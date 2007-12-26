@@ -57,6 +57,8 @@ public final class DumpDB {
 
       CSVWriter csvwriter;
 
+      // TODO output TournamentParameters once 1853081 is completed
+      
       // teams
       output.putNextEntry(new ZipEntry("Teams.csv"));
       csvwriter = new CSVWriter(outputWriter);

@@ -64,7 +64,7 @@ public final class GenerateDB {
         final String db = "fll";
         generateDB(challengeDocument, db, true);
 
-        final Connection connection = Utilities.createDBConnection("fll", "fll", db);
+        final Connection connection = Utilities.createDBConnection(db);
         final Document document = Queries.getChallengeDocument(connection);
         LOG.info("Title: " + document.getDocumentElement().getAttribute("title"));
         connection.close();
@@ -79,25 +79,40 @@ public final class GenerateDB {
   }
 
   /**
-   * Generate a completly new DB from document.  This also stores the document
-   * in the database for later use.
-   *
-   * @param document and XML document that describes a tournament
+   * Create a new database <code>database</code> and then call {@link #generateDB(Document, Connection, boolean)}.
+   * 
    * @param database name for the database to generate
-   * @param forceRebuild recreate all tables from scratch, if false don't
-   * recreate the tables that hold team information
    */
   public static void generateDB(final Document document,
                                 final String database,
                                 final boolean forceRebuild)
     throws SQLException, UnsupportedEncodingException {
     Connection connection = null;
+    try {
+      connection = Utilities.createDBConnection(database);
+      generateDB(document, connection, forceRebuild);
+    } finally {
+      Utilities.closeConnection(connection);
+    }
+  }
+  
+  /**
+   * Generate a completly new DB from document.  This also stores the document
+   * in the database for later use.
+   *
+   * @param document and XML document that describes a tournament
+   * @param database connection to the database to create the tables in
+   * @param forceRebuild recreate all tables from scratch, if false don't
+   * recreate the tables that hold team information
+   */
+  public static void generateDB(final Document document,
+                                final Connection connection,
+                                final boolean forceRebuild) throws SQLException, UnsupportedEncodingException {
+    
     Statement stmt = null;
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      connection = Utilities.createDBConnection(database);
-      
       stmt = connection.createStatement();
 
       stmt.executeUpdate("SET WRITE_DELAY 100 MILLIS");
