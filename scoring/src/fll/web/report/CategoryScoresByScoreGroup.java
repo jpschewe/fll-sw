@@ -48,14 +48,15 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
 
   @Override
   protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
-    final PrintWriter writer = response.getWriter();
     final ServletContext application = getServletContext();
     final Connection connection = (Connection)application.getAttribute("connection");
     final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 
+    final PrintWriter writer = response.getWriter();
+    writer.write("<html><body>");
     writer.write("<h1>FLL Categorized Score Summary by score group</h1>");
     writer.write("<hr/>");
-    
+
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
     final NodeList subjectiveCategoryElements = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
@@ -80,7 +81,8 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
         for(String categoryTitle : subjectiveCategories.keySet()) {
           final String categoryName = subjectiveCategories.get(categoryTitle);
 
-          prep = connection.prepareStatement("SELECT Judge FROM " + categoryName + " WHERE TeamNumber = ? AND Tournament = ? AND ComputedTotal IS NOT NULL ORDER BY Judge");
+          prep = connection.prepareStatement("SELECT Judge FROM " + categoryName
+              + " WHERE TeamNumber = ? AND Tournament = ? AND ComputedTotal IS NOT NULL ORDER BY Judge");
           prep.setString(2, currentTournament);
 
           // foreach team, put the team in a score group
@@ -120,24 +122,44 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
             prep.setString(1, currentTournament);
             rs = prep.executeQuery();
             while(rs.next()) {
+              final String teamNum = rs.getString(1);
+              final String org = rs.getString(2);
+              final String name = rs.getString(3);
+              final double score = rs.getDouble(4);
+              final boolean scoreWasNull = rs.wasNull();
               writer.write("<tr>");
               writer.write("<td>");
-              writer.write(rs.getString(1));
+              if(null == teamNum) {
+                writer.write("");
+              } else {
+                writer.write(teamNum);
+              }
               writer.write("</td>");
               writer.write("<td>");
-              writer.write(rs.getString(2));
+              if(null == org) {
+                writer.write("");
+              } else {
+                writer.write(org);
+              }
               writer.write("</td>");
               writer.write("<td>");
-              writer.write(rs.getString(3));
+              if(null == name) {
+                writer.write("");
+              } else {
+                writer.write(name);
+              }
               writer.write("</td>");
-              writer.write("<td>");
-              writer.write(Utilities.NUMBER_FORMAT_INSTANCE.format(rs.getDouble(4)));
+              if(!scoreWasNull) {
+                writer.write("<td>");
+                writer.write(Utilities.NUMBER_FORMAT_INSTANCE.format(score));
+              } else {
+                writer.write("<td align='center' class='warn'>No Score");
+              }
               writer.write("</td>");
               writer.write("</tr>");
             }
             writer.write("</table");
           }
-
         }
       }
 
@@ -148,5 +170,6 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
       Utilities.closeStatement(stmt);
     }
 
+    writer.write("</body></html>");
   }
 }

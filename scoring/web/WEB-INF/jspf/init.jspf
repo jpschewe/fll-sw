@@ -55,7 +55,7 @@
   final String database = (String)application.getAttribute("database");
   //Initialize the connection
   if(null == application.getAttribute("connection")) {
-    final Connection connection = Utilities.createDBConnection("fll", "fll", database);
+    final Connection connection = Utilities.createDBConnection(database);
     application.setAttribute("connection", connection);
   }
   pageContext.setAttribute("dbinitialized", Utilities.testDatabaseInitialized((Connection)application.getAttribute("connection")));
