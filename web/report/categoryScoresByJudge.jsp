@@ -4,8 +4,6 @@
       
 <%@ page import="java.sql.Connection" %>
 
-<%@ page import="org.w3c.dom.Document" %>
-  
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
 final String tournamentReq = request.getParameter("currentTournament");

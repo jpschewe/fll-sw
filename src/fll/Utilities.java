@@ -236,37 +236,6 @@ public final class Utilities {
   }
 
   /**
-   * Calls createDBConnection with fll as username and password
-   * 
-   * @see #createDBConnection(String, String)
-   */
-  public static Connection createDBConnection() throws RuntimeException {
-    return createDBConnection("fll", "fll");
-  }
-
-  /**
-   * Calls createDBConnection with fll as username and password.
-   * 
-   * @param database
-   *          the database to use
-   * @see #createDBConnection(String, String)
-   */
-  public static Connection createDBConnection(final String database) throws RuntimeException {
-    return createDBConnection("fll", "fll", database);
-  }
-
-  /**
-   * Calls createDBConnection with fll as the database
-   * 
-   * @see #createDBConnection(String, String, String)
-   * @throws RuntimeException
-   *           on an error
-   */
-  public static Connection createDBConnection(final String username, final String password) throws RuntimeException {
-    return createDBConnection(username, password, "fll");
-  }
-
-  /**
    * Creates a database connection.
    * 
    * @param username
@@ -278,7 +247,7 @@ public final class Utilities {
    * @throws RuntimeException
    *           on an error
    */
-  public static Connection createDBConnection(final String username, final String password, final String database) throws RuntimeException {
+  public static Connection createDBConnection(final String database) throws RuntimeException {
     // create connection to database and puke if anything goes wrong
     loadDBDriver();
 
@@ -290,7 +259,7 @@ public final class Utilities {
     try {
       connection = DriverManager.getConnection(myURL);
     } catch(final SQLException sqle) {
-      throw new RuntimeException("Unable to create connection: " + sqle.getMessage() + " database: " + database + " user: " + username);
+      throw new RuntimeException("Unable to create connection: " + sqle.getMessage() + " database: " + database);
     }
 
     if(Boolean.getBoolean("inside.test")) {
