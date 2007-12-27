@@ -258,6 +258,7 @@ public final class GenerateDB {
         createStatement.append(" TimeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,");
         createStatement.append(" NoShow boolean DEFAULT FALSE NOT NULL,");
         createStatement.append(" Bye boolean DEFAULT FALSE NOT NULL,");
+        createStatement.append(" Verified boolean DEFAULT FALSE NOT NULL,");
         final NodeList goals = performanceElement.getElementsByTagName("goal");
         for(int i=0; i<goals.getLength(); i++) {
           final Element element = (Element)goals.item(i);

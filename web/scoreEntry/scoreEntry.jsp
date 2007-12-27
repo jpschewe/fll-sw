@@ -30,6 +30,7 @@ if(null == lTeamNum) {
 
 final int teamNumber = Integer.parseInt(lTeamNum);
 final Connection connection = (Connection)application.getAttribute("connection");
+final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
 final Map tournamentTeams = Queries.getTournamentTeams(connection);
 if(!tournamentTeams.containsKey(new Integer(teamNumber))) {
   //FIX error, redirect to error page
@@ -75,6 +76,12 @@ if("1".equals(request.getParameter("EditFlag"))) {
       }
 	}
   lRunNumber = nextRunNumber;
+}
+final String roundText;
+if(lRunNumber > numSeedingRounds) {
+	roundText = "Playoff&nbsp;Round&nbsp;" + (lRunNumber - numSeedingRounds);
+} else {
+	roundText = "Run&nbsp;Number&nbsp;" + lRunNumber;
 }
 
 final String minimumAllowedScoreStr = ((Element)challengeDocument.getDocumentElement().getElementsByTagName("Performance").item(0)).getAttribute("minimumScore");
@@ -229,7 +236,7 @@ function CancelClicked() {
         <tr>
           <td align="center" valign="middle">
           <!-- top info bar (team name etc) -->
-<%if(lRunNumber <= Queries.getNumSeedingRounds(connection)) {%>
+<%if(lRunNumber <= numSeedingRounds) {%>
             <c:if test="${editFlag}">
               <table border="1" cellpadding="0" cellspacing="0" width="100%" bgcolor='yellow'>
             </c:if>
@@ -254,7 +261,7 @@ function CancelClicked() {
                     </tr>
                     <tr align="center">
                       <td>
-                        <font face="Arial" size="4" color='#0000ff'>#<%=team.getTeamNumber()%>&nbsp;<%=team.getOrganization()%>&nbsp;<%=team.getTeamName()%>&nbsp;--&nbsp;Run Number:&nbsp;<%=lRunNumber%></font>
+                        <font face="Arial" size="4" color='#0000ff'>#<%=team.getTeamNumber()%>&nbsp;<%=team.getOrganization()%>&nbsp;<%=team.getTeamName()%>&nbsp;--&nbsp;<%=roundText%></font>
                       </td>
                     </tr>
                   </table> <!--  end inner box on title -->
