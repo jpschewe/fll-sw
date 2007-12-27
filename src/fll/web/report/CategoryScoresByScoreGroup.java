@@ -111,7 +111,7 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
 
           // select from FinalScores
           for(String scoreGroup : scoreGroups.keySet()) {
-            writer.write("<h3>" + categoryTitle + " Division: " + division + " Score Group: " + scoreGroup + "</h3");
+            writer.write("<h3>" + categoryTitle + " Division: " + division + " Score Group: " + scoreGroup + "</h3>");
             writer.write("<table border='0'>");
             writer.write("<tr><th colspan='3'>Team # / Organization / Team Name</th><th>Scaled Score</th></tr>");
 
