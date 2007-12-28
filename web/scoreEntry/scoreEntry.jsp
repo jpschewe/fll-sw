@@ -1,20 +1,14 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
-      
+
 <%@ page import="fll.Team" %>
-<%@ page import="fll.db.Queries" %>
-<%@ page import="fll.Utilities" %>
 <%@ page import="fll.web.playoff.Playoff" %>
 <%@ page import="fll.web.scoreEntry.ScoreEntry" %>
-  
-<%@ page import="org.w3c.dom.Document" %>
+
 <%@ page import="org.w3c.dom.Element" %>
-  
+
 <%@ page import="java.text.NumberFormat" %>
 <%@ page import="java.util.Map" %>
 
-
-<%@ page import="java.sql.Connection" %>
-  
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 
@@ -95,7 +89,7 @@ pageContext.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == maxRunComple
 final String tournament = Queries.getCurrentTournament(connection);
 pageContext.setAttribute("isBye", Boolean.valueOf(Queries.isBye(connection, tournament, teamNumber, lRunNumber)));
 %>
-  
+
 <html>
   <head>
     <c:if test="${not empty param.EditFlag}" var="editFlag">
@@ -105,7 +99,7 @@ pageContext.setAttribute("isBye", Boolean.valueOf(Queries.isBye(connection, tour
       <title><x:out select="$challengeDocument/fll/@title"/> (Score Entry)</title>
       <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     </c:if>
-      
+
     <style type='text/css'>
       TD {font-family: arial}
     </style>
@@ -132,7 +126,7 @@ function init() {
     gbl_NoShow = 0;
     reset();
   </c:if>
-      
+
   refresh();
 }
 
@@ -146,7 +140,7 @@ function refresh() {
   } else {
     document.scoreEntry.NoShow[1].checked = true;
   }        
-        
+
   var score = 0;
 
   <%ScoreEntry.generateRefreshBody(out, challengeDocument);%>
@@ -157,7 +151,7 @@ function refresh() {
   }
 
   document.scoreEntry.totalScore.value = score;
-  
+
   check_restrictions();
 }
 
@@ -165,16 +159,16 @@ function check_restrictions() {
   var error_found = false;
   
 <%ScoreEntry.generateCheckRestrictionsBody(out, challengeDocument);%>
-  
+
   if(error_found) {
     document.getElementById("submit").disabled = true;
   } else {
     document.getElementById("submit").disabled = false;
   }
 }
-  
+
 <%ScoreEntry.generateIsConsistent(out, challengeDocument);%>
-    
+
 
 <%ScoreEntry.generateIncrementMethods(out, challengeDocument);%>
 </c:if> <!-- end check for bye -->
@@ -321,10 +315,9 @@ function CancelClicked() {
                     </tr>
                   </table>
                 </td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                  <td>&nbsp;</td>
+                <td colspan='3'>&nbsp;</td>
               </tr>
+              <%ScoreEntry.generateVerificationInput(out, challengeDocument, request);%>
             </c:if> <!-- end check for bye -->
             <c:if test="${isBye}">
               <tr>
@@ -347,10 +340,7 @@ function CancelClicked() {
                   <input type='submit' name='delete' value='Delete Score' onclick='return confirm("Are you sure you want to delete this score?")'>
                 </c:if>
               </td>
-              <td align='right'>
-                &nbsp;
-              </td>
-              <td>&nbsp;</td>
+              <td colspan='2'>&nbsp;</td>
             </tr>
           </table> <!-- end score entry table  -->
 

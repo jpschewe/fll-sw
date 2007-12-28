@@ -128,6 +128,14 @@ public final class ScoreEntry {
 
       formatter.format("%n%n");
     } // end for each goal
+    
+    // method for double-check field
+    formatter.format("<!-- Verified -->%n");
+    formatter.format("var Verified;%n");
+    formatter.format("function %s(newValue) {%n", getSetMethodName("Verified"));
+    formatter.format("  Verified = newValue;%n");
+    formatter.format("  refresh();%n");
+    formatter.format("}%n%n%n");
 
     // generate the methods to update the computed goal variables
     final NodeList computedGoals = performanceElement.getElementsByTagName("computedGoal");
@@ -202,6 +210,13 @@ public final class ScoreEntry {
       formatter.format("document.scoreEntry.score_%s.value = %s;%n", name, computedVarName);
       formatter.format("%n");
     } // end foreach goal
+
+    // set the radio buttons for score verification
+    formatter.format("if(Verified == 0) {%n");
+    formatter.format("  document.scoreEntry.Verified[1].checked = true%n"); // NO
+    formatter.format("} else {%n");
+    formatter.format("  document.scoreEntry.Verified[0].checked = true%n"); // YES
+    formatter.format("}%n");
 
     // output calls to the computed goal methods
     final NodeList computedGoals = performanceElement.getElementsByTagName("computedGoal");
@@ -329,8 +344,30 @@ public final class ScoreEntry {
         writer.println("  " + getVarNameForRawScore(name) + " = " + initialValue + ";");
       }
     }
+    // Reset the double-check value
+    writer.println("  Verified = 0");
 
     writer.println("}");
+  }
+
+  /**
+   * Generates the portion of the score entry form where the user checks whether
+   * the score has been double-checked or not.
+   * 
+   * @param writer
+   * @param document
+   * @param request
+   * @throws IOException
+   */
+  public static void generateVerificationInput(final JspWriter writer, final Document document, final HttpServletRequest request) throws IOException {
+    writer.println("<!-- Score Verification -->");
+    writer.println("    <tr>");
+    writer.println("      <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Score entry verified:</font></td>");
+    writer.println("      <td><table border='0' cellpadding='0' cellspacing='0' width='150'><tr align='center'>");
+    generateYesNoButtons("Verified", writer);
+    writer.println("      </tr></table></td>");
+    writer.println("      <td colspan='3'>&nbsp;</td>");
+    writer.println("    </tr>");
   }
 
   /**
@@ -504,6 +541,8 @@ public final class ScoreEntry {
             writer.println("  " + rawVarName + " = " + rs.getString(name) + ";");
           }
         }
+        // Always init the special double-check column
+        writer.println("  Verified = " + rs.getString("Verified") + ";");
       } else {
         throw new RuntimeException("Cannot find TeamNumber and RunNumber in Performance table" + " TeamNumber: " + teamNumber + " RunNumber: "
             + runNumber);

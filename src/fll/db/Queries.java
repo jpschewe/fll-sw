@@ -323,6 +323,9 @@ public final class Queries {
 
     columns.append(", NoShow");
     values.append(", " + noShow);
+    
+    columns.append(", Verified");
+    values.append(", " + request.getParameter("Verified"));
 
     // now do each goal
     final Element rootElement = document.getDocumentElement();
@@ -453,7 +456,7 @@ public final class Queries {
                     + " AND Tournament = '" + currentTournament + "'");
                 if(rs.next()) {
                   throw new RuntimeException("Unable to update score for team number " + teamNumber + " in playoff round " + playoffRun
-                      + " because that team " + " has scores entered in subsequent rounds which would become inconsistent. "
+                      + " because that team has scores entered in subsequent rounds which would become inconsistent. "
                       + "Delete those scores and then you may update this score.");
                 }
               } finally {
@@ -477,8 +480,7 @@ public final class Queries {
               }
             }
             // No dependent score was found, so we can update the playoff table
-            // to reflect
-            // the new winner.
+            // to reflect the new winner.
             try {
               stmt = connection.createStatement();
               sql.append("UPDATE PlayoffData SET Team = " + newWinner.getTeamNumber());
@@ -545,6 +547,8 @@ public final class Queries {
         sql.append(", " + name + " = " + value);
       }
     }
+    
+    sql.append(", Verified = " + request.getParameter("Verified"));
 
     sql.append(" WHERE TeamNumber = " + teamNumber);
 
@@ -634,9 +638,8 @@ public final class Queries {
             }
           }
           // No dependent score was found, so we can update the playoff table to
-          // reflect
-          // the deletion of this score by removing the team from the next run
-          // column in the bracket
+          // reflect the deletion of this score by removing the team from the
+          // next run column in the bracket
           try {
             stmt = connection.createStatement();
             sql.append("UPDATE PlayoffData SET Team = " + Team.NULL_TEAM_NUMBER);
