@@ -1,12 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="org.w3c.dom.Document" %>
-
-<%@ page import="fll.db.Queries" %>
 <%@ page import="fll.web.playoff.BracketData" %>
-  
-<%@ page import="java.sql.Connection" %>
-  
+
 <%
 /*
   application parameters
@@ -15,7 +10,6 @@
 */
 
 final Connection connection = (Connection)application.getAttribute("connection");
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final String currentTournament = Queries.getCurrentTournament(connection);
 
 if(null == application.getAttribute("playoffDivision")) {
@@ -25,7 +19,7 @@ final String division = (String)application.getAttribute("playoffDivision");
 
 final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection,division);
 
-final int playoffRoundNumber;  
+final int playoffRoundNumber;
 //check application for playoffRoundNumber
 if(null == application.getAttribute("playoffRoundNumber")) {
   playoffRoundNumber = 1;
@@ -34,7 +28,7 @@ if(null == application.getAttribute("playoffRoundNumber")) {
 }
 
 final BracketData bracketInfo =
-  new BracketData(connection, division, playoffRoundNumber, playoffRoundNumber+2, 4, false);
+  new BracketData(connection, division, playoffRoundNumber, playoffRoundNumber+2, 4, false, true);
 
 bracketInfo.addBracketLabels(playoffRoundNumber);
 

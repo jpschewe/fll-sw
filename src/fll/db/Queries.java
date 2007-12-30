@@ -38,7 +38,7 @@ import fll.xml.ChallengeParser;
 
 /**
  * Does all of our queries.
- * 
+ *
  * @version $Revision$
  */
 public final class Queries {
@@ -108,7 +108,7 @@ public final class Queries {
   /**
    * Get the list of divisions at this tournament as a List of Strings. Uses
    * getCurrentTournament to determine the tournament.
-   * 
+   *
    * @param connection
    *          the database connection
    * @return the List of divisions. List of strings.
@@ -136,7 +136,8 @@ public final class Queries {
   }
 
   /**
-   * Figure out the next run number for teamNumber.
+   * Figure out the next run number for teamNumber. Does not ignore unverified
+   * scores.
    */
   public static int getNextRunNumber(final Connection connection, final int teamNumber) throws SQLException {
     final String currentTournament = getCurrentTournament(connection);
@@ -163,7 +164,7 @@ public final class Queries {
   /**
    * Figure out the highest run number a team has completed. This should be the
    * same as next run number -1, but sometimes we get non-consecutive runs in
-   * and this just finds the max run number.
+   * and this just finds the max run number. Does not ignore unverified scores.
    */
   public static int getMaxRunNumber(final Connection connection, final int teamNumber) throws SQLException {
     final String currentTournament = getCurrentTournament(connection);
@@ -185,7 +186,7 @@ public final class Queries {
       Utilities.closeStatement(stmt);
     }
   }
-  
+
   /**
    * Get the number of scoresheets to print on a single sheet of paper. Returns
    * an integer value as stored in TournamentParameters table for the
@@ -213,7 +214,7 @@ public final class Queries {
   /**
    * Insert a performance score into the database. All of the values are
    * expected to be in request.
-   * 
+   *
    * @return the SQL executed
    * @throws SQLException
    *           on a database error.
@@ -246,7 +247,7 @@ public final class Queries {
     final int numSeedingRounds = getNumSeedingRounds(connection);
 
     // Perform updates to the playoff data table if in playoff rounds.
-    if(irunNumber > numSeedingRounds) {
+    if((irunNumber > numSeedingRounds) && "1".equals(request.getParameter("Verified")) ) {
       final int playoffRun = irunNumber - numSeedingRounds;
       final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun);
       final String division = getEventDivision(connection, Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumber).intValue());
@@ -255,9 +256,10 @@ public final class Queries {
             playoffRun);
 
         // If sibling team is the NULL team, then no playoff meta data needs
-        // updating,
-        // since we are still waiting for an earlier round to be entered.
-        if(Team.NULL_TEAM_NUMBER != siblingTeam) {
+        // updating, since we are still waiting for an earlier round to be
+        // entered. Also, if the sibling team isn't verified, we shouldn't
+        // be updating the playoffdata table.
+        if(Team.NULL_TEAM_NUMBER != siblingTeam && Playoff.isVerified(connection, currentTournament, Team.getTeamFromDatabase(connection, siblingTeam), irunNumber)) {
           final Team opponent = Team.getTeamFromDatabase(connection, siblingTeam);
           final Team winner = Playoff.pickWinner(connection, document, opponent, request, irunNumber);
 
@@ -323,7 +325,7 @@ public final class Queries {
 
     columns.append(", NoShow");
     values.append(", " + noShow);
-    
+
     columns.append(", Verified");
     values.append(", " + request.getParameter("Verified"));
 
@@ -386,7 +388,7 @@ public final class Queries {
   /**
    * Update a performance score in the database. All of the values are expected
    * to be in request.
-   * 
+   *
    * @return the SQL executed
    * @throws SQLException
    *           on a database error.
@@ -421,7 +423,7 @@ public final class Queries {
     final StringBuffer sql = new StringBuffer();
 
     // Check if we need to update the PlayoffData table
-    if(irunNumber > numSeedingRounds) {
+    if( irunNumber > numSeedingRounds ) {
       final int playoffRun = irunNumber - numSeedingRounds;
       final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun);
       final String division = getEventDivision(connection, Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumber).intValue());
@@ -443,12 +445,11 @@ public final class Queries {
           }
           final Team oldWinner = Playoff.pickWinner(connection, document, teamA, teamB, irunNumber);
           final Team newWinner = Playoff.pickWinner(connection, document, teamB, request, irunNumber);
+          Statement stmt = null;
+          ResultSet rs = null;
           if(oldWinner != null && newWinner != null && !oldWinner.equals(newWinner)) {
             // This score update changes the result of the match, so make sure
-            // no
-            // other scores exist in later round for either of these 2 teams.
-            Statement stmt = null;
-            ResultSet rs = null;
+            // no other scores exist in later round for either of these 2 teams.
             if(getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun + 1) > 0) {
               try {
                 stmt = connection.createStatement();
@@ -479,8 +480,39 @@ public final class Queries {
                 Utilities.closeStatement(stmt);
               }
             }
-            // No dependent score was found, so we can update the playoff table
-            // to reflect the new winner.
+          }
+          // If the second-check flag is NO or the opposing team is not verified, we set the match "winner" (possibly back) to NULL.
+          if("0".equals(request.getParameter("Verified"))
+              || !(Playoff.performanceScoreExists(connection, teamB, irunNumber)
+                    && Playoff.isVerified(connection, currentTournament, teamB, irunNumber))) {
+            try {
+              stmt = connection.createStatement();
+              sql.append("UPDATE PlayoffData SET Team = " + Team.NULL_TEAM_NUMBER);
+              sql.append(" WHERE event_division = '" + division + "'");
+              sql.append(" AND Tournament = '" + currentTournament + "'");
+              sql.append(" AND PlayoffRound = " + (playoffRun + 1));
+              sql.append(" AND LineNumber = " + ((ptLine +1) / 2));
+              stmt.executeUpdate(sql.toString());
+              sql.append("; ");
+            } finally {
+              Utilities.closeStatement(stmt);
+            }
+            final int semiFinalRound = getNumPlayoffRounds(connection, division) - 1;
+            if(playoffRun == semiFinalRound && isThirdPlaceEnabled(connection, division)) {
+              try {
+                stmt = connection.createStatement();
+                sql.append("UPDATE PlayoffData SET Team = " + Team.NULL_TEAM_NUMBER);
+                sql.append(" WHERE event_division = '" + division + "'");
+                sql.append(" AND Tournament = '" + currentTournament + "'");
+                sql.append(" AND PlayoffRound = " + (playoffRun + 1));
+                sql.append(" AND LineNumber = " + ((ptLine + 5) / 2));
+                stmt.executeUpdate(sql.toString());
+                sql.append("; ");
+              } finally {
+                Utilities.closeStatement(stmt);
+              }
+            }
+          } else {
             try {
               stmt = connection.createStatement();
               sql.append("UPDATE PlayoffData SET Team = " + newWinner.getTeamNumber());
@@ -547,7 +579,7 @@ public final class Queries {
         sql.append(", " + name + " = " + value);
       }
     }
-    
+
     sql.append(", Verified = " + request.getParameter("Verified"));
 
     sql.append(" WHERE TeamNumber = " + teamNumber);
@@ -570,7 +602,7 @@ public final class Queries {
   /**
    * Delete a performance score in the database. All of the values are expected
    * to be in request.
-   * 
+   *
    * @return the SQL executed
    * @throws RuntimeException
    *           if a parameter is missing or if the playoff meta data would
@@ -688,7 +720,7 @@ public final class Queries {
 
   /**
    * Get the division that a team is in for the current tournament.
-   * 
+   *
    * @param teamNumber
    *          the team's number
    * @return the event division for the team
@@ -716,33 +748,48 @@ public final class Queries {
   }
 
   /**
-   * Get a list of team numbers that have less runs than seeding rounds
-   * 
+   * Get a list of team numbers that have fewer runs than seeding rounds. This
+   * uses only verified performance scores, so scores that have not been
+   * double-checked will show up in this report as not entered.
+   *
    * @param connection
    *          connection to the database
    * @param tournamentTeams
    *          keyed by team number
+   * @param division
+   *          String with the division to query on, or the special string
+   *          "__all__" if all divisions should be queried.
+   * @param verifiedScoresOnly
+   *          True if the database query should use only verified scores, false
+   *          if it should use all scores.
    * @return a List of Team objects
    * @throws SQLException
    *           on a database error
    * @throws RuntimeException
    *           if a team can't be found in tournamentTeams
    */
-  public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection, final Map<Integer, Team> tournamentTeams, final String division)
+  public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection, final Map<Integer, Team> tournamentTeams, final String division, final boolean verifiedScoresOnly)
       throws SQLException, RuntimeException {
     final String currentTournament = getCurrentTournament(connection);
+    final String view;
+
+    if(verifiedScoresOnly)
+      view = "verified_performance";
+    else
+      view = "Performance";
+
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
       if("__all__".equals(division)) {
-        prep = connection.prepareStatement("SELECT TeamNumber,Count(*) FROM Performance WHERE Tournament = ? GROUP BY TeamNumber"
+        prep = connection.prepareStatement("SELECT TeamNumber,Count(*) FROM " + view + " WHERE Tournament = ? GROUP BY TeamNumber"
             + " HAVING Count(*) < ?");
         prep.setString(1, currentTournament);
         prep.setInt(2, getNumSeedingRounds(connection));
       } else {
-        prep = connection.prepareStatement("SELECT Performance.TeamNumber,Count(Performance.TeamNumber) FROM Performance,current_tournament_teams"
-            + " WHERE Performance.TeamNumber = current_tournament_teams.TeamNumber" + " AND current_tournament_teams.event_division = ?"
-            + " AND Performance.Tournament = ?" + " GROUP BY Performance.TeamNumber" + " HAVING Count(Performance.TeamNumber) < ?");
+        prep = connection.prepareStatement("SELECT " + view + ".TeamNumber,Count(" + view + ".TeamNumber) FROM " + view
+            + ",current_tournament_teams WHERE " + view + ".TeamNumber = current_tournament_teams.TeamNumber AND current_tournament_teams.event_division = ?"
+            + " AND " + view + ".Tournament = ? GROUP BY " + view + ".TeamNumber HAVING Count(" + view + ".TeamNumber) < ?");
         prep.setString(1, division);
         prep.setString(2, currentTournament);
         prep.setInt(3, getNumSeedingRounds(connection));
@@ -766,33 +813,56 @@ public final class Queries {
   }
 
   /**
-   * Get a list of team numbers that have more runs than seeding rounds
-   * 
+   * Convenience function that defaults to querying all scores, not just those
+   * that are verified.
+   */
+  public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection, final Map<Integer, Team> tournamentTeams, final String division)
+  throws SQLException, RuntimeException {
+    return getTeamsNeedingSeedingRuns(connection, tournamentTeams, division, false);
+  }
+
+  /**
+   * Get a list of team numbers that have more runs than seeding rounds.
+   *
    * @param connection
    *          connection to the database
    * @param tournamentTeams
    *          keyed by team number
+   * @param division
+   *          String with the division to query on, or the special string
+   *          "__all__" if all divisions should be queried.
+   * @param verifiedScoresOnly
+   *          True if the database query should use only verified scores, false
+   *          if it should use all scores.
    * @return a List of Team objects
    * @throws SQLException
    *           on a database error
    * @throws RuntimeException
    *           if a team can't be found in tournamentTeams
    */
-  public static List<Team> getTeamsWithExtraRuns(final Connection connection, final Map<Integer, Team> tournamentTeams, final String division)
+  public static List<Team> getTeamsWithExtraRuns(final Connection connection, final Map<Integer, Team> tournamentTeams, final String division, final boolean verifiedScoresOnly)
       throws SQLException, RuntimeException {
     final String currentTournament = getCurrentTournament(connection);
+    final String view;
+
+    if(verifiedScoresOnly)
+      view = "verified_performance";
+    else
+      view = "Performance";
+
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
       if("__all__".equals(division)) {
-        prep = connection.prepareStatement("SELECT TeamNumber,Count(*) FROM Performance" + " WHERE Tournament = ?" + " GROUP BY TeamNumber"
+        prep = connection.prepareStatement("SELECT TeamNumber,Count(*) FROM " + view + " WHERE Tournament = ? GROUP BY TeamNumber"
             + " HAVING Count(*) > ?");
         prep.setString(1, currentTournament);
         prep.setInt(2, getNumSeedingRounds(connection));
       } else {
-        prep = connection.prepareStatement("SELECT Performance.TeamNumber,Count(Performance.TeamNumber) FROM Performance,current_tournament_teams"
-            + " WHERE Performance.TeamNumber = current_tournament_teams.TeamNumber" + " AND current_tournament_teams.event_division = ?"
-            + " AND Performance.Tournament = ?" + " GROUP BY Performance.TeamNumber" + " HAVING Count(Performance.TeamNumber) > ?");
+        prep = connection.prepareStatement("SELECT " + view + ".TeamNumber,Count(" + view + ".TeamNumber) FROM "
+            + view + ",current_tournament_teams WHERE " + view + ".TeamNumber = current_tournament_teams.TeamNumber"
+            + " AND current_tournament_teams.event_division = ? AND " + view + ".Tournament = ? GROUP BY "
+            + view + ".TeamNumber" + " HAVING Count(" + view + ".TeamNumber) > ?");
         prep.setString(1, division);
         prep.setString(2, currentTournament);
         prep.setInt(3, getNumSeedingRounds(connection));
@@ -816,8 +886,20 @@ public final class Queries {
   }
 
   /**
-   * Get the order of the teams as seeded in the performance rounds.
-   * 
+   * Convenience function that defaults to querying all scores, not just those
+   * that are verified.
+   */
+  public static List<Team> getTeamsWithExtraRuns(final Connection connection, final Map<Integer, Team> tournamentTeams, final String division)
+  throws SQLException, RuntimeException {
+    return getTeamsWithExtraRuns(connection, tournamentTeams, division, false);
+  }
+
+  /**
+   * Get the order of the teams as seeded in the performance rounds. This will
+   * include unverified scores, the assumption being that if you performed the
+   * seeding round checks, which exclude unverified scores, you really do want
+   * to advance teams.
+   *
    * @param connection
    *          connection to the database
    * @param divisionStr
@@ -866,7 +948,7 @@ public final class Queries {
    * Get the number of seeding rounds from the database. This value is stored in
    * the table TournamentParameters with the Param of SeedingRounds. If no such
    * value exists a value of 3 is inserted and then returned.
-   * 
+   *
    * @return the number of seeding rounds
    * @throws SQLException
    *           on a database error
@@ -892,7 +974,7 @@ public final class Queries {
 
   /**
    * Set the number of seeding rounds.
-   * 
+   *
    * @param connection
    *          the connection
    * @param newSeedingRounds
@@ -927,7 +1009,7 @@ public final class Queries {
 
   /**
    * Get the current tournament from the database.
-   * 
+   *
    * @return the tournament, or DUMMY if not set. There should always be a DUMMY
    *         tournament in the Tournaments table.
    */
@@ -953,7 +1035,7 @@ public final class Queries {
 
   /**
    * Set the current tournament in the database.
-   * 
+   *
    * @param connection
    *          db connection
    * @param currentTournament
@@ -983,7 +1065,7 @@ public final class Queries {
 
   /**
    * Get a list of tournament names in the DB ordered by name.
-   * 
+   *
    * @return list of tournament names as strings
    */
   public static List<String> getTournamentNames(final Connection connection) throws SQLException {
@@ -1006,7 +1088,7 @@ public final class Queries {
 
   /**
    * Get a list of regions in the DB ordered by region.
-   * 
+   *
    * @return list of regions as strings
    */
   public static List<String> getRegions(final Connection connection) throws SQLException {
@@ -1031,7 +1113,7 @@ public final class Queries {
    * Delete a team from the database. This clears team from the Teams table and
    * all tables specified by the challengeDocument. It is not an error if the
    * team doesn't exist.
-   * 
+   *
    * @param teamNumber
    *          team to delete
    * @param document
@@ -1076,7 +1158,7 @@ public final class Queries {
 
   /**
    * Total the scores in the database for the current tournament.
-   * 
+   *
    * @param document
    *          the challenge document
    * @param connection
@@ -1097,7 +1179,7 @@ public final class Queries {
 
   /**
    * Compute the total scores for all entered subjective scores.
-   * 
+   *
    * @param document
    * @param connection
    * @throws SQLException
@@ -1150,8 +1232,8 @@ public final class Queries {
 
   /**
    * Compute the total scores for all entered performance scores in the current
-   * tournament.
-   * 
+   * tournament. Uses both verified and unverified scores.
+   *
    * @param document
    *          the challenge document
    * @param connection
@@ -1206,7 +1288,7 @@ public final class Queries {
    * Get the challenge document out of the database. This method doesn't
    * validate the document, since it's assumed that the document was validated
    * before it was put in the database.
-   * 
+   *
    * @param connection
    *          connection to the database
    * @return the document
@@ -1235,7 +1317,7 @@ public final class Queries {
 
   /**
    * Advance a team to the next tournament.
-   * 
+   *
    * @param connection
    *          the database connection
    * @param teamNumber
@@ -1310,7 +1392,7 @@ public final class Queries {
   /**
    * Change the current tournament for a team. This will delete all scores for
    * the team in it's current tournament.
-   * 
+   *
    * @param connection
    *          db connection
    * @param document
@@ -1380,7 +1462,7 @@ public final class Queries {
   /**
    * Demote the team to it's previous tournament. This will delete all scores
    * for the team in it's current tournament.
-   * 
+   *
    * @param connection
    *          db connection
    * @param document
@@ -1431,7 +1513,7 @@ public final class Queries {
 
   /**
    * Get the previous tournament for this team, given the current tournament.
-   * 
+   *
    * @param connection
    *          the database connection
    * @param teamNumber
@@ -1466,7 +1548,7 @@ public final class Queries {
 
   /**
    * Get the next tournament for the given tournament.
-   * 
+   *
    * @param connection
    *          the database connection
    * @param tournament
@@ -1494,7 +1576,7 @@ public final class Queries {
   /**
    * Add a team to the database. Automatically adds the team to the current
    * tournament as well.
-   * 
+   *
    * @return null on success, the name of the other team with the same team
    *         number on an error
    */
@@ -1598,7 +1680,7 @@ public final class Queries {
   /**
    * Make sure all of the judges are properly assigned for the current
    * tournament
-   * 
+   *
    * @param connection
    *          the database connection
    * @param document
@@ -1636,7 +1718,7 @@ public final class Queries {
    * Determines whether or not the playoff data table has been initialized for
    * the specified division. Uses the current tournament value obtained from
    * getCurrentTournament().
-   * 
+   *
    * @param connection
    *          The database connection to use.
    * @param division
@@ -1668,7 +1750,7 @@ public final class Queries {
       Utilities.closeStatement(stmt);
     }
   }
-  
+
   /**
    * Get the color for a division index. Below are the colors used. <table>
    * <td>
@@ -1687,7 +1769,7 @@ public final class Queries {
    * <td>continue at the top</td>
    * </tr>
    * </ol>
-   * 
+   *
    * @param index
    *          the division index
    */
@@ -1709,7 +1791,7 @@ public final class Queries {
 
   /**
    * Get the value of Bye for the given team number, tournament and run number
-   * 
+   *
    * @return true if the score is a bye, false if it's not a bye or the score
    *         does not exist
    * @throws SQLException
@@ -1737,7 +1819,7 @@ public final class Queries {
   /**
    * Used to get the line number of a team from the playoff table for a specific
    * round of the playoff bracket.
-   * 
+   *
    * @param connection
    *          Database connection to use.
    * @param tournament
@@ -1776,7 +1858,7 @@ public final class Queries {
   /**
    * Gets the number of the team from the PlayoffData table given the
    * tournament, division, line number, and playoff round.
-   * 
+   *
    * @param connection
    *          Database connection.
    * @param tournament
@@ -1822,7 +1904,7 @@ public final class Queries {
    * Get the division that a team is registered in. This is different from
    * {@link #getEventDivision(Connection, int)} in that it doesn't change
    * throughout the season.
-   * 
+   *
    * @param connection
    *          Database connection.
    * @param teamNumber
@@ -1853,7 +1935,7 @@ public final class Queries {
   /**
    * Returns the number of playoff rounds for the specified division. Depends on
    * the PlayoffData table having been initialized for that division.
-   * 
+   *
    * @param connection
    *          The database connection.
    * @param division
@@ -1875,7 +1957,7 @@ public final class Queries {
   /**
    * Returns the max number of playoff rounds all divisions. Depends on the
    * PlayoffData table having been initialized for that division.
-   * 
+   *
    * @param connection
    *          The database connection.
    * @return The maximum number of playoff rounds in all divisions, or 0 if
@@ -1896,7 +1978,7 @@ public final class Queries {
 
   /**
    * Get size of first playoff round.
-   * 
+   *
    * @param connection
    *          Database connection to use.
    * @param division

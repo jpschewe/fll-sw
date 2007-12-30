@@ -33,7 +33,7 @@ import fll.xml.XMLUtils;
 
 /**
  * Java code used in scoreEntry.jsp.
- * 
+ *
  * @version $Revision$
  */
 public final class ScoreEntry {
@@ -87,7 +87,7 @@ public final class ScoreEntry {
    * Genrate the increment methods and variable declarations for the goals in
    * the performance element of document. Generate the methods to compute goals
    * as well.
-   * 
+   *
    * @throws ParseException
    */
   public static void generateIncrementMethods(final Writer writer, final Document document) throws IOException, ParseException {
@@ -128,7 +128,7 @@ public final class ScoreEntry {
 
       formatter.format("%n%n");
     } // end for each goal
-    
+
     // method for double-check field
     formatter.format("<!-- Verified -->%n");
     formatter.format("var Verified;%n");
@@ -236,7 +236,7 @@ public final class ScoreEntry {
 
   /**
    * Output the body for the check_restrictions method.
-   * 
+   *
    * @param writer
    *          where to write
    * @param document
@@ -344,8 +344,6 @@ public final class ScoreEntry {
         writer.println("  " + getVarNameForRawScore(name) + " = " + initialValue + ";");
       }
     }
-    // Reset the double-check value
-    writer.println("  Verified = 0");
 
     writer.println("}");
   }
@@ -353,7 +351,7 @@ public final class ScoreEntry {
   /**
    * Generates the portion of the score entry form where the user checks whether
    * the score has been double-checked or not.
-   * 
+   *
    * @param writer
    * @param document
    * @param request
@@ -542,7 +540,7 @@ public final class ScoreEntry {
           }
         }
         // Always init the special double-check column
-        writer.println("  Verified = " + rs.getString("Verified") + ";");
+        writer.println("  Verified = " + rs.getBoolean("Verified") + ";");
       } else {
         throw new RuntimeException("Cannot find TeamNumber and RunNumber in Performance table" + " TeamNumber: " + teamNumber + " RunNumber: "
             + runNumber);
@@ -579,7 +577,7 @@ public final class ScoreEntry {
   /**
    * The name of the javascript variable that represents the raw score for a
    * goal
-   * 
+   *
    * @param goalName
    * @return
    */
@@ -693,7 +691,7 @@ public final class ScoreEntry {
   }
 
   /**
-   * 
+   *
    * @param ele either a "stringConstant" element or a "goalRef" element
    * @return the string value
    */
@@ -709,7 +707,7 @@ public final class ScoreEntry {
   }
 
   /**
-   * 
+   *
    * @param ele
    *          the element that is a polynomial, all of it's children are terms,
    *          variableRefs and constants
@@ -760,7 +758,7 @@ public final class ScoreEntry {
   /**
    * Make the appropriate modifications to <code>value</code> to reflect the
    * specified floating point handling
-   * 
+   *
    * @param value
    *          the expression
    * @param floatingPoint
@@ -799,7 +797,7 @@ public final class ScoreEntry {
   }
 
   /**
-   * 
+   *
    * @param formatter where to write
    * @param ifPrefix what goes before "if", either spaces or "else"
    * @param ele

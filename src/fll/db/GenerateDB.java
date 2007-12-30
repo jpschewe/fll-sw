@@ -46,7 +46,7 @@ public final class GenerateDB {
    */
   private static final String TOURNAMENT_DATATYPE = "varchar(128)";
 
-    
+
   /**
    * Generate a new database
    *
@@ -73,14 +73,14 @@ public final class GenerateDB {
       e.printStackTrace();
     }
   }
-  
+
   private GenerateDB() {
-     
+
   }
 
   /**
    * Create a new database <code>database</code> and then call {@link #generateDB(Document, Connection, boolean)}.
-   * 
+   *
    * @param database name for the database to generate
    */
   public static void generateDB(final Document document,
@@ -95,7 +95,7 @@ public final class GenerateDB {
       Utilities.closeConnection(connection);
     }
   }
-  
+
   /**
    * Generate a completly new DB from document.  This also stores the document
    * in the database for later use.
@@ -108,7 +108,7 @@ public final class GenerateDB {
   public static void generateDB(final Document document,
                                 final Connection connection,
                                 final boolean forceRebuild) throws SQLException, UnsupportedEncodingException {
-    
+
     Statement stmt = null;
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -128,7 +128,7 @@ public final class GenerateDB {
       if(LOG.isDebugEnabled()) {
         LOG.debug("Tables:" + tables);
       }
-      
+
       //Table structure for table 'Tournaments'
       if(forceRebuild) {
         stmt.executeUpdate("DROP TABLE IF EXISTS Tournaments CASCADE");
@@ -144,7 +144,7 @@ public final class GenerateDB {
         stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DUMMY', 'Default dummy tournament')");
         stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DROP', 'Dummy tournament for teams that drop out')");
       }
-      
+
       // table to hold head-to-head playoff meta-data
       stmt.executeUpdate("DROP TABLE IF EXISTS PlayoffData CASCADE");
       stmt.executeUpdate("CREATE TABLE PlayoffData (" +
@@ -198,7 +198,7 @@ public final class GenerateDB {
                            + "  Description varchar(255) default NULL,"
                            + "  PRIMARY KEY  (Param)"
                            + ")");
-        
+
         //populate tournament parameters with default values
         stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('CurrentTournament', 'DUMMY', 'This is the currently running tournament name - see Tournaments table')");
         stmt.executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('SeedingRounds', 3, 'Number of seeding rounds before elimination round - used to downselect top performance scores in queries')");
@@ -209,8 +209,8 @@ public final class GenerateDB {
         prep = connection.prepareStatement("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('ChallengeDocument', ?, 'The XML document describing the challenge')");
       } else {
         prep = connection.prepareStatement("UPDATE TournamentParameters SET Value = ? WHERE Param = 'ChallengeDocument'");
-      }        
-      
+      }
+
       //dump the document into a byte array so we can push it into the database
       final XMLWriter xmlwriter = new XMLWriter();
       final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -220,7 +220,7 @@ public final class GenerateDB {
       final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
       prep.setAsciiStream(1, bais, bytes.length);
       prep.executeUpdate();
-      
+
       // Table structure for table 'Judges'
       stmt.executeUpdate("DROP TABLE IF EXISTS Judges CASCADE");
       stmt.executeUpdate("CREATE TABLE Judges ("
@@ -231,7 +231,7 @@ public final class GenerateDB {
                          + "  PRIMARY KEY  (id,category,Tournament,event_division)"
                          + ")");
 
-      
+
       // Table structure for table 'tablenames'
       stmt.executeUpdate("DROP TABLE IF EXISTS tablenames CASCADE");
       stmt.executeUpdate("CREATE TABLE tablenames ("
@@ -241,22 +241,29 @@ public final class GenerateDB {
                          + "  PRIMARY KEY (Tournament,SideA,SideB)"
                          + ")");
 
-      
+
       final Element rootElement = document.getDocumentElement();
       final StringBuilder createStatement = new StringBuilder();
-      
+
       //performance
+      final StringBuilder performanceColumns = new StringBuilder(); // used for view below
       {
         final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
         final String tableName = "Performance";
         stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max CASCADE");
         stmt.executeUpdate("DROP TABLE IF EXISTS " + tableName + " CASCADE");
         createStatement.append("CREATE TABLE " + tableName + " (");
+        performanceColumns.append("TeamNumber,");
         createStatement.append(" TeamNumber INTEGER NOT NULL,");
+        performanceColumns.append("Tournament,");
         createStatement.append(" Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,");
+        performanceColumns.append("RunNumber,");
         createStatement.append(" RunNumber INTEGER NOT NULL,");
+        performanceColumns.append("TimeStamp,");
         createStatement.append(" TimeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,");
+        performanceColumns.append("NoShow,");
         createStatement.append(" NoShow boolean DEFAULT FALSE NOT NULL,");
+        performanceColumns.append("Bye,");
         createStatement.append(" Bye boolean DEFAULT FALSE NOT NULL,");
         createStatement.append(" Verified boolean DEFAULT FALSE NOT NULL,");
         final NodeList goals = performanceElement.getElementsByTagName("goal");
@@ -264,15 +271,18 @@ public final class GenerateDB {
           final Element element = (Element)goals.item(i);
           final String columnDefinition = generateGoalColumnDefinition(element);
           createStatement.append(" " + columnDefinition + ",");
+          performanceColumns.append(element.getAttribute("name") + ",");
         }
+        performanceColumns.append("ComputedTotal,");
         createStatement.append(" ComputedTotal float DEFAULT NULL,");
+        performanceColumns.append("StandardizedScore");
         createStatement.append(" StandardizedScore float default NULL,");
         createStatement.append(" PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
         createStatement.append(");");
         stmt.executeUpdate(createStatement.toString());
 
       }
-      
+
       //loop over each subjective category
       final StringBuilder finalScores = new StringBuilder();
       finalScores.append("CREATE TABLE FinalScores (");
@@ -319,7 +329,7 @@ public final class GenerateDB {
 
 
       // create views
-      
+
       // max seeding round score
       stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
       stmt.executeUpdate("CREATE VIEW performance_seeding_max AS SELECT TeamNumber, Tournament, Max(ComputedTotal) As Score FROM Performance WHERE NoShow = 0 AND RunNumber <= (SELECT Value FROM TournamentParameters WHERE TournamentParameters.Param = 'SeedingRounds') GROUP BY TeamNumber, Tournament");
@@ -328,8 +338,11 @@ public final class GenerateDB {
       stmt.executeUpdate("DROP VIEW IF EXISTS current_tournament_teams");
       stmt.executeUpdate("CREATE VIEW current_tournament_teams AS SELECT * FROM TournamentTeams WHERE Tournament IN (SELECT Value FROM TournamentParameters WHERE Param = 'CurrentTournament')");
 
+      // verified performance scores
+      stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
+      stmt.executeUpdate("CREATE VIEW verified_performance AS SELECT " + performanceColumns.toString() + " FROM Performance WHERE Verified = TRUE");
       //FIX add foreign key constraints
-      
+
     } finally {
       Utilities.closeStatement(stmt);
       Utilities.closePreparedStatement(prep);
@@ -358,9 +371,9 @@ public final class GenerateDB {
     } else {
       definition += " float";
     }
-    
+
     LOG.debug("GoalColumnDefinition: " + definition);
-    
+
     return definition;
   }
 

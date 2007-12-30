@@ -124,6 +124,8 @@ function init() {
   </c:if>
   <c:if test="${not editFlag}">
     gbl_NoShow = 0;
+        // Always init the special double-check column
+    Verified = 0;
     reset();
   </c:if>
 
@@ -139,7 +141,7 @@ function refresh() {
     document.scoreEntry.NoShow[0].checked = true;
   } else {
     document.scoreEntry.NoShow[1].checked = true;
-  }        
+  }
 
   var score = 0;
 
@@ -157,7 +159,7 @@ function refresh() {
 
 function check_restrictions() {
   var error_found = false;
-  
+
 <%ScoreEntry.generateCheckRestrictionsBody(out, challengeDocument);%>
 
   if(error_found) {
@@ -175,7 +177,7 @@ function check_restrictions() {
 
 /**
  * Used to replace text in an element by ID.
- */        
+ */
 function replaceText(sId, sText) {
   var el;
   if(document.getElementById
@@ -191,7 +193,7 @@ function replaceText(sId, sText) {
 
 /**
  * Called when the cancel button is clicked.
- */        
+ */
 function CancelClicked() {
   <c:if test="${editFlag}">
   if (confirm("Cancel and lose changes?") == true) {
@@ -217,7 +219,7 @@ function CancelClicked() {
   <c:if test="${not editFlag}">
     <body onload="init()">
   </c:if>
-    
+
     <form action="submit.jsp" method="POST" name="scoreEntry">
 
       <c:if test="${editFlag}">
@@ -264,7 +266,7 @@ function CancelClicked() {
             </table> <!--  end top info bar -->
 
           </td></tr>
-      
+
 
       <!-- score entry -->
       <tr>
@@ -288,7 +290,7 @@ function CancelClicked() {
 
             <c:if test="${not isBye}">
               <%ScoreEntry.generateScoreEntry(out, challengeDocument, request);%>
-              
+
               <!-- Total Score -->
               <tr>
                 <td colspan='3'>
@@ -324,7 +326,7 @@ function CancelClicked() {
                 <td colspan='3'><b>Bye Run</b></td>
               </tr>
             </c:if>
-              
+
             <tr>
               <td colspan='3' align='right'>
                 <c:if test="${not isBye}">
