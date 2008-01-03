@@ -33,12 +33,12 @@ import fll.Utilities;
  * if desired.
  *
  * @author Dan Churchill
- * 
+ *
  */
 public class BracketData {
 
   private static final Logger LOG = Logger.getLogger(BracketData.class);
-  
+
   /**
    * Data type for brackets.
    */
@@ -93,7 +93,7 @@ public class BracketData {
      */
     public String getComment() { return _comment; }
   }
-  
+
   /**
    * Cell that has an inner table with label, table assignment, and printed
    * checkbox and info.
@@ -209,10 +209,11 @@ public class BracketData {
   private int _numSeedingRounds;
   private int _finalsRound;
   private boolean _showFinalScores;
+  private boolean _showOnlyVerifiedScores;
 
   /**
    * Constructs a bracket data object with playoff data from the database.
-   * 
+   *
    * @param pConnection
    *          Database connection to use.
    * @param pDivision
@@ -244,9 +245,10 @@ public class BracketData {
     _rowsPerTeam = pRowsPerTeam;
     _firstRoundSize = Queries.getFirstPlayoffRoundSize(pConnection, pDivision);
     _numSeedingRounds = Queries.getNumSeedingRounds(pConnection);
-    
+
     _showFinalScores = true;
-    
+    _showOnlyVerifiedScores = true;
+
     if(pFirstRound < 1) {
       _firstRound = 1;
     } else {
@@ -254,9 +256,9 @@ public class BracketData {
     }
 
     _lastRound = pLastRound;
-    
+
     _finalsRound = Queries.getNumPlayoffRounds(pConnection, pDivision);
-    
+
     _bracketData = new TreeMap<Integer, SortedMap<Integer, BracketDataType>>();
     for(int i=_firstRound; i<=_lastRound; i++) {
       _bracketData.put(new Integer(i), new TreeMap<Integer, BracketDataType>());
@@ -281,15 +283,15 @@ public class BracketData {
         final int team = rs.getInt(3);
         final String table = rs.getString(4);
         final boolean printed = rs.getBoolean(5);
-        
+
         SortedMap<Integer, BracketDataType> roundData = _bracketData.get(round);
-        
+
         final TeamBracketCell d = new TeamBracketCell();
         d.setTable(table);
         d.setTeam(Team.getTeamFromDatabase(pConnection, team));
         d.setDBLine(line);
         d.setPrinted(printed);
-        // Very brief explaination of the math:
+        // Very brief explanation of the math:
         // Let y = target output row in the table (this is the key value of the inner Map elements of _bracketData)
         // Let x = the number of rows per team (variable '_rowsPerTeam') in the left-most column of the output table
         //  (Given: x is a positive, even value. The math would work for other values, but it's meaningless when we
@@ -320,7 +322,7 @@ public class BracketData {
               " division:'" + pDivision + "')");
         }
       }
-      
+
     } finally {
       Utilities.closeResultSet(rs);
       Utilities.closeStatement(stmt);
@@ -328,7 +330,7 @@ public class BracketData {
   }
   /**
    * Constructor including explicit show scores flag.
-   * 
+   *
    * @param pShowFinals
    *          True if the final scores should be displayed (e.g. for the
    *          administrative brackets) or false if they should not (e.g. for the
@@ -347,8 +349,32 @@ public class BracketData {
   }
 
   /**
+   * Constructor including explicit show scores flag.
+   *
+   * @param pShowFinals
+   *          True if the final scores should be displayed (e.g. for the
+   *          administrative brackets) or false if they should not (e.g. for the
+   *          big screen display).
+   * @param pShowOnlyVerifiedScores
+   *          True if only verified scores should be displayed, false if all
+   *          scores should be displayed.
+   * @throws SQLException
+   */
+  public BracketData(final Connection connection,
+                     final String division,
+                     final int pFirstRound,
+                     final int pLastRound,
+                     final int pRowsPerTeam,
+                     final boolean pShowFinals,
+                     final boolean pShowOnlyVerifiedScores) throws SQLException {
+    this(connection, division, pFirstRound, pLastRound, pRowsPerTeam);
+    _showFinalScores = pShowFinals;
+    _showOnlyVerifiedScores = pShowOnlyVerifiedScores;
+  }
+
+  /**
    * Returns the playoff meta data for a specified location in the brackets.
-   * 
+   *
    * @param round
    *          The column of the playoff data table, otherwise known as the round
    *          number.
@@ -363,7 +389,7 @@ public class BracketData {
 
   /**
    * Returns the number of rows in the specified round number.
-   * 
+   *
    * @return Html table row number of the last row for the rounds stored in the
    *         instance of BracketData, or 0 if there are no rows in it.
    */
@@ -379,15 +405,15 @@ public class BracketData {
       return 0;
     }
   }
-  
+
   public int getFirstRound() {
     return _firstRound;
   }
-  
+
   public int getLastRound() {
     return _lastRound;
   }
-  
+
   public int getFirstRoundSize() {
     return _firstRoundSize;
   }
@@ -403,7 +429,7 @@ public class BracketData {
    * contains text, the \<td\> element will have attribute class='Leaf'. Font
    * tags for team number, team name, and score have classes of 'TeamNumber',
    * 'TeamName', and 'TeamScore', respectively.
-   * 
+   *
    * @param connection
    *          Database connection for looking up team scores, etc.
    * @param tournament
@@ -438,13 +464,13 @@ public class BracketData {
       sb.append("<td width='200' class='Leaf'>");
       if(round == _finalsRound) {
         sb.append(getDisplayString(connection, tournament,
-                                   round+_numSeedingRounds, ((TeamBracketCell)d).getTeam(), _showFinalScores));
+                                   round+_numSeedingRounds, ((TeamBracketCell)d).getTeam(), _showFinalScores, _showOnlyVerifiedScores));
       } else if(_showFinalScores || round != _finalsRound+1) {
         sb.append(getDisplayString(connection, tournament,
-                                   round+_numSeedingRounds, ((TeamBracketCell)d).getTeam()));
+                                   round+_numSeedingRounds, ((TeamBracketCell)d).getTeam(), true, _showOnlyVerifiedScores));
       }
       sb.append("</td>");
-      
+
     } else if(d instanceof BracketLabelCell) {
       sb.append("<td width='200'><font size='4'>");
       sb.append(((BracketLabelCell)d).getLabel() + "</font>");
@@ -499,9 +525,9 @@ public class BracketData {
         sb.append(myD.getLabel() + "</font>");
         sb.append("</td>");
       }
-      
+
     }
-    
+
     return sb.toString();
   }
 
@@ -521,7 +547,7 @@ public class BracketData {
   /**
    * Used to get a bridge cell that goes just to the right of the specified
    * round's column.
-   * 
+   *
    * @param row
    *          The table row for which to look up a bridge cell.
    * @param round
@@ -589,7 +615,7 @@ public class BracketData {
         Math.round((row + _rowsPerTeam*Math.pow(2, ar+1) - _rowsPerTeam*Math.pow(2, ar-1) + _rowsPerTeam/2 - 1))
                                                %
                              Math.round((_rowsPerTeam*Math.pow(2, ar+1))));
-  
+
       if( modVal <= Math.round(_rowsPerTeam*Math.pow(2, ar)) &&
           round <= _finalsRound) {
         if(cs.equals(TopRightCornerStyle.MEET_BOTTOM_OF_CELL)) {
@@ -617,9 +643,9 @@ public class BracketData {
     }
     return sb.toString();
   }
-  
+
   /**
-   * 
+   *
    * @param row
    * @return true if row is below (numerically greater than) the bottom-most
    *         teamname of the first displayed round.
@@ -628,7 +654,7 @@ public class BracketData {
     final int firstDisplayedRoundSize = (getFirstRoundSize()/((int)Math.round(Math.pow(2, _firstRound-1))));
     return row > ( 1 + (firstDisplayedRoundSize-1)*getRowsPerTeam() );
   }
-  
+
   private int topRowOfConsolationBracket() {
     final int firstDisplayedRoundSize = (getFirstRoundSize()/((int)Math.round(Math.pow(2, _firstRound-1))));
     return 3 + (firstDisplayedRoundSize-1)*getRowsPerTeam();
@@ -638,7 +664,7 @@ public class BracketData {
    * Adds labels for the bracket numbers to the specified playoff round number.
    * If this function is used, addBracketLabelsAndScoreGenFormElements must not
    * be used.
-   * 
+   *
    * @param roundNumber
    */
   public void addBracketLabels(final int roundNumber) {
@@ -696,7 +722,7 @@ public class BracketData {
       tables.add("Table 1");
       tables.add("Table 2");
     }
-    
+
     Iterator<String> tAssignIt = tables.iterator();
     int assignCount = Queries.getTableAssignmentCount(pConnection, tournament, division) % tables.size();
     while(assignCount-- > 0) {
@@ -777,34 +803,32 @@ public class BracketData {
   }
 
   /**
-   * Defaults showScore to true.
-   * 
-   * @see #getDisplayString(Connection, String, int, Team, boolean)
-   */
-  public static String getDisplayString(final Connection connection,
-                                        final String currentTournament,
-                                        final int runNumber,
-                                        final Team team)
-    throws IllegalArgumentException, SQLException {
-    return getDisplayString(connection, currentTournament, runNumber, team, true);
-  }
-  
-  /**
-   * What to display given a team number, handles TIE, null and BYE
+   * Obtains string to display for a team's info, given a team number. This
+   * handles a TIE, null and BYE. This function respects the set value for
+   * whether to display or hide verified scores. If unverified scores are
+   * displayed, they will be shown as red text.
    *
-   * @param connection connection to the database
-   * @param currentTournament the current tournament
-   * @param runNumber the current run, used to get the score
-   * @param team team to get display string for
-   * @param showScore if the score should be shown
-   * @throws IllegalArgumentException if teamNumber is invalid
-   * @throws SQLException on a database error
+   * @param connection
+   *          connection to the database
+   * @param currentTournament
+   *          the current tournament
+   * @param runNumber
+   *          the current run, used to get the score
+   * @param team
+   *          team to get display string for
+   * @param showScore
+   *          if the score should be shown
+   * @throws IllegalArgumentException
+   *           if teamNumber is invalid
+   * @throws SQLException
+   *           on a database error
    */
   public static String getDisplayString(final Connection connection,
                                         final String currentTournament,
                                         final int runNumber,
                                         final Team team,
-                                        final boolean showScore)
+                                        final boolean showScore,
+                                        final boolean showOnlyVerifiedScores)
   throws IllegalArgumentException, SQLException {
     if(Team.BYE.equals(team)) {
       return "<font class='TeamName'>BYE</font>";
@@ -820,17 +844,39 @@ public class BracketData {
       sb.append(team.getTeamName());
       sb.append("</font>");
       if(showScore && Playoff.performanceScoreExists(connection, team, runNumber)
-          && !Playoff.isBye(connection, currentTournament, team, runNumber)) {
+          && (!showOnlyVerifiedScores || Playoff.isVerified(connection, currentTournament, team, runNumber))
+          && !Playoff.isBye(connection, currentTournament, team, runNumber))
+      {
+        final boolean scoreVerified = Playoff.isVerified(connection, currentTournament, team, runNumber);
+        if(!scoreVerified)
+        {
+          sb.append("<span style='color:red'>");
+        }
         sb.append("<font class='TeamScore'>&nbsp;Score: ");
-        if(Playoff.isNoShow(connection, currentTournament, team, runNumber)) {
+        if(Playoff.isNoShow(connection, currentTournament, team, runNumber))
+        {
           sb.append("No Show");
-        } else {
+        }
+        else
+        {
           //only display score if it's not a bye
           sb.append(Playoff.getPerformanceScore(connection, currentTournament, team, runNumber));
         }
         sb.append("</font>");
+        if(!scoreVerified)
+        {
+          sb.append("</span>");
+        }
       }
       return sb.toString();
     }
+  }
+
+  public void setShowOnlyVerifiedScores(final boolean v) {
+    _showOnlyVerifiedScores = v;
+  }
+
+  public boolean getShowOnlyVerifiedScores() {
+    return _showOnlyVerifiedScores;
   }
 }

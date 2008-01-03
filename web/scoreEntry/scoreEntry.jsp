@@ -1,20 +1,14 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
-      
+
 <%@ page import="fll.Team" %>
-<%@ page import="fll.db.Queries" %>
-<%@ page import="fll.Utilities" %>
 <%@ page import="fll.web.playoff.Playoff" %>
 <%@ page import="fll.web.scoreEntry.ScoreEntry" %>
-  
-<%@ page import="org.w3c.dom.Document" %>
+
 <%@ page import="org.w3c.dom.Element" %>
-  
+
 <%@ page import="java.text.NumberFormat" %>
 <%@ page import="java.util.Map" %>
 
-
-<%@ page import="java.sql.Connection" %>
-  
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 
@@ -30,6 +24,7 @@ if(null == lTeamNum) {
 
 final int teamNumber = Integer.parseInt(lTeamNum);
 final Connection connection = (Connection)application.getAttribute("connection");
+final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
 final Map tournamentTeams = Queries.getTournamentTeams(connection);
 if(!tournamentTeams.containsKey(new Integer(teamNumber))) {
   //FIX error, redirect to error page
@@ -76,6 +71,12 @@ if("1".equals(request.getParameter("EditFlag"))) {
 	}
   lRunNumber = nextRunNumber;
 }
+final String roundText;
+if(lRunNumber > numSeedingRounds) {
+	roundText = "Playoff&nbsp;Round&nbsp;" + (lRunNumber - numSeedingRounds);
+} else {
+	roundText = "Run&nbsp;Number&nbsp;" + lRunNumber;
+}
 
 final String minimumAllowedScoreStr = ((Element)challengeDocument.getDocumentElement().getElementsByTagName("Performance").item(0)).getAttribute("minimumScore");
 final int minimumAllowedScore = NumberFormat.getInstance().parse(minimumAllowedScoreStr).intValue();
@@ -88,7 +89,7 @@ pageContext.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == maxRunComple
 final String tournament = Queries.getCurrentTournament(connection);
 pageContext.setAttribute("isBye", Boolean.valueOf(Queries.isBye(connection, tournament, teamNumber, lRunNumber)));
 %>
-  
+
 <html>
   <head>
     <c:if test="${not empty param.EditFlag}" var="editFlag">
@@ -98,7 +99,7 @@ pageContext.setAttribute("isBye", Boolean.valueOf(Queries.isBye(connection, tour
       <title><x:out select="$challengeDocument/fll/@title"/> (Score Entry)</title>
       <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     </c:if>
-      
+
     <style type='text/css'>
       TD {font-family: arial}
     </style>
@@ -123,9 +124,11 @@ function init() {
   </c:if>
   <c:if test="${not editFlag}">
     gbl_NoShow = 0;
+        // Always init the special double-check column
+    Verified = 0;
     reset();
   </c:if>
-      
+
   refresh();
 }
 
@@ -138,8 +141,8 @@ function refresh() {
     document.scoreEntry.NoShow[0].checked = true;
   } else {
     document.scoreEntry.NoShow[1].checked = true;
-  }        
-        
+  }
+
   var score = 0;
 
   <%ScoreEntry.generateRefreshBody(out, challengeDocument);%>
@@ -150,31 +153,31 @@ function refresh() {
   }
 
   document.scoreEntry.totalScore.value = score;
-  
+
   check_restrictions();
 }
 
 function check_restrictions() {
   var error_found = false;
-  
+
 <%ScoreEntry.generateCheckRestrictionsBody(out, challengeDocument);%>
-  
+
   if(error_found) {
     document.getElementById("submit").disabled = true;
   } else {
     document.getElementById("submit").disabled = false;
   }
 }
-  
+
 <%ScoreEntry.generateIsConsistent(out, challengeDocument);%>
-    
+
 
 <%ScoreEntry.generateIncrementMethods(out, challengeDocument);%>
 </c:if> <!-- end check for bye -->
 
 /**
  * Used to replace text in an element by ID.
- */        
+ */
 function replaceText(sId, sText) {
   var el;
   if(document.getElementById
@@ -190,7 +193,7 @@ function replaceText(sId, sText) {
 
 /**
  * Called when the cancel button is clicked.
- */        
+ */
 function CancelClicked() {
   <c:if test="${editFlag}">
   if (confirm("Cancel and lose changes?") == true) {
@@ -216,7 +219,7 @@ function CancelClicked() {
   <c:if test="${not editFlag}">
     <body onload="init()">
   </c:if>
-    
+
     <form action="submit.jsp" method="POST" name="scoreEntry">
 
       <c:if test="${editFlag}">
@@ -229,7 +232,7 @@ function CancelClicked() {
         <tr>
           <td align="center" valign="middle">
           <!-- top info bar (team name etc) -->
-<%if(lRunNumber <= Queries.getNumSeedingRounds(connection)) {%>
+<%if(lRunNumber <= numSeedingRounds) {%>
             <c:if test="${editFlag}">
               <table border="1" cellpadding="0" cellspacing="0" width="100%" bgcolor='yellow'>
             </c:if>
@@ -254,7 +257,7 @@ function CancelClicked() {
                     </tr>
                     <tr align="center">
                       <td>
-                        <font face="Arial" size="4" color='#0000ff'>#<%=team.getTeamNumber()%>&nbsp;<%=team.getOrganization()%>&nbsp;<%=team.getTeamName()%>&nbsp;--&nbsp;Run Number:&nbsp;<%=lRunNumber%></font>
+                        <font face="Arial" size="4" color='#0000ff'>#<%=team.getTeamNumber()%>&nbsp;<%=team.getOrganization()%>&nbsp;<%=team.getTeamName()%>&nbsp;--&nbsp;<%=roundText%></font>
                       </td>
                     </tr>
                   </table> <!--  end inner box on title -->
@@ -263,7 +266,7 @@ function CancelClicked() {
             </table> <!--  end top info bar -->
 
           </td></tr>
-      
+
 
       <!-- score entry -->
       <tr>
@@ -287,7 +290,7 @@ function CancelClicked() {
 
             <c:if test="${not isBye}">
               <%ScoreEntry.generateScoreEntry(out, challengeDocument, request);%>
-              
+
               <!-- Total Score -->
               <tr>
                 <td colspan='3'>
@@ -314,17 +317,16 @@ function CancelClicked() {
                     </tr>
                   </table>
                 </td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                  <td>&nbsp;</td>
+                <td colspan='3'>&nbsp;</td>
               </tr>
+              <%ScoreEntry.generateVerificationInput(out, challengeDocument, request);%>
             </c:if> <!-- end check for bye -->
             <c:if test="${isBye}">
               <tr>
                 <td colspan='3'><b>Bye Run</b></td>
               </tr>
             </c:if>
-              
+
             <tr>
               <td colspan='3' align='right'>
                 <c:if test="${not isBye}">
@@ -340,10 +342,7 @@ function CancelClicked() {
                   <input type='submit' name='delete' value='Delete Score' onclick='return confirm("Are you sure you want to delete this score?")'>
                 </c:if>
               </td>
-              <td align='right'>
-                &nbsp;
-              </td>
-              <td>&nbsp;</td>
+              <td colspan='2'>&nbsp;</td>
             </tr>
           </table> <!-- end score entry table  -->
 

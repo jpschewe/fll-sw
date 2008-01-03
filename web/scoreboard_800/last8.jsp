@@ -1,14 +1,10 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="fll.db.Queries" %>
-  
-<%@ page import="java.sql.Connection" %>
-
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
 pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
 %>
-  
+
 <HTML>
 <head>
   <style>
@@ -35,15 +31,15 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
       <tr>
         <td colspan='6' align='center'>
           <sql:query var="result" dataSource="${datasource}">
-            SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, current_tournament_teams.event_division, Performance.Tournament, Performance.RunNumber, Performance.Bye, Performance.NoShow, Performance.TimeStamp, Performance.ComputedTotal
-              FROM Teams,Performance, current_tournament_teams
-              WHERE Performance.Tournament = '<c:out value="${currentTournament}"/>'
-                AND Teams.TeamNumber = Performance.TeamNumber
+            SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, current_tournament_teams.event_division, verified_performance.Tournament, verified_performance.RunNumber, verified_performance.Bye, verified_performance.NoShow, verified_performance.TimeStamp, verified_performance.ComputedTotal
+              FROM Teams,verified_performance, current_tournament_teams
+              WHERE verified_performance.Tournament = '<c:out value="${currentTournament}"/>'
+                AND Teams.TeamNumber = verified_performance.TeamNumber
                 AND Teams.TeamNumber = current_tournament_teams.TeamNumber
-                AND Performance.Bye = False
-              ORDER BY Performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 8
+                AND verified_performance.Bye = False
+              ORDER BY verified_performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 8
           </sql:query>
-                  
+
           <!-- scores here -->
           <table border='1' bordercolor='#aaaaaa' cellpadding='4' cellspacing='0' width='100%'>
             <c:forEach items="${result.rows}" var="row">

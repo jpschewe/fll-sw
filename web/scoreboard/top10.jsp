@@ -1,14 +1,10 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="fll.Utilities" %>
-<%@ page import="fll.db.Queries" %>
-  
-<%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.PreparedStatement" %>
 <%@ page import="java.sql.ResultSet" %>
 
 <%@ page import="java.util.List" %>
-      
+
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
 final String currentTournament = Queries.getCurrentTournament(connection);
@@ -60,10 +56,10 @@ pageContext.setAttribute("division", divisions.get(divisionIndex));
         <td colspan='5' align='center'>
           <!-- scores here -->
           <table border='1' bordercolor='#aaaaaa' cellpadding='4' cellspacing='0' width='100%'>
-        
+
             <%
             final PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore FROM"
-                + " (SELECT TeamNumber, MAX(ComputedTotal) AS MaxOfComputedScore FROM Performance WHERE Tournament = ? "
+                + " (SELECT TeamNumber, MAX(ComputedTotal) AS MaxOfComputedScore FROM verified_performance WHERE Tournament = ? "
                 + " AND RunNumber <= ? AND NoShow = False AND Bye = False GROUP BY TeamNumber) AS T2"
                 + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber AND current_tournament_teams.event_division = ?"
                 + " ORDER BY T2.MaxOfComputedScore DESC LIMIT 10");
@@ -71,7 +67,7 @@ pageContext.setAttribute("division", divisions.get(divisionIndex));
             prep.setInt(2, Queries.getNumSeedingRounds(connection));
             prep.setString(3, (String) pageContext.getAttribute("division"));
             final ResultSet rs = prep.executeQuery();
-                
+
             double prevScore = -1;
             int i = 1;
             int rank = 0;
@@ -80,7 +76,7 @@ pageContext.setAttribute("division", divisions.get(divisionIndex));
               if(score != prevScore) {
                 rank = i;
               }
-            %>      
+            %>
             <tr align='left'>
               <td width='7%' align='right'>
                 <font size='3'>

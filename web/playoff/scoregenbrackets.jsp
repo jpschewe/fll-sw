@@ -1,12 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="org.w3c.dom.Document" %>
-
-<%@ page import="fll.db.Queries" %>
 <%@ page import="fll.web.playoff.BracketData" %>
-  
-<%@ page import="java.sql.Connection" %>
-  
+
 <%
 /*
   Parameters:
@@ -55,7 +50,7 @@
   }
 
   final BracketData bracketInfo =
-    new BracketData(connection, divisionStr, firstRound, lastRound, 4);
+    new BracketData(connection, divisionStr, firstRound, lastRound, 4, true, false);
 
   final int numMatches = bracketInfo.addBracketLabelsAndScoreGenFormElements(connection, currentTournament, divisionStr);
 %>

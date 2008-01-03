@@ -1,16 +1,12 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="fll.Utilities" %>
-<%@ page import="fll.db.Queries" %>
 <%@ page import="fll.Team" %>
 
-<%@ page import="java.util.Map" %>
 <%@ page import="java.util.Iterator" %>
 
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.ResultSet" %>
-<%@ page import="java.sql.Connection" %>
-  
+
 <%
 final String lEditFlag = request.getParameter("EditFlag");
 
@@ -25,7 +21,7 @@ if(rs.next()) {
 }
 Utilities.closeResultSet(rs);
 Utilities.closeStatement(stmt);
-  
+
 %>
 
 <html>
@@ -49,22 +45,22 @@ function editFlagBoxClicked() {
   } else {
     document.selectTeam.RunNumber.disabled=true;
 		text.style.color = "gray";
-  }        
+  }
 }
 
 </script>
   </head>
   <body onload="editFlagBoxClicked()">
-      
+
     <form action="scoreEntry.jsp" method="POST" name="selectTeam">
-        
+
       <!-- top info bar -->
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>
           <td align="center" valign="middle" bgcolor="#e0e0e0" colspan='3'>
             <table border="1" cellpadding="0" cellspacing="0" width="100%">
             <tr align="center" valign="middle"><td>
-        
+
             <table border="0" cellpadding="5" cellspacing="0" width="90%">
               <tr>
                 <td valign="middle" align="center">
@@ -73,16 +69,16 @@ function editFlagBoxClicked() {
                 </td>
               </tr>
             </table>
-        
+
               </td></tr>
               </table>
           </td>
         </tr>
       </table>
-    
+
       <table>
         <tr align='left' valign='top'>
-          <!-- pick team from a list -->            
+          <!-- pick team from a list -->
           <td>
             <br>
             <font face='arial' size='4'>Select team for this scorecard:</font><br>
@@ -130,13 +126,13 @@ function editFlagBoxClicked() {
         </tr>
         </td></tr></table>
         <tr>
-          <!-- submit button -->            
+          <!-- submit button -->
           <td align='left'>
             <!--<font face='arial' size='4'><b>Submit</b></font>-->
             <input class='dark_bg' type="submit" value="Submit">
           </td>
         </tr>
-        
+
       </table>
     </form>
     <%@ include file="/WEB-INF/jspf/footer.jspf" %>

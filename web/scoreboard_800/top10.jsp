@@ -67,7 +67,7 @@
          // See top10 for regular scoreboard
 
          final PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore FROM"
-             + " (SELECT TeamNumber, MAX(ComputedTotal) AS MaxOfComputedScore FROM Performance WHERE Tournament = ? "
+             + " (SELECT TeamNumber, MAX(ComputedTotal) AS MaxOfComputedScore FROM verified_performance WHERE Tournament = ? "
              + " AND RunNumber <= ? AND NoShow = False AND Bye = False GROUP BY TeamNumber) AS T2"
              + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber AND current_tournament_teams.event_division = ?"
              + " ORDER BY T2.MaxOfComputedScore DESC LIMIT 10");
