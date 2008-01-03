@@ -54,7 +54,7 @@ final Connection connection = (Connection)application.getAttribute("connection")
           <!-- pick team from a list -->
           <td>
             <font face='arial' size='4'>Select Team to Edit From List:</font><br>
-            <select size='20' name='TeamNumber'>
+            <select size='20' name='TeamNumber' ondblclick='selectTeam.submit()'>
               <%
               final Statement stmt = connection.createStatement();
               final ResultSet rs = stmt.executeQuery("SELECT TeamNumber,TeamName,Organization,Division FROM Teams ORDER BY TeamNumber ASC");

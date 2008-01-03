@@ -24,7 +24,7 @@ final String division = request.getParameter("division");
     <%if("__all__".equals(division)) {%>
       [All divisions]
     <%} else {%>
-      [Division: <%=division%>
+      [Division: <%=division%>]
     <%} %></h2>
       <p>Teams with fewer runs than seeding rounds. Teams with no runs are excluded from this check.
         <ul>

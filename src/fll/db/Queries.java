@@ -259,7 +259,9 @@ public final class Queries {
         // updating, since we are still waiting for an earlier round to be
         // entered. Also, if the sibling team isn't verified, we shouldn't
         // be updating the playoffdata table.
-        if(Team.NULL_TEAM_NUMBER != siblingTeam && Playoff.isVerified(connection, currentTournament, Team.getTeamFromDatabase(connection, siblingTeam), irunNumber)) {
+        if(Team.NULL_TEAM_NUMBER != siblingTeam
+            && Playoff.performanceScoreExists(connection, siblingTeam, irunNumber)
+            && Playoff.isVerified(connection, currentTournament, Team.getTeamFromDatabase(connection, siblingTeam), irunNumber)) {
           final Team opponent = Team.getTeamFromDatabase(connection, siblingTeam);
           final Team winner = Playoff.pickWinner(connection, document, opponent, request, irunNumber);
 
