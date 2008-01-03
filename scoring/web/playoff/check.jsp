@@ -1,20 +1,17 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="fll.db.Queries" %>
 <%@ page import="fll.Team" %>
 
 <%@ page import="java.util.Iterator" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 
-<%@ page import="java.sql.Connection" %>
-  
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
 final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
 final String division = request.getParameter("division");
 %>
-  
+
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
@@ -27,12 +24,12 @@ final String division = request.getParameter("division");
     <%if("__all__".equals(division)) {%>
       [All divisions]
     <%} else {%>
-      [Division: <%=division%>
+      [Division: <%=division%>]
     <%} %></h2>
       <p>Teams with fewer runs than seeding rounds. Teams with no runs are excluded from this check.
         <ul>
 <%
-final List<Team> less = Queries.getTeamsNeedingSeedingRuns(connection, tournamentTeams, division);
+final List<Team> less = Queries.getTeamsNeedingSeedingRuns(connection, tournamentTeams, division, true);
 final Iterator<Team> lessIter = less.iterator();
 if(lessIter.hasNext()) {
   while(lessIter.hasNext()) {
@@ -49,7 +46,7 @@ if(lessIter.hasNext()) {
       <p>Teams with more runs than seeding rounds:
         <ul>
 <%
-final List<Team> more = Queries.getTeamsWithExtraRuns(connection, tournamentTeams, division);
+final List<Team> more = Queries.getTeamsWithExtraRuns(connection, tournamentTeams, division, true);
 final Iterator<Team> moreIter = more.iterator();
 if(moreIter.hasNext()) {
   while(moreIter.hasNext()) {

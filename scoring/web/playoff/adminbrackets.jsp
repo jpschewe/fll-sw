@@ -1,28 +1,14 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="org.w3c.dom.Document" %>
-
-<%@ page import="fll.Team" %>
-<%@ page import="fll.Utilities" %>
-<%@ page import="fll.db.Queries" %>
-<%@ page import="fll.web.playoff.Playoff" %>
 <%@ page import="fll.web.playoff.BracketData" %>
-  
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.LinkedList" %>
-<%@ page import="java.util.Iterator" %>
 
-<%@ page import="java.sql.Connection" %>
-  
 <%
 /*
   Parameters:
     division - String for the division
 */
-  
+
 final Connection connection = (Connection)application.getAttribute("connection");
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final String currentTournament = Queries.getCurrentTournament(connection);
 
 final String divisionStr = request.getParameter("division");
@@ -64,7 +50,7 @@ if(firstRound > 1 && firstRound >= lastRound) {
 }
 
 final BracketData bracketInfo =
-  new BracketData(connection, divisionStr, firstRound, lastRound, 4);
+  new BracketData(connection, divisionStr, firstRound, lastRound, 4, true, false);
 
 for(int i = 1; i < lastColumn; i++) {
   bracketInfo.addBracketLabels(i);

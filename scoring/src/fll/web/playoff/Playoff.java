@@ -35,13 +35,13 @@ import fll.util.ScoreUtils;
 
 /**
  * Add class comment here!
- * 
+ *
  * @version $Revision$
  */
 public final class Playoff {
 
   private static final Logger LOG = Logger.getLogger(Playoff.class);
-  
+
   /**
    * Tolerance for comparing floating point numbers in the tiebreaker.
    */
@@ -49,7 +49,7 @@ public final class Playoff {
 
   /**
    * Just for debugging.
-   * 
+   *
    * @param args
    *          ignored
    */
@@ -77,7 +77,7 @@ public final class Playoff {
   /**
    * Build the list of teams ordered from top to bottom (visually) of a single
    * elimination bracket.
-   * 
+   *
    * @param connection
    *          connection to the database
    * @param divisionStr
@@ -119,7 +119,7 @@ public final class Playoff {
    * and the score data contained in the request object. Calls
    * Queries.updateScoreTotals() to ensure the ComputedScore column is up to
    * date.
-   * 
+   *
    * @param connection
    *          Database connection with write access to Performance table.
    * @param document
@@ -162,7 +162,7 @@ public final class Playoff {
   /**
    * Decide who is the winner of runNumber. Calls Queries.updateScoreTotals() to
    * ensure the ComputedScore column is up to date
-   * 
+   *
    * @param connection
    *          database connection with write access to Performance table
    * @param document
@@ -184,7 +184,7 @@ public final class Playoff {
   public static Team pickWinner(final Connection connection, final Document document, final Team teamA, final Team teamB, final int runNumber)
       throws SQLException, ParseException {
     final Element performanceElement = (Element)document.getDocumentElement().getElementsByTagName("Performance").item(0);
-    
+
     final TeamScore teamAScore = new DatabaseTeamScore(performanceElement, teamA.getTeamNumber(), runNumber, connection);
     final TeamScore teamBScore = new DatabaseTeamScore(performanceElement, teamB.getTeamNumber(), runNumber, connection);
     final Team retval = pickWinner(document, teamA, teamAScore, teamB, teamBScore);
@@ -195,7 +195,7 @@ public final class Playoff {
 
   /**
    * Pick the winner between the scores of two teams
-   * 
+   *
    * @param document
    *          the challenge document
    * @param teamAScore
@@ -239,7 +239,7 @@ public final class Playoff {
 
   /**
    * Evaluate the tiebreaker to determine the winner.
-   * 
+   *
    * @param document
    *          the challenge document
    * @param teamAScore
@@ -249,7 +249,7 @@ public final class Playoff {
    * @return the winner, may be Team.TIE
    */
   private static Team evaluateTiebreaker(final Document document, final Team teamA, final TeamScore teamAScore, final Team teamB, final TeamScore teamBScore) throws ParseException {
-  
+
     final Element performanceElement = (Element)document.getDocumentElement().getElementsByTagName("Performance").item(0);
     final Element tiebreakerElement = (Element)performanceElement.getElementsByTagName("tiebreaker").item(0);
 
@@ -278,7 +278,7 @@ public final class Playoff {
   /**
    * Insert a by run for a given team, tournament, run number in the performance
    * table.
-   * 
+   *
    * @throws SQLException
    *           on a database error
    */
@@ -297,7 +297,7 @@ public final class Playoff {
   /**
    * If team is not null, calls performanceScoreExists(connection,
    * team.getTeamNumber(), runNumber), otherwise returns false.
-   * 
+   *
    * @see #performanceScoreExists(Connection, int, int)
    */
   public static boolean performanceScoreExists(final Connection connection, final Team team, final int runNumber) throws SQLException {
@@ -311,7 +311,7 @@ public final class Playoff {
   /**
    * Test if a performance score exists for the given team, tournament and run
    * number
-   * 
+   *
    * @throws SQLException
    *           on a database error
    */
@@ -333,7 +333,7 @@ public final class Playoff {
 
   /**
    * Get the performance score for the given team, tournament and run number
-   * 
+   *
    * @throws SQLException
    *           on a database error
    * @throws IllegalArgumentException
@@ -348,8 +348,8 @@ public final class Playoff {
       ResultSet rs = null;
       try {
         stmt = connection.createStatement();
-        rs = stmt.executeQuery("SELECT ComputedTotal FROM Performance" + " WHERE TeamNumber = " + team.getTeamNumber() + " AND Tournament = '"
-            + tournament + "'" + " AND RunNumber = " + runNumber);
+        rs = stmt.executeQuery("SELECT ComputedTotal FROM Performance WHERE TeamNumber = " + team.getTeamNumber() + " AND Tournament = '"
+            + tournament + "' AND RunNumber = " + runNumber);
         if(rs.next()) {
           return rs.getDouble(1);
         } else {
@@ -365,7 +365,7 @@ public final class Playoff {
 
   /**
    * Get the value of NoShow for the given team, tournament and run number
-   * 
+   *
    * @throws SQLException
    *           on a database error
    * @throws IllegalArgumentException
@@ -393,7 +393,7 @@ public final class Playoff {
 
   /**
    * Get the value of Bye for the given team, tournament and run number
-   * 
+   *
    * @throws SQLException
    *           on a database error
    * @throws IllegalArgumentException
@@ -405,7 +405,7 @@ public final class Playoff {
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Bye FROM Performance" + " WHERE TeamNumber = " + team.getTeamNumber() + " AND Tournament = '" + tournament + "'"
+      rs = stmt.executeQuery("SELECT Bye FROM Performance WHERE TeamNumber = " + team.getTeamNumber() + " AND Tournament = '" + tournament + "'"
           + " AND RunNumber = " + runNumber);
       if(rs.next()) {
         return rs.getBoolean(1);
@@ -418,7 +418,30 @@ public final class Playoff {
       Utilities.closeStatement(stmt);
     }
   }
-  
+
+  /**
+   * Returns true if the score has been verified, i.e. double-checked.
+   */
+  public static boolean isVerified(final Connection connection, final String tournament, final Team team, final int runNumber)
+      throws SQLException, IllegalArgumentException {
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT Verified FROM Performance WHERE TeamNumber = " + team.getTeamNumber() + " AND Tournament = '" + tournament + "'"
+          + " AND RunNumber = " + runNumber);
+      if(rs.next()) {
+        return rs.getBoolean(1);
+      } else {
+        throw new RuntimeException("No score exists for tournament: " + tournament + " teamNumber: " + team.getTeamNumber() + " runNumber: "
+            + runNumber);
+      }
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closeStatement(stmt);
+    }
+  }
+
   /**
    * Output the table for the printable brackets to out
    */
@@ -507,7 +530,7 @@ public final class Playoff {
             // team information
             final Team team = currentRoundTeams[playoffRunNumber].next();
             out.println("<td class='Leaf' width='200'>");
-            out.println(BracketData.getDisplayString(connection, currentTournament, (playoffRunNumber + numSeedingRounds + 1), team, false));
+            out.println(BracketData.getDisplayString(connection, currentTournament, (playoffRunNumber + numSeedingRounds + 1), team, false, false));
 
             out.println("</td>");
 
@@ -749,7 +772,7 @@ public final class Playoff {
             // team information
             final Team team = (Team)currentRoundTeams[playoffRunNumber].next();
             out.println("<td class='Leaf' width='200'>");
-            out.println(BracketData.getDisplayString(connection, currentTournament, (playoffRunNumber + numSeedingRounds + 1), team, false));
+            out.println(BracketData.getDisplayString(connection, currentTournament, (playoffRunNumber + numSeedingRounds + 1), team, false, false));
 
             out.println("</td>");
 

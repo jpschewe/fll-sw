@@ -1,20 +1,14 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
-      
-<%@ page import="fll.db.Queries" %>
-<%@ page import="fll.web.playoff.Playoff" %>
+
 <%@ page import="fll.web.scoreEntry.Submit" %>
 
-<%@ page import="java.sql.Connection" %>
-  
-<%@ page import="org.w3c.dom.Document" %>
-    
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
- 
+
 final Connection connection = (Connection)application.getAttribute("connection");
 %>
 
-    
+
 <html>
   <head>
     <title><x:out select="$challengeDocument/fll/@title"/> (Submit Scores)</title>
@@ -22,7 +16,7 @@ final Connection connection = (Connection)application.getAttribute("connection")
   </head>
 
   <body>
-      
+
     <%-- save to database --%>
     <c:choose>
       <c:when test="${not empty param.delete}">
@@ -37,7 +31,7 @@ final Connection connection = (Connection)application.getAttribute("connection")
     </c:choose>
 
     <h1>Submitted Scores</h1>
-      
+
     <p>SQL executed: <br>&nbsp;&nbsp;<c:out value="${sql}"/></p>
       
     <table border='1'>          

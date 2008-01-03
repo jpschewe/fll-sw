@@ -1,9 +1,5 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.Utilities"%>
-<%@ page import="fll.db.Queries"%>
-
-<%@ page import="java.sql.Connection"%>
 <%@ page import="java.sql.PreparedStatement"%>
 <%@ page import="java.sql.ResultSet"%>
 
@@ -15,9 +11,9 @@
       final String currentTournament = Queries.getCurrentTournament(connection);
 
       final PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, current_tournament_teams.event_division,"
-          + " Performance.Tournament, Performance.RunNumber, Performance.Bye, Performance.NoShow, Performance.ComputedTotal FROM Teams,Performance,current_tournament_teams"
-          + " WHERE Performance.Tournament = ? AND current_tournament_teams.TeamNumber = Teams.TeamNumber"
-          + " AND Teams.TeamNumber = Performance.TeamNumber ORDER BY Teams.Organization, Teams.TeamNumber, Performance.RunNumber");
+          + " verified_performance.Tournament, verified_performance.RunNumber, verified_performance.Bye, verified_performance.NoShow, verified_performance.ComputedTotal FROM Teams,verified_performance,current_tournament_teams"
+          + " WHERE verified_performance.Tournament = ? AND current_tournament_teams.TeamNumber = Teams.TeamNumber"
+          + " AND Teams.TeamNumber = verified_performance.TeamNumber ORDER BY Teams.Organization, Teams.TeamNumber, verified_performance.RunNumber");
       prep.setString(1, currentTournament);
       final ResultSet rs = prep.executeQuery();
       final List divisions = Queries.getDivisions(connection);
@@ -43,7 +39,7 @@ var scrollTimer;
 var scrollAmount = 2;    // scroll by 100 pixels each time
 var documentYposition = 0;
 var scrollPause = 100; // amount of time, in milliseconds, to pause between scrolls
-          
+
 //http://www.evolt.org/article/document_body_doctype_switching_and_more/17/30655/index.html
 function getScrollPosition() {
   if (window.pageYOffset) {
