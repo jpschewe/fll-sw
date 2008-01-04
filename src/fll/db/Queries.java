@@ -2027,4 +2027,28 @@ public final class Queries {
       Utilities.closeStatement(stmt);
     }
   }
+  
+  /**
+   * Returns the table assignment string for the given tournament, event
+   * division, round number, and line number. If the table assignment is NULL,
+   * returns null.
+   */
+  public static String getAssignedTable(final Connection connection, final String tournament, final String event_division,
+                                        final int round, final int line) throws SQLException {
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT AssignedTable from PlayoffData WHERE Tournament='" + tournament + "' AND event_division='" + event_division + "'"
+          + " AND PlayoffRound=" + round + " AND LineNumber=" + line + " AND AssignedTable IS NOT NULL");
+      if(rs.next()) {
+        return rs.getString(1);
+      } else {
+        return null;
+      }
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closeStatement(stmt);
+    }
+  }
 }

@@ -31,6 +31,7 @@ final BracketData bracketInfo =
   new BracketData(connection, division, playoffRoundNumber, playoffRoundNumber+2, 4, false, true);
 
 bracketInfo.addBracketLabels(playoffRoundNumber);
+bracketInfo.addTableLabelsForBigScreen(connection, currentTournament, division);
 
 %>
 
@@ -47,6 +48,7 @@ bracketInfo.addBracketLabels(playoffRoundNumber);
       FONT.TeamName {color:#ffffff;font-weight:bold}
       FONT.TeamScore {color:#ffffff;font-weight:bold;font-size:10pt}
       FONT.TIE {color:#ff0000;font-weight:bold}
+      .TABLE_ASSIGNMENT {font-family:monospace; font-size:85%; font-weight:bold; background-color:white; padding-left:5%; padding-right:5%}
   </style>
 
 <!-- stuff for automatic scrolling -->

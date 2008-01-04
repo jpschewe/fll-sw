@@ -21,19 +21,17 @@ import fll.Utilities;
 /**
  * Class to provide convenient access to the contents of the PlayoffData table.
  * A bracket data object contains all the playoff meta data for the current
- * tournament, in a specified division, for a given range of playoff
- * rounds.  This data can be thought of a sparse matrix containing entries
- * only where a team name would appear if the matrix was overlayed on an
- * elimination bracket. Then, by iterating over rounds and rows, the data
- * access method provides cell-by-cell output in either row-major or
- * column-major order, as you desire. By setting various options, you can
- * automatically insert things like bracket labels, table assignment
- * labels, table assignment selectors, etc. Of course, it is also possible
- * to simply request the data for a specific cell and handle it directly,
- * if desired.
- *
+ * tournament, in a specified division, for a given range of playoff rounds.
+ * This data can be thought of a sparse matrix containing entries only where a
+ * team name would appear if the matrix was overlaid on an elimination bracket.
+ * Then, by iterating over rounds and rows, the data access method provides
+ * cell-by-cell output in either row-major or column-major order, as you desire.
+ * By specifying options to the constructor or calling additional functions
+ * after initial creation of a BracketData object, you can insert bracket label
+ * cells, table assignment labels, table assignment form elements, etc.
+ * 
  * @author Dan Churchill
- *
+ * 
  */
 public class BracketData {
 
@@ -74,6 +72,20 @@ public class BracketData {
     }
     private String _label;
     public String getLabel() { return _label; }
+  }
+  
+  /**
+   * Cell for table labels on the big screen display.
+   * 
+   * For now, this type of bracket data cell contains only the string. In the
+   * future, we may also wish to store a color associated with the given table.
+   */
+  public static class BigScreenTableAssignmentCell extends BracketDataType {
+    public BigScreenTableAssignmentCell(final String table) {
+      _table = table;
+    }
+    private String _table;
+    public String getTable() { return _table; }
   }
 
   /**
@@ -199,7 +211,8 @@ public class BracketData {
     }
   }
 
-  // Map of round number to map of line number to playoff meta data for that
+  // Map of round number to map of line number (of the conceptual table - not
+  // the column of the PlayoffData table) to playoff meta data for that
   // round number and line number.
   private Map<Integer, SortedMap<Integer, BracketDataType>> _bracketData;
   private int _firstRound;
@@ -217,7 +230,7 @@ public class BracketData {
    * @param pConnection
    *          Database connection to use.
    * @param pDivision
-   *          Divsion from which to look up playoff data.
+   *          Division from which to look up playoff data.
    * @param pFirstRound
    *          The first playoff round of interest (1st playoff round is 1, not
    *          the number of seeding rounds + 1)
@@ -525,7 +538,11 @@ public class BracketData {
         sb.append(myD.getLabel() + "</font>");
         sb.append("</td>");
       }
-
+    } else if(d instanceof BigScreenTableAssignmentCell) {
+      // TODO: Add a background-color:rgb(r,g,b) to the td style attribute based on a color from the database table information
+      sb.append("<td align='right' style='padding-right:15%'><span class='table_assignment'>");
+      sb.append(((BigScreenTableAssignmentCell)d).getTable());
+      sb.append("</span></td>");
     }
 
     return sb.toString();
@@ -695,6 +712,55 @@ public class BracketData {
           roundData.put(it.next(), new BracketLabelCell(bracketNumber++));
         }
       }
+    }
+  }
+  
+  /**
+   * Adds bracket data cells containing hard table assignments (those saved in
+   * the database) to the cells just below the top team of a bracket and just
+   * above the bottom team. If no table assignment is present in the database,
+   * no bracket data cell is created. If the BracketData class has been
+   * specified to have fewer than 4 lines per team (i.e. 2 lines per team only)
+   * then this function will have no effect.
+   * 
+   * @param connection
+   * @param tournament
+   * @param event_division
+   * @throws SQLException
+   */
+  public void addTableLabelsForBigScreen(final Connection connection, final String tournament, final String event_division)
+  throws SQLException {
+    if(_rowsPerTeam < 4) {
+      LOG.warn(new String("Table labels cannot be added to bracket data because there are too few lines per team for them to fit."));
+      return; // if there aren't enough rows-per-team to include table labels, just return
+    }
+    Iterator<Integer> round_it = _bracketData.keySet().iterator();
+    while(round_it.hasNext()) {
+      // We can't modify the map while we iterate over it - we'll add these after identifying all new cells
+      SortedMap<Integer, BracketDataType> newCells = new TreeMap<Integer, BracketDataType>();
+      int dblinenum = 0;
+      int tablelinemod = -1;
+      final Integer round = round_it.next();
+      final SortedMap<Integer, BracketDataType> roundData = _bracketData.get(round);
+      Iterator<Integer> line_it = roundData.keySet().iterator();
+      while(line_it.hasNext()) {
+        final Integer lineNumber = line_it.next();
+        final BracketDataType cell = roundData.get(lineNumber);
+        if(cell != null && cell instanceof TeamBracketCell) {
+          dblinenum++;
+          tablelinemod += 2;
+          if(tablelinemod > 1) {
+            tablelinemod = -1;
+          }
+          // Get the table assignment from cell info
+          final String table = Queries.getAssignedTable(connection, tournament, event_division, round.intValue(), dblinenum);
+          if(table != null) {
+            newCells.put(new Integer(lineNumber.intValue()+tablelinemod), new BigScreenTableAssignmentCell(table));
+          }
+        }
+      }
+      // Merge the new cells into the roundData
+      roundData.putAll(newCells);
     }
   }
 
