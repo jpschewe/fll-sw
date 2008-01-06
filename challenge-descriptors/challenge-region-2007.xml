@@ -91,6 +91,7 @@
    message="There are only 11 oil barrels on the field">
    <term coefficient="1" goal="power_plant_supply_oil" scoreType="raw" />
    <term coefficient="1" goal="oil_barrels_base" scoreType="raw" />
+   <term coefficient="1" goal="corn_harvest" scoreType="raw" />
   </restriction>
 
 
