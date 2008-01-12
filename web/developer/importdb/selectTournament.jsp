@@ -40,7 +40,7 @@ pageContext.setAttribute("driverName", Utilities.getDBDriverName());
  scope="page">
   SELECT Name, Location from Tournaments ORDER BY Name
 </sql:query>
-<form name="selectTournament" action="CheckDifferences">
+<form name="selectTournament" action="CheckTournamentExists">
 <p>Select a tournament to import</p>
 <select name="tournament">
 <c:forEach var="row" items="${query_result.rowsByIndex}">
