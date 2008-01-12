@@ -24,9 +24,21 @@
     <location>/errorHandler.jsp</location>
   </error-page>
 
+  <!-- servlets -->
+  <servlet>
+    <servlet-name>log4j-init</servlet-name>
+    <servlet-class>fll.web.Log4jInit</servlet-class>
+
+    <init-param>
+      <param-name>log4j-init-file</param-name>
+      <param-value>WEB-INF/classes/log4j.properties</param-value>
+    </init-param>
+
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  
   <servlet>
     <servlet-name>GetFile</servlet-name>
-    <description>Get various binary files</description>
     <servlet-class>fll.web.GetFile</servlet-class>
   </servlet>
   <servlet-mapping>
@@ -36,7 +48,6 @@
 
   <servlet>
     <servlet-name>CreateDB</servlet-name>
-    <description>Create databases</description>
     <servlet-class>fll.web.setup.CreateDB</servlet-class>
   </servlet>
   <servlet-mapping>
@@ -46,22 +57,40 @@
   
   <servlet>
     <servlet-name>ImportDBDump</servlet-name>
-    <description>Import Database</description>
-    <servlet-class>fll.web.developer.ImportDBDump</servlet-class>
+    <servlet-class>fll.web.developer.importdb.ImportDBDump</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>ImportDBDump</servlet-name>
-    <url-pattern>/developer/ImportDBDump</url-pattern>
+    <url-pattern>/developer/importdb/ImportDBDump</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>CheckTournamentExists</servlet-name>
+    <servlet-class>fll.web.developer.importdb.CheckTournamentExists</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>CheckTournamentExists</servlet-name>
+    <url-pattern>/developer/importdb/CheckTournamentExists</url-pattern>
   </servlet-mapping>
 
   <servlet>
     <servlet-name>CategoryScoresByScoreGroup</servlet-name>
-    <description>Score group scores</description>
     <servlet-class>fll.web.report.CategoryScoresByScoreGroup</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>CategoryScoresByScoreGroup</servlet-name>
     <url-pattern>/report/CategoryScoresByScoreGroup</url-pattern>
   </servlet-mapping>
+
+  
+  <servlet>
+    <servlet-name>CommitTeam</servlet-name>
+    <servlet-class>fll.web.admin.CommitTeam</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>CommitTeam</servlet-name>
+    <url-pattern>/admin/CommitTeam</url-pattern>
+  </servlet-mapping>
+  
   
 </web-app>

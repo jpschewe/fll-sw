@@ -66,7 +66,7 @@ ${message}
  <li><a href="<c:url value='/setup'/>">Go to database setup</a></li>
 
 <li>
- <form id='import' action='ImportDBDump' method='post'
+ <form id='import' action='importdb/ImportDBDump' method='post'
   enctype='multipart/form-data'>
 
  <p>Import data from a database dump into the current database.</p>

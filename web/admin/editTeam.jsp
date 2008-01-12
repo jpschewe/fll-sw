@@ -88,7 +88,7 @@ function confirmChangeTournament() {
   <body onload='init()'>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Edit Team)</h1>
 
-    <form action="commitTeam.jsp" method="post" name="editTeam">
+    <form action="CommitTeam" method="post" name="editTeam">
     <c:if test="${not empty param.addTeam}">
       <input type='hidden' name='addTeam' value='<c:out value="${param.addTeam}" />'>
     </c:if>
