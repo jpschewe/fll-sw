@@ -28,6 +28,11 @@ final Connection connection = (Connection)application.getAttribute("connection")
 
   </head>
   <body>
+${message}
+
+<%-- clear out the message, so that we don't see it again --%>
+<c:remove var="message" />
+  
     <form action="editTeam.jsp" method="POST" name="selectTeam">
       <!-- top info bar -->
       <table width="100%" border="0" cellpadding="0" cellspacing="0">

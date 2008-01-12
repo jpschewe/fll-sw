@@ -135,6 +135,7 @@ public final class GenerateDB {
       }
 
       if(forceRebuild || !tables.contains("Tournaments".toLowerCase())) {
+        
         stmt.executeUpdate("CREATE TABLE Tournaments ("
                            + "Name " + TOURNAMENT_DATATYPE + " NOT NULL,"
                            + "Location longvarchar,"
