@@ -1,14 +1,10 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="fll.web.report.CategoryScores" %>
 <%@ page import="fll.db.Queries" %>
       
 <%@ page import="java.sql.Connection" %>
 
-<%@ page import="org.w3c.dom.Document" %>
-  
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 final Connection connection = (Connection)application.getAttribute("connection");
 final String tournamentReq = request.getParameter("currentTournament");
 final String tournament;
@@ -74,9 +70,8 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
               </td>
               <td><fmt:formatNumber value="${row[3]}" maxFractionDigits="2" minFractionDigits="2"/></td>
             </tr>
-            </tr>
           </c:forEach>
-          <tr><td colspan='5'><hr</td></tr>
+          <tr><td colspan='5'><hr/></td></tr>
         </table>
       </x:forEach> <!-- end foreach category -->
     </c:forEach> <!-- end foreach division -->
