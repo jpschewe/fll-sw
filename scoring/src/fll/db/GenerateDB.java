@@ -342,6 +342,7 @@ public final class GenerateDB {
       // verified performance scores
       stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
       stmt.executeUpdate("CREATE VIEW verified_performance AS SELECT " + performanceColumns.toString() + " FROM Performance WHERE Verified = TRUE");
+      
       //FIX add foreign key constraints
 
     } finally {
