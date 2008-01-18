@@ -351,11 +351,11 @@ public final class ImportDB {
         destPrep.executeUpdate();
         Utilities.closePreparedStatement(destPrep);
 
-        // Note: If this list changes, then the hack below needs to be modified
         final StringBuffer columns = new StringBuffer();
         columns.append(" TeamNumber,");
         columns.append(" Tournament,");
         columns.append(" RunNumber,");
+        // Note: If TimeStamp is no longer the 4th element, then the hack below needs to be modified
         columns.append(" TimeStamp,");
         final NodeList goals = performanceElement.getElementsByTagName("goal");
         final int numColumns = goals.getLength() + 6;
