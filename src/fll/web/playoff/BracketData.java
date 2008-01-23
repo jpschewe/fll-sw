@@ -804,8 +804,8 @@ public class BracketData {
   }
 
   /**
-   * Adds bracket data cells containing hard table assignments (those saved in
-   * the database) to the cells just below the top team of a bracket and just
+   * Adds bracket data cells containing hard table assignments (i.e. those saved
+   * in the database) to the cells just below the top team of a bracket and just
    * above the bottom team. If no table assignment is present in the database,
    * no bracket data cell is created. If the BracketData class has been
    * specified to have fewer than 4 lines per team (i.e. 2 lines per team only)
@@ -816,7 +816,7 @@ public class BracketData {
    * @param eventDivision
    * @throws SQLException
    */
-  public void addTableLabelsForBigScreen(final Connection connection, final String tournament, final String eventDivision) throws SQLException {
+  public void addStaticTableLabels(final Connection connection, final String tournament, final String eventDivision) throws SQLException {
     if(_rowsPerTeam < 4) {
       LOG.warn(new String("Table labels cannot be added to bracket data because there are too few lines per team for them to fit."));
       return; // if there aren't enough rows-per-team to include table labels,
