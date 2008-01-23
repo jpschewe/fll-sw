@@ -287,8 +287,8 @@ public final class Playoff {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
-      stmt.executeUpdate("INSERT INTO Performance(TeamNumber, Tournament, RunNumber, Bye)" + " VALUES( " + team.getTeamNumber() + ", '" + tournament
-          + "', " + runNumber + ", 1)");
+      stmt.executeUpdate("INSERT INTO Performance(TeamNumber, Tournament, RunNumber, Bye, Verified)" + " VALUES( " + team.getTeamNumber() + ", '" + tournament
+          + "', " + runNumber + ", 1, 1)");
     } finally {
       Utilities.closeStatement(stmt);
     }
