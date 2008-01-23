@@ -3,7 +3,7 @@
 <%@ page import="fll.web.playoff.BracketData" %>
 
 <%
-/*
+	/*
   application parameters
   playoffDivision - String for the division
   playoffRoundNumber - Integer for the playoff round number, counted from the 1st playoff round
@@ -31,8 +31,7 @@ final BracketData bracketInfo =
   new BracketData(connection, division, playoffRoundNumber, playoffRoundNumber+2, 4, false, true);
 
 bracketInfo.addBracketLabels(playoffRoundNumber);
-bracketInfo.addTableLabelsForBigScreen(connection, currentTournament, division);
-
+bracketInfo.addStaticTableLabels(connection, currentTournament, division);
 %>
 
 <html>

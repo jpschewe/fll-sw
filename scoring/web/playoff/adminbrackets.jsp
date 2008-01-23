@@ -3,7 +3,7 @@
 <%@ page import="fll.web.playoff.BracketData" %>
 
 <%
-/*
+	/*
   Parameters:
     division - String for the division
 */
@@ -55,7 +55,7 @@ final BracketData bracketInfo =
 for(int i = 1; i < lastColumn; i++) {
   bracketInfo.addBracketLabels(i);
 }
-
+bracketInfo.addStaticTableLabels(connection, currentTournament, divisionStr);
 %>
 
 <html>
@@ -73,6 +73,7 @@ for(int i = 1; i < lastColumn; i++) {
       FONT.TeamName {font-weight:bold}
       FONT.TeamScore {font-weight:bold;font-size:10pt}
       FONT.TIE {color:#ff0000;font-weight:bold}
+      .TABLE_ASSIGNMENT {font-family:monospace; font-size:85%; font-weight:bold; background-color:white; padding-left:5%; padding-right:5%}
   </style>
 
   <body>
