@@ -1,13 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
-<%@ page import="fll.db.GenerateDB"%>
-<%@ page import="fll.xml.ChallengeParser"%>
-
-<%@ page import="java.io.InputStreamReader"%>
-<%@ page import="fll.web.UploadProcessor"%>
-<%@ page import="org.w3c.dom.Document"%>
-<%@ page import="org.apache.commons.fileupload.FileItem"%>
-
 <html>
 <head>
 <link rel="stylesheet" type="text/css"

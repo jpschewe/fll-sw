@@ -32,7 +32,7 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
            <th>Score</th>
           </tr>
           <sql:query var="result" dataSource="${datasource}">
-            SELECT Teams.TeamNumber,Teams.TeamName,Performance.ComputedTotal,Performance.NoShow
+            SELECT Teams.TeamNumber,Teams.TeamName,Teams.Organization,Performance.ComputedTotal,Performance.NoShow
                      FROM Teams,Performance,current_tournament_teams
                      WHERE Performance.RunNumber = <c:out value="${param.RunNumber}"/>
                        AND Teams.TeamNumber = Performance.TeamNumber
@@ -45,6 +45,7 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
             <tr>
               <td><c:out value="${row.TeamNumber}"/></td>
               <td><c:out value="${row.TeamName}"/></td>
+              <td><c:out value="${row.Organization}"/></td>
               <c:if test="${row.NoShow == True}" var="test">
                 <td>No Show</td>
               </c:if>
