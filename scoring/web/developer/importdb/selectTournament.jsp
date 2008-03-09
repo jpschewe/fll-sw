@@ -1,5 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<%@ page import="fll.Utilities"%>
+
 <c:if test="${empty dbimport_url}">
  <c:set var="message" scope="session">
   <p class='error'>You cannot goto the selectTournament for dbimport
@@ -48,7 +50,7 @@ pageContext.setAttribute("driverName", Utilities.getDBDriverName());
 </c:forEach>
 </select>
 	
-	<submit/>
+	<input type='submit'/>
 </form>
 
 

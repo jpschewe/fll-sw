@@ -7,7 +7,7 @@ package fll.web;
 
 import javax.servlet.http.HttpServlet;
 
-import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.xml.DOMConfigurator;
 
 /**
  * @author jpschewe
@@ -26,9 +26,9 @@ public class Log4jInit extends HttpServlet {
 
       // set some properties that are used in the log4j config file
       System.setProperty("app.name", "web");
-      System.setProperty("logroot", prefix + "/WEB-INF/");
+      System.setProperty("logroot", prefix + "/"); // need the trailing slash because of how the log4j.xml file is built
 
-      PropertyConfigurator.configure(prefix + file);
+      DOMConfigurator.configure(prefix + file);
     }
   }
 

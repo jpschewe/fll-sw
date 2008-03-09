@@ -67,8 +67,7 @@ public class ImportDBDump extends HttpServlet {
         // import the database
         final FileItem dumpFileItem = (FileItem)request.getAttribute("dbdump");
         final ZipInputStream zipfile = new ZipInputStream(dumpFileItem.getInputStream());
-        /* final Document challengeDocument = */ImportDB.loadDatabaseDump(zipfile, memConnection);
-        // GenerateDB.generateDB(challengeDocument, database, true);
+        ImportDB.loadDatabaseDump(zipfile, memConnection);
 
         // let the jsp code know where to find the database
         session.setAttribute("dbimport_url", url);

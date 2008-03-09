@@ -481,7 +481,7 @@
 				<include name="*.xml" />
 				<include name="ChangeLog" />
 				<include name="${tomcat}" />
-				<include name="*.t" />
+				<include name="*.template" />
 			</zipfileset>
 		</zip>
 
@@ -735,7 +735,7 @@
 			<map from="${basedir}" to="${-scripts.root}" />
 		</pathconvert>
 
-		<copy file="run.sh.t" tofile="${-scripts.dir}/${app.name}.sh" overwrite="true">
+		<copy file="run.sh.template" tofile="${-scripts.dir}/${app.name}.sh" overwrite="true">
 			<filterset>
 				<filter token="CLASSPATH" value="${classpath.unix}" />
 				<filter token="CLASSNAME" value="${class.main}" />
@@ -747,7 +747,7 @@
 				<include name="${app.name}.sh" />
 			</fileset>
 		</chmod>
-		<copy file="run.bat.t" tofile="${-scripts.dir}/${app.name}.bat" overwrite="true">
+		<copy file="run.bat.template" tofile="${-scripts.dir}/${app.name}.bat" overwrite="true">
 			<filterset>
 				<filter token="CLASSPATH" value="${classpath.windows}" />
 				<filter token="CLASSNAME" value="${class.main}" />

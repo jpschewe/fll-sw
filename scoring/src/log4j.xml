@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>
+
+  <!-- limit CONSOLE to be info -->
+  <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+    <param name="threshold" value="INFO"/>
+    <layout class="org.apache.log4j.TTCCLayout">
+      <param name="dateFormat" value="RELATIVE"/>
+    </layout>
+  </appender>
+
+  <appender name="LOGFILE" class="org.apache.log4j.DailyRollingFileAppender">
+    <param name="File" value="${logroot}fll${app.name}.log"/>
+    <param name="datePattern" value="'.'yyyy-MM-dd"/>
+    <param name="Append" value="false"/>
+    <layout class="org.apache.log4j.TTCCLayout">
+      <param name="dateFormat" value="DATE"/>
+    </layout>
+  </appender>
+
+<!--appender name="SYSLOG" class="org.apache.log4j.net.SyslogAppender">
+  <param name="syslogHost" value="localhost"/>
+  <param name="facility" value="USER"/>
+  <layout class="org.apache.log4j.PatternLayout">
+    <param name="conversionPattern" value="%d [%p]: %m%n"/>
+  </layout>
+</appender-->
+
+  <!-- stuff for debugging -->
+  <!--logger name="fll.web.admin.UploadSubjectiveData">
+    <level value="DEBUG"/>
+  </logger-->
+  <!-- end stuff for debugging -->
+  
+  <root>
+    <level value="INFO"/>
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="LOGFILE"/>
+  </root>
+
+  
+</log4j:configuration>
