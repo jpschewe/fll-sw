@@ -499,7 +499,6 @@
 
 
   <tiebreaker>
-   <!-- FIX need real tiebreaker -->
    <test winner='high'>
      <term goal='solar_power_satellite_bonus' scoreType='computed'/>
    </test>
