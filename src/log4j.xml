@@ -28,9 +28,9 @@
 </appender-->
 
   <!-- stuff for debugging -->
-  <!--logger name="fll.web.admin.UploadSubjectiveData">
+  <logger name="fll.web.report.FinalistSchedulerUI">
     <level value="DEBUG"/>
-  </logger-->
+  </logger>
   <!-- end stuff for debugging -->
   
   <root>

@@ -14,6 +14,8 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,6 +48,61 @@ public final class Queries {
 
   private Queries() {
     // no instances
+  }
+
+  /**
+   * Compute the score groups that each team are in for a given category.
+   * 
+   * @param connection
+   *          the connection to the database
+   * @param tournament
+   *          the tournament to work within
+   * @param division
+   *          the division to compute the score groups for
+   * @param categoryName
+   *          the database name of the category
+   * @return
+   */
+  public static Map<String, Collection<Integer>> computeScoreGroups(final Connection connection,
+                                                                    final String tournament,
+                                                                    final String division,
+                                                                    final String categoryName) throws SQLException {
+    final Map<String, Collection<Integer>> scoreGroups = new HashMap<String, Collection<Integer>>();
+
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT Judge FROM " + categoryName
+          + " WHERE TeamNumber = ? AND Tournament = ? AND ComputedTotal IS NOT NULL ORDER BY Judge");
+      prep.setString(2, tournament);
+
+      // foreach team, put the team in a score group
+      for(Team team : Queries.getTournamentTeams(connection).values()) {
+        // only show the teams for the division that we are looking at right
+        // now
+        if(division.equals(team.getEventDivision())) {
+          final int teamNum = team.getTeamNumber();
+          StringBuilder scoreGroup = new StringBuilder();
+          prep.setInt(1, teamNum);
+          rs = prep.executeQuery();
+          while(rs.next()) {
+            scoreGroup.append(rs.getString(1));
+          }
+          Utilities.closeResultSet(rs);
+
+          final String scoreGroupStr = scoreGroup.toString();
+          if(!scoreGroups.containsKey(scoreGroupStr)) {
+            scoreGroups.put(scoreGroupStr, new LinkedList<Integer>());
+          }
+          scoreGroups.get(scoreGroupStr).add(teamNum);
+        }
+      }
+    } finally {
+      Utilities.closeResultSet(rs);
+      Utilities.closePreparedStatement(prep);
+    }
+
+    return scoreGroups;
   }
 
   /**
@@ -1135,8 +1192,7 @@ public final class Queries {
    * @throws SQLException
    *           on an error talking to the database
    */
-  public static void deleteTeam(final int teamNumber, final Document document, final Connection connection)
-      throws SQLException {
+  public static void deleteTeam(final int teamNumber, final Document document, final Connection connection) throws SQLException {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
@@ -2054,8 +2110,8 @@ public final class Queries {
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT AssignedTable from PlayoffData WHERE Tournament='" + tournament + "' AND event_division='" + eventDivision
-          + "'" + " AND PlayoffRound=" + round + " AND LineNumber=" + line + " AND AssignedTable IS NOT NULL");
+      rs = stmt.executeQuery("SELECT AssignedTable from PlayoffData WHERE Tournament='" + tournament + "' AND event_division='" + eventDivision + "'"
+          + " AND PlayoffRound=" + round + " AND LineNumber=" + line + " AND AssignedTable IS NOT NULL");
       if(rs.next()) {
         return rs.getString(1);
       } else {

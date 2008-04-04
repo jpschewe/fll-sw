@@ -56,6 +56,8 @@ Utilities.closeStatement(stmt);
 
       <li><a href="CategoryScoresByScoreGroup">Categorized Scores by Score Group</a>.  This displays the scaled scores for each category by score group (all judges that saw a team).</li>
 
+      <li><a href='<c:url value="FinalistSchedulerUI"><c:param name="init" value="true"/></li></c:url>'>Schedule Finalists</a></li>
+      
     </ol>
 
     <p>Some reports that are handy for intermediate reporting and

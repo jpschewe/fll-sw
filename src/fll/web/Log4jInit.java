@@ -7,6 +7,7 @@ package fll.web;
 
 import javax.servlet.http.HttpServlet;
 
+import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
 /**
@@ -29,6 +30,8 @@ public class Log4jInit extends HttpServlet {
       System.setProperty("logroot", prefix + "/"); // need the trailing slash because of how the log4j.xml file is built
 
       DOMConfigurator.configure(prefix + file);
+      
+      Logger.getRootLogger().info("Logging initialized");
     }
   }
 

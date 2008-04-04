@@ -82,6 +82,15 @@
     <url-pattern>/report/CategoryScoresByScoreGroup</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>FinalistSchedulerUI</servlet-name>
+    <servlet-class>fll.web.report.FinalistSchedulerUI</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>FinalistSchedulerUI</servlet-name>
+    <url-pattern>/report/FinalistSchedulerUI</url-pattern>
+  </servlet-mapping>
+
   
   <servlet>
     <servlet-name>CommitTeam</servlet-name>
