@@ -14,7 +14,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -28,7 +27,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
 
@@ -80,34 +78,8 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
         // foreach subjective category
         for(String categoryTitle : subjectiveCategories.keySet()) {
           final String categoryName = subjectiveCategories.get(categoryTitle);
-
-          prep = connection.prepareStatement("SELECT Judge FROM " + categoryName
-              + " WHERE TeamNumber = ? AND Tournament = ? AND ComputedTotal IS NOT NULL ORDER BY Judge");
-          prep.setString(2, currentTournament);
-
-          // foreach team, put the team in a score group
-          final Map<String, Collection<Integer>> scoreGroups = new HashMap<String, Collection<Integer>>();
-          for(Team team : Queries.getTournamentTeams(connection).values()) {
-            // only show the teams for the division that we are looking at right
-            // now
-            if(division.equals(team.getEventDivision())) {
-              final int teamNum = team.getTeamNumber();
-              StringBuilder scoreGroup = new StringBuilder();
-              prep.setInt(1, teamNum);
-              rs = prep.executeQuery();
-              while(rs.next()) {
-                scoreGroup.append(rs.getString(1));
-              }
-              Utilities.closeResultSet(rs);
-
-              final String scoreGroupStr = scoreGroup.toString();
-              if(!scoreGroups.containsKey(scoreGroupStr)) {
-                scoreGroups.put(scoreGroupStr, new LinkedList<Integer>());
-              }
-              scoreGroups.get(scoreGroupStr).add(teamNum);
-            }
-          }
-          Utilities.closePreparedStatement(prep);
+          
+          final Map<String, Collection<Integer>> scoreGroups = Queries.computeScoreGroups(connection, currentTournament, division, categoryName);
 
           // select from FinalScores
           for(String scoreGroup : scoreGroups.keySet()) {
