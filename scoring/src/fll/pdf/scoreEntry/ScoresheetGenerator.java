@@ -276,7 +276,7 @@ public class ScoresheetGenerator {
     sciC.setPaddingTop(9);
     sciC.setPaddingRight(36);
     sciC.setHorizontalAlignment(Element.ALIGN_RIGHT);
-    Phrase cpr = new Phrase("All Challenge Pieces Returned _______", ARIAL_8PT_NORMAL);
+    /*Phrase cpr = new Phrase("All Challenge Pieces Returned _______", ARIAL_8PT_NORMAL);
     PdfPCell cprC = new PdfPCell(cpr);
     cprC.setBorder(0);
     cprC.setPaddingTop(9);
@@ -287,7 +287,7 @@ public class ScoresheetGenerator {
     blankC.setBorder(0);
     blankC.setPaddingTop(9);
     blankC.setPaddingRight(36);
-    blankC.setHorizontalAlignment(Element.ALIGN_RIGHT);
+    blankC.setHorizontalAlignment(Element.ALIGN_RIGHT);*/
     
     PdfPTable[] team = new PdfPTable[m_numTeams];
     PdfPCell[] cell = new PdfPCell[m_numTeams];
@@ -387,8 +387,8 @@ public class ScoresheetGenerator {
       team[i].addCell(desC);
       team[i].addCell(tciC);
       team[i].addCell(sciC);
-      team[i].addCell(cprC);
-      team[i].addCell(blankC);
+  /*    team[i].addCell(cprC);
+      team[i].addCell(blankC);*/
       
       cell[i] = new PdfPCell(team[i]);
       cell[i].setBorder(0);
