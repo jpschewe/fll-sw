@@ -237,9 +237,10 @@ public final class GenerateDB {
       stmt.executeUpdate("DROP TABLE IF EXISTS tablenames CASCADE");
       stmt.executeUpdate("CREATE TABLE tablenames ("
                          + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
+                         + "  PairID INTEGER NOT NULL,"
                          + "  SideA varchar(64) NOT NULL,"
                          + "  SideB varchar(64) NOT NULL,"
-                         + "  PRIMARY KEY (Tournament,SideA,SideB)"
+                         + "  PRIMARY KEY (Tournament,PairID)"
                          + ")");
 
 
