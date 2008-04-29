@@ -504,12 +504,12 @@ public final class ImportDB {
         destPrep.executeUpdate();
         Utilities.closePreparedStatement(destPrep);
 
-        sourcePrep = sourceConnection.prepareStatement("SELECT Tournament, SideA, SideB " + "FROM tablenames WHERE Tournament=?");
+        sourcePrep = sourceConnection.prepareStatement("SELECT Tournament, PairID, SideA, SideB " + "FROM tablenames WHERE Tournament=?");
         sourcePrep.setString(1, tournament);
-        destPrep = destinationConnection.prepareStatement("INSERT INTO tablenames (Tournament, SideA, SideB) " + "VALUES (?, ?, ?)");
+        destPrep = destinationConnection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) " + "VALUES (?, ?, ?, ?)");
         sourceRS = sourcePrep.executeQuery();
         while(sourceRS.next()) {
-          for(int i = 1; i < 4; i++) {
+          for(int i = 1; i <= 4; i++) {
             Object sourceObj = sourceRS.getObject(i);
             if("".equals(sourceObj)) {
               sourceObj = null;

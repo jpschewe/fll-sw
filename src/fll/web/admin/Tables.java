@@ -84,7 +84,7 @@ public final class Tables {
         Statement stmt = null;
         try {
           stmt = connection.createStatement();
-          rs = stmt.executeQuery("SELECT SideA,SideB FROM tablenames WHERE Tournament = '" + tournament + "'");
+          rs = stmt.executeQuery("SELECT SideA,SideB FROM tablenames WHERE Tournament = '" + tournament + "' ORDER BY PairID");
           for(row=0; rs.next(); row++) {
             final String sideA = rs.getString(1);
             final String sideB = rs.getString(2);
@@ -179,7 +179,7 @@ public final class Tables {
       stmt.executeUpdate("DELETE FROM tablenames where Tournament = '" + tournament + "'");
       
       //walk request parameters and insert data into database
-      prep = connection.prepareStatement("INSERT INTO tablenames (Tournament, SideA, SideB) VALUES('" + tournament + "', ?, ?)");
+      prep = connection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) VALUES('" + tournament + "',?, ?, ?)");
       int row = 0;
       String sideA = request.getParameter("SideA" + row);
       String sideB = request.getParameter("SideB" + row);
@@ -188,8 +188,9 @@ public final class Tables {
         if (null == delete || delete.equals("")) {
           // Don't put blank entries in the database
           if (!(sideA.trim().equals("") && sideB.trim().equals(""))) {
-            prep.setString(1, sideA);
-            prep.setString(2, sideB);
+            prep.setInt(1, row);
+            prep.setString(2, sideA);
+            prep.setString(3, sideB);
             prep.executeUpdate();
           }
         }
