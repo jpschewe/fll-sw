@@ -29,6 +29,7 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
           <tr>
            <th>Team Number </th>
            <th>Team Name </th>
+           <th>Organization </th>
            <th>Score</th>
           </tr>
           <sql:query var="result" dataSource="${datasource}">
