@@ -23,7 +23,9 @@ final Connection connection = (Connection)application.getAttribute("connection")
 
       <li>Current Tournament -&gt; <%=Queries.getCurrentTournament(connection)%></li>
 
-      <li><a href="instructions.jsp">Instructions</a></li>
+      <li><a href="wiki/fll-sw/instructions.html">Instructions (from Wiki)</a></li>
+
+      <li><a href="wiki/fll-sw/home.html">Wiki Documentation</a></li>
 
       <li><a href="scoreEntry/select_team.jsp">Score Entry</a></li>
 
