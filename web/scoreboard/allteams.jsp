@@ -2,9 +2,13 @@
 
 <%@ page import="java.sql.PreparedStatement"%>
 <%@ page import="java.sql.ResultSet"%>
+<%@ page import="java.sql.Connection"%>
 
 <%@ page import="java.util.List"%>
 <%@ page import="java.util.Iterator"%>
+
+<%@ page import="fll.Utilities"%>
+<%@ page import="fll.db.Queries"%>
 
 <%
       final Connection connection = (Connection) application.getAttribute("connection");
@@ -16,7 +20,7 @@
           + " AND Teams.TeamNumber = verified_performance.TeamNumber ORDER BY Teams.Organization, Teams.TeamNumber, verified_performance.RunNumber");
       prep.setString(1, currentTournament);
       final ResultSet rs = prep.executeQuery();
-      final List divisions = Queries.getDivisions(connection);
+      final List<String> divisions = Queries.getDivisions(connection);
 %>
 
 <c:set var="thisURL">
@@ -97,11 +101,11 @@ function start() {
  <tr align='left'>
   <%
             final String divisionStr = rs.getString("event_division");
-            final Iterator divisionIter = divisions.iterator();
+            final Iterator<String> divisionIter = divisions.iterator();
             boolean found = false;
             int index = 0;
             while (divisionIter.hasNext() && !found) {
-              final String div = (String) divisionIter.next();
+              final String div = divisionIter.next();
               if (divisionStr.equals(div)) {
                 found = true;
               } else {
@@ -283,8 +287,6 @@ function start() {
 </table>
 
 
-
-</div>
 </body>
 <%
       Utilities.closeResultSet(rs);

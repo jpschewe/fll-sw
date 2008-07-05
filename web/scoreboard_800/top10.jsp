@@ -1,4 +1,4 @@
-<%@ include file="/WEB-INF/jspf/init.jspf"%>
+<%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Utilities"%>
 <%@ page import="fll.db.Queries"%>
@@ -21,7 +21,7 @@
         divisionIndex = divisionIndexObj.intValue();
       }
       divisionIndex++;
-      final List divisions = Queries.getDivisions(connection);
+      final List<String> divisions = Queries.getDivisions(connection);
       if (divisionIndex >= divisions.size()) {
         divisionIndex = 0;
       }
