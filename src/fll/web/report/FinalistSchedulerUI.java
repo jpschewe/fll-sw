@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,9 +43,16 @@ import fll.util.ScoreUtils;
  */
 public class FinalistSchedulerUI extends HttpServlet {
 
-  private static final String CATEGORIES_KEY = "categories";
+  /**
+   * Key into session that contains the names for the categories.
+   */
+  private static final String CATEGORIES_KEY = "subjectiveCategories";
 
-  private static final String FINALISTS_KEY = "finalists";
+  /**
+   * Key into session that contains the "extra" categories and the finalists in
+   * those categories.
+   */
+  private static final String EXTRA_CATEGORIES_FINALISTS_KEY = "extraCategories";
 
   private static final Logger LOG = Logger.getLogger(FinalistSchedulerUI.class);
 
@@ -63,34 +71,42 @@ public class FinalistSchedulerUI extends HttpServlet {
     // initialize the session
     if(null != request.getParameter("init") || null == session.getAttribute(CATEGORIES_KEY)) {
       // no categories cache, need to compute them
-      final List<Element> categories = new LinkedList<Element>();
+      final List<String> subjectiveCategories = new LinkedList<String>();
       final NodeList subjectiveCategoryElements = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
       for(int i = 0; i < subjectiveCategoryElements.getLength(); i++) {
         final Element subjectiveElement = (Element)subjectiveCategoryElements.item(i);
-        categories.add(subjectiveElement);
+        final String categoryTitle = subjectiveElement.getAttribute("title");
+        subjectiveCategories.add(categoryTitle);
       }
-      session.setAttribute(CATEGORIES_KEY, categories);
+      session.setAttribute(CATEGORIES_KEY, subjectiveCategories);
       if(LOG.isDebugEnabled()) {
-        LOG.debug("Initialized categories to: " + categories);
+        LOG.debug("Initialized subjectiveCategories to: " + subjectiveCategories);
       }
     }
     // can't type inside the session, but we know the type
     @SuppressWarnings("unchecked")
-    final List<Element> categories = (List<Element>)session.getAttribute(CATEGORIES_KEY);
+    final List<String> categories = (List<String>)session.getAttribute(CATEGORIES_KEY);
 
-    if(null != request.getParameter("init") || null == session.getAttribute(FINALISTS_KEY)) {
-      session.setAttribute(FINALISTS_KEY, new HashMap<String, Collection<Integer>>());
+    if(null != request.getParameter("init") || null == session.getAttribute(EXTRA_CATEGORIES_FINALISTS_KEY)) {
+      session.setAttribute(EXTRA_CATEGORIES_FINALISTS_KEY, new HashMap<String, Map<String, List<Integer>>>());
       if(LOG.isDebugEnabled()) {
-        LOG.debug("Initialized finalists");
+        LOG.debug("Initialized extra categories");
       }
     }
     // can't type inside the session, but we know the type
     @SuppressWarnings("unchecked")
-    final Map<String, Collection<Integer>> finalists = (Map<String, Collection<Integer>>)session.getAttribute(FINALISTS_KEY);
+    final Map<String, Map<String, List<Integer>>> extraCategoryFinalists = (Map<String, Map<String, List<Integer>>>)session
+        .getAttribute(EXTRA_CATEGORIES_FINALISTS_KEY);
     // done with initialization of session
 
     // process request parameters
-    if(null != request.getParameter("create-category")) {
+    if(null != request.getParameter("num-finalists")) {
+      // just store the number of finalists and prompt for extra categories
+      final int numFinalists = Integer.valueOf(request.getParameter("num-finalists"));
+      session.setAttribute("numFinalists", numFinalists);
+      response.sendRedirect(response.encodeRedirectURL("promptForCategoryName.jsp"));
+      return;
+    } else if(null != request.getParameter("create-category")) {
       if(null == request.getParameter("new-category")) {
         LOG.error("No category specified");
         session.setAttribute("message", "<p class='error'>You must specify a category name</p>");
@@ -98,207 +114,267 @@ public class FinalistSchedulerUI extends HttpServlet {
         return;
       } else {
         final String categoryName = request.getParameter("new-category");
-        if(finalists.containsKey(categoryName)) {
+        if(categories.contains(categoryName)) {
           LOG.error("duplicate category: " + categoryName);
           session.setAttribute("message", "<p class='error'>The category name <i>" + categoryName
               + "</i> has already been specified, please pick another one</p>");
           response.sendRedirect(response.encodeRedirectURL("promptForCategoryName.jsp"));
           return;
         } else {
-          displayFinalistForm(response, connection, categoryName);
+          try {
+            categories.add(categoryName);
+
+            final int numFinalists = (Integer)session.getAttribute("numFinalists");
+
+            for(final String division : Queries.getDivisions(connection)) {
+              final Map<String, List<Integer>> divisionFinalists;
+              if(extraCategoryFinalists.containsKey(division)) {
+                divisionFinalists = extraCategoryFinalists.get(division);
+              } else {
+                divisionFinalists = new HashMap<String, List<Integer>>();
+                extraCategoryFinalists.put(division, divisionFinalists);
+              }
+
+              final List<Integer> finalistNums = new LinkedList<Integer>();
+              for(int i = 1; i <= numFinalists; ++i) {
+                final String numStr = request.getParameter(division + "-finalist-" + i);
+                if(null != numStr) {
+                  try {
+                    finalistNums.add(Integer.valueOf(numStr));
+                  } catch(final NumberFormatException e) {
+                    throw new RuntimeException("Internal error, cannot parse number '" + numStr + "'", e);
+                  }
+                }
+              } // numFinalists
+
+              divisionFinalists.put(categoryName, finalistNums);
+            } // divisions
+
+          } catch(final SQLException sqle) {
+            throw new RuntimeException(sqle);
+          }
+          response.sendRedirect(response.encodeRedirectURL("promptForCategoryName.jsp"));
           return;
-        }
-      }
-    } else if(null != request.getParameter("submit-finalists")) {
-      // get the finalists list
-      final Collection<Integer> finalistNums = new LinkedList<Integer>();
-      for(final String finalistNumStr : request.getParameterValues("finalist")) {
-        try {
-          finalistNums.add(Integer.valueOf(finalistNumStr));
-        } catch(final NumberFormatException e) {
-          throw new RuntimeException("Internal error, cannot parse number '" + finalistNumStr + "'", e);
-        }
-      }
-      finalists.put(request.getParameter("category-title"), finalistNums);
+        } // ok to add category
+      } // new category to add
     } else if(null != request.getParameter("done")) {
-      displayFinalistSchedule(request, response, connection, finalists);
+      final int numFinalists = (Integer)session.getAttribute("numFinalists");
+      displayProposedFinalists(response, connection, challengeDocument, numFinalists, extraCategoryFinalists);
+      return;
+    } else if(null != request.getParameter("submit-finalists")) {
+      // display the schedule
+      displayFinalistSchedule(request, response, connection, categories);
 
       // clear out session and return
       session.removeAttribute(CATEGORIES_KEY);
-      session.removeAttribute(FINALISTS_KEY);
+      session.removeAttribute(EXTRA_CATEGORIES_FINALISTS_KEY);
 
       return;
     }
     // done with request parameters
 
-    if(!categories.isEmpty()) {
-      // remove the first category off the list and set the session attribute
-      // back
-      final Element subjectiveElement = categories.remove(0);
-      session.setAttribute(CATEGORIES_KEY, categories);
-
-      displayFinalistFormForCategory(response, connection, subjectiveElement);
-
-    } else {
-      // prompt user for name of new category or done
-      if(LOG.isDebugEnabled()) {
-        LOG.debug("done with subjective categories, asking for new categories");
-      }
-      response.sendRedirect(response.encodeRedirectURL("promptForCategoryName.jsp"));
-      return;
-    }
+    // send them back to pick a number
+    LOG.warn("No parameters, sending user back to get num finalists");
+    response.sendRedirect(response.encodeRedirectURL("promptForNumFinalists.jsp"));
   }
 
   private void displayFinalistSchedule(final HttpServletRequest request,
                                        final HttpServletResponse response,
                                        final Connection connection,
-                                       final Map<String, Collection<Integer>> finalists) throws IOException {
-    // call schedule and display results
-    final List<Map<String, Integer>> schedule = ScoreUtils.scheduleFinalists(finalists);
-    if(LOG.isDebugEnabled()) {
-      LOG.debug("Finalists schedule is: " + schedule);
-    }
+                                       final List<String> categories) throws IOException {
 
-    // compute the list of all categories
-    final List<String> finalistCategories = new LinkedList<String>();
-    for(final Map<String, Integer> timeSlot : schedule) {
-      for(final String catName : timeSlot.keySet()) {
-        if(!finalistCategories.contains(catName)) {
-          finalistCategories.add(catName);
-        }
-      }
-    }
-
-    // write out table of finalists
-    final PrintWriter writer = response.getWriter();
-    writer.write("<html><body>");
-    writer.write("<h1>Finalists Schedule</h1>");
-    writer.write("<table border='1'>");
-
-    writer.write("<tr><th>Time Slot</th>");
-    for(final String catName : finalistCategories) {
-      writer.write("<th>" + catName + "</th>");
-    }
-    writer.write("</tr>");
-
-    int slot = 1;
-    for(final Map<String, Integer> timeSlot : schedule) {
-      writer.write("<tr>");
-      writer.write("<td>" + slot + "</td>");
-
-      for(final String catName : finalistCategories) {
-        writer.write("<td>");
-        if(timeSlot.containsKey(catName)) {
-          final Integer teamNumber = timeSlot.get(catName);
-          try {
-            final Team team = Team.getTeamFromDatabase(connection, teamNumber);
-            writer.write(team.getTeamNumber() + " - " + team.getTeamName());
-          } catch(final SQLException e) {
-            throw new RuntimeException("Error getting information for team " + teamNumber, e);
-          }
-        } else {
-          writer.write("&nbsp;");
-        }
-        writer.write("</td>");
-      }
-
-      writer.write("</tr>");
-
-      ++slot;
-    }
-
-    writer.write("</table>");
-    writer.write("</body></html>");
-  }
-
-  /**
-   * Display the finalist form for a known subjective category.
-   * 
-   * @param response
-   * @param connection
-   * @param subjectiveElement
-   * @throws IOException
-   */
-  private void displayFinalistFormForCategory(final HttpServletResponse response, final Connection connection, final Element subjectiveElement)
-      throws IOException {
-
-    PreparedStatement prep = null;
-    ResultSet rs = null;
     try {
-      // display the teams by division and score group
-      final String categoryTitle = subjectiveElement.getAttribute("title");
-      final String categoryName = subjectiveElement.getAttribute("name");
-      final String currentTournament = Queries.getCurrentTournament(connection);
-      final PrintWriter writer = response.getWriter();
-      writer.write("<html><body>");
-      writer.write("<h1>Choose finalists for " + categoryTitle + "</h1>");
-      writer.write("<hr/>");
+      final Formatter formatter = new Formatter(response.getWriter());
+      formatter.format("<html><body>");
+      formatter.format("<h1>Finalists Schedule</h1>");
 
-      writer.write("<form method='post' action='FinalistSchedulerUI'>");
-      writer.write("<input type='hidden' name='category-title' value='" + categoryTitle + "'/>");
-      // foreach division
-      for(String division : Queries.getDivisions(connection)) {
+      for(final String division : Queries.getDivisions(connection)) {
+        formatter.format("<h2>Division: %s</h2>", division);
 
-        final Map<String, Collection<Integer>> scoreGroups = Queries.computeScoreGroups(connection, currentTournament, division, categoryName);
+        // build input for schedule
+        final Map<String, Collection<Integer>> divisionFinalists = new HashMap<String, Collection<Integer>>();
+        for(final String categoryTitle : categories) {
+          final Collection<Integer> catFinalists = new LinkedList<Integer>();
+          final String[] teamNumsStr = request.getParameterValues(division + "-" + categoryTitle);
+          for(final String teamNumStr : teamNumsStr) {
+            catFinalists.add(Integer.valueOf(teamNumStr));
+          }
+          divisionFinalists.put(categoryTitle, catFinalists);
+        }
+
+        // call schedule
+        final List<Map<String, Integer>> schedule = ScoreUtils.scheduleFinalists(divisionFinalists);
         if(LOG.isDebugEnabled()) {
-          LOG.debug("Found score groups for category " + categoryName + " division " + division + ": " + scoreGroups);
+          LOG.debug("Division: " + division + " finalists schedule is: " + schedule);
         }
 
-        for(String scoreGroup : scoreGroups.keySet()) {
-          writer.write("<h3>" + categoryTitle + " Division: " + division + " Score Group: " + scoreGroup + "</h3>");
-          writer.write("<table border='0'>");
-          writer.write("<tr><th>Finalist</th><th colspan='3'>Team # / Organization / Team Name</th><th>Scaled Score</th></tr>");
+        // write out table of finalists
+        formatter.format("<table border='1'>");
 
-          final String teamSelect = StringUtils.join(scoreGroups.get(scoreGroup).iterator(), ", ");
-          prep = connection.prepareStatement("SELECT Teams.TeamNumber,Teams.Organization,Teams.TeamName,FinalScores." + categoryName
-              + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
-              + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " DESC");
-          prep.setString(1, currentTournament);
-          rs = prep.executeQuery();
-          while(rs.next()) {
-            final String teamNum = rs.getString(1);
-            final String org = rs.getString(2);
-            final String name = rs.getString(3);
-            final double score = rs.getDouble(4);
-            final boolean scoreWasNull = rs.wasNull();
-            writer.write("<tr>");
-            writer.write("<td><input type='checkbox' name='finalist' value='" + teamNum + "'/></td>");
+        formatter.format("<tr><th>Time Slot</th>");
+        for(final String categoryTitle : categories) {
+          formatter.format("<th>%s</th>", categoryTitle);
+        }
+        formatter.format("</tr>");
 
-            writer.write("<td>");
-            if(null == teamNum) {
-              writer.write("");
+        int slot = 1;
+        for(final Map<String, Integer> timeSlot : schedule) {
+          formatter.format("<tr>");
+          formatter.format("<td>%s</td>", slot);
+
+          for(final String categoryTitle : categories) {
+            formatter.format("<td>");
+            if(timeSlot.containsKey(categoryTitle)) {
+              final Integer teamNumber = timeSlot.get(categoryTitle);
+              try {
+                final Team team = Team.getTeamFromDatabase(connection, teamNumber);
+                formatter.format("%s - %s", team.getTeamNumber(), team.getTeamName());
+              } catch(final SQLException e) {
+                throw new RuntimeException("Error getting information for team " + teamNumber, e);
+              }
             } else {
-              writer.write(teamNum);
+              formatter.format("&nbsp;");
             }
-            writer.write("</td>");
-            writer.write("<td>");
-            if(null == org) {
-              writer.write("");
+            formatter.format("</td>");
+          }
+
+          formatter.format("</tr>");
+
+          ++slot;
+        }
+
+        formatter.format("</table>");
+      } // divisions
+
+      formatter.format("</body></html>");
+    } catch(final SQLException sqle) {
+      throw new RuntimeException(sqle);
+    }
+  }
+
+  /**
+   * Display the proposed finalists and allow the user to pick which ones to
+   * actually schedule.
+   * 
+   * @param response
+   * @param connection
+   * @param numFinalists
+   * @param finalists
+   *          map of divisions to map of extra category names to list of team
+   *          numbers
+   * @throws IOException
+   */
+  private void displayProposedFinalists(final HttpServletResponse response,
+                                        final Connection connection,
+                                        final Document challengeDocument,
+                                        final int numFinalists,
+                                        final Map<String, Map<String, List<Integer>>> finalists) throws IOException {
+    final PrintWriter writer = response.getWriter();
+
+    final Formatter formatter = new Formatter();
+
+    final NodeList subjectiveCategoryElements = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
+
+    // map of teams to HTML color names
+    final Map<Integer, String> teamColors = new HashMap<Integer, String>();
+
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      formatter.format("<h1>Choose finalists to be scheduled</h1>");
+      formatter.format("<hr/>");
+
+      formatter
+          .format("<p>Below are the proposed finalists, please choose at least one team per category per division that should be called back for finalist judging");
+      formatter.format("<form action='FinalistSchedulerUI' method='POST'>");
+
+      // display the teams by division and score group
+      final String currentTournament = Queries.getCurrentTournament(connection);
+
+      formatter.format("<form method='post' action='FinalistSchedulerUI'>");
+
+      // foreach division
+      for(final String division : Queries.getDivisions(connection)) {
+        formatter.format("<h2>Division: %s</h2>", division);
+
+        for(int i = 0; i < subjectiveCategoryElements.getLength(); i++) {
+          final Element subjectiveElement = (Element)subjectiveCategoryElements.item(i);
+          final String categoryTitle = subjectiveElement.getAttribute("title");
+          final String categoryName = subjectiveElement.getAttribute("name");
+
+          final Map<String, Collection<Integer>> scoreGroups = Queries.computeScoreGroups(connection, currentTournament, division, categoryName);
+          if(LOG.isDebugEnabled()) {
+            LOG.debug("Found score groups for category " + categoryName + " division " + division + ": " + scoreGroups);
+          }
+
+          formatter.format("<table border='1'><tbody>");
+          formatter.format("<tr><th colspan='3'>%s</th></tr>", categoryTitle);
+          formatter.format("<tr><th>Score Group</th><th>Team #</th><th>Finalist?</th></tr>");
+
+          for(final String scoreGroup : scoreGroups.keySet()) {
+            final String teamSelect = StringUtils.join(scoreGroups.get(scoreGroup).iterator(), ", ");
+            prep = connection.prepareStatement("SELECT Teams.TeamNumber" + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
+                + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName
+                + " DESC LIMIT " + numFinalists);
+            prep.setString(1, currentTournament);
+            rs = prep.executeQuery();
+            while(rs.next()) {
+              final int teamNum = rs.getInt(1);
+              if(teamColors.containsKey(teamNum)) {
+                teamColors.put(teamNum, getNextAvailableTeamColor());
+              } else {
+                teamColors.put(teamNum, null);
+              }
+              formatter.format("<tr class='team-%s'><td>%s</td><td>%s</td><td><input type='checkbox' name='%s-%s' value='%s'/></tr>", teamNum,
+                  scoreGroup, teamNum, division, categoryTitle, teamNum);
+            }
+          } // score groups
+          formatter.format("</tbody></table");
+        } // subjective categories
+
+        // other categories
+        final Map<String, List<Integer>> divisionFinalists = finalists.get(division);
+        if(null == divisionFinalists) {
+          throw new RuntimeException("Internal error, no finalists for division: " + division);
+        }
+
+        for(final Map.Entry<String, List<Integer>> entry : divisionFinalists.entrySet()) {
+          final String categoryTitle = entry.getKey();
+          final List<Integer> teams = entry.getValue();
+
+          formatter.format("<table border='1'><tbody>");
+          formatter.format("<tr><th colspan='2'>%s</th></tr>", categoryTitle);
+          formatter.format("<tr><th>Team #</th><th>Finalist?</th></tr>");
+          for(final Integer teamNum : teams) {
+            if(teamColors.containsKey(teamNum)) {
+              teamColors.put(teamNum, getNextAvailableTeamColor());
             } else {
-              writer.write(org);
+              teamColors.put(teamNum, null);
             }
-            writer.write("</td>");
-            writer.write("<td>");
-            if(null == name) {
-              writer.write("");
-            } else {
-              writer.write(name);
-            }
-            writer.write("</td>");
-            if(!scoreWasNull) {
-              writer.write("<td>");
-              writer.write(Utilities.NUMBER_FORMAT_INSTANCE.format(score));
-            } else {
-              writer.write("<td align='center' class='warn'>No Score");
-            }
-            writer.write("</td>");
-            writer.write("</tr>");
-          } // results
-          writer.write("</table");
-        } // score groups
+
+            formatter.format("<tr class='team-%s'><td>%s</td><td><input type='checkbox' name='%s-%s' value='%s'/></tr>", teamNum, teamNum, division,
+                categoryTitle, teamNum);
+          }
+          formatter.format("</tbody></table");
+        } // other categories
 
       } // divisions
 
+      writer.write("<html><head>");
+      writer.write("<title>Finalist Scheduling</title>");
+      writer.write("<link rel='stylesheet' type='text/css' href='/fll-sw/style/style.jsp' />");
+      writer.write("</head>");
+      // TODO write out style sheet for teams
+      writer.write("<style type='text/css'>");
+      for(final Map.Entry<Integer, String> entry : teamColors.entrySet()) {
+        final String color = entry.getValue();
+        if(null != color) {
+          final int teamNum = entry.getKey();
+          writer.write("tr.team-" + teamNum + " td { background-color: " + color + "; color: black; }");
+        }
+      }
+      writer.write("</style>");
+      writer.write(formatter.toString());
       writer.write("<input type='submit' name='submit-finalists' value='Submit'>");
       writer.write("</form>");
       writer.write("</body></html>");
@@ -312,83 +388,25 @@ public class FinalistSchedulerUI extends HttpServlet {
   }
 
   /**
-   * Display the finalist form for a newly created category
+   * Get the next color available to use for the background of proposed
+   * finalists.
    * 
-   * @param response
-   * @param connection
-   * @param categoryTitle
-   *          the name/title of the new category
-   * @throws IOException
+   * @return HTML color code
    */
-  private void displayFinalistForm(final HttpServletResponse response, final Connection connection, final String categoryTitle) throws IOException {
-
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      // display the teams by division and score group
-      final PrintWriter writer = response.getWriter();
-      writer.write("<html><body>");
-      writer.write("<h1>Choose finalists for " + categoryTitle + "</h1>");
-      writer.write("<hr/>");
-
-      writer.write("<form method='post' action='FinalistSchedulerUI'>");
-      writer.write("<input type='hidden' name='category-title' value='" + categoryTitle + "'/>");
-      // foreach division
-      for(String division : Queries.getDivisions(connection)) {
-
-        writer.write("<h3>" + categoryTitle + " Division: " + division + "</h3>");
-        writer.write("<table border='0'>");
-        writer.write("<tr><th>Finalist</th><th colspan='3'>Team # / Organization / Team Name</th></tr>");
-
-        prep = connection.prepareStatement("SELECT Teams.TeamNumber,Teams.Organization,Teams.TeamName"
-            + " FROM Teams, current_tournament_teams WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber"
-            + " AND current_tournament_teams.event_division = ?");
-        prep.setString(1, division);
-        rs = prep.executeQuery();
-        while(rs.next()) {
-          final String teamNum = rs.getString(1);
-          final String org = rs.getString(2);
-          final String name = rs.getString(3);
-          writer.write("<tr>");
-          writer.write("<td><input type='checkbox' name='finalist' value='" + teamNum + "'/></td>");
-
-          writer.write("<td>");
-          if(null == teamNum) {
-            writer.write("");
-          } else {
-            writer.write(teamNum);
-          }
-          writer.write("</td>");
-          writer.write("<td>");
-          if(null == org) {
-            writer.write("");
-          } else {
-            writer.write(org);
-          }
-          writer.write("</td>");
-          writer.write("<td>");
-          if(null == name) {
-            writer.write("");
-          } else {
-            writer.write(name);
-          }
-          writer.write("</td>");
-          writer.write("</tr>");
-        } // results
-        writer.write("</table");
-
-      } // divisions
-
-      writer.write("<input type='submit' name='submit-finalists' value='Submit'>");
-      writer.write("</form>");
-      writer.write("</body></html>");
-
-    } catch(final SQLException e) {
-      throw new RuntimeException("Error getting finalist data", e);
-    } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+  private String getNextAvailableTeamColor() {
+    if(_teamColorIndex >= _teamColors.length) {
+      LOG.error("Ran out of team colors at index " + _teamColorIndex);
+      _teamColorIndex = 0;
     }
+    final String color = _teamColors[_teamColorIndex];
+    ++_teamColorIndex;
+    return color;
   }
+
+  private int _teamColorIndex = 0;
+
+  private String[] _teamColors = { "#CD5555", "#EE0000", "#FF6347", "#00FFAA", "#D19275", "#00B2EE", "#FF7D40", "#FFDAB9", "#FCB514", "#FFEC8B",
+                                  "#C8F526", "#7CFC00", "#4AC948", "#62B1F6", "#AAAAFF", "#8470FF", "#AB82FF", "#A020F0", "#E066FF", "#DB70DB",
+                                  "#FF00CC", "#FF34B3", "#FF0066", "#FF0033", "#FF030D", };
 
 }
