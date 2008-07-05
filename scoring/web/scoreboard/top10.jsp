@@ -2,8 +2,13 @@
 
 <%@ page import="java.sql.PreparedStatement" %>
 <%@ page import="java.sql.ResultSet" %>
+<%@ page import="java.sql.Connection" %>
 
 <%@ page import="java.util.List" %>
+
+<%@ page import="fll.Utilities" %>
+<%@ page import="fll.db.Queries" %>
+
 
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
@@ -17,7 +22,7 @@ if(null == divisionIndexObj) {
   divisionIndex = divisionIndexObj.intValue();
 }
 divisionIndex++;
-final List divisions = Queries.getDivisions(connection);
+final List<String> divisions = Queries.getDivisions(connection);
 if(divisionIndex >= divisions.size()) {
   divisionIndex = 0;
 }

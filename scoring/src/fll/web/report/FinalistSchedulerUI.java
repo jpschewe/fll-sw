@@ -364,7 +364,7 @@ public class FinalistSchedulerUI extends HttpServlet {
       writer.write("<title>Finalist Scheduling</title>");
       writer.write("<link rel='stylesheet' type='text/css' href='/fll-sw/style/style.jsp' />");
       writer.write("</head>");
-      // TODO write out style sheet for teams
+      // write out style sheet for teams
       writer.write("<style type='text/css'>");
       for(final Map.Entry<Integer, String> entry : teamColors.entrySet()) {
         final String color = entry.getValue();
