@@ -85,7 +85,13 @@ public final class Queries {
           StringBuilder scoreGroup = new StringBuilder();
           prep.setInt(1, teamNum);
           rs = prep.executeQuery();
+          boolean first = true;
           while(rs.next()) {
+            if(!first) { 
+              scoreGroup.append("-");
+            } else {
+              first = false;
+            }
             scoreGroup.append(rs.getString(1));
           }
           Utilities.closeResultSet(rs);
