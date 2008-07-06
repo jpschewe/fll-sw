@@ -44,7 +44,7 @@
 	<path id="application.classpath">
 		<pathelement location="${dir.lib}/JonsInfra-0.2.jar" />
 		<pathelement location="${dir.lib}/log4j-1.2.14.jar" />
-		<pathelement location="${dir.lib}/opencsv-1.7-jps.jar" />
+		<pathelement location="${dir.lib}/opencsv-1.8.jar" />
 
 		<pathelement location="${dir.lib}/commons-lang-2.0.jar" />
 		
