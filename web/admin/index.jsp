@@ -80,7 +80,8 @@
  <li>
  <form id='uploadTeams' ACTION='<c:url value="uploadTeams.jsp"/>'
   METHOD="POST" ENCTYPE="multipart/form-data">Upload the datafile
- for teams. The filter functionality provided here is very basic and has
+ for teams. This file can be tab separated or comma separated. The filter 
+functionality provided here is very basic and has
  very limited feedback. It's suggested that you edit the input file
  before upload to contain only the teams for your tournament(s). <input
   type="file" size="32" name="teamsFile"> <input type="submit"
