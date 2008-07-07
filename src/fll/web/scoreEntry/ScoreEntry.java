@@ -118,9 +118,16 @@ public final class ScoreEntry {
         formatter.format("}%n");
       } else {
         formatter.format("function %s(increment) {%n", getIncrementMethodName(name));
+        formatter.format("  var temp = %s%n", rawVarName);
         formatter.format("  %s += increment;%n", rawVarName);
+        formatter.format("  if(%s > %s) {%n", rawVarName, max);
+        formatter.format("    %s = %s", rawVarName, max);
+        formatter.format("   }");
+        formatter.format("  if(%s < %s) {%n", rawVarName, min);
+        formatter.format("    %s = %s", rawVarName, min);
+        formatter.format("   }");
         formatter.format("  if(!isConsistent()) {%n");
-        formatter.format("    %s -= increment;%n", rawVarName);
+        formatter.format("    %s = temp;%n", rawVarName);
         formatter.format("  }%n");
         formatter.format("  refresh();%n");
         formatter.format("}%n");
