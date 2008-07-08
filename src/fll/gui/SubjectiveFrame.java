@@ -17,9 +17,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -43,7 +40,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextPane;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
@@ -152,22 +148,7 @@ public final class SubjectiveFrame extends JFrame {
     topPanel.add(summaryButton);
     summaryButton.addActionListener(new ActionListener() {
       public void actionPerformed(final ActionEvent ae) {
-        final TableModel model = buildTableModelForSummary();
-        final JTable table = new JTable(model);
-        final JScrollPane tableScroller = new JScrollPane(table);
-        final JDialog dialog = new JDialog();
-        final Container cpane = dialog.getContentPane();
-        cpane.setLayout(new BorderLayout());
-        cpane.add(tableScroller, BorderLayout.CENTER);
-
-        final JButton closeButton = new JButton("Close");
-        closeButton.addActionListener(new ActionListener() {
-          public void actionPerformed(final ActionEvent ae) {
-            dialog.setVisible(false);
-            dialog.dispose();
-          }
-        });
-        cpane.add(closeButton, BorderLayout.SOUTH);
+        final SummaryDialog dialog = new SummaryDialog(SubjectiveFrame.this);
 
         dialog.pack();
         dialog.setVisible(true);
@@ -213,67 +194,6 @@ public final class SubjectiveFrame extends JFrame {
       }
     });
     setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-  }
-
-  private TableModel buildTableModelForSummary() {
-    final Map<Integer, Integer[]> data = new HashMap<Integer, Integer[]>();
-
-    final Vector<String> columnNames = new Vector<String>();
-    columnNames.add("TeamNumber");
-
-    final NodeList subjectiveCategories = _challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
-    for(int i = 0; i < subjectiveCategories.getLength(); i++) {
-      final Element subjectiveElement = (Element)subjectiveCategories.item(i);
-      final String category = subjectiveElement.getAttribute("name");
-      final String categoryTitle = subjectiveElement.getAttribute("title");
-      columnNames.add(categoryTitle);
-
-      final NodeList goals = subjectiveElement.getElementsByTagName("goal");
-      final Element categoryElement = (Element)_scoreDocument.getDocumentElement().getElementsByTagName(category).item(0);
-      final NodeList scores = categoryElement.getElementsByTagName("score");
-      for(int scoreIdx = 0; scoreIdx < scores.getLength(); scoreIdx++) {
-        int numValues = 0;
-        final Element scoreElement = (Element)scores.item(scoreIdx);
-        for(int goalIdx = 0; goalIdx < goals.getLength(); goalIdx++) {
-          final Element goalElement = (Element)goals.item(goalIdx);
-          final String goalName = goalElement.getAttribute("name");
-          final String value = scoreElement.getAttribute(goalName);
-          if(null != value && !"".equals(value)) {
-            numValues++;
-            break;
-          }
-        }
-
-        if(numValues > 0 || Boolean.parseBoolean(scoreElement.getAttribute("NoShow"))) {
-          final int teamNumber = Integer.parseInt(scoreElement.getAttribute("teamNumber"));
-          if(!data.containsKey(teamNumber)) {
-            final Integer[] counts = new Integer[subjectiveCategories.getLength()];
-            Arrays.fill(counts, 0);
-            data.put(teamNumber, counts);
-          }
-
-          // if there is a score or a No Show, then increment counter for this
-          // team/category combination
-          data.get(teamNumber)[i]++;
-        }
-      }
-    }
-
-    final Vector<Vector<Integer>> tableData = new Vector<Vector<Integer>>();
-    final List<Integer> teamNumbers = new ArrayList<Integer>(data.keySet());
-    Collections.sort(teamNumbers);
-    for(Integer teamNumber : teamNumbers) {
-      final Integer[] counts = data.get(teamNumber);
-      final Vector<Integer> row = new Vector<Integer>();
-      row.add(teamNumber);
-      for(Integer value : counts) {
-        row.add(value);
-      }
-      tableData.add(row);
-    }
-
-    return new DefaultTableModel(tableData, columnNames);
-
   }
 
   /**
@@ -481,7 +401,12 @@ public final class SubjectiveFrame extends JFrame {
   private final File _file;
 
   private final Document _challengeDocument;
-
+  /*package*/ final Document getChallengeDocument() {
+    return _challengeDocument;
+  }
   private final Document _scoreDocument;
+  /*package*/ final Document getScoreDocument() {
+    return _scoreDocument;
+  }
 
 }
