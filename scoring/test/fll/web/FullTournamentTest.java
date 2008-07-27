@@ -248,7 +248,7 @@ public class FullTournamentTest extends TestCase {
       Utilities.closePreparedStatement(prep);
 
       // submit those values
-      request = form.getRequest("submit", "Finished");
+      request = form.getRequest("finished", "Finished");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
       Assert.assertNull("Got error from judges assignment", response.getElementWithID("error"));
@@ -256,7 +256,7 @@ public class FullTournamentTest extends TestCase {
       // commit judges information
       form = response.getFormWithName("judges");
       Assert.assertNotNull(form);
-      request = form.getRequest("submit", "Commit");
+      request = form.getRequest("commit", "Commit");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully assigned judges."));

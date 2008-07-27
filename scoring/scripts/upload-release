@@ -1,3 +1,2 @@
-for file in fll-sw-*; do
-  curl -T ${file} ftp://upload.sourceforge.net/incoming/
-done
+echo "Use rsync -avP -e ssh fll-sw-* <user>@frs.sourceforge.net:uploads/"
+echo "You will need your SF.net password"
