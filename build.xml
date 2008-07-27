@@ -19,6 +19,8 @@
 	<property name="dir.test" value="test" />
 	<property name="dir.tmp" value="tmp" />
 
+	<property name="dir.tools" value="${basedir}/tools" />
+
 	<!--  ==================== Compilation Control Options ==================== -->
 
 	<!--
@@ -47,11 +49,11 @@
 		<pathelement location="${dir.lib}/opencsv-1.8.jar" />
 
 		<pathelement location="${dir.lib}/commons-lang-2.0.jar" />
-		
+
 		<!-- database -->
 		<pathelement location="${dir.lib}/hsqldb-1.8.0.7.jar" />
-			
-    	<!-- xerces XML parser -->
+
+		<!-- xerces XML parser -->
 		<pathelement location="${dir.lib}/xercesImpl.jar" />
 		<pathelement location="${dir.lib}/xml-apis.jar" />
 	</path>
@@ -89,12 +91,12 @@
 		<pathelement location="${dir.lib}/test/js.jar" />
 		<pathelement location="${dir.lib}/test/junit-4.1.jar" />
 		<pathelement location="${dir.lib}/test/nekohtml.jar" />
-		
+
 		<!-- uispec -->
 		<pathelement location="${dir.lib}/test/uispec4j-1.4.jar" />
-		
+
 		<pathelement location="${dir.web}/WEB-INF/classes" />
-		
+
 	</path>
 
 	<target name="init">
@@ -103,8 +105,60 @@
 		<uptodate property="jsp.notRequired" targetfile="${dir.tmp}/.tstamp">
 			<srcfiles dir="${basedir}/web" includes="**" />
 		</uptodate>
+
+		<!-- set arch -->
+		<condition property="arch" value="linux">
+			<os name="Linux" />
+		</condition>
+		<condition property="arch" value="windows">
+			<os family="windows" />
+		</condition>
+		<condition property="arch" value="other">
+			<not>
+				<isset property="arch" />
+			</not>
+		</condition>
+		<echo message="arch is ${arch}" />
+
+		<!-- set the jvm property for which jvm to use -->
+		<condition property="jvm" value="${dir.tools}/jdk-linux/bin/java">
+			<equals arg1="linux" arg2="${arch}" />
+		</condition>
+		<condition property="jvm" value="${dir.tools}/jdk-windows/bin/java">
+			<equals arg1="windows" arg2="${arch}" />
+		</condition>
+		<condition property="jvm" value="java">
+			<not>
+				<isset property="jvm" />
+			</not>
+		</condition>
+		<echo message="jvm is ${jvm}" />
 	</target>
 
+
+	<!-- expand the appropriate jvm, but only if needed -->
+	<target name="-jvm.check" depends="init">
+		<condition property="jvm.uptodate">
+			<or>
+				<equals arg1="${jvm}" arg2="java" />
+				<and>
+					<available file="${jvm}" />
+					<uptodate srcfile="jdk-${arch}.tar.bz2" targetfile="tools/jdk-${arch}/expanded"/>
+				</and>
+			</or>
+		</condition>
+	</target>
+
+	<target name="jvm.expand" depends="-jvm.check" unless="jvm.uptodate">
+		<mkdir dir="${dir.tools}" />
+		<untar src="jdk-${arch}.tar.bz2" dest="${dir.tools}" compression="bzip2" />
+		<chmod perm="+x">
+			<fileset dir="${dir.tools}">
+				<include name="**/bin/*" />
+			</fileset>
+		</chmod>
+		<touch file="tools/jdk-${arch}/expanded"/>
+	</target>
 
 	<!-- ==================== Clean Target ==================================== -->
 	<target name="clean" description="Delete old build and dist directories">
@@ -136,7 +190,7 @@
 			<param name="class.main" value="fll.gui.SubjectiveFrame" />
 			<param name="-scripts.dir" value="${dir.tmp}/subjective" />
 			<param name="-scripts.root" value="." />
-			<param name="-java.args" value="-Dapp.name=subjective -Dlogroot=./"/>
+			<param name="-java.args" value="-Dapp.name=subjective -Dlogroot=./" />
 			<reference torefid="-scripts.path" refid="subjective.dist.classpath" />
 		</antcall>
 
@@ -176,7 +230,7 @@
 			<param name="class.main" value="fll.gui.SubjectiveFrame" />
 			<param name="-scripts.dir" value="${dir.build}/bin" />
 			<param name="-scripts.root" value=".." />
-			<param name="-java.args" value="-Dapp.name=subjective -Dlogroot=./"/>
+			<param name="-java.args" value="-Dapp.name=subjective -Dlogroot=./" />
 			<reference torefid="-scripts.path" refid="application.build.classpath" />
 		</antcall>
 		<antcall target="-buildscripts">
@@ -184,7 +238,7 @@
 			<param name="class.main" value="fll.xml.ImportDocument" />
 			<param name="-scripts.dir" value="${dir.build}/bin" />
 			<param name="-scripts.root" value=".." />
-			<param name="-java.args" value="-Dapp.name=importDocument -Dlogroot=./"/>
+			<param name="-java.args" value="-Dapp.name=importDocument -Dlogroot=./" />
 			<reference torefid="-scripts.path" refid="application.build.classpath" />
 		</antcall>
 		<antcall target="-buildscripts">
@@ -192,7 +246,7 @@
 			<param name="class.main" value="fll.xml.ExportDocument" />
 			<param name="-scripts.dir" value="${dir.build}/bin" />
 			<param name="-scripts.root" value=".." />
-			<param name="-java.args" value="-Dapp.name=exportDocument -Dlogroot=./"/>
+			<param name="-java.args" value="-Dapp.name=exportDocument -Dlogroot=./" />
 			<reference torefid="-scripts.path" refid="application.build.classpath" />
 		</antcall>
 		<antcall target="-buildscripts">
@@ -200,7 +254,7 @@
 			<param name="class.main" value="fll.db.ImportDB" />
 			<param name="-scripts.dir" value="${dir.build}/bin" />
 			<param name="-scripts.root" value=".." />
-			<param name="-java.args" value="-Dapp.name=importDB -Dlogroot=./"/>
+			<param name="-java.args" value="-Dapp.name=importDB -Dlogroot=./" />
 			<reference torefid="-scripts.path" refid="application.build.classpath" />
 		</antcall>
 		<antcall target="-buildscripts">
@@ -208,7 +262,7 @@
 			<param name="class.main" value="fll.xml.ChallengeParser" />
 			<param name="-scripts.dir" value="${dir.build}/bin" />
 			<param name="-scripts.root" value=".." />
-			<param name="-java.args" value="-Dapp.name=challengeParser -Dlogroot=./"/>
+			<param name="-java.args" value="-Dapp.name=challengeParser -Dlogroot=./" />
 			<reference torefid="-scripts.path" refid="application.build.classpath" />
 		</antcall>
 
@@ -350,10 +404,10 @@
 		<move todir="${dir.build}/tomcat">
 			<fileset dir="${dir.build}/${tomcat}" />
 		</move>
-		
-	    <!-- clean out tomcat work directory -->
+
+		<!-- clean out tomcat work directory -->
 		<delete dir="${dir.build}/tomcat/work" />
-					
+
 		<chmod perm="+x">
 			<fileset dir="${dir.build}/tomcat/bin">
 				<include name="*.sh" />
@@ -404,7 +458,7 @@
 	</target>
 
 	<target name="-tomcat.run">
-		<java classname="org.apache.catalina.startup.Bootstrap" fork="true" spawn="${spawn}" taskname="tomcat">
+		<java jvm="${jvm}" classname="org.apache.catalina.startup.Bootstrap" fork="true" spawn="${spawn}" taskname="tomcat">
 			<classpath>
 				<!-- include two tries to find tools.jar depending on if java.home expands to jre directory -->
 				<pathelement location="${java.home}/lib/tools.jar" />
@@ -640,9 +694,9 @@
 		<delete dir="${dir.build}/db-save" />
 	</target>
 
-	<target name="-junit" depends="compile,compile.test">
+	<target name="-junit" depends="jvm.expand,compile,compile.test">
 		<antcall target="-junit.setup" />
-		<junit fork="yes" haltonfailure="false" dir="${dir.build}" showoutput="true" failureproperty="test.failed">
+		<junit fork="yes" jvm="${jvm}" haltonfailure="false" dir="${dir.build}" showoutput="true" failureproperty="test.failed">
 			<classpath>
 				<path refid="test.classpath" />
 
@@ -656,15 +710,16 @@
 		<antcall target="-junit.teardown" />
 	</target>
 
-	<target name="-junit.single" depends="compile,compile.test">
+	<target name="-junit.single" depends="jvm.expand,compile,compile.test">
 		<antcall target="-junit.setup" />
-		<junit fork="yes" haltonfailure="false" dir="${dir.build}" showoutput="true" failureproperty="test.failed">
+		<junit fork="yes" jvm="${jvm}" haltonfailure="false" dir="${dir.build}" showoutput="true" failureproperty="test.failed">
+
 			<classpath>
 				<path refid="test.classpath" />
 
 				<pathelement location="${dir.web}/WEB-INF/classes" />
 			</classpath>
-			<formatter type="brief" usefile="false" />
+			<formatter type="plain" usefile="false" />
 			<test name="${junit.test.class}" if="junit.test.class" todir="${dir.build}/test-results" />
 		</junit>
 		<antcall target="-junit.teardown" />
