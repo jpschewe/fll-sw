@@ -1,0 +1,97 @@
+\documentclass[letterpaper,11pt]{report}
+\usepackage{fullpage}
+\usepackage{float}
+\usepackage{alltt}
+
+\title{FLL Tournament Scheduling}
+\author{Jon Schewe}
+
+\begin{document}
+\maketitle
+
+\chapter{Initial}
+\section{Given}
+The following information is known about the tournament.
+
+\begin{itemize}
+\item TN = number of teams at the tournament
+\item Teams: $T_{0}, T_{1}, ..., T_{n}$
+\item division of team: $T_{0}.div$
+\item $TN_{div1}$ = number of division 1 teams
+\item $TN_{div2}$ = number of division 2 teams
+\item $TN_{div1} + TN_{div2}$ == TN
+\item SOS - the start of the tournament (time 0)
+\end{itemize}
+
+\section{Setup}
+The performance, technical and subjective time slots are defined as
+follows.
+
+\subsection{Subjective}
+%TODO figure out how to put in a lunch break
+
+Everything defined here is true for all subjective judging categories, currently only Presentation and Technical.
+
+\begin{itemize}
+\item $JN_{cat,div}$ - number of judges for category $cat$ in division $div$
+\item $subjective_{start}$ = SOS
+\item $CN_{cat,div}$ - number of subjective slots for category $cat$ in division $div$
+\end{itemize}
+
+\section{Performance}
+\begin{itemize}
+\item TableN - number of tables
+\item coaches meeting = SOS + 30
+\item $performance_{start}$ = SOS + 60 - give time for teams to get settled
+\item $PN_{round} = ceil(TN / 2) / TableN$ - number of slots for a given round
+\end{itemize}
+
+%TODO need to figure out how to do multi-line pseudocode again
+$P_{1} = performance_{start}$
+$for round \in 2 \dots NRounds:$
+\begin{math}
+  P_{round} = P_{round-1} + 5
+\end{math}
+end
+
+\section{Constraints}
+Constraints that need to be applied to a given team.
+
+\begin{itemize}
+\item $P1_{end} = P1_{start} + 5$
+\item $P2_{end} = P2_{start} + 5$
+\item $P3_{end} = P3_{start} + 5$
+
+\item $P1_{end} + 15 <= P2_{start}$
+\item $P2_{end} + 15 <= P3_{start}$
+
+\item $pres_{end} = pres_{start} + 20$
+\item $tech_{end} = tech_{start} + 20$
+
+\end{itemize}
+
+% need 15 minutes between events
+% FIXME this isn't right, need to figure out how to get the right delay
+\begin{math}
+if pres_{end} <= P1_{end}:
+  pres_{end} + 15 <= P1_{end}
+else:
+  P1_{end} + 15 <= pres_{end}
+endif
+\end{math}
+
+%\item $abs(P1_{end} - pres_{start}) >= 15$
+%\item $abs(P2_{end} - pres_{start}) >= 15$
+%\item $abs(P3_{end} - pres_{start}) >= 15$
+
+%\item $abs(P1_{end} - tech_{start}) >= 15$
+%\item $abs(P2_{end} - tech_{start}) >= 15$
+%\item $abs(P3_{end} - tech_{start}) >= 15$
+
+%\item $abs(tech_{end} - pres_{start}) >= 15$
+%\item $abs(pres_{end} - tech_{start}) >= 15$
+
+%\end{itemize}
+
+
+\end{document}
