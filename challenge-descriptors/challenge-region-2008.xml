@@ -7,16 +7,15 @@
 
  <Performance minimumScore="0" weight="1.0">
 
-  <goal name="bury_cabon_dioxide" title="Bury Carbon Dioxide"
+  <goal name="bury_carbon_dioxide" title="Carbon Dioxide in Underground Reservoir"
    multiplier="5" max="4" />
-    <!-- FIXME need to know max -->
     
   <goal name="construct_levees_red"
-   title="Construct Levees touching RED" multiplier="5"
+   title="Upright Levees touching RED Shore" multiplier="5"
       max="8" />
 
   <goal name="construct_levees_green"
-   title="Construct Levees touching GREEN" multiplier="4"
+   title="Upright Levees touching GREEN Shore" multiplier="4"
       max="8" />
     <restriction lowerBound="0" upperBound="8"
       message="There are only 3 levees on the table">
@@ -24,16 +23,16 @@
       <term goal="construct_levees_green" scoreType="raw"/>
     </restriction>
     
-  <goal name="test_levees" title="Test Levees"
+  <goal name="test_levees" title="Test Levee - Storm Activated"
       multiplier="15" />
 
-  <goal name="raise_flood_barrier" title="Raise The Flood Barrier" multiplier="15" />
+  <goal name="raise_flood_barrier" title="Flood Barrier Raised" multiplier="15" />
 
-  <goal name="elevate_house" title="Elevate The House" multiplier="25" />
+  <goal name="elevate_house" title="House Elevated" multiplier="25" />
 
-  <goal name="turn_off_lights" title="Turn Off The Lights" multiplier="20"/>
+  <goal name="turn_off_lights" title="House Lights turned Off" multiplier="20"/>
 
-  <goal name="open_window" title="Open A Window"
+  <goal name="open_window" title="House Window Open"
    multiplier="25"/>
 
   <goal name="get_people_together_pink" title="Three or more red/white citizens touching the pink"
@@ -48,35 +47,38 @@
   <goal name="find_agreement" title="Align the Arrows"
    multiplier="40" />
 
-  <goal name="fund_research" title="Fund Research or Corrective Action" multiplier="15" />
+  <goal name="fund_research" title="Money to Research Area or Underground Reservoir" multiplier="15" />
 
-  <goal name="deliver_machine" title="Deliver An Ice Core Drilling Machine" multiplier="20" />
+  <goal name="deliver_machine" title="Ice Core Drilling Machine delivered to Research area" multiplier="20" />
 
-  <goal name="drill_assembly" title="Drill Assembly Raised Completely Vertical" multiplier="10" />
+  <goal name="drill_assembly" title="Drilling Machine Assemble Raised Completed" multiplier="10" />
     
-  <goal name="extract_sample" title="Extract An Ice Core Sample" multiplier="20" />
+  <goal name="ice_core" title="Ice Core"
+      initialValue="0">
+      <value score="30" title="IN BASE" value="in_base"/>
+      <value score="20" title="EXTRACTED NOT IN BASE" value="extracted"/>
+      <value score="0" title="NOT EXTRACTED" value="none"/>
+    </goal>
 
-  <goal name="ice_core_base" title="Ice Core IN Base" multiplier="10" />
+  <goal name="deliver_buoy" title="Ice Buoy Delivered to Research Area" multiplier="25" />
 
-  <goal name="deliver_buoy" title="Deliver An Ice Buoy" multiplier="25" />
-
-  <goal name="insulate_house" title="Insulte A House"
+  <goal name="insulate_house" title="Both Insulations in Green Grid Area"
    multiplier="10" />
 
-  <goal name="ride_bicycle" title="Ride A Bicycle" multiplier="10" />
+  <goal name="ride_bicycle" title="Bike in Green Grid Area" multiplier="10" />
 
-  <goal name="telecommute" title="Telecommute And Research" multiplier="10" />
+  <goal name="telecommute" title="Computer in Green Grid Area" multiplier="10" />
 
-  <goal name="study_wildlife_bear" title="Study Wildlife - Bear"
+  <goal name="study_wildlife_bear" title="Study Wildlife - Bear in Research Area"
       initialValue="0">
       <value score="15" title="Upright" value="upright"/>
       <value score="10" title="Sleeping" value="sleeping"/>
       <value score="0" title="None" value="none"/>
   </goal>
 
-  <goal name="study_wildlife_snowmobile" title="Study Wildlife - Snowmobile" multiplier="10" />
+  <goal name="study_wildlife_snowmobile" title="Study Wildlife - Snowmobile in Research Area" multiplier="10" />
     
-    <goal name="beat_clock" title="Beat the Clock"
+    <goal name="beat_clock" title="Beat the Clock - Robot in Research Area"
       initialValue="0"
       >
       <value score="15" title="Research Area" value="research_area"/>
@@ -84,10 +86,35 @@
       <value score="0" title="None" value="none"/>
     </goal>
 
-    <!-- FIXME need tiebreaker -->
   <tiebreaker>
    <test winner='high'>
+     <term goal='bury_carbon_dioxide' scoreType='computed'/>
+   </test>
+   <test winner='high'>
+     <term goal='deliver_buoy' scoreType='computed'/>
+   </test>
+   <test winner='high'>
+     <term goal='get_people_together_pink' scoreType='computed'/>
+     <term goal='get_people_together_green' scoreType='computed'/>
+     <term goal='get_people_together_research' scoreType='computed'/>
+   </test>
+   <test winner='high'>
+     <term goal='elevate_house' scoreType='computed'/>
+   </test>
+   <test winner='high'>
+     <term goal='open_window' scoreType='computed'/>
+   </test>
+   <test winner='high'>
+     <term goal='deliver_machine' scoreType='computed'/>
+   </test>
+   <test winner='high'>
      <term goal='beat_clock' scoreType='computed'/>
+   </test>
+   <test winner='high'>
+     <term goal='ice_core' scoreType='computed'/>
+   </test>
+   <test winner='high'>
+     <term goal='study_wildlife_bear' scoreType='computed'/>
    </test>
   </tiebreaker>
 
