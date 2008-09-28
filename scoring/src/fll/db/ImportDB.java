@@ -20,6 +20,9 @@ import java.text.SimpleDateFormat;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import net.mtu.eggplant.util.Functions;
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -90,8 +93,8 @@ public final class ImportDB {
             LOG.info("Destination either isn't HSQLDB or there is a problem", sqle);
           }
         } finally {
-          Utilities.closeStatement(stmt1);
-          Utilities.closeStatement(stmt2);
+          SQLFunctions.closeStatement(stmt1);
+          SQLFunctions.closeStatement(stmt2);
         }
 
         final boolean differences = checkForDifferences(sourceConnection, destinationConnection, tournament);
@@ -118,8 +121,8 @@ public final class ImportDB {
             LOG.info("Destination either isn't HSQLDB or there is a problem", sqle);
           }
         } finally {
-          Utilities.closeStatement(stmt1);
-          Utilities.closeStatement(stmt2);
+          SQLFunctions.closeStatement(stmt1);
+          SQLFunctions.closeStatement(stmt2);
         }
 
       }
@@ -199,7 +202,7 @@ public final class ImportDB {
           insertPrep.setString(3, nextTournament);
           insertPrep.executeUpdate();
         }
-        Utilities.closeResultSet(checkRS);
+        SQLFunctions.closeResultSet(checkRS);
 
         // import the data from the tournament
         importDatabase(memConnection, destConnection, tournament, challengeDocument);
@@ -211,18 +214,18 @@ public final class ImportDB {
       // shutdown new database
       destStmt.executeUpdate("SHUTDOWN COMPACT");
     } finally {
-      Utilities.closeResultSet(memRS);
-      Utilities.closeStatement(memStmt);
-      Utilities.closeConnection(memConnection);
+      SQLFunctions.closeResultSet(memRS);
+      SQLFunctions.closeStatement(memStmt);
+      SQLFunctions.closeConnection(memConnection);
 
-      Utilities.closePreparedStatement(insertPrep);
+      SQLFunctions.closePreparedStatement(insertPrep);
 
-      Utilities.closeResultSet(checkRS);
-      Utilities.closePreparedStatement(checkPrep);
+      SQLFunctions.closeResultSet(checkRS);
+      SQLFunctions.closePreparedStatement(checkPrep);
 
-      Utilities.closePreparedStatement(destPrep);
-      Utilities.closeStatement(destStmt);
-      Utilities.closeConnection(destConnection);
+      SQLFunctions.closePreparedStatement(destPrep);
+      SQLFunctions.closeStatement(destStmt);
+      SQLFunctions.closeConnection(destConnection);
     }
   }
 
@@ -301,7 +304,7 @@ public final class ImportDB {
       destPrep = destinationConnection.prepareStatement("DELETE FROM Judges WHERE Tournament = ?");
       destPrep.setString(1, tournament);
       destPrep.executeUpdate();
-      Utilities.closePreparedStatement(destPrep);
+      SQLFunctions.closePreparedStatement(destPrep);
 
       destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES (?, ?, ?, ?)");
       destPrep.setString(4, tournament);
@@ -315,16 +318,16 @@ public final class ImportDB {
         destPrep.setString(3, sourceRS.getString(3));
         destPrep.executeUpdate();
       }
-      Utilities.closeResultSet(sourceRS);
-      Utilities.closePreparedStatement(sourcePrep);
-      Utilities.closePreparedStatement(destPrep);
+      SQLFunctions.closeResultSet(sourceRS);
+      SQLFunctions.closePreparedStatement(sourcePrep);
+      SQLFunctions.closePreparedStatement(destPrep);
 
       // import tournament teams
       LOG.info("Importing TournamentTeams");
       destPrep = destinationConnection.prepareStatement("DELETE FROM TournamentTeams WHERE Tournament = ?");
       destPrep.setString(1, tournament);
       destPrep.executeUpdate();
-      Utilities.closePreparedStatement(destPrep);
+      SQLFunctions.closePreparedStatement(destPrep);
       sourcePrep = sourceConnection.prepareStatement("SELECT TeamNumber, event_division, advanced FROM TournamentTeams WHERE Tournament = ?");
       sourcePrep.setString(1, tournament);
       destPrep = destinationConnection
@@ -337,9 +340,9 @@ public final class ImportDB {
         destPrep.setBoolean(4, sourceRS.getBoolean(3));
         destPrep.executeUpdate();
       }
-      Utilities.closeResultSet(sourceRS);
-      Utilities.closePreparedStatement(sourcePrep);
-      Utilities.closePreparedStatement(destPrep);
+      SQLFunctions.closeResultSet(sourceRS);
+      SQLFunctions.closePreparedStatement(sourcePrep);
+      SQLFunctions.closePreparedStatement(destPrep);
 
       // performance
       {
@@ -349,7 +352,7 @@ public final class ImportDB {
         destPrep = destinationConnection.prepareStatement("DELETE FROM " + tableName + " WHERE Tournament = ?");
         destPrep.setString(1, tournament);
         destPrep.executeUpdate();
-        Utilities.closePreparedStatement(destPrep);
+        SQLFunctions.closePreparedStatement(destPrep);
 
         final StringBuffer columns = new StringBuffer();
         columns.append(" TeamNumber,");
@@ -406,9 +409,9 @@ public final class ImportDB {
           }
           destPrep.executeUpdate();
         }
-        Utilities.closeResultSet(sourceRS);
-        Utilities.closePreparedStatement(sourcePrep);
-        Utilities.closePreparedStatement(destPrep);
+        SQLFunctions.closeResultSet(sourceRS);
+        SQLFunctions.closePreparedStatement(sourcePrep);
+        SQLFunctions.closePreparedStatement(destPrep);
       }
 
       // loop over each subjective category
@@ -421,7 +424,7 @@ public final class ImportDB {
         destPrep = destinationConnection.prepareStatement("DELETE FROM " + tableName + " WHERE Tournament = ?");
         destPrep.setString(1, tournament);
         destPrep.executeUpdate();
-        Utilities.closePreparedStatement(destPrep);
+        SQLFunctions.closePreparedStatement(destPrep);
 
         final StringBuffer columns = new StringBuffer();
         columns.append(" TeamNumber,");
@@ -462,9 +465,9 @@ public final class ImportDB {
           }
           destPrep.executeUpdate();
         }
-        Utilities.closeResultSet(sourceRS);
-        Utilities.closePreparedStatement(sourcePrep);
-        Utilities.closePreparedStatement(destPrep);
+        SQLFunctions.closeResultSet(sourceRS);
+        SQLFunctions.closePreparedStatement(sourcePrep);
+        SQLFunctions.closePreparedStatement(destPrep);
       }
 
       // PlayoffData
@@ -473,7 +476,7 @@ public final class ImportDB {
         destPrep = destinationConnection.prepareStatement("DELETE FROM PlayoffData WHERE Tournament = ?");
         destPrep.setString(1, tournament);
         destPrep.executeUpdate();
-        Utilities.closePreparedStatement(destPrep);
+        SQLFunctions.closePreparedStatement(destPrep);
 
         sourcePrep = sourceConnection.prepareStatement("SELECT event_division, Tournament, PlayoffRound, LineNumber, Team, AssignedTable, Printed "
             + "FROM PlayoffData WHERE Tournament=?");
@@ -491,9 +494,9 @@ public final class ImportDB {
           }
           destPrep.executeUpdate();
         }
-        Utilities.closeResultSet(sourceRS);
-        Utilities.closePreparedStatement(sourcePrep);
-        Utilities.closePreparedStatement(destPrep);
+        SQLFunctions.closeResultSet(sourceRS);
+        SQLFunctions.closePreparedStatement(sourcePrep);
+        SQLFunctions.closePreparedStatement(destPrep);
       }
 
       // TableNames
@@ -502,7 +505,7 @@ public final class ImportDB {
         destPrep = destinationConnection.prepareStatement("DELETE FROM tablenames WHERE Tournament = ?");
         destPrep.setString(1, tournament);
         destPrep.executeUpdate();
-        Utilities.closePreparedStatement(destPrep);
+        SQLFunctions.closePreparedStatement(destPrep);
 
         sourcePrep = sourceConnection.prepareStatement("SELECT Tournament, PairID, SideA, SideB " + "FROM tablenames WHERE Tournament=?");
         sourcePrep.setString(1, tournament);
@@ -518,14 +521,14 @@ public final class ImportDB {
           }
           destPrep.executeUpdate();
         }
-        Utilities.closeResultSet(sourceRS);
-        Utilities.closePreparedStatement(sourcePrep);
-        Utilities.closePreparedStatement(destPrep);
+        SQLFunctions.closeResultSet(sourceRS);
+        SQLFunctions.closePreparedStatement(sourcePrep);
+        SQLFunctions.closePreparedStatement(destPrep);
       }
     } finally {
-      Utilities.closeResultSet(sourceRS);
-      Utilities.closePreparedStatement(sourcePrep);
-      Utilities.closePreparedStatement(destPrep);
+      SQLFunctions.closeResultSet(sourceRS);
+      SQLFunctions.closePreparedStatement(sourcePrep);
+      SQLFunctions.closePreparedStatement(destPrep);
     }
   }
 
@@ -549,7 +552,7 @@ public final class ImportDB {
         LOG.error("Tournament: " + tournament + " doesn't exist in the destination database!");
         return true;
       }
-      Utilities.closePreparedStatement(destPrep);
+      SQLFunctions.closePreparedStatement(destPrep);
 
       sourcePrep = sourceConnection.prepareStatement("SELECT Name FROM Tournaments WHERE Name = ?");
       sourcePrep.setString(1, tournament);
@@ -557,7 +560,7 @@ public final class ImportDB {
         LOG.error("Tournament: " + tournament + " doesn't exist in the source database!");
         return true;
       }
-      Utilities.closePreparedStatement(sourcePrep);
+      SQLFunctions.closePreparedStatement(sourcePrep);
 
       // check names and regions and make sure that each team in the source
       // tournament is in the destination tournament
@@ -579,25 +582,25 @@ public final class ImportDB {
         destRS = destPrep.executeQuery();
         if(destRS.next()) {
           final String destName = destRS.getString(1);
-          if(!Utilities.safeEquals(destName, sourceName)) {
+          if(!Functions.safeEquals(destName, sourceName)) {
             differencesFound = true;
             LOG.error("There is a team with a different name in the source database that in the destination database.  Number: " + num
                 + " source name: " + sourceName + " dest name: " + destName);
           }
           final String destRegion = destRS.getString(2);
-          if(!Utilities.safeEquals(destRegion, sourceRegion)) {
+          if(!Functions.safeEquals(destRegion, sourceRegion)) {
             differencesFound = true;
             LOG.error("There is a team with a different region in the source database that in the destination database.  Number: " + num
                 + " source region: " + sourceRegion + " dest region: " + destRegion);
           }
           final String destDivision = destRS.getString(3);
-          if(!Utilities.safeEquals(destDivision, sourceDivision)) {
+          if(!Functions.safeEquals(destDivision, sourceDivision)) {
             differencesFound = true;
             LOG.error("There is a team with a different division in the source database that in the destination database.  Number: " + num
                 + " source division: " + sourceDivision + " dest division: " + destDivision);
           }
           final String destOrganization = destRS.getString(4);
-          if(!Utilities.safeEquals(destOrganization, sourceOrganization)) {
+          if(!Functions.safeEquals(destOrganization, sourceOrganization)) {
             differencesFound = true;
             LOG.error("There is a team with a different organization in the source database that in the destination database.  Number: " + num
                 + " source organization: " + sourceOrganization + " dest organization: " + destOrganization);
@@ -607,12 +610,12 @@ public final class ImportDB {
           differencesFound = true;
           LOG.error("There is a team in the source database that isn't in the destination database. Number: " + num + " name: " + sourceName);
         }
-        Utilities.closeResultSet(destRS);
+        SQLFunctions.closeResultSet(destRS);
       }
-      Utilities.closeResultSet(destRS);
-      Utilities.closeResultSet(sourceRS);
-      Utilities.closePreparedStatement(destPrep);
-      Utilities.closePreparedStatement(sourcePrep);
+      SQLFunctions.closeResultSet(destRS);
+      SQLFunctions.closeResultSet(sourceRS);
+      SQLFunctions.closePreparedStatement(destPrep);
+      SQLFunctions.closePreparedStatement(sourcePrep);
 
       // check that the source database has the same teams in TournamentTeams
       // (for the given tournament) as destination database
@@ -630,15 +633,15 @@ public final class ImportDB {
             found = true;
           }
         }
-        Utilities.closeResultSet(destRS);
+        SQLFunctions.closeResultSet(destRS);
         if(!found) {
           LOG.error("Team " + teamNumber + " is in tournament " + tournament + " in the source database, but not in the destination database.");
           differencesFound = true;
         }
       }
-      Utilities.closeResultSet(sourceRS);
-      Utilities.closePreparedStatement(destPrep);
-      Utilities.closePreparedStatement(sourcePrep);
+      SQLFunctions.closeResultSet(sourceRS);
+      SQLFunctions.closePreparedStatement(destPrep);
+      SQLFunctions.closePreparedStatement(sourcePrep);
 
       // check that the destination database has the same teams in
       // TournamentTeams (for the given tournament) as the source database
@@ -656,23 +659,23 @@ public final class ImportDB {
             found = true;
           }
         }
-        Utilities.closeResultSet(sourceRS);
+        SQLFunctions.closeResultSet(sourceRS);
         if(!found) {
           LOG.error("Team " + teamNumber + " is in tournament " + tournament + " in the destination database, but not in the source database.");
           differencesFound = true;
         }
       }
-      Utilities.closeResultSet(destRS);
-      Utilities.closePreparedStatement(destPrep);
-      Utilities.closePreparedStatement(sourcePrep);
+      SQLFunctions.closeResultSet(destRS);
+      SQLFunctions.closePreparedStatement(destPrep);
+      SQLFunctions.closePreparedStatement(sourcePrep);
 
-      // FIX check documents
+      // TODO check documents bug: 2126186
 
     } finally {
-      Utilities.closeResultSet(sourceRS);
-      Utilities.closeResultSet(destRS);
-      Utilities.closePreparedStatement(sourcePrep);
-      Utilities.closePreparedStatement(destPrep);
+      SQLFunctions.closeResultSet(sourceRS);
+      SQLFunctions.closeResultSet(destRS);
+      SQLFunctions.closePreparedStatement(sourcePrep);
+      SQLFunctions.closePreparedStatement(destPrep);
     }
     return differencesFound;
   }

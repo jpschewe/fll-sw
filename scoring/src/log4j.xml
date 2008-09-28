@@ -27,10 +27,25 @@
   </layout>
 </appender-->
 
-  <!-- stuff for debugging -->
-  <!--logger name="fll.web.report.FinalistSchedulerUI">
-    <level value="DEBUG"/>
-  </logger-->
+  <!--  for debugging the database, set levels to something lower than fatal to actually see log output -->
+  <logger name="log4jdbc.debug">
+    <level value="FATAL"/>
+  </logger>
+  <logger name="jdbc.sqlonly">
+    <level value="FATAL"/>
+  </logger>
+  <logger name="jdbc.sqltiming">
+    <level value="FATAL"/>
+  </logger>
+  <logger name="jdbc.audit">
+    <level value="FATAL"/>
+  </logger>
+  <logger name="jdbc.resultset">
+    <level value="FATAL"/>
+  </logger>
+  
+ <!-- stuff for debugging -->
+    
   <!-- end stuff for debugging -->
   
   <root>

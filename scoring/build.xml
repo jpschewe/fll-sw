@@ -8,18 +8,25 @@
 	<property name="app.name" value="${ant.project.name}" />
 	<property name="app.version" value="3.3" />
 
-	<property name="dir.build" value="build" />
+	<property name="dir.build" value="${basedir}/build" />
 	<property name="tomcat" value="apache-tomcat-5.5.20" />
 	<property name="dir.tomcat" value="${dir.build}/${tomcat}" />
 
 	<property name="dir.dist" value="dist" />
 	<property name="dir.web" value="${dir.build}/tomcat/webapps/${app.name}" />
+	<property name="dir.classes" value="${dir.web}/WEB-INF/classes" />
+	<property name="dir.classes.test" value="${dir.build}/classes/test" />
+
 	<property name="dir.lib" value="lib" />
 	<property name="dir.src" value="src" />
 	<property name="dir.test" value="test" />
 	<property name="dir.tmp" value="tmp" />
 
 	<property name="dir.tools" value="${basedir}/tools" />
+
+	<property name="dir.reports" value="${dir.build}/docs/reports" />
+	<property name="dir.coverage" value="${dir.build}/coverage" />
+
 
 	<!--  ==================== Compilation Control Options ==================== -->
 
@@ -42,32 +49,48 @@
 
 	<property name="inside.test" value="false" />
 
-	<!-- ==================== Compilation Classpath =========================== -->
+	<!-- ==================== Classpaths =========================== -->
+	<path id="emma.lib">
+		<pathelement location="${dir.lib}/emma/emma.jar" />
+		<pathelement location="${dir.lib}/emma/emma_ant.jar" />
+	</path>
+
 	<path id="application.classpath">
-		<pathelement location="${dir.lib}/JonsInfra-0.2.jar" />
-		<pathelement location="${dir.lib}/log4j-1.2.14.jar" />
-		<pathelement location="${dir.lib}/opencsv-1.8.jar" />
+		<pathelement location="${dir.lib}/JonsInfra-0.7.jar" />
 
 		<pathelement location="${dir.lib}/commons-lang-2.0.jar" />
 
 		<!-- database -->
 		<pathelement location="${dir.lib}/hsqldb-1.8.0.7.jar" />
+		<pathelement location="${dir.lib}/log4jdbc3-1.1.jar" />
+
+		<!-- pdf library -->
+		<pathelement location="${dir.lib}/iText-2.1.3.jar" />
+
+		<pathelement location="${dir.lib}/opencsv-1.8.jar" />
+
+		<!-- logging -->
+		<pathelement location="${dir.lib}/log4j-1.2.14.jar" />
+		<pathelement location="${dir.lib}/slf4j-api-1.5.3.jar" />
+		<pathelement location="${dir.lib}/slf4j-log4j12-1.5.3.jar" />
+
 
 		<!-- xerces XML parser -->
 		<pathelement location="${dir.lib}/xercesImpl.jar" />
 		<pathelement location="${dir.lib}/xml-apis.jar" />
+
+		<pathelement location="${dir.classes}" />
+
+		<path refid="emma.lib" />
 	</path>
 
 	<path id="compile.classpath">
 		<!-- Include all JAR files that will be included in /WEB-INF/lib -->
 		<path refid="application.classpath" />
 
-		<!-- pdf library -->
-		<pathelement location="${dir.lib}/itext-1.4.8.jar" />
-
 		<!-- file upload -->
-		<pathelement location="${dir.lib}/commons-io-1.3.jar" />
 		<pathelement location="${dir.lib}/commons-fileupload-1.1.1.jar" />
+		<pathelement location="${dir.lib}/commons-io-1.3.jar" />
 
 		<!-- JSTL libraries -->
 		<pathelement location="${dir.lib}/jstl.jar" />
@@ -85,20 +108,46 @@
 	<path id="test.classpath">
 		<path refid="compile.classpath" />
 
+		<pathelement location="${dir.lib}/test/junit-4.5.jar" />
+
 		<!-- http unit -->
 		<pathelement location="${dir.lib}/test/Tidy.jar" />
 		<pathelement location="${dir.lib}/test/httpunit.jar" />
 		<pathelement location="${dir.lib}/test/js.jar" />
-		<pathelement location="${dir.lib}/test/junit-4.1.jar" />
 		<pathelement location="${dir.lib}/test/nekohtml.jar" />
 
 		<!-- uispec -->
 		<pathelement location="${dir.lib}/test/uispec4j-1.4.jar" />
 
-		<pathelement location="${dir.web}/WEB-INF/classes" />
-
+		<pathelement location="${dir.classes.test}" />
 	</path>
 
+	<!-- ==================== Emma (Code coverage) ==================== -->
+	<target name="emma.report" description="Generate the emma report">
+		<taskdef resource="emma_ant.properties" classpathref="emma.lib" />
+		<emma>
+			<report sourcepath="${dir.src}">
+				<fileset dir="${dir.coverage}">
+					<include name="*.emma" />
+				</fileset>
+				<html outfile="${dir.reports}/coverage.html" />
+			</report>
+		</emma>
+		<echo message="See ${dir.reports}/coverage.html for the coverage report" />
+	</target>
+
+	<target name="emma.instr" depends="compile">
+		<mkdir dir="${dir.coverage}" />
+		<taskdef resource="emma_ant.properties" classpathref="emma.lib" />
+
+		<emma>
+			<instr instrpath="${dir.classes}" mode="overwrite" metadatafile="${dir.coverage}/metadata.emma" merge="true">
+				<filter includes="fll.*" />
+			</instr>
+		</emma>
+	</target>
+
+	<!-- ==================== Setup/Prepare/Clean ==================== -->
 	<target name="init">
 		<tstamp />
 
@@ -143,7 +192,7 @@
 				<equals arg1="${jvm}" arg2="java" />
 				<and>
 					<available file="${jvm}" />
-					<uptodate srcfile="jdk-${arch}.tar.bz2" targetfile="tools/jdk-${arch}/expanded"/>
+					<uptodate srcfile="jdk-${arch}.tar.bz2" targetfile="tools/jdk-${arch}/expanded" />
 				</and>
 			</or>
 		</condition>
@@ -157,7 +206,7 @@
 				<include name="**/bin/*" />
 			</fileset>
 		</chmod>
-		<touch file="tools/jdk-${arch}/expanded"/>
+		<touch file="tools/jdk-${arch}/expanded" />
 	</target>
 
 	<!-- ==================== Clean Target ==================================== -->
@@ -274,10 +323,10 @@
 	</target>
 
 	<target name="compile.classes" depends="prepare" description="Compile Java sources">
+		<mkdir dir="${dir.classes}" />
 
 		<!-- Compile Java classes as necessary -->
-		<mkdir dir="${dir.web}/WEB-INF/classes" />
-		<javac srcdir="src" destdir="${dir.web}/WEB-INF/classes" debug="${compile.debug}" deprecation="${compile.deprecation}" optimize="${compile.optimize}">
+		<javac srcdir="src" destdir="${dir.classes}" debug="${compile.debug}" deprecation="${compile.deprecation}" optimize="${compile.optimize}">
 			<classpath refid="compile.classpath" />
 			<compilerarg value="-Xlint:unchecked" />
 		</javac>
@@ -285,6 +334,7 @@
 	</target>
 
 	<target name="compile.test" depends="prepare,compile" description="Compile Java test sources">
+		<mkdir dir="${dir.classes.test}" />
 
 		<!-- Copy static files from external dependencies as needed -->
 		<copy todir="${dir.web}/WEB-INF/classes">
@@ -294,7 +344,7 @@
 		</copy>
 
 		<!-- Compile Java classes as necessary -->
-		<javac srcdir="test" destdir="${dir.web}/WEB-INF/classes" debug="${compile.debug}" deprecation="${compile.deprecation}" optimize="${compile.optimize}">
+		<javac srcdir="test" destdir="${dir.classes.test}" debug="${compile.debug}" deprecation="${compile.deprecation}" optimize="${compile.optimize}">
 			<classpath refid="test.classpath" />
 			<compilerarg value="-Xlint:unchecked" />
 		</javac>
@@ -415,7 +465,7 @@
 		</chmod>
 	</target>
 
-	<target name="tomcat.start.debug" description="start up tomcat for debugging the database">
+	<target name="tomcat.start.test" description="start up tomcat for testing - starts the database in server mode">
 		<antcall target="tomcat.start">
 			<param name="inside.test" value="true" />
 		</antcall>
@@ -459,11 +509,18 @@
 
 	<target name="-tomcat.run">
 		<java jvm="${jvm}" classname="org.apache.catalina.startup.Bootstrap" fork="true" spawn="${spawn}" taskname="tomcat">
+			<jvmarg value="-Demma.coverage.out.file=${dir.coverage}/tomcat-coverage.emma" />
+			<jvmarg value="-Demma.coverage.out.merge=true" />
+
 			<classpath>
 				<!-- include two tries to find tools.jar depending on if java.home expands to jre directory -->
 				<pathelement location="${java.home}/lib/tools.jar" />
 				<pathelement location="${java.home}/../lib/tools.jar" />
 				<pathelement location="${dir.build}/tomcat/bin/bootstrap.jar" />
+
+				<!-- for when running the unit tests -->
+				<path refid="emma.lib" />
+
 			</classpath>
 			<sysproperty key="java.endorsed.dirs" file="${dir.build}/tomcat/common/endorsed" />
 			<sysproperty key="catalina.base" file="${dir.build}/tomcat" />
@@ -484,8 +541,24 @@
 		<antcall target="clean" />
 		<!-- make sure the tests pass -->
 		<antcall target="test" />
+
+		<!-- create & copy the coverage report to the side so that the clean doesn't remove it-->
+		<antcall target="emma.report" />
+		<mkdir dir="dist-save" />
+		<copy todir="dist-save">
+			<fileset dir="${dir.reports}" />
+		</copy>
+
 		<!-- clean everything out before a distribution is made -->
 		<antcall target="clean" />
+
+		<!-- copy the coverage report back -->
+		<mkdir dir="${dir.reports}" />
+		<copy todir="${dir.reports}">
+			<fileset dir="dist-save" />
+		</copy>
+		<delete dir="dist-save" />
+
 		<antcall target="-dist.real" />
 	</target>
 
@@ -494,6 +567,12 @@
 		<mkdir dir="${dir.dist}/docs" />
 		<copy todir="${dir.dist}/docs">
 			<fileset dir="${basedir}/docs" />
+		</copy>
+
+		<!-- copy coverage reports -->
+    <mkdir dir="${dir.dist}/docs/reports"/>
+		<copy todir="${dir.dist}/docs/reports">
+			<fileset dir="${dir.reports}" />
 		</copy>
 
 		<!-- copy scripts -->
@@ -580,7 +659,6 @@
 	<!-- ==================== Javadoc Target ================================== -->
 	<target name="javadoc" description="Create Javadoc API documentation">
 
-		<mkdir dir="${dir.dist}/docs" />
 		<mkdir dir="${dir.dist}/docs/api" />
 		<javadoc sourcepath="src" windowtitle="${app.name}" destdir="${dir.dist}/docs/api" packagenames="fll.*" use="true" splitindex="true" additionalparam="-tag beaninfo:a:BeanInfo -tag valid:a:Validity -tag feasible:a:Feasibility -tag test:a:Tests -tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator">
 			<classpath>
@@ -667,8 +745,8 @@
 
 		<!-- copy in test database -->
 		<antcall target="install.testdb" />
+		<antcall target="tomcat.start.test">
 
-		<antcall target="tomcat.start">
 			<param name="inside.test" value="true" />
 		</antcall>
 
@@ -694,14 +772,21 @@
 		<delete dir="${dir.build}/db-save" />
 	</target>
 
-	<target name="-junit" depends="jvm.expand,compile,compile.test">
+	<target name="-junit" depends="jvm.expand,compile,compile.test,emma.instr">
+		<!-- delete the emma output data so that we get a clean report -->
+		<delete file="${dir.coverage}/coverage.emma" />
+		<delete file="${dir.coverage}/tomcat-coverage.emma" />
+
 		<antcall target="-junit.setup" />
+
 		<junit fork="yes" jvm="${jvm}" haltonfailure="false" dir="${dir.build}" showoutput="true" failureproperty="test.failed">
+			<jvmarg value="-Demma.coverage.out.file=${dir.coverage}/coverage.emma" />
+			<jvmarg value="-Demma.coverage.out.merge=true" />
+
 			<classpath>
 				<path refid="test.classpath" />
-
-				<pathelement location="${dir.web}/WEB-INF/classes" />
 			</classpath>
+			
 			<formatter type="brief" usefile="false" />
 			<batchtest todir="${dir.build}/test-results">
 				<fileset dir="${dir.test}" includes="**/*Test.java" />
@@ -716,8 +801,6 @@
 
 			<classpath>
 				<path refid="test.classpath" />
-
-				<pathelement location="${dir.web}/WEB-INF/classes" />
 			</classpath>
 			<formatter type="plain" usefile="false" />
 			<test name="${junit.test.class}" if="junit.test.class" todir="${dir.build}/test-results" />

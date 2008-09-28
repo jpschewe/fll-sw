@@ -5,7 +5,8 @@
   
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="fll.Utilities" %>
+<%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
+
 <%@ page import="fll.db.Queries" %>
 
 <%@ page import="java.util.List" %>
@@ -47,8 +48,8 @@ String nextTournament = null;
   final String organization = rs.getString(3);
   final String region = rs.getString(4);
   final String division = rs.getString(5);
-  Utilities.closeResultSet(rs);
-  Utilities.closeStatement(stmt);
+  SQLFunctions.closeResultSet(rs);
+  SQLFunctions.closeStatement(stmt);
 %>
   document.editTeam.teamName.value = "<%= teamName %>";
   document.editTeam.organization.value = "<%= organization == null ? "" : organization %>";

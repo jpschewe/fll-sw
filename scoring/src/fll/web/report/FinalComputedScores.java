@@ -3,7 +3,24 @@
  * INSciTE is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.pdf.report;
+package fll.web.report;
+
+import java.awt.Color;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Iterator;
+
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import com.lowagie.text.Chunk;
 import com.lowagie.text.Document;
@@ -22,27 +39,8 @@ import com.lowagie.text.pdf.PdfPageEventHelper;
 import com.lowagie.text.pdf.PdfTemplate;
 import com.lowagie.text.pdf.PdfWriter;
 
-import fll.db.Queries;
 import fll.Utilities;
-
-import java.awt.Color;
-
-import java.io.IOException;
-import java.io.OutputStream;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import java.text.NumberFormat;
-import java.text.ParseException;
-
-import java.util.Iterator;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import fll.db.Queries;
 
 
 /**
@@ -99,7 +97,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
     // write the headertable
     updateHeader(writer, document); // creates the header table with current division, etc.
     _header.setTotalWidth(document.right() - document.left());
-    _header.writeSelectedRows(0, -1, document.left(), document.getPageSize().height() - 10, cb);
+    _header.writeSelectedRows(0, -1, document.left(), document.getPageSize().getHeight() - 10, cb);
     
     // compose the footer
     String text = "Page " + writer.getPageNumber() + " of ";
@@ -481,12 +479,12 @@ public final class FinalComputedScores extends PdfPageEventHelper {
     } catch(final DocumentException de) {
       throw new RuntimeException("Error creating PDF document!", de);
     } finally {
-      Utilities.closeResultSet(rawScoreRS);
-      Utilities.closeResultSet(teamsRS);
+      SQLFunctions.closeResultSet(rawScoreRS);
+      SQLFunctions.closeResultSet(teamsRS);
       
-      Utilities.closeStatement(stmt);
-      Utilities.closeStatement(teamsStmt);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closeStatement(teamsStmt);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 

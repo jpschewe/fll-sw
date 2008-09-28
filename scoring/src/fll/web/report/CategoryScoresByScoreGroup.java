@@ -11,7 +11,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +20,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
@@ -65,13 +66,10 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
       subjectiveCategories.put(title, name);
     }
 
-    Statement stmt = null;
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
       final String currentTournament = Queries.getCurrentTournament(connection);
-
-      stmt = connection.createStatement();
 
       // foreach division
       for(String division : Queries.getDivisions(connection)) {
@@ -138,8 +136,8 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
     } catch(final SQLException sqle) {
       throw new RuntimeException(sqle);
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
 
     writer.write("</body></html>");

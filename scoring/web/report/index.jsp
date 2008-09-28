@@ -1,6 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="fll.Utilities" %>
+<%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
+
 <%@ page import="fll.db.Queries" %>
 
 <%@ page import="java.sql.Statement" %>
@@ -25,8 +26,8 @@ if(rs.next()) {
 } else {
   maxRunNumber = 1;
 }
-Utilities.closeResultSet(rs);
-Utilities.closeStatement(stmt);
+SQLFunctions.closeResultSet(rs);
+SQLFunctions.closeStatement(stmt);
 %>
 <html>
   <head>
@@ -44,12 +45,11 @@ Utilities.closeStatement(stmt);
       needs to be executed before any reports can be generated.  You will be
       returned to this page if there are no errors summarizing scores.</li>
 
-      <li>Final Computed Scores
-          <a href='<c:url value="/GetFile">
+      <li><a href='<c:url value="/GetFile">
                      <c:param name="filename" value="finalComputedScores.pdf"/>
-                   </c:url>' target='_new'>PDF version</a>
+                   </c:url>' target='_new'>Final Computed Scores</a>
         </li>
-        
+
       <li><a href="categorizedScores.jsp">Categorized Scores</a></li>
 
       <li><a href="categoryScoresByJudge.jsp">Categorized Scores by judge</a></li>
@@ -58,6 +58,8 @@ Utilities.closeStatement(stmt);
 
       <li><a href="promptForNumFinalists.jsp">Schedule Finalists</a></li>
       
+ <li><a href="RankingReport">Ranking Report for teams</a></li>        
+
     </ol>
 
     <p>Some reports that are handy for intermediate reporting and

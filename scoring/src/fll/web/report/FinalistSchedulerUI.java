@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -32,7 +34,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import fll.Team;
-import fll.Utilities;
 import fll.db.Queries;
 import fll.util.ScoreUtils;
 
@@ -382,8 +383,8 @@ public class FinalistSchedulerUI extends HttpServlet {
     } catch(final SQLException e) {
       throw new RuntimeException("Error getting finalist data", e);
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 

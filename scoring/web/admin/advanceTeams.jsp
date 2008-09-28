@@ -1,7 +1,8 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.db.Queries" %>
-<%@ page import="fll.Utilities" %>
+
+<%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
       
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.Connection" %>
@@ -52,8 +53,8 @@ final Connection connection = (Connection)application.getAttribute("connection")
             </tr>
           <%
           }
-          Utilities.closeResultSet(rs);
-          Utilities.closeStatement(stmt);
+          SQLFunctions.closeResultSet(rs);
+          SQLFunctions.closeStatement(stmt);
           %>
 
         </table>

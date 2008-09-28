@@ -91,6 +91,15 @@
     <url-pattern>/report/FinalistSchedulerUI</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>RankingReport</servlet-name>
+    <servlet-class>fll.web.report.RankingReport</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>RankingReport</servlet-name>
+    <url-pattern>/report/RankingReport</url-pattern>
+  </servlet-mapping>
+
   
   <servlet>
     <servlet-name>CommitTeam</servlet-name>

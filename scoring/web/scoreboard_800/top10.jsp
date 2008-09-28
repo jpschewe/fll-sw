@@ -9,6 +9,8 @@
 
 <%@ page import="java.util.List"%>
 
+<%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
+
 <%
       final Connection connection = (Connection) application.getAttribute("connection");
       final String currentTournament = Queries.getCurrentTournament(connection);
@@ -125,8 +127,8 @@
 </center>
 </body>
 <%
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
 %>
 
 </HTML>

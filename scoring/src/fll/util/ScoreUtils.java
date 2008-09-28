@@ -15,6 +15,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.mtu.eggplant.util.Functions;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -191,9 +193,9 @@ public class ScoreUtils {
     final String leftStr = evalStrOrGoalRef((Element)leftEle.getFirstChild(), teamScore);
     final String rightStr = evalStrOrGoalRef((Element)rightEle.getFirstChild(), teamScore);
     if("equal-to".equals(ineqEle.getNodeName())) {
-      return Utilities.safeEquals(leftStr, rightStr);
+      return Functions.safeEquals(leftStr, rightStr);
     } else if("no-equal-to".equals(ineqEle.getNodeName())) {
-      return !Utilities.safeEquals(leftStr, rightStr);
+      return !Functions.safeEquals(leftStr, rightStr);
     } else {
       throw new RuntimeException("Unexpected inequality found in enum condition: " + ineqEle.getNodeName());
     }

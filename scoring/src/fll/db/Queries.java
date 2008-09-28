@@ -25,6 +25,9 @@ import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -87,14 +90,14 @@ public final class Queries {
           rs = prep.executeQuery();
           boolean first = true;
           while(rs.next()) {
-            if(!first) { 
+            if(!first) {
               scoreGroup.append("-");
             } else {
               first = false;
             }
             scoreGroup.append(rs.getString(1));
           }
-          Utilities.closeResultSet(rs);
+          SQLFunctions.closeResultSet(rs);
 
           final String scoreGroupStr = scoreGroup.toString();
           if(!scoreGroups.containsKey(scoreGroupStr)) {
@@ -104,8 +107,8 @@ public final class Queries {
         }
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
 
     return scoreGroups;
@@ -136,8 +139,8 @@ public final class Queries {
         tournamentTeams.put(new Integer(team.getTeamNumber()), team);
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
     return tournamentTeams;
   }
@@ -160,8 +163,8 @@ public final class Queries {
         tableList.add(labels);
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
 
     return tableList;
@@ -191,10 +194,300 @@ public final class Queries {
         list.add(division);
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
     return list;
+  }
+
+  /**
+   * Category name used for the overall rank for a team in the map returned by
+   * {@link #getTeamRankings(Connection)}.
+   */
+  public static final String OVERALL_CATEGORY_NAME = "Overall";
+
+  /**
+   * Category name used for the performance rank for a team in the map returned
+   * by {@link #getTeamRankings(Connection)}.
+   */
+  public static final String PERFORMANCE_CATEGORY_NAME = "Performance";
+
+  /**
+   * Get the ranking of all teams in all categories.
+   * 
+   * @return Map with key of division and value is another Map. This Map has a
+   *         key of team number and a value of another Map. The key of this Map
+   *         is the category name {@link #OVERALL_CATEGORY_NAME} is a special
+   *         category and the value is the rank.
+   */
+  public static Map<String, Map<Integer, Map<String, Integer>>> getTeamRankings(final Connection connection, final Document challengeDocument)
+      throws SQLException {
+    final Map<String, Map<Integer, Map<String, Integer>>> rankingMap = new HashMap<String, Map<Integer, Map<String, Integer>>>();
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      final String tournament = getCurrentTournament(connection);
+      final List<String> divisions = getDivisions(connection);
+
+      // find the performance ranking
+      determinePerformanceRanking(connection, tournament, divisions, rankingMap);
+
+      // find the subjective category rankings
+      determineSubjectiveRanking(connection, tournament, divisions, challengeDocument, rankingMap);
+
+      // find the overall ranking
+      determineOverallRanking(connection, tournament, divisions, rankingMap);
+
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
+    }
+
+    return rankingMap;
+  }
+
+  /**
+   * Determine the subjective category ranking for all teams at a tournament.
+   * 
+   * @param connection
+   * @param tournament
+   * @param divisions
+   * @param rankingMap
+   * @throws SQLException
+   */
+  private static void determineSubjectiveRanking(final Connection connection,
+                                                 final String tournament,
+                                                 final List<String> divisions,
+                                                 final Document challengeDocument,
+                                                 final Map<String, Map<Integer, Map<String, Integer>>> rankingMap) throws SQLException {
+
+    // cache the subjective categories title->dbname
+    final Map<String, String> subjectiveCategories = new HashMap<String, String>();
+    final NodeList subjectiveCategoryElements = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
+    for(int i = 0; i < subjectiveCategoryElements.getLength(); i++) {
+      final Element subjectiveElement = (Element)subjectiveCategoryElements.item(i);
+      final String title = subjectiveElement.getAttribute("title");
+      final String name = subjectiveElement.getAttribute("name");
+      subjectiveCategories.put(title, name);
+    }
+
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      for(final String division : divisions) {
+        final Map<Integer, Map<String, Integer>> teamMap;
+        if(rankingMap.containsKey(division)) {
+          teamMap = rankingMap.get(division);
+        } else {
+          teamMap = new HashMap<Integer, Map<String, Integer>>();
+          rankingMap.put(division, teamMap);
+        }
+
+        // foreach subjective category
+        for(String categoryTitle : subjectiveCategories.keySet()) {
+          final String categoryName = subjectiveCategories.get(categoryTitle);
+
+          final Map<String, Collection<Integer>> scoreGroups = Queries.computeScoreGroups(connection, tournament, division, categoryName);
+
+          // select from FinalScores
+          for(String scoreGroup : scoreGroups.keySet()) {
+            final String teamSelect = StringUtils.join(scoreGroups.get(scoreGroup).iterator(), ", ");
+            prep = connection.prepareStatement("SELECT Teams.TeamNumber,FinalScores." + categoryName
+                + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
+                + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " DESC");
+            prep.setString(1, tournament);
+            rs = prep.executeQuery();
+            int tieRank = 1;
+            int rank = 1;
+            double prevScore = Double.NaN;
+            while(rs.next()) {
+              final int team = rs.getInt(1);
+              double score = rs.getDouble(2);
+              if(rs.wasNull()) {
+                score = Double.NaN;
+              }
+
+              final Map<String, Integer> teamRanks;
+              if(teamMap.containsKey(team)) {
+                teamRanks = teamMap.get(team);
+              } else {
+                teamRanks = new HashMap<String, Integer>();
+                teamMap.put(team, teamRanks);
+              }
+              // 3 decimal places should be considered equal
+              if(Math.abs(score - prevScore) < 0.001) {
+                teamRanks.put(categoryTitle, tieRank);
+              } else {
+                tieRank = rank;
+                teamRanks.put(categoryTitle, rank);
+              }
+
+              // setup for next round
+              prevScore = score;
+
+              // increment rank counter
+              ++rank;
+            } // end score group rank
+            SQLFunctions.closeResultSet(rs);
+          } // end foreach score group
+        } // end foreach category
+      } // end foreach division
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+
+  /**
+   * Determine the overall ranking for all teams at a tournament.
+   * 
+   * @param connection
+   * @param tournament
+   * @param divisions
+   * @param rankingMap
+   * @throws SQLException
+   */
+  private static void determineOverallRanking(final Connection connection,
+                                              final String tournament,
+                                              final List<String> divisions,
+                                              final Map<String, Map<Integer, Map<String, Integer>>> rankingMap) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      final StringBuilder query = new StringBuilder();
+      query.append("SELECT Teams.TeamNumber, FInalScores.OverallScore");
+      query.append(" FROM Teams,FinalScores,current_tournament_teams");
+      query.append(" WHERE FinalScores.TeamNumber = Teams.TeamNumber");
+      query.append(" AND FinalScores.Tournament = ?");
+      query.append(" AND current_tournament_teams.event_division = ?");
+      query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
+      query.append(" ORDER BY FinalScores.OverallScore DESC, Teams.TeamNumber");
+      prep = connection.prepareStatement(query.toString());
+      prep.setString(1, tournament);
+      for(final String division : divisions) {
+        final Map<Integer, Map<String, Integer>> teamMap;
+        if(rankingMap.containsKey(division)) {
+          teamMap = rankingMap.get(division);
+        } else {
+          teamMap = new HashMap<Integer, Map<String, Integer>>();
+          rankingMap.put(division, teamMap);
+        }
+
+        prep.setString(2, division);
+        rs = prep.executeQuery();
+        int rank = 1;
+        int tieRank = 1; // handle ties
+        double prevScore = Double.NaN;
+        while(rs.next()) {
+          final int team = rs.getInt(1);
+          double score = rs.getDouble(2);
+          if(rs.wasNull()) {
+            score = Double.NaN;
+          }
+
+          final Map<String, Integer> teamRanks;
+          if(teamMap.containsKey(team)) {
+            teamRanks = teamMap.get(team);
+          } else {
+            teamRanks = new HashMap<String, Integer>();
+            teamMap.put(team, teamRanks);
+          }
+          // 3 decimal places should be considered equal
+          if(Math.abs(score - prevScore) < 0.001) {
+            teamRanks.put(OVERALL_CATEGORY_NAME, tieRank);
+          } else {
+            tieRank = rank;
+            teamRanks.put(OVERALL_CATEGORY_NAME, rank);
+          }
+
+          // setup for next round
+          prevScore = score;
+
+          // increment rank counter
+          ++rank;
+        }
+        SQLFunctions.closeResultSet(rs);
+      }
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+
+  /**
+   * Determine the performance ranking for all teams at a tournament.
+   * 
+   * @param connection
+   * @param tournament
+   * @param divisions
+   * @param rankingMap
+   * @throws SQLException
+   */
+  private static void determinePerformanceRanking(final Connection connection,
+                                                  final String tournament,
+                                                  final List<String> divisions,
+                                                  final Map<String, Map<Integer, Map<String, Integer>>> rankingMap) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      final StringBuilder query = new StringBuilder();
+      query.append("SELECT Teams.TeamNumber, FInalScores.performance");
+      query.append(" FROM Teams,FinalScores,current_tournament_teams");
+      query.append(" WHERE FinalScores.TeamNumber = Teams.TeamNumber");
+      query.append(" AND FinalScores.Tournament = ?");
+      query.append(" AND current_tournament_teams.event_division = ?");
+      query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
+      query.append(" ORDER BY FinalScores.performance DESC, Teams.TeamNumber");
+      prep = connection.prepareStatement(query.toString());
+      prep.setString(1, tournament);
+      for(final String division : divisions) {
+        final Map<Integer, Map<String, Integer>> teamMap;
+        if(rankingMap.containsKey(division)) {
+          teamMap = rankingMap.get(division);
+        } else {
+          teamMap = new HashMap<Integer, Map<String, Integer>>();
+          rankingMap.put(division, teamMap);
+        }
+
+        prep.setString(2, division);
+        rs = prep.executeQuery();
+        int rank = 1;
+        int tieRank = 1; // handle ties
+        double prevScore = Double.NaN;
+        while(rs.next()) {
+          final int team = rs.getInt(1);
+          double score = rs.getDouble(2);
+          if(rs.wasNull()) {
+            score = Double.NaN;
+          }
+
+          final Map<String, Integer> teamRanks;
+          if(teamMap.containsKey(team)) {
+            teamRanks = teamMap.get(team);
+          } else {
+            teamRanks = new HashMap<String, Integer>();
+            teamMap.put(team, teamRanks);
+          }
+          // 3 decimal places should be considered equal
+          if(Math.abs(score - prevScore) < 0.001) {
+            teamRanks.put(PERFORMANCE_CATEGORY_NAME, tieRank);
+          } else {
+            tieRank = rank;
+            teamRanks.put(PERFORMANCE_CATEGORY_NAME, rank);
+          }
+
+          // setup for next round
+          prevScore = score;
+
+          // increment rank counter
+          ++rank;
+        }
+        SQLFunctions.closeResultSet(rs);
+      }
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
+    }
   }
 
   /**
@@ -218,8 +511,8 @@ public final class Queries {
       }
       return runNumber + 1;
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -244,8 +537,8 @@ public final class Queries {
       }
       return runNumber;
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -268,8 +561,8 @@ public final class Queries {
       }
       return nup;
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -340,7 +633,7 @@ public final class Queries {
               stmt = connection.createStatement();
               stmt.executeUpdate(sql.toString());
             } finally {
-              Utilities.closeStatement(stmt);
+              SQLFunctions.closeStatement(stmt);
             }
             final int semiFinalRound = getNumPlayoffRounds(connection, division) - 1;
             if(playoffRun == semiFinalRound && isThirdPlaceEnabled(connection, division)) {
@@ -360,7 +653,7 @@ public final class Queries {
                 stmt.executeUpdate(sql.toString());
                 sql.append("; ");
               } finally {
-                Utilities.closeStatement(stmt);
+                SQLFunctions.closeStatement(stmt);
               }
             }
           }
@@ -420,7 +713,7 @@ public final class Queries {
       stmt = connection.createStatement();
       stmt.executeUpdate(sql);
     } finally {
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeStatement(stmt);
     }
 
     return sql;
@@ -443,8 +736,8 @@ public final class Queries {
         return false;
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -524,8 +817,8 @@ public final class Queries {
                       + "Delete those scores and then you may update this score.");
                 }
               } finally {
-                Utilities.closeResultSet(rs);
-                Utilities.closeStatement(stmt);
+                SQLFunctions.closeResultSet(rs);
+                SQLFunctions.closeStatement(stmt);
               }
             }
             if(getPlayoffTableLineNumber(connection, currentTournament, Integer.toString(siblingTeam), playoffRun + 1) > 0) {
@@ -539,8 +832,8 @@ public final class Queries {
                       + "Delete those scores and then you may update this score.");
                 }
               } finally {
-                Utilities.closeResultSet(rs);
-                Utilities.closeStatement(stmt);
+                SQLFunctions.closeResultSet(rs);
+                SQLFunctions.closeStatement(stmt);
               }
             }
           }
@@ -559,7 +852,7 @@ public final class Queries {
               stmt.executeUpdate(sql.toString());
               sql.append("; ");
             } finally {
-              Utilities.closeStatement(stmt);
+              SQLFunctions.closeStatement(stmt);
             }
             final int semiFinalRound = getNumPlayoffRounds(connection, division) - 1;
             if(playoffRun == semiFinalRound && isThirdPlaceEnabled(connection, division)) {
@@ -573,7 +866,7 @@ public final class Queries {
                 stmt.executeUpdate(sql.toString());
                 sql.append("; ");
               } finally {
-                Utilities.closeStatement(stmt);
+                SQLFunctions.closeStatement(stmt);
               }
             }
           } else {
@@ -587,7 +880,7 @@ public final class Queries {
               stmt.executeUpdate(sql.toString());
               sql.append("; ");
             } finally {
-              Utilities.closeStatement(stmt);
+              SQLFunctions.closeStatement(stmt);
             }
             final int semiFinalRound = getNumPlayoffRounds(connection, division) - 1;
             if(playoffRun == semiFinalRound && isThirdPlaceEnabled(connection, division)) {
@@ -607,7 +900,7 @@ public final class Queries {
                 stmt.executeUpdate(sql.toString());
                 sql.append("; ");
               } finally {
-                Utilities.closeStatement(stmt);
+                SQLFunctions.closeStatement(stmt);
               }
             }
           }
@@ -657,7 +950,7 @@ public final class Queries {
       stmt = connection.createStatement();
       stmt.executeUpdate(sql.toString());
     } finally {
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeStatement(stmt);
     }
 
     return sql.toString();
@@ -714,8 +1007,8 @@ public final class Queries {
                     + "Delete those scores and then you may delete this score.");
               }
             } finally {
-              Utilities.closeResultSet(rs);
-              Utilities.closeStatement(stmt);
+              SQLFunctions.closeResultSet(rs);
+              SQLFunctions.closeStatement(stmt);
             }
           }
           if(getPlayoffTableLineNumber(connection, currentTournament, Integer.toString(siblingTeam), playoffRun + 1) > 0) {
@@ -729,8 +1022,8 @@ public final class Queries {
                     + "Delete those scores and then you may delete this score.");
               }
             } finally {
-              Utilities.closeResultSet(rs);
-              Utilities.closeStatement(stmt);
+              SQLFunctions.closeResultSet(rs);
+              SQLFunctions.closeStatement(stmt);
             }
           }
           // No dependent score was found, so we can update the playoff table to
@@ -746,7 +1039,7 @@ public final class Queries {
             stmt.executeUpdate(sql.toString());
             sql.append("; ");
           } finally {
-            Utilities.closeStatement(stmt);
+            SQLFunctions.closeStatement(stmt);
           }
           final int semiFinalRound = getNumPlayoffRounds(connection, division) - 1;
           if(playoffRun == semiFinalRound && isThirdPlaceEnabled(connection, division)) {
@@ -760,7 +1053,7 @@ public final class Queries {
               stmt.executeUpdate(sql.toString());
               sql.append("; ");
             } finally {
-              Utilities.closeStatement(stmt);
+              SQLFunctions.closeStatement(stmt);
             }
           }
         } // End if(siblingTeam != Team.NULL_TEAM_NUMBER.
@@ -776,7 +1069,7 @@ public final class Queries {
       stmt = connection.createStatement();
       stmt.executeUpdate(update);
     } finally {
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeStatement(stmt);
     }
 
     return sql.toString() + update;
@@ -806,8 +1099,8 @@ public final class Queries {
         throw new RuntimeException("Couldn't find team number " + teamNumber + " in the list of tournament teams!");
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -875,8 +1168,8 @@ public final class Queries {
       }
       return list;
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -951,8 +1244,8 @@ public final class Queries {
       }
       return list;
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -1010,8 +1303,8 @@ public final class Queries {
       }
       return list;
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -1038,8 +1331,8 @@ public final class Queries {
         return 3;
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -1058,7 +1351,7 @@ public final class Queries {
       stmt = connection.createStatement();
       stmt.executeUpdate("UPDATE TournamentParameters SET Value = " + newSeedingRounds + " WHERE Param = 'SeedingRounds'");
     } finally {
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -1078,7 +1371,7 @@ public final class Queries {
       stmt = connection.createStatement();
       stmt.executeUpdate("UPDATE TournamentParameters SET Value = " + newNup + " WHERE Param = 'ScoresheetLayoutNUp'");
     } finally {
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -1103,8 +1396,8 @@ public final class Queries {
         return "DUMMY";
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -1133,8 +1426,8 @@ public final class Queries {
         return false;
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -1155,8 +1448,8 @@ public final class Queries {
         retval.add(tournamentName);
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
     return retval;
   }
@@ -1178,8 +1471,8 @@ public final class Queries {
         retval.add(region);
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
     return retval;
   }
@@ -1224,7 +1517,7 @@ public final class Queries {
       stmt.executeUpdate("DELETE FROM FinalScores WHERE TeamNumber = " + teamNumber);
 
     } finally {
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -1296,9 +1589,9 @@ public final class Queries {
         selectPrep.close();
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(updatePrep);
-      Utilities.closePreparedStatement(selectPrep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(updatePrep);
+      SQLFunctions.closePreparedStatement(selectPrep);
     }
   }
 
@@ -1350,9 +1643,9 @@ public final class Queries {
       updatePrep.close();
       selectPrep.close();
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(updatePrep);
-      Utilities.closePreparedStatement(selectPrep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(updatePrep);
+      SQLFunctions.closePreparedStatement(selectPrep);
     }
   }
 
@@ -1382,8 +1675,8 @@ public final class Queries {
         throw new RuntimeException("Could not find challenge document in database");
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -1416,7 +1709,7 @@ public final class Queries {
 
         return true;
       } finally {
-        Utilities.closePreparedStatement(prep);
+        SQLFunctions.closePreparedStatement(prep);
       }
     }
   }
@@ -1456,8 +1749,8 @@ public final class Queries {
           + " nextTournaments: " + nextTournaments + " - using DUMMY tournament as default");
       return "DUMMY";
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -1494,7 +1787,7 @@ public final class Queries {
         prep.setInt(1, teamNumber);
         prep.setString(2, currentTournament);
         prep.executeUpdate();
-        Utilities.closePreparedStatement(prep);
+        SQLFunctions.closePreparedStatement(prep);
       }
 
       // delete from Performance
@@ -1502,21 +1795,21 @@ public final class Queries {
       prep.setInt(1, teamNumber);
       prep.setString(2, currentTournament);
       prep.executeUpdate();
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closePreparedStatement(prep);
 
       // delete from TournamentTeams
       prep = connection.prepareStatement("DELETE FROM TournamentTeams WHERE TeamNumber = ? AND Tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setString(2, currentTournament);
       prep.executeUpdate();
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closePreparedStatement(prep);
 
       // delete from FinalScores
       prep = connection.prepareStatement("DELETE FROM FinalScores WHERE TeamNumber = ? AND Tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setString(2, currentTournament);
       prep.executeUpdate();
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closePreparedStatement(prep);
 
       // set new tournament
       prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division) VALUES (?, ?, ?)");
@@ -1524,10 +1817,10 @@ public final class Queries {
       prep.setString(2, newTournament);
       prep.setString(3, getDivisionOfTeam(connection, teamNumber));
       prep.executeUpdate();
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closePreparedStatement(prep);
 
     } finally {
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -1558,7 +1851,7 @@ public final class Queries {
         prep.setInt(1, teamNumber);
         prep.setString(2, currentTournament);
         prep.executeUpdate();
-        Utilities.closePreparedStatement(prep);
+        SQLFunctions.closePreparedStatement(prep);
       }
 
       // delete from Performance
@@ -1566,24 +1859,24 @@ public final class Queries {
       prep.setInt(1, teamNumber);
       prep.setString(2, currentTournament);
       prep.executeUpdate();
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closePreparedStatement(prep);
 
       // delete from TournamentTeams
       prep = connection.prepareStatement("DELETE FROM TournamentTeams WHERE TeamNumber = ? AND Tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setString(2, currentTournament);
       prep.executeUpdate();
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closePreparedStatement(prep);
 
       // delete from FinalScores
       prep = connection.prepareStatement("DELETE FROM FinalScores WHERE TeamNumber = ? AND Tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setString(2, currentTournament);
       prep.executeUpdate();
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closePreparedStatement(prep);
 
     } finally {
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -1616,8 +1909,8 @@ public final class Queries {
       }
 
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
 
   }
@@ -1644,8 +1937,8 @@ public final class Queries {
         return null;
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -1674,7 +1967,7 @@ public final class Queries {
         final String dup = rs.getString(1);
         return dup;
       } else {
-        Utilities.closeResultSet(rs);
+        SQLFunctions.closeResultSet(rs);
         rs = null;
       }
 
@@ -1685,20 +1978,20 @@ public final class Queries {
       prep.setString(4, division);
       prep.setInt(5, number);
       prep.executeUpdate();
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closePreparedStatement(prep);
 
       prep = connection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) VALUES(?, ?, ?)");
       prep.setString(1, getCurrentTournament(connection));
       prep.setInt(2, number);
       prep.setString(3, division);
       prep.executeUpdate();
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closePreparedStatement(prep);
 
       return null;
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -1722,7 +2015,7 @@ public final class Queries {
       prep.setInt(5, number);
       prep.executeUpdate();
     } finally {
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -1747,9 +2040,9 @@ public final class Queries {
         insertPrep.executeUpdate();
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
-      Utilities.closePreparedStatement(insertPrep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(insertPrep);
     }
   }
 
@@ -1780,13 +2073,13 @@ public final class Queries {
         if(!rs.next()) {
           return false;
         }
-        Utilities.closeResultSet(rs);
+        SQLFunctions.closeResultSet(rs);
         rs = null;
       }
       return true;
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -1822,13 +2115,14 @@ public final class Queries {
         return rs.getInt(1) > 0;
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
   /**
-   * Get the color for a division index. Below are the colors used. <table>
+   * Get the color for a division index. Below are the colors used.
+   * <table>
    * <td>
    * <td bgcolor="#800000">0 - #800000</td>
    * </tr>
@@ -1842,9 +2136,7 @@ public final class Queries {
    * <td bgcolor="#FF00FF">3 - #FF00FF</td>
    * </tr>
    * <td>
-   * <td>continue at the top</td>
-   * </tr>
-   * </ol>
+   * <td>continue at the top</td> </tr> </ol>
    * 
    * @param index
    *          the division index
@@ -1887,8 +2179,8 @@ public final class Queries {
         return false;
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -1926,8 +2218,8 @@ public final class Queries {
         return -1; // indicates team not present in this run
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -1970,8 +2262,8 @@ public final class Queries {
         }
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
     return Team.NULL_TEAM_NUMBER;
   }
@@ -2003,8 +2295,8 @@ public final class Queries {
         throw new RuntimeException("Unable to find team number " + teamNumber + "in the database.");
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -2079,8 +2371,8 @@ public final class Queries {
         return 0;
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -2097,8 +2389,8 @@ public final class Queries {
         return 0;
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -2124,8 +2416,8 @@ public final class Queries {
         return null;
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 }

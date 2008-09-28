@@ -10,9 +10,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.w3c.dom.Element;
 
-import fll.Utilities;
 import fll.db.Queries;
 
 /**
@@ -143,7 +144,7 @@ public class DatabaseTeamScore extends TeamScore {
   public void cleanup() {
     // don't close the result set in case it was passed into the constructor,
     // closing the prepared statement will take care of the one we create
-    Utilities.closePreparedStatement(_prep);
+    SQLFunctions.closePreparedStatement(_prep);
     _prep = null;
   }
 

@@ -22,14 +22,18 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.List;
 
+import net.mtu.eggplant.io.LogWriter;
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 import org.hsqldb.Server;
+import org.slf4j.LoggerFactory;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 /**
- * Some handy utilties.
+ * Some handy utilities.
  * 
  * @version $Revision$
  */
@@ -113,7 +117,7 @@ public final class Utilities {
       insertPrepSQL.append(")");
       valuesSQL.append(")");
       stmt.executeUpdate(createTable.toString());
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeStatement(stmt);
 
       // load each line into a row in the table
       prep = connection.prepareStatement(insertPrepSQL.append(valuesSQL).toString());
@@ -125,8 +129,8 @@ public final class Utilities {
       }
 
     } finally {
-      Utilities.closeStatement(stmt);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -197,7 +201,7 @@ public final class Utilities {
       }
       return false;
     } finally {
-      Utilities.closeResultSet(rs);
+      SQLFunctions.closeResultSet(rs);
     }
   }
 
@@ -215,7 +219,11 @@ public final class Utilities {
    * Get the name of the database driver class.
    */
   public static String getDBDriverName() {
-    return "org.hsqldb.jdbcDriver";
+    if(Boolean.getBoolean("inside.test")) {
+      return "net.sf.log4jdbc.DriverSpy";
+    } else {
+      return "org.hsqldb.jdbcDriver";
+    }
   }
 
   /**
@@ -252,7 +260,12 @@ public final class Utilities {
     loadDBDriver();
 
     Connection connection = null;
-    final String myURL = "jdbc:hsqldb:file:" + database + ";shutdown=true";
+    final String myURL;
+    if(Boolean.getBoolean("inside.test")) {
+      myURL = "jdbc:log4jdbc:hsqldb:file:" + database + ";shutdown=true";
+    } else {
+      myURL = "jdbc:hsqldb:file:" + database + ";shutdown=true";
+    }
     if(LOG.isDebugEnabled()) {
       LOG.debug("myURL: " + myURL);
     }
@@ -275,9 +288,8 @@ public final class Utilities {
         server.setDatabasePath(0, database);
         server.setDatabaseName(0, "fll");
         server.setNoSystemExit(true);
-        final PrintWriter output = new PrintWriter(System.out);
-        server.setErrWriter(output);
-        server.setLogWriter(output);
+        server.setErrWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"), LogWriter.LogLevel.ERROR)));
+        server.setLogWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"), LogWriter.LogLevel.INFO)));
         server.setTrace(true);
         server.start();
         // final Thread dbThread = new Thread(new Runnable() {
@@ -305,79 +317,6 @@ public final class Utilities {
 
   public static boolean isTestServerStarted() {
     return _testServerStarted;
-  }
-
-  /**
-   * Close stmt and ignore SQLExceptions. This is useful in a finally so that
-   * all of the finally block gets executed. Handles null.
-   */
-  public static void closeStatement(final Statement stmt) {
-    try {
-      if(null != stmt) {
-        stmt.close();
-      }
-    } catch(final SQLException sqle) {
-      // ignore
-      LOG.debug(sqle);
-    }
-  }
-
-  /**
-   * Close prep and ignore SQLExceptions. This is useful in a finally so that
-   * all of the finally block gets executed. Handles null.
-   */
-  public static void closePreparedStatement(final PreparedStatement prep) {
-    try {
-      if(null != prep) {
-        prep.close();
-      }
-    } catch(final SQLException sqle) {
-      // ignore
-      LOG.debug(sqle);
-    }
-  }
-
-  /**
-   * Close rs and ignore SQLExceptions. This is useful in a finally so that all
-   * of the finally block gets executed. Handles null.
-   */
-  public static void closeResultSet(final ResultSet rs) {
-    try {
-      if(null != rs) {
-        rs.close();
-      }
-    } catch(final SQLException sqle) {
-      // ignore
-      LOG.debug(sqle);
-    }
-  }
-
-  /**
-   * Close connection and ignore SQLExceptions. This is useful in a finally so
-   * that all of the finally block gets executed. Handles null.
-   */
-  public static void closeConnection(final Connection connection) {
-    try {
-      if(null != connection) {
-        connection.close();
-      }
-    } catch(final SQLException sqle) {
-      // ignore
-      LOG.debug(sqle);
-    }
-  }
-
-  /**
-   * Equals call that handles null without a NullPointerException.
-   */
-  public static boolean safeEquals(final Object o1, final Object o2) {
-    if(o1 == o2) {
-      return true;
-    } else if(null == o1 && null != o2) {
-      return false;
-    } else {
-      return o1.equals(o2);
-    }
   }
 
   /**

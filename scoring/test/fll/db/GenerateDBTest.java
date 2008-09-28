@@ -12,8 +12,8 @@ import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
 
+import org.junit.Test;
 import org.w3c.dom.Document;
 
 import fll.TestUtils;
@@ -24,12 +24,13 @@ import fll.xml.ChallengeParser;
  *
  * @version $Revision$
  */
-public class GenerateDBTest extends TestCase {
+public class GenerateDBTest {
   
   /**
    * Test creating a new database from scratch and creating over an existing
    * database.
    */
+  @Test
   public void testCreateDB()
     throws SQLException, UnsupportedEncodingException {
     final InputStream stream = GenerateDBTest.class.getResourceAsStream("data/challenge-test.xml");

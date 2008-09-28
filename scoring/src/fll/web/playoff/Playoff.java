@@ -22,6 +22,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspWriter;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -290,7 +292,7 @@ public final class Playoff {
       stmt.executeUpdate("INSERT INTO Performance(TeamNumber, Tournament, RunNumber, Bye, Verified)" + " VALUES( " + team.getTeamNumber() + ", '" + tournament
           + "', " + runNumber + ", 1, 1)");
     } finally {
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -326,8 +328,8 @@ public final class Playoff {
           + " AND RunNumber = " + runNumber);
       return rs.next();
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -357,8 +359,8 @@ public final class Playoff {
               + " runNumber: " + runNumber);
         }
       } finally {
-        Utilities.closeResultSet(rs);
-        Utilities.closeStatement(stmt);
+        SQLFunctions.closeResultSet(rs);
+        SQLFunctions.closeStatement(stmt);
       }
     }
   }
@@ -386,8 +388,8 @@ public final class Playoff {
             + runNumber);
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -414,8 +416,8 @@ public final class Playoff {
             + runNumber);
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -437,8 +439,8 @@ public final class Playoff {
             + runNumber);
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -885,7 +887,7 @@ public final class Playoff {
         lineNbr++;
       }
     } finally {
-      Utilities.closePreparedStatement(stmt);
+      SQLFunctions.closePreparedStatement(stmt);
     }
 
     // Create the remaining entries for the playoff data table using default
@@ -910,7 +912,7 @@ public final class Playoff {
         currentRoundSize = currentRoundSize / 2;
       }
     } finally {
-      Utilities.closePreparedStatement(stmt);
+      SQLFunctions.closePreparedStatement(stmt);
     }
 
     // Now get all entries, ordered by PlayoffRound and LineNumber, and do table
@@ -982,7 +984,7 @@ public final class Playoff {
               stmt.setInt(2, line2 / 2 + 2);
             }
           } finally {
-            Utilities.closePreparedStatement(stmt);
+            SQLFunctions.closePreparedStatement(stmt);
           }
         }/*
            * Don't assign tables at initialization anymore - now we'll do this
@@ -996,12 +998,12 @@ public final class Playoff {
            * final String[] tblNames = tableIt.next(); stmt.setString(1,
            * tblNames[0]); stmt.setInt(2, line1); stmt.execute();
            * stmt.setString(1, tblNames[1]); stmt.setInt(2, line2);
-           * stmt.execute(); } finally { Utilities.closePreparedStatement(stmt); } }
+           * stmt.execute(); } finally { SQLFunctions.closePreparedStatement(stmt); } }
            */
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(selStmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(selStmt);
     }
   }
 

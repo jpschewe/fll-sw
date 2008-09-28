@@ -15,6 +15,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
@@ -88,8 +90,8 @@ public final class ImportDocument {
       LOG.fatal("Error talking to database", sqle);
       System.exit(1);
     } finally {
-      Utilities.closePreparedStatement(prep);
-      Utilities.closeConnection(connection);
+      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.closeConnection(connection);
     }
     System.exit(0);
   }

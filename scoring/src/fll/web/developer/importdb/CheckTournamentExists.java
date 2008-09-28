@@ -16,9 +16,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 
-import fll.Utilities;
 import fll.db.Queries;
 import fll.web.SessionAttributes;
 
@@ -63,7 +64,7 @@ public class CheckTournamentExists extends HttpServlet {
       message.append("<p class='error'>Error talking to the database: " + sqle.getMessage() + "</p>");
       LOG.error(sqle);
     } finally {
-      Utilities.closeConnection(connection);
+      SQLFunctions.closeConnection(connection);
     }
     
     session.setAttribute("message", message.toString());

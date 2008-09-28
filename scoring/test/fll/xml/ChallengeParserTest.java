@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
 
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -24,7 +23,7 @@ import org.w3c.dom.NodeList;
  * @version $Revision$
  * 
  */
-public class ChallengeParserTest extends TestCase {
+public class ChallengeParserTest {
 
   /**
    * Load illegal-restriction.xml and ensure an exception is thrown on the
@@ -266,7 +265,7 @@ public class ChallengeParserTest extends TestCase {
           || "restriction".equals(nodeName) || "tiebreaker".equals(nodeName));
     }
   }
-  
+
   /**
    * Check that setting an initial value below the minimum for a goal fails.
    */
@@ -300,7 +299,8 @@ public class ChallengeParserTest extends TestCase {
   }
 
   /**
-   * Check that setting an initial value for an enum goal that doesn't match an enum value fails.
+   * Check that setting an initial value for an enum goal that doesn't match an
+   * enum value fails.
    */
   @Test
   public void testInitialValueEnumNoMatch() {
@@ -316,7 +316,7 @@ public class ChallengeParserTest extends TestCase {
   }
 
   /**
-   * Check that a variable is not allowed to reference a computed goal. 
+   * Check that a variable is not allowed to reference a computed goal.
    */
   @Test
   public void testVariableRefComputedGoal() {
@@ -330,7 +330,7 @@ public class ChallengeParserTest extends TestCase {
     }
     Assert.assertTrue("Expected a runtime exception due to a variable referencing a computed goal", exception);
   }
-  
+
   /**
    * Check that a variableRef is not allowed in a tiebreaker.
    */
@@ -346,7 +346,7 @@ public class ChallengeParserTest extends TestCase {
     }
     Assert.assertTrue("Expected a runtime exception due to a variableRef in a tiebreaker", exception);
   }
- 
+
   /**
    * Check that a variableRef is not allowed in a restriction.
    */
@@ -363,7 +363,6 @@ public class ChallengeParserTest extends TestCase {
     Assert.assertTrue("Expected a runtime exception due to a variableRef in a restriction", exception);
   }
 
-
   /**
    * Check that a two variables in a computed goal may not have the same name.
    */
@@ -379,5 +378,5 @@ public class ChallengeParserTest extends TestCase {
     }
     Assert.assertTrue("Expected a runtime exception due to two variables having the same name in a computed goal.", exception);
   }
-  
+
 }

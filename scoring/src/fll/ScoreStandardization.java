@@ -13,6 +13,8 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -89,14 +91,14 @@ public final class ScoreStandardization {
         throw new RuntimeException("Can't find StandardizedMean in TournamentParameters");
       }
       final double mean = rs.getDouble(1);
-      Utilities.closeResultSet(rs);
+      SQLFunctions.closeResultSet(rs);
 
       rs = stmt.executeQuery("SELECT Value From TournamentParameters WHERE Param = 'StandardizedSigma'");
       if(!rs.next()) {
         throw new RuntimeException("Can't find StandardizedSigma in TournamentParameters");
       }
       final double sigma = rs.getDouble(1);
-      Utilities.closeResultSet(rs);
+      SQLFunctions.closeResultSet(rs);
 
       prep = connection.prepareStatement("INSERT INTO FinalScores " + " ( TeamNumber, Tournament, performance ) " + " SELECT TeamNumber"
           + ", Tournament" + ", ((Score - ?) * (" + sigma + " / ?)" + " ) + " + mean + " FROM performance_seeding_max" + " WHERE Tournament = '"
@@ -134,12 +136,12 @@ public final class ScoreStandardization {
       } else {
         throw new RuntimeException("No performance scores for standardization");
       }
-      Utilities.closeResultSet(rs);
+      SQLFunctions.closeResultSet(rs);
 
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -158,14 +160,14 @@ public final class ScoreStandardization {
         throw new RuntimeException("Can't find StandardizedMean in TournamentParameters");
       }
       final double mean = rs.getDouble(1);
-      Utilities.closeResultSet(rs);
+      SQLFunctions.closeResultSet(rs);
 
       rs = stmt.executeQuery("SELECT Value From TournamentParameters WHERE Param = 'StandardizedSigma'");
       if(!rs.next()) {
         throw new RuntimeException("Can't find StandardizedSigma in TournamentParameters");
       }
       final double sigma = rs.getDouble(1);
-      Utilities.closeResultSet(rs);
+      SQLFunctions.closeResultSet(rs);
 
       final Element rootElement = document.getDocumentElement();
 
@@ -204,14 +206,14 @@ public final class ScoreStandardization {
             throw new RuntimeException("Not enough scores for Judge: " + judge + " in category: " + category);
           }
         }
-        Utilities.closeResultSet(rs);
+        SQLFunctions.closeResultSet(rs);
 
       }
 
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
-      Utilities.closePreparedStatement(updatePrep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(updatePrep);
     }
 
   }
@@ -259,7 +261,7 @@ public final class ScoreStandardization {
 
       stmt.executeUpdate(sql.toString());
     } finally {
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -291,9 +293,9 @@ public final class ScoreStandardization {
     // return null;
     // }
     // } finally {
-    // Utilities.closeResultSet(rs);
-    // Utilities.closeResultSet(rs2);
-    // Utilities.closeStatement(stmt);
+    // SQLFunctions.closeResultSet(rs);
+    // SQLFunctions.closeResultSet(rs2);
+    // SQLFuctions.closeStatement(stmt);
     // }
     // TODO need some better error reporting here. See the Access VB code.
     // I'm not sure the best way to select from a ResultSet...

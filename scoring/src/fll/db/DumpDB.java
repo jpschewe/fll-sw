@@ -14,12 +14,13 @@ import java.sql.Statement;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import fll.Utilities;
 import fll.xml.XMLWriter;
 
 /**
@@ -65,7 +66,7 @@ public final class DumpDB {
       rs = stmt.executeQuery("SELECT * FROM Teams");
       csvwriter.writeAll(rs, true);
       csvwriter.flush();
-      Utilities.closeResultSet(rs);
+      SQLFunctions.closeResultSet(rs);
       output.closeEntry();
 
       // judges
@@ -74,7 +75,7 @@ public final class DumpDB {
       rs = stmt.executeQuery("SELECT * FROM Judges");
       csvwriter.writeAll(rs, true);
       csvwriter.flush();
-      Utilities.closeResultSet(rs);
+      SQLFunctions.closeResultSet(rs);
       output.closeEntry();
 
       // TournamentTeams
@@ -83,7 +84,7 @@ public final class DumpDB {
       rs = stmt.executeQuery("SELECT * FROM TournamentTeams");
       csvwriter.writeAll(rs, true);
       csvwriter.flush();
-      Utilities.closeResultSet(rs);
+      SQLFunctions.closeResultSet(rs);
       output.closeEntry();
 
       // Tournaments
@@ -92,7 +93,7 @@ public final class DumpDB {
       rs = stmt.executeQuery("SELECT * FROM Tournaments");
       csvwriter.writeAll(rs, true);
       csvwriter.flush();
-      Utilities.closeResultSet(rs);
+      SQLFunctions.closeResultSet(rs);
       output.closeEntry();
       
       // performance
@@ -101,7 +102,7 @@ public final class DumpDB {
       rs = stmt.executeQuery("SELECT * FROM Performance");
       csvwriter.writeAll(rs, true);
       csvwriter.flush();
-      Utilities.closeResultSet(rs);
+      SQLFunctions.closeResultSet(rs);
       output.closeEntry();
       
       // each subjective category
@@ -115,7 +116,7 @@ public final class DumpDB {
         rs = stmt.executeQuery("SELECT * FROM " + tableName);
         csvwriter.writeAll(rs, true);
         csvwriter.flush();
-        Utilities.closeResultSet(rs);
+        SQLFunctions.closeResultSet(rs);
         output.closeEntry();
       }
       
@@ -125,7 +126,7 @@ public final class DumpDB {
       rs = stmt.executeQuery("SELECT * FROM PlayoffData");
       csvwriter.writeAll(rs, true);
       csvwriter.flush();
-      Utilities.closeResultSet(rs);
+      SQLFunctions.closeResultSet(rs);
       output.closeEntry();
       
       // tablenames
@@ -134,7 +135,7 @@ public final class DumpDB {
       rs = stmt.executeQuery("SELECT * FROM tablenames");
       csvwriter.writeAll(rs, true);
       csvwriter.flush();
-      Utilities.closeResultSet(rs);
+      SQLFunctions.closeResultSet(rs);
       output.closeEntry();
 
       // FinalScores
@@ -143,12 +144,12 @@ public final class DumpDB {
       rs = stmt.executeQuery("SELECT * FROM FinalScores");
       csvwriter.writeAll(rs, true);
       csvwriter.flush();
-      Utilities.closeResultSet(rs);
+      SQLFunctions.closeResultSet(rs);
       output.closeEntry();
       
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
   

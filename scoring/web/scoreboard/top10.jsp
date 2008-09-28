@@ -9,6 +9,8 @@
 <%@ page import="fll.Utilities" %>
 <%@ page import="fll.db.Queries" %>
 
+<%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
+
 
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
@@ -134,8 +136,8 @@ pageContext.setAttribute("division", divisions.get(divisionIndex));
   </center>
 </body>
 <%
-Utilities.closeResultSet(rs);
-Utilities.closePreparedStatement(prep);
+SQLFunctions.closeResultSet(rs);
+SQLFunctions.closePreparedStatement(prep);
 %>
 
 </HTML>

@@ -7,6 +7,8 @@
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.ResultSet" %>
 
+<%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
+
 <%
 final String lEditFlag = request.getParameter("EditFlag");
 
@@ -19,8 +21,8 @@ if(rs.next()) {
 } else {
   maxRunNumber = 1;
 }
-Utilities.closeResultSet(rs);
-Utilities.closeStatement(stmt);
+SQLFunctions.closeResultSet(rs);
+SQLFunctions.closeStatement(stmt);
 
 %>
 

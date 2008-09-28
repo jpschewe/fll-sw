@@ -16,8 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,7 +31,7 @@ import fll.xml.ChallengeParser;
  * @version $Revision$
  * 
  */
-public class ScoreTest extends TestCase {
+public class ScoreTest {
 
   private static final Logger LOG = Logger.getLogger(ScoreTest.class);
 

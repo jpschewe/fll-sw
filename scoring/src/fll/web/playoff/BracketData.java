@@ -12,11 +12,12 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 
-import fll.db.Queries;
 import fll.Team;
-import fll.Utilities;
+import fll.db.Queries;
 
 /**
  * Class to provide convenient access to the contents of the PlayoffData table.
@@ -417,8 +418,8 @@ public class BracketData {
       }
 
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
