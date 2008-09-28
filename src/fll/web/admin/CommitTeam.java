@@ -16,6 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import net.mtu.eggplant.util.Functions;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
@@ -92,7 +94,7 @@ public class CommitTeam extends HttpServlet {
           Queries.updateTeam(connection, teamNumber, request.getParameter("teamName"), request.getParameter("organization"), request
               .getParameter("region"), division);
           final String teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
-          if(!Utilities.safeEquals(teamCurrentTournament, request.getParameter("currentTournament"))) {
+          if(!Functions.safeEquals(teamCurrentTournament, request.getParameter("currentTournament"))) {
             Queries.changeTeamCurrentTournament(connection, challengeDocument, teamNumber, request.getParameter("currentTournament"));
           }
         }

@@ -30,7 +30,7 @@ public class SubjectiveFrameTestBroken extends UISpecTestCase {
 
   static {
     // ensurre UISpec4J can intercept windows
-//    FIX need to figure out how to fix this 
+//    TODO need to figure out how to fix this 
 //    UISpec4J.init();
   }
 
@@ -95,9 +95,9 @@ public class SubjectiveFrameTestBroken extends UISpecTestCase {
 //    GenerateDB.generateDB(document, database, false);
 //    final Connection connection = Utilities.createDBConnection(database);
 //
-//    // FIX create teams
+//    // TODO create teams
 //    
-//    // FIX assign judges
+//    // TODO assign judges
 //    
 //
 //    // create the zip file
@@ -110,9 +110,9 @@ public class SubjectiveFrameTestBroken extends UISpecTestCase {
 //    // start the app with the specified scores
 //    startApp(subjectiveScores);
 //    
-//    // FIX check that the right teams exist in the table
+//    // TODO check that the right teams exist in the table
 //    
-//    // FIX try and enter some data
+//    // TODO try and enter some data
 //    
 //    subjectiveScores.delete();
 //    TestUtils.cleanupDB(database);

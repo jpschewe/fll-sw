@@ -14,11 +14,12 @@ import java.text.NumberFormat;
 
 import javax.servlet.jsp.JspWriter;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import fll.Utilities;
 import fll.db.Queries;
 
 /**
@@ -127,17 +128,17 @@ public final class ScoreGroupScores {
 
           out.println("  <tr><td colspan='4'><hr</td></tr>");
         } // end loop over teams
-        Utilities.closeResultSet(teamsRS);
+        SQLFunctions.closeResultSet(teamsRS);
 
         out.println("</table>");
       }// end loop over score groups
-      Utilities.closeResultSet(groupRS);
+      SQLFunctions.closeResultSet(groupRS);
 
     } finally {
-      Utilities.closeResultSet(teamsRS);
-      Utilities.closeResultSet(groupRS);
-      Utilities.closePreparedStatement(prep);
-      Utilities.closePreparedStatement(prep2);
+      SQLFunctions.closeResultSet(teamsRS);
+      SQLFunctions.closeResultSet(groupRS);
+      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.closePreparedStatement(prep2);
     }
   }
 

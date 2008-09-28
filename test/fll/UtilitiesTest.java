@@ -17,6 +17,7 @@ import java.sql.Statement;
 import java.util.Arrays;
 
 import junit.framework.JUnit4TestAdapter;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -89,9 +90,9 @@ public class UtilitiesTest {
       }
       
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
-      Utilities.closeConnection(connection);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closeConnection(connection);
     }
     
   }

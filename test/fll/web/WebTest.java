@@ -5,6 +5,15 @@
  */
 package fll.web;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+
+import junit.framework.Assert;
+
+import org.apache.log4j.Logger;
+import org.junit.Test;
+import org.xml.sax.SAXException;
+
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -12,36 +21,25 @@ import com.meterware.httpunit.WebResponse;
 
 import fll.TestUtils;
 
-import java.io.IOException;
-
-import java.net.MalformedURLException;
-
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
-import org.apache.log4j.Logger;
-
-import org.xml.sax.SAXException;
-
 /**
  * Basic tests.
  *
  * @version $Revision$
  */
-public class WebTest extends TestCase {
+public class WebTest {
   
   private static final Logger LOG = Logger.getLogger(WebTest.class);
 
   /**
    * Basic load of the pages.
    */
+  @Test
   public void testPages()
     throws SAXException, MalformedURLException, IOException {
     final String[] pages = new String[] {
       "",
       "display.jsp",
       "index.jsp",
-      "instructions.jsp",
       "welcome.jsp",
 
     };

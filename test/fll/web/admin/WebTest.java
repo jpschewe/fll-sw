@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
 
+import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
@@ -26,11 +26,12 @@ import fll.TestUtils;
  *
  * @version $Revision$
  */
-public class WebTest extends TestCase {
+public class WebTest {
   
   /**
    * Basic load of the pages.
    */
+  @Test
   public void testPages()
     throws SAXException, MalformedURLException, IOException {
     final String[] pages = new String[] {
@@ -55,6 +56,7 @@ public class WebTest extends TestCase {
   /**
    * Test changing tournaments to DUMMY and then back to State.
    */
+  @Test
   public void testChangeTournament()
     throws MalformedURLException, IOException, SAXException {
     final WebConversation conversation = new WebConversation();

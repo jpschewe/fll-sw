@@ -23,12 +23,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspWriter;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import fll.Utilities;
 import fll.db.Queries;
 
 /**
@@ -124,8 +125,8 @@ public final class Judges {
           generateRow(out, subjectiveCategories, divisions, row, id, category, division);
         }
       } finally {
-        Utilities.closeResultSet(rs);
-        Utilities.closeStatement(stmt);
+        SQLFunctions.closeResultSet(rs);
+        SQLFunctions.closeStatement(stmt);
       }
     } else {
       // need to walk the parameters to see what we've been passed
@@ -348,8 +349,8 @@ public final class Judges {
       }
 
     } finally {
-      Utilities.closeStatement(stmt);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(prep);
     }
 
     // finally redirect to index.jsp

@@ -5,23 +5,21 @@
  */
 package fll.web.admin;
 
-import fll.db.Queries;
-import fll.Utilities;
-
 import java.io.IOException;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.text.ParseException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspWriter;
+
+import net.mtu.eggplant.util.sql.SQLFunctions;
+import fll.db.Queries;
 
 /**
  * Java code used in judges.jsp
@@ -91,8 +89,8 @@ public final class Tables {
             generateRow(out, row, sideA, sideB, "");
           }
         } finally {
-          Utilities.closeResultSet(rs);
-          Utilities.closeStatement(stmt);
+          SQLFunctions.closeResultSet(rs);
+          SQLFunctions.closeStatement(stmt);
         }
       } else {
         //need to walk the parameters to see what we've been passed
@@ -202,8 +200,8 @@ public final class Tables {
       }
       
     } finally {
-      Utilities.closeStatement(stmt);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(prep);
     }
     
     //finally redirect to index.jsp 

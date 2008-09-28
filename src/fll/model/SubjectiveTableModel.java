@@ -98,7 +98,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
       } else {
         return String.class;
         /*
-         * FIX bug: 1830392
+         * TODO bug: 1830392
          * 
          * this isn't working so well, we need to look closer at this final
          * Element goalEle = getGoalDescription(column -4);

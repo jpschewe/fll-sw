@@ -25,10 +25,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 
 import au.com.bytecode.opencsv.CSVReader;
-import fll.Utilities;
 
 /**
  * Java code for uploading team data to the database. Called from
@@ -159,8 +160,8 @@ public final class UploadTeams {
         }
       }
     } finally {
-      Utilities.closePreparedStatement(insertPrep);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(insertPrep);
+      SQLFunctions.closeStatement(stmt);
     }
 
     // save this for other pages to use
@@ -214,8 +215,8 @@ public final class UploadTeams {
         throw new RuntimeException("Internal error, can't get count");
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -257,7 +258,7 @@ public final class UploadTeams {
       }
       stmt.executeUpdate(sql);
     } finally {
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 
@@ -374,9 +375,9 @@ public final class UploadTeams {
 
       return true;
     } finally {
-      Utilities.closeStatement(stmt);
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 

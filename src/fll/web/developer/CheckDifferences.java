@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.Utilities;
 
 /**
@@ -44,8 +45,8 @@ public class CheckDifferences extends HttpServlet {
 
       }
     } finally {
-      Utilities.closeStatement(memStmt);
-      Utilities.closeConnection(memConnection);
+      SQLFunctions.closeStatement(memStmt);
+      SQLFunctions.closeConnection(memConnection);
     }
 
     session.setAttribute("message", message.toString());

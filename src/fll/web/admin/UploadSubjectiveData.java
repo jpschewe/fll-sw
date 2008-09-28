@@ -19,13 +19,14 @@ import java.util.zip.ZipFile;
 
 import javax.servlet.jsp.JspWriter;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import fll.Utilities;
 import fll.db.Queries;
 import fll.xml.XMLUtils;
 
@@ -81,7 +82,7 @@ public final class UploadSubjectiveData {
         final NodeList goalDescriptions = categoryElement.getElementsByTagName("goal");
       
         if(null == categoryElement) {
-          throw new RuntimeException("Cannot find subjective category description for category in score document: " + categoryElement.getNodeName());
+          throw new RuntimeException("Cannot find subjective category description for category in score document");
         } else {
 
           PreparedStatement insertPrep = null;
@@ -151,7 +152,7 @@ public final class UploadSubjectiveData {
             }
 
           } finally {
-            Utilities.closePreparedStatement(insertPrep);
+            SQLFunctions.closePreparedStatement(insertPrep);
           }
         }
       } else {

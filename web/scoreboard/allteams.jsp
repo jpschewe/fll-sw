@@ -7,6 +7,8 @@
 <%@ page import="java.util.List"%>
 <%@ page import="java.util.Iterator"%>
 
+<%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
+
 <%@ page import="fll.Utilities"%>
 <%@ page import="fll.db.Queries"%>
 
@@ -289,7 +291,7 @@ function start() {
 
 </body>
 <%
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
 %>
 </HTML>

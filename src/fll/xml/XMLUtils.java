@@ -17,6 +17,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -25,7 +27,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import fll.Team;
-import fll.Utilities;
 import fll.db.Queries;
 
 /**
@@ -138,10 +139,10 @@ public final class XMLUtils {
       }
       return document;
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeResultSet(rs2);
-      Utilities.closePreparedStatement(prep);
-      Utilities.closePreparedStatement(prep2);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeResultSet(rs2);
+      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.closePreparedStatement(prep2);
     }
   }
 

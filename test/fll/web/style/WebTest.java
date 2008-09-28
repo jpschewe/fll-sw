@@ -8,8 +8,7 @@ package fll.web.style;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
@@ -24,11 +23,12 @@ import fll.TestUtils;
  *
  * @version $Revision$
  */
-public class WebTest extends TestCase {
+public class WebTest {
   
   /**
    * Basic load of the pages.
    */
+  @Test
   public void testPages()
     throws SAXException, MalformedURLException, IOException {
     final WebConversation conversation = new WebConversation();

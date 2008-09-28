@@ -5,18 +5,13 @@
  */
 package fll.web.admin;
 
-import fll.Utilities;
-
 import java.io.IOException;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.text.ParseException;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -27,6 +22,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspWriter;
+
+import net.mtu.eggplant.util.sql.SQLFunctions;
+import fll.Utilities;
 
 /**
  * Java code used in tournaments.jsp
@@ -97,8 +95,8 @@ public final class Tournaments {
             generateRow(out, row, name, name, location, next);
           }
         } finally {
-          Utilities.closeResultSet(rs);
-          Utilities.closeStatement(stmt);
+          SQLFunctions.closeResultSet(rs);
+          SQLFunctions.closeStatement(stmt);
         }
       } else {
         //need to walk the parameters to see what we've been passed
@@ -314,9 +312,9 @@ public final class Tournaments {
       }
       
     } finally {
-      Utilities.closePreparedStatement(insertPrep);
-      Utilities.closePreparedStatement(updatePrep);
-      Utilities.closePreparedStatement(deletePrep);
+      SQLFunctions.closePreparedStatement(insertPrep);
+      SQLFunctions.closePreparedStatement(updatePrep);
+      SQLFunctions.closePreparedStatement(deletePrep);
     }
 
     //finally redirect to index.jsp

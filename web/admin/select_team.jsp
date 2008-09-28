@@ -1,6 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="fll.Utilities" %>
+<%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
 
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.Connection" %>
@@ -81,8 +81,8 @@ ${message}
                 out.print(")");
                 out.print("</option>\n");
               }
-              Utilities.closeResultSet(rs);
-              Utilities.closeStatement(stmt);
+              SQLFunctions.closeResultSet(rs);
+              SQLFunctions.closeStatement(stmt);
               %>
             </select>
           </td>

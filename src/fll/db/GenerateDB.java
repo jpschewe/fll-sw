@@ -5,31 +5,30 @@
  */
 package fll.db;
 
-import fll.Team;
-import fll.Utilities;
-import fll.xml.ChallengeParser;
-import fll.xml.XMLWriter;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.util.Collection;
 import java.util.LinkedList;
 
-import org.apache.log4j.Logger;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import fll.Team;
+import fll.Utilities;
+import fll.xml.ChallengeParser;
+import fll.xml.XMLWriter;
 
 /**
  * Generate tables for fll tournament from XML document
@@ -92,7 +91,7 @@ public final class GenerateDB {
       connection = Utilities.createDBConnection(database);
       generateDB(document, connection, forceRebuild);
     } finally {
-      Utilities.closeConnection(connection);
+      SQLFunctions.closeConnection(connection);
     }
   }
 
@@ -344,12 +343,12 @@ public final class GenerateDB {
       stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
       stmt.executeUpdate("CREATE VIEW verified_performance AS SELECT " + performanceColumns.toString() + " FROM Performance WHERE Verified = TRUE");
       
-      //FIX add foreign key constraints
+      //TODO add foreign key constraints bug: 1580421
 
     } finally {
-      Utilities.closeStatement(stmt);
-      Utilities.closePreparedStatement(prep);
-      Utilities.closeConnection(connection);
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.closeConnection(connection);
     }
 
   }

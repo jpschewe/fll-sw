@@ -29,8 +29,8 @@ import fll.Team;
 import fll.Utilities;
 import fll.db.DumpDB;
 import fll.db.Queries;
-import fll.pdf.report.FinalComputedScores;
-import fll.pdf.scoreEntry.ScoresheetGenerator;
+import fll.web.report.FinalComputedScores;
+import fll.web.scoreEntry.ScoresheetGenerator;
 import fll.xml.XMLUtils;
 import fll.xml.XMLWriter;
 

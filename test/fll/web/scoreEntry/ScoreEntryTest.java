@@ -11,8 +11,6 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.text.ParseException;
 
-import junit.framework.TestCase;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -25,7 +23,7 @@ import fll.xml.ChallengeParserTest;
  * @version $Revision$
  * 
  */
-public class ScoreEntryTest extends TestCase {
+public class ScoreEntryTest {
 
   /**
    * Test method for

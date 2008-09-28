@@ -10,6 +10,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 /**
  * The static state of a team. This does not include information about the team
  * at a given tournament. Note that the {@link #getDivision() division}
@@ -105,8 +107,8 @@ public final class Team {
         return null;
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
     }
   }
 

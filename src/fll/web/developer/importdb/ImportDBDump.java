@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.log4j.Logger;
@@ -82,8 +84,8 @@ public class ImportDBDump extends HttpServlet {
       message.append("<p class='error'>Error loading data into the database: " + sqle.getMessage() + "</p>");
       LOG.error(sqle);
     } finally {
-      Utilities.closeStatement(memStmt);
-      Utilities.closeConnection(memConnection);
+      SQLFunctions.closeStatement(memStmt);
+      SQLFunctions.closeConnection(memConnection);
     }
 
     session.setAttribute("message", message.toString());
@@ -112,6 +114,7 @@ public class ImportDBDump extends HttpServlet {
       memConnection = DriverManager.getConnection((String)session.getAttribute("dbimport_url"));
       memPrep = memConnection.prepareStatement("SELECT Name, Location, NextTournament FROM Tournaments WHERE Name = ?");
       memPrep.setString(1, selectedTournament);
+      rs = memPrep.executeQuery();
       if(rs.next()) {
         prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location, NextTournament) VALUES (?, ?, ?)");        
         prep.setString(1, rs.getString(1));
@@ -128,10 +131,10 @@ public class ImportDBDump extends HttpServlet {
       LOG.error(sqle, sqle);
       session.setAttribute("redirect_url", "selectTournament.jsp");
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(memPrep);
-      Utilities.closeConnection(memConnection);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(memPrep);
+      SQLFunctions.closeConnection(memConnection);
+      SQLFunctions.closePreparedStatement(prep);
     }
 
     session.setAttribute("message", message.toString());

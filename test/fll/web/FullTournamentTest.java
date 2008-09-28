@@ -22,9 +22,10 @@ import java.text.ParseException;
 import javax.swing.table.TableModel;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
+import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -51,7 +52,7 @@ import fll.xml.ChallengeParser;
  * 
  * @version $Revision$
  */
-public class FullTournamentTest extends TestCase {
+public class FullTournamentTest {
 
   private static final Logger LOG = Logger.getLogger(FullTournamentTest.class);
 
@@ -59,10 +60,11 @@ public class FullTournamentTest extends TestCase {
    * Test a full tournament as a single thread. This tests to make sure
    * everything works normally.
    */
+  @Test
   public void testSerial() throws MalformedURLException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException,
       ParseException, SQLException {
     if (LOG.isInfoEnabled()) {
-      LOG.info("Starting test " + getName());
+      LOG.info("Starting serial test");
     }
     doFullTournament(false);
   }
@@ -71,10 +73,11 @@ public class FullTournamentTest extends TestCase {
    * Test a full tournament as multiple threads. This is a more of a stress
    * test.
    */
+  @Test
   public void testParallel() throws MalformedURLException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException,
       ParseException, SQLException {
     if (LOG.isInfoEnabled()) {
-      LOG.info("Starting test " + getName());
+      LOG.info("Starting parallel test");
     }
     doFullTournament(true);
   }
@@ -217,8 +220,8 @@ public class FullTournamentTest extends TestCase {
       rs = prep.executeQuery();
       Assert.assertTrue("Could not find judges information in test data", rs.next());
       final int numJudges = rs.getInt(1);
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
       while (!form.hasParameterNamed("id" + String.valueOf(numJudges - 1))) {
         if (LOG.isDebugEnabled()) {
           LOG.debug("Adding a row to the judges entry form");
@@ -244,8 +247,8 @@ public class FullTournamentTest extends TestCase {
         form.setParameter("div" + judgeIndex, division);
         ++judgeIndex;
       }
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
 
       // submit those values
       request = form.getRequest("finished", "Finished");
@@ -284,8 +287,8 @@ public class FullTournamentTest extends TestCase {
       rs = prep.executeQuery();
       Assert.assertTrue("No performance scores in test data", rs.next());
       final int maxRuns = rs.getInt(1);
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
 
       final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
       Assert.assertNotNull(challengeDocument);
@@ -366,13 +369,13 @@ public class FullTournamentTest extends TestCase {
       // Assert.assertNotNull("Could not create test database connection",
       // connection);
 
+      // division 1
       final int[] division1ExpectedRank = { 2636, 3127, 3439, 4462, 3125, 2116, 2104, 2113 };
-      final int[] division2ExpectedRank = { 3208, 3061, 2863, 2110, 3063, 353, 2043, 3129 };
-
+      String division = "DivI/Gr4-6";
       request = new GetMethodWebRequest(TestUtils.URL_ROOT + "developer/query.jsp");
       request.setParameter("query", "SELECT FinalScores.TeamNumber" + " FROM FinalScores, current_tournament_teams"
           + " WHERE FinalScores.TeamNumber = current_tournament_teams.TeamNumber" + " AND FinalScores.Tournament = '" + testTournament + "'"
-          + " AND current_tournament_teams.event_division = 'DivI/Gr4-6'" + " ORDER BY FinalScores.OverallScore DESC");
+          + " AND current_tournament_teams.event_division = '" + division + "'" + " ORDER BY FinalScores.OverallScore DESC");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
       WebTable table = response.getTableWithID("queryResult");
@@ -381,10 +384,13 @@ public class FullTournamentTest extends TestCase {
         Assert.assertEquals("Ranking is incorrect", expectedTeamNumberStr, table.getCellAsText(rank + 1, 0));
       }
 
+      // division 2
+      final int[] division2ExpectedRank = { 3208, 3061, 2863, 2110, 3063, 353, 2043, 3129 };
+      division = "DivII/Gr7-9";
       request = new GetMethodWebRequest(TestUtils.URL_ROOT + "developer/query.jsp");
       request.setParameter("query", "SELECT FinalScores.TeamNumber" + " FROM FinalScores, current_tournament_teams"
           + " WHERE FinalScores.TeamNumber = current_tournament_teams.TeamNumber" + " AND FinalScores.Tournament = '" + testTournament + "'"
-          + " AND current_tournament_teams.event_division = 'DivII/Gr7-9'" + " ORDER BY FinalScores.OverallScore DESC");
+          + " AND current_tournament_teams.event_division = '" + division + "'" + " ORDER BY FinalScores.OverallScore DESC");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
       table = response.getTableWithID("queryResult");
@@ -403,19 +409,20 @@ public class FullTournamentTest extends TestCase {
        * 0; while(rs.next()) { final int teamNumber = rs.getInt(1);
        * Assert.assertEquals("Ranking is incorrect",
        * division1ExpectedRank[rank], teamNumber); }
-       * Utilities.closeResultSet(rs); // division2 prep.setString(2,
+       * SQLFunctions.closeResultSet(rs); // division2 prep.setString(2,
        * "DivII/Gr7-9"); rs = prep.executeQuery(); rank = 0; while(rs.next()) {
        * final int teamNumber = rs.getInt(1); Assert.assertEquals("Ranking is
        * incorrect", division2ExpectedRank[rank], teamNumber); }
-       * Utilities.closeResultSet(rs); Utilities.closePreparedStatement(prep);
+       * SQLFunctions.closeResultSet(rs); SQLFunctions.closePreparedStatement(prep);
        */
 
       // TODO check scores?
+      
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closeStatement(stmt);
-      Utilities.closePreparedStatement(prep);
-      Utilities.closeConnection(testDataConn);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.closeConnection(testDataConn);
       // Utilities.closeConnection(connection);
     }
   }
@@ -503,8 +510,8 @@ public class FullTournamentTest extends TestCase {
           }
         }
       }
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
       subjective.save();
 
       // upload scores
@@ -519,8 +526,8 @@ public class FullTournamentTest extends TestCase {
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Subjective data uploaded successfully"));
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -616,8 +623,8 @@ public class FullTournamentTest extends TestCase {
         Assert.fail("Cannot find scores for " + teamNumber + " run " + runNumber);
       }
     } finally {
-      Utilities.closeResultSet(rs);
-      Utilities.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
 
   }
