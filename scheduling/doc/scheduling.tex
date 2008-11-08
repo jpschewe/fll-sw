@@ -3,95 +3,165 @@
 \usepackage{float}
 \usepackage{alltt}
 
+
+% algorithm environment for pseudocode 
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\floatname{algorithm}{Constraint Set}
+
 \title{FLL Tournament Scheduling}
 \author{Jon Schewe}
 
 \begin{document}
 \maketitle
 
-\chapter{Initial}
-\section{Given}
-The following information is known about the tournament.
+\chapter{FLL Scheduling Constraints}
 
-\begin{itemize}
-\item TN = number of teams at the tournament
-\item Teams: $T_{0}, T_{1}, ..., T_{n}$
-\item division of team: $T_{0}.div$
-\item $TN_{div1}$ = number of division 1 teams
-\item $TN_{div2}$ = number of division 2 teams
-\item $TN_{div1} + TN_{div2}$ == TN
-\item SOS - the start of the tournament (time 0)
-\end{itemize}
+\section{Definitions}
 
-\section{Setup}
-The performance, technical and subjective time slots are defined as
-follows.
+\begin{algorithmic}
+\STATE $SOS$ - the start of the tournament (time 0)
+\STATE $TN$ - number of teams at the tournament
+\STATE $TN_{N}$ - number of division $N$ teams
+\STATE $T_{0}, T_{1}, \dots, T_{n}$ - teams
+\STATE $div(T_{0})$ - division of team $T_{0}$
+\STATE $changetime = 15$ - time between events
+\end{algorithmic}
 
-\subsection{Subjective}
+
+\section{Subjective}
 %TODO figure out how to put in a lunch break
 
 Everything defined here is true for all subjective judging categories, currently only Presentation and Technical.
 
-\begin{itemize}
-\item $JN_{cat,div}$ - number of judges for category $cat$ in division $div$
-\item $subjective_{start}$ = SOS
-\item $CN_{cat,div}$ - number of subjective slots for category $cat$ in division $div$
-\end{itemize}
+\begin{algorithmic}
+\STATE $JN_{cat,div}$ - number of judges for category $cat$ in division $div$
+\STATE $subjective_{start} = SOS$
+\end{algorithmic}
 
 \section{Performance}
-\begin{itemize}
-\item TableN - number of tables
-\item coaches meeting = SOS + 30
-\item $performance_{start}$ = SOS + 60 - give time for teams to get settled
-\item $PN_{round} = ceil(TN / 2) / TableN$ - number of slots for a given round
-\end{itemize}
+\begin{algorithmic}
+\STATE $TableN$ - number of tables
+\STATE $coaches meeting = SOS + 30$
+\STATE $performance_{start} = SOS + 60$ - give time for teams to get settled
+\STATE $PN = ceil(TN / 2) / TableN$ - number of time slots for each performance round
+\end{algorithmic}
 
-%TODO need to figure out how to do multi-line pseudocode again
-$P_{1} = performance_{start}$
-$for round \in 2 \dots NRounds:$
-\begin{math}
-  P_{round} = P_{round-1} + 5
-\end{math}
-end
+\begin{algorithmic}
+\STATE $P_{1} = performance_{start}$
+\FOR{$round \in 2 \dots NRounds$}
+  \STATE $P_{round} = P_{round-1} + 5$
+\ENDFOR
+\end{algorithmic}
 
-\section{Constraints}
-Constraints that need to be applied to a given team.
+\section{Team Constraints}
+These constraints are applied to each team.
 
-\begin{itemize}
-\item $P1_{end} = P1_{start} + 5$
-\item $P2_{end} = P2_{start} + 5$
-\item $P3_{end} = P3_{start} + 5$
+\begin{algorithm}
+\caption{Relationship between presentation and technical}
+\begin{algorithmic}
+\IF{$pres_{end} <= tech_{start}$}
+  \STATE $pres_{end} + changetime <= tech_{start}$
+\ELSE
+  \STATE $tech_{end} + changetime <= pres_{start}$
+\ENDIF
+\end{algorithmic}
+\end{algorithm}
 
-\item $P1_{end} + 15 <= P2_{start}$
-\item $P2_{end} + 15 <= P3_{start}$
+\begin{algorithm}
+\caption{Basic constraints on performance rounds}
+\begin{algorithmic}
+\FOR{$round \in 1 \dots NRounds$}
+  \STATE $P_{N_{end}} = P_{N_{start}} + 5$
+\ENDFOR
+\FOR{$round \in 2 \dots NRounds$}
+  \STATE $P_{{N-1}_{end}} + 15 <= P_{N_{start}}$
+\ENDFOR
 
-\item $pres_{end} = pres_{start} + 20$
-\item $tech_{end} = tech_{start} + 20$
+\STATE $pres_{end} = pres_{start} + 20$
+\STATE $tech_{end} = tech_{start} + 20$
+\end{algorithmic}
+\end{algorithm}
 
-\end{itemize}
+\begin{algorithm}
+\caption{Relationships between performance rounds}
+\begin{algorithmic}
+\FOR{$round \in 2 \dots NRounds$}
+  \STATE $P_{{N-1}_{end}} + changetime <= P_{N_{start}}$
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
 
-% need 15 minutes between events
-% FIXME this isn't right, need to figure out how to get the right delay
-\begin{math}
-if pres_{end} <= P1_{end}:
-  pres_{end} + 15 <= P1_{end}
-else:
-  P1_{end} + 15 <= pres_{end}
-endif
-\end{math}
+\begin{algorithm}
+\caption{Relationships between Presentation judging and performance}
+\begin{algorithmic}
+\FOR{$i \in 1 \dots 3$}
+  \IF{$pres_{end} <= P_{i_{start}}$}
+    \STATE $pres_{end} + changetime <= P_{i_{start}}$
+  \ELSE
+    \STATE $P_{i_{end}} + changetime <= pres_{start}$
+  \ENDIF
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
 
-%\item $abs(P1_{end} - pres_{start}) >= 15$
-%\item $abs(P2_{end} - pres_{start}) >= 15$
-%\item $abs(P3_{end} - pres_{start}) >= 15$
+\begin{algorithm}
+\caption{Relationships between Technical judging and performance}
+\begin{algorithmic}
+\FOR{$i \in 1 \dots NRounds$}
+  \IF{$tech_{end} <= P_{i_{start}}$}
+    \STATE $tech_{end} + changetime <= P_{i_{start}}$
+  \ELSE
+    \STATE $P_{i_{end}} + changetime <= tech_{start}$
+  \ENDIF
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
 
-%\item $abs(P1_{end} - tech_{start}) >= 15$
-%\item $abs(P2_{end} - tech_{start}) >= 15$
-%\item $abs(P3_{end} - tech_{start}) >= 15$
+\section{Tournament Constraints}
+These constraints pertain to the tournament as a whole.
 
-%\item $abs(tech_{end} - pres_{start}) >= 15$
-%\item $abs(pres_{end} - tech_{start}) >= 15$
+\begin{algorithm}
+\caption{There can only be $PN$ teams competing on the performance tables
+at the same time}
+\begin{algorithmic}
 
-%\end{itemize}
+\STATE $teamsAtTime = []$
+\FORALL{$T \in teams$}
+  \FORALL{$i \in 1 \dots NRounds$}
+    \STATE $teamsAtTime[T_{P_{i_{start}}}].append(T)$
+  \ENDFOR
+  \FORALL{$key \in teamsAtTime.keys()$}
+    \IF{$teamsAtTime[key].size() > PN$}
+      \STATE BACKTRACK - perhaps can make this a constraint?
+    \ENDIF
+  \ENDFOR
+\ENDFOR
+
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{There can only be $JN_{cat,div}$ teams being judged at the same
+time in division $div$ for category $cat$}
+\begin{algorithmic}
+\FORALL{$cat \in tech, pres$}
+  \FORALL{$div \in divisions$}
+    \STATE $teamsAtTime_{cat,div} = []$
+  \ENDFOR
+  \FORALL{$T \in teams$}
+    \STATE $teamsAtTime_{cat,div(T)}[T_{cat_{start}}].append(T)$
+  \ENDFOR
+  \FORALL{$div \in divisions$}
+    \FORALL{$key \in teamsAtTime_{cat,div}.keys()$}
+      \IF{$teamsAtTime_{cat,div}[key].size() > JN_{cat,div}$}
+        \STATE BACKTRACK - perhaps can make this a constraint?
+      \ENDIF
+    \ENDFOR
+  \ENDFOR
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
 
 
 \end{document}
