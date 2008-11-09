@@ -3,6 +3,8 @@
 \usepackage{float}
 \usepackage{alltt}
 
+% html links
+\usepackage{hyperref}
 
 % algorithm environment for pseudocode 
 \usepackage{algorithm}
@@ -163,5 +165,14 @@ time in division $div$ for category $cat$}
 \end{algorithmic}
 \end{algorithm}
 
+\section{Implementation ideas}
+Possible solvers include:
+\begin{itemize}
+\item \url{http://www.ict.kth.se/courses/ID2204/software.html}{Gecode/J} - isn't native Java so dropped
+\item \url{http://www.koalog.com/php/jcs.php}{Koalog} - is commercial
+\item \url{http://choco.emn.fr/}{Choco}
+\end{itemize}
+
+So Choco is the winner.
 
 \end{document}
