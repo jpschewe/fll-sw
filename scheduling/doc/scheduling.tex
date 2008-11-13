@@ -28,6 +28,7 @@
 \STATE $T_{0}, T_{1}, \dots, T_{n}$ - teams
 \STATE $div(T_{0})$ - division of team $T_{0}$
 \STATE $changetime = 15$ - time between events
+\STATE $performance_changetime = 45$ - time between performance rounds
 \end{algorithmic}
 
 
@@ -71,7 +72,7 @@ These constraints are applied to each team.
 \end{algorithm}
 
 \begin{algorithm}
-\caption{Basic constraints on performance rounds}
+\caption{Basic constraints}
 \begin{algorithmic}
 \FOR{$round \in 1 \dots NRounds$}
   \STATE $P_{N_{end}} = P_{N_{start}} + 5$
@@ -89,7 +90,7 @@ These constraints are applied to each team.
 \caption{Relationships between performance rounds}
 \begin{algorithmic}
 \FOR{$round \in 2 \dots NRounds$}
-  \STATE $P_{{N-1}_{end}} + changetime <= P_{N_{start}}$
+  \STATE $P_{{N-1}_{end}} + performance_changetime <= P_{N_{start}}$
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
