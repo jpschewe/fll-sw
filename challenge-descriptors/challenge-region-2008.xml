@@ -189,7 +189,7 @@
    name="background" title="Background, Data and Graphics">
   </goal>
   <goal initialValue="0" max="20" min="0" multiplier="1" name="creative"
-   title="Creative Presentation">
+   title="Quality of Presentation/Creative Presentation">
   </goal>
   <goal initialValue="0" max="20" min="0" multiplier="1" name="sharing"
    title="Sharing">
