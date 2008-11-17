@@ -161,39 +161,38 @@
 
  <subjectiveCategory name="programming" title="Programming"
   weight="0.5">
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="programming_strategy" title="Strategy, Process, Problem Solving"/>
   <goal initialValue="0" max="20" min="0" multiplier="1"
-   name="useoflanguage" title="Use of Language">
+   name="useoflanguage" title="Language Use, Modularity/Abstraction">
   </goal>
   <goal initialValue="0" max="20" min="0" multiplier="1"
-   name="modularity" title="Modularity/Abstraction">
+   name="programming_kids" title="Kids Did the Work">
   </goal>
   <goal initialValue="0" max="20" min="0" multiplier="1"
    name="sensorcontrol" title="Sensor Control">
   </goal>
   <goal initialValue="0" max="20" min="0" multiplier="1" name="design"
-   title="Design">
-  </goal>
-  <goal initialValue="0" max="20" min="0" multiplier="1"
-   name="programming_kids" title="Kids Did the Work">
+   title="Overall Design">
   </goal>
  </subjectiveCategory>
 
  <subjectiveCategory name="research" title="Research Project Assessment"
   weight="1.0">
   <goal initialValue="0" max="20" min="0" multiplier="1"
-   name="questions" title="Questions, Language Use">
+   name="research" title="Research">
   </goal>
   <goal initialValue="0" max="20" min="0" multiplier="1"
-   name="completeness" title="Completeness, Teamwork">
+   name="innovative_solution" title="Innovative Solution">
   </goal>
   <goal initialValue="0" max="20" min="0" multiplier="1"
-   name="background" title="Background, Data, and Graphics">
+   name="background" title="Background, Data and Graphics">
   </goal>
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="analysis"
-   title="Analysis and Conclusions">
+  <goal initialValue="0" max="20" min="0" multiplier="1" name="creative"
+   title="Creative Presentation">
   </goal>
-  <goal initialValue="0" max="20" min="0" multiplier="1" name="style"
-   title="Style">
+  <goal initialValue="0" max="20" min="0" multiplier="1" name="sharing"
+   title="Sharing">
   </goal>
  </subjectiveCategory>
 
