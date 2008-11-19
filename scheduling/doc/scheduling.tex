@@ -28,7 +28,9 @@
 \STATE $T_{0}, T_{1}, \dots, T_{n}$ - teams
 \STATE $div(T_{0})$ - division of team $T_{0}$
 \STATE $changetime = 15$ - time between events
-\STATE $performance_changetime = 45$ - time between performance rounds
+\STATE $performanceChangetime = 45$ - time between performance rounds
+\STATE $specialPerformanceChangetime = 30$ - time between performance
+rounds for teams with opponents in a different round
 \end{algorithmic}
 
 
@@ -90,7 +92,7 @@ These constraints are applied to each team.
 \caption{Relationships between performance rounds}
 \begin{algorithmic}
 \FOR{$round \in 2 \dots NRounds$}
-  \STATE $P_{{N-1}_{end}} + performance_changetime <= P_{N_{start}}$
+  \STATE $P_{{N-1}_{end}} + performanceChangetime <= P_{N_{start}}$ \COMMENT FIX: Note that if the opponent is in a different round $performanceChangeTime$ needs to be $specialPerformanceChangetime$
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
