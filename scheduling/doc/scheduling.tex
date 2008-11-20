@@ -123,6 +123,19 @@ These constraints are applied to each team.
 \end{algorithmic}
 \end{algorithm}
 
+\begin{algorithm}
+\caption{Each team should always compete against other teams}
+\begin{algorithmic}
+\FOR{$round \in 1 \dots NRounds$}
+  \STATE $opp = opponent(P_round)$
+  \FOR{$r \in round+1 \dots NRounds$}
+    \STATE $opp != opponent(P_r)$
+  \ENDFOR
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+
 \section{Tournament Constraints}
 These constraints pertain to the tournament as a whole.
 
