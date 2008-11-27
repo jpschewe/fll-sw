@@ -18,9 +18,9 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import fll.xml.XMLUtils;
 import fll.xml.XMLWriter;
 
 /**
@@ -107,9 +107,7 @@ public final class DumpDB {
       
       // each subjective category
       final Element rootElement = challengeDocument.getDocumentElement();
-      final NodeList subjectiveCategories = rootElement.getElementsByTagName("subjectiveCategory");
-      for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
-        final Element categoryElement = (Element)subjectiveCategories.item(cat);
+      for(final Element categoryElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
         final String tableName = categoryElement.getAttribute("name");
         output.putNextEntry(new ZipEntry(tableName + ".csv"));
         csvwriter = new CSVWriter(outputWriter);

@@ -31,7 +31,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import fll.Team;
 import fll.Utilities;
@@ -39,6 +38,7 @@ import fll.util.ScoreUtils;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.Playoff;
 import fll.xml.ChallengeParser;
+import fll.xml.XMLUtils;
 
 /**
  * Does all of our queries.
@@ -263,9 +263,7 @@ public final class Queries {
 
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
-    final NodeList subjectiveCategoryElements = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
-    for(int i = 0; i < subjectiveCategoryElements.getLength(); i++) {
-      final Element subjectiveElement = (Element)subjectiveCategoryElements.item(i);
+    for(final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       final String title = subjectiveElement.getAttribute("title");
       final String name = subjectiveElement.getAttribute("name");
       subjectiveCategories.put(title, name);
@@ -688,9 +686,7 @@ public final class Queries {
     // now do each goal
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
-    final NodeList goals = performanceElement.getElementsByTagName("goal");
-    for(int i = 0; i < goals.getLength(); i++) {
-      final Element element = (Element)goals.item(i);
+    for(final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
       final String name = element.getAttribute("name");
 
       final String value = request.getParameter(name);
@@ -698,8 +694,8 @@ public final class Queries {
         throw new RuntimeException("Missing parameter: " + name);
       }
       columns.append(", " + name);
-      final NodeList valueChildren = element.getElementsByTagName("value");
-      if(valueChildren.getLength() > 0) {
+      final List<Element> valueChildren = XMLUtils.filterToElements(element.getElementsByTagName("value"));
+      if(valueChildren.size() > 0) {
         // enumerated
         values.append(", '" + value + "'");
       } else {
@@ -919,17 +915,15 @@ public final class Queries {
     // now do each goal
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
-    final NodeList goals = performanceElement.getElementsByTagName("goal");
-    for(int i = 0; i < goals.getLength(); i++) {
-      final Element element = (Element)goals.item(i);
+    for(final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
       final String name = element.getAttribute("name");
 
       final String value = request.getParameter(name);
       if(null == value) {
         throw new RuntimeException("Missing parameter: " + name);
       }
-      final NodeList valueChildren = element.getElementsByTagName("value");
-      if(valueChildren.getLength() > 0) {
+      final List<Element> valueChildren = XMLUtils.filterToElements(element.getElementsByTagName("value"));
+      if(valueChildren.size() > 0) {
         // enumerated
         sql.append(", " + name + " = '" + value + "'");
       } else {
@@ -1497,9 +1491,7 @@ public final class Queries {
       stmt = connection.createStatement();
 
       // delete from subjective categories
-      final NodeList subjectiveCategories = document.getDocumentElement().getElementsByTagName("subjectiveCategory");
-      for(int i = 0; i < subjectiveCategories.getLength(); i++) {
-        final Element category = (Element)subjectiveCategories.item(i);
+      for(final Element category : XMLUtils.filterToElements(document.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
         final String name = category.getAttribute("name");
         stmt.executeUpdate("DELETE FROM " + name + " WHERE TeamNumber = " + teamNumber);
       }
@@ -1559,9 +1551,7 @@ public final class Queries {
     ResultSet rs = null;
     try {
       // Subjective ---
-      final NodeList subjectiveCategories = rootElement.getElementsByTagName("subjectiveCategory");
-      for(int catIndex = 0; catIndex < subjectiveCategories.getLength(); catIndex++) {
-        final Element subjectiveElement = (Element)subjectiveCategories.item(catIndex);
+      for(final Element subjectiveElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
         final String categoryName = subjectiveElement.getAttribute("name");
 
         // build up the SQL
@@ -1779,9 +1769,7 @@ public final class Queries {
     try {
 
       // delete from subjective categories
-      final NodeList subjectiveCategories = document.getDocumentElement().getElementsByTagName("subjectiveCategory");
-      for(int i = 0; i < subjectiveCategories.getLength(); i++) {
-        final Element category = (Element)subjectiveCategories.item(i);
+      for(final Element category : XMLUtils.filterToElements(document.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
         final String name = category.getAttribute("name");
         prep = connection.prepareStatement("DELETE FROM " + name + " WHERE TeamNumber = ? AND Tournament = ?");
         prep.setInt(1, teamNumber);
@@ -1843,9 +1831,7 @@ public final class Queries {
     PreparedStatement prep = null;
     try {
       // delete from subjective categories
-      final NodeList subjectiveCategories = document.getDocumentElement().getElementsByTagName("subjectiveCategory");
-      for(int i = 0; i < subjectiveCategories.getLength(); i++) {
-        final Element category = (Element)subjectiveCategories.item(i);
+      for(final Element category : XMLUtils.filterToElements(document.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
         final String name = category.getAttribute("name");
         prep = connection.prepareStatement("DELETE FROM " + name + " WHERE TeamNumber = ? AND Tournament = ?");
         prep.setInt(1, teamNumber);
@@ -2058,7 +2044,6 @@ public final class Queries {
    */
   public static boolean isJudgesProperlyAssigned(final Connection connection, final Document document) throws SQLException {
 
-    final NodeList subjectiveCategories = document.getDocumentElement().getElementsByTagName("subjectiveCategory");
 
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -2066,8 +2051,8 @@ public final class Queries {
       prep = connection.prepareStatement("SELECT id FROM Judges WHERE Tournament = ? AND category = ?");
       prep.setString(1, getCurrentTournament(connection));
 
-      for(int i = 0; i < subjectiveCategories.getLength(); i++) {
-        final String categoryName = ((Element)subjectiveCategories.item(i)).getAttribute("name");
+      for(final Element element : XMLUtils.filterToElements(document.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+        final String categoryName = element.getAttribute("name");
         prep.setString(2, categoryName);
         rs = prep.executeQuery();
         if(!rs.next()) {

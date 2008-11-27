@@ -11,7 +11,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -21,6 +23,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -90,9 +93,7 @@ public final class XMLUtils {
       final Element top = document.createElement("scores");
       document.appendChild(top);
 
-      final NodeList subjectiveCategories = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
-      for (int cat = 0; cat < subjectiveCategories.getLength(); cat++) {
-        final Element categoryDescription = (Element) subjectiveCategories.item(cat);
+      for(final Element categoryDescription : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
         final String categoryName = categoryDescription.getAttribute("name");
         final Element categoryElement = document.createElement(categoryName);
         top.appendChild(categoryElement);
@@ -122,9 +123,7 @@ public final class XMLUtils {
               prep2.setString(3, judge);
               rs2 = prep2.executeQuery();
               if (rs2.next()) {
-                final NodeList goals = categoryDescription.getElementsByTagName("goal");
-                for (int i = 0; i < goals.getLength(); i++) {
-                  final Element goalDescription = (Element) goals.item(i);
+                for(final Element goalDescription : XMLUtils.filterToElements(categoryDescription.getElementsByTagName("goal"))) {
                   final String goalName = goalDescription.getAttribute("name");
                   final String value = rs2.getString(goalName);
                   if (!rs2.wasNull()) {
@@ -218,9 +217,7 @@ public final class XMLUtils {
    * @return the element or null if one is not found
    */
   public static Element getSubjectiveCategoryByName(final Document challengeDocument, final String name) {
-    final NodeList subjectiveCategories = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
-    for (int categoryIndex = 0; categoryIndex < subjectiveCategories.getLength(); categoryIndex++) {
-      final Element categoryElement = (Element) subjectiveCategories.item(categoryIndex);
+    for(final Element categoryElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       final String categoryName = categoryElement.getAttribute("name");
       if (categoryName.equals(name)) {
         return categoryElement;
@@ -241,8 +238,8 @@ public final class XMLUtils {
       return false;
     }
     
-    final NodeList values = element.getElementsByTagName("value");
-    return values.getLength() > 0;
+    final List<Element> values = XMLUtils.filterToElements(element.getElementsByTagName("value"));
+    return values.size() > 0;
   }
   
   /**
@@ -254,4 +251,22 @@ public final class XMLUtils {
   public static boolean isComputedGoal(final Element element) {
     return "computedGoal".equals(element.getNodeName());
   }  
+  
+  /**
+   * Filter the nodelist to only Elements.
+   * 
+   * @param nodelist cannot be null
+   * @return
+   */
+  public static List<Element> filterToElements(final NodeList nodelist) {
+     final List<Element> retval = new ArrayList<Element>(nodelist.getLength());
+     for(int i=0; i<nodelist.getLength(); ++i) {
+       final Node node = nodelist.item(i);
+       if(node instanceof Element) {
+         retval.add((Element)node);
+       }
+     }
+     return retval;
+  }
+  
 }

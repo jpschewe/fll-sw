@@ -28,9 +28,9 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import fll.db.Queries;
+import fll.xml.XMLUtils;
 
 /**
  * Java code used in judges.jsp
@@ -56,7 +56,7 @@ public final class Judges {
     final Connection connection = (Connection)application.getAttribute("connection");
     final String tournament = Queries.getCurrentTournament(connection);
 
-    final NodeList subjectiveCategories = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
+    final List<Element> subjectiveCategories = XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"));
 
     // count the number of rows present
     int rowIndex = 0;
@@ -91,7 +91,7 @@ public final class Judges {
         return;
       }
     } else if(null != request.getParameter("commit")) {
-      commitData(subjectiveCategories, request, response, connection, Queries.getCurrentTournament(connection));
+      commitData(request, response, connection, Queries.getCurrentTournament(connection));
       return;
     }
 
@@ -145,7 +145,7 @@ public final class Judges {
 
     // if there aren't enough judges in the database for each category,
     // generate some more
-    final int tableRows = Math.max(Math.max(numRows, subjectiveCategories.getLength()), row);
+    final int tableRows = Math.max(Math.max(numRows, subjectiveCategories.size()), row);
 
     for(; row < tableRows; row++) {
       generateRow(out, subjectiveCategories, divisions, row, null, null, null);
@@ -180,7 +180,7 @@ public final class Judges {
    *          division judge is scoring, can be null
    */
   private static void generateRow(final JspWriter out,
-                                  final NodeList subjectiveCategories,
+                                  final List<Element> subjectiveCategories,
                                   final List<String> divisions,
                                   final int row,
                                   final String id,
@@ -194,8 +194,7 @@ public final class Judges {
     out.println("></td>");
 
     out.println("  <td><select name='cat" + row + "'>");
-    for(int choice = 0; choice < subjectiveCategories.getLength(); choice++) {
-      final Element category = (Element)subjectiveCategories.item(choice);
+    for(final Element category : subjectiveCategories) {
       final String categoryName = category.getAttribute("name");
       out.print("  <option value='" + categoryName + "'");
       if(categoryName.equals(cat)) {
@@ -225,7 +224,7 @@ public final class Judges {
    * 
    * @return null if everything is ok, otherwise the error message
    */
-  private static String generateVerifyTable(final JspWriter out, final NodeList subjectiveCategories, final HttpServletRequest request)
+  private static String generateVerifyTable(final JspWriter out, final List<Element> subjectiveCategories, final HttpServletRequest request)
       throws IOException, ParseException {
     // keep track of any errors
     final StringBuffer error = new StringBuffer();
@@ -235,8 +234,8 @@ public final class Judges {
 
     // populate a hash where key is category name and value is an empty
     // Set. Use set so there are no duplicates
-    for(int i = 0; i < subjectiveCategories.getLength(); i++) {
-      final String categoryName = ((Element)subjectiveCategories.item(i)).getAttribute("name");
+    for(final Element element : subjectiveCategories) {
+      final String categoryName = element.getAttribute("name");
       hash.put(categoryName, new HashSet<String>());
     }
 
@@ -316,8 +315,7 @@ public final class Judges {
    * @param tournament
    *          the current tournament
    */
-  private static void commitData(final NodeList subjectiveCategories,
-                                 final HttpServletRequest request,
+  private static void commitData(final HttpServletRequest request,
                                  final HttpServletResponse response,
                                  final Connection connection,
                                  final String tournament) throws SQLException, IOException {

@@ -50,10 +50,14 @@
 	<property name="inside.test" value="false" />
 
 	<!-- ==================== Classpaths =========================== -->
-	<path id="emma.lib">
-		<pathelement location="${dir.lib}/emma/emma.jar" />
-		<pathelement location="${dir.lib}/emma/emma_ant.jar" />
-	</path>
+	<path id="cobertura.classpath">
+    <fileset dir="${dir.lib}/cobertura">
+      <include name="*.jar" />
+      <include name="lib/**/*.jar" />
+    </fileset>
+		<pathelement location="${dir.lib}/log4j-1.2.14.jar" />
+  </path>	
+	<taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
 
 	<path id="application.classpath">
 		<pathelement location="${dir.lib}/JonsInfra-0.7.jar" />
@@ -81,7 +85,7 @@
 
 		<pathelement location="${dir.classes}" />
 
-		<path refid="emma.lib" />
+		<path refid="cobertura.classpath"/>
 	</path>
 
 	<path id="compile.classpath">
@@ -122,31 +126,42 @@
 		<pathelement location="${dir.classes.test}" />
 	</path>
 
-	<!-- ==================== Emma (Code coverage) ==================== -->
-	<target name="emma.report" description="Generate the emma report">
-		<taskdef resource="emma_ant.properties" classpathref="emma.lib" />
-		<emma>
-			<report sourcepath="${dir.src}">
-				<fileset dir="${dir.coverage}">
-					<include name="*.emma" />
-				</fileset>
-				<html outfile="${dir.reports}/coverage.html" />
-			</report>
-		</emma>
-		<echo message="See ${dir.reports}/coverage.html for the coverage report" />
-	</target>
-
-	<target name="emma.instr" depends="compile">
+	<!-- ==================== Code coverage ==================== -->
+  <target name="coverage.instr" depends="compile" description="Instrument files for code coverage">
 		<mkdir dir="${dir.coverage}" />
-		<taskdef resource="emma_ant.properties" classpathref="emma.lib" />
-
-		<emma>
-			<instr instrpath="${dir.classes}" mode="overwrite" metadatafile="${dir.coverage}/metadata.emma" merge="true">
-				<filter includes="fll.*" />
-			</instr>
-		</emma>
-	</target>
-
+		
+		<delete file="${dir.coverage}/cobertura.ser"/>
+		<delete file="${dir.coverage}/tomcat-cobertura.ser"/>
+		<delete file="${dir.coverage}/merge-cobertura.ser"/>
+		
+    <cobertura-instrument datafile="${dir.coverage}/cobertura.ser">
+      <fileset dir="${dir.classes}">
+        <include name="**/*.class"/>
+      </fileset>      
+    </cobertura-instrument>
+  </target>
+  
+  <target name="coverage.report" description="Generate coverage report">
+    <cobertura-merge datafile="${dir.coverage}/merge-cobertura.ser">
+      <fileset dir="${dir.coverage}">
+        <include name="cobertura.ser"/>
+        <include name="tomcat-cobertura.ser"/>
+      </fileset>
+    </cobertura-merge>
+    
+    <mkdir dir="${dir.reports}/coverage"/>
+    <cobertura-report format="html" 
+    destdir="${dir.reports}/coverage"
+    datafile="${dir.coverage}/merge-cobertura.ser" 
+    >
+      <fileset dir="${dir.src}">
+        <include name="**/*.java" />
+      </fileset>
+    </cobertura-report>
+    
+    <echo message="See ${dir.reports}/coverage/index.html for the coverage report" />
+  </target>
+    
 	<!-- ==================== Setup/Prepare/Clean ==================== -->
 	<target name="init">
 		<tstamp />
@@ -476,6 +491,7 @@
 		<antcall target="-tomcat.run">
 			<param name="operation" value="start" />
 			<param name="spawn" value="true" />
+			<param name="inside.test" value="${inside.test}"/>
 		</antcall>
 
 		<echo message="Waiting for tomcat to startup" />
@@ -509,8 +525,7 @@
 
 	<target name="-tomcat.run">
 		<java jvm="${jvm}" classname="org.apache.catalina.startup.Bootstrap" fork="true" spawn="${spawn}" taskname="tomcat">
-			<jvmarg value="-Demma.coverage.out.file=${dir.coverage}/tomcat-coverage.emma" />
-			<jvmarg value="-Demma.coverage.out.merge=true" />
+  		<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/tomcat-cobertura.ser"/>
 
 			<classpath>
 				<!-- include two tries to find tools.jar depending on if java.home expands to jre directory -->
@@ -519,7 +534,7 @@
 				<pathelement location="${dir.build}/tomcat/bin/bootstrap.jar" />
 
 				<!-- for when running the unit tests -->
-				<path refid="emma.lib" />
+				<path refid="cobertura.classpath"/>
 
 			</classpath>
 			<sysproperty key="java.endorsed.dirs" file="${dir.build}/tomcat/common/endorsed" />
@@ -543,7 +558,7 @@
 		<antcall target="test" />
 
 		<!-- create & copy the coverage report to the side so that the clean doesn't remove it-->
-		<antcall target="emma.report" />
+		<antcall target="coverage.report" />
 		<mkdir dir="dist-save" />
 		<copy todir="dist-save">
 			<fileset dir="${dir.reports}" />
@@ -552,7 +567,7 @@
 		<!-- clean everything out before a distribution is made -->
 		<antcall target="clean" />
 
-		<!-- copy the coverage report back -->
+		<!-- copy the reports back -->
 		<mkdir dir="${dir.reports}" />
 		<copy todir="${dir.reports}">
 			<fileset dir="dist-save" />
@@ -569,7 +584,7 @@
 			<fileset dir="${basedir}/docs" />
 		</copy>
 
-		<!-- copy coverage reports -->
+		<!-- copy reports -->
     <mkdir dir="${dir.dist}/docs/reports"/>
 		<copy todir="${dir.dist}/docs/reports">
 			<fileset dir="${dir.reports}" />
@@ -680,16 +695,7 @@
 		<copy todir="${dir.web}">
 			<fileset dir="web">
 				<exclude name="**/*.java" />
-				<exclude name="**/*.jspf" />
 			</fileset>
-		</copy>
-		<copy todir="${dir.web}">
-			<fileset dir="web">
-				<include name="**/*.jspf" />
-			</fileset>
-			<filterset>
-				<filter token="APP-VERSION" value="${app.version}" />
-			</filterset>
 		</copy>
 
 		<!-- Copy static files from external dependencies as needed -->
@@ -697,6 +703,9 @@
 			<fileset dir="${dir.src}">
 				<exclude name="**/*.java" />
 			</fileset>
+			<filterset>
+				<filter token="APP-VERSION" value="${app.version}" />
+			</filterset>
 		</copy>
 		<copy todir="${dir.web}/WEB-INF/lib">
 			<fileset dir="${dir.lib}">
@@ -772,16 +781,13 @@
 		<delete dir="${dir.build}/db-save" />
 	</target>
 
-	<target name="-junit" depends="jvm.expand,compile,compile.test,emma.instr">
-		<!-- delete the emma output data so that we get a clean report -->
-		<delete file="${dir.coverage}/coverage.emma" />
-		<delete file="${dir.coverage}/tomcat-coverage.emma" />
+	<target name="-junit" depends="jvm.expand,compile,compile.test,coverage.instr">
 
 		<antcall target="-junit.setup" />
 
 		<junit fork="yes" jvm="${jvm}" haltonfailure="false" dir="${dir.build}" showoutput="true" failureproperty="test.failed">
-			<jvmarg value="-Demma.coverage.out.file=${dir.coverage}/coverage.emma" />
-			<jvmarg value="-Demma.coverage.out.merge=true" />
+			<sysproperty key="net.sourceforge.cobertura.datafile"
+			value="${dir.coverage}/cobertura.ser"/>
 
 			<classpath>
 				<path refid="test.classpath" />

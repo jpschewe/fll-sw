@@ -9,6 +9,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -17,7 +18,6 @@ import net.mtu.eggplant.util.gui.SortableTableModel;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import fll.Utilities;
 import fll.util.ScoreUtils;
@@ -42,13 +42,13 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
   public SubjectiveTableModel(final Document scoreDocument, final Element subjectiveElement) {
     _scoreDocument = scoreDocument;
     _subjectiveElement = subjectiveElement;
-    _goals = subjectiveElement.getChildNodes();
+    _goals = XMLUtils.filterToElements(subjectiveElement.getChildNodes());
     final Element categoryScoreElement = (Element)((Element)_scoreDocument.getDocumentElement()).getElementsByTagName(
         subjectiveElement.getAttribute("name")).item(0);
-    final NodeList scoreElements = categoryScoreElement.getElementsByTagName("score");
-    _scoreElements = new Element[scoreElements.getLength()];
-    for(int i = 0; i < scoreElements.getLength(); i++) {
-      _scoreElements[i] = (Element)scoreElements.item(i);
+    final List<Element> scoreElements = XMLUtils.filterToElements(categoryScoreElement.getElementsByTagName("score"));
+    _scoreElements = new Element[scoreElements.size()];
+    for(int i = 0; i < scoreElements.size(); i++) {
+      _scoreElements[i] = scoreElements.get(i);
     }
 
     // by default sort by team number
@@ -245,12 +245,11 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
           element.setAttribute("modified", Boolean.TRUE.toString());
         }
       } else {
-        final NodeList posValues = goalDescription.getElementsByTagName("value");
-        if(posValues.getLength() > 0) {
+        final List<Element> posValues = XMLUtils.filterToElements(goalDescription.getElementsByTagName("value"));
+        if(posValues.size() > 0) {
           // enumerated, convert from title to value
           boolean found = false;
-          for(int v = 0; v < posValues.getLength() && !found; v++) {
-            final Element posValue = (Element)posValues.item(v);
+          for(final Element posValue : posValues) {
             if(posValue.getAttribute("title").equalsIgnoreCase((String)value)) {
               // found it
               element.setAttribute(goalName, posValue.getAttribute("value"));
@@ -347,17 +346,17 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
    * Get the description element for goal at index
    */
   private Element getGoalDescription(final int index) {
-    return (Element)_goals.item(index);
+    return _goals.get(index);
   }
 
   /**
    * Find out how many goals there are.
    */
   private int getNumGoals() {
-    return _goals.getLength();
+    return _goals.size();
   }
 
-  private final NodeList _goals;
+  private final List<Element> _goals;
 
   private int _sortedColumn = 0;
 

@@ -32,7 +32,8 @@ import javax.swing.table.TableModel;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+
+import fll.xml.XMLUtils;
 
 /**
  * Summary dialog for subjective scores.
@@ -91,22 +92,18 @@ import org.w3c.dom.NodeList;
     final List<String> columnNames = new LinkedList<String>();
     columnNames.add("TeamNumber");
 
-    final NodeList subjectiveCategories = _challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
-    for(int i = 0; i < subjectiveCategories.getLength(); i++) {
-      final Element subjectiveElement = (Element)subjectiveCategories.item(i);
+    final List<Element> subjectiveCategories = XMLUtils.filterToElements(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"));
+    for(int catIdx = 0; catIdx < subjectiveCategories.size(); catIdx++) {
+      final Element subjectiveElement = subjectiveCategories.get(catIdx);
       final String category = subjectiveElement.getAttribute("name");
       final String categoryTitle = subjectiveElement.getAttribute("title");
       columnNames.add(categoryTitle);
 
-      final NodeList goals = subjectiveElement.getElementsByTagName("goal");
+      final List<Element> goals = XMLUtils.filterToElements(subjectiveElement.getElementsByTagName("goal"));
       final Element categoryElement = (Element)_scoreDocument.getDocumentElement().getElementsByTagName(category).item(0);
-      final NodeList scores = categoryElement.getElementsByTagName("score");
-      for(int scoreIdx = 0; scoreIdx < scores.getLength(); scoreIdx++) {
-        final Element scoreElement = (Element)scores.item(scoreIdx);
-
+      for(final Element scoreElement : XMLUtils.filterToElements(categoryElement.getElementsByTagName("score"))) {
         int numValues = 0;
-        for(int goalIdx = 0; goalIdx < goals.getLength(); goalIdx++) {
-          final Element goalElement = (Element)goals.item(goalIdx);
+        for(final Element goalElement : goals) {
           final String goalName = goalElement.getAttribute("name");
           final String value = scoreElement.getAttribute(goalName);
           if(null != value && !"".equals(value)) {
@@ -117,7 +114,7 @@ import org.w3c.dom.NodeList;
 
         final int teamNumber = Integer.parseInt(scoreElement.getAttribute("teamNumber"));
         if(!data.containsKey(teamNumber)) {
-          final Integer[] counts = new Integer[subjectiveCategories.getLength()];
+          final Integer[] counts = new Integer[subjectiveCategories.size()];
           Arrays.fill(counts, 0);
           data.put(teamNumber, counts);
         }
@@ -125,7 +122,7 @@ import org.w3c.dom.NodeList;
         if(numValues > 0 || Boolean.parseBoolean(scoreElement.getAttribute("NoShow"))) {
           // if there is a score or a No Show, then increment counter for this
           // team/category combination
-          data.get(teamNumber)[i]++;
+          data.get(teamNumber)[catIdx]++;
         } // end if score
 
       } // end foreach score row

@@ -52,7 +52,6 @@ import net.mtu.eggplant.util.gui.SortableTable;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import fll.model.SubjectiveTableModel;
 import fll.xml.ChallengeParser;
@@ -158,9 +157,7 @@ public final class SubjectiveFrame extends JFrame {
     final JTabbedPane tabbedPane = new JTabbedPane();
     getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
-    final NodeList subjectiveCategories = _challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
-    for(int i = 0; i < subjectiveCategories.getLength(); i++) {
-      final Element subjectiveElement = (Element)subjectiveCategories.item(i);
+    for(final Element subjectiveElement : XMLUtils.filterToElements(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       final SubjectiveTableModel tableModel = new SubjectiveTableModel(_scoreDocument, subjectiveElement);
       final JTable table = new SortableTable(tableModel);
       final String title = subjectiveElement.getAttribute("title");
@@ -169,22 +166,21 @@ public final class SubjectiveFrame extends JFrame {
       tableScroller.setPreferredSize(new Dimension(640, 480));
       tabbedPane.addTab(title, tableScroller);
 
-      final NodeList goals = subjectiveElement.getElementsByTagName("goal");
-      for(int g = 0; g < goals.getLength(); g++) {
-        final Element goalDescription = (Element)goals.item(g);
-        final NodeList posValuesList = goalDescription.getElementsByTagName("value");
-        if(posValuesList.getLength() > 0) {
+      int g=0;
+      for(final Element goalDescription : XMLUtils.filterToElements(subjectiveElement.getElementsByTagName("goal"))) {
+        final List<Element> posValuesList = XMLUtils.filterToElements(goalDescription.getElementsByTagName("value"));
+        if(posValuesList.size() > 0) {
           // enumerated
           final Vector<String> posValues = new Vector<String>();
           posValues.add("");
-          for(int v = 0; v < posValuesList.getLength(); v++) {
-            final Element posValue = (Element)posValuesList.item(v);
+          for(final Element posValue : posValuesList) {
             posValues.add(posValue.getAttribute("title"));
           }
 
           final TableColumn column = table.getColumnModel().getColumn(g + 4);
           column.setCellEditor(new DefaultCellEditor(new JComboBox(posValues)));
         }
+        ++g;
       }
     }
 
@@ -236,27 +232,22 @@ public final class SubjectiveFrame extends JFrame {
     stopCellEditors();
 
     final List<String> warnings = new LinkedList<String>();
-    final NodeList subjectiveCategories = _challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
-    for(int i = 0; i < subjectiveCategories.getLength(); i++) {
-      final Element subjectiveElement = (Element)subjectiveCategories.item(i);
+    for(final Element subjectiveElement : XMLUtils.filterToElements(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       final String category = subjectiveElement.getAttribute("name");
       final String categoryTitle = subjectiveElement.getAttribute("title");
 
-      final NodeList goals = subjectiveElement.getElementsByTagName("goal");
+      final List<Element> goals = XMLUtils.filterToElements(subjectiveElement.getElementsByTagName("goal"));
       final Element categoryElement = (Element)_scoreDocument.getDocumentElement().getElementsByTagName(category).item(0);
-      final NodeList scores = categoryElement.getElementsByTagName("score");
-      for(int scoreIdx = 0; scoreIdx < scores.getLength(); scoreIdx++) {
+      for(final Element scoreElement : XMLUtils.filterToElements(categoryElement.getElementsByTagName("score"))) {
         int numValues = 0;
-        final Element scoreElement = (Element)scores.item(scoreIdx);
-        for(int goalIdx = 0; goalIdx < goals.getLength(); goalIdx++) {
-          final Element goalElement = (Element)goals.item(goalIdx);
+        for(final Element goalElement : goals) {
           final String goalName = goalElement.getAttribute("name");
           final String value = scoreElement.getAttribute(goalName);
           if(null != value && !"".equals(value)) {
             numValues++;
           }
         }
-        if(numValues != goals.getLength() && numValues != 0) {
+        if(numValues != goals.size() && numValues != 0) {
           warnings.add(categoryTitle + ": " + scoreElement.getAttribute("teamNumber") + " has too few scores (needs all or none): " + numValues);
         }
 

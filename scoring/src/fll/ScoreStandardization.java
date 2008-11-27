@@ -18,9 +18,9 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import fll.db.Queries;
+import fll.xml.XMLUtils;
 
 /**
  * Does score standardization routines from the web.
@@ -120,9 +120,7 @@ public final class ScoreStandardization {
 
         // subjective
         final Element rootElement = document.getDocumentElement();
-        final NodeList subjectiveCategories = rootElement.getElementsByTagName("subjectiveCategory");
-        for(int cat = 0; cat < subjectiveCategories.getLength(); cat++) {
-          final Element catElement = (Element)subjectiveCategories.item(cat);
+        for(final Element catElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
           final String catName = catElement.getAttribute("name");
 
           // insert rows from the current tournament and category, keeping team
@@ -172,9 +170,7 @@ public final class ScoreStandardization {
       final Element rootElement = document.getDocumentElement();
 
       // subjective categories
-      final NodeList subjectiveCategories = rootElement.getElementsByTagName("subjectiveCategory");
-      for(int cat = 0; cat < subjectiveCategories.getLength(); cat++) {
-        final Element catElement = (Element)subjectiveCategories.item(cat);
+      for(final Element catElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
         final String category = catElement.getAttribute("name");
 
         /*
@@ -246,9 +242,7 @@ public final class ScoreStandardization {
       sql.append("performance * " + performanceWeight);
 
       // subjective categories
-      final NodeList subjectiveCategories = rootElement.getElementsByTagName("subjectiveCategory");
-      for(int cat = 0; cat < subjectiveCategories.getLength(); cat++) {
-        final Element catElement = (Element)subjectiveCategories.item(cat);
+      for(final Element catElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
         final String catName = catElement.getAttribute("name");
         final double catWeight = NumberFormat.getInstance().parse(catElement.getAttribute("weight")).doubleValue();
 

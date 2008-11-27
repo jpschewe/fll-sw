@@ -18,10 +18,10 @@ import java.util.Map;
 import net.mtu.eggplant.util.Functions;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import fll.Utilities;
 import fll.web.playoff.TeamScore;
+import fll.xml.XMLUtils;
 
 /**
  * Scoring utilities.
@@ -49,14 +49,12 @@ public class ScoreUtils {
   public static double computeTotalScore(final TeamScore teamScore) throws ParseException {
 
     final Element categoryElement = teamScore.getCategoryDescription();
-    final NodeList goals = categoryElement.getElementsByTagName("goal");
     if(!teamScore.scoreExists()) {
       return Double.NaN;
     }
 
     double computedTotal = 0;
-    for(int i = 0; i < goals.getLength(); i++) {
-      final Element goal = (Element)goals.item(i);
+    for(final Element goal : XMLUtils.filterToElements(categoryElement.getElementsByTagName("goal"))) {
       final String goalName = goal.getAttribute("name");
       final Double val = teamScore.getComputedScore(goalName);
       if(null == val) {
@@ -66,9 +64,7 @@ public class ScoreUtils {
     }
 
     // do computed goals
-    final NodeList computedGoals = categoryElement.getElementsByTagName("computedGoal");
-    for(int i = 0; i < computedGoals.getLength(); ++i) {
-      final Element computedGoalEle = (Element)computedGoals.item(i);
+    for(final Element computedGoalEle : XMLUtils.filterToElements(categoryElement.getElementsByTagName("computedGoal"))) {
       final Double val = evalComputedGoal(computedGoalEle, teamScore);
       if(null == val) {
         return Double.NaN;
@@ -91,9 +87,7 @@ public class ScoreUtils {
     final String computedGoalName = computedGoalEle.getAttribute("name");
     final Map<String, Double> variableValues = new HashMap<String, Double>();
 
-    final NodeList children = computedGoalEle.getChildNodes();
-    for(int childIdx = 0; childIdx < children.getLength(); ++childIdx) {
-      final Element childElement = (Element)children.item(childIdx);
+    for(final Element childElement : XMLUtils.filterToElements(computedGoalEle.getChildNodes())) {
       if("variable".equals(childElement.getNodeName())) {
         final String variableName = childElement.getAttribute("name");
         final Double variableValue = evalPoly(childElement, teamScore, variableValues);
@@ -122,9 +116,7 @@ public class ScoreUtils {
    */
   private static Double evalSwitch(final Element switchElement, final TeamScore teamScore, final Map<String, Double> variableValues)
       throws ParseException {
-    final NodeList caseElements = switchElement.getChildNodes();
-    for(int i = 0; i < caseElements.getLength(); ++i) {
-      final Element caseElement = (Element)caseElements.item(i);
+    for(final Element caseElement : XMLUtils.filterToElements(switchElement.getChildNodes())) {
       if("case".equals(caseElement.getNodeName())) {
         final Element conditionEle = (Element)caseElement.getFirstChild();
         if(evalCondition(conditionEle, teamScore, variableValues)) {
@@ -255,9 +247,7 @@ public class ScoreUtils {
    */
   public static Double evalPoly(final Element ele, final TeamScore teamScore, final Map<String, Double> variableValues) throws ParseException {
     double value = 0;
-    final NodeList children = ele.getChildNodes();
-    for(int i = 0; i < children.getLength(); ++i) {
-      final Element child = (Element)children.item(i);
+    for(final Element child : XMLUtils.filterToElements(ele.getChildNodes())) {
       if("constant".equals(child.getNodeName())) {
         final String valueStr = child.getAttribute("value");
         final double val = Utilities.NUMBER_FORMAT_INSTANCE.parse(valueStr).doubleValue();

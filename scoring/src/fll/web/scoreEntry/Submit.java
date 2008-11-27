@@ -13,7 +13,8 @@ import javax.servlet.jsp.JspWriter;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+
+import fll.xml.XMLUtils;
 
 /**
  * Java code for submit.jsp.
@@ -36,9 +37,7 @@ public final class Submit {
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
     //check all goal min and max values
-    final NodeList goals = performanceElement.getElementsByTagName("goal");
-    for(int i=0; i<goals.getLength(); i++) {
-      final Element element = (Element)goals.item(i);
+    for(final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
       final String name = element.getAttribute("name");
       out.println("<tr>");
       out.println("  <td>" + name + "</td>");

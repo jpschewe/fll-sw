@@ -17,6 +17,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -26,10 +27,10 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import fll.Utilities;
 import fll.xml.ChallengeParser;
+import fll.xml.XMLUtils;
 
 /**
  * Import scores from a tournament database into a master score database.
@@ -360,10 +361,9 @@ public final class ImportDB {
         columns.append(" RunNumber,");
         // Note: If TimeStamp is no longer the 4th element, then the hack below needs to be modified
         columns.append(" TimeStamp,");
-        final NodeList goals = performanceElement.getElementsByTagName("goal");
-        final int numColumns = goals.getLength() + 6;
-        for(int i = 0; i < goals.getLength(); i++) {
-          final Element element = (Element)goals.item(i);
+        final List<Element> goals = XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"));
+        final int numColumns = goals.size() + 6;
+        for(final Element element : goals) {
           columns.append(" " + element.getAttribute("name") + ",");
         }
         columns.append(" NoShow,");
@@ -415,9 +415,7 @@ public final class ImportDB {
       }
 
       // loop over each subjective category
-      final NodeList subjectiveCategories = rootElement.getElementsByTagName("subjectiveCategory");
-      for(int cat = 0; cat < subjectiveCategories.getLength(); cat++) {
-        final Element categoryElement = (Element)subjectiveCategories.item(cat);
+      for(final Element categoryElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
         final String tableName = categoryElement.getAttribute("name");
         LOG.info("Importing " + tableName);
 
@@ -429,10 +427,9 @@ public final class ImportDB {
         final StringBuffer columns = new StringBuffer();
         columns.append(" TeamNumber,");
         columns.append(" Tournament,");
-        final NodeList goals = categoryElement.getElementsByTagName("goal");
-        final int numColumns = goals.getLength() + 3;
-        for(int i = 0; i < goals.getLength(); i++) {
-          final Element element = (Element)goals.item(i);
+        final List<Element> goals = XMLUtils.filterToElements(categoryElement.getElementsByTagName("goal"));
+        final int numColumns = goals.size() + 3;
+        for(final Element element : goals) {
           columns.append(" " + element.getAttribute("name") + ",");
         }
         columns.append(" Judge");
