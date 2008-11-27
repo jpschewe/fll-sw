@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
+import java.util.List;
 
 import javax.swing.table.TableModel;
 
@@ -28,7 +29,6 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.Button;
@@ -46,6 +46,7 @@ import fll.TestUtils;
 import fll.Utilities;
 import fll.gui.SubjectiveFrame;
 import fll.xml.ChallengeParser;
+import fll.xml.XMLUtils;
 
 /**
  * Do full tournament tests.
@@ -462,15 +463,13 @@ public class FullTournamentTest {
       final SubjectiveFrame subjective = new SubjectiveFrame(subjectiveZip);
 
       // insert scores into zip
-      final NodeList subjectiveCategories = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
-      for (int i = 0; i < subjectiveCategories.getLength(); i++) {
-        final Element subjectiveElement = (Element) subjectiveCategories.item(i);
+      for(final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
         final String category = subjectiveElement.getAttribute("name");
         final String title = subjectiveElement.getAttribute("title");
         // find appropriate table model
         final TableModel tableModel = subjective.getTableModelForTitle(title);
 
-        final NodeList goals = subjectiveElement.getElementsByTagName("goal");
+        final List<Element> goals = XMLUtils.filterToElements(subjectiveElement.getElementsByTagName("goal"));
         prep = testDataConn.prepareStatement("SELECT * FROM " + category + " WHERE Tournament = ?");
         prep.setString(1, testTournament);
         rs = prep.executeQuery();
@@ -496,8 +495,7 @@ public class FullTournamentTest {
             Assert.assertTrue("Can't find No Show column in subjective table model", columnIndex >= 0);
             tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);
           } else {
-            for (int goalIdx = 0; goalIdx < goals.getLength(); ++goalIdx) {
-              final Element goalElement = (Element) goals.item(goalIdx);
+            for(final Element goalElement : goals) {
               final String goalName = goalElement.getAttribute("name");
               final String goalTitle = goalElement.getAttribute("title");
 
@@ -581,9 +579,7 @@ public class FullTournamentTest {
         } else {
           // walk over challenge descriptor to get all element names and then
           // use the values from rs
-          final NodeList goals = performanceElement.getElementsByTagName("goal");
-          for (int i = 0; i < goals.getLength(); i++) {
-            final Element element = (Element) goals.item(i);
+          for(final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
             final String name = element.getAttribute("name");
             final int min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).intValue();
             final int max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).intValue();

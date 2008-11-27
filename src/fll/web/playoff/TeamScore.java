@@ -6,10 +6,10 @@
 package fll.web.playoff;
 
 import java.text.ParseException;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import fll.Utilities;
 import fll.util.ScoreUtils;
@@ -105,8 +105,8 @@ public abstract class TeamScore {
         return ScoreUtils.evalComputedGoal(goalDescription, this);
       } else {
         final double multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalDescription.getAttribute("multiplier")).doubleValue();
-        final NodeList values = goalDescription.getElementsByTagName("value");
-        if(values.getLength() == 0) {
+        final List<Element> values = XMLUtils.filterToElements(goalDescription.getElementsByTagName("value"));
+        if(values.size() == 0) {
           final Double score = getRawScore(goalName);
           if(null == score) {
             return null;
@@ -120,8 +120,7 @@ public abstract class TeamScore {
           if(null != enumVal) {
             boolean found = false;
             double score = -1;
-            for(int v = 0; v < values.getLength() && !found; v++) {
-              final Element value = (Element)values.item(v);
+            for(final Element value : values) {
               if(value.getAttribute("value").equals(enumVal)) {
                 score = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).doubleValue();
                 found = true;
@@ -195,9 +194,7 @@ public abstract class TeamScore {
    * @return the goal description, null if none found
    */
   public final Element getGoalDescription(final String name) {
-    final NodeList children = getCategoryDescription().getChildNodes();
-    for(int i = 0; i < children.getLength(); ++i) {
-      final Element child = (Element)children.item(i);
+    for(final Element child : XMLUtils.filterToElements(getCategoryDescription().getChildNodes())) {
       if(("goal".equals(child.getNodeName()) || "computedGoal".equals(child.getNodeName())) && name.equals(child.getAttribute("name"))) {
         return child;
       }

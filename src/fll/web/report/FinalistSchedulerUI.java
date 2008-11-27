@@ -31,11 +31,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import fll.Team;
 import fll.db.Queries;
 import fll.util.ScoreUtils;
+import fll.xml.XMLUtils;
 
 /**
  * @author jpschewe
@@ -73,9 +73,7 @@ public class FinalistSchedulerUI extends HttpServlet {
     if(null != request.getParameter("init") || null == session.getAttribute(CATEGORIES_KEY)) {
       // no categories cache, need to compute them
       final List<String> subjectiveCategories = new LinkedList<String>();
-      final NodeList subjectiveCategoryElements = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
-      for(int i = 0; i < subjectiveCategoryElements.getLength(); i++) {
-        final Element subjectiveElement = (Element)subjectiveCategoryElements.item(i);
+      for(final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
         final String categoryTitle = subjectiveElement.getAttribute("title");
         subjectiveCategories.add(categoryTitle);
       }
@@ -274,7 +272,7 @@ public class FinalistSchedulerUI extends HttpServlet {
 
     final Formatter formatter = new Formatter();
 
-    final NodeList subjectiveCategoryElements = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
+    final List<Element> subjectiveCategoryElements = XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"));
 
     // map of teams to HTML color names
     final Map<Integer, String> teamColors = new HashMap<Integer, String>();
@@ -298,8 +296,7 @@ public class FinalistSchedulerUI extends HttpServlet {
       for(final String division : Queries.getDivisions(connection)) {
         formatter.format("<h2>Division: %s</h2>", division);
 
-        for(int i = 0; i < subjectiveCategoryElements.getLength(); i++) {
-          final Element subjectiveElement = (Element)subjectiveCategoryElements.item(i);
+        for(final Element subjectiveElement : subjectiveCategoryElements) {
           final String categoryTitle = subjectiveElement.getAttribute("title");
           final String categoryName = subjectiveElement.getAttribute("name");
 

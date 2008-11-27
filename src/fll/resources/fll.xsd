@@ -9,6 +9,7 @@
      maxOccurs="unbounded" />
    </xsd:sequence>
    <xsd:attribute name="title" type="xsd:string" use="required" />
+   <xsd:attribute name="revision" type="xsd:string" use="optional" />
   </xsd:complexType>
  </xsd:element>
 

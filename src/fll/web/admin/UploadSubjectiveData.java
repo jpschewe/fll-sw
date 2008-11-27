@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -25,7 +26,6 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import fll.db.Queries;
 import fll.xml.XMLUtils;
@@ -79,7 +79,7 @@ public final class UploadSubjectiveData {
         final Element scoreCategoryElement = (Element)scoreCategoryNode;
         final String categoryName = scoreCategoryElement.getNodeName();
         final Element categoryElement = XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
-        final NodeList goalDescriptions = categoryElement.getElementsByTagName("goal");
+        final List<Element> goalDescriptions = XMLUtils.filterToElements(categoryElement.getElementsByTagName("goal"));
       
         if(null == categoryElement) {
           throw new RuntimeException("Cannot find subjective category description for category in score document");
@@ -96,9 +96,8 @@ public final class UploadSubjectiveData {
             final StringBuffer insertSQLValues = new StringBuffer();
             insertSQLValues.append(") VALUES ( ?, ?, ?, ?");
             updateStmt.append("UPDATE " + categoryName + " SET NoShow = ? ");
-            final int numGoals = goalDescriptions.getLength();
-            for(int goalIndex=0; goalIndex<numGoals; goalIndex++) {
-              final Element goalDescription = (Element)goalDescriptions.item(goalIndex);
+            final int numGoals = goalDescriptions.size();
+            for(final Element goalDescription : goalDescriptions) {
               insertSQLColumns.append(", " + goalDescription.getAttribute("name"));
               insertSQLValues.append(", ?");
               updateStmt.append(", " + goalDescription.getAttribute("name") + " = ?");
@@ -112,9 +111,7 @@ public final class UploadSubjectiveData {
             insertPrep.setString(2, currentTournament);
             updatePrep.setString(numGoals+3, currentTournament);
             
-            final NodeList scores = scoreCategoryElement.getElementsByTagName("score");
-            for(int scoreIndex=0; scoreIndex<scores.getLength(); scoreIndex++) {
-              final Element scoreElement = (Element)scores.item(scoreIndex);
+            for(final Element scoreElement : XMLUtils.filterToElements(scoreCategoryElement.getElementsByTagName("score"))) {
             
               if(scoreElement.hasAttribute("modified")
                  && "true".equalsIgnoreCase(scoreElement.getAttribute("modified"))) {
@@ -130,7 +127,7 @@ public final class UploadSubjectiveData {
                 updatePrep.setString(numGoals+4, judge);
               
                 for(int goalIndex=0; goalIndex<numGoals; goalIndex++) {
-                  final Element goalDescription = (Element)goalDescriptions.item(goalIndex);
+                  final Element goalDescription = goalDescriptions.get(goalIndex);
                   final String goalName = goalDescription.getAttribute("name");
                   final String value = scoreElement.getAttribute(goalName);
                   if(null != value && !"".equals(value.trim())) {

@@ -16,11 +16,11 @@ import java.sql.Statement;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Iterator;
+import java.util.List;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import com.lowagie.text.Chunk;
 import com.lowagie.text.Document;
@@ -41,6 +41,7 @@ import com.lowagie.text.pdf.PdfWriter;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.xml.XMLUtils;
 
 
 /**
@@ -155,7 +156,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
 
       final Element rootElement = _challengeDocument.getDocumentElement();
 
-      final NodeList subjectiveCategories = rootElement.getElementsByTagName("subjectiveCategory");
+      final List<Element> subjectiveCategories = XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"));
       stmt = connection.createStatement();
       teamsStmt = connection.createStatement();
 
@@ -164,11 +165,11 @@ public final class FinalComputedScores extends PdfPageEventHelper {
         _division = (String)divisionIter.next();
 
         // Figure out how many subjective categories have weights > 0.
-        final double[] weights = new double[subjectiveCategories.getLength()];
-        final Element[] catElements = new Element[subjectiveCategories.getLength()];
+        final double[] weights = new double[subjectiveCategories.size()];
+        final Element[] catElements = new Element[subjectiveCategories.size()];
         int nonZeroWeights = 0;
-        for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
-          catElements[cat] = (Element)subjectiveCategories.item(cat);
+        for(int cat=0; cat<subjectiveCategories.size(); cat++) {
+          catElements[cat] = subjectiveCategories.get(cat);
           weights[cat] = Utilities.NUMBER_FORMAT_INSTANCE.parse(catElements[cat].getAttribute("weight")).doubleValue();
           if(weights[cat] > 0.0) {
             nonZeroWeights++;
@@ -199,8 +200,8 @@ public final class FinalComputedScores extends PdfPageEventHelper {
           divTable.addCell(teamCell);
           divTable.addCell("");
 
-          PdfPCell[] catCells = new PdfPCell[subjectiveCategories.getLength()];
-          Paragraph[] catPars = new Paragraph[subjectiveCategories.getLength()];
+          PdfPCell[] catCells = new PdfPCell[subjectiveCategories.size()];
+          Paragraph[] catPars = new Paragraph[subjectiveCategories.size()];
           for(int cat=0; cat<catElements.length; cat++) {
             if(weights[cat] > 0.0) {
               final String catTitle = catElements[cat].getAttribute("title");
@@ -239,8 +240,8 @@ public final class FinalComputedScores extends PdfPageEventHelper {
             wCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
             divTable.addCell(wCell);
 
-            PdfPCell[] wCells = new PdfPCell[subjectiveCategories.getLength()];
-            Paragraph[] wPars = new Paragraph[subjectiveCategories.getLength()];
+            PdfPCell[] wCells = new PdfPCell[subjectiveCategories.size()];
+            Paragraph[] wPars = new Paragraph[subjectiveCategories.size()];
             for(int cat=0; cat<catElements.length; cat++) {
               if(weights[cat] > 0.0) {
                 wPars[cat] = new Paragraph(Double.toString(weights[cat]), ARIAL_8PT_NORMAL);
@@ -323,8 +324,8 @@ public final class FinalComputedScores extends PdfPageEventHelper {
                 curteam.addCell(new Phrase("Raw:", ARIAL_8PT_NORMAL));
 
                 // Next, one column containing the raw score for each subjective category with weight > 0
-                for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
-                  final Element catElement = (Element)subjectiveCategories.item(cat);
+                for(int cat=0; cat<subjectiveCategories.size(); cat++) {
+                  final Element catElement = (Element)subjectiveCategories.get(cat);
                   final double catWeight = weights[cat];
                   if(catWeight > 0.0) {
                     final String catName = catElement.getAttribute("name");
@@ -397,7 +398,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
                 curteam.addCell(new Phrase("Scaled:", ARIAL_8PT_NORMAL));
 
                 // Next, one column containing the scaled score for each subjective category with weight > 0
-                for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
+                for(int cat=0; cat<subjectiveCategories.size(); cat++) {
                   final double catWeight = weights[cat];
                   if(catWeight > 0.0) {
                     final double scaledScore;

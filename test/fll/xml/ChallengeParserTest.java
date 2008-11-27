@@ -12,9 +12,6 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * Test various aspects of the XML document parsing.
@@ -244,26 +241,6 @@ public class ChallengeParserTest {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due a reference to non-enum goal inside enumCond", exception);
-  }
-
-  /**
-   * Ensure that getChildNodes() and getNextSibling() properly ignore comments.
-   */
-  @Test
-  public void testXMLComments() {
-    final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml");
-    Assert.assertNotNull(stream);
-    final Document document = ChallengeParser.parse(new InputStreamReader(stream));
-    final Element rootElement = document.getDocumentElement();
-    final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
-    final NodeList children = performanceElement.getChildNodes();
-    for(int i = 0; i < children.getLength(); ++i) {
-      final Node child = children.item(i);
-      Assert.assertTrue("Should be an instance of element", child instanceof Element);
-      final String nodeName = child.getNodeName();
-      Assert.assertTrue("Unexpected node name: " + nodeName, "goal".equals(nodeName) || "computedGoal".equals(nodeName)
-          || "restriction".equals(nodeName) || "tiebreaker".equals(nodeName));
-    }
   }
 
   /**

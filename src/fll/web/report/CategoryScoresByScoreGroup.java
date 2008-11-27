@@ -26,10 +26,10 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.xml.XMLUtils;
 
 /**
  * Display the report for scores by score group.
@@ -58,9 +58,7 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
 
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
-    final NodeList subjectiveCategoryElements = challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory");
-    for(int i = 0; i < subjectiveCategoryElements.getLength(); i++) {
-      final Element subjectiveElement = (Element)subjectiveCategoryElements.item(i);
+    for(final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       final String title = subjectiveElement.getAttribute("title");
       final String name = subjectiveElement.getAttribute("name");
       subjectiveCategories.put(title, name);

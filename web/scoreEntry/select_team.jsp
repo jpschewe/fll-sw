@@ -78,6 +78,9 @@ function editFlagBoxClicked() {
         </tr>
       </table>
 
+      <table> <!-- outer table -->
+        <tr><td>
+
       <table>
         <tr align='left' valign='top'>
           <!-- pick team from a list -->
@@ -86,9 +89,9 @@ function editFlagBoxClicked() {
             <font face='arial' size='4'>Select team for this scorecard:</font><br>
             <select size='20' name='TeamNumber' ondblclick='selectTeam.submit()'>
               <%
-              final Iterator iter = Queries.getTournamentTeams(connection).values().iterator();
+              final Iterator<Team> iter = Queries.getTournamentTeams(connection).values().iterator();
               while(iter.hasNext()) {
-                final Team team = (Team)iter.next();
+                final Team team = iter.next();
                 out.print("<option value=");
                 out.print(String.valueOf(team.getTeamNumber()));
                 out.print(">");
@@ -103,7 +106,8 @@ function editFlagBoxClicked() {
             </select>
           </td>
         </tr>
-        <table border='1'><tr><td>
+        <tr><td>
+        <table border='1'>
         <tr>
            <!-- check to edit -->
           <td align='left' valign='bottom'>
@@ -126,7 +130,7 @@ function editFlagBoxClicked() {
             <b><span id='select_number_text'>Select Run Number for editing</span></b>
           </td>
         </tr>
-        </td></tr></table>
+        </table></td></tr>
         <tr>
           <!-- submit button -->
           <td align='left'>
@@ -136,6 +140,11 @@ function editFlagBoxClicked() {
         </tr>
 
       </table>
+
+</td></tr>
+
+</table> <!-- outer table -->
+
     </form>
     <%@ include file="/WEB-INF/jspf/footer.jspf" %>
   </body>

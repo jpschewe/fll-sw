@@ -9,12 +9,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Map;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import com.lowagie.text.Chunk;
 import com.lowagie.text.Document;
@@ -31,16 +31,19 @@ import com.lowagie.text.pdf.PdfWriter;
 
 import fll.Team;
 import fll.Utilities;
+import fll.Version;
 import fll.db.Queries;
+import fll.xml.XMLUtils;
 
 /**
  * @author Dan Churchill
- *
+ * 
  */
 public class ScoresheetGenerator {
   private static final String LONG_BLANK = "_________________________";
+
   private static final String SHORT_BLANK = "___________";
-  
+
   /**
    * Create a new ScoresheetGenerator object populated with form header data
    * provided in the given Map. The map should contain String[] objects, each of
@@ -52,12 +55,12 @@ public class ScoresheetGenerator {
    * <li><b>"checkX"</b> - Present only for matches that should be printed.
    * <li><b>"roundX"</b> - For X = 1, 2, ... numMatches. Playoff round number
    * for scoresheet X.
-   * <li><b>"teamAX"</b> - For X = 1, 2, ... numMatches. Team number of team
-   * on table A for match X.
+   * <li><b>"teamAX"</b> - For X = 1, 2, ... numMatches. Team number of team on
+   * table A for match X.
    * <li><b>"tableAX"</b> - For X = 1, 2, ... numTeams. Table assignment for
    * table A on match X.
-   * <li><b>"teamBX"</b> - For X = 1, 2, ... numMatches. Team number of team
-   * on table B for match X.
+   * <li><b>"teamBX"</b> - For X = 1, 2, ... numMatches. Team number of team on
+   * table B for match X.
    * <li><b>"tableBX"</b> - For X = 1, 2, ... numTeams. Table assignment for
    * table B on match X.
    * </ul>
@@ -79,9 +82,10 @@ public class ScoresheetGenerator {
    *          scoresheet.
    */
   public ScoresheetGenerator(final Map<?, ?> formParms, final Connection connection, final String tournament, final org.w3c.dom.Document document)
-  throws SQLException {
+      throws SQLException {
     final int numMatches = Integer.parseInt(((String[])formParms.get("numMatches"))[0]);
-    final boolean[] checkedMatches = new boolean[numMatches+1]; // ignore slot index 0
+    final boolean[] checkedMatches = new boolean[numMatches + 1]; // ignore slot
+    // index 0
     int checkedMatchCount = 0;
     // Build array of out how many matches we are printing
     for(int i = 1; i <= numMatches; i++) {
@@ -91,29 +95,30 @@ public class ScoresheetGenerator {
         checkedMatchCount++;
       }
     }
-    
+
     m_numTeams = checkedMatchCount * 2;
 
     initializeArrays();
-    m_pageTitle = "";
-    
+    setPageTitle(m_pageTitle);
+
     // Loop through checked matches, populate data, and update database to track
     // printed status and remember assigned tables.
     PreparedStatement updatePrep = null;
     try {
-      //build up the SQL
-      updatePrep = connection.prepareStatement("UPDATE PlayoffData SET Printed=true, AssignedTable=?" +
-          " WHERE event_division=? AND Tournament=? AND PlayoffRound=? AND Team=?");
-      // could do division here, too, but since getting it from Team object, will defer to same place as other
+      // build up the SQL
+      updatePrep = connection.prepareStatement("UPDATE PlayoffData SET Printed=true, AssignedTable=?"
+          + " WHERE event_division=? AND Tournament=? AND PlayoffRound=? AND Team=?");
+      // could do division here, too, but since getting it from Team object,
+      // will defer to same place as other
       updatePrep.setString(3, tournament);
-      
+
       int j = 0;
       for(int i = 1; i <= numMatches; i++) {
         if(checkedMatches[i]) {
           final String round = ((String[])formParms.get("round" + i))[0];
           final int iRound = Integer.parseInt(round);
           // Get teamA info
-          final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(((String[])formParms.get(new String("teamA"+i)))[0]));
+          final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(((String[])formParms.get(new String("teamA" + i)))[0]));
           m_name[j] = teamA.getTeamName();
           m_number[j] = Integer.toString(teamA.getTeamNumber());
           m_round[j] = "Playoff Round " + round;
@@ -125,7 +130,7 @@ public class ScoresheetGenerator {
           updatePrep.executeUpdate();
           j++;
           // Get teamB info
-          final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(((String[])formParms.get(new String("teamB"+i)))[0]));
+          final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(((String[])formParms.get(new String("teamB" + i)))[0]));
           m_name[j] = teamB.getTeamName();
           m_number[j] = Integer.toString(teamB.getTeamNumber());
           m_round[j] = "Playoff Round " + round;
@@ -148,44 +153,49 @@ public class ScoresheetGenerator {
   /**
    * Print blank scoresheets.
    * 
-   * @param numTeams number of scoresheets to print
-   * @param document the challenge document
+   * @param numTeams
+   *          number of scoresheets to print
+   * @param document
+   *          the challenge document
    */
   public ScoresheetGenerator(final int numTeams, final org.w3c.dom.Document document) {
     m_numTeams = numTeams;
     initializeArrays();
 
-    m_pageTitle = "";
-    for (int i = 0; i < m_numTeams; i++) {
-        m_table[i] = SHORT_BLANK;
-        m_name[i] = LONG_BLANK;
-        m_round[i] = SHORT_BLANK;
-        m_number[i] = SHORT_BLANK;
-      }
+    setPageTitle("");
+    for(int i = 0; i < m_numTeams; i++) {
+      m_table[i] = SHORT_BLANK;
+      m_name[i] = LONG_BLANK;
+      m_round[i] = SHORT_BLANK;
+      m_number[i] = SHORT_BLANK;
+    }
     setChallengeInfo(document);
   }
-  
+
   /**
    * Print a single scoresheet for a team.
-   *  
-   * @param teamNumber the team to print the scoresheet for
-   * @param document the challenge document
-   * @param connection the database connection
+   * 
+   * @param teamNumber
+   *          the team to print the scoresheet for
+   * @param document
+   *          the challenge document
+   * @param connection
+   *          the database connection
    */
   public ScoresheetGenerator(final int teamNumber, final org.w3c.dom.Document document, final Connection connection) throws SQLException {
     m_numTeams = 1;
     initializeArrays();
 
     final Team teamA = Team.getTeamFromDatabase(connection, teamNumber);
-    
-    m_pageTitle = "";
+
+    setPageTitle("");
     m_table[0] = SHORT_BLANK;
     m_name[0] = teamA.getTeamName();
     m_round[0] = SHORT_BLANK;
     m_number[0] = Integer.toString(teamA.getTeamNumber());
-    setChallengeInfo(document);    
+    setChallengeInfo(document);
   }
-        
+
   /**
    * Private support function to create new data arrays for the scoresheet
    * information. IMPORTANT!!! The value of m_numTeams must be set before the
@@ -201,14 +211,11 @@ public class ScoresheetGenerator {
     m_goalValue = new PdfPCell[0];
   }
 
-  private static final Font ARIAL_8PT_NORMAL = FontFactory.getFont(
-                                                                 FontFactory.HELVETICA, 8, Font.NORMAL, new Color(0, 0, 0));
+  private static final Font ARIAL_8PT_NORMAL = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, new Color(0, 0, 0));
 
-  private static final Font ARIAL_10PT_NORMAL = FontFactory.getFont(
-                                                                  FontFactory.HELVETICA, 10, Font.NORMAL);
+  private static final Font ARIAL_10PT_NORMAL = FontFactory.getFont(FontFactory.HELVETICA, 10, Font.NORMAL);
 
-  private static final Font COURIER_10PT_NORMAL = FontFactory.getFont(
-                                                                    FontFactory.COURIER, 10, Font.NORMAL);
+  private static final Font COURIER_10PT_NORMAL = FontFactory.getFont(FontFactory.COURIER, 10, Font.NORMAL);
 
   public void writeFile(final Connection connection, final OutputStream out) throws DocumentException, SQLException {
 
@@ -217,7 +224,7 @@ public class ScoresheetGenerator {
 
     if(nup == 1) {
       orientationIsPortrait = true;
-    } else if (nup == 2) {
+    } else if(nup == 2) {
       orientationIsPortrait = false;
     } else {
       orientationIsPortrait = false;
@@ -231,27 +238,37 @@ public class ScoresheetGenerator {
       pdfDoc = new Document(PageSize.LETTER.rotate()); // landscape
     }
     PdfWriter.getInstance(pdfDoc, out);
-    
+
     // Measurements are always in points (72 per inch)
     // This sets up 1/2 inch margins
     pdfDoc.setMargins(0.5f * 72, 0.5f * 72, 0.35f * 72, 0.35f * 72);
     pdfDoc.open();
-    
+
     // Header cell with challenge title to add to both scoresheets
-    Paragraph p = new Paragraph();
-    Chunk c = new Chunk(m_pageTitle, FontFactory.getFont(
-        FontFactory.HELVETICA_BOLD, 14, Font.NORMAL, new Color(255, 255, 255)));
-    p.setAlignment(Element.ALIGN_CENTER);
-    p.add(c);
-    PdfPCell head = new PdfPCell();
+    final Paragraph titleParagraph = new Paragraph();
+    final Chunk titleChunk = new Chunk(m_pageTitle, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Font.NORMAL, Color.WHITE));
+    titleParagraph.setAlignment(Element.ALIGN_CENTER);
+    titleParagraph.add(titleChunk);
+
+    titleParagraph.add(Chunk.NEWLINE);
+    final Chunk swVersionChunk = new Chunk("SW version: " + Version.getVersion(), FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, Color.WHITE));
+    titleParagraph.add(swVersionChunk);
+    if(null != m_revision) {
+
+      final Chunk revisionChunk = new Chunk(" Descriptor revision: " + m_revision, FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, Color.WHITE));
+
+      titleParagraph.add(revisionChunk);
+    }
+
+    final PdfPCell head = new PdfPCell();
     head.setColspan(2);
     head.setBorder(1);
     head.setPaddingTop(0);
     head.setPaddingBottom(3);
     head.setBackgroundColor(new Color(64, 64, 64));
     head.setVerticalAlignment(Element.ALIGN_TOP);
-    head.addElement(p);
-    
+    head.addElement(titleParagraph);
+
     // Cells for judge initials, team initials, score field, and 2nd
     // check initials
     Phrase ji = new Phrase("Judge's Initials _______", ARIAL_8PT_NORMAL);
@@ -278,7 +295,7 @@ public class ScoresheetGenerator {
     sciC.setPaddingTop(9);
     sciC.setPaddingRight(36);
     sciC.setHorizontalAlignment(Element.ALIGN_RIGHT);
-    
+
     Phrase cpr = new Phrase("All Challenge Pieces Returned _______", ARIAL_8PT_NORMAL);
     PdfPCell cprC = new PdfPCell(cpr);
     cprC.setBorder(0);
@@ -291,7 +308,7 @@ public class ScoresheetGenerator {
     blankC.setPaddingTop(9);
     blankC.setPaddingRight(36);
     blankC.setHorizontalAlignment(Element.ALIGN_RIGHT);
-    
+
     PdfPTable[] team = new PdfPTable[m_numTeams];
     PdfPCell[] cell = new PdfPCell[m_numTeams];
 
@@ -300,29 +317,31 @@ public class ScoresheetGenerator {
     // TODO - break this if statement out into a private function
     if(nup == 1) {
       wholePage = new PdfPTable(1); // 1 column
-    } else if (nup == 2) {
+    } else if(nup == 2) {
       wholePage = new PdfPTable(2); // 2 columns
     } else {
-      wholePage = new PdfPTable(2); // default to 2 columns - should never get here
+      wholePage = new PdfPTable(2); // default to 2 columns - should never get
+      // here
     }
     wholePage.setWidthPercentage(100);
-    for (int i = 0; i < m_numTeams; i++) {
-      if (i > 0 && (i % nup) == 0) {
+    for(int i = 0; i < m_numTeams; i++) {
+      if(i > 0 && (i % nup) == 0) {
         pdfDoc.newPage();
         if(nup == 1) {
           wholePage = new PdfPTable(1); // 1 column
-        } else if (nup == 2) {
+        } else if(nup == 2) {
           wholePage = new PdfPTable(2); // 2 columns
         } else {
-          wholePage = new PdfPTable(2); // default to 2 columns - should never get here
+          wholePage = new PdfPTable(2); // default to 2 columns - should never
+          // get here
         }
         wholePage.setWidthPercentage(100);
       }
       team[i] = new PdfPTable(2);
       team[i].getDefaultCell().setBorder(0);
-      
+
       team[i].addCell(head);
-      
+
       // Table label cell
       Paragraph tblP = new Paragraph("Table:", ARIAL_10PT_NORMAL);
       tblP.setAlignment(Element.ALIGN_RIGHT);
@@ -335,7 +354,7 @@ public class ScoresheetGenerator {
       PdfPCell tblVc = new PdfPCell(team[i].getDefaultCell());
       tblVc.addElement(tblV);
       team[i].addCell(tblVc);
-      
+
       // Round number label cell
       Paragraph rndP = new Paragraph("Round Number:", ARIAL_10PT_NORMAL);
       rndP.setAlignment(Element.ALIGN_RIGHT);
@@ -348,7 +367,7 @@ public class ScoresheetGenerator {
       PdfPCell rndVc = new PdfPCell(team[i].getDefaultCell());
       rndVc.addElement(rndV);
       team[i].addCell(rndVc);
-      
+
       // Team number label cell
       Paragraph nbrP = new Paragraph("Team Number:", ARIAL_10PT_NORMAL);
       nbrP.setAlignment(Element.ALIGN_RIGHT);
@@ -361,7 +380,7 @@ public class ScoresheetGenerator {
       PdfPCell nbrVc = new PdfPCell(team[i].getDefaultCell());
       nbrVc.addElement(nbrV);
       team[i].addCell(nbrVc);
-      
+
       // Team name label cell
       Paragraph nameP = new Paragraph("Team Name:", ARIAL_10PT_NORMAL);
       nameP.setAlignment(Element.ALIGN_RIGHT);
@@ -374,45 +393,45 @@ public class ScoresheetGenerator {
       PdfPCell nameVc = new PdfPCell(team[i].getDefaultCell());
       nameVc.addElement(nameV);
       team[i].addCell(nameVc);
-      
+
       PdfPCell blankRow = new PdfPCell(new Phrase(""));
       blankRow.setColspan(2);
       blankRow.setBorder(0);
       blankRow.setMinimumHeight(9);
       team[i].addCell(blankRow);
-      
-      for (int j = 0; j < m_goalLabel.length; j++) {
+
+      for(int j = 0; j < m_goalLabel.length; j++) {
         team[i].addCell(m_goalLabel[j]);
         team[i].addCell(m_goalValue[j]);
       }
-      
+
       team[i].addCell(jiC);
       team[i].addCell(desC);
       team[i].addCell(tciC);
       team[i].addCell(sciC);
-      
+
       // second check
       team[i].addCell(cprC);
       team[i].addCell(blankC);
-      
+
       cell[i] = new PdfPCell(team[i]);
       cell[i].setBorder(0);
       cell[i].setPadding(0);
-      
+
       // Interior borders between scoresheets on a page
       if(nup > 1) {
-        if (i % 2 == 0) {
+        if(i % 2 == 0) {
           cell[i].setPaddingRight(36);
         } else {
           cell[i].setPaddingLeft(36);
         }
       }
-      
+
       // Add the current scoresheet to the page
       wholePage.addCell(cell[i]);
-      
+
       // Add the current table of scoresheets to the document
-      if ( (i % nup) == (nup - 1) ) {
+      if((i % nup) == (nup - 1)) {
         pdfDoc.add(wholePage);
       }
     }
@@ -420,7 +439,7 @@ public class ScoresheetGenerator {
     // Add a blank cells to complete the table of the last page
     int numBlanks = (nup - (m_numTeams % nup)) % nup;
     if(numBlanks > 0) {
-      for (int j = 0; j < numBlanks; j++) {
+      for(int j = 0; j < numBlanks; j++) {
         PdfPCell blank = new PdfPCell();
         blank.setBorder(0);
         wholePage.addCell(blank);
@@ -432,27 +451,30 @@ public class ScoresheetGenerator {
   }
 
   /**
-   * Stores the goal cells that are inserted into the output after the team
-   * name headers and before the scoring/initials blanks at the bottom of the
+   * Stores the goal cells that are inserted into the output after the team name
+   * headers and before the scoring/initials blanks at the bottom of the
    * scoresheet.
    * 
    * @param document
-   *            The document object containing the challenge descriptor info.
+   *          The document object containing the challenge descriptor info.
    */
   public void setChallengeInfo(final org.w3c.dom.Document document) {
     final org.w3c.dom.Element rootElement = document.getDocumentElement();
-    m_pageTitle = rootElement.getAttribute("title");
-    final org.w3c.dom.Element performanceElement = (org.w3c.dom.Element) rootElement.getElementsByTagName("Performance").item(0);
-    final NodeList goals = performanceElement.getElementsByTagName("goal");
-    final NodeList computedGoals = performanceElement.getElementsByTagName("computedGoal");
-    final NodeList children = performanceElement.getChildNodes();
-    
-    m_goalLabel = new PdfPCell[goals.getLength()+computedGoals.getLength()];
-    m_goalValue = new PdfPCell[goals.getLength()+computedGoals.getLength()];
+    setPageTitle(rootElement.getAttribute("title"));
+    if(rootElement.hasAttribute("revision")) {
+      setRevisionInfo(rootElement.getAttribute("revision"));
+    }
+
+    final org.w3c.dom.Element performanceElement = (org.w3c.dom.Element)rootElement.getElementsByTagName("Performance").item(0);
+    final List<org.w3c.dom.Element> goals = XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"));
+    final List<org.w3c.dom.Element> computedGoals = XMLUtils.filterToElements(performanceElement.getElementsByTagName("computedGoal"));
+    final List<org.w3c.dom.Element> children = XMLUtils.filterToElements(performanceElement.getChildNodes());
+
+    m_goalLabel = new PdfPCell[goals.size() + computedGoals.size()];
+    m_goalValue = new PdfPCell[goals.size() + computedGoals.size()];
     int realI = 0;
-    for (int i = 0; i < children.getLength(); i++) {
-      if(children.item(i).getNodeType() == Node.ELEMENT_NODE) {
-        final org.w3c.dom.Element element = (org.w3c.dom.Element) children.item(i);
+    for(final org.w3c.dom.Element element : children) {
+      if(element.getNodeType() == Node.ELEMENT_NODE) {
         if(element.getNodeName().equals("goal") || element.getNodeName().equals("computedGoal")) {
           final String name = element.getAttribute("name");
 
@@ -472,35 +494,32 @@ public class ScoresheetGenerator {
             m_goalValue[realI].addElement(q);
           } else {
             try {
-              final int min = Utilities.NUMBER_FORMAT_INSTANCE.parse(
-                  element.getAttribute("min")).intValue();
-              final int max = Utilities.NUMBER_FORMAT_INSTANCE.parse(
-                  element.getAttribute("max")).intValue();
-              
+              final int min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).intValue();
+              final int max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).intValue();
+
               // If element has child nodes, then we have an enumerated list
               // of choices. Otherwise it is either yes/no or a numeric field.
-              if (element.hasChildNodes()) {
-                final NodeList posValues = element
-                .getElementsByTagName("value");
-                String choices = ((org.w3c.dom.Element) posValues.item(0))
-                .getAttribute("title").replace(" ", "\u00a0"); // replace spaces with "no-break" spaces
-                for (int v = 1; v < posValues.getLength(); v++) {
-                  choices = choices
-                  + " /\u00a0"
-                  + ((org.w3c.dom.Element) posValues.item(v))
-                  .getAttribute("title").replace(" ", "\u00a0");
+              if(element.hasChildNodes()) {
+                final List<org.w3c.dom.Element> posValues = XMLUtils.filterToElements(element.getElementsByTagName("value"));
+                String choices = posValues.get(0).getAttribute("title").replace(" ", "\u00a0"); // replace
+                // spaces
+                // with
+                // "no-break"
+                // spaces
+                for(int v = 1; v < posValues.size(); v++) {
+                  choices = choices + " /\u00a0" + posValues.get(v).getAttribute("title").replace(" ", "\u00a0");
                 }
                 Chunk c = new Chunk("", COURIER_10PT_NORMAL);
                 c.append(choices.toUpperCase());
                 m_goalValue[realI] = new PdfPCell();
                 m_goalValue[realI].addElement(c);
-                
+
               } else {
-                if (0 == min && 1 == max) {
+                if(0 == min && 1 == max) {
                   Paragraph q = new Paragraph("YES / NO", COURIER_10PT_NORMAL);
                   m_goalValue[realI] = new PdfPCell();
                   m_goalValue[realI].addElement(q);
-                  
+
                 } else {
                   final String range = "(" + min + " - " + max + ")";
                   PdfPTable t = new PdfPTable(2);
@@ -516,9 +535,8 @@ public class ScoresheetGenerator {
                   m_goalValue[realI].addElement(t);
                 }
               }
-            } catch (final ParseException pe) {
-              throw new RuntimeException(
-                  "FATAL: min/max not parsable for goal: " + name);
+            } catch(final ParseException pe) {
+              throw new RuntimeException("FATAL: min/max not parsable for goal: " + name);
             }
           }
           m_goalValue[realI].setBorder(0);
@@ -530,6 +548,8 @@ public class ScoresheetGenerator {
   }
 
   private int m_numTeams;
+
+  private String m_revision;
 
   private String m_pageTitle;
 
@@ -549,19 +569,22 @@ public class ScoresheetGenerator {
     m_pageTitle = title;
   }
 
+  private void setRevisionInfo(final String revision) {
+    m_revision = revision;
+  }
+
   /**
    * Sets the table label for scoresheet with index i.
    * 
    * @param i
-   *            The 0-based index of the scoresheet to which to assign this
-   *            table label.
+   *          The 0-based index of the scoresheet to which to assign this table
+   *          label.
    * @param table
-   *            A string with the table label for the specified scoresheet.
+   *          A string with the table label for the specified scoresheet.
    * @throws IllegalArgumentException
-   *             Thrown if the index is out of valid range.
+   *           Thrown if the index is out of valid range.
    */
-  public void setTable(final int i, final String table)
-    throws IllegalArgumentException {
+  public void setTable(final int i, final String table) throws IllegalArgumentException {
     if(i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
@@ -575,19 +598,18 @@ public class ScoresheetGenerator {
    * Sets the team name for scoresheet with index i.
    * 
    * @param i
-   *            The 0-based index of the scoresheet to which to assign this
-   *            team name.
+   *          The 0-based index of the scoresheet to which to assign this team
+   *          name.
    * @param name
-   *            A string with the team name for the specified scoresheet.
+   *          A string with the team name for the specified scoresheet.
    * @throws IllegalArgumentException
-   *             Thrown if the index is out of valid range.
+   *           Thrown if the index is out of valid range.
    */
-  public void setName(final int i, final String name)
-    throws IllegalArgumentException {
+  public void setName(final int i, final String name) throws IllegalArgumentException {
     if(i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if(i >= m_numTeams) { 
+    if(i >= m_numTeams) {
       throw new IllegalArgumentException("Index must be < " + m_numTeams);
     }
     m_name[i] = name;
@@ -597,12 +619,12 @@ public class ScoresheetGenerator {
    * Sets the team number for scoresheet with index i.
    * 
    * @param i
-   *            The 0-based index of the scoresheet to which to assign this
-   *            team number.
+   *          The 0-based index of the scoresheet to which to assign this team
+   *          number.
    * @param number
-   *            A string with the team number for the specified scoresheet.
+   *          A string with the team number for the specified scoresheet.
    * @throws IllegalArgumentException
-   *             Thrown if the index is out of valid range.
+   *           Thrown if the index is out of valid range.
    */
   public void setNumber(final int i, final String number) throws IllegalArgumentException {
     if(i < 0) {
@@ -618,14 +640,14 @@ public class ScoresheetGenerator {
    * Sets the round number descriptor for scoresheet with index i.
    * 
    * @param i
-   *            The 0-based index of the scoresheet to which to assign this
-   *            round number.
+   *          The 0-based index of the scoresheet to which to assign this round
+   *          number.
    * @param round
-   *            A string with the round number descriptor for the specified
-   *            scoresheet.
+   *          A string with the round number descriptor for the specified
+   *          scoresheet.
    * @throws IllegalArgumentException
-   *             Thrown if the index is out of valid range.
-   */     
+   *           Thrown if the index is out of valid range.
+   */
   public void setRound(final int i, final String round) throws IllegalArgumentException {
     if(i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");

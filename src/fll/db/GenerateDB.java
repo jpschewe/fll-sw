@@ -17,17 +17,18 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import fll.Team;
 import fll.Utilities;
 import fll.xml.ChallengeParser;
+import fll.xml.XMLUtils;
 import fll.xml.XMLWriter;
 
 /**
@@ -267,9 +268,7 @@ public final class GenerateDB {
         performanceColumns.append("Bye,");
         createStatement.append(" Bye boolean DEFAULT FALSE NOT NULL,");
         createStatement.append(" Verified boolean DEFAULT FALSE NOT NULL,");
-        final NodeList goals = performanceElement.getElementsByTagName("goal");
-        for(int i=0; i<goals.getLength(); i++) {
-          final Element element = (Element)goals.item(i);
+        for(final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
           final String columnDefinition = generateGoalColumnDefinition(element);
           createStatement.append(" " + columnDefinition + ",");
           performanceColumns.append(element.getAttribute("name") + ",");
@@ -289,11 +288,9 @@ public final class GenerateDB {
       finalScores.append("CREATE TABLE FinalScores (");
       finalScores.append("TeamNumber integer NOT NULL,");
       finalScores.append("Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,");
-      final NodeList subjectiveCategories = rootElement.getElementsByTagName("subjectiveCategory");
-      for(int cat=0; cat<subjectiveCategories.getLength(); cat++) {
+      for(final Element categoryElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
         createStatement.setLength(0);
 
-        final Element categoryElement = (Element)subjectiveCategories.item(cat);
         final String tableName = categoryElement.getAttribute("name");
 
         stmt.executeUpdate("DROP TABLE IF EXISTS " + tableName + " CASCADE");
@@ -302,9 +299,7 @@ public final class GenerateDB {
         createStatement.append(" Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,");
         createStatement.append(" Judge VARCHAR(64) NOT NULL,");
         createStatement.append(" NoShow boolean DEFAULT FALSE NOT NULL,");
-        final NodeList goals = categoryElement.getElementsByTagName("goal");
-        for(int i=0; i<goals.getLength(); i++) {
-          final Element element = (Element)goals.item(i);
+        for(final Element element : XMLUtils.filterToElements(categoryElement.getElementsByTagName("goal"))) {
           final String columnDefinition = generateGoalColumnDefinition(element);
           createStatement.append(" " + columnDefinition + ",");
         }
@@ -365,8 +360,8 @@ public final class GenerateDB {
     //check if there are any subelements to determine if this goal is enumerated or not
 
     String definition = goalName;
-    final NodeList posValues = goalElement.getElementsByTagName("value");
-    if(posValues.getLength() > 0) {
+    final List<Element> posValues = XMLUtils.filterToElements(goalElement.getElementsByTagName("value"));
+    if(posValues.size() > 0) {
       //enumerated
       //HSQLDB doesn't support enum
       definition += " longvarchar";
