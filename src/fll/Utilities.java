@@ -20,7 +20,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import javax.servlet.ServletContext;
 
 import net.mtu.eggplant.io.LogWriter;
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -379,4 +383,21 @@ public final class Utilities {
     }
   }
 
+  /**
+   * Add a display name to the list of known displays. Synchronized to avoid
+   * race conditions.
+   * 
+   * @param application
+   * @param name
+   */
+  public synchronized static void appendDisplayName(final ServletContext application, final String name) {
+    // ServletContext isn't type safe
+    @SuppressWarnings("unchecked")
+    Set<String> displayNames = (Set<String>)application.getAttribute("displayNames");
+    if(null == displayNames) {
+      displayNames = new HashSet<String>();
+    }
+    displayNames.add(name);
+    application.setAttribute("displayNames", displayNames);
+  }
 }
