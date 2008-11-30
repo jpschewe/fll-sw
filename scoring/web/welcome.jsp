@@ -6,6 +6,15 @@
     
     <title><x:out select="$challengeDocument/fll/@title"/></title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
+<style type='text/css'>
+html {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+</style>
+    
   </head>
 
   <body>

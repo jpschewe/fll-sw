@@ -7,7 +7,7 @@
         
 </head>
   <body>
-<center>
+
 <table border='0' cellpadding='0' cellspacing='0' width='98%'>
 <tr>
   <td align='center'>
@@ -16,10 +16,7 @@
     </font>
   </td>
 </tr>
-<tr><td colspan='2'><hr size='1'></td></tr>
-<tr>
-</tr>
 </table>
-</center>
+
 </body>
 </html>

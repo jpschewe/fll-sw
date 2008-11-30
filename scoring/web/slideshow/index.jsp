@@ -36,9 +36,21 @@ session.setAttribute("slideShowLastImage",lastImage);
 
 int slideShowInterval;
 if(null == application.getAttribute("slideShowInterval")) {
-  slideShowInterval = 5000;
+  slideShowInterval = 10000;
 } else {
-  slideShowInterval = ((Integer)application.getAttribute("slideShowInterval")).intValue();
+  slideShowInterval = ((Integer)application.getAttribute("slideShowInterval")).intValue() * 1000;
+}
+
+// let the display specific value override the default value if it exists
+if(null != session.getAttribute("displayName")) {
+  final String displayName = (String)session.getAttribute("displayName");
+  if(null != application.getAttribute(displayName + "_slideShowInterval")) {
+    slideShowInterval = ((Integer)application.getAttribute(displayName + "_slideShowInterval")).intValue() * 1000;   
+  }
+}
+
+if(slideShowInterval < 1) {
+  slideShowInterval = 1 * 1000;
 }
 %>
 
@@ -46,6 +58,12 @@ if(null == application.getAttribute("slideShowInterval")) {
 <head>
   <style>
     FONT {color: #ffffff; font-family: "Arial"}
+html {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
+}    
   </style>
   <script language=javascript>
     window.setInterval("location.href='index.jsp'",<%=slideShowInterval %>);
