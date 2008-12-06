@@ -93,6 +93,7 @@ public final class ImportDocument {
       SQLFunctions.closePreparedStatement(prep);
       SQLFunctions.closeConnection(connection);
     }
+    LOG.info("Inserted document " + args[0] + " into database " + args[1]);
     System.exit(0);
   }
 

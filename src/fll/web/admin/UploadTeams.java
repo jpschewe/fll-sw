@@ -149,7 +149,7 @@ public final class UploadTeams {
         if(values.length > 0) { // skip empty lines
           int column = 1;
           for(final String value : values) {
-            insertPrep.setString(column, value);
+            insertPrep.setString(column, null == value ? null : value.trim());
             ++column;
           }
           for(; column <= columnNamesSeen.size(); column++) {

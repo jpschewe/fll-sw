@@ -36,10 +36,10 @@ assignments for the selected teams will be removed</p>
     <c:forEach var="tournament" items="${tournamentNames}">
      <c:choose>
       <c:when test="${tournament == region}">
-       <option selected><c:out value="${tournament}" /></option>
+       <option value='${tournament}' selected><c:out value="${tournament}" /></option>
       </c:when>
       <c:otherwise>
-       <option><c:out value="${tournament}" /></option>
+       <option value='${tournament}'><c:out value="${tournament}" /></option>
       </c:otherwise>
      </c:choose>
     </c:forEach>

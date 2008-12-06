@@ -53,6 +53,14 @@ public class XMLWriter {
     _output = (writer instanceof PrintWriter) ? (PrintWriter)writer : new PrintWriter(writer);
   }
 
+  private String _stylesheet = null;
+  public String getStyleSheet() {
+    return _stylesheet;
+  }
+  public void setStyleSheet(final String stylesheet) {
+    _stylesheet = stylesheet;
+  }
+  
   /**
    * Recursively write out node.
    */
@@ -67,6 +75,10 @@ public class XMLWriter {
       final Document document = (Document)node;
       indent();
       _output.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+      
+      if(null != getStyleSheet()) {
+        _output.println("<?xml-stylesheet type='text/css' href='" + getStyleSheet() + "'?>");
+      }
       _output.flush();
       write(((Node) (document.getDoctype())));
       write(((Node) (document.getDocumentElement())));

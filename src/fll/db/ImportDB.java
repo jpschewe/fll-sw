@@ -329,10 +329,10 @@ public final class ImportDB {
       destPrep.setString(1, tournament);
       destPrep.executeUpdate();
       SQLFunctions.closePreparedStatement(destPrep);
-      sourcePrep = sourceConnection.prepareStatement("SELECT TeamNumber, event_division, advanced FROM TournamentTeams WHERE Tournament = ?");
+      sourcePrep = sourceConnection.prepareStatement("SELECT TeamNumber, event_division FROM TournamentTeams WHERE Tournament = ?");
       sourcePrep.setString(1, tournament);
       destPrep = destinationConnection
-          .prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, advanced) VALUeS (?, ?, ?, ?)");
+          .prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) VALUeS (?, ?, ?, ?)");
       destPrep.setString(1, tournament);
       sourceRS = sourcePrep.executeQuery();
       while(sourceRS.next()) {
