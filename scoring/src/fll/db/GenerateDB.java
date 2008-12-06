@@ -183,7 +183,6 @@ public final class GenerateDB {
                            + "  TeamNumber integer NOT NULL,"
                            + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
                            + "  event_division varchar(32) default '1' NOT NULL,"
-                           + "  advanced boolean default FALSE NOT NULL,"
                            + "  PRIMARY KEY (TeamNumber, Tournament)"
                            + ")");
       }

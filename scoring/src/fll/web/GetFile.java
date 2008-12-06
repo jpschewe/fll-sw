@@ -132,6 +132,19 @@ public final class GetFile extends HttpServlet {
         final ServletOutputStream os = response.getOutputStream();
         os.println("Judges are not properly assigned, please go back to the administration page and assign judges");
       }
+    } else if("challenge.xml".equals(filename)) {
+      final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
+
+      final XMLWriter xmlwriter = new XMLWriter();
+
+      response.reset();
+      response.setContentType("text/xml");
+      response.setHeader("Content-Disposition", "filename=challenge.xml");
+      xmlwriter.setOutput(response.getOutputStream(), null);
+      xmlwriter.setNeedsIndent(true);
+      xmlwriter.setStyleSheet("fll.css");
+      xmlwriter.write(challengeDocument);
+
     } else if("subjective-data.zip".equals(filename)) {
       final Connection connection = (Connection)application.getAttribute("connection");
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
