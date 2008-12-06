@@ -193,7 +193,7 @@ public final class ImportDB {
         final String location = memRS.getString(2);
         final String nextTournament = memRS.getString(3);
         
-        // add the tournament to the tourrnaments table if it doesn't already
+        // add the tournament to the tournaments table if it doesn't already
         // exist
         checkPrep.setString(1, tournament);
         checkRS = checkPrep.executeQuery();
@@ -362,12 +362,13 @@ public final class ImportDB {
         // Note: If TimeStamp is no longer the 4th element, then the hack below needs to be modified
         columns.append(" TimeStamp,");
         final List<Element> goals = XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"));
-        final int numColumns = goals.size() + 6;
+        final int numColumns = goals.size() + 7;
         for(final Element element : goals) {
           columns.append(" " + element.getAttribute("name") + ",");
         }
         columns.append(" NoShow,");
-        columns.append(" Bye");
+        columns.append(" Bye,");
+        columns.append(" Verified");
 
         StringBuffer sql = new StringBuffer();
         sql.append("INSERT INTO ");

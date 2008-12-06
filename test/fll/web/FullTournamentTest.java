@@ -608,6 +608,8 @@ public class FullTournamentTest {
               form.setParameter(name, value);
             }
           }
+          // Set the verified field to yes
+          form.setParameter("Verified", "1");
         }
 
         // submit score
