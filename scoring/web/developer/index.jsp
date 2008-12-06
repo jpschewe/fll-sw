@@ -26,7 +26,7 @@
  </c:redirect>
 
 </c:if>
-<%-- end if a form submssion --%>
+<%-- end if a form submission --%>
 
 <html>
 <head>
