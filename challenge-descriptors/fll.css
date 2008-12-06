@@ -9,44 +9,81 @@
 
    Eric Engstrom (engstrom@mtu.net)
  */
-
-* { 
-  display:      block;
-  margin: 	10pt;
-  font-family:  Comic SANS MS,fantasy,times,serif;
-  text-aligh:	left;
+* {
+	display: block;
+	margin: 10pt;
+	font-family: Comic SANS MS, fantasy, times, serif;
+	text-align: left;
 }
 
-fll:before { 
-  margin-bottom: 200%;
-  font-size:	200%;
-  text-align: 	center;
-  content: 	attr(title)
+fll:before {
+	margin-bottom: 200%;
+	font-size: 200%;
+	text-align: center;
+	content: attr(title)
 }
 
-goal:before { 
-  content: "Goal: '" attr(title) "' [" attr(name) "]";
+goal:before {
+	content: "Goal: '" attr(title) "' [" attr(name) "]";
 }
 
-restriction>* { 
-  display: inline;
-  margin-right: 0pt;
-  margin-left: 0pt;
+restriction>* {
+	display: inline;
+	margin-right: 0pt;
+	margin-left: 0pt;
 }
+
 restriction:before {
-  content: "Restriction: " attr(lowerBound) " <= ";
+	content: "Restriction: " attr(lowerBound) " <= ";
 }
+
 restriction:after {
-  content: " <= " attr(upperBound);
+	content: " <= " attr(upperBound);
 }
+
+tiebreaker:before {
+	content: "Tiebreaker";
+}
+
+test:before {
+	content: "Team with the " attr(winner) " score wins";
+}
+
+Performance:before {
+	content: "Performance";
+}
+
+subjectiveCategory:before {
+	content: attr(title);
+}
+
+term[coefficient]:before {
+	content:  attr(coefficient) " x " attr(scoreType) "(" attr(goal);
+}
+/*
+term[floatingPoint]:before {
+	content: attr(floatingPoint);
+}
+
+term[scoreType]:before {
+	content: attr(scoreType);
+}
+*/
+
+term:before {
+	content: attr(scoreType) "(" attr(goal);
+}
+
+
+term:after {
+	content: ")";
+}
+
 
 term:not(:last-child):after {
-  content: " + ";
-}
-term[coefficient]:before{ 
-  content: attr(coefficient) "x " attr(goal);
-}
-term:before {
-  content: attr(goal);
+  content: ") + ";
 }
 
+constant:before {
+	content: attr(value);
+}
