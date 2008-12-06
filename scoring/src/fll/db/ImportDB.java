@@ -332,13 +332,12 @@ public final class ImportDB {
       sourcePrep = sourceConnection.prepareStatement("SELECT TeamNumber, event_division FROM TournamentTeams WHERE Tournament = ?");
       sourcePrep.setString(1, tournament);
       destPrep = destinationConnection
-          .prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) VALUeS (?, ?, ?, ?)");
+          .prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) VALUeS (?, ?, ?)");
       destPrep.setString(1, tournament);
       sourceRS = sourcePrep.executeQuery();
       while(sourceRS.next()) {
         destPrep.setInt(2, sourceRS.getInt(1));
         destPrep.setString(3, sourceRS.getString(2));
-        destPrep.setBoolean(4, sourceRS.getBoolean(3));
         destPrep.executeUpdate();
       }
       SQLFunctions.closeResultSet(sourceRS);
