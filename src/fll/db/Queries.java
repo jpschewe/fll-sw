@@ -212,6 +212,8 @@ public final class Queries {
    */
   public static final String PERFORMANCE_CATEGORY_NAME = "Performance";
 
+  public static final int NO_SHOW_RANK = -1;
+
   /**
    * Get the ranking of all teams in all categories.
    * 
@@ -263,7 +265,8 @@ public final class Queries {
 
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
-    for(final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+    for(final Element subjectiveElement : XMLUtils
+        .filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       final String title = subjectiveElement.getAttribute("title");
       final String name = subjectiveElement.getAttribute("name");
       subjectiveCategories.put(title, name);
@@ -312,8 +315,10 @@ public final class Queries {
                 teamRanks = new HashMap<String, Integer>();
                 teamMap.put(team, teamRanks);
               }
-              // 3 decimal places should be considered equal
-              if(Math.abs(score - prevScore) < 0.001) {
+              if(Double.isNaN(score)) {
+                teamRanks.put(categoryTitle, NO_SHOW_RANK);
+              } else if(Math.abs(score - prevScore) < 0.001) {
+                // 3 decimal places should be considered equal
                 teamRanks.put(categoryTitle, tieRank);
               } else {
                 tieRank = rank;
@@ -2043,7 +2048,6 @@ public final class Queries {
    * @return true if everything is ok
    */
   public static boolean isJudgesProperlyAssigned(final Connection connection, final Document document) throws SQLException {
-
 
     PreparedStatement prep = null;
     ResultSet rs = null;

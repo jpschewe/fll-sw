@@ -106,11 +106,28 @@ pageContext.setAttribute("isBye", Boolean.valueOf(Queries.isBye(connection, tour
 
 <script language="javascript">
     <c:if test="${not isBye}">
+    <!-- Verified -->
+    var Verified;
+    function set_Verified(newValue) {
+      Verified = newValue;
+      refresh();
+    }
+
 <!-- No Show -->
 var gbl_NoShow;
 function setNoShow(value) {
   gbl_NoShow = value;
   refresh();
+}
+function submit_NoShow() {
+ if(confirm("Are you sure this is a 'No Show'")) {
+  gbl_NoShow = 1;
+  Verified = 1;
+  refresh();
+  return 1;
+ } else {
+  return 0;
+ }
 }
 
 function init() {
@@ -122,8 +139,8 @@ function init() {
     ScoreEntry.generateInitForScoreEdit(out, application, challengeDocument, team.getTeamNumber(), lRunNumber);
   %>
   </c:if>
+  gbl_NoShow = 0;
   <c:if test="${not editFlag}">
-    gbl_NoShow = 0;
         // Always init the special double-check column
     Verified = 0;
     reset();
@@ -136,13 +153,8 @@ function init() {
 <%ScoreEntry.generateReset(out, challengeDocument);%>
 
 function refresh() {
-  if(gbl_NoShow == 1) {
-    reset();
-    document.scoreEntry.NoShow[0].checked = true;
-  } else {
-    document.scoreEntry.NoShow[1].checked = true;
-  }
-
+  document.scoreEntry.NoShow.value = gbl_NoShow;
+  
   var score = 0;
 
   <%ScoreEntry.generateRefreshBody(out, challengeDocument);%>
@@ -300,6 +312,7 @@ function CancelClicked() {
                   <input type='text' name='totalScore' size='3' readonly>
                 </td>
               </tr>
+              <!-- 
               <tr>
                 <td>
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color="red">No Show:</font>
@@ -319,6 +332,8 @@ function CancelClicked() {
                 </td>
                 <td colspan='3'>&nbsp;</td>
               </tr>
+              -->
+              <input type='hidden' name='NoShow'/>
               <%ScoreEntry.generateVerificationInput(out, challengeDocument, request);%>
             </c:if> <!-- end check for bye -->
             <c:if test="${isBye}">
@@ -331,7 +346,7 @@ function CancelClicked() {
               <td colspan='3' align='right'>
                 <c:if test="${not isBye}">
                   <c:if test="${editFlag}">
-                    <input type='submit' id='submit' name='submit' value='Submit Score' onclick='return confirm("You are changing a score -- Are you sure?")'>
+                    <input type='submit' id='submit' name='submit' value='Submit Score' onclick='return confirm("Submit Changes?")'>
                   </c:if>
                   <c:if test="${not editFlag}">
                     <input type='submit' id='submit' name='submit' value='Submit Score' onclick='return confirm("Submit Data -- Are you sure?")'>
@@ -342,7 +357,9 @@ function CancelClicked() {
                   <input type='submit' name='delete' value='Delete Score' onclick='return confirm("Are you sure you want to delete this score?")'>
                 </c:if>
               </td>
-              <td colspan='2'>&nbsp;</td>
+              <td colspan='2'>
+                <input type='submit' id='submit' name='submit' value='No Show' onclick='return submit_NoShow()'>
+              </td>
             </tr>
           </table> <!-- end score entry table  -->
 

@@ -57,7 +57,6 @@ public class RankingReport extends HttpServlet {
 
   private static final Font HEADER_FONT = TITLE_FONT;
 
-
   @Override
   protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
     doGet(request, response);
@@ -69,7 +68,6 @@ public class RankingReport extends HttpServlet {
       final ServletContext application = getServletContext();
       final Connection connection = (Connection)application.getAttribute("connection");
       final org.w3c.dom.Document challengeDocument = (org.w3c.dom.Document)application.getAttribute("challengeDocument");
-      
 
       // create simple doc and write to a ByteArrayOutputStream
       final Document document = new Document(PageSize.LETTER);
@@ -77,7 +75,7 @@ public class RankingReport extends HttpServlet {
       final PdfWriter writer = PdfWriter.getInstance(document, baos);
       final Element root = challengeDocument.getDocumentElement();
       writer.setPageEvent(new PageEventHandler(root.getAttribute("title"), Queries.getCurrentTournament(connection)));
-      
+
       document.open();
 
       document.addTitle("Ranking Report");
@@ -99,13 +97,19 @@ public class RankingReport extends HttpServlet {
           para.add(Chunk.NEWLINE);
           para
               .add(new Chunk(
-                             "Each team is ranked in each category in the judging group and division they were judged in (if mutiple judging groups exist). Performance and Overall score are ranked by division only. Team may have the same rank if they were tied or were in different judging groups. ", RANK_VALUE_FONT));
+                  "Each team is ranked in each category in the judging group and division they were judged in (if mutiple judging groups exist). Performance and Overall score are ranked by division only. Team may have the same rank if they were tied or were in different judging groups. ",
+                  RANK_VALUE_FONT));
           para.add(Chunk.NEWLINE);
           para.add(Chunk.NEWLINE);
           for(final Map.Entry<String, Integer> rankEntry : teamEntry.getValue().entrySet()) {
             para.add(new Chunk(rankEntry.getKey() + ": ", RANK_TITLE_FONT));
 
-            para.add(new Chunk(String.valueOf(rankEntry.getValue()), RANK_VALUE_FONT));
+            final int rank = rankEntry.getValue();
+            if(Queries.NO_SHOW_RANK == rank) {
+              para.add(new Chunk("No Show", RANK_VALUE_FONT));
+            } else {
+              para.add(new Chunk(String.valueOf(rank), RANK_VALUE_FONT));
+            }
             para.add(Chunk.NEWLINE);
           }
           document.add(para);
@@ -144,10 +148,13 @@ public class RankingReport extends HttpServlet {
       _challengeTitle = challengeTitle;
       _formattedDate = DateFormat.getDateInstance().format(new Date());
     }
+
     private String _formattedDate;
+
     private String _tournament;
+
     private String _challengeTitle;
-    
+
     @Override
     // initialization of the header table
     public void onEndPage(final PdfWriter writer, final Document document) {
