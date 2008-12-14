@@ -496,7 +496,7 @@ public final class ScoreEntry {
         + " AND Tournament = '" + tournament + "'");
     try {
       if(rs.next()) {
-        writer.println("  gbl_NoShow = " + rs.getString("NoShow") + ";");
+        //writer.println("  gbl_NoShow = " + rs.getString("NoShow") + ";");
 
         final Element rootElement = document.getDocumentElement();
         final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
