@@ -168,8 +168,13 @@ public class ParseSchedule {
 
     final CSVReader csvreader = new CSVReader(new FileReader(file));
 
-    String[] line;
-    while(null != (line = csvreader.readNext()) && _teamNumColumn == -1) {
+    while(_teamNumColumn == -1) {
+      final String[] line = csvreader.readNext();
+      if(null == line) {
+        LOG.fatal("Cannot find header line and reached EOF");
+        System.exit(1);
+      }
+      
       _teamNumColumn = -1;
       _divisionColumn = -1;
       _presentationColumn = -1;
@@ -576,6 +581,7 @@ public class ParseSchedule {
    */
   private TeamScheduleInfo parseLine(final CSVReader csvReader) throws IOException {
     final String[] line = csvReader.readNext();
+
     try {
 
       final String teamNumberStr = line[_teamNumColumn];
