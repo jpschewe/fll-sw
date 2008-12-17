@@ -523,7 +523,7 @@
 
 	</target>
 
-	<target name="-tomcat.run">
+	<target name="-tomcat.run" depends="jvm.expand">
 		<java jvm="${jvm}" classname="org.apache.catalina.startup.Bootstrap" fork="true" spawn="${spawn}" taskname="tomcat">
   		<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/tomcat-cobertura.ser"/>
 
