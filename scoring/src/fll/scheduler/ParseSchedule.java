@@ -95,6 +95,26 @@ public class ParseSchedule {
   private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm");
 
   private static final DateFormat DATE_FORMAT_SS = new SimpleDateFormat("HH:mm:ss");
+  
+  public static final long SECONDS_PER_MINUTE = 60;
+
+  public static final long PERFORMANCE_DURATION = 5 * SECONDS_PER_MINUTE * 1000;
+
+  public static final long SUBJECTIVE_DURATION = 20 * SECONDS_PER_MINUTE * 1000;
+
+  public static final long CHANGETIME = 15 * SECONDS_PER_MINUTE * 1000;
+
+  /**
+   * This is the time required between performance runs for each team.
+   */
+  public static final long PERFORMANCE_CHANGETIME = 45 * SECONDS_PER_MINUTE * 1000;
+
+  /**
+   * This is the time required between performance runs for the two teams in
+   * involved in the performance run that crosses round 1 and round 2 when there
+   * is an odd number of teams.
+   */
+  public static final long SPECIAL_PERFORMANCE_CHANGETIME = 30 * SECONDS_PER_MINUTE * 1000;
 
   /**
    * @param args
@@ -423,26 +443,6 @@ public class ParseSchedule {
 
     return retval;
   }
-
-  public static final long SECONDS_PER_MINUTE = 60;
-
-  public static final long PERFORMANCE_DURATION = 5 * SECONDS_PER_MINUTE * 1000;
-
-  public static final long SUBJECTIVE_DURATION = 20 * SECONDS_PER_MINUTE * 1000;
-
-  public static final long CHANGETIME = 15 * SECONDS_PER_MINUTE * 1000;
-
-  /**
-   * This is the time required between performance runs for each team.
-   */
-  public static final long PERFORMANCE_CHANGETIME = 45 * SECONDS_PER_MINUTE * 1000;
-
-  /**
-   * This is the time required between performance runs for the two teams in
-   * involved in the performance run that crosses round 1 and round 2 when there
-   * is an odd number of teams.
-   */
-  public static final long SPECIAL_PERFORMANCE_CHANGETIME = 30 * SECONDS_PER_MINUTE * 1000;
 
   /**
    * Find the round of the opponent for a given team in a given round.
