@@ -8,6 +8,7 @@ package fll.model;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -340,6 +341,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
       throw new RuntimeException(pe);
     }
   }
+
   private final Element _subjectiveElement;
 
   /**
@@ -371,8 +373,8 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
   }
 
   public void sort(final int column) {
-    // only sort first 4 columns
-    if(column < 4) {
+    // only sort first 4 columns and the total score
+    if(column < 4 || column == getNumGoals() + 5) {
       if(column == _sortedColumn) {
         _ascending = !_ascending;
       } else {
@@ -420,8 +422,16 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
           final String judge2 = e2.getAttribute("judge");
           return judge1.compareTo(judge2);
         default:
-          // don't sort other columns
-          return 0;
+          if(getSortedColumn() == getNumGoals() + 5) {
+            final SubjectiveTeamScore scoreOne = new SubjectiveTeamScore(_subjectiveElement, e1);
+            final SubjectiveTeamScore scoreTwo = new SubjectiveTeamScore(_subjectiveElement, e2);
+            final double score1 = ScoreUtils.computeTotalScore(scoreOne);
+            final double score2 = ScoreUtils.computeTotalScore(scoreTwo);
+            return Double.compare(score1, score2);
+          } else {
+            // don't sort other columns
+            return 0;
+          }
         }
       } catch(final ParseException pe) {
         throw new RuntimeException(pe);
@@ -429,9 +439,5 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
     }
   };
 
-  private final Comparator<Element> _inverseComparator = new Comparator<Element>() {
-    public int compare(final Element o1, final Element o2) {
-      return -1 * _comparator.compare(o1, o2);
-    }
-  };
+  private final Comparator<Element> _inverseComparator = Collections.reverseOrder(_comparator);
 }
