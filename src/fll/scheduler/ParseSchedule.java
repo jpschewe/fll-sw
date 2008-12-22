@@ -7,6 +7,7 @@ package fll.scheduler;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -28,7 +29,16 @@ import org.apache.log4j.Logger;
 
 import au.com.bytecode.opencsv.CSVReader;
 
-import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.BadElementException;
+import com.lowagie.text.Cell;
+import com.lowagie.text.Chunk;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Table;
+import com.lowagie.text.pdf.PdfWriter;
 
 import fll.Utilities;
 
@@ -101,7 +111,7 @@ public class ParseSchedule {
 
   private static final DateFormat DATE_FORMAT_AM_PM_SS = new SimpleDateFormat("hh:mm:ss a");
 
-  private static final DateFormat OUTPUT_DATE_FORMAT = new SimpleDateFormat("HH:mm");
+  private static final DateFormat OUTPUT_DATE_FORMAT = new SimpleDateFormat("H:mm");
 
   private static final DateFormat DATE_FORMAT_SS = new SimpleDateFormat("HH:mm:ss");
 
@@ -285,6 +295,9 @@ public class ParseSchedule {
       System.exit(1);
     }
 
+    // TODO think about moving more of this out to instance variables and doing
+    // more work in another function
+
     final Map<Date, Map<String, List<TeamScheduleInfo>>> matches = new HashMap<Date, Map<String, List<TeamScheduleInfo>>>();
     final Set<String> tableColors = new HashSet<String>();
     final Set<String> divisions = new HashSet<String>();
@@ -314,45 +327,178 @@ public class ParseSchedule {
     verifyPresentationAtTime(schedule, numJudges);
     verifyTechnicalAtTime(schedule, numJudges);
 
-    computeGeneralSchedule(schedule, matches);
+//    computeGeneralSchedule(schedule, matches);
 
-    // print out detailed schedules
-    outputPresentationSchedule(schedule);
-    outputTechnicalSchedule(schedule);
-    outputPerformanceSchedule(schedule);
+    try {
+      outputDetailedSchedules(schedule);
+    } catch(final DocumentException e) {
+      throw new RuntimeException("Error creating PDF document", e);
+    }
+
   }
 
-  private void outputPerformanceSchedule(final List<TeamScheduleInfo> schedule) {
+  private void outputDetailedSchedules(final List<TeamScheduleInfo> schedule) throws DocumentException, IOException {
+    // print out detailed schedules
+    final Document detailedSchedules = new Document(PageSize.LETTER); // portrait
+
+    // Measurements are always in points (72 per inch)
+    // This sets up 1/4 inch margins
+    detailedSchedules.setMargins(0.25f * 72, 0.25f * 72, 0.35f * 72, 0.35f * 72);
+
+    // output to a PDF
+    // TODO generate the filename based on the name of the file that is
+    // currently being read
+    final FileOutputStream output = new FileOutputStream("detailedSchedules.pdf");
+    PdfWriter.getInstance(detailedSchedules, output);
+
+    detailedSchedules.open();
+
+    outputPresentationSchedule(schedule, detailedSchedules);
+    detailedSchedules.add(Chunk.NEXTPAGE);
+    
+    outputTechnicalSchedule(schedule, detailedSchedules);
+    detailedSchedules.add(Chunk.NEXTPAGE);
+    
+    outputPerformanceSchedule(schedule, detailedSchedules);
+
+    detailedSchedules.close();
+    output.close();
+
+  }
+
+  private void outputPerformanceSchedule(final List<TeamScheduleInfo> schedule, final Document detailedSchedules) throws DocumentException {
+
     for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
       Collections.sort(schedule, getPerformanceComparator(round));
-      LOGGER.info(new Formatter().format("Team #\tDiv\tSchool or Organization\tTeam Name\tPerf #%d\tPerf %d Table", (round+1), (round+1)));
-      final String formatString = "%d\t%s\t%s\t%s\t%s\t%s %d";
+      
+      final Table table = createTable(6);
+      table.setWidths(new float[] { 2, 1, 3, 3, 2, 1 });
+
+      int row = 0;
+      table.addCell(createHeaderCell("Team #"), row, 0);
+      table.addCell(createHeaderCell("Div"), row, 1);
+      table.addCell(createHeaderCell("School or Organization"), row, 2);
+      table.addCell(createHeaderCell("Team Name"), row, 3);
+      table.addCell(createHeaderCell(new Formatter().format("Perf #%d", (round+1)).toString()), row, 4);
+      table.addCell(createHeaderCell(new Formatter().format("Perf %d Table", (round+1)).toString()), row, 5);
+      ++row;
+      
+//      LOGGER.info(new Formatter().format("Team #\tDiv\tSchool or Organization\tTeam Name\tPerf #%d\tPerf %d Table", (round + 1), (round + 1)));
+//      final String formatString = "%d\t%s\t%s\t%s\t%s\t%s %d";
       for(final TeamScheduleInfo si : schedule) {
-        LOGGER.info(new Formatter().format(formatString, si.teamNumber, si.division, si.organization, si.teamName, OUTPUT_DATE_FORMAT
-            .format(si.perf[round]), si.perfTableColor[round], si.perfTableSide[round]));
+//        LOGGER.info(new Formatter().format(formatString, si.teamNumber, si.division, si.organization, si.teamName, OUTPUT_DATE_FORMAT
+//            .format(si.perf[round]), si.perfTableColor[round], si.perfTableSide[round]));
+        
+        table.addCell(createCell(String.valueOf(si.teamNumber)), row, 0);
+        table.addCell(createCell(si.division), row, 1);
+        table.addCell(createCell(si.organization), row, 2);
+        table.addCell(createCell(si.teamName), row, 3);
+        table.addCell(createCell(OUTPUT_DATE_FORMAT.format(si.perf[round])), row, 4);
+        table.addCell(createCell(si.perfTableColor[round] + " " + si.perfTableSide[round]), row, 5);
+
+        ++row;
       }
+      
+      detailedSchedules.add(table);
+      detailedSchedules.add(Chunk.NEXTPAGE);
     }
   }
 
-  private void outputPresentationSchedule(final List<TeamScheduleInfo> schedule) {
-    Collections.sort(schedule, _presentationComparator);
-    LOGGER.info("Team #\tDiv\tSchool or Organization\tTeam Name\tPresentation\tJudging Station");
-    final String formatString = "%d\t%s\t%s\t%s\t%s\t%s";
-    for(final TeamScheduleInfo si : schedule) {
-      LOGGER.info(new Formatter().format(formatString, si.teamNumber, si.division, si.organization, si.teamName, OUTPUT_DATE_FORMAT
-          .format(si.presentation), si.judge));
-    }
-    
+  private static Cell createCell(final String text) throws BadElementException {
+    final Cell cell = createBasicCell(new Chunk(text));
+    return cell;
   }
 
-  private void outputTechnicalSchedule(final List<TeamScheduleInfo> schedule) {
+  private static Cell createBasicCell(final Chunk chunk) throws BadElementException {
+    final Cell cell = new Cell(chunk);
+    cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+    cell.setUseDescender(true);
+    return cell;
+  }
+
+  private static Cell createHeaderCell(final String text) throws BadElementException {
+    final Chunk chunk = new Chunk(text);
+    chunk.getFont().setStyle(Font.BOLD);
+    final Cell cell = createBasicCell(chunk);
+    cell.setHeader(true);
+
+    return cell;
+  }
+
+  private static Table createTable(final int rows) throws BadElementException {
+    final Table table = new Table(6);
+    table.setCellsFitPage(true);
+    table.setWidth(100);
+    return table;
+  }
+
+  private void outputPresentationSchedule(final List<TeamScheduleInfo> schedule, final Document detailedSchedules) throws DocumentException {
+      final Table table = createTable(6);
+      table.setWidths(new float[] { 2, 1, 3, 3, 2, 1 });
+
+      Collections.sort(schedule, _presentationComparator);
+      int row = 0;
+      // LOGGER.info("Team #\tDiv\tSchool or Organization\tTeam Name\tPresentation\tJudging Station");
+      table.addCell(createHeaderCell("Team #"), row, 0);
+      table.addCell(createHeaderCell("Div"), row, 1);
+      table.addCell(createHeaderCell("School or Organization"), row, 2);
+      table.addCell(createHeaderCell("Team Name"), row, 3);
+      table.addCell(createHeaderCell("Presentation"), row, 4);
+      table.addCell(createHeaderCell("Judging Station"), row, 5);
+      ++row;
+
+      // final String formatString = "%d\t%s\t%s\t%s\t%s\t%s";
+      for(final TeamScheduleInfo si : schedule) {
+        // LOGGER.info(new Formatter().format(formatString, si.teamNumber,
+        // si.division, si.organization, si.teamName, OUTPUT_DATE_FORMAT
+        // .format(si.presentation), si.judge));
+        table.addCell(createCell(String.valueOf(si.teamNumber)), row, 0);
+        table.addCell(createCell(si.division), row, 1);
+        table.addCell(createCell(si.organization), row, 2);
+        table.addCell(createCell(si.teamName), row, 3);
+        table.addCell(createCell(OUTPUT_DATE_FORMAT.format(si.presentation)), row, 4);
+        table.addCell(createCell(si.judge), row, 5);
+
+        ++row;
+      }
+
+      detailedSchedules.add(table);
+
+  }
+
+  private void outputTechnicalSchedule(final List<TeamScheduleInfo> schedule, final Document detailedSchedules) throws DocumentException {
     Collections.sort(schedule, _technicalComparator);
-    LOGGER.info("Team #\tDiv\tSchool or Organization\tTeam Name\tTechnical\tJudging Station");
-    final String formatString = "%d\t%s\t%s\t%s\t%s\t%s";
+
+    final Table table = createTable(6);
+    table.setWidths(new float[] { 2, 1, 3, 3, 2, 1 });
+
+    int row = 0;
+
+    // header
+    table.addCell(createHeaderCell("Team #"), row, 0);
+    table.addCell(createHeaderCell("Div"), row, 1);
+    table.addCell(createHeaderCell("School or Organization"), row, 2);
+    table.addCell(createHeaderCell("Team Name"), row, 3);
+    table.addCell(createHeaderCell("Technical"), row, 4);
+    table.addCell(createHeaderCell("Judging Station"), row, 5);
+    ++row;
+
+    // LOGGER.info("Team #\tDiv\tSchool or Organization\tTeam Name\tTechnical\tJudging Station");
+    // final String formatString = "%d\t%s\t%s\t%s\t%s\t%s";
     for(final TeamScheduleInfo si : schedule) {
-      LOGGER.info(new Formatter().format(formatString, si.teamNumber, si.division, si.organization, si.teamName, OUTPUT_DATE_FORMAT
-          .format(si.technical), si.judge));
+//      LOGGER.info(new Formatter().format(formatString, si.teamNumber, si.division, si.organization, si.teamName, OUTPUT_DATE_FORMAT
+//          .format(si.technical), si.judge));
+      table.addCell(createCell(String.valueOf(si.teamNumber)), row, 0);
+      table.addCell(createCell(si.division), row, 1);
+      table.addCell(createCell(si.organization), row, 2);
+      table.addCell(createCell(si.teamName), row, 3);
+      table.addCell(createCell(OUTPUT_DATE_FORMAT.format(si.technical)), row, 4);
+      table.addCell(createCell(si.judge), row, 5);
+
+      ++row;
     }
+    detailedSchedules.add(table);
+
   }
 
   /**
