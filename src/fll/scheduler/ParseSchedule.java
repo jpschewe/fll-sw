@@ -334,7 +334,7 @@ public class ParseSchedule {
     }
   }
 
-  private PdfPTable outputPresentationSchedule(final List<TeamScheduleInfo> schedule) {
+  private void outputPresentationSchedule(final List<TeamScheduleInfo> schedule) {
     Collections.sort(schedule, _presentationComparator);
     LOGGER.info("Team #\tDiv\tSchool or Organization\tTeam Name\tPresentation\tJudging Station");
     final String formatString = "%d\t%s\t%s\t%s\t%s\t%s";
@@ -343,7 +343,6 @@ public class ParseSchedule {
           .format(si.presentation), si.judge));
     }
     
-    return table;
   }
 
   private void outputTechnicalSchedule(final List<TeamScheduleInfo> schedule) {
