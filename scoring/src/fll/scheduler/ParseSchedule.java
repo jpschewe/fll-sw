@@ -135,6 +135,18 @@ public class ParseSchedule {
    */
   public static final long SPECIAL_PERFORMANCE_CHANGETIME = 30 * SECONDS_PER_MINUTE * 1000;
 
+  private Map<Date, Map<String, List<TeamScheduleInfo>>> _matches = new HashMap<Date, Map<String, List<TeamScheduleInfo>>>();
+
+  private final File _file;
+
+  private final Set<String> _tableColors = new HashSet<String>();
+
+  private final Set<String> _divisions = new HashSet<String>();
+
+  private final Set<String> _judges = new HashSet<String>();
+
+  private final List<TeamScheduleInfo> _schedule = new LinkedList<TeamScheduleInfo>();
+
   /**
    * @param args
    */
@@ -153,20 +165,20 @@ public class ParseSchedule {
           }
         });
         for(final File f : files) {
-          final ParseSchedule ps = new ParseSchedule();
+          final ParseSchedule ps = new ParseSchedule(f);
 
           try {
-            ps.parseFile(f);
+            ps.parseFile();
           } catch(final IOException ioe) {
             LOGGER.fatal(ioe, ioe);
             System.exit(1);
           }
         }
       } else if(file.isFile()) {
-        final ParseSchedule ps = new ParseSchedule();
+        final ParseSchedule ps = new ParseSchedule(file);
 
         try {
-          ps.parseFile(file);
+          ps.parseFile();
         } catch(final IOException ioe) {
           LOGGER.fatal(ioe, ioe);
           System.exit(1);
@@ -177,15 +189,17 @@ public class ParseSchedule {
     LOGGER.info("Finished, if no errors found, you're good");
   }
 
-  public void parseFile(final File file) throws IOException {
-    LOGGER.info(new Formatter().format("Reading file %s", file.getAbsoluteFile()));
+  public ParseSchedule(final File f) {
+    _file = f;
+  }
 
-    if(!file.canRead() || !file.isFile()) {
-      LOGGER.fatal("File is not readable or not a file: " + file.getAbsolutePath());
-      return;
-    }
-
-    final CSVReader csvreader = new CSVReader(new FileReader(file));
+  /**
+   * Find the index of the columns. If a column can't be found, output an error
+   * and exit.
+   * 
+   * @throws IOException
+   */
+  private void findColumns(final CSVReader csvreader) throws IOException {
 
     while(_teamNumColumn == -1) {
       final String[] line = csvreader.readNext();
@@ -294,60 +308,96 @@ public class ParseSchedule {
       LOGGER.fatal("Could not find perf3TableColumn");
       System.exit(1);
     }
+  }
 
-    // TODO think about moving more of this out to instance variables and doing
-    // more work in another function
-
-    final Map<Date, Map<String, List<TeamScheduleInfo>>> matches = new HashMap<Date, Map<String, List<TeamScheduleInfo>>>();
-    final Set<String> tableColors = new HashSet<String>();
-    final Set<String> divisions = new HashSet<String>();
-    final Set<String> judges = new HashSet<String>();
-    final List<TeamScheduleInfo> schedule = new LinkedList<TeamScheduleInfo>();
+  /**
+   * Parse the data of the schedule.
+   * 
+   * @throws IOException
+   */
+  private void parseData(final CSVReader csvreader) throws IOException {
     TeamScheduleInfo ti;
     while(null != (ti = parseLine(csvreader))) {
-      schedule.add(ti);
+      _schedule.add(ti);
 
       // keep track of some meta information
       for(int round = 0; round < ti.perfTableColor.length; ++round) {
-        tableColors.add(ti.perfTableColor[round]);
-        addToMatches(matches, ti, round);
+        _tableColors.add(ti.perfTableColor[round]);
+        addToMatches(_matches, ti, round);
       }
-      divisions.add(ti.division);
-      judges.add(ti.judge);
+      _divisions.add(ti.division);
+      _judges.add(ti.judge);
+    }
+  }
+
+  /**
+   * Verify the schedule.
+   * 
+   * @return if the schedule is valid.
+   * @throws IOException
+   */
+  private boolean verifySchedule() {
+    // create separate local variables for each return so that the function is
+    // guaranteed to be called. If this isn't done the short-circuit boolean
+    // logic evaluation will prevent the function from being called.
+
+    boolean retval = true;
+
+    for(final TeamScheduleInfo verify : _schedule) {
+      final boolean ret = verifyTeam(_matches, verify);
+      retval &= ret;
     }
 
-    for(final TeamScheduleInfo verify : schedule) {
-      verifyTeam(matches, verify);
-    }
-
-    final int numberOfTableColors = tableColors.size();
+    final int numberOfTableColors = _tableColors.size();
     // final int numDivisions = divisions.size();
-    final int numJudges = judges.size();
-    verifyPerformanceAtTime(numberOfTableColors, schedule);
-    verifyPresentationAtTime(schedule, numJudges);
-    verifyTechnicalAtTime(schedule, numJudges);
+    final int numJudges = _judges.size();
+    boolean ret = verifyPerformanceAtTime(numberOfTableColors, _schedule);
+    retval &= ret;
+    ret = verifyPresentationAtTime(_schedule, numJudges);
+    retval &= ret;
+    ret = verifyTechnicalAtTime(_schedule, numJudges);
+    retval &= ret;
 
-//    computeGeneralSchedule(schedule, matches);
+    return retval;
+  }
+
+  public void parseFile() throws IOException {
+    LOGGER.info(new Formatter().format("Reading file %s", _file.getAbsoluteFile()));
+
+    if(!_file.canRead() || !_file.isFile()) {
+      LOGGER.fatal("File is not readable or not a file: " + _file.getAbsolutePath());
+      return;
+    }
+
+    final CSVReader csvreader = new CSVReader(new FileReader(_file));
+    findColumns(csvreader);
+
+    parseData(csvreader);
+
+    verifySchedule();
+
+    // computeGeneralSchedule(schedule, matches);
 
     try {
-      final String filename = file.getPath();
-      final int dotIdx = filename.lastIndexOf('.');
-      final String baseFilename;
-      if(-1 == dotIdx) {
-        baseFilename = filename;
-      } else {
-        baseFilename = filename.substring(0, dotIdx);
-      }
-      final File pdfFile = new File(baseFilename + "-detailed.pdf");
-      LOGGER.info("Writing detailed schedules to " + pdfFile.getAbsolutePath());
-      outputDetailedSchedules(schedule, pdfFile);
+      outputDetailedSchedules(_schedule);
     } catch(final DocumentException e) {
       throw new RuntimeException("Error creating PDF document", e);
     }
 
   }
 
-  private void outputDetailedSchedules(final List<TeamScheduleInfo> schedule, final File pdfFile) throws DocumentException, IOException {
+  private void outputDetailedSchedules(final List<TeamScheduleInfo> schedule) throws DocumentException, IOException {
+    final String filename = _file.getPath();
+    final int dotIdx = filename.lastIndexOf('.');
+    final String baseFilename;
+    if(-1 == dotIdx) {
+      baseFilename = filename;
+    } else {
+      baseFilename = filename.substring(0, dotIdx);
+    }
+    final File pdfFile = new File(baseFilename + "-detailed.pdf");
+    LOGGER.info("Writing detailed schedules to " + pdfFile.getAbsolutePath());
+
     // print out detailed schedules
     final Document detailedSchedules = new Document(PageSize.LETTER); // portrait
 
@@ -363,10 +413,10 @@ public class ParseSchedule {
 
     outputPresentationSchedule(schedule, detailedSchedules);
     detailedSchedules.add(Chunk.NEXTPAGE);
-    
+
     outputTechnicalSchedule(schedule, detailedSchedules);
     detailedSchedules.add(Chunk.NEXTPAGE);
-    
+
     outputPerformanceSchedule(schedule, detailedSchedules);
 
     detailedSchedules.close();
@@ -378,7 +428,7 @@ public class ParseSchedule {
 
     for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
       Collections.sort(schedule, getPerformanceComparator(round));
-      
+
       final Table table = createTable(6);
       table.setWidths(new float[] { 2, 1, 3, 3, 2, 1 });
 
@@ -387,10 +437,10 @@ public class ParseSchedule {
       table.addCell(createHeaderCell("Div"), row, 1);
       table.addCell(createHeaderCell("School or Organization"), row, 2);
       table.addCell(createHeaderCell("Team Name"), row, 3);
-      table.addCell(createHeaderCell(new Formatter().format("Perf #%d", (round+1)).toString()), row, 4);
-      table.addCell(createHeaderCell(new Formatter().format("Perf %d Table", (round+1)).toString()), row, 5);
+      table.addCell(createHeaderCell(new Formatter().format("Perf #%d", (round + 1)).toString()), row, 4);
+      table.addCell(createHeaderCell(new Formatter().format("Perf %d Table", (round + 1)).toString()), row, 5);
       ++row;
-      
+
       for(final TeamScheduleInfo si : schedule) {
         table.addCell(createCell(String.valueOf(si.teamNumber)), row, 0);
         table.addCell(createCell(si.division), row, 1);
@@ -401,7 +451,7 @@ public class ParseSchedule {
 
         ++row;
       }
-      
+
       detailedSchedules.add(table);
       detailedSchedules.add(Chunk.NEXTPAGE);
     }
@@ -436,31 +486,31 @@ public class ParseSchedule {
   }
 
   private void outputPresentationSchedule(final List<TeamScheduleInfo> schedule, final Document detailedSchedules) throws DocumentException {
-      final Table table = createTable(6);
-      table.setWidths(new float[] { 2, 1, 3, 3, 2, 1 });
+    final Table table = createTable(6);
+    table.setWidths(new float[] { 2, 1, 3, 3, 2, 1 });
 
-      Collections.sort(schedule, _presentationComparator);
-      int row = 0;
-      table.addCell(createHeaderCell("Team #"), row, 0);
-      table.addCell(createHeaderCell("Div"), row, 1);
-      table.addCell(createHeaderCell("School or Organization"), row, 2);
-      table.addCell(createHeaderCell("Team Name"), row, 3);
-      table.addCell(createHeaderCell("Presentation"), row, 4);
-      table.addCell(createHeaderCell("Judging Station"), row, 5);
+    Collections.sort(schedule, _presentationComparator);
+    int row = 0;
+    table.addCell(createHeaderCell("Team #"), row, 0);
+    table.addCell(createHeaderCell("Div"), row, 1);
+    table.addCell(createHeaderCell("School or Organization"), row, 2);
+    table.addCell(createHeaderCell("Team Name"), row, 3);
+    table.addCell(createHeaderCell("Presentation"), row, 4);
+    table.addCell(createHeaderCell("Judging Station"), row, 5);
+    ++row;
+
+    for(final TeamScheduleInfo si : schedule) {
+      table.addCell(createCell(String.valueOf(si.teamNumber)), row, 0);
+      table.addCell(createCell(si.division), row, 1);
+      table.addCell(createCell(si.organization), row, 2);
+      table.addCell(createCell(si.teamName), row, 3);
+      table.addCell(createCell(OUTPUT_DATE_FORMAT.format(si.presentation)), row, 4);
+      table.addCell(createCell(si.judge), row, 5);
+
       ++row;
+    }
 
-      for(final TeamScheduleInfo si : schedule) {
-        table.addCell(createCell(String.valueOf(si.teamNumber)), row, 0);
-        table.addCell(createCell(si.division), row, 1);
-        table.addCell(createCell(si.organization), row, 2);
-        table.addCell(createCell(si.teamName), row, 3);
-        table.addCell(createCell(OUTPUT_DATE_FORMAT.format(si.presentation)), row, 4);
-        table.addCell(createCell(si.judge), row, 5);
-
-        ++row;
-      }
-
-      detailedSchedules.add(table);
+    detailedSchedules.add(table);
 
   }
 
