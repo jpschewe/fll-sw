@@ -330,14 +330,24 @@ public class ParseSchedule {
 //    computeGeneralSchedule(schedule, matches);
 
     try {
-      outputDetailedSchedules(schedule);
+      final String filename = file.getPath();
+      final int dotIdx = filename.lastIndexOf('.');
+      final String baseFilename;
+      if(-1 == dotIdx) {
+        baseFilename = filename;
+      } else {
+        baseFilename = filename.substring(0, dotIdx);
+      }
+      final File pdfFile = new File(baseFilename + "-detailed.pdf");
+      LOGGER.info("Writing detailed schedules to " + pdfFile.getAbsolutePath());
+      outputDetailedSchedules(schedule, pdfFile);
     } catch(final DocumentException e) {
       throw new RuntimeException("Error creating PDF document", e);
     }
 
   }
 
-  private void outputDetailedSchedules(final List<TeamScheduleInfo> schedule) throws DocumentException, IOException {
+  private void outputDetailedSchedules(final List<TeamScheduleInfo> schedule, final File pdfFile) throws DocumentException, IOException {
     // print out detailed schedules
     final Document detailedSchedules = new Document(PageSize.LETTER); // portrait
 
@@ -346,9 +356,7 @@ public class ParseSchedule {
     detailedSchedules.setMargins(0.25f * 72, 0.25f * 72, 0.35f * 72, 0.35f * 72);
 
     // output to a PDF
-    // TODO generate the filename based on the name of the file that is
-    // currently being read
-    final FileOutputStream output = new FileOutputStream("detailedSchedules.pdf");
+    final FileOutputStream output = new FileOutputStream(pdfFile);
     PdfWriter.getInstance(detailedSchedules, output);
 
     detailedSchedules.open();
@@ -383,12 +391,7 @@ public class ParseSchedule {
       table.addCell(createHeaderCell(new Formatter().format("Perf %d Table", (round+1)).toString()), row, 5);
       ++row;
       
-//      LOGGER.info(new Formatter().format("Team #\tDiv\tSchool or Organization\tTeam Name\tPerf #%d\tPerf %d Table", (round + 1), (round + 1)));
-//      final String formatString = "%d\t%s\t%s\t%s\t%s\t%s %d";
       for(final TeamScheduleInfo si : schedule) {
-//        LOGGER.info(new Formatter().format(formatString, si.teamNumber, si.division, si.organization, si.teamName, OUTPUT_DATE_FORMAT
-//            .format(si.perf[round]), si.perfTableColor[round], si.perfTableSide[round]));
-        
         table.addCell(createCell(String.valueOf(si.teamNumber)), row, 0);
         table.addCell(createCell(si.division), row, 1);
         table.addCell(createCell(si.organization), row, 2);
@@ -438,7 +441,6 @@ public class ParseSchedule {
 
       Collections.sort(schedule, _presentationComparator);
       int row = 0;
-      // LOGGER.info("Team #\tDiv\tSchool or Organization\tTeam Name\tPresentation\tJudging Station");
       table.addCell(createHeaderCell("Team #"), row, 0);
       table.addCell(createHeaderCell("Div"), row, 1);
       table.addCell(createHeaderCell("School or Organization"), row, 2);
@@ -447,11 +449,7 @@ public class ParseSchedule {
       table.addCell(createHeaderCell("Judging Station"), row, 5);
       ++row;
 
-      // final String formatString = "%d\t%s\t%s\t%s\t%s\t%s";
       for(final TeamScheduleInfo si : schedule) {
-        // LOGGER.info(new Formatter().format(formatString, si.teamNumber,
-        // si.division, si.organization, si.teamName, OUTPUT_DATE_FORMAT
-        // .format(si.presentation), si.judge));
         table.addCell(createCell(String.valueOf(si.teamNumber)), row, 0);
         table.addCell(createCell(si.division), row, 1);
         table.addCell(createCell(si.organization), row, 2);
@@ -483,11 +481,7 @@ public class ParseSchedule {
     table.addCell(createHeaderCell("Judging Station"), row, 5);
     ++row;
 
-    // LOGGER.info("Team #\tDiv\tSchool or Organization\tTeam Name\tTechnical\tJudging Station");
-    // final String formatString = "%d\t%s\t%s\t%s\t%s\t%s";
     for(final TeamScheduleInfo si : schedule) {
-//      LOGGER.info(new Formatter().format(formatString, si.teamNumber, si.division, si.organization, si.teamName, OUTPUT_DATE_FORMAT
-//          .format(si.technical), si.judge));
       table.addCell(createCell(String.valueOf(si.teamNumber)), row, 0);
       table.addCell(createCell(si.division), row, 1);
       table.addCell(createCell(si.organization), row, 2);
