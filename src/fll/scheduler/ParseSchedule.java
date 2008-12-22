@@ -86,16 +86,16 @@ public class ParseSchedule {
 
   private int _perf3TableColumn = -1;
 
-  private int _numberOfRounds = 3;
+  private static int NUMBER_OF_ROUNDS = 3;
 
   private static final DateFormat DATE_FORMAT_AM_PM = new SimpleDateFormat("hh:mm a");
 
   private static final DateFormat DATE_FORMAT_AM_PM_SS = new SimpleDateFormat("hh:mm:ss a");
 
-  private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm");
+  private static final DateFormat OUTPUT_DATE_FORMAT = new SimpleDateFormat("HH:mm");
 
   private static final DateFormat DATE_FORMAT_SS = new SimpleDateFormat("HH:mm:ss");
-  
+
   public static final long SECONDS_PER_MINUTE = 60;
 
   public static final long PERFORMANCE_DURATION = 5 * SECONDS_PER_MINUTE * 1000;
@@ -174,7 +174,7 @@ public class ParseSchedule {
         LOG.fatal("Cannot find header line and reached EOF");
         System.exit(1);
       }
-      
+
       _teamNumColumn = -1;
       _divisionColumn = -1;
       _presentationColumn = -1;
@@ -289,6 +289,64 @@ public class ParseSchedule {
     verifyPresentationAtTime(schedule, numJudges);
     verifyTechnicalAtTime(schedule, numJudges);
 
+    computeGeneralSchedule(schedule, matches);
+
+  }
+
+  private void computeGeneralSchedule(final List<TeamScheduleInfo> schedule, final Map<Date, Map<String, List<TeamScheduleInfo>>> matches) {
+    Date minTechnical = null;
+    Date maxTechnical = null;
+    Date minPresentation = null;
+    Date maxPresentation = null;
+    final Date[] minPerf = new Date[NUMBER_OF_ROUNDS];
+    final Date[] maxPerf = new Date[NUMBER_OF_ROUNDS];
+
+    for(final TeamScheduleInfo si : schedule) {
+      if(null != si.technical) {
+        if(null == minTechnical || si.technical.before(minTechnical)) {
+          minTechnical = si.technical;
+        }
+        if(null == maxTechnical || si.technical.after(maxTechnical)) {
+          maxTechnical = si.technical;
+        }
+      }
+      if(null != si.presentation) {
+        if(null == minPresentation || si.presentation.before(minPresentation)) {
+          minPresentation = si.presentation;
+        }
+        if(null == maxPresentation || si.presentation.after(maxPresentation)) {
+          maxPresentation = si.presentation;
+        }
+      }
+
+      for(int i = 0; i < NUMBER_OF_ROUNDS; ++i) {
+        if(null != si.perf[i]) {
+          // ignore the teams that cross round boundaries
+          final int opponentRound = findOpponentRound(matches, si, i);
+          if(opponentRound == i) {
+            if(null == minPerf[i] || si.perf[i].before(minPerf[i])) {
+              minPerf[i] = si.perf[i];
+            }
+
+            if(null == maxPerf[i] || si.perf[i].after(maxPerf[i])) {
+              maxPerf[i] = si.perf[i];
+            }
+          }
+        }
+      }
+
+    }
+
+    // print out the general schedule
+    LOG.info("min technical: " + OUTPUT_DATE_FORMAT.format(minTechnical));
+    LOG.info("max technical: " + OUTPUT_DATE_FORMAT.format(maxTechnical));
+    LOG.info("min presentation: " + OUTPUT_DATE_FORMAT.format(minPresentation));
+    LOG.info("max presentation: " + OUTPUT_DATE_FORMAT.format(maxPresentation));
+    for(int i = 0; i < NUMBER_OF_ROUNDS; ++i) {
+      LOG.info("min performance round " + (i + 1) + ": " + OUTPUT_DATE_FORMAT.format(minPerf[i]));
+      LOG.info("max performance round " + (i + 1) + ": " + OUTPUT_DATE_FORMAT.format(maxPerf[i]));
+    }
+
   }
 
   /**
@@ -324,7 +382,7 @@ public class ParseSchedule {
     tableMatches.add(ti);
 
     if(tableMatches.size() > 2) {
-      LOG.error(new Formatter().format("Too many teams competing on table: %s at time: %s. Teams: %s", ti.perfTableColor[round], DATE_FORMAT
+      LOG.error(new Formatter().format("Too many teams competing on table: %s at time: %s. Teams: %s", ti.perfTableColor[round], OUTPUT_DATE_FORMAT
           .format(ti.perf[round]), tableMatches));
       return false;
     } else {
@@ -344,7 +402,7 @@ public class ParseSchedule {
     // constraint set 6
     final Map<Date, Set<Integer>> teamsAtTime = new HashMap<Date, Set<Integer>>();
     for(final TeamScheduleInfo si : schedule) {
-      for(int round = 0; round < _numberOfRounds; ++round) {
+      for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
         Set<Integer> teams;
         if(teamsAtTime.containsKey(si.perf[round])) {
           teams = teamsAtTime.get(si.perf[round]);
@@ -516,16 +574,16 @@ public class ParseSchedule {
     }
     if(ti.perf[0].getTime() + PERFORMANCE_DURATION + changetime > ti.perf[1].getTime()) {
       LOG.error(new Formatter().format("Team %d doesn't have enough time (%d minutes) between performance 1 and performance 2: %s - %s",
-          ti.teamNumber, changetime / 1000 / SECONDS_PER_MINUTE, DATE_FORMAT.format(ti.perf[0]), DATE_FORMAT.format(ti.perf[1])));
+          ti.teamNumber, changetime / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.format(ti.perf[0]), OUTPUT_DATE_FORMAT.format(ti.perf[1])));
     }
 
     if(ti.perf[1].getTime() + PERFORMANCE_DURATION + PERFORMANCE_CHANGETIME > ti.perf[2].getTime()) {
       LOG.error(new Formatter().format("Team %d doesn't have enough time (%d minutes) between performance 2 and performance 3: %s - %s",
-          ti.teamNumber, changetime / 1000 / SECONDS_PER_MINUTE, DATE_FORMAT.format(ti.perf[1]), DATE_FORMAT.format(ti.perf[2])));
+          ti.teamNumber, changetime / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.format(ti.perf[1]), OUTPUT_DATE_FORMAT.format(ti.perf[2])));
     }
 
     // constraint set 4
-    for(int round = 0; round < _numberOfRounds; ++round) {
+    for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
       if(ti.presentation.before(ti.perf[round])) {
         if(ti.presentation.getTime() + SUBJECTIVE_DURATION + CHANGETIME > ti.perf[round].getTime()) {
           LOG.error(new Formatter().format("Team %d has doesn't have enough time between presentation and performance round %d", ti.teamNumber,
@@ -542,7 +600,7 @@ public class ParseSchedule {
     }
 
     // constraint set 5
-    for(int round = 0; round < _numberOfRounds; ++round) {
+    for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
       if(ti.technical.before(ti.perf[round])) {
         if(ti.technical.getTime() + SUBJECTIVE_DURATION + CHANGETIME > ti.perf[round].getTime()) {
           LOG.error(new Formatter().format("Team %d has doesn't have enough time between technical and performance round %d", ti.teamNumber,
@@ -559,10 +617,10 @@ public class ParseSchedule {
     }
 
     // make sure that all oponents are different
-    for(int round = 0; round < _numberOfRounds; ++round) {
+    for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
       final int opponent = findOpponent(matches, ti, round);
       if(-1 != opponent) {
-        for(int r = round + 1; r < _numberOfRounds; ++r) {
+        for(int r = round + 1; r < NUMBER_OF_ROUNDS; ++r) {
           final int otherOpponent = findOpponent(matches, ti, r);
           if(otherOpponent != -1 && opponent == otherOpponent) {
             LOG.error(new Formatter().format("Team %d competes against %d more than once", ti.teamNumber, opponent));
@@ -647,7 +705,7 @@ public class ParseSchedule {
       if(s.split(":").length > 2) {
         return DATE_FORMAT_SS.parse(s);
       } else {
-        return DATE_FORMAT.parse(s);
+        return OUTPUT_DATE_FORMAT.parse(s);
       }
     }
   }
@@ -670,11 +728,11 @@ public class ParseSchedule {
 
     public String judge;
 
-    public Date[] perf = new Date[_numberOfRounds];
+    public Date[] perf = new Date[NUMBER_OF_ROUNDS];
 
-    public String[] perfTableColor = new String[_numberOfRounds];
+    public String[] perfTableColor = new String[NUMBER_OF_ROUNDS];
 
-    public int[] perfTableSide = new int[_numberOfRounds];
+    public int[] perfTableSide = new int[NUMBER_OF_ROUNDS];
 
     /**
      * Find the performance round for the matching time.
@@ -683,7 +741,7 @@ public class ParseSchedule {
      * @return the round, -1 if cannot be found
      */
     public int findRoundFortime(final Date time) {
-      for(int round = 0; round < _numberOfRounds; ++round) {
+      for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
         if(perf[round].equals(time)) {
           return round;
         }
