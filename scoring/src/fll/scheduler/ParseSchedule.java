@@ -5,6 +5,7 @@
  */
 package fll.scheduler;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
@@ -107,13 +108,17 @@ public class ParseSchedule {
 
   private static int NUMBER_OF_ROUNDS = 3;
 
-  private static final DateFormat DATE_FORMAT_AM_PM = new SimpleDateFormat("hh:mm a");
+  private static final DateFormat DATE_FORMAT_AM_PM = new SimpleDateFormat(
+      "hh:mm a");
 
-  private static final DateFormat DATE_FORMAT_AM_PM_SS = new SimpleDateFormat("hh:mm:ss a");
+  private static final DateFormat DATE_FORMAT_AM_PM_SS = new SimpleDateFormat(
+      "hh:mm:ss a");
 
-  private static final DateFormat OUTPUT_DATE_FORMAT = new SimpleDateFormat("H:mm");
+  private static final DateFormat OUTPUT_DATE_FORMAT = new SimpleDateFormat(
+      "H:mm");
 
-  private static final DateFormat DATE_FORMAT_SS = new SimpleDateFormat("HH:mm:ss");
+  private static final DateFormat DATE_FORMAT_SS = new SimpleDateFormat(
+      "HH:mm:ss");
 
   public static final long SECONDS_PER_MINUTE = 60;
 
@@ -362,10 +367,12 @@ public class ParseSchedule {
   }
 
   public void parseFile() throws IOException {
-    LOGGER.info(new Formatter().format("Reading file %s", _file.getAbsoluteFile()));
+    LOGGER.info(new Formatter().format("Reading file %s", _file
+        .getAbsoluteFile()));
 
     if(!_file.canRead() || !_file.isFile()) {
-      LOGGER.fatal("File is not readable or not a file: " + _file.getAbsolutePath());
+      LOGGER.fatal("File is not readable or not a file: "
+          + _file.getAbsolutePath());
       return;
     }
 
@@ -386,7 +393,69 @@ public class ParseSchedule {
 
   }
 
-  private void outputDetailedSchedules(final List<TeamScheduleInfo> schedule) throws DocumentException, IOException {
+  /**
+   * Find the team that is competing earliest after the specified time on the
+   * specified table and side in the specified round (specified as a zero based
+   * index).
+   * 
+   * @param time
+   *          the time after which to find a competition
+   * @param table
+   *          the table color
+   * @param side
+   *          the side - zero based index
+   * @param round
+   *          the round - zero based index
+   */
+  private TeamScheduleInfo findNextTeam(final Date time,
+                                        final String table,
+                                        final int side,
+                                        final int round) {
+    TeamScheduleInfo retval = null;
+    for(final TeamScheduleInfo si : _schedule) {
+      if(table.equals(si.perfTableColor[round])
+          && side == si.perfTableSide[round] && si.perf[round].after(time)) {
+        if(retval == null) {
+          retval = si;
+        } else if(null != si.perf[round]
+            && si.perf[round].before(retval.perf[round])) {
+          retval = si;
+        }
+      }
+    }
+    return retval;
+  }
+
+  /**
+   * Check if the specified team needs to stay around after their performance to
+   * even up the table.
+   * 
+   * @param schedule
+   *          the schedule
+   * @param si
+   *          the TeamScheduleInfo for the team
+   * @param round
+   *          the round the team is competing at (zero based index)
+   * @return if the team needs to stay
+   */
+  private boolean checkIfTeamNeedsToStay(final TeamScheduleInfo si,
+                                         final int round) {
+    final TeamScheduleInfo next = findNextTeam(si.perf[round],
+        si.perfTableColor[round], si.perfTableSide[round], round);
+    if(null != next) {
+      final int nextOpponent = findOpponent(_matches, next, round);
+      if(-1 == nextOpponent) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  private void outputDetailedSchedules(final List<TeamScheduleInfo> schedule)
+      throws DocumentException, IOException {
     final String filename = _file.getPath();
     final int dotIdx = filename.lastIndexOf('.');
     final String baseFilename;
@@ -403,7 +472,8 @@ public class ParseSchedule {
 
     // Measurements are always in points (72 per inch)
     // This sets up 1/4 inch margins
-    detailedSchedules.setMargins(0.25f * 72, 0.25f * 72, 0.35f * 72, 0.35f * 72);
+    detailedSchedules
+        .setMargins(0.25f * 72, 0.25f * 72, 0.35f * 72, 0.35f * 72);
 
     // output to a PDF
     final FileOutputStream output = new FileOutputStream(pdfFile);
@@ -424,10 +494,15 @@ public class ParseSchedule {
 
   }
 
-  private void outputPerformanceSchedule(final List<TeamScheduleInfo> schedule, final Document detailedSchedules) throws DocumentException {
+  private void outputPerformanceSchedule(final List<TeamScheduleInfo> schedule,
+                                         final Document detailedSchedules)
+      throws DocumentException {
 
     for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
       Collections.sort(schedule, getPerformanceComparator(round));
+
+      // list of teams staying around to even up the teams
+      final List<TeamScheduleInfo> teamsStaying = new LinkedList<TeamScheduleInfo>();
 
       final Table table = createTable(6);
       table.setWidths(new float[] { 2, 1, 3, 3, 2, 1 });
@@ -437,22 +512,48 @@ public class ParseSchedule {
       table.addCell(createHeaderCell("Div"), row, 1);
       table.addCell(createHeaderCell("School or Organization"), row, 2);
       table.addCell(createHeaderCell("Team Name"), row, 3);
-      table.addCell(createHeaderCell(new Formatter().format("Perf #%d", (round + 1)).toString()), row, 4);
-      table.addCell(createHeaderCell(new Formatter().format("Perf %d Table", (round + 1)).toString()), row, 5);
+      table.addCell(createHeaderCell(new Formatter().format("Perf #%d",
+          (round + 1)).toString()), row, 4);
+      table.addCell(createHeaderCell(new Formatter().format("Perf %d Table",
+          (round + 1)).toString()), row, 5);
       ++row;
 
       for(final TeamScheduleInfo si : schedule) {
+        // check if team needs to stay and color the cell magenta if they do
+        final Color backgroundColor;
+        if(checkIfTeamNeedsToStay(si, round)) {
+          teamsStaying.add(si);
+          backgroundColor = Color.MAGENTA;
+        } else {
+          backgroundColor = null;
+        }
+
         table.addCell(createCell(String.valueOf(si.teamNumber)), row, 0);
         table.addCell(createCell(si.division), row, 1);
         table.addCell(createCell(si.organization), row, 2);
         table.addCell(createCell(si.teamName), row, 3);
-        table.addCell(createCell(OUTPUT_DATE_FORMAT.format(si.perf[round])), row, 4);
-        table.addCell(createCell(si.perfTableColor[round] + " " + si.perfTableSide[round]), row, 5);
+        table.addCell(createCell(OUTPUT_DATE_FORMAT.format(si.perf[round]),
+            backgroundColor), row, 4);
+        table.addCell(createCell(si.perfTableColor[round] + " "
+            + si.perfTableSide[round], backgroundColor), row, 5);
 
         ++row;
       }
 
       detailedSchedules.add(table);
+
+      // output teams staying
+      if(!teamsStaying.isEmpty()) {
+        final String formatString = "Team %d will please stay at the table and compete again - score will not count.";
+        final Table stayingTable = createTable(1);
+        for(final TeamScheduleInfo si : teamsStaying) {
+          stayingTable.addCell(createCell(new Formatter().format(formatString,
+              si.teamNumber).toString(), Color.MAGENTA));
+        }
+        detailedSchedules.add(stayingTable);
+
+      }
+
       detailedSchedules.add(Chunk.NEXTPAGE);
     }
   }
@@ -462,14 +563,25 @@ public class ParseSchedule {
     return cell;
   }
 
-  private static Cell createBasicCell(final Chunk chunk) throws BadElementException {
+  private static Cell createCell(final String text, final Color backgroundColor)
+      throws BadElementException {
+    final Cell cell = createCell(text);
+    if(null != backgroundColor) {
+      cell.setBackgroundColor(backgroundColor);
+    }
+    return cell;
+  }
+
+  private static Cell createBasicCell(final Chunk chunk)
+      throws BadElementException {
     final Cell cell = new Cell(chunk);
     cell.setHorizontalAlignment(Element.ALIGN_CENTER);
     cell.setUseDescender(true);
     return cell;
   }
 
-  private static Cell createHeaderCell(final String text) throws BadElementException {
+  private static Cell createHeaderCell(final String text)
+      throws BadElementException {
     final Chunk chunk = new Chunk(text);
     chunk.getFont().setStyle(Font.BOLD);
     final Cell cell = createBasicCell(chunk);
@@ -478,14 +590,16 @@ public class ParseSchedule {
     return cell;
   }
 
-  private static Table createTable(final int rows) throws BadElementException {
-    final Table table = new Table(6);
+  private static Table createTable(final int columns) throws BadElementException {
+    final Table table = new Table(columns);
     table.setCellsFitPage(true);
     table.setWidth(100);
     return table;
   }
 
-  private void outputPresentationSchedule(final List<TeamScheduleInfo> schedule, final Document detailedSchedules) throws DocumentException {
+  private void outputPresentationSchedule(final List<TeamScheduleInfo> schedule,
+                                          final Document detailedSchedules)
+      throws DocumentException {
     final Table table = createTable(6);
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 1 });
 
@@ -504,7 +618,8 @@ public class ParseSchedule {
       table.addCell(createCell(si.division), row, 1);
       table.addCell(createCell(si.organization), row, 2);
       table.addCell(createCell(si.teamName), row, 3);
-      table.addCell(createCell(OUTPUT_DATE_FORMAT.format(si.presentation)), row, 4);
+      table.addCell(createCell(OUTPUT_DATE_FORMAT.format(si.presentation)),
+          row, 4);
       table.addCell(createCell(si.judge), row, 5);
 
       ++row;
@@ -514,7 +629,9 @@ public class ParseSchedule {
 
   }
 
-  private void outputTechnicalSchedule(final List<TeamScheduleInfo> schedule, final Document detailedSchedules) throws DocumentException {
+  private void outputTechnicalSchedule(final List<TeamScheduleInfo> schedule,
+                                       final Document detailedSchedules)
+      throws DocumentException {
     Collections.sort(schedule, _technicalComparator);
 
     final Table table = createTable(6);
@@ -536,7 +653,8 @@ public class ParseSchedule {
       table.addCell(createCell(si.division), row, 1);
       table.addCell(createCell(si.organization), row, 2);
       table.addCell(createCell(si.teamName), row, 3);
-      table.addCell(createCell(OUTPUT_DATE_FORMAT.format(si.technical)), row, 4);
+      table
+          .addCell(createCell(OUTPUT_DATE_FORMAT.format(si.technical)), row, 4);
       table.addCell(createCell(si.judge), row, 5);
 
       ++row;
@@ -600,7 +718,8 @@ public class ParseSchedule {
     };
   }
 
-  private void computeGeneralSchedule(final List<TeamScheduleInfo> schedule, final Map<Date, Map<String, List<TeamScheduleInfo>>> matches) {
+  private void computeGeneralSchedule(final List<TeamScheduleInfo> schedule,
+                                      final Map<Date, Map<String, List<TeamScheduleInfo>>> matches) {
     Date minTechnical = null;
     Date maxTechnical = null;
     Date minPresentation = null;
@@ -647,11 +766,15 @@ public class ParseSchedule {
     // print out the general schedule
     LOGGER.info("min technical: " + OUTPUT_DATE_FORMAT.format(minTechnical));
     LOGGER.info("max technical: " + OUTPUT_DATE_FORMAT.format(maxTechnical));
-    LOGGER.info("min presentation: " + OUTPUT_DATE_FORMAT.format(minPresentation));
-    LOGGER.info("max presentation: " + OUTPUT_DATE_FORMAT.format(maxPresentation));
+    LOGGER.info("min presentation: "
+        + OUTPUT_DATE_FORMAT.format(minPresentation));
+    LOGGER.info("max presentation: "
+        + OUTPUT_DATE_FORMAT.format(maxPresentation));
     for(int i = 0; i < NUMBER_OF_ROUNDS; ++i) {
-      LOGGER.info("min performance round " + (i + 1) + ": " + OUTPUT_DATE_FORMAT.format(minPerf[i]));
-      LOGGER.info("max performance round " + (i + 1) + ": " + OUTPUT_DATE_FORMAT.format(maxPerf[i]));
+      LOGGER.info("min performance round " + (i + 1) + ": "
+          + OUTPUT_DATE_FORMAT.format(minPerf[i]));
+      LOGGER.info("max performance round " + (i + 1) + ": "
+          + OUTPUT_DATE_FORMAT.format(maxPerf[i]));
     }
 
   }
@@ -669,7 +792,9 @@ public class ParseSchedule {
    * @return true if this succeeds, false if this shows too many teams on the
    *         table
    */
-  private static boolean addToMatches(final Map<Date, Map<String, List<TeamScheduleInfo>>> matches, final TeamScheduleInfo ti, final int round) {
+  private static boolean addToMatches(final Map<Date, Map<String, List<TeamScheduleInfo>>> matches,
+                                      final TeamScheduleInfo ti,
+                                      final int round) {
     final Map<String, List<TeamScheduleInfo>> timeMatches;
     if(matches.containsKey(ti.perf[round])) {
       timeMatches = matches.get(ti.perf[round]);
@@ -689,8 +814,10 @@ public class ParseSchedule {
     tableMatches.add(ti);
 
     if(tableMatches.size() > 2) {
-      LOGGER.error(new Formatter().format("Too many teams competing on table: %s at time: %s. Teams: %s", ti.perfTableColor[round],
-          OUTPUT_DATE_FORMAT.format(ti.perf[round]), tableMatches));
+      LOGGER.error(new Formatter().format(
+          "Too many teams competing on table: %s at time: %s. Teams: %s",
+          ti.perfTableColor[round], OUTPUT_DATE_FORMAT.format(ti.perf[round]),
+          tableMatches));
       return false;
     } else {
       return true;
@@ -705,7 +832,8 @@ public class ParseSchedule {
    * @param round
    * @return
    */
-  private boolean verifyPerformanceAtTime(final int numberOfTableColors, final List<TeamScheduleInfo> schedule) {
+  private boolean verifyPerformanceAtTime(final int numberOfTableColors,
+                                          final List<TeamScheduleInfo> schedule) {
     // constraint set 6
     final Map<Date, Set<Integer>> teamsAtTime = new HashMap<Date, Set<Integer>>();
     for(final TeamScheduleInfo si : schedule) {
@@ -724,7 +852,8 @@ public class ParseSchedule {
     boolean retval = true;
     for(final Map.Entry<Date, Set<Integer>> entry : teamsAtTime.entrySet()) {
       if(entry.getValue().size() > numberOfTableColors * 2) {
-        LOGGER.error(new Formatter().format("There are too many teams at %s", entry.getKey()));
+        LOGGER.error(new Formatter().format("There are too many teams at %s",
+            entry.getKey()));
 
         retval = false;
       }
@@ -739,7 +868,8 @@ public class ParseSchedule {
    * @param schedule
    * @return
    */
-  private static boolean verifyPresentationAtTime(final List<TeamScheduleInfo> schedule, final int numJudges) {
+  private static boolean verifyPresentationAtTime(final List<TeamScheduleInfo> schedule,
+                                                  final int numJudges) {
     // constraint set 7
     final Map<Date, Set<TeamScheduleInfo>> teamsAtTime = new HashMap<Date, Set<TeamScheduleInfo>>();
     for(final TeamScheduleInfo si : schedule) {
@@ -754,9 +884,11 @@ public class ParseSchedule {
     }
 
     boolean retval = true;
-    for(final Map.Entry<Date, Set<TeamScheduleInfo>> entry : teamsAtTime.entrySet()) {
+    for(final Map.Entry<Date, Set<TeamScheduleInfo>> entry : teamsAtTime
+        .entrySet()) {
       if(entry.getValue().size() > numJudges) {
-        LOGGER.error(new Formatter().format("There are too many teams at %s in presentation", entry.getKey()));
+        LOGGER.error(new Formatter().format(
+            "There are too many teams at %s in presentation", entry.getKey()));
 
         retval = false;
       }
@@ -764,7 +896,9 @@ public class ParseSchedule {
       final Set<String> judges = new HashSet<String>();
       for(final TeamScheduleInfo ti : entry.getValue()) {
         if(!judges.add(ti.judge)) {
-          LOGGER.error(new Formatter().format("Judges %s cannot see more than one team at %s in presentation", ti.judge, ti.presentation));
+          LOGGER.error(new Formatter().format(
+              "Judges %s cannot see more than one team at %s in presentation",
+              ti.judge, ti.presentation));
           retval = false;
         }
       }
@@ -780,7 +914,8 @@ public class ParseSchedule {
    * @param schedule
    * @return
    */
-  private static boolean verifyTechnicalAtTime(final List<TeamScheduleInfo> schedule, final int numJudges) {
+  private static boolean verifyTechnicalAtTime(final List<TeamScheduleInfo> schedule,
+                                               final int numJudges) {
     // constraint set 7
     final Map<Date, Set<TeamScheduleInfo>> teamsAtTime = new HashMap<Date, Set<TeamScheduleInfo>>();
     for(final TeamScheduleInfo si : schedule) {
@@ -795,9 +930,11 @@ public class ParseSchedule {
     }
 
     boolean retval = true;
-    for(final Map.Entry<Date, Set<TeamScheduleInfo>> entry : teamsAtTime.entrySet()) {
+    for(final Map.Entry<Date, Set<TeamScheduleInfo>> entry : teamsAtTime
+        .entrySet()) {
       if(entry.getValue().size() > numJudges) {
-        LOGGER.error(new Formatter().format("There are too many teams at %s in technical", entry.getKey()));
+        LOGGER.error(new Formatter().format(
+            "There are too many teams at %s in technical", entry.getKey()));
 
         retval = false;
       }
@@ -805,7 +942,9 @@ public class ParseSchedule {
       final Set<String> judges = new HashSet<String>();
       for(final TeamScheduleInfo ti : entry.getValue()) {
         if(!judges.add(ti.judge)) {
-          LOGGER.error(new Formatter().format("Judges %s cannot see more than one team at %s in presentation", ti.judge, ti.presentation));
+          LOGGER.error(new Formatter().format(
+              "Judges %s cannot see more than one team at %s in presentation",
+              ti.judge, ti.presentation));
           retval = false;
         }
       }
@@ -822,8 +961,11 @@ public class ParseSchedule {
    * @param round
    * @return the round number or -1 if no opponent
    */
-  private int findOpponentRound(final Map<Date, Map<String, List<TeamScheduleInfo>>> matches, final TeamScheduleInfo ti, final int round) {
-    final List<TeamScheduleInfo> tableMatches = matches.get(ti.perf[round]).get(ti.perfTableColor[round]);
+  private int findOpponentRound(final Map<Date, Map<String, List<TeamScheduleInfo>>> matches,
+                                final TeamScheduleInfo ti,
+                                final int round) {
+    final List<TeamScheduleInfo> tableMatches = matches.get(ti.perf[round])
+        .get(ti.perfTableColor[round]);
     if(tableMatches.size() > 1) {
       if(tableMatches.get(0).equals(ti)) {
         return tableMatches.get(1).findRoundFortime(ti.perf[round]);
@@ -843,8 +985,11 @@ public class ParseSchedule {
    * @param round
    * @return the team number or -1 if no opponent
    */
-  private int findOpponent(final Map<Date, Map<String, List<TeamScheduleInfo>>> matches, final TeamScheduleInfo ti, final int round) {
-    final List<TeamScheduleInfo> tableMatches = matches.get(ti.perf[round]).get(ti.perfTableColor[round]);
+  private int findOpponent(final Map<Date, Map<String, List<TeamScheduleInfo>>> matches,
+                           final TeamScheduleInfo ti,
+                           final int round) {
+    final List<TeamScheduleInfo> tableMatches = matches.get(ti.perf[round])
+        .get(ti.perfTableColor[round]);
     if(tableMatches.size() > 1) {
       if(tableMatches.get(0).equals(ti)) {
         return tableMatches.get(1).teamNumber;
@@ -856,16 +1001,27 @@ public class ParseSchedule {
     }
   }
 
-  private boolean verifyTeam(final Map<Date, Map<String, List<TeamScheduleInfo>>> matches, final TeamScheduleInfo ti) {
+  private boolean verifyTeam(final Map<Date, Map<String, List<TeamScheduleInfo>>> matches,
+                             final TeamScheduleInfo ti) {
     // constraint set 1
     if(ti.presentation.before(ti.technical)) {
-      if(ti.presentation.getTime() + SUBJECTIVE_DURATION + CHANGETIME > ti.technical.getTime()) {
-        LOGGER.error(new Formatter().format("Team %d has doesn't have enough time between presentation and technical", ti.teamNumber));
+      if(ti.presentation.getTime() + SUBJECTIVE_DURATION + CHANGETIME > ti.technical
+          .getTime()) {
+        LOGGER
+            .error(new Formatter()
+                .format(
+                    "Team %d has doesn't have enough time between presentation and technical",
+                    ti.teamNumber));
         return false;
       }
     } else {
-      if(ti.technical.getTime() + SUBJECTIVE_DURATION + CHANGETIME > ti.presentation.getTime()) {
-        LOGGER.error(new Formatter().format("Team %d has doesn't have enough time between presentation and technical", ti.teamNumber));
+      if(ti.technical.getTime() + SUBJECTIVE_DURATION + CHANGETIME > ti.presentation
+          .getTime()) {
+        LOGGER
+            .error(new Formatter()
+                .format(
+                    "Team %d has doesn't have enough time between presentation and technical",
+                    ti.teamNumber));
         return false;
       }
     }
@@ -879,28 +1035,48 @@ public class ParseSchedule {
     } else {
       changetime = PERFORMANCE_CHANGETIME;
     }
-    if(ti.perf[0].getTime() + PERFORMANCE_DURATION + changetime > ti.perf[1].getTime()) {
-      LOGGER.error(new Formatter().format("Team %d doesn't have enough time (%d minutes) between performance 1 and performance 2: %s - %s",
-          ti.teamNumber, changetime / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.format(ti.perf[0]), OUTPUT_DATE_FORMAT.format(ti.perf[1])));
+    if(ti.perf[0].getTime() + PERFORMANCE_DURATION + changetime > ti.perf[1]
+        .getTime()) {
+      LOGGER
+          .error(new Formatter()
+              .format(
+                  "Team %d doesn't have enough time (%d minutes) between performance 1 and performance 2: %s - %s",
+                  ti.teamNumber, changetime / 1000 / SECONDS_PER_MINUTE,
+                  OUTPUT_DATE_FORMAT.format(ti.perf[0]), OUTPUT_DATE_FORMAT
+                      .format(ti.perf[1])));
     }
 
-    if(ti.perf[1].getTime() + PERFORMANCE_DURATION + PERFORMANCE_CHANGETIME > ti.perf[2].getTime()) {
-      LOGGER.error(new Formatter().format("Team %d doesn't have enough time (%d minutes) between performance 2 and performance 3: %s - %s",
-          ti.teamNumber, changetime / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.format(ti.perf[1]), OUTPUT_DATE_FORMAT.format(ti.perf[2])));
+    if(ti.perf[1].getTime() + PERFORMANCE_DURATION + PERFORMANCE_CHANGETIME > ti.perf[2]
+        .getTime()) {
+      LOGGER
+          .error(new Formatter()
+              .format(
+                  "Team %d doesn't have enough time (%d minutes) between performance 2 and performance 3: %s - %s",
+                  ti.teamNumber, changetime / 1000 / SECONDS_PER_MINUTE,
+                  OUTPUT_DATE_FORMAT.format(ti.perf[1]), OUTPUT_DATE_FORMAT
+                      .format(ti.perf[2])));
     }
 
     // constraint set 4
     for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
       if(ti.presentation.before(ti.perf[round])) {
-        if(ti.presentation.getTime() + SUBJECTIVE_DURATION + CHANGETIME > ti.perf[round].getTime()) {
-          LOGGER.error(new Formatter().format("Team %d has doesn't have enough time between presentation and performance round %d", ti.teamNumber,
-              round + 1));
+        if(ti.presentation.getTime() + SUBJECTIVE_DURATION + CHANGETIME > ti.perf[round]
+            .getTime()) {
+          LOGGER
+              .error(new Formatter()
+                  .format(
+                      "Team %d has doesn't have enough time between presentation and performance round %d",
+                      ti.teamNumber, round + 1));
           return false;
         }
       } else {
-        if(ti.perf[round].getTime() + PERFORMANCE_DURATION + CHANGETIME > ti.presentation.getTime()) {
-          LOGGER.error(new Formatter().format("Team %d has doesn't have enough time between presentation and performance round %d", ti.teamNumber,
-              round + 1));
+        if(ti.perf[round].getTime() + PERFORMANCE_DURATION + CHANGETIME > ti.presentation
+            .getTime()) {
+          LOGGER
+              .error(new Formatter()
+                  .format(
+                      "Team %d has doesn't have enough time between presentation and performance round %d",
+                      ti.teamNumber, round + 1));
           return false;
         }
       }
@@ -909,15 +1085,23 @@ public class ParseSchedule {
     // constraint set 5
     for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
       if(ti.technical.before(ti.perf[round])) {
-        if(ti.technical.getTime() + SUBJECTIVE_DURATION + CHANGETIME > ti.perf[round].getTime()) {
-          LOGGER.error(new Formatter().format("Team %d has doesn't have enough time between technical and performance round %d", ti.teamNumber,
-              round + 1));
+        if(ti.technical.getTime() + SUBJECTIVE_DURATION + CHANGETIME > ti.perf[round]
+            .getTime()) {
+          LOGGER
+              .error(new Formatter()
+                  .format(
+                      "Team %d has doesn't have enough time between technical and performance round %d",
+                      ti.teamNumber, round + 1));
           return false;
         }
       } else {
-        if(ti.perf[round].getTime() + PERFORMANCE_DURATION + CHANGETIME > ti.technical.getTime()) {
-          LOGGER.error(new Formatter().format("Team %d has doesn't have enough time between technical and performance round %d", ti.teamNumber,
-              round + 1));
+        if(ti.perf[round].getTime() + PERFORMANCE_DURATION + CHANGETIME > ti.technical
+            .getTime()) {
+          LOGGER
+              .error(new Formatter()
+                  .format(
+                      "Team %d has doesn't have enough time between technical and performance round %d",
+                      ti.teamNumber, round + 1));
           return false;
         }
       }
@@ -930,7 +1114,9 @@ public class ParseSchedule {
         for(int r = round + 1; r < NUMBER_OF_ROUNDS; ++r) {
           final int otherOpponent = findOpponent(matches, ti, r);
           if(otherOpponent != -1 && opponent == otherOpponent) {
-            LOGGER.error(new Formatter().format("Team %d competes against %d more than once", ti.teamNumber, opponent));
+            LOGGER.error(new Formatter().format(
+                "Team %d competes against %d more than once", ti.teamNumber,
+                opponent));
             return false;
           }
         }
@@ -944,7 +1130,8 @@ public class ParseSchedule {
    * @return the schedule info or null if there was an error, or the last line
    *         is hit
    */
-  private TeamScheduleInfo parseLine(final CSVReader csvReader) throws IOException {
+  private TeamScheduleInfo parseLine(final CSVReader csvReader)
+      throws IOException {
     final String[] line = csvReader.readNext();
 
     try {
@@ -955,7 +1142,8 @@ public class ParseSchedule {
         return null;
       }
       final TeamScheduleInfo ti = new TeamScheduleInfo();
-      ti.teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
+      ti.teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr)
+          .intValue();
       ti.teamName = line[_teamNameColumn];
       ti.organization = line[_organizationColumn];
       ti.division = line[_divisionColumn];
@@ -966,28 +1154,34 @@ public class ParseSchedule {
       String table = line[_perf1TableColumn];
       String[] tablePieces = table.split(" ");
       if(tablePieces.length != 2) {
-        throw new RuntimeException("Error parsing table information from: " + table);
+        throw new RuntimeException("Error parsing table information from: "
+            + table);
       }
       ti.perfTableColor[0] = tablePieces[0];
-      ti.perfTableSide[0] = Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue();
+      ti.perfTableSide[0] = Utilities.NUMBER_FORMAT_INSTANCE.parse(
+          tablePieces[1]).intValue();
       ti.perf[0] = parseDate(line[_perf1Column]);
 
       table = line[_perf2TableColumn];
       tablePieces = table.split(" ");
       if(tablePieces.length != 2) {
-        throw new RuntimeException("Error parsing table information from: " + table);
+        throw new RuntimeException("Error parsing table information from: "
+            + table);
       }
       ti.perfTableColor[1] = tablePieces[0];
-      ti.perfTableSide[1] = Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue();
+      ti.perfTableSide[1] = Utilities.NUMBER_FORMAT_INSTANCE.parse(
+          tablePieces[1]).intValue();
       ti.perf[1] = parseDate(line[_perf2Column]);
 
       table = line[_perf3TableColumn];
       tablePieces = table.split(" ");
       if(tablePieces.length != 2) {
-        throw new RuntimeException("Error parsing table information from: " + table);
+        throw new RuntimeException("Error parsing table information from: "
+            + table);
       }
       ti.perfTableColor[2] = tablePieces[0];
-      ti.perfTableSide[2] = Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue();
+      ti.perfTableSide[2] = Utilities.NUMBER_FORMAT_INSTANCE.parse(
+          tablePieces[1]).intValue();
       ti.perf[2] = parseDate(line[_perf3Column]);
 
       return ti;
