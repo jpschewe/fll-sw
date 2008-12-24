@@ -356,12 +356,11 @@ public class ParseSchedule {
     boolean retval = true;
 
     for(final TeamScheduleInfo verify : _schedule) {
-      final boolean ret = verifyTeam(_matches, verify);
+      final boolean ret = verifyTeam(verify);
       retval &= ret;
     }
 
     final int numberOfTableColors = _tableColors.size();
-    // final int numDivisions = divisions.size();
     final int numJudges = _judges.size();
     boolean ret = verifyPerformanceAtTime(numberOfTableColors, _schedule);
     retval &= ret;
@@ -402,15 +401,14 @@ public class ParseSchedule {
 
   /**
    * Find the team that is competing earliest after the specified time on the
-   * specified table and side in the specified round (specified as a zero based
-   * index).
+   * specified table and side in the specified round.
    * 
    * @param time
    *          the time after which to find a competition
    * @param table
    *          the table color
    * @param side
-   *          the side - zero based index
+   *          the side
    * @param round
    *          the round - zero based index
    */
@@ -443,21 +441,24 @@ public class ParseSchedule {
    *          the TeamScheduleInfo for the team
    * @param round
    *          the round the team is competing at (zero based index)
-   * @return if the team needs to stay
+   * @return the team one needs to compete against in an extra round or null if
+   *         the team does not need to stay
    */
-  private boolean checkIfTeamNeedsToStay(final TeamScheduleInfo si,
-                                         final int round) {
+  private TeamScheduleInfo checkIfTeamNeedsToStay(final TeamScheduleInfo si,
+                                                  final int round) {
+    final int otherSide = 2 == si.perfTableSide[round] ? 1 : 2;
     final TeamScheduleInfo next = findNextTeam(si.perf[round],
-        si.perfTableColor[round], si.perfTableSide[round], round);
+        si.perfTableColor[round], otherSide, round);
+
     if(null != next) {
-      final int nextOpponent = findOpponent(_matches, next, round);
-      if(-1 == nextOpponent) {
-        return true;
+      final TeamScheduleInfo nextOpponent = findOpponent(next, round);
+      if(null == nextOpponent) {
+        return next;
       } else {
-        return false;
+        return null;
       }
     } else {
-      return false;
+      return null;
     }
   }
 
@@ -530,7 +531,7 @@ public class ParseSchedule {
       for(final TeamScheduleInfo si : schedule) {
         // check if team needs to stay and color the cell magenta if they do
         final Color backgroundColor;
-        if(checkIfTeamNeedsToStay(si, round)) {
+        if(null != checkIfTeamNeedsToStay(si, round)) {
           teamsStaying.add(si);
           backgroundColor = Color.MAGENTA;
         } else {
@@ -759,7 +760,7 @@ public class ParseSchedule {
       for(int i = 0; i < NUMBER_OF_ROUNDS; ++i) {
         if(null != si.perf[i]) {
           // ignore the teams that cross round boundaries
-          final int opponentRound = findOpponentRound(_matches, si, i);
+          final int opponentRound = findOpponentRound(si, i);
           if(opponentRound == i) {
             if(null == minPerf[i] || si.perf[i].before(minPerf[i])) {
               minPerf[i] = si.perf[i];
@@ -972,10 +973,8 @@ public class ParseSchedule {
    * @param round
    * @return the round number or -1 if no opponent
    */
-  private int findOpponentRound(final Map<Date, Map<String, List<TeamScheduleInfo>>> matches,
-                                final TeamScheduleInfo ti,
-                                final int round) {
-    final List<TeamScheduleInfo> tableMatches = matches.get(ti.perf[round])
+  private int findOpponentRound(final TeamScheduleInfo ti, final int round) {
+    final List<TeamScheduleInfo> tableMatches = _matches.get(ti.perf[round])
         .get(ti.perfTableColor[round]);
     if(tableMatches.size() > 1) {
       if(tableMatches.get(0).equals(ti)) {
@@ -994,26 +993,53 @@ public class ParseSchedule {
    * @param matches
    * @param ti
    * @param round
-   * @return the team number or -1 if no opponent
+   * @return the team number or null if no opponent
    */
-  private int findOpponent(final Map<Date, Map<String, List<TeamScheduleInfo>>> matches,
-                           final TeamScheduleInfo ti,
-                           final int round) {
-    final List<TeamScheduleInfo> tableMatches = matches.get(ti.perf[round])
+  private TeamScheduleInfo findOpponent(final TeamScheduleInfo ti,
+                                        final int round) {
+    final List<TeamScheduleInfo> tableMatches = _matches.get(ti.perf[round])
         .get(ti.perfTableColor[round]);
     if(tableMatches.size() > 1) {
       if(tableMatches.get(0).equals(ti)) {
-        return tableMatches.get(1).teamNumber;
+        return tableMatches.get(1);
       } else {
-        return tableMatches.get(0).teamNumber;
+        return tableMatches.get(0);
       }
     } else {
-      return -1;
+      return null;
     }
   }
 
-  private boolean verifyTeam(final Map<Date, Map<String, List<TeamScheduleInfo>>> matches,
-                             final TeamScheduleInfo ti) {
+  private boolean verifyPerformanceVsSubjective(final int teamNumber,
+                                                final Date subjectiveTime,
+                                                final String subjectiveName,
+                                                final Date performanceTime,
+                                                final String performanceName) {
+    if(subjectiveTime.before(performanceTime)) {
+      if(subjectiveTime.getTime() + SUBJECTIVE_DURATION + CHANGETIME > performanceTime
+          .getTime()) {
+        LOGGER
+            .error(new Formatter()
+                .format(
+                    "Team %d has doesn't have enough time between %s and performance round %s",
+                    teamNumber, subjectiveName, performanceName));
+        return false;
+      }
+    } else {
+      if(performanceTime.getTime() + PERFORMANCE_DURATION + CHANGETIME > subjectiveTime
+          .getTime()) {
+        LOGGER
+            .error(new Formatter()
+                .format(
+                    "Team %d has doesn't have enough time between %s and performance round %s",
+                    teamNumber, subjectiveName, performanceName));
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private boolean verifyTeam(final TeamScheduleInfo ti) {
     // constraint set 1
     if(ti.presentation.before(ti.technical)) {
       if(ti.presentation.getTime() + SUBJECTIVE_DURATION + CHANGETIME > ti.technical
@@ -1039,8 +1065,8 @@ public class ParseSchedule {
 
     // constraint set 3
     final long changetime;
-    final int round1OpponentRound = findOpponentRound(matches, ti, 0);
-    final int round2OpponentRound = findOpponentRound(matches, ti, 1);
+    final int round1OpponentRound = findOpponentRound(ti, 0);
+    final int round2OpponentRound = findOpponentRound(ti, 1);
     if(round1OpponentRound != 0 || round2OpponentRound != 1) {
       changetime = SPECIAL_PERFORMANCE_CHANGETIME;
     } else {
@@ -1070,67 +1096,69 @@ public class ParseSchedule {
 
     // constraint set 4
     for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
-      if(ti.presentation.before(ti.perf[round])) {
-        if(ti.presentation.getTime() + SUBJECTIVE_DURATION + CHANGETIME > ti.perf[round]
-            .getTime()) {
-          LOGGER
-              .error(new Formatter()
-                  .format(
-                      "Team %d has doesn't have enough time between presentation and performance round %d",
-                      ti.teamNumber, round + 1));
-          return false;
-        }
-      } else {
-        if(ti.perf[round].getTime() + PERFORMANCE_DURATION + CHANGETIME > ti.presentation
-            .getTime()) {
-          LOGGER
-              .error(new Formatter()
-                  .format(
-                      "Team %d has doesn't have enough time between presentation and performance round %d",
-                      ti.teamNumber, round + 1));
-          return false;
-        }
+      final boolean result = verifyPerformanceVsSubjective(ti.teamNumber,
+          ti.presentation, "presentation", ti.perf[round], String.valueOf(round));
+      if(!result) {
+        return false;
       }
     }
 
     // constraint set 5
     for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
-      if(ti.technical.before(ti.perf[round])) {
-        if(ti.technical.getTime() + SUBJECTIVE_DURATION + CHANGETIME > ti.perf[round]
-            .getTime()) {
-          LOGGER
-              .error(new Formatter()
-                  .format(
-                      "Team %d has doesn't have enough time between technical and performance round %d",
-                      ti.teamNumber, round + 1));
-          return false;
-        }
-      } else {
-        if(ti.perf[round].getTime() + PERFORMANCE_DURATION + CHANGETIME > ti.technical
-            .getTime()) {
-          LOGGER
-              .error(new Formatter()
-                  .format(
-                      "Team %d has doesn't have enough time between technical and performance round %d",
-                      ti.teamNumber, round + 1));
-          return false;
-        }
+      final boolean result = verifyPerformanceVsSubjective(ti.teamNumber,
+          ti.technical, "technical", ti.perf[round], String.valueOf(round));
+      if(!result) {
+        return false;
       }
     }
 
-    // make sure that all oponents are different
+    // make sure that all opponents are different
     for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
-      final int opponent = findOpponent(matches, ti, round);
-      if(-1 != opponent) {
+      final TeamScheduleInfo opponent = findOpponent(ti, round);
+      if(null != opponent) {
         for(int r = round + 1; r < NUMBER_OF_ROUNDS; ++r) {
-          final int otherOpponent = findOpponent(matches, ti, r);
-          if(otherOpponent != -1 && opponent == otherOpponent) {
+          final TeamScheduleInfo otherOpponent = findOpponent(ti, r);
+          if(otherOpponent != null && opponent.equals(otherOpponent)) {
             LOGGER.error(new Formatter().format(
                 "Team %d competes against %d more than once", ti.teamNumber,
                 opponent));
             return false;
           }
         }
+      }
+    }
+
+    // check if the team needs to stay for any extra founds
+    for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
+      final TeamScheduleInfo next = checkIfTeamNeedsToStay(ti, round);
+      if(null != next) {
+        // everything else checked out, only only need to check the end time
+        // against subjective and the next round
+        boolean result = verifyPerformanceVsSubjective(ti.teamNumber,
+            ti.technical, "presentation", next.perf[round], "extra");
+        if(!result) {
+          return false;
+        }
+
+        result = verifyPerformanceVsSubjective(ti.teamNumber, ti.technical,
+            "technical", next.perf[round], "extra");
+        if(!result) {
+          return false;
+        }
+
+        if(round + 1 < NUMBER_OF_ROUNDS) {
+          if(next.perf[round].getTime() + PERFORMANCE_DURATION
+              + PERFORMANCE_CHANGETIME > ti.perf[round+1].getTime()) {
+            LOGGER
+                .error(new Formatter()
+                    .format(
+                        "Team %d doesn't have enough time (%d minutes) between performance %d and performance extra: %s - %s",
+                        ti.teamNumber, changetime / 1000 / SECONDS_PER_MINUTE,
+                        OUTPUT_DATE_FORMAT.format(next.perf[round]),
+                        OUTPUT_DATE_FORMAT.format(ti.perf[round+1])));
+          }
+        }
+
       }
     }
 
@@ -1231,7 +1259,7 @@ public class ParseSchedule {
    * @version $Revision$
    * 
    */
-  private final class TeamScheduleInfo {
+  private static final class TeamScheduleInfo {
     public int teamNumber;
 
     public String teamName;
@@ -1271,15 +1299,25 @@ public class ParseSchedule {
     public String toString() {
       return "[ScheduleInfo for " + teamNumber + "]";
     }
+
+    public boolean equals(final Object o) {
+      if(o == this) {
+        return true;
+      } else if(o instanceof TeamScheduleInfo) {
+        return ((TeamScheduleInfo)o).teamNumber == this.teamNumber;
+      } else {
+        return false;
+      }
+    }
   }
 
-  private static class PageFooter extends PdfPageEventHelper {
+  private static final class PageFooter extends PdfPageEventHelper {
     @Override
     public void onEndPage(final PdfWriter writer, final Document document) {
       final Rectangle page = document.getPageSize();
       final PdfPTable foot = new PdfPTable(1);
-      final PdfPCell cell = new PdfPCell(new Phrase("- " + writer
-          .getPageNumber() + " -"));
+      final PdfPCell cell = new PdfPCell(new Phrase("- "
+          + writer.getPageNumber() + " -"));
       cell.setHorizontalAlignment(Element.ALIGN_CENTER);
       cell.setUseDescender(true);
       foot.addCell(cell);
