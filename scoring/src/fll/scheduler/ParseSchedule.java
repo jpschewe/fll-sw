@@ -188,6 +188,8 @@ public class ParseSchedule {
           LOGGER.fatal(ioe, ioe);
           System.exit(1);
         }
+      } else {
+        LOGGER.error("No such file or directory: " + file.getAbsolutePath());
       }
     }
 
@@ -383,7 +385,7 @@ public class ParseSchedule {
 
     verifySchedule();
 
-    // computeGeneralSchedule(schedule, matches);
+     computeGeneralSchedule();
 
     try {
       outputDetailedSchedules(_schedule);
@@ -718,8 +720,7 @@ public class ParseSchedule {
     };
   }
 
-  private void computeGeneralSchedule(final List<TeamScheduleInfo> schedule,
-                                      final Map<Date, Map<String, List<TeamScheduleInfo>>> matches) {
+  private void computeGeneralSchedule() {
     Date minTechnical = null;
     Date maxTechnical = null;
     Date minPresentation = null;
@@ -727,7 +728,7 @@ public class ParseSchedule {
     final Date[] minPerf = new Date[NUMBER_OF_ROUNDS];
     final Date[] maxPerf = new Date[NUMBER_OF_ROUNDS];
 
-    for(final TeamScheduleInfo si : schedule) {
+    for(final TeamScheduleInfo si : _schedule) {
       if(null != si.technical) {
         if(null == minTechnical || si.technical.before(minTechnical)) {
           minTechnical = si.technical;
@@ -748,7 +749,7 @@ public class ParseSchedule {
       for(int i = 0; i < NUMBER_OF_ROUNDS; ++i) {
         if(null != si.perf[i]) {
           // ignore the teams that cross round boundaries
-          final int opponentRound = findOpponentRound(matches, si, i);
+          final int opponentRound = findOpponentRound(_matches, si, i);
           if(opponentRound == i) {
             if(null == minPerf[i] || si.perf[i].before(minPerf[i])) {
               minPerf[i] = si.perf[i];
