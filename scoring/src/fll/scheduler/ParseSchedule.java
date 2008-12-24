@@ -36,9 +36,15 @@ import com.lowagie.text.Chunk;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
+import com.lowagie.text.ExceptionConverter;
 import com.lowagie.text.Font;
 import com.lowagie.text.PageSize;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.Rectangle;
 import com.lowagie.text.Table;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfPageEventHelper;
 import com.lowagie.text.pdf.PdfWriter;
 
 import fll.Utilities;
@@ -385,7 +391,7 @@ public class ParseSchedule {
 
     verifySchedule();
 
-     computeGeneralSchedule();
+    computeGeneralSchedule();
 
     try {
       outputDetailedSchedules(_schedule);
@@ -479,7 +485,8 @@ public class ParseSchedule {
 
     // output to a PDF
     final FileOutputStream output = new FileOutputStream(pdfFile);
-    PdfWriter.getInstance(detailedSchedules, output);
+    final PdfWriter writer = PdfWriter.getInstance(detailedSchedules, output);
+    writer.setPageEvent(new PageFooter());
 
     detailedSchedules.open();
 
@@ -518,6 +525,7 @@ public class ParseSchedule {
           (round + 1)).toString()), row, 4);
       table.addCell(createHeaderCell(new Formatter().format("Perf %d Table",
           (round + 1)).toString()), row, 5);
+      table.endHeaders();
       ++row;
 
       for(final TeamScheduleInfo si : schedule) {
@@ -592,7 +600,8 @@ public class ParseSchedule {
     return cell;
   }
 
-  private static Table createTable(final int columns) throws BadElementException {
+  private static Table createTable(final int columns)
+      throws BadElementException {
     final Table table = new Table(columns);
     table.setCellsFitPage(true);
     table.setWidth(100);
@@ -613,6 +622,7 @@ public class ParseSchedule {
     table.addCell(createHeaderCell("Team Name"), row, 3);
     table.addCell(createHeaderCell("Presentation"), row, 4);
     table.addCell(createHeaderCell("Judging Station"), row, 5);
+    table.endHeaders();
     ++row;
 
     for(final TeamScheduleInfo si : schedule) {
@@ -648,6 +658,7 @@ public class ParseSchedule {
     table.addCell(createHeaderCell("Team Name"), row, 3);
     table.addCell(createHeaderCell("Technical"), row, 4);
     table.addCell(createHeaderCell("Judging Station"), row, 5);
+    table.endHeaders();
     ++row;
 
     for(final TeamScheduleInfo si : schedule) {
@@ -1262,4 +1273,22 @@ public class ParseSchedule {
       return "[ScheduleInfo for " + teamNumber + "]";
     }
   }
+
+  private static class PageFooter extends PdfPageEventHelper {
+    @Override
+    public void onEndPage(final PdfWriter writer, final Document document) {
+      final Rectangle page = document.getPageSize();
+      final PdfPTable foot = new PdfPTable(1);
+      final PdfPCell cell = new PdfPCell(new Phrase("- " + writer
+          .getPageNumber() + " -"));
+      cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+      cell.setUseDescender(true);
+      foot.addCell(cell);
+      foot.setTotalWidth(page.getWidth() - document.leftMargin()
+          - document.rightMargin());
+      foot.writeSelectedRows(0, -1, document.leftMargin(), document
+          .bottomMargin(), writer.getDirectContent());
+    }
+  }
+
 }
