@@ -1097,7 +1097,7 @@ public class ParseSchedule {
     // constraint set 4
     for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
       final boolean result = verifyPerformanceVsSubjective(ti.teamNumber,
-          ti.presentation, "presentation", ti.perf[round], String.valueOf(round));
+          ti.presentation, "presentation", ti.perf[round], String.valueOf(round+1));
       if(!result) {
         return false;
       }
@@ -1106,7 +1106,7 @@ public class ParseSchedule {
     // constraint set 5
     for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
       final boolean result = verifyPerformanceVsSubjective(ti.teamNumber,
-          ti.technical, "technical", ti.perf[round], String.valueOf(round));
+          ti.technical, "technical", ti.perf[round], String.valueOf(round+1));
       if(!result) {
         return false;
       }
