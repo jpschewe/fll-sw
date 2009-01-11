@@ -7,7 +7,6 @@ package fll.scheduler;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -25,6 +24,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.prefs.Preferences;
+
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+
+import net.mtu.eggplant.util.BasicFileFilter;
 
 import org.apache.log4j.Logger;
 
@@ -157,25 +162,50 @@ public class ParseSchedule {
 
   private final List<TeamScheduleInfo> _schedule = new LinkedList<TeamScheduleInfo>();
 
+  private static final Preferences prefs = Preferences.userNodeForPackage(ParseSchedule.class);
+  private static final String STARTING_DIRECTORY_PREF = "startingDirectory";
+  
   /**
    * @param args
    */
   public static void main(final String[] args) {
-    if(args.length < 1) {
-      LOGGER.fatal("Must specify the file to read");
-      System.exit(1);
+    final String startingDirectory = prefs.get(STARTING_DIRECTORY_PREF, null);
+    
+    final JFileChooser fileChooser = new JFileChooser();
+    final FileFilter filter = new BasicFileFilter("csv or directory", "csv");
+    fileChooser.setFileFilter(filter);
+    fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+    fileChooser.setMultiSelectionEnabled(true);
+    if(null != startingDirectory) {
+      fileChooser.setCurrentDirectory(new File(startingDirectory));
     }
+    
+    final int returnVal = fileChooser.showOpenDialog(null);
+    if(returnVal == JFileChooser.APPROVE_OPTION) {
+      final File currentDirectory = fileChooser.getCurrentDirectory();
+      prefs.put(STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
+      
+      final File[] selectedFiles = fileChooser.getSelectedFiles();
 
-    for(final String arg : args) {
-      final File file = new File(arg);
-      if(file.isDirectory()) {
-        final File[] files = file.listFiles(new FileFilter() {
-          public boolean accept(final File pathname) {
-            return pathname.getName().endsWith(".csv");
+      for(final File file : selectedFiles) {
+        if(file.isDirectory()) {
+          final File[] files = file.listFiles(new java.io.FileFilter() {
+            public boolean accept(final File pathname) {
+              return pathname.getName().endsWith(".csv");
+            }
+          });
+          for(final File f : files) {
+            final ParseSchedule ps = new ParseSchedule(f);
+
+            try {
+              ps.parseFile();
+            } catch(final IOException ioe) {
+              LOGGER.fatal(ioe, ioe);
+              System.exit(1);
+            }
           }
-        });
-        for(final File f : files) {
-          final ParseSchedule ps = new ParseSchedule(f);
+        } else if(file.isFile()) {
+          final ParseSchedule ps = new ParseSchedule(file);
 
           try {
             ps.parseFile();
@@ -183,18 +213,9 @@ public class ParseSchedule {
             LOGGER.fatal(ioe, ioe);
             System.exit(1);
           }
+        } else {
+          LOGGER.error("No such file or directory: " + file.getAbsolutePath());
         }
-      } else if(file.isFile()) {
-        final ParseSchedule ps = new ParseSchedule(file);
-
-        try {
-          ps.parseFile();
-        } catch(final IOException ioe) {
-          LOGGER.fatal(ioe, ioe);
-          System.exit(1);
-        }
-      } else {
-        LOGGER.error("No such file or directory: " + file.getAbsolutePath());
       }
     }
 
@@ -1097,7 +1118,8 @@ public class ParseSchedule {
     // constraint set 4
     for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
       final boolean result = verifyPerformanceVsSubjective(ti.teamNumber,
-          ti.presentation, "presentation", ti.perf[round], String.valueOf(round+1));
+          ti.presentation, "presentation", ti.perf[round], String
+              .valueOf(round + 1));
       if(!result) {
         return false;
       }
@@ -1106,7 +1128,7 @@ public class ParseSchedule {
     // constraint set 5
     for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
       final boolean result = verifyPerformanceVsSubjective(ti.teamNumber,
-          ti.technical, "technical", ti.perf[round], String.valueOf(round+1));
+          ti.technical, "technical", ti.perf[round], String.valueOf(round + 1));
       if(!result) {
         return false;
       }
@@ -1148,14 +1170,14 @@ public class ParseSchedule {
 
         if(round + 1 < NUMBER_OF_ROUNDS) {
           if(next.perf[round].getTime() + PERFORMANCE_DURATION
-              + PERFORMANCE_CHANGETIME > ti.perf[round+1].getTime()) {
+              + PERFORMANCE_CHANGETIME > ti.perf[round + 1].getTime()) {
             LOGGER
                 .error(new Formatter()
                     .format(
                         "Team %d doesn't have enough time (%d minutes) between performance %d and performance extra: %s - %s",
                         ti.teamNumber, changetime / 1000 / SECONDS_PER_MINUTE,
                         OUTPUT_DATE_FORMAT.format(next.perf[round]),
-                        OUTPUT_DATE_FORMAT.format(ti.perf[round+1])));
+                        OUTPUT_DATE_FORMAT.format(ti.perf[round + 1])));
           }
         }
 
