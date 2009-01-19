@@ -26,7 +26,7 @@ function init() {
 <%
 final Connection connection = (Connection)application.getAttribute("connection");
         
-final List tournamentNames = Queries.getTournamentNames(connection);
+final List<String> tournamentNames = Queries.getTournamentNames(connection);
 
 int teamNumber = -1;
 String currentTournament = null;
@@ -136,9 +136,9 @@ function confirmChangeTournament() {
           %>
             <select name='currentTournament'>
               <%
-              final Iterator iter = tournamentNames.iterator();
+              final Iterator<String> iter = tournamentNames.iterator();
               while(iter.hasNext()) {
-              final String tournamentName = (String)iter.next();
+              final String tournamentName = iter.next();
               if(tournamentName.equals(currentTournament)) {
               %>
                   <option value='<%=tournamentName%>' selected>
