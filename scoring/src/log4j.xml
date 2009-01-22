@@ -45,7 +45,12 @@
   </logger>
   
  <!-- stuff for debugging -->
-    
+  <!-- logger name="fll.web">
+    <level value="TRACE"/>
+  </logger-->
+  <!-- logger name="fll.db.Queries">
+    <level value="TRACE"/>
+  </logger-->
   <!-- end stuff for debugging -->
   
   <root>

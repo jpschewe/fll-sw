@@ -33,7 +33,7 @@ import fll.db.Queries;
  */
 public class CommitTeam extends HttpServlet {
 
-  private static final Logger LOG = Logger.getLogger(CommitTeam.class);
+  private static final Logger LOGGER = Logger.getLogger(CommitTeam.class);
 
   /**
    * 
@@ -41,78 +41,96 @@ public class CommitTeam extends HttpServlet {
    * @param response
    */
   @Override
-  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
-    if(LOG.isTraceEnabled()) {
-      LOG.trace("Top of CommitTeam.doPost");
+  protected void doPost(final HttpServletRequest request,
+                        final HttpServletResponse response) throws IOException {
+    if(LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Top of CommitTeam.doPost");
     }
-    
+
     final StringBuilder message = new StringBuilder();
     final ServletContext application = getServletContext();
     final HttpSession session = request.getSession();
-    final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-    final Connection connection = (Connection)application.getAttribute("connection");
+    final Document challengeDocument = (Document)application
+        .getAttribute("challengeDocument");
+    final Connection connection = (Connection)application
+        .getAttribute("connection");
 
     try {
       // parse the numbers first so that we don't get a partial commit
-      final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("teamNumber")).intValue();
+      final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(
+          request.getParameter("teamNumber")).intValue();
       final String division = request.getParameter("division");
 
       if(null != request.getParameter("delete")) {
-        if(LOG.isInfoEnabled()) {
-          LOG.info("Deleting " + teamNumber);
+        if(LOGGER.isInfoEnabled()) {
+          LOGGER.info("Deleting " + teamNumber);
         }
         Queries.deleteTeam(teamNumber, challengeDocument, connection);
       } else if(null != request.getParameter("advance")) {
-        if(LOG.isInfoEnabled()) {
-          LOG.info("Advancing " + teamNumber);
+        if(LOGGER.isInfoEnabled()) {
+          LOGGER.info("Advancing " + teamNumber);
         }
         final boolean result = Queries.advanceTeam(connection, teamNumber);
         if(!result) {
           message.append("<p class='error'>Error advancing team</p>");
-          LOG.error("Error advancing team: " + teamNumber);
+          LOGGER.error("Error advancing team: " + teamNumber);
         }
       } else if(null != request.getParameter("demote")) {
-        if(LOG.isInfoEnabled()) {
-          LOG.info("Demoting team: " + teamNumber);
+        if(LOGGER.isInfoEnabled()) {
+          LOGGER.info("Demoting team: " + teamNumber);
         }
         Queries.demoteTeam(connection, challengeDocument, teamNumber);
       } else if(null != request.getParameter("commit")) {
         if(null != request.getParameter("addTeam")) {
-          if(LOG.isInfoEnabled()) {
-            LOG.info("Adding" + teamNumber);
+          if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Adding" + teamNumber);
           }
-          final String otherTeam = Queries.addTeam(connection, teamNumber, request.getParameter("teamName"), request.getParameter("organization"),
+          final String otherTeam = Queries.addTeam(connection, teamNumber,
+              request.getParameter("teamName"), request
+                  .getParameter("organization"),
               request.getParameter("region"), division);
           if(null != otherTeam) {
-            message.append("<p class='error'>Error, team number " + teamNumber + " is already assigned.</p>");
-            LOG.error("TeamNumber " + teamNumber + " is already assigned");
+            message.append("<p class='error'>Error, team number " + teamNumber
+                + " is already assigned.</p>");
+            LOGGER.error("TeamNumber " + teamNumber + " is already assigned");
           }
         } else {
-          if(LOG.isInfoEnabled()) {
-            LOG.info("Updating " + teamNumber + " team info");
+          if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Updating " + teamNumber + " team info");
           }
-          Queries.updateTeam(connection, teamNumber, request.getParameter("teamName"), request.getParameter("organization"), request
-              .getParameter("region"), division);
-          final String teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
-          if(!Functions.safeEquals(teamCurrentTournament, request.getParameter("currentTournament"))) {
-            Queries.changeTeamCurrentTournament(connection, challengeDocument, teamNumber, request.getParameter("currentTournament"));
+          Queries.updateTeam(connection, teamNumber, request
+              .getParameter("teamName"), request.getParameter("organization"),
+              request.getParameter("region"), division);
+          // this will be null if the tournament can't be changed
+          final String newTournament = request
+              .getParameter("currentTournament");
+          if(null != newTournament) {
+            final String teamCurrentTournament = Queries
+                .getTeamCurrentTournament(connection, teamNumber);
+            if(!Functions.safeEquals(teamCurrentTournament, newTournament)) {
+              Queries.changeTeamCurrentTournament(connection,
+                  challengeDocument, teamNumber, request
+                      .getParameter("currentTournament"));
+            }
           }
         }
       }
 
     } catch(final ParseException pe) {
-      LOG.error("Error parsing team number, this is an internal error", pe);
-      throw new RuntimeException("Error parsing team number, this is an internal error", pe);
+      LOGGER.error("Error parsing team number, this is an internal error", pe);
+      throw new RuntimeException(
+          "Error parsing team number, this is an internal error", pe);
     } catch(SQLException e) {
-      LOG.error("There was an error talking to the database", e);
-      throw new RuntimeException("There was an error talking to the database", e);
+      LOGGER.error("There was an error talking to the database", e);
+      throw new RuntimeException("There was an error talking to the database",
+          e);
     }
 
-    if(LOG.isTraceEnabled()) {
-      LOG.trace("Bottom of CommitTeam.doPost");
+    if(LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Bottom of CommitTeam.doPost");
     }
-    
+
     session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));    
+    response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
   }
 }
