@@ -216,21 +216,6 @@ function CancelClicked() {
     window.location.href= "select_team.jsp";
   }
 }
-/**
- * Called to check verified flag
- */
-function verification() {
-if (Verified == 1)
-{
-m = "You are changing a score -- are you sure?";
-return m;
-}
-else 
-{
-m = "You are submitting a score without verification -- are you sure?";
-return m;
-}
-}
 </script>
 
   </head>
@@ -361,7 +346,7 @@ return m;
               <td colspan='3' align='right'>
                 <c:if test="${not isBye}">
                   <c:if test="${editFlag}">
-                    <input type='submit' id='submit' name='submit' value='Submit Score' onclick='return confirm(verification())'>
+                    <input type='submit' id='submit' name='submit' value='Submit Score' onclick='return confirm("Submit Changes?")'>
                   </c:if>
                   <c:if test="${not editFlag}">
                     <input type='submit' id='submit' name='submit' value='Submit Score' onclick='return confirm("Submit Data -- Are you sure?")'>
