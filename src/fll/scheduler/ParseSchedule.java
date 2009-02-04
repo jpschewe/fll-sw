@@ -162,15 +162,17 @@ public class ParseSchedule {
 
   private final List<TeamScheduleInfo> _schedule = new LinkedList<TeamScheduleInfo>();
 
-  private static final Preferences prefs = Preferences.userNodeForPackage(ParseSchedule.class);
+  private static final Preferences prefs = Preferences
+      .userNodeForPackage(ParseSchedule.class);
+
   private static final String STARTING_DIRECTORY_PREF = "startingDirectory";
-  
+
   /**
    * @param args
    */
   public static void main(final String[] args) {
     final String startingDirectory = prefs.get(STARTING_DIRECTORY_PREF, null);
-    
+
     final JFileChooser fileChooser = new JFileChooser();
     final FileFilter filter = new BasicFileFilter("csv or directory", "csv");
     fileChooser.setFileFilter(filter);
@@ -179,12 +181,12 @@ public class ParseSchedule {
     if(null != startingDirectory) {
       fileChooser.setCurrentDirectory(new File(startingDirectory));
     }
-    
+
     final int returnVal = fileChooser.showOpenDialog(null);
     if(returnVal == JFileChooser.APPROVE_OPTION) {
       final File currentDirectory = fileChooser.getCurrentDirectory();
       prefs.put(STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
-      
+
       final File[] selectedFiles = fileChooser.getSelectedFiles();
 
       for(final File file : selectedFiles) {
@@ -868,28 +870,30 @@ public class ParseSchedule {
   private boolean verifyPerformanceAtTime(final int numberOfTableColors,
                                           final List<TeamScheduleInfo> schedule) {
     // constraint set 6
-    final Map<Date, Set<Integer>> teamsAtTime = new HashMap<Date, Set<Integer>>();
+    final Map<Date, Set<TeamScheduleInfo>> teamsAtTime = new HashMap<Date, Set<TeamScheduleInfo>>();
     for(final TeamScheduleInfo si : schedule) {
       for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
-        Set<Integer> teams;
+        final Set<TeamScheduleInfo> teams;
         if(teamsAtTime.containsKey(si.perf[round])) {
           teams = teamsAtTime.get(si.perf[round]);
         } else {
-          teams = new HashSet<Integer>();
+          teams = new HashSet<TeamScheduleInfo>();
           teamsAtTime.put(si.perf[round], teams);
         }
-        teams.add(si.teamNumber);
+        teams.add(si);
       }
     }
 
     boolean retval = true;
-    for(final Map.Entry<Date, Set<Integer>> entry : teamsAtTime.entrySet()) {
+    for(final Map.Entry<Date, Set<TeamScheduleInfo>> entry : teamsAtTime
+        .entrySet()) {
       if(entry.getValue().size() > numberOfTableColors * 2) {
         LOGGER.error(new Formatter().format("There are too many teams at %s",
             entry.getKey()));
 
         retval = false;
       }
+
     }
 
     return retval;
@@ -1134,16 +1138,25 @@ public class ParseSchedule {
       }
     }
 
-    // make sure that all opponents are different
+    // make sure that all opponents are different & sides are different
     for(int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
       final TeamScheduleInfo opponent = findOpponent(ti, round);
       if(null != opponent) {
+        if(opponent.perfTableSide[round] == ti.perfTableSide[round]) {
+          LOGGER
+              .error(new Formatter()
+                  .format(
+                      "Team %d and team %d are both on table %s side %d at the same time for round %d",
+                      ti.teamNumber, opponent.teamNumber,
+                      ti.perfTableColor[round], ti.perfTableSide[round], (round+1)));
+        }
+
         for(int r = round + 1; r < NUMBER_OF_ROUNDS; ++r) {
           final TeamScheduleInfo otherOpponent = findOpponent(ti, r);
           if(otherOpponent != null && opponent.equals(otherOpponent)) {
             LOGGER.error(new Formatter().format(
                 "Team %d competes against %d more than once", ti.teamNumber,
-                opponent));
+                opponent.teamNumber));
             return false;
           }
         }
@@ -1221,6 +1234,11 @@ public class ParseSchedule {
       ti.perfTableColor[0] = tablePieces[0];
       ti.perfTableSide[0] = Utilities.NUMBER_FORMAT_INSTANCE.parse(
           tablePieces[1]).intValue();
+      if(ti.perfTableSide[0] > 2 || ti.perfTableSide[0] < 1) {
+        LOGGER
+            .error("There are only two sides to the table, number must be 1 or 2 team: "
+                + ti.teamNumber + " round 1");
+      }
       ti.perf[0] = parseDate(line[_perf1Column]);
 
       table = line[_perf2TableColumn];
@@ -1232,6 +1250,11 @@ public class ParseSchedule {
       ti.perfTableColor[1] = tablePieces[0];
       ti.perfTableSide[1] = Utilities.NUMBER_FORMAT_INSTANCE.parse(
           tablePieces[1]).intValue();
+      if(ti.perfTableSide[1] > 2 || ti.perfTableSide[1] < 1) {
+        LOGGER
+            .error("There are only two sides to the table, number must be 1 or 2 team: "
+                + ti.teamNumber + " round 2");
+      }
       ti.perf[1] = parseDate(line[_perf2Column]);
 
       table = line[_perf3TableColumn];
@@ -1243,6 +1266,11 @@ public class ParseSchedule {
       ti.perfTableColor[2] = tablePieces[0];
       ti.perfTableSide[2] = Utilities.NUMBER_FORMAT_INSTANCE.parse(
           tablePieces[1]).intValue();
+      if(ti.perfTableSide[2] > 2 || ti.perfTableSide[2] < 1) {
+        LOGGER
+            .error("There are only two sides to the table, number must be 1 or 2 team: "
+                + ti.teamNumber + " round 2");
+      }
       ti.perf[2] = parseDate(line[_perf3Column]);
 
       return ti;

@@ -54,5 +54,9 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/test/junit-4.5.jar"/>
+	<classpathentry kind="lib" path="lib/cobertura/asm-2.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/cobertura/asm-tree-2.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/cobertura/cobertura.jar"/>
+	<classpathentry kind="lib" path="lib/cobertura/jakarta-oro-2.0.8.jar"/>
 	<classpathentry kind="output" path="build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
