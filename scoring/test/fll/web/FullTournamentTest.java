@@ -55,7 +55,7 @@ import fll.xml.XMLUtils;
  */
 public class FullTournamentTest {
 
-  private static final Logger LOG = Logger.getLogger(FullTournamentTest.class);
+  private static final Logger LOGGER = Logger.getLogger(FullTournamentTest.class);
 
   /**
    * Test a full tournament as a single thread. This tests to make sure
@@ -64,8 +64,8 @@ public class FullTournamentTest {
   @Test
   public void testSerial() throws MalformedURLException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException,
       ParseException, SQLException {
-    if (LOG.isInfoEnabled()) {
-      LOG.info("Starting serial test");
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("Starting serial test");
     }
     doFullTournament(false);
   }
@@ -77,8 +77,8 @@ public class FullTournamentTest {
   @Test
   public void testParallel() throws MalformedURLException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException,
       ParseException, SQLException {
-    if (LOG.isInfoEnabled()) {
-      LOG.info("Starting parallel test");
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("Starting parallel test");
     }
     doFullTournament(true);
   }
@@ -115,7 +115,8 @@ public class FullTournamentTest {
 
       // --- initialize database ---
       final WebConversation conversation = new WebConversation();
-      WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "setup/");
+      WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "setup/");
       WebResponse response = conversation.getResponse(request);
       Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
 
@@ -126,16 +127,18 @@ public class FullTournamentTest {
       Assert.assertNotNull(challengeDocIS);
       final UploadFileSpec challengeUpload = new UploadFileSpec("challenge-test.xml", challengeDocIS, "text/xml");
       Assert.assertNotNull(challengeUpload);
-      form.setParameter("xmldocument", new UploadFileSpec[] {challengeUpload});
+      form.setParameter("xmldocument", new UploadFileSpec[] { challengeUpload });
       request = form.getRequest("reinitializeDatabase");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
-      Assert.assertNotNull("Error initializing database: " + response.getText(), response.getElementWithID("success"));
+      Assert.assertNotNull("Error initializing database: "
+          + response.getText(), response.getElementWithID("success"));
       challengeDocIS.close();
 
       // --- load teams ---
       // find upload form on admin page
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "admin/");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "admin/");
       response = conversation.getResponse(request);
       Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
       form = response.getFormWithID("uploadTeams");
@@ -169,17 +172,20 @@ public class FullTournamentTest {
       request = form.getRequest();
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
-      Assert.assertNotNull("Error loading teams: " + response.getText(), response.getElementWithID("success"));
+      Assert.assertNotNull("Error loading teams: "
+          + response.getText(), response.getElementWithID("success"));
 
       // create tournaments for all regions
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "admin/index.jsp");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "admin/index.jsp");
       request.setParameter("addTournamentsForRegions", "1");
       response = conversation.getResponse(request);
       Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
       Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully added tournaments for regions"));
 
       // initialize tournaments by region
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "admin/tournamentInitialization.jsp");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "admin/tournamentInitialization.jsp");
       response = conversation.getResponse(request);
       Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
       form = response.getFormWithName("form");
@@ -195,7 +201,8 @@ public class FullTournamentTest {
       Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully initialized tournament for teams based on region."));
 
       // set the tournamet
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "admin/index.jsp");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "admin/index.jsp");
       response = conversation.getResponse(request);
       Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
       form = response.getFormWithID("currentTournament");
@@ -204,11 +211,14 @@ public class FullTournamentTest {
       request = form.getRequest();
       response = conversation.getResponse(request);
       Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-      Assert.assertNotNull("Error loading teams: " + response.getText(), response.getElementWithID("success"));
-      Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Tournament changed to " + testTournament));
+      Assert.assertNotNull("Error loading teams: "
+          + response.getText(), response.getElementWithID("success"));
+      Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Tournament changed to "
+          + testTournament));
 
       // assign judges
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "admin/judges.jsp");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "admin/judges.jsp");
       response = conversation.getResponse(request);
       Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
       form = response.getFormWithName("judges");
@@ -223,9 +233,10 @@ public class FullTournamentTest {
       final int numJudges = rs.getInt(1);
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closePreparedStatement(prep);
-      while (!form.hasParameterNamed("id" + String.valueOf(numJudges - 1))) {
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("Adding a row to the judges entry form");
+      while (!form.hasParameterNamed("id"
+          + String.valueOf(numJudges - 1))) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Adding a row to the judges entry form");
         }
         request = form.getRequest("submit", "Add Row");
         response = conversation.getResponse(request);
@@ -243,9 +254,12 @@ public class FullTournamentTest {
         final String id = rs.getString(1);
         final String category = rs.getString(2);
         final String division = rs.getString(3);
-        form.setParameter("id" + judgeIndex, id);
-        form.setParameter("cat" + judgeIndex, category);
-        form.setParameter("div" + judgeIndex, division);
+        form.setParameter("id"
+            + judgeIndex, id);
+        form.setParameter("cat"
+            + judgeIndex, category);
+        form.setParameter("div"
+            + judgeIndex, division);
         ++judgeIndex;
       }
       SQLFunctions.closeResultSet(rs);
@@ -266,7 +280,8 @@ public class FullTournamentTest {
       Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully assigned judges."));
 
       // assign table labels
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "admin/tables.jsp");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "admin/tables.jsp");
       response = conversation.getResponse(request);
       Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
       form = response.getFormWithName("tables");
@@ -301,19 +316,22 @@ public class FullTournamentTest {
       prep.setString(1, testTournament);
       final ScoreEntryQueue scoreEntryQueue = new ScoreEntryQueue(parallel ? 4 : 1, testDataConn, performanceElement, testTournament);
       for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
-        if (!initializedPlayoff && runNumber > numSeedingRounds) {
+        if (!initializedPlayoff
+            && runNumber > numSeedingRounds) {
           // TODO make sure to check the result of checking the seeding rounds
 
           // initialize the playoff brackets with playoff/index.jsp form
-          request = new GetMethodWebRequest(TestUtils.URL_ROOT + "playoff");
+          request = new GetMethodWebRequest(TestUtils.URL_ROOT
+              + "playoff");
           response = conversation.getResponse(request);
           Assert.assertTrue(response.isHTML());
           form = response.getFormWithName("initialize");
           Assert.assertNotNull(form);
           final String[] divisions = form.getOptionValues("division");
           for (int divIdx = 0; divIdx < divisions.length; ++divIdx) {
-            if (LOG.isDebugEnabled()) {
-              LOG.debug("Initializing playoff brackets for division " + divisions[divIdx]);
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("Initializing playoff brackets for division "
+                  + divisions[divIdx]);
             }
             form.setParameter("division", divisions[divIdx]);
             request = form.getRequest();
@@ -332,7 +350,7 @@ public class FullTournamentTest {
           final int teamNumber = rs.getInt(1);
           enterPerformanceScore(testDataConn, performanceElement, testTournament, runNumber, teamNumber);
         }
-        LOG.info("Waiting for queue to finish");
+        LOGGER.info("Waiting for queue to finish");
         scoreEntryQueue.waitForQueueToFinish();
       }
       scoreEntryQueue.shutdown();
@@ -340,27 +358,33 @@ public class FullTournamentTest {
       enterSubjectiveScores(testDataConn, challengeDocument, testTournament);
 
       // compute final scores
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/summarizePhase1.jsp");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "report/summarizePhase1.jsp");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/summarizePhase2.jsp");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "report/summarizePhase2.jsp");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully summarized scores"));
 
       // generate reports
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/categorizedScores.jsp");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "report/categorizedScores.jsp");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/categoryScoresByJudge.jsp");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "report/categoryScoresByJudge.jsp");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "report/CategoryScoresByScoreGroup");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "report/CategoryScoresByScoreGroup");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
 
       // PDF reports
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "GetFile");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "GetFile");
       request.setParameter("filename", "finalComputedScores.pdf");
       response = conversation.getResponse(request);
       Assert.assertEquals("application/pdf", response.getContentType());
@@ -373,10 +397,12 @@ public class FullTournamentTest {
       // division 1
       final int[] division1ExpectedRank = { 2636, 3127, 3439, 4462, 3125, 2116, 2104, 2113 };
       String division = "DivI/Gr4-6";
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "developer/query.jsp");
-      request.setParameter("query", "SELECT FinalScores.TeamNumber" + " FROM FinalScores, current_tournament_teams"
-          + " WHERE FinalScores.TeamNumber = current_tournament_teams.TeamNumber" + " AND FinalScores.Tournament = '" + testTournament + "'"
-          + " AND current_tournament_teams.event_division = '" + division + "'" + " ORDER BY FinalScores.OverallScore DESC");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "developer/query.jsp");
+      request.setParameter("query", "SELECT FinalScores.TeamNumber"
+          + " FROM FinalScores, current_tournament_teams" + " WHERE FinalScores.TeamNumber = current_tournament_teams.TeamNumber"
+          + " AND FinalScores.Tournament = '" + testTournament + "'" + " AND current_tournament_teams.event_division = '" + division + "'"
+          + " ORDER BY FinalScores.OverallScore DESC");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
       WebTable table = response.getTableWithID("queryResult");
@@ -388,10 +414,12 @@ public class FullTournamentTest {
       // division 2
       final int[] division2ExpectedRank = { 3208, 3061, 2863, 2110, 3063, 353, 2043, 3129 };
       division = "DivII/Gr7-9";
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "developer/query.jsp");
-      request.setParameter("query", "SELECT FinalScores.TeamNumber" + " FROM FinalScores, current_tournament_teams"
-          + " WHERE FinalScores.TeamNumber = current_tournament_teams.TeamNumber" + " AND FinalScores.Tournament = '" + testTournament + "'"
-          + " AND current_tournament_teams.event_division = '" + division + "'" + " ORDER BY FinalScores.OverallScore DESC");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "developer/query.jsp");
+      request.setParameter("query", "SELECT FinalScores.TeamNumber"
+          + " FROM FinalScores, current_tournament_teams" + " WHERE FinalScores.TeamNumber = current_tournament_teams.TeamNumber"
+          + " AND FinalScores.Tournament = '" + testTournament + "'" + " AND current_tournament_teams.event_division = '" + division + "'"
+          + " ORDER BY FinalScores.OverallScore DESC");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
       table = response.getTableWithID("queryResult");
@@ -404,21 +432,21 @@ public class FullTournamentTest {
        * prep = connection.prepareStatement("SELECT FinalScores.TeamNumber FROM
        * FinalScores, current_tournament_teams WHERE FinalScores.TeamNumber =
        * current_tournament_teams.TeamNumber AND FinalScores.Tournament = ? AND
-       * current_tournament_teams.event_division = ? ORDER BY FinalScores.OverallScore
-       * DESC"); prep.setString(1, testTournament); // division 1
-       * prep.setString(2, "DivI/Gr4-6"); rs = prep.executeQuery(); int rank =
-       * 0; while(rs.next()) { final int teamNumber = rs.getInt(1);
+       * current_tournament_teams.event_division = ? ORDER BY
+       * FinalScores.OverallScore DESC"); prep.setString(1, testTournament); //
+       * division 1 prep.setString(2, "DivI/Gr4-6"); rs = prep.executeQuery();
+       * int rank = 0; while(rs.next()) { final int teamNumber = rs.getInt(1);
        * Assert.assertEquals("Ranking is incorrect",
        * division1ExpectedRank[rank], teamNumber); }
        * SQLFunctions.closeResultSet(rs); // division2 prep.setString(2,
        * "DivII/Gr7-9"); rs = prep.executeQuery(); rank = 0; while(rs.next()) {
        * final int teamNumber = rs.getInt(1); Assert.assertEquals("Ranking is
        * incorrect", division2ExpectedRank[rank], teamNumber); }
-       * SQLFunctions.closeResultSet(rs); SQLFunctions.closePreparedStatement(prep);
+       * SQLFunctions.closeResultSet(rs);
+       * SQLFunctions.closePreparedStatement(prep);
        */
 
       // TODO check scores?
-      
     } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closeStatement(stmt);
@@ -445,7 +473,8 @@ public class FullTournamentTest {
       final WebConversation conversation = new WebConversation();
 
       // download subjective zip
-      WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "GetFile");
+      WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "GetFile");
       request.setParameter("filename", "subjective-data.zip");
       WebResponse response = conversation.getResponse(request);
       Assert.assertEquals("application/zip", response.getContentType());
@@ -463,14 +492,15 @@ public class FullTournamentTest {
       final SubjectiveFrame subjective = new SubjectiveFrame(subjectiveZip);
 
       // insert scores into zip
-      for(final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+      for (final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
         final String category = subjectiveElement.getAttribute("name");
         final String title = subjectiveElement.getAttribute("title");
         // find appropriate table model
         final TableModel tableModel = subjective.getTableModelForTitle(title);
 
         final List<Element> goals = XMLUtils.filterToElements(subjectiveElement.getElementsByTagName("goal"));
-        prep = testDataConn.prepareStatement("SELECT * FROM " + category + " WHERE Tournament = ?");
+        prep = testDataConn.prepareStatement("SELECT * FROM "
+            + category + " WHERE Tournament = ?");
         prep.setString(1, testTournament);
         rs = prep.executeQuery();
         while (rs.next()) {
@@ -479,15 +509,17 @@ public class FullTournamentTest {
           final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
           Assert.assertTrue("Can't find TeamNumber column in subjective table model", teamNumberColumn >= 0);
           int rowIndex = -1;
-          for (int rowIdx = 0; rowIdx < tableModel.getRowCount() && rowIndex == -1; ++rowIdx) {
-            final Object teamNumberRaw= tableModel.getValueAt(rowIdx, teamNumberColumn);
+          for (int rowIdx = 0; rowIdx < tableModel.getRowCount()
+              && rowIndex == -1; ++rowIdx) {
+            final Object teamNumberRaw = tableModel.getValueAt(rowIdx, teamNumberColumn);
             Assert.assertNotNull(teamNumberRaw);
             final int value = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberRaw.toString()).intValue();
             if (value == teamNumber) {
               rowIndex = rowIdx;
             }
           }
-          Assert.assertTrue("Can't find team " + teamNumber + " in subjective table model", rowIndex >= 0);
+          Assert.assertTrue("Can't find team "
+              + teamNumber + " in subjective table model", rowIndex >= 0);
 
           if (rs.getBoolean("NoShow")) {
             // find column for no show
@@ -495,13 +527,14 @@ public class FullTournamentTest {
             Assert.assertTrue("Can't find No Show column in subjective table model", columnIndex >= 0);
             tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);
           } else {
-            for(final Element goalElement : goals) {
+            for (final Element goalElement : goals) {
               final String goalName = goalElement.getAttribute("name");
               final String goalTitle = goalElement.getAttribute("title");
 
               // find column index for goal and call set
               final int columnIndex = findColumnByName(tableModel, goalTitle);
-              Assert.assertTrue("Can't find " + goalTitle + " column in subjective table model", columnIndex >= 0);
+              Assert.assertTrue("Can't find "
+                  + goalTitle + " column in subjective table model", columnIndex >= 0);
               final int value = rs.getInt(goalName);
               tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
             }
@@ -513,7 +546,8 @@ public class FullTournamentTest {
       subjective.save();
 
       // upload scores
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT + "admin/index.jsp");
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "admin/index.jsp");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
       WebForm form = response.getFormWithName("uploadSubjective");
@@ -526,6 +560,49 @@ public class FullTournamentTest {
     } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+
+  /**
+   * Set a score element that may need button presses to be
+   * incremented/decremented.
+   * 
+   * @param form the form
+   * @param name the name of the element
+   * @param value the value to set the score element to
+   * @param valueStr the value as a string for enums
+   * @throws IOException if there is an error writing to the form
+   * @throws SAXException if there is an error clicking the buttons
+   * @throws ParseException if there is an error parsing the default value of
+   *           the form element as a number
+   */
+  public static void setFormScoreElement(final WebForm form, final String name, final int value, final String valueStr) throws IOException, SAXException,
+      ParseException {
+    if (form.isReadOnlyParameter(name)) {
+      final int defaultValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(form.getParameterValue(name)).intValue();
+      final int difference = value
+          - defaultValue;
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Need to increment/decrement "
+            + name + " " + difference);
+      }
+      final Button button;
+      if (difference > 0) {
+        button = form.getButtonWithID("inc_"
+            + name + "_1");
+      } else {
+        button = form.getButtonWithID("dec_"
+            + name + "_-1");
+      }
+      if (null == button) {
+        throw new RuntimeException("Cannot find button for increment/decrement of "
+            + name + "button: " + button);
+      }
+      for (int val = 0; val < Math.abs(difference); ++val) {
+        button.click();
+      }
+    } else {
+      form.setParameter(name, valueStr);
     }
   }
 
@@ -544,14 +621,18 @@ public class FullTournamentTest {
    * @throws MalformedURLException
    * @throws ParseException
    */
-  /* package */static void enterPerformanceScore(final Connection testDataConn, final Element performanceElement, final String testTournament,
-      final int runNumber, final int teamNumber) throws SQLException, IOException, SAXException, MalformedURLException, ParseException {
+  /* package */static void enterPerformanceScore(final Connection testDataConn,
+                                                 final Element performanceElement,
+                                                 final String testTournament,
+                                                 final int runNumber,
+                                                 final int teamNumber) throws SQLException, IOException, SAXException, MalformedURLException, ParseException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
 
-      if (LOG.isInfoEnabled()) {
-        LOG.info("Setting score for " + teamNumber + " run: " + runNumber);
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("Setting score for "
+            + teamNumber + " run: " + runNumber);
       }
       final WebConversation conversation = new WebConversation();
 
@@ -562,7 +643,8 @@ public class FullTournamentTest {
       rs = prep.executeQuery();
       if (rs.next()) {
         // need to get the score entry form
-        WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "scoreEntry/select_team.jsp");
+        WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
+            + "scoreEntry/select_team.jsp");
         WebResponse response = conversation.getResponse(request);
         Assert.assertTrue(response.isHTML());
         WebForm form = response.getFormWithName("selectTeam");
@@ -579,34 +661,18 @@ public class FullTournamentTest {
         } else {
           // walk over challenge descriptor to get all element names and then
           // use the values from rs
-          for(final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
+          for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
             final String name = element.getAttribute("name");
             final int min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).intValue();
             final int max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).intValue();
-            if (LOG.isDebugEnabled()) {
-              LOG.debug("Setting form parameter: " + name + " min: " + min + " max: " + max + " readonly: " + form.isReadOnlyParameter(name));
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("Setting form parameter: "
+                  + name + " min: " + min + " max: " + max + " readonly: " + form.isReadOnlyParameter(name));
             }
-            if (form.isReadOnlyParameter(name)) {
-              final int value = rs.getInt(name);
-              final int defaultValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(form.getParameterValue(name)).intValue();
-              final int difference = value - defaultValue;
-              if (LOG.isDebugEnabled()) {
-                LOG.debug("Need to increment/decrement " + name + " " + difference);
-              }
-              final Button button;
-              if (difference < 0) {
-                button = form.getButtonWithID("inc_" + name + "_1");
-              } else {
-                button = form.getButtonWithID("dec_" + name + "_-1");
-              }
-              Assert.assertNotNull("Cannot find button for increment/decrement of " + name, button);
-              for (int val = 0; val < Math.abs(difference); ++val) {
-                button.click();
-              }
-            } else {
-              final String value = rs.getString(name);
-              form.setParameter(name, value);
-            }
+
+            final int value = rs.getInt(name);
+            final String valueStr = rs.getString(name);
+            setFormScoreElement(form, name, value, valueStr);
           }
           // Set the verified field to yes
           form.setParameter("Verified", "1");
@@ -616,9 +682,11 @@ public class FullTournamentTest {
         request = form.getRequest("submit");
         response = conversation.getResponse(request);
         Assert.assertTrue(response.isHTML());
-        Assert.assertEquals("Errors: " + response.getText(), 0, response.getElementsWithName("error").length);
+        Assert.assertEquals("Errors: "
+            + response.getText(), 0, response.getElementsWithName("error").length);
       } else {
-        Assert.fail("Cannot find scores for " + teamNumber + " run " + runNumber);
+        Assert.fail("Cannot find scores for "
+            + teamNumber + " run " + runNumber);
       }
     } finally {
       SQLFunctions.closeResultSet(rs);
