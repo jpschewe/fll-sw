@@ -14,12 +14,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -27,9 +30,12 @@ import javax.servlet.jsp.JspWriter;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
 import org.apache.log4j.Logger;
 
 import au.com.bytecode.opencsv.CSVReader;
+import fll.web.UploadProcessor;
 
 /**
  * Java code for uploading team data to the database. Called from
@@ -37,29 +43,63 @@ import au.com.bytecode.opencsv.CSVReader;
  * 
  * @version $Revision$
  */
-public final class UploadTeams {
+public final class UploadTeams extends HttpServlet {
 
-  private static final Logger LOG = Logger.getLogger(UploadTeams.class);
+  private static final Logger LOGGER = Logger.getLogger(UploadTeams.class);
 
-  private UploadTeams() {
-    // No instances
+  /**
+   * @param request
+   * @param response
+   */
+  @Override
+  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+    final StringBuilder message = new StringBuilder();
+    final ServletContext application = getServletContext();
+    final HttpSession session = request.getSession();
+    final Connection connection = (Connection) application.getAttribute("connection");
+    try {
+      UploadProcessor.processUpload(request);
+      final FileItem teamsFileItem = (FileItem) request.getAttribute("teamsFile");
+      final File file = File.createTempFile("fll", null);
+      teamsFileItem.write(file);
+      UploadTeams.parseFile(file, connection, session);
+      file.delete();
+    } catch (final SQLException sqle) {
+      message.append("<p class='error'>Error saving team data into the database: "
+          + sqle.getMessage() + "</p>");
+      LOGGER.error(sqle, sqle);
+      throw new RuntimeException("Error saving team data into the database", sqle);
+    } catch (final ParseException e) {
+      message.append("<p class='error'>Error saving team data into the database: "
+          + e.getMessage() + "</p>");
+      LOGGER.error(e, e);
+      throw new RuntimeException("Error saving team data into the database", e);
+    } catch (final FileUploadException e) {
+      message.append("<p class='error'>Error processing team data upload: "
+          + e.getMessage() + "</p>");
+      LOGGER.error(e, e);
+      throw new RuntimeException("Error processing team data upload", e);
+    } catch (final Exception e) {
+      message.append("<p class='error'>Error saving team data into the database: "
+          + e.getMessage() + "</p>");
+      LOGGER.error(e, e);
+      throw new RuntimeException("Error saving team data into the database", e);
+    }
+    session.setAttribute("message", message.toString());
+    response.sendRedirect(response.encodeRedirectURL("filterTeams.jsp"));
+
   }
 
   /**
    * Take file and parse it as tab delimited.
    * 
-   * @param file
-   *          the file that the teams are in
-   * @param connection
-   *          the database connection to connect to
-   * @param session
-   *          used to store the list of columns in a format suitable for use in
-   *          selection form elements. The attribute name is
+   * @param file the file that the teams are in
+   * @param connection the database connection to connect to
+   * @param session used to store the list of columns in a format suitable for
+   *          use in selection form elements. The attribute name is
    *          columnSelectOptions.
-   * @throws SQLException
-   *           if an error occurs talking to the database
-   * @throws IOException
-   *           if an error occurs reading from file
+   * @throws SQLException if an error occurs talking to the database
+   * @throws IOException if an error occurs reading from file
    */
   public static void parseFile(final File file, final Connection connection, final HttpSession session) throws SQLException, IOException {
     // determine if the file is tab separated or comma separated, check the
@@ -68,19 +108,19 @@ public final class UploadTeams {
     final CSVReader csvReader;
     final String firstLine = reader.readLine();
     reader.close();
-    if(firstLine.indexOf("\t") != -1) {
+    if (firstLine.indexOf("\t") != -1) {
       csvReader = new CSVReader(new FileReader(file), '\t');
     } else {
       csvReader = new CSVReader(new FileReader(file));
     }
-    
+
     // parse file into table AllTeams
 
     // stores <option value='columnName'>columnName</option> for each column
     final StringBuffer selectOptions = new StringBuffer();
 
     // parse out the first line as the names of the columns
-    //final List<String> columnNames = splitLine(reader.readLine());
+    // final List<String> columnNames = splitLine(reader.readLine());
     final String[] columnNames = csvReader.readNext();
 
     // build the SQL for inserting a row into the temporary table
@@ -96,28 +136,33 @@ public final class UploadTeams {
     // iterate over each column name and append to appropriate buffers
     boolean first = true;
     final List<String> columnNamesSeen = new LinkedList<String>();
-    for(String header : columnNames) {
+    for (String header : columnNames) {
       final String columnName = sanitizeColumnName(header);
-      if(LOG.isDebugEnabled()) {
-        LOG.debug("header: " + header + " columnName: " + columnName);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("header: "
+            + header + " columnName: " + columnName);
       }
-      if(columnNamesSeen.contains(columnName)) {
-        throw new RuntimeException("Duplicate column name found: " + columnName);
+      if (columnNamesSeen.contains(columnName)) {
+        throw new RuntimeException("Duplicate column name found: "
+            + columnName);
       } else {
         columnNamesSeen.add(columnName);
       }
 
-      if(first) {
+      if (first) {
         first = false;
       } else {
         createTable.append(", ");
         createFilteredTable.append(", ");
         insertPrepSQL.append(", ");
       }
-      createTable.append(columnName + " longvarchar");
-      createFilteredTable.append(columnName + " longvarchar");
+      createTable.append(columnName
+          + " longvarchar");
+      createFilteredTable.append(columnName
+          + " longvarchar");
       insertPrepSQL.append("?");
-      selectOptions.append("<option value='" + columnName + "'>" + columnName + "</option>");
+      selectOptions.append("<option value='"
+          + columnName + "'>" + columnName + "</option>");
     }
     createTable.append(")");
     createFilteredTable.append(")");
@@ -130,8 +175,9 @@ public final class UploadTeams {
       stmt.executeUpdate("DROP TABLE IF EXISTS AllTeams"); // make sure the
       // table doesn't yet
       // exist
-      if(LOG.isDebugEnabled()) {
-        LOG.debug("creating table: " + createTable.toString());
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("creating table: "
+            + createTable.toString());
       }
       stmt.executeUpdate(createTable.toString()); // create AllTeams
 
@@ -145,14 +191,14 @@ public final class UploadTeams {
 
       // loop over the rest of the rows and insert them into the temporary table
       String[] values;
-      while(null != (values = csvReader.readNext())) {
-        if(values.length > 0) { // skip empty lines
+      while (null != (values = csvReader.readNext())) {
+        if (values.length > 0) { // skip empty lines
           int column = 1;
-          for(final String value : values) {
+          for (final String value : values) {
             insertPrep.setString(column, null == value ? null : value.trim());
             ++column;
           }
-          for(; column <= columnNamesSeen.size(); column++) {
+          for (; column <= columnNamesSeen.size(); column++) {
             insertPrep.setString(column, null);
           }
 
@@ -171,13 +217,10 @@ public final class UploadTeams {
   /**
    * Apply the set of filters currently stored in session.
    * 
-   * @param connection
-   *          the database connection
-   * @param request
-   *          the request where the filters are stored
+   * @param connection the database connection
+   * @param request the request where the filters are stored
    * @return the number of rows that match
-   * @throws SQLException
-   *           if an error occurs talking to the database
+   * @throws SQLException if an error occurs talking to the database
    */
   public static long applyFilters(final Connection connection, final HttpServletRequest request) throws SQLException {
     Statement stmt = null;
@@ -187,29 +230,38 @@ public final class UploadTeams {
 
       final StringBuffer whereClause = new StringBuffer();
       int filterCount = 0;
-      String filterColumn = request.getParameter("filterColumn" + filterCount);
-      String filterText = request.getParameter("filterText" + filterCount);
-      String filterDelete = request.getParameter("filterDelete" + filterCount);
-      while(null != filterColumn) {
-        if(!"".equals(filterText) && !"1".equals(filterDelete)) {
-          if(whereClause.length() > 0) {
+      String filterColumn = request.getParameter("filterColumn"
+          + filterCount);
+      String filterText = request.getParameter("filterText"
+          + filterCount);
+      String filterDelete = request.getParameter("filterDelete"
+          + filterCount);
+      while (null != filterColumn) {
+        if (!"".equals(filterText)
+            && !"1".equals(filterDelete)) {
+          if (whereClause.length() > 0) {
             whereClause.append(" AND ");
           }
-          whereClause.append(filterColumn + " LIKE '" + filterText.trim() + "'");
+          whereClause.append(filterColumn
+              + " LIKE '" + filterText.trim() + "'");
         }
 
         filterCount++;
-        filterColumn = request.getParameter("filterColumn" + filterCount);
-        filterText = request.getParameter("filterText" + filterCount);
-        filterDelete = request.getParameter("filterDelete" + filterCount);
+        filterColumn = request.getParameter("filterColumn"
+            + filterCount);
+        filterText = request.getParameter("filterText"
+            + filterCount);
+        filterDelete = request.getParameter("filterDelete"
+            + filterCount);
       }
 
       String sql = "SELECT COUNT(*) FROM AllTeams";
-      if(whereClause.length() > 0) {
-        sql += " WHERE " + whereClause.toString();
+      if (whereClause.length() > 0) {
+        sql += " WHERE "
+            + whereClause.toString();
       }
       rs = stmt.executeQuery(sql);
-      if(rs.next()) {
+      if (rs.next()) {
         return rs.getLong(1);
       } else {
         throw new RuntimeException("Internal error, can't get count");
@@ -231,21 +283,29 @@ public final class UploadTeams {
 
       final StringBuffer whereClause = new StringBuffer();
       int filterCount = 0;
-      String filterColumn = request.getParameter("filterColumn" + filterCount);
-      String filterText = request.getParameter("filterText" + filterCount);
-      String filterDelete = request.getParameter("filterDelete" + filterCount);
-      while(null != filterColumn) {
-        if(!"".equals(filterText) && !"1".equals(filterDelete)) {
-          if(whereClause.length() > 0) {
+      String filterColumn = request.getParameter("filterColumn"
+          + filterCount);
+      String filterText = request.getParameter("filterText"
+          + filterCount);
+      String filterDelete = request.getParameter("filterDelete"
+          + filterCount);
+      while (null != filterColumn) {
+        if (!"".equals(filterText)
+            && !"1".equals(filterDelete)) {
+          if (whereClause.length() > 0) {
             whereClause.append(" AND ");
           }
-          whereClause.append(filterColumn + " LIKE '" + filterText.trim() + "'");
+          whereClause.append(filterColumn
+              + " LIKE '" + filterText.trim() + "'");
         }
 
         filterCount++;
-        filterColumn = request.getParameter("filterColumn" + filterCount);
-        filterText = request.getParameter("filterText" + filterCount);
-        filterDelete = request.getParameter("filterDelete" + filterCount);
+        filterColumn = request.getParameter("filterColumn"
+            + filterCount);
+        filterText = request.getParameter("filterText"
+            + filterCount);
+        filterDelete = request.getParameter("filterDelete"
+            + filterCount);
       }
 
       // first clean out FilteredTeams
@@ -253,8 +313,9 @@ public final class UploadTeams {
 
       // do the copy
       String sql = "INSERT INTO FilteredTeams SELECT * FROM AllTeams";
-      if(whereClause.length() > 0) {
-        sql += " WHERE " + whereClause.toString();
+      if (whereClause.length() > 0) {
+        sql += " WHERE "
+            + whereClause.toString();
       }
       stmt.executeUpdate(sql);
     } finally {
@@ -271,23 +332,16 @@ public final class UploadTeams {
    * <li>Copy the teams into the Teams table</li>
    * </ul>
    * 
-   * @param connection
-   *          connection with admin priviliges to DB
-   * @param request
-   *          used to get the information about which columns are mapped to
-   *          which
-   * @param response
-   *          used to redirect pages for errors
-   * @param session
-   *          used to store error messages
-   * @param out
-   *          used to output information/messages to user user about the
+   * @param connection connection with admin priviliges to DB
+   * @param request used to get the information about which columns are mapped
+   *          to which
+   * @param response used to redirect pages for errors
+   * @param session used to store error messages
+   * @param out used to output information/messages to user user about the
    *          verification
    * @return if successful
-   * @throws SQLException
-   *           on error talking to DB
-   * @throws IOException
-   *           on error writing to webpage
+   * @throws SQLException on error talking to DB
+   * @throws IOException on error writing to webpage
    */
   public static boolean verifyTeams(final Connection connection,
                                     final HttpServletRequest request,
@@ -303,7 +357,8 @@ public final class UploadTeams {
       final StringBuffer values = new StringBuffer();
 
       final String teamNumberColumn = request.getParameter("TeamNumber");
-      if(null == teamNumberColumn || "".equals(teamNumberColumn)) {
+      if (null == teamNumberColumn
+          || "".equals(teamNumberColumn)) {
         // Error, redirect back to teamColumnSelection.jsp with error message
         session.setAttribute("errorMessage", "You must specify a column for TeamNumber");
         response.sendRedirect(response.encodeRedirectURL("teamColumnSelection.jsp"));
@@ -317,13 +372,17 @@ public final class UploadTeams {
       int numValues = 1;
 
       final Enumeration<?> paramIter = request.getParameterNames();
-      while(paramIter.hasMoreElements()) {
-        final String parameter = (String)paramIter.nextElement();
-        if(null != parameter && !"".equals(parameter) && !"TeamNumber".equals(parameter)) {
+      while (paramIter.hasMoreElements()) {
+        final String parameter = (String) paramIter.nextElement();
+        if (null != parameter
+            && !"".equals(parameter) && !"TeamNumber".equals(parameter)) {
           final String value = request.getParameter(parameter);
-          if(null != value && !"".equals(value)) {
-            dbColumns.append(", " + parameter);
-            dataColumns.append(", " + value);
+          if (null != value
+              && !"".equals(value)) {
+            dbColumns.append(", "
+                + parameter);
+            dataColumns.append(", "
+                + value);
             values.append(",?");
             numValues++;
           }
@@ -335,33 +394,38 @@ public final class UploadTeams {
       stmt.executeUpdate("DELETE FROM Teams");
 
       // now copy the data over converting the team number to an integer
-      final String selectSQL = "SELECT " + dataColumns.toString() + " FROM FilteredTeams";
-      final String insertSQL = "INSERT INTO Teams (" + dbColumns.toString() + ") VALUES(" + values.toString() + ")";
+      final String selectSQL = "SELECT "
+          + dataColumns.toString() + " FROM FilteredTeams";
+      final String insertSQL = "INSERT INTO Teams ("
+          + dbColumns.toString() + ") VALUES(" + values.toString() + ")";
       prep = connection.prepareStatement(insertSQL);
 
       rs = stmt.executeQuery(selectSQL);
-      while(rs.next()) {
+      while (rs.next()) {
         // convert TeamNumber to an integer
         final String teamNumStr = rs.getString(1);
-        if(LOG.isDebugEnabled()) {
-          LOG.debug("Inserting " + teamNumStr + " into Teams");
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Inserting "
+              + teamNumStr + " into Teams");
         }
         try {
           final int teamNum = Integer.parseInt(teamNumStr);
           prep.setInt(1, teamNum);
-        } catch(final NumberFormatException nfe) {
-          out.println("<font color='red'>Error, " + teamNumStr + " is not numeric.<br/>");
+        } catch (final NumberFormatException nfe) {
+          out.println("<font color='red'>Error, "
+              + teamNumStr + " is not numeric.<br/>");
           out.println("Go back and check your input file for errors.<br/></font>");
           return false;
         }
 
-        for(int i = 1; i < numValues; i++) { // skip TeamNumber
+        for (int i = 1; i < numValues; i++) { // skip TeamNumber
           prep.setString(i + 1, rs.getString(i + 1));
         }
         try {
           prep.executeUpdate();
-        } catch(final SQLException sqle) {
-          LOG.error("Got error inserting teamNumber " + teamNumStr + " into Teams table");
+        } catch (final SQLException sqle) {
+          LOGGER.error("Got error inserting teamNumber "
+              + teamNumStr + " into Teams table");
           throw sqle;
         }
       }
@@ -383,7 +447,6 @@ public final class UploadTeams {
 
   /**
    * Create a string that's a valid column name.
-   * 
    * <ul>
    * <li>Replace '#' with '_'</li>
    * <li>Replace ' ' with '_'</li>
@@ -397,9 +460,11 @@ public final class UploadTeams {
    * </ul>
    */
   private static String sanitizeColumnName(final String str) {
-    if(null == str || "".equals(str)) {
-      return "EMPTYHEADER_" + _emptyHeaderCount++;
-    } else if("constraint".equalsIgnoreCase(str)) {
+    if (null == str
+        || "".equals(str)) {
+      return "EMPTYHEADER_"
+          + _emptyHeaderCount++;
+    } else if ("constraint".equalsIgnoreCase(str)) {
       return "CONSTRAINT_";
     } else {
       String ret = str;

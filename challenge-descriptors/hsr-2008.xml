@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="HSR 2008 Challenge: Climate Connections"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="fll.xsd"
+ revision="$Rev: 351 $">
+
+  <Performance minimumScore="0" weight="1.0">
+
+  <!-- want to know the type of robot, but can't change the score, so set the multiplier to 0 -->
+  <goal name="robot_type" title="Robot Type" initialValue="1"
+   multiplier="0">
+   <value score="1" title="1 Robot" value="1_robot" />
+   <value score="2" title="2 Robot" value="2_robot" />
+  </goal>
+    
+  <goal name="bury_carbon_dioxide" title="Carbon Dioxide in Underground Reservoir"
+   multiplier="20" max="4" />
+  <!--  10 point bonus per item for 2 robot -->
+  <computedGoal name="bury_carbon_dioxide_bonus"
+   title="Carbon Dioxide 2 Robot Bonus">
+   <switch>
+    <case>
+     <enumCondition>
+      <left>
+       <goalRef goal="robot_type" />
+      </left>
+      <equal-to />
+      <right>
+       <stringConstant value="2_robot" />
+      </right>
+     </enumCondition>
+     <result>
+      <term scoreType="raw" coefficient="10" goal="bury_carbon_dioxide"/>
+     </result>
+    </case>
+    <default>
+     <constant value="0" />
+    </default>
+   </switch>
+  </computedGoal>
+
+  <goal name="construct_levees_red"
+   title="Upright Levees touching RED Shore" multiplier="5"
+      max="8" />
+
+  <goal name="construct_levees_green"
+   title="Upright Levees touching GREEN Shore" multiplier="4"
+      max="8" />
+    <restriction lowerBound="0" upperBound="8"
+      message="There are only 3 levees on the table">
+      <term goal="construct_levees_red" scoreType="raw"/>
+      <term goal="construct_levees_green" scoreType="raw"/>
+    </restriction>
+    
+  <goal name="raise_flood_barrier" title="Flood Barrier Raised" multiplier="15" />
+
+  <goal name="elevate_house" title="House Elevated" multiplier="25" />
+
+  <goal name="turn_off_lights" title="House Lights turned Off" multiplier="20"/>
+
+  <goal name="open_window" title="House Window Open"
+   multiplier="25"/>
+
+  <goal name="get_people_together_pink" title="Three or more red/white citizens touching the pink"
+   multiplier="10" />
+
+  <goal name="get_people_together_green" title="Three or more blue/gray leaders touching the green mountain and/or city"
+   multiplier="10" />
+
+  <goal name="get_people_together_research" title="Three or more black/white scientists touching the research area"
+   multiplier="10" />
+    
+  <goal name="find_agreement" title="Align the Arrows"
+   multiplier="40" />
+
+  <goal name="fund_research" title="Money to Research Area" multiplier="40" />
+  <!--  10 point bonus for 2 robot -->
+  <computedGoal name="fund_research_bonus"
+   title="Fund Research 2 Robot Bonus">
+   <switch>
+    <case>
+     <enumCondition>
+      <left>
+       <goalRef goal="robot_type" />
+      </left>
+      <equal-to />
+      <right>
+       <stringConstant value="2_robot" />
+      </right>
+     </enumCondition>
+     <result>
+      <constant value="10"/>
+     </result>
+    </case>
+    <default>
+     <constant value="0" />
+    </default>
+   </switch>
+  </computedGoal>
+
+  <goal name="deliver_machine" title="Ice Core Drilling Machine delivered to Research area" multiplier="50" />
+
+  <goal name="deliver_buoy" title="Ice Buoy Delivered to Research Area" multiplier="25" />
+  <!--  15 point bonus for 2 robot -->
+  <computedGoal name="deliver_buoy_bonus"
+   title="Deliver Buoy 2 Robot Bonus">
+   <switch>
+    <case>
+     <enumCondition>
+      <left>
+       <goalRef goal="robot_type" />
+      </left>
+      <equal-to />
+      <right>
+       <stringConstant value="2_robot" />
+      </right>
+     </enumCondition>
+     <result>
+      <constant value="15"/>
+     </result>
+    </case>
+    <default>
+     <constant value="0" />
+    </default>
+   </switch>
+  </computedGoal>
+
+  <goal name="rescue_people" title="Rescue people on house"
+      min="0" max="2" multiplier="30"/>
+    
+  <goal name="ride_bicycle" title="Bike in Yellow Grid Area" multiplier="10" />
+
+  <goal name="telecommute" title="Computer in Yellow Grid Area" multiplier="10" />
+
+  <goal name="study_wildlife_bear" title="Study Wildlife - Bear in Research Area"
+      multiplier="20"/>
+
+  <goal name="study_wildlife_snowmobile" title="Study Wildlife - Snowmobile in Research Area" multiplier="20" />
+    
+    <goal name="beat_clock" title="Beat the Clock - Robot in Yellow Grid Area"
+      multiplier="15"/>
+
+  <tiebreaker>
+   <test winner='high'>
+     <term goal='bury_carbon_dioxide' scoreType='computed'/>
+   </test>
+   <test winner='high'>
+     <term goal='deliver_buoy' scoreType='computed'/>
+     <term goal='deliver_buoy_bonus' scoreType='computed'/>
+   </test>
+   <test winner='high'>
+     <term goal='get_people_together_pink' scoreType='computed'/>
+     <term goal='get_people_together_green' scoreType='computed'/>
+     <term goal='get_people_together_research' scoreType='computed'/>
+   </test>
+   <test winner='high'>
+     <term goal='elevate_house' scoreType='computed'/>
+   </test>
+   <test winner='high'>
+     <term goal='open_window' scoreType='computed'/>
+   </test>
+   <test winner='high'>
+     <term goal='deliver_machine' scoreType='computed'/>
+   </test>
+   <test winner='high'>
+     <term goal='beat_clock' scoreType='computed'/>
+   </test>
+   <test winner='high'>
+     <term goal='study_wildlife_bear' scoreType='computed'/>
+   </test>
+  </tiebreaker>
+
+ </Performance>
+
+ <subjectiveCategory name="head2head" title="Head to Head"
+  weight="1.0">
+  <goal initialValue="0" max="1000" min="0" multiplier="1" name="score"
+   title="Score">
+  </goal>
+  <goal initialValue="0" max="50" min="0" multiplier="1" name="bonus"
+   title="Bonus">
+  </goal>
+ </subjectiveCategory>
+  
+</fll>

@@ -120,14 +120,13 @@ function setNoShow(value) {
   refresh();
 }
 function submit_NoShow() {
- if(confirm("Are you sure this is a 'No Show'")) {
+ retval = confirm("Are you sure this is a 'No Show'?") 
+ if(retval) {
   gbl_NoShow = 1;
   Verified = 1;
   refresh();
-  return 1;
- } else {
-  return 0;
  }
+ return retval;
 }
 
 function init() {

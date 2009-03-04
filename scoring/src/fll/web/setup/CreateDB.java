@@ -97,7 +97,7 @@ public class CreateDB extends HttpServlet {
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error loading data into the database: " + sqle.getMessage() + "</p>");
       LOG.error(sqle);
-      throw new RuntimeException(sqle);
+      throw new RuntimeException("Error loading data into the database", sqle);
     }
     
     session.setAttribute("message", message.toString());

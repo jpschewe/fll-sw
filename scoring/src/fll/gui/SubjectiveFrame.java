@@ -185,6 +185,7 @@ public final class SubjectiveFrame extends JFrame {
     }
 
     addWindowListener(new WindowAdapter() {
+      @Override
       public void windowClosing(final WindowEvent e) {
         quit();
       }

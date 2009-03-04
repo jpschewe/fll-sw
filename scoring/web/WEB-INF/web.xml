@@ -110,5 +110,23 @@
     <url-pattern>/admin/CommitTeam</url-pattern>
   </servlet-mapping>
   
+
+  <servlet>
+    <servlet-name>UploadSubjectiveData</servlet-name>
+    <servlet-class>fll.web.admin.UploadSubjectiveData</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>UploadSubjectiveData</servlet-name>
+    <url-pattern>/admin/UploadSubjectiveData</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>UploadTeams</servlet-name>
+    <servlet-class>fll.web.admin.UploadTeams</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>UploadTeams</servlet-name>
+    <url-pattern>/admin/UploadTeams</url-pattern>
+  </servlet-mapping>
   
 </web-app>
