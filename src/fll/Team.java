@@ -223,6 +223,6 @@ public final class Team {
 
   @Override
   public String toString() {
-    return "[" + getTeamNumber() + " " + getTeamName() + "]";
+    return "[" + getTeamNumber() + ": " + getTeamName() + "]";
   }
 }

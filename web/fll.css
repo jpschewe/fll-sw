@@ -1,14 +1,3 @@
-/* CSS file for the challenge.xml file.
-   
-   Just playing around with CSS files as applied directly to XML
-   for formatting in a browser.   
-
-   NOTE: at this time, only Mozilla 1.0 and perhaps Opera support all
-         the CSS extensions (mostly CSS2 stuff) that is needed in here;
-         MS InternetExplorer 6.0 does not.
-
-   Eric Engstrom (engstrom@mtu.net)
- */
 * {
 	display: block;
 	margin: 10pt;
@@ -23,11 +12,84 @@ fll:before {
 	content: attr(title)
 }
 
-goal:before {
-	content: "Goal: '" attr(title) "' [" attr(name) "]";
+goal:before {	
+	content: "Goal: '" attr(title) "' [" attr(name) "] min: " attr(min) " max: " attr(max) " multiplier: " attr(multiplier);
 }
 
-restriction>* {
+value:before {
+	content: "    Enum Value: '" attr(title) "' [" attr(value) "] score: " attr(score);
+}
+	
+stringConstant:before {
+	content: "'" attr(value) "'";
+}
+
+goalRef:before {
+	content: attr(goal);
+}
+
+computedGoal:before {
+	content: "Computed Goal: '" attr(title) "' [" attr(name) "]";
+}
+
+default:before {
+	content: "} else {";
+}
+default:after {
+	content: "}";
+}
+
+enumCondition * {
+	display: inline;
+	margin-right: 0pt;
+	margin-left: 0pt;
+}
+enumCondition:after {
+	content: ") {";
+}
+
+case>* {
+	display: inline;
+	margin-right: 0pt;
+	margin-left: 0pt;
+}
+		
+condition * {
+	display: inline;
+	margin-right: 0pt;
+	margin-left: 0pt;
+}
+
+case:first-child:before {
+	content: "if (";
+}
+
+case:before {
+	content: "} else if (";
+}
+condition:after {
+	content: ") {";
+}
+equal-to:before {
+	content: " == ";
+}
+not-equal-to:before {
+	content: " != ";
+}
+less-than:before {
+	content: " < ";
+}
+less-than-or-equal:before {
+	content: " <= ";
+}
+greater-than:before {
+	content: " > ";
+}
+greater-than-or-equal:before {
+	content: " >= ";
+}
+
+restriction * {
 	display: inline;
 	margin-right: 0pt;
 	margin-left: 0pt;
@@ -43,32 +105,25 @@ restriction:after {
 
 tiebreaker:before {
 	content: "Tiebreaker";
+	counter-reset: tiebreaker;
 }
 
 test:before {
-	content: "Team with the " attr(winner) " score wins";
+	content: counter(tiebreaker) ". Team with the " attr(winner) " score wins";
+	counter-increment: tiebreaker;
 }
 
 Performance:before {
-	content: "Performance";
+	content: "Performance weight: " attr(weight);
 }
 
 subjectiveCategory:before {
-	content: attr(title);
+	content: attr(title) " weight: " attr(weight);
 }
 
 term[coefficient]:before {
 	content:  attr(coefficient) " x " attr(scoreType) "(" attr(goal);
 }
-/*
-term[floatingPoint]:before {
-	content: attr(floatingPoint);
-}
-
-term[scoreType]:before {
-	content: attr(scoreType);
-}
-*/
 
 term:before {
 	content: attr(scoreType) "(" attr(goal);
@@ -84,6 +139,29 @@ term:not(:last-child):after {
   content: ") + ";
 }
 
+result {
+	display: block;
+}
+
+result * {
+	display: inline;
+}
+
 constant:before {
 	content: attr(value);
 }
+constant:not(:last-child):before {
+	content: attr(value) " + ";
+}
+
+variableRef:before {
+	content: attr(coefficient) " x " attr(variable);
+}
+variableRef:not(:last-child):before {
+	content: attr(coefficient) " x " attr(variable) " + ";
+}
+
+variable:before {
+	content: attr(name) " = ";
+}
+  

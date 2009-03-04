@@ -58,6 +58,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
     Arrays.sort(_scoreElements, _comparator);
   }
 
+  @Override
   public String getColumnName(final int column) {
     switch(column) {
     case 0:
@@ -79,6 +80,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
     }
   }
 
+  @Override
   public Class<?> getColumnClass(final int column) {
     switch(column) {
     case 0:
@@ -167,6 +169,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
     }
   }
 
+  @Override
   public boolean isCellEditable(final int row, final int column) {
     switch(column) {
     case 0:
@@ -201,6 +204,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
     }
   }
 
+  @Override
   public void setValueAt(final Object value, final int row, final int column) {
     setValueAt(value, row, column, true);
   }

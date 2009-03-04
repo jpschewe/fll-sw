@@ -30,6 +30,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import fll.Team;
+import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FP;
 import fll.util.ScoreUtils;
@@ -54,11 +55,23 @@ public final class Playoff {
    * @param args ignored
    */
   public static void main(final String[] args) {
+    try {
+    final String divisionStr = "1";
+    final Connection connection = Utilities.createDBConnection("/home/jpschewe/projects/fll-sw/working-dir/scoring/build/tomcat/webapps/fll-sw/WEB-INF/flldb");
+    final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
+
+    final List<Team> seedingOrder = Queries.getPlayoffSeedingOrder(connection, divisionStr, tournamentTeams);
+    LOGGER.info("Seeding order: " + seedingOrder);
+    } catch(final Exception e) {
+      LOGGER.error(e, e);
+    }
+    /*
     final int[] testValues = new int[] { 1, 2, 4, 7, 8, 16, 32, 64, 128 };
     for (int i = 0; i < testValues.length; ++i) {
       LOGGER.info("brackets for "
           + testValues[i] + " is: " + Arrays.toString(computeInitialBrackets(testValues[i])));
     }
+    */
   }
 
   private Playoff() {
@@ -96,29 +109,6 @@ public final class Playoff {
     }
     
     return list;
-
-    // if(seedingOrder.size() > 128) {
-    // // TODO one of these days I need to compute this rather than using an
-    // // array
-    // throw new RuntimeException(
-    // "More than 128 teams sent to playoff brackets!  System overload");
-    // }
-    // int bracketIndex = 0;
-    // while(SEED_ARRAY[bracketIndex].length < seedingOrder.size()) {
-    // bracketIndex++;
-    // }
-    //
-    // final List<Team> list = new LinkedList<Team>();
-    // for(int i = 0; i < SEED_ARRAY[bracketIndex].length; i++) {
-    // if(SEED_ARRAY[bracketIndex][i] > seedingOrder.size()) {
-    // list.add(Team.BYE);
-    // } else {
-    // final Team team = (Team)seedingOrder
-    // .get(SEED_ARRAY[bracketIndex][i] - 1);
-    // list.add(team);
-    // }
-    // }
-    // return list;
   }
 
   /**
