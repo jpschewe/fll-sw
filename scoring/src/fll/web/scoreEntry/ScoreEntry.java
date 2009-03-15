@@ -490,11 +490,11 @@ public final class ScoreEntry {
   private static void generateYesNoButtons(final String name, final JspWriter writer) throws IOException {
     // generate radio buttons with calls to set<name>
     writer.println("        <td>");
-    writer.println("          <input type='radio' name='"
+    writer.println("          <input type='radio' id='" + name + "_yes' name='"
         + name + "' value='1' onclick='" + getSetMethodName(name) + "(1)'>");
     writer.println("          Yes");
     writer.println("          &nbsp;&nbsp;");
-    writer.println("          <input type='radio' name='"
+    writer.println("          <input type='radio' id='" + name + "_no' name='"
         + name + "' value='0' onclick='" + getSetMethodName(name) + "(0)'>");
     writer.println("          No");
     writer.println("        </td>");

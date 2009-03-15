@@ -128,8 +128,8 @@
 
 	<!-- ==================== Code coverage ==================== -->
 	<target name="coverage.instr" depends="compile" description="Instrument files for code coverage">
+    
 		<mkdir dir="${dir.coverage}" />
-
 		<delete file="${dir.coverage}/cobertura.ser" />
 		<delete file="${dir.coverage}/tomcat-cobertura.ser" />
 		<delete file="${dir.coverage}/merge-cobertura.ser" />
@@ -498,14 +498,10 @@
 		</antcall>
 
 		<echo message="Waiting for tomcat to startup" />
-		<java classname="fll.web.WaitForTomcatStart" fork="yes" taskname="Wait for Tomcat Start">
-			<classpath>
-				<path refid="test.classpath" />
-
-				<pathelement location="${dir.web}/WEB-INF/classes" />
-			</classpath>
-		</java>
-
+		<waitfor maxwait="5" maxwaitunit="minute" checkevery="1000" checkeveryunit="millisecond" timeoutproperty="fll-sw.timeout">
+			<http url="http://localhost:9080/fll-sw/setup" />
+		</waitfor>
+		<fail message="Access to timed out to http://localhost:9080/fll-sw/setup " if="fll-sw.timeout" />
 	</target>
 
 	<target name="tomcat.stop" depends="tomcat.expand,compile.test" description="shut down tomcat">
@@ -516,14 +512,11 @@
 		</antcall>
 
 		<echo message="Waiting for tomcat to shutdown" />
-		<java classname="fll.web.WaitForTomcatStop" fork="yes" taskname="Wait for Tomcat Stop">
-			<classpath>
-				<path refid="test.classpath" />
-
-				<pathelement location="${dir.web}/WEB-INF/classes" />
-			</classpath>
-		</java>
-
+		<waitfor maxwait="5" maxwaitunit="minute" checkevery="1000" checkeveryunit="millisecond">
+			<not>
+				<http url="http://localhost:9080/fll-sw/setup" />
+			</not>
+		</waitfor>
 	</target>
 
 	<target name="-tomcat.run" depends="jvm.expand">
@@ -734,7 +727,7 @@
     </fail>
 	</target>
 
-	<target name="test.single" depends="-junit.single" description="Run the unit tests">
+	<target name="test.single" depends="-junit.single" description="Run a single unit test specified by junit.test.class property.">
 		<condition property="test.halt">
 			<and>
 				<isset property="test.failed" />
