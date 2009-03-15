@@ -412,7 +412,7 @@ public class FullTournamentTest {
       }
 
       // division 2
-      final int[] division2ExpectedRank = { 3208, 3061, 2863, 2110, 3063, 353, 2043, 3129 };
+      final int[] division2ExpectedRank = { 3208, 3061, 2863, 2110, 3063, 353, 3129, 2043 };
       division = "DivII/Gr7-9";
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "developer/query.jsp");
@@ -425,7 +425,7 @@ public class FullTournamentTest {
       table = response.getTableWithID("queryResult");
       for (int rank = 0; rank < division2ExpectedRank.length; ++rank) {
         final String expectedTeamNumberStr = String.valueOf(division2ExpectedRank[rank]);
-        Assert.assertEquals("Ranking is incorrect", expectedTeamNumberStr, table.getCellAsText(rank + 1, 0));
+        Assert.assertEquals("Ranking is incorrect for rank " + rank, expectedTeamNumberStr, table.getCellAsText(rank + 1, 0));
       }
 
       /*
@@ -665,7 +665,8 @@ public class FullTournamentTest {
                   + name + " min: " + min + " max: " + max + " readonly: " + form.isReadOnlyParameter(name));
             }
 
-            if (XMLUtils.isEnumeratedGoal(element)) {
+            if (XMLUtils.isEnumeratedGoal(element)
+                || (0 == min && 1 == max)) {
               final String valueStr = rs.getString(name);
               form.setParameter(name, valueStr);
             } else {
