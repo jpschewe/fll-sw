@@ -570,39 +570,34 @@ public class FullTournamentTest {
    * @param form the form
    * @param name the name of the element
    * @param value the value to set the score element to
-   * @param valueStr the value as a string for enums
    * @throws IOException if there is an error writing to the form
    * @throws SAXException if there is an error clicking the buttons
    * @throws ParseException if there is an error parsing the default value of
    *           the form element as a number
    */
-  public static void setFormScoreElement(final WebForm form, final String name, final int value, final String valueStr) throws IOException, SAXException,
-      ParseException {
-    if (form.isReadOnlyParameter(name)) {
-      final int defaultValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(form.getParameterValue(name)).intValue();
-      final int difference = value
-          - defaultValue;
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Need to increment/decrement "
-            + name + " " + difference);
-      }
-      final Button button;
-      if (difference > 0) {
-        button = form.getButtonWithID("inc_"
-            + name + "_1");
-      } else {
-        button = form.getButtonWithID("dec_"
-            + name + "_-1");
-      }
-      if (null == button) {
-        throw new RuntimeException("Cannot find button for increment/decrement of "
-            + name + "button: " + button);
-      }
-      for (int val = 0; val < Math.abs(difference); ++val) {
-        button.click();
-      }
+  public static void setFormScoreElement(final WebForm form, final String name, final int value) throws IOException, SAXException, ParseException {
+    // must be a number
+    final int defaultValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(form.getParameterValue(name)).intValue();
+    final int difference = value
+        - defaultValue;
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Need to increment/decrement "
+          + name + " " + difference);
+    }
+    final Button button;
+    if (difference > 0) {
+      button = form.getButtonWithID("inc_"
+          + name + "_1");
     } else {
-      form.setParameter(name, valueStr);
+      button = form.getButtonWithID("dec_"
+          + name + "_-1");
+    }
+    if (null == button) {
+      throw new RuntimeException("Cannot find button for increment/decrement of "
+          + name + "button: " + button);
+    }
+    for (int val = 0; val < Math.abs(difference); ++val) {
+      button.click();
     }
   }
 
@@ -670,9 +665,13 @@ public class FullTournamentTest {
                   + name + " min: " + min + " max: " + max + " readonly: " + form.isReadOnlyParameter(name));
             }
 
-            final int value = rs.getInt(name);
-            final String valueStr = rs.getString(name);
-            setFormScoreElement(form, name, value, valueStr);
+            if (XMLUtils.isEnumeratedGoal(element)) {
+              final String valueStr = rs.getString(name);
+              form.setParameter(name, valueStr);
+            } else {
+              final int value = rs.getInt(name);
+              setFormScoreElement(form, name, value);
+            }
           }
           // Set the verified field to yes
           form.setParameter("Verified", "1");
