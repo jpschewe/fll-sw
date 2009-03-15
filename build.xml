@@ -51,12 +51,12 @@
 
 	<!-- ==================== Classpaths =========================== -->
 	<path id="cobertura.classpath">
-    <fileset dir="${dir.lib}/cobertura">
-      <include name="*.jar" />
-      <include name="lib/**/*.jar" />
-    </fileset>
+		<fileset dir="${dir.lib}/cobertura">
+			<include name="*.jar" />
+			<include name="lib/**/*.jar" />
+		</fileset>
 		<pathelement location="${dir.lib}/log4j-1.2.14.jar" />
-  </path>	
+	</path>
 	<taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
 
 	<path id="application.classpath">
@@ -85,7 +85,7 @@
 
 		<pathelement location="${dir.classes}" />
 
-		<path refid="cobertura.classpath"/>
+		<path refid="cobertura.classpath" />
 	</path>
 
 	<path id="compile.classpath">
@@ -127,50 +127,44 @@
 	</path>
 
 	<!-- ==================== Code coverage ==================== -->
-  <target name="coverage.instr" depends="compile" description="Instrument files for code coverage">
+	<target name="coverage.instr" depends="compile" description="Instrument files for code coverage">
 		<mkdir dir="${dir.coverage}" />
-		
-		<delete file="${dir.coverage}/cobertura.ser"/>
-		<delete file="${dir.coverage}/tomcat-cobertura.ser"/>
-		<delete file="${dir.coverage}/merge-cobertura.ser"/>
-		
-    <cobertura-instrument datafile="${dir.coverage}/cobertura.ser">
-      <fileset dir="${dir.classes}">
-        <include name="**/*.class"/>
-      </fileset>      
-    </cobertura-instrument>
-  </target>
-  
-  <target name="coverage.report" description="Generate coverage report">
-    <cobertura-merge datafile="${dir.coverage}/merge-cobertura.ser">
-      <fileset dir="${dir.coverage}">
-        <include name="cobertura.ser"/>
-        <include name="tomcat-cobertura.ser"/>
-      </fileset>
-    </cobertura-merge>
-    
-    <mkdir dir="${dir.reports}/coverage"/>
-    <cobertura-report format="html" 
-    destdir="${dir.reports}/coverage"
-    datafile="${dir.coverage}/merge-cobertura.ser" 
-    >
-      <fileset dir="${dir.src}">
-        <include name="**/*.java" />
-      </fileset>
-    </cobertura-report>
 
-    <cobertura-report format="xml" 
-    destdir="${dir.reports}/coverage"
-    datafile="${dir.coverage}/merge-cobertura.ser" 
-    >
-      <fileset dir="${dir.src}">
-        <include name="**/*.java" />
-      </fileset>
-    </cobertura-report>
+		<delete file="${dir.coverage}/cobertura.ser" />
+		<delete file="${dir.coverage}/tomcat-cobertura.ser" />
+		<delete file="${dir.coverage}/merge-cobertura.ser" />
 
-    <echo message="See ${dir.reports}/coverage/index.html for the coverage report" />
-  </target>
-    
+		<cobertura-instrument datafile="${dir.coverage}/cobertura.ser">
+			<fileset dir="${dir.classes}">
+				<include name="**/*.class" />
+			</fileset>
+		</cobertura-instrument>
+	</target>
+
+	<target name="coverage.report" description="Generate coverage report">
+		<cobertura-merge datafile="${dir.coverage}/merge-cobertura.ser">
+			<fileset dir="${dir.coverage}">
+				<include name="cobertura.ser" />
+				<include name="tomcat-cobertura.ser" />
+			</fileset>
+		</cobertura-merge>
+
+		<mkdir dir="${dir.reports}/coverage" />
+		<cobertura-report format="html" destdir="${dir.reports}/coverage" datafile="${dir.coverage}/merge-cobertura.ser">
+			<fileset dir="${dir.src}">
+				<include name="**/*.java" />
+			</fileset>
+		</cobertura-report>
+
+		<cobertura-report format="xml" destdir="${dir.reports}/coverage" datafile="${dir.coverage}/merge-cobertura.ser">
+			<fileset dir="${dir.src}">
+				<include name="**/*.java" />
+			</fileset>
+		</cobertura-report>
+
+		<echo message="See ${dir.reports}/coverage/index.html for the coverage report" />
+	</target>
+
 	<!-- ==================== Setup/Prepare/Clean ==================== -->
 	<target name="init">
 		<tstamp />
@@ -500,7 +494,7 @@
 		<antcall target="-tomcat.run">
 			<param name="operation" value="start" />
 			<param name="spawn" value="true" />
-			<param name="inside.test" value="${inside.test}"/>
+			<param name="inside.test" value="${inside.test}" />
 		</antcall>
 
 		<echo message="Waiting for tomcat to startup" />
@@ -534,7 +528,7 @@
 
 	<target name="-tomcat.run" depends="jvm.expand">
 		<java jvm="${jvm}" classname="org.apache.catalina.startup.Bootstrap" fork="true" spawn="${spawn}" taskname="tomcat">
-  		<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/tomcat-cobertura.ser"/>
+			<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/tomcat-cobertura.ser" />
 
 			<classpath>
 				<!-- include two tries to find tools.jar depending on if java.home expands to jre directory -->
@@ -543,7 +537,7 @@
 				<pathelement location="${dir.build}/tomcat/bin/bootstrap.jar" />
 
 				<!-- for when running the unit tests -->
-				<path refid="cobertura.classpath"/>
+				<path refid="cobertura.classpath" />
 
 			</classpath>
 			<sysproperty key="java.endorsed.dirs" file="${dir.build}/tomcat/common/endorsed" />
@@ -594,7 +588,7 @@
 		</copy>
 
 		<!-- copy reports -->
-    <mkdir dir="${dir.dist}/docs/reports"/>
+		<mkdir dir="${dir.dist}/docs/reports" />
 		<copy todir="${dir.dist}/docs/reports">
 			<fileset dir="${dir.reports}" />
 		</copy>
@@ -795,13 +789,12 @@
 		<antcall target="-junit.setup" />
 
 		<junit fork="yes" jvm="${jvm}" haltonfailure="false" dir="${dir.build}" showoutput="true" failureproperty="test.failed">
-			<sysproperty key="net.sourceforge.cobertura.datafile"
-			value="${dir.coverage}/cobertura.ser"/>
+			<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/cobertura.ser" />
 
 			<classpath>
 				<path refid="test.classpath" />
 			</classpath>
-			
+
 			<formatter type="brief" usefile="false" />
 			<formatter type="xml" />
 			<batchtest todir="${dir.build}/test-results">
@@ -870,10 +863,13 @@
 		</checkstyle>
 	</target>
 
-	<target name="continuous" description="Runs the continuous integration build" depends="test,javadoc">
-	  <antcall target="coverage.report"/>
+	<target name="continuous" description="Runs the continuous integration build">
+		<antcall target="clean" />
+		<antcall target="javadoc" />
+		<antcall target="test" />
+		<antcall target="coverage.report" />
 	</target>
-	
+
 	<!-- ==================== SECONDARY TARGETS ==================== -->
 	<!-- build scripts to run the application -->
 	<target name="-buildscripts.check">
