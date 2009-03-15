@@ -158,7 +158,16 @@
         <include name="**/*.java" />
       </fileset>
     </cobertura-report>
-    
+
+    <cobertura-report format="xml" 
+    destdir="${dir.reports}/coverage"
+    datafile="${dir.coverage}/merge-cobertura.ser" 
+    >
+      <fileset dir="${dir.src}">
+        <include name="**/*.java" />
+      </fileset>
+    </cobertura-report>
+
     <echo message="See ${dir.reports}/coverage/index.html for the coverage report" />
   </target>
     
@@ -794,6 +803,7 @@
 			</classpath>
 			
 			<formatter type="brief" usefile="false" />
+			<formatter type="xml" />
 			<batchtest todir="${dir.build}/test-results">
 				<fileset dir="${dir.test}" includes="**/*Test.java" />
 			</batchtest>
@@ -860,6 +870,10 @@
 		</checkstyle>
 	</target>
 
+	<target name="continuous" description="Runs the continuous integration build" depends="test,javadoc">
+	  <antcall target="coverage.report"/>
+	</target>
+	
 	<!-- ==================== SECONDARY TARGETS ==================== -->
 	<!-- build scripts to run the application -->
 	<target name="-buildscripts.check">
