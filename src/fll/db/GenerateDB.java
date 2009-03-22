@@ -342,7 +342,6 @@ public final class GenerateDB {
     } finally {
       SQLFunctions.closeStatement(stmt);
       SQLFunctions.closePreparedStatement(prep);
-      SQLFunctions.closeConnection(connection);
     }
 
   }
