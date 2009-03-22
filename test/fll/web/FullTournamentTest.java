@@ -22,10 +22,10 @@ import java.util.List;
 
 import javax.swing.table.TableModel;
 
-import junit.framework.Assert;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
+import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -113,35 +113,19 @@ public class FullTournamentTest {
 
       stmt = testDataConn.createStatement();
 
-      // --- initialize database ---
       final WebConversation conversation = new WebConversation();
-      WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "setup/");
-      WebResponse response = conversation.getResponse(request);
-      Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
 
-      WebForm form = response.getFormWithID("setup");
-      Assert.assertNotNull(form);
-      form.setCheckbox("force_rebuild", true); // rebuild the whole database
+      // --- initialize database ---
       final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml");
-      Assert.assertNotNull(challengeDocIS);
-      final UploadFileSpec challengeUpload = new UploadFileSpec("challenge-test.xml", challengeDocIS, "text/xml");
-      Assert.assertNotNull(challengeUpload);
-      form.setParameter("xmldocument", new UploadFileSpec[] { challengeUpload });
-      request = form.getRequest("reinitializeDatabase");
-      response = conversation.getResponse(request);
-      Assert.assertTrue(response.isHTML());
-      Assert.assertNotNull("Error initializing database: "
-          + response.getText(), response.getElementWithID("success"));
-      challengeDocIS.close();
+      TestUtils.initializeDatabase(challengeDocIS);
 
       // --- load teams ---
       // find upload form on admin page
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+      WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "admin/");
-      response = conversation.getResponse(request);
+      WebResponse response = conversation.getResponse(request);
       Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-      form = response.getFormWithID("uploadTeams");
+      WebForm form = response.getFormWithID("uploadTeams");
 
       // set the parameters
       final InputStream teamsIS = FullTournamentTest.class.getResourceAsStream("data/teams-ft.csv");
@@ -443,7 +427,7 @@ public class FullTournamentTest {
        * final int teamNumber = rs.getInt(1); Assert.assertEquals("Ranking is
        * incorrect", division2ExpectedRank[rank], teamNumber); }
        * SQLFunctions.closeResultSet(rs);
-       * SQLFunctions.closePreparedStatement(prep);
+       * SQLFunctions.closePreparedStateUtilities.createDBConnection(database);ment(prep);
        */
 
       // TODO check scores?

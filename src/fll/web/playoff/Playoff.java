@@ -12,12 +12,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspWriter;
@@ -34,6 +37,8 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FP;
 import fll.util.ScoreUtils;
+import fll.xml.BracketSortType;
+import fll.xml.XMLUtils;
 
 /**
  * Add class comment here!
@@ -56,22 +61,23 @@ public final class Playoff {
    */
   public static void main(final String[] args) {
     try {
-    final String divisionStr = "1";
-    final Connection connection = Utilities.createDBConnection("/home/jpschewe/projects/fll-sw/working-dir/scoring/build/tomcat/webapps/fll-sw/WEB-INF/flldb");
-    final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-
-    final List<Team> seedingOrder = Queries.getPlayoffSeedingOrder(connection, divisionStr, tournamentTeams);
-    LOGGER.info("Seeding order: " + seedingOrder);
-    } catch(final Exception e) {
+      final String divisionStr = "1";
+      final Connection connection = Utilities
+                                             .createDBConnection("/home/jpschewe/projects/fll-sw/working-dir/scoring/build/tomcat/webapps/fll-sw/WEB-INF/flldb");
+      final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
+      final Document challengeDocument = Queries.getChallengeDocument(connection);
+      final List<Team> seedingOrder = buildInitialBracketOrder(connection, challengeDocument, divisionStr, tournamentTeams);
+      LOGGER.info("Initial bracket order: "
+          + seedingOrder);
+    } catch (final Exception e) {
       LOGGER.error(e, e);
     }
     /*
-    final int[] testValues = new int[] { 1, 2, 4, 7, 8, 16, 32, 64, 128 };
-    for (int i = 0; i < testValues.length; ++i) {
-      LOGGER.info("brackets for "
-          + testValues[i] + " is: " + Arrays.toString(computeInitialBrackets(testValues[i])));
-    }
-    */
+     * final int[] testValues = new int[] { 1, 2, 4, 7, 8, 16, 32, 64, 128 };
+     * for (int i = 0; i < testValues.length; ++i) { LOGGER.info("brackets for "
+     * + testValues[i] + " is: " +
+     * Arrays.toString(computeInitialBrackets(testValues[i]))); }
+     */
   }
 
   private Playoff() {
@@ -88,27 +94,75 @@ public final class Playoff {
    * @return a List of teams
    * @throws SQLException on a database error
    */
-  public static List<Team> buildInitialBracketOrder(final Connection connection, final String divisionStr, final Map<Integer, Team> tournamentTeams)
-      throws SQLException {
+  public static List<Team> buildInitialBracketOrder(final Connection connection,
+                                                    final Document challengeDocument,
+                                                    final String divisionStr,
+                                                    final Map<Integer, Team> tournamentTeams) throws SQLException {
 
-    final List<Team> seedingOrder = Queries.getPlayoffSeedingOrder(connection, divisionStr, tournamentTeams);
+    final BracketSortType bracketSort = XMLUtils.getBracketSort(challengeDocument);
+    if (BracketSortType.ALPHA_TEAM == bracketSort) {
+      final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
+      // sort by team name
+      Collections.sort(teams, new Comparator<Team>() {
+        public int compare(final Team one, final Team two) {
+          return one.getTeamName().compareTo(two.getTeamName());
+        }
+      });
+      
+      final int[] seeding = computeInitialBrackets(teams.size());
+      final int byesNeeded = seeding.length
+          - teams.size();
 
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("seedingOrder: "
-          + seedingOrder);
-    }
-    final int[] seeding = computeInitialBrackets(seedingOrder.size());
-    final List<Team> list = new LinkedList<Team>();
-    for (int i = 0; i < seeding.length; i++) {
-      if (seeding[i] > seedingOrder.size()) {
-        list.add(Team.BYE);
-      } else {
-        final Team team = (Team) seedingOrder.get(seeding[i] - 1);
-        list.add(team);
+      // give byes to the last byesNeeded teams.
+      final List<Team> list = new LinkedList<Team>();
+      for (int teamIdx = 0; teamIdx < teams.size(); ++teamIdx) {
+        list.add(teams.get(teamIdx));
+        if(teamIdx >= teams.size() - byesNeeded) {
+          list.add(Team.BYE);
+        }
       }
+      if(list.size() != seeding.length) {
+        throw new InternalError("Programming error, list size should be the same as seeding length");
+      }
+      return list;      
+    } else {
+      final List<Team> seedingOrder;
+      if (BracketSortType.RANDOM == bracketSort) {
+        seedingOrder = new ArrayList<Team>(tournamentTeams.values());
+        // assign a random number to each team
+        final double[] randoms = new double[seedingOrder.size()];
+        final Random generator = new Random();
+        for (int i = 0; i < randoms.length; ++i) {
+          randoms[i] = generator.nextDouble();
+        }
+        Collections.sort(seedingOrder, new Comparator<Team>() {
+          public int compare(final Team one, final Team two) {
+            final int oneIdx = seedingOrder.indexOf(one);
+            final int twoIdx = seedingOrder.indexOf(two);
+            return Double.compare(randoms[oneIdx], randoms[twoIdx]);
+          }
+        });
+      } else {
+        seedingOrder = Queries.getPlayoffSeedingOrder(connection, divisionStr, tournamentTeams);
+      }
+
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("seedingOrder: "
+            + seedingOrder);
+      }
+      final int[] seeding = computeInitialBrackets(seedingOrder.size());
+      final List<Team> list = new LinkedList<Team>();
+      for (int i = 0; i < seeding.length; i++) {
+        if (seeding[i] > seedingOrder.size()) {
+          list.add(Team.BYE);
+        } else {
+          final Team team = (Team) seedingOrder.get(seeding[i] - 1);
+          list.add(team);
+        }
+      }
+      return list;
     }
-    
-    return list;
+
   }
 
   /**
@@ -428,7 +482,7 @@ public final class Playoff {
     final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
 
     // initialize currentRound to contain a full bracket setup
-    List<Team> tempCurrentRound = buildInitialBracketOrder(connection, division, tournamentTeams);
+    List<Team> tempCurrentRound = buildInitialBracketOrder(connection, challengeDocument, division, tournamentTeams);
     if (tempCurrentRound.size() > 1) {
       out.println("<table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>");
 
@@ -578,8 +632,13 @@ public final class Playoff {
     }
   }
 
-  private static void genScoresheetForm(final JspWriter out, final Team teamA, final Team teamB, final String tableA, final String tableB,
-                                        final List<String[]> tables, final String round) throws IOException {
+  private static void genScoresheetForm(final JspWriter out,
+                                        final Team teamA,
+                                        final Team teamB,
+                                        final String tableA,
+                                        final String tableB,
+                                        final List<String[]> tables,
+                                        final String round) throws IOException {
     final String formName = "genScoresheet_"
         + teamA.getTeamNumber() + "_" + teamB.getTeamNumber();
     out.println("<form name='"
@@ -657,7 +716,9 @@ public final class Playoff {
    * Output the table for the printable brackets to out
    */
   @SuppressWarnings("unchecked")
-  public static void displayScoresheetGenerationBrackets(final Connection connection, final Document challengeDocument, final String division,
+  public static void displayScoresheetGenerationBrackets(final Connection connection,
+                                                         final Document challengeDocument,
+                                                         final String division,
                                                          final JspWriter out) throws IOException, SQLException, ParseException {
 
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
@@ -669,7 +730,7 @@ public final class Playoff {
     }
 
     // initialize currentRound to contain a full bracket setup
-    List<Team> tempCurrentRound = buildInitialBracketOrder(connection, division, tournamentTeams);
+    List<Team> tempCurrentRound = buildInitialBracketOrder(connection, challengeDocument, division, tournamentTeams);
     if (tempCurrentRound.size() > 1) {
       out.println("<table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>");
 
@@ -851,7 +912,10 @@ public final class Playoff {
     }
   }
 
-  public static void initializeBrackets(final Connection connection, final Document challengeDocument, final String division, final boolean enableThird,
+  public static void initializeBrackets(final Connection connection,
+                                        final Document challengeDocument,
+                                        final String division,
+                                        final boolean enableThird,
                                         final JspWriter out) throws IOException, SQLException, ParseException {
 
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
@@ -870,7 +934,7 @@ public final class Playoff {
     // round 1 teams)
     // Note: Our math will rely on the length of the list returned by
     // buildInitialBracketOrder to be a power of 2. It always should be.
-    List<Team> firstRound = buildInitialBracketOrder(connection, division, tournamentTeams);
+    List<Team> firstRound = buildInitialBracketOrder(connection, challengeDocument, division, tournamentTeams);
 
     // Insert those teams into the database.
     // At this time we let the table assignment field default to NULL.
@@ -1020,6 +1084,8 @@ public final class Playoff {
   }
 
   /**
+   * Compute the assignments to the initial playoff brackets.
+   * 
    * @param numTeams will be rounded up to the next power of 2
    * @return the initial bracket index 0 plays 1, 2 plays 3, will have size of
    *         numTeams rounded up to next power of 2

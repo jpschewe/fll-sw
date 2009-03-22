@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="Science of Speed: 2008"
+ bracketSort="ALPHA_TEAM"
+ revision="$Rev: 351 $"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="fll.xsd"
+ >
+
+  <Performance minimumScore="-20" weight="1.0">
+
+  <goal name="seconds" title="Seconds" multiplier="0" max="10"/>
+  <goal name="tenths" title="Tenths" multiplier="0" max="10"/>
+  <goal name="hundredths" title="Hundreths" multiplier="0" max="10"/>
+  <goal name="thousandths" title="Thousandths" multiplier="0" max="10"/>
+  
+  <!-- compute the score for the software, this is the time times -1 so that a higher score is good -->
+  <computedGoal name="score" title="Score for software (will be negative)">
+    <switch>
+      <default>
+        <term coefficient="-1" goal="seconds" scoreType="raw" floatingPoint="decimal"/>
+        <term coefficient="-0.1" goal="tenths" scoreType="raw" floatingPoint="decimal"/>
+        <term coefficient="-0.01" goal="hundredths" scoreType="raw" floatingPoint="decimal"/>
+        <term coefficient="-0.001" goal="thousandths" scoreType="raw" floatingPoint="decimal"/>
+      </default>
+    </switch>
+  </computedGoal>
+
+  <tiebreaker>
+   <test winner='high'>
+     <term goal='score' scoreType='computed'/>
+   </test>
+  </tiebreaker>
+
+ </Performance>
+
+</fll>
