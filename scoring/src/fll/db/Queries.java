@@ -15,14 +15,11 @@ import java.sql.Types;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -1328,53 +1325,34 @@ public final class Queries {
   public static List<Team> getPlayoffSeedingOrder(final Connection connection, final String divisionStr, final Map<Integer, Team> tournamentTeams)
       throws SQLException, RuntimeException {
 
-    final int numSeedingRounds = getNumSeedingRounds(connection);
-    if (numSeedingRounds < 1) {
-      final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
-      // assign a random number to each team
-      final double[] randoms = new double[teams.size()];
-      final Random generator = new Random();
-      for (int i = 0; i < randoms.length; ++i) {
-        randoms[i] = generator.nextDouble();
-      }
-      Collections.sort(teams, new Comparator<Team>() {
-        public int compare(final Team one, final Team two) {
-          final int oneIdx = teams.indexOf(one);
-          final int twoIdx = teams.indexOf(two);
-          return Double.compare(randoms[oneIdx], randoms[twoIdx]);
-        }
-      });
-      return teams;
-    } else {
-      final List<Team> retval = new ArrayList<Team>();
-      final String currentTournament = getCurrentTournament(connection);
+    final List<Team> retval = new ArrayList<Team>();
+    final String currentTournament = getCurrentTournament(connection);
 
-      PreparedStatement prep = null;
-      ResultSet rs = null;
-      try {
-        prep = connection.prepareStatement("SELECT performance_seeding_max.TeamNumber, performance_seeding_max.Score, RAND() as random"
-            + " FROM performance_seeding_max, current_tournament_teams" + " WHERE performance_seeding_max.Tournament = ?"
-            + " AND performance_seeding_max.TeamNumber = current_tournament_teams.TeamNumber" + " AND current_tournament_teams.event_division = ?"
-            + " ORDER BY performance_seeding_max.Score DESC, random");
-        prep.setString(1, currentTournament);
-        prep.setString(2, divisionStr);
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT performance_seeding_max.TeamNumber, performance_seeding_max.Score, RAND() as random"
+          + " FROM performance_seeding_max, current_tournament_teams" + " WHERE performance_seeding_max.Tournament = ?"
+          + " AND performance_seeding_max.TeamNumber = current_tournament_teams.TeamNumber" + " AND current_tournament_teams.event_division = ?"
+          + " ORDER BY performance_seeding_max.Score DESC, random");
+      prep.setString(1, currentTournament);
+      prep.setString(2, divisionStr);
 
-        rs = prep.executeQuery();
-        while (rs.next()) {
-          final int teamNumber = rs.getInt(1);
-          final Team team = tournamentTeams.get(new Integer(teamNumber));
-          if (null == team) {
-            throw new RuntimeException("Couldn't find team number "
-                + teamNumber + " in the list of tournament teams!");
-          }
-          retval.add(team);
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final int teamNumber = rs.getInt(1);
+        final Team team = tournamentTeams.get(new Integer(teamNumber));
+        if (null == team) {
+          throw new RuntimeException("Couldn't find team number "
+              + teamNumber + " in the list of tournament teams!");
         }
-      } finally {
-        SQLFunctions.closeResultSet(rs);
-        SQLFunctions.closePreparedStatement(prep);
+        retval.add(team);
       }
-      return retval;
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
+    return retval;
   }
 
   /**

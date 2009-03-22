@@ -269,4 +269,22 @@ public final class XMLUtils {
      return retval;
   }
   
+  /**
+   * Get the bracket sort type from the document. If the attribute doesn't exist, then return {@link BracketSortType#SEEDING}.
+   */
+  public static BracketSortType getBracketSort(final Document challengeDocument) {
+    final Element root = challengeDocument.getDocumentElement();
+    if(root.hasAttribute("bracketSort")) {
+      final String sortStr = root.getAttribute("bracketSort");
+      final BracketSortType sort = BracketSortType.valueOf(BracketSortType.class, sortStr);
+      if(null == sort) {
+        return BracketSortType.SEEDING;
+      } else {
+        return sort;
+      }
+    } else {
+      return BracketSortType.SEEDING;
+    }
+  }
+  
 }
