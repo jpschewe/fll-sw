@@ -11,12 +11,22 @@
    <xsd:attribute name="title" type="xsd:string" use="required" />
    <xsd:attribute name="revision" type="xsd:string" use="optional" />
    <xsd:attribute name="bracketSort" type="bracketSortType"
-    use="optional">
+    default="SEEDING">
     <xsd:annotation>
      <xsd:documentation>
       The sort type for the brackets. Defaults to
       "SEEDING", which sorts
       teams based upon the seeding rounds.
+     </xsd:documentation>
+    </xsd:annotation>
+   </xsd:attribute>
+   <xsd:attribute name="winner" type="highlowType"
+    default="HIGH">
+    <xsd:annotation>
+     <xsd:documentation>
+      Determine which scores are "better". Default is for high scores to win,
+      although one might want to use low scores for a golf tournament or
+      drag race times.
      </xsd:documentation>
     </xsd:annotation>
    </xsd:attribute>
@@ -298,7 +308,8 @@
       </xsd:annotation>
       <xsd:complexContent>
        <xsd:extension base="polynomial">
-        <xsd:attribute name="winner" type="highlow" use="required" />
+        <xsd:attribute name="winner" type="highlowType"
+         use="required" />
        </xsd:extension>
       </xsd:complexContent>
      </xsd:complexType>
@@ -495,10 +506,10 @@
   </xsd:restriction>
  </xsd:simpleType>
 
- <xsd:simpleType name="highlow">
+ <xsd:simpleType name="highlowType">
   <xsd:restriction base="xsd:string">
-   <xsd:enumeration value="high" />
-   <xsd:enumeration value="low" />
+   <xsd:enumeration value="HIGH" />
+   <xsd:enumeration value="LOW" />
   </xsd:restriction>
  </xsd:simpleType>
 
