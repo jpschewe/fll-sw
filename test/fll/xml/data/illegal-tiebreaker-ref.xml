@@ -8,10 +8,10 @@
     <goal initialValue="0" max="8" min="0" multiplier="2" name="crates" title="Crates Elsewhere on Table"></goal>
     
     <tiebreaker>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="crates_base" />
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="foo" />
       </test> 
     </tiebreaker>

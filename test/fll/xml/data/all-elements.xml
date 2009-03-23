@@ -110,43 +110,43 @@
     </restriction>
 
     <tiebreaker>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="crates_base" scoreType="raw"/>
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="crates" scoreType="raw"/>
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="dolphin" scoreType="raw"/>
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="flags_rows"  scoreType="raw"/>
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="flags"  scoreType="raw"/>
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="submarine"  scoreType="computed"/>
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="archaeological"  scoreType="computed"/>
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="shipping_container"  scoreType="raw"/>
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="pump_station"  scoreType="raw"/>
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="pipeline"  scoreType="raw"/>
       </test>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="sample_species"  scoreType="raw"/>
       </test>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="artifical_reef"  scoreType="raw"/>
       </test>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="computed"  scoreType="computed"/>
         <constant value="10"/>
       </test>

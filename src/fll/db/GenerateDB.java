@@ -340,6 +340,7 @@ public final class GenerateDB {
       //TODO add foreign key constraints bug: 1580421
 
     } finally {
+      SQLFunctions.closeResultSet(rs);
       SQLFunctions.closeStatement(stmt);
       SQLFunctions.closePreparedStatement(prep);
     }
