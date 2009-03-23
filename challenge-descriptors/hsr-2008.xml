@@ -141,31 +141,31 @@
       multiplier="15"/>
 
   <tiebreaker>
-   <test winner='high'>
+   <test winner='HIGH'>
      <term goal='bury_carbon_dioxide' scoreType='computed'/>
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
      <term goal='deliver_buoy' scoreType='computed'/>
      <term goal='deliver_buoy_bonus' scoreType='computed'/>
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
      <term goal='get_people_together_pink' scoreType='computed'/>
      <term goal='get_people_together_green' scoreType='computed'/>
      <term goal='get_people_together_research' scoreType='computed'/>
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
      <term goal='elevate_house' scoreType='computed'/>
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
      <term goal='open_window' scoreType='computed'/>
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
      <term goal='deliver_machine' scoreType='computed'/>
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
      <term goal='beat_clock' scoreType='computed'/>
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
      <term goal='study_wildlife_bear' scoreType='computed'/>
    </test>
   </tiebreaker>

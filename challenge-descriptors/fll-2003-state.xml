@@ -77,15 +77,15 @@
     </restriction>
 
     <tiebreaker>
-      <test goal="boulders_in_circle" winner="high" />
-      <test goal="boulders_outside_circle" winner="high" />
-      <test goal="ice_core" winner="high" />
-      <test goal="free_rover" winner="high" />
-      <test goal="habitation_modules" winner="high" />
-      <test goal="clear_solar" winner="high" />
-      <test goal="launch_canister" winner="high" />
-      <test goal="exit_base" winner="high" />
-      <test goal="vehicle" winner="high" />
+      <test goal="boulders_in_circle" winner="HIGH" />
+      <test goal="boulders_outside_circle" winner="HIGH" />
+      <test goal="ice_core" winner="HIGH" />
+      <test goal="free_rover" winner="HIGH" />
+      <test goal="habitation_modules" winner="HIGH" />
+      <test goal="clear_solar" winner="HIGH" />
+      <test goal="launch_canister" winner="HIGH" />
+      <test goal="exit_base" winner="HIGH" />
+      <test goal="vehicle" winner="HIGH" />
     </tiebreaker>
 
   </Performance>

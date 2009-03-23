@@ -499,43 +499,43 @@
 
 
   <tiebreaker>
-   <test winner='high'>
+   <test winner='HIGH'>
      <term goal='solar_power_satellite_bonus' scoreType='computed'/>
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
      <term goal='solar_power_satellite' scoreType='computed'/>
    </test>
-   <test winner='low'>
+   <test winner='LOW'>
     <term goal='pollution_deduction' scoreType='computed'/>
     </test>
-    <test winner='high'>
+    <test winner='HIGH'>
     <term goal='roof_solar_panel' scoreType='computed'/>
     </test>
-    <test winner='high'>
+    <test winner='HIGH'>
     <term goal='personal_vehicle_choice' scoreType='computed'/>
     </test>
-    <test winner='high'>
+    <test winner='HIGH'>
     <term goal='tree_planting' scoreType='computed'/>
     </test>
-    <test winner='high'>
+    <test winner='HIGH'>
     <term goal='wind_turbines' scoreType='computed'/>
     </test>
-    <test winner='high'>
+    <test winner='HIGH'>
     <term goal='corn_harvest' scoreType='computed'/>
     </test>
-    <test winner='high'>
+    <test winner='HIGH'>
     <term goal='uranium_mining' scoreType='computed'/>
     </test>
-    <test winner='high'>
+    <test winner='HIGH'>
     <term goal='wave_turbine' scoreType='computed'/>
     </test>
-    <test winner='high'>
+    <test winner='HIGH'>
     <term goal='grid_connection' scoreType='computed'/>
     </test>
-    <test winner='high'>
+    <test winner='HIGH'>
     <term goal='hydro_dam' scoreType='computed'/>
     </test>
-    <test winner='high'>
+    <test winner='HIGH'>
     <term goal='oil_barrels_base' scoreType='computed'/>
     </test>
     

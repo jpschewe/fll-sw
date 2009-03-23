@@ -152,40 +152,40 @@
    title="Red coal AT the coal mining property" multiplier="2" max="8" />
 
   <tiebreaker>
-   <test winner='high'>
+   <test winner='HIGH'>
     <term goal='solar_power_satellite_bonus' scoreType='computed' />
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
     <term goal='solar_power_satellite' scoreType='computed' />
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
     <term goal='tree_planting_elsewhere' scoreType='computed' />
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
     <term goal='tree_planting_community_a_b' scoreType='computed' />
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
     <term goal='grid_connection' scoreType='computed' />
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
     <term goal='wind_turbine_ocean' scoreType='computed' />
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
     <term goal='wind_turbine_farm' scoreType='computed' />
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
     <term goal='roof_solar_panel' scoreType='computed' />
    </test>
-      <test winner='high'>
+      <test winner='HIGH'>
     <term goal='personal_vehicle_choice' scoreType='computed' />
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
     <term goal='power_plant_supply_corn' scoreType='computed' />
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
     <term goal='power_plant_supply_uranium' scoreType='computed' />
    </test>
-   <test winner='high'>
+   <test winner='HIGH'>
     <term goal='hydro_dam' scoreType='computed' />
    </test>
   </tiebreaker>

@@ -80,7 +80,7 @@ public class BracketSortTest {
       
       // put some teams in the database
       for(int i=0; i<teamNames.length; ++i) {
-        final String otherTeam = Queries.addTeam(connection, teamNames.length - i, teamNames[i], null, null, divisionStr);
+        final String otherTeam = Queries.addTeam(connection, teamNames.length - i, teamNames[i], null, "DUMMY", divisionStr);
         Assert.assertNull(otherTeam);
       }
       final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);

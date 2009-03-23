@@ -87,38 +87,38 @@
     </goal>
 
     <tiebreaker>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="dirt_in_trap" />
         <term goal="dirt_elsewhere" />
       </test>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="molecular_motor" />
       </test>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="move_atoms" />
       </test>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="smart_medicine" />
       </test>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="atomic_force" />
       </test>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="dumper" />
       </test>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="dirt_trap" />
       </test>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="self_assembly" />
       </test>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="smell_head" />
       </test>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="smell_off_plate" />
       </test>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="nanotube_strength" />
       </test>
     </tiebreaker>

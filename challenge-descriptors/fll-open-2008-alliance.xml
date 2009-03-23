@@ -272,7 +272,7 @@
     
   <tiebreaker>
       <!-- doesn't matter as no head to head -->
-   <test winner='high'>
+   <test winner='HIGH'>
      <term goal='one_solar_power_satellite' scoreType='computed'/>
    </test>
   </tiebreaker>

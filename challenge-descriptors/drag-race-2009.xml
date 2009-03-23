@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fll title="Science of Speed: 2008"
  bracketSort="ALPHA_TEAM"
+  winner='HIGH'
  revision="$Rev: 351 $"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:noNamespaceSchemaLocation="fll.xsd"
@@ -26,7 +27,7 @@
   </computedGoal>
 
   <tiebreaker>
-   <test winner='high'>
+   <test winner='HIGH'>
      <term goal='score' scoreType='computed'/>
    </test>
   </tiebreaker>

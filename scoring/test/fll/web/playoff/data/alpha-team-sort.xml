@@ -26,7 +26,7 @@
   </computedGoal>
 
   <tiebreaker>
-   <test winner='high'>
+   <test winner='HIGH'>
      <term goal='score' scoreType='computed'/>
    </test>
   </tiebreaker>
