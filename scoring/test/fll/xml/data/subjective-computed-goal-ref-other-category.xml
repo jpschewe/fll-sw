@@ -89,40 +89,40 @@
     </restriction>
 
     <tiebreaker>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="crates_base" />
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="crates" />
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="dolphin" />
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="flags_rows" />
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="flags" />
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="submarine" />
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="archaeological" />
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="shipping_container" />
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="pump_station" />
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="pipeline" />
       </test>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="sample_species" />
       </test>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="artifical_reef" />
       </test>
     </tiebreaker>

@@ -63,13 +63,13 @@
     </computedGoal>
     
     <tiebreaker>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="flags_rows" />
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="flags" />
       </test> 
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="pump_station" />
       </test> 
     </tiebreaker>

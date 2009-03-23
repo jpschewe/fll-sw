@@ -108,7 +108,7 @@
     
 
     <tiebreaker>
-      <test winner="high">
+      <test winner="HIGH">
         <term goal="crates_base" />
       </test> 
     </tiebreaker>
