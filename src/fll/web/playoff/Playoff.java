@@ -30,7 +30,6 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import fll.Team;
 import fll.Utilities;
@@ -38,6 +37,7 @@ import fll.db.Queries;
 import fll.util.FP;
 import fll.util.ScoreUtils;
 import fll.xml.BracketSortType;
+import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
 /**
@@ -108,7 +108,7 @@ public final class Playoff {
           return one.getTeamName().compareTo(two.getTeamName());
         }
       });
-      
+
       final int[] seeding = computeInitialBrackets(teams.size());
       final int byesNeeded = seeding.length
           - teams.size();
@@ -117,14 +117,15 @@ public final class Playoff {
       final List<Team> list = new LinkedList<Team>();
       for (int teamIdx = 0; teamIdx < teams.size(); ++teamIdx) {
         list.add(teams.get(teamIdx));
-        if(teamIdx >= teams.size() - byesNeeded) {
+        if (teamIdx >= teams.size()
+            - byesNeeded) {
           list.add(Team.BYE);
         }
       }
-      if(list.size() != seeding.length) {
+      if (list.size() != seeding.length) {
         throw new InternalError("Programming error, list size should be the same as seeding length");
       }
-      return list;      
+      return list;
     } else {
       final List<Team> seedingOrder;
       if (BracketSortType.RANDOM == bracketSort) {
@@ -143,7 +144,7 @@ public final class Playoff {
           }
         });
       } else {
-        seedingOrder = Queries.getPlayoffSeedingOrder(connection, divisionStr, tournamentTeams);
+        seedingOrder = Queries.getPlayoffSeedingOrder(connection, challengeDocument, divisionStr, tournamentTeams);
       }
 
       if (LOGGER.isDebugEnabled()) {
@@ -261,10 +262,11 @@ public final class Playoff {
         } else {
           final double scoreA = ScoreUtils.computeTotalScore(teamAScore);
           final double scoreB = ScoreUtils.computeTotalScore(teamBScore);
+          final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(document);
           if (FP.lessThan(scoreA, scoreB, TIEBREAKER_TOLERANCE)) {
-            return teamB;
+            return WinnerType.HIGH == winnerCriteria ? teamB : teamA;
           } else if (FP.lessThan(scoreB, scoreA, TIEBREAKER_TOLERANCE)) {
-            return teamA;
+            return WinnerType.HIGH == winnerCriteria ? teamA : teamB;
           } else {
             return evaluateTiebreaker(document, teamA, teamAScore, teamB, teamBScore);
           }
@@ -290,23 +292,18 @@ public final class Playoff {
     final Element tiebreakerElement = (Element) performanceElement.getElementsByTagName("tiebreaker").item(0);
 
     // walk test elements in tiebreaker to decide who wins
-    Node child = tiebreakerElement.getFirstChild();
-    while (null != child) {
-      if (child instanceof Element) {
-        final Element testElement = (Element) child;
-        if ("test".equals(testElement.getTagName())) {
-          final Map<String, Double> variableValues = Collections.emptyMap();
-          final double sumA = ScoreUtils.evalPoly(testElement, teamAScore, variableValues);
-          final double sumB = ScoreUtils.evalPoly(testElement, teamBScore, variableValues);
-          final String highlow = testElement.getAttribute("winner");
-          if (sumA > sumB) {
-            return ("high".equals(highlow) ? teamA : teamB);
-          } else if (sumA < sumB) {
-            return ("high".equals(highlow) ? teamB : teamA);
-          }
+    for (final Element testElement : XMLUtils.filterToElements(tiebreakerElement.getChildNodes())) {
+      if ("test".equals(testElement.getTagName())) {
+        final Map<String, Double> variableValues = Collections.emptyMap();
+        final double sumA = ScoreUtils.evalPoly(testElement, teamAScore, variableValues);
+        final double sumB = ScoreUtils.evalPoly(testElement, teamBScore, variableValues);
+        final WinnerType highlow = XMLUtils.getWinnerCriteria(testElement);
+        if (sumA > sumB) {
+          return (WinnerType.HIGH == highlow ? teamA : teamB);
+        } else if (sumA < sumB) {
+          return (WinnerType.HIGH == highlow ? teamB : teamA);
         }
       }
-      child = child.getNextSibling();
     }
     return Team.TIE;
   }

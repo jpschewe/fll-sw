@@ -41,6 +41,7 @@ import com.lowagie.text.pdf.PdfWriter;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
 
@@ -139,6 +140,9 @@ public final class FinalComputedScores extends PdfPageEventHelper {
                              final OutputStream out)
     throws SQLException, IOException {
 
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(_challengeDocument);          
+    final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
+   
     Statement stmt = null;
     Statement teamsStmt = null;
     ResultSet rawScoreRS = null;
@@ -289,7 +293,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
             query.append(" AND FinalScores.Tournament = '" + _tournament + "'");
             query.append(" AND current_tournament_teams.event_division = ?");
             query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
-            query.append(" ORDER BY FinalScores.OverallScore DESC, Teams.TeamNumber");
+            query.append(" ORDER BY FinalScores.OverallScore " + ascDesc + ", Teams.TeamNumber");
             prep = connection.prepareStatement(query.toString());
             prep.setString(1, _division);
             teamsRS = prep.executeQuery(); 
@@ -334,7 +338,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
                                         + " FROM " + catName
                                         + " WHERE TeamNumber = " + teamNumber
                                         + " AND Tournament = '" + _tournament + "'"
-                                        + " ORDER BY ComputedTotal DESC");
+                                        + " ORDER BY ComputedTotal " + ascDesc);
                     boolean scoreSeen = false;
                     String rawScoreText = "";
                     while(rawScoreRS.next()) {

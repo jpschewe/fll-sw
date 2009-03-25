@@ -35,6 +35,7 @@ import org.w3c.dom.Element;
 import fll.Team;
 import fll.db.Queries;
 import fll.util.ScoreUtils;
+import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
 /**
@@ -268,6 +269,9 @@ public class FinalistSchedulerUI extends HttpServlet {
                                         final Document challengeDocument,
                                         final int numFinalists,
                                         final Map<String, Map<String, List<Integer>>> finalists) throws IOException {
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+    final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
+
     final PrintWriter writer = response.getWriter();
 
     final Formatter formatter = new Formatter();
@@ -313,7 +317,7 @@ public class FinalistSchedulerUI extends HttpServlet {
             final String teamSelect = StringUtils.join(scoreGroups.get(scoreGroup).iterator(), ", ");
             prep = connection.prepareStatement("SELECT Teams.TeamNumber" + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
                 + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName
-                + " DESC LIMIT " + numFinalists);
+                + " " + ascDesc + " LIMIT " + numFinalists);
             prep.setString(1, currentTournament);
             rs = prep.executeQuery();
             while(rs.next()) {

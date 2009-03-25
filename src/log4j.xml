@@ -51,9 +51,9 @@
   <!-- logger name="fll.db.Queries">
     <level value="TRACE"/>
   </logger-->
-  <logger name="fll.web.playoff">
-    <level value="DEBUG"/>
-  </logger>
+  <!-- logger name="fll.web.scoreboard">
+    <level value="TRACE"/>
+  </logger-->
   <!-- end stuff for debugging -->
   
   <root>

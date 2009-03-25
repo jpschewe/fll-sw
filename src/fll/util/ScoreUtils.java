@@ -118,9 +118,10 @@ public class ScoreUtils {
       throws ParseException {
     for(final Element caseElement : XMLUtils.filterToElements(switchElement.getChildNodes())) {
       if("case".equals(caseElement.getNodeName())) {
-        final Element conditionEle = (Element)caseElement.getFirstChild();
+        final List<Element> children = XMLUtils.filterToElements(caseElement.getChildNodes());
+        final Element conditionEle = children.get(0);
         if(evalCondition(conditionEle, teamScore, variableValues)) {
-          final Element resultElement = (Element)conditionEle.getNextSibling();
+          final Element resultElement = children.get(1);
           if("result".equals(resultElement.getNodeName())) {
             return evalPoly(resultElement, teamScore, variableValues);
           } else if("switch".equals(resultElement.getNodeName())) {
@@ -182,8 +183,8 @@ public class ScoreUtils {
    * @return
    */
   private static boolean evalEnumCond(final Element leftEle, final Element ineqEle, final Element rightEle, final TeamScore teamScore) {
-    final String leftStr = evalStrOrGoalRef((Element)leftEle.getFirstChild(), teamScore);
-    final String rightStr = evalStrOrGoalRef((Element)rightEle.getFirstChild(), teamScore);
+    final String leftStr = evalStrOrGoalRef(XMLUtils.filterToElements(leftEle.getChildNodes()).get(0), teamScore);
+    final String rightStr = evalStrOrGoalRef(XMLUtils.filterToElements(rightEle.getChildNodes()).get(0), teamScore);
     if("equal-to".equals(ineqEle.getNodeName())) {
       return Functions.safeEquals(leftStr, rightStr);
     } else if("no-equal-to".equals(ineqEle.getNodeName())) {
@@ -220,9 +221,10 @@ public class ScoreUtils {
    */
   private static boolean evalCondition(final Element conditionEle, final TeamScore teamScore, final Map<String, Double> variableValues)
       throws ParseException {
-    final Element leftEle = (Element)conditionEle.getFirstChild();
-    final Element ineqEle = (Element)leftEle.getNextSibling();
-    final Element rightEle = (Element)ineqEle.getNextSibling();
+    final List<Element> children = XMLUtils.filterToElements(conditionEle.getChildNodes());
+    final Element leftEle = children.get(0);
+    final Element ineqEle = children.get(1);
+    final Element rightEle = children.get(2);
     if("enumCondition".equals(conditionEle.getNodeName())) {
       return evalEnumCond(leftEle, ineqEle, rightEle, teamScore);
     } else if("condition".equals(conditionEle.getNodeName())) {
