@@ -9,7 +9,7 @@ fll:before {
 	margin-bottom: 200%;
 	font-size: 200%;
 	text-align: center;
-	content: attr(title)
+	content: attr(title) " revision: " attr(revision) " playoff brackets sorted by " attr(bracketSort) " scores sorted by " attr(winner)	
 }
 
 goal:before {	

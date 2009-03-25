@@ -38,6 +38,7 @@ import fll.util.ScoreUtils;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.Playoff;
 import fll.xml.ChallengeParser;
+import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
 /**
@@ -226,14 +227,17 @@ public final class Queries {
       final String tournament = getCurrentTournament(connection);
       final List<String> divisions = getDivisions(connection);
 
+      final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+      final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
+
       // find the performance ranking
-      determinePerformanceRanking(connection, tournament, divisions, rankingMap);
+      determinePerformanceRanking(connection, ascDesc, tournament, divisions, rankingMap);
 
       // find the subjective category rankings
-      determineSubjectiveRanking(connection, tournament, divisions, challengeDocument, rankingMap);
+      determineSubjectiveRanking(connection, ascDesc, tournament, divisions, challengeDocument, rankingMap);
 
       // find the overall ranking
-      determineOverallRanking(connection, tournament, divisions, rankingMap);
+      determineOverallRanking(connection, ascDesc, tournament, divisions, rankingMap);
 
     } finally {
       SQLFunctions.closeResultSet(rs);
@@ -253,6 +257,7 @@ public final class Queries {
    * @throws SQLException
    */
   private static void determineSubjectiveRanking(final Connection connection,
+                                                 final String ascDesc,
                                                  final String tournament,
                                                  final List<String> divisions,
                                                  final Document challengeDocument,
@@ -289,7 +294,7 @@ public final class Queries {
             final String teamSelect = StringUtils.join(scoreGroups.get(scoreGroup).iterator(), ", ");
             prep = connection.prepareStatement("SELECT Teams.TeamNumber,FinalScores."
                 + categoryName + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
-                + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " DESC");
+                + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " " + ascDesc);
             prep.setString(1, tournament);
             rs = prep.executeQuery();
             int tieRank = 1;
@@ -346,6 +351,7 @@ public final class Queries {
    * @throws SQLException
    */
   private static void determineOverallRanking(final Connection connection,
+                                              final String ascDesc,
                                               final String tournament,
                                               final List<String> divisions,
                                               final Map<String, Map<Integer, Map<String, Integer>>> rankingMap) throws SQLException {
@@ -359,7 +365,7 @@ public final class Queries {
       query.append(" AND FinalScores.Tournament = ?");
       query.append(" AND current_tournament_teams.event_division = ?");
       query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
-      query.append(" ORDER BY FinalScores.OverallScore DESC, Teams.TeamNumber");
+      query.append(" ORDER BY FinalScores.OverallScore " + ascDesc + ", Teams.TeamNumber");
       prep = connection.prepareStatement(query.toString());
       prep.setString(1, tournament);
       for (final String division : divisions) {
@@ -423,9 +429,11 @@ public final class Queries {
    * @throws SQLException
    */
   private static void determinePerformanceRanking(final Connection connection,
+                                                  final String ascDesc,
                                                   final String tournament,
                                                   final List<String> divisions,
                                                   final Map<String, Map<Integer, Map<String, Integer>>> rankingMap) throws SQLException {
+
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -436,7 +444,7 @@ public final class Queries {
       query.append(" AND FinalScores.Tournament = ?");
       query.append(" AND current_tournament_teams.event_division = ?");
       query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
-      query.append(" ORDER BY FinalScores.performance DESC, Teams.TeamNumber");
+      query.append(" ORDER BY FinalScores.performance " + ascDesc + ", Teams.TeamNumber");
       prep = connection.prepareStatement(query.toString());
       prep.setString(1, tournament);
       for (final String division : divisions) {
@@ -1316,17 +1324,23 @@ public final class Queries {
    * to advance teams.
    * 
    * @param connection connection to the database
+   * @param challengeDocument the challenge descriptor
    * @param divisionStr the division to generate brackets for, as a String
    * @param tournamentTeams keyed by team number
    * @return a List of team numbers as Integers
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
-  public static List<Team> getPlayoffSeedingOrder(final Connection connection, final String divisionStr, final Map<Integer, Team> tournamentTeams)
-      throws SQLException, RuntimeException {
+  public static List<Team> getPlayoffSeedingOrder(final Connection connection,
+                                                  final Document challengeDocument,
+                                                  final String divisionStr,
+                                                  final Map<Integer, Team> tournamentTeams) throws SQLException, RuntimeException {
 
     final List<Team> retval = new ArrayList<Team>();
     final String currentTournament = getCurrentTournament(connection);
+
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+    final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
 
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -1334,7 +1348,7 @@ public final class Queries {
       prep = connection.prepareStatement("SELECT performance_seeding_max.TeamNumber, performance_seeding_max.Score, RAND() as random"
           + " FROM performance_seeding_max, current_tournament_teams" + " WHERE performance_seeding_max.Tournament = ?"
           + " AND performance_seeding_max.TeamNumber = current_tournament_teams.TeamNumber" + " AND current_tournament_teams.event_division = ?"
-          + " ORDER BY performance_seeding_max.Score DESC, random");
+          + " ORDER BY performance_seeding_max.Score " + ascDesc + ", random");
       prep.setString(1, currentTournament);
       prep.setString(2, divisionStr);
 

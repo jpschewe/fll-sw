@@ -29,6 +29,7 @@ import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
 /**
@@ -50,6 +51,9 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
     final ServletContext application = getServletContext();
     final Connection connection = (Connection)application.getAttribute("connection");
     final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
+
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+    final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
 
     final PrintWriter writer = response.getWriter();
     writer.write("<html><body>");
@@ -86,7 +90,7 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
             final String teamSelect = StringUtils.join(scoreGroups.get(scoreGroup).iterator(), ", ");
             prep = connection.prepareStatement("SELECT Teams.TeamNumber,Teams.Organization,Teams.TeamName,FinalScores." + categoryName
                 + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
-                + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " DESC");
+                + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " " + ascDesc);
             prep.setString(1, currentTournament);
             rs = prep.executeQuery();
             while(rs.next()) {

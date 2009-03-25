@@ -49,7 +49,7 @@ public final class XMLUtils {
     final Document document = DOCUMENT_BUILDER.newDocument();
     final Element top = document.createElement("teams");
     document.appendChild(top);
-    for(Team team : teams) {
+    for (Team team : teams) {
       final Element teamElement = document.createElement("team");
       teamElement.setAttribute("teamName", team.getTeamName());
       teamElement.setAttribute("teamNumber", String.valueOf(team.getTeamNumber()));
@@ -66,19 +66,18 @@ public final class XMLUtils {
    * Create a document to hold subject scores for the tournament described in
    * challengeDocument.
    * 
-   * @param challengeDocument
-   *          describes the tournament
-   * @param teams
-   *          the teams for this tournament
-   * @param connection
-   *          the database connection used to retrieve the judge information
-   * @param tournament
-   *          the tournament to generate the document for, used for deciding
-   *          which set of judges to use
+   * @param challengeDocument describes the tournament
+   * @param teams the teams for this tournament
+   * @param connection the database connection used to retrieve the judge
+   *          information
+   * @param tournament the tournament to generate the document for, used for
+   *          deciding which set of judges to use
    * @return the document
    */
-  public static Document createSubjectiveScoresDocument(final Document challengeDocument, final Collection<Team> teams, final Connection connection,
-      final String tournament) throws SQLException {
+  public static Document createSubjectiveScoresDocument(final Document challengeDocument,
+                                                        final Collection<Team> teams,
+                                                        final Connection connection,
+                                                        final String tournament) throws SQLException {
     ResultSet rs = null;
     ResultSet rs2 = null;
     PreparedStatement prep = null;
@@ -93,7 +92,7 @@ public final class XMLUtils {
       final Element top = document.createElement("scores");
       document.appendChild(top);
 
-      for(final Element categoryDescription : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+      for (final Element categoryDescription : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
         final String categoryName = categoryDescription.getAttribute("name");
         final Element categoryElement = document.createElement(categoryName);
         top.appendChild(categoryElement);
@@ -104,9 +103,10 @@ public final class XMLUtils {
           final String judge = rs.getString(1);
           final String division = rs.getString(2);
 
-          for(Team team : teams) {
+          for (Team team : teams) {
             final String teamDiv = Queries.getEventDivision(connection, team.getTeamNumber());
-            if ("All".equals(division) || division.equals(teamDiv)) {
+            if ("All".equals(division)
+                || division.equals(teamDiv)) {
               final Element scoreElement = document.createElement("score");
               categoryElement.appendChild(scoreElement);
 
@@ -117,13 +117,14 @@ public final class XMLUtils {
               scoreElement.setAttribute("judge", judge);
               scoreElement.setAttribute("NoShow", "false");
 
-              prep2 = connection.prepareStatement("SELECT * FROM " + categoryName + " WHERE TeamNumber = ? AND Tournament = ? AND Judge = ?");
+              prep2 = connection.prepareStatement("SELECT * FROM "
+                  + categoryName + " WHERE TeamNumber = ? AND Tournament = ? AND Judge = ?");
               prep2.setInt(1, team.getTeamNumber());
               prep2.setString(2, currentTournament);
               prep2.setString(3, judge);
               rs2 = prep2.executeQuery();
               if (rs2.next()) {
-                for(final Element goalDescription : XMLUtils.filterToElements(categoryDescription.getElementsByTagName("goal"))) {
+                for (final Element goalDescription : XMLUtils.filterToElements(categoryDescription.getElementsByTagName("goal"))) {
                   final String goalName = goalDescription.getAttribute("name");
                   final String value = rs2.getString(goalName);
                   if (!rs2.wasNull()) {
@@ -210,14 +211,12 @@ public final class XMLUtils {
   /**
    * Find a subjective category by name.
    * 
-   * @param challengeDocument
-   *          the document to look in
-   * @param name
-   *          the name to look for
+   * @param challengeDocument the document to look in
+   * @param name the name to look for
    * @return the element or null if one is not found
    */
   public static Element getSubjectiveCategoryByName(final Document challengeDocument, final String name) {
-    for(final Element categoryElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+    for (final Element categoryElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       final String categoryName = categoryElement.getAttribute("name");
       if (categoryName.equals(name)) {
         return categoryElement;
@@ -233,15 +232,15 @@ public final class XMLUtils {
    * @return if the element represents an enumerated goal
    */
   public static boolean isEnumeratedGoal(final Element element) {
-    if(!"goal".equals(element.getNodeName())) {
+    if (!"goal".equals(element.getNodeName())) {
       // not a goal element
       return false;
     }
-    
+
     final List<Element> values = XMLUtils.filterToElements(element.getElementsByTagName("value"));
     return values.size() > 0;
   }
-  
+
   /**
    * Check if an element describes a computed goal or not.
    * 
@@ -250,8 +249,8 @@ public final class XMLUtils {
    */
   public static boolean isComputedGoal(final Element element) {
     return "computedGoal".equals(element.getNodeName());
-  }  
-  
+  }
+
   /**
    * Filter the nodelist to only Elements.
    * 
@@ -259,25 +258,26 @@ public final class XMLUtils {
    * @return
    */
   public static List<Element> filterToElements(final NodeList nodelist) {
-     final List<Element> retval = new ArrayList<Element>(nodelist.getLength());
-     for(int i=0; i<nodelist.getLength(); ++i) {
-       final Node node = nodelist.item(i);
-       if(node instanceof Element) {
-         retval.add((Element)node);
-       }
-     }
-     return retval;
+    final List<Element> retval = new ArrayList<Element>(nodelist.getLength());
+    for (int i = 0; i < nodelist.getLength(); ++i) {
+      final Node node = nodelist.item(i);
+      if (node instanceof Element) {
+        retval.add((Element) node);
+      }
+    }
+    return retval;
   }
-  
+
   /**
-   * Get the bracket sort type from the document. If the attribute doesn't exist, then return {@link BracketSortType#SEEDING}.
+   * Get the bracket sort type from the document. If the attribute doesn't
+   * exist, then return {@link BracketSortType#SEEDING}.
    */
   public static BracketSortType getBracketSort(final Document challengeDocument) {
     final Element root = challengeDocument.getDocumentElement();
-    if(root.hasAttribute("bracketSort")) {
+    if (root.hasAttribute("bracketSort")) {
       final String sortStr = root.getAttribute("bracketSort");
       final BracketSortType sort = BracketSortType.valueOf(BracketSortType.class, sortStr);
-      if(null == sort) {
+      if (null == sort) {
         return BracketSortType.SEEDING;
       } else {
         return sort;
@@ -286,5 +286,36 @@ public final class XMLUtils {
       return BracketSortType.SEEDING;
     }
   }
+
+  /**
+   * Get the winner criteria for the tournament.
+   */
+  public static WinnerType getWinnerCriteria(final Document challengeDocument) {
+    final Element root = challengeDocument.getDocumentElement();
+    return getWinnerCriteria(root);
+  }
   
+  /**
+   * Get the winner criteria for a particular element.
+   */
+  public static WinnerType getWinnerCriteria(final Element element) {
+    if (element.hasAttribute("winner")) {
+      final String str = element.getAttribute("winner");
+      final String sortStr;
+      if(null != str) {
+        sortStr = str.toUpperCase();
+      } else {
+        sortStr = "HIGH";
+      }
+      final WinnerType sort = WinnerType.valueOf(WinnerType.class, sortStr);
+      if (null == sort) {
+        return WinnerType.HIGH;
+      } else {
+        return sort;
+      }
+    } else {
+      return WinnerType.HIGH;
+    }
+  }
+
 }

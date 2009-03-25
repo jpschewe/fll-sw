@@ -1,6 +1,10 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.db.Queries" %>
+<%@ page import="fll.xml.WinnerType" %>
+<%@ page import="fll.xml.XMLUtils" %>
+
+<%@ page import="org.w3c.dom.Document" %>
       
 <%@ page import="java.sql.Connection" %>
 
@@ -13,6 +17,12 @@ if(tournamentReq == null) {
 } else {
   tournament = tournamentReq;
 }
+
+final Document challengeDocument = (Document)application.getAttribute("challengeDocument");;
+final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);          
+final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
+
+pageContext.setAttribute("ascDesc", ascDesc);
 pageContext.setAttribute("currentTournament", tournament);
 pageContext.setAttribute("divisions", Queries.getDivisions(connection));
 %>
@@ -44,7 +54,7 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
               AND TournamentTeams.Tournament = FinalScores.Tournament
               AND TournamentTeams.event_division = '<c:out value="${division}"/>'
               AND FinalScores.Tournament = '<c:out value="${currentTournament}"/>'
-              ORDER BY FinalScores.<x:out select="./@name"/> DESC
+              ORDER BY FinalScores.<x:out select="./@name"/> ${ascDesc}
           </sql:query>
           <c:forEach var="row" items="${scores.rowsByIndex}">
             <tr>

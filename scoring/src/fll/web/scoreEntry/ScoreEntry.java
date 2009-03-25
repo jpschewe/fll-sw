@@ -671,7 +671,8 @@ public final class ScoreEntry {
       final String childName = childEle.getNodeName();
       if ("case".equals(childName)) {
         hasCase = true;
-        final Element conditionEle = (Element) childEle.getFirstChild();
+        final List<Element> childChildren = XMLUtils.filterToElements(childEle.getChildNodes());
+        final Element conditionEle = childChildren.get(0);
         final String ifPrefix;
         if (childIdx > 0) {
           ifPrefix = " else ";
@@ -680,7 +681,7 @@ public final class ScoreEntry {
         }
         generateCondition(formatter, ifPrefix, conditionEle);
         formatter.format(" {%n");
-        final Element resultEle = (Element) conditionEle.getNextSibling();
+        final Element resultEle = childChildren.get(1);
         final String resultName = resultEle.getNodeName();
         if ("result".equals(resultName)) {
           formatter.format("%s%s = %s;%n", generateIndentSpace(indent
@@ -826,11 +827,12 @@ public final class ScoreEntry {
   private static void generateCondition(final Formatter formatter, final String ifPrefix, final Element ele) throws ParseException {
     formatter.format("%sif(", ifPrefix);
 
-    final Element leftEle = (Element) ele.getFirstChild();
-    final Element leftVal = (Element) leftEle.getFirstChild();
-    final Element ineqEle = (Element) leftEle.getNextSibling();
-    final Element rightEle = (Element) ineqEle.getNextSibling();
-    final Element rightVal = (Element) rightEle.getFirstChild();
+    final List<Element> elementChildren = XMLUtils.filterToElements(ele.getChildNodes());
+    final Element leftEle = elementChildren.get(0);
+    final Element leftVal = XMLUtils.filterToElements(leftEle.getChildNodes()).get(0);
+    final Element ineqEle = elementChildren.get(1);
+    final Element rightEle = elementChildren.get(2);
+    final Element rightVal = XMLUtils.filterToElements(rightEle.getChildNodes()).get(0);
     final String nodeName = ele.getNodeName();
     if ("condition".equals(nodeName)) {
       formatter.format("%s %s %s", polyToString(leftEle), ineqToString(ineqEle), polyToString(rightEle));

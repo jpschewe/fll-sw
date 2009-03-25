@@ -1,0 +1,24 @@
+th {
+	border: none;
+	font-weight: bold;
+}
+
+td {
+	padding: 4;
+}
+
+td.center {
+	text-align: center;
+}
+td.left {
+	text-align: left;
+}
+td.right {
+	text-align: right;
+}
+
+body {
+	background: #000080;
+	color: #ffffff;
+	font-family: 'Arial' font-size :   3;
+}
