@@ -186,46 +186,8 @@
 			</not>
 		</condition>
 		<echo message="arch is ${arch}" />
-
-		<!-- set the jvm property for which jvm to use -->
-		<condition property="jvm" value="${dir.tools}/jdk-linux/bin/java">
-			<equals arg1="linux" arg2="${arch}" />
-		</condition>
-		<condition property="jvm" value="${dir.tools}/jdk-windows/bin/java">
-			<equals arg1="windows" arg2="${arch}" />
-		</condition>
-		<condition property="jvm" value="java">
-			<not>
-				<isset property="jvm" />
-			</not>
-		</condition>
-		<echo message="jvm is ${jvm}" />
 	</target>
 
-
-	<!-- expand the appropriate jvm, but only if needed -->
-	<target name="-jvm.check" depends="init">
-		<condition property="jvm.uptodate">
-			<or>
-				<equals arg1="${jvm}" arg2="java" />
-				<and>
-					<available file="${jvm}" />
-					<uptodate srcfile="jdk-${arch}.tar.bz2" targetfile="tools/jdk-${arch}/expanded" />
-				</and>
-			</or>
-		</condition>
-	</target>
-
-	<target name="jvm.expand" depends="-jvm.check" unless="jvm.uptodate">
-		<mkdir dir="${dir.tools}" />
-		<untar src="jdk-${arch}.tar.bz2" dest="${dir.tools}" compression="bzip2" />
-		<chmod perm="+x">
-			<fileset dir="${dir.tools}">
-				<include name="**/bin/*" />
-			</fileset>
-		</chmod>
-		<touch file="tools/jdk-${arch}/expanded" />
-	</target>
 
 	<!-- ==================== Clean Target ==================================== -->
 	<target name="clean" description="Delete old build and dist directories">
@@ -519,8 +481,7 @@
 		</waitfor>
 	</target>
 
-	<target name="-tomcat.run" depends="jvm.expand">
-		<!--java jvm="${jvm}" classname="org.apache.catalina.startup.Bootstrap" fork="true" spawn="${spawn}" taskname="tomcat"-->
+	<target name="-tomcat.run">
 		<java classname="org.apache.catalina.startup.Bootstrap" fork="true" spawn="${spawn}" taskname="tomcat">
 			<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/tomcat-cobertura.ser" />
 
@@ -639,37 +600,7 @@
 			<zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version}" />
 		</zip>
 
-
-		<!-- create a Windows distribution -->
-		<mkdir dir="${dir.dist}/tools" />
-		<untar src="jdk-windows.tar.bz2" dest="${dir.dist}/tools" compression="bzip2" />
-		<zip zipfile="${app.name}-${app.version}-windows.zip">
-			<zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version}" />
-		</zip>
-		<delete dir="${dir.dist}/tools/jdk-windows" />
-
-		<!-- create a Linux distribution -->
-		<mkdir dir="${dir.dist}/tools" />
-		<untar src="jdk-linux.tar.bz2" dest="${dir.dist}/tools" compression="bzip2" />
-		<tar destfile="${app.name}-${app.version}-linux.tar.bz2" compression="bzip2">
-			<tarfileset dir="${dir.dist}" prefix="${app.name}-${app.version}" mode="755">
-				<include name="**/*.sh" />
-				<include name="**/bin/*" />
-				<include name="**/*.so" />
-			</tarfileset>
-			<tarfileset dir="${dir.dist}" prefix="${app.name}-${app.version}">
-				<include name="**" />
-				<exclude name="**/*.sh" />
-				<exclude name="**/bin/*" />
-				<exclude name="**/*.so" />
-			</tarfileset>
-		</tar>
-		<delete dir="${dir.dist}/tools/jdk-linux" />
-
 		<echo message="The distribution file is ${app.name}-${app.version}.zip" />
-		<echo message="The Windows distribution file is ${app.name}-${app.version}-windows.zip" />
-		<echo message="The Linux distribution file is ${app.name}-${app.version}-linux.tar.bz2" />
-
 	</target>
 
 	<!-- ==================== Javadoc Target ================================== -->
@@ -787,11 +718,10 @@
 		<delete dir="${dir.build}/db-save" />
 	</target>
 
-	<target name="-junit" depends="jvm.expand,compile,compile.test,coverage.instr">
+	<target name="-junit" depends="compile,compile.test,coverage.instr">
 
 		<antcall target="-junit.setup" />
 
-		<!--junit fork="yes" jvm="${jvm}" haltonfailure="false" dir="${dir.build}" showoutput="true" failureproperty="test.failed"-->
 		<junit fork="yes" haltonfailure="false" dir="${dir.build}" showoutput="true" failureproperty="test.failed">
 			<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/cobertura.ser" />
 
@@ -808,9 +738,8 @@
 		<antcall target="-junit.teardown" />
 	</target>
 
-	<target name="-junit.single" depends="jvm.expand,compile,compile.test">
+	<target name="-junit.single" depends="compile,compile.test">
 		<antcall target="-junit.setup" />
-		<!--junit fork="yes" jvm="${jvm}" haltonfailure="false" dir="${dir.build}" showoutput="true" failureproperty="test.failed"-->
 		<junit fork="yes" haltonfailure="false" dir="${dir.build}" showoutput="true" failureproperty="test.failed">
 
 			<classpath>

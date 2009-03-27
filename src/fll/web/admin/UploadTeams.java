@@ -35,6 +35,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.log4j.Logger;
 
 import au.com.bytecode.opencsv.CSVReader;
+import fll.db.GenerateDB;
 import fll.web.UploadProcessor;
 
 /**
@@ -62,7 +63,7 @@ public final class UploadTeams extends HttpServlet {
       final FileItem teamsFileItem = (FileItem) request.getAttribute("teamsFile");
       final File file = File.createTempFile("fll", null);
       teamsFileItem.write(file);
-      UploadTeams.parseFile(file, connection, session);
+      parseFile(file, connection, session);
       file.delete();
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error saving team data into the database: "
@@ -390,8 +391,9 @@ public final class UploadTeams extends HttpServlet {
       }
 
       // clean out Teams table first
-      stmt = connection.createStatement();
-      stmt.executeUpdate("DELETE FROM Teams");
+      prep = connection.prepareStatement("DELETE FROM Teams WHERE Region <> ?");
+      prep.setString(1, GenerateDB.INTERNAL_TOURNAMENT);
+      prep.executeUpdate();
 
       // now copy the data over converting the team number to an integer
       final String selectSQL = "SELECT "
@@ -400,6 +402,7 @@ public final class UploadTeams extends HttpServlet {
           + dbColumns.toString() + ") VALUES(" + values.toString() + ")";
       prep = connection.prepareStatement(insertSQL);
 
+      stmt = connection.createStatement();
       rs = stmt.executeQuery(selectSQL);
       while (rs.next()) {
         // convert TeamNumber to an integer

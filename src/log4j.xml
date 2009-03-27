@@ -4,7 +4,6 @@
 
   <!-- limit CONSOLE to be info -->
   <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
-    <param name="threshold" value="INFO"/>
     <layout class="org.apache.log4j.TTCCLayout">
       <param name="dateFormat" value="RELATIVE"/>
     </layout>

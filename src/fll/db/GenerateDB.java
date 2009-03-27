@@ -48,6 +48,11 @@ public final class GenerateDB {
 
 
   /**
+   * Tournament name for internal teams. These teams should not be deleted.
+   */
+  public static final String INTERNAL_TOURNAMENT = "INTERNAL";
+
+  /**
    * Generate a new database
    *
    * @param args ignored
@@ -140,24 +145,12 @@ public final class GenerateDB {
                            + "Name " + TOURNAMENT_DATATYPE + " NOT NULL,"
                            + "Location longvarchar,"
                            + "NextTournament " + TOURNAMENT_DATATYPE + " default NULL," //Tournament that teams may advance to from this one
-                           + "PRIMARY KEY (Name)"
+                           + "CONSTRAINT tournaments_pk PRIMARY KEY (Name)"
                            +")");
         stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DUMMY', 'Default dummy tournament')");
         stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DROP', 'Dummy tournament for teams that drop out')");
+        //TODO can we add a constraint that NextTournament must refer to Name and still handle null?
       }
-
-      // table to hold head-to-head playoff meta-data
-      stmt.executeUpdate("DROP TABLE IF EXISTS PlayoffData CASCADE");
-      stmt.executeUpdate("CREATE TABLE PlayoffData (" +
-            " event_division varchar(32) NOT NULL," +
-            " Tournament " + TOURNAMENT_DATATYPE + " NOT NULL," +
-            " PlayoffRound integer NOT NULL," +
-            " LineNumber integer NOT NULL," +
-            " Team integer default " + Team.NULL_TEAM_NUMBER + "," +
-            " AssignedTable varchar(64) default NULL," +
-            " Printed boolean default FALSE," +
-            " PRIMARY KEY (event_division, Tournament, PlayoffRound, LineNumber)" +
-            ")");
 
       // Table structure for table 'Teams'
       if(forceRebuild) {
@@ -170,9 +163,56 @@ public final class GenerateDB {
                            + "  Organization varchar(255),"
                            + "  Division varchar(32) default '1' NOT NULL,"
                            + "  Region varchar(255) default 'DUMMY' NOT NULL,"
-                           + "  PRIMARY KEY  (TeamNumber)"
+                           + "  CONSTRAINT teams_pk PRIMARY KEY (TeamNumber)"
                            + ")");
+        
+        // add the bye team so that references work 
+        prep = connection.prepareStatement("INSERT INTO Teams(TeamNumber, TeamName, Region) VALUES(?, ?, ?)");
+        prep.setInt(1, Team.BYE.getTeamNumber());
+        prep.setString(2, Team.BYE.getTeamName());
+        prep.setString(3, INTERNAL_TOURNAMENT);
+        prep.executeUpdate();
+        
+        // add the tie team so that references work 
+        prep = connection.prepareStatement("INSERT INTO Teams(TeamNumber, TeamName, Region) VALUES(?, ?, ?)");
+        prep.setInt(1, Team.TIE.getTeamNumber());
+        prep.setString(2, Team.TIE.getTeamName());
+        prep.setString(3, "INTERNAL");
+        prep.executeUpdate();
+        
+        // add the null team so that references work 
+        prep = connection.prepareStatement("INSERT INTO Teams(TeamNumber, TeamName, Region) VALUES(?, ?, ?)");
+        prep.setInt(1, Team.NULL.getTeamNumber());
+        prep.setString(2, Team.NULL.getTeamName());
+        prep.setString(3, "INTERNAL");
+        prep.executeUpdate();
       }
+      
+      // Table structure for table 'tablenames'
+      stmt.executeUpdate("DROP TABLE IF EXISTS tablenames CASCADE");
+      stmt.executeUpdate("CREATE TABLE tablenames ("
+                         + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
+                         + "  PairID INTEGER NOT NULL,"
+                         + "  SideA varchar(64) NOT NULL,"
+                         + "  SideB varchar(64) NOT NULL,"
+                         + "  CONSTRAINT tablenames_pk PRIMARY KEY (Tournament,PairID)"
+                         + " ,CONSTRAINT tablenames_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(Name)"
+                         + ")");
+
+      // table to hold head-to-head playoff meta-data
+      stmt.executeUpdate("DROP TABLE IF EXISTS PlayoffData CASCADE");
+      stmt.executeUpdate("CREATE TABLE PlayoffData (" +
+            " event_division varchar(32) NOT NULL," +
+            " Tournament " + TOURNAMENT_DATATYPE + " NOT NULL," +
+            " PlayoffRound integer NOT NULL," +
+            " LineNumber integer NOT NULL," +
+            " Team integer default " + Team.NULL_TEAM_NUMBER + "," +
+            " AssignedTable varchar(64) default NULL," +
+            " Printed boolean default FALSE," +
+            " CONSTRAINT playoff_data_pk PRIMARY KEY (event_division, Tournament, PlayoffRound, LineNumber)" +
+            ",CONSTRAINT playoff_data_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(Name)" +
+            ",CONSTRAINT playoff_data_fk2 FOREIGN KEY(Team) REFERENCES Teams(TeamNumber)" +
+            ")");
 
       // table to hold team numbers of teams in this tournament
       if(forceRebuild) {
@@ -183,7 +223,9 @@ public final class GenerateDB {
                            + "  TeamNumber integer NOT NULL,"
                            + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
                            + "  event_division varchar(32) default '1' NOT NULL,"
-                           + "  PRIMARY KEY (TeamNumber, Tournament)"
+                           + "  CONSTRAINT tournament_teams_pk PRIMARY KEY (TeamNumber, Tournament)"
+                           + " ,CONSTRAINT tournament_teams_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)"
+                           + " ,CONSTRAINT tournament_teams_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(Name)"
                            + ")");
       }
 
@@ -196,7 +238,7 @@ public final class GenerateDB {
                            + "  Param varchar(64) NOT NULL,"
                            + "  Value longvarchar NOT NULL,"
                            + "  Description varchar(255) default NULL,"
-                           + "  PRIMARY KEY  (Param)"
+                           + "  CONSTRAINT tournament_parameters_pk PRIMARY KEY  (Param)"
                            + ")");
 
         //populate tournament parameters with default values
@@ -228,19 +270,10 @@ public final class GenerateDB {
                          + "  category varchar(64) NOT NULL,"
                          + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
                          + "  event_division varchar(32) NOT NULL,"
-                         + "  PRIMARY KEY  (id,category,Tournament,event_division)"
+                         + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,event_division)"
+                         + " ,CONSTRAINT judges_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(Name)"
                          + ")");
 
-
-      // Table structure for table 'tablenames'
-      stmt.executeUpdate("DROP TABLE IF EXISTS tablenames CASCADE");
-      stmt.executeUpdate("CREATE TABLE tablenames ("
-                         + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
-                         + "  PairID INTEGER NOT NULL,"
-                         + "  SideA varchar(64) NOT NULL,"
-                         + "  SideB varchar(64) NOT NULL,"
-                         + "  PRIMARY KEY (Tournament,PairID)"
-                         + ")");
 
 
       final Element rootElement = document.getDocumentElement();
@@ -276,7 +309,9 @@ public final class GenerateDB {
         createStatement.append(" ComputedTotal float DEFAULT NULL,");
         performanceColumns.append("StandardizedScore");
         createStatement.append(" StandardizedScore float default NULL,");
-        createStatement.append(" PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
+        createStatement.append(" CONSTRAINT " + tableName + "_pk PRIMARY KEY (TeamNumber, Tournament, RunNumber)");
+        createStatement.append(",CONSTRAINT " + tableName + "_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)");
+        createStatement.append(",CONSTRAINT " + tableName + "_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(Name)");
         createStatement.append(");");
         stmt.executeUpdate(createStatement.toString());
 
@@ -304,7 +339,9 @@ public final class GenerateDB {
         }
         createStatement.append(" ComputedTotal float DEFAULT NULL,");
         createStatement.append(" StandardizedScore float default NULL,");
-        createStatement.append(" PRIMARY KEY (TeamNumber, Tournament, Judge)");
+        createStatement.append(" CONSTRAINT " + tableName + "_pk PRIMARY KEY (TeamNumber, Tournament, Judge)");
+        createStatement.append(",CONSTRAINT " + tableName + "_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)");
+        createStatement.append(",CONSTRAINT " + tableName + "_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(Name)");
         createStatement.append(");");
         stmt.executeUpdate(createStatement.toString());
 
@@ -314,7 +351,9 @@ public final class GenerateDB {
       //Table structure for table 'FinalScores'
       finalScores.append(" performance float default NULL,");
       finalScores.append(" OverallScore float,");
-      finalScores.append("PRIMARY KEY (TeamNumber, Tournament)");
+      finalScores.append("CONSTRAINT final_scores_pk PRIMARY KEY (TeamNumber, Tournament)");
+      finalScores.append(",CONSTRAINT final_scores_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)");
+      finalScores.append(",CONSTRAINT final_scores_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(Name)");
       finalScores.append(")");
       stmt.executeUpdate("DROP TABLE IF EXISTS FinalScores CASCADE");
       if(LOG.isDebugEnabled()) {
@@ -337,8 +376,6 @@ public final class GenerateDB {
       stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
       stmt.executeUpdate("CREATE VIEW verified_performance AS SELECT " + performanceColumns.toString() + " FROM Performance WHERE Verified = TRUE");
       
-      //TODO add foreign key constraints bug: 1580421
-
     } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closeStatement(stmt);
