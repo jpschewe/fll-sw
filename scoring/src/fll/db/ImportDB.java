@@ -299,7 +299,7 @@ public final class ImportDB {
     ResultSet sourceRS = null;
     try {
       final Element rootElement = document.getDocumentElement();
-
+      
       // judges
       LOG.info("Importing Judges");
       destPrep = destinationConnection.prepareStatement("DELETE FROM Judges WHERE Tournament = ?");
@@ -393,7 +393,7 @@ public final class ImportDB {
             if("".equals(sourceObj)) {
               sourceObj = null;
             }
-            // XXX Hack for timestamps - need a better solution
+            // FIXME Hack for timestamps - need a better solution
             if(3 == i) {
               // timestamp column of the performance table
               if(sourceObj instanceof String) {
@@ -467,6 +467,33 @@ public final class ImportDB {
         SQLFunctions.closePreparedStatement(destPrep);
       }
 
+      // TableNames
+      {
+        LOG.info("Importing tablenames");
+        destPrep = destinationConnection.prepareStatement("DELETE FROM tablenames WHERE Tournament = ?");
+        destPrep.setString(1, tournament);
+        destPrep.executeUpdate();
+        SQLFunctions.closePreparedStatement(destPrep);
+
+        sourcePrep = sourceConnection.prepareStatement("SELECT Tournament, PairID, SideA, SideB " + "FROM tablenames WHERE Tournament=?");
+        sourcePrep.setString(1, tournament);
+        destPrep = destinationConnection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) " + "VALUES (?, ?, ?, ?)");
+        sourceRS = sourcePrep.executeQuery();
+        while(sourceRS.next()) {
+          for(int i = 1; i <= 4; i++) {
+            Object sourceObj = sourceRS.getObject(i);
+            if("".equals(sourceObj)) {
+              sourceObj = null;
+            }
+            destPrep.setObject(i, sourceObj);
+          }
+          destPrep.executeUpdate();
+        }
+        SQLFunctions.closeResultSet(sourceRS);
+        SQLFunctions.closePreparedStatement(sourcePrep);
+        SQLFunctions.closePreparedStatement(destPrep);
+      }
+      
       // PlayoffData
       {
         LOG.info("Importing PlayoffData");
@@ -496,32 +523,7 @@ public final class ImportDB {
         SQLFunctions.closePreparedStatement(destPrep);
       }
 
-      // TableNames
-      {
-        LOG.info("Importing tablenames");
-        destPrep = destinationConnection.prepareStatement("DELETE FROM tablenames WHERE Tournament = ?");
-        destPrep.setString(1, tournament);
-        destPrep.executeUpdate();
-        SQLFunctions.closePreparedStatement(destPrep);
-
-        sourcePrep = sourceConnection.prepareStatement("SELECT Tournament, PairID, SideA, SideB " + "FROM tablenames WHERE Tournament=?");
-        sourcePrep.setString(1, tournament);
-        destPrep = destinationConnection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) " + "VALUES (?, ?, ?, ?)");
-        sourceRS = sourcePrep.executeQuery();
-        while(sourceRS.next()) {
-          for(int i = 1; i <= 4; i++) {
-            Object sourceObj = sourceRS.getObject(i);
-            if("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-        SQLFunctions.closeResultSet(sourceRS);
-        SQLFunctions.closePreparedStatement(sourcePrep);
-        SQLFunctions.closePreparedStatement(destPrep);
-      }
+      
     } finally {
       SQLFunctions.closeResultSet(sourceRS);
       SQLFunctions.closePreparedStatement(sourcePrep);
