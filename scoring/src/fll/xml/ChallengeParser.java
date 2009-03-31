@@ -36,6 +36,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import fll.Utilities;
+import fll.util.FP;
 
 /**
  * Parse challenge description and generate script/text for scoreEntry page.
@@ -53,51 +54,59 @@ public final class ChallengeParser {
 
   /**
    * Parse the specified XML document and report errors.
-   * 
    * <ul>
-   *   <li>arg[0] - the location of the document to parse
+   * <li>arg[0] - the location of the document to parse
    * </ul>
    */
   public static void main(final String[] args) {
-    if(args.length < 1) {
+    if (args.length < 1) {
       LOG.fatal("Usage: ChallengeParser <xml file>");
       System.exit(1);
     }
     final File challengeFile = new File(args[0]);
-    if(!challengeFile.exists()) {
-      LOG.fatal(challengeFile.getAbsolutePath() + " doesn't exist");
+    if (!challengeFile.exists()) {
+      LOG.fatal(challengeFile.getAbsolutePath()
+          + " doesn't exist");
       System.exit(1);
     }
-    if(!challengeFile.canRead()) {
-      LOG.fatal(challengeFile.getAbsolutePath() + " is not readable");
+    if (!challengeFile.canRead()) {
+      LOG.fatal(challengeFile.getAbsolutePath()
+          + " is not readable");
       System.exit(1);
     }
-    if(!challengeFile.isFile()) {
-      LOG.fatal(challengeFile.getAbsolutePath() + " is not a file");
+    if (!challengeFile.isFile()) {
+      LOG.fatal(challengeFile.getAbsolutePath()
+          + " is not a file");
       System.exit(1);
     }
     try {
       final FileReader input = new FileReader(challengeFile);
       final Document challengeDocument = ChallengeParser.parse(input);
-      if(null == challengeDocument) {
+      if (null == challengeDocument) {
         LOG.fatal("Error parsing challenge descriptor");
         System.exit(1);
       }
 
-      LOG.info("Title: " + challengeDocument.getDocumentElement().getAttribute("title"));
+      LOG.info("Title: "
+          + challengeDocument.getDocumentElement().getAttribute("title"));
       final Element rootElement = challengeDocument.getDocumentElement();
-      final Element performanceElement = (org.w3c.dom.Element)rootElement.getElementsByTagName("Performance").item(0);
+      final Element performanceElement = (org.w3c.dom.Element) rootElement.getElementsByTagName("Performance").item(0);
       final List<Element> goals = XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"));
       LOG.info("The performance goals are");
-      for(final Element element : goals) {
+      for (final Element element : goals) {
         final String name = element.getAttribute("name");
         LOG.info(name);
       }
-    } catch(final Exception e) {
+    } catch (final Exception e) {
       LOG.fatal(e, e);
       System.exit(1);
     }
   }
+
+  /**
+   * Used to compare the initial value against enum values and min/maxes.
+   */
+  public static final double INITIAL_VALUE_TOLERANCE = 1E-4;
 
   private ChallengeParser() {
     // no instances
@@ -108,8 +117,7 @@ public final class ChallengeParser {
    * validated and must be in the fll namespace. Does not close the stream after
    * reading.
    * 
-   * @param stream
-   *          a stream containing document
+   * @param stream a stream containing document
    * @return the challengeDocument, null on an error
    */
   public static Document parse(final Reader stream) {
@@ -143,10 +151,11 @@ public final class ChallengeParser {
 
       parser.setEntityResolver(new EntityResolver() {
         public InputSource resolveEntity(final String publicID, final String systemID) throws SAXException, IOException {
-          if(LOG.isDebugEnabled()) {
-            LOG.debug("resolveEntity(" + publicID + ", " + systemID + ")");
+          if (LOG.isDebugEnabled()) {
+            LOG.debug("resolveEntity("
+                + publicID + ", " + systemID + ")");
           }
-          if(systemID.endsWith("fll.xsd")) {
+          if (systemID.endsWith("fll.xsd")) {
             // just use the one we store internally
             // final int slashidx = systemID.lastIndexOf("/") + 1;
             return new InputSource(classLoader.getResourceAsStream("fll/resources/fll.xsd")); // +
@@ -161,22 +170,23 @@ public final class ChallengeParser {
       final StringWriter writer = new StringWriter();
       final char[] buffer = new char[1024];
       int bytesRead;
-      while((bytesRead = stream.read(buffer)) != -1) {
+      while ((bytesRead = stream.read(buffer)) != -1) {
         writer.write(buffer, 0, bytesRead);
       }
 
       final Document document = parser.parse(new InputSource(new StringReader(writer.toString())));
       validateDocument(document);
       return document;
-    } catch(final SAXParseException spe) {
-      throw new RuntimeException("Error parsing file line: " + spe.getLineNumber() + " column: " + spe.getColumnNumber() + " " + spe.getMessage());
-    } catch(final SAXException se) {
+    } catch (final SAXParseException spe) {
+      throw new RuntimeException("Error parsing file line: "
+          + spe.getLineNumber() + " column: " + spe.getColumnNumber() + " " + spe.getMessage());
+    } catch (final SAXException se) {
       throw new RuntimeException(se);
-    } catch(final IOException ioe) {
+    } catch (final IOException ioe) {
       throw new RuntimeException(ioe);
-    } catch(final ParserConfigurationException pce) {
+    } catch (final ParserConfigurationException pce) {
       throw new RuntimeException(pce);
-    } catch(final ParseException pe) {
+    } catch (final ParseException pe) {
       throw new RuntimeException(pe);
     }
   }
@@ -184,91 +194,91 @@ public final class ChallengeParser {
   /**
    * Do validation of the document that cannot be done by the XML parser.
    * 
-   * @param document
-   *          the document to validate
+   * @param document the document to validate
    * @throws ParseException
-   * @throws RuntimeException
-   *           if an error occurs
+   * @throws RuntimeException if an error occurs
    */
   private static void validateDocument(final Document document) throws ParseException {
     final Element rootElement = document.getDocumentElement();
-    if(!"fll".equals(rootElement.getTagName())) {
+    if (!"fll".equals(rootElement.getTagName())) {
       throw new RuntimeException("Not a fll challenge description file");
     }
 
-    for(final Element childNode : XMLUtils.filterToElements(rootElement.getChildNodes())) {
-      if("Performance".equals(childNode.getNodeName()) || "SubjectiveCategory".equals(childNode.getNodeName())) {
-        final Element childElement = (Element)childNode;
+    for (final Element childNode : XMLUtils.filterToElements(rootElement.getChildNodes())) {
+      if ("Performance".equals(childNode.getNodeName())
+          || "SubjectiveCategory".equals(childNode.getNodeName())) {
+        final Element childElement = (Element) childNode;
 
         // get all nodes named goal at any level under category element
         final Map<String, Element> goals = new HashMap<String, Element>();
-        for(final Element element : XMLUtils.filterToElements(childElement.getElementsByTagName("goal"))) {
+        for (final Element element : XMLUtils.filterToElements(childElement.getElementsByTagName("goal"))) {
           final String name = element.getAttribute("name");
           goals.put(name, element);
 
           // check initial values
-          final int initialValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("initialValue")).intValue();
-          if(XMLUtils.isEnumeratedGoal(element)) {
+          final double initialValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("initialValue")).doubleValue();
+          if (XMLUtils.isEnumeratedGoal(element)) {
             boolean foundMatch = false;
-            for(final Element valueEle : XMLUtils.filterToElements(element.getChildNodes())) {
-              final int score = Utilities.NUMBER_FORMAT_INSTANCE.parse(valueEle.getAttribute("score")).intValue();
-              if(score == initialValue) {
+            for (final Element valueEle : XMLUtils.filterToElements(element.getChildNodes())) {
+              final double score = Utilities.NUMBER_FORMAT_INSTANCE.parse(valueEle.getAttribute("score")).doubleValue();
+              if (FP.equals(score, initialValue, INITIAL_VALUE_TOLERANCE)) {
                 foundMatch = true;
               }
             }
-            if(!foundMatch) {
-              throw new RuntimeException(new Formatter().format("Initial value for %s(%d) does not match the score of any value element within the goal", name, initialValue).toString());
+            if (!foundMatch) {
+              throw new RuntimeException(new Formatter().format("Initial value for %s(%d) does not match the score of any value element within the goal", name,
+                                                                initialValue).toString());
             }
 
           } else {
-            final int min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).intValue();
-            final int max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).intValue();
-            if(initialValue < min) {
+            final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
+            final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
+            if (FP.lessThan(initialValue, min, INITIAL_VALUE_TOLERANCE)) {
               throw new RuntimeException(new Formatter().format("Initial value for %s(%d) is less than min(%d)", name, initialValue, min).toString());
             }
-            if(initialValue > max) {
-              throw new RuntimeException(new Formatter().format("Initial value for %s(%d) is greater than max(%d)", name, initialValue, max)
-                  .toString());
+            if (FP.greaterThan(initialValue, max, INITIAL_VALUE_TOLERANCE)) {
+              throw new RuntimeException(new Formatter().format("Initial value for %s(%d) is greater than max(%d)", name, initialValue, max).toString());
             }
           }
         }
 
         // for all computedGoals
-        for(final Element computedGoalElement : XMLUtils.filterToElements(childElement.getElementsByTagName("computedGoal"))) {
+        for (final Element computedGoalElement : XMLUtils.filterToElements(childElement.getElementsByTagName("computedGoal"))) {
 
           // for all termElements
-          for(final Element termElement : XMLUtils.filterToElements(computedGoalElement.getElementsByTagName("term"))) {
+          for (final Element termElement : XMLUtils.filterToElements(computedGoalElement.getElementsByTagName("term"))) {
 
             // check that the computed goal only references goals
             final String referencedGoalName = termElement.getAttribute("goal");
-            if(!goals.containsKey(referencedGoalName)) {
-              throw new RuntimeException("Computed goal '" + computedGoalElement.getAttribute("name") + "' references goal '" + referencedGoalName
-                  + "' which is not a standard goal");
+            if (!goals.containsKey(referencedGoalName)) {
+              throw new RuntimeException("Computed goal '"
+                  + computedGoalElement.getAttribute("name") + "' references goal '" + referencedGoalName + "' which is not a standard goal");
             }
           }
 
           // for all goalRef elements
-          for(final Element goalRefElement : XMLUtils.filterToElements(computedGoalElement.getElementsByTagName("goalRef"))) {
+          for (final Element goalRefElement : XMLUtils.filterToElements(computedGoalElement.getElementsByTagName("goalRef"))) {
 
             // can't reference a non-enum goal with goalRef in enumCond
             final String referencedGoalName = goalRefElement.getAttribute("goal");
             final Element referencedGoalElement = goals.get(referencedGoalName);
-            if(!XMLUtils.isEnumeratedGoal(referencedGoalElement)) {
-              throw new RuntimeException("Computed goal '" + computedGoalElement.getAttribute("name")
-                  + "' has a goalRef element that references goal '" + referencedGoalName + " " + referencedGoalElement
-                  + "' which is not an enumerated goal");
+            if (!XMLUtils.isEnumeratedGoal(referencedGoalElement)) {
+              throw new RuntimeException("Computed goal '"
+                  + computedGoalElement.getAttribute("name") + "' has a goalRef element that references goal '" + referencedGoalName + " "
+                  + referencedGoalElement + "' which is not an enumerated goal");
             }
           }
 
         } // end foreach computed goal
 
         // for all terms
-        for(final Element termElement : XMLUtils.filterToElements(childElement.getElementsByTagName("term"))) {
+        for (final Element termElement : XMLUtils.filterToElements(childElement.getElementsByTagName("term"))) {
           final String goalValueType = termElement.getAttribute("scoreType");
           final String referencedGoalName = termElement.getAttribute("goal");
           final Element referencedGoalElement = goals.get(referencedGoalName);
           // can't use the raw score of an enum inside a polynomial term
-          if("raw".equals(goalValueType) && (XMLUtils.isEnumeratedGoal(referencedGoalElement) || XMLUtils.isComputedGoal(referencedGoalElement))) {
+          if ("raw".equals(goalValueType)
+              && (XMLUtils.isEnumeratedGoal(referencedGoalElement) || XMLUtils.isComputedGoal(referencedGoalElement))) {
             throw new RuntimeException("Cannot use the raw score from an enumerated or computed goal in a polynomial term.  Referenced goal '"
                 + referencedGoalName + "'");
           }

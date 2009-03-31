@@ -9,15 +9,12 @@
 
   <Performance minimumScore="-20" weight="1.0">
 
-  <goal name="seconds" title="Seconds" max="10"/>
-  <goal name="tenths" title="Tenths" max="10"/>
-  <goal name="hundredths" title="Hundreths" max="10"/>
-  <goal name="thousandths" title="Thousandths" max="10"/>
+  <goal name="time" title="Seconds" max="10" scoreType="FLOAT"/>
   
   <tiebreaker>
   <!-- should be empty, but not allowed by the schema -->
    <test winner='LOW'>
-     <term goal='seconds' scoreType='computed'/>
+     <term goal='time' scoreType='computed'/>
    </test>
   </tiebreaker>
 

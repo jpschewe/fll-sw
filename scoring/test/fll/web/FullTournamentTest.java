@@ -45,6 +45,7 @@ import com.meterware.httpunit.WebTable;
 import fll.TestUtils;
 import fll.Utilities;
 import fll.gui.SubjectiveFrame;
+import fll.util.FP;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 
@@ -561,8 +562,8 @@ public class FullTournamentTest {
    */
   public static void setFormScoreElement(final WebForm form, final String name, final int value) throws IOException, SAXException, ParseException {
     // must be a number
-    final int defaultValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(form.getParameterValue(name)).intValue();
-    final int difference = value
+    final double defaultValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(form.getParameterValue(name)).doubleValue();
+    final double difference = value
         - defaultValue;
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Need to increment/decrement "
@@ -642,15 +643,15 @@ public class FullTournamentTest {
           // use the values from rs
           for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
             final String name = element.getAttribute("name");
-            final int min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).intValue();
-            final int max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).intValue();
+            final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
+            final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
             if (LOGGER.isDebugEnabled()) {
               LOGGER.debug("Setting form parameter: "
                   + name + " min: " + min + " max: " + max + " readonly: " + form.isReadOnlyParameter(name));
             }
 
             if (XMLUtils.isEnumeratedGoal(element)
-                || (0 == min && 1 == max)) {
+                || (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE) && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE))) {
               final String valueStr = rs.getString(name);
               form.setParameter(name, valueStr);
             } else {

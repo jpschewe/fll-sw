@@ -24,8 +24,10 @@
     default="HIGH">
     <xsd:annotation>
      <xsd:documentation>
-      Determine which scores are "better". Default is for high scores to win,
-      although one might want to use low scores for a golf tournament or
+      Determine which scores are "better". Default is
+      for high scores to win,
+      although one might want to use low scores
+      for a golf tournament or
       drag race times.
      </xsd:documentation>
     </xsd:annotation>
@@ -141,23 +143,18 @@
     by multiplying the count, in the range min to max, by
     the
     multiplier. If there are child elements, the score is the score
-    associated with the choosen child element times the multiplier.
-
-    The
-    order of the goals in the XML document specifies the order of
-    the
-    goals on the score sheet.
+    associated with the chosen child element times the multiplier.
    </xsd:documentation>
   </xsd:annotation>
   <xsd:complexType>
    <xsd:sequence>
     <xsd:element name="value" minOccurs="0" maxOccurs="unbounded">
      <xsd:complexType>
-      <xsd:attribute name="score" type="xsd:integer"
+      <xsd:attribute name="score" type="xsd:decimal"
        default="0">
        <xsd:annotation>
         <xsd:documentation>
-         The score one gets for this value of an
+         The raw score one gets for this value of an
          enumerated goal.
         </xsd:documentation>
        </xsd:annotation>
@@ -184,9 +181,7 @@
 
    <xsd:attribute name="title" type="xsd:string" use="required" />
 
-   <xsd:attribute name="description" type="xsd:string" />
-
-   <xsd:attribute name="min" type="xsd:integer" default="0">
+   <xsd:attribute name="min" type="xsd:decimal" default="0">
     <xsd:annotation>
      <xsd:documentation>
       The minimum raw score for this goal. Ignored if
@@ -196,7 +191,7 @@
     </xsd:annotation>
    </xsd:attribute>
 
-   <xsd:attribute name="max" type="xsd:integer" default="1">
+   <xsd:attribute name="max" type="xsd:decimal" default="1">
     <xsd:annotation>
      <xsd:documentation>
       The maximum raw score for this goal. Ignored if
@@ -209,7 +204,7 @@
    <xsd:attribute name="multiplier" type="xsd:decimal"
     default="1" />
 
-   <xsd:attribute name="initialValue" type="xsd:integer"
+   <xsd:attribute name="initialValue" type="xsd:decimal"
     default="0">
     <xsd:annotation>
      <xsd:documentation>
@@ -220,8 +215,23 @@
     </xsd:annotation>
    </xsd:attribute>
 
+   <xsd:attribute name="scoreType" type="scoreType"
+    default="INTEGER">
+    <xsd:annotation>
+     <xsd:documentation>
+      Specifies the type of number allowed for this goal value.
+     </xsd:documentation>
+    </xsd:annotation>
+   </xsd:attribute>
   </xsd:complexType>
  </xsd:element>
+ 
+ <xsd:simpleType name="scoreType">
+  <xsd:restriction base="xsd:string">
+   <xsd:enumeration value='FLOAT' />
+   <xsd:enumeration value='INTEGER' />
+  </xsd:restriction>
+ </xsd:simpleType>
 
  <xsd:element name="restriction">
   <xsd:annotation>
@@ -510,6 +520,11 @@
   <xsd:restriction base="xsd:string">
    <xsd:enumeration value="HIGH" />
    <xsd:enumeration value="LOW" />
+   
+   <!--  deprecated -->
+   <xsd:enumeration value="high" />
+   <xsd:enumeration value="low" />
+   
   </xsd:restriction>
  </xsd:simpleType>
 
