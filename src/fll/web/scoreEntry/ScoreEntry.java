@@ -29,6 +29,9 @@ import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.util.FP;
+import fll.xml.ChallengeParser;
+import fll.xml.ScoreType;
 import fll.xml.XMLUtils;
 
 /**
@@ -105,17 +108,32 @@ public final class ScoreEntry {
       formatter.format("var %s;%n", rawVarName);
       formatter.format("var %s;%n", getVarNameForComputedScore(name));
 
-      if (element.getElementsByTagName("value").getLength() > 0
-          || ("0".equals(min) && "1".equals(max))) {
-        formatter.format("function %s(newValue) {%n", getSetMethodName(name));
-        formatter.format("  var temp = %s;%n", rawVarName);
-        formatter.format("  %s = newValue;%n", rawVarName);
-        formatter.format("  if(!isConsistent()) {%n");
-        formatter.format("    %s = temp;%n", rawVarName);
-        formatter.format("  }%n");
-        formatter.format("  refresh();%n");
-        formatter.format("}%n");
+      // set method
+      formatter.format("function %s(newValue) {%n", getSetMethodName(name));
+      formatter.format("  var temp = %s;%n", rawVarName);
+      formatter.format("  %s = newValue;%n", rawVarName);
+      formatter.format("  if(!isConsistent()) {%n");
+      formatter.format("    %s = temp;%n", rawVarName);
+      formatter.format("  }%n");
+      formatter.format("  refresh();%n");
+      formatter.format("}%n");
+
+      // check input method
+      formatter.format("function %s() {%n", getCheckMethodName(name));
+      formatter.format("  var str = document.scoreEntry.%s.value;%n", name);
+      if (ScoreType.FLOAT == XMLUtils.getScoreType(element)) {
+        formatter.format("  var num = parseFloat(str);%n");
       } else {
+        formatter.format("  var num = parseInt(str);%n");
+      }
+      formatter.format("  if(!isNaN(num)) {%n");
+      formatter.format("    %s(num);%n", getSetMethodName(name));
+      formatter.format("  }%n");
+      formatter.format("  refresh();%n");
+      formatter.format("}%n");
+
+      if (element.getElementsByTagName("value").getLength() == 0
+          && !("0".equals(min) && "1".equals(max))) {
         formatter.format("function %s(increment) {%n", getIncrementMethodName(name));
         formatter.format("  var temp = %s%n", rawVarName);
         formatter.format("  %s += increment;%n", rawVarName);
@@ -314,15 +332,15 @@ public final class ScoreEntry {
 
     for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
       final String name = element.getAttribute("name");
-      final int initialValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("initialValue")).intValue();
+      final double initialValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("initialValue")).doubleValue();
       if (XMLUtils.isEnumeratedGoal(element)) {
         // find score that matches initialValue or is min
         final List<Element> values = XMLUtils.filterToElements(element.getElementsByTagName("value"));
         boolean found = false;
         for (final Element valueEle : values) {
           final String value = valueEle.getAttribute("value");
-          final int valueScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(valueEle.getAttribute("score")).intValue();
-          if (valueScore == initialValue) {
+          final double valueScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(valueEle.getAttribute("score")).doubleValue();
+          if (FP.equals(valueScore, initialValue, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
             writer.println("  "
                 + getVarNameForRawScore(name) + " = \"" + value + "\";");
             found = true;
@@ -397,52 +415,7 @@ public final class ScoreEntry {
               writer.println("  </td>");
             } else {
               writer.println("  <td>");
-              // start inc/dec buttons
-              writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='150'>");
-              writer.println("      <tr align='center'>");
-
-              final int min = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalEle.getAttribute("min")).intValue();
-              final int max = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalEle.getAttribute("max")).intValue();
-              if (0 == min
-                  && 1 == max) {
-                generateYesNoButtons(name, writer);
-              } else {
-                final int range = max
-                    - min;
-
-                if (range >= 10) {
-                  generateIncDecButton(name, 5, writer);
-                } else if (range >= 5) {
-                  generateIncDecButton(name, 3, writer);
-                }
-
-                // +1
-                generateIncDecButton(name, 1, writer);
-
-                // -1
-                generateIncDecButton(name, -1, writer);
-
-                if (range >= 10) {
-                  generateIncDecButton(name, -5, writer);
-                } else if (range >= 5) {
-                  generateIncDecButton(name, -3, writer);
-                }
-              }
-              writer.println("       </tr>");
-              writer.println("    </table>");
-              writer.println("  </td>");
-              // end inc/dec buttons
-
-              // count
-              writer.println("  <td align='right'>");
-              if (0 == min
-                  && 1 == max) {
-                writer.println("    <input type='text' name='"
-                    + name + "_radioValue' size='3' align='right' readonly>");
-              } else {
-                writer.println("    <input type='text' name='"
-                    + name + "' size='3' align='right' readonly>");
-              }
+              generateSimpleGoalButtons(goalEle, name, writer);
               writer.println("  </td>");
             } // end simple goal
           } // goal
@@ -469,6 +442,65 @@ public final class ScoreEntry {
   }
 
   /**
+   * Generate a the buttons for a simple goal.
+   * 
+   * @param goalEle
+   * @param name
+   * @param writer
+   * @throws IOException
+   * @throws ParseException
+   */
+  private static void generateSimpleGoalButtons(final Element goalEle, final String name, final JspWriter writer) throws IOException, ParseException {
+    // start inc/dec buttons
+    writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='150'>");
+    writer.println("      <tr align='center'>");
+
+    final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalEle.getAttribute("min")).doubleValue();
+    final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalEle.getAttribute("max")).doubleValue();
+    if (0 == min
+        && 1 == max) {
+      generateYesNoButtons(name, writer);
+    } else {
+      final double range = max
+          - min;
+
+      if (range >= 10) {
+        generateIncDecButton(name, 5, writer);
+      } else if (range >= 5) {
+        generateIncDecButton(name, 3, writer);
+      }
+
+      // +1
+      generateIncDecButton(name, 1, writer);
+
+      // -1
+      generateIncDecButton(name, -1, writer);
+
+      if (range >= 10) {
+        generateIncDecButton(name, -5, writer);
+      } else if (range >= 5) {
+        generateIncDecButton(name, -3, writer);
+      }
+    }
+    writer.println("       </tr>");
+    writer.println("    </table>");
+    writer.println("  </td>");
+    // end inc/dec buttons
+
+    // count
+    writer.println("  <td align='right'>");
+    if (0 == min
+        && 1 == max) {
+      writer.println("    <input type='text' name='"
+          + name + "_radioValue' size='3' align='right' readonly>");
+    } else {
+      // allow these to be editable
+      writer.println("    <input type='text' name='"
+          + name + "' size='3' align='right' onChange='" + getCheckMethodName(name) + "()'>");
+    }
+  }
+
+  /**
    * Generate an increment or decrement button for goal name with
    * increment/decrement increment.
    */
@@ -490,12 +522,12 @@ public final class ScoreEntry {
   private static void generateYesNoButtons(final String name, final JspWriter writer) throws IOException {
     // generate radio buttons with calls to set<name>
     writer.println("        <td>");
-    writer.println("          <input type='radio' id='" + name + "_yes' name='"
-        + name + "' value='1' onclick='" + getSetMethodName(name) + "(1)'>");
+    writer.println("          <input type='radio' id='"
+        + name + "_yes' name='" + name + "' value='1' onclick='" + getSetMethodName(name) + "(1)'>");
     writer.println("          Yes");
     writer.println("          &nbsp;&nbsp;");
-    writer.println("          <input type='radio' id='" + name + "_no' name='"
-        + name + "' value='0' onclick='" + getSetMethodName(name) + "(0)'>");
+    writer.println("          <input type='radio' id='"
+        + name + "_no' name='" + name + "' value='0' onclick='" + getSetMethodName(name) + "(0)'>");
     writer.println("          No");
     writer.println("        </td>");
   }
@@ -504,7 +536,10 @@ public final class ScoreEntry {
    * Generate the initial assignment of the global variables for editing a
    * team's score.
    */
-  public static void generateInitForScoreEdit(final JspWriter writer, final ServletContext application, final Document document, final int teamNumber,
+  public static void generateInitForScoreEdit(final JspWriter writer,
+                                              final ServletContext application,
+                                              final Document document,
+                                              final int teamNumber,
                                               final int runNumber) throws SQLException, IOException {
     final Connection connection = (Connection) application.getAttribute("connection");
     final String tournament = Queries.getCurrentTournament(connection);
@@ -612,6 +647,14 @@ public final class ScoreEntry {
    */
   private static String getSetMethodName(final String goalName) {
     return "set_"
+        + goalName;
+  }
+
+  /**
+   * The name of the method that checks input for the specified goal.
+   */
+  private static String getCheckMethodName(final String goalName) {
+    return "check_"
         + goalName;
   }
 

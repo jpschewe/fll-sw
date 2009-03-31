@@ -22,6 +22,7 @@ import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.util.ScoreUtils;
+import fll.xml.ScoreType;
 import fll.xml.XMLUtils;
 
 /**
@@ -34,21 +35,19 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
   private static final Logger LOG = Logger.getLogger(SubjectiveTableModel.class);
 
   /**
-   * @param scoreDocument
-   *          XML document that represents the teams that are being scored alnog
-   *          with the judges and the current set of scores
-   * @param subjectiveElement
-   *          subjective category
+   * @param scoreDocument XML document that represents the teams that are being
+   *          scored alnog with the judges and the current set of scores
+   * @param subjectiveElement subjective category
    */
   public SubjectiveTableModel(final Document scoreDocument, final Element subjectiveElement) {
     _scoreDocument = scoreDocument;
     _subjectiveElement = subjectiveElement;
     _goals = XMLUtils.filterToElements(subjectiveElement.getChildNodes());
-    final Element categoryScoreElement = (Element)((Element)_scoreDocument.getDocumentElement()).getElementsByTagName(
-        subjectiveElement.getAttribute("name")).item(0);
+    final Element categoryScoreElement = (Element) ((Element) _scoreDocument.getDocumentElement()).getElementsByTagName(subjectiveElement.getAttribute("name"))
+                                                                                                  .item(0);
     final List<Element> scoreElements = XMLUtils.filterToElements(categoryScoreElement.getElementsByTagName("score"));
     _scoreElements = new Element[scoreElements.size()];
-    for(int i = 0; i < scoreElements.size(); i++) {
+    for (int i = 0; i < scoreElements.size(); i++) {
       _scoreElements[i] = scoreElements.get(i);
     }
 
@@ -60,7 +59,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
 
   @Override
   public String getColumnName(final int column) {
-    switch(column) {
+    switch (column) {
     case 0:
       return "TeamNumber";
     case 1:
@@ -70,9 +69,9 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
     case 3:
       return "Judge";
     default:
-      if(column == getNumGoals() + 4) {
+      if (column == getNumGoals() + 4) {
         return "No Show";
-      } else if(column == getNumGoals() + 5) {
+      } else if (column == getNumGoals() + 5) {
         return "Total Score";
       } else {
         return getGoalDescription(column - 4).getAttribute("title");
@@ -82,7 +81,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
 
   @Override
   public Class<?> getColumnClass(final int column) {
-    switch(column) {
+    switch (column) {
     case 0:
       return Integer.class;
     case 1:
@@ -92,19 +91,17 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
     case 3:
       return String.class;
     default:
-      if(column == getNumGoals() + 4) {
+      if (column == getNumGoals() + 4) {
         // No Show
         return Boolean.class;
-      } else if(column == getNumGoals() + 5) {
+      } else if (column == getNumGoals() + 5) {
         // Total Score
         return Double.class;
       } else {
         return String.class;
         /*
-         * TODO bug: 1830392
-         * 
-         * this isn't working so well, we need to look closer at this final
-         * Element goalEle = getGoalDescription(column -4);
+         * TODO bug: 1830392 this isn't working so well, we need to look closer
+         * at this final Element goalEle = getGoalDescription(column -4);
          * if(XMLUtils.isEnumeratedGoal(goalEle)) { return String.class; } else
          * if(XMLUtils.isComputedGoal(goalEle)) { return Double.class; } else {
          * return Integer.class; }
@@ -124,15 +121,15 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
   public Object getValueAt(final int row, final int column) {
     try {
       final Element scoreEle = getScoreElement(row);
-      switch(column) {
+      switch (column) {
       case 0:
-        if(scoreEle.hasAttribute("teamNumber")) {
+        if (scoreEle.hasAttribute("teamNumber")) {
           return Utilities.NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber")).intValue();
         } else {
           return null;
         }
       case 1:
-        if(scoreEle.hasAttribute("teamName")) {
+        if (scoreEle.hasAttribute("teamName")) {
           return scoreEle.getAttribute("teamName");
         } else {
           return null;
@@ -142,9 +139,9 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
       case 3:
         return scoreEle.getAttribute("judge");
       default:
-        if(column == getNumGoals() + 4) {
+        if (column == getNumGoals() + 4) {
           return Boolean.valueOf(scoreEle.getAttribute("NoShow"));
-        } else if(column == getNumGoals() + 5) {
+        } else if (column == getNumGoals() + 5) {
           // compute total score
           final double newTotalScore = ScoreUtils.computeTotalScore(getTeamScore(row));
           return newTotalScore;
@@ -153,25 +150,31 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
           final String goalName = goalDescription.getAttribute("name");
           // the order really matters here because a computed goal will never
           // have an entry in scoreEle
-          if(XMLUtils.isComputedGoal(goalDescription)) {
+          if (XMLUtils.isComputedGoal(goalDescription)) {
             return getTeamScore(row).getComputedScore(goalName);
-          } else if(!scoreEle.hasAttribute(goalName)) {
+          } else if (!scoreEle.hasAttribute(goalName)) {
             return null;
-          } else if(XMLUtils.isEnumeratedGoal(goalDescription)) {
+          } else if (XMLUtils.isEnumeratedGoal(goalDescription)) {
             return getTeamScore(row).getEnumRawScore(goalName);
           } else {
-            return getTeamScore(row).getRawScore(goalName);
+            final Double score =  getTeamScore(row).getRawScore(goalName);
+            final ScoreType scoreType = XMLUtils.getScoreType(scoreEle);
+            if(ScoreType.FLOAT == scoreType || null == score) {
+              return score;
+            } else {
+              return score.intValue();
+            }
           }
         }
       }
-    } catch(final ParseException pe) {
+    } catch (final ParseException pe) {
       throw new RuntimeException("Error in challenge.xml!!! Unparsable number", pe);
     }
   }
 
   @Override
   public boolean isCellEditable(final int row, final int column) {
-    switch(column) {
+    switch (column) {
     case 0:
       // TeamNumber
       return false;
@@ -185,20 +188,21 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
       // Judge
       return false;
     default:
-      if(column == getNumGoals() + 4) {
+      if (column == getNumGoals() + 4) {
         // No Show
         return true;
-      } else if(column == getNumGoals() + 5) {
+      } else if (column == getNumGoals() + 5) {
         // Total Score
         return false;
       } else {
         final Element goalDescription = getGoalDescription(column - 4);
-        if(XMLUtils.isComputedGoal(goalDescription)) {
+        if (XMLUtils.isComputedGoal(goalDescription)) {
           return false;
-        } else if("goal".equals(goalDescription.getNodeName())) {
+        } else if ("goal".equals(goalDescription.getNodeName())) {
           return true;
         } else {
-          throw new RuntimeException("Expected 'computedGoal' or 'goal', but found: " + goalDescription.getNodeName());
+          throw new RuntimeException("Expected 'computedGoal' or 'goal', but found: "
+              + goalDescription.getNodeName());
         }
       }
     }
@@ -217,25 +221,26 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
     boolean error = false;
     final Element element = getScoreElement(row);
 
-    if(column == getNumGoals() + 4) {
+    if (column == getNumGoals() + 4) {
       // No Show
-      if(value instanceof Boolean) {
+      if (value instanceof Boolean) {
         element.setAttribute("NoShow", value.toString());
-        if(setModified) {
+        if (setModified) {
           element.setAttribute("modified", Boolean.TRUE.toString());
         }
 
-        final Boolean b = (Boolean)value;
-        if(b) {
+        final Boolean b = (Boolean) value;
+        if (b) {
           // delete all scores for that team
-          for(int i = 0; i < getNumGoals(); i++) {
+          for (int i = 0; i < getNumGoals(); i++) {
             setValueAt(null, row, i + 4);
           }
         }
       } else {
         error = true;
       }
-    } else if(value != null && !"".equals(value) && Boolean.parseBoolean(element.getAttribute("NoShow"))) {
+    } else if (value != null
+        && !"".equals(value) && Boolean.parseBoolean(element.getAttribute("NoShow"))) {
       // don't allow changes to rows with NoShow set to true, but allow the
       // scores to be set to null
       error = true;
@@ -243,55 +248,63 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
       final Element goalDescription = getGoalDescription(column - 4);
       final String goalName = goalDescription.getAttribute("name");
       // support deleting a value
-      if(null == value || "".equals(value)) {
+      if (null == value
+          || "".equals(value)) {
         // remove value
         element.setAttribute(goalName, "");
-        if(setModified) {
+        if (setModified) {
           element.setAttribute("modified", Boolean.TRUE.toString());
         }
       } else {
         final List<Element> posValues = XMLUtils.filterToElements(goalDescription.getElementsByTagName("value"));
-        if(posValues.size() > 0) {
+        if (posValues.size() > 0) {
           // enumerated, convert from title to value
           boolean found = false;
-          for(final Element posValue : posValues) {
-            if(posValue.getAttribute("title").equalsIgnoreCase((String)value)) {
+          for (final Element posValue : posValues) {
+            if (posValue.getAttribute("title").equalsIgnoreCase((String) value)) {
               // found it
               element.setAttribute(goalName, posValue.getAttribute("value"));
-              if(setModified) {
+              if (setModified) {
                 element.setAttribute("modified", Boolean.TRUE.toString());
               }
               found = true;
             }
           }
-          if(!found) {
+          if (!found) {
             error = true;
           }
         } else {
           // numeric
 
-          int min = 0;
-          int max = 1;
+          double min = 0;
+          double max = 1;
           try {
-            min = NumberFormat.getInstance().parse(goalDescription.getAttribute("min")).intValue();
-            max = NumberFormat.getInstance().parse(goalDescription.getAttribute("max")).intValue();
+            min = NumberFormat.getInstance().parse(goalDescription.getAttribute("min")).doubleValue();
+            max = NumberFormat.getInstance().parse(goalDescription.getAttribute("max")).doubleValue();
 
-          } catch(final ParseException pe) {
-            throw new RuntimeException("Error in challenge.xml!!! min or max unparseable for goal: " + goalDescription.getAttribute("name"));
+          } catch (final ParseException pe) {
+            throw new RuntimeException("Error in challenge.xml!!! min or max unparseable for goal: "
+                + goalDescription.getAttribute("name"));
           }
 
+          final ScoreType scoreType = XMLUtils.getScoreType(element);
           try {
-            final double doubleValue = NumberFormat.getInstance().parse(value.toString()).doubleValue();
-            if(doubleValue > max || doubleValue < min) {
+            final Number parsedValue = NumberFormat.getInstance().parse(value.toString());
+            if (parsedValue.doubleValue() > max
+                || parsedValue.doubleValue() < min) {
               error = true;
             } else {
-              element.setAttribute(goalName, String.valueOf(doubleValue));
-              if(setModified) {
+              if (ScoreType.FLOAT == scoreType) {
+                element.setAttribute(goalName, String.valueOf(parsedValue.doubleValue()));
+              } else {
+                element.setAttribute(goalName, String.valueOf(parsedValue.intValue()));
+              }
+              if (setModified) {
                 element.setAttribute("modified", Boolean.TRUE.toString());
               }
             }
-          } catch(final ParseException pe) {
-            if(LOG.isDebugEnabled()) {
+          } catch (final ParseException pe) {
+            if (LOG.isDebugEnabled()) {
               LOG.debug(pe, pe);
             }
             error = true;
@@ -300,7 +313,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
       }
     }
 
-    if(error) {
+    if (error) {
       // reset
       setValueAt(getValueAt(row, column), row, column, false);
     } else {
@@ -315,9 +328,9 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
    * Force the computed goals in the specified row to be updated.
    */
   private void forceComputedGoalUpdates(final int row) {
-    for(int i = 0; i < getNumGoals(); ++i) {
+    for (int i = 0; i < getNumGoals(); ++i) {
       final Element goalEle = getGoalDescription(i);
-      if(XMLUtils.isComputedGoal(goalEle)) {
+      if (XMLUtils.isComputedGoal(goalEle)) {
         fireTableCellUpdated(row, i + 4);
       }
     }
@@ -341,7 +354,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
   private SubjectiveTeamScore getTeamScore(final int index) {
     try {
       return new SubjectiveTeamScore(_subjectiveElement, getScoreElement(index));
-    } catch(final ParseException pe) {
+    } catch (final ParseException pe) {
       throw new RuntimeException(pe);
     }
   }
@@ -378,14 +391,15 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
 
   public void sort(final int column) {
     // only sort first 4 columns and the total score
-    if(column < 4 || column == getNumGoals() + 5) {
-      if(column == _sortedColumn) {
+    if (column < 4
+        || column == getNumGoals() + 5) {
+      if (column == _sortedColumn) {
         _ascending = !_ascending;
       } else {
         _sortedColumn = column;
       }
 
-      if(isAscending()) {
+      if (isAscending()) {
         Arrays.sort(_scoreElements, _comparator);
       } else {
         Arrays.sort(_scoreElements, _inverseComparator);
@@ -402,13 +416,13 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
   private final Comparator<Element> _comparator = new Comparator<Element>() {
     public int compare(final Element e1, final Element e2) {
       try {
-        switch(getSortedColumn()) {
+        switch (getSortedColumn()) {
         case 0:
           final int team1 = NumberFormat.getInstance().parse(e1.getAttribute("teamNumber")).intValue();
           final int team2 = NumberFormat.getInstance().parse(e2.getAttribute("teamNumber")).intValue();
-          if(team1 == team2) {
+          if (team1 == team2) {
             return 0;
-          } else if(team1 < team2) {
+          } else if (team1 < team2) {
             return -1;
           } else {
             return 1;
@@ -426,7 +440,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
           final String judge2 = e2.getAttribute("judge");
           return judge1.compareTo(judge2);
         default:
-          if(getSortedColumn() == getNumGoals() + 5) {
+          if (getSortedColumn() == getNumGoals() + 5) {
             final SubjectiveTeamScore scoreOne = new SubjectiveTeamScore(_subjectiveElement, e1);
             final SubjectiveTeamScore scoreTwo = new SubjectiveTeamScore(_subjectiveElement, e2);
             final double score1 = ScoreUtils.computeTotalScore(scoreOne);
@@ -437,7 +451,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
             return 0;
           }
         }
-      } catch(final ParseException pe) {
+      } catch (final ParseException pe) {
         throw new RuntimeException(pe);
       }
     }

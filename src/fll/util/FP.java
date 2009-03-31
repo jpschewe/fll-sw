@@ -21,7 +21,7 @@ public class FP {
   /**
    * Check if two values are equal given a tolerance.
    */
-  public boolean equals(final double a, final double b, final double tolerance) {
+  public static boolean equals(final double a, final double b, final double tolerance) {
     if(isFinite(a) && isFinite(b)) {
       return Math.abs(a - b) <= tolerance;
     } else {

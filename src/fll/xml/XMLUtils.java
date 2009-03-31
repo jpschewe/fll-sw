@@ -318,4 +318,27 @@ public final class XMLUtils {
     }
   }
 
+  /**
+   * Get the score type for a particular element.
+   */
+  public static ScoreType getScoreType(final Element element) {
+    if (element.hasAttribute("scoreType")) {
+      final String str = element.getAttribute("scoreType");
+      final String sortStr;
+      if(null != str) {
+        sortStr = str.toUpperCase();
+      } else {
+        sortStr = "INTEGER";
+      }
+      final ScoreType sort = ScoreType.valueOf(ScoreType.class, sortStr);
+      if (null == sort) {
+        return ScoreType.INTEGER;
+      } else {
+        return sort;
+      }
+    } else {
+      return ScoreType.INTEGER;
+    }
+  }
+  
 }

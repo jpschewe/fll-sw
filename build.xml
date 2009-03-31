@@ -451,7 +451,7 @@
 		</antcall>
 	</target>
 
-	<target name="tomcat.start" depends="tomcat.expand,compile.test" description="start up tomcat">
+	<target name="tomcat.start" depends="tomcat.expand" description="start up tomcat">
 		<echo message="Starting tomcat" />
 		<antcall target="-tomcat.run">
 			<param name="operation" value="start" />
@@ -466,7 +466,7 @@
 		<fail message="Access to timed out to http://localhost:9080/fll-sw/setup " if="fll-sw.timeout" />
 	</target>
 
-	<target name="tomcat.stop" depends="tomcat.expand,compile.test" description="shut down tomcat">
+	<target name="tomcat.stop" depends="tomcat.expand" description="shut down tomcat">
 		<echo message="Shutting down tomcat" />
 		<antcall target="-tomcat.run">
 			<param name="operation" value="stop" />
