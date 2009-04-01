@@ -3,13 +3,14 @@
 <%@ page import="fll.db.Queries" %>
 <%@ page import="fll.xml.WinnerType" %>
 <%@ page import="fll.xml.XMLUtils" %>
+<%@ page import="fll.web.ApplicationAttributes" %>
 
 <%@ page import="org.w3c.dom.Document" %>
       
 <%@ page import="java.sql.Connection" %>
 
 <%
-final Connection connection = (Connection)application.getAttribute("connection");
+final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
 final String tournamentReq = request.getParameter("currentTournament");
 final String tournament;
 if(tournamentReq == null) {
@@ -18,7 +19,7 @@ if(tournamentReq == null) {
   tournament = tournamentReq;
 }
 
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");;
+final Document challengeDocument = (Document)application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);;
 final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);          
 final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
 
@@ -27,7 +28,8 @@ pageContext.setAttribute("currentTournament", tournament);
 pageContext.setAttribute("divisions", Queries.getDivisions(connection));
 %>
 
-<html>
+
+<%@page import="fll.web.ApplicationAttributes"%><html>
   <head>
     <title><x:out select="$challengeDocument/fll/@title"/> (Categorized Scores)</title>
   </head>

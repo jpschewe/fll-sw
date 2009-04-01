@@ -39,6 +39,8 @@ import com.lowagie.text.pdf.PdfWriter;
 
 import fll.Team;
 import fll.db.Queries;
+import fll.web.ApplicationAttributes;
+import fll.web.Init;
 
 /**
  * @author jpschewe
@@ -65,9 +67,15 @@ public class RankingReport extends HttpServlet {
   @Override
   protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
     try {
+      Init.initialize(request, response);
+    } catch (final SQLException e) {
+      throw new RuntimeException("Error in initialization", e);
+    }
+    
+    try {
       final ServletContext application = getServletContext();
-      final Connection connection = (Connection)application.getAttribute("connection");
-      final org.w3c.dom.Document challengeDocument = (org.w3c.dom.Document)application.getAttribute("challengeDocument");
+      final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
+      final org.w3c.dom.Document challengeDocument = (org.w3c.dom.Document)application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
 
       // create simple doc and write to a ByteArrayOutputStream
       final Document document = new Document(PageSize.LETTER);

@@ -1,11 +1,16 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.web.scoreEntry.Submit" %>
+<%@ page import="fll.web.ApplicationAttributes"%>
+
+<%@ page import="java.sql.Connection"%>
+<%@ page import="org.w3c.dom.Document"%>
+<%@ page import="fll.db.Queries"%>
 
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
+final Document challengeDocument = (Document)application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
 
-final Connection connection = (Connection)application.getAttribute("connection");
+final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
 %>
 
 

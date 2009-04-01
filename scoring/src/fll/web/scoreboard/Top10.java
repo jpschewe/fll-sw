@@ -48,6 +48,8 @@ import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.web.ApplicationAttributes;
+import fll.web.Init;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
@@ -77,9 +79,15 @@ public class Top10 extends HttpServlet {
       LOGGER.trace("Entering doPost");
     }
 
+    try {
+      Init.initialize(request, response);
+    } catch (final SQLException e) {
+      throw new RuntimeException("Error in initialization", e);
+    }
+
     final ServletContext application = getServletContext();
     final HttpSession session = request.getSession();
-    final Connection connection = (Connection) application.getAttribute("connection");
+    final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
     final Formatter formatter = new Formatter(response.getWriter());
     final String showOrgStr = request.getParameter("showOrganization");
     final boolean showOrg = null == showOrgStr ? true : Boolean.parseBoolean(showOrgStr);

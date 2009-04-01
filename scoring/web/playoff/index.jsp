@@ -1,6 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.db.Queries" %>
+ <%@ page import="fll.web.ApplicationAttributes" %>
   
 <%@ page import="java.util.Iterator" %>
 <%@ page import="java.util.List" %>
@@ -8,7 +9,7 @@
 <%@ page import="java.sql.Connection" %>
   
 <%
-final Connection connection = (Connection)application.getAttribute("connection");
+final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
 final List<String> divisions = Queries.getDivisions(connection);
 final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
 %>

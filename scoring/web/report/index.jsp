@@ -3,6 +3,7 @@
 <%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
 
 <%@ page import="fll.db.Queries" %>
+<%@ page import="fll.web.ApplicationAttributes"%>
 
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.ResultSet" %>
@@ -17,7 +18,7 @@ if(null != messageReq) {
   message.append("</i><br>");
 }
 
-final Connection connection = (Connection)application.getAttribute("connection");
+final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
 final Statement stmt = connection.createStatement();
 final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = '" + Queries.getCurrentTournament(connection) + "'");
 final int maxRunNumber;

@@ -4,10 +4,11 @@
 <%@ page import="fll.db.Queries" %>
 <%@ page import="java.sql.Connection" %>
 <%@ page import="org.w3c.dom.Document" %>
+<%@ page import="fll.web.ApplicationAttributes"%>
 
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-final Connection connection = (Connection)application.getAttribute("connection");
+final Document challengeDocument = (Document)application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
+final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
 final String currentTournament = Queries.getCurrentTournament(connection);
   
 ScoreStandardization.updateTeamTotalScores(connection, challengeDocument, currentTournament);

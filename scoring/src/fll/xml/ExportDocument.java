@@ -60,7 +60,7 @@ public final class ExportDocument {
     Statement stmt = null;
     ResultSet rs = null;
     try {
-      connection = Utilities.createDBConnection(args[1]);
+      connection = Utilities.createDataSource(args[1]).getConnection();
       stmt = connection.createStatement();
       rs = stmt.executeQuery("SELECT Value FROM TournamentParameters WHERE Param = 'ChallengeDocument'");
       if(rs.next()) {

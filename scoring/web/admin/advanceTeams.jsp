@@ -2,6 +2,8 @@
 
 <%@ page import="fll.db.Queries" %>
 
+<%@ page import="fll.web.ApplicationAttributes" %>
+
 <%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
       
 <%@ page import="java.sql.Statement" %>
@@ -9,7 +11,7 @@
 <%@ page import="java.sql.ResultSet" %>
       
 <%
-final Connection connection = (Connection)application.getAttribute("connection");
+final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
 %>
 
 <c:if test="${not empty param.submit}">
@@ -20,7 +22,8 @@ final Connection connection = (Connection)application.getAttribute("connection")
   </c:forEach>
 </c:if>
       
-<html>
+
+<%@page import="fll.web.ApplicationAttributes"%><html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     <title><x:out select="$challengeDocument/fll/@title"/> (Select Team)</title>

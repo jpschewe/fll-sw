@@ -7,6 +7,7 @@ Prompt for how many teams should be considered from each scored category.
 
 <%@ page import="fll.Team" %>
 <%@ page import="fll.db.Queries" %>
+<%@ page import="fll.web.ApplicationAttributes"%>
 
 <%@ page import="java.util.List" %>
 
@@ -14,7 +15,7 @@ Prompt for how many teams should be considered from each scored category.
 
 
 <%
-final Connection connection = (Connection)application.getAttribute("connection");
+final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
 final List<String> divisions = Queries.getDivisions(connection);
 pageContext.setAttribute("divisions", divisions);
 %>

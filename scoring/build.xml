@@ -10,10 +10,10 @@
 
 	<property name="dir.build" value="${basedir}/build" />
 	<property name="tomcat" value="apache-tomcat-5.5.20" />
-	<property name="dir.tomcat" value="${dir.build}/${tomcat}" />
+	<property name="dir.tomcat" value="${dir.build}/tomcat" />
 
 	<property name="dir.dist" value="dist" />
-	<property name="dir.web" value="${dir.build}/tomcat/webapps/${app.name}" />
+	<property name="dir.web" value="${dir.tomcat}/webapps/${app.name}" />
 	<property name="dir.classes" value="${dir.web}/WEB-INF/classes" />
 	<property name="dir.classes.test" value="${dir.build}/classes/test" />
 
@@ -21,6 +21,8 @@
 	<property name="dir.src" value="src" />
 	<property name="dir.test" value="test" />
 	<property name="dir.tmp" value="tmp" />
+	<property name="dir.tmp.subjective" value="${dir.tmp}/subjective" />
+	<property name="dir.src.jsp" value="${dir.build}/jsp_source" />
 
 	<property name="dir.tools" value="${basedir}/tools" />
 
@@ -169,8 +171,8 @@
 	<target name="init">
 		<tstamp />
 
-		<uptodate property="jsp.notRequired" targetfile="${dir.tmp}/.tstamp">
-			<srcfiles dir="${basedir}/web" includes="**" />
+		<uptodate property="jsp.notRequired" targetfile="${dir.src.jsp}/.timestamp">
+			<srcfiles dir="web" includes="**" />
 		</uptodate>
 
 		<!-- set arch -->
@@ -202,10 +204,10 @@
 	<target name="compile" depends="prepare,compile.classes,compile.jsp" description="Compile Java sources">
 
 		<!-- stuff for subjective scoring app -->
-		<mkdir dir="${dir.tmp}/subjective" />
-		<mkdir dir="${dir.tmp}/subjective/lib" />
-		<jar destfile="${dir.tmp}/subjective/lib/subjective.jar" basedir="${dir.web}/WEB-INF/classes" index="true" />
-		<copy todir="${dir.tmp}/subjective/lib">
+		<mkdir dir="${dir.tmp.subjective}" />
+		<mkdir dir="${dir.tmp.subjective}/lib" />
+		<jar destfile="${dir.tmp.subjective}/lib/subjective.jar" basedir="${dir.web}/WEB-INF/classes" index="true" />
+		<copy todir="${dir.tmp.subjective}/lib">
 			<fileset dir="${dir.lib}" />
 		</copy>
 		<path id="subjective.dist.classpath">
@@ -217,7 +219,7 @@
 		<antcall target="-buildscripts">
 			<param name="app.name" value="subjective" />
 			<param name="class.main" value="fll.gui.SubjectiveFrame" />
-			<param name="-scripts.dir" value="${dir.tmp}/subjective" />
+			<param name="-scripts.dir" value="${dir.tmp.subjective}" />
 			<param name="-scripts.root" value="." />
 			<param name="-java.args" value="-Dapp.name=subjective -Dlogroot=./" />
 			<reference torefid="-scripts.path" refid="subjective.dist.classpath" />
@@ -233,19 +235,19 @@
 			</fileset>
 		</chmod>
 
-		<copy todir="${dir.tmp}/subjective">
+		<copy todir="${dir.tmp.subjective}">
 			<fileset dir="bin">
 				<include name="setenv.*" />
 			</fileset>
 		</copy>
 		<chmod perm="+x">
-			<fileset dir="${dir.tmp}/subjective">
+			<fileset dir="${dir.tmp.subjective}">
 				<include name="*.sh" />
 			</fileset>
 		</chmod>
 
 		<zip zipfile="${dir.web}/subjective.zip">
-			<zipfileset prefix="subjective" dir="${dir.tmp}/subjective" />
+			<zipfileset prefix="subjective" dir="${dir.tmp.subjective}" />
 		</zip>
 
 
@@ -330,116 +332,70 @@
 		</javac>
 	</target>
 
-	<!-- not perfect, but will work -->
-	<target name="compile.jsp" depends="compile.classes" description="Compile JSP sources" unless="jsp.notRequired">
+	<target name="generate.jsp" depends="prepare" description="Generate Java sources for JSP files" unless="jsp.notRequired">
+		<mkdir dir="${dir.src.jsp}" />
+		<taskdef classname="org.apache.jasper.JspC" name="jasper2">
+			<classpath id="jspc.classpath">
+				<pathelement location="${java.home}/lib/tools.jar" />
+				<pathelement location="${java.home}/../lib/tools.jar" />
 
-		<mkdir dir="${dir.tmp}" />
-		<!--    <jspc srcdir="web"
-    destdir="${dir.tmp}">
-    <include name="**/*.jsp" />
-    <classpath>
-    <pathelement location="${dir.web}/WEB-INF/classes" />
-    <path refid="compile.classpath" />
-  </classpath>
-  </jspc> -->
+				<fileset dir="${dir.tomcat}/bin">
+					<include name="*.jar" />
+				</fileset>
+				<fileset dir="${dir.tomcat}/server/lib">
+					<include name="*.jar" />
+				</fileset>
+				<fileset dir="${dir.tomcat}/common/lib">
+					<include name="*.jar" />
+				</fileset>
+			</classpath>
+		</taskdef>
 
-		<!-- broken with Tomcat 5 for now -->
-		<!--    <java classname="org.apache.jasper.JspC"
-    fork="yes"
-    failonerror="true"
-    taskname="jspc"
-    dir="${basedir}"
-    >
-    <classpath>
-    <pathelement location="${dir.web}/WEB-INF/classes" />
-    <path refid="compile.classpath" />
-  </classpath>
-    <arg line="-d ${dir.tmp}" />
-    <arg line="-die9" />
-    <arg line="-webapp ${dir.web}" />
-  </java>
+		<jasper2 validateXml="false" uriroot="${dir.web}" webXmlFragment="${dir.web}/WEB-INF/generated_web.xml" outputDir="${dir.src.jsp}" />
+		
+		<touch file="${dir.src.jsp}/.timestamp"/>
+	</target>
 
-    <javac srcdir="${dir.tmp}"
-    destdir="${dir.tmp}"
-    debug="${compile.debug}"
-    deprecation="${compile.deprecation}"
-    optimize="${compile.optimize}"
->
-    <classpath>
-    <pathelement location="${dir.web}/WEB-INF/classes" />
-    <path refid="compile.classpath" />
-  </classpath>
-  </javac> -->
-
-		<!-- still broken, even though this is what Jakarta says to use
-    <taskdef classname="org.apache.jasper.JspC" name="jasper2" > 
-    <classpath id="jspc.classpath"> 
-    <pathelement location="${java.home}/../lib/tools.jar"/> 
-    <fileset dir="${dir.tomcat}/bin"> 
-    <include name="*.jar"/> 
-  </fileset> 
-    <fileset dir="${dir.tomcat}/server/lib"> 
-    <include name="*.jar"/> 
-  </fileset> 
-    <fileset dir="${dir.tomcat}/common/lib"> 
-    <include name="*.jar"/> 
-  </fileset> 
-  </classpath> 
-  </taskdef> 
-
-    <jasper2 
-    validateXml="false" 
-    uriroot="${dir.web}" 
-    webXmlFragment="${dir.web}/WEB-INF/generated_web.xml" 
-    outputDir="${dir.tmp}" /> 
-
-    <javac destdir="${dir.web}/WEB-INF/classes"
-    optimize="${compile.optimize}"
-    debug="${compile.debug}"
-    deprecation="${compile.deprecation}"
-    failonerror="true"
-    srcdir="${}/WEB-INF/src" 
-    excludes="**/*.smap">
-    <classpath>
-    <path refid="compile.classpath" />
-    <pathelement location="${dir.tmp}"/>
-    <fileset dir="${dir.web}/WEB-INF/lib">
-    <include name="*.jar"/>
-  </fileset>
-    <pathelement location="${dir.tomcat}/common/classes"/>
-    <fileset dir="${tomcat.home}/common/lib">
-    <include name="*.jar"/>
-  </fileset>
-    <pathelement location="${dir.tomcat}/shared/classes"/>
-    <fileset dir="${dir.tomcat}/shared/lib">
-    <include name="*.jar"/>
-  </fileset>
-    <fileset dir="${dir.tomcat}/bin"> 
-    <include name="*.jar"/> 
-  </fileset> 
-  </classpath>
-    <include name="**" />
-    <exclude name="tags/**" />
-  </javac> -->
+	<target name="compile.jsp" depends="compile.classes,generate.jsp" description="Compile JSP sources">
+		<javac destdir="${dir.web}/WEB-INF/classes" optimize="${compile.optimize}" debug="${compile.debug}" deprecation="${compile.deprecation}" failonerror="true" srcdir="${dir.src.jsp}" excludes="**/*.smap">
+			<classpath>
+				<path refid="compile.classpath" />
+				<fileset dir="${dir.web}/WEB-INF/lib">
+					<include name="*.jar" />
+				</fileset>
+				<pathelement location="${dir.tomcat}/common/classes" />
+				<fileset dir="${dir.tomcat}/common/lib">
+					<include name="*.jar" />
+				</fileset>
+				<pathelement location="${dir.tomcat}/shared/classes" />
+				<fileset dir="${dir.tomcat}/shared/lib">
+					<include name="*.jar" />
+				</fileset>
+				<fileset dir="${dir.tomcat}/bin">
+					<include name="*.jar" />
+				</fileset>
+			</classpath>
+			<include name="**/*.java" />
+		</javac>
 	</target>
 
 
 	<!-- ==================== Tomcat Targets =================================== -->
 	<target name="-tomcat.check">
-		<available property="tomcat.uptodate" file="${dir.build}/tomcat/bin/startup.sh" />
+		<available property="tomcat.uptodate" file="${dir.tomcat}/bin/startup.sh" />
 	</target>
 
 	<target name="tomcat.expand" depends="-tomcat.check" unless="tomcat.uptodate">
 		<untar src="${tomcat}.tar.bz2" dest="${dir.build}" compression="bzip2" />
-		<move todir="${dir.build}/tomcat">
+		<move todir="${dir.tomcat}">
 			<fileset dir="${dir.build}/${tomcat}" />
 		</move>
 
 		<!-- clean out tomcat work directory -->
-		<delete dir="${dir.build}/tomcat/work" />
+		<delete dir="${dir.tomcat}/work" />
 
 		<chmod perm="+x">
-			<fileset dir="${dir.build}/tomcat/bin">
+			<fileset dir="${dir.tomcat}/bin">
 				<include name="*.sh" />
 			</fileset>
 		</chmod>
@@ -482,28 +438,40 @@
 	</target>
 
 	<target name="-tomcat.run">
+		<!-- for when running the unit tests -->
+		<!--
+		<copy todir="${dir.tomcat}/shared/lib">
+			<fileset dir="${dir.lib}/cobertura">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+		-->
+
 		<java classname="org.apache.catalina.startup.Bootstrap" fork="true" spawn="${spawn}" taskname="tomcat">
 			<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/tomcat-cobertura.ser" />
 
 			<classpath>
 				<!-- include multiple directories to find tools.jar depending on if java.home expands to jre directory and if tools is used -->
-				<!--pathelement location="${dir.tools}/jdk-linux/lib/tools.jar" /-->
-				<!--pathelement location="${dir.tools}/jdk-windows/lib/tools.jar" /-->
+				<!--
 				<pathelement location="${java.home}/lib/tools.jar" />
 				<pathelement location="${java.home}/../lib/tools.jar" />
+	            -->
 				
-				<!-- where is tomcat -->
-				<pathelement location="${dir.build}/tomcat/bin/bootstrap.jar" />
-
-				<!-- for when running the unit tests -->
-				<path refid="cobertura.classpath" />
-
+				<!-- tomcat jars -->
+				<pathelement location="${dir.tomcat}/bin/bootstrap.jar" />
+				<pathelement location="${dir.tomcat}/bin/commons-logging-api.jar"/>
+				
+				<!-- for running inside unit tests -->
+				<path id="cobertura.classpath"/>
+				
 			</classpath>
-			<sysproperty key="java.endorsed.dirs" file="${dir.build}/tomcat/common/endorsed" />
-			<sysproperty key="catalina.base" file="${dir.build}/tomcat" />
-			<sysproperty key="catalina.home" file="${dir.build}/tomcat" />
-			<sysproperty key="java.io.tmpdir" file="${dir.build}/tomcat/temp" />
-
+			<sysproperty key="java.util.logging.manager" value="org.apache.juli.ClassLoaderLogManager"/>
+			<sysproperty key="java.util.logging.config.file" file="${dir.tomcat}/conf/logging.properties"/>
+			<sysproperty key="java.endorsed.dirs" file="${dir.tomcat}/common/endorsed" />
+			<sysproperty key="catalina.base" file="${dir.tomcat}" />
+			<sysproperty key="catalina.home" file="${dir.tomcat}" />
+			<sysproperty key="java.io.tmpdir" file="${dir.tomcat}/temp" />
+			
 			<!-- only defined when called from the unit tests, will end up empty otherwise -->
 			<sysproperty key="inside.test" value="${inside.test}" />
 
@@ -691,8 +659,8 @@
 
 		<!-- copy in test database -->
 		<antcall target="install.testdb" />
-		<antcall target="tomcat.start.test">
 
+		<antcall target="tomcat.start.test">
 			<param name="inside.test" value="true" />
 		</antcall>
 
@@ -722,7 +690,7 @@
 
 		<antcall target="-junit.setup" />
 
-		<junit fork="yes" haltonfailure="false" dir="${dir.build}" showoutput="true" failureproperty="test.failed">
+		<junit fork="yes" haltonfailure="false" dir="${dir.build}" failureproperty="test.failed">
 			<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/cobertura.ser" />
 
 			<classpath>
@@ -739,8 +707,8 @@
 	</target>
 
 	<target name="-junit.single" depends="compile,compile.test">
-		<antcall target="-junit.setup" />
-		<junit fork="yes" haltonfailure="false" dir="${dir.build}" showoutput="true" failureproperty="test.failed">
+		<!--antcall target="-junit.setup" /-->
+		<junit fork="yes" haltonfailure="false" dir="${dir.build}" failureproperty="test.failed">
 
 			<classpath>
 				<path refid="test.classpath" />
@@ -748,7 +716,7 @@
 			<formatter type="plain" usefile="false" />
 			<test name="${junit.test.class}" if="junit.test.class" todir="${dir.build}/test-results" />
 		</junit>
-		<antcall target="-junit.teardown" />
+		<!--antcall target="-junit.teardown" /-->
 	</target>
 
 	<target name="install.testdb" description="install the test database" depends="compile">

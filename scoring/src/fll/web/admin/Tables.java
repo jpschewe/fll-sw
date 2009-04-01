@@ -20,6 +20,7 @@ import javax.servlet.jsp.JspWriter;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.db.Queries;
+import fll.web.ApplicationAttributes;
 
 /**
  * Java code used in judges.jsp
@@ -40,7 +41,7 @@ public final class Tables {
                                   final HttpServletRequest request,
                                   final HttpServletResponse response)
     throws SQLException, IOException, ParseException {
-    final Connection connection = (Connection)application.getAttribute("connection");
+    final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
     final String tournament = Queries.getCurrentTournament(connection);
     final String submitButton = request.getParameter("submit");
 

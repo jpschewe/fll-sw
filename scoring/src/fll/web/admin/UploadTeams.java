@@ -36,6 +36,8 @@ import org.apache.log4j.Logger;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fll.db.GenerateDB;
+import fll.web.ApplicationAttributes;
+import fll.web.Init;
 import fll.web.UploadProcessor;
 
 /**
@@ -54,10 +56,16 @@ public final class UploadTeams extends HttpServlet {
    */
   @Override
   protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+    try {
+      Init.initialize(request, response);
+    } catch (final SQLException e) {
+      throw new RuntimeException("Error in initialization", e);
+    }
+
     final StringBuilder message = new StringBuilder();
     final ServletContext application = getServletContext();
     final HttpSession session = request.getSession();
-    final Connection connection = (Connection) application.getAttribute("connection");
+    final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
     try {
       UploadProcessor.processUpload(request);
       final FileItem teamsFileItem = (FileItem) request.getAttribute("teamsFile");

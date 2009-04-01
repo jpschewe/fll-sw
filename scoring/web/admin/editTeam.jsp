@@ -8,6 +8,7 @@
 <%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
 
 <%@ page import="fll.db.Queries" %>
+<%@ page import="fll.web.ApplicationAttributes" %>
 
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Iterator" %>
@@ -24,7 +25,7 @@
 <script language='javascript'>
 function init() {  
 <%
-final Connection connection = (Connection)application.getAttribute("connection");
+final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
         
 final List<String> tournamentNames = Queries.getTournamentNames(connection);
 

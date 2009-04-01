@@ -30,6 +30,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.db.Queries;
+import fll.web.ApplicationAttributes;
 import fll.xml.XMLUtils;
 
 /**
@@ -53,7 +54,7 @@ public final class Judges {
                                   final HttpServletRequest request,
                                   final HttpServletResponse response) throws SQLException, IOException, ParseException {
     final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-    final Connection connection = (Connection)application.getAttribute("connection");
+    final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
     final String tournament = Queries.getCurrentTournament(connection);
 
     final List<Element> subjectiveCategories = XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"));

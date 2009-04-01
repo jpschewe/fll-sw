@@ -2,10 +2,12 @@
 
 <%@ page import="fll.db.Queries"%>
 
+<%@ page import="fll.web.ApplicationAttributes"%>
+
 <%@ page import="java.sql.Connection"%>
 
 <%
-      Connection connection = (Connection) application.getAttribute("connection");
+      Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
       pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
 %>
 <%-- check for form submission --%>

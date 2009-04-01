@@ -30,6 +30,7 @@ import org.w3c.dom.Element;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FP;
+import fll.web.ApplicationAttributes;
 import fll.xml.ChallengeParser;
 import fll.xml.ScoreType;
 import fll.xml.XMLUtils;
@@ -423,7 +424,7 @@ public final class ScoreEntry {
           // computed score
           writer.println("  <td align='right'>");
           writer.println("    <input type='text' name='score_"
-              + name + "' size='3' align='right' readonly>");
+              + name + "' size='3' align='right' readonly tabindex='-1'>");
           writer.println("  </td>");
 
           // error message
@@ -492,7 +493,7 @@ public final class ScoreEntry {
     if (0 == min
         && 1 == max) {
       writer.println("    <input type='text' name='"
-          + name + "_radioValue' size='3' align='right' readonly>");
+          + name + "_radioValue' size='3' align='right' readonly tabindex='-1'>");
     } else {
       // allow these to be editable
       writer.println("    <input type='text' name='"
@@ -541,7 +542,7 @@ public final class ScoreEntry {
                                               final Document document,
                                               final int teamNumber,
                                               final int runNumber) throws SQLException, IOException {
-    final Connection connection = (Connection) application.getAttribute("connection");
+    final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
     final String tournament = Queries.getCurrentTournament(connection);
     final Statement stmt = connection.createStatement();
     final ResultSet rs = stmt.executeQuery("SELECT * from Performance"

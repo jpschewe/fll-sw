@@ -1,18 +1,21 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Team" %>
+<%@ page import="fll.web.ApplicationAttributes"%>
+<%@ page import="fll.db.Queries"%>
 
 <%@ page import="java.util.Iterator" %>
 
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.ResultSet" %>
+<%@ page import="java.sql.Connection" %>
 
 <%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
 
 <%
 final String lEditFlag = request.getParameter("EditFlag");
 
-final Connection connection = (Connection)application.getAttribute("connection");
+final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
 final Statement stmt = connection.createStatement();
 final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = '" + Queries.getCurrentTournament(connection) + "'");
 final int maxRunNumber;

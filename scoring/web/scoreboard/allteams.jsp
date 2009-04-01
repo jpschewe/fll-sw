@@ -11,9 +11,10 @@
 
 <%@ page import="fll.Utilities"%>
 <%@ page import="fll.db.Queries"%>
+<%@ page import="fll.web.ApplicationAttributes"%>
 
 <%
-      final Connection connection = (Connection) application.getAttribute("connection");
+      final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
       final String currentTournament = Queries.getCurrentTournament(connection);
 
       final PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, current_tournament_teams.event_division,"

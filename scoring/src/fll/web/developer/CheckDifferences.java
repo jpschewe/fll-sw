@@ -40,7 +40,7 @@ public class CheckDifferences extends HttpServlet {
       if(null == tournament) {
         message.append("You must select a tournament!");
       } else {
-        // first check if the selected tournament exists in the destination database
+        // TODO first check if the selected tournament exists in the destination database
         
 
       }

@@ -3,9 +3,10 @@
 <%@ page import="fll.db.Queries"%>
 
 <%@ page import="java.sql.Connection"%>
+<%@ page import="fll.web.ApplicationAttributes"%>
 
 <%
-      final Connection connection = (Connection) application.getAttribute("connection");
+      final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
       pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
 %>
 
