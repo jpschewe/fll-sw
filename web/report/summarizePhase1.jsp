@@ -3,6 +3,7 @@
 <%@ page import="fll.ScoreStandardization" %>
 <%@ page import="fll.db.Queries" %>
 <%@ page import="fll.Utilities" %>
+<%@ page import="fll.web.ApplicationAttributes"%>
       
 <%@ page import="org.w3c.dom.Document" %>
 
@@ -14,8 +15,8 @@
 
 
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-final Connection connection = (Connection)application.getAttribute("connection");
+final Document challengeDocument = (Document)application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
+final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
 final String currentTournament = Queries.getCurrentTournament(connection);
   
 Queries.updateScoreTotals(challengeDocument, connection);

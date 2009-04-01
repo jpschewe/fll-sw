@@ -29,6 +29,8 @@ import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.web.ApplicationAttributes;
+import fll.web.Init;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
@@ -37,7 +39,6 @@ import fll.xml.XMLUtils;
  * 
  * @author jpschewe
  * @version $Revision$
- * 
  */
 public class CategoryScoresByScoreGroup extends HttpServlet {
 
@@ -48,9 +49,15 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
 
   @Override
   protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+    try {
+      Init.initialize(request, response);
+    } catch (final SQLException e) {
+      throw new RuntimeException("Error in initialization", e);
+    }
+
     final ServletContext application = getServletContext();
-    final Connection connection = (Connection)application.getAttribute("connection");
-    final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
+    final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
+    final Document challengeDocument = (Document) application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
 
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
     final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
@@ -62,7 +69,7 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
 
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
-    for(final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+    for (final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       final String title = subjectiveElement.getAttribute("title");
       final String name = subjectiveElement.getAttribute("name");
       subjectiveCategories.put(title, name);
@@ -74,26 +81,27 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
       final String currentTournament = Queries.getCurrentTournament(connection);
 
       // foreach division
-      for(String division : Queries.getDivisions(connection)) {
+      for (String division : Queries.getDivisions(connection)) {
         // foreach subjective category
-        for(String categoryTitle : subjectiveCategories.keySet()) {
+        for (String categoryTitle : subjectiveCategories.keySet()) {
           final String categoryName = subjectiveCategories.get(categoryTitle);
-          
+
           final Map<String, Collection<Integer>> scoreGroups = Queries.computeScoreGroups(connection, currentTournament, division, categoryName);
 
           // select from FinalScores
-          for(String scoreGroup : scoreGroups.keySet()) {
-            writer.write("<h3>" + categoryTitle + " Division: " + division + " Score Group: " + scoreGroup + "</h3>");
+          for (String scoreGroup : scoreGroups.keySet()) {
+            writer.write("<h3>"
+                + categoryTitle + " Division: " + division + " Score Group: " + scoreGroup + "</h3>");
             writer.write("<table border='0'>");
             writer.write("<tr><th colspan='3'>Team # / Organization / Team Name</th><th>Scaled Score</th></tr>");
 
             final String teamSelect = StringUtils.join(scoreGroups.get(scoreGroup).iterator(), ", ");
-            prep = connection.prepareStatement("SELECT Teams.TeamNumber,Teams.Organization,Teams.TeamName,FinalScores." + categoryName
-                + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
+            prep = connection.prepareStatement("SELECT Teams.TeamNumber,Teams.Organization,Teams.TeamName,FinalScores."
+                + categoryName + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
                 + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " " + ascDesc);
             prep.setString(1, currentTournament);
             rs = prep.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
               final String teamNum = rs.getString(1);
               final String org = rs.getString(2);
               final String name = rs.getString(3);
@@ -101,27 +109,27 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
               final boolean scoreWasNull = rs.wasNull();
               writer.write("<tr>");
               writer.write("<td>");
-              if(null == teamNum) {
+              if (null == teamNum) {
                 writer.write("");
               } else {
                 writer.write(teamNum);
               }
               writer.write("</td>");
               writer.write("<td>");
-              if(null == org) {
+              if (null == org) {
                 writer.write("");
               } else {
                 writer.write(org);
               }
               writer.write("</td>");
               writer.write("<td>");
-              if(null == name) {
+              if (null == name) {
                 writer.write("");
               } else {
                 writer.write(name);
               }
               writer.write("</td>");
-              if(!scoreWasNull) {
+              if (!scoreWasNull) {
                 writer.write("<td>");
                 writer.write(Utilities.NUMBER_FORMAT_INSTANCE.format(score));
               } else {
@@ -135,7 +143,7 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
         }
       }
 
-    } catch(final SQLException sqle) {
+    } catch (final SQLException sqle) {
       throw new RuntimeException(sqle);
     } finally {
       SQLFunctions.closeResultSet(rs);

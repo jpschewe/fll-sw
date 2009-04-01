@@ -13,24 +13,27 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
+import javax.sql.DataSource;
 
 import net.mtu.eggplant.io.LogWriter;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 import org.hsqldb.Server;
+import org.hsqldb.jdbc.jdbcDataSource;
 import org.slf4j.LoggerFactory;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -65,19 +68,13 @@ public final class Utilities {
    * to true. This method assumes that the table to be created does not exist,
    * an error will be reported if it does.
    * 
-   * @param connection
-   *          the database connection to create the table within
-   * @param tablename
-   *          name of the table to create
-   * @param reader
-   *          where to read the data from, a {@link CSVReader} will be created
-   *          from this
-   * @throws SQLException
-   *           if there is an error putting data in the database
-   * @throws IOException
-   *           if there is an error reading the data
-   * @throws RuntimeException
-   *           if the first line cannot be read
+   * @param connection the database connection to create the table within
+   * @param tablename name of the table to create
+   * @param reader where to read the data from, a {@link CSVReader} will be
+   *          created from this
+   * @throws SQLException if there is an error putting data in the database
+   * @throws IOException if there is an error reading the data
+   * @throws RuntimeException if the first line cannot be read
    */
   public static void loadCSVFile(final Connection connection, final String tablename, final Reader reader) throws IOException, SQLException {
     Statement stmt = null;
@@ -98,13 +95,13 @@ public final class Utilities {
       createTable.append(tablename);
       createTable.append(" (");
       String[] line = csvreader.readNext();
-      if(null == line) {
+      if (null == line) {
         throw new RuntimeException("Cannot find the header line");
       }
       stmt = connection.createStatement();
       boolean first = true;
-      for(String columnName : line) {
-        if(first) {
+      for (String columnName : line) {
+        if (first) {
           first = false;
         } else {
           createTable.append(", ");
@@ -125,8 +122,8 @@ public final class Utilities {
 
       // load each line into a row in the table
       prep = connection.prepareStatement(insertPrepSQL.append(valuesSQL).toString());
-      while(null != (line = csvreader.readNext())) {
-        for(int i = 0; i < line.length; ++i) {
+      while (null != (line = csvreader.readNext())) {
+        for (int i = 0; i < line.length; ++i) {
           prep.setString(i + 1, line[i]);
         }
         prep.executeUpdate();
@@ -145,38 +142,46 @@ public final class Utilities {
    * thrown.
    * 
    * @return true if the database is ok
-   * @throws RuntimeException
-   *           on any error
+   * @throws RuntimeException on any error
    */
   public static boolean testHSQLDB(final String baseFilename) {
     final File baseFile = new File(baseFilename);
     final File dir = baseFile.getParentFile();
-    if(null == dir) {
-      LOG.warn("There is no parent file for " + baseFile.getAbsolutePath());
+    if (null == dir) {
+      LOG.warn("There is no parent file for "
+          + baseFile.getAbsolutePath());
       return false;
     }
-    if(!dir.isDirectory()) {
-      LOG.warn("Database directory " + dir.getAbsolutePath() + " is not a directory");
+    if (!dir.isDirectory()) {
+      LOG.warn("Database directory "
+          + dir.getAbsolutePath() + " is not a directory");
       return false;
     }
-    if(!dir.canWrite()) {
-      LOG.warn("Database directory " + dir.getAbsolutePath() + " is not writable");
+    if (!dir.canWrite()) {
+      LOG.warn("Database directory "
+          + dir.getAbsolutePath() + " is not writable");
       return false;
     }
-    if(!dir.canRead()) {
-      LOG.warn("Database directory " + dir.getAbsolutePath() + " is not readable");
+    if (!dir.canRead()) {
+      LOG.warn("Database directory "
+          + dir.getAbsolutePath() + " is not readable");
       return false;
     }
 
     final String[] extensions = new String[] { ".properties", ".script", ".log", ".data", ".backup", };
-    for(String extension : extensions) {
-      final File file = new File(baseFilename + extension);
-      if(file.exists() && !file.canWrite()) {
-        LOG.warn("Database file " + file.getAbsolutePath() + " exists and is not writable");
+    for (String extension : extensions) {
+      final File file = new File(baseFilename
+          + extension);
+      if (file.exists()
+          && !file.canWrite()) {
+        LOG.warn("Database file "
+            + file.getAbsolutePath() + " exists and is not writable");
         return false;
       }
-      if(file.exists() && !file.canRead()) {
-        LOG.warn("Database file " + file.getAbsolutePath() + " exists and is not readable");
+      if (file.exists()
+          && !file.canRead()) {
+        LOG.warn("Database file "
+            + file.getAbsolutePath() + " exists and is not readable");
         return false;
       }
     }
@@ -188,8 +193,7 @@ public final class Utilities {
    * Test that the database behind the connection is initialized. Checks for the
    * existance of the TournamentParameters tables.
    * 
-   * @param connection
-   *          the connection to check
+   * @param connection the connection to check
    * @return true if the database is initialized
    */
   public static boolean testDatabaseInitialized(final Connection connection) throws SQLException {
@@ -198,8 +202,8 @@ public final class Utilities {
       // get list of tables that already exist
       final DatabaseMetaData metadata = connection.getMetaData();
       rs = metadata.getTables(null, null, "%", null);
-      while(rs.next()) {
-        if("TournamentParameters".toLowerCase().equals(rs.getString(3).toLowerCase())) {
+      while (rs.next()) {
+        if ("TournamentParameters".toLowerCase().equals(rs.getString(3).toLowerCase())) {
           return true;
         }
       }
@@ -210,20 +214,10 @@ public final class Utilities {
   }
 
   /**
-   * @return the URL to use to connect to the database.
-   */
-  public static String getDBURLString(final String database) {
-    if(LOG.isDebugEnabled()) {
-      LOG.debug("URL: jdbc:hsqldb:file:" + database + ";shutdown=true");
-    }
-    return "jdbc:hsqldb:file:" + database + ";shutdown=true";
-  }
-
-  /**
    * Get the name of the database driver class.
    */
   public static String getDBDriverName() {
-    if(Boolean.getBoolean("inside.test")) {
+    if (Boolean.getBoolean("inside.test")) {
       return "net.sf.log4jdbc.DriverSpy";
     } else {
       return "org.hsqldb.jdbcDriver";
@@ -232,56 +226,51 @@ public final class Utilities {
 
   /**
    * Load the database driver and throw a RuntimeException if there is an error.
-   * 
    */
   public static void loadDBDriver() {
     try {
       // register the driver
       Class.forName(Utilities.getDBDriverName()).newInstance();
-    } catch(final ClassNotFoundException e) {
+    } catch (final ClassNotFoundException e) {
       throw new RuntimeException("Unable to load driver.", e);
-    } catch(final InstantiationException ie) {
+    } catch (final InstantiationException ie) {
       throw new RuntimeException("Unable to load driver.", ie);
-    } catch(final IllegalAccessException iae) {
+    } catch (final IllegalAccessException iae) {
       throw new RuntimeException("Unable to load driver.", iae);
     }
   }
 
   /**
-   * Creates a database connection.
+   * Create a datasource for the specified database
    * 
-   * @param username
-   *          username to use
-   * @param password
-   *          password to use
-   * @param database
-   *          name of the database to connect to
-   * @throws RuntimeException
-   *           on an error
+   * @param database the database to connect to
+   * @return a datasource
    */
-  public static Connection createDBConnection(final String database) throws RuntimeException {
-    // create connection to database and puke if anything goes wrong
-    loadDBDriver();
-
-    Connection connection = null;
+  public static DataSource createDataSource(final String database) {
     final String myURL;
-    if(Boolean.getBoolean("inside.test")) {
-      myURL = "jdbc:log4jdbc:hsqldb:file:" + database + ";shutdown=true";
+    if (Boolean.getBoolean("inside.test")) {
+      // TODO disabled until 2724372 is fixed
+      //myURL = "jdbc:log4jdbc:hsqldb:file:"
+      myURL = "jdbc:hsqldb:file:"
+          + database + ";shutdown=true";
     } else {
-      myURL = "jdbc:hsqldb:file:" + database + ";shutdown=true";
+      myURL = "jdbc:hsqldb:file:"
+          + database + ";shutdown=true";
     }
-    if(LOG.isDebugEnabled()) {
-      LOG.debug("myURL: " + myURL);
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("myURL: "
+          + myURL);
     }
-    try {
-      connection = DriverManager.getConnection(myURL);
-    } catch(final SQLException sqle) {
-      throw new RuntimeException("Unable to create connection: " + sqle.getMessage() + " database: " + database);
-    }
-
-    if(Boolean.getBoolean("inside.test")) {
-      if(!_testServerStarted) {
-        if(LOG.isInfoEnabled()) {
+    
+    final jdbcDataSource dataSource = new jdbcDataSource();
+    dataSource.setDatabase(myURL);
+    dataSource.setUser("sa");
+    
+    /*
+    // startup test database server
+    if (Boolean.getBoolean("inside.test")) {
+      if (!_testServerStarted) {
+        if (LOG.isInfoEnabled()) {
           LOG.info("Starting database server for testing");
         }
         // TODO This still isn't working quite right when run from inside
@@ -310,8 +299,21 @@ public final class Utilities {
         _testServerStarted = true;
       }
     }
+    */
 
-    return connection;
+    return dataSource;
+  }
+
+  /**
+   * Creates a database connection.
+   * 
+   * @param database name of the database to connect to
+   * @throws SQLException 
+   * 
+   * @deprecated use {@link #createDataSource(String)} instead.
+   */
+  public static Connection createDBConnection(final String database) throws SQLException {
+    return createDataSource(database).getConnection();
   }
 
   /**
@@ -328,7 +330,8 @@ public final class Utilities {
    */
   private static final FilenameFilter GRAPHICS_FILTER = new FilenameFilter() {
     public boolean accept(final File dir, final String name) {
-      if(name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg")) {
+      if (name.endsWith(".png")
+          || name.endsWith(".jpg") || name.endsWith(".jpeg")) {
         return true;
       } else {
         return false;
@@ -341,7 +344,7 @@ public final class Utilities {
    */
   private static final FileFilter DIRFILTER = new FileFilter() {
     public boolean accept(final File f) {
-      if(f.isDirectory()) {
+      if (f.isDirectory()) {
         return true;
       } else {
         return false;
@@ -350,27 +353,33 @@ public final class Utilities {
   };
 
   public static void buildGraphicFileList(final String p, final File[] d, final List<String> f) {
-    if(LOG.isDebugEnabled()) {
-      LOG.debug("buildGraphicFileList(" + p + "," + Arrays.toString(d) + "," + f.toString() + ")");
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("buildGraphicFileList("
+          + p + "," + Arrays.toString(d) + "," + f.toString() + ")");
     }
-    for(int i = 0; i < d.length; i++) {
-      String np = (p.length() == 0 ? p : p + "/") + d[i].getName();
+    for (int i = 0; i < d.length; i++) {
+      String np = (p.length() == 0 ? p : p
+          + "/")
+          + d[i].getName();
       String[] files = d[i].list(GRAPHICS_FILTER);
-      if(files != null) {
-        if(LOG.isDebugEnabled()) {
-          LOG.debug("files: " + Arrays.toString(files));
+      if (files != null) {
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("files: "
+              + Arrays.toString(files));
         }
         java.util.Arrays.sort(files);
-        for(int j = 0; j < files.length; j++) {
-          f.add(np + "/" + files[j]);
+        for (int j = 0; j < files.length; j++) {
+          f.add(np
+              + "/" + files[j]);
         }
       } else {
         LOG.debug("files: null");
       }
       File[] dirs = d[i].listFiles(DIRFILTER);
-      if(dirs != null) {
-        if(LOG.isDebugEnabled()) {
-          LOG.debug("dirs: " + Arrays.toString(dirs));
+      if (dirs != null) {
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("dirs: "
+              + Arrays.toString(dirs));
         }
         java.util.Arrays.sort(dirs);
         buildGraphicFileList(np, dirs, f);
@@ -378,8 +387,9 @@ public final class Utilities {
         LOG.debug("dirs: null");
       }
     }
-    if(LOG.isDebugEnabled()) {
-      LOG.debug("f: " + f.toString());
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("f: "
+          + f.toString());
     }
   }
 
@@ -393,8 +403,8 @@ public final class Utilities {
   public synchronized static void appendDisplayName(final ServletContext application, final String name) {
     // ServletContext isn't type safe
     @SuppressWarnings("unchecked")
-    Set<String> displayNames = (Set<String>)application.getAttribute("displayNames");
-    if(null == displayNames) {
+    Set<String> displayNames = (Set<String>) application.getAttribute("displayNames");
+    if (null == displayNames) {
       displayNames = new HashSet<String>();
     }
     displayNames.add(name);

@@ -39,7 +39,7 @@ public final class ScoreStandardization {
   public static void main(final String[] args) {
     try {
       final String tournament = "state";
-      final Connection connection = Utilities.createDBConnection("tomcat/webapps/fll-sw/WEB-INF/flldb");
+      final Connection connection = Utilities.createDataSource("tomcat/webapps/fll-sw/WEB-INF/flldb").getConnection();
       final Document challengeDocument = Queries.getChallengeDocument(connection);
       Queries.updateScoreTotals(challengeDocument, connection);
 

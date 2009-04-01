@@ -39,6 +39,8 @@ public class WebTest {
     };
     final WebConversation conversation = new WebConversation();
     for(int i=0; i<pages.length; i++) {
+      TestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
+
       final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "scoreboard/" + pages[i]);
       final WebResponse response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());

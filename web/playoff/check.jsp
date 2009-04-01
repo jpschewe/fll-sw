@@ -5,9 +5,13 @@
 <%@ page import="java.util.Iterator" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="fll.db.Queries" %>
+<%@ page import="java.sql.Connection" %>
+<%@ page import="fll.web.ApplicationAttributes" %>
+
 
 <%
-final Connection connection = (Connection)application.getAttribute("connection");
+final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
 final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
 final String division = request.getParameter("division");
 %>

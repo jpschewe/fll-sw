@@ -1,6 +1,10 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.web.playoff.BracketData" %>
+<%@ page import="fll.web.ApplicationAttributes" %>
+<%@ page import="java.sql.Connection" %>
+<%@ page import="fll.db.Queries" %>
+
 
 <%
 	/*
@@ -8,7 +12,7 @@
     division - String for the division
 */
 
-final Connection connection = (Connection)application.getAttribute("connection");
+final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
 final String currentTournament = Queries.getCurrentTournament(connection);
 
 final String divisionStr = request.getParameter("division");

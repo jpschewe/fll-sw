@@ -2,6 +2,8 @@
   
 <%@ page import="fll.web.admin.UploadTeams" %>
 
+<%@ page import="fll.web.ApplicationAttributes" %>
+
 <%@ page import="java.sql.Connection" %>
 
 <c:if test="${not empty param.next}">
@@ -17,7 +19,7 @@
 </c:if>
   
 <%
-final Connection connection = (Connection)application.getAttribute("connection");
+final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
 
 if(null == session.getAttribute("columnSelectOptions")) {
   throw new RuntimeException("Error columnSelectOptions not set.  Please start back at administration page and go forward.");

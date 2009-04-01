@@ -4,90 +4,13 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-<%@ page import="fll.Utilities" %>
-<%@ page import="fll.db.Queries" %>
-  
-<%@ page import="java.sql.Connection" %>
-  
-<%@ page import="org.w3c.dom.Document" %>
-
-<%-- TODO working on moving these to session variables --%>
 <%-- initialize some application variables --%>
-
-<c:if test="${empty database}">
-  <%
-    pageContext.setAttribute("dbok", Utilities.testHSQLDB(config.getServletContext().getRealPath("/WEB-INF/flldb")));
-  %>
-  
-  <c:if test="${not dbok}">
-    <c:set scope="session" var="message">
-      <p class='error'>
-      The database does not exist yet or there is a problem with the database files. Please create the database.<br/>
-      </p>
-    </c:set>
-    <c:redirect url="/setup" />
-  </c:if>
-  
-  <!-- HSQL -->
-  <c:set var="database" scope="application">
-    <%= config.getServletContext().getRealPath("/WEB-INF/flldb") %>
-  </c:set>
-</c:if>
-
-<c:if test="${empty datasource}">
-  <%
-    pageContext.setAttribute("url", Utilities.getDBURLString((String)application.getAttribute("database")));
-    pageContext.setAttribute("driverName", Utilities.getDBDriverName());
-  %>
-
-  <sql:setDataSource scope="session"
-                     var="datasource"
-                     url="${url}"
-                     driver="${driverName}"
-                     />
-
-  <sql:update dataSource="${datasource}" sql="SET WRITE_DELAY 100 MILLIS"/>
-
-</c:if>
-
 <%
-{ // put this in it's own scope so it can be included multiple times
-  final String database = (String)application.getAttribute("database");
-  //Initialize the connection
-  if(null == application.getAttribute("connection")) {
-    final Connection connection = Utilities.createDBConnection(database);
-    application.setAttribute("connection", connection);
-  }
-  pageContext.setAttribute("dbinitialized", Utilities.testDatabaseInitialized((Connection)application.getAttribute("connection")));
-%>
-  <c:if test="${not dbinitialized}">
-    <c:set scope="session" var="message">
-      <p class='error'>
-      The database is not yet initialized. Please create the database.<br/>
-      </p>
-    </c:set>
-    <c:redirect url="/setup" />
-  </c:if>
-<%	    
-    
-  if(null == application.getAttribute("challengeDocument")) {  
-    final Document document = Queries.getChallengeDocument((Connection)application.getAttribute("connection"));
-    if(null == document) {
-      throw new RuntimeException("Could not find xml challenge description in the database!");
-    }
-    application.setAttribute("challengeDocument", document);
-  }
-  
-  if(null == application.getAttribute("ScorePageText")) {
-    application.setAttribute("ScorePageText", "FLL");
+{ // separate scope so we don't end up with trouble
+  final String url = fll.web.Init.initialize(request, response);
+  if(null != url) {
+    response.sendRedirect(response.encodeRedirectURL(url));
+    return;
   }
 }
 %>
-
-<%-- keep browser from caching any content --%>
-<%
-response.setHeader("Cache-Control","no-store"); // HTTP 1.1
-response.setHeader("Pragma","no-cache"); // HTTP 1.0
-response.setDateHeader ("Expires", 0); // prevents caching at the proxy server
-%>
-

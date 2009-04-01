@@ -3,6 +3,7 @@
 <%@ page import="org.w3c.dom.Document" %>
 
 <%@ page import="fll.web.playoff.Playoff" %>
+  <%@ page import="fll.web.ApplicationAttributes" %>
   
 <%@ page import="java.sql.Connection" %>
   
@@ -13,7 +14,7 @@
     enableThird - has value 'yes' if we are to have 3rd/4th place brackets
 */
   
-final Connection connection = (Connection)application.getAttribute("connection");
+final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 
 final String divisionStr = request.getParameter("division");

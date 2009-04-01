@@ -10,6 +10,8 @@ import java.net.MalformedURLException;
 
 import junit.framework.Assert;
 
+import org.apache.log4j.Logger;
+import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -28,6 +30,8 @@ import fll.TestUtils;
  */
 public class WebTest {
   
+  private static final Logger LOGGER = Logger.getLogger(WebTest.class);
+
   /**
    * Basic load of the pages.
    */
@@ -47,6 +51,10 @@ public class WebTest {
     };
     final WebConversation conversation = new WebConversation();
     for(int i=0; i<pages.length; i++) {
+      if(LOGGER.isInfoEnabled()) {
+        LOGGER.info("Testing page " + pages[i]);
+      }
+      TestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
       final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "admin/" + pages[i]);
       final WebResponse response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
@@ -59,6 +67,8 @@ public class WebTest {
   @Test
   public void testChangeTournament()
     throws MalformedURLException, IOException, SAXException {
+    TestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
+
     final WebConversation conversation = new WebConversation();
     final WebRequest request = new PostMethodWebRequest(TestUtils.URL_ROOT + "admin/index.jsp");
     request.setParameter("currentTournament", "DUMMY");

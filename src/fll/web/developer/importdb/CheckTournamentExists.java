@@ -21,6 +21,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 
 import fll.db.Queries;
+import fll.web.Init;
 import fll.web.SessionAttributes;
 
 /**
@@ -44,6 +45,8 @@ public class CheckTournamentExists extends HttpServlet {
 
     Connection connection = null;
     try {
+      Init.initialize(request, response);
+
       if (null != request.getAttribute("tournament")) {
         final String selectedTournament = (String)request.getAttribute("tournament");
         session.setAttribute("selectedTournament", selectedTournament);

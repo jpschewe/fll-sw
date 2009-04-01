@@ -8,6 +8,12 @@
 
 <%@ page import="java.text.NumberFormat" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="fll.web.ApplicationAttributes"%>
+<%@ page import="fll.Utilities"%>
+
+<%@ page import="fll.db.Queries"%>
+<%@ page import="java.sql.Connection"%>
+<%@ page import="org.w3c.dom.Document"%>
 
 <%
 final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
@@ -23,9 +29,9 @@ if(null == lTeamNum) {
 }
 
 final int teamNumber = Integer.parseInt(lTeamNum);
-final Connection connection = (Connection)application.getAttribute("connection");
+final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
 final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
-final Map tournamentTeams = Queries.getTournamentTeams(connection);
+final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
 if(!tournamentTeams.containsKey(new Integer(teamNumber))) {
   //FIX error, redirect to error page
   //response.sendError(response.SC_BAD_REQUEST, "Team number selected is not valid.");
@@ -323,30 +329,9 @@ return m;
                   <font size='4'><u>Total Score:</u></font>
                 </td>
                 <td align='right'>
-                  <input type='text' name='totalScore' size='3' readonly>
+                  <input type='text' name='totalScore' size='3' readonly tabindex='-1'>
                 </td>
               </tr>
-              <!-- 
-              <tr>
-                <td>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color="red">No Show:</font>
-                </td>
-                <td>
-                  <table border='0' cellpadding='0' cellspacing='0' width='150'>
-                    <tr align='center'>
-                      <td>
-                        <input type='radio' name='NoShow' value='1' onclick='setNoShow(1)'>
-                        Yes
-                        &nbsp;&nbsp;
-                        <input type='radio' name='NoShow' value='0' onclick='setNoShow(0)'>
-                        No
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-                <td colspan='3'>&nbsp;</td>
-              </tr>
-              -->
               <input type='hidden' name='NoShow'/>
               <%ScoreEntry.generateVerificationInput(out, challengeDocument, request);%>
             </c:if> <!-- end check for bye -->

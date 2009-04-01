@@ -5,9 +5,10 @@
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.ResultSet" %>
+<%@ page import="fll.web.ApplicationAttributes" %>
 
 <%
-final Connection connection = (Connection)application.getAttribute("connection");
+final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
 %>
 
 <html>

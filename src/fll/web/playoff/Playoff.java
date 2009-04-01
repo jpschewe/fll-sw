@@ -63,7 +63,7 @@ public final class Playoff {
     try {
       final String divisionStr = "1";
       final Connection connection = Utilities
-                                             .createDBConnection("/home/jpschewe/projects/fll-sw/working-dir/scoring/build/tomcat/webapps/fll-sw/WEB-INF/flldb");
+                                             .createDataSource("/home/jpschewe/projects/fll-sw/working-dir/scoring/build/tomcat/webapps/fll-sw/WEB-INF/flldb").getConnection();
       final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
       final Document challengeDocument = Queries.getChallengeDocument(connection);
       final List<Team> seedingOrder = buildInitialBracketOrder(connection, challengeDocument, divisionStr, tournamentTeams);

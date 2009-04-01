@@ -1,15 +1,13 @@
-<%@ include file="WEB-INF/jspf/init.jspf" %>
-
 <%@ page isErrorPage="true" %>
   
 <html>
   <head>
-    <title><x:out select="$challengeDocument/fll/@title"/> (An error has occurred)</title>
+    <title>An error has occurred</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument/fll/@title"/> (An error has occurred)</h1>
+    <h1>An error has occurred</h1>
 
     <p><font color="red">An error has occurred!</font><br/>  Error messages:</p>
     <ul>

@@ -23,6 +23,8 @@ import org.w3c.dom.Document;
 
 import fll.db.GenerateDB;
 import fll.db.ImportDB;
+import fll.web.ApplicationAttributes;
+import fll.web.Init;
 import fll.web.UploadProcessor;
 import fll.xml.ChallengeParser;
 
@@ -49,6 +51,8 @@ public class CreateDB extends HttpServlet {
     final HttpSession session = request.getSession();
 
     try {
+      Init.initialize(request, response);
+
       // must be first to ensure the form parameters are set
       UploadProcessor.processUpload(request);
 
@@ -66,8 +70,8 @@ public class CreateDB extends HttpServlet {
           GenerateDB.generateDB(document, db, forceRebuild);
 
           // remove application variables that depend on the database
-          application.removeAttribute("connection");
-          application.removeAttribute("challengeDocument");
+          application.removeAttribute(ApplicationAttributes.CONNECTION);
+          application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
 
           message.append("<p id='success'><i>Successfully initialized database</i></p>");
         }
@@ -80,9 +84,9 @@ public class CreateDB extends HttpServlet {
         ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileItem.getInputStream()), database);
 
         // remove application variables that depend on the database
-        application.removeAttribute("connection");
-        application.removeAttribute("challengeDocument");
-        application.removeAttribute("database");
+        application.removeAttribute(ApplicationAttributes.CONNECTION);
+        application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
+        application.removeAttribute(ApplicationAttributes.DATABASE);
         
         message.append("<p id='success'><i>Successfully initialized database from dump</i></p>");        
       } else {

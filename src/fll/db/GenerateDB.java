@@ -38,7 +38,7 @@ import fll.xml.XMLWriter;
  */
 public final class GenerateDB {
 
-  private static final Logger LOG = Logger.getLogger(GenerateDB.class);
+  private static final Logger LOGGER = Logger.getLogger(GenerateDB.class);
   /**
    * sql datatype for tournament columns.  Until we change the tournament
    * references to be all integers, let's just use a constant to make it easy
@@ -69,9 +69,9 @@ public final class GenerateDB {
         final String db = "fll";
         generateDB(challengeDocument, db, true);
 
-        final Connection connection = Utilities.createDBConnection(db);
+        final Connection connection = Utilities.createDataSource(db).getConnection();
         final Document document = Queries.getChallengeDocument(connection);
-        LOG.info("Title: " + document.getDocumentElement().getAttribute("title"));
+        LOGGER.info("Title: " + document.getDocumentElement().getAttribute("title"));
         connection.close();
       }
     } catch(final Exception e) {
@@ -94,7 +94,9 @@ public final class GenerateDB {
     throws SQLException, UnsupportedEncodingException {
     Connection connection = null;
     try {
-      connection = Utilities.createDBConnection(database);
+      LOGGER.info("Creating database connection to database: " + database);
+      connection = Utilities.createDataSource(database).getConnection();
+      LOGGER.info("Received connection: " + connection);
       generateDB(document, connection, forceRebuild);
     } finally {
       SQLFunctions.closeConnection(connection);
@@ -130,8 +132,8 @@ public final class GenerateDB {
         tables.add(rs.getString(3).toLowerCase());
       }
       rs.close();
-      if(LOG.isDebugEnabled()) {
-        LOG.debug("Tables:" + tables);
+      if(LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Tables:" + tables);
       }
 
       //Table structure for table 'Tournaments'
@@ -356,8 +358,8 @@ public final class GenerateDB {
       finalScores.append(",CONSTRAINT final_scores_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(Name)");
       finalScores.append(")");
       stmt.executeUpdate("DROP TABLE IF EXISTS FinalScores CASCADE");
-      if(LOG.isDebugEnabled()) {
-        LOG.debug(finalScores.toString());
+      if(LOGGER.isDebugEnabled()) {
+        LOGGER.debug(finalScores.toString());
       }
       stmt.executeUpdate(finalScores.toString());
 
@@ -405,7 +407,7 @@ public final class GenerateDB {
       definition += " float";
     }
 
-    LOG.debug("GoalColumnDefinition: " + definition);
+    LOGGER.debug("GoalColumnDefinition: " + definition);
 
     return definition;
   }

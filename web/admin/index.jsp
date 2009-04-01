@@ -1,6 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%@ page import="fll.db.Queries"%>
+<%@ page import="fll.web.ApplicationAttributes" %>
 
 <%@ page import="java.sql.Connection"%>
 <%@ page import="java.sql.Statement"%>
@@ -10,7 +11,7 @@
 
 <%
 	final Connection connection = (Connection) application
-			.getAttribute("connection");
+			.getAttribute(ApplicationAttributes.CONNECTION);
 	final StringBuffer message = new StringBuffer();
 	final String messageReq = request.getParameter("message");
 	if (null != messageReq) {

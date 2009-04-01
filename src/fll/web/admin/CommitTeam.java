@@ -23,6 +23,8 @@ import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.web.ApplicationAttributes;
+import fll.web.Init;
 
 /**
  * Commit the changes made by editTeam.jsp.
@@ -44,11 +46,17 @@ public class CommitTeam extends HttpServlet {
       LOGGER.trace("Top of CommitTeam.doPost");
     }
 
+    try {
+      Init.initialize(request, response);
+    } catch (final SQLException e) {
+      throw new RuntimeException("Error in initialization", e);
+    }
+
     final StringBuilder message = new StringBuilder();
     final ServletContext application = getServletContext();
     final HttpSession session = request.getSession();
     final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
-    final Connection connection = (Connection) application.getAttribute("connection");
+    final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
 
     try {
       // parse the numbers first so that we don't get a partial commit

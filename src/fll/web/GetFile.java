@@ -53,6 +53,7 @@ public final class GetFile extends HttpServlet {
   @Override
   protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
     try {
+      Init.initialize(request, response);
       GetFile.getFile(getServletContext(), request, response);
     } catch(final ParseException pe) {
       throw new RuntimeException(pe);
@@ -100,7 +101,7 @@ public final class GetFile extends HttpServlet {
       throws SQLException, IOException, DocumentException, ParseException {
     final String filename = request.getParameter("filename");
     if("teams.xml".equals(filename)) {
-      final Connection connection = (Connection)application.getAttribute("connection");
+      final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
       final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
       final Document teamsDocument = XMLUtils.createTeamsDocument(connection, tournamentTeams.values());
       final XMLWriter xmlwriter = new XMLWriter();
@@ -111,7 +112,7 @@ public final class GetFile extends HttpServlet {
       xmlwriter.setOutput(response.getOutputStream(), null);
       xmlwriter.write(teamsDocument);
     } else if("score.xml".equals(filename)) {
-      final Connection connection = (Connection)application.getAttribute("connection");
+      final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
       if(Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
         final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
@@ -146,7 +147,7 @@ public final class GetFile extends HttpServlet {
       xmlwriter.write(challengeDocument);
 
     } else if("subjective-data.zip".equals(filename)) {
-      final Connection connection = (Connection)application.getAttribute("connection");
+      final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
       if(Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
         response.reset();
@@ -160,7 +161,7 @@ public final class GetFile extends HttpServlet {
         os.println("Judges are not properly assigned, please go back to the administration page and assign judges");
       }
     } else if("database.zip".equals(filename)) {
-      final Connection connection = (Connection)application.getAttribute("connection");
+      final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
 
       response.reset();
@@ -171,7 +172,7 @@ public final class GetFile extends HttpServlet {
       DumpDB.dumpDatabase(zipOut, connection, challengeDocument);
       zipOut.close();
     } else if("finalComputedScores.pdf".equals(filename)) {
-      final Connection connection = (Connection)application.getAttribute("connection");
+      final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
       final String tournament = Queries.getCurrentTournament(connection);
       response.reset();
@@ -180,7 +181,7 @@ public final class GetFile extends HttpServlet {
       final FinalComputedScores fcs = new FinalComputedScores(challengeDocument, tournament);
       fcs.generateReport(connection, response.getOutputStream());
     } else if("teamScoreSheet.pdf".equals(filename)) {
-      final Connection connection = (Connection)application.getAttribute("connection");
+      final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
       response.reset();
       response.setContentType("application/pdf");
@@ -193,7 +194,7 @@ public final class GetFile extends HttpServlet {
       // Write the scoresheets to the browser - content-type: application/pdf
       scoresheetGen.writeFile(connection, response.getOutputStream());
     } else if("scoreSheet.pdf".equals(filename)) {
-      final Connection connection = (Connection)application.getAttribute("connection");
+      final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
       final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
       final String tournament = Queries.getCurrentTournament(connection);
       response.reset();
@@ -207,8 +208,8 @@ public final class GetFile extends HttpServlet {
       // Write the scoresheets to the browser - content-type: application/pdf
       scoresheetGen.writeFile(connection, response.getOutputStream());
     } else if("blankScoreSheet.pdf".equals(filename)) {
-      final Connection connection = (Connection)application.getAttribute("connection");
-      final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
+      final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
+      final Document challengeDocument = (Document)application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");

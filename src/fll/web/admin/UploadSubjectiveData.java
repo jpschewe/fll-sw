@@ -33,6 +33,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.db.Queries;
+import fll.web.ApplicationAttributes;
+import fll.web.Init;
 import fll.web.UploadProcessor;
 import fll.xml.XMLUtils;
 
@@ -51,6 +53,12 @@ public final class UploadSubjectiveData extends HttpServlet {
    */
   @Override
   protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+    try {
+      Init.initialize(request, response);
+    } catch (final SQLException e) {
+      throw new RuntimeException("Error in initialization", e);
+    }
+
     final StringBuilder message = new StringBuilder();
     final ServletContext application = getServletContext();
     final HttpSession session = request.getSession();
@@ -63,7 +71,7 @@ public final class UploadSubjectiveData extends HttpServlet {
       final File file = File.createTempFile("fll", null);
       subjectiveFileItem.write(file);
 
-      final Connection connection = (Connection) application.getAttribute("connection");
+      final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
       saveSubjectiveData(file, Queries.getCurrentTournament(connection), (Document) application.getAttribute("challengeDocument"), connection);
       file.delete();
 

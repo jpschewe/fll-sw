@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -22,6 +23,8 @@ import org.apache.log4j.Logger;
 
 import fll.Utilities;
 import fll.db.ImportDB;
+import fll.web.Init;
+import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 
 /**
@@ -57,6 +60,8 @@ public class ImportDBDump extends HttpServlet {
     Utilities.loadDBDriver();
 
     try {
+      Init.initialize(request, response);
+
       // must be first to ensure the form parameters are set
       UploadProcessor.processUpload(request);
 
@@ -98,12 +103,14 @@ public class ImportDBDump extends HttpServlet {
    * 
    * @param session
    *          the session
+   * @throws SQLException 
    */
-  public static void createSelectedTournament(final HttpSession session) {
+  public static void createSelectedTournament(final HttpSession session) throws SQLException {
     final StringBuilder message = new StringBuilder();
     
     final String selectedTournament = (String)session.getAttribute("selected_tournament");
-    final Connection connection = (Connection)session.getAttribute("connection");
+    final DataSource datasource = (DataSource)session.getAttribute(SessionAttributes.DATASOURCE);
+    final Connection connection = datasource.getConnection();
     
     Utilities.loadDBDriver();
     Connection memConnection = null;

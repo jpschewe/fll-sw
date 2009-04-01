@@ -25,6 +25,7 @@ import javax.servlet.jsp.JspWriter;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.Utilities;
+import fll.web.ApplicationAttributes;
 
 /**
  * Java code used in tournaments.jsp
@@ -38,7 +39,7 @@ public final class Tournaments {
    */
   public static void generatePage(final JspWriter out, final ServletContext application, final HttpServletRequest request, final HttpServletResponse response)
       throws SQLException, IOException, ParseException {
-    final Connection connection = (Connection) application.getAttribute("connection");
+    final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
 
     final String numRowsStr = request.getParameter("numRows");
     int numRows;

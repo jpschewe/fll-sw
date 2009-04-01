@@ -2,12 +2,17 @@
 
 <%@ page import="fll.web.playoff.BracketData" %>
 
+<%@ page import="fll.web.ApplicationAttributes" %>
+<%@ page import="fll.db.Queries" %>
+<%@ page import="java.sql.Connection" %>
+<%@ page import="org.w3c.dom.Document" %>
+
 <%
 /*
   Parameters:
     division - String for the division
 */
-  final Connection connection = (Connection)application.getAttribute("connection");
+  final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
   final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
   final String currentTournament = Queries.getCurrentTournament(connection);
 
