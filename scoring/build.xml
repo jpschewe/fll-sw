@@ -333,6 +333,8 @@
 	</target>
 
 	<target name="generate.jsp" depends="prepare,tomcat.expand" description="Generate Java sources for JSP files" unless="jsp.notRequired">
+<echo message="generate.jsp disabled for now"/>
+<!--
 		<mkdir dir="${dir.src.jsp}" />
 		<taskdef classname="org.apache.jasper.JspC" name="jasper2">
 			<classpath id="jspc.classpath">
@@ -354,9 +356,12 @@
 		<jasper2 validateXml="false" uriroot="${dir.web}" webXmlFragment="${dir.web}/WEB-INF/generated_web.xml" outputDir="${dir.src.jsp}" />
 		
 		<touch file="${dir.src.jsp}/.timestamp"/>
+-->
 	</target>
 
 	<target name="compile.jsp" depends="compile.classes,generate.jsp" description="Compile JSP sources">
+		<echo message="compile.jsp disabled for now"/>
+<!--
 		<javac destdir="${dir.web}/WEB-INF/classes" optimize="${compile.optimize}" debug="${compile.debug}" deprecation="${compile.deprecation}" failonerror="true" srcdir="${dir.src.jsp}" excludes="**/*.smap">
 			<classpath>
 				<path refid="compile.classpath" />
@@ -377,6 +382,7 @@
 			</classpath>
 			<include name="**/*.java" />
 		</javac>
+-->
 	</target>
 
 
