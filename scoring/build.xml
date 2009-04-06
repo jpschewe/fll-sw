@@ -9,7 +9,6 @@
 	<property name="app.version" value="4.3" />
 
 	<property name="dir.build" value="${basedir}/build" />
-	<property name="tomcat" value="apache-tomcat-5.5.20" />
 	<property name="dir.tomcat" value="${dir.build}/tomcat" />
 
 	<property name="dir.dist" value="dist" />
@@ -106,8 +105,8 @@
 
 
 		<!-- tomcat libraries -->
-		<pathelement location="${dir.lib}/tomcat/servlet-api.jar" />
-		<pathelement location="${dir.lib}/tomcat/jsp-api.jar" />
+		<pathelement location="${basedir}/tomcat/lib/servlet-api.jar" />
+		<pathelement location="${basedir}/tomcat/lib/jsp-api.jar" />
 
 	</path>
 
@@ -332,79 +331,39 @@
 		</javac>
 	</target>
 
+	<import file="${basedir}/tomcat/bin/catalina-tasks.xml"/>
 	<target name="generate.jsp" depends="prepare,tomcat.expand" description="Generate Java sources for JSP files" unless="jsp.notRequired">
-<echo message="generate.jsp disabled for now"/>
-<!--
-		<mkdir dir="${dir.src.jsp}" />
-		<taskdef classname="org.apache.jasper.JspC" name="jasper2">
-			<classpath id="jspc.classpath">
-				<pathelement location="${java.home}/lib/tools.jar" />
-				<pathelement location="${java.home}/../lib/tools.jar" />
-
-				<fileset dir="${dir.tomcat}/bin">
-					<include name="*.jar" />
-				</fileset>
-				<fileset dir="${dir.tomcat}/server/lib">
-					<include name="*.jar" />
-				</fileset>
-				<fileset dir="${dir.tomcat}/common/lib">
-					<include name="*.jar" />
-				</fileset>
-			</classpath>
-		</taskdef>
-
-		<jasper2 validateXml="false" uriroot="${dir.web}" webXmlFragment="${dir.web}/WEB-INF/generated_web.xml" outputDir="${dir.src.jsp}" />
-		
+		<jasper validateXml="false" uriroot="${dir.web}" webXmlFragment="${dir.web}/WEB-INF/generated_web.xml" outputDir="${dir.src.jsp}" />
+			 
 		<touch file="${dir.src.jsp}/.timestamp"/>
--->
 	</target>
 
 	<target name="compile.jsp" depends="compile.classes,generate.jsp" description="Compile JSP sources">
-		<echo message="compile.jsp disabled for now"/>
-<!--
 		<javac destdir="${dir.web}/WEB-INF/classes" optimize="${compile.optimize}" debug="${compile.debug}" deprecation="${compile.deprecation}" failonerror="true" srcdir="${dir.src.jsp}" excludes="**/*.smap">
 			<classpath>
 				<path refid="compile.classpath" />
 				<fileset dir="${dir.web}/WEB-INF/lib">
 					<include name="*.jar" />
 				</fileset>
-				<pathelement location="${dir.tomcat}/common/classes" />
-				<fileset dir="${dir.tomcat}/common/lib">
-					<include name="*.jar" />
-				</fileset>
-				<pathelement location="${dir.tomcat}/shared/classes" />
-				<fileset dir="${dir.tomcat}/shared/lib">
+				<fileset dir="${dir.tomcat}/lib">
 					<include name="*.jar" />
 				</fileset>
 				<fileset dir="${dir.tomcat}/bin">
 					<include name="*.jar" />
 				</fileset>
 			</classpath>
-			<include name="**/*.java" />
+			<include name="**" />
+			<exclude name="tags/**" />
 		</javac>
--->
 	</target>
 
 
 	<!-- ==================== Tomcat Targets =================================== -->
-	<target name="-tomcat.check">
-		<available property="tomcat.uptodate" file="${dir.tomcat}/bin/startup.sh" />
-	</target>
-
-	<target name="tomcat.expand" depends="-tomcat.check" unless="tomcat.uptodate">
-		<untar src="${tomcat}.tar.bz2" dest="${dir.build}" compression="bzip2" />
-		<move todir="${dir.tomcat}">
-			<fileset dir="${dir.build}/${tomcat}" />
-		</move>
-
-		<!-- clean out tomcat work directory -->
-		<delete dir="${dir.tomcat}/work" />
-
-		<chmod perm="+x">
-			<fileset dir="${dir.tomcat}/bin">
-				<include name="*.sh" />
-			</fileset>
-		</chmod>
+	<target name="tomcat.expand" description="copy tomcat to the right place in the build directory">
+		<mkdir dir="${dir.tomcat}" />
+		<copy todir="${dir.tomcat}">
+			<fileset dir="${basedir}/tomcat"/>
+		</copy>
 	</target>
 
 	<target name="tomcat.start.test" description="start up tomcat for testing - starts the database in server mode">
@@ -423,9 +382,9 @@
 
 		<echo message="Waiting for tomcat to startup" />
 		<waitfor maxwait="5" maxwaitunit="minute" checkevery="1000" checkeveryunit="millisecond" timeoutproperty="fll-sw.timeout">
-			<http url="http://localhost:9080/fll-sw/setup" />
+			<http url="http://localhost:9080/" />
 		</waitfor>
-		<fail message="Access to timed out to http://localhost:9080/fll-sw/setup " if="fll-sw.timeout" />
+		<fail message="Access to timed out to http://localhost:9080/ " if="fll-sw.timeout" />
 	</target>
 
 	<target name="tomcat.stop" depends="tomcat.expand" description="shut down tomcat">
@@ -438,7 +397,7 @@
 		<echo message="Waiting for tomcat to shutdown" />
 		<waitfor maxwait="5" maxwaitunit="minute" checkevery="1000" checkeveryunit="millisecond">
 			<not>
-				<http url="http://localhost:9080/fll-sw/setup" />
+				<http url="http://localhost:9080/" />
 			</not>
 		</waitfor>
 	</target>
@@ -558,14 +517,9 @@
 		<!-- src zip file -->
 		<zip zipfile="${app.name}-${app.version}-src.zip">
 			<zipfileset dir="${basedir}">
-				<include name="web/**" />
-				<include name="${dir.src}/**" />
-				<include name="docs/**" />
-				<include name="prj.el" />
-				<include name="*.xml" />
-				<include name="ChangeLog" />
-				<include name="${tomcat}" />
-				<include name="*.template" />
+				<exclude name="build/**" />
+				<exclude name="override.properties" />
+				<exclude name="tmp/**" />
 			</zipfileset>
 		</zip>
 
@@ -594,7 +548,7 @@
 
 
 	<!-- ==================== Prepare Target ================================== -->
-	<target name="prepare" depends="init,tomcat.expand">
+	<target name="prepare" depends="init,tomcat.expand" description="prepare the build directory">
 
 		<!-- Create build directory and copy static content -->
 		<mkdir dir="${dir.web}" />
