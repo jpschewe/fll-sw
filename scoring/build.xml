@@ -339,7 +339,7 @@
 	</target>
 
 	<target name="compile.jsp" depends="compile.classes,generate.jsp" description="Compile JSP sources">
-		<javac destdir="${dir.web}/WEB-INF/classes" optimize="${compile.optimize}" debug="${compile.debug}" deprecation="${compile.deprecation}" failonerror="true" srcdir="${dir.src.jsp}" excludes="**/*.smap">
+		<javac destdir="${dir.src.jsp}" optimize="${compile.optimize}" debug="${compile.debug}" deprecation="${compile.deprecation}" failonerror="true" srcdir="${dir.src.jsp}" excludes="**/*.smap">
 			<classpath>
 				<path refid="compile.classpath" />
 				<fileset dir="${dir.web}/WEB-INF/lib">
