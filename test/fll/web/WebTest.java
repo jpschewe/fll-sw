@@ -23,35 +23,32 @@ import fll.TestUtils;
 
 /**
  * Basic tests.
- *
+ * 
  * @version $Revision$
  */
 public class WebTest {
-  
+
   private static final Logger LOG = Logger.getLogger(WebTest.class);
 
   /**
    * Basic load of the pages.
    */
   @Test
-  public void testPages()
-    throws SAXException, MalformedURLException, IOException {
-    final String[] pages = new String[] {
-      "",
-      "display.jsp",
-      "index.jsp",
-      "welcome.jsp",
+  public void testPages() throws SAXException, MalformedURLException, IOException {
+    final String[] pages = new String[] { "", "display.jsp", "index.jsp", "welcome.jsp",
 
     };
     final WebConversation conversation = new WebConversation();
-    for(int i=0; i<pages.length; i++) {
-      LOG.info("Testing page " + pages[i]);
+    for (final String page : pages) {
+      LOG.info("Testing page "
+          + page);
       TestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
 
-      final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + pages[i]);
+      final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + page);
       final WebResponse response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
     }
   }
-  
+
 }

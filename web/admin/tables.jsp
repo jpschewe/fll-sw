@@ -10,6 +10,6 @@
 
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Table Labels)</h1>
-<% Tables.generatePage(out, application, request, response); %>
+<% Tables.generatePage(out, session, request, response); %>
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
 </body></html>

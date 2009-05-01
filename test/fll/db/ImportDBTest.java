@@ -19,7 +19,6 @@ import org.junit.Test;
 /**
  * @author jpschewe
  * @version $Revision$
- * 
  */
 public class ImportDBTest {
 
@@ -34,7 +33,6 @@ public class ImportDBTest {
    * Test
    * {@link ImportDB#loadFromDumpIntoNewDB(java.util.zip.ZipInputStream, String)}
    * and make sure no exceptions are thrown.
-   * 
    */
   @Test
   public void testLoadFromDumpIntoNewDB() throws IOException, SQLException {

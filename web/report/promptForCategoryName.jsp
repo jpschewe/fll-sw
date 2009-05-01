@@ -7,15 +7,16 @@ Prompt for how many teams should be considered from each scored category.
 
 <%@ page import="fll.Team" %>
 <%@ page import="fll.db.Queries" %>
-<%@ page import="fll.web.ApplicationAttributes"%>
-
+<%@ page import="fll.web.SessionAttributes"%>
+<%@ page import="javax.sql.DataSource" %>
 <%@ page import="java.util.List" %>
 
 <%@ page import="java.sql.Connection" %>
 
 
 <%
-final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
+final DataSource datasource = SessionAttributes.getDataSource(session);
+final Connection connection = datasource.getConnection();
 final List<String> divisions = Queries.getDivisions(connection);
 pageContext.setAttribute("divisions", divisions);
 %>

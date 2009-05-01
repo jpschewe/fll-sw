@@ -1,106 +1,119 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fll title="variableRef in tiebreaker - should fail" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="fll.xsd">
+<fll title="variableRef in tiebreaker - should fail" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="fll.xsd">
 
-  <Performance minimumScore="0" weight="1.0">
- <!-- comment here at the top -->
-    <goal initialValue="0" max="1" min="0" multiplier="40" name="pump_station" title="Protect the Pump Station"></goal>
+	<Performance minimumScore="0" weight="1.0">
+		<!-- comment here at the top -->
+		<goal initialValue="0" max="1" min="0" multiplier="40" name="pump_station"
+			title="Protect the Pump Station"></goal>
 
- <!-- comment in the middle -->
-    <goal initialValue="0" max="1" min="0" multiplier="30" name="flags" title="Transect Flags: Any Flags"></goal>
+		<!-- comment in the middle -->
+		<goal initialValue="0" max="1" min="0" multiplier="30" name="flags"
+			title="Transect Flags: Any Flags"></goal>
 
-    <goal initialValue="0" max="3" min="0" multiplier="15" name="flags_rows" title="Transect Flags: Number of Rows"></goal>
+		<goal initialValue="0" max="3" min="0" multiplier="15" name="flags_rows"
+			title="Transect Flags: Number of Rows"></goal>
 
-    <goal initialValue="0" max="1" min="0" multiplier="1" name="archaeological" title="Archaeological Artifacts">
-      <value score="35" title="In Base" value="in_base"></value>
-      <value score="25" title="Off Ship" value="off_ship"></value>
-      <value score="0" title="No" value="no"></value>
-    </goal>
-    
+		<goal initialValue="0" max="1" min="0" multiplier="1"
+			name="archaeological" title="Archaeological Artifacts">
+			<value score="35" title="In Base" value="in_base"></value>
+			<value score="25" title="Off Ship" value="off_ship"></value>
+			<value score="0" title="No" value="no"></value>
+		</goal>
 
-    <goal initialValue="0" max="1" min="0" multiplier="25" name="dolphin" title="Release Dolphin"></goal>
 
-    <goal initialValue="0" max="1" min="0" multiplier="35" name="sample_species" title="Sample Species (Grey Fish Only)"></goal>
+		<goal initialValue="0" max="1" min="0" multiplier="25" name="dolphin"
+			title="Release Dolphin"></goal>
 
-    <goal initialValue="0" max="1" min="0" multiplier="1" name="submarine" title="Deploy The Submarine">
-      <value score="40" title="Yes Upright" value="upright"></value>
-      <value score="35" title="Yes Not Upright" value="yes"></value>
-      <value score="0" title="No" value="no"></value>
-    </goal>
-    
+		<goal initialValue="0" max="1" min="0" multiplier="35"
+			name="sample_species" title="Sample Species (Grey Fish Only)"></goal>
 
-    <goal initialValue="0" max="1" min="0" multiplier="40" name="artifical_reef" title="Artifical Reef"></goal>
+		<goal initialValue="0" max="1" min="0" multiplier="1" name="submarine"
+			title="Deploy The Submarine">
+			<value score="40" title="Yes Upright" value="upright"></value>
+			<value score="35" title="Yes Not Upright" value="yes"></value>
+			<value score="0" title="No" value="no"></value>
+		</goal>
 
-    <goal initialValue="0" max="1" min="0" multiplier="40" name="pipeline" title="Service The Pipeline"></goal>
 
-    <goal initialValue="0" max="1" min="0" multiplier="30" name="shipping_container" title="Shipping Container at Base"></goal>
+		<goal initialValue="0" max="1" min="0" multiplier="40"
+			name="artifical_reef" title="Artifical Reef"></goal>
 
-    <goal initialValue="0" max="8" min="0" multiplier="5" name="crates_base" title="Crates in Base"></goal>
+		<goal initialValue="0" max="1" min="0" multiplier="40" name="pipeline"
+			title="Service The Pipeline"></goal>
 
-    <goal initialValue="0" max="8" min="0" multiplier="2" name="crates" title="Crates Elsewhere on Table"></goal>
+		<goal initialValue="0" max="1" min="0" multiplier="30"
+			name="shipping_container" title="Shipping Container at Base"></goal>
 
-    <goal name="robot_type" title="Robot Type"
-      multiplier="0" initialValue="1">
-      <value score="1" title="RCX" value="rcx"/>
-      <value score="2" title="NXT" value="nxt"/>
-    </goal>
-    
-        
-    <computedGoal name="computed" title="Test computed goal">
-      <variable name="subtotal">
-        <term goal="computed" scoreType="computed"/> <!-- cannot reference a computed goal -->
-      </variable>
-      <switch>
-        <case>
-          <enumCondition>  
-            <left>
-              <goalRef goal="robot_type"/>
-            </left>
-            <equal-to/>
-            <right>
-              <stringConstant value="rcx"/>
-            </right>
-          </enumCondition>
-          <switch>
-            <case>
-              <condition>
-                <left>
-                  <variableRef variable="subtotal"/>
-                </left>
-                <less-than/> <!-- any inequality -->
-                <right>
-                  <constant value="300"/>
-                </right>
-              </condition>
-              <result>
-                <term goal="pump_station" scoreType="computed"/>
-                <term goal="flags" scoreType="computed"/>
-                <term goal="flags_rows" scoreType="computed"/>
-                <constant value="60"/>
-              </result>
-            </case>
-            <default> <!-- default case is required, the default just has a result -->
-              <constant value="240"/>
-              <term coefficient="0.4" goal="pump_station" scoreType="computed"/>
-              <term coefficient="0.4" goal="flags" scoreType="computed"/>
-              <term coefficient="0.4" goal="flags_rows" scoreType="computed"/>
-            </default>
-          </switch>
-        </case>
-        <default>
-          <constant value="0"/>
-        </default>
-      </switch>
-    </computedGoal>
-    
+		<goal initialValue="0" max="8" min="0" multiplier="5" name="crates_base"
+			title="Crates in Base"></goal>
 
-    <tiebreaker>
-      <test winner="HIGH">
-        <term goal="crates_base" />
-        <variableRef variable="foo"/> <!-- not allowed here -->
-      </test> 
-    </tiebreaker>
+		<goal initialValue="0" max="8" min="0" multiplier="2" name="crates"
+			title="Crates Elsewhere on Table"></goal>
 
-  </Performance>
+		<goal name="robot_type" title="Robot Type" multiplier="0"
+			initialValue="1">
+			<value score="1" title="RCX" value="rcx" />
+			<value score="2" title="NXT" value="nxt" />
+		</goal>
 
-  
+
+		<computedGoal name="computed" title="Test computed goal">
+			<variable name="subtotal">
+				<term goal="computed" scoreType="computed" /> <!-- cannot reference a computed goal -->
+			</variable>
+			<switch>
+				<case>
+					<enumCondition>
+						<left>
+							<goalRef goal="robot_type" />
+						</left>
+						<equal-to />
+						<right>
+							<stringConstant value="rcx" />
+						</right>
+					</enumCondition>
+					<switch>
+						<case>
+							<condition>
+								<left>
+									<variableRef variable="subtotal" />
+								</left>
+								<less-than /> <!-- any inequality -->
+								<right>
+									<constant value="300" />
+								</right>
+							</condition>
+							<result>
+								<term goal="pump_station" scoreType="computed" />
+								<term goal="flags" scoreType="computed" />
+								<term goal="flags_rows" scoreType="computed" />
+								<constant value="60" />
+							</result>
+						</case>
+						<default> <!-- default case is required, the default just has a result -->
+							<constant value="240" />
+							<term coefficient="0.4" goal="pump_station" scoreType="computed" />
+							<term coefficient="0.4" goal="flags" scoreType="computed" />
+							<term coefficient="0.4" goal="flags_rows" scoreType="computed" />
+						</default>
+					</switch>
+				</case>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+
+		<tiebreaker>
+			<test winner="HIGH">
+				<term goal="crates_base" />
+				<variableRef variable="foo" /> <!-- not allowed here -->
+			</test>
+		</tiebreaker>
+
+	</Performance>
+
+
 </fll>

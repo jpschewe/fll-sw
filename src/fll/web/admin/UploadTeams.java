@@ -21,12 +21,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
+import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -36,8 +36,8 @@ import org.apache.log4j.Logger;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fll.db.GenerateDB;
-import fll.web.ApplicationAttributes;
 import fll.web.Init;
+import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 
 /**
@@ -63,10 +63,10 @@ public final class UploadTeams extends HttpServlet {
     }
 
     final StringBuilder message = new StringBuilder();
-    final ServletContext application = getServletContext();
     final HttpSession session = request.getSession();
-    final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
+    final DataSource datasource = SessionAttributes.getDataSource(session);
     try {
+      final Connection connection = datasource.getConnection();
       UploadProcessor.processUpload(request);
       final FileItem teamsFileItem = (FileItem) request.getAttribute("teamsFile");
       final File file = File.createTempFile("fll", null);
@@ -145,7 +145,7 @@ public final class UploadTeams extends HttpServlet {
     // iterate over each column name and append to appropriate buffers
     boolean first = true;
     final List<String> columnNamesSeen = new LinkedList<String>();
-    for (String header : columnNames) {
+    for (final String header : columnNames) {
       final String columnName = sanitizeColumnName(header);
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("header: "

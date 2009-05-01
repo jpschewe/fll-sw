@@ -2,15 +2,18 @@
 
 <%@ page import="fll.web.scoreEntry.Submit" %>
 <%@ page import="fll.web.ApplicationAttributes"%>
+<%@ page import="fll.web.SessionAttributes" %>
 
 <%@ page import="java.sql.Connection"%>
+<%@ page import="javax.sql.DataSource" %>
 <%@ page import="org.w3c.dom.Document"%>
 <%@ page import="fll.db.Queries"%>
 
 <%
-final Document challengeDocument = (Document)application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
+final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
-final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
+final DataSource datasource = SessionAttributes.getDataSource(session);
+final Connection connection = datasource.getConnection();
 %>
 
 

@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -33,8 +34,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.db.Queries;
-import fll.web.ApplicationAttributes;
 import fll.web.Init;
+import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 import fll.xml.XMLUtils;
 
@@ -46,7 +47,7 @@ import fll.xml.XMLUtils;
 public final class UploadSubjectiveData extends HttpServlet {
 
   private static final Logger LOGGER = Logger.getLogger(UploadSubjectiveData.class);
-  
+
   /**
    * @param request
    * @param response
@@ -71,7 +72,8 @@ public final class UploadSubjectiveData extends HttpServlet {
       final File file = File.createTempFile("fll", null);
       subjectiveFileItem.write(file);
 
-      final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
+      final DataSource datasource = SessionAttributes.getDataSource(session);
+      final Connection connection = datasource.getConnection();
       saveSubjectiveData(file, Queries.getCurrentTournament(connection), (Document) application.getAttribute("challengeDocument"), connection);
       file.delete();
 
@@ -135,7 +137,7 @@ public final class UploadSubjectiveData extends HttpServlet {
         LOGGER.trace("An element: "
             + scoreCategoryNode);
       }
-      final Element scoreCategoryElement = (Element) scoreCategoryNode;
+      final Element scoreCategoryElement = scoreCategoryNode;
       final String categoryName = scoreCategoryElement.getNodeName();
       final Element categoryElement = XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
       final List<Element> goalDescriptions = XMLUtils.filterToElements(categoryElement.getElementsByTagName("goal"));

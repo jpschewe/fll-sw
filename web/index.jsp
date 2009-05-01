@@ -1,11 +1,14 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="java.sql.Connection" %>
+<%@ page import="javax.sql.DataSource" %>
+
 <%@ page import="fll.db.Queries" %>
-<%@ page import="fll.web.ApplicationAttributes"%>
+<%@ page import="fll.web.SessionAttributes"%>
 
 <%
-final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
+final DataSource datasource = SessionAttributes.getDataSource(session);
+final Connection connection = datasource.getConnection();
 %>
 
 <c:if test="${not empty param.ScorePageText}">

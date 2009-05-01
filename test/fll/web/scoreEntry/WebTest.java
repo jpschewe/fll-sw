@@ -22,28 +22,26 @@ import fll.TestUtils;
 
 /**
  * Basic tests.
- *
+ * 
  * @version $Revision$
  */
 public class WebTest {
-  
+
   /**
    * Basic load of the pages.
    */
   @Test
-  public void testPages()
-    throws SAXException, MalformedURLException, IOException {
-    final String[] pages = new String[] {
-      "select_team.jsp",
-    };
+  public void testPages() throws SAXException, MalformedURLException, IOException {
+    final String[] pages = new String[] { "select_team.jsp", };
     final WebConversation conversation = new WebConversation();
-    for(int i=0; i<pages.length; i++) {
+    for (final String page : pages) {
       TestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
 
-      final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "scoreEntry/" + pages[i]);
+      final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "scoreEntry/" + page);
       final WebResponse response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
     }
   }
-  
+
 }

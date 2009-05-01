@@ -22,37 +22,39 @@ import fll.Utilities;
 
 /**
  * Dump the challenge document out of a database.
- *
+ * 
  * @version $Revision$
  */
 public final class ExportDocument {
 
   private static final Logger LOG = Logger.getLogger(ExportDocument.class);
-  
+
   /**
    * Export the challenge document from the specified database.
-   *
    * <ul>
-   *   <li>arg[0] - the location of the database (eg. ./flldb)
-   *   <li>arg[1] - where to store the xml file
+   * <li>arg[0] - the location of the database (eg. ./flldb)
+   * <li>arg[1] - where to store the xml file
    * </ul>
    */
   public static void main(final String[] args) throws IOException {
-    if(args.length < 2) {
+    if (args.length < 2) {
       LOG.fatal("Usage: ExportDocument <xml file> <db>");
       System.exit(1);
     }
     final File challengeFile = new File(args[0]);
-    if(challengeFile.exists() && !challengeFile.canWrite()) {
-      LOG.fatal(challengeFile.getAbsolutePath() + " exists and is not writable");
+    if (challengeFile.exists()
+        && !challengeFile.canWrite()) {
+      LOG.fatal(challengeFile.getAbsolutePath()
+          + " exists and is not writable");
       System.exit(1);
     }
-    if(challengeFile.isDirectory()) {
-      LOG.fatal(challengeFile.getAbsolutePath() + " is a directory");
+    if (challengeFile.isDirectory()) {
+      LOG.fatal(challengeFile.getAbsolutePath()
+          + " is a directory");
       System.exit(1);
     }
 
-    if(!Utilities.testHSQLDB(args[1])) {
+    if (!Utilities.testHSQLDB(args[1])) {
       LOG.fatal("There is a problem with the database, see previous log messages");
       System.exit(1);
     }
@@ -63,34 +65,36 @@ public final class ExportDocument {
       connection = Utilities.createDataSource(args[1]).getConnection();
       stmt = connection.createStatement();
       rs = stmt.executeQuery("SELECT Value FROM TournamentParameters WHERE Param = 'ChallengeDocument'");
-      if(rs.next()) {
+      if (rs.next()) {
         final Reader reader = rs.getCharacterStream(1);
         final FileWriter writer = new FileWriter(challengeFile);
-        
+
         // copy to the file
         final CharBuffer buffer = CharBuffer.allocate(32 * 1024);
-        while(reader.read(buffer) != -1 || buffer.position() > 0) {
-          buffer.flip(); 
+        while (reader.read(buffer) != -1
+            || buffer.position() > 0) {
+          buffer.flip();
           writer.append(buffer);
           buffer.clear();
         }
         reader.close();
         writer.close();
-        
+
       } else {
         throw new RuntimeException("Could not find challenge document in database");
       }
 
-    } catch(final UnsupportedEncodingException uee) {
+    } catch (final UnsupportedEncodingException uee) {
       LOG.fatal("UTF8 not a supported encoding???", uee);
       System.exit(1);
-    } catch(final SQLException sqle) {
+    } catch (final SQLException sqle) {
       LOG.fatal("Error talking to database", sqle);
       System.exit(1);
     }
     System.exit(0);
   }
 
-  private ExportDocument() {}
-  
+  private ExportDocument() {
+  }
+
 }

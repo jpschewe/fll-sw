@@ -2,11 +2,12 @@
       
 <%@ page import="fll.db.Queries" %>
 <%@ page import="java.sql.Connection" %>    
-<%@ page import="fll.web.ApplicationAttributes" %>
-  
+<%@ page import="fll.web.SessionAttributes" %>
+<%@ page import="javax.sql.DataSource" %>
 
 <%
-final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
+final DataSource datasource = SessionAttributes.getDataSource(session);
+final Connection connection = datasource.getConnection();
 
 pageContext.setAttribute("regions", Queries.getRegions(connection));
 %>

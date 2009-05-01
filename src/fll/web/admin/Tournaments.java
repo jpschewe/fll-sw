@@ -18,14 +18,15 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
+import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.Utilities;
-import fll.web.ApplicationAttributes;
+import fll.web.SessionAttributes;
 
 /**
  * Java code used in tournaments.jsp
@@ -37,9 +38,10 @@ public final class Tournaments {
   /**
    * Generate the tournaments page
    */
-  public static void generatePage(final JspWriter out, final ServletContext application, final HttpServletRequest request, final HttpServletResponse response)
+  public static void generatePage(final JspWriter out, final HttpSession session, final HttpServletRequest request, final HttpServletResponse response)
       throws SQLException, IOException, ParseException {
-    final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
+    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final Connection connection = datasource.getConnection();
 
     final String numRowsStr = request.getParameter("numRows");
     int numRows;
@@ -67,7 +69,7 @@ public final class Tournaments {
     }
 
     if (verified) {
-      commitData(request, response, connection, application, out);
+      commitData(request, response, connection, out);
     } else {
       out
          .println("<p><b>Tournament name's must be unique and next tournament must refer to the name of another tournament listed.  Tournaments can be removed by erasing the name and location.</b></p>");
@@ -281,7 +283,6 @@ public final class Tournaments {
   private static void commitData(final HttpServletRequest request,
                                  final HttpServletResponse response,
                                  final Connection connection,
-                                 final ServletContext application,
                                  final JspWriter out) throws SQLException, IOException {
     PreparedStatement updatePrep = null;
     PreparedStatement insertPrep = null;

@@ -5,10 +5,12 @@
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.ResultSet" %>
-<%@ page import="fll.web.ApplicationAttributes" %>
+<%@ page import="fll.web.SessionAttributes" %>
+<%@ page import="javax.sql.DataSource" %>
 
 <%
-final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
+final DataSource datasource = SessionAttributes.getDataSource(session);
+final Connection connection = datasource.getConnection();
 %>
 
 <html>

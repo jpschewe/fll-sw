@@ -20,21 +20,21 @@ import fll.TestUtils;
 
 /**
  * Basic tests.
- *
+ * 
  * @version $Revision$
  */
 public class WebTest {
-  
+
   /**
    * Basic load of the pages.
    */
   @Test
-  public void testPages()
-    throws SAXException, MalformedURLException, IOException {
+  public void testPages() throws SAXException, MalformedURLException, IOException {
     final WebConversation conversation = new WebConversation();
-    final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "style/style.jsp");
+    final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
+        + "style/style.jsp");
     final WebResponse response = conversation.getResponse(request);
     "text/css".equals(response.getContentType());
   }
-  
+
 }

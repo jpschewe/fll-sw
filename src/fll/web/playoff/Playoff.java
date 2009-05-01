@@ -55,18 +55,21 @@ public final class Playoff {
   private static final double TIEBREAKER_TOLERANCE = 1E-4;
 
   /**
-   * Just for debugging.
+   * Just for debugging. FIXME turn into test
    * 
    * @param args ignored
    */
   public static void main(final String[] args) {
     try {
       final String divisionStr = "1";
-      final Connection connection = Utilities
-                                             .createDataSource("/home/jpschewe/projects/fll-sw/working-dir/scoring/build/tomcat/webapps/fll-sw/WEB-INF/flldb").getConnection();
+      final Connection connection = Utilities.createDataSource("/home/jpschewe/projects/fll-sw/working-dir/scoring/build/tomcat/webapps/fll-sw/WEB-INF/flldb")
+                                             .getConnection();
       final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
       final Document challengeDocument = Queries.getChallengeDocument(connection);
-      final List<Team> seedingOrder = buildInitialBracketOrder(connection, challengeDocument, divisionStr, tournamentTeams);
+      final BracketSortType bracketSort = XMLUtils.getBracketSort(challengeDocument);
+      final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+
+      final List<Team> seedingOrder = buildInitialBracketOrder(connection, bracketSort, winnerCriteria, divisionStr, tournamentTeams);
       LOGGER.info("Initial bracket order: "
           + seedingOrder);
     } catch (final Exception e) {
@@ -95,11 +98,11 @@ public final class Playoff {
    * @throws SQLException on a database error
    */
   public static List<Team> buildInitialBracketOrder(final Connection connection,
-                                                    final Document challengeDocument,
+                                                    final BracketSortType bracketSort,
+                                                    final WinnerType winnerCriteria,
                                                     final String divisionStr,
                                                     final Map<Integer, Team> tournamentTeams) throws SQLException {
 
-    final BracketSortType bracketSort = XMLUtils.getBracketSort(challengeDocument);
     if (BracketSortType.ALPHA_TEAM == bracketSort) {
       final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
       // sort by team name
@@ -144,7 +147,7 @@ public final class Playoff {
           }
         });
       } else {
-        seedingOrder = Queries.getPlayoffSeedingOrder(connection, challengeDocument, divisionStr, tournamentTeams);
+        seedingOrder = Queries.getPlayoffSeedingOrder(connection, winnerCriteria, divisionStr, tournamentTeams);
       }
 
       if (LOGGER.isDebugEnabled()) {
@@ -153,11 +156,11 @@ public final class Playoff {
       }
       final int[] seeding = computeInitialBrackets(seedingOrder.size());
       final List<Team> list = new LinkedList<Team>();
-      for (int i = 0; i < seeding.length; i++) {
-        if (seeding[i] > seedingOrder.size()) {
+      for (final int element : seeding) {
+        if (element > seedingOrder.size()) {
           list.add(Team.BYE);
         } else {
-          final Team team = (Team) seedingOrder.get(seeding[i] - 1);
+          final Team team = (Team) seedingOrder.get(element - 1);
           list.add(team);
         }
       }
@@ -189,14 +192,17 @@ public final class Playoff {
    * @throws RuntimeException if database contains no data for teamA for
    *           runNumber.
    */
-  public static Team pickWinner(final Connection connection, final Document document, final Team teamA, final HttpServletRequest request, final int runNumber)
-      throws SQLException, ParseException {
-    final Element performanceElement = (Element) document.getDocumentElement().getElementsByTagName("Performance").item(0);
-
+  public static Team pickWinner(final Connection connection,
+                                final Element performanceElement,
+                                final Element tiebreakerElement,
+                                final WinnerType winnerCriteria,
+                                final Team teamA,
+                                final HttpServletRequest request,
+                                final int runNumber) throws SQLException, ParseException {
     final TeamScore teamAScore = new DatabaseTeamScore(performanceElement, teamA.getTeamNumber(), runNumber, connection);
     final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("TeamNumber")));
     final TeamScore teamBScore = new HttpTeamScore(performanceElement, teamB.getTeamNumber(), runNumber, request);
-    final Team retval = pickWinner(document, teamA, teamAScore, teamB, teamBScore);
+    final Team retval = pickWinner(tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB, teamBScore);
     teamAScore.cleanup();
     teamBScore.cleanup();
     return retval;
@@ -218,13 +224,16 @@ public final class Playoff {
    * @throws SQLException on a database error
    * @throws ParseException if the XML document is invalid
    */
-  public static Team pickWinner(final Connection connection, final Document document, final Team teamA, final Team teamB, final int runNumber)
-      throws SQLException, ParseException {
-    final Element performanceElement = (Element) document.getDocumentElement().getElementsByTagName("Performance").item(0);
-
+  public static Team pickWinner(final Connection connection,
+                                final Element performanceElement,
+                                final Element tiebreakerElement,
+                                final WinnerType winnerCriteria,
+                                final Team teamA,
+                                final Team teamB,
+                                final int runNumber) throws SQLException, ParseException {
     final TeamScore teamAScore = new DatabaseTeamScore(performanceElement, teamA.getTeamNumber(), runNumber, connection);
     final TeamScore teamBScore = new DatabaseTeamScore(performanceElement, teamB.getTeamNumber(), runNumber, connection);
-    final Team retval = pickWinner(document, teamA, teamAScore, teamB, teamBScore);
+    final Team retval = pickWinner(tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB, teamBScore);
     teamAScore.cleanup();
     teamBScore.cleanup();
     return retval;
@@ -233,13 +242,14 @@ public final class Playoff {
   /**
    * Pick the winner between the scores of two teams
    * 
-   * @param document the challenge document
-   * @param teamAScore the score for team A
-   * @param teamBScore the score for team B
    * @return the winner, null on a tie or a missing score
    */
-  private static Team pickWinner(final Document document, final Team teamA, final TeamScore teamAScore, final Team teamB, final TeamScore teamBScore)
-      throws ParseException {
+  private static Team pickWinner(final Element tiebreakerElement,
+                                 final WinnerType winnerCriteria,
+                                 final Team teamA,
+                                 final TeamScore teamAScore,
+                                 final Team teamB,
+                                 final TeamScore teamBScore) throws ParseException {
 
     // teamA can actually be a bye here in the degenerate case of a 3-team
     // tournament with 3rd/4th place brackets enabled...
@@ -262,13 +272,12 @@ public final class Playoff {
         } else {
           final double scoreA = ScoreUtils.computeTotalScore(teamAScore);
           final double scoreB = ScoreUtils.computeTotalScore(teamBScore);
-          final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(document);
           if (FP.lessThan(scoreA, scoreB, TIEBREAKER_TOLERANCE)) {
             return WinnerType.HIGH == winnerCriteria ? teamB : teamA;
           } else if (FP.lessThan(scoreB, scoreA, TIEBREAKER_TOLERANCE)) {
             return WinnerType.HIGH == winnerCriteria ? teamA : teamB;
           } else {
-            return evaluateTiebreaker(document, teamA, teamAScore, teamB, teamBScore);
+            return evaluateTiebreaker(tiebreakerElement, teamA, teamAScore, teamB, teamBScore);
           }
         }
       } else {
@@ -280,16 +289,17 @@ public final class Playoff {
   /**
    * Evaluate the tiebreaker to determine the winner.
    * 
-   * @param document the challenge document
+   * @param tiebreakerElement the element from the XML document specifying the
+   *          tiebreaker
    * @param teamAScore team A's score information
    * @param teamBScore team B's score information
    * @return the winner, may be Team.TIE
    */
-  private static Team evaluateTiebreaker(final Document document, final Team teamA, final TeamScore teamAScore, final Team teamB, final TeamScore teamBScore)
-      throws ParseException {
-
-    final Element performanceElement = (Element) document.getDocumentElement().getElementsByTagName("Performance").item(0);
-    final Element tiebreakerElement = (Element) performanceElement.getElementsByTagName("tiebreaker").item(0);
+  private static Team evaluateTiebreaker(final Element tiebreakerElement,
+                                         final Team teamA,
+                                         final TeamScore teamAScore,
+                                         final Team teamB,
+                                         final TeamScore teamBScore) throws ParseException {
 
     // walk test elements in tiebreaker to decide who wins
     for (final Element testElement : XMLUtils.filterToElements(tiebreakerElement.getChildNodes())) {
@@ -468,10 +478,29 @@ public final class Playoff {
   }
 
   /**
-   * Output the table for the printable brackets to out
+   * Pulls bracketSort and winnerCriteria out of challenge descriptor.
    */
   public static void displayPrintableBrackets(final Connection connection, final Document challengeDocument, final String division, final JspWriter out)
       throws IOException, SQLException, ParseException {
+    final BracketSortType bracketSort = XMLUtils.getBracketSort(challengeDocument);
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+
+    final Element performanceElement = (Element) challengeDocument.getDocumentElement().getElementsByTagName("Performance").item(0);
+    final Element tiebreakerElement = (Element) performanceElement.getElementsByTagName("tiebreaker").item(0);
+
+    displayPrintableBrackets(connection, performanceElement, tiebreakerElement, bracketSort, winnerCriteria, division, out);
+  }
+
+  /**
+   * Output the table for the printable brackets to out
+   */
+  public static void displayPrintableBrackets(final Connection connection,
+                                              final Element performanceElement,
+                                              final Element tiebreakerElement,
+                                              final BracketSortType bracketSort,
+                                              final WinnerType winnerCriteria,
+                                              final String division,
+                                              final JspWriter out) throws IOException, SQLException, ParseException {
 
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
     final String currentTournament = Queries.getCurrentTournament(connection);
@@ -479,7 +508,7 @@ public final class Playoff {
     final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
 
     // initialize currentRound to contain a full bracket setup
-    List<Team> tempCurrentRound = buildInitialBracketOrder(connection, challengeDocument, division, tournamentTeams);
+    List<Team> tempCurrentRound = buildInitialBracketOrder(connection, bracketSort, winnerCriteria, division, tournamentTeams);
     if (tempCurrentRound.size() > 1) {
       out.println("<table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>");
 
@@ -500,17 +529,17 @@ public final class Playoff {
       out.println("</tr>");
 
       // the row at which the last team was displayed
-      int[] lastTeam = new int[numRuns];
+      final int[] lastTeam = new int[numRuns];
       Arrays.fill(lastTeam, 0);
       // the teams for a given round
       @SuppressWarnings("unchecked")
-      // until generic array creation is allowed
+      final// until generic array creation is allowed
       Iterator<Team>[] currentRoundTeams = new Iterator[numRuns];
       // the bracket that will be displayed next
-      int[] bracketIndex = new int[numRuns];
+      final int[] bracketIndex = new int[numRuns];
       Arrays.fill(bracketIndex, 1);
       // the team that will be displayed next
-      int[] teamIndex = new int[numRuns];
+      final int[] teamIndex = new int[numRuns];
       Arrays.fill(teamIndex, 1);
 
       for (int tempRunNumber = 0; tempRunNumber < numRuns; tempRunNumber++) {
@@ -523,7 +552,7 @@ public final class Playoff {
           final Team teamA = prevIter.next();
           if (prevIter.hasNext()) {
             final Team teamB = prevIter.next();
-            final Team winner = pickWinner(connection, challengeDocument, teamA, teamB, tempRunNumber
+            final Team winner = pickWinner(connection, performanceElement, tiebreakerElement, winnerCriteria, teamA, teamB, tempRunNumber
                 + numSeedingRounds + 1);
             newCurrentRound.add(winner);
           } else {
@@ -717,6 +746,8 @@ public final class Playoff {
                                                          final Document challengeDocument,
                                                          final String division,
                                                          final JspWriter out) throws IOException, SQLException, ParseException {
+    final Element performanceElement = (Element) challengeDocument.getDocumentElement().getElementsByTagName("Performance").item(0);
+    final Element tiebreakerElement = (Element) performanceElement.getElementsByTagName("tiebreaker").item(0);
 
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
     final String currentTournament = Queries.getCurrentTournament(connection);
@@ -726,8 +757,12 @@ public final class Playoff {
       tournamentTables.add(new String[] { "", "" });
     }
 
+    // FIXME push up
+    final BracketSortType bracketSort = XMLUtils.getBracketSort(challengeDocument);
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+
     // initialize currentRound to contain a full bracket setup
-    List<Team> tempCurrentRound = buildInitialBracketOrder(connection, challengeDocument, division, tournamentTeams);
+    List<Team> tempCurrentRound = buildInitialBracketOrder(connection, bracketSort, winnerCriteria, division, tournamentTeams);
     if (tempCurrentRound.size() > 1) {
       out.println("<table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>");
 
@@ -748,22 +783,22 @@ public final class Playoff {
       out.println("</tr>");
 
       // the row at which the last team was displayed
-      int[] lastTeam = new int[numRuns];
+      final int[] lastTeam = new int[numRuns];
       Arrays.fill(lastTeam, 0);
       // the teams for a given round
-      Iterator<Team>[] currentRoundTeams = new Iterator[numRuns];
+      final Iterator<Team>[] currentRoundTeams = new Iterator[numRuns];
       // the bracket that will be displayed next
-      int[] bracketIndex = new int[numRuns];
+      final int[] bracketIndex = new int[numRuns];
       Arrays.fill(bracketIndex, 1);
       // the team that will be displayed next
-      int[] teamIndex = new int[numRuns];
+      final int[] teamIndex = new int[numRuns];
       Arrays.fill(teamIndex, 1);
       // the table that will be assigned next
-      Iterator<String[]>[] currentRoundTable = new Iterator[numRuns];
+      final Iterator<String[]>[] currentRoundTable = new Iterator[numRuns];
       // team iterator for scoresheet generation form
-      Iterator<Team>[] scoreGenTeams = new Iterator[numRuns];
+      final Iterator<Team>[] scoreGenTeams = new Iterator[numRuns];
       // match counts per round
-      int[] matchCounts = new int[numRuns];
+      final int[] matchCounts = new int[numRuns];
       Arrays.fill(matchCounts, 0);
 
       for (int tempRunNumber = 0; tempRunNumber < numRuns; tempRunNumber++) {
@@ -780,7 +815,7 @@ public final class Playoff {
           final Team teamA = (Team) prevIter.next();
           if (prevIter.hasNext()) {
             final Team teamB = (Team) prevIter.next();
-            final Team winner = pickWinner(connection, challengeDocument, teamA, teamB, tempRunNumber
+            final Team winner = pickWinner(connection, performanceElement, tiebreakerElement, winnerCriteria, teamA, teamB, tempRunNumber
                 + numSeedingRounds + 1);
             newCurrentRound.add(winner);
             if (!((teamA != null && teamA.equals(Team.BYE)) || (teamB != null && teamB.equals(Team.BYE)))) {
@@ -919,6 +954,10 @@ public final class Playoff {
     final String currentTournament = Queries.getCurrentTournament(connection);
     final List<String[]> tournamentTables = Queries.getTournamentTables(connection);
 
+    // FIXME push up
+    final BracketSortType bracketSort = XMLUtils.getBracketSort(challengeDocument);
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+
     // Work-around for if they didn't initialize tournament table labels.
     if (tournamentTables.size() == 0) {
       tournamentTables.add(new String[] { "", "" });
@@ -931,11 +970,11 @@ public final class Playoff {
     // round 1 teams)
     // Note: Our math will rely on the length of the list returned by
     // buildInitialBracketOrder to be a power of 2. It always should be.
-    List<Team> firstRound = buildInitialBracketOrder(connection, challengeDocument, division, tournamentTeams);
+    final List<Team> firstRound = buildInitialBracketOrder(connection, bracketSort, winnerCriteria, division, tournamentTeams);
 
     // Insert those teams into the database.
     // At this time we let the table assignment field default to NULL.
-    Iterator<Team> it = firstRound.iterator();
+    final Iterator<Team> it = firstRound.iterator();
     PreparedStatement stmt = null;
     try {
       stmt = connection.prepareStatement("INSERT INTO PlayoffData"
@@ -1088,7 +1127,7 @@ public final class Playoff {
    *         numTeams rounded up to next power of 2
    * @throw IllegalArgumentException if numTeams is less than 1
    */
-  public static int[] computeInitialBrackets(int numTeams) {
+  public static int[] computeInitialBrackets(final int numTeams) {
     if (numTeams < 1) {
       throw new IllegalArgumentException("numTeams must be greater than or equal to 1: "
           + numTeams);
@@ -1130,7 +1169,7 @@ public final class Playoff {
    * @param n the number
    * @return if the number is a power of 2
    */
-  private static boolean isPowerOfTwoFast(int n) {
+  private static boolean isPowerOfTwoFast(final int n) {
     return ((n != 0) && (n & (n - 1)) == 0);
   }
 }

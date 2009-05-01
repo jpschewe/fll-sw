@@ -132,9 +132,9 @@ public final class TestUtils {
    */
   public static void cleanupDB(final String database) {
     final String[] extensions = new String[] { "properties", "script", "data", "backup", "log", };
-    for (int i = 0; i < extensions.length; i++) {
+    for (final String extension : extensions) {
       final File file = new File(database
-          + "." + extensions[i]);
+          + "." + extension);
       if (file.exists()) {
         if (!file.delete()) {
           file.deleteOnExit();
@@ -149,9 +149,9 @@ public final class TestUtils {
    * @param challengeDocIS input stream that has the tournament descriptor to
    *          load in it, this input stream is closed by this method upon
    *          successful completion
-   * @throws SAXException 
-   * @throws IOException 
-   * @throws MalformedURLException 
+   * @throws SAXException
+   * @throws IOException
+   * @throws MalformedURLException
    */
   public static void initializeDatabase(final InputStream challengeDocIS) throws MalformedURLException, IOException, SAXException {
     Assert.assertNotNull("Challenge descriptor must not be null", challengeDocIS);
@@ -162,7 +162,7 @@ public final class TestUtils {
     WebResponse response = conversation.getResponse(request);
     Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
 
-    WebForm form = response.getFormWithID("setup");
+    final WebForm form = response.getFormWithID("setup");
     Assert.assertNotNull(form);
     form.setCheckbox("force_rebuild", true); // rebuild the whole database
     final UploadFileSpec challengeUpload = new UploadFileSpec("challenge-test.xml", challengeDocIS, "text/xml");
@@ -175,16 +175,15 @@ public final class TestUtils {
         + response.getText(), response.getElementWithID("success"));
     challengeDocIS.close();
   }
-  
+
   /**
    * Initialize a database from a zip file.
    * 
-   * @param inputStream input stream that has database to
-   *          load in it, this input stream is closed by this method upon
-   *          successful completion
-   * @throws SAXException 
-   * @throws IOException 
-   * @throws MalformedURLException 
+   * @param inputStream input stream that has database to load in it, this input
+   *          stream is closed by this method upon successful completion
+   * @throws SAXException
+   * @throws IOException
+   * @throws MalformedURLException
    */
   public static void initializeDatabaseFromDump(final InputStream inputStream) throws MalformedURLException, IOException, SAXException {
     Assert.assertNotNull("Zip to load must not be null", inputStream);
@@ -195,7 +194,7 @@ public final class TestUtils {
     WebResponse response = conversation.getResponse(request);
     Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
 
-    WebForm form = response.getFormWithID("import");
+    final WebForm form = response.getFormWithID("import");
     Assert.assertNotNull(form);
     final UploadFileSpec challengeUpload = new UploadFileSpec("database.zip", inputStream, "application/zip");
     Assert.assertNotNull(challengeUpload);

@@ -2,16 +2,18 @@
 
 <%@ page import="fll.db.Queries" %>
 
-<%@ page import="fll.web.ApplicationAttributes" %>
+<%@ page import="fll.web.SessionAttributes" %>
 
 <%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
       
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.ResultSet" %>
+<%@ page import="javax.sql.DataSource" %>
       
 <%
-final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
+final DataSource datasource = SessionAttributes.getDataSource(session);
+final Connection connection = datasource.getConnection();
 %>
 
 <c:if test="${not empty param.submit}">
@@ -23,7 +25,6 @@ final Connection connection = (Connection)application.getAttribute(ApplicationAt
 </c:if>
       
 
-<%@page import="fll.web.ApplicationAttributes"%><html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     <title><x:out select="$challengeDocument/fll/@title"/> (Select Team)</title>

@@ -8,7 +8,7 @@
 <%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
 
 <%@ page import="fll.db.Queries" %>
-<%@ page import="fll.web.ApplicationAttributes" %>
+<%@ page import="fll.web.SessionAttributes" %>
 
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Iterator" %>
@@ -16,6 +16,7 @@
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.ResultSet" %>
+<%@ page import="javax.sql.DataSource" %>
 
 <%@ page import="java.text.NumberFormat" %>
 
@@ -25,7 +26,8 @@
 <script language='javascript'>
 function init() {  
 <%
-final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
+final DataSource datasource = SessionAttributes.getDataSource(session);
+final Connection connection = datasource.getConnection();
         
 final List<String> tournamentNames = Queries.getTournamentNames(connection);
 

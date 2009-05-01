@@ -27,14 +27,12 @@ import fll.web.SessionAttributes;
 /**
  * @author jpschewe
  * @version $Revision$
- *
  */
 public class CheckTournamentExists extends HttpServlet {
 
   private static final Logger LOG = Logger.getLogger(CheckTournamentExists.class);
-  
+
   /**
-   * 
    * @param request
    * @param response
    */
@@ -48,30 +46,32 @@ public class CheckTournamentExists extends HttpServlet {
       Init.initialize(request, response);
 
       if (null != request.getAttribute("tournament")) {
-        final String selectedTournament = (String)request.getAttribute("tournament");
+        final String selectedTournament = (String) request.getAttribute("tournament");
         session.setAttribute("selectedTournament", selectedTournament);
-        
+
         // Check if the tournament exists
-        final DataSource datasource = (DataSource)session.getAttribute(SessionAttributes.DATASOURCE);
+        final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
         connection = datasource.getConnection();
         final List<String> existingTournaments = Queries.getTournamentNames(connection);
-        
-        if(!existingTournaments.contains(selectedTournament)) {
+
+        if (!existingTournaments.contains(selectedTournament)) {
           session.setAttribute("redirect_url", "promptCreateTournament.jsp");
         }
-        
+
       } else {
-        message.append("<p class='error'>Unknown form state, expected form fields not seen: " + request + "</p>");
+        message.append("<p class='error'>Unknown form state, expected form fields not seen: "
+            + request + "</p>");
       }
-    } catch(final SQLException sqle) {
-      message.append("<p class='error'>Error talking to the database: " + sqle.getMessage() + "</p>");
+    } catch (final SQLException sqle) {
+      message.append("<p class='error'>Error talking to the database: "
+          + sqle.getMessage() + "</p>");
       LOG.error(sqle);
     } finally {
       SQLFunctions.closeConnection(connection);
     }
-    
+
     session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL((String)session.getAttribute("redirect_url")));
+    response.sendRedirect(response.encodeRedirectURL((String) session.getAttribute("redirect_url")));
   }
-  
+
 }

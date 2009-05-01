@@ -40,7 +40,6 @@ import fll.xml.XMLUtils;
  * 
  * @author jpschewe
  * @version $Revision$
- * 
  */
 /* package */class SummaryDialog extends JDialog {
 
@@ -50,27 +49,23 @@ import fll.xml.XMLUtils;
     final Container cpane = getContentPane();
     cpane.setLayout(new BorderLayout());
 
-    final TableModel[] models = buildTableModels(owner.getChallengeDocument(),
-        owner.getScoreDocument());
+    final TableModel[] models = buildTableModels(owner.getChallengeDocument(), owner.getScoreDocument());
     final JTable teamTable = new JTable(models[0]);
     teamTable.setDefaultRenderer(Integer.class, CustomCellRenderer.INSTANCE);
     final JPanel teamPanel = new JPanel(new BorderLayout());
-    final JLabel teamLabel = new JLabel(
-        "# of scores for each team in each category");
+    final JLabel teamLabel = new JLabel("# of scores for each team in each category");
     final JScrollPane teamTableScroller = new JScrollPane(teamTable);
     teamPanel.add(teamLabel, BorderLayout.NORTH);
     teamPanel.add(teamTableScroller, BorderLayout.CENTER);
     cpane.add(teamPanel, BorderLayout.CENTER);
 
     final JTable summaryTable = new JTable(models[1]);
-    final JLabel summaryLabel = new JLabel(
-        "# of teams in each category with the specified # of scores");
+    final JLabel summaryLabel = new JLabel("# of teams in each category with the specified # of scores");
     final JPanel summaryPanel = new JPanel(new BorderLayout());
     summaryPanel.add(summaryLabel, BorderLayout.NORTH);
     final JScrollPane summaryTableScroller = new JScrollPane(summaryTable);
     final Dimension sumPrefSize = summaryTable.getPreferredSize();
-    summaryTableScroller.setPreferredSize(new Dimension(sumPrefSize.width,
-        sumPrefSize.height * 2));
+    summaryTableScroller.setPreferredSize(new Dimension(sumPrefSize.width, sumPrefSize.height * 2));
     summaryPanel.add(summaryTableScroller, BorderLayout.CENTER);
     cpane.add(summaryPanel, BorderLayout.NORTH);
 
@@ -85,51 +80,44 @@ import fll.xml.XMLUtils;
   }
 
   /**
-   * 
    * @param _challengeDocument
    * @param _scoreDocument
    * @return [0] is the team table model, [1] is the summary table model
    */
-  private TableModel[] buildTableModels(final Document _challengeDocument,
-                                        final Document _scoreDocument) {
+  private TableModel[] buildTableModels(final Document _challengeDocument, final Document _scoreDocument) {
     final Map<Integer, Integer[]> data = new HashMap<Integer, Integer[]>();
 
     final List<String> columnNames = new LinkedList<String>();
 
-    final List<Element> subjectiveCategories = XMLUtils
-        .filterToElements(_challengeDocument.getDocumentElement()
-            .getElementsByTagName("subjectiveCategory"));
-    for(int catIdx = 0; catIdx < subjectiveCategories.size(); catIdx++) {
+    final List<Element> subjectiveCategories = XMLUtils.filterToElements(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"));
+    for (int catIdx = 0; catIdx < subjectiveCategories.size(); catIdx++) {
       final Element subjectiveElement = subjectiveCategories.get(catIdx);
       final String category = subjectiveElement.getAttribute("name");
       final String categoryTitle = subjectiveElement.getAttribute("title");
       columnNames.add(categoryTitle);
 
-      final List<Element> goals = XMLUtils.filterToElements(subjectiveElement
-          .getElementsByTagName("goal"));
-      final Element categoryElement = (Element)_scoreDocument
-          .getDocumentElement().getElementsByTagName(category).item(0);
-      for(final Element scoreElement : XMLUtils
-          .filterToElements(categoryElement.getElementsByTagName("score"))) {
+      final List<Element> goals = XMLUtils.filterToElements(subjectiveElement.getElementsByTagName("goal"));
+      final Element categoryElement = (Element) _scoreDocument.getDocumentElement().getElementsByTagName(category).item(0);
+      for (final Element scoreElement : XMLUtils.filterToElements(categoryElement.getElementsByTagName("score"))) {
         int numValues = 0;
-        for(final Element goalElement : goals) {
+        for (final Element goalElement : goals) {
           final String goalName = goalElement.getAttribute("name");
           final String value = scoreElement.getAttribute(goalName);
-          if(null != value && !"".equals(value)) {
+          if (null != value
+              && !"".equals(value)) {
             numValues++;
             break;
           }
         } // end foreach goal
 
-        final int teamNumber = Integer.parseInt(scoreElement
-            .getAttribute("teamNumber"));
-        if(!data.containsKey(teamNumber)) {
+        final int teamNumber = Integer.parseInt(scoreElement.getAttribute("teamNumber"));
+        if (!data.containsKey(teamNumber)) {
           final Integer[] counts = new Integer[subjectiveCategories.size()];
           Arrays.fill(counts, 0);
           data.put(teamNumber, counts);
         }
 
-        if(numValues > 0
+        if (numValues > 0
             || Boolean.parseBoolean(scoreElement.getAttribute("NoShow"))) {
           // if there is a score or a No Show, then increment counter for this
           // team/category combination
@@ -145,11 +133,11 @@ import fll.xml.XMLUtils;
     final List<List<Integer>> tableData = new LinkedList<List<Integer>>();
     final List<Integer> teamNumbers = new ArrayList<Integer>(data.keySet());
     Collections.sort(teamNumbers);
-    for(Integer teamNumber : teamNumbers) {
+    for (final Integer teamNumber : teamNumbers) {
       final Integer[] counts = data.get(teamNumber);
-      for(int column = 0; column < counts.length; ++column) {
+      for (int column = 0; column < counts.length; ++column) {
         // make sure that counts[column] rows exist in summaryData
-        while(summaryData.size() < counts[column] + 1) {
+        while (summaryData.size() < counts[column] + 1) {
           final Integer[] summaryRow = new Integer[columnNames.size()];
           Arrays.fill(summaryRow, 0);
           summaryData.add(summaryRow);
@@ -159,22 +147,20 @@ import fll.xml.XMLUtils;
       }
       final List<Integer> row = new LinkedList<Integer>();
       row.add(teamNumber);
-      for(final Integer value : counts) {
+      for (final Integer value : counts) {
         row.add(value);
       }
       tableData.add(row);
     }
 
-    return new TableModel[] { new CountTableModel(tableData, columnNames),
-                             new SummaryTableModel(summaryData, columnNames) };
+    return new TableModel[] { new CountTableModel(tableData, columnNames), new SummaryTableModel(summaryData, columnNames) };
   }
 
   /**
    * Table model for the summary data
    */
   private static final class SummaryTableModel extends AbstractTableModel {
-    public SummaryTableModel(final List<Integer[]> summaryData,
-                             final List<String> columnNames) {
+    public SummaryTableModel(final List<Integer[]> summaryData, final List<String> columnNames) {
       _summaryData = summaryData;
       _columnNames = columnNames;
     }
@@ -183,8 +169,9 @@ import fll.xml.XMLUtils;
 
     private final List<String> _columnNames;
 
+    @Override
     public Class<?> getColumnClass(final int column) {
-      if(0 == column) {
+      if (0 == column) {
         return String.class;
       } else {
         return Integer.class;
@@ -199,16 +186,17 @@ import fll.xml.XMLUtils;
       return _columnNames.size() + 1;
     }
 
+    @Override
     public String getColumnName(final int column) {
-      if(column == 0) {
+      if (column == 0) {
         return "# of scores";
       } else {
         return _columnNames.get(column - 1);
       }
     }
 
-    public Object getValueAt(int row, int column) {
-      if(column == 0) {
+    public Object getValueAt(final int row, final int column) {
+      if (column == 0) {
         return row;
       } else {
         final Integer[] rowData = _summaryData.get(row);
@@ -221,8 +209,7 @@ import fll.xml.XMLUtils;
    * Table model for the counts of scores for each team.
    */
   private static final class CountTableModel extends AbstractTableModel {
-    public CountTableModel(final List<List<Integer>> data,
-                           final List<String> columnNames) {
+    public CountTableModel(final List<List<Integer>> data, final List<String> columnNames) {
       _data = data;
       _columnNames = columnNames;
     }
@@ -231,8 +218,9 @@ import fll.xml.XMLUtils;
 
     private final List<String> _columnNames;
 
+    @Override
     public Class<?> getColumnClass(final int column) {
-      if(0 == column) {
+      if (0 == column) {
         return String.class;
       } else {
         return Integer.class;
@@ -247,16 +235,17 @@ import fll.xml.XMLUtils;
       return _columnNames.size() + 1;
     }
 
+    @Override
     public String getColumnName(final int column) {
-      if(column == 0) {
+      if (column == 0) {
         return "Team Number";
       } else {
 
-        return _columnNames.get(column-1);
+        return _columnNames.get(column - 1);
       }
     }
 
-    public Object getValueAt(int row, int column) {
+    public Object getValueAt(final int row, final int column) {
       final List<Integer> rowData = _data.get(row);
       return rowData.get(column);
     }
@@ -264,10 +253,8 @@ import fll.xml.XMLUtils;
 
   /**
    * Show all 0's in red.
-   * 
    */
-  private static final class CustomCellRenderer extends
-      DefaultTableCellRenderer {
+  private static final class CustomCellRenderer extends DefaultTableCellRenderer {
     public static final CustomCellRenderer INSTANCE = new CustomCellRenderer();
 
     @Override
@@ -277,9 +264,9 @@ import fll.xml.XMLUtils;
                                                    final boolean hasFocus,
                                                    final int row,
                                                    final int column) {
-      final Component comp = super.getTableCellRendererComponent(table, value,
-          isSelected, hasFocus, row, column);
-      if(value instanceof Number && ((Number)value).intValue() == 0) {
+      final Component comp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+      if (value instanceof Number
+          && ((Number) value).intValue() == 0) {
         comp.setForeground(Color.RED);
       } else {
         comp.setForeground(Color.BLACK);

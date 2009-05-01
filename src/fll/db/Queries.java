@@ -77,12 +77,12 @@ public final class Queries {
       prep.setString(2, tournament);
 
       // foreach team, put the team in a score group
-      for (Team team : Queries.getTournamentTeams(connection).values()) {
+      for (final Team team : Queries.getTournamentTeams(connection).values()) {
         // only show the teams for the division that we are looking at right
         // now
         if (division.equals(team.getEventDivision())) {
           final int teamNum = team.getTeamNumber();
-          StringBuilder scoreGroup = new StringBuilder();
+          final StringBuilder scoreGroup = new StringBuilder();
           prep.setInt(1, teamNum);
           rs = prep.executeQuery();
           boolean first = true;
@@ -147,7 +147,7 @@ public final class Queries {
 
     Statement stmt = null;
     ResultSet rs = null;
-    List<String[]> tableList = new LinkedList<String[]>();
+    final List<String[]> tableList = new LinkedList<String[]>();
     try {
       stmt = connection.createStatement();
 
@@ -221,8 +221,8 @@ public final class Queries {
   public static Map<String, Map<Integer, Map<String, Integer>>> getTeamRankings(final Connection connection, final Document challengeDocument)
       throws SQLException {
     final Map<String, Map<Integer, Map<String, Integer>>> rankingMap = new HashMap<String, Map<Integer, Map<String, Integer>>>();
-    PreparedStatement prep = null;
-    ResultSet rs = null;
+    final PreparedStatement prep = null;
+    final ResultSet rs = null;
     try {
       final String tournament = getCurrentTournament(connection);
       final List<String> divisions = getDivisions(connection);
@@ -284,13 +284,13 @@ public final class Queries {
         }
 
         // foreach subjective category
-        for (String categoryTitle : subjectiveCategories.keySet()) {
+        for (final String categoryTitle : subjectiveCategories.keySet()) {
           final String categoryName = subjectiveCategories.get(categoryTitle);
 
           final Map<String, Collection<Integer>> scoreGroups = Queries.computeScoreGroups(connection, tournament, division, categoryName);
 
           // select from FinalScores
-          for (String scoreGroup : scoreGroups.keySet()) {
+          for (final String scoreGroup : scoreGroups.keySet()) {
             final String teamSelect = StringUtils.join(scoreGroups.get(scoreGroup).iterator(), ", ");
             prep = connection.prepareStatement("SELECT Teams.TeamNumber,FinalScores."
                 + categoryName + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
@@ -365,7 +365,8 @@ public final class Queries {
       query.append(" AND FinalScores.Tournament = ?");
       query.append(" AND current_tournament_teams.event_division = ?");
       query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
-      query.append(" ORDER BY FinalScores.OverallScore " + ascDesc + ", Teams.TeamNumber");
+      query.append(" ORDER BY FinalScores.OverallScore "
+          + ascDesc + ", Teams.TeamNumber");
       prep = connection.prepareStatement(query.toString());
       prep.setString(1, tournament);
       for (final String division : divisions) {
@@ -444,7 +445,8 @@ public final class Queries {
       query.append(" AND FinalScores.Tournament = ?");
       query.append(" AND current_tournament_teams.event_division = ?");
       query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
-      query.append(" ORDER BY FinalScores.performance " + ascDesc + ", Teams.TeamNumber");
+      query.append(" ORDER BY FinalScores.performance "
+          + ascDesc + ", Teams.TeamNumber");
       prep = connection.prepareStatement(query.toString());
       prep.setString(1, tournament);
       for (final String division : divisions) {
@@ -587,6 +589,9 @@ public final class Queries {
   public static String insertPerformanceScore(final Document document, final Connection connection, final HttpServletRequest request) throws SQLException,
       ParseException, RuntimeException {
     final String currentTournament = getCurrentTournament(connection);
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(document);
+    final Element performanceElement = (Element) document.getDocumentElement().getElementsByTagName("Performance").item(0);
+    final Element tiebreakerElement = (Element) performanceElement.getElementsByTagName("tiebreaker").item(0);
 
     final String teamNumber = request.getParameter("TeamNumber");
     if (null == teamNumber) {
@@ -625,10 +630,10 @@ public final class Queries {
             && Playoff.performanceScoreExists(connection, siblingTeam, irunNumber)
             && Playoff.isVerified(connection, currentTournament, Team.getTeamFromDatabase(connection, siblingTeam), irunNumber)) {
           final Team opponent = Team.getTeamFromDatabase(connection, siblingTeam);
-          final Team winner = Playoff.pickWinner(connection, document, opponent, request, irunNumber);
+          final Team winner = Playoff.pickWinner(connection, performanceElement, tiebreakerElement, winnerCriteria, opponent, request, irunNumber);
 
           if (winner != null) {
-            StringBuffer sql = new StringBuffer();
+            final StringBuffer sql = new StringBuffer();
             // update the playoff data table with the winning team...
             sql.append("UPDATE PlayoffData SET Team = "
                 + winner.getTeamNumber());
@@ -710,8 +715,6 @@ public final class Queries {
         + request.getParameter("Verified"));
 
     // now do each goal
-    final Element rootElement = document.getDocumentElement();
-    final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
     for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
       final String name = element.getAttribute("name");
 
@@ -780,6 +783,9 @@ public final class Queries {
   public static String updatePerformanceScore(final Document document, final Connection connection, final HttpServletRequest request) throws SQLException,
       ParseException, RuntimeException {
     final String currentTournament = getCurrentTournament(connection);
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(document);
+    final Element performanceElement = (Element) document.getDocumentElement().getElementsByTagName("Performance").item(0);
+    final Element tiebreakerElement = (Element) performanceElement.getElementsByTagName("tiebreaker").item(0);
 
     final String teamNumber = request.getParameter("TeamNumber");
     if (null == teamNumber) {
@@ -825,8 +831,8 @@ public final class Queries {
             throw new RuntimeException("Unable to find one of these team numbers in the database: "
                 + teamNumber + " and " + siblingTeam);
           }
-          final Team oldWinner = Playoff.pickWinner(connection, document, teamA, teamB, irunNumber);
-          final Team newWinner = Playoff.pickWinner(connection, document, teamB, request, irunNumber);
+          final Team oldWinner = Playoff.pickWinner(connection, performanceElement, tiebreakerElement, winnerCriteria, teamA, teamB, irunNumber);
+          final Team newWinner = Playoff.pickWinner(connection, performanceElement, tiebreakerElement, winnerCriteria, teamB, request, irunNumber);
           Statement stmt = null;
           ResultSet rs = null;
           if (oldWinner != null
@@ -969,8 +975,6 @@ public final class Queries {
         + request.getParameter("totalScore"));
 
     // now do each goal
-    final Element rootElement = document.getDocumentElement();
-    final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
     for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
       final String name = element.getAttribute("name");
 
@@ -1324,7 +1328,7 @@ public final class Queries {
    * to advance teams.
    * 
    * @param connection connection to the database
-   * @param challengeDocument the challenge descriptor
+   * @param winnerCriteria what determines a winner
    * @param divisionStr the division to generate brackets for, as a String
    * @param tournamentTeams keyed by team number
    * @return a List of team numbers as Integers
@@ -1332,14 +1336,13 @@ public final class Queries {
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
   public static List<Team> getPlayoffSeedingOrder(final Connection connection,
-                                                  final Document challengeDocument,
+                                                  final WinnerType winnerCriteria,
                                                   final String divisionStr,
                                                   final Map<Integer, Team> tournamentTeams) throws SQLException, RuntimeException {
 
     final List<Team> retval = new ArrayList<Team>();
     final String currentTournament = getCurrentTournament(connection);
 
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
     final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
 
     PreparedStatement prep = null;
@@ -2347,7 +2350,7 @@ public final class Queries {
    */
   public static int getNumPlayoffRounds(final Connection connection) throws SQLException {
     int numRounds = 0;
-    for (String division : getDivisions(connection)) {
+    for (final String division : getDivisions(connection)) {
       final int x = getFirstPlayoffRoundSize(connection, division);
       if (x > 0) {
         numRounds = Math.max((int) Math.round(Math.log(x)

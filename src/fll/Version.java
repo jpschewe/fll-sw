@@ -16,7 +16,6 @@ import org.apache.log4j.Logger;
  * 
  * @author jpschewe
  * @version $Revision$
- * 
  */
 public final class Version {
 
@@ -25,7 +24,7 @@ public final class Version {
   private static final String _version;
   static {
     final InputStream stream = Version.class.getResourceAsStream("/fll/resources/version.properties");
-    if(null == stream) {
+    if (null == stream) {
       LOG.error("Unable to find version.properties!");
       _version = "NO-PROPERTIES-FILE";
     } else {
@@ -35,7 +34,7 @@ public final class Version {
         versionProps.load(stream);
         stream.close();
         version = versionProps.getProperty("version", "NO-PROPERTY");
-      } catch(final IOException ioe) {
+      } catch (final IOException ioe) {
         LOG.error("Error loading version properties", ioe);
         version = "EXCEPTION";
       }
@@ -47,8 +46,9 @@ public final class Version {
   /**
    * @param args
    */
-  public static void main(String[] args) {
-    LOG.info("Version is: " + getVersion());
+  public static void main(final String[] args) {
+    LOG.info("Version is: "
+        + getVersion());
   }
 
   /**
@@ -57,7 +57,7 @@ public final class Version {
    * @return the version
    */
   public static String getVersion() {
-    if(_version.contains("APP-VERSION")) {
+    if (_version.contains("APP-VERSION")) {
       return "devel";
     } else {
       return _version;

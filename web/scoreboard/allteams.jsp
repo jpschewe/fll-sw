@@ -3,6 +3,7 @@
 <%@ page import="java.sql.PreparedStatement"%>
 <%@ page import="java.sql.ResultSet"%>
 <%@ page import="java.sql.Connection"%>
+<%@ page import="javax.sql.DataSource" %>
 
 <%@ page import="java.util.List"%>
 <%@ page import="java.util.Iterator"%>
@@ -11,10 +12,11 @@
 
 <%@ page import="fll.Utilities"%>
 <%@ page import="fll.db.Queries"%>
-<%@ page import="fll.web.ApplicationAttributes"%>
+<%@ page import="fll.web.SessionAttributes"%>
 
 <%
-      final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
+final DataSource datasource = SessionAttributes.getDataSource(session);
+final Connection connection = datasource.getConnection();
       final String currentTournament = Queries.getCurrentTournament(connection);
 
       final PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, current_tournament_teams.event_division,"

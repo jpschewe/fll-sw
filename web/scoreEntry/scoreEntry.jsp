@@ -9,14 +9,16 @@
 <%@ page import="java.text.NumberFormat" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="fll.web.ApplicationAttributes"%>
+<%@ page import="fll.web.SessionAttributes" %>
 <%@ page import="fll.Utilities"%>
 
 <%@ page import="fll.db.Queries"%>
 <%@ page import="java.sql.Connection"%>
+<%@ page import="javax.sql.DataSource" %>
 <%@ page import="org.w3c.dom.Document"%>
 
 <%
-final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
+final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
 final String lTeamNum = request.getParameter("TeamNumber");
 if(null == lTeamNum) {
@@ -29,7 +31,8 @@ if(null == lTeamNum) {
 }
 
 final int teamNumber = Integer.parseInt(lTeamNum);
-final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
+final DataSource datasource = SessionAttributes.getDataSource(session);
+final Connection connection = datasource.getConnection();
 final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
 final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
 if(!tournamentTeams.containsKey(new Integer(teamNumber))) {
@@ -141,7 +144,7 @@ function init() {
 
   <c:if test="${editFlag}">
   <%
-    ScoreEntry.generateInitForScoreEdit(out, application, challengeDocument, team.getTeamNumber(), lRunNumber);
+    ScoreEntry.generateInitForScoreEdit(out, session, challengeDocument, team.getTeamNumber(), lRunNumber);
   %>
   </c:if>
   gbl_NoShow = 0;

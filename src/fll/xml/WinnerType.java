@@ -31,9 +31,7 @@ package fll.xml;
  * If the winner should be a high score or a low score.
  * 
  * @author jpschewe
- *
  */
 public enum WinnerType {
-  HIGH,
-  LOW;
+  HIGH, LOW;
 }

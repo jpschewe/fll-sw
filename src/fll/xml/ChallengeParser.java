@@ -207,7 +207,7 @@ public final class ChallengeParser {
     for (final Element childNode : XMLUtils.filterToElements(rootElement.getChildNodes())) {
       if ("Performance".equals(childNode.getNodeName())
           || "SubjectiveCategory".equals(childNode.getNodeName())) {
-        final Element childElement = (Element) childNode;
+        final Element childElement = childNode;
 
         // get all nodes named goal at any level under category element
         final Map<String, Element> goals = new HashMap<String, Element>();

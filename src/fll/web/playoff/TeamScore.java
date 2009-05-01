@@ -18,16 +18,16 @@ import fll.xml.XMLUtils;
 /**
  * Represents a score for a team. Only the values of simple goals are available
  * through this object. The values of computed goals are only computed when
- * computing the {@link fll.db.Queries#computeTotalScore(TeamScore) total score}.
+ * computing the {@link fll.db.Queries#computeTotalScore(TeamScore) total score}
+ * .
  * 
  * @author jpschewe
  * @version $Revision$
- * 
  */
 public abstract class TeamScore {
 
   private static final Logger LOG = Logger.getLogger(TeamScore.class);
-  
+
   /**
    * Run number used for team scores that are not performance scores.
    */
@@ -83,8 +83,7 @@ public abstract class TeamScore {
   /**
    * The raw score for a particular simple goal, as a double.
    * 
-   * @param goalName
-   *          the goal to get the score for
+   * @param goalName the goal to get the score for
    * @return the score, null if there is no score for the specified name
    */
   public abstract Double getRawScore(String goalName);
@@ -93,51 +92,54 @@ public abstract class TeamScore {
    * The computed score for a particular goal. This handles both "goal" elements
    * and "computedGoal" elements.
    * 
-   * @param goalName
-   *          the goal to get the score for
-   * @return the score, null if there is no score for the specified goal or one it depends upon
+   * @param goalName the goal to get the score for
+   * @return the score, null if there is no score for the specified goal or one
+   *         it depends upon
    */
   public final Double getComputedScore(final String goalName) {
     assertScoreExists();
     try {
       final Element goalDescription = getGoalDescription(goalName);
-      if(XMLUtils.isComputedGoal(goalDescription)) {
+      if (XMLUtils.isComputedGoal(goalDescription)) {
         return ScoreUtils.evalComputedGoal(goalDescription, this);
       } else {
         final double multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalDescription.getAttribute("multiplier")).doubleValue();
         final List<Element> values = XMLUtils.filterToElements(goalDescription.getElementsByTagName("value"));
-        if(values.size() == 0) {
+        if (values.size() == 0) {
           final Double score = getRawScore(goalName);
-          if(null == score) {
+          if (null == score) {
             return null;
           } else {
-            return multiplier * score;
+            return multiplier
+                * score;
           }
         } else {
           // enumerated
           // find enum value that matches raw score value
           final String enumVal = getEnumRawScore(goalName);
-          if(null != enumVal) {
+          if (null != enumVal) {
             boolean found = false;
             double score = -1;
-            for(final Element value : values) {
-              if(value.getAttribute("value").equals(enumVal)) {
+            for (final Element value : values) {
+              if (value.getAttribute("value").equals(enumVal)) {
                 score = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.getAttribute("score")).doubleValue();
                 found = true;
               }
             }
-            if(!found) {
-              throw new RuntimeException("Error, enum value in database '" + enumVal + "' for goal: " + goalName + " is not a valid value");
+            if (!found) {
+              throw new RuntimeException("Error, enum value in database '"
+                  + enumVal + "' for goal: " + goalName + " is not a valid value");
             }
-            return score * multiplier;
+            return score
+                * multiplier;
           } else {
-            LOG.warn("Error, got null as value for enumerated goal: " + goalName + " team: " + getTeamNumber() + " run: "
-                + getRunNumber() + " category: " + getCategoryDescription().getAttribute("name"));
+            LOG.warn("Error, got null as value for enumerated goal: "
+                + goalName + " team: " + getTeamNumber() + " run: " + getRunNumber() + " category: " + getCategoryDescription().getAttribute("name"));
             return null;
           }
         }
       }
-    } catch(final ParseException pe) {
+    } catch (final ParseException pe) {
       throw new RuntimeException(pe);
     }
   }
@@ -145,8 +147,7 @@ public abstract class TeamScore {
   /**
    * The raw score for a particular enumerated goal, as a String.
    * 
-   * @param goalName
-   *          the goal to get the score for
+   * @param goalName the goal to get the score for
    * @return the score
    */
   public abstract String getEnumRawScore(String goalName);
@@ -175,12 +176,13 @@ public abstract class TeamScore {
    * @return the name of the category
    */
   public final String getCategoryName() {
-    if("Performance".equals(getCategoryDescription().getNodeName())) {
+    if ("Performance".equals(getCategoryDescription().getNodeName())) {
       return "Performance";
-    } else if("subjectiveCategory".equals(getCategoryDescription().getNodeName())) {
+    } else if ("subjectiveCategory".equals(getCategoryDescription().getNodeName())) {
       return getCategoryDescription().getAttribute("name");
     } else {
-      throw new RuntimeException("Unexpected category element found: " + getCategoryDescription().getNodeName());
+      throw new RuntimeException("Unexpected category element found: "
+          + getCategoryDescription().getNodeName());
     }
   }
 
@@ -189,13 +191,13 @@ public abstract class TeamScore {
   /**
    * Find the goal description for the specified goal name
    * 
-   * @param name
-   *          the name of the goal to find
+   * @param name the name of the goal to find
    * @return the goal description, null if none found
    */
   public final Element getGoalDescription(final String name) {
-    for(final Element child : XMLUtils.filterToElements(getCategoryDescription().getChildNodes())) {
-      if(("goal".equals(child.getNodeName()) || "computedGoal".equals(child.getNodeName())) && name.equals(child.getAttribute("name"))) {
+    for (final Element child : XMLUtils.filterToElements(getCategoryDescription().getChildNodes())) {
+      if (("goal".equals(child.getNodeName()) || "computedGoal".equals(child.getNodeName()))
+          && name.equals(child.getAttribute("name"))) {
         return child;
       }
     }
@@ -204,10 +206,9 @@ public abstract class TeamScore {
 
   /**
    * If the score doesn't exist, throw a RuntimeException
-   * 
    */
   protected final void assertScoreExists() {
-    if(!scoreExists()) {
+    if (!scoreExists()) {
       throw new RuntimeException("Attempt to retrieve team score data when the data does not exist");
     }
   }

@@ -3,14 +3,15 @@
 <%@ page import="fll.db.Queries"%>
 <%@ page import="fll.xml.WinnerType"%>
 <%@ page import="fll.xml.XMLUtils"%>
-<%@ page import="fll.web.ApplicationAttributes"%>
-
+<%@ page import="fll.web.SessionAttributes"%>
+<%@ page import="javax.sql.DataSource" %>
 <%@ page import="org.w3c.dom.Document"%>
 
 <%@ page import="java.sql.Connection"%>
 
 <%
-  final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
+final DataSource datasource = SessionAttributes.getDataSource(session);
+final Connection connection = datasource.getConnection();
   final String tournamentReq = request.getParameter("currentTournament");
   final String tournament;
   if (tournamentReq == null) {

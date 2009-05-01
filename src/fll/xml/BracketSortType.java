@@ -4,7 +4,6 @@ package fll.xml;
  * How to sort teams as they are seeded into the brackets.
  * 
  * @author jpschewe
- *
  */
 public enum BracketSortType {
 

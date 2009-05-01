@@ -7,11 +7,12 @@
 
 <%@ page import="fll.Utilities" %>
 <%@ page import="fll.db.Queries" %>
-<%@ page import="fll.web.ApplicationAttributes" %>
-
+<%@ page import="fll.web.SessionAttributes" %>
+<%@ page import="javax.sql.DataSource" %>
       
 <%
-final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
+final DataSource datasource = SessionAttributes.getDataSource(session);
+final Connection connection = datasource.getConnection();
       
 final List<String> divisions = Queries.getDivisions(connection);
 pageContext.setAttribute("divisions", divisions);

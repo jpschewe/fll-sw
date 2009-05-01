@@ -1,204 +1,241 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fll title="Using an enum raw score in the tiebreaker" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="fll.xsd">
+<fll title="Using an enum raw score in the tiebreaker" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="fll.xsd">
 
-  <Performance minimumScore="0" weight="1.0">
+	<Performance minimumScore="0" weight="1.0">
 
-    <goal initialValue="0" max="1" min="0" multiplier="40" name="pump_station" title="Protect the Pump Station"></goal>
+		<goal initialValue="0" max="1" min="0" multiplier="40" name="pump_station"
+			title="Protect the Pump Station"></goal>
 
-    <goal initialValue="0" max="1" min="0" multiplier="30" name="flags" title="Transect Flags: Any Flags"></goal>
+		<goal initialValue="0" max="1" min="0" multiplier="30" name="flags"
+			title="Transect Flags: Any Flags"></goal>
 
-    <goal initialValue="0" max="3" min="0" multiplier="15" name="flags_rows" title="Transect Flags: Number of Rows"></goal>
+		<goal initialValue="0" max="3" min="0" multiplier="15" name="flags_rows"
+			title="Transect Flags: Number of Rows"></goal>
 
-    <goal initialValue="0" max="1" min="0" multiplier="1" name="archaeological" title="Archaeological Artifacts">
-      <value score="35" title="In Base" value="in_base"></value>
-      <value score="25" title="Off Ship" value="off_ship"></value>
-      <value score="0" title="No" value="no"></value>
-    </goal>
-    
-
-    <goal initialValue="0" max="1" min="0" multiplier="25" name="dolphin" title="Release Dolphin"></goal>
-
-    <goal initialValue="0" max="1" min="0" multiplier="35" name="sample_species" title="Sample Species (Grey Fish Only)"></goal>
-
-    <goal initialValue="0" max="1" min="0" multiplier="1" name="submarine" title="Deploy The Submarine">
-      <value score="40" title="Yes Upright" value="upright"></value>
-      <value score="35" title="Yes Not Upright" value="yes"></value>
-      <value score="0" title="No" value="no"></value>
-    </goal>
-    
-
-    <goal initialValue="0" max="1" min="0" multiplier="40" name="artifical_reef" title="Artifical Reef"></goal>
-
-    <goal initialValue="0" max="1" min="0" multiplier="40" name="pipeline" title="Service The Pipeline"></goal>
-
-    <goal initialValue="0" max="1" min="0" multiplier="30" name="shipping_container" title="Shipping Container at Base"></goal>
-
-    <goal initialValue="0" max="8" min="0" multiplier="5" name="crates_base" title="Crates in Base"></goal>
-
-    <goal initialValue="0" max="8" min="0" multiplier="2" name="crates" title="Crates Elsewhere on Table"></goal>
-
-    <goal name="robot_type" title="Robot Type"
-      multiplier="0">
-      <value score="1" title="RCX" value="rcx"/>
-      <value score="2" title="NXT" value="nxt"/>
-    </goal>
-    
-        
-    <computedGoal name="computed" title="Test computed goal">
-      <switch>
-        <case>
-          <enumCondition>  
-            <left>
-              <goalRef goal="robot_type"/>
-            </left>
-            <equal-to/>
-            <right>
-              <stringConstant value="rcx"/>
-            </right>
-          </enumCondition>
-          <switch>
-            <case>
-              <condition>
-                <left>
-                  <term goal="pump_station" scoreType="computed"/>
-                  <term goal="flags" scoreType="computed"/>
-                  <term goal="flags_rows" scoreType="raw"/>
-                </left>
-                <less-than/> <!-- any inequality -->
-                <right>
-                  <constant value="300"/>
-                </right>
-              </condition>
-              <result>
-                <term goal="pump_station" scoreType="computed"/>
-                <term goal="flags" scoreType="computed"/>
-                <term goal="flags_rows" scoreType="computed"/>
-                <constant value="60"/>
-              </result>
-            </case>
-            <default> <!-- default case is required, the default just has a result -->
-              <constant value="240"/>
-              <term coefficient="0.4" goal="pump_station" scoreType="computed"/>
-              <term coefficient="0.4" goal="flags" scoreType="computed"/>
-              <term coefficient="0.4" goal="flags_rows" scoreType="computed"/>
-            </default>
-          </switch>
-        </case>
-        <default>
-          <constant value="0"/>
-        </default>
-      </switch>
-    </computedGoal>
-    
-    <restriction lowerBound="0" message="There are a maximum of 8 crates on the table" upperBound="8">
-      <term coefficient="1" goal="crates_base"/>
-      <term coefficient="1" goal="crates"/>
-    </restriction>
-
-    <tiebreaker>
-      <test winner="HIGH">
-        <term goal="robot_type" scoreType="raw" /> <!-- can't use an enum raw score in a polynomial -->
-      </test> 
-      <test winner="HIGH">
-        <term goal="crates_base" />
-      </test> 
-      <test winner="HIGH">
-        <term goal="crates" />
-      </test> 
-      <test winner="HIGH">
-        <term goal="dolphin" />
-      </test> 
-      <test winner="HIGH">
-        <term goal="flags_rows" />
-      </test> 
-      <test winner="HIGH">
-        <term goal="flags" />
-      </test> 
-      <test winner="HIGH">
-        <term goal="submarine" />
-      </test> 
-      <test winner="HIGH">
-        <term goal="archaeological" />
-      </test> 
-      <test winner="HIGH">
-        <term goal="shipping_container" />
-      </test> 
-      <test winner="HIGH">
-        <term goal="pump_station" />
-      </test> 
-      <test winner="HIGH">
-        <term goal="pipeline" />
-      </test>
-      <test winner="HIGH">
-        <term goal="sample_species" />
-      </test>
-      <test winner="HIGH">
-        <term goal="artifical_reef" />
-      </test>
-      <test winner="HIGH">
-        <term goal="computed" />
-        <constant value="10"/>
-      </test>
-    </tiebreaker>
-
-  </Performance>
-
-  <subjectiveCategory name="teamwork" title="Teamwork" weight="1.0">
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="roles" title="Roles and Responsibilities"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="professionalism" title="Gracious Professionalism"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="dynamics" title="Problem Solving &amp; Team Dynamics &amp; Communications"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="confidence" title="Confidence &amp; Enthusiasm"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="fll_values" title="FLL Values"></goal>
-    <computedGoal name="computed" title="Test computed goal">
-      <switch>
-        <case>
-          <condition>
-            <left>
-              <term goal="roles" scoreType="computed"/>
-              <term goal="dynamics" scoreType="raw"/>
-            </left>
-            <less-than/>
-            <right>
-              <constant value="30"/>
-            </right>
-          </condition>
-          <result>
-            <constant value="100"/>
-          </result>
-        </case>
-        <default>
-          <constant value="10"/>
-        </default>
-      </switch>
-    </computedGoal>
-    
-  </subjectiveCategory>
-
-  
-  <subjectiveCategory name="robustdesign" title="Robust Design" weight="0.5">
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="strategy" title="Strategy, Process, Problem Solving"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="locomotion" title="Locomotion and Navigation"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="design_kids" title="Kids Did the Work"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="structural" title="Structural"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="overall_design" title="Overall Design"></goal>
-  </subjectiveCategory>
+		<goal initialValue="0" max="1" min="0" multiplier="1"
+			name="archaeological" title="Archaeological Artifacts">
+			<value score="35" title="In Base" value="in_base"></value>
+			<value score="25" title="Off Ship" value="off_ship"></value>
+			<value score="0" title="No" value="no"></value>
+		</goal>
 
 
-  <subjectiveCategory name="programming" title="Robust Programming" weight="0.5">
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="useoflanguage" title="Use of Language"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="modularity" title="Modularity/Abstraction"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="sensorcontrol" title="Sensor Control"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="design" title="Design"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="programming_kids" title="Kids Did the Work"></goal>
-  </subjectiveCategory>
+		<goal initialValue="0" max="1" min="0" multiplier="25" name="dolphin"
+			title="Release Dolphin"></goal>
 
-  <subjectiveCategory name="research" title="Research Project Assessment" weight="1.0">
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="questions" title="Questions, Language Use"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="completeness" title="Completeness, Teamwork"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="background" title="Background, Data, and Graphics"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="analysis" title="Analysis and Conclusions"></goal>
-    <goal initialValue="0" max="20" min="1" multiplier="1" name="style" title="Style"></goal>
-  </subjectiveCategory>
+		<goal initialValue="0" max="1" min="0" multiplier="35"
+			name="sample_species" title="Sample Species (Grey Fish Only)"></goal>
 
-  
+		<goal initialValue="0" max="1" min="0" multiplier="1" name="submarine"
+			title="Deploy The Submarine">
+			<value score="40" title="Yes Upright" value="upright"></value>
+			<value score="35" title="Yes Not Upright" value="yes"></value>
+			<value score="0" title="No" value="no"></value>
+		</goal>
+
+
+		<goal initialValue="0" max="1" min="0" multiplier="40"
+			name="artifical_reef" title="Artifical Reef"></goal>
+
+		<goal initialValue="0" max="1" min="0" multiplier="40" name="pipeline"
+			title="Service The Pipeline"></goal>
+
+		<goal initialValue="0" max="1" min="0" multiplier="30"
+			name="shipping_container" title="Shipping Container at Base"></goal>
+
+		<goal initialValue="0" max="8" min="0" multiplier="5" name="crates_base"
+			title="Crates in Base"></goal>
+
+		<goal initialValue="0" max="8" min="0" multiplier="2" name="crates"
+			title="Crates Elsewhere on Table"></goal>
+
+		<goal name="robot_type" title="Robot Type" multiplier="0">
+			<value score="1" title="RCX" value="rcx" />
+			<value score="2" title="NXT" value="nxt" />
+		</goal>
+
+
+		<computedGoal name="computed" title="Test computed goal">
+			<switch>
+				<case>
+					<enumCondition>
+						<left>
+							<goalRef goal="robot_type" />
+						</left>
+						<equal-to />
+						<right>
+							<stringConstant value="rcx" />
+						</right>
+					</enumCondition>
+					<switch>
+						<case>
+							<condition>
+								<left>
+									<term goal="pump_station" scoreType="computed" />
+									<term goal="flags" scoreType="computed" />
+									<term goal="flags_rows" scoreType="raw" />
+								</left>
+								<less-than /> <!-- any inequality -->
+								<right>
+									<constant value="300" />
+								</right>
+							</condition>
+							<result>
+								<term goal="pump_station" scoreType="computed" />
+								<term goal="flags" scoreType="computed" />
+								<term goal="flags_rows" scoreType="computed" />
+								<constant value="60" />
+							</result>
+						</case>
+						<default> <!-- default case is required, the default just has a result -->
+							<constant value="240" />
+							<term coefficient="0.4" goal="pump_station" scoreType="computed" />
+							<term coefficient="0.4" goal="flags" scoreType="computed" />
+							<term coefficient="0.4" goal="flags_rows" scoreType="computed" />
+						</default>
+					</switch>
+				</case>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+		<restriction lowerBound="0"
+			message="There are a maximum of 8 crates on the table" upperBound="8">
+			<term coefficient="1" goal="crates_base" />
+			<term coefficient="1" goal="crates" />
+		</restriction>
+
+		<tiebreaker>
+			<test winner="HIGH">
+				<term goal="robot_type" scoreType="raw" /> <!-- can't use an enum raw score in a polynomial -->
+			</test>
+			<test winner="HIGH">
+				<term goal="crates_base" />
+			</test>
+			<test winner="HIGH">
+				<term goal="crates" />
+			</test>
+			<test winner="HIGH">
+				<term goal="dolphin" />
+			</test>
+			<test winner="HIGH">
+				<term goal="flags_rows" />
+			</test>
+			<test winner="HIGH">
+				<term goal="flags" />
+			</test>
+			<test winner="HIGH">
+				<term goal="submarine" />
+			</test>
+			<test winner="HIGH">
+				<term goal="archaeological" />
+			</test>
+			<test winner="HIGH">
+				<term goal="shipping_container" />
+			</test>
+			<test winner="HIGH">
+				<term goal="pump_station" />
+			</test>
+			<test winner="HIGH">
+				<term goal="pipeline" />
+			</test>
+			<test winner="HIGH">
+				<term goal="sample_species" />
+			</test>
+			<test winner="HIGH">
+				<term goal="artifical_reef" />
+			</test>
+			<test winner="HIGH">
+				<term goal="computed" />
+				<constant value="10" />
+			</test>
+		</tiebreaker>
+
+	</Performance>
+
+	<subjectiveCategory name="teamwork" title="Teamwork"
+		weight="1.0">
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="roles"
+			title="Roles and Responsibilities"></goal>
+		<goal initialValue="0" max="20" min="1" multiplier="1"
+			name="professionalism" title="Gracious Professionalism"></goal>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="dynamics"
+			title="Problem Solving &amp; Team Dynamics &amp; Communications"></goal>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="confidence"
+			title="Confidence &amp; Enthusiasm"></goal>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="fll_values"
+			title="FLL Values"></goal>
+		<computedGoal name="computed" title="Test computed goal">
+			<switch>
+				<case>
+					<condition>
+						<left>
+							<term goal="roles" scoreType="computed" />
+							<term goal="dynamics" scoreType="raw" />
+						</left>
+						<less-than />
+						<right>
+							<constant value="30" />
+						</right>
+					</condition>
+					<result>
+						<constant value="100" />
+					</result>
+				</case>
+				<default>
+					<constant value="10" />
+				</default>
+			</switch>
+		</computedGoal>
+
+	</subjectiveCategory>
+
+
+	<subjectiveCategory name="robustdesign" title="Robust Design"
+		weight="0.5">
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="strategy"
+			title="Strategy, Process, Problem Solving"></goal>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="locomotion"
+			title="Locomotion and Navigation"></goal>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="design_kids"
+			title="Kids Did the Work"></goal>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="structural"
+			title="Structural"></goal>
+		<goal initialValue="0" max="20" min="1" multiplier="1"
+			name="overall_design" title="Overall Design"></goal>
+	</subjectiveCategory>
+
+
+	<subjectiveCategory name="programming" title="Robust Programming"
+		weight="0.5">
+		<goal initialValue="0" max="20" min="1" multiplier="1"
+			name="useoflanguage" title="Use of Language"></goal>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="modularity"
+			title="Modularity/Abstraction"></goal>
+		<goal initialValue="0" max="20" min="1" multiplier="1"
+			name="sensorcontrol" title="Sensor Control"></goal>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="design"
+			title="Design"></goal>
+		<goal initialValue="0" max="20" min="1" multiplier="1"
+			name="programming_kids" title="Kids Did the Work"></goal>
+	</subjectiveCategory>
+
+	<subjectiveCategory name="research"
+		title="Research Project Assessment" weight="1.0">
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="questions"
+			title="Questions, Language Use"></goal>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="completeness"
+			title="Completeness, Teamwork"></goal>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="background"
+			title="Background, Data, and Graphics"></goal>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="analysis"
+			title="Analysis and Conclusions"></goal>
+		<goal initialValue="0" max="20" min="1" multiplier="1" name="style"
+			title="Style"></goal>
+	</subjectiveCategory>
+
+
 </fll>
