@@ -45,7 +45,10 @@ import org.w3c.dom.Document;
 import fll.Team;
 import fll.db.GenerateDB;
 import fll.db.Queries;
+import fll.xml.BracketSortType;
 import fll.xml.ChallengeParser;
+import fll.xml.WinnerType;
+import fll.xml.XMLUtils;
 
 /**
  * Test the various playoff bracket sort methods.
@@ -56,17 +59,18 @@ public class BracketSortTest {
 
   /**
    * Test sorting alphabetically by team name.
-   * @throws ClassNotFoundException 
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
-   * @throws SQLException 
-   * @throws UnsupportedEncodingException 
+   * 
+   * @throws ClassNotFoundException
+   * @throws IllegalAccessException
+   * @throws InstantiationException
+   * @throws SQLException
+   * @throws UnsupportedEncodingException
    */
   @Test
   public void testAlphaTeam() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, UnsupportedEncodingException {
     final String divisionStr = "1";
     final String[] teamNames = new String[] { "A", "B", "C", "D", "E", "F" };
-    
+
     Connection connection = null;
     try {
       // load in data/alpha-team-sort.xml
@@ -77,15 +81,19 @@ public class BracketSortTest {
       Class.forName("org.hsqldb.jdbcDriver").newInstance();
       connection = DriverManager.getConnection("jdbc:hsqldb:mem:flldb-testAlphaTeam");
       GenerateDB.generateDB(document, connection, true);
-      
+
       // put some teams in the database
-      for(int i=0; i<teamNames.length; ++i) {
-        final String otherTeam = Queries.addTeam(connection, teamNames.length - i, teamNames[i], null, "DUMMY", divisionStr);
+      for (int i = 0; i < teamNames.length; ++i) {
+        final String otherTeam = Queries.addTeam(connection, teamNames.length
+            - i, teamNames[i], null, "DUMMY", divisionStr);
         Assert.assertNull(otherTeam);
       }
       final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-      
-      final List<Team> order = Playoff.buildInitialBracketOrder(connection, document, divisionStr, tournamentTeams);
+
+      final BracketSortType bracketSort = XMLUtils.getBracketSort(document);
+      final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(document);
+
+      final List<Team> order = Playoff.buildInitialBracketOrder(connection, bracketSort, winnerCriteria, divisionStr, tournamentTeams);
       Assert.assertEquals("A", order.get(0).getTeamName());
       Assert.assertEquals("B", order.get(1).getTeamName());
       Assert.assertEquals("C", order.get(2).getTeamName());
@@ -94,11 +102,10 @@ public class BracketSortTest {
       Assert.assertEquals(Team.BYE, order.get(5));
       Assert.assertEquals("F", order.get(6).getTeamName());
       Assert.assertEquals(Team.BYE, order.get(7));
-      
+
     } finally {
       SQLFunctions.closeConnection(connection);
     }
   }
-  
 
 }

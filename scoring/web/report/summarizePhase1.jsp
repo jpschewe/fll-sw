@@ -4,6 +4,7 @@
 <%@ page import="fll.db.Queries" %>
 <%@ page import="fll.Utilities" %>
 <%@ page import="fll.web.ApplicationAttributes"%>
+<%@ page import="fll.web.SessionAttributes" %>
       
 <%@ page import="org.w3c.dom.Document" %>
 
@@ -12,11 +13,13 @@
 <%@ page import="java.sql.ResultSet" %>
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.Connection" %>
+<%@ page import="javax.sql.DataSource" %>
 
 
 <%
-final Document challengeDocument = (Document)application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
-final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
+final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+final DataSource datasource = SessionAttributes.getDataSource(session);
+final Connection connection = datasource.getConnection();
 final String currentTournament = Queries.getCurrentTournament(connection);
   
 Queries.updateScoreTotals(challengeDocument, connection);

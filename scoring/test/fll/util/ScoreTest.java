@@ -29,7 +29,6 @@ import fll.xml.ChallengeParser;
  * 
  * @author jpschewe
  * @version $Revision$
- * 
  */
 public class ScoreTest {
 
@@ -46,7 +45,7 @@ public class ScoreTest {
     final Document document = ChallengeParser.parse(new InputStreamReader(stream));
     Assert.assertNotNull(document);
     final Element rootElement = document.getDocumentElement();
-    final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
+    final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
     Assert.assertNotNull(performanceElement);
 
     final Map<String, Double> simpleGoals = new HashMap<String, Double>();
@@ -96,7 +95,7 @@ public class ScoreTest {
     final Document document = ChallengeParser.parse(new InputStreamReader(stream));
     Assert.assertNotNull(document);
     final Element rootElement = document.getDocumentElement();
-    final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
+    final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
     Assert.assertNotNull(performanceElement);
 
     final Map<String, Double> simpleGoals = new HashMap<String, Double>();
@@ -152,33 +151,37 @@ public class ScoreTest {
     finalists.put("research", Arrays.asList(5568, 1452, 2683, 3517));
 
     final List<Map<String, Integer>> schedule = ScoreUtils.scheduleFinalists(finalists);
-    if(LOG.isDebugEnabled()) {
-      LOG.debug("Finalists: " + finalists + " schedule: " + schedule);
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Finalists: "
+          + finalists + " schedule: " + schedule);
     }
-    
+
     // check that each team in finalists is in the schedule
-    for(final Map.Entry<String, Collection<Integer>> entry : finalists.entrySet()) {
+    for (final Map.Entry<String, Collection<Integer>> entry : finalists.entrySet()) {
       final String category = entry.getKey();
-      for(final Integer team : entry.getValue()) {
-        
+      for (final Integer team : entry.getValue()) {
+
         // find the team in the schedule
         boolean found = false;
         final Iterator<Map<String, Integer>> iter = schedule.iterator();
-        while(iter.hasNext() && !found) {
+        while (iter.hasNext()
+            && !found) {
           final Map<String, Integer> timeSlot = iter.next();
-          if(team.equals(timeSlot.get(category))) {
+          if (team.equals(timeSlot.get(category))) {
             found = true;
           }
         }
-        Assert.assertTrue(team + " is not scheduled for " + category, found);
+        Assert.assertTrue(team
+            + " is not scheduled for " + category, found);
       }
     }
-    
+
     // check that each time slot does not contain the same team twice
-    for(final Map<String, Integer> timeSlot : schedule) {
+    for (final Map<String, Integer> timeSlot : schedule) {
       final Collection<Integer> teamsSeen = new LinkedList<Integer>();
-      for(final Integer team : timeSlot.values()) {
-        Assert.assertFalse(team + " appears twice in a time slot in the schedule: " + timeSlot,  teamsSeen.contains(team));
+      for (final Integer team : timeSlot.values()) {
+        Assert.assertFalse(team
+            + " appears twice in a time slot in the schedule: " + timeSlot, teamsSeen.contains(team));
         teamsSeen.add(team);
       }
     }

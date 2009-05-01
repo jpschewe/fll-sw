@@ -1,8 +1,8 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%@ page import="fll.db.Queries"%>
-<%@ page import="fll.web.ApplicationAttributes" %>
-
+<%@ page import="fll.web.SessionAttributes" %>
+<%@ page import="javax.sql.DataSource" %>
 <%@ page import="java.sql.Connection"%>
 <%@ page import="java.sql.Statement"%>
 <%@ page import="java.sql.ResultSet"%>
@@ -10,8 +10,8 @@
 <%@ page import="java.text.NumberFormat"%>
 
 <%
-	final Connection connection = (Connection) application
-			.getAttribute(ApplicationAttributes.CONNECTION);
+final DataSource datasource = SessionAttributes.getDataSource(session);
+final Connection connection = datasource.getConnection();
 	final StringBuffer message = new StringBuffer();
 	final String messageReq = request.getParameter("message");
 	if (null != messageReq) {

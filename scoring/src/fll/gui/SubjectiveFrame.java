@@ -40,6 +40,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextPane;
+import javax.swing.WindowConstants;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
@@ -72,8 +73,9 @@ public final class SubjectiveFrame extends JFrame {
       fileChooser.setDialogTitle("Please choose the subjective data file");
       // NOTE: Should get JonsInfra fixed for this
       fileChooser.setFileFilter(new BasicFileFilter("Zip files", "zip") {
+        @Override
         public boolean accept(final File f) {
-          if(f.isDirectory()) {
+          if (f.isDirectory()) {
             return true;
           } else {
             return super.accept(f);
@@ -81,7 +83,7 @@ public final class SubjectiveFrame extends JFrame {
         }
       });
       final int state = fileChooser.showOpenDialog(null);
-      if(JFileChooser.APPROVE_OPTION == state) {
+      if (JFileChooser.APPROVE_OPTION == state) {
         final File file = fileChooser.getSelectedFile();
         final SubjectiveFrame frame = new SubjectiveFrame(file);
         setInitialDirectory(file);
@@ -90,8 +92,9 @@ public final class SubjectiveFrame extends JFrame {
       } else {
         System.exit(0);
       }
-    } catch(final IOException ioe) {
-      JOptionPane.showMessageDialog(null, "Error reading data file: " + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    } catch (final IOException ioe) {
+      JOptionPane.showMessageDialog(null, "Error reading data file: "
+          + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
       System.exit(1);
     }
   }
@@ -99,8 +102,7 @@ public final class SubjectiveFrame extends JFrame {
   /**
    * Create a window to edit subjective scores.
    * 
-   * @param file
-   *          where to read the data in from and where to save data to
+   * @param file where to read the data in from and where to save data to
    */
   public SubjectiveFrame(final File file) throws IOException {
     super("Subjective Score Entry");
@@ -136,8 +138,9 @@ public final class SubjectiveFrame extends JFrame {
       public void actionPerformed(final ActionEvent ae) {
         try {
           save();
-        } catch(final IOException ioe) {
-          JOptionPane.showMessageDialog(null, "Error writing to data file: " + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (final IOException ioe) {
+          JOptionPane.showMessageDialog(null, "Error writing to data file: "
+              + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
       }
@@ -157,7 +160,7 @@ public final class SubjectiveFrame extends JFrame {
     final JTabbedPane tabbedPane = new JTabbedPane();
     getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
-    for(final Element subjectiveElement : XMLUtils.filterToElements(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+    for (final Element subjectiveElement : XMLUtils.filterToElements(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       final SubjectiveTableModel tableModel = new SubjectiveTableModel(_scoreDocument, subjectiveElement);
       final JTable table = new SortableTable(tableModel);
       final String title = subjectiveElement.getAttribute("title");
@@ -166,14 +169,14 @@ public final class SubjectiveFrame extends JFrame {
       tableScroller.setPreferredSize(new Dimension(640, 480));
       tabbedPane.addTab(title, tableScroller);
 
-      int g=0;
-      for(final Element goalDescription : XMLUtils.filterToElements(subjectiveElement.getElementsByTagName("goal"))) {
+      int g = 0;
+      for (final Element goalDescription : XMLUtils.filterToElements(subjectiveElement.getElementsByTagName("goal"))) {
         final List<Element> posValuesList = XMLUtils.filterToElements(goalDescription.getElementsByTagName("value"));
-        if(posValuesList.size() > 0) {
+        if (posValuesList.size() > 0) {
           // enumerated
           final Vector<String> posValues = new Vector<String>();
           posValues.add("");
-          for(final Element posValue : posValuesList) {
+          for (final Element posValue : posValuesList) {
             posValues.add(posValue.getAttribute("title"));
           }
 
@@ -190,7 +193,7 @@ public final class SubjectiveFrame extends JFrame {
         quit();
       }
     });
-    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
   }
 
   /**
@@ -198,21 +201,22 @@ public final class SubjectiveFrame extends JFrame {
    * saving and cancel doesn't quit.
    */
   private void quit() {
-    if(validateData()) {
+    if (validateData()) {
 
-      final int state = JOptionPane.showConfirmDialog(SubjectiveFrame.this, "Save data?  Data will be saved in same file as it was read from.",
-          "Exit", JOptionPane.YES_NO_CANCEL_OPTION);
-      if(JOptionPane.YES_OPTION == state) {
+      final int state = JOptionPane.showConfirmDialog(SubjectiveFrame.this, "Save data?  Data will be saved in same file as it was read from.", "Exit",
+                                                      JOptionPane.YES_NO_CANCEL_OPTION);
+      if (JOptionPane.YES_OPTION == state) {
         try {
           save();
           setVisible(false);
           dispose();
-        } catch(final IOException ioe) {
-          JOptionPane.showMessageDialog(null, "Error writing to data file: " + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (final IOException ioe) {
+          JOptionPane.showMessageDialog(null, "Error writing to data file: "
+              + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
         System.exit(0);
-      } else if(JOptionPane.NO_OPTION == state) {
+      } else if (JOptionPane.NO_OPTION == state) {
         setVisible(false);
         dispose();
         System.exit(0);
@@ -233,35 +237,39 @@ public final class SubjectiveFrame extends JFrame {
     stopCellEditors();
 
     final List<String> warnings = new LinkedList<String>();
-    for(final Element subjectiveElement : XMLUtils.filterToElements(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+    for (final Element subjectiveElement : XMLUtils.filterToElements(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       final String category = subjectiveElement.getAttribute("name");
       final String categoryTitle = subjectiveElement.getAttribute("title");
 
       final List<Element> goals = XMLUtils.filterToElements(subjectiveElement.getElementsByTagName("goal"));
-      final Element categoryElement = (Element)_scoreDocument.getDocumentElement().getElementsByTagName(category).item(0);
-      for(final Element scoreElement : XMLUtils.filterToElements(categoryElement.getElementsByTagName("score"))) {
+      final Element categoryElement = (Element) _scoreDocument.getDocumentElement().getElementsByTagName(category).item(0);
+      for (final Element scoreElement : XMLUtils.filterToElements(categoryElement.getElementsByTagName("score"))) {
         int numValues = 0;
-        for(final Element goalElement : goals) {
+        for (final Element goalElement : goals) {
           final String goalName = goalElement.getAttribute("name");
           final String value = scoreElement.getAttribute(goalName);
-          if(null != value && !"".equals(value)) {
+          if (null != value
+              && !"".equals(value)) {
             numValues++;
           }
         }
-        if(numValues != goals.size() && numValues != 0) {
-          warnings.add(categoryTitle + ": " + scoreElement.getAttribute("teamNumber") + " has too few scores (needs all or none): " + numValues);
+        if (numValues != goals.size()
+            && numValues != 0) {
+          warnings.add(categoryTitle
+              + ": " + scoreElement.getAttribute("teamNumber") + " has too few scores (needs all or none): " + numValues);
         }
 
       }
     }
 
-    if(!warnings.isEmpty()) {
+    if (!warnings.isEmpty()) {
       // join the warnings with carriage returns and display them
       final StyledDocument doc = new DefaultStyledDocument();
-      for(String warning : warnings) {
+      for (final String warning : warnings) {
         try {
-          doc.insertString(doc.getLength(), warning + "\n", null);
-        } catch(final BadLocationException ble) {
+          doc.insertString(doc.getLength(), warning
+              + "\n", null);
+        } catch (final BadLocationException ble) {
           throw new RuntimeException(ble);
         }
       }
@@ -290,13 +298,13 @@ public final class SubjectiveFrame extends JFrame {
    */
   private void stopCellEditors() {
     final Iterator<JTable> iter = _tables.values().iterator();
-    while(iter.hasNext()) {
+    while (iter.hasNext()) {
       final JTable table = iter.next();
       final int editingColumn = table.getEditingColumn();
       final int editingRow = table.getEditingRow();
-      if(editingColumn > -1) {
+      if (editingColumn > -1) {
         final TableCellEditor cellEditor = table.getCellEditor(editingRow, editingColumn);
-        if(null != cellEditor) {
+        if (null != cellEditor) {
           cellEditor.stopCellEditing();
         }
       }
@@ -306,11 +314,10 @@ public final class SubjectiveFrame extends JFrame {
   /**
    * Save out to the same file that things were read in.
    * 
-   * @throws IOException
-   *           if an error occurs writing to the file
+   * @throws IOException if an error occurs writing to the file
    */
   public void save() throws IOException {
-    if(validateData()) {
+    if (validateData()) {
 
       final XMLWriter xmlwriter = new XMLWriter();
 
@@ -332,13 +339,12 @@ public final class SubjectiveFrame extends JFrame {
    * Set the initial directory preference. This supports opening new file
    * dialogs to a (hopefully) better default in the user's next session.
    * 
-   * @param dir
-   *          the File for the directory in which file dialogs should open
+   * @param dir the File for the directory in which file dialogs should open
    */
   private static void setInitialDirectory(final File dir) {
     // Store only directories
     final File directory;
-    if(dir.isDirectory()) {
+    if (dir.isDirectory()) {
       directory = dir;
     } else {
       directory = dir.getParentFile();
@@ -347,7 +353,7 @@ public final class SubjectiveFrame extends JFrame {
     final Preferences preferences = Preferences.userNodeForPackage(SubjectiveFrame.class);
     final String previousPath = preferences.get(INITIAL_DIRECTORY_PREFERENCE_KEY, null);
 
-    if(!directory.toString().equals(previousPath)) {
+    if (!directory.toString().equals(previousPath)) {
       preferences.put(INITIAL_DIRECTORY_PREFERENCE_KEY, directory.toString());
     }
   }
@@ -363,7 +369,7 @@ public final class SubjectiveFrame extends JFrame {
     final String path = preferences.get(INITIAL_DIRECTORY_PREFERENCE_KEY, null);
 
     File dir = null;
-    if(null != path) {
+    if (null != path) {
       dir = new File(path);
     }
     return dir;
@@ -374,7 +380,7 @@ public final class SubjectiveFrame extends JFrame {
    */
   private static final String INITIAL_DIRECTORY_PREFERENCE_KEY = "InitialDirectory";
 
-  private Map<String, JTable> _tables = new HashMap<String, JTable>();
+  private final Map<String, JTable> _tables = new HashMap<String, JTable>();
 
   /**
    * Get the table model for a given subjective title. Mostly for testing.
@@ -383,7 +389,7 @@ public final class SubjectiveFrame extends JFrame {
    */
   public TableModel getTableModelForTitle(final String title) {
     final JTable table = _tables.get(title);
-    if(null == table) {
+    if (null == table) {
       return null;
     } else {
       return table.getModel();
@@ -393,11 +399,14 @@ public final class SubjectiveFrame extends JFrame {
   private final File _file;
 
   private final Document _challengeDocument;
-  /*package*/ final Document getChallengeDocument() {
+
+  /* package */final Document getChallengeDocument() {
     return _challengeDocument;
   }
+
   private final Document _scoreDocument;
-  /*package*/ final Document getScoreDocument() {
+
+  /* package */final Document getScoreDocument() {
     return _scoreDocument;
   }
 

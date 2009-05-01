@@ -11,7 +11,6 @@ import java.net.MalformedURLException;
 import junit.framework.Assert;
 
 import org.apache.log4j.Logger;
-import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -25,37 +24,29 @@ import fll.TestUtils;
 
 /**
  * Basic tests.
- *
+ * 
  * @version $Revision$
  */
 public class WebTest {
-  
+
   private static final Logger LOGGER = Logger.getLogger(WebTest.class);
 
   /**
    * Basic load of the pages.
    */
   @Test
-  public void testPages()
-    throws SAXException, MalformedURLException, IOException {
-    final String[] pages = new String[] {
-      "",
-      "index.jsp",
-      "edit_event_division.jsp",
-      "tournaments.jsp",
-      "judges.jsp",
-      "tables.jsp",
-      "select_team.jsp",
-      "remoteControl.jsp",
-      "advanceTeams.jsp",
-    };
+  public void testPages() throws SAXException, MalformedURLException, IOException {
+    final String[] pages = new String[] { "", "index.jsp", "edit_event_division.jsp", "tournaments.jsp", "judges.jsp", "tables.jsp", "select_team.jsp",
+                                         "remoteControl.jsp", "advanceTeams.jsp", };
     final WebConversation conversation = new WebConversation();
-    for(int i=0; i<pages.length; i++) {
-      if(LOGGER.isInfoEnabled()) {
-        LOGGER.info("Testing page " + pages[i]);
+    for (final String page : pages) {
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("Testing page "
+            + page);
       }
       TestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
-      final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT + "admin/" + pages[i]);
+      final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "admin/" + page);
       final WebResponse response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
     }
@@ -65,18 +56,18 @@ public class WebTest {
    * Test changing tournaments to DUMMY and then back to State.
    */
   @Test
-  public void testChangeTournament()
-    throws MalformedURLException, IOException, SAXException {
+  public void testChangeTournament() throws MalformedURLException, IOException, SAXException {
     TestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
 
     final WebConversation conversation = new WebConversation();
-    final WebRequest request = new PostMethodWebRequest(TestUtils.URL_ROOT + "admin/index.jsp");
+    final WebRequest request = new PostMethodWebRequest(TestUtils.URL_ROOT
+        + "admin/index.jsp");
     request.setParameter("currentTournament", "DUMMY");
     conversation.getResponse(request);
 
     request.setParameter("currentTournament", "State");
     conversation.getResponse(request);
-    
+
   }
-  
+
 }

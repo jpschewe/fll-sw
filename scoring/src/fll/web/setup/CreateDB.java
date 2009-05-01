@@ -25,6 +25,7 @@ import fll.db.GenerateDB;
 import fll.db.ImportDB;
 import fll.web.ApplicationAttributes;
 import fll.web.Init;
+import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 import fll.xml.ChallengeParser;
 
@@ -33,14 +34,12 @@ import fll.xml.ChallengeParser;
  * 
  * @author jpschewe
  * @version $Revision$
- * 
  */
 public class CreateDB extends HttpServlet {
 
   private static final Logger LOG = Logger.getLogger(CreateDB.class);
 
   /**
-   * 
    * @param request
    * @param response
    */
@@ -69,9 +68,10 @@ public class CreateDB extends HttpServlet {
           final String db = getServletConfig().getServletContext().getRealPath("/WEB-INF/flldb");
           GenerateDB.generateDB(document, db, forceRebuild);
 
-          // remove application variables that depend on the database
-          application.removeAttribute(ApplicationAttributes.CONNECTION);
+          // remove application & session variables that depend on the database
+          session.removeAttribute(SessionAttributes.DATASOURCE);
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
+          application.removeAttribute(ApplicationAttributes.DATABASE);
 
           message.append("<p id='success'><i>Successfully initialized database</i></p>");
         }
@@ -84,28 +84,32 @@ public class CreateDB extends HttpServlet {
         ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileItem.getInputStream()), database);
 
         // remove application variables that depend on the database
-        application.removeAttribute(ApplicationAttributes.CONNECTION);
+        session.removeAttribute(SessionAttributes.DATASOURCE);
         application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
         application.removeAttribute(ApplicationAttributes.DATABASE);
-        
-        message.append("<p id='success'><i>Successfully initialized database from dump</i></p>");        
+
+        message.append("<p id='success'><i>Successfully initialized database from dump</i></p>");
       } else {
-        message.append("<p class='error'>Unknown form state, expected form fields not seen: " + request + "</p>");
+        message.append("<p class='error'>Unknown form state, expected form fields not seen: "
+            + request + "</p>");
       }
     } catch (final FileUploadException fue) {
-      message.append("<p class='error'>Error handling the file upload: " + fue.getMessage() + "</p>");
+      message.append("<p class='error'>Error handling the file upload: "
+          + fue.getMessage() + "</p>");
       LOG.error(fue);
     } catch (final IOException ioe) {
-      message.append("<p class='error'>Error reading challenge descriptor: " + ioe.getMessage() + "</p>");
+      message.append("<p class='error'>Error reading challenge descriptor: "
+          + ioe.getMessage() + "</p>");
       LOG.error(ioe);
     } catch (final SQLException sqle) {
-      message.append("<p class='error'>Error loading data into the database: " + sqle.getMessage() + "</p>");
+      message.append("<p class='error'>Error loading data into the database: "
+          + sqle.getMessage() + "</p>");
       LOG.error(sqle);
       throw new RuntimeException("Error loading data into the database", sqle);
     }
-    
+
     session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL((String)session.getAttribute("redirect_url")));
+    response.sendRedirect(response.encodeRedirectURL((String) session.getAttribute("redirect_url")));
   }
 
 }

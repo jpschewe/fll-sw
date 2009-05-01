@@ -21,7 +21,9 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
+import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -31,6 +33,7 @@ import org.w3c.dom.Element;
 
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
+import fll.web.SessionAttributes;
 import fll.xml.XMLUtils;
 
 /**
@@ -49,31 +52,34 @@ public final class Judges {
   /**
    * Generate the judges page
    */
-  public static void generatePage(final JspWriter out,
-                                  final ServletContext application,
-                                  final HttpServletRequest request,
-                                  final HttpServletResponse response) throws SQLException, IOException, ParseException {
-    final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-    final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
+  public static void generatePage(final JspWriter out, final ServletContext application, final HttpServletRequest request, final HttpServletResponse response)
+      throws SQLException, IOException, ParseException {
+    final HttpSession session = request.getSession();
+    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final Connection connection = datasource.getConnection();
     final String tournament = Queries.getCurrentTournament(connection);
 
     final List<Element> subjectiveCategories = XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"));
 
     // count the number of rows present
     int rowIndex = 0;
-    while(null != request.getParameter("cat" + (rowIndex + 1))) {
+    while (null != request.getParameter("cat"
+        + (rowIndex + 1))) {
       ++rowIndex;
-      out.println("<!-- found a row " + rowIndex + "-->");
+      out.println("<!-- found a row "
+          + rowIndex + "-->");
     }
-    if(null != request.getParameter("add_rows")) {
-      if(LOG.isDebugEnabled()) {
-        LOG.debug("<!-- adding another row to " + rowIndex + "-->");
+    if (null != request.getParameter("add_rows")) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("<!-- adding another row to "
+            + rowIndex + "-->");
       }
       try {
         final Integer numRows = Integer.valueOf(request.getParameter("num_rows"));
         rowIndex += numRows;
-      } catch(final NumberFormatException nfe) {
-        if(LOG.isDebugEnabled()) {
+      } catch (final NumberFormatException nfe) {
+        if (LOG.isDebugEnabled()) {
           LOG.debug("Got exception reading number of rows, defaulting to 1", nfe);
         }
         rowIndex += 1;
@@ -84,20 +90,21 @@ public final class Judges {
     out.println("<form action='judges.jsp' method='POST' name='judges'>");
 
     String errorString = null;
-    if(null != request.getParameter("finished")) {
+    if (null != request.getParameter("finished")) {
       errorString = generateVerifyTable(out, subjectiveCategories, request);
-      if(null == errorString) {
+      if (null == errorString) {
         // everything is good
         out.println("</form>");
         return;
       }
-    } else if(null != request.getParameter("commit")) {
+    } else if (null != request.getParameter("commit")) {
       commitData(request, response, connection, Queries.getCurrentTournament(connection));
       return;
     }
 
-    if(null != errorString) {
-      out.println("<p id='error'><font color='red'>" + errorString + "</font></p>");
+    if (null != errorString) {
+      out.println("<p id='error'><font color='red'>"
+          + errorString + "</font></p>");
     }
 
     // get list of divisions and add "All" as a possible value
@@ -105,21 +112,22 @@ public final class Judges {
     divisions.add(0, "All");
 
     out
-        .println("<p>Judges ID's must be unique.  They can be just the name of the judge.  Keep in mind that this ID needs to be entered on the judging forms.  There must be at least 1 judge for each category.</p>");
+       .println("<p>Judges ID's must be unique.  They can be just the name of the judge.  Keep in mind that this ID needs to be entered on the judging forms.  There must be at least 1 judge for each category.</p>");
 
     out.println("<table border='1'><tr><th>ID</th><th>Category</th><th>Division</th></tr>");
 
     int row = 0; // keep track of which row we're generating
 
-    if(null == request.getParameter("cat0")) {
+    if (null == request.getParameter("cat0")) {
       // this is the first time the page has been visited so we need to read
       // the judges out of the DB
       ResultSet rs = null;
       Statement stmt = null;
       try {
         stmt = connection.createStatement();
-        rs = stmt.executeQuery("SELECT id, category, event_division FROM Judges WHERE Tournament = '" + tournament + "'");
-        for(row = 0; rs.next(); row++) {
+        rs = stmt.executeQuery("SELECT id, category, event_division FROM Judges WHERE Tournament = '"
+            + tournament + "'");
+        for (row = 0; rs.next(); row++) {
           final String id = rs.getString(1);
           final String category = rs.getString(2);
           final String division = rs.getString(3);
@@ -131,16 +139,22 @@ public final class Judges {
       }
     } else {
       // need to walk the parameters to see what we've been passed
-      String id = request.getParameter("id" + row);
-      String category = request.getParameter("cat" + row);
-      String division = request.getParameter("div" + row);
-      while(null != category) {
+      String id = request.getParameter("id"
+          + row);
+      String category = request.getParameter("cat"
+          + row);
+      String division = request.getParameter("div"
+          + row);
+      while (null != category) {
         generateRow(out, subjectiveCategories, divisions, row, id, category, division);
 
         row++;
-        id = request.getParameter("id" + row);
-        category = request.getParameter("cat" + row);
-        division = request.getParameter("div" + row);
+        id = request.getParameter("id"
+            + row);
+        category = request.getParameter("cat"
+            + row);
+        division = request.getParameter("div"
+            + row);
       }
     }
 
@@ -148,7 +162,7 @@ public final class Judges {
     // generate some more
     final int tableRows = Math.max(Math.max(numRows, subjectiveCategories.size()), row);
 
-    for(; row < tableRows; row++) {
+    for (; row < tableRows; row++) {
       generateRow(out, subjectiveCategories, divisions, row, null, null, null);
     }
 
@@ -164,21 +178,14 @@ public final class Judges {
    * Generate a row in the judges table defaulting the form elemenets to the
    * given information.
    * 
-   * @param out
-   *          where to print
-   * @param subjectiveCategories
-   *          the possible categroies
-   * @param divisions
-   *          List of divisions as Strings, "All" is always the first element in
-   *          the list
-   * @param row
-   *          the row being generated, used for naming form elements
-   * @param id
-   *          id of judge, can be null
-   * @param cat
-   *          category of judge, can be null
-   * @param division
-   *          division judge is scoring, can be null
+   * @param out where to print
+   * @param subjectiveCategories the possible categroies
+   * @param divisions List of divisions as Strings, "All" is always the first
+   *          element in the list
+   * @param row the row being generated, used for naming form elements
+   * @param id id of judge, can be null
+   * @param cat category of judge, can be null
+   * @param division division judge is scoring, can be null
    */
   private static void generateRow(final JspWriter out,
                                   final List<Element> subjectiveCategories,
@@ -188,30 +195,38 @@ public final class Judges {
                                   final String cat,
                                   final String division) throws IOException {
     out.println("<tr>");
-    out.print("  <td><input type='text' name='id" + row + "'");
-    if(null != id) {
-      out.print(" value='" + id + "'");
+    out.print("  <td><input type='text' name='id"
+        + row + "'");
+    if (null != id) {
+      out.print(" value='"
+          + id + "'");
     }
     out.println("></td>");
 
-    out.println("  <td><select name='cat" + row + "'>");
-    for(final Element category : subjectiveCategories) {
+    out.println("  <td><select name='cat"
+        + row + "'>");
+    for (final Element category : subjectiveCategories) {
       final String categoryName = category.getAttribute("name");
-      out.print("  <option value='" + categoryName + "'");
-      if(categoryName.equals(cat)) {
+      out.print("  <option value='"
+          + categoryName + "'");
+      if (categoryName.equals(cat)) {
         out.print(" selected");
       }
-      out.println(">" + categoryName + "</option>");
+      out.println(">"
+          + categoryName + "</option>");
     }
     out.println("  </select></td>");
 
-    out.println("  <td><select name='div" + row + "'>");
-    for(String div : divisions) {
-      out.print("  <option value='" + div + "'");
-      if(div.equals(division)) {
+    out.println("  <td><select name='div"
+        + row + "'>");
+    for (final String div : divisions) {
+      out.print("  <option value='"
+          + div + "'");
+      if (div.equals(division)) {
         out.print(" selected");
       }
-      out.println(">" + div + "</option>");
+      out.println(">"
+          + div + "</option>");
     }
     out.println("  </select></td>");
 
@@ -235,7 +250,7 @@ public final class Judges {
 
     // populate a hash where key is category name and value is an empty
     // Set. Use set so there are no duplicates
-    for(final Element element : subjectiveCategories) {
+    for (final Element element : subjectiveCategories) {
       final String categoryName = element.getAttribute("name");
       hash.put(categoryName, new HashSet<String>());
     }
@@ -243,33 +258,38 @@ public final class Judges {
     // walk request and push judge id into the Set, if not null or empty,
     // in the value for each category in the hash.
     int row = 0;
-    String id = request.getParameter("id" + row);
-    String category = request.getParameter("cat" + row);
-    while(null != category) {
-      if(null != id) {
+    String id = request.getParameter("id"
+        + row);
+    String category = request.getParameter("cat"
+        + row);
+    while (null != category) {
+      if (null != id) {
         id = id.trim();
         id = id.toUpperCase();
-        if(id.length() > 0) {
+        if (id.length() > 0) {
           final Set<String> set = hash.get(category);
           set.add(id);
         }
       }
 
       row++;
-      id = request.getParameter("id" + row);
-      category = request.getParameter("cat" + row);
+      id = request.getParameter("id"
+          + row);
+      category = request.getParameter("cat"
+          + row);
     }
 
     // now walk the keys of the hash and make sure that all values have a list
     // of size > 0, otherwise append an error to error.
-    for(String categoryName : hash.keySet()) {
+    for (final String categoryName : hash.keySet()) {
       final Set<String> set = hash.get(categoryName);
-      if(set.isEmpty()) {
-        error.append("You must specify at least one judge for " + categoryName + "<br>");
+      if (set.isEmpty()) {
+        error.append("You must specify at least one judge for "
+            + categoryName + "<br>");
       }
     }
 
-    if(error.length() > 0) {
+    if (error.length() > 0) {
       return error.toString();
     } else {
       out.println("<p>If everything looks ok, click Commit, otherwise click Cancel and you'll go back to the edit page.</p>");
@@ -278,27 +298,37 @@ public final class Judges {
 
       // walk request and put data in a table
       row = 0;
-      id = request.getParameter("id" + row);
-      category = request.getParameter("cat" + row);
-      String division = request.getParameter("div" + row);
-      while(null != category) {
-        if(null != id && division != null) {
+      id = request.getParameter("id"
+          + row);
+      category = request.getParameter("cat"
+          + row);
+      String division = request.getParameter("div"
+          + row);
+      while (null != category) {
+        if (null != id
+            && division != null) {
           id = id.trim();
           id = id.toUpperCase();
-          if(id.length() > 0) {
+          if (id.length() > 0) {
             out.println("<tr>");
-            out.println("  <td>" + id + " <input type='hidden' name='id" + row + "' value='" + id + "'></td>");
-            out.println("  <td>" + category + " <input type='hidden' name='cat" + row + "' value='" + category + "'></td>");
-            out.println("  <td>" + division + " <input type='hidden' name='div" + row + "' value='" + division + "'></td>");
+            out.println("  <td>"
+                + id + " <input type='hidden' name='id" + row + "' value='" + id + "'></td>");
+            out.println("  <td>"
+                + category + " <input type='hidden' name='cat" + row + "' value='" + category + "'></td>");
+            out.println("  <td>"
+                + division + " <input type='hidden' name='div" + row + "' value='" + division + "'></td>");
             out.println("</tr>");
 
           }
         }
 
         row++;
-        id = request.getParameter("id" + row);
-        category = request.getParameter("cat" + row);
-        division = request.getParameter("div" + row);
+        id = request.getParameter("id"
+            + row);
+        category = request.getParameter("cat"
+            + row);
+        division = request.getParameter("div"
+            + row);
       }
 
       out.println("</table>");
@@ -313,38 +343,42 @@ public final class Judges {
    * Commit the subjective data from request to the database and redirect
    * response back to index.jsp.
    * 
-   * @param tournament
-   *          the current tournament
+   * @param tournament the current tournament
    */
-  private static void commitData(final HttpServletRequest request,
-                                 final HttpServletResponse response,
-                                 final Connection connection,
-                                 final String tournament) throws SQLException, IOException {
+  private static void commitData(final HttpServletRequest request, final HttpServletResponse response, final Connection connection, final String tournament)
+      throws SQLException, IOException {
     Statement stmt = null;
     PreparedStatement prep = null;
     try {
       stmt = connection.createStatement();
 
       // delete old data in judges
-      stmt.executeUpdate("DELETE FROM Judges where Tournament = '" + tournament + "'");
+      stmt.executeUpdate("DELETE FROM Judges where Tournament = '"
+          + tournament + "'");
 
       // walk request parameters and insert data into database
       prep = connection.prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES(?, ?, ?, ?)");
       prep.setString(4, tournament);
       int row = 0;
-      String id = request.getParameter("id" + row);
-      String category = request.getParameter("cat" + row);
-      String division = request.getParameter("div" + row);
-      while(null != category) {
+      String id = request.getParameter("id"
+          + row);
+      String category = request.getParameter("cat"
+          + row);
+      String division = request.getParameter("div"
+          + row);
+      while (null != category) {
         prep.setString(1, id);
         prep.setString(2, category);
         prep.setString(3, division);
         prep.executeUpdate();
 
         row++;
-        id = request.getParameter("id" + row);
-        category = request.getParameter("cat" + row);
-        division = request.getParameter("div" + row);
+        id = request.getParameter("id"
+            + row);
+        category = request.getParameter("cat"
+            + row);
+        division = request.getParameter("div"
+            + row);
       }
 
     } finally {

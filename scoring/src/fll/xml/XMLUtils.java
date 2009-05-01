@@ -49,7 +49,7 @@ public final class XMLUtils {
     final Document document = DOCUMENT_BUILDER.newDocument();
     final Element top = document.createElement("teams");
     document.appendChild(top);
-    for (Team team : teams) {
+    for (final Team team : teams) {
       final Element teamElement = document.createElement("team");
       teamElement.setAttribute("teamName", team.getTeamName());
       teamElement.setAttribute("teamNumber", String.valueOf(team.getTeamNumber()));
@@ -103,7 +103,7 @@ public final class XMLUtils {
           final String judge = rs.getString(1);
           final String division = rs.getString(2);
 
-          for (Team team : teams) {
+          for (final Team team : teams) {
             final String teamDiv = Queries.getEventDivision(connection, team.getTeamNumber());
             if ("All".equals(division)
                 || division.equals(teamDiv)) {
@@ -276,7 +276,7 @@ public final class XMLUtils {
     final Element root = challengeDocument.getDocumentElement();
     if (root.hasAttribute("bracketSort")) {
       final String sortStr = root.getAttribute("bracketSort");
-      final BracketSortType sort = BracketSortType.valueOf(BracketSortType.class, sortStr);
+      final BracketSortType sort = Enum.valueOf(BracketSortType.class, sortStr);
       if (null == sort) {
         return BracketSortType.SEEDING;
       } else {
@@ -294,7 +294,7 @@ public final class XMLUtils {
     final Element root = challengeDocument.getDocumentElement();
     return getWinnerCriteria(root);
   }
-  
+
   /**
    * Get the winner criteria for a particular element.
    */
@@ -302,12 +302,12 @@ public final class XMLUtils {
     if (element.hasAttribute("winner")) {
       final String str = element.getAttribute("winner");
       final String sortStr;
-      if(null != str) {
+      if (null != str) {
         sortStr = str.toUpperCase();
       } else {
         sortStr = "HIGH";
       }
-      final WinnerType sort = WinnerType.valueOf(WinnerType.class, sortStr);
+      final WinnerType sort = Enum.valueOf(WinnerType.class, sortStr);
       if (null == sort) {
         return WinnerType.HIGH;
       } else {
@@ -325,12 +325,12 @@ public final class XMLUtils {
     if (element.hasAttribute("scoreType")) {
       final String str = element.getAttribute("scoreType");
       final String sortStr;
-      if(null != str) {
+      if (null != str) {
         sortStr = str.toUpperCase();
       } else {
         sortStr = "INTEGER";
       }
-      final ScoreType sort = ScoreType.valueOf(ScoreType.class, sortStr);
+      final ScoreType sort = Enum.valueOf(ScoreType.class, sortStr);
       if (null == sort) {
         return ScoreType.INTEGER;
       } else {
@@ -340,5 +340,5 @@ public final class XMLUtils {
       return ScoreType.INTEGER;
     }
   }
-  
+
 }

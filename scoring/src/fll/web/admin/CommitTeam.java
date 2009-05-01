@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.Functions;
 
@@ -23,8 +24,8 @@ import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.Queries;
-import fll.web.ApplicationAttributes;
 import fll.web.Init;
+import fll.web.SessionAttributes;
 
 /**
  * Commit the changes made by editTeam.jsp.
@@ -56,9 +57,10 @@ public class CommitTeam extends HttpServlet {
     final ServletContext application = getServletContext();
     final HttpSession session = request.getSession();
     final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
-    final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
-
+    final DataSource datasource = (DataSource)session.getAttribute(SessionAttributes.DATASOURCE);
+    
     try {
+      final Connection connection = datasource.getConnection();
       // parse the numbers first so that we don't get a partial commit
       final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("teamNumber")).intValue();
       final String division = request.getParameter("division");
@@ -121,7 +123,7 @@ public class CommitTeam extends HttpServlet {
     } catch (final ParseException pe) {
       LOGGER.error("Error parsing team number, this is an internal error", pe);
       throw new RuntimeException("Error parsing team number, this is an internal error", pe);
-    } catch (SQLException e) {
+    } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
     }

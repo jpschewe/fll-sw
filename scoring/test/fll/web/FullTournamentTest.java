@@ -410,7 +410,8 @@ public class FullTournamentTest {
       table = response.getTableWithID("queryResult");
       for (int rank = 0; rank < division2ExpectedRank.length; ++rank) {
         final String expectedTeamNumberStr = String.valueOf(division2ExpectedRank[rank]);
-        Assert.assertEquals("Ranking is incorrect for rank " + rank, expectedTeamNumberStr, table.getCellAsText(rank + 1, 0));
+        Assert.assertEquals("Ranking is incorrect for rank "
+            + rank, expectedTeamNumberStr, table.getCellAsText(rank + 1, 0));
       }
 
       /*
@@ -428,7 +429,8 @@ public class FullTournamentTest {
        * final int teamNumber = rs.getInt(1); Assert.assertEquals("Ranking is
        * incorrect", division2ExpectedRank[rank], teamNumber); }
        * SQLFunctions.closeResultSet(rs);
-       * SQLFunctions.closePreparedStateUtilities.createDBConnection(database);ment(prep);
+       * SQLFunctions.closePreparedStateUtilities
+       * .createDBConnection(database);ment(prep);
        */
 
       // TODO check scores?
@@ -535,7 +537,7 @@ public class FullTournamentTest {
           + "admin/index.jsp");
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
-      WebForm form = response.getFormWithName("uploadSubjective");
+      final WebForm form = response.getFormWithName("uploadSubjective");
       request = form.getRequest();
       final UploadFileSpec subjectiveUpload = new UploadFileSpec(subjectiveZip);
       form.setParameter("subjectiveFile", new UploadFileSpec[] { subjectiveUpload });

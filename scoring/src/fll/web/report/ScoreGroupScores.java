@@ -46,12 +46,13 @@ public final class ScoreGroupScores {
 
     out.println("<hr>");
 
-    out.println("<h2>Tournament: " + tournament + "</h2>");
+    out.println("<h2>Tournament: "
+        + tournament + "</h2>");
 
     // get the list of divisions
-    for(String division : Queries.getDivisions(connection)) {
+    for (final String division : Queries.getDivisions(connection)) {
       // foreach category
-      for(final Element catElement : subjectiveCategories) {
+      for (final Element catElement : subjectiveCategories) {
         final String catName = catElement.getAttribute("name");
         final String catTitle = catElement.getAttribute("title");
 
@@ -64,8 +65,12 @@ public final class ScoreGroupScores {
   /**
    * Generate the table for a category
    */
-  private static void generateCategoryTable(final String tournament, final Connection connection, final JspWriter out, final String categoryName,
-      final String categoryTitle, final String division) throws SQLException, IOException {
+  private static void generateCategoryTable(final String tournament,
+                                            final Connection connection,
+                                            final JspWriter out,
+                                            final String categoryName,
+                                            final String categoryTitle,
+                                            final String division) throws SQLException, IOException {
 
     ResultSet teamsRS = null;
     ResultSet groupRS = null;
@@ -82,7 +87,8 @@ public final class ScoreGroupScores {
       while (groupRS.next()) {
         final String scoreGroup = groupRS.getString(1);
 
-        out.println("<h3>" + categoryTitle + " Division: " + division + " Score Group: " + scoreGroup + "</h3>");
+        out.println("<h3>"
+            + categoryTitle + " Division: " + division + " Score Group: " + scoreGroup + "</h3>");
 
         out.println("<table border='0'>");
         out.println("  <tr>");
@@ -95,8 +101,8 @@ public final class ScoreGroupScores {
         // display all team scores
         prep2 = connection.prepareStatement("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,SummarizedScores.StandardizedScore"
             + " FROM SummarizedScores,Teams,current_tournament_teams" + " WHERE Teams.TeamNumber = SummarizedScores.TeamNumber"
-            + " AND current_tournament_teams.TeamNumber = Teams.TeamNumber" + " AND SummarizedScores.Tournament = ?" + " AND current_tournament_teams.event_division = ?"
-            + " AND SummarizedScores.Category = ?" + " AND SummarizedScores.ScoreGroup = ?"
+            + " AND current_tournament_teams.TeamNumber = Teams.TeamNumber" + " AND SummarizedScores.Tournament = ?"
+            + " AND current_tournament_teams.event_division = ?" + " AND SummarizedScores.Category = ?" + " AND SummarizedScores.ScoreGroup = ?"
             + " ORDER BY SummarizedScores.StandardizedScore DESC, Teams.TeamNumber");
         prep2.setString(1, tournament);
         prep2.setString(2, division);
@@ -109,7 +115,7 @@ public final class ScoreGroupScores {
           final String teamName = teamsRS.getString(2);
 
           final double score;
-          double v = teamsRS.getDouble(4);
+          final double v = teamsRS.getDouble(4);
           if (teamsRS.wasNull()) {
             score = Double.NaN;
           } else {
@@ -118,11 +124,15 @@ public final class ScoreGroupScores {
 
           out.println("  <tr>");
 
-          out.println("    <td>" + teamNumber + "</td>");
-          out.println("    <td>" + organization + "</td>");
-          out.println("    <td>" + teamName + "</td>");
+          out.println("    <td>"
+              + teamNumber + "</td>");
+          out.println("    <td>"
+              + organization + "</td>");
+          out.println("    <td>"
+              + teamName + "</td>");
 
-          out.println("    <td>" + SCORE_FORMAT.format(score) + "</td>");
+          out.println("    <td>"
+              + SCORE_FORMAT.format(score) + "</td>");
 
           out.println("  </tr>");
 

@@ -17,12 +17,10 @@ import fll.Utilities;
  * 
  * @author jpschewe
  * @version $Revision$
- * 
  */
 public class CheckDifferences extends HttpServlet {
 
   /**
-   * 
    * @param request
    * @param response
    */
@@ -31,17 +29,17 @@ public class CheckDifferences extends HttpServlet {
     final StringBuilder message = new StringBuilder();
     final HttpSession session = request.getSession();
 
-    Connection memConnection = null;
-    Statement memStmt = null;
+    final Connection memConnection = null;
+    final Statement memStmt = null;
 
     Utilities.loadDBDriver();
     try {
       final String tournament = request.getParameter("tournament");
-      if(null == tournament) {
+      if (null == tournament) {
         message.append("You must select a tournament!");
       } else {
-        // TODO first check if the selected tournament exists in the destination database
-        
+        // TODO first check if the selected tournament exists in the destination
+        // database
 
       }
     } finally {
@@ -50,6 +48,6 @@ public class CheckDifferences extends HttpServlet {
     }
 
     session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL((String)session.getAttribute("redirect_url")));
+    response.sendRedirect(response.encodeRedirectURL((String) session.getAttribute("redirect_url")));
   }
 }

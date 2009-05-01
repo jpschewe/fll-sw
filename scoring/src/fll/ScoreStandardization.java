@@ -202,7 +202,7 @@ public final class ScoreStandardization {
             updatePrep.setDouble(2, sgStdev);
             updatePrep.setString(3, judge);
             updatePrep.executeUpdate();
-          } else { //if(sgCount == 1) {
+          } else { // if(sgCount == 1) {
             throw new RuntimeException("Not enough scores for Judge: "
                 + judge + " in category: " + category);
           } // ignore 0 in a judging group

@@ -5,7 +5,6 @@
  */
 package fll.db;
 
-
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -21,18 +20,17 @@ import fll.xml.ChallengeParser;
 
 /**
  * Test generating various databases.
- *
+ * 
  * @version $Revision$
  */
 public class GenerateDBTest {
-  
+
   /**
    * Test creating a new database from scratch and creating over an existing
    * database.
    */
   @Test
-  public void testCreateDB()
-    throws SQLException, UnsupportedEncodingException {
+  public void testCreateDB() throws SQLException, UnsupportedEncodingException {
     final InputStream stream = GenerateDBTest.class.getResourceAsStream("data/challenge-test.xml");
     Assert.assertNotNull(stream);
     final Document document = ChallengeParser.parse(new InputStreamReader(stream));
@@ -42,7 +40,7 @@ public class GenerateDBTest {
     GenerateDB.generateDB(document, database, false);
 
     GenerateDB.generateDB(document, database, true);
-    
+
     TestUtils.cleanupDB(database);
   }
 }

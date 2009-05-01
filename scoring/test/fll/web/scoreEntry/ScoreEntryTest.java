@@ -21,19 +21,17 @@ import fll.xml.ChallengeParserTest;
 /**
  * @author jpschewe
  * @version $Revision$
- * 
  */
 public class ScoreEntryTest {
 
   /**
    * Test method for
-   * {@link fll.web.scoreEntry.ScoreEntry#generateCheckRestrictionsBody(java.io.Writer, org.w3c.dom.Document)}.
-   * 
+   * {@link fll.web.scoreEntry.ScoreEntry#generateCheckRestrictionsBody(java.io.Writer, org.w3c.dom.Document)}
+   * .
    * <p>
    * Load all-elements.xml (from {@link ChallengeParserTest}) and make sure
    * there are no errors.
    * </p>
-   * 
    */
   @Test
   public void testGenerateCheckRestrictionsBody() throws IOException, ParseException {

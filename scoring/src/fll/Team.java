@@ -69,14 +69,11 @@ public final class Team {
   /**
    * Builds a team object from its database info given the team number.
    * 
-   * @param connection
-   *          Database connection.
-   * @param teamNumber
-   *          Number of the team for which to build an object.
+   * @param connection Database connection.
+   * @param teamNumber Number of the team for which to build an object.
    * @return The new Team object or null if the team was not found in the
    *         database.
-   * @throws SQLException
-   *           on a database access error.
+   * @throws SQLException on a database access error.
    */
   public static Team getTeamFromDatabase(final Connection connection, final int teamNumber) throws SQLException {
     // First, handle known non-database team numbers...
@@ -94,9 +91,10 @@ public final class Team {
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Division, Organization, Region, TeamName FROM Teams" + " WHERE TeamNumber = " + teamNumber);
+      rs = stmt.executeQuery("SELECT Division, Organization, Region, TeamName FROM Teams"
+          + " WHERE TeamNumber = " + teamNumber);
       if (rs.next()) {
-        Team x = new Team();
+        final Team x = new Team();
         x._division = rs.getString(1);
         x._organization = rs.getString(2);
         x._region = rs.getString(3);
@@ -189,7 +187,7 @@ public final class Team {
   }
 
   private String _eventDivision;
-  
+
   /**
    * The event division that a team is entered as.
    * 
@@ -202,7 +200,7 @@ public final class Team {
   public void setEventDivision(final String v) {
     _eventDivision = v;
   }
-  
+
   /**
    * Compares team numbers.
    */
@@ -223,6 +221,7 @@ public final class Team {
 
   @Override
   public String toString() {
-    return "[" + getTeamNumber() + ": " + getTeamName() + "]";
+    return "["
+        + getTeamNumber() + ": " + getTeamName() + "]";
   }
 }

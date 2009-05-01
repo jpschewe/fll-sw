@@ -1,224 +1,130 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:noNamespaceSchemaLocation="fll.xsd"
-     title="FLL 2003 Challenge: Mission Mars" >
+	xsi:noNamespaceSchemaLocation="fll.xsd" title="FLL 2003 Challenge: Mission Mars">
 
-  <!-- $Rev$ -->
+	<!-- $Rev$ -->
 
-  <Performance weight="1.0">
+	<Performance weight="1.0">
 
-    <goal name="exit_base"
-	  title="Exit the Tetrahedron Base"
-	  multiplier="39" />
+		<goal name="exit_base" title="Exit the Tetrahedron Base"
+			multiplier="39" />
 
-    <goal name="launch_canister"
-	  title="MAV Launcher">
-      <value score="39" title="Canister Launched" value="launched" />
-      <value score="27" title="Empty Launch" value="empty" />
-      <value score="0" title="No Launch" value="zero" />
-    </goal>
+		<goal name="launch_canister" title="MAV Launcher">
+			<value score="39" title="Canister Launched" value="launched" />
+			<value score="27" title="Empty Launch" value="empty" />
+			<value score="0" title="No Launch" value="zero" />
+		</goal>
 
-    <goal name="boulders_in_circle"
-	  title="Boulders in Launch Circle"
-          max="4"
-	  multiplier="14"
-          initialValue="2" />
+		<goal name="boulders_in_circle" title="Boulders in Launch Circle"
+			max="4" multiplier="14" initialValue="2" />
 
-    <goal name="boulders_outside_circle"
-	  title="Boulders On Field outside Circle"
-          max="4"
-	  multiplier="8"
-          initialValue="2" />
+		<goal name="boulders_outside_circle" title="Boulders On Field outside Circle"
+			max="4" multiplier="8" initialValue="2" />
 
-    <goal name="ice_core"
-	  title="Move Ice Cores to Base">
-      <value score="49" title="3 Ice Cores In Base" value="three" />
-      <value score="31" title="2 Ice Cores In Base" value="two" />
-      <value score="27" title="1 Ice Core In Base" value="one" />
-      <value score="0" title="0 Ice Cores In Base" value="zero" />
-    </goal>
+		<goal name="ice_core" title="Move Ice Cores to Base">
+			<value score="49" title="3 Ice Cores In Base" value="three" />
+			<value score="31" title="2 Ice Cores In Base" value="two" />
+			<value score="27" title="1 Ice Core In Base" value="one" />
+			<value score="0" title="0 Ice Cores In Base" value="zero" />
+		</goal>
 
-    <goal name="vehicle"
-	  title="All Terrain Vehicle Test"
-	  multiplier="39" />
+		<goal name="vehicle" title="All Terrain Vehicle Test" multiplier="39" />
 
-    <goal name="free_rover"
-	  title="Free the Rover">
-      <value score="43" title="In Base" value="base" />
-      <value score="31" title="Off Dune and on Wheels" value="wheels" />
-      <value score="0" title="Not Freed Successfully" value="zero" />
-    </goal>
+		<goal name="free_rover" title="Free the Rover">
+			<value score="43" title="In Base" value="base" />
+			<value score="31" title="Off Dune and on Wheels" value="wheels" />
+			<value score="0" title="Not Freed Successfully" value="zero" />
+		</goal>
 
-    <goal name="alliance_habitation"
-	  title="Alliance Habitat Module"
-	  multiplier="43" />
+		<goal name="alliance_habitation" title="Alliance Habitat Module"
+			multiplier="43" />
 
-    <goal name="habitation_modules"
-	  title="180/90 Degree Habitat Modules">
-      <value score="49" title="V-Shape" value="v" />
-      <value score="31" title="Two Modules Connect" value="two" />
-      <value score="27" title="One Module Connect" value="one" />
-      <value score="0" title="Zero" value="zero" />
-    </goal>
+		<goal name="habitation_modules" title="180/90 Degree Habitat Modules">
+			<value score="49" title="V-Shape" value="v" />
+			<value score="31" title="Two Modules Connect" value="two" />
+			<value score="27" title="One Module Connect" value="one" />
+			<value score="0" title="Zero" value="zero" />
+		</goal>
 
-    <goal name="clear_solar"
-	  title="Clear the Solar Panel">
-      <value score="43" title="Complete" value="completely" />
-      <value score="31" title="Partial" value="partially" />
-      <value score="0" title="None" value="zero" />
-    </goal>
+		<goal name="clear_solar" title="Clear the Solar Panel">
+			<value score="43" title="Complete" value="completely" />
+			<value score="31" title="Partial" value="partially" />
+			<value score="0" title="None" value="zero" />
+		</goal>
 
-    <restriction lowerBound="0"
-		 upperBound="4"
-                 message="There are a maximum of 4 boulders on the table"
-                 >
-      <term scoreType="raw" goal="boulders_in_circle" />
-      <term scoreType="raw" goal="boulders_outside_circle" />
-    </restriction>
+		<restriction lowerBound="0" upperBound="4"
+			message="There are a maximum of 4 boulders on the table">
+			<term scoreType="raw" goal="boulders_in_circle" />
+			<term scoreType="raw" goal="boulders_outside_circle" />
+		</restriction>
 
-    <tiebreaker>
-      <test goal="boulders_in_circle" winner="HIGH" />
-      <test goal="boulders_outside_circle" winner="HIGH" />
-      <test goal="ice_core" winner="HIGH" />
-      <test goal="free_rover" winner="HIGH" />
-      <test goal="habitation_modules" winner="HIGH" />
-      <test goal="clear_solar" winner="HIGH" />
-      <test goal="launch_canister" winner="HIGH" />
-      <test goal="exit_base" winner="HIGH" />
-      <test goal="vehicle" winner="HIGH" />
-    </tiebreaker>
+		<tiebreaker>
+			<test goal="boulders_in_circle" winner="HIGH" />
+			<test goal="boulders_outside_circle" winner="HIGH" />
+			<test goal="ice_core" winner="HIGH" />
+			<test goal="free_rover" winner="HIGH" />
+			<test goal="habitation_modules" winner="HIGH" />
+			<test goal="clear_solar" winner="HIGH" />
+			<test goal="launch_canister" winner="HIGH" />
+			<test goal="exit_base" winner="HIGH" />
+			<test goal="vehicle" winner="HIGH" />
+		</tiebreaker>
 
-  </Performance>
+	</Performance>
 
-  <subjectiveCategory name="InnovativeDesign"
-                      title="Innovative Design"
-                      weight="0.0"
-                      >
-    <goal name="inFunction"
-          title="Creativity in Function"
-          min="1"
-          max="20" />
-    <goal name="Uniqueness"
-          title="Uniqueness"
-          min="1"
-          max="20" />
-    <goal name="inDesignProcess"
-          title="Creativity in Design Process"
-          min="1"
-          max="20" />
-    <goal name="inDesignAndAppearance"
-          title="Creativity in Design and Appearance"
-          min="1"
-          max="20" />
-    <goal name="OverallCreativity"
-          title="Overall Design and Integration"
-          min="1"
-          max="20" />
-  </subjectiveCategory>
+	<subjectiveCategory name="InnovativeDesign" title="Innovative Design"
+		weight="0.0">
+		<goal name="inFunction" title="Creativity in Function" min="1"
+			max="20" />
+		<goal name="Uniqueness" title="Uniqueness" min="1" max="20" />
+		<goal name="inDesignProcess" title="Creativity in Design Process"
+			min="1" max="20" />
+		<goal name="inDesignAndAppearance" title="Creativity in Design and Appearance"
+			min="1" max="20" />
+		<goal name="OverallCreativity" title="Overall Design and Integration"
+			min="1" max="20" />
+	</subjectiveCategory>
 
-  <subjectiveCategory name="RobustDesign"
-                      title="Robust Design"
-                      weight="0.5"
-                      >
-    <goal name="Structural"
-          title="Structural Design"
-          min="1"
-          max="20" />
-    <goal name="Locomotion"
-          title="Locomotion"
-          min="1"
-          max="20" />
-    <goal name="Manipulation"
-          title="Manipulation"
-          min="1"
-          max="20" />
-    <goal name="Navigation"
-          title="Navigation"
-          min="1"
-          max="20" />
-    <goal name="OverallDesign"
-          title="Overall Design and Integration"
-          min="1"
-          max="20" />
-  </subjectiveCategory>
+	<subjectiveCategory name="RobustDesign" title="Robust Design"
+		weight="0.5">
+		<goal name="Structural" title="Structural Design" min="1" max="20" />
+		<goal name="Locomotion" title="Locomotion" min="1" max="20" />
+		<goal name="Manipulation" title="Manipulation" min="1" max="20" />
+		<goal name="Navigation" title="Navigation" min="1" max="20" />
+		<goal name="OverallDesign" title="Overall Design and Integration"
+			min="1" max="20" />
+	</subjectiveCategory>
 
 
-  <subjectiveCategory name="ResearchPresentation"
-                      title="Research Presentation"
-                      weight="1.0"
-                      >
-    <goal name="Research"
-          title="Research"
-          min="1"
-          max="20" />
-    <goal name="Knowledge"
-          title="Knowldege"
-          min="1"
-          max="20" />
-    <goal name="ChallengeSpecific"
-          title="Challenge Specific"
-          min="1"
-          max="20" />
-    <goal name="Presentation"
-          title="Presentation"
-          min="1"
-          max="20" />
-    <goal name="Innovation"
-          title="Innovation"
-          min="1"
-          max="20" />
-  </subjectiveCategory>
+	<subjectiveCategory name="ResearchPresentation"
+		title="Research Presentation" weight="1.0">
+		<goal name="Research" title="Research" min="1" max="20" />
+		<goal name="Knowledge" title="Knowldege" min="1" max="20" />
+		<goal name="ChallengeSpecific" title="Challenge Specific" min="1"
+			max="20" />
+		<goal name="Presentation" title="Presentation" min="1" max="20" />
+		<goal name="Innovation" title="Innovation" min="1" max="20" />
+	</subjectiveCategory>
 
-  <subjectiveCategory name="Programming"
-                      title="Programming"
-                      weight="0.5"
-                      >
-    <goal name="UseOfLanguage"
-          title="Use of Language"
-          min="1"
-          max="20" />
-    <goal name="Modularity"
-          title="Modularity/Abstraction"
-          min="1"
-          max="20" />
-    <goal name="SensorControl"
-          title="Sensor Control"
-          min="1"
-          max="20" />
-    <goal name="Design"
-          title="Design"
-          min="1"
-          max="20" />
-    <goal name="ProgrammingInGeneral"
-          title="In General"
-          min="1"
-          max="20" />
-  </subjectiveCategory>
+	<subjectiveCategory name="Programming" title="Programming"
+		weight="0.5">
+		<goal name="UseOfLanguage" title="Use of Language" min="1" max="20" />
+		<goal name="Modularity" title="Modularity/Abstraction" min="1"
+			max="20" />
+		<goal name="SensorControl" title="Sensor Control" min="1" max="20" />
+		<goal name="Design" title="Design" min="1" max="20" />
+		<goal name="ProgrammingInGeneral" title="In General" min="1" max="20" />
+	</subjectiveCategory>
 
-  <subjectiveCategory name="Teamwork"
-                      title="Teamwork"
-                      weight="1.0"
-                      >
-    <goal name="TeamIntegration"
-          title="Team Integration"
-          min="1"
-          max="20" />
-    <goal name="Respect"
-          title="Respect"
-          min="1"
-          max="20" />
-    <goal name="FocusedEffort"
-          title="Focused Effort"
-          min="1"
-          max="20" />
-    <goal name="Participation"
-          title="Participation"
-          min="1"
-          max="20" />
-    <goal name="DecisionSolving"
-          title="Decision Making and Problem Solving"
-          min="1"
-          max="20" />
-  </subjectiveCategory>
+	<subjectiveCategory name="Teamwork" title="Teamwork"
+		weight="1.0">
+		<goal name="TeamIntegration" title="Team Integration" min="1"
+			max="20" />
+		<goal name="Respect" title="Respect" min="1" max="20" />
+		<goal name="FocusedEffort" title="Focused Effort" min="1" max="20" />
+		<goal name="Participation" title="Participation" min="1" max="20" />
+		<goal name="DecisionSolving" title="Decision Making and Problem Solving"
+			min="1" max="20" />
+	</subjectiveCategory>
 
 </fll>

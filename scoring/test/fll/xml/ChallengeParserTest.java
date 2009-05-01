@@ -18,7 +18,6 @@ import org.w3c.dom.Document;
  * 
  * @author jpschewe
  * @version $Revision$
- * 
  */
 public class ChallengeParserTest {
 
@@ -26,7 +25,6 @@ public class ChallengeParserTest {
    * Load illegal-restriction.xml and ensure an exception is thrown on the
    * illegal reference. This checks for a bad reference in a term element of a
    * restriction.
-   * 
    */
   @Test
   public void testIllegalRestriction() {
@@ -35,7 +33,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-restriction.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due to a missing reference", exception);
@@ -45,7 +43,6 @@ public class ChallengeParserTest {
    * Load illegal-tiebreaker-ref.xml and ensure an exception is thrown on the
    * illegal reference. This checks for a bad reference in a term element of a
    * tiebreaker.
-   * 
    */
   @Test
   public void testIllegalTiebreakerRef() {
@@ -54,7 +51,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-tiebreaker-ref.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due to a missing reference in a tiebreaker", exception);
@@ -62,7 +59,6 @@ public class ChallengeParserTest {
 
   /**
    * Load all-elements.xml and make sure there are no errors.
-   * 
    */
   @Test
   public void testAllElements() {
@@ -76,7 +72,6 @@ public class ChallengeParserTest {
    * Load illegal-computed-enumgoal-ref.xml and ensure an exception is thrown on
    * the illegal reference. This checks for a bad reference in a goalRef element
    * of a computed goal.
-   * 
    */
   @Test
   public void testIllegalComputedEnumGoal() {
@@ -85,7 +80,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-computed-enumgoal-ref.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due to a missing reference", exception);
@@ -95,7 +90,6 @@ public class ChallengeParserTest {
    * Load illegal-computed-goal-ref.xml and ensure an exception is thrown on the
    * illegal reference. This checks for a bad reference in a term element of a
    * computed goal.
-   * 
    */
   @Test
   public void testIllegalComputedGoal() {
@@ -104,7 +98,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/illegal-computed-goal-ref.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due to a missing reference", exception);
@@ -114,7 +108,6 @@ public class ChallengeParserTest {
    * Load subjective-computed-goal-ref-other-category. This ensure that a
    * computed goal in one subjective category cannot reference a goal in another
    * subjective category.
-   * 
    */
   @Test
   public void testSubjectiveComputedRefOtherCategory() {
@@ -123,7 +116,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/subjective-computed-goal-ref-other-category.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due to a missing reference", exception);
@@ -132,7 +125,6 @@ public class ChallengeParserTest {
   /**
    * Load subjective-duplicate-goals.xml. This checks if two goals having the
    * same name in the same category is caught as an error.
-   * 
    */
   @Test
   public void testDuplicateSubjectiveGoals() {
@@ -141,7 +133,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/subjective-duplicate-goals.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due to duplicate goals", exception);
@@ -150,7 +142,6 @@ public class ChallengeParserTest {
   /**
    * Load subjective-two-categories-same-goal.xml. This ensure that two
    * subjective categories can have goals with the same name.
-   * 
    */
   @Test
   public void testSubjectiveSameGoal() {
@@ -170,7 +161,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/computed-ref-computed.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due a computed goal referencing a computed goal", exception);
@@ -187,7 +178,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/enum-using-raw-score-computed.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due a reference to the raw score of an enum in a computed goal polynomial", exception);
@@ -204,7 +195,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/enum-using-raw-score-tiebreaker.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due a reference to the raw score of an enum in a tiebreaker polynomial", exception);
@@ -221,7 +212,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/enum-using-raw-score-restriction.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due a reference to the raw score of an enum in a restriction polynomial", exception);
@@ -237,7 +228,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/non-enum-in-enumcond.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due a reference to non-enum goal inside enumCond", exception);
@@ -253,7 +244,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/initial-value-below-min.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due the initial value being below the min", exception);
@@ -269,7 +260,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/initial-value-above-max.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due the initial value being above the max", exception);
@@ -286,7 +277,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/initial-value-enum-no-match.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due the initial value being set to something that doesn't match an enum value", exception);
@@ -302,7 +293,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/variable-ref-computed-goal.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due to a variable referencing a computed goal", exception);
@@ -318,7 +309,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/variableRef-in-tiebreaker.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due to a variableRef in a tiebreaker", exception);
@@ -334,7 +325,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/variableRef-in-restriction.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due to a variableRef in a restriction", exception);
@@ -350,7 +341,7 @@ public class ChallengeParserTest {
       final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/duplicate-variable.xml");
       Assert.assertNotNull(stream);
       ChallengeParser.parse(new InputStreamReader(stream));
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       exception = true;
     }
     Assert.assertTrue("Expected a runtime exception due to two variables having the same name in a computed goal.", exception);

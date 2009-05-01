@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -37,6 +38,7 @@ import fll.db.Queries;
 import fll.util.ScoreUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.Init;
+import fll.web.SessionAttributes;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
@@ -73,66 +75,69 @@ public class FinalistSchedulerUI extends HttpServlet {
     }
 
     final ServletContext application = getServletContext();
-    final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
-    final Document challengeDocument = (Document) application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
     final HttpSession session = request.getSession();
+    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final Document challengeDocument = (Document) application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
 
-    // initialize the session
-    if (null != request.getParameter("init")
-        || null == session.getAttribute(CATEGORIES_KEY)) {
-      // no categories cache, need to compute them
-      final List<String> subjectiveCategories = new LinkedList<String>();
-      for (final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
-        final String categoryTitle = subjectiveElement.getAttribute("title");
-        subjectiveCategories.add(categoryTitle);
-      }
-      session.setAttribute(CATEGORIES_KEY, subjectiveCategories);
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Initialized subjectiveCategories to: "
-            + subjectiveCategories);
-      }
-    }
-    // can't type inside the session, but we know the type
-    @SuppressWarnings("unchecked")
-    final List<String> categories = (List<String>) session.getAttribute(CATEGORIES_KEY);
+    try {
 
-    if (null != request.getParameter("init")
-        || null == session.getAttribute(EXTRA_CATEGORIES_FINALISTS_KEY)) {
-      session.setAttribute(EXTRA_CATEGORIES_FINALISTS_KEY, new HashMap<String, Map<String, List<Integer>>>());
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Initialized extra categories");
-      }
-    }
-    // can't type inside the session, but we know the type
-    @SuppressWarnings("unchecked")
-    final Map<String, Map<String, List<Integer>>> extraCategoryFinalists = (Map<String, Map<String, List<Integer>>>) session
-                                                                                                                            .getAttribute(EXTRA_CATEGORIES_FINALISTS_KEY);
-    // done with initialization of session
+      final Connection connection = datasource.getConnection();
 
-    // process request parameters
-    if (null != request.getParameter("num-finalists")) {
-      // just store the number of finalists and prompt for extra categories
-      final int numFinalists = Integer.valueOf(request.getParameter("num-finalists"));
-      session.setAttribute("numFinalists", numFinalists);
-      response.sendRedirect(response.encodeRedirectURL("promptForCategoryName.jsp"));
-      return;
-    } else if (null != request.getParameter("create-category")) {
-      if (null == request.getParameter("new-category")) {
-        LOG.error("No category specified");
-        session.setAttribute("message", "<p class='error'>You must specify a category name</p>");
+      // initialize the session
+      if (null != request.getParameter("init")
+          || null == session.getAttribute(CATEGORIES_KEY)) {
+        // no categories cache, need to compute them
+        final List<String> subjectiveCategories = new LinkedList<String>();
+        for (final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+          final String categoryTitle = subjectiveElement.getAttribute("title");
+          subjectiveCategories.add(categoryTitle);
+        }
+        session.setAttribute(CATEGORIES_KEY, subjectiveCategories);
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("Initialized subjectiveCategories to: "
+              + subjectiveCategories);
+        }
+      }
+      // can't type inside the session, but we know the type
+      @SuppressWarnings("unchecked")
+      final List<String> categories = (List<String>) session.getAttribute(CATEGORIES_KEY);
+
+      if (null != request.getParameter("init")
+          || null == session.getAttribute(EXTRA_CATEGORIES_FINALISTS_KEY)) {
+        session.setAttribute(EXTRA_CATEGORIES_FINALISTS_KEY, new HashMap<String, Map<String, List<Integer>>>());
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("Initialized extra categories");
+        }
+      }
+      // can't type inside the session, but we know the type
+      @SuppressWarnings("unchecked")
+      final Map<String, Map<String, List<Integer>>> extraCategoryFinalists = (Map<String, Map<String, List<Integer>>>) session
+                                                                                                                              .getAttribute(EXTRA_CATEGORIES_FINALISTS_KEY);
+      // done with initialization of session
+
+      // process request parameters
+      if (null != request.getParameter("num-finalists")) {
+        // just store the number of finalists and prompt for extra categories
+        final int numFinalists = Integer.valueOf(request.getParameter("num-finalists"));
+        session.setAttribute("numFinalists", numFinalists);
         response.sendRedirect(response.encodeRedirectURL("promptForCategoryName.jsp"));
         return;
-      } else {
-        final String categoryName = request.getParameter("new-category");
-        if (categories.contains(categoryName)) {
-          LOG.error("duplicate category: "
-              + categoryName);
-          session.setAttribute("message", "<p class='error'>The category name <i>"
-              + categoryName + "</i> has already been specified, please pick another one</p>");
+      } else if (null != request.getParameter("create-category")) {
+        if (null == request.getParameter("new-category")) {
+          LOG.error("No category specified");
+          session.setAttribute("message", "<p class='error'>You must specify a category name</p>");
           response.sendRedirect(response.encodeRedirectURL("promptForCategoryName.jsp"));
           return;
         } else {
-          try {
+          final String categoryName = request.getParameter("new-category");
+          if (categories.contains(categoryName)) {
+            LOG.error("duplicate category: "
+                + categoryName);
+            session.setAttribute("message", "<p class='error'>The category name <i>"
+                + categoryName + "</i> has already been specified, please pick another one</p>");
+            response.sendRedirect(response.encodeRedirectURL("promptForCategoryName.jsp"));
+            return;
+          } else {
             categories.add(categoryName);
 
             final int numFinalists = (Integer) session.getAttribute("numFinalists");
@@ -163,28 +168,28 @@ public class FinalistSchedulerUI extends HttpServlet {
               divisionFinalists.put(categoryName, finalistNums);
             } // divisions
 
-          } catch (final SQLException sqle) {
-            throw new RuntimeException(sqle);
-          }
-          response.sendRedirect(response.encodeRedirectURL("promptForCategoryName.jsp"));
-          return;
-        } // ok to add category
-      } // new category to add
-    } else if (null != request.getParameter("done")) {
-      final int numFinalists = (Integer) session.getAttribute("numFinalists");
-      displayProposedFinalists(response, connection, challengeDocument, numFinalists, extraCategoryFinalists);
-      return;
-    } else if (null != request.getParameter("submit-finalists")) {
-      // display the schedule
-      displayFinalistSchedule(request, response, connection, categories);
+            response.sendRedirect(response.encodeRedirectURL("promptForCategoryName.jsp"));
+            return;
+          } // ok to add category
+        } // new category to add
+      } else if (null != request.getParameter("done")) {
+        final int numFinalists = (Integer) session.getAttribute("numFinalists");
+        displayProposedFinalists(response, connection, challengeDocument, numFinalists, extraCategoryFinalists);
+        return;
+      } else if (null != request.getParameter("submit-finalists")) {
+        // display the schedule
+        displayFinalistSchedule(request, response, connection, categories);
 
-      // clear out session and return
-      session.removeAttribute(CATEGORIES_KEY);
-      session.removeAttribute(EXTRA_CATEGORIES_FINALISTS_KEY);
+        // clear out session and return
+        session.removeAttribute(CATEGORIES_KEY);
+        session.removeAttribute(EXTRA_CATEGORIES_FINALISTS_KEY);
 
-      return;
+        return;
+      }
+      // done with request parameters
+    } catch (final SQLException sqle) {
+      throw new RuntimeException(sqle);
     }
-    // done with request parameters
 
     // send them back to pick a number
     LOG.warn("No parameters, sending user back to get num finalists");
@@ -428,8 +433,8 @@ public class FinalistSchedulerUI extends HttpServlet {
 
   private int _teamColorIndex = 0;
 
-  private String[] _teamColors = { "#CD5555", "#EE0000", "#FF6347", "#00FFAA", "#D19275", "#00B2EE", "#FF7D40", "#FFDAB9", "#FCB514", "#FFEC8B", "#C8F526",
-                                  "#7CFC00", "#4AC948", "#62B1F6", "#AAAAFF", "#8470FF", "#AB82FF", "#A020F0", "#E066FF", "#DB70DB", "#FF00CC", "#FF34B3",
-                                  "#FF0066", "#FF0033", "#FF030D", };
+  private final String[] _teamColors = { "#CD5555", "#EE0000", "#FF6347", "#00FFAA", "#D19275", "#00B2EE", "#FF7D40", "#FFDAB9", "#FCB514", "#FFEC8B",
+                                        "#C8F526", "#7CFC00", "#4AC948", "#62B1F6", "#AAAAFF", "#8470FF", "#AB82FF", "#A020F0", "#E066FF", "#DB70DB",
+                                        "#FF00CC", "#FF34B3", "#FF0066", "#FF0033", "#FF030D", };
 
 }

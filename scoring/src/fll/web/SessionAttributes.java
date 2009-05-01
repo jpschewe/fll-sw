@@ -5,12 +5,15 @@
  */
 package fll.web;
 
+import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
+
 /**
- * Keys for session variables.
+ * Keys for session variables. Each key has an associated accessor function as
+ * well that helps with type safety.
  * 
  * @author jpschewe
  * @version $Revision$
- * 
  */
 public final class SessionAttributes {
 
@@ -24,17 +27,19 @@ public final class SessionAttributes {
    */
   public static final String MESSAGE = "message";
 
+  public static String getMessage(final HttpSession session) {
+    return getAttribute(session, MESSAGE, String.class);
+  }
+
   /**
    * {@link javax.sql.DataSource} that is connected to the tournament database.
    * Initialized in 'jspf/init.jspf'.
    */
   public static final String DATASOURCE = "datasource";
 
-  /**
-   * List of {@link fll.Team}s. Used in playoff/brackets.jsp to keep track of
-   * the current list of teams in bracket order.
-   */
-  public static final String CURRENT_ROUND = "currentRound";
+  public static DataSource getDataSource(final HttpSession session) {
+    return getAttribute(session, DATASOURCE, DataSource.class);
+  }
 
   /**
    * {@link String} that keeps track of what page is being shown on the big
@@ -42,5 +47,25 @@ public final class SessionAttributes {
    * to keep from refreshing the display too often.
    */
   public static final String SESSION_DISPLAY_PAGE = "sessionDisplayPage";
+  public static String getSessionDisplayPage(final HttpSession session) {
+    return getAttribute(session, SESSION_DISPLAY_PAGE, String.class);
+  }
 
+  /**
+   * Get session attribute and send appropriate error if type is wrong. Note
+   * that null is always valid.
+   * 
+   * @param session where to get the attribute
+   * @param attribute the attribute to get
+   * @param clazz the expected type
+   */
+  public static <T> T getAttribute(final HttpSession session, final String attribute, final Class<T> clazz) {
+    final Object o = session.getAttribute(attribute);
+    if (o == null
+        || clazz.isInstance(o)) {
+      return clazz.cast(o);
+    } else {
+      throw new RuntimeException(String.format("Expecting session attribute '%s' to be of type '%s', but was of type '%s'", attribute, clazz, o.getClass()));
+    }
+  }
 }

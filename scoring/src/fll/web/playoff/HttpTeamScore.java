@@ -39,7 +39,7 @@ import org.w3c.dom.Element;
     assertScoreExists();
     return Double.parseDouble(_request.getParameter(goalName));
   }
-  
+
   /**
    * @see fll.web.playoff.TeamScore#isNoShow()
    */
@@ -50,7 +50,8 @@ import org.w3c.dom.Element;
     if (null == noShow) {
       throw new RuntimeException("Missing parameter: NoShow");
     }
-    return noShow.equalsIgnoreCase("true") || noShow.equalsIgnoreCase("t") || noShow.equals("1");
+    return noShow.equalsIgnoreCase("true")
+        || noShow.equalsIgnoreCase("t") || noShow.equals("1");
   }
 
   /*

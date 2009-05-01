@@ -25,23 +25,18 @@ import org.xml.sax.SAXException;
  * a pool of threads.
  * 
  * @author jpschewe
- * 
  */
-/*package */class ScoreEntryQueue {
+/* package */class ScoreEntryQueue {
 
   private static final Logger LOG = Logger.getLogger(ScoreEntryQueue.class);
 
   /**
    * Create the queue.
    * 
-   * @param numThreads
-   *          the number of threads to use
-   * @param testDataConn
-   *          where to get the data from
-   * @param performanceElement
-   *          the challenge descriptor
-   * @param testTournament
-   *          the tournament to enter scores for
+   * @param numThreads the number of threads to use
+   * @param testDataConn where to get the data from
+   * @param performanceElement the challenge descriptor
+   * @param testTournament the tournament to enter scores for
    */
   public ScoreEntryQueue(final int numThreads, final Connection testDataConn, final Element performanceElement, final String testTournament) {
     _testDataConn = testDataConn;
@@ -51,7 +46,7 @@ import org.xml.sax.SAXException;
     for (int i = 0; i < numThreads; ++i) {
       final Thread t = new Thread(new Runnable() {
         public void run() {
-          Thread thread = Thread.currentThread();
+          final Thread thread = Thread.currentThread();
           for (;;) {
             Data data = null;
             synchronized (_queue) {
@@ -63,14 +58,14 @@ import org.xml.sax.SAXException;
                 }
               }
               data = _queue.remove(0);
-              if(data == FINISHED) {
+              if (data == FINISHED) {
                 // requeue so all threads will finish
                 _queue.add(data);
                 _queue.notifyAll();
                 return;
               }
             }
-            
+
             final int teamNumber = data.getTeamNumber();
             final int runNumber = data.getRunNumber();
 
@@ -78,7 +73,7 @@ import org.xml.sax.SAXException;
             synchronized (_freeData) {
               _freeData.add(data);
             }
-            
+
             enterPerformanceScore(teamNumber, runNumber);
             synchronized (_inProcess) {
               _inProcess.remove(thread);
@@ -95,7 +90,7 @@ import org.xml.sax.SAXException;
    * Shutdown the queue.
    */
   public void shutdown() {
-    synchronized(_queue) {
+    synchronized (_queue) {
       _queue.add(FINISHED);
       _queue.notifyAll();
     }
@@ -103,7 +98,7 @@ import org.xml.sax.SAXException;
 
   public void queuePerformanceScore(final int runNumber, final int teamNumber) {
     synchronized (_queue) {
-      Data data = getFreeData();
+      final Data data = getFreeData();
       data.setRunNumber(runNumber);
       data.setTeamNumber(teamNumber);
       _queue.add(data);
@@ -115,7 +110,7 @@ import org.xml.sax.SAXException;
    * Wait for the queue to empty and for everything to be processed.
    */
   public void waitForQueueToFinish() {
-    if(LOG.isDebugEnabled()) {
+    if (LOG.isDebugEnabled()) {
       LOG.debug("waitForQueueToFinish:Top");
     }
     // wait for the queue to empty
@@ -128,8 +123,9 @@ import org.xml.sax.SAXException;
         }
       }
     }
-    if(LOG.isDebugEnabled()) {
-      LOG.debug("waitForQueueToFinish:Queue is empty, waiting for processes: " + _inProcess.size());
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("waitForQueueToFinish:Queue is empty, waiting for processes: "
+          + _inProcess.size());
     }
     // now wait for the processes to finish, this order works
     // only because we assume that the queue is filled first
@@ -145,7 +141,7 @@ import org.xml.sax.SAXException;
         }
       }
     }
-    if(LOG.isDebugEnabled()) {
+    if (LOG.isDebugEnabled()) {
       LOG.debug("waitForQueueToFinish:Bottom");
     }
   }
@@ -155,20 +151,24 @@ import org.xml.sax.SAXException;
       synchronized (_inProcess) {
         _inProcess.add(Thread.currentThread());
       }
-      
+
       FullTournamentTest.enterPerformanceScore(_testDataConn, _performanceElement, _testTournament, runNumber, teamNumber);
     } catch (final SQLException sqle) {
       LOG.error("Got exception", sqle);
-      Assert.fail("Got exception: " + sqle.getMessage());
+      Assert.fail("Got exception: "
+          + sqle.getMessage());
     } catch (final IOException ioe) {
       LOG.error("Got exception", ioe);
-      Assert.fail("Got exception: " + ioe.getMessage());
+      Assert.fail("Got exception: "
+          + ioe.getMessage());
     } catch (final SAXException se) {
       LOG.error("Got exception", se);
-      Assert.fail("Got exception: " + se.getMessage());
+      Assert.fail("Got exception: "
+          + se.getMessage());
     } catch (final ParseException pe) {
       LOG.error("Got exception", pe);
-      Assert.fail("Got exception: " + pe.getMessage());
+      Assert.fail("Got exception: "
+          + pe.getMessage());
     }
   }
 
@@ -198,8 +198,9 @@ import org.xml.sax.SAXException;
   private final List<Data> _freeData = new LinkedList<Data>();
 
   private final Set<Thread> _inProcess = new HashSet<Thread>();
-  private static final Data FINISHED = new Data(); 
-  
+
+  private static final Data FINISHED = new Data();
+
   private static final class Data {
     private int _runNumber;
 

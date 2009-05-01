@@ -25,17 +25,13 @@ import fll.db.Queries;
 public class DatabaseTeamScore extends TeamScore {
 
   /**
-   * Create a database team score object for a non-performance score, for use when
-   * the result set is already available.
+   * Create a database team score object for a non-performance score, for use
+   * when the result set is already available.
    * 
-   * @param categoryDescription
-   *          passed to superclass
-   * @param connection
-   *          the connection to get the data from
-   * @param teamNumber
-   *          passed to superclass
-   * @throws SQLException
-   *           if there is an error getting the current tournament
+   * @param categoryDescription passed to superclass
+   * @param connection the connection to get the data from
+   * @param teamNumber passed to superclass
+   * @throws SQLException if there is an error getting the current tournament
    */
   public DatabaseTeamScore(final Element categoryDescription, final int teamNumber, final ResultSet rs) throws SQLException {
     super(categoryDescription, teamNumber);
@@ -43,23 +39,17 @@ public class DatabaseTeamScore extends TeamScore {
     _result = rs;
     _scoreExists = true;
   }
-  
+
   /**
    * Create a database team score object for a performance score.
    * 
-   * @param categoryDescription
-   *          passed to superclass
-   * @param connection
-   *          the connection to get the data from
-   * @param teamNumber
-   *          passed to superclass
-   * @param runNumber
-   *          passed to superclass
-   * @throws SQLException
-   *           if there is an error getting the current tournament
+   * @param categoryDescription passed to superclass
+   * @param connection the connection to get the data from
+   * @param teamNumber passed to superclass
+   * @param runNumber passed to superclass
+   * @throws SQLException if there is an error getting the current tournament
    */
-  public DatabaseTeamScore(final Element categoryDescription, final int teamNumber, final int runNumber, final Connection connection)
-      throws SQLException {
+  public DatabaseTeamScore(final Element categoryDescription, final int teamNumber, final int runNumber, final Connection connection) throws SQLException {
     super(categoryDescription, teamNumber, runNumber);
 
     final String tournament = Queries.getCurrentTournament(connection);
@@ -71,16 +61,11 @@ public class DatabaseTeamScore extends TeamScore {
    * Create a database team score object for a performance score, for use when
    * the result set is already available.
    * 
-   * @param categoryDescription
-   *          passed to superclass
-   * @param connection
-   *          the connection to get the data from
-   * @param teamNumber
-   *          passed to superclass
-   * @param runNumber
-   *          passed to superclass
-   * @throws SQLException
-   *           if there is an error getting the current tournament
+   * @param categoryDescription passed to superclass
+   * @param connection the connection to get the data from
+   * @param teamNumber passed to superclass
+   * @param runNumber passed to superclass
+   * @throws SQLException if there is an error getting the current tournament
    */
   public DatabaseTeamScore(final Element categoryDescription, final int teamNumber, final int runNumber, final ResultSet rs) throws SQLException {
     super(categoryDescription, teamNumber, runNumber);
@@ -96,7 +81,7 @@ public class DatabaseTeamScore extends TeamScore {
   public String getEnumRawScore(final String goalName) {
     try {
       return getResultSet().getString(goalName);
-    } catch(final SQLException sqle) {
+    } catch (final SQLException sqle) {
       throw new RuntimeException(sqle);
     }
   }
@@ -108,12 +93,12 @@ public class DatabaseTeamScore extends TeamScore {
   public Double getRawScore(final String goalName) {
     try {
       final double val = getResultSet().getDouble(goalName);
-      if(getResultSet().wasNull()) {
+      if (getResultSet().wasNull()) {
         return null;
       } else {
         return val;
       }
-    } catch(final SQLException sqle) {
+    } catch (final SQLException sqle) {
       throw new RuntimeException(sqle);
     }
   }
@@ -125,7 +110,7 @@ public class DatabaseTeamScore extends TeamScore {
   public boolean isNoShow() {
     try {
       return getResultSet().getBoolean("NoShow");
-    } catch(final SQLException sqle) {
+    } catch (final SQLException sqle) {
       throw new RuntimeException(sqle);
     }
   }
@@ -172,10 +157,12 @@ public class DatabaseTeamScore extends TeamScore {
   private ResultSet createResultSet(final Connection connection, final String tournament) throws SQLException {
     ResultSet result;
     final String categoryName = getCategoryName();
-    if(NON_PERFORMANCE_RUN_NUMBER == getRunNumber()) {
-      _prep = connection.prepareStatement("SELECT * FROM " + categoryName + " WHERE TeamNumber = ? AND Tournament = ?");
+    if (NON_PERFORMANCE_RUN_NUMBER == getRunNumber()) {
+      _prep = connection.prepareStatement("SELECT * FROM "
+          + categoryName + " WHERE TeamNumber = ? AND Tournament = ?");
     } else {
-      _prep = connection.prepareStatement("SELECT * FROM " + categoryName + " WHERE TeamNumber = ? AND Tournament = ? AND RunNumber = ?");
+      _prep = connection.prepareStatement("SELECT * FROM "
+          + categoryName + " WHERE TeamNumber = ? AND Tournament = ? AND RunNumber = ?");
       _prep.setInt(3, getRunNumber());
     }
     _prep.setInt(1, getTeamNumber());

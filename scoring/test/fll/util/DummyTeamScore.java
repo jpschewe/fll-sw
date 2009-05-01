@@ -17,41 +17,44 @@ import fll.web.playoff.TeamScore;
  * 
  * @author jpschewe
  * @version $Revision$
- *
  */
 public class DummyTeamScore extends TeamScore {
 
-  public DummyTeamScore(final Element categoryElement, final int teamNumber, final int runNumber, final Map<String, Double> simpleGoals, final Map<String, String> enumGoals) {
+  public DummyTeamScore(final Element categoryElement, final int teamNumber, final int runNumber, final Map<String, Double> simpleGoals,
+      final Map<String, String> enumGoals) {
     super(categoryElement, teamNumber, runNumber);
-     _simpleGoals = new HashMap<String, Double>(simpleGoals);
+    _simpleGoals = new HashMap<String, Double>(simpleGoals);
     _enumGoals = new HashMap<String, String>(enumGoals);
   }
-  
-  /* (non-Javadoc)
+
+  /*
+   * (non-Javadoc)
    * @see fll.web.playoff.TeamScore#getEnumRawScore(java.lang.String)
    */
   @Override
   public String getEnumRawScore(final String goalName) {
-    if(_enumGoals.containsKey(goalName)) {
+    if (_enumGoals.containsKey(goalName)) {
       return _enumGoals.get(goalName);
     } else {
       return null;
     }
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
    * @see fll.web.playoff.TeamScore#getRawScore(java.lang.String)
    */
   @Override
   public Double getRawScore(final String goalName) {
-    if(_simpleGoals.containsKey(goalName)) {
+    if (_simpleGoals.containsKey(goalName)) {
       return _simpleGoals.get(goalName);
     } else {
       return null;
     }
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
    * @see fll.web.playoff.TeamScore#isNoShow()
    */
   @Override
@@ -59,15 +62,16 @@ public class DummyTeamScore extends TeamScore {
     return false;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
    * @see fll.web.playoff.TeamScore#scoreExists()
    */
   @Override
   public boolean scoreExists() {
     return true;
   }
-  
+
   private final Map<String, Double> _simpleGoals;
-  
+
   private final Map<String, String> _enumGoals;
 }

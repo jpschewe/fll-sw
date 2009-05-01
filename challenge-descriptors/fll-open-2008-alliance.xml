@@ -1,281 +1,298 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fll title="FLL 2007 Challenge: Power Puzzle - Alliance"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:noNamespaceSchemaLocation="fll.xsd">
+<fll title="FLL 2007 Challenge: Power Puzzle - Alliance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="fll.xsd">
 
- <!-- $Rev: 351 $ -->
+	<!-- $Rev: 351 $ -->
 
- <Performance minimumScore="0" weight="1.0">
+	<Performance minimumScore="0" weight="1.0">
 
-  <goal name="one_roof_solar_panel" title="Side 1 Solar Panel ON Roof"
-   multiplier="15" />
-    
-  <goal name="one_personal_vehicle_choice"
-   title="Side 1 Car TO House &amp; Truck TO Farm" multiplier="35" />
+		<goal name="one_roof_solar_panel" title="Side 1 Solar Panel ON Roof"
+			multiplier="15" />
 
-  <goal name="one_hydro_dam" title="Side 1 Hydro-Dam TOUCHING banks" multiplier="25" />
+		<goal name="one_personal_vehicle_choice" title="Side 1 Car TO House &amp; Truck TO Farm"
+			multiplier="35" />
 
-  <goal name="one_flood_house" title="Side 1 Houses TOUCHED by Dam or Flood" multiplier="-10" />
+		<goal name="one_hydro_dam" title="Side 1 Hydro-Dam TOUCHING banks"
+			multiplier="25" />
 
-  <goal name="one_wind_turbines" title="Side 1 Wind Turbines TOUCHING Communities" multiplier="15"
-   max="2" />
+		<goal name="one_flood_house" title="Side 1 Houses TOUCHED by Dam or Flood"
+			multiplier="-10" />
 
-  <goal name="one_grid_connection" title="Side 1 Grid Connection TOUCHING Communities" multiplier="5"
-   max="3" />
+		<goal name="one_wind_turbines" title="Side 1 Wind Turbines TOUCHING Communities"
+			multiplier="15" max="2" />
 
-  <goal name="one_alt_fuel_community" title="Side 1 Communities with Grid AND (Dam or Windmill)"
-   multiplier="5" max="3" />
-  <restriction lowerBound="0" upperBound="3"
-   message="You cannot have more communities with alternate fuel than communities connected to the grid.">
-   <term goal="one_grid_connection" scoreType="raw" />
-   <term coefficient="-1" goal="one_alt_fuel_community" scoreType="raw" />
-  </restriction>
+		<goal name="one_grid_connection" title="Side 1 Grid Connection TOUCHING Communities"
+			multiplier="5" max="3" />
 
-  <goal name="one_solar_power_satellite" title="Side 1 Solar Power Satellite"
-   multiplier="15" />
+		<goal name="one_alt_fuel_community" title="Side 1 Communities with Grid AND (Dam or Windmill)"
+			multiplier="5" max="3" />
+		<restriction lowerBound="0" upperBound="3"
+			message="You cannot have more communities with alternate fuel than communities connected to the grid.">
+			<term goal="one_grid_connection" scoreType="raw" />
+			<term coefficient="-1" goal="one_alt_fuel_community" scoreType="raw" />
+		</restriction>
 
-  <goal name="one_wave_turbine" title="Side 1 Wave Turbines in Ocean" multiplier="25" max="2" />
+		<goal name="one_solar_power_satellite" title="Side 1 Solar Power Satellite"
+			multiplier="15" />
 
-    <computedGoal name="one_wave_turbine_bonus" title="Side 1 Wave Turbine Bonus">
-      <switch>
-        <case>
-          <condition>
-            <left>
-              <term scoreType="raw" goal="one_wave_turbine"/>
-            </left>
-          <greater-than/>
-            <right>
-              <constant value="1"/>
-            </right>
-        </condition>
-          <result>
-            <constant value="25"/>
-          </result>
-        </case>
-        <default>
-          <constant value="0"/>
-        </default>
-      </switch>
-    </computedGoal>
+		<goal name="one_wave_turbine" title="Side 1 Wave Turbines in Ocean"
+			multiplier="25" max="2" />
 
-  <goal name="one_coal_mining" title="Side 1 Coal Car Retrieved to Base" multiplier="10" />
+		<computedGoal name="one_wave_turbine_bonus" title="Side 1 Wave Turbine Bonus">
+			<switch>
+				<case>
+					<condition>
+						<left>
+							<term scoreType="raw" goal="one_wave_turbine" />
+						</left>
+						<greater-than />
+						<right>
+							<constant value="1" />
+						</right>
+					</condition>
+					<result>
+						<constant value="25" />
+					</result>
+				</case>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
 
-  <goal name="one_oil_drilling" title="Side 1 Oil Barrels OFF platform" multiplier="10" />
+		<goal name="one_coal_mining" title="Side 1 Coal Car Retrieved to Base"
+			multiplier="10" />
 
-  <goal name="one_corn_harvest" title="Side 1 Corn TO Base AND Oil TO Farm" multiplier="25" />
+		<goal name="one_oil_drilling" title="Side 1 Oil Barrels OFF platform"
+			multiplier="10" />
 
-  <goal name="one_uranium_mining" title="Side 1 Uranium OUT Of Farm"
-   multiplier="15" />
+		<goal name="one_corn_harvest" title="Side 1 Corn TO Base AND Oil TO Farm"
+			multiplier="25" />
 
-  <goal name="one_tree_planting" title="Side 1 Tree TO North of river Planting" multiplier="10"
-   max="8" />
-  <computedGoal name="one_tree_planting_bonus" title="Side 1 Tree Planting Bonus">
-    <switch>
-        <case>
-          <condition>
-            <left>
-              <term scoreType="raw" goal="one_tree_planting"/>
-            </left>
-            <greater-than/>
-            <right>
-              <constant value="4"/>
-            </right>
-          </condition>
-          <result>
-            <term scoreType="raw" goal="one_tree_planting" coefficient="20"/>
-            <constant value="-80"/>
-          </result>
-        </case>
-        <default>
-          <constant value="0"/>
-        </default>
-      </switch>
-  </computedGoal>
+		<goal name="one_uranium_mining" title="Side 1 Uranium OUT Of Farm"
+			multiplier="15" />
 
-  <goal name="one_power_plant_supply_tree" title="Side 1 Trees TO Power Plant (Limit 1 per planted tree &amp; No Red Fuel)"
-   multiplier="10" max="2" />
-  <restriction lowerBound="0" upperBound="4"
-   message="There must be one tree planted for each used as fuel">
-   <term coefficient="1" goal="one_tree_planting" scoreType="raw" />
-   <term coefficient="-1" goal="one_power_plant_supply_tree"
-    scoreType="raw" />
-  </restriction>
+		<goal name="one_tree_planting" title="Side 1 Tree TO North of river Planting"
+			multiplier="10" max="8" />
+		<computedGoal name="one_tree_planting_bonus" title="Side 1 Tree Planting Bonus">
+			<switch>
+				<case>
+					<condition>
+						<left>
+							<term scoreType="raw" goal="one_tree_planting" />
+						</left>
+						<greater-than />
+						<right>
+							<constant value="4" />
+						</right>
+					</condition>
+					<result>
+						<term scoreType="raw" goal="one_tree_planting" coefficient="20" />
+						<constant value="-80" />
+					</result>
+				</case>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
 
-  <goal name="one_power_plant_supply_coal"
-   title="Side 1 Black Coal TO Power Plant - at least 10 pieces &amp; No Red Fuel"
-   multiplier="10" />
+		<goal name="one_power_plant_supply_tree"
+			title="Side 1 Trees TO Power Plant (Limit 1 per planted tree &amp; No Red Fuel)"
+			multiplier="10" max="2" />
+		<restriction lowerBound="0" upperBound="4"
+			message="There must be one tree planted for each used as fuel">
+			<term coefficient="1" goal="one_tree_planting" scoreType="raw" />
+			<term coefficient="-1" goal="one_power_plant_supply_tree"
+				scoreType="raw" />
+		</restriction>
 
-  <goal name="one_power_plant_supply_uranium"
-   title="Side 1 Green Uranium TO Power Plant &amp; No Red Fuel" multiplier="10" max="2" />
+		<goal name="one_power_plant_supply_coal"
+			title="Side 1 Black Coal TO Power Plant - at least 10 pieces &amp; No Red Fuel"
+			multiplier="10" />
 
-  <goal name="one_power_plant_supply_oil"
-   title="Side 1 White Oil Barrels TO Power Plant &amp; No Red Fuel" multiplier="5"
-   max="7" />
+		<goal name="one_power_plant_supply_uranium"
+			title="Side 1 Green Uranium TO Power Plant &amp; No Red Fuel"
+			multiplier="10" max="2" />
 
-  <goal name="one_oil_barrels_base"
-   title="Side 1 Oil Barrels IN base" multiplier="10"
-   max="11" />
+		<goal name="one_power_plant_supply_oil"
+			title="Side 1 White Oil Barrels TO Power Plant &amp; No Red Fuel"
+			multiplier="5" max="7" />
 
-  <restriction lowerBound="0" upperBound="11"
-   message="There are only 11 oil barrels on the field">
-   <term coefficient="1" goal="one_power_plant_supply_oil" scoreType="raw" />
-   <term coefficient="1" goal="one_oil_barrels_base" scoreType="raw" />
-   <term coefficient="1" goal="one_corn_harvest" scoreType="raw" />
-  </restriction>
+		<goal name="one_oil_barrels_base" title="Side 1 Oil Barrels IN base"
+			multiplier="10" max="11" />
 
-
-  <goal name="one_pollution_deduction" title="Side 1 Oil Barrels TOUCHING Water or House Property"
-   multiplier="-40" />
-
-
-    <!-- side 2 goals -->
-    
-  <goal name="two_roof_solar_panel" title="Side 2 Solar Panel ON Roof"
-   multiplier="15" />
-    
-  <goal name="two_personal_vehicle_choice"
-   title="Side 2 Car TO House &amp; Truck TO Farm" multiplier="35" />
-
-  <goal name="two_hydro_dam" title="Side 2 Hydro-Dam TOUCHING banks" multiplier="25" />
-
-  <goal name="two_flood_house" title="Side 2 Houses TOUCHED by Dam or Flood" multiplier="-10" />
-
-  <goal name="two_wind_turbines" title="Side 2 Wind Turbines TOUCHING Communities" multiplier="15"
-   max="2" />
-
-  <goal name="two_grid_connection" title="Side 2 Grid Connection TOUCHING Communities" multiplier="5"
-   max="3" />
-
-  <goal name="two_alt_fuel_community" title="Side 2 Communities with Grid AND (Dam or Windmill)"
-   multiplier="5" max="3" />
-  <restriction lowerBound="0" upperBound="3"
-   message="You cannot have more communities with alternate fuel than communities connected to the grid.">
-   <term goal="two_grid_connection" scoreType="raw" />
-   <term coefficient="-1" goal="two_alt_fuel_community" scoreType="raw" />
-  </restriction>
-
-  <goal name="two_solar_power_satellite" title="Side 2 Solar Power Satellite"
-   multiplier="15" />
-
-  <goal name="two_wave_turbine" title="Side 2 Wave Turbines in Ocean" multiplier="25" />
-
-    <computedGoal name="two_wave_turbine_bonus" title="Side 2 Wave Turbine Bonus">
-      <switch>
-        <case>
-          <condition>
-            <left>
-              <term scoreType="raw" goal="two_wave_turbine"/>
-            </left>
-          <greater-than/>
-            <right>
-              <constant value="1"/>
-            </right>
-        </condition>
-          <result>
-            <constant value="25"/>
-          </result>
-        </case>
-        <default>
-          <constant value="0"/>
-        </default>
-      </switch>
-    </computedGoal>
-    
-  <restriction lowerBound="0" upperBound="2"
-   message="You cannot have both wave turbines on both sides">
-   <term coefficient="1" goal="one_wave_turbine" scoreType="raw" />
-   <term coefficient="1" goal="two_wave_turbine" scoreType="raw" />
-  </restriction>
-
-  <goal name="two_coal_mining" title="Side 2 Coal Car Retrieved to Base" multiplier="10" />
-
-  <goal name="two_oil_drilling" title="Side 2 Oil Barrels OFF platform" multiplier="10" />
-
-  <goal name="two_corn_harvest" title="Side 2 Corn TO Base AND Oil TO Farm" multiplier="25" />
-
-  <goal name="two_uranium_mining" title="Side 2 Uranium OUT Of Farm"
-   multiplier="15" />
-
-  <goal name="two_tree_planting" title="Side 2 Tree TO North of river Planting" multiplier="10"
-   max="8" />
-  <computedGoal name="two_tree_planting_bonus" title="Side 2 Tree Planting Bonus">
-    <switch>
-        <case>
-          <condition>
-            <left>
-              <term scoreType="raw" goal="two_tree_planting"/>
-            </left>
-            <greater-than/>
-            <right>
-              <constant value="4"/>
-            </right>
-          </condition>
-          <result>
-            <term scoreType="raw" goal="two_tree_planting" coefficient="20"/>
-            <constant value="-80"/>
-          </result>
-        </case>
-        <default>
-          <constant value="0"/>
-        </default>
-      </switch>
-  </computedGoal>
-    
-  <restriction lowerBound="0" upperBound="8"
-   message="There are only 8 trees between the two sides!">
-   <term coefficient="1" goal="one_tree_planting" scoreType="raw" />
-   <term coefficient="1" goal="two_tree_planting" scoreType="raw" />
-  </restriction>   
-
-  <goal name="two_power_plant_supply_tree" title="Side 2 Trees TO Power Plant (Limit 1 per planted tree &amp; No Red Fuel)"
-   multiplier="10" max="2" />
-  <restriction lowerBound="0" upperBound="4"
-   message="There must be one tree planted for each used as fuel">
-   <term coefficient="1" goal="two_tree_planting" scoreType="raw" />
-   <term coefficient="-1" goal="two_power_plant_supply_tree"
-    scoreType="raw" />
-  </restriction>
-
-  <restriction lowerBound="0" upperBound="8"
-   message="There are only 8 trees between the two sides!">
-   <term coefficient="1" goal="one_tree_planting" scoreType="raw" />
-   <term coefficient="1" goal="one_power_plant_supply_tree" scoreType="raw" />
-   <term coefficient="1" goal="two_tree_planting" scoreType="raw" />
-   <term coefficient="1" goal="two_power_plant_supply_tree" scoreType="raw" />
-  </restriction>
-
-  <goal name="two_power_plant_supply_coal"
-   title="Side 2 Black Coal TO Power Plant - at least 10 pieces &amp; No Red Fuel"
-   multiplier="10" />
-
-  <goal name="two_power_plant_supply_uranium"
-   title="Side 2 Green Uranium TO Power Plant &amp; No Red Fuel" multiplier="10" max="2" />
-
-  <goal name="two_power_plant_supply_oil"
-   title="Side 2 White Oil Barrels TO Power Plant &amp; No Red Fuel" multiplier="5"
-   max="7" />
-
-  <goal name="two_oil_barrels_base"
-   title="Side 2 Oil Barrels IN base" multiplier="10"
-   max="11" />
-
-  <restriction lowerBound="0" upperBound="11"
-   message="There are only 11 oil barrels on the field">
-   <term coefficient="1" goal="two_power_plant_supply_oil" scoreType="raw" />
-   <term coefficient="1" goal="two_oil_barrels_base" scoreType="raw" />
-   <term coefficient="1" goal="two_corn_harvest" scoreType="raw" />
-  </restriction>
+		<restriction lowerBound="0" upperBound="11"
+			message="There are only 11 oil barrels on the field">
+			<term coefficient="1" goal="one_power_plant_supply_oil"
+				scoreType="raw" />
+			<term coefficient="1" goal="one_oil_barrels_base" scoreType="raw" />
+			<term coefficient="1" goal="one_corn_harvest" scoreType="raw" />
+		</restriction>
 
 
-  <goal name="two_pollution_deduction" title="Side 2 Oil Barrels TOUCHING Water or House Property"
-   multiplier="-40" />
-    
-  <tiebreaker>
-      <!-- doesn't matter as no head to head -->
-   <test winner='HIGH'>
-     <term goal='one_solar_power_satellite' scoreType='computed'/>
-   </test>
-  </tiebreaker>
- </Performance>
+		<goal name="one_pollution_deduction" title="Side 1 Oil Barrels TOUCHING Water or House Property"
+			multiplier="-40" />
+
+
+		<!-- side 2 goals -->
+
+		<goal name="two_roof_solar_panel" title="Side 2 Solar Panel ON Roof"
+			multiplier="15" />
+
+		<goal name="two_personal_vehicle_choice" title="Side 2 Car TO House &amp; Truck TO Farm"
+			multiplier="35" />
+
+		<goal name="two_hydro_dam" title="Side 2 Hydro-Dam TOUCHING banks"
+			multiplier="25" />
+
+		<goal name="two_flood_house" title="Side 2 Houses TOUCHED by Dam or Flood"
+			multiplier="-10" />
+
+		<goal name="two_wind_turbines" title="Side 2 Wind Turbines TOUCHING Communities"
+			multiplier="15" max="2" />
+
+		<goal name="two_grid_connection" title="Side 2 Grid Connection TOUCHING Communities"
+			multiplier="5" max="3" />
+
+		<goal name="two_alt_fuel_community" title="Side 2 Communities with Grid AND (Dam or Windmill)"
+			multiplier="5" max="3" />
+		<restriction lowerBound="0" upperBound="3"
+			message="You cannot have more communities with alternate fuel than communities connected to the grid.">
+			<term goal="two_grid_connection" scoreType="raw" />
+			<term coefficient="-1" goal="two_alt_fuel_community" scoreType="raw" />
+		</restriction>
+
+		<goal name="two_solar_power_satellite" title="Side 2 Solar Power Satellite"
+			multiplier="15" />
+
+		<goal name="two_wave_turbine" title="Side 2 Wave Turbines in Ocean"
+			multiplier="25" />
+
+		<computedGoal name="two_wave_turbine_bonus" title="Side 2 Wave Turbine Bonus">
+			<switch>
+				<case>
+					<condition>
+						<left>
+							<term scoreType="raw" goal="two_wave_turbine" />
+						</left>
+						<greater-than />
+						<right>
+							<constant value="1" />
+						</right>
+					</condition>
+					<result>
+						<constant value="25" />
+					</result>
+				</case>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+		<restriction lowerBound="0" upperBound="2"
+			message="You cannot have both wave turbines on both sides">
+			<term coefficient="1" goal="one_wave_turbine" scoreType="raw" />
+			<term coefficient="1" goal="two_wave_turbine" scoreType="raw" />
+		</restriction>
+
+		<goal name="two_coal_mining" title="Side 2 Coal Car Retrieved to Base"
+			multiplier="10" />
+
+		<goal name="two_oil_drilling" title="Side 2 Oil Barrels OFF platform"
+			multiplier="10" />
+
+		<goal name="two_corn_harvest" title="Side 2 Corn TO Base AND Oil TO Farm"
+			multiplier="25" />
+
+		<goal name="two_uranium_mining" title="Side 2 Uranium OUT Of Farm"
+			multiplier="15" />
+
+		<goal name="two_tree_planting" title="Side 2 Tree TO North of river Planting"
+			multiplier="10" max="8" />
+		<computedGoal name="two_tree_planting_bonus" title="Side 2 Tree Planting Bonus">
+			<switch>
+				<case>
+					<condition>
+						<left>
+							<term scoreType="raw" goal="two_tree_planting" />
+						</left>
+						<greater-than />
+						<right>
+							<constant value="4" />
+						</right>
+					</condition>
+					<result>
+						<term scoreType="raw" goal="two_tree_planting" coefficient="20" />
+						<constant value="-80" />
+					</result>
+				</case>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+		<restriction lowerBound="0" upperBound="8"
+			message="There are only 8 trees between the two sides!">
+			<term coefficient="1" goal="one_tree_planting" scoreType="raw" />
+			<term coefficient="1" goal="two_tree_planting" scoreType="raw" />
+		</restriction>
+
+		<goal name="two_power_plant_supply_tree"
+			title="Side 2 Trees TO Power Plant (Limit 1 per planted tree &amp; No Red Fuel)"
+			multiplier="10" max="2" />
+		<restriction lowerBound="0" upperBound="4"
+			message="There must be one tree planted for each used as fuel">
+			<term coefficient="1" goal="two_tree_planting" scoreType="raw" />
+			<term coefficient="-1" goal="two_power_plant_supply_tree"
+				scoreType="raw" />
+		</restriction>
+
+		<restriction lowerBound="0" upperBound="8"
+			message="There are only 8 trees between the two sides!">
+			<term coefficient="1" goal="one_tree_planting" scoreType="raw" />
+			<term coefficient="1" goal="one_power_plant_supply_tree"
+				scoreType="raw" />
+			<term coefficient="1" goal="two_tree_planting" scoreType="raw" />
+			<term coefficient="1" goal="two_power_plant_supply_tree"
+				scoreType="raw" />
+		</restriction>
+
+		<goal name="two_power_plant_supply_coal"
+			title="Side 2 Black Coal TO Power Plant - at least 10 pieces &amp; No Red Fuel"
+			multiplier="10" />
+
+		<goal name="two_power_plant_supply_uranium"
+			title="Side 2 Green Uranium TO Power Plant &amp; No Red Fuel"
+			multiplier="10" max="2" />
+
+		<goal name="two_power_plant_supply_oil"
+			title="Side 2 White Oil Barrels TO Power Plant &amp; No Red Fuel"
+			multiplier="5" max="7" />
+
+		<goal name="two_oil_barrels_base" title="Side 2 Oil Barrels IN base"
+			multiplier="10" max="11" />
+
+		<restriction lowerBound="0" upperBound="11"
+			message="There are only 11 oil barrels on the field">
+			<term coefficient="1" goal="two_power_plant_supply_oil"
+				scoreType="raw" />
+			<term coefficient="1" goal="two_oil_barrels_base" scoreType="raw" />
+			<term coefficient="1" goal="two_corn_harvest" scoreType="raw" />
+		</restriction>
+
+
+		<goal name="two_pollution_deduction" title="Side 2 Oil Barrels TOUCHING Water or House Property"
+			multiplier="-40" />
+
+		<tiebreaker>
+			<!-- doesn't matter as no head to head -->
+			<test winner='HIGH'>
+				<term goal='one_solar_power_satellite' scoreType='computed' />
+			</test>
+		</tiebreaker>
+	</Performance>
 
 </fll>

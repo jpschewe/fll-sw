@@ -20,6 +20,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -31,6 +33,7 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.Init;
+import fll.web.SessionAttributes;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
@@ -56,7 +59,9 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
     }
 
     final ServletContext application = getServletContext();
-    final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
+    final HttpSession session = request.getSession();
+
+    final DataSource datasource = (DataSource)session.getAttribute(SessionAttributes.DATASOURCE);
     final Document challengeDocument = (Document) application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
 
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
@@ -78,18 +83,20 @@ public class CategoryScoresByScoreGroup extends HttpServlet {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
+      final Connection connection = datasource.getConnection();
+
       final String currentTournament = Queries.getCurrentTournament(connection);
 
       // foreach division
-      for (String division : Queries.getDivisions(connection)) {
+      for (final String division : Queries.getDivisions(connection)) {
         // foreach subjective category
-        for (String categoryTitle : subjectiveCategories.keySet()) {
+        for (final String categoryTitle : subjectiveCategories.keySet()) {
           final String categoryName = subjectiveCategories.get(categoryTitle);
 
           final Map<String, Collection<Integer>> scoreGroups = Queries.computeScoreGroups(connection, currentTournament, division, categoryName);
 
           // select from FinalScores
-          for (String scoreGroup : scoreGroups.keySet()) {
+          for (final String scoreGroup : scoreGroups.keySet()) {
             writer.write("<h3>"
                 + categoryTitle + " Division: " + division + " Score Group: " + scoreGroup + "</h3>");
             writer.write("<table border='0'>");

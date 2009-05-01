@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -48,8 +49,8 @@ import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.Queries;
-import fll.web.ApplicationAttributes;
 import fll.web.Init;
+import fll.web.SessionAttributes;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
@@ -87,7 +88,7 @@ public class Top10 extends HttpServlet {
 
     final ServletContext application = getServletContext();
     final HttpSession session = request.getSession();
-    final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
+    final DataSource datasource = SessionAttributes.getDataSource(session);
     final Formatter formatter = new Formatter(response.getWriter());
     final String showOrgStr = request.getParameter("showOrganization");
     final boolean showOrg = null == showOrgStr ? true : Boolean.parseBoolean(showOrgStr);
@@ -95,6 +96,8 @@ public class Top10 extends HttpServlet {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
+      final Connection connection = datasource.getConnection();
+
       final String currentTournament = Queries.getCurrentTournament(connection);
 
       final Integer divisionIndexObj = (Integer) session.getAttribute("divisionIndex");
@@ -129,10 +132,10 @@ public class Top10 extends HttpServlet {
                        Queries.getColorForDivisionIndex(divisionIndex), divisions.get(divisionIndex));
       formatter.format("</tr>");
 
-      final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-      final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);          
+      final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
+      final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
       final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
-      
+
       prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore FROM"
           + " (SELECT TeamNumber, MAX(ComputedTotal) AS MaxOfComputedScore FROM verified_performance WHERE Tournament = ? "
           + " AND RunNumber <= ? AND NoShow = False AND Bye = False GROUP BY TeamNumber) AS T2"

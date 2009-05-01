@@ -1,163 +1,175 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fll title="FLL 2006 Challenge: Nano Quest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="fll.xsd">
+<fll title="FLL 2006 Challenge: Nano Quest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="fll.xsd">
 
-  <!-- $Rev$ -->
-	
-  <Performance minimumScore="0" weight="1.0">
+	<!-- $Rev$ -->
 
-    <goal name="smell_off_plate" title="_ Smell (Off Paper Plate)"
-      min="0"
-      max="2"
-      multiplier="5"
-      />
-    <goal name="smell_head" title=" (On Head or Neck)"
-      min="0"
-      max="2"
-      multiplier="10"
-      />
-    <restriction lowerBound="0" upperBound="2" message="There cannot be more molecules on the head than off the plate">
-      <term scoreType="raw" coefficient="1" goal="smell_off_plate"/>
-      <term scoreType="raw" coefficient="-1" goal="smell_head"/>
-    </restriction>
+	<Performance minimumScore="0" weight="1.0">
 
-    <goal name="smart_medicine" title="_ Deliver Buckyball"
-      multiplier="50"
-      />
+		<goal name="smell_off_plate" title="_ Smell (Off Paper Plate)"
+			min="0" max="2" multiplier="5" />
+		<goal name="smell_head" title=" (On Head or Neck)" min="0" max="2"
+			multiplier="10" />
+		<restriction lowerBound="0" upperBound="2"
+			message="There cannot be more molecules on the head than off the plate">
+			<term scoreType="raw" coefficient="1" goal="smell_off_plate" />
+			<term scoreType="raw" coefficient="-1" goal="smell_head" />
+		</restriction>
 
-    <goal name="atomic_force" title="_ Free the Probe's Nanotip"
-      multiplier="40"
-      />
+		<goal name="smart_medicine" title="_ Deliver Buckyball"
+			multiplier="50" />
 
-    <goal name="move_atoms" title="_ Individual Atom Manipulation">
-      <value score="40" title="0 to 5 white" value="atoms_high"/>
-      <value score="30" title="6 or 7 white" value="atoms_low"/>
-      <value score="0" title="&lt; 8 red/not done" value="atoms_none"/>
-    </goal>
+		<goal name="atomic_force" title="_ Free the Probe's Nanotip"
+			multiplier="40" />
 
-    <goal name="self_assembly" title="_ Self-alignment of Atoms"
-      multiplier="30"
-      />
+		<goal name="move_atoms" title="_ Individual Atom Manipulation">
+			<value score="40" title="0 to 5 white" value="atoms_high" />
+			<value score="30" title="6 or 7 white" value="atoms_low" />
+			<value score="0" title="&lt; 8 red/not done" value="atoms_none" />
+		</goal>
 
-    <goal name="molecular_motor" title="_ Molecular Motor"
-      multiplier="40"
-      />
-    
-    <goal name="dumper" title="_ Robot Emptied Dirt Dumper"
-      multiplier="15"
-      />
+		<goal name="self_assembly" title="_ Self-alignment of Atoms"
+			multiplier="30" />
 
-    <goal name="dirt_trap" title="Dirt Trap on Mark"
-      multiplier="15"
-      />
+		<goal name="molecular_motor" title="_ Molecular Motor"
+			multiplier="40" />
 
-    
-    <goal name="dirt_in_trap" title="Dirt in Dirt Trap"
-      multiplier="5"
-      max="8"
-      />
+		<goal name="dumper" title="_ Robot Emptied Dirt Dumper"
+			multiplier="15" />
 
-    <goal name="dirt_elsewhere" title="Dirt Elsewhere"
-      multiplier="3"
-      max="8"
-      />
-    <restriction lowerBound="0" upperBound="8" message="There are a maximum of 3 dirt pieces on the table">
-      <term scoreType="raw" coefficient="1" goal="dirt_in_trap"/>
-      <term scoreType="raw" coefficient="1" goal="dirt_elsewhere"/>
-    </restriction>
-
-    <goal name="space_elevator" title="_ Operate Space Elevator"
-      multiplier="40"
-      />
-
-    <goal name="nanotube_strength" title="_ Nanotube Strength">
-      <value score="40" title="Supported by Cable" value="supported_by_cable"/>
-      <value score="20" title="Truck on Frame" value="truck_on_frame"/>
-      <value score="0" title="None" value="none"/>
-    </goal>
-
-    <goal name="fairness" title="Fairness Bonus: RCX completes 3 missions, NXT completes 6"
-      multiplier="20"
-      />
-    
-    <!-- want to know the type of robot, but can't change the score, so set the multiplier to 0 -->
-    <goal name="robot_type" title="Robot Type" initialValue="1"
-      multiplier="0">
-      <value score="1" title="RCX" value="rcx"/>
-      <value score="2" title="NXT" value="nxt"/>
-    </goal>
-
-    <tiebreaker>
-      <test winner="HIGH">
-        <term goal="dirt_in_trap" />
-        <term goal="dirt_elsewhere" />
-      </test>
-      <test winner="HIGH">
-        <term goal="molecular_motor" />
-      </test>
-      <test winner="HIGH">
-        <term goal="move_atoms" />
-      </test>
-      <test winner="HIGH">
-        <term goal="smart_medicine" />
-      </test>
-      <test winner="HIGH">
-        <term goal="atomic_force" />
-      </test>
-      <test winner="HIGH">
-        <term goal="dumper" />
-      </test>
-      <test winner="HIGH">
-        <term goal="dirt_trap" />
-      </test>
-      <test winner="HIGH">
-        <term goal="self_assembly" />
-      </test>
-      <test winner="HIGH">
-        <term goal="smell_head" />
-      </test>
-      <test winner="HIGH">
-        <term goal="smell_off_plate" />
-      </test>
-      <test winner="HIGH">
-        <term goal="nanotube_strength" />
-      </test>
-    </tiebreaker>
-
-  </Performance>
-
-  <subjectiveCategory name="teamwork" title="Teamwork" weight="1.0">
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="roles" title="Roles and Responsibilities"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="professionalism" title="Gracious Professionalism"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="dynamics" title="Problem Solving &amp; Team Dynamics &amp; Communications"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="confidence" title="Confidence &amp; Enthusiasm"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="fll_values" title="FLL Values"></goal>
-  </subjectiveCategory>
-
-  
-  <subjectiveCategory name="robustdesign" title="Robust Design" weight="0.5">
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="strategy" title="Strategy, Process, Problem Solving"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="locomotion" title="Locomotion and Navigation"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="design_kids" title="Kids Did the Work"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="structural" title="Structural"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="overall_design" title="Overall Design"></goal>
-  </subjectiveCategory>
+		<goal name="dirt_trap" title="Dirt Trap on Mark" multiplier="15" />
 
 
-  <subjectiveCategory name="programming" title="Robust Programming" weight="0.5">
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="useoflanguage" title="Use of Language"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="modularity" title="Modularity/Abstraction"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="sensorcontrol" title="Sensor Control"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="design" title="Design"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="programming_kids" title="Kids Did the Work"></goal>
-  </subjectiveCategory>
+		<goal name="dirt_in_trap" title="Dirt in Dirt Trap" multiplier="5"
+			max="8" />
 
-  <subjectiveCategory name="research" title="Research Project Assessment" weight="1.0">
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="questions" title="Questions, Language Use"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="completeness" title="Completeness, Teamwork"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="background" title="Background, Data, and Graphics"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="analysis" title="Analysis and Conclusions"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="style" title="Style"></goal>
-  </subjectiveCategory>
+		<goal name="dirt_elsewhere" title="Dirt Elsewhere" multiplier="3"
+			max="8" />
+		<restriction lowerBound="0" upperBound="8"
+			message="There are a maximum of 3 dirt pieces on the table">
+			<term scoreType="raw" coefficient="1" goal="dirt_in_trap" />
+			<term scoreType="raw" coefficient="1" goal="dirt_elsewhere" />
+		</restriction>
 
-  
+		<goal name="space_elevator" title="_ Operate Space Elevator"
+			multiplier="40" />
+
+		<goal name="nanotube_strength" title="_ Nanotube Strength">
+			<value score="40" title="Supported by Cable" value="supported_by_cable" />
+			<value score="20" title="Truck on Frame" value="truck_on_frame" />
+			<value score="0" title="None" value="none" />
+		</goal>
+
+		<goal name="fairness"
+			title="Fairness Bonus: RCX completes 3 missions, NXT completes 6"
+			multiplier="20" />
+
+		<!--
+			want to know the type of robot, but can't change the score, so set
+			the multiplier to 0
+		-->
+		<goal name="robot_type" title="Robot Type" initialValue="1"
+			multiplier="0">
+			<value score="1" title="RCX" value="rcx" />
+			<value score="2" title="NXT" value="nxt" />
+		</goal>
+
+		<tiebreaker>
+			<test winner="HIGH">
+				<term goal="dirt_in_trap" />
+				<term goal="dirt_elsewhere" />
+			</test>
+			<test winner="HIGH">
+				<term goal="molecular_motor" />
+			</test>
+			<test winner="HIGH">
+				<term goal="move_atoms" />
+			</test>
+			<test winner="HIGH">
+				<term goal="smart_medicine" />
+			</test>
+			<test winner="HIGH">
+				<term goal="atomic_force" />
+			</test>
+			<test winner="HIGH">
+				<term goal="dumper" />
+			</test>
+			<test winner="HIGH">
+				<term goal="dirt_trap" />
+			</test>
+			<test winner="HIGH">
+				<term goal="self_assembly" />
+			</test>
+			<test winner="HIGH">
+				<term goal="smell_head" />
+			</test>
+			<test winner="HIGH">
+				<term goal="smell_off_plate" />
+			</test>
+			<test winner="HIGH">
+				<term goal="nanotube_strength" />
+			</test>
+		</tiebreaker>
+
+	</Performance>
+
+	<subjectiveCategory name="teamwork" title="Teamwork"
+		weight="1.0">
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="roles"
+			title="Roles and Responsibilities"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1"
+			name="professionalism" title="Gracious Professionalism"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="dynamics"
+			title="Problem Solving &amp; Team Dynamics &amp; Communications"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="confidence"
+			title="Confidence &amp; Enthusiasm"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="fll_values"
+			title="FLL Values"></goal>
+	</subjectiveCategory>
+
+
+	<subjectiveCategory name="robustdesign" title="Robust Design"
+		weight="0.5">
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="strategy"
+			title="Strategy, Process, Problem Solving"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="locomotion"
+			title="Locomotion and Navigation"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="design_kids"
+			title="Kids Did the Work"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="structural"
+			title="Structural"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1"
+			name="overall_design" title="Overall Design"></goal>
+	</subjectiveCategory>
+
+
+	<subjectiveCategory name="programming" title="Robust Programming"
+		weight="0.5">
+		<goal initialValue="0" max="20" min="0" multiplier="1"
+			name="useoflanguage" title="Use of Language"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="modularity"
+			title="Modularity/Abstraction"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1"
+			name="sensorcontrol" title="Sensor Control"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="design"
+			title="Design"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1"
+			name="programming_kids" title="Kids Did the Work"></goal>
+	</subjectiveCategory>
+
+	<subjectiveCategory name="research"
+		title="Research Project Assessment" weight="1.0">
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="questions"
+			title="Questions, Language Use"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="completeness"
+			title="Completeness, Teamwork"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="background"
+			title="Background, Data, and Graphics"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="analysis"
+			title="Analysis and Conclusions"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="style"
+			title="Style"></goal>
+	</subjectiveCategory>
+
+
 </fll>

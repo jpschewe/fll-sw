@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -19,22 +18,17 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.io.LogWriter;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.hsqldb.Server;
 import org.hsqldb.jdbc.jdbcDataSource;
-import org.slf4j.LoggerFactory;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
@@ -100,7 +94,7 @@ public final class Utilities {
       }
       stmt = connection.createStatement();
       boolean first = true;
-      for (String columnName : line) {
+      for (final String columnName : line) {
         if (first) {
           first = false;
         } else {
@@ -169,7 +163,7 @@ public final class Utilities {
     }
 
     final String[] extensions = new String[] { ".properties", ".script", ".log", ".data", ".backup", };
-    for (String extension : extensions) {
+    for (final String extension : extensions) {
       final File file = new File(baseFilename
           + extension);
       if (file.exists()
@@ -250,7 +244,7 @@ public final class Utilities {
     final String myURL;
     if (Boolean.getBoolean("inside.test")) {
       // TODO disabled until 2724372 is fixed
-      //myURL = "jdbc:log4jdbc:hsqldb:file:"
+      // myURL = "jdbc:log4jdbc:hsqldb:file:"
       myURL = "jdbc:hsqldb:file:"
           + database + ";shutdown=true";
     } else {
@@ -261,45 +255,30 @@ public final class Utilities {
       LOG.debug("myURL: "
           + myURL);
     }
-    
+
     final jdbcDataSource dataSource = new jdbcDataSource();
     dataSource.setDatabase(myURL);
     dataSource.setUser("sa");
-    
+
     /*
-    // startup test database server
-    if (Boolean.getBoolean("inside.test")) {
-      if (!_testServerStarted) {
-        if (LOG.isInfoEnabled()) {
-          LOG.info("Starting database server for testing");
-        }
-        // TODO This still isn't working quite right when run from inside
-        // Eclipse, when run from the commandline forcing the parameter it's
-        // fine
-        final Server server = new Server();
-        server.setPort(9042);
-        server.setDatabasePath(0, database);
-        server.setDatabaseName(0, "fll");
-        server.setNoSystemExit(true);
-        server.setErrWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"), LogWriter.LogLevel.ERROR)));
-        server.setLogWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"), LogWriter.LogLevel.INFO)));
-        server.setTrace(true);
-        server.start();
-        // final Thread dbThread = new Thread(new Runnable() {
-        // public void run() {
-        // org.hsqldb.Server.main(new String[] {
-        // "-port", "9042",
-        // "-database.0", database,
-        // "-dbname.0", "fll",
-        // "-no_system_exit", "true",
-        // });
-        // }});
-        // dbThread.setDaemon(true);
-        // dbThread.start();
-        _testServerStarted = true;
-      }
-    }
-    */
+     * // startup test database server if (Boolean.getBoolean("inside.test")) {
+     * if (!_testServerStarted) { if (LOG.isInfoEnabled()) {
+     * LOG.info("Starting database server for testing"); } // TODO This still
+     * isn't working quite right when run from inside // Eclipse, when run from
+     * the commandline forcing the parameter it's // fine final Server server =
+     * new Server(); server.setPort(9042); server.setDatabasePath(0, database);
+     * server.setDatabaseName(0, "fll"); server.setNoSystemExit(true);
+     * server.setErrWriter(new PrintWriter(new
+     * LogWriter(LoggerFactory.getLogger("database"),
+     * LogWriter.LogLevel.ERROR))); server.setLogWriter(new PrintWriter(new
+     * LogWriter(LoggerFactory.getLogger("database"),
+     * LogWriter.LogLevel.INFO))); server.setTrace(true); server.start(); //
+     * final Thread dbThread = new Thread(new Runnable() { // public void run()
+     * { // org.hsqldb.Server.main(new String[] { // "-port", "9042", //
+     * "-database.0", database, // "-dbname.0", "fll", // "-no_system_exit",
+     * "true", // }); // }}); // dbThread.setDaemon(true); // dbThread.start();
+     * _testServerStarted = true; } }
+     */
 
     return dataSource;
   }
@@ -308,10 +287,10 @@ public final class Utilities {
    * Creates a database connection.
    * 
    * @param database name of the database to connect to
-   * @throws SQLException 
-   * 
+   * @throws SQLException
    * @deprecated use {@link #createDataSource(String)} instead.
    */
+  @Deprecated
   public static Connection createDBConnection(final String database) throws SQLException {
     return createDataSource(database).getConnection();
   }
@@ -357,25 +336,25 @@ public final class Utilities {
       LOG.debug("buildGraphicFileList("
           + p + "," + Arrays.toString(d) + "," + f.toString() + ")");
     }
-    for (int i = 0; i < d.length; i++) {
-      String np = (p.length() == 0 ? p : p
+    for (final File element : d) {
+      final String np = (p.length() == 0 ? p : p
           + "/")
-          + d[i].getName();
-      String[] files = d[i].list(GRAPHICS_FILTER);
+          + element.getName();
+      final String[] files = element.list(GRAPHICS_FILTER);
       if (files != null) {
         if (LOG.isDebugEnabled()) {
           LOG.debug("files: "
               + Arrays.toString(files));
         }
         java.util.Arrays.sort(files);
-        for (int j = 0; j < files.length; j++) {
+        for (final String file : files) {
           f.add(np
-              + "/" + files[j]);
+              + "/" + file);
         }
       } else {
         LOG.debug("files: null");
       }
-      File[] dirs = d[i].listFiles(DIRFILTER);
+      final File[] dirs = element.listFiles(DIRFILTER);
       if (dirs != null) {
         if (LOG.isDebugEnabled()) {
           LOG.debug("dirs: "

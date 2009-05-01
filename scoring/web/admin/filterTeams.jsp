@@ -2,9 +2,10 @@
   
 <%@ page import="fll.web.admin.UploadTeams" %>
 
-<%@ page import="fll.web.ApplicationAttributes" %>
+<%@ page import="fll.web.SessionAttributes" %>
 
 <%@ page import="java.sql.Connection" %>
+<%@ page import="javax.sql.DataSource" %>
 
 <c:if test="${not empty param.next}">
   <%-- next button was clicked --%>
@@ -19,7 +20,8 @@
 </c:if>
   
 <%
-final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
+final DataSource datasource = SessionAttributes.getDataSource(session);
+final Connection connection = datasource.getConnection();
 
 if(null == session.getAttribute("columnSelectOptions")) {
   throw new RuntimeException("Error columnSelectOptions not set.  Please start back at administration page and go forward.");

@@ -14,6 +14,7 @@ import java.util.Map;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
 import com.lowagie.text.Chunk;
@@ -41,6 +42,9 @@ import fll.xml.XMLUtils;
  * @author Dan Churchill
  */
 public class ScoresheetGenerator {
+
+  private static final Logger LOGGER = Logger.getLogger(ScoresheetGenerator.class);
+
   private static final String LONG_BLANK = "_________________________";
 
   private static final String SHORT_BLANK = "___________";
@@ -87,7 +91,7 @@ public class ScoresheetGenerator {
     int checkedMatchCount = 0;
     // Build array of out how many matches we are printing
     for (int i = 1; i <= numMatches; i++) {
-      String checkX = "print"
+      final String checkX = "print"
           + i;
       checkedMatches[i] = null != formParms.get(checkX);
       if (checkedMatches[i]) {
@@ -273,71 +277,55 @@ public class ScoresheetGenerator {
 
     // Cells for judge initials, team initials, score field, and 2nd
     // check initials
-    Phrase ji = new Phrase("Judge's Initials _______", ARIAL_8PT_NORMAL);
-    PdfPCell jiC = new PdfPCell(ji);
+    final Phrase ji = new Phrase("Judge's Initials _______", ARIAL_8PT_NORMAL);
+    final PdfPCell jiC = new PdfPCell(ji);
     jiC.setBorder(0);
     jiC.setPaddingTop(9);
     jiC.setPaddingRight(36);
     jiC.setHorizontalAlignment(Element.ALIGN_RIGHT);
-    Phrase des = new Phrase("Data Entry Score _______", ARIAL_8PT_NORMAL);
-    PdfPCell desC = new PdfPCell(des);
+    final Phrase des = new Phrase("Data Entry Score _______", ARIAL_8PT_NORMAL);
+    final PdfPCell desC = new PdfPCell(des);
     desC.setBorder(0);
     desC.setPaddingTop(9);
     desC.setPaddingRight(36);
     desC.setHorizontalAlignment(Element.ALIGN_RIGHT);
-    Phrase tci = new Phrase("Team Check Inititals _______", ARIAL_8PT_NORMAL);
-    PdfPCell tciC = new PdfPCell(tci);
+    final Phrase tci = new Phrase("Team Check Inititals _______", ARIAL_8PT_NORMAL);
+    final PdfPCell tciC = new PdfPCell(tci);
     tciC.setBorder(0);
     tciC.setPaddingTop(9);
     tciC.setPaddingRight(36);
     tciC.setHorizontalAlignment(Element.ALIGN_RIGHT);
-    Phrase sci = new Phrase("2nd Check Initials _______", ARIAL_8PT_NORMAL);
-    PdfPCell sciC = new PdfPCell(sci);
+    final Phrase sci = new Phrase("2nd Check Initials _______", ARIAL_8PT_NORMAL);
+    final PdfPCell sciC = new PdfPCell(sci);
     sciC.setBorder(0);
     sciC.setPaddingTop(9);
     sciC.setPaddingRight(36);
     sciC.setHorizontalAlignment(Element.ALIGN_RIGHT);
 
-    Phrase cpr = new Phrase("All Challenge Pieces Returned _______", ARIAL_8PT_NORMAL);
-    PdfPCell cprC = new PdfPCell(cpr);
+    final Phrase cpr = new Phrase("All Challenge Pieces Returned _______", ARIAL_8PT_NORMAL);
+    final PdfPCell cprC = new PdfPCell(cpr);
     cprC.setBorder(0);
     cprC.setPaddingTop(9);
     cprC.setPaddingRight(36);
     cprC.setHorizontalAlignment(Element.ALIGN_RIGHT);
-    Phrase blank1 = new Phrase("", ARIAL_8PT_NORMAL);
-    PdfPCell blankC = new PdfPCell(blank1);
+    final Phrase blank1 = new Phrase("", ARIAL_8PT_NORMAL);
+    final PdfPCell blankC = new PdfPCell(blank1);
     blankC.setBorder(0);
     blankC.setPaddingTop(9);
     blankC.setPaddingRight(36);
     blankC.setHorizontalAlignment(Element.ALIGN_RIGHT);
 
-    PdfPTable[] team = new PdfPTable[m_numTeams];
-    PdfPCell[] cell = new PdfPCell[m_numTeams];
+    final PdfPTable[] team = new PdfPTable[m_numTeams];
+    final PdfPCell[] cell = new PdfPCell[m_numTeams];
 
     // Create a table with a grid cell for each scoresheet on the page
-    PdfPTable wholePage;
-    // TODO - break this if statement out into a private function
-    if (nup == 1) {
-      wholePage = new PdfPTable(1); // 1 column
-    } else if (nup == 2) {
-      wholePage = new PdfPTable(2); // 2 columns
-    } else {
-      wholePage = new PdfPTable(2); // default to 2 columns - should never get
-      // here
-    }
+    PdfPTable wholePage = getTableForPage(nup);
     wholePage.setWidthPercentage(100);
     for (int i = 0; i < m_numTeams; i++) {
       if (i > 0
           && (i % nup) == 0) {
         pdfDoc.newPage();
-        if (nup == 1) {
-          wholePage = new PdfPTable(1); // 1 column
-        } else if (nup == 2) {
-          wholePage = new PdfPTable(2); // 2 columns
-        } else {
-          wholePage = new PdfPTable(2); // default to 2 columns - should never
-          // get here
-        }
+        wholePage = getTableForPage(nup);
         wholePage.setWidthPercentage(100);
       }
       team[i] = new PdfPTable(2);
@@ -346,58 +334,58 @@ public class ScoresheetGenerator {
       team[i].addCell(head);
 
       // Table label cell
-      Paragraph tblP = new Paragraph("Table:", ARIAL_10PT_NORMAL);
+      final Paragraph tblP = new Paragraph("Table:", ARIAL_10PT_NORMAL);
       tblP.setAlignment(Element.ALIGN_RIGHT);
-      PdfPCell tblLc = new PdfPCell(team[i].getDefaultCell());
+      final PdfPCell tblLc = new PdfPCell(team[i].getDefaultCell());
       tblLc.setPaddingRight(9);
       tblLc.addElement(tblP);
       team[i].addCell(tblLc);
       // Table value cell
-      Paragraph tblV = new Paragraph(m_table[i], COURIER_10PT_NORMAL);
-      PdfPCell tblVc = new PdfPCell(team[i].getDefaultCell());
+      final Paragraph tblV = new Paragraph(m_table[i], COURIER_10PT_NORMAL);
+      final PdfPCell tblVc = new PdfPCell(team[i].getDefaultCell());
       tblVc.addElement(tblV);
       team[i].addCell(tblVc);
 
       // Round number label cell
-      Paragraph rndP = new Paragraph("Round Number:", ARIAL_10PT_NORMAL);
+      final Paragraph rndP = new Paragraph("Round Number:", ARIAL_10PT_NORMAL);
       rndP.setAlignment(Element.ALIGN_RIGHT);
-      PdfPCell rndlc = new PdfPCell(team[i].getDefaultCell());
+      final PdfPCell rndlc = new PdfPCell(team[i].getDefaultCell());
       rndlc.setPaddingRight(9);
       rndlc.addElement(rndP);
       team[i].addCell(rndlc);
       // Round number value cell
-      Paragraph rndV = new Paragraph(m_round[i], COURIER_10PT_NORMAL);
-      PdfPCell rndVc = new PdfPCell(team[i].getDefaultCell());
+      final Paragraph rndV = new Paragraph(m_round[i], COURIER_10PT_NORMAL);
+      final PdfPCell rndVc = new PdfPCell(team[i].getDefaultCell());
       rndVc.addElement(rndV);
       team[i].addCell(rndVc);
 
       // Team number label cell
-      Paragraph nbrP = new Paragraph("Team Number:", ARIAL_10PT_NORMAL);
+      final Paragraph nbrP = new Paragraph("Team Number:", ARIAL_10PT_NORMAL);
       nbrP.setAlignment(Element.ALIGN_RIGHT);
-      PdfPCell nbrlc = new PdfPCell(team[i].getDefaultCell());
+      final PdfPCell nbrlc = new PdfPCell(team[i].getDefaultCell());
       nbrlc.setPaddingRight(9);
       nbrlc.addElement(nbrP);
       team[i].addCell(nbrlc);
       // Team number value cell
-      Paragraph nbrV = new Paragraph(m_number[i], COURIER_10PT_NORMAL);
-      PdfPCell nbrVc = new PdfPCell(team[i].getDefaultCell());
+      final Paragraph nbrV = new Paragraph(m_number[i], COURIER_10PT_NORMAL);
+      final PdfPCell nbrVc = new PdfPCell(team[i].getDefaultCell());
       nbrVc.addElement(nbrV);
       team[i].addCell(nbrVc);
 
       // Team name label cell
-      Paragraph nameP = new Paragraph("Team Name:", ARIAL_10PT_NORMAL);
+      final Paragraph nameP = new Paragraph("Team Name:", ARIAL_10PT_NORMAL);
       nameP.setAlignment(Element.ALIGN_RIGHT);
-      PdfPCell namelc = new PdfPCell(team[i].getDefaultCell());
+      final PdfPCell namelc = new PdfPCell(team[i].getDefaultCell());
       namelc.setPaddingRight(9);
       namelc.addElement(nameP);
       team[i].addCell(namelc);
       // Team name value cell
-      Paragraph nameV = new Paragraph(m_name[i], COURIER_10PT_NORMAL);
-      PdfPCell nameVc = new PdfPCell(team[i].getDefaultCell());
+      final Paragraph nameV = new Paragraph(m_name[i], COURIER_10PT_NORMAL);
+      final PdfPCell nameVc = new PdfPCell(team[i].getDefaultCell());
       nameVc.addElement(nameV);
       team[i].addCell(nameVc);
 
-      PdfPCell blankRow = new PdfPCell(new Phrase(""));
+      final PdfPCell blankRow = new PdfPCell(new Phrase(""));
       blankRow.setColspan(2);
       blankRow.setBorder(0);
       blankRow.setMinimumHeight(9);
@@ -440,11 +428,11 @@ public class ScoresheetGenerator {
     }
 
     // Add a blank cells to complete the table of the last page
-    int numBlanks = (nup - (m_numTeams % nup))
+    final int numBlanks = (nup - (m_numTeams % nup))
         % nup;
     if (numBlanks > 0) {
       for (int j = 0; j < numBlanks; j++) {
-        PdfPCell blank = new PdfPCell();
+        final PdfPCell blank = new PdfPCell();
         blank.setBorder(0);
         wholePage.addCell(blank);
       }
@@ -487,7 +475,7 @@ public class ScoresheetGenerator {
 
           // This is the text for the left hand "label" cell
           final String title = element.getAttribute("title");
-          Paragraph p = new Paragraph(title, ARIAL_10PT_NORMAL);
+          final Paragraph p = new Paragraph(title, ARIAL_10PT_NORMAL);
           p.setAlignment(Element.ALIGN_RIGHT);
           m_goalLabel[realI] = new PdfPCell();
           m_goalLabel[realI].setBorder(0);
@@ -496,7 +484,7 @@ public class ScoresheetGenerator {
           m_goalLabel[realI].setVerticalAlignment(Element.ALIGN_TOP);
           // If element is a computed goal, just put a blank on the right.
           if (element.getNodeName().equals("computedGoal")) {
-            Paragraph q = new Paragraph(SHORT_BLANK, COURIER_10PT_NORMAL);
+            final Paragraph q = new Paragraph(SHORT_BLANK, COURIER_10PT_NORMAL);
             m_goalValue[realI] = new PdfPCell();
             m_goalValue[realI].addElement(q);
           } else {
@@ -517,7 +505,7 @@ public class ScoresheetGenerator {
                   choices = choices
                       + " /\u00a0" + posValues.get(v).getAttribute("title").replace(" ", "\u00a0");
                 }
-                Chunk c = new Chunk("", COURIER_10PT_NORMAL);
+                final Chunk c = new Chunk("", COURIER_10PT_NORMAL);
                 c.append(choices.toUpperCase());
                 m_goalValue[realI] = new PdfPCell();
                 m_goalValue[realI].addElement(c);
@@ -525,20 +513,20 @@ public class ScoresheetGenerator {
               } else {
                 if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
                     && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-                  Paragraph q = new Paragraph("YES / NO", COURIER_10PT_NORMAL);
+                  final Paragraph q = new Paragraph("YES / NO", COURIER_10PT_NORMAL);
                   m_goalValue[realI] = new PdfPCell();
                   m_goalValue[realI].addElement(q);
 
                 } else {
                   final String range = "("
                       + min + " - " + max + ")";
-                  PdfPTable t = new PdfPTable(2);
+                  final PdfPTable t = new PdfPTable(2);
                   t.setHorizontalAlignment(Element.ALIGN_LEFT);
                   t.setTotalWidth(72);
                   t.setLockedWidth(true);
-                  Phrase r = new Phrase("", ARIAL_8PT_NORMAL);
+                  final Phrase r = new Phrase("", ARIAL_8PT_NORMAL);
                   t.addCell(new PdfPCell(r));
-                  Phrase q = new Phrase(range, ARIAL_8PT_NORMAL);
+                  final Phrase q = new Phrase(range, ARIAL_8PT_NORMAL);
                   t.addCell(new PdfPCell(q));
                   m_goalValue[realI] = new PdfPCell();
                   m_goalValue[realI].setPaddingTop(9);
@@ -558,7 +546,7 @@ public class ScoresheetGenerator {
     }
   }
 
-  private int m_numTeams;
+  private final int m_numTeams;
 
   private String m_revision;
 
@@ -659,5 +647,33 @@ public class ScoresheetGenerator {
           + m_numTeams);
     }
     m_round[i] = round;
+  }
+
+  /**
+   * Create table for page given number of sheets per page.
+   * 
+   * @param nup
+   * @return
+   */
+  private static PdfPTable getTableForPage(final int nup) {
+    final PdfPTable wholePage;
+    switch (nup) {
+    case 1: {
+      wholePage = new PdfPTable(1); // 1 column
+      break;
+    }
+    case 2: {
+      wholePage = new PdfPTable(2); // 2 columns
+      break;
+    }
+    default: {
+      wholePage = new PdfPTable(2); // default to 2 columns - should never get
+      // here
+      LOGGER.error("Nup set to something later than 2: "
+          + nup + " defaulting to 2.");
+      break;
+    }
+    }
+    return wholePage;
   }
 }

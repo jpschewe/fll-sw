@@ -43,8 +43,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
     _scoreDocument = scoreDocument;
     _subjectiveElement = subjectiveElement;
     _goals = XMLUtils.filterToElements(subjectiveElement.getChildNodes());
-    final Element categoryScoreElement = (Element) ((Element) _scoreDocument.getDocumentElement()).getElementsByTagName(subjectiveElement.getAttribute("name"))
-                                                                                                  .item(0);
+    final Element categoryScoreElement = (Element) (_scoreDocument.getDocumentElement()).getElementsByTagName(subjectiveElement.getAttribute("name")).item(0);
     final List<Element> scoreElements = XMLUtils.filterToElements(categoryScoreElement.getElementsByTagName("score"));
     _scoreElements = new Element[scoreElements.size()];
     for (int i = 0; i < scoreElements.size(); i++) {
@@ -157,9 +156,10 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
           } else if (XMLUtils.isEnumeratedGoal(goalDescription)) {
             return getTeamScore(row).getEnumRawScore(goalName);
           } else {
-            final Double score =  getTeamScore(row).getRawScore(goalName);
+            final Double score = getTeamScore(row).getRawScore(goalName);
             final ScoreType scoreType = XMLUtils.getScoreType(scoreEle);
-            if(ScoreType.FLOAT == scoreType || null == score) {
+            if (ScoreType.FLOAT == scoreType
+                || null == score) {
               return score;
             } else {
               return score.intValue();

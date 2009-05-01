@@ -29,10 +29,8 @@ package fll.xml;
 
 /**
  * @author jpschewe
- *
  */
 public enum ScoreType {
-  INTEGER,
-  FLOAT;
+  INTEGER, FLOAT;
 
 }

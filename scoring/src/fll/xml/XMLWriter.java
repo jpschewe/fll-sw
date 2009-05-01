@@ -12,33 +12,30 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 
 import org.apache.log4j.Logger;
-
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentType;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-
 /**
- * Basic XML writer.  Based on the sample in xerces-2.0.2 dom.Writer.
+ * Basic XML writer. Based on the sample in xerces-2.0.2 dom.Writer.
  * 
  * @version $Revision$
  */
 public class XMLWriter {
 
   private static final Logger LOG = Logger.getLogger(XMLWriter.class);
-  
+
   public XMLWriter() {
   }
 
   /**
    * Set the output writer, if encoding is null, use UTF8.
    */
-  public void setOutput(final OutputStream stream,
-                        final String encoding) throws UnsupportedEncodingException {
+  public void setOutput(final OutputStream stream, final String encoding) throws UnsupportedEncodingException {
     final Writer writer;
-    if(encoding == null) {
+    if (encoding == null) {
       writer = new OutputStreamWriter(stream, "UTF8");
     } else {
       writer = new OutputStreamWriter(stream, encoding);
@@ -50,48 +47,51 @@ public class XMLWriter {
    * Set the output writer.
    */
   public void setOutput(final Writer writer) {
-    _output = (writer instanceof PrintWriter) ? (PrintWriter)writer : new PrintWriter(writer);
+    _output = (writer instanceof PrintWriter) ? (PrintWriter) writer : new PrintWriter(writer);
   }
 
   private String _stylesheet = null;
+
   public String getStyleSheet() {
     return _stylesheet;
   }
+
   public void setStyleSheet(final String stylesheet) {
     _stylesheet = stylesheet;
   }
-  
+
   /**
    * Recursively write out node.
    */
   public void write(final Node node) {
-    if(null == node) {
+    if (null == node) {
       return;
     }
-    
+
     final short type = node.getNodeType();
-    switch(type) {
+    switch (type) {
     case Node.DOCUMENT_NODE: {
-      final Document document = (Document)node;
+      final Document document = (Document) node;
       indent();
       _output.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-      
-      if(null != getStyleSheet()) {
-        _output.println("<?xml-stylesheet type='text/css' href='" + getStyleSheet() + "'?>");
+
+      if (null != getStyleSheet()) {
+        _output.println("<?xml-stylesheet type='text/css' href='"
+            + getStyleSheet() + "'?>");
       }
       _output.flush();
-      write(((Node) (document.getDoctype())));
-      write(((Node) (document.getDocumentElement())));
+      write(((document.getDoctype())));
+      write(((document.getDocumentElement())));
       break;
     }
     case Node.DOCUMENT_TYPE_NODE: {
-      final DocumentType doctype = (DocumentType)node;
+      final DocumentType doctype = (DocumentType) node;
       indent();
       _output.print("<!DOCTYPE ");
       _output.print(doctype.getName());
       final String publicId = doctype.getPublicId();
       final String systemId = doctype.getSystemId();
-      if(publicId != null) {
+      if (publicId != null) {
         _output.print(" PUBLIC '");
         _output.print(publicId);
         _output.print("' '");
@@ -103,7 +103,7 @@ public class XMLWriter {
         _output.print('\'');
       }
       final String internalSubset = doctype.getInternalSubset();
-      if(internalSubset != null) {
+      if (internalSubset != null) {
         _output.println(" [");
         _output.print(internalSubset);
         _output.print(']');
@@ -116,8 +116,7 @@ public class XMLWriter {
       _output.print('<');
       _output.print(node.getNodeName());
       final Attr[] attrs = sortAttributes(node.getAttributes());
-      for(int i = 0; i < attrs.length; i++) {
-        final Attr attr = attrs[i];
+      for (final Attr attr : attrs) {
         _output.print(' ');
         _output.print(attr.getNodeName());
         _output.print("=\"");
@@ -125,16 +124,16 @@ public class XMLWriter {
         _output.print('"');
       }
 
-      if(getNeedsIndent()) {
+      if (getNeedsIndent()) {
         _output.println('>');
       } else {
         _output.print('>');
       }
-      
+
       _output.flush();
-      
+
       _indent += INDENT_OFFSET;
-      
+
       Node child = node.getFirstChild();
       while (child != null) {
         write(child);
@@ -168,7 +167,8 @@ public class XMLWriter {
       _output.print("<?");
       _output.print(node.getNodeName());
       final String data = node.getNodeValue();
-      if(data != null && data.length() > 0) {
+      if (data != null
+          && data.length() > 0) {
         _output.print(' ');
         _output.print(data);
       }
@@ -177,14 +177,15 @@ public class XMLWriter {
       break;
     }
     default:
-      LOG.debug("Skipping node type: " + type);
+      LOG.debug("Skipping node type: "
+          + type);
     }
     if (type == Node.ELEMENT_NODE) {
       _indent -= INDENT_OFFSET;
       indent();
       _output.print("</");
       _output.print(node.getNodeName());
-      if(getNeedsIndent()) {
+      if (getNeedsIndent()) {
         _output.println('>');
       } else {
         _output.print('>');
@@ -196,22 +197,22 @@ public class XMLWriter {
   private Attr[] sortAttributes(final NamedNodeMap attrs) {
     final int len = attrs == null ? 0 : attrs.getLength();
     final Attr[] array = new Attr[len];
-    for(int i = 0; i < len; i++) {
-      array[i] = (Attr)attrs.item(i);
+    for (int i = 0; i < len; i++) {
+      array[i] = (Attr) attrs.item(i);
     }
 
-    for(int i = 0; i < len - 1; i++) {
+    for (int i = 0; i < len - 1; i++) {
       String name = array[i].getNodeName();
       int index = i;
-      for(int j = i + 1; j < len; j++) {
-        String curName = array[j].getNodeName();
-        if(curName.compareTo(name) < 0) {
+      for (int j = i + 1; j < len; j++) {
+        final String curName = array[j].getNodeName();
+        if (curName.compareTo(name) < 0) {
           name = curName;
           index = j;
         }
       }
 
-      if(index != i) {
+      if (index != i) {
         final Attr temp = array[i];
         array[i] = array[index];
         array[index] = temp;
@@ -222,15 +223,15 @@ public class XMLWriter {
   }
 
   private void normalizeAndPrint(final String s) {
-    int len = s == null ? 0 : s.length();
-    for(int i = 0; i < len; i++) {
+    final int len = s == null ? 0 : s.length();
+    for (int i = 0; i < len; i++) {
       normalizeAndPrint(s.charAt(i));
     }
 
   }
 
   private void normalizeAndPrint(final char c) {
-    switch(c) {
+    switch (c) {
     case '<': {
       _output.print("&lt;");
       break;
@@ -258,29 +259,35 @@ public class XMLWriter {
    * INDENT_OFFSET.
    */
   private void indent() {
-    if(getNeedsIndent()) {
-      for(int i=0; i<_indent; i++) {
+    if (getNeedsIndent()) {
+      for (int i = 0; i < _indent; i++) {
         _output.print(' ');
       }
     }
   }
 
   private boolean _needsIndent = false;
+
   /**
-   * Get the needs indent property.  If true then carriage returns and
-   * indentation will be added to the XML file when written out.  This
-   * defaults to false because if you are writing out an XML file that already
-   * has nice formatting, this will just add extra carriage returns and
-   * indentation.
+   * Get the needs indent property. If true then carriage returns and
+   * indentation will be added to the XML file when written out. This defaults
+   * to false because if you are writing out an XML file that already has nice
+   * formatting, this will just add extra carriage returns and indentation.
    */
-  public boolean getNeedsIndent() { return _needsIndent; }
+  public boolean getNeedsIndent() {
+    return _needsIndent;
+  }
 
   /**
    * @see #getNeedsIndent()
    */
-  public void setNeedsIndent(final boolean v) { _needsIndent = v; }
-  
+  public void setNeedsIndent(final boolean v) {
+    _needsIndent = v;
+  }
+
   private PrintWriter _output;
+
   private int _indent = 0;
+
   private static final int INDENT_OFFSET = 2;
 }

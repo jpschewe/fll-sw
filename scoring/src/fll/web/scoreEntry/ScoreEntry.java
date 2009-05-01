@@ -19,9 +19,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
+import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -30,7 +31,7 @@ import org.w3c.dom.Element;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FP;
-import fll.web.ApplicationAttributes;
+import fll.web.SessionAttributes;
 import fll.xml.ChallengeParser;
 import fll.xml.ScoreType;
 import fll.xml.XMLUtils;
@@ -277,7 +278,7 @@ public final class ScoreEntry {
     }
 
     // output variable declaration for each goal
-    for (String goalName : goalsWithRestrictions) {
+    for (final String goalName : goalsWithRestrictions) {
       formatter.format("  var %s = \"\";%n", getElementIDForError(goalName));
     }
 
@@ -293,7 +294,7 @@ public final class ScoreEntry {
       formatter.format("  var %s = %s;%n", restrictValStr, polyString);
       formatter.format("  if(%s > %f || %s < %f) {%n", restrictValStr, upperBound, restrictValStr, lowerBound);
       // append error text to each error cell if the restriction is violated
-      for (String goalName : getGoalsInRestriction(restrictEle)) {
+      for (final String goalName : getGoalsInRestriction(restrictEle)) {
         final String errorId = getElementIDForError(goalName);
         formatter.format("    %s = %s + \" \" + \"%s\";%n", errorId, errorId, message);
       }
@@ -302,7 +303,7 @@ public final class ScoreEntry {
     }
 
     // output text assignment for each goal involved in a restriction
-    for (String goalName : goalsWithRestrictions) {
+    for (final String goalName : goalsWithRestrictions) {
       final String errorId = getElementIDForError(goalName);
       formatter.format("  replaceText(\"%s\", %s);%n", errorId, errorId);
       formatter.format("  if(%s.length > 0) {%n", errorId);
@@ -538,11 +539,12 @@ public final class ScoreEntry {
    * team's score.
    */
   public static void generateInitForScoreEdit(final JspWriter writer,
-                                              final ServletContext application,
+                                              final HttpSession session,
                                               final Document document,
                                               final int teamNumber,
                                               final int runNumber) throws SQLException, IOException {
-    final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
+    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final Connection connection = datasource.getConnection();
     final String tournament = Queries.getCurrentTournament(connection);
     final Statement stmt = connection.createStatement();
     final ResultSet rs = stmt.executeQuery("SELECT * from Performance"

@@ -51,11 +51,13 @@ import fll.db.Queries;
 public class Init {
 
   private static final Logger LOGGER = Logger.getLogger(Init.class);
-  
+
   /**
    * @param request
    * @param response
-   * @return the URL to redirect to if there was trouble. This should be passed to encodeRedirectURL. If this is null, then everything initialized OK
+   * @return the URL to redirect to if there was trouble. This should be passed
+   *         to encodeRedirectURL. If this is null, then everything initialized
+   *         OK
    * @throws IOException
    * @throws RuntimeException
    * @throws SQLException
@@ -63,17 +65,18 @@ public class Init {
   public static String initialize(final HttpServletRequest request, final HttpServletResponse response) throws IOException, SQLException, RuntimeException {
     final HttpSession session = request.getSession();
     final ServletContext application = session.getServletContext();
-    
+
     if (null == application.getAttribute(ApplicationAttributes.DATABASE)) {
       final boolean dbok = Utilities.testHSQLDB(application.getRealPath("/WEB-INF/flldb"));
       if (!dbok) {
-        if(LOGGER.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Database files not ok, redirecting to setup");
         }
         session
                .setAttribute(SessionAttributes.MESSAGE,
                              "<p class='error'>The database does not exist yet or there is a problem with the database files. Please create the database.<br/></p>");
-        return request.getContextPath() + "/setup";
+        return request.getContextPath()
+            + "/setup";
       }
 
       application.setAttribute(ApplicationAttributes.DATABASE, application.getRealPath("/WEB-INF/flldb"));
@@ -84,37 +87,32 @@ public class Init {
     // initialize the datasource
     final DataSource datasource;
     if (null == session.getAttribute(SessionAttributes.DATASOURCE)) {
-      if(LOGGER.isDebugEnabled()) {
+      if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Datasource not available, creating");
       }
       datasource = Utilities.createDataSource(database);
       session.setAttribute(SessionAttributes.DATASOURCE, datasource);
     } else {
-      datasource = (DataSource)session.getAttribute(SessionAttributes.DATASOURCE);
+      datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
     }
 
     // Initialize the connection
     final Connection connection = datasource.getConnection();
-    if (null == application.getAttribute(ApplicationAttributes.CONNECTION)) { 
-      if(LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Creating database connection");
-      }
-      application.setAttribute(ApplicationAttributes.CONNECTION, connection);
-    }
 
     // check if the database is initialized
     final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
     if (!dbinitialized) {
-      if(LOGGER.isDebugEnabled()) {
+      if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Database not initialized, redirecting to setup");
       }
       session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>The database is not yet initialized. Please create the database.<br/></p>");
-      return request.getContextPath() + "/setup";
+      return request.getContextPath()
+          + "/setup";
     }
 
     // load the challenge descriptor
     if (null == application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT)) {
-      if(LOGGER.isDebugEnabled()) {
+      if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Loading challenge descriptor");
       }
       final Document document = Queries.getChallengeDocument(connection);
@@ -133,8 +131,8 @@ public class Init {
     response.setHeader("Cache-Control", "no-store"); // HTTP 1.1
     response.setHeader("Pragma", "no-cache"); // HTTP 1.0
     response.setDateHeader("Expires", 0); // prevents caching at the proxy
-                                          // server
-    
+    // server
+
     return null;
   }
 }

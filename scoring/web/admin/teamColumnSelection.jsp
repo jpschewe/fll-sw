@@ -1,14 +1,15 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
   
 <%@ page import="fll.web.admin.UploadTeams" %>
-<%@ page import="fll.web.ApplicationAttributes" %>
-
+<%@ page import="fll.web.SessionAttributes" %>
+<%@ page import="javax.sql.DataSource" %>
 <%@ page import="java.sql.Connection" %>
   
 <!-- query string <c:out value="${request.queryString}"/> -->
   
 <%
-final Connection connection = (Connection)application.getAttribute(ApplicationAttributes.CONNECTION);
+final DataSource datasource = SessionAttributes.getDataSource(session);
+final Connection connection = datasource.getConnection();
 
 if(null == session.getAttribute("columnSelectOptions")) {
   throw new RuntimeException("Error columnSelectOptions not set.  Please start back at administration page and go forward.");

@@ -13,7 +13,6 @@ import org.apache.log4j.xml.DOMConfigurator;
 /**
  * @author jpschewe
  * @version $Revision$
- * 
  */
 public class Log4jInit extends HttpServlet {
 
@@ -23,14 +22,17 @@ public class Log4jInit extends HttpServlet {
     final String file = getInitParameter("log4j-init-file");
 
     // if the log4j-init-file is not set, then no point in trying
-    if(file != null) {
+    if (file != null) {
 
       // set some properties that are used in the log4j config file
       System.setProperty("app.name", "web");
-      System.setProperty("logroot", prefix + "/"); // need the trailing slash because of how the log4j.xml file is built
+      System.setProperty("logroot", prefix
+          + "/"); // need the trailing slash because of how the log4j.xml file
+                  // is built
 
-      DOMConfigurator.configure(prefix + file);
-      
+      DOMConfigurator.configure(prefix
+          + file);
+
       Logger.getRootLogger().info("Logging initialized");
     }
   }

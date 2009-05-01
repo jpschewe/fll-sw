@@ -1,225 +1,237 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fll title="FLL 2007 Challenge: Power Puzzle"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:noNamespaceSchemaLocation="fll.xsd">
+<fll title="FLL 2007 Challenge: Power Puzzle" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="fll.xsd">
 
- <!-- $Rev: 351 $ -->
+	<!-- $Rev: 351 $ -->
 
- <Performance minimumScore="0" weight="1.0">
+	<Performance minimumScore="0" weight="1.0">
 
-  <!-- want to know the type of robot, but can't change the score, so set the multiplier to 0 -->
-  <goal name="robot_type" title="Robot Type" initialValue="1"
-   multiplier="0">
-   <value score="1" title="1 Robot" value="1_robot" />
-   <value score="2" title="2 Robot" value="2_robot" />
-  </goal>
-
-
-  <goal name="roof_solar_panel" title="Solar Panel ON Roof"
-   multiplier="30" />
-
-  <goal name="personal_vehicle_choice"
-   title="Car TO House &amp; Truck TO Farm"
-   multiplier="25" />
-  <!--  15 point bonus for 2 robot -->
-  <computedGoal name="personal_vehicle_choice_bonus"
-   title="Personal Vehicle Choice 2 Robot Bonus">
-   <switch>
-    <case>
-     <enumCondition>
-      <left>
-       <goalRef goal="robot_type" />
-      </left>
-      <equal-to />
-      <right>
-       <stringConstant value="2_robot" />
-      </right>
-     </enumCondition>
-     <result>
-      <constant value="15" />
-     </result>
-    </case>
-    <default>
-     <constant value="0" />
-    </default>
-   </switch>
-  </computedGoal>
-
-  <goal name="hydro_dam" title="Hydro-Dam TOUCHING banks"
-   multiplier="25" />
-
-  <goal name="flood_house" title="Houses TOUCHED by Dam or Flood"
-   multiplier="-10" />
-
-  <goal name="wind_turbine_farm"
-   title="Wind Turbine TOUCHING the Farm" multiplier="20" />
-
-  <goal name="wind_turbine_ocean"
-   title="Wind Turbine COMPLETELY IN the Ocean" multiplier="35" />
-
-  <goal name="grid_connection"
-   title="Grid Connection CONNECTING Ocean Windmill TO Land" multiplier="35" />
-
-  <goal name="solar_power_satellite" title="Solar Power Satellite"
-   multiplier="15" />
-
-  <goal name="solar_power_satellite_bonus" title="First to Satellite"
-   multiplier="5" />
-  <restriction lowerBound="0" upperBound="1"
-   message="You cannot have the satellite bonus without having the satellite score">
-   <term coefficient="1" goal="solar_power_satellite" scoreType="raw" />
-   <term coefficient="-1" goal="solar_power_satellite_bonus"
-    scoreType="raw" />
-  </restriction>
-
-  <goal name="coal_mining" title="Coal Car Retrieved to Base"
-   multiplier="10" />
-
-  <goal name="oil_drilling" title="Oil Barrels OFF platform NOT on base"
-   multiplier="15" />
-
-	<goal name="oil_touching_water_or_house"
-			 title="Oil barrel TOUCHING water OR house" multiplier="-40"/>
-
-  <goal name="corn_harvest" title="Corn OUT of Farm NOT on base" multiplier="15" />
-
-  <goal name="uranium_mining" title="Uranium OUT Of Farm NOT on base"
-   multiplier="15" />
-
-  <goal name="tree_planting_community_a_b"
-   title="Trees planted in Community A or B" multiplier="20" max="4" />
-
-  <goal name="tree_planting_elsewhere" title="Trees planted elsewhere"
-   multiplier="30" max="4" />
-
-  <restriction lowerBound="0" upperBound="4"
-   message="There are only 4 trees on the field!">
-   <term coefficient="1" goal="tree_planting_community_a_b"
-    scoreType="raw" />
-   <term coefficient="1" goal="tree_planting_elsewhere" scoreType="raw" />
-  </restriction>
-
-  <goal name="power_plant_supply_coal"
-   title="Black Coal pieces TO Power Plant" multiplier="2" max="20" />
-
-  <goal name="power_plant_supply_uranium"
-   title="Green Uranium TO Power Plant" multiplier="10" max="2" />
-
-  <goal name="power_plant_supply_corn"
-   title="Yellow Corn TO Power Plant" multiplier="10" max="2" />
-
-  <goal name="power_plant_supply_oil"
-   title="White Oil Barrels TO Power Plant" multiplier="15" max="7" />
-  <!-- bonus for 2 robot division, 5 per barrel -->
-  <computedGoal name="power_plant_supply_oil_bonus"
-   title="White Oil Barrels 2 Robot Bonus">
-   <switch>
-    <case>
-     <enumCondition>
-      <left>
-       <goalRef goal="robot_type" />
-      </left>
-      <equal-to />
-      <right>
-       <stringConstant value="2_robot" />
-      </right>
-     </enumCondition>
-     <result>
-       <term scoreType="raw" coefficient="5" goal="power_plant_supply_oil"/>  
-     </result>
-    </case>
-    <default>
-     <constant value="0" />
-    </default>
-   </switch>
-  </computedGoal>
+		<!--
+			want to know the type of robot, but can't change the score, so set
+			the multiplier to 0
+		-->
+		<goal name="robot_type" title="Robot Type" initialValue="1"
+			multiplier="0">
+			<value score="1" title="1 Robot" value="1_robot" />
+			<value score="2" title="2 Robot" value="2_robot" />
+		</goal>
 
 
-  <goal name="gray_energy" title="Gray energy source AT power plant"
-   multiplier="-5" max="6" />
+		<goal name="roof_solar_panel" title="Solar Panel ON Roof"
+			multiplier="30" />
 
-  <goal name="gray_oil_barrels"
-   title="Gray Oil Barrels AT the coal mining property" multiplier="10"
-   max="4" />
+		<goal name="personal_vehicle_choice" title="Car TO House &amp; Truck TO Farm"
+			multiplier="25" />
+		<!--  15 point bonus for 2 robot -->
+		<computedGoal name="personal_vehicle_choice_bonus"
+			title="Personal Vehicle Choice 2 Robot Bonus">
+			<switch>
+				<case>
+					<enumCondition>
+						<left>
+							<goalRef goal="robot_type" />
+						</left>
+						<equal-to />
+						<right>
+							<stringConstant value="2_robot" />
+						</right>
+					</enumCondition>
+					<result>
+						<constant value="15" />
+					</result>
+				</case>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
 
-  <goal name="gray_corn"
-   title="Gray Corn AT the coal mining property" multiplier="10" />
-   
-  <goal name="gray_uranium"
-   title="Gray Uranium AT the coal mining property" multiplier="10" />
+		<goal name="hydro_dam" title="Hydro-Dam TOUCHING banks"
+			multiplier="25" />
 
-  <goal name="bad_fuel_sequestering_red"
-   title="Red coal AT the coal mining property" multiplier="2" max="8" />
+		<goal name="flood_house" title="Houses TOUCHED by Dam or Flood"
+			multiplier="-10" />
 
-  <tiebreaker>
-   <test winner='HIGH'>
-    <term goal='solar_power_satellite_bonus' scoreType='computed' />
-   </test>
-   <test winner='HIGH'>
-    <term goal='solar_power_satellite' scoreType='computed' />
-   </test>
-   <test winner='HIGH'>
-    <term goal='tree_planting_elsewhere' scoreType='computed' />
-   </test>
-   <test winner='HIGH'>
-    <term goal='tree_planting_community_a_b' scoreType='computed' />
-   </test>
-   <test winner='HIGH'>
-    <term goal='grid_connection' scoreType='computed' />
-   </test>
-   <test winner='HIGH'>
-    <term goal='wind_turbine_ocean' scoreType='computed' />
-   </test>
-   <test winner='HIGH'>
-    <term goal='wind_turbine_farm' scoreType='computed' />
-   </test>
-   <test winner='HIGH'>
-    <term goal='roof_solar_panel' scoreType='computed' />
-   </test>
-      <test winner='HIGH'>
-    <term goal='personal_vehicle_choice' scoreType='computed' />
-   </test>
-   <test winner='HIGH'>
-    <term goal='power_plant_supply_corn' scoreType='computed' />
-   </test>
-   <test winner='HIGH'>
-    <term goal='power_plant_supply_uranium' scoreType='computed' />
-   </test>
-   <test winner='HIGH'>
-    <term goal='hydro_dam' scoreType='computed' />
-   </test>
-  </tiebreaker>
+		<goal name="wind_turbine_farm" title="Wind Turbine TOUCHING the Farm"
+			multiplier="20" />
 
- </Performance>
+		<goal name="wind_turbine_ocean" title="Wind Turbine COMPLETELY IN the Ocean"
+			multiplier="35" />
 
- <subjectiveCategory name="head2head" title="Head to Head"
-  weight="5.5">
-  <goal initialValue="0" max="1000" min="0" multiplier="1" name="score"
-   title="Score">
-  </goal>
-  <goal initialValue="0" max="50" min="0" multiplier="1" name="bonus"
-   title="Bonus">
-  </goal>
- </subjectiveCategory>
- 
-  <subjectiveCategory name="teamwork" title="Team Management" weight="1.0">
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="dynamics" title="Team Dynamics - Decision Making and Problem Solving"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="management" title="Team Management - Time, Task, and Project Management"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="structure" title="Team Structure - Roles and Participation"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="communication" title="Team Communication - Respect, Team Interaction and Confidence"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="general" title="Team Management General"></goal>
-  </subjectiveCategory>
+		<goal name="grid_connection" title="Grid Connection CONNECTING Ocean Windmill TO Land"
+			multiplier="35" />
 
-  <subjectiveCategory name="research" title="Research Presentation" weight="2.5">
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="definition" title="Problem Definition"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="design" title="Design of Solution"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="evaluation" title="Evaluation of Solution"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="innovation" title="Innovation"></goal>
-    <goal initialValue="0" max="20" min="0" multiplier="1" name="communications" title="Communications"></goal>
-    <goal name="submitted" title="Documents Submitted Prior to Competition">
-      <value score="33" value="yes" title="Yes"/>
-      <value score="0" value="no" title="No"/>
-    </goal>
-  </subjectiveCategory> 
+		<goal name="solar_power_satellite" title="Solar Power Satellite"
+			multiplier="15" />
+
+		<goal name="solar_power_satellite_bonus" title="First to Satellite"
+			multiplier="5" />
+		<restriction lowerBound="0" upperBound="1"
+			message="You cannot have the satellite bonus without having the satellite score">
+			<term coefficient="1" goal="solar_power_satellite" scoreType="raw" />
+			<term coefficient="-1" goal="solar_power_satellite_bonus"
+				scoreType="raw" />
+		</restriction>
+
+		<goal name="coal_mining" title="Coal Car Retrieved to Base"
+			multiplier="10" />
+
+		<goal name="oil_drilling" title="Oil Barrels OFF platform NOT on base"
+			multiplier="15" />
+
+		<goal name="oil_touching_water_or_house" title="Oil barrel TOUCHING water OR house"
+			multiplier="-40" />
+
+		<goal name="corn_harvest" title="Corn OUT of Farm NOT on base"
+			multiplier="15" />
+
+		<goal name="uranium_mining" title="Uranium OUT Of Farm NOT on base"
+			multiplier="15" />
+
+		<goal name="tree_planting_community_a_b" title="Trees planted in Community A or B"
+			multiplier="20" max="4" />
+
+		<goal name="tree_planting_elsewhere" title="Trees planted elsewhere"
+			multiplier="30" max="4" />
+
+		<restriction lowerBound="0" upperBound="4"
+			message="There are only 4 trees on the field!">
+			<term coefficient="1" goal="tree_planting_community_a_b"
+				scoreType="raw" />
+			<term coefficient="1" goal="tree_planting_elsewhere" scoreType="raw" />
+		</restriction>
+
+		<goal name="power_plant_supply_coal" title="Black Coal pieces TO Power Plant"
+			multiplier="2" max="20" />
+
+		<goal name="power_plant_supply_uranium" title="Green Uranium TO Power Plant"
+			multiplier="10" max="2" />
+
+		<goal name="power_plant_supply_corn" title="Yellow Corn TO Power Plant"
+			multiplier="10" max="2" />
+
+		<goal name="power_plant_supply_oil" title="White Oil Barrels TO Power Plant"
+			multiplier="15" max="7" />
+		<!-- bonus for 2 robot division, 5 per barrel -->
+		<computedGoal name="power_plant_supply_oil_bonus" title="White Oil Barrels 2 Robot Bonus">
+			<switch>
+				<case>
+					<enumCondition>
+						<left>
+							<goalRef goal="robot_type" />
+						</left>
+						<equal-to />
+						<right>
+							<stringConstant value="2_robot" />
+						</right>
+					</enumCondition>
+					<result>
+						<term scoreType="raw" coefficient="5" goal="power_plant_supply_oil" />
+					</result>
+				</case>
+				<default>
+					<constant value="0" />
+				</default>
+			</switch>
+		</computedGoal>
+
+
+		<goal name="gray_energy" title="Gray energy source AT power plant"
+			multiplier="-5" max="6" />
+
+		<goal name="gray_oil_barrels" title="Gray Oil Barrels AT the coal mining property"
+			multiplier="10" max="4" />
+
+		<goal name="gray_corn" title="Gray Corn AT the coal mining property"
+			multiplier="10" />
+
+		<goal name="gray_uranium" title="Gray Uranium AT the coal mining property"
+			multiplier="10" />
+
+		<goal name="bad_fuel_sequestering_red" title="Red coal AT the coal mining property"
+			multiplier="2" max="8" />
+
+		<tiebreaker>
+			<test winner='HIGH'>
+				<term goal='solar_power_satellite_bonus' scoreType='computed' />
+			</test>
+			<test winner='HIGH'>
+				<term goal='solar_power_satellite' scoreType='computed' />
+			</test>
+			<test winner='HIGH'>
+				<term goal='tree_planting_elsewhere' scoreType='computed' />
+			</test>
+			<test winner='HIGH'>
+				<term goal='tree_planting_community_a_b' scoreType='computed' />
+			</test>
+			<test winner='HIGH'>
+				<term goal='grid_connection' scoreType='computed' />
+			</test>
+			<test winner='HIGH'>
+				<term goal='wind_turbine_ocean' scoreType='computed' />
+			</test>
+			<test winner='HIGH'>
+				<term goal='wind_turbine_farm' scoreType='computed' />
+			</test>
+			<test winner='HIGH'>
+				<term goal='roof_solar_panel' scoreType='computed' />
+			</test>
+			<test winner='HIGH'>
+				<term goal='personal_vehicle_choice' scoreType='computed' />
+			</test>
+			<test winner='HIGH'>
+				<term goal='power_plant_supply_corn' scoreType='computed' />
+			</test>
+			<test winner='HIGH'>
+				<term goal='power_plant_supply_uranium' scoreType='computed' />
+			</test>
+			<test winner='HIGH'>
+				<term goal='hydro_dam' scoreType='computed' />
+			</test>
+		</tiebreaker>
+
+	</Performance>
+
+	<subjectiveCategory name="head2head" title="Head to Head"
+		weight="5.5">
+		<goal initialValue="0" max="1000" min="0" multiplier="1" name="score"
+			title="Score">
+		</goal>
+		<goal initialValue="0" max="50" min="0" multiplier="1" name="bonus"
+			title="Bonus">
+		</goal>
+	</subjectiveCategory>
+
+	<subjectiveCategory name="teamwork" title="Team Management"
+		weight="1.0">
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="dynamics"
+			title="Team Dynamics - Decision Making and Problem Solving"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="management"
+			title="Team Management - Time, Task, and Project Management"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="structure"
+			title="Team Structure - Roles and Participation"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1"
+			name="communication" title="Team Communication - Respect, Team Interaction and Confidence"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="general"
+			title="Team Management General"></goal>
+	</subjectiveCategory>
+
+	<subjectiveCategory name="research" title="Research Presentation"
+		weight="2.5">
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="definition"
+			title="Problem Definition"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="design"
+			title="Design of Solution"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="evaluation"
+			title="Evaluation of Solution"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="innovation"
+			title="Innovation"></goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1"
+			name="communications" title="Communications"></goal>
+		<goal name="submitted" title="Documents Submitted Prior to Competition">
+			<value score="33" value="yes" title="Yes" />
+			<value score="0" value="no" title="No" />
+		</goal>
+	</subjectiveCategory>
 
 </fll>

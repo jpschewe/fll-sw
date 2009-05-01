@@ -34,10 +34,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Formatter;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -45,8 +46,8 @@ import org.apache.log4j.Logger;
 
 import fll.Utilities;
 import fll.db.Queries;
-import fll.web.ApplicationAttributes;
 import fll.web.Init;
+import fll.web.SessionAttributes;
 
 /**
  * @author jpschewe
@@ -80,8 +81,8 @@ public class Last8 extends HttpServlet {
       throw new RuntimeException("Error in initialization", e);
     }
 
-    final ServletContext application = getServletContext();
-    final Connection connection = (Connection) application.getAttribute(ApplicationAttributes.CONNECTION);
+    final HttpSession session = request.getSession();
+    final DataSource datasource = SessionAttributes.getDataSource(session);
     final Formatter formatter = new Formatter(response.getWriter());
     final String showOrgStr = request.getParameter("showOrganization");
     final boolean showOrg = null == showOrgStr ? true : Boolean.parseBoolean(showOrgStr);
@@ -89,6 +90,8 @@ public class Last8 extends HttpServlet {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
+      final Connection connection = datasource.getConnection();
+      
       final String currentTournament = Queries.getCurrentTournament(connection);
 
       formatter.format("<html>");

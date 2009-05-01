@@ -5,7 +5,6 @@
  */
 package fll.web.scoreEntry;
 
-
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,28 +21,28 @@ import fll.xml.XMLUtils;
  * @version $Revision$
  */
 public final class Submit {
-      
+
   private Submit() {
-    
+
   }
 
   /**
    * Generate rows of a table that shows the values of all the parameters
-   * expected.  
+   * expected.
    */
-  public static void generateParameterTableRows(final JspWriter out,
-                                                final Document document,
-                                                final HttpServletRequest request) throws IOException {
+  public static void generateParameterTableRows(final JspWriter out, final Document document, final HttpServletRequest request) throws IOException {
     final Element rootElement = document.getDocumentElement();
-    final Element performanceElement = (Element)rootElement.getElementsByTagName("Performance").item(0);
-    //check all goal min and max values
-    for(final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
+    final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
+    // check all goal min and max values
+    for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
       final String name = element.getAttribute("name");
       out.println("<tr>");
-      out.println("  <td>" + name + "</td>");
-      out.println("  <td>" + request.getParameter(name) + "</td>");
+      out.println("  <td>"
+          + name + "</td>");
+      out.println("  <td>"
+          + request.getParameter(name) + "</td>");
       out.println("</tr>");
     }
-  }  
-    
+  }
+
 }
