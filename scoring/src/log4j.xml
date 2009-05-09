@@ -2,66 +2,69 @@
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 <log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>
 
-	<!-- limit CONSOLE to be info -->
-	<appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
-		<layout class="org.apache.log4j.TTCCLayout">
-			<param name="dateFormat" value="RELATIVE" />
-		</layout>
-	</appender>
+ <!-- limit CONSOLE to be info -->
+ <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+  <layout class="org.apache.log4j.TTCCLayout">
+   <param name="dateFormat" value="RELATIVE" />
+  </layout>
+ </appender>
 
-	<appender name="LOGFILE" class="org.apache.log4j.DailyRollingFileAppender">
-		<param name="File" value="${logroot}fll${app.name}.log" />
-		<param name="datePattern" value="'.'yyyy-MM-dd" />
-		<param name="Append" value="false" />
-		<layout class="org.apache.log4j.TTCCLayout">
-			<param name="dateFormat" value="DATE" />
-		</layout>
-	</appender>
+ <appender name="LOGFILE" class="org.apache.log4j.DailyRollingFileAppender">
+  <param name="File" value="${logroot}fll${app.name}.log" />
+  <param name="datePattern" value="'.'yyyy-MM-dd" />
+  <param name="Append" value="false" />
+  <layout class="org.apache.log4j.TTCCLayout">
+   <param name="dateFormat" value="DATE" />
+  </layout>
+ </appender>
 
-	<!--
-		appender name="SYSLOG" class="org.apache.log4j.net.SyslogAppender">
-		<param name="syslogHost" value="localhost"/> <param name="facility"
-		value="USER"/> <layout class="org.apache.log4j.PatternLayout"> <param
-		name="conversionPattern" value="%d [%p]: %m%n"/> </layout> </appender
-	-->
+ <!--
+  appender name="SYSLOG" class="org.apache.log4j.net.SyslogAppender">
+  <param name="syslogHost" value="localhost"/> <param name="facility"
+  value="USER"/> <layout class="org.apache.log4j.PatternLayout"> <param
+  name="conversionPattern" value="%d [%p]: %m%n"/> </layout> </appender
+ -->
 
-	<!--
-		for debugging the database, set levels to something lower than fatal
-		to actually see log output
-	-->
-	<logger name="log4jdbc.debug">
-		<level value="FATAL" />
-	</logger>
-	<logger name="jdbc.sqlonly">
-		<level value="FATAL" />
-	</logger>
-	<logger name="jdbc.sqltiming">
-		<level value="FATAL" />
-	</logger>
-	<logger name="jdbc.audit">
-		<level value="FATAL" />
-	</logger>
-	<logger name="jdbc.resultset">
-		<level value="FATAL" />
-	</logger>
+ <!--
+  for debugging the database, set levels to something lower than fatal
+  to actually see log output
+ -->
+ <logger name="log4jdbc.debug">
+  <level value="FATAL" />
+ </logger>
+ <logger name="jdbc.sqlonly">
+  <level value="FATAL" />
+ </logger>
+ <logger name="jdbc.sqltiming">
+  <level value="FATAL" />
+ </logger>
+ <logger name="jdbc.audit">
+  <level value="FATAL" />
+ </logger>
+ <logger name="jdbc.resultset">
+  <level value="FATAL" />
+ </logger>
 
-	<!-- stuff for debugging -->
-	<!-- logger name="fll.web">
+ <!-- stuff for debugging -->
+ <!-- logger name="fll.web">
     <level value="TRACE"/>
   </logger-->
-	<!--
-		logger name="fll.db.Queries"> <level value="TRACE"/> </logger
-	-->
-	<!--
-		logger name="fll.web.scoreboard"> <level value="TRACE"/> </logger
-	-->
-	<!-- end stuff for debugging -->
+ <!--
+  logger name="fll.db.Queries"> <level value="TRACE"/> </logger
+ -->
+ <!--
+  logger name="fll.web.scoreboard"> <level value="TRACE"/> </logger
+ -->
+ <!-- logger name="fll.Utilities">
+  <level value="TRACE" />
+ </logger-->
+ <!-- end stuff for debugging -->
 
-	<root>
-		<level value="INFO" />
-		<appender-ref ref="CONSOLE" />
-		<appender-ref ref="LOGFILE" />
-	</root>
+ <root>
+  <level value="INFO" />
+  <appender-ref ref="CONSOLE" />
+  <appender-ref ref="LOGFILE" />
+ </root>
 
 
 </log4j:configuration>

@@ -75,9 +75,7 @@ ${message}
 </li>
 
  <li>inside.test: <%=System.getProperty("inside.test")%> -- <%=Boolean.getBoolean("inside.test")%></li>
- <li>Test server started: <%=fll.Utilities.isTestServerStarted()%>
- </li>
-</ul>
+ </ul>
 
 <%@ include file="/WEB-INF/jspf/footer.jspf"%>
 </body>

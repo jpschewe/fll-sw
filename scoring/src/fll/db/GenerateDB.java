@@ -109,7 +109,7 @@ public final class GenerateDB {
    * the database for later use.
    * 
    * @param document and XML document that describes a tournament
-   * @param database connection to the database to create the tables in
+   * @param connection connection to the database to create the tables in
    * @param forceRebuild recreate all tables from scratch, if false don't
    *          recreate the tables that hold team information
    */

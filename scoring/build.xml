@@ -319,7 +319,7 @@
 		<javac srcdir="src" destdir="${dir.classes}" debug="${compile.debug}"
 			deprecation="${compile.deprecation}" optimize="${compile.optimize}">
 			<classpath refid="compile.classpath" />
-			<compilerarg value="-Xlint:unchecked" />
+			<compilerarg value="-Xlint:-serial" />
 		</javac>
 
 	</target>
@@ -339,7 +339,7 @@
 		<javac srcdir="test" destdir="${dir.classes.test}" debug="${compile.debug}"
 			deprecation="${compile.deprecation}" optimize="${compile.optimize}">
 			<classpath refid="test.classpath" />
-			<compilerarg value="-Xlint:unchecked" />
+			<compilerarg value="-Xlint:-serial" />
 		</javac>
 	</target>
 
@@ -670,10 +670,8 @@
 		<!-- copy in test database -->
 		<antcall target="install.testdb" />
 
-		<antcall target="tomcat.start.test">
-			<param name="inside.test" value="true" />
-		</antcall>
-
+		<antcall target="tomcat.start.test"/>
+		
 		<mkdir dir="${dir.build}/test-results" />
 	</target>
 

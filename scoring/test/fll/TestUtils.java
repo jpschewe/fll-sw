@@ -97,7 +97,7 @@ public final class TestUtils {
    * @param password password to use
    * @throws RuntimeException on an error
    */
-  public static Connection createDBConnection() throws RuntimeException {
+  public static Connection createTestDBConnection() throws RuntimeException {
     // create connection to database and puke if anything goes wrong
     // register the driver
     try {

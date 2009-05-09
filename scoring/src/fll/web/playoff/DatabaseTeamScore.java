@@ -29,8 +29,8 @@ public class DatabaseTeamScore extends TeamScore {
    * when the result set is already available.
    * 
    * @param categoryDescription passed to superclass
-   * @param connection the connection to get the data from
    * @param teamNumber passed to superclass
+   * @param rs the {@link ResultSet} to pull the scores from
    * @throws SQLException if there is an error getting the current tournament
    */
   public DatabaseTeamScore(final Element categoryDescription, final int teamNumber, final ResultSet rs) throws SQLException {
@@ -62,9 +62,9 @@ public class DatabaseTeamScore extends TeamScore {
    * the result set is already available.
    * 
    * @param categoryDescription passed to superclass
-   * @param connection the connection to get the data from
    * @param teamNumber passed to superclass
    * @param runNumber passed to superclass
+   * @param rs the {@link ResultSet} to pull the scores from
    * @throws SQLException if there is an error getting the current tournament
    */
   public DatabaseTeamScore(final Element categoryDescription, final int teamNumber, final int runNumber, final ResultSet rs) throws SQLException {

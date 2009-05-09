@@ -50,8 +50,8 @@ public class FP {
   }
 
   /**
-   * Check that the value is not {@linke Double#NaN} and is
-   * {@link Double#isFinite()).
+   * Check that the value is not {@link Double#NaN} and is
+   * not {@link Double#isInfinite(double)}.
    */
   public static boolean isFinite(final double value) {
     return !Double.isInfinite(value)

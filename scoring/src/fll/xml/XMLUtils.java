@@ -252,10 +252,10 @@ public final class XMLUtils {
   }
 
   /**
-   * Filter the nodelist to only Elements.
+   * Filter the {@link NodeList} to only Elements.
    * 
    * @param nodelist cannot be null
-   * @return
+   * @return the list of {@link Element}s
    */
   public static List<Element> filterToElements(final NodeList nodelist) {
     final List<Element> retval = new ArrayList<Element>(nodelist.getLength());

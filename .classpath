@@ -1,79 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="scoring/src" />
-	<classpathentry kind="src" output="scoring/build/classes/test"
-		path="scoring/test" />
-	<classpathentry kind="lib" path="scoring/lib/ant/antlr-2.7.6.jar" />
-	<classpathentry kind="lib"
-		path="scoring/lib/ant/checkstyle-4.2.jar" />
-	<classpathentry kind="lib"
-		path="scoring/lib/ant/commons-beanutils-core.jar" />
-	<classpathentry kind="lib"
-		path="scoring/lib/ant/commons-cli-1.0.jar" />
-	<classpathentry kind="lib"
-		path="scoring/lib/ant/commons-collections.jar" />
-	<classpathentry kind="lib"
-		path="scoring/lib/ant/commons-logging.jar" />
-	<classpathentry kind="lib" path="scoring/lib/commons-lang-2.0.jar" />
-	<classpathentry kind="lib" path="scoring/lib/jstl.jar" />
-	<classpathentry kind="lib" path="scoring/lib/standard.jar" />
+	<classpathentry kind="src" path="scoring/src"/>
+	<classpathentry kind="src" output="scoring/build/classes/test" path="scoring/test"/>
+	<classpathentry kind="lib" path="scoring/lib/ant/antlr-2.7.6.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/ant/checkstyle-4.2.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/ant/commons-beanutils-core.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/ant/commons-cli-1.0.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/ant/commons-collections.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/ant/commons-logging.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/commons-lang-2.0.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/jstl.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/standard.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/httpunit.jar">
 		<attributes>
-			<attribute name="javadoc_location" value="http://httpunit.sourceforge.net/doc/api" />
+			<attribute name="javadoc_location" value="http://httpunit.sourceforge.net/doc/api"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="scoring/lib/test/js.jar" />
-	<classpathentry kind="lib" path="scoring/lib/test/nekohtml.jar" />
-	<classpathentry kind="lib" path="scoring/lib/test/Tidy.jar" />
-	<classpathentry kind="lib" path="scoring/lib/xercesImpl.jar" />
-	<classpathentry kind="con"
-		path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5" />
-	<classpathentry kind="lib" path="scoring/lib/hsqldb-1.8.0.7.jar" />
+	<classpathentry kind="lib" path="scoring/lib/test/js.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/nekohtml.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/Tidy.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/xercesImpl.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="lib" path="scoring/lib/hsqldb-1.8.0.7.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/opencsv-1.8.jar">
 		<attributes>
-			<attribute name="javadoc_location" value="http://opencsv.sourceforge.net/api/" />
+			<attribute name="javadoc_location" value="http://opencsv.sourceforge.net/api/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib"
-		path="scoring/tomcat/lib/servlet-api.jar" />
-	<classpathentry kind="lib" path="scoring/lib/commons-io-1.3.jar" />
-	<classpathentry kind="lib"
-		path="scoring/lib/commons-fileupload-1.1.1.jar" />
-	<classpathentry kind="lib" path="scoring/lib/serializer.jar" />
-	<classpathentry kind="lib" path="scoring/lib/xalan.jar" />
+	<classpathentry kind="lib" path="scoring/tomcat/lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/commons-io-1.3.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/commons-fileupload-1.1.1.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/serializer.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/xalan.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/xml-apis.jar">
 		<attributes>
-			<attribute name="javadoc_location"
-				value="http://xerces.apache.org/xerces2-j/javadocs/api" />
+			<attribute name="javadoc_location" value="http://xerces.apache.org/xerces2-j/javadocs/api"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="scoring/lib/log4j-1.2.14.jar" />
-	<classpathentry kind="lib" path="scoring/lib/test/uispec4j-1.4.jar" />
+	<classpathentry kind="lib" path="scoring/lib/log4j-1.2.14.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/uispec4j-1.4.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/JonsInfra-0.7.jar">
 		<attributes>
-			<attribute name="javadoc_location"
-				value="http://mtu.net/~jpschewe/JonsInfra/0.6/api/index.html" />
+			<attribute name="javadoc_location" value="http://mtu.net/~jpschewe/JonsInfra/0.6/api/index.html"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="scoring/lib/slf4j-api-1.5.3.jar" />
-	<classpathentry kind="lib"
-		path="scoring/lib/slf4j-log4j12-1.5.3.jar" />
-	<classpathentry kind="lib" path="scoring/lib/log4jdbc3-1.1.jar" />
+	<classpathentry kind="lib" path="scoring/lib/slf4j-api-1.5.3.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/slf4j-log4j12-1.5.3.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/log4jdbc3-1.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/iText-2.1.3.jar">
 		<attributes>
-			<attribute name="javadoc_location" value="http://www.1t3xt.info/api/" />
+			<attribute name="javadoc_location" value="http://www.1t3xt.info/api/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="scoring/lib/test/junit-4.5.jar" />
-	<classpathentry kind="lib"
-		path="scoring/lib/cobertura/asm-2.2.1.jar" />
-	<classpathentry kind="lib"
-		path="scoring/lib/cobertura/asm-tree-2.2.1.jar" />
-	<classpathentry kind="lib"
-		path="scoring/lib/cobertura/cobertura.jar" />
-	<classpathentry kind="lib"
-		path="scoring/lib/cobertura/jakarta-oro-2.0.8.jar" />
-	<classpathentry kind="lib" path="scoring/tomcat/lib/jsp-api.jar" />
-	<classpathentry kind="output"
-		path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes" />
+	<classpathentry kind="lib" path="scoring/lib/test/junit-4.5.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/cobertura/asm-2.2.1.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/cobertura/asm-tree-2.2.1.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/cobertura/jakarta-oro-2.0.8.jar"/>
+	<classpathentry kind="lib" path="scoring/tomcat/lib/jsp-api.jar"/>
+	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>

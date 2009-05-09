@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -25,10 +26,13 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.io.LogWriter;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
+import org.hsqldb.Server;
 import org.hsqldb.jdbc.jdbcDataSource;
+import org.slf4j.LoggerFactory;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
@@ -40,7 +44,7 @@ import au.com.bytecode.opencsv.CSVWriter;
  */
 public final class Utilities {
 
-  private static final Logger LOG = Logger.getLogger(Utilities.class);
+  private static final Logger LOGGER = Logger.getLogger(Utilities.class);
 
   /**
    * Single instance of the default NumberFormat instance to save on overhead
@@ -142,22 +146,22 @@ public final class Utilities {
     final File baseFile = new File(baseFilename);
     final File dir = baseFile.getParentFile();
     if (null == dir) {
-      LOG.warn("There is no parent file for "
+      LOGGER.warn("There is no parent file for "
           + baseFile.getAbsolutePath());
       return false;
     }
     if (!dir.isDirectory()) {
-      LOG.warn("Database directory "
+      LOGGER.warn("Database directory "
           + dir.getAbsolutePath() + " is not a directory");
       return false;
     }
     if (!dir.canWrite()) {
-      LOG.warn("Database directory "
+      LOGGER.warn("Database directory "
           + dir.getAbsolutePath() + " is not writable");
       return false;
     }
     if (!dir.canRead()) {
-      LOG.warn("Database directory "
+      LOGGER.warn("Database directory "
           + dir.getAbsolutePath() + " is not readable");
       return false;
     }
@@ -168,13 +172,13 @@ public final class Utilities {
           + extension);
       if (file.exists()
           && !file.canWrite()) {
-        LOG.warn("Database file "
+        LOGGER.warn("Database file "
             + file.getAbsolutePath() + " exists and is not writable");
         return false;
       }
       if (file.exists()
           && !file.canRead()) {
-        LOG.warn("Database file "
+        LOGGER.warn("Database file "
             + file.getAbsolutePath() + " exists and is not readable");
         return false;
       }
@@ -234,6 +238,8 @@ public final class Utilities {
     }
   }
 
+  private static Server _testDatabaseServer = null;
+
   /**
    * Create a datasource for the specified database
    * 
@@ -251,8 +257,8 @@ public final class Utilities {
       myURL = "jdbc:hsqldb:file:"
           + database + ";shutdown=true";
     }
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("myURL: "
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("myURL: "
           + myURL);
     }
 
@@ -260,25 +266,28 @@ public final class Utilities {
     dataSource.setDatabase(myURL);
     dataSource.setUser("sa");
 
-    /*
-     * // startup test database server if (Boolean.getBoolean("inside.test")) {
-     * if (!_testServerStarted) { if (LOG.isInfoEnabled()) {
-     * LOG.info("Starting database server for testing"); } // TODO This still
-     * isn't working quite right when run from inside // Eclipse, when run from
-     * the commandline forcing the parameter it's // fine final Server server =
-     * new Server(); server.setPort(9042); server.setDatabasePath(0, database);
-     * server.setDatabaseName(0, "fll"); server.setNoSystemExit(true);
-     * server.setErrWriter(new PrintWriter(new
-     * LogWriter(LoggerFactory.getLogger("database"),
-     * LogWriter.LogLevel.ERROR))); server.setLogWriter(new PrintWriter(new
-     * LogWriter(LoggerFactory.getLogger("database"),
-     * LogWriter.LogLevel.INFO))); server.setTrace(true); server.start(); //
-     * final Thread dbThread = new Thread(new Runnable() { // public void run()
-     * { // org.hsqldb.Server.main(new String[] { // "-port", "9042", //
-     * "-database.0", database, // "-dbname.0", "fll", // "-no_system_exit",
-     * "true", // }); // }}); // dbThread.setDaemon(true); // dbThread.start();
-     * _testServerStarted = true; } }
-     */
+    // startup test database server
+    if (Boolean.getBoolean("inside.test")) {
+      if (null == _testDatabaseServer) {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Configuring test database server");
+        }
+        _testDatabaseServer = new Server();
+        _testDatabaseServer.setPort(9042);
+        _testDatabaseServer.setDatabasePath(0, database);
+        _testDatabaseServer.setDatabaseName(0, "fll");
+        _testDatabaseServer.setNoSystemExit(true);
+        _testDatabaseServer.setErrWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"), LogWriter.LogLevel.ERROR)));
+        _testDatabaseServer.setLogWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"), LogWriter.LogLevel.INFO)));
+        _testDatabaseServer.setTrace(true);
+      }
+      if (1 != _testDatabaseServer.getState()) {
+        if (LOGGER.isInfoEnabled()) {
+          LOGGER.info("Starting database server for testing");
+        }
+        _testDatabaseServer.start();
+      }
+    }
 
     return dataSource;
   }
@@ -293,15 +302,6 @@ public final class Utilities {
   @Deprecated
   public static Connection createDBConnection(final String database) throws SQLException {
     return createDataSource(database).getConnection();
-  }
-
-  /**
-   * Ensure that we only start the test database server once
-   */
-  private static boolean _testServerStarted = false;
-
-  public static boolean isTestServerStarted() {
-    return _testServerStarted;
   }
 
   /**
@@ -332,8 +332,8 @@ public final class Utilities {
   };
 
   public static void buildGraphicFileList(final String p, final File[] d, final List<String> f) {
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("buildGraphicFileList("
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("buildGraphicFileList("
           + p + "," + Arrays.toString(d) + "," + f.toString() + ")");
     }
     for (final File element : d) {
@@ -342,8 +342,8 @@ public final class Utilities {
           + element.getName();
       final String[] files = element.list(GRAPHICS_FILTER);
       if (files != null) {
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("files: "
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("files: "
               + Arrays.toString(files));
         }
         java.util.Arrays.sort(files);
@@ -352,22 +352,22 @@ public final class Utilities {
               + "/" + file);
         }
       } else {
-        LOG.debug("files: null");
+        LOGGER.debug("files: null");
       }
       final File[] dirs = element.listFiles(DIRFILTER);
       if (dirs != null) {
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("dirs: "
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("dirs: "
               + Arrays.toString(dirs));
         }
         java.util.Arrays.sort(dirs);
         buildGraphicFileList(np, dirs, f);
       } else {
-        LOG.debug("dirs: null");
+        LOGGER.debug("dirs: null");
       }
     }
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("f: "
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("f: "
           + f.toString());
     }
   }

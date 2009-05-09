@@ -18,8 +18,7 @@ import fll.xml.XMLUtils;
 /**
  * Represents a score for a team. Only the values of simple goals are available
  * through this object. The values of computed goals are only computed when
- * computing the {@link fll.db.Queries#computeTotalScore(TeamScore) total score}
- * .
+ * computing the {@link ScoreUtils#computeTotalScore(TeamScore) total score}.
  * 
  * @author jpschewe
  * @version $Revision$

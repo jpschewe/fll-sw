@@ -32,7 +32,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.Team;
-import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FP;
 import fll.util.ScoreUtils;
@@ -54,35 +53,6 @@ public final class Playoff {
    */
   private static final double TIEBREAKER_TOLERANCE = 1E-4;
 
-  /**
-   * Just for debugging. FIXME turn into test
-   * 
-   * @param args ignored
-   */
-  public static void main(final String[] args) {
-    try {
-      final String divisionStr = "1";
-      final Connection connection = Utilities.createDataSource("/home/jpschewe/projects/fll-sw/working-dir/scoring/build/tomcat/webapps/fll-sw/WEB-INF/flldb")
-                                             .getConnection();
-      final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-      final Document challengeDocument = Queries.getChallengeDocument(connection);
-      final BracketSortType bracketSort = XMLUtils.getBracketSort(challengeDocument);
-      final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
-
-      final List<Team> seedingOrder = buildInitialBracketOrder(connection, bracketSort, winnerCriteria, divisionStr, tournamentTeams);
-      LOGGER.info("Initial bracket order: "
-          + seedingOrder);
-    } catch (final Exception e) {
-      LOGGER.error(e, e);
-    }
-    /*
-     * final int[] testValues = new int[] { 1, 2, 4, 7, 8, 16, 32, 64, 128 };
-     * for (int i = 0; i < testValues.length; ++i) { LOGGER.info("brackets for "
-     * + testValues[i] + " is: " +
-     * Arrays.toString(computeInitialBrackets(testValues[i]))); }
-     */
-  }
-
   private Playoff() {
     // no instances
   }
@@ -91,7 +61,8 @@ public final class Playoff {
    * Build the list of teams ordered from top to bottom (visually) of a single
    * elimination bracket.
    * 
-   * @param connection connection to the database
+   * @param connection connection to the database, cannot be null if bracket
+   *          sort is {@link BracketSortType#SEEDING}, otherwise can be null
    * @param divisionStr the division to generate brackets for, as a String
    * @param tournamentTeams keyed by team number
    * @return a List of teams
@@ -147,6 +118,7 @@ public final class Playoff {
           }
         });
       } else {
+        // standard seeding
         seedingOrder = Queries.getPlayoffSeedingOrder(connection, winnerCriteria, divisionStr, tournamentTeams);
       }
 
@@ -177,7 +149,10 @@ public final class Playoff {
    * 
    * @param connection Database connection with write access to Performance
    *          table.
-   * @param document XML document description of tournament.
+   * @param performanceElement the XML element representing the performance
+   *          scoring
+   * @param tiebreakerElement the XML element representing the tiebreaker
+   * @param winnerCriteria the criteria for picking a winner
    * @param teamA First team to check.
    * @param request The servlet request object containing the form data from a
    *          scoresheet which is to be tested against the score for teamA and
@@ -214,7 +189,10 @@ public final class Playoff {
    * 
    * @param connection database connection with write access to Performance
    *          table
-   * @param document XML document description of tournament
+   * @param performanceElement the XML element representing the performance
+   *          scoring
+   * @param tiebreakerElement the XML element representing the tiebreaker
+   * @param winnerCriteria the criteria for picking a winner
    * @param teamA first team to check
    * @param teamB second team to check
    * @param runNumber what run to compare scores for
@@ -757,7 +735,6 @@ public final class Playoff {
       tournamentTables.add(new String[] { "", "" });
     }
 
-    // FIXME push up
     final BracketSortType bracketSort = XMLUtils.getBracketSort(challengeDocument);
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
 
@@ -954,7 +931,6 @@ public final class Playoff {
     final String currentTournament = Queries.getCurrentTournament(connection);
     final List<String[]> tournamentTables = Queries.getTournamentTables(connection);
 
-    // FIXME push up
     final BracketSortType bracketSort = XMLUtils.getBracketSort(challengeDocument);
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
 
@@ -1125,7 +1101,7 @@ public final class Playoff {
    * @param numTeams will be rounded up to the next power of 2
    * @return the initial bracket index 0 plays 1, 2 plays 3, will have size of
    *         numTeams rounded up to next power of 2
-   * @throw IllegalArgumentException if numTeams is less than 1
+   * @throws IllegalArgumentException if numTeams is less than 1
    */
   public static int[] computeInitialBrackets(final int numTeams) {
     if (numTeams < 1) {

@@ -61,7 +61,7 @@ public final class Queries {
    * @param tournament the tournament to work within
    * @param division the division to compute the score groups for
    * @param categoryName the database name of the category
-   * @return
+   * @return Score groups. Map is name of score group to collection of teams in that score group
    */
   public static Map<String, Collection<Integer>> computeScoreGroups(final Connection connection,
                                                                     final String tournament,
@@ -198,13 +198,13 @@ public final class Queries {
 
   /**
    * Category name used for the overall rank for a team in the map returned by
-   * {@link #getTeamRankings(Connection)}.
+   * {@link #getTeamRankings(Connection, Document)}.
    */
   public static final String OVERALL_CATEGORY_NAME = "Overall";
 
   /**
    * Category name used for the performance rank for a team in the map returned
-   * by {@link #getTeamRankings(Connection)}.
+   * by {@link #getTeamRankings(Connection, Document)}.
    */
   public static final String PERFORMANCE_CATEGORY_NAME = "Performance";
 
