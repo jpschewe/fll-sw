@@ -158,6 +158,9 @@ public class RankingReport extends HttpServlet {
     }
   }
 
+  /**
+   * Be able to initialize the header table at the end of a page.
+   */
   private static final class PageEventHandler extends PdfPageEventHelper {
     public PageEventHandler(final String challengeTitle, final String tournament) {
       _tournament = tournament;

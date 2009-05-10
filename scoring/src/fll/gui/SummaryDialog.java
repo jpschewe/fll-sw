@@ -80,16 +80,16 @@ import fll.xml.XMLUtils;
   }
 
   /**
-   * @param _challengeDocument
-   * @param _scoreDocument
+   * @param challengeDocument
+   * @param scoreDocument
    * @return [0] is the team table model, [1] is the summary table model
    */
-  private TableModel[] buildTableModels(final Document _challengeDocument, final Document _scoreDocument) {
+  private TableModel[] buildTableModels(final Document challengeDocument, final Document scoreDocument) {
     final Map<Integer, Integer[]> data = new HashMap<Integer, Integer[]>();
 
     final List<String> columnNames = new LinkedList<String>();
 
-    final List<Element> subjectiveCategories = XMLUtils.filterToElements(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"));
+    final List<Element> subjectiveCategories = XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"));
     for (int catIdx = 0; catIdx < subjectiveCategories.size(); catIdx++) {
       final Element subjectiveElement = subjectiveCategories.get(catIdx);
       final String category = subjectiveElement.getAttribute("name");
@@ -97,7 +97,7 @@ import fll.xml.XMLUtils;
       columnNames.add(categoryTitle);
 
       final List<Element> goals = XMLUtils.filterToElements(subjectiveElement.getElementsByTagName("goal"));
-      final Element categoryElement = (Element) _scoreDocument.getDocumentElement().getElementsByTagName(category).item(0);
+      final Element categoryElement = (Element) scoreDocument.getDocumentElement().getElementsByTagName(category).item(0);
       for (final Element scoreElement : XMLUtils.filterToElements(categoryElement.getElementsByTagName("score"))) {
         int numValues = 0;
         for (final Element goalElement : goals) {

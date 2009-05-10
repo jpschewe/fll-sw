@@ -760,12 +760,7 @@
 	<!-- ===================== Checkstyle =================== -->
 	<taskdef resource="checkstyletask.properties">
 		<classpath>
-			<pathelement location="${dir.lib}/ant/antlr-2.7.6.jar" />
-			<pathelement location="${dir.lib}/ant/checkstyle-4.2.jar" />
-			<pathelement location="${dir.lib}/ant/commons-beanutils-core.jar" />
-			<pathelement location="${dir.lib}/ant/commons-cli-1.0.jar" />
-			<pathelement location="${dir.lib}/ant/commons-collections.jar" />
-			<pathelement location="${dir.lib}/ant/commons-logging.jar" />
+			<pathelement location="${dir.lib}/ant/checkstyle-all-5.0.jar" />
 		</classpath>
 	</taskdef>
 
@@ -776,6 +771,8 @@
 			<fileset dir="${dir.src}">
 				<include name="**/*.java" />
 			</fileset>
+			<formatter type="plain" />
+			<formatter type="xml" toFile="${dir.build}/checkstyle_report.xml"/>			
 		</checkstyle>
 	</target>
 
@@ -788,6 +785,8 @@
 			<fileset dir="${dir.src}">
 				<include name="**/*.java" />
 			</fileset>
+			<formatter type="plain" />
+			<formatter type="xml" toFile="${dir.build}/checkstyle_report.xml"/>			
 		</checkstyle>
 	</target>
 
@@ -796,6 +795,7 @@
 		<antcall target="javadoc" />
 		<antcall target="test" />
 		<antcall target="coverage.report" />
+		<antcall target="checkstyle.full" />
 	</target>
 
 	<!-- ==================== SECONDARY TARGETS ==================== -->

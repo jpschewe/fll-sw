@@ -29,7 +29,7 @@ import fll.xml.XMLUtils;
  * @author jpschewe
  * @version $Revision$
  */
-public class ScoreUtils {
+public final class ScoreUtils {
 
   private ScoreUtils() {
     // no instances

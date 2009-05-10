@@ -2,12 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="scoring/src"/>
 	<classpathentry kind="src" output="scoring/build/classes/test" path="scoring/test"/>
-	<classpathentry kind="lib" path="scoring/lib/ant/antlr-2.7.6.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/ant/checkstyle-4.2.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/ant/commons-beanutils-core.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/ant/commons-cli-1.0.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/ant/commons-collections.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/ant/commons-logging.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-lang-2.0.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/jstl.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/standard.jar"/>
@@ -58,5 +52,6 @@
 	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/jakarta-oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="scoring/tomcat/lib/jsp-api.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/ant/checkstyle-all-5.0.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>

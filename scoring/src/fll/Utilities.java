@@ -35,7 +35,6 @@ import org.hsqldb.jdbc.jdbcDataSource;
 import org.slf4j.LoggerFactory;
 
 import au.com.bytecode.opencsv.CSVReader;
-import au.com.bytecode.opencsv.CSVWriter;
 
 /**
  * Some handy utilities.
@@ -62,7 +61,7 @@ public final class Utilities {
   /**
    * Load a CSV file into an SQL table. Assumes that the first line in the CSV
    * file specifies the column names. This method is meant as the inverse of
-   * {@link CSVWriter#writeAll(ResultSet, boolean)} with includeColumnNames set
+   * {@link au.com.bytecode.opencsv.CSVWriter#writeAll(ResultSet, boolean)} with includeColumnNames set
    * to true. This method assumes that the table to be created does not exist,
    * an error will be reported if it does.
    * 
@@ -379,7 +378,7 @@ public final class Utilities {
    * @param application
    * @param name
    */
-  public synchronized static void appendDisplayName(final ServletContext application, final String name) {
+  public static synchronized void appendDisplayName(final ServletContext application, final String name) {
     // ServletContext isn't type safe
     @SuppressWarnings("unchecked")
     Set<String> displayNames = (Set<String>) application.getAttribute("displayNames");

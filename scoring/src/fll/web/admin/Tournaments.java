@@ -35,6 +35,10 @@ import fll.web.SessionAttributes;
  */
 public final class Tournaments {
 
+  private Tournaments() {
+    // no instances
+  }
+  
   /**
    * Generate the tournaments page
    */

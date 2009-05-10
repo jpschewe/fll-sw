@@ -400,13 +400,13 @@ public final class SubjectiveFrame extends JFrame {
 
   private final Document _challengeDocument;
 
-  /* package */final Document getChallengeDocument() {
+  /* package */ Document getChallengeDocument() {
     return _challengeDocument;
   }
 
   private final Document _scoreDocument;
 
-  /* package */final Document getScoreDocument() {
+  /* package */ Document getScoreDocument() {
     return _scoreDocument;
   }
 

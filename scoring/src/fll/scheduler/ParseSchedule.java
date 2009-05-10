@@ -114,7 +114,7 @@ public class ParseSchedule {
 
   private int _perf3TableColumn = -1;
 
-  private static int NUMBER_OF_ROUNDS = 3;
+  private static final int NUMBER_OF_ROUNDS = 3;
 
   private static final DateFormat DATE_FORMAT_AM_PM = new SimpleDateFormat("hh:mm a");
 
@@ -156,7 +156,7 @@ public class ParseSchedule {
 
   private final List<TeamScheduleInfo> _schedule = new LinkedList<TeamScheduleInfo>();
 
-  private static final Preferences prefs = Preferences.userNodeForPackage(ParseSchedule.class);
+  private static final Preferences PREFS = Preferences.userNodeForPackage(ParseSchedule.class);
 
   private static final String STARTING_DIRECTORY_PREF = "startingDirectory";
 
@@ -164,7 +164,7 @@ public class ParseSchedule {
    * @param args
    */
   public static void main(final String[] args) {
-    final String startingDirectory = prefs.get(STARTING_DIRECTORY_PREF, null);
+    final String startingDirectory = PREFS.get(STARTING_DIRECTORY_PREF, null);
 
     final JFileChooser fileChooser = new JFileChooser();
     final FileFilter filter = new BasicFileFilter("csv or directory", "csv");
@@ -178,7 +178,7 @@ public class ParseSchedule {
     final int returnVal = fileChooser.showOpenDialog(null);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       final File currentDirectory = fileChooser.getCurrentDirectory();
-      prefs.put(STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
+      PREFS.put(STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
 
       final File[] selectedFiles = fileChooser.getSelectedFiles();
 
@@ -607,7 +607,7 @@ public class ParseSchedule {
     final Table table = createTable(6);
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 1 });
 
-    Collections.sort(schedule, _presentationComparator);
+    Collections.sort(schedule, PRESENTATION_COMPARATOR);
     int row = 0;
     table.addCell(createHeaderCell("Team #"), row, 0);
     table.addCell(createHeaderCell("Div"), row, 1);
@@ -634,7 +634,7 @@ public class ParseSchedule {
   }
 
   private void outputTechnicalSchedule(final List<TeamScheduleInfo> schedule, final Document detailedSchedules) throws DocumentException {
-    Collections.sort(schedule, _technicalComparator);
+    Collections.sort(schedule, TECHNICAL_COMPARATOR);
 
     final Table table = createTable(6);
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 1 });
@@ -668,7 +668,7 @@ public class ParseSchedule {
   /**
    * Sort by division, then judge, then by time.
    */
-  private static final Comparator<TeamScheduleInfo> _presentationComparator = new Comparator<TeamScheduleInfo>() {
+  private static final Comparator<TeamScheduleInfo> PRESENTATION_COMPARATOR = new Comparator<TeamScheduleInfo>() {
     public int compare(final TeamScheduleInfo one, final TeamScheduleInfo two) {
       if (!one.division.equals(two.division)) {
         return one.division.compareTo(two.division);
@@ -683,7 +683,7 @@ public class ParseSchedule {
   /**
    * Sort by division, then by time.
    */
-  private static final Comparator<TeamScheduleInfo> _technicalComparator = new Comparator<TeamScheduleInfo>() {
+  private static final Comparator<TeamScheduleInfo> TECHNICAL_COMPARATOR = new Comparator<TeamScheduleInfo>() {
     public int compare(final TeamScheduleInfo one, final TeamScheduleInfo two) {
       if (!one.division.equals(two.division)) {
         return one.division.compareTo(two.division);
@@ -1222,25 +1222,25 @@ public class ParseSchedule {
    * @version $Revision$
    */
   private static final class TeamScheduleInfo {
-    public int teamNumber;
+    private int teamNumber;
 
-    public String teamName;
+    private String teamName;
 
-    public String organization;
+    private String organization;
 
-    public String division;
+    private String division;
 
-    public Date presentation;
+    private Date presentation;
 
-    public Date technical;
+    private Date technical;
 
-    public String judge;
+    private String judge;
 
-    public Date[] perf = new Date[NUMBER_OF_ROUNDS];
+    private Date[] perf = new Date[NUMBER_OF_ROUNDS];
 
-    public String[] perfTableColor = new String[NUMBER_OF_ROUNDS];
+    private String[] perfTableColor = new String[NUMBER_OF_ROUNDS];
 
-    public int[] perfTableSide = new int[NUMBER_OF_ROUNDS];
+    private int[] perfTableSide = new int[NUMBER_OF_ROUNDS];
 
     /**
      * Find the performance round for the matching time.
@@ -1263,6 +1263,12 @@ public class ParseSchedule {
           + teamNumber + "]";
     }
 
+    @Override
+    public int hashCode() {
+      return teamNumber;
+    }
+    
+    @Override
     public boolean equals(final Object o) {
       if (o == this) {
         return true;
@@ -1274,6 +1280,9 @@ public class ParseSchedule {
     }
   }
 
+  /**
+   * Page footer for schedule.
+   */
   private static final class PageFooter extends PdfPageEventHelper {
     @Override
     public void onEndPage(final PdfWriter writer, final Document document) {

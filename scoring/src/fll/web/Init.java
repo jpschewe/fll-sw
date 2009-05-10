@@ -48,10 +48,14 @@ import fll.db.Queries;
  * 
  * @author jpschewe
  */
-public class Init {
+public final class Init {
 
   private static final Logger LOGGER = Logger.getLogger(Init.class);
 
+  private Init() {
+    // no instances
+  }
+  
   /**
    * @param request
    * @param response

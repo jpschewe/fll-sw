@@ -21,12 +21,12 @@ public final class Version {
 
   private static final Logger LOG = Logger.getLogger(Version.class);
 
-  private static final String _version;
+  private static final String VERSION;
   static {
     final InputStream stream = Version.class.getResourceAsStream("/fll/resources/version.properties");
     if (null == stream) {
       LOG.error("Unable to find version.properties!");
-      _version = "NO-PROPERTIES-FILE";
+      VERSION = "NO-PROPERTIES-FILE";
     } else {
       final Properties versionProps = new Properties();
       String version;
@@ -39,10 +39,14 @@ public final class Version {
         version = "EXCEPTION";
       }
 
-      _version = version;
+      VERSION = version;
     }
   }
 
+  private Version() {
+    // no instances
+  }
+  
   /**
    * @param args
    */
@@ -57,10 +61,10 @@ public final class Version {
    * @return the version
    */
   public static String getVersion() {
-    if (_version.contains("APP-VERSION")) {
+    if (VERSION.contains("APP-VERSION")) {
       return "devel";
     } else {
-      return _version;
+      return VERSION;
     }
   }
 }

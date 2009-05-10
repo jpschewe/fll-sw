@@ -19,8 +19,12 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 /**
  * Process uploads from JSP pages.
  */
-public class UploadProcessor {
+public final class UploadProcessor {
 
+  private UploadProcessor() {
+    // no instances
+  }
+  
   /**
    * Processes <code>request</code> as a file upload and puts the results back
    * in the <code>request</code> object. Each parameter that is a file upload

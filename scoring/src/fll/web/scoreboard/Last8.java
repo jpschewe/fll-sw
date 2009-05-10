@@ -54,7 +54,7 @@ import fll.web.SessionAttributes;
  */
 public class Last8 extends HttpServlet {
 
-  private static Logger LOGGER = Logger.getLogger(Last8.class);
+  private static final Logger LOGGER = Logger.getLogger(Last8.class);
 
   /**
    * @param request

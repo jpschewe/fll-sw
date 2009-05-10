@@ -18,8 +18,12 @@ import fll.Utilities;
  * @author jpschewe
  * @version $Revision$
  */
-public class CheckDifferences extends HttpServlet {
+public final class CheckDifferences extends HttpServlet {
 
+  private CheckDifferences() {
+    // no instances
+  }
+  
   /**
    * @param request
    * @param response
@@ -40,7 +44,6 @@ public class CheckDifferences extends HttpServlet {
       } else {
         // TODO first check if the selected tournament exists in the destination
         // database
-
       }
     } finally {
       SQLFunctions.closeStatement(memStmt);

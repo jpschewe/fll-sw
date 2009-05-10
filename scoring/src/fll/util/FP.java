@@ -11,7 +11,7 @@ package fll.util;
  * @author jpschewe
  * @version $Revision$
  */
-public class FP {
+public final class FP {
 
   private FP() {
     // no instances

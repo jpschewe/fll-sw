@@ -59,7 +59,7 @@ import fll.xml.XMLUtils;
  */
 public class Top10 extends HttpServlet {
 
-  private static Logger LOGGER = Logger.getLogger(Top10.class);
+  private static final Logger LOGGER = Logger.getLogger(Top10.class);
 
   /**
    * @param request
