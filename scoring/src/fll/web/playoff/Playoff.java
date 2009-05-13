@@ -76,6 +76,7 @@ public final class Playoff {
 
     if (BracketSortType.ALPHA_TEAM == bracketSort) {
       final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
+      filterTeamsToDivision(connection, teams, divisionStr);
       // sort by team name
       Collections.sort(teams, new Comparator<Team>() {
         public int compare(final Team one, final Team two) {
@@ -104,6 +105,7 @@ public final class Playoff {
       final List<Team> seedingOrder;
       if (BracketSortType.RANDOM == bracketSort) {
         seedingOrder = new ArrayList<Team>(tournamentTeams.values());
+        filterTeamsToDivision(connection, seedingOrder, divisionStr);
         // assign a random number to each team
         final double[] randoms = new double[seedingOrder.size()];
         final Random generator = new Random();
@@ -139,6 +141,25 @@ public final class Playoff {
       return list;
     }
 
+  }
+
+  /**
+   * Filter the specified list to just the teams in the specified event division.
+   * 
+   * @param teams list that is modified
+   * @param divisionStr the division to keep
+   * @throws RuntimeException 
+   * @throws SQLException 
+   */
+  private static void filterTeamsToDivision(final Connection connection, final List<Team> teams, final String divisionStr) throws SQLException, RuntimeException {
+    final Iterator<Team> iter = teams.iterator();
+    while(iter.hasNext()) {
+      final Team t = iter.next();
+      final String eventDivision = Queries.getEventDivision(connection, t.getTeamNumber());
+      if(!eventDivision.equals(divisionStr)) {
+        iter.remove();
+      }
+    }
   }
 
   /**
@@ -307,6 +328,9 @@ public final class Playoff {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
+      if(LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Inserting bye for team: " + team.getTeamNumber() + " run: " + runNumber);
+      }
       stmt.executeUpdate("INSERT INTO Performance(TeamNumber, Tournament, RunNumber, Bye, Verified)"
           + " VALUES( " + team.getTeamNumber() + ", '" + tournament + "', " + runNumber + ", 1, 1)");
     } finally {
@@ -927,6 +951,10 @@ public final class Playoff {
                                         final boolean enableThird,
                                         final JspWriter out) throws IOException, SQLException, ParseException {
 
+    if(LOGGER.isDebugEnabled()) {
+      LOGGER.debug("initializing brackets for division: " + division + " enableThird: " + enableThird);
+    }
+    
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
     final String currentTournament = Queries.getCurrentTournament(connection);
     final List<String[]> tournamentTables = Queries.getTournamentTables(connection);
@@ -948,6 +976,10 @@ public final class Playoff {
     // buildInitialBracketOrder to be a power of 2. It always should be.
     final List<Team> firstRound = buildInitialBracketOrder(connection, bracketSort, winnerCriteria, division, tournamentTeams);
 
+    if(LOGGER.isDebugEnabled()) {
+      LOGGER.debug("initial bracket order: " + firstRound);
+    }
+    
     // Insert those teams into the database.
     // At this time we let the table assignment field default to NULL.
     final Iterator<Team> it = firstRound.iterator();
@@ -1048,8 +1080,9 @@ public final class Playoff {
         }
 
         // Advance teams if one of them is a bye...
-        if (team1 == Team.BYE_TEAM_NUMBER
-            || team2 == Team.BYE_TEAM_NUMBER) {
+        if ((team1 == Team.BYE_TEAM_NUMBER
+            || team2 == Team.BYE_TEAM_NUMBER)
+            && !(team1 == Team.BYE_TEAM_NUMBER && team2 == Team.BYE_TEAM_NUMBER)) {
           final int teamToAdvance = (team1 == Team.BYE_TEAM_NUMBER ? team2 : team1);
 
           insertBye(connection, Team.getTeamFromDatabase(connection, teamToAdvance), numSeedingRounds + 1);

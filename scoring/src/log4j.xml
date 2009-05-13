@@ -58,6 +58,9 @@
  <!-- logger name="fll.Utilities">
   <level value="TRACE" />
  </logger-->
+ <!-- logger name="fll.web.playoff">
+   <level value="TRACE"/>
+ </logger-->
  <!-- end stuff for debugging -->
 
  <root>
