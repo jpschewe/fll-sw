@@ -30,16 +30,22 @@ package fll.web.playoff;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
 import fll.Team;
+import fll.db.GenerateDB;
+import fll.db.Queries;
 import fll.xml.BracketSortType;
 import fll.xml.ChallengeParser;
 import fll.xml.WinnerType;
@@ -70,30 +76,49 @@ public class BracketSortTest {
     final InputStream challengeDocIS = BracketSortTest.class.getResourceAsStream("data/alpha-team-sort.xml");
     final Document document = ChallengeParser.parse(new InputStreamReader(challengeDocIS));
 
-    // put some teams in the database
-    final Map<Integer, Team> tournamentTeams = new HashMap<Integer, Team>();
-    for (int i = 0; i < teamNames.length; ++i) {
-      final Team team = new Team();
-      team.setDivision(divisionStr);
-      team.setRegion("DUMMY");
-      team.setTeamName(teamNames[i]);
-      team.setTeamNumber(teamNames.length
-          - i);
-      tournamentTeams.put(team.getTeamNumber(), team);
+    Connection connection = null;
+    try {
+      // create in memory test database instance
+      Class.forName("org.hsqldb.jdbcDriver").newInstance();
+      connection = DriverManager.getConnection("jdbc:hsqldb:mem:flldb-testAlphaTeam");
+      GenerateDB.generateDB(document, connection, true);
+
+      // put some teams in the database
+      for (int i = 0; i < teamNames.length; ++i) {
+        final String otherTeam = Queries.addTeam(connection, teamNames.length
+            - i, teamNames[i], null, "DUMMY", divisionStr);
+        Assert.assertNull(otherTeam);
+      }
+      final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
+
+      // put some teams in the database
+      // final Map<Integer, Team> tournamentTeams = new HashMap<Integer,
+      // Team>();
+      // for (int i = 0; i < teamNames.length; ++i) {
+      // final Team team = new Team();
+      // team.setDivision(divisionStr);
+      // team.setRegion("DUMMY");
+      // team.setTeamName(teamNames[i]);
+      // team.setTeamNumber(teamNames.length
+      // - i);
+      // tournamentTeams.put(team.getTeamNumber(), team);
+      // }
+
+      final BracketSortType bracketSort = XMLUtils.getBracketSort(document);
+      final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(document);
+      final List<Team> order = Playoff.buildInitialBracketOrder(connection, bracketSort, winnerCriteria, divisionStr, tournamentTeams);
+      Assert.assertEquals("A", order.get(0).getTeamName());
+      Assert.assertEquals("B", order.get(1).getTeamName());
+      Assert.assertEquals("C", order.get(2).getTeamName());
+      Assert.assertEquals("D", order.get(3).getTeamName());
+      Assert.assertEquals("E", order.get(4).getTeamName());
+      Assert.assertEquals(Team.BYE, order.get(5));
+      Assert.assertEquals("F", order.get(6).getTeamName());
+      Assert.assertEquals(Team.BYE, order.get(7));
+    } finally {
+      SQLFunctions.closeConnection(connection);
     }
 
-    final BracketSortType bracketSort = XMLUtils.getBracketSort(document);
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(document);
-
-    final List<Team> order = Playoff.buildInitialBracketOrder(null, bracketSort, winnerCriteria, divisionStr, tournamentTeams);
-    Assert.assertEquals("A", order.get(0).getTeamName());
-    Assert.assertEquals("B", order.get(1).getTeamName());
-    Assert.assertEquals("C", order.get(2).getTeamName());
-    Assert.assertEquals("D", order.get(3).getTeamName());
-    Assert.assertEquals("E", order.get(4).getTeamName());
-    Assert.assertEquals(Team.BYE, order.get(5));
-    Assert.assertEquals("F", order.get(6).getTeamName());
-    Assert.assertEquals(Team.BYE, order.get(7));
   }
 
 }

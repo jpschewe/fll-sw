@@ -61,8 +61,7 @@ public final class Playoff {
    * Build the list of teams ordered from top to bottom (visually) of a single
    * elimination bracket.
    * 
-   * @param connection connection to the database, cannot be null if bracket
-   *          sort is {@link BracketSortType#SEEDING}, otherwise can be null
+   * @param connection connection to the database
    * @param divisionStr the division to generate brackets for, as a String
    * @param tournamentTeams keyed by team number
    * @return a List of teams
