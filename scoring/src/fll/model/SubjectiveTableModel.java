@@ -5,7 +5,6 @@
  */
 package fll.model;
 
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -279,8 +278,8 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
           double min = 0;
           double max = 1;
           try {
-            min = NumberFormat.getInstance().parse(goalDescription.getAttribute("min")).doubleValue();
-            max = NumberFormat.getInstance().parse(goalDescription.getAttribute("max")).doubleValue();
+            min = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalDescription.getAttribute("min")).doubleValue();
+            max = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalDescription.getAttribute("max")).doubleValue();
 
           } catch (final ParseException pe) {
             throw new RuntimeException("Error in challenge.xml!!! min or max unparseable for goal: "
@@ -289,7 +288,7 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
 
           final ScoreType scoreType = XMLUtils.getScoreType(element);
           try {
-            final Number parsedValue = NumberFormat.getInstance().parse(value.toString());
+            final Number parsedValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.toString());
             if (parsedValue.doubleValue() > max
                 || parsedValue.doubleValue() < min) {
               error = true;
@@ -418,8 +417,8 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
       try {
         switch (getSortedColumn()) {
         case 0:
-          final int team1 = NumberFormat.getInstance().parse(e1.getAttribute("teamNumber")).intValue();
-          final int team2 = NumberFormat.getInstance().parse(e2.getAttribute("teamNumber")).intValue();
+          final int team1 = Utilities.NUMBER_FORMAT_INSTANCE.parse(e1.getAttribute("teamNumber")).intValue();
+          final int team2 = Utilities.NUMBER_FORMAT_INSTANCE.parse(e2.getAttribute("teamNumber")).intValue();
           if (team1 == team2) {
             return 0;
           } else if (team1 < team2) {

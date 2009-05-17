@@ -13,7 +13,7 @@ html {
 }
 </style>
   </head>
-  <frameset rows="30,*" border='1' framespacing='0'>
+  <frameset rows="50,*" border='1' framespacing='0'>
       <frame name='title' src='title.jsp' marginheight='0' marginwidth='0' scrolling='no'>
       <frame name='brackets' src='remoteControlBrackets.jsp' marginwidth='0' scrolling='no'>
 </frameset>

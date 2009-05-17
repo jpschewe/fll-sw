@@ -135,16 +135,16 @@ public class Top10 extends HttpServlet {
       final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
       final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
       final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
-
+      final String maxMin = WinnerType.HIGH == winnerCriteria ? "MAX" : "MIN";
+      
       prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore FROM"
-          + " (SELECT TeamNumber, MAX(ComputedTotal) AS MaxOfComputedScore FROM verified_performance WHERE Tournament = ? "
-          + " AND RunNumber <= ? AND NoShow = False AND Bye = False GROUP BY TeamNumber) AS T2"
+          + " (SELECT TeamNumber, " + maxMin + "(ComputedTotal) AS MaxOfComputedScore FROM verified_performance WHERE Tournament = ? "
+          + " AND NoShow = False AND Bye = False GROUP BY TeamNumber) AS T2"
           + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams"
           + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber AND current_tournament_teams.event_division = ?"
           + " ORDER BY T2.MaxOfComputedScore " + ascDesc + " LIMIT 10");
       prep.setString(1, currentTournament);
-      prep.setInt(2, Queries.getNumSeedingRounds(connection));
-      prep.setString(3, divisions.get(divisionIndex));
+      prep.setString(2, divisions.get(divisionIndex));
       rs = prep.executeQuery();
 
       double prevScore = -1;

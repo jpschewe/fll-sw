@@ -46,7 +46,7 @@ public final class Utilities {
   private static final Logger LOGGER = Logger.getLogger(Utilities.class);
 
   /**
-   * Single instance of the default NumberFormat instance to save on overhead
+   * Single instance of the default NumberFormat instance to save on overhead and to use for consistency of formatting.
    */
   public static final NumberFormat NUMBER_FORMAT_INSTANCE = NumberFormat.getInstance();
   static {

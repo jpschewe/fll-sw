@@ -2217,6 +2217,32 @@ public final class Queries {
   }
 
   /**
+   * Get the value of NoShow for the given team number, tournament and run number
+   * 
+   * @return true if the score is a No Show, false if it's not a bye or the score
+   *         does not exist
+   * @throws SQLException on a database error
+   */
+  public static boolean isNoShow(final Connection connection, final String tournament, final int teamNumber, final int runNumber) throws SQLException,
+      IllegalArgumentException {
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT NoShow FROM Performance"
+          + " WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + tournament + "'" + " AND RunNumber = " + runNumber);
+      if (rs.next()) {
+        return rs.getBoolean(1);
+      } else {
+        return false;
+      }
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
+    }
+  }
+
+  /**
    * Used to get the line number of a team from the playoff table for a specific
    * round of the playoff bracket.
    * 

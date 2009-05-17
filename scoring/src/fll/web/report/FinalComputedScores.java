@@ -13,7 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Iterator;
 import java.util.List;
@@ -363,7 +362,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
                   } else {
                     scoreSeen = true;
                   }
-                  rawScoreText += SCORE_FORMAT.format(v);
+                  rawScoreText += Utilities.NUMBER_FORMAT_INSTANCE.format(v);
                 }
               }
               final PdfPCell subjCell = new PdfPCell((!scoreSeen ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED) : new Phrase(rawScoreText, ARIAL_8PT_NORMAL)));
@@ -374,7 +373,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
             }
           }
 
-          // Column for the highest performance score of the first 3 rounds
+          // Column for the highest performance score of the seeding rounds
           rawScoreRS = stmt.executeQuery("SELECT score FROM performance_seeding_max"
               + " WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + _tournament + "'");
           final double rawScore;
@@ -388,7 +387,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
           } else {
             rawScore = Double.NaN;
           }
-          PdfPCell pCell = new PdfPCell((Double.isNaN(rawScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED) : new Phrase(SCORE_FORMAT.format(rawScore),
+          PdfPCell pCell = new PdfPCell((Double.isNaN(rawScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED) : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(rawScore),
                                                                                                                             ARIAL_8PT_NORMAL)));
           pCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
           pCell.setBorder(0);
@@ -424,7 +423,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
               }
 
               final PdfPCell subjCell = new PdfPCell((Double.isNaN(scaledScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)
-                  : new Phrase(SCORE_FORMAT.format(scaledScore), ARIAL_8PT_NORMAL)));
+                  : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(scaledScore), ARIAL_8PT_NORMAL)));
               subjCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
               subjCell.setBorder(0);
               curteam.addCell(subjCell);
@@ -441,7 +440,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
               scaledScore = v;
             }
 
-            pCell = new PdfPCell((Double.isNaN(scaledScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED) : new Phrase(SCORE_FORMAT.format(scaledScore),
+            pCell = new PdfPCell((Double.isNaN(scaledScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED) : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(scaledScore),
                                                                                                                         ARIAL_8PT_NORMAL)));
             pCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
             pCell.setBorder(0);
@@ -449,7 +448,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
           }
 
           // Last column contains the overall scaled score
-          pCell = new PdfPCell((Double.isNaN(totalScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED) : new Phrase(SCORE_FORMAT.format(totalScore),
+          pCell = new PdfPCell((Double.isNaN(totalScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED) : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(totalScore),
                                                                                                                      ARIAL_8PT_NORMAL)));
           pCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
           pCell.setBorder(0);
@@ -498,11 +497,4 @@ public final class FinalComputedScores extends PdfPageEventHelper {
       SQLFunctions.closePreparedStatement(prep);
     }
   }
-
-  private static final NumberFormat SCORE_FORMAT = NumberFormat.getInstance();
-  static {
-    SCORE_FORMAT.setMaximumFractionDigits(2);
-    SCORE_FORMAT.setMinimumFractionDigits(2);
-  }
-
 }

@@ -12,7 +12,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -33,6 +32,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.Utilities;
 import fll.db.Queries;
 import fll.web.Init;
 import fll.web.SessionAttributes;
@@ -180,7 +180,7 @@ public final class UploadSubjectiveData extends HttpServlet {
 
             if (scoreElement.hasAttribute("modified")
                 && "true".equalsIgnoreCase(scoreElement.getAttribute("modified"))) {
-              final int teamNumber = NumberFormat.getInstance().parse(scoreElement.getAttribute("teamNumber")).intValue();
+              final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(scoreElement.getAttribute("teamNumber")).intValue();
               final String judge = scoreElement.getAttribute("judge");
               final boolean noShow = Boolean.parseBoolean(scoreElement.getAttribute("NoShow"));
               updatePrep.setBoolean(1, noShow);

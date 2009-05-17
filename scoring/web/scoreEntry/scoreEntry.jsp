@@ -6,7 +6,6 @@
 
 <%@ page import="org.w3c.dom.Element" %>
 
-<%@ page import="java.text.NumberFormat" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="fll.web.ApplicationAttributes"%>
 <%@ page import="fll.web.SessionAttributes" %>
@@ -88,7 +87,7 @@ if(lRunNumber > numSeedingRounds) {
 }
 
 final String minimumAllowedScoreStr = ((Element)challengeDocument.getDocumentElement().getElementsByTagName("Performance").item(0)).getAttribute("minimumScore");
-final int minimumAllowedScore = NumberFormat.getInstance().parse(minimumAllowedScoreStr).intValue();
+final int minimumAllowedScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(minimumAllowedScoreStr).intValue();
 
 //check if this is the last run a team has completed
 final int maxRunCompleted = Queries.getMaxRunNumber(connection, teamNumber);
@@ -97,6 +96,7 @@ pageContext.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == maxRunComple
 //check if the score being edited is a bye
 final String tournament = Queries.getCurrentTournament(connection);
 pageContext.setAttribute("isBye", Boolean.valueOf(Queries.isBye(connection, tournament, teamNumber, lRunNumber)));
+pageContext.setAttribute("isNoShow", Boolean.valueOf(Queries.isNoShow(connection, tournament, teamNumber, lRunNumber)));
 %>
 
 <html>
@@ -323,7 +323,18 @@ return m;
                 </td>
             </tr>
 
-            <c:if test="${not isBye}">
+            <c:choose>           
+            <c:when test="${isBye}">
+              <tr>
+                <td colspan='3'><b>Bye Run</b></td>
+              </tr>
+            </c:when>
+            <c:when test="${isNoShow}">
+              <tr>
+                <td colspan='3'><b>No Show</b></td>
+              </tr>
+            </c:when>
+            <c:otherwise>
               <%ScoreEntry.generateScoreEntry(out, challengeDocument, request);%>
 
               <!-- Total Score -->
@@ -337,16 +348,12 @@ return m;
               </tr>
               <input type='hidden' name='NoShow'/>
               <%ScoreEntry.generateVerificationInput(out, challengeDocument, request);%>
-            </c:if> <!-- end check for bye -->
-            <c:if test="${isBye}">
-              <tr>
-                <td colspan='3'><b>Bye Run</b></td>
-              </tr>
-            </c:if>
+            </c:otherwise>
+            </c:choose>  <!-- end check for bye -->
 
             <tr>
               <td colspan='3' align='right'>
-                <c:if test="${not isBye}">
+                <c:if test="${not isBye and not isNoShow}">
                   <c:if test="${editFlag}">
                     <input type='submit' id='submit' name='submit' value='Submit Score' onclick='return confirm(verification())'>
                   </c:if>

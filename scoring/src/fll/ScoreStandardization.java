@@ -10,7 +10,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.NumberFormat;
 import java.text.ParseException;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -236,7 +235,7 @@ public final class ScoreStandardization {
 
       final Element rootElement = document.getDocumentElement();
       final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
-      final double performanceWeight = NumberFormat.getInstance().parse(performanceElement.getAttribute("weight")).doubleValue();
+      final double performanceWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(performanceElement.getAttribute("weight")).doubleValue();
 
       // performance
       sql.append("performance * "
@@ -245,7 +244,7 @@ public final class ScoreStandardization {
       // subjective categories
       for (final Element catElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
         final String catName = catElement.getAttribute("name");
-        final double catWeight = NumberFormat.getInstance().parse(catElement.getAttribute("weight")).doubleValue();
+        final double catWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(catElement.getAttribute("weight")).doubleValue();
 
         sql.append(" + "
             + catName + " * " + catWeight);

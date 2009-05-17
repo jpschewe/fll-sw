@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.NumberFormat;
 import java.util.List;
 
 import javax.servlet.jsp.JspWriter;
@@ -20,6 +19,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.Utilities;
 import fll.db.Queries;
 import fll.xml.XMLUtils;
 
@@ -132,7 +132,7 @@ public final class ScoreGroupScores {
               + teamName + "</td>");
 
           out.println("    <td>"
-              + SCORE_FORMAT.format(score) + "</td>");
+              + Utilities.NUMBER_FORMAT_INSTANCE.format(score) + "</td>");
 
           out.println("  </tr>");
 
@@ -151,11 +151,4 @@ public final class ScoreGroupScores {
       SQLFunctions.closePreparedStatement(prep2);
     }
   }
-
-  private static final NumberFormat SCORE_FORMAT = NumberFormat.getInstance();
-  static {
-    SCORE_FORMAT.setMaximumFractionDigits(2);
-    SCORE_FORMAT.setMinimumFractionDigits(2);
-  }
-
 }
