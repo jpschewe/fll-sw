@@ -129,7 +129,7 @@ public final class ImportDB {
         }
 
       }
-    } catch (final Exception e) {
+    } catch (final Throwable e) {
       e.printStackTrace();
     }
   }

@@ -351,8 +351,9 @@ public final class ScoreUtils {
     // reorient the map to be based on teams so that we can figure out which
     // team has the most categories and schedule that team first
     final Map<Integer, List<String>> finalistsCount = new HashMap<Integer, List<String>>();
-    for (final String category : finalists.keySet()) {
-      final Collection<Integer> teams = finalists.get(category);
+    for(final Map.Entry<String, Collection<Integer>> entry : finalists.entrySet()) {
+      final String category = entry.getKey();
+      final Collection<Integer> teams = entry.getValue();
       for (final Integer team : teams) {
         if (!finalistsCount.containsKey(team)) {
           finalistsCount.put(team, new LinkedList<String>());

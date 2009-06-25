@@ -61,7 +61,8 @@ public final class Queries {
    * @param tournament the tournament to work within
    * @param division the division to compute the score groups for
    * @param categoryName the database name of the category
-   * @return Score groups. Map is name of score group to collection of teams in that score group
+   * @return Score groups. Map is name of score group to collection of teams in
+   *         that score group
    */
   public static Map<String, Collection<Integer>> computeScoreGroups(final Connection connection,
                                                                     final String tournament,
@@ -133,7 +134,7 @@ public final class Queries {
         team.setRegion(rs.getString("Region"));
         team.setDivision(rs.getString("Division"));
         team.setEventDivision(rs.getString("event_division"));
-        tournamentTeams.put(new Integer(team.getTeamNumber()), team);
+        tournamentTeams.put(Integer.valueOf(team.getTeamNumber()), team);
       }
     } finally {
       SQLFunctions.closeResultSet(rs);
@@ -221,28 +222,20 @@ public final class Queries {
   public static Map<String, Map<Integer, Map<String, Integer>>> getTeamRankings(final Connection connection, final Document challengeDocument)
       throws SQLException {
     final Map<String, Map<Integer, Map<String, Integer>>> rankingMap = new HashMap<String, Map<Integer, Map<String, Integer>>>();
-    final PreparedStatement prep = null;
-    final ResultSet rs = null;
-    try {
-      final String tournament = getCurrentTournament(connection);
-      final List<String> divisions = getDivisions(connection);
+    final String tournament = getCurrentTournament(connection);
+    final List<String> divisions = getDivisions(connection);
 
-      final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
-      final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+    final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
 
-      // find the performance ranking
-      determinePerformanceRanking(connection, ascDesc, tournament, divisions, rankingMap);
+    // find the performance ranking
+    determinePerformanceRanking(connection, ascDesc, tournament, divisions, rankingMap);
 
-      // find the subjective category rankings
-      determineSubjectiveRanking(connection, ascDesc, tournament, divisions, challengeDocument, rankingMap);
+    // find the subjective category rankings
+    determineSubjectiveRanking(connection, ascDesc, tournament, divisions, challengeDocument, rankingMap);
 
-      // find the overall ranking
-      determineOverallRanking(connection, ascDesc, tournament, divisions, rankingMap);
-
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
-    }
+    // find the overall ranking
+    determineOverallRanking(connection, ascDesc, tournament, divisions, rankingMap);
 
     return rankingMap;
   }
@@ -284,14 +277,17 @@ public final class Queries {
         }
 
         // foreach subjective category
-        for (final String categoryTitle : subjectiveCategories.keySet()) {
-          final String categoryName = subjectiveCategories.get(categoryTitle);
+        for (final Map.Entry<String, String> entry : subjectiveCategories.entrySet()) {
+          final String categoryTitle = entry.getKey();
+          final String categoryName = entry.getValue();
 
           final Map<String, Collection<Integer>> scoreGroups = Queries.computeScoreGroups(connection, tournament, division, categoryName);
 
           // select from FinalScores
-          for (final String scoreGroup : scoreGroups.keySet()) {
-            final String teamSelect = StringUtils.join(scoreGroups.get(scoreGroup).iterator(), ", ");
+          for (final Map.Entry<String, Collection<Integer>> sgEntry : scoreGroups.entrySet()) {
+            final Collection<Integer> teamScores = sgEntry.getValue();
+
+            final String teamSelect = StringUtils.join(teamScores.iterator(), ", ");
             prep = connection.prepareStatement("SELECT Teams.TeamNumber,FinalScores."
                 + categoryName + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
                 + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " " + ascDesc);
@@ -1358,7 +1354,7 @@ public final class Queries {
       rs = prep.executeQuery();
       while (rs.next()) {
         final int teamNumber = rs.getInt(1);
-        final Team team = tournamentTeams.get(new Integer(teamNumber));
+        final Team team = tournamentTeams.get(Integer.valueOf(teamNumber));
         if (null == team) {
           throw new RuntimeException("Couldn't find team number "
               + teamNumber + " in the list of tournament teams!");
@@ -1682,7 +1678,7 @@ public final class Queries {
           final int teamNumber = rs.getInt("TeamNumber");
           final int runNumber = rs.getInt("RunNumber");
           final double computedTotal = ScoreUtils.computeTotalScore(new DatabaseTeamScore(performanceElement, teamNumber, runNumber, rs));
-          if (Double.NaN != computedTotal) {
+          if (!Double.isNaN(computedTotal)) {
             updatePrep.setDouble(1, Math.max(computedTotal, minimumPerformanceScore));
           } else {
             updatePrep.setNull(1, Types.DOUBLE);
@@ -2217,10 +2213,11 @@ public final class Queries {
   }
 
   /**
-   * Get the value of NoShow for the given team number, tournament and run number
+   * Get the value of NoShow for the given team number, tournament and run
+   * number
    * 
-   * @return true if the score is a No Show, false if it's not a bye or the score
-   *         does not exist
+   * @return true if the score is a No Show, false if it's not a bye or the
+   *         score does not exist
    * @throws SQLException on a database error
    */
   public static boolean isNoShow(final Connection connection, final String tournament, final int teamNumber, final int runNumber) throws SQLException,

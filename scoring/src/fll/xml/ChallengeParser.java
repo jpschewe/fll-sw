@@ -12,7 +12,6 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.ParseException;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -226,18 +225,18 @@ public final class ChallengeParser {
               }
             }
             if (!foundMatch) {
-              throw new RuntimeException(new Formatter().format("Initial value for %s(%d) does not match the score of any value element within the goal", name,
-                                                                initialValue).toString());
+              throw new RuntimeException(String.format("Initial value for %s(%f) does not match the score of any value element within the goal", name,
+                                                                initialValue));
             }
 
           } else {
             final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
             final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
             if (FP.lessThan(initialValue, min, INITIAL_VALUE_TOLERANCE)) {
-              throw new RuntimeException(new Formatter().format("Initial value for %s(%d) is less than min(%d)", name, initialValue, min).toString());
+              throw new RuntimeException(String.format("Initial value for %s(%f) is less than min(%f)", name, initialValue, min));
             }
             if (FP.greaterThan(initialValue, max, INITIAL_VALUE_TOLERANCE)) {
-              throw new RuntimeException(new Formatter().format("Initial value for %s(%d) is greater than max(%d)", name, initialValue, max).toString());
+              throw new RuntimeException(String.format("Initial value for %s(%f) is greater than max(%f)", name, initialValue, max));
             }
           }
         }

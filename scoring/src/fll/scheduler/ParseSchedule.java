@@ -116,13 +116,33 @@ public class ParseSchedule {
 
   private static final int NUMBER_OF_ROUNDS = 3;
 
-  private static final DateFormat DATE_FORMAT_AM_PM = new SimpleDateFormat("hh:mm a");
+  private static final ThreadLocal<DateFormat> DATE_FORMAT_AM_PM = new ThreadLocal<DateFormat>() {
+    @Override
+    protected DateFormat initialValue() {
+      return new SimpleDateFormat("hh:mm a");  
+    }
+  };
 
-  private static final DateFormat DATE_FORMAT_AM_PM_SS = new SimpleDateFormat("hh:mm:ss a");
+  private static final ThreadLocal<DateFormat> DATE_FORMAT_AM_PM_SS = new ThreadLocal<DateFormat>() {
+    @Override
+    protected DateFormat initialValue() {
+      return new SimpleDateFormat("hh:mm:ss a");
+    }
+  };
 
-  private static final DateFormat OUTPUT_DATE_FORMAT = new SimpleDateFormat("H:mm");
+  private static final ThreadLocal<DateFormat> OUTPUT_DATE_FORMAT = new ThreadLocal<DateFormat> () {
+    @Override
+    protected DateFormat initialValue() {
+      return new SimpleDateFormat("H:mm");
+    }
+  };
 
-  private static final DateFormat DATE_FORMAT_SS = new SimpleDateFormat("HH:mm:ss");
+  private static final ThreadLocal<DateFormat> DATE_FORMAT_SS = new ThreadLocal<DateFormat>() {
+    @Override
+    protected DateFormat initialValue() {
+      return new SimpleDateFormat("HH:mm:ss");
+    }
+  };
 
   public static final long SECONDS_PER_MINUTE = 60;
 
@@ -543,7 +563,7 @@ public class ParseSchedule {
         table.addCell(createCell(si.division), row, 1);
         table.addCell(createCell(si.organization), row, 2);
         table.addCell(createCell(si.teamName), row, 3);
-        table.addCell(createCell(OUTPUT_DATE_FORMAT.format(si.perf[round]), backgroundColor), row, 4);
+        table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.perf[round]), backgroundColor), row, 4);
         table.addCell(createCell(si.perfTableColor[round]
             + " " + si.perfTableSide[round], backgroundColor), row, 5);
 
@@ -623,7 +643,7 @@ public class ParseSchedule {
       table.addCell(createCell(si.division), row, 1);
       table.addCell(createCell(si.organization), row, 2);
       table.addCell(createCell(si.teamName), row, 3);
-      table.addCell(createCell(OUTPUT_DATE_FORMAT.format(si.presentation)), row, 4);
+      table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.presentation)), row, 4);
       table.addCell(createCell(si.judge), row, 5);
 
       ++row;
@@ -656,7 +676,7 @@ public class ParseSchedule {
       table.addCell(createCell(si.division), row, 1);
       table.addCell(createCell(si.organization), row, 2);
       table.addCell(createCell(si.teamName), row, 3);
-      table.addCell(createCell(OUTPUT_DATE_FORMAT.format(si.technical)), row, 4);
+      table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.technical)), row, 4);
       table.addCell(createCell(si.judge), row, 5);
 
       ++row;
@@ -772,18 +792,18 @@ public class ParseSchedule {
 
     // print out the general schedule
     LOGGER.info("min technical: "
-        + OUTPUT_DATE_FORMAT.format(minTechnical));
+        + OUTPUT_DATE_FORMAT.get().format(minTechnical));
     LOGGER.info("max technical: "
-        + OUTPUT_DATE_FORMAT.format(maxTechnical));
+        + OUTPUT_DATE_FORMAT.get().format(maxTechnical));
     LOGGER.info("min presentation: "
-        + OUTPUT_DATE_FORMAT.format(minPresentation));
+        + OUTPUT_DATE_FORMAT.get().format(minPresentation));
     LOGGER.info("max presentation: "
-        + OUTPUT_DATE_FORMAT.format(maxPresentation));
+        + OUTPUT_DATE_FORMAT.get().format(maxPresentation));
     for (int i = 0; i < NUMBER_OF_ROUNDS; ++i) {
       LOGGER.info("min performance round "
-          + (i + 1) + ": " + OUTPUT_DATE_FORMAT.format(minPerf[i]));
+          + (i + 1) + ": " + OUTPUT_DATE_FORMAT.get().format(minPerf[i]));
       LOGGER.info("max performance round "
-          + (i + 1) + ": " + OUTPUT_DATE_FORMAT.format(maxPerf[i]));
+          + (i + 1) + ": " + OUTPUT_DATE_FORMAT.get().format(maxPerf[i]));
     }
 
   }
@@ -819,7 +839,7 @@ public class ParseSchedule {
 
     if (tableMatches.size() > 2) {
       LOGGER.error(new Formatter().format("Too many teams competing on table: %s at time: %s. Teams: %s", ti.perfTableColor[round],
-                                          OUTPUT_DATE_FORMAT.format(ti.perf[round]), tableMatches));
+                                          OUTPUT_DATE_FORMAT.get().format(ti.perf[round]), tableMatches));
       return false;
     } else {
       return true;
@@ -1039,14 +1059,14 @@ public class ParseSchedule {
         + PERFORMANCE_DURATION + changetime > ti.perf[1].getTime()) {
       LOGGER.error(new Formatter().format("Team %d doesn't have enough time (%d minutes) between performance 1 and performance 2: %s - %s", ti.teamNumber,
                                           changetime
-                                              / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.format(ti.perf[0]), OUTPUT_DATE_FORMAT.format(ti.perf[1])));
+                                              / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.get().format(ti.perf[0]), OUTPUT_DATE_FORMAT.get().format(ti.perf[1])));
     }
 
     if (ti.perf[1].getTime()
         + PERFORMANCE_DURATION + PERFORMANCE_CHANGETIME > ti.perf[2].getTime()) {
       LOGGER.error(new Formatter().format("Team %d doesn't have enough time (%d minutes) between performance 2 and performance 3: %s - %s", ti.teamNumber,
                                           changetime
-                                              / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.format(ti.perf[1]), OUTPUT_DATE_FORMAT.format(ti.perf[2])));
+                                              / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.get().format(ti.perf[1]), OUTPUT_DATE_FORMAT.get().format(ti.perf[2])));
     }
 
     // constraint set 4
@@ -1104,10 +1124,12 @@ public class ParseSchedule {
         if (round + 1 < NUMBER_OF_ROUNDS) {
           if (next.perf[round].getTime()
               + PERFORMANCE_DURATION + PERFORMANCE_CHANGETIME > ti.perf[round + 1].getTime()) {
-            LOGGER.error(new Formatter().format("Team %d doesn't have enough time (%d minutes) between performance %d and performance extra: %s - %s",
+            LOGGER.error(String.format("Team %d doesn't have enough time (%d minutes) between performance %d and performance extra: %s - %s",
                                                 ti.teamNumber, changetime
-                                                    / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.format(next.perf[round]),
-                                                OUTPUT_DATE_FORMAT.format(ti.perf[round + 1])));
+                                                    / 1000 / SECONDS_PER_MINUTE,
+                                                    round,
+                                                    OUTPUT_DATE_FORMAT.get().format(next.perf[round]),
+                                                OUTPUT_DATE_FORMAT.get().format(ti.perf[round + 1])));
           }
         }
 
@@ -1202,15 +1224,15 @@ public class ParseSchedule {
     if (s.indexOf("AM") > 0
         || s.indexOf("PM") > 0) {
       if (s.split(":").length > 2) {
-        return DATE_FORMAT_AM_PM_SS.parse(s);
+        return DATE_FORMAT_AM_PM_SS.get().parse(s);
       } else {
-        return DATE_FORMAT_AM_PM.parse(s);
+        return DATE_FORMAT_AM_PM.get().parse(s);
       }
     } else {
       if (s.split(":").length > 2) {
-        return DATE_FORMAT_SS.parse(s);
+        return DATE_FORMAT_SS.get().parse(s);
       } else {
-        return OUTPUT_DATE_FORMAT.parse(s);
+        return OUTPUT_DATE_FORMAT.get().parse(s);
       }
     }
   }
