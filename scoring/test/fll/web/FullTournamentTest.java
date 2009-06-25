@@ -68,22 +68,22 @@ public class FullTournamentTest {
   public void tearDown() {
     conversation = null;
   }
+
   private WebConversation conversation = null;
 
   /**
    * Test a full tournament as a single thread. This tests to make sure
    * everything works normally.
    */
-  // @Test
-  // public void testSerial() throws MalformedURLException, IOException,
-  // SAXException, ClassNotFoundException, InstantiationException,
-  // IllegalAccessException,
-  // ParseException, SQLException {
-  // if (LOGGER.isInfoEnabled()) {
-  // LOGGER.info("Starting serial test");
-  // }
-  // doFullTournament(false);
-  // }
+  @Test
+  public void testSerial() throws MalformedURLException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+      ParseException, SQLException {
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("Starting serial test");
+    }
+    doFullTournament(false);
+  }
+
   /**
    * Test a full tournament as multiple threads. This is a more of a stress
    * test.
@@ -271,8 +271,7 @@ public class FullTournamentTest {
 
   }
 
-  private void assignJudges(final Connection testDataConn, final String testTournament) throws MalformedURLException,
-      IOException, SAXException, SQLException {
+  private void assignJudges(final Connection testDataConn, final String testTournament) throws MalformedURLException, IOException, SAXException, SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
