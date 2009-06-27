@@ -25,9 +25,7 @@ import javax.swing.table.TableModel;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -58,18 +56,6 @@ import fll.xml.XMLUtils;
 public class FullTournamentTest {
 
   private static final Logger LOGGER = Logger.getLogger(FullTournamentTest.class);
-
-  @Before
-  public void setUp() {
-    conversation = new WebConversation();
-  }
-
-  @After
-  public void tearDown() {
-    conversation = null;
-  }
-
-  private WebConversation conversation = null;
 
   /**
    * Test a full tournament as a single thread. This tests to make sure
@@ -127,160 +113,99 @@ public class FullTournamentTest {
 
       stmt = testDataConn.createStatement();
 
+      final WebConversation conversation = new WebConversation();
+
       // --- initialize database ---
       final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml");
       TestUtils.initializeDatabase(challengeDocIS);
 
-      loadTeams();
-
-      createTournamentsForAllRegions();
-
-      initializeTournamentsByRegion();
-
-      setTournament(testTournament);
-
-      assignJudges(testDataConn, testTournament);
-
-      assignTableLabels();
-
-      /*
-       * --- Enter 3 runs for each team --- Use data from test data base,
-       * converted from Field 2005. Enter 4th run and rest of playoffs
-       */
-      prep = testDataConn.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?");
-      prep.setString(1, testTournament);
-      rs = prep.executeQuery();
-      Assert.assertTrue("No performance scores in test data", rs.next());
-      final int maxRuns = rs.getInt(1);
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
-
-      final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
-      Assert.assertNotNull(challengeDocument);
-      final Element rootElement = challengeDocument.getDocumentElement();
-      final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
-
-      prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?");
-      boolean initializedPlayoff = false;
-      prep.setString(1, testTournament);
-      final ScoreEntryQueue scoreEntryQueue = new ScoreEntryQueue(parallel ? 4 : 1, testDataConn, performanceElement, testTournament);
-      for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
-        if (!initializedPlayoff
-            && runNumber > numSeedingRounds) {
-          // TODO make sure to check the result of checking the seeding rounds
-
-          // initialize the playoff brackets with playoff/index.jsp form
-          WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-              + "playoff");
-          WebResponse response = conversation.getResponse(request);
-          Assert.assertTrue(response.isHTML());
-          WebForm form = response.getFormWithName("initialize");
-          Assert.assertNotNull(form);
-          final String[] divisions = form.getOptionValues("division");
-          for (int divIdx = 0; divIdx < divisions.length; ++divIdx) {
-            if (LOGGER.isDebugEnabled()) {
-              LOGGER.debug("Initializing playoff brackets for division "
-                  + divisions[divIdx]);
-            }
-            form.setParameter("division", divisions[divIdx]);
-            request = form.getRequest();
-            response = conversation.getResponse(request);
-            Assert.assertTrue(response.isHTML());
-          }
-          initializedPlayoff = true;
-
-        }
-
-        prep.setInt(2, runNumber);
-        rs = prep.executeQuery();
-
-        // for each score in a run
-        while (rs.next()) {
-          final int teamNumber = rs.getInt(1);
-          enterPerformanceScore(testDataConn, performanceElement, testTournament, runNumber, teamNumber);
-        }
-        LOGGER.info("Waiting for queue to finish");
-        scoreEntryQueue.waitForQueueToFinish();
-      }
-      scoreEntryQueue.shutdown();
-
-      enterSubjectiveScores(testDataConn, challengeDocument, testTournament);
-
-      computeFinalScores();
-
-      verifyHTMLReports();
-
-      // PDF reports
-      verifyPDFReports();
-
-      verifyRankingAndScores(testTournament);
-
-      // TODO check scores?
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
-      SQLFunctions.closePreparedStatement(prep);
-      SQLFunctions.closeConnection(testDataConn);
-      // Utilities.closeConnection(connection);
-    }
-  }
-
-  private void createTournamentsForAllRegions() throws MalformedURLException, IOException, SAXException {
-    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "admin/index.jsp");
-    request.setParameter("addTournamentsForRegions", "1");
-    WebResponse response = conversation.getResponse(request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-    Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully added tournaments for regions"));
-  }
-
-  private void initializeTournamentsByRegion() throws MalformedURLException, IOException, SAXException {
-    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "admin/tournamentInitialization.jsp");
-    WebResponse response = conversation.getResponse(request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-    WebForm form = response.getFormWithName("form");
-    Assert.assertNotNull(form);
-    request = form.getRequest();
-    response = conversation.getResponse(request);
-    Assert.assertTrue(response.isHTML());
-    form = response.getFormWithName("verify");
-    Assert.assertNotNull(form);
-    request = form.getRequest();
-    response = conversation.getResponse(request);
-    Assert.assertTrue(response.isHTML());
-    Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully initialized tournament for teams based on region."));
-
-  }
-
-  private void setTournament(final String testTournament) throws MalformedURLException, IOException, SAXException {
-    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "admin/index.jsp");
-    WebResponse response = conversation.getResponse(request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-    WebForm form = response.getFormWithID("currentTournament");
-    Assert.assertNotNull(form);
-    form.setParameter("currentTournament", testTournament);
-    request = form.getRequest();
-    response = conversation.getResponse(request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-    Assert.assertNotNull("Error loading teams: "
-        + response.getText(), response.getElementWithID("success"));
-    Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Tournament changed to "
-        + testTournament));
-
-  }
-
-  private void assignJudges(final Connection testDataConn, final String testTournament) throws MalformedURLException, IOException, SAXException, SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      // assign judges
+      // --- load teams ---
+      // find upload form on admin page
       WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "admin/judges.jsp");
+          + "admin/");
       WebResponse response = conversation.getResponse(request);
       Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-      WebForm form = response.getFormWithName("judges");
+      WebForm form = response.getFormWithID("uploadTeams");
+
+      // set the parameters
+      final InputStream teamsIS = FullTournamentTest.class.getResourceAsStream("data/teams-ft.csv");
+      Assert.assertNotNull(teamsIS);
+      final UploadFileSpec teamsUpload = new UploadFileSpec("teams.csv", teamsIS, "text/plain");
+      form.setParameter("teamsFile", new UploadFileSpec[] { teamsUpload });
+      request = form.getRequest();
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      // Assert.assertNotNull("Error uploading data file: " +
+      // response.getText(), response.getElementWithID("success"));
+      teamsIS.close();
+
+      // skip past the filter page
+      form = response.getFormWithName("filterTeams");
+      request = form.getRequest("next");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+
+      // team column selection
+      form = response.getFormWithName("verifyTeams");
+      Assert.assertNotNull(form);
+      form.setParameter("TeamNumber", "tea_number");
+      form.setParameter("TeamName", "tea_name");
+      form.setParameter("Organization", "org_name");
+      form.setParameter("Region", "eve_name");
+      form.setParameter("Division", "div_name");
+      request = form.getRequest();
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      Assert.assertNotNull("Error loading teams: "
+          + response.getText(), response.getElementWithID("success"));
+
+      // create tournaments for all regions
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "admin/index.jsp");
+      request.setParameter("addTournamentsForRegions", "1");
+      response = conversation.getResponse(request);
+      Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
+      Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully added tournaments for regions"));
+
+      // initialize tournaments by region
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "admin/tournamentInitialization.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
+      form = response.getFormWithName("form");
+      Assert.assertNotNull(form);
+      request = form.getRequest();
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      form = response.getFormWithName("verify");
+      Assert.assertNotNull(form);
+      request = form.getRequest();
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully initialized tournament for teams based on region."));
+
+      // set the tournamet
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "admin/index.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
+      form = response.getFormWithID("currentTournament");
+      Assert.assertNotNull(form);
+      form.setParameter("currentTournament", testTournament);
+      request = form.getRequest();
+      response = conversation.getResponse(request);
+      Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
+      Assert.assertNotNull("Error loading teams: "
+          + response.getText(), response.getElementWithID("success"));
+      Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Tournament changed to "
+          + testTournament));
+
+      // assign judges
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "admin/judges.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
+      form = response.getFormWithName("judges");
       Assert.assertNotNull(form);
 
       // need to add rows to form if test database has more judges than
@@ -321,6 +246,8 @@ public class FullTournamentTest {
             + judgeIndex, division);
         ++judgeIndex;
       }
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
 
       // submit those values
       request = form.getRequest("finished", "Finished");
@@ -336,70 +263,117 @@ public class FullTournamentTest {
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully assigned judges."));
 
-    } finally {
+      // assign table labels
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "admin/tables.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
+      form = response.getFormWithName("tables");
+      Assert.assertNotNull(form);
+      form.setParameter("SideA0", "red");
+      form.setParameter("SideB0", "blue");
+      request = form.getRequest("submit", "Finished");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      Assert.assertNull("Got error from judges assignment", response.getElementWithID("error"));
+      Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully assigned tables."));
+
+      /*
+       * --- Enter 3 runs for each team --- Use data from test data base,
+       * converted from Field 2005. Enter 4th run and rest of playoffs
+       */
+      prep = testDataConn.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?");
+      prep.setString(1, testTournament);
+      rs = prep.executeQuery();
+      Assert.assertTrue("No performance scores in test data", rs.next());
+      final int maxRuns = rs.getInt(1);
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closePreparedStatement(prep);
-    }
-  }
 
-  private void assignTableLabels() throws SAXException, MalformedURLException, IOException {
-    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "admin/tables.jsp");
-    WebResponse response = conversation.getResponse(request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-    WebForm form = response.getFormWithName("tables");
-    Assert.assertNotNull(form);
-    form.setParameter("SideA0", "red");
-    form.setParameter("SideB0", "blue");
-    request = form.getRequest("submit", "Finished");
-    response = conversation.getResponse(request);
-    Assert.assertTrue(response.isHTML());
-    Assert.assertNull("Got error from judges assignment", response.getElementWithID("error"));
-    Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully assigned tables."));
-  }
+      final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
+      Assert.assertNotNull(challengeDocument);
+      final Element rootElement = challengeDocument.getDocumentElement();
+      final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
 
-  private void verifyPDFReports() throws MalformedURLException, IOException, SAXException {
-    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "GetFile");
-    request.setParameter("filename", "finalComputedScores.pdf");
-    WebResponse response = conversation.getResponse(request);
-    Assert.assertEquals("application/pdf", response.getContentType());
+      prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?");
+      boolean initializedPlayoff = false;
+      prep.setString(1, testTournament);
+      final ScoreEntryQueue scoreEntryQueue = new ScoreEntryQueue(parallel ? 4 : 1, testDataConn, performanceElement, testTournament);
+      for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
+        if (!initializedPlayoff
+            && runNumber > numSeedingRounds) {
+          // TODO make sure to check the result of checking the seeding rounds
 
-  }
+          // initialize the playoff brackets with playoff/index.jsp form
+          request = new GetMethodWebRequest(TestUtils.URL_ROOT
+              + "playoff");
+          response = conversation.getResponse(request);
+          Assert.assertTrue(response.isHTML());
+          form = response.getFormWithName("initialize");
+          Assert.assertNotNull(form);
+          final String[] divisions = form.getOptionValues("division");
+          for (int divIdx = 0; divIdx < divisions.length; ++divIdx) {
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("Initializing playoff brackets for division "
+                  + divisions[divIdx]);
+            }
+            form.setParameter("division", divisions[divIdx]);
+            request = form.getRequest();
+            response = conversation.getResponse(request);
+            Assert.assertTrue(response.isHTML());
+          }
+          initializedPlayoff = true;
 
-  private void computeFinalScores() throws MalformedURLException, IOException, SAXException {
-    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "report/summarizePhase1.jsp");
-    WebResponse response = conversation.getResponse(request);
-    Assert.assertTrue(response.isHTML());
-    request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "report/summarizePhase2.jsp");
-    response = conversation.getResponse(request);
-    Assert.assertTrue(response.isHTML());
-    Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully summarized scores"));
+        }
 
-  }
+        prep.setInt(2, runNumber);
+        rs = prep.executeQuery();
 
-  private void verifyHTMLReports() throws MalformedURLException, IOException, SAXException {
-    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "report/categorizedScores.jsp");
-    WebResponse response = conversation.getResponse(request);
-    Assert.assertTrue(response.isHTML());
-    request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "report/categoryScoresByJudge.jsp");
-    response = conversation.getResponse(request);
-    Assert.assertTrue(response.isHTML());
-    request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "report/CategoryScoresByScoreGroup");
-    response = conversation.getResponse(request);
-    Assert.assertTrue(response.isHTML());
-  }
+        // for each score in a run
+        while (rs.next()) {
+          final int teamNumber = rs.getInt(1);
+          enterPerformanceScore(testDataConn, performanceElement, testTournament, runNumber, teamNumber);
+        }
+        LOGGER.info("Waiting for queue to finish");
+        scoreEntryQueue.waitForQueueToFinish();
+      }
+      scoreEntryQueue.shutdown();
 
-  private void verifyRankingAndScores(final String testTournament) throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      // check ranking and scores
+      enterSubjectiveScores(testDataConn, challengeDocument, testTournament);
+
+      // compute final scores
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "report/summarizePhase1.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "report/summarizePhase2.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully summarized scores"));
+
+      // generate reports
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "report/categorizedScores.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "report/categoryScoresByJudge.jsp");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "report/CategoryScoresByScoreGroup");
+      response = conversation.getResponse(request);
+      Assert.assertTrue(response.isHTML());
+
+      // PDF reports
+      request = new GetMethodWebRequest(TestUtils.URL_ROOT
+          + "GetFile");
+      request.setParameter("filename", "finalComputedScores.pdf");
+      response = conversation.getResponse(request);
+      Assert.assertEquals("application/pdf", response.getContentType());
+
+      // check ranking  and scores
       final double scoreFP = 1E-1; // just check to one decimal place
       final Connection connection = TestUtils.createTestDBConnection();
       Assert.assertNotNull("Could not create test database connection", connection);
@@ -419,11 +393,9 @@ public class FullTournamentTest {
       int rank = 0;
       while (rs.next()) {
         final int teamNumber = rs.getInt(1);
-        Assert.assertEquals("Division I Ranking is incorrect for rank: "
-            + rank, division1ExpectedRank[rank], teamNumber);
+        Assert.assertEquals("Division I Ranking is incorrect for rank: " + rank, division1ExpectedRank[rank], teamNumber);
         final double score = rs.getDouble(2);
-        Assert.assertEquals("Overall score incorrect for team: "
-            + teamNumber, division1ExpectedScores[rank], score, scoreFP);
+        Assert.assertEquals("Overall score incorrect for team: " + teamNumber, division1ExpectedScores[rank], score, scoreFP);
 
         ++rank;
       }
@@ -438,59 +410,23 @@ public class FullTournamentTest {
       rank = 0;
       while (rs.next()) {
         final int teamNumber = rs.getInt(1);
-        Assert.assertEquals("Division II Ranking is incorrect for rank: "
-            + rank, division2ExpectedRank[rank], teamNumber);
+        Assert.assertEquals("Division II Ranking is incorrect for rank: " + rank, division2ExpectedRank[rank], teamNumber);
         final double score = rs.getDouble(2);
-        Assert.assertEquals("Overall score incorrect for team: "
-            + teamNumber, division2ExpectedScores[rank], score, scoreFP);
+        Assert.assertEquals("Overall score incorrect for team: " + teamNumber, division2ExpectedScores[rank], score, scoreFP);
 
         ++rank;
       }
-    } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closePreparedStatement(prep);
+
+      // TODO check scores?
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.closeConnection(testDataConn);
+      // Utilities.closeConnection(connection);
     }
-  }
-
-  private void loadTeams() throws MalformedURLException, IOException, SAXException {
-    // find upload form on admin page
-    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "admin/");
-    WebResponse response = conversation.getResponse(request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-    WebForm form = response.getFormWithID("uploadTeams");
-
-    // set the parameters
-    final InputStream teamsIS = FullTournamentTest.class.getResourceAsStream("data/teams-ft.csv");
-    Assert.assertNotNull(teamsIS);
-    final UploadFileSpec teamsUpload = new UploadFileSpec("teams.csv", teamsIS, "text/plain");
-    form.setParameter("teamsFile", new UploadFileSpec[] { teamsUpload });
-    request = form.getRequest();
-    response = conversation.getResponse(request);
-    Assert.assertTrue(response.isHTML());
-    // Assert.assertNotNull("Error uploading data file: " +
-    // response.getText(), response.getElementWithID("success"));
-    teamsIS.close();
-
-    // skip past the filter page
-    form = response.getFormWithName("filterTeams");
-    request = form.getRequest("next");
-    response = conversation.getResponse(request);
-    Assert.assertTrue(response.isHTML());
-
-    // team column selection
-    form = response.getFormWithName("verifyTeams");
-    Assert.assertNotNull(form);
-    form.setParameter("TeamNumber", "tea_number");
-    form.setParameter("TeamName", "tea_name");
-    form.setParameter("Organization", "org_name");
-    form.setParameter("Region", "eve_name");
-    form.setParameter("Division", "div_name");
-    request = form.getRequest();
-    response = conversation.getResponse(request);
-    Assert.assertTrue(response.isHTML());
-    Assert.assertNotNull("Error loading teams: "
-        + response.getText(), response.getElementWithID("success"));
   }
 
   /**
@@ -631,7 +567,7 @@ public class FullTournamentTest {
     }
     if (null == button) {
       throw new RuntimeException("Cannot find button for increment/decrement of "
-          + name);
+          + name + "button: " + button);
     }
     for (int val = 0; val < Math.abs(difference); ++val) {
       button.click();

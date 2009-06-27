@@ -43,6 +43,5 @@ public class ImportDBTest {
     final String database = tempFile.getAbsolutePath();
 
     ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), database);
-
   }
 }

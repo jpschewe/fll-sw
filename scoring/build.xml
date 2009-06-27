@@ -15,12 +15,16 @@
 
 	<property name="dir.dist" value="dist" />
 	<property name="dir.web" value="${dir.tomcat}/webapps/${app.name}" />
+
 	<property name="dir.classes" value="${dir.web}/WEB-INF/classes" />
 	<property name="dir.classes.test" value="${dir.build}/classes/test" />
 
 	<property name="dir.lib" value="lib" />
 	<property name="dir.src" value="src" />
-	<property name="dir.test" value="test" />
+
+	<property name="dir.test.unit" value="test-unit" />
+	<property name="dir.test.integration" value="test-integration" />
+
 	<property name="dir.tmp" value="tmp" />
 	<property name="dir.tmp.subjective" value="${dir.tmp}/subjective" />
 	<property name="dir.src.jsp" value="${dir.build}/jsp_source" />
@@ -128,8 +132,7 @@
 	</path>
 
 	<!-- ==================== Code coverage ==================== -->
-	<target name="coverage.instr" depends="compile"
-		description="Instrument files for code coverage">
+	<target name="coverage.instr" depends="compile" description="Instrument files for code coverage">
     
 		<mkdir dir="${dir.coverage}" />
 		<delete file="${dir.coverage}/cobertura.ser" />
@@ -152,13 +155,11 @@
 		</cobertura-merge>
 
 		<mkdir dir="${dir.reports}/coverage" />
-		<cobertura-report format="html" destdir="${dir.reports}/coverage"
-			datafile="${dir.coverage}/merge-cobertura.ser">
+		<cobertura-report format="html" destdir="${dir.reports}/coverage" datafile="${dir.coverage}/merge-cobertura.ser">
 			<fileset dir="${dir.src}">
 				<include name="**/*.java" />
 			</fileset>
 		</cobertura-report>
-
 		<cobertura-report format="xml" destdir="${dir.reports}/coverage"
 			datafile="${dir.coverage}/merge-cobertura.ser">
 			<fileset dir="${dir.src}">
@@ -207,14 +208,12 @@
 	<!--
 		==================== Compile Target ==================================
 	-->
-	<target name="compile" depends="prepare,compile.classes,compile.jsp"
-		description="Compile Java sources">
+	<target name="compile" depends="prepare,compile.classes,compile.jsp" description="Compile Java sources">
 
 		<!-- stuff for subjective scoring app -->
 		<mkdir dir="${dir.tmp.subjective}" />
 		<mkdir dir="${dir.tmp.subjective}/lib" />
-		<jar destfile="${dir.tmp.subjective}/lib/subjective.jar" basedir="${dir.web}/WEB-INF/classes"
-			index="true" />
+		<jar destfile="${dir.tmp.subjective}/lib/subjective.jar" basedir="${dir.web}/WEB-INF/classes" index="true" />
 		<copy todir="${dir.tmp.subjective}/lib">
 			<fileset dir="${dir.lib}" />
 		</copy>
@@ -312,52 +311,66 @@
 
 	</target>
 
+	<macrodef name="compile">
+		<attribute name="dir.dest" />
+		<attribute name="dir.src" />
+		<element name="classpath-elements" />
+
+		<sequential>
+			<mkdir dir="@{dir.dest}" />
+
+			<!-- Copy static files from external dependencies as needed -->
+			<copy todir="@{dir.dest}">
+				<fileset dir="@{dir.src}">
+					<exclude name="**/*.java" />
+				</fileset>
+			</copy>
+
+			<javac srcdir="@{dir.src}" destdir="@{dir.dest}" debug="${compile.debug}" deprecation="${compile.deprecation}" optimize="${compile.optimize}">
+				<classpath>
+					<classpath-elements />
+				</classpath>
+				<compilerarg value="-Xlint:-serial" />
+			</javac>
+		</sequential>
+	</macrodef>
+
 	<target name="compile.classes" depends="prepare" description="Compile Java sources">
-		<mkdir dir="${dir.classes}" />
-
-		<!-- Compile Java classes as necessary -->
-		<javac srcdir="src" destdir="${dir.classes}" debug="${compile.debug}"
-			deprecation="${compile.deprecation}" optimize="${compile.optimize}">
-			<classpath refid="compile.classpath" />
-			<compilerarg value="-Xlint:-serial" />
-		</javac>
-
+		<compile dir.dest="${dir.classes}" dir.src="${dir.src}">
+			<classpath-elements>
+				<path refid="compile.classpath" />
+			</classpath-elements>
+		</compile>
 	</target>
 
-	<target name="compile.test" depends="prepare,compile"
-		description="Compile Java test sources">
-		<mkdir dir="${dir.classes.test}" />
+	<target name="compile.test.all" depends="compile.test.unit, compile.test.integration" description="Compile all tests" />
 
-		<!-- Copy static files from external dependencies as needed -->
-		<copy todir="${dir.web}/WEB-INF/classes">
-			<fileset dir="${dir.test}">
-				<exclude name="**/*.java" />
-			</fileset>
-		</copy>
+	<target name="compile.test.unit" depends="prepare,compile" description="Compile the unit tests">
+		<compile dir.dest="${dir.classes.test}" dir.src="${dir.test.unit}">
+			<classpath-elements>
+				<path refid="test.classpath" />
+			</classpath-elements>
+		</compile>
+	</target>
 
-		<!-- Compile Java classes as necessary -->
-		<javac srcdir="test" destdir="${dir.classes.test}" debug="${compile.debug}"
-			deprecation="${compile.deprecation}" optimize="${compile.optimize}">
-			<classpath refid="test.classpath" />
-			<compilerarg value="-Xlint:-serial" />
-		</javac>
+	<target name="compile.test.integration" depends="prepare,compile,compile.test.unit" description="Compile the integration tests">
+		<compile dir.dest="${dir.classes.test}" dir.src="${dir.test.integration}">
+			<classpath-elements>
+				<path refid="test.classpath" />
+			</classpath-elements>
+		</compile>
 	</target>
 
 	<import file="${basedir}/tomcat/bin/catalina-tasks.xml" />
-	<target name="generate.jsp" depends="prepare,tomcat.expand"
-		description="Generate Java sources for JSP files" unless="jsp.notRequired">
-		<jasper validateXml="false" uriroot="${dir.web}"
-			webXmlFragment="${dir.web}/WEB-INF/generated_web.xml" outputDir="${dir.src.jsp}" />
+	<target name="generate.jsp" depends="prepare,tomcat.expand" description="Generate Java sources for JSP files" unless="jsp.notRequired">
+		<jasper validateXml="false" uriroot="${dir.web}" webXmlFragment="${dir.web}/WEB-INF/generated_web.xml" outputDir="${dir.src.jsp}" />
 
 		<touch file="${dir.src.jsp}/.timestamp" />
 	</target>
 
-	<target name="compile.jsp" depends="compile.classes,generate.jsp"
-		description="Compile JSP sources">
-		<javac destdir="${dir.src.jsp}" optimize="${compile.optimize}"
-			debug="${compile.debug}" deprecation="${compile.deprecation}"
-			failonerror="true" srcdir="${dir.src.jsp}" excludes="**/*.smap">
-			<classpath>
+	<target name="compile.jsp" depends="compile.classes,generate.jsp" description="Compile JSP sources">
+		<compile dir.src="${dir.src.jsp}" dir.dest="${dir.src.jsp}">
+			<classpath-elements>
 				<path refid="compile.classpath" />
 				<fileset dir="${dir.web}/WEB-INF/lib">
 					<include name="*.jar" />
@@ -368,27 +381,36 @@
 				<fileset dir="${dir.tomcat}/bin">
 					<include name="*.jar" />
 				</fileset>
-			</classpath>
-			<include name="**" />
-			<exclude name="tags/**" />
-		</javac>
+			</classpath-elements>
+		</compile>
+		<!--	<javac destdir="${dir.src.jsp}" optimize="${compile.optimize}" debug="${compile.debug}" deprecation="${compile.deprecation}" failonerror="true" srcdir="${dir.src.jsp}" excludes="**/*.smap">
+		<classpath>
+			<path refid="compile.classpath" />
+			<fileset dir="${dir.web}/WEB-INF/lib">
+				<include name="*.jar" />
+			</fileset>
+			<fileset dir="${dir.tomcat}/lib">
+				<include name="*.jar" />
+			</fileset>
+			<fileset dir="${dir.tomcat}/bin">
+				<include name="*.jar" />
+			</fileset>
+		</classpath>
+		<include name="**" />
+		<exclude name="tags/**" />
+	</javac> -->
 	</target>
 
 
-	<!--
-		==================== Tomcat Targets
-		===================================
-	-->
-	<target name="tomcat.expand"
-		description="copy tomcat to the right place in the build directory">
+	<!-- ================ Tomcat Targets =========== -->
+	<target name="tomcat.expand" description="copy tomcat to the right place in the build directory">
 		<mkdir dir="${dir.tomcat}" />
 		<copy todir="${dir.tomcat}">
 			<fileset dir="${basedir}/tomcat" />
 		</copy>
 	</target>
 
-	<target name="tomcat.start.test"
-		description="start up tomcat for testing - starts the database in server mode">
+	<target name="tomcat.start.test" description="start up tomcat for testing - starts the database in server mode">
 		<antcall target="tomcat.start">
 			<param name="inside.test" value="true" />
 		</antcall>
@@ -403,12 +425,10 @@
 		</antcall>
 
 		<echo message="Waiting for tomcat to startup" />
-		<waitfor maxwait="5" maxwaitunit="minute" checkevery="1000"
-			checkeveryunit="millisecond" timeoutproperty="fll-sw.timeout">
+		<waitfor maxwait="5" maxwaitunit="minute" checkevery="1000" checkeveryunit="millisecond" timeoutproperty="fll-sw.timeout">
 			<http url="http://localhost:9080/" />
 		</waitfor>
-		<fail message="Access to timed out to http://localhost:9080/ "
-			if="fll-sw.timeout" />
+		<fail message="Access to timed out to http://localhost:9080/ " if="fll-sw.timeout" />
 	</target>
 
 	<target name="tomcat.stop" depends="tomcat.expand" description="shut down tomcat">
@@ -419,8 +439,7 @@
 		</antcall>
 
 		<echo message="Waiting for tomcat to shutdown" />
-		<waitfor maxwait="5" maxwaitunit="minute" checkevery="1000"
-			checkeveryunit="millisecond">
+		<waitfor maxwait="5" maxwaitunit="minute" checkevery="1000" checkeveryunit="millisecond">
 			<not>
 				<http url="http://localhost:9080/" />
 			</not>
@@ -435,10 +454,8 @@
 			</copy>
 		-->
 
-		<java classname="org.apache.catalina.startup.Bootstrap" fork="true"
-			spawn="${spawn}" taskname="tomcat">
-			<sysproperty key="net.sourceforge.cobertura.datafile"
-				value="${dir.coverage}/tomcat-cobertura.ser" />
+		<java classname="org.apache.catalina.startup.Bootstrap" fork="true" spawn="${spawn}" taskname="tomcat">
+			<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/tomcat-cobertura.ser" />
 
 			<classpath>
 				<!--
@@ -577,9 +594,7 @@
 	<target name="javadoc" description="Create Javadoc API documentation">
 
 		<mkdir dir="${dir.dist}/docs/api" />
-		<javadoc sourcepath="src" windowtitle="${app.name}" destdir="${dir.dist}/docs/api"
-			packagenames="fll.*" use="true" splitindex="true"
-			additionalparam="-tag beaninfo:a:BeanInfo -tag valid:a:Validity -tag feasible:a:Feasibility -tag test:a:Tests -tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator">
+		<javadoc sourcepath="src" windowtitle="${app.name}" destdir="${dir.dist}/docs/api" packagenames="fll.*" use="true" splitindex="true" additionalparam="-tag beaninfo:a:BeanInfo -tag valid:a:Validity -tag feasible:a:Feasibility -tag test:a:Tests -tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator">
 			<classpath>
 				<path refid="compile.classpath" />
 				<pathelement location="${dir.src}" />
@@ -632,103 +647,8 @@
 
 	</target>
 
-	<!-- ==================== Tests using JUnit ==================== -->
-	<target name="test" depends="-junit" description="Run the unit tests">
-		<condition property="test.halt">
-			<and>
-				<isset property="test.failed" />
-				<!-- isset property="test.halt-if-failed" / -->
-			</and>
-		</condition>
-		<fail if="test.halt" message="JUnit tests failed">
-			** One or more JUnit tests failed.
-		</fail>
-	</target>
-
-	<target name="test.single" depends="-junit.single"
-		description="Run a single unit test specified by junit.test.class property.">
-		<condition property="test.halt">
-			<and>
-				<isset property="test.failed" />
-				<!-- isset property="test.halt-if-failed" / -->
-			</and>
-		</condition>
-		<fail if="test.halt" message="JUnit tests failed">
-			** One or more JUnit tests failed.
-		</fail>
-	</target>
-
-	<target name="-junit.setup">
-		<!-- save current database -->
-		<mkdir dir="${dir.build}/db-save" />
-		<move todir="${dir.build}/db-save">
-			<fileset dir="${dir.web}/WEB-INF">
-				<include name="flldb.*" />
-			</fileset>
-		</move>
-
-		<!-- copy in test database -->
-		<antcall target="install.testdb" />
-
-		<antcall target="tomcat.start.test"/>
-		
-		<mkdir dir="${dir.build}/test-results" />
-	</target>
-
-	<target name="-junit.teardown">
-		<antcall target="tomcat.stop" />
-
-		<!-- delete test database -->
-		<delete>
-			<fileset dir="${dir.web}/WEB-INF">
-				<include name="flldb.*" />
-			</fileset>
-		</delete>
-
-		<!-- restore database -->
-		<move todir="${dir.web}/WEB-INF">
-			<fileset dir="${dir.build}/db-save">
-				<include name="flldb.*" />
-			</fileset>
-		</move>
-		<delete dir="${dir.build}/db-save" />
-	</target>
-
-	<target name="-junit" depends="compile,compile.test,coverage.instr">
-
-		<antcall target="-junit.setup" />
-
-		<junit fork="yes" haltonfailure="false" dir="${dir.build}"
-			failureproperty="test.failed">
-			<sysproperty key="net.sourceforge.cobertura.datafile"
-				value="${dir.coverage}/cobertura.ser" />
-
-			<classpath>
-				<path refid="test.classpath" />
-			</classpath>
-
-			<formatter type="brief" usefile="false" />
-			<formatter type="xml" />
-			<batchtest todir="${dir.build}/test-results">
-				<fileset dir="${dir.test}" includes="**/*Test.java" />
-			</batchtest>
-		</junit>
-		<antcall target="-junit.teardown" />
-	</target>
-
-	<target name="-junit.single" depends="compile,compile.test">
-		<!--antcall target="-junit.setup" /-->
-		<junit fork="yes" haltonfailure="false" dir="${dir.build}"
-			failureproperty="test.failed">
-
-			<classpath>
-				<path refid="test.classpath" />
-			</classpath>
-			<formatter type="plain" usefile="false" />
-			<test name="${junit.test.class}" if="junit.test.class" todir="${dir.build}/test-results" />
-		</junit>
-		<!--antcall target="-junit.teardown" /-->
-	</target>
+	<!-- ==================== Tests  ==================== -->
+	<target name="test.all" depends="test.integration" description="Run all tests" />
 
 	<target name="test.report" description="Generate the test report">
 		<mkdir dir="${dir.reports}/junit" />
@@ -738,12 +658,10 @@
 			</fileset>
 			<report format="frames" todir="${dir.reports}/junit" />
 		</junitreport>
-		<echo
-			message="See ${dir.reports}/junit/index.html to see the unit test results" />
+		<echo message="See ${dir.reports}/junit/index.html to see the unit test results" />
 	</target>
 
-	<target name="install.testdb" description="install the test database"
-		depends="compile">
+	<target name="install.testdb" description="install the test database" depends="compile">
 		<delete>
 			<fileset dir="${dir.web}/WEB-INF">
 				<include name="flldb.*" />
@@ -755,6 +673,96 @@
 			</fileset>
 			<mapper type="glob" from="testdb.*" to="flldb.*" />
 		</copy>
+	</target>
+
+	<target name="savedb">
+		<!-- save current database -->
+		<mkdir dir="${dir.build}/db-save" />
+		<move todir="${dir.build}/db-save">
+			<fileset dir="${dir.web}/WEB-INF">
+				<include name="flldb.*" />
+			</fileset>
+		</move>
+	</target>
+
+	<target name="restoredb">
+		<!-- restore database -->
+		<move todir="${dir.web}/WEB-INF">
+			<fileset dir="${dir.build}/db-save">
+				<include name="flldb.*" />
+			</fileset>
+		</move>
+		<delete dir="${dir.build}/db-save" />
+
+	</target>
+
+	<macrodef name="run-tests">
+		<attribute name="working-dir" />
+		<attribute name="dir.src" />
+
+		<sequential>
+			<antcall target="savedb"/>
+			
+			<!-- copy in test database -->
+			<antcall target="install.testdb" />
+
+
+			<mkdir dir="${dir.build}/test-results" />
+
+			<junit fork="yes" haltonfailure="false" dir="@{working-dir}">
+				<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/cobertura.ser" />
+
+				<classpath>
+					<path refid="test.classpath" />
+				</classpath>
+
+				<formatter type="brief" usefile="false" />
+				<formatter type="xml" />
+				<batchtest todir="${dir.build}/test-results">
+					<fileset dir="@{dir.src}" includes="**/*.java">
+						<contains text="@Test" />
+					</fileset>
+				</batchtest>
+			</junit>
+			
+			<!-- delete test database -->
+			<delete>
+				<fileset dir="${dir.web}/WEB-INF">
+					<include name="flldb.*" />
+				</fileset>
+			</delete>
+
+			<antcall target="restoredb"/>
+		</sequential>
+	</macrodef>
+
+	<!-- one shot tests -->
+	<target name="test.single" depends="compile,compile.test.all" description="Run a single unit test specified by junit.test.class property.">
+		<antcall target="tomcat.start.test" />
+		<junit fork="yes" haltonfailure="false" dir="${dir.build}">
+
+			<classpath>
+				<path refid="test.classpath" />
+			</classpath>
+			<formatter type="plain" usefile="false" />
+			<test name="${junit.test.class}" if="junit.test.class" todir="${dir.build}/test-results" />
+		</junit>
+		
+		<antcall target="tomcat.stop" />
+	</target>
+
+	<!-- unit tests -->
+	<target name="test.unit" depends="compile,compile.test.unit,coverage.instr" description="Run the unit tests">
+		<run-tests working-dir="${dir.build}" dir.src="${dir.test.unit}" />
+	</target>
+
+	<!-- integration tests -->
+	<target name="test.integration" depends="compile,compile.test.integration,coverage.instr" description="Run the integration tests">
+		<antcall target="tomcat.start.test" />
+
+		<run-tests working-dir="${dir.build}" dir.src="${dir.test.integration}" />
+
+		<antcall target="tomcat.stop" />
 	</target>
 
 	<!-- ===================== Checkstyle =================== -->
@@ -772,28 +780,26 @@
 				<include name="**/*.java" />
 			</fileset>
 			<formatter type="plain" />
-			<formatter type="xml" toFile="${dir.build}/checkstyle_report.xml"/>			
+			<formatter type="xml" toFile="${dir.build}/checkstyle_report.xml" />
 		</checkstyle>
 	</target>
 
-	<target name="checkstyle.full"
-		description="Check for code convention violations (more aggressive)">
+	<target name="checkstyle.full" description="Check for code convention violations (more aggressive)">
 		<mkdir dir="${dir.build}/classes" />
 
-		<checkstyle config="checkstyle_nightly_checks.xml"
-			failOnViolation="false">
+		<checkstyle config="checkstyle_nightly_checks.xml" failOnViolation="false">
 			<fileset dir="${dir.src}">
 				<include name="**/*.java" />
 			</fileset>
 			<formatter type="plain" />
-			<formatter type="xml" toFile="${dir.build}/checkstyle_report.xml"/>			
+			<formatter type="xml" toFile="${dir.build}/checkstyle_report.xml" />
 		</checkstyle>
 	</target>
 
 	<target name="continuous" description="Runs the continuous integration build">
 		<antcall target="clean" />
 		<antcall target="javadoc" />
-		<antcall target="test" />
+		<antcall target="test-all" />
 		<antcall target="coverage.report" />
 		<antcall target="checkstyle.full" />
 	</target>
@@ -809,21 +815,17 @@
 		</uptodate>
 	</target>
 
-	<target name="-buildscripts" depends="-buildscripts.check"
-		unless="-scripts.uptodate">
+	<target name="-buildscripts" depends="-buildscripts.check" unless="-scripts.uptodate">
 		<mkdir dir="${-scripts.dir}" />
 
-		<pathconvert targetos="unix" property="classpath.unix"
-			refid="-scripts.path">
+		<pathconvert targetos="unix" property="classpath.unix" refid="-scripts.path">
 			<map from="${basedir}" to="${-scripts.root}" />
 		</pathconvert>
-		<pathconvert targetos="windows" property="classpath.windows"
-			refid="-scripts.path">
+		<pathconvert targetos="windows" property="classpath.windows" refid="-scripts.path">
 			<map from="${basedir}" to="${-scripts.root}" />
 		</pathconvert>
 
-		<copy file="run.sh.template" tofile="${-scripts.dir}/${app.name}.sh"
-			overwrite="true">
+		<copy file="run.sh.template" tofile="${-scripts.dir}/${app.name}.sh" overwrite="true">
 			<filterset>
 				<filter token="CLASSPATH" value="${classpath.unix}" />
 				<filter token="CLASSNAME" value="${class.main}" />
@@ -835,8 +837,7 @@
 				<include name="${app.name}.sh" />
 			</fileset>
 		</chmod>
-		<copy file="run.bat.template" tofile="${-scripts.dir}/${app.name}.bat"
-			overwrite="true">
+		<copy file="run.bat.template" tofile="${-scripts.dir}/${app.name}.bat" overwrite="true">
 			<filterset>
 				<filter token="CLASSPATH" value="${classpath.windows}" />
 				<filter token="CLASSNAME" value="${class.main}" />

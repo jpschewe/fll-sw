@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="scoring/src"/>
-	<classpathentry kind="src" output="scoring/build/classes/test" path="scoring/test"/>
+	<classpathentry kind="src" output="scoring/build/classes/test" path="scoring/test-unit"/>
+	<classpathentry kind="src" output="scoring/build/classes/test" path="scoring/test-integration"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-lang-2.0.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/jstl.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/standard.jar"/>
