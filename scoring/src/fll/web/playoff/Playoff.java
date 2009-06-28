@@ -72,7 +72,10 @@ public final class Playoff {
                                                     final WinnerType winnerCriteria,
                                                     final String divisionStr,
                                                     final Map<Integer, Team> tournamentTeams) throws SQLException {
-
+    if(null == connection) {
+      throw new NullPointerException("Connection cannot be null");
+    }
+    
     if (BracketSortType.ALPHA_TEAM == bracketSort) {
       final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
       filterTeamsToDivision(connection, teams, divisionStr);
