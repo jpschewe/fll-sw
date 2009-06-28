@@ -648,7 +648,7 @@
 	</target>
 
 	<!-- ==================== Tests  ==================== -->
-	<target name="test.all" depends="test.integration" description="Run all tests" />
+	<target name="test.all" depends="test.integration,test.unit" description="Run all tests" />
 
 	<target name="test.report" description="Generate the test report">
 		<mkdir dir="${dir.reports}/junit" />
