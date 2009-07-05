@@ -54,5 +54,6 @@
 	<classpathentry kind="lib" path="scoring/lib/cobertura/jakarta-oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="scoring/tomcat/lib/jsp-api.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/ant/checkstyle-all-5.0.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/selenium-java-client-driver.jar" sourcepath="scoring/lib/test/selenium-java-client-driver-sources.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
