@@ -83,20 +83,9 @@ public final class ScoreStandardization {
           + tournament + "'");
 
       // performance
-      rs = stmt.executeQuery("SELECT Value From TournamentParameters WHERE Param = 'StandardizedMean'");
-      if (!rs.next()) {
-        throw new RuntimeException("Can't find StandardizedMean in TournamentParameters");
-      }
-      final double mean = rs.getDouble(1);
-      SQLFunctions.closeResultSet(rs);
-
-      rs = stmt.executeQuery("SELECT Value From TournamentParameters WHERE Param = 'StandardizedSigma'");
-      if (!rs.next()) {
-        throw new RuntimeException("Can't find StandardizedSigma in TournamentParameters");
-      }
-      final double sigma = rs.getDouble(1);
-      SQLFunctions.closeResultSet(rs);
-
+      final double mean = getStandardizedMean(connection);
+      final double sigma = getStandardizedSigma(connection);
+      
       prep = connection.prepareStatement("INSERT INTO FinalScores "
           + " ( TeamNumber, Tournament, performance ) " + " SELECT TeamNumber" + ", Tournament" + ", ((Score - ?) * (" + sigma + " / ?)" + " ) + " + mean
           + " FROM performance_seeding_max" + " WHERE Tournament = '" + tournament + "'");
@@ -144,6 +133,14 @@ public final class ScoreStandardization {
     }
   }
 
+  private static double getStandardizedMean(final Connection connection) throws SQLException {
+    return Queries.getDoubleTournamentParameter(connection, "StandardizedMean");
+  }
+
+  private static double getStandardizedSigma(final Connection connection) throws SQLException {
+    return Queries.getDoubleTournamentParameter(connection, "StandardizedSigma");
+  }
+
   /**
    * Populate the StandardizedScore column of each subjective table.
    */
@@ -153,20 +150,9 @@ public final class ScoreStandardization {
     PreparedStatement updatePrep = null;
     try {
       stmt = connection.createStatement();
-
-      rs = stmt.executeQuery("SELECT Value From TournamentParameters WHERE Param = 'StandardizedMean'");
-      if (!rs.next()) {
-        throw new RuntimeException("Can't find StandardizedMean in TournamentParameters");
-      }
-      final double mean = rs.getDouble(1);
-      SQLFunctions.closeResultSet(rs);
-
-      rs = stmt.executeQuery("SELECT Value From TournamentParameters WHERE Param = 'StandardizedSigma'");
-      if (!rs.next()) {
-        throw new RuntimeException("Can't find StandardizedSigma in TournamentParameters");
-      }
-      final double sigma = rs.getDouble(1);
-      SQLFunctions.closeResultSet(rs);
+      
+      final double mean = getStandardizedMean(connection);
+      final double sigma = getStandardizedSigma(connection);
 
       final Element rootElement = document.getDocumentElement();
 

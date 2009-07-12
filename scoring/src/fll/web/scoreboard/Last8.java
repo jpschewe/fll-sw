@@ -34,7 +34,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Formatter;
 
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -46,42 +47,24 @@ import org.apache.log4j.Logger;
 
 import fll.Utilities;
 import fll.db.Queries;
-import fll.web.Init;
+import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
 /**
  * @author jpschewe
  */
-public class Last8 extends HttpServlet {
+public class Last8 extends BaseFLLServlet {
 
   private static final Logger LOGGER = Logger.getLogger(Last8.class);
 
-  /**
-   * @param request
-   * @param response
-   */
-  @Override
-  protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
-    doPost(request, response);
-  }
-
-  /**
-   * @param request
-   * @param response
-   */
-  @Override
-  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session) throws IOException, ServletException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Entering doPost");
     }
 
-    try {
-      Init.initialize(request, response);
-    } catch (final SQLException e) {
-      throw new RuntimeException("Error in initialization", e);
-    }
-
-    final HttpSession session = request.getSession();
     final DataSource datasource = SessionAttributes.getDataSource(session);
     final Formatter formatter = new Formatter(response.getWriter());
     final String showOrgStr = request.getParameter("showOrganization");
@@ -91,7 +74,7 @@ public class Last8 extends HttpServlet {
     ResultSet rs = null;
     try {
       final Connection connection = datasource.getConnection();
-      
+
       final String currentTournament = Queries.getCurrentTournament(connection);
 
       formatter.format("<html>");

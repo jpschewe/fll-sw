@@ -33,7 +33,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="scoring/lib/log4j-1.2.14.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/test/uispec4j-1.4.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/JonsInfra-0.7.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="http://mtu.net/~jpschewe/JonsInfra/0.6/api/index.html"/>
@@ -55,5 +54,10 @@
 	<classpathentry kind="lib" path="scoring/tomcat/lib/jsp-api.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/ant/checkstyle-all-5.0.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/selenium-java-client-driver.jar" sourcepath="scoring/lib/test/selenium-java-client-driver-sources.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/uispec4j-jdk6-2.0.jar" sourcepath="scoring/lib/test/uispec4j-jdk6-2.0-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/scoring/lib/test/uispec4j-2.0-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>

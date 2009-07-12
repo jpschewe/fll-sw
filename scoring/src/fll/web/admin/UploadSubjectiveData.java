@@ -18,6 +18,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,7 +35,7 @@ import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.db.Queries;
-import fll.web.Init;
+import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 import fll.xml.XMLUtils;
@@ -48,21 +49,9 @@ public final class UploadSubjectiveData extends HttpServlet {
 
   private static final Logger LOGGER = Logger.getLogger(UploadSubjectiveData.class);
 
-  /**
-   * @param request
-   * @param response
-   */
-  @Override
-  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
-    try {
-      Init.initialize(request, response);
-    } catch (final SQLException e) {
-      throw new RuntimeException("Error in initialization", e);
-    }
+  protected void processRequest(final HttpServletRequest request, final HttpServletResponse response, final ServletContext application, final HttpSession session)throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
-    final ServletContext application = getServletContext();
-    final HttpSession session = request.getSession();
 
     try {
       // must be first to ensure the form parameters are set
@@ -74,7 +63,7 @@ public final class UploadSubjectiveData extends HttpServlet {
 
       final DataSource datasource = SessionAttributes.getDataSource(session);
       final Connection connection = datasource.getConnection();
-      saveSubjectiveData(file, Queries.getCurrentTournament(connection), (Document) application.getAttribute("challengeDocument"), connection);
+      saveSubjectiveData(file, Queries.getCurrentTournament(connection), ApplicationAttributes.getChallengeDocument(application), connection);
       file.delete();
 
       message.append("Subjective data uploaded successfully");

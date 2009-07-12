@@ -9,7 +9,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.zip.ZipInputStream;
 
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -23,6 +24,7 @@ import org.apache.log4j.Logger;
 
 import fll.Utilities;
 import fll.db.ImportDB;
+import fll.web.BaseFLLServlet;
 import fll.web.Init;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
@@ -33,7 +35,7 @@ import fll.web.UploadProcessor;
  * @author jpschewe
  * @version $Revision$
  */
-public class ImportDBDump extends HttpServlet {
+public class ImportDBDump extends BaseFLLServlet {
 
   private static final Logger LOG = Logger.getLogger(ImportDBDump.class);
 
@@ -43,14 +45,11 @@ public class ImportDBDump extends HttpServlet {
    */
   private static int _importdbCount = 0;
 
-  /**
-   * @param request
-   * @param response
-   */
-  @Override
-  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session) throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
-    final HttpSession session = request.getSession();
 
     Connection memConnection = null;
     Statement memStmt = null;

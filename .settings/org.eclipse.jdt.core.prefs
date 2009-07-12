@@ -1,4 +1,4 @@
-#Thu Feb 12 19:17:44 CST 2009
+#Sat Jul 11 19:55:51 CDT 2009
 eclipse.preferences.version=1
 org.eclipse.jdt.core.compiler.problem.annotationSuperInterface=warning
 org.eclipse.jdt.core.compiler.problem.autoboxing=ignore
@@ -71,7 +71,7 @@ org.eclipse.jdt.core.formatter.alignment_for_conditional_expression=80
 org.eclipse.jdt.core.formatter.alignment_for_enum_constants=0
 org.eclipse.jdt.core.formatter.alignment_for_expressions_in_array_initializer=18
 org.eclipse.jdt.core.formatter.alignment_for_multiple_fields=16
-org.eclipse.jdt.core.formatter.alignment_for_parameters_in_constructor_declaration=16
+org.eclipse.jdt.core.formatter.alignment_for_parameters_in_constructor_declaration=82
 org.eclipse.jdt.core.formatter.alignment_for_parameters_in_method_declaration=82
 org.eclipse.jdt.core.formatter.alignment_for_selector_in_method_invocation=18
 org.eclipse.jdt.core.formatter.alignment_for_superclass_in_type_declaration=16

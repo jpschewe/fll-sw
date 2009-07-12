@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -24,7 +24,7 @@ import org.w3c.dom.Document;
 import fll.db.GenerateDB;
 import fll.db.ImportDB;
 import fll.web.ApplicationAttributes;
-import fll.web.Init;
+import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 import fll.xml.ChallengeParser;
@@ -35,23 +35,14 @@ import fll.xml.ChallengeParser;
  * @author jpschewe
  * @version $Revision$
  */
-public class CreateDB extends HttpServlet {
+public class CreateDB extends BaseFLLServlet {
 
   private static final Logger LOG = Logger.getLogger(CreateDB.class);
 
-  /**
-   * @param request
-   * @param response
-   */
-  @Override
-  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+  protected void processRequest(final HttpServletRequest request, final HttpServletResponse response, final ServletContext application, final HttpSession session)throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
-    final ServletContext application = getServletContext();
-    final HttpSession session = request.getSession();
 
     try {
-      Init.initialize(request, response);
-
       // must be first to ensure the form parameters are set
       UploadProcessor.processUpload(request);
 

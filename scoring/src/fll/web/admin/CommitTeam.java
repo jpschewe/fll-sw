@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -24,7 +24,7 @@ import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.Queries;
-import fll.web.Init;
+import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
 /**
@@ -33,32 +33,22 @@ import fll.web.SessionAttributes;
  * @author jpschewe
  * @version $Revision$
  */
-public class CommitTeam extends HttpServlet {
+public class CommitTeam extends BaseFLLServlet {
 
   private static final Logger LOGGER = Logger.getLogger(CommitTeam.class);
 
-  /**
-   * @param request
-   * @param response
-   */
-  @Override
-  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session) throws IOException, ServletException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Top of CommitTeam.doPost");
     }
 
-    try {
-      Init.initialize(request, response);
-    } catch (final SQLException e) {
-      throw new RuntimeException("Error in initialization", e);
-    }
-
     final StringBuilder message = new StringBuilder();
-    final ServletContext application = getServletContext();
-    final HttpSession session = request.getSession();
     final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
-    final DataSource datasource = (DataSource)session.getAttribute(SessionAttributes.DATASOURCE);
-    
+    final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
+
     try {
       final Connection connection = datasource.getConnection();
       // parse the numbers first so that we don't get a partial commit

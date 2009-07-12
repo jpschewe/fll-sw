@@ -4,13 +4,15 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Statement;
 
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.Utilities;
+import fll.web.BaseFLLServlet;
 
 /**
  * Check for differences in team information between two databases.
@@ -18,20 +20,14 @@ import fll.Utilities;
  * @author jpschewe
  * @version $Revision$
  */
-public final class CheckDifferences extends HttpServlet {
+public final class CheckDifferences extends BaseFLLServlet {
 
   private CheckDifferences() {
     // no instances
   }
   
-  /**
-   * @param request
-   * @param response
-   */
-  @Override
-  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+  protected void processRequest(final HttpServletRequest request, final HttpServletResponse response, final ServletContext application, final HttpSession session)throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
-    final HttpSession session = request.getSession();
 
     final Connection memConnection = null;
     final Statement memStmt = null;

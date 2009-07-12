@@ -36,7 +36,7 @@ import java.util.Formatter;
 import java.util.List;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -49,7 +49,7 @@ import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.Queries;
-import fll.web.Init;
+import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
@@ -57,37 +57,18 @@ import fll.xml.XMLUtils;
 /**
  * @author jpschewe
  */
-public class Top10 extends HttpServlet {
+public class Top10 extends BaseFLLServlet {
 
   private static final Logger LOGGER = Logger.getLogger(Top10.class);
 
-  /**
-   * @param request
-   * @param response
-   */
-  @Override
-  protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
-    doPost(request, response);
-  }
-
-  /**
-   * @param request
-   * @param response
-   */
-  @Override
-  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session) throws IOException, ServletException {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Entering doPost");
     }
 
-    try {
-      Init.initialize(request, response);
-    } catch (final SQLException e) {
-      throw new RuntimeException("Error in initialization", e);
-    }
-
-    final ServletContext application = getServletContext();
-    final HttpSession session = request.getSession();
     final DataSource datasource = SessionAttributes.getDataSource(session);
     final Formatter formatter = new Formatter(response.getWriter());
     final String showOrgStr = request.getParameter("showOrganization");
@@ -136,11 +117,10 @@ public class Top10 extends HttpServlet {
       final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
       final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
       final String maxMin = WinnerType.HIGH == winnerCriteria ? "MAX" : "MIN";
-      
+
       prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore FROM"
           + " (SELECT TeamNumber, " + maxMin + "(ComputedTotal) AS MaxOfComputedScore FROM verified_performance WHERE Tournament = ? "
-          + " AND NoShow = False AND Bye = False GROUP BY TeamNumber) AS T2"
-          + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams"
+          + " AND NoShow = False AND Bye = False GROUP BY TeamNumber) AS T2" + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams"
           + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber AND current_tournament_teams.event_division = ?"
           + " ORDER BY T2.MaxOfComputedScore " + ascDesc + " LIMIT 10");
       prep.setString(1, currentTournament);

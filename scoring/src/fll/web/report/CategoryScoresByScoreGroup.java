@@ -17,7 +17,6 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -32,7 +31,7 @@ import org.w3c.dom.Element;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
-import fll.web.Init;
+import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
@@ -43,26 +42,15 @@ import fll.xml.XMLUtils;
  * @author jpschewe
  * @version $Revision$
  */
-public class CategoryScoresByScoreGroup extends HttpServlet {
+public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
-  @Override
-  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
-    doGet(request, response);
-  }
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session) throws IOException, ServletException {
 
-  @Override
-  protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
-    try {
-      Init.initialize(request, response);
-    } catch (final SQLException e) {
-      throw new RuntimeException("Error in initialization", e);
-    }
-
-    final ServletContext application = getServletContext();
-    final HttpSession session = request.getSession();
-
-    final DataSource datasource = (DataSource)session.getAttribute(SessionAttributes.DATASOURCE);
-    final Document challengeDocument = (Document) application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
+    final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
+    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
     final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";

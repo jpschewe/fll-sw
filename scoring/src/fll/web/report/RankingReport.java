@@ -16,7 +16,6 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -42,14 +41,14 @@ import com.lowagie.text.pdf.PdfWriter;
 import fll.Team;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
-import fll.web.Init;
+import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
 /**
  * @author jpschewe
  * @version $Revision$
  */
-public class RankingReport extends HttpServlet {
+public class RankingReport extends BaseFLLServlet {
 
   private static final Logger LOG = Logger.getLogger(RankingReport.class);
 
@@ -61,22 +60,12 @@ public class RankingReport extends HttpServlet {
 
   private static final Font HEADER_FONT = TITLE_FONT;
 
-  @Override
-  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
-    doGet(request, response);
-  }
-
-  @Override
-  protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
-    try {
-      Init.initialize(request, response);
-    } catch (final SQLException e) {
-      throw new RuntimeException("Error in initialization", e);
-    }
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session) throws IOException, ServletException {
 
     try {
-      final ServletContext application = getServletContext();
-      final HttpSession session = request.getSession();
       final DataSource datasource = SessionAttributes.getDataSource(session);
       final Connection connection = datasource.getConnection();
       final org.w3c.dom.Document challengeDocument = (org.w3c.dom.Document) application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);

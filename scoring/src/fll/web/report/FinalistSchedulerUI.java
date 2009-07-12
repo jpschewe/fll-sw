@@ -20,7 +20,6 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -37,7 +36,7 @@ import fll.Team;
 import fll.db.Queries;
 import fll.util.ScoreUtils;
 import fll.web.ApplicationAttributes;
-import fll.web.Init;
+import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
@@ -46,7 +45,7 @@ import fll.xml.XMLUtils;
  * @author jpschewe
  * @version $Revision$
  */
-public class FinalistSchedulerUI extends HttpServlet {
+public class FinalistSchedulerUI extends BaseFLLServlet {
 
   /**
    * Key into session that contains the names for the categories.
@@ -61,23 +60,13 @@ public class FinalistSchedulerUI extends HttpServlet {
 
   private static final Logger LOG = Logger.getLogger(FinalistSchedulerUI.class);
 
-  @Override
-  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
-    doGet(request, response);
-  }
 
-  @Override
-  protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
-    try {
-      Init.initialize(request, response);
-    } catch (final SQLException e) {
-      throw new RuntimeException("Error in initialization", e);
-    }
-
-    final ServletContext application = getServletContext();
-    final HttpSession session = request.getSession();
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session) throws IOException, ServletException {
     final DataSource datasource = SessionAttributes.getDataSource(session);
-    final Document challengeDocument = (Document) application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
+    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
     try {
 

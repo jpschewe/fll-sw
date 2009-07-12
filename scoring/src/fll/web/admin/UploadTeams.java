@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -36,7 +37,7 @@ import org.apache.log4j.Logger;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fll.db.GenerateDB;
-import fll.web.Init;
+import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 
@@ -46,24 +47,16 @@ import fll.web.UploadProcessor;
  * 
  * @version $Revision$
  */
-public final class UploadTeams extends HttpServlet {
+public final class UploadTeams extends BaseFLLServlet {
 
   private static final Logger LOGGER = Logger.getLogger(UploadTeams.class);
 
-  /**
-   * @param request
-   * @param response
-   */
-  @Override
-  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
-    try {
-      Init.initialize(request, response);
-    } catch (final SQLException e) {
-      throw new RuntimeException("Error in initialization", e);
-    }
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session) throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
-    final HttpSession session = request.getSession();
     final DataSource datasource = SessionAttributes.getDataSource(session);
     try {
       final Connection connection = datasource.getConnection();
@@ -235,40 +228,16 @@ public final class UploadTeams extends HttpServlet {
     Statement stmt = null;
     ResultSet rs = null;
     try {
+      final String whereClause = createFilterWhereClauseFromRequest(request);
+
       stmt = connection.createStatement();
-
-      final StringBuffer whereClause = new StringBuffer();
-      int filterCount = 0;
-      String filterColumn = request.getParameter("filterColumn"
-          + filterCount);
-      String filterText = request.getParameter("filterText"
-          + filterCount);
-      String filterDelete = request.getParameter("filterDelete"
-          + filterCount);
-      while (null != filterColumn) {
-        if (!"".equals(filterText)
-            && !"1".equals(filterDelete)) {
-          if (whereClause.length() > 0) {
-            whereClause.append(" AND ");
-          }
-          whereClause.append(filterColumn
-              + " LIKE '" + filterText.trim() + "'");
-        }
-
-        filterCount++;
-        filterColumn = request.getParameter("filterColumn"
-            + filterCount);
-        filterText = request.getParameter("filterText"
-            + filterCount);
-        filterDelete = request.getParameter("filterDelete"
-            + filterCount);
-      }
 
       String sql = "SELECT COUNT(*) FROM AllTeams";
       if (whereClause.length() > 0) {
         sql += " WHERE "
-            + whereClause.toString();
+            + whereClause;
       }
+
       rs = stmt.executeQuery(sql);
       if (rs.next()) {
         return rs.getLong(1);
@@ -288,34 +257,9 @@ public final class UploadTeams extends HttpServlet {
   public static void copyFilteredTeams(final Connection connection, final HttpServletRequest request) throws SQLException {
     Statement stmt = null;
     try {
+      final String whereClause = createFilterWhereClauseFromRequest(request);
+
       stmt = connection.createStatement();
-
-      final StringBuffer whereClause = new StringBuffer();
-      int filterCount = 0;
-      String filterColumn = request.getParameter("filterColumn"
-          + filterCount);
-      String filterText = request.getParameter("filterText"
-          + filterCount);
-      String filterDelete = request.getParameter("filterDelete"
-          + filterCount);
-      while (null != filterColumn) {
-        if (!"".equals(filterText)
-            && !"1".equals(filterDelete)) {
-          if (whereClause.length() > 0) {
-            whereClause.append(" AND ");
-          }
-          whereClause.append(filterColumn
-              + " LIKE '" + filterText.trim() + "'");
-        }
-
-        filterCount++;
-        filterColumn = request.getParameter("filterColumn"
-            + filterCount);
-        filterText = request.getParameter("filterText"
-            + filterCount);
-        filterDelete = request.getParameter("filterDelete"
-            + filterCount);
-      }
 
       // first clean out FilteredTeams
       stmt.executeUpdate("DELETE FROM FilteredTeams");
@@ -324,12 +268,42 @@ public final class UploadTeams extends HttpServlet {
       String sql = "INSERT INTO FilteredTeams SELECT * FROM AllTeams";
       if (whereClause.length() > 0) {
         sql += " WHERE "
-            + whereClause.toString();
+            + whereClause;
       }
       stmt.executeUpdate(sql);
     } finally {
       SQLFunctions.closeStatement(stmt);
     }
+  }
+
+  private static String createFilterWhereClauseFromRequest(final HttpServletRequest request) {
+    final StringBuffer whereClause = new StringBuffer();
+    int filterCount = 0;
+    String filterColumn = request.getParameter("filterColumn"
+        + filterCount);
+    String filterText = request.getParameter("filterText"
+        + filterCount);
+    String filterDelete = request.getParameter("filterDelete"
+        + filterCount);
+    while (null != filterColumn) {
+      if (!"".equals(filterText)
+          && !"1".equals(filterDelete)) {
+        if (whereClause.length() > 0) {
+          whereClause.append(" AND ");
+        }
+        whereClause.append(filterColumn
+            + " LIKE '" + filterText.trim() + "'");
+      }
+
+      filterCount++;
+      filterColumn = request.getParameter("filterColumn"
+          + filterCount);
+      filterText = request.getParameter("filterText"
+          + filterCount);
+      filterDelete = request.getParameter("filterDelete"
+          + filterCount);
+    }
+    return whereClause.toString();
   }
 
   /**

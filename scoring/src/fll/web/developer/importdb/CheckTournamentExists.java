@@ -10,7 +10,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -21,6 +22,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 
 import fll.db.Queries;
+import fll.web.BaseFLLServlet;
 import fll.web.Init;
 import fll.web.SessionAttributes;
 
@@ -28,18 +30,15 @@ import fll.web.SessionAttributes;
  * @author jpschewe
  * @version $Revision$
  */
-public class CheckTournamentExists extends HttpServlet {
+public class CheckTournamentExists extends BaseFLLServlet {
 
   private static final Logger LOG = Logger.getLogger(CheckTournamentExists.class);
 
-  /**
-   * @param request
-   * @param response
-   */
-  @Override
-  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session) throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
-    final HttpSession session = request.getSession();
 
     Connection connection = null;
     try {

@@ -34,6 +34,16 @@ public class ScoreTest {
 
   private static final Logger LOG = Logger.getLogger(ScoreTest.class);
 
+  private Element loadDocumentAndGetPerformanceElemnt(final InputStream stream) {
+    Assert.assertNotNull(stream);
+    final Document document = ChallengeParser.parse(new InputStreamReader(stream));
+    Assert.assertNotNull(document);
+    final Element rootElement = document.getDocumentElement();
+    final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
+    Assert.assertNotNull(performanceElement);
+    return performanceElement;
+  }
+  
   /**
    * Test computed goals. Loads data/test-computed-goal.xml and uses a dummy
    * team score object.
@@ -41,12 +51,7 @@ public class ScoreTest {
   @Test
   public void testComputedGoals() throws ParseException {
     final InputStream stream = ScoreTest.class.getResourceAsStream("data/test-computed-goal.xml");
-    Assert.assertNotNull(stream);
-    final Document document = ChallengeParser.parse(new InputStreamReader(stream));
-    Assert.assertNotNull(document);
-    final Element rootElement = document.getDocumentElement();
-    final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
-    Assert.assertNotNull(performanceElement);
+    final Element performanceElement = loadDocumentAndGetPerformanceElemnt(stream);
 
     final Map<String, Double> simpleGoals = new HashMap<String, Double>();
     final Map<String, String> enumGoals = new HashMap<String, String>();
@@ -91,12 +96,7 @@ public class ScoreTest {
   @Test
   public void testVariables() throws ParseException {
     final InputStream stream = ScoreTest.class.getResourceAsStream("data/test-variables.xml");
-    Assert.assertNotNull(stream);
-    final Document document = ChallengeParser.parse(new InputStreamReader(stream));
-    Assert.assertNotNull(document);
-    final Element rootElement = document.getDocumentElement();
-    final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
-    Assert.assertNotNull(performanceElement);
+    final Element performanceElement = loadDocumentAndGetPerformanceElemnt(stream);
 
     final Map<String, Double> simpleGoals = new HashMap<String, Double>();
     final Map<String, String> enumGoals = new HashMap<String, String>();
