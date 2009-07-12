@@ -12,7 +12,7 @@
  <appender name="LOGFILE" class="org.apache.log4j.DailyRollingFileAppender">
   <param name="File" value="${logroot}fll${app.name}.log" />
   <param name="datePattern" value="'.'yyyy-MM-dd" />
-  <param name="Append" value="false" />
+  <param name="Append" value="true" />
   <layout class="org.apache.log4j.TTCCLayout">
    <param name="dateFormat" value="DATE" />
   </layout>

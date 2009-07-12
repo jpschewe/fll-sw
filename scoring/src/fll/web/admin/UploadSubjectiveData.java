@@ -19,7 +19,6 @@ import java.util.zip.ZipFile;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -36,6 +35,7 @@ import org.w3c.dom.Element;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
+import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 import fll.xml.XMLUtils;
@@ -45,7 +45,7 @@ import fll.xml.XMLUtils;
  * 
  * @version $Revision$
  */
-public final class UploadSubjectiveData extends HttpServlet {
+public final class UploadSubjectiveData extends BaseFLLServlet {
 
   private static final Logger LOGGER = Logger.getLogger(UploadSubjectiveData.class);
 
