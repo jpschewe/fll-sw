@@ -43,7 +43,7 @@ import com.meterware.httpunit.WebResponse;
 
 import fll.TestUtils;
 import fll.Utilities;
-import fll.gui.SubjectiveFrame;
+import fll.subjective.SubjectiveFrame;
 import fll.util.FP;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;

@@ -49,7 +49,10 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
 
   private static final Logger LOGGER = Logger.getLogger(UploadSubjectiveData.class);
 
-  protected void processRequest(final HttpServletRequest request, final HttpServletResponse response, final ServletContext application, final HttpSession session)throws IOException, ServletException {
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session) throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
 
@@ -64,7 +67,10 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       final DataSource datasource = SessionAttributes.getDataSource(session);
       final Connection connection = datasource.getConnection();
       saveSubjectiveData(file, Queries.getCurrentTournament(connection), ApplicationAttributes.getChallengeDocument(application), connection);
-      file.delete();
+      if(!file.delete()) {
+        LOGGER.warn("Unable to delete file " + file.getAbsolutePath() + ", setting to delete on exit");
+        file.deleteOnExit();
+      }
 
       message.append("Subjective data uploaded successfully");
     } catch (final SQLException sqle) {
@@ -129,84 +135,83 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       final Element scoreCategoryElement = scoreCategoryNode;
       final String categoryName = scoreCategoryElement.getNodeName();
       final Element categoryElement = XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
+      if (null == categoryElement) {
+        throw new RuntimeException("Cannot find subjective category description for category in score document category: " + categoryName);
+      }
       final List<Element> goalDescriptions = XMLUtils.filterToElements(categoryElement.getElementsByTagName("goal"));
 
-      if (null == categoryElement) {
-        throw new RuntimeException("Cannot find subjective category description for category in score document");
-      } else {
+      PreparedStatement insertPrep = null;
+      PreparedStatement updatePrep = null;
+      try {
+        // prepare statements for update and insert
 
-        PreparedStatement insertPrep = null;
-        PreparedStatement updatePrep = null;
-        try {
-          // prepare statements for update and insert
+        final StringBuffer updateStmt = new StringBuffer();
+        final StringBuffer insertSQLColumns = new StringBuffer();
+        insertSQLColumns.append("INSERT INTO "
+            + categoryName + " (TeamNumber, Tournament, Judge, NoShow");
+        final StringBuffer insertSQLValues = new StringBuffer();
+        insertSQLValues.append(") VALUES ( ?, ?, ?, ?");
+        updateStmt.append("UPDATE "
+            + categoryName + " SET NoShow = ? ");
+        final int numGoals = goalDescriptions.size();
+        for (final Element goalDescription : goalDescriptions) {
+          insertSQLColumns.append(", "
+              + goalDescription.getAttribute("name"));
+          insertSQLValues.append(", ?");
+          updateStmt.append(", "
+              + goalDescription.getAttribute("name") + " = ?");
+        }
 
-          final StringBuffer updateStmt = new StringBuffer();
-          final StringBuffer insertSQLColumns = new StringBuffer();
-          insertSQLColumns.append("INSERT INTO "
-              + categoryName + " (TeamNumber, Tournament, Judge, NoShow");
-          final StringBuffer insertSQLValues = new StringBuffer();
-          insertSQLValues.append(") VALUES ( ?, ?, ?, ?");
-          updateStmt.append("UPDATE "
-              + categoryName + " SET NoShow = ? ");
-          final int numGoals = goalDescriptions.size();
-          for (final Element goalDescription : goalDescriptions) {
-            insertSQLColumns.append(", "
-                + goalDescription.getAttribute("name"));
-            insertSQLValues.append(", ?");
-            updateStmt.append(", "
-                + goalDescription.getAttribute("name") + " = ?");
-          }
+        updateStmt.append(" WHERE TeamNumber = ? AND Tournament = ? AND Judge = ?");
+        updatePrep = connection.prepareStatement(updateStmt.toString());
+        insertPrep = connection.prepareStatement(insertSQLColumns.toString()
+            + insertSQLValues.toString() + ")");
+        // initialze the tournament
+        insertPrep.setString(2, currentTournament);
+        updatePrep.setString(numGoals + 3, currentTournament);
 
-          updateStmt.append(" WHERE TeamNumber = ? AND Tournament = ? AND Judge = ?");
-          updatePrep = connection.prepareStatement(updateStmt.toString());
-          insertPrep = connection.prepareStatement(insertSQLColumns.toString()
-              + insertSQLValues.toString() + ")");
-          // initialze the tournament
-          insertPrep.setString(2, currentTournament);
-          updatePrep.setString(numGoals + 3, currentTournament);
+        for (final Element scoreElement : XMLUtils.filterToElements(scoreCategoryElement.getElementsByTagName("score"))) {
 
-          for (final Element scoreElement : XMLUtils.filterToElements(scoreCategoryElement.getElementsByTagName("score"))) {
+          if (scoreElement.hasAttribute("modified")
+              && "true".equalsIgnoreCase(scoreElement.getAttribute("modified"))) {
+            final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(scoreElement.getAttribute("teamNumber")).intValue();
+            final String judge = scoreElement.getAttribute("judge");
+            final boolean noShow = Boolean.parseBoolean(scoreElement.getAttribute("NoShow"));
+            updatePrep.setBoolean(1, noShow);
+            insertPrep.setBoolean(4, noShow);
 
-            if (scoreElement.hasAttribute("modified")
-                && "true".equalsIgnoreCase(scoreElement.getAttribute("modified"))) {
-              final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(scoreElement.getAttribute("teamNumber")).intValue();
-              final String judge = scoreElement.getAttribute("judge");
-              final boolean noShow = Boolean.parseBoolean(scoreElement.getAttribute("NoShow"));
-              updatePrep.setBoolean(1, noShow);
-              insertPrep.setBoolean(4, noShow);
+            insertPrep.setInt(1, teamNumber);
+            updatePrep.setInt(numGoals + 2, teamNumber);
+            insertPrep.setString(3, judge);
+            updatePrep.setString(numGoals + 4, judge);
 
-              insertPrep.setInt(1, teamNumber);
-              updatePrep.setInt(numGoals + 2, teamNumber);
-              insertPrep.setString(3, judge);
-              updatePrep.setString(numGoals + 4, judge);
-
-              for (int goalIndex = 0; goalIndex < numGoals; goalIndex++) {
-                final Element goalDescription = goalDescriptions.get(goalIndex);
-                final String goalName = goalDescription.getAttribute("name");
-                final String value = scoreElement.getAttribute(goalName);
-                if (null != value
-                    && !"".equals(value.trim())) {
-                  insertPrep.setString(goalIndex + 5, value.trim());
-                  updatePrep.setString(goalIndex + 2, value.trim());
-                } else {
-                  insertPrep.setNull(goalIndex + 5, Types.DOUBLE);
-                  updatePrep.setNull(goalIndex + 2, Types.DOUBLE);
-                }
-              }
-
-              // attempt the update first
-              final int modifiedRows = updatePrep.executeUpdate();
-              if (modifiedRows < 1) {
-                // do insert
-                insertPrep.executeUpdate();
+            for (int goalIndex = 0; goalIndex < numGoals; goalIndex++) {
+              final Element goalDescription = goalDescriptions.get(goalIndex);
+              final String goalName = goalDescription.getAttribute("name");
+              final String value = scoreElement.getAttribute(goalName);
+              if (null != value
+                  && !"".equals(value.trim())) {
+                insertPrep.setString(goalIndex + 5, value.trim());
+                updatePrep.setString(goalIndex + 2, value.trim());
+              } else {
+                insertPrep.setNull(goalIndex + 5, Types.DOUBLE);
+                updatePrep.setNull(goalIndex + 2, Types.DOUBLE);
               }
             }
-          }
 
-        } finally {
-          SQLFunctions.closePreparedStatement(insertPrep);
+            // attempt the update first
+            final int modifiedRows = updatePrep.executeUpdate();
+            if (modifiedRows < 1) {
+              // do insert
+              insertPrep.executeUpdate();
+            }
+          }
         }
+
+      } finally {
+        SQLFunctions.closePreparedStatement(insertPrep);
       }
+
     }
 
     Queries.updateSubjectiveScoreTotals(challengeDocument, connection);

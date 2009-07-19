@@ -59,5 +59,10 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/scoring/lib/test/uispec4j-2.0-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="scoring/lib/xmlunit-1.2.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://xmlunit.sourceforge.net/api/index.html"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>

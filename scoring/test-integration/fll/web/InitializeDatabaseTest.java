@@ -10,6 +10,9 @@ import org.junit.Test;
 
 import com.thoughtworks.selenium.SeleneseTestCase;
 
+/**
+ * Test initializing the database via the web.
+ */
 public class InitializeDatabaseTest extends SeleneseTestCase {
 
   private static final Logger LOGGER = Logger.getLogger(InitializeDatabaseTest.class);

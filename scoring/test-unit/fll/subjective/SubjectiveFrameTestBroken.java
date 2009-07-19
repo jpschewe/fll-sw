@@ -3,7 +3,7 @@
  * INSciTE is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.gui;
+package fll.subjective;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,11 +26,11 @@ import org.w3c.dom.Element;
  */
 public class SubjectiveFrameTestBroken extends UISpecTestCase {
 
-  static {
+//  static {
     // ensurre UISpec4J can intercept windows
     // TODO need to figure out how to fix this
     // UISpec4J.init();
-  }
+//  }
 
   private Window _mainWindow;
 

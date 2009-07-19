@@ -3,7 +3,7 @@
  * INSciTE is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.gui;
+package fll.subjective;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

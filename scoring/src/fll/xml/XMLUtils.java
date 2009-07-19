@@ -21,6 +21,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
+import org.custommonkey.xmlunit.Diff;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -238,7 +239,7 @@ public final class XMLUtils {
     }
 
     final List<Element> values = XMLUtils.filterToElements(element.getElementsByTagName("value"));
-    return values.size() > 0;
+    return !values.isEmpty();
   }
 
   /**
@@ -340,5 +341,64 @@ public final class XMLUtils {
       return ScoreType.INTEGER;
     }
   }
+  
+  /**
+   * @see #getDoubleAttributeValue(Element, String)
+   */
+  public static String getStringAttributeValue(final Element element, final String attributeName) {
+    if (null == element) {
+      return null;
+    }
+    final String str = element.getAttribute(attributeName);
+    return str;
+  }
 
+  /**
+   * @see #getDoubleAttributeValue(Element, String)
+   */
+  public static Boolean getBooleanAttributeValue(final Element element, final String attributeName) {
+    if (null == element) {
+      return null;
+    }
+    final String str = element.getAttribute(attributeName);
+    if (null == str
+        || "".equals(str)) {
+      return null;
+    } else {
+      return Boolean.valueOf(str);
+    }
+  }
+
+  /**
+   * Get a double value from an attribute.
+   * 
+   * @param element the element to get the attribute from, may be null
+   * @param attributeName the attribute name to get
+   * @return the value, null if element is null or the attribute value is null or empty
+   */
+  public static Double getDoubleAttributeValue(final Element element, final String attributeName) {
+    if (null == element) {
+      return null;
+    }
+    final String str = element.getAttribute(attributeName);
+    if (null == str
+        || "".equals(str)) {
+      return null;
+    } else {
+      return Double.valueOf(str);
+    }
+  }
+
+  /**
+   * Compare two documents and check if they are the same or not.
+   * 
+   * @param controlDoc
+   * @param testDoc
+   * @return true if the documents have the same elements and attributes,
+   *         reguardless of order
+   */
+  public static boolean compareDocuments(final Document controlDoc, final Document testDoc) {
+    final Diff xmldiff = new Diff(controlDoc, testDoc);
+    return xmldiff.similar();
+  }
 }

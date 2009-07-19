@@ -3,7 +3,7 @@
  * INSciTE is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.gui;
+package fll.subjective;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -54,7 +55,6 @@ import net.mtu.eggplant.util.gui.SortableTable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import fll.model.SubjectiveTableModel;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 import fll.xml.XMLWriter;
@@ -68,25 +68,9 @@ public final class SubjectiveFrame extends JFrame {
 
   public static void main(final String[] args) {
     try {
-      final File initialDirectory = getInitialDirectory();
-      final JFileChooser fileChooser = new JFileChooser(initialDirectory);
-      fileChooser.setDialogTitle("Please choose the subjective data file");
-      // NOTE: Should get JonsInfra fixed for this
-      fileChooser.setFileFilter(new BasicFileFilter("Zip files", "zip") {
-        @Override
-        public boolean accept(final File f) {
-          if (f.isDirectory()) {
-            return true;
-          } else {
-            return super.accept(f);
-          }
-        }
-      });
-      final int state = fileChooser.showOpenDialog(null);
-      if (JFileChooser.APPROVE_OPTION == state) {
-        final File file = fileChooser.getSelectedFile();
+      final File file = chooseSubjectiveFile("Please choose the subjective data file");
+      if (null != file) {
         final SubjectiveFrame frame = new SubjectiveFrame(file);
-        setInitialDirectory(file);
         frame.pack();
         frame.setVisible(true);
       } else {
@@ -157,6 +141,39 @@ public final class SubjectiveFrame extends JFrame {
       }
     });
 
+    final JButton compareButton = new JButton("Compare Scores");
+    topPanel.add(compareButton);
+    compareButton.addActionListener(new ActionListener() {
+      public void actionPerformed(final ActionEvent ae) {
+        final File compareFile = chooseSubjectiveFile("Choose the file to compare with");
+        if (null != compareFile) {
+          try {
+            save();
+          } catch (final IOException ioe) {
+            JOptionPane.showMessageDialog(null, "Error writing to data file: "
+                + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+          }
+
+          try {
+          final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareSubjectiveFiles(_file, compareFile);
+          if (null == diffs) {
+            JOptionPane.showMessageDialog(null, "Challenge descriptors are different, comparison failed", "Error", JOptionPane.ERROR_MESSAGE);
+
+          } else if (!diffs.isEmpty()) {
+            showDifferencesDialog(diffs);
+          } else {
+            JOptionPane.showMessageDialog(null, "No differences found", "No Differences", JOptionPane.INFORMATION_MESSAGE);
+
+          }
+          } catch(final IOException e) {
+            JOptionPane.showMessageDialog(null, "Error reading compare file: "
+                                          + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            
+          }
+        }
+      }
+    });
+
     final JTabbedPane tabbedPane = new JTabbedPane();
     getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
@@ -194,6 +211,54 @@ public final class SubjectiveFrame extends JFrame {
       }
     });
     setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+  }
+
+  /**
+   * Show differences.
+   */
+  private void showDifferencesDialog(final Collection<SubjectiveScoreDifference> diffs) {
+    // TODO make the be hot links to the correct tab and entry that is referenced
+    final SubjectiveDiffTableModel model = new SubjectiveDiffTableModel(diffs);
+    final JTable table = new JTable(model);
+    final JDialog dialog = new JDialog(this, false);
+    final Container cpane = dialog.getContentPane();
+    cpane.setLayout(new BorderLayout());
+    final JScrollPane tableScroller = new JScrollPane(table);
+    cpane.add(tableScroller, BorderLayout.CENTER);
+    dialog.pack();
+    dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+    dialog.setVisible(true);
+  }
+
+  /**
+   * Prompt the user for a file.
+   * 
+   * @param title the title on the chooser dialog
+   * @return the file if accepted, null if canceled
+   */
+  private static File chooseSubjectiveFile(final String title) {
+    final File initialDirectory = getInitialDirectory();
+    final JFileChooser fileChooser = new JFileChooser(initialDirectory);
+    fileChooser.setDialogTitle(title);
+    // NOTE: Should get JonsInfra fixed for this
+    fileChooser.setFileFilter(new BasicFileFilter("Zip files", "zip") {
+      @Override
+      public boolean accept(final File f) {
+        if (f.isDirectory()) {
+          return true;
+        } else {
+          return super.accept(f);
+        }
+      }
+    });
+    final int state = fileChooser.showOpenDialog(null);
+    if (JFileChooser.APPROVE_OPTION == state) {
+      final File file = fileChooser.getSelectedFile();
+      setInitialDirectory(file);
+      return file;
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -400,13 +465,13 @@ public final class SubjectiveFrame extends JFrame {
 
   private final Document _challengeDocument;
 
-  /* package */ Document getChallengeDocument() {
+  /* package */Document getChallengeDocument() {
     return _challengeDocument;
   }
 
   private final Document _scoreDocument;
 
-  /* package */ Document getScoreDocument() {
+  /* package */Document getScoreDocument() {
     return _scoreDocument;
   }
 

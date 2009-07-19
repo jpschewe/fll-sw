@@ -201,6 +201,9 @@ import org.xml.sax.SAXException;
 
   private static final Data FINISHED = new Data();
 
+  /**
+   * Which data to be submitted.
+   */
   private static final class Data {
     private int _runNumber;
 
