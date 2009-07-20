@@ -65,6 +65,7 @@
 	<taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
 
 	<path id="application.classpath">
+	        <pathelement location="${dir.lib}/xmlunit-1.2.jar" />
 		<pathelement location="${dir.lib}/JonsInfra-0.7.jar" />
 
 		<pathelement location="${dir.lib}/commons-lang-2.0.jar" />
