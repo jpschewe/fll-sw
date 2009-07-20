@@ -815,7 +815,10 @@
 		<sequential>
 			<mkdir dir="${dir.build}" />
 
-			<checkstyle config="@{config}">
+			<checkstyle
+        failOnViolation="false"
+        config="@{config}"
+        >
 				<fileset dir="${dir.src}">
 					<include name="**/*.java" />
 				</fileset>
