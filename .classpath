@@ -33,11 +33,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="scoring/lib/log4j-1.2.14.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/JonsInfra-0.7.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="http://mtu.net/~jpschewe/JonsInfra/0.6/api/index.html"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="scoring/lib/slf4j-api-1.5.3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/slf4j-log4j12-1.5.3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/log4jdbc3-1.1.jar"/>
@@ -47,8 +42,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="scoring/lib/test/junit-4.5.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/cobertura/asm-2.2.1.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/cobertura/asm-tree-2.2.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/jakarta-oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="scoring/tomcat/lib/jsp-api.jar"/>
@@ -64,5 +57,8 @@
 			<attribute name="javadoc_location" value="http://xmlunit.sourceforge.net/api/index.html"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="scoring/lib/JonsInfra-0.8.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/cobertura/asm-3.0.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/cobertura/asm-tree-3.0.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>

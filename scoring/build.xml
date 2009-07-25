@@ -58,7 +58,6 @@
 	<path id="cobertura.classpath">
 		<fileset dir="${dir.lib}/cobertura">
 			<include name="*.jar" />
-			<include name="lib/**/*.jar" />
 		</fileset>
 		<pathelement location="${dir.lib}/log4j-1.2.14.jar" />
 	</path>
@@ -66,7 +65,7 @@
 
 	<path id="application.classpath">
 	        <pathelement location="${dir.lib}/xmlunit-1.2.jar" />
-		<pathelement location="${dir.lib}/JonsInfra-0.7.jar" />
+		<pathelement location="${dir.lib}/JonsInfra-0.8.jar" />
 
 		<pathelement location="${dir.lib}/commons-lang-2.0.jar" />
 
@@ -835,12 +834,7 @@
 	</macrodef>
 
 	<target name="checkstyle" description="Check for code convention violations">
-		<run-checkstyle config="checkstyle_checks.xml" />
-	</target>
-
-	<target name="checkstyle.full"
-		description="Check for code convention violations (more aggressive)">
-		<run-checkstyle config="checkstyle_nightly_checks.xml" />
+		<run-checkstyle config="checkstyle.xml" />
 	</target>
 
 	<target name="continuous" description="Runs the continuous integration build">
@@ -848,7 +842,7 @@
 		<antcall target="javadoc" />
 		<antcall target="test.all" />
 		<antcall target="coverage.report" />
-		<antcall target="checkstyle.full" />
+		<antcall target="checkstyle" />
 	</target>
 
 	<!-- ==================== SECONDARY TARGETS ==================== -->
