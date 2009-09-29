@@ -459,18 +459,14 @@ public class ScoresheetGenerator {
 
     final org.w3c.dom.Element performanceElement = (org.w3c.dom.Element) rootElement.getElementsByTagName("Performance").item(0);
     final List<org.w3c.dom.Element> goals = XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"));
-    final List<org.w3c.dom.Element> computedGoals = XMLUtils.filterToElements(performanceElement.getElementsByTagName("computedGoal"));
     final List<org.w3c.dom.Element> children = XMLUtils.filterToElements(performanceElement.getChildNodes());
 
-    m_goalLabel = new PdfPCell[goals.size()
-        + computedGoals.size()];
-    m_goalValue = new PdfPCell[goals.size()
-        + computedGoals.size()];
+    m_goalLabel = new PdfPCell[goals.size()];
+    m_goalValue = new PdfPCell[goals.size()];
     int realI = 0;
     for (final org.w3c.dom.Element element : children) {
       if (element.getNodeType() == Node.ELEMENT_NODE) {
-        if (element.getNodeName().equals("goal")
-            || element.getNodeName().equals("computedGoal")) {
+        if (element.getNodeName().equals("goal")) {
           final String name = element.getAttribute("name");
 
           // This is the text for the left hand "label" cell
@@ -482,62 +478,56 @@ public class ScoresheetGenerator {
           m_goalLabel[realI].setPaddingRight(9);
           m_goalLabel[realI].addElement(p);
           m_goalLabel[realI].setVerticalAlignment(Element.ALIGN_TOP);
-          // If element is a computed goal, just put a blank on the right.
-          if (element.getNodeName().equals("computedGoal")) {
-            final Paragraph q = new Paragraph(SHORT_BLANK, COURIER_10PT_NORMAL);
-            m_goalValue[realI] = new PdfPCell();
-            m_goalValue[realI].addElement(q);
-          } else {
-            try {
-              final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
-              final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
+          try {
+            final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
+            final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
 
-              // If element has child nodes, then we have an enumerated list
-              // of choices. Otherwise it is either yes/no or a numeric field.
-              if (element.hasChildNodes()) {
-                final List<org.w3c.dom.Element> posValues = XMLUtils.filterToElements(element.getElementsByTagName("value"));
-                String choices = posValues.get(0).getAttribute("title").replace(" ", "\u00a0"); // replace
-                // spaces
-                // with
-                // "no-break"
-                // spaces
-                for (int v = 1; v < posValues.size(); v++) {
-                  choices = choices
-                      + " /\u00a0" + posValues.get(v).getAttribute("title").replace(" ", "\u00a0");
-                }
-                final Chunk c = new Chunk("", COURIER_10PT_NORMAL);
-                c.append(choices.toUpperCase());
+            // If element has child nodes, then we have an enumerated list
+            // of choices. Otherwise it is either yes/no or a numeric field.
+            if (element.hasChildNodes()) {
+              final List<org.w3c.dom.Element> posValues = XMLUtils.filterToElements(element.getElementsByTagName("value"));
+              String choices = posValues.get(0).getAttribute("title").replace(" ", "\u00a0"); // replace
+              // spaces
+              // with
+              // "no-break"
+              // spaces
+              for (int v = 1; v < posValues.size(); v++) {
+                choices = choices
+                    + " /\u00a0" + posValues.get(v).getAttribute("title").replace(" ", "\u00a0");
+              }
+              final Chunk c = new Chunk("", COURIER_10PT_NORMAL);
+              c.append(choices.toUpperCase());
+              m_goalValue[realI] = new PdfPCell();
+              m_goalValue[realI].addElement(c);
+
+            } else {
+              if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
+                  && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+                final Paragraph q = new Paragraph("YES / NO", COURIER_10PT_NORMAL);
                 m_goalValue[realI] = new PdfPCell();
-                m_goalValue[realI].addElement(c);
+                m_goalValue[realI].addElement(q);
 
               } else {
-                if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
-                    && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-                  final Paragraph q = new Paragraph("YES / NO", COURIER_10PT_NORMAL);
-                  m_goalValue[realI] = new PdfPCell();
-                  m_goalValue[realI].addElement(q);
-
-                } else {
-                  final String range = "("
-                      + min + " - " + max + ")";
-                  final PdfPTable t = new PdfPTable(2);
-                  t.setHorizontalAlignment(Element.ALIGN_LEFT);
-                  t.setTotalWidth(72);
-                  t.setLockedWidth(true);
-                  final Phrase r = new Phrase("", ARIAL_8PT_NORMAL);
-                  t.addCell(new PdfPCell(r));
-                  final Phrase q = new Phrase(range, ARIAL_8PT_NORMAL);
-                  t.addCell(new PdfPCell(q));
-                  m_goalValue[realI] = new PdfPCell();
-                  m_goalValue[realI].setPaddingTop(9);
-                  m_goalValue[realI].addElement(t);
-                }
+                final String range = "("
+                    + min + " - " + max + ")";
+                final PdfPTable t = new PdfPTable(2);
+                t.setHorizontalAlignment(Element.ALIGN_LEFT);
+                t.setTotalWidth(72);
+                t.setLockedWidth(true);
+                final Phrase r = new Phrase("", ARIAL_8PT_NORMAL);
+                t.addCell(new PdfPCell(r));
+                final Phrase q = new Phrase(range, ARIAL_8PT_NORMAL);
+                t.addCell(new PdfPCell(q));
+                m_goalValue[realI] = new PdfPCell();
+                m_goalValue[realI].setPaddingTop(9);
+                m_goalValue[realI].addElement(t);
               }
-            } catch (final ParseException pe) {
-              throw new RuntimeException("FATAL: min/max not parsable for goal: "
-                  + name);
             }
+          } catch (final ParseException pe) {
+            throw new RuntimeException("FATAL: min/max not parsable for goal: "
+                + name);
           }
+
           m_goalValue[realI].setBorder(0);
           m_goalValue[realI].setVerticalAlignment(Element.ALIGN_MIDDLE);
           realI++;
