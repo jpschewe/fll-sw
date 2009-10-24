@@ -8,10 +8,11 @@
 	<property file="override.properties" />
 
 	<property name="app.name" value="${ant.project.name}" />
-	<property name="app.version" value="5.0" />
+	<property name="app.version" value="5.1" />
 
 	<property name="dir.build" value="${basedir}/build" />
 	<property name="dir.tomcat" value="${dir.build}/tomcat" />
+        <property name="dir.tomcat.src" value="${basedir}/tools/tomcat" />
 
 	<property name="dir.dist" value="dist" />
 	<property name="dir.web" value="${dir.tomcat}/webapps/${app.name}" />
@@ -109,8 +110,8 @@
 
 
 		<!-- tomcat libraries -->
-		<pathelement location="${basedir}/tomcat/lib/servlet-api.jar" />
-		<pathelement location="${basedir}/tomcat/lib/jsp-api.jar" />
+		<pathelement location="${dir.tomcat.src}/lib/servlet-api.jar" />
+		<pathelement location="${dir.tomcat.src}/lib/jsp-api.jar" />
 
 	</path>
 
@@ -258,7 +259,7 @@
 		<!-- build scripts for testing -->
 		<path id="application.build.classpath">
 			<path refid="application.classpath" />
-			<pathelement location="${basedir}/tomcat/webapps/${app.name}/WEB-INF/classes" />
+			<pathelement location="${dir.tomcat.src}/webapps/${app.name}/WEB-INF/classes" />
 		</path>
 		<antcall target="-buildscripts">
 			<param name="app.name" value="subjective" />
@@ -362,7 +363,7 @@
 		</compile>
 	</target>
 
-	<import file="${basedir}/tomcat/bin/catalina-tasks.xml" />
+	<import file="${dir.tomcat.src}/bin/catalina-tasks.xml" />
 	<target name="generate.jsp" depends="prepare,tomcat.expand"
 		description="Generate Java sources for JSP files" unless="jsp.notRequired">
 		<jasper validateXml="false" uriroot="${dir.web}"
@@ -375,7 +376,7 @@
 		description="Compile JSP sources">
 		<compile dir.src="${dir.src.jsp}" dir.dest="${dir.src.jsp}">
 			<classpath-elements>
-				<path refid="compile.classpath" />
+				<path refid="application.classpath" />
 				<fileset dir="${dir.web}/WEB-INF/lib">
 					<include name="*.jar" />
 				</fileset>
@@ -406,7 +407,7 @@
 		description="copy tomcat to the right place in the build directory">
 		<mkdir dir="${dir.tomcat}" />
 		<copy todir="${dir.tomcat}">
-			<fileset dir="${basedir}/tomcat" />
+			<fileset dir="${dir.tomcat.src}" />
 		</copy>
 	</target>
 

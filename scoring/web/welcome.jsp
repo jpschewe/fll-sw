@@ -5,7 +5,6 @@
     <meta http-equiv='refresh' content='90' />
     
     <title><x:out select="$challengeDocument/fll/@title"/></title>
-    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
 <style type='text/css'>
 html {
   margin-top: 5px;
@@ -13,6 +12,9 @@ html {
   margin-left: 5px;
   margin-right: 5px;
 }
+body {
+      margin-top: 4;
+      }
 </style>
     
   </head>
@@ -20,15 +22,17 @@ html {
   <body>
 
     <center>
-      <h1><x:out select="$challengeDocument/fll/@title"/></h1>
+      <h1>Boston Scientific MN <i>FIRST</i> LEGO League Tournament</h1>
+        
+      <h2><x:out select="$challengeDocument/fll/@title"/></h2>
       
       <br />
       <br />
-      <img width='95%' align='center' src='<c:url value="/images/logo.gif"/>' /><br />
+      <img align='center' src='<c:url value="/images/logo.gif"/>' /><br />
 
-      <font face='arial' size='3'>
-        <b><c:out value="${ScorePageText}" /></b>
-      </font>
+      <img align='center' src='<c:url value="/images/fll_logo.gif"/>' /><br />
+          
+          <br/>
 
             
     </center>
