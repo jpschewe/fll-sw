@@ -81,7 +81,7 @@ public class CommitTeam extends BaseFLLServlet {
       } else if (null != request.getParameter("commit")) {
         if (null != request.getParameter("addTeam")) {
           if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Adding"
+            LOGGER.info("Adding "
                 + teamNumber);
           }
           final String otherTeam = Queries.addTeam(connection, teamNumber, request.getParameter("teamName"), request.getParameter("organization"),
