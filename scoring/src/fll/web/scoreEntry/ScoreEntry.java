@@ -176,6 +176,10 @@ public final class ScoreEntry {
    * Generate the body of the refresh function
    */
   public static void generateRefreshBody(final Writer writer, final Document document) throws ParseException, IOException {
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Entering generateRefreshBody");
+    }
+
     final Formatter formatter = new Formatter(writer);
 
     final Element rootElement = document.getDocumentElement();
@@ -185,10 +189,21 @@ public final class ScoreEntry {
     for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
       final String name = element.getAttribute("name");
       final String multiplier = element.getAttribute("multiplier");
-      final String min = element.getAttribute("min");
-      final String max = element.getAttribute("max");
+      final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
+      final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
       final String rawVarName = getVarNameForRawScore(name);
       final String computedVarName = getVarNameForComputedScore(name);
+
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("name: "
+            + name);
+        LOG.trace("multiplier: "
+            + multiplier);
+        LOG.trace("min: "
+            + min);
+        LOG.trace("max: "
+            + max);
+      }
 
       formatter.format("<!-- %s -->%n", name);
 
@@ -209,8 +224,8 @@ public final class ScoreEntry {
           formatter.format("  %s = %f * %s;%n", computedVarName, valueScore, multiplier);
         }
         formatter.format("}%n");
-      } else if ("0".equals(min)
-          && "1".equals(max)) {
+      } else if (0 == min
+          && 1 == max) {
         // set the radio button to match the gbl variable
         formatter.format("if(%s == 0) {%n", rawVarName);
         formatter.format("  document.scoreEntry.%s[1].checked = true%n", name);
@@ -251,6 +266,10 @@ public final class ScoreEntry {
       formatter.format("score += %s;%n", computedVarName);
 
       formatter.format("%n");
+    }
+
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Exiting generateRefreshBody");
     }
 
   }
