@@ -125,7 +125,7 @@ public class ScoresheetGenerator {
           final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(((String[]) formParms.get(new String("teamA"
               + i)))[0]));
           m_name[j] = teamA.getTeamName();
-          m_number[j] = Integer.toString(teamA.getTeamNumber());
+          m_number[j] = teamA.getTeamNumber();
           m_round[j] = "Playoff Round "
               + round;
           m_table[j] = ((String[]) formParms.get(new String("tableA"
@@ -140,7 +140,7 @@ public class ScoresheetGenerator {
           final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(((String[]) formParms.get(new String("teamB"
               + i)))[0]));
           m_name[j] = teamB.getTeamName();
-          m_number[j] = Integer.toString(teamB.getTeamNumber());
+          m_number[j] = teamB.getTeamNumber();
           m_round[j] = "Playoff Round "
               + round;
           m_table[j] = ((String[]) formParms.get(new String("tableB"
@@ -175,7 +175,7 @@ public class ScoresheetGenerator {
       m_table[i] = SHORT_BLANK;
       m_name[i] = LONG_BLANK;
       m_round[i] = SHORT_BLANK;
-      m_number[i] = SHORT_BLANK;
+      m_number[i] = null;
     }
     setChallengeInfo(document);
   }
@@ -197,7 +197,7 @@ public class ScoresheetGenerator {
     m_table[0] = SHORT_BLANK;
     m_name[0] = teamA.getTeamName();
     m_round[0] = SHORT_BLANK;
-    m_number[0] = Integer.toString(teamA.getTeamNumber());
+    m_number[0] = teamA.getTeamNumber();
     setChallengeInfo(document);
   }
 
@@ -210,7 +210,7 @@ public class ScoresheetGenerator {
     m_table = new String[m_numTeams];
     m_name = new String[m_numTeams];
     m_round = new String[m_numTeams];
-    m_number = new String[m_numTeams];
+    m_number = new Integer[m_numTeams];
     m_goalLabel = new PdfPCell[0];
     m_goalValue = new PdfPCell[0];
   }
@@ -333,31 +333,34 @@ public class ScoresheetGenerator {
 
       team[i].addCell(head);
 
+      final PdfPTable teamInfo = new PdfPTable(4);
+      teamInfo.setWidthPercentage(100);
+      
       // Table label cell
       final Paragraph tblP = new Paragraph("Table:", ARIAL_10PT_NORMAL);
       tblP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell tblLc = new PdfPCell(team[i].getDefaultCell());
       tblLc.setPaddingRight(9);
       tblLc.addElement(tblP);
-      team[i].addCell(tblLc);
+      teamInfo.addCell(tblLc);
       // Table value cell
       final Paragraph tblV = new Paragraph(m_table[i], COURIER_10PT_NORMAL);
       final PdfPCell tblVc = new PdfPCell(team[i].getDefaultCell());
       tblVc.addElement(tblV);
-      team[i].addCell(tblVc);
+      teamInfo.addCell(tblVc);
 
       // Round number label cell
-      final Paragraph rndP = new Paragraph("Round Number:", ARIAL_10PT_NORMAL);
+      final Paragraph rndP = new Paragraph("Round:", ARIAL_10PT_NORMAL);
       rndP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell rndlc = new PdfPCell(team[i].getDefaultCell());
       rndlc.setPaddingRight(9);
       rndlc.addElement(rndP);
-      team[i].addCell(rndlc);
+      teamInfo.addCell(rndlc);
       // Round number value cell
       final Paragraph rndV = new Paragraph(m_round[i], COURIER_10PT_NORMAL);
       final PdfPCell rndVc = new PdfPCell(team[i].getDefaultCell());
       rndVc.addElement(rndV);
-      team[i].addCell(rndVc);
+      teamInfo.addCell(rndVc);
 
       // Team number label cell
       final Paragraph nbrP = new Paragraph("Team Number:", ARIAL_10PT_NORMAL);
@@ -365,26 +368,53 @@ public class ScoresheetGenerator {
       final PdfPCell nbrlc = new PdfPCell(team[i].getDefaultCell());
       nbrlc.setPaddingRight(9);
       nbrlc.addElement(nbrP);
-      team[i].addCell(nbrlc);
+      teamInfo.addCell(nbrlc);
       // Team number value cell
-      final Paragraph nbrV = new Paragraph(m_number[i], COURIER_10PT_NORMAL);
+      final Paragraph nbrV = new Paragraph(null == m_number[i] ? SHORT_BLANK : String.valueOf(m_number[i]), COURIER_10PT_NORMAL);
       final PdfPCell nbrVc = new PdfPCell(team[i].getDefaultCell());
       nbrVc.addElement(nbrV);
-      team[i].addCell(nbrVc);
+      teamInfo.addCell(nbrVc);
 
+      // Team division label cell
+      final Paragraph divP = new Paragraph("Division:", ARIAL_10PT_NORMAL);
+      divP.setAlignment(Element.ALIGN_RIGHT);
+      final PdfPCell divlc = new PdfPCell(team[i].getDefaultCell());
+      divlc.setPaddingRight(9);
+      divlc.addElement(divP);
+      teamInfo.addCell(divlc);
+      // Team division value cell
+      final String divStr;
+      if(null != m_number[i]) {
+        divStr = Queries.getEventDivision(connection, m_number[i]);
+      } else {
+        divStr = SHORT_BLANK;
+      }
+      final Paragraph divV = new Paragraph(divStr, COURIER_10PT_NORMAL);
+      final PdfPCell divVc = new PdfPCell(team[i].getDefaultCell());
+      divVc.addElement(divV);
+      teamInfo.addCell(divVc);
+      
       // Team name label cell
       final Paragraph nameP = new Paragraph("Team Name:", ARIAL_10PT_NORMAL);
       nameP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell namelc = new PdfPCell(team[i].getDefaultCell());
       namelc.setPaddingRight(9);
       namelc.addElement(nameP);
-      team[i].addCell(namelc);
+      teamInfo.addCell(namelc);
       // Team name value cell
       final Paragraph nameV = new Paragraph(m_name[i], COURIER_10PT_NORMAL);
       final PdfPCell nameVc = new PdfPCell(team[i].getDefaultCell());
+      nameVc.setColspan(3);
       nameVc.addElement(nameV);
-      team[i].addCell(nameVc);
+      teamInfo.addCell(nameVc);
 
+      // add team info cell to the team table
+      final PdfPCell teamInfoCell = new PdfPCell(team[i].getDefaultCell());
+      teamInfoCell.addElement(teamInfo);
+      teamInfoCell.setColspan(2);
+      
+      team[i].addCell(teamInfoCell);
+      
       final PdfPCell blankRow = new PdfPCell(new Phrase(""));
       blankRow.setColspan(2);
       blankRow.setBorder(0);
@@ -548,7 +578,7 @@ public class ScoresheetGenerator {
 
   private String[] m_round;
 
-  private String[] m_number;
+  private Integer[] m_number;
 
   private PdfPCell[] m_goalLabel;
 
@@ -608,7 +638,7 @@ public class ScoresheetGenerator {
    * @param number A string with the team number for the specified scoresheet.
    * @throws IllegalArgumentException Thrown if the index is out of valid range.
    */
-  public void setNumber(final int i, final String number) throws IllegalArgumentException {
+  public void setNumber(final int i, final Integer number) throws IllegalArgumentException {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
