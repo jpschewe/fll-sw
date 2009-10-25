@@ -420,8 +420,10 @@ public final class GenerateDB {
       definition += " float";
     }
 
-    LOGGER.debug("GoalColumnDefinition: "
-        + definition);
+    if(LOGGER.isDebugEnabled()) {
+      LOGGER.debug("GoalColumnDefinition: "
+                   + definition);
+    }
 
     return definition;
   }

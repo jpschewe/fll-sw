@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<clay-model clay-version="2.0.0">
+<database-model author="" begin-script="" end-script="" id="1f769f17:1248908e683:-8000" name="dbModel" sql-dialect-id="jp.azzurri.clay.dialect.HSQLDB_1_8_0_Dialect" version="1.0">
+<schema-list>
+<schema id="1f769f17:1248908e683:-7ffd" name="DEFAULT_SCHEMA">
+<table-list>
+<table id="1f769f17:1248908e683:-7fff" name="Tournaments">
+<column-list>
+<column auto-increment="false" column-size="128" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7ffa" mandatory="true" name="Name">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="NULL" id="1f769f17:1248908e683:-7ff7" mandatory="false" name="Location">
+<data-type name="LONGVARCHAR" selected-variant-pattern="LONGVARCHAR"/>
+</column>
+</column-list>
+<primary-key id="1f769f17:1248908e683:-7ffe" name="PK_TOURNAMENTS">
+<primary-key-column name="Name"/>
+</primary-key>
+</table>
+<table id="1f769f17:1248908e683:-7ff6" name="Teams">
+<column-list>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7ff2" mandatory="true" name="TeamNumber">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
+<column auto-increment="false" column-size="255" decimal-digits="0" default-value="'&lt;No Name&gt;'" id="1f769f17:1248908e683:-7fe5" mandatory="true" name="TeamName">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="255" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7fe4" mandatory="false" name="Organization">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="32" decimal-digits="0" default-value="'1'" id="1f769f17:1248908e683:-7fe1" mandatory="true" name="Division">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="255" decimal-digits="0" default-value="'DUMMY'" id="1f769f17:1248908e683:-7fe0" mandatory="true" name="Region">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+</column-list>
+<primary-key id="1f769f17:1248908e683:-7ff5" name="PK_TEAMS">
+<primary-key-column name="TeamNumber"/>
+</primary-key>
+</table>
+<table id="1f769f17:1248908e683:-7fdf" name="tablenames">
+<column-list>
+<column auto-increment="false" column-size="128" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7fdb" mandatory="true" name="Tournament">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7fda" mandatory="true" name="PairID">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
+<column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7fd9" mandatory="true" name="SideA">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7fd8" mandatory="true" name="SideB">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+</column-list>
+<primary-key id="1f769f17:1248908e683:-7fde" name="PK_TABLENAMES">
+<primary-key-column name="Tournament"/>
+<primary-key-column name="PairID"/>
+</primary-key>
+<foreign-key-list>
+<foreign-key id="1f769f17:1248908e683:-7f37" name="FK_tablenames_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key-column column-name="Tournament" referenced-key-column-name="Name"/>
+</foreign-key>
+</foreign-key-list>
+</table>
+<table id="1f769f17:1248908e683:-7ef3" name="PlayoffData">
+<column-list>
+<column auto-increment="false" column-size="32" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7eeb" mandatory="true" name="event_division">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="128" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7ee8" mandatory="true" name="Tournament">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7ee7" mandatory="true" name="PlayoffRound">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7ee6" mandatory="true" name="LineNumber">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="Team.NULL_TEAM_NUMBER" id="1f769f17:1248908e683:-7ee5" mandatory="false" name="Team">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
+<column auto-increment="false" column-size="64" decimal-digits="0" default-value="NULL" id="1f769f17:1248908e683:-7ee2" mandatory="false" name="AssignedTable">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="false" id="1f769f17:1248908e683:-7ee1" mandatory="false" name="Printed">
+<data-type name="BOOLEAN" selected-variant-pattern="BOOLEAN"/>
+</column>
+</column-list>
+<primary-key id="1f769f17:1248908e683:-7ef2" name="PK_PLAYOFFDATA">
+<primary-key-column name="event_division"/>
+<primary-key-column name="Tournament"/>
+<primary-key-column name="PlayoffRound"/>
+<primary-key-column name="LineNumber"/>
+</primary-key>
+<foreign-key-list>
+<foreign-key id="1f769f17:1248908e683:-7ed6" name="FK_PlayoffData_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key-column column-name="Tournament" referenced-key-column-name="Name"/>
+</foreign-key>
+<foreign-key id="1f769f17:1248908e683:-7e97" name="FK_PlayoffData_2" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TEAMS" referenced-table="Teams" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key-column column-name="Team" referenced-key-column-name="TeamNumber"/>
+</foreign-key>
+</foreign-key-list>
+</table>
+<table id="1f769f17:1248908e683:-7e39" name="TournamentTeams">
+<column-list>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7e35" mandatory="true" name="TeamNumber">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
+<column auto-increment="false" column-size="128" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7e34" mandatory="true" name="Tournament">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="32" decimal-digits="0" default-value="'1'" id="1f769f17:1248908e683:-7e31" mandatory="true" name="event_division">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+</column-list>
+<primary-key id="1f769f17:1248908e683:-7e38" name="PK_TOURNAMENTTEAMS">
+<primary-key-column name="TeamNumber"/>
+<primary-key-column name="Tournament"/>
+</primary-key>
+<foreign-key-list>
+<foreign-key id="1f769f17:1248908e683:-7de1" name="FK_TournamentTeams_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TEAMS" referenced-table="Teams" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key-column column-name="TeamNumber" referenced-key-column-name="TeamNumber"/>
+</foreign-key>
+<foreign-key id="1f769f17:1248908e683:-7db1" name="FK_TournamentTeams_2" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key-column column-name="Tournament" referenced-key-column-name="Name"/>
+</foreign-key>
+</foreign-key-list>
+</table>
+<table id="1f769f17:1248908e683:-7d6b" name="TournamentParameters">
+<column-list>
+<column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d67" mandatory="true" name="Param">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d66" mandatory="true" name="Value">
+<data-type name="LONGVARCHAR" selected-variant-pattern="LONGVARCHAR"/>
+</column>
+<column auto-increment="false" column-size="255" decimal-digits="0" default-value="NULL" id="1f769f17:1248908e683:-7d65" mandatory="false" name="Description">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+</column-list>
+<primary-key id="1f769f17:1248908e683:-7d6a" name="PK_TOURNAMENTPARAMETERS">
+<primary-key-column name="Param"/>
+</primary-key>
+</table>
+<table id="1f769f17:1248908e683:-7d64" name="Judges">
+<column-list>
+<column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d60" mandatory="true" name="id">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d5f" mandatory="true" name="category">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="128" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d5e" mandatory="true" name="Tournament">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="32" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d5d" mandatory="true" name="event_division">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+</column-list>
+<primary-key id="1f769f17:1248908e683:-7d63" name="PK_JUDGES">
+<primary-key-column name="id"/>
+<primary-key-column name="category"/>
+<primary-key-column name="Tournament"/>
+<primary-key-column name="event_division"/>
+</primary-key>
+<foreign-key-list>
+<foreign-key id="1f769f17:1248908e683:-7d2d" name="FK_Judges_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key-column column-name="Tournament" referenced-key-column-name="Name"/>
+</foreign-key>
+</foreign-key-list>
+</table>
+<table id="1f769f17:1248908e683:-7cf8" name="Performance">
+<column-list>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7cf4" mandatory="true" name="TeamNumber">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
+<column auto-increment="false" column-size="128" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7cf3" mandatory="true" name="Tournament">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7cf2" mandatory="true" name="RunNumber">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="CURRENT_TIMESTAMP" id="1f769f17:1248908e683:-7cf1" mandatory="true" name="Timestamp">
+<data-type name="TIMESTAMP" selected-variant-pattern="TIMESTAMP"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="false" id="1f769f17:1248908e683:-7cf0" mandatory="true" name="NoShow">
+<data-type name="BOOLEAN" selected-variant-pattern="BOOLEAN"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="false" id="1f769f17:1248908e683:-7cef" mandatory="false" name="Bye">
+<data-type name="BOOLEAN" selected-variant-pattern="BOOLEAN"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="false" id="1f769f17:1248908e683:-7cee" mandatory="true" name="Verified">
+<data-type name="BOOLEAN" selected-variant-pattern="BOOLEAN"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7ce9" mandatory="false" name="&lt;standard goal name&gt;">
+<data-type name="FLOAT" selected-variant-pattern="FLOAT"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7ce8" mandatory="false" name="&lt;enum goal name&gt;">
+<data-type name="LONGVARCHAR" selected-variant-pattern="LONGVARCHAR"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="NULL" id="1f769f17:1248908e683:-7ced" mandatory="false" name="ComputedTotal">
+<data-type name="FLOAT" selected-variant-pattern="FLOAT"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="NULL" id="1f769f17:1248908e683:-7cec" mandatory="false" name="StandardizedScore">
+<data-type name="FLOAT" selected-variant-pattern="FLOAT"/>
+</column>
+</column-list>
+<primary-key id="1f769f17:1248908e683:-7cf7" name="PK_PERFORMANCE">
+<primary-key-column name="TeamNumber"/>
+<primary-key-column name="Tournament"/>
+<primary-key-column name="RunNumber"/>
+</primary-key>
+<foreign-key-list>
+<foreign-key id="1f769f17:1248908e683:-7cc7" name="FK_Performance_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TEAMS" referenced-table="Teams" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key-column column-name="TeamNumber" referenced-key-column-name="TeamNumber"/>
+</foreign-key>
+<foreign-key id="1f769f17:1248908e683:-7c3c" name="FK_Performance_2" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key-column column-name="Tournament" referenced-key-column-name="Name"/>
+</foreign-key>
+</foreign-key-list>
+</table>
+<table id="1f769f17:1248908e683:-7c14" name="&lt;subjective category&gt;">
+<column-list>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7c10" mandatory="true" name="TeamNumber">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
+<column auto-increment="false" column-size="128" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7c0f" mandatory="true" name="Tournament">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7c0e" mandatory="true" name="Judge">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="FALSE" id="1f769f17:1248908e683:-7c0d" mandatory="true" name="NoShow">
+<data-type name="BOOLEAN" selected-variant-pattern="BOOLEAN"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7c0c" mandatory="false" name="&lt;standard goal name&gt;">
+<data-type name="FLOAT" selected-variant-pattern="FLOAT"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7c0b" mandatory="false" name="&lt;enum goal name&gt;">
+<data-type name="LONGVARCHAR" selected-variant-pattern="LONGVARCHAR"/>
+</column>
+</column-list>
+<primary-key id="1f769f17:1248908e683:-7c13" name="PK_&lt;SUBJECTIVE CATEGORY&gt;">
+<primary-key-column name="TeamNumber"/>
+<primary-key-column name="Tournament"/>
+<primary-key-column name="Judge"/>
+</primary-key>
+<foreign-key-list>
+<foreign-key id="1f769f17:1248908e683:-7bbf" name="FK_&lt;subjective category&gt;_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TEAMS" referenced-table="Teams" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key-column column-name="TeamNumber" referenced-key-column-name="TeamNumber"/>
+</foreign-key>
+<foreign-key id="1f769f17:1248908e683:-7b5c" name="FK_&lt;subjective category&gt;_2" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key-column column-name="Tournament" referenced-key-column-name="Name"/>
+</foreign-key>
+</foreign-key-list>
+</table>
+<table id="1f769f17:1248908e683:-7b41" name="FinalScores">
+<column-list>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7b3b" mandatory="true" name="TeamNumber">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
+<column auto-increment="false" column-size="128" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7b3a" mandatory="true" name="Tournament">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="NULL" id="1f769f17:1248908e683:-7b39" mandatory="false" name="&lt;subjective category name&gt;">
+<data-type name="FLOAT" selected-variant-pattern="FLOAT"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="NULL" id="1f769f17:1248908e683:-7b36" mandatory="false" name="performance">
+<data-type name="FLOAT" selected-variant-pattern="FLOAT"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7b35" mandatory="false" name="OverallScore">
+<data-type name="FLOAT" selected-variant-pattern="FLOAT"/>
+</column>
+</column-list>
+<primary-key id="1f769f17:1248908e683:-7b40" name="PK_FINALSCORES">
+<primary-key-column name="TeamNumber"/>
+<primary-key-column name="Tournament"/>
+</primary-key>
+<foreign-key-list>
+<foreign-key id="1f769f17:1248908e683:-7b15" name="FK_FinalScores_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TEAMS" referenced-table="Teams" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key-column column-name="TeamNumber" referenced-key-column-name="TeamNumber"/>
+</foreign-key>
+<foreign-key id="1f769f17:1248908e683:-7af8" name="FK_FinalScores_2" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key-column column-name="Tournament" referenced-key-column-name="Name"/>
+</foreign-key>
+</foreign-key-list>
+</table>
+</table-list>
+</schema>
+</schema-list>
+</database-model>
+<diagram>
+<table-figure refid="1f769f17:1248908e683:-7fff" x="418" y="212"/>
+<table-figure refid="1f769f17:1248908e683:-7ff6" x="767" y="239"/>
+<table-figure refid="1f769f17:1248908e683:-7fdf" x="223" y="38"/>
+<table-figure refid="1f769f17:1248908e683:-7ef3" x="340" y="291"/>
+<table-figure refid="1f769f17:1248908e683:-7e39" x="625" y="5"/>
+<table-figure refid="1f769f17:1248908e683:-7d6b" x="5" y="422"/>
+<table-figure refid="1f769f17:1248908e683:-7d64" x="151" y="287"/>
+<table-figure refid="1f769f17:1248908e683:-7cf8" x="876" y="508"/>
+<table-figure refid="1f769f17:1248908e683:-7c14" x="382" y="616"/>
+<table-figure refid="1f769f17:1248908e683:-7b41" x="76" y="618"/>
+</diagram>
+</clay-model>
