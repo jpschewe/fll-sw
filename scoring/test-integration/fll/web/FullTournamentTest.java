@@ -184,7 +184,7 @@ public class FullTournamentTest {
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull(response.getFirstMatchingTextBlock(MATCH_TEXT, "Successfully initialized tournament for teams based on region."));
 
-      // set the tournamet
+      // set the tournament
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "admin/index.jsp");
       response = conversation.getResponse(request);
@@ -300,30 +300,33 @@ public class FullTournamentTest {
       prep.setString(1, testTournament);
       final ScoreEntryQueue scoreEntryQueue = new ScoreEntryQueue(parallel ? 4 : 1, testDataConn, performanceElement, testTournament);
       for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
-        if (!initializedPlayoff
-            && runNumber > numSeedingRounds) {
-          // TODO make sure to check the result of checking the seeding rounds
+        if(runNumber > numSeedingRounds) {
+          //TODO generate scoresheets here
 
-          // initialize the playoff brackets with playoff/index.jsp form
-          request = new GetMethodWebRequest(TestUtils.URL_ROOT
-              + "playoff");
-          response = conversation.getResponse(request);
-          Assert.assertTrue(response.isHTML());
-          form = response.getFormWithName("initialize");
-          Assert.assertNotNull(form);
-          final String[] divisions = form.getOptionValues("division");
-          for (int divIdx = 0; divIdx < divisions.length; ++divIdx) {
-            if (LOGGER.isDebugEnabled()) {
-              LOGGER.debug("Initializing playoff brackets for division "
-                  + divisions[divIdx]);
-            }
-            form.setParameter("division", divisions[divIdx]);
-            request = form.getRequest();
+          if (!initializedPlayoff) {
+            // TODO make sure to check the result of checking the seeding rounds
+
+            // initialize the playoff brackets with playoff/index.jsp form
+            request = new GetMethodWebRequest(TestUtils.URL_ROOT
+                                              + "playoff");
             response = conversation.getResponse(request);
             Assert.assertTrue(response.isHTML());
-          }
-          initializedPlayoff = true;
+            form = response.getFormWithName("initialize");
+            Assert.assertNotNull(form);
+            final String[] divisions = form.getOptionValues("division");
+            for (int divIdx = 0; divIdx < divisions.length; ++divIdx) {
+              if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Initializing playoff brackets for division "
+                             + divisions[divIdx]);
+              }
+              form.setParameter("division", divisions[divIdx]);
+              request = form.getRequest();
+              response = conversation.getResponse(request);
+              Assert.assertTrue(response.isHTML());
+            }
+            initializedPlayoff = true;
 
+          }
         }
 
         prep.setInt(2, runNumber);
