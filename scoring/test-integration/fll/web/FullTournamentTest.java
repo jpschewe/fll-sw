@@ -60,10 +60,11 @@ public class FullTournamentTest {
   /**
    * Test a full tournament as a single thread. This tests to make sure
    * everything works normally.
+   * @throws InterruptedException 
    */
   @Test
   public void testSerial() throws MalformedURLException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-      ParseException, SQLException {
+      ParseException, SQLException, InterruptedException {
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Starting serial test");
     }
@@ -73,11 +74,11 @@ public class FullTournamentTest {
   /**
    * Test a full tournament as multiple threads. This is a more of a stress
    * test.
+   * @throws InterruptedException 
    */
-  //FIXME uncomment
-//  @Test
+  @Test
   public void testParallel() throws MalformedURLException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-      ParseException, SQLException {
+      ParseException, SQLException, InterruptedException {
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Starting parallel test");
     }
@@ -96,9 +97,10 @@ public class FullTournamentTest {
    * @throws IllegalAccessException
    * @throws ParseException
    * @throws SQLException
+   * @throws InterruptedException 
    */
   private void doFullTournament(final boolean parallel) throws MalformedURLException, IOException, SAXException, ClassNotFoundException,
-      InstantiationException, IllegalAccessException, ParseException, SQLException {
+      InstantiationException, IllegalAccessException, ParseException, SQLException, InterruptedException {
     final int numSeedingRounds = 3;
 
     // create connection to database with test data
@@ -301,20 +303,19 @@ public class FullTournamentTest {
       prep.setString(1, testTournament);
       final ScoreEntryQueue scoreEntryQueue = new ScoreEntryQueue(parallel ? 4 : 1, testDataConn, performanceElement, testTournament);
       for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
+        request = new GetMethodWebRequest(TestUtils.URL_ROOT
+                                          + "playoff");
+        response = conversation.getResponse(request);
+        Assert.assertTrue(response.isHTML());
+        form = response.getFormWithName("initialize");
+        Assert.assertNotNull(form);
+        final String[] divisions = form.getOptionValues("division");
+      
         if(runNumber > numSeedingRounds) {
-          //TODO generate scoresheets here
-
           if (!initializedPlayoff) {
             // TODO make sure to check the result of checking the seeding rounds
 
             // initialize the playoff brackets with playoff/index.jsp form
-            request = new GetMethodWebRequest(TestUtils.URL_ROOT
-                                              + "playoff");
-            response = conversation.getResponse(request);
-            Assert.assertTrue(response.isHTML());
-            form = response.getFormWithName("initialize");
-            Assert.assertNotNull(form);
-            final String[] divisions = form.getOptionValues("division");
             for (int divIdx = 0; divIdx < divisions.length; ++divIdx) {
               if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Initializing playoff brackets for division "
@@ -326,7 +327,6 @@ public class FullTournamentTest {
               Assert.assertTrue(response.isHTML());
             }
             initializedPlayoff = true;
-
           }
         }
 
@@ -340,6 +340,15 @@ public class FullTournamentTest {
         }
         LOGGER.info("Waiting for queue to finish");
         scoreEntryQueue.waitForQueueToFinish();
+
+        //FIXME get scoresheet printing to work for more than the first pdf
+//        if(runNumber > numSeedingRounds && runNumber != maxRuns) {
+//          for (int divIdx = 0; divIdx < divisions.length; ++divIdx) {
+//            printPlayoffScoresheets(divisions[divIdx]);
+//            LOGGER.info("Succssfully printed scoresheets round: " + runNumber + "division: " + divisions[divIdx]);
+//          }          
+//        }
+        
       }
       scoreEntryQueue.shutdown();
 
@@ -438,9 +447,10 @@ public class FullTournamentTest {
    * @throws SAXException 
    * @throws IOException 
    * @throws MalformedURLException 
+   * @throws InterruptedException 
    * 
    */
-  private void printPlayoffScoresheets(final String division) throws MalformedURLException, IOException, SAXException {
+  private void printPlayoffScoresheets(final String division) throws MalformedURLException, IOException, SAXException, InterruptedException {
     final WebConversation conversation = new WebConversation();
     WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
                                                  + "playoff/index.jsp");
@@ -454,7 +464,7 @@ public class FullTournamentTest {
     request.setParameter("division", division);
     
     // click 'Display Brackets'
-    request = form.getRequest("submit");    
+    request = form.getRequest();    
     response = conversation.getResponse(request);
     Assert.assertTrue(response.isHTML());
     
@@ -462,11 +472,11 @@ public class FullTournamentTest {
     form = response.getFormWithName("printScoreSheets");
     
     // click 'Print scoresheets'
-    request = form.getRequest("submit");
+    request = form.getRequest();
     response = conversation.getResponse(request);
     
     // check that result is PDF
-    Assert.assertEquals("application/pdf", response.getContentType());        
+    Assert.assertEquals("application/pdf", response.getContentType());
   }
   
   /**
