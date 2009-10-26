@@ -74,7 +74,8 @@ public class FullTournamentTest {
    * Test a full tournament as multiple threads. This is a more of a stress
    * test.
    */
-  @Test
+  //FIXME uncomment
+//  @Test
   public void testParallel() throws MalformedURLException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException,
       ParseException, SQLException {
     if (LOGGER.isInfoEnabled()) {
@@ -432,6 +433,42 @@ public class FullTournamentTest {
     }
   }
 
+  /**
+   * Visit the printable brackets for the division specified and print the brackets.
+   * @throws SAXException 
+   * @throws IOException 
+   * @throws MalformedURLException 
+   * 
+   */
+  private void printPlayoffScoresheets(final String division) throws MalformedURLException, IOException, SAXException {
+    final WebConversation conversation = new WebConversation();
+    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
+                                                 + "playoff/index.jsp");
+    WebResponse response = conversation.getResponse(request);
+    Assert.assertTrue(response.isHTML());
+
+    // find form named 'printable'    
+    WebForm form = response.getFormWithName("printable");
+    
+    // set division
+    request.setParameter("division", division);
+    
+    // click 'Display Brackets'
+    request = form.getRequest("submit");    
+    response = conversation.getResponse(request);
+    Assert.assertTrue(response.isHTML());
+    
+    // find form named 'printScoreSheets'
+    form = response.getFormWithName("printScoreSheets");
+    
+    // click 'Print scoresheets'
+    request = form.getRequest("submit");
+    response = conversation.getResponse(request);
+    
+    // check that result is PDF
+    Assert.assertEquals("application/pdf", response.getContentType());        
+  }
+  
   /**
    * Simulate entering subjective scores by pulling them out of testDataConn.
    * 
