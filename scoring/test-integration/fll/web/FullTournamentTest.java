@@ -57,6 +57,12 @@ public class FullTournamentTest {
 
   private static final Logger LOGGER = Logger.getLogger(FullTournamentTest.class);
 
+  //FIXME just for debugging
+  public static void main(final String[] args) throws MalformedURLException, IOException, SAXException, InterruptedException {
+    printPlayoffScoresheets("DivI/Gr4-6");
+    printPlayoffScoresheets("DivII/Gr7-9");
+  }
+  
   /**
    * Test a full tournament as a single thread. This tests to make sure
    * everything works normally.
@@ -341,13 +347,12 @@ public class FullTournamentTest {
         LOGGER.info("Waiting for queue to finish");
         scoreEntryQueue.waitForQueueToFinish();
 
-        //FIXME get scoresheet printing to work for more than the first pdf
-//        if(runNumber > numSeedingRounds && runNumber != maxRuns) {
-//          for (int divIdx = 0; divIdx < divisions.length; ++divIdx) {
-//            printPlayoffScoresheets(divisions[divIdx]);
-//            LOGGER.info("Succssfully printed scoresheets round: " + runNumber + "division: " + divisions[divIdx]);
-//          }          
-//        }
+        if(runNumber > numSeedingRounds && runNumber != maxRuns) {
+          for (int divIdx = 0; divIdx < divisions.length; ++divIdx) {
+            printPlayoffScoresheets(divisions[divIdx]);
+            LOGGER.info("Succssfully printed scoresheets round: " + runNumber + "division: " + divisions[divIdx]);
+          }          
+        }
         
       }
       scoreEntryQueue.shutdown();
@@ -450,7 +455,7 @@ public class FullTournamentTest {
    * @throws InterruptedException 
    * 
    */
-  private void printPlayoffScoresheets(final String division) throws MalformedURLException, IOException, SAXException, InterruptedException {
+  private static void printPlayoffScoresheets(final String division) throws MalformedURLException, IOException, SAXException, InterruptedException {
     final WebConversation conversation = new WebConversation();
     WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
                                                  + "playoff/index.jsp");
@@ -459,12 +464,13 @@ public class FullTournamentTest {
 
     // find form named 'printable'    
     WebForm form = response.getFormWithName("printable");
-    
+
+    request = form.getRequest();    
+
     // set division
     request.setParameter("division", division);
     
     // click 'Display Brackets'
-    request = form.getRequest();    
     response = conversation.getResponse(request);
     Assert.assertTrue(response.isHTML());
     
@@ -477,6 +483,7 @@ public class FullTournamentTest {
     
     // check that result is PDF
     Assert.assertEquals("application/pdf", response.getContentType());
+    
   }
   
   /**
