@@ -4,7 +4,8 @@
 <%@ page import="java.sql.ResultSet"%>
 <%@ page import="java.sql.Connection"%>
 <%@ page import="javax.sql.DataSource" %>
-
+<%@ page import="java.io.File"%>
+<%@ page import="java.util.ArrayList"%>
 <%@ page import="java.util.List"%>
 <%@ page import="java.util.Iterator"%>
 
@@ -28,13 +29,32 @@ final Connection connection = datasource.getConnection();
       final List<String> divisions = Queries.getDivisions(connection);
 %>
 
+<%
+//All logos shall be located under sponsor_logos in the fll web folder.
+String imagePath = application.getRealPath("sponsor_logos");
+File[] directories = {new  File(imagePath)};
+List<String> logoFiles = new ArrayList<String>();
+Utilities.buildGraphicFileList("", directories, logoFiles);
+
+//This varible holds the index of the last image, relative to imagePath
+int lastLogoIndex;
+final int numLogos = logoFiles.size();
+if(numLogos < 1) {
+	lastLogoIndex = -1;
+} else if(null != session.getAttribute("lastLogoIndex")) {
+	lastLogoIndex = ((Integer)session.getAttribute("lastLogoIndex")).intValue();
+} else {
+	lastLogoIndex = numLogos - 1;
+}
+%>
+
 <c:set var="thisURL">
  <c:url value="${pageContext.request.servletPath}">
   <c:param name="scroll" value="${param.scroll}" />
  </c:url>
 </c:set>
 
-<HTML>
+<html>
 <head>
 <style>
 	FONT {color: #ffffff; font-family: "Arial"}
@@ -95,6 +115,8 @@ function start() {
 <%
 if (rs.next()) {
   boolean done = false;
+  final int scoresBetweenLogos = 2;
+  int currentScoreIndex = 0;
   while (!done) {
 %>
 <table border='0' cellpadding='0' cellspacing='0' width='99%' class='<c:out value="${colorStr}" />'>
@@ -161,12 +183,28 @@ if (rs.next()) {
         done = true;
       }
     } while (!done && prevNum == rs.getInt("TeamNumber"));%></font></td>
+        </tr>
       </table>
     </td>
   </tr>
+<%
+  currentScoreIndex++;
+  if(numLogos > 0 && ( currentScoreIndex == scoresBetweenLogos || done) ) {
+	  currentScoreIndex = 0;
+	  // display the next logo
+%>
+  <tr style='background-color:white'>
+    <td width='50%' style='vertical-align:middle; text-align:right'>MN FLL sponsored by:</td>
+    <td width='50%' style='vertical-align:middle; text-align:left; padding:3px'><%
+    lastLogoIndex = (lastLogoIndex + 1) % numLogos;
+    out.print("<img src='../" + logoFiles.get(lastLogoIndex) + "'/>");
+    %></td>
+  </tr>
+<%  } else { %>
   <tr>
     <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
   </tr>
+<%  } %>
 </table>
 
 <c:choose>
@@ -180,7 +218,10 @@ if (rs.next()) {
 
 <%
   } //end while(!done)
-}//end if
+  session.setAttribute("lastLogoIndex",lastLogoIndex); // save the last logo displayed so next reload starts with next sponsor
+} else {
+	// no scores to display - put a table up with logos in it
+}
 %>
 
 <table border='0' cellpadding='0' cellspacing='0' width='99%'>
