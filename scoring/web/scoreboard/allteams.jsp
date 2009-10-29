@@ -81,30 +81,28 @@ function start() {
 </head>
 
 <body bgcolor='#000080' onload='start()'>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 
 <c:set var="colorStr" value="A" />
 
 <%
-        if (rs.next()) {
-        boolean done = false;
-        while (!done) {
+if (rs.next()) {
+  boolean done = false;
+  while (!done) {
 %>
-<table border='0' cellpadding='0' cellspacing='0' width='99%'
- class='<c:out value="${colorStr}" />'>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   height='15' width='1'></td>
- </tr>
- <tr align='left'>
-  <%
+<table border='0' cellpadding='0' cellspacing='0' width='99%' class='<c:out value="${colorStr}" />'>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' height='15' width='1'></td>
+  </tr>
+  <tr align='left'>
+    <%
             final String divisionStr = rs.getString("event_division");
             final Iterator<String> divisionIter = divisions.iterator();
             boolean found = false;
@@ -118,177 +116,143 @@ function start() {
               }
             }
             final String headerColor = Queries.getColorForDivisionIndex(index);
-  %>
-  <td width='25%' bgcolor='<%=headerColor%>'><font size='2'><b>&nbsp;&nbsp;Division:&nbsp;<%=divisionStr%>&nbsp;&nbsp;</b></font>
-  </td>
-  <td align='right'><font size='2'><b>Team&nbsp;#:&nbsp;<%=rs.getInt("TeamNumber")%>&nbsp;&nbsp;</b></font>
-  </td>
- </tr>
- <tr align='left'>
-  <td colspan='2'><font size='4'>&nbsp;&nbsp;<%=rs.getString("Organization")%></font>
-  </td>
- </tr>
- <tr align='left'>
-  <td colspan='2'><font size='4'>&nbsp;&nbsp;<%=rs.getString("TeamName")%></font>
-  </td>
- </tr>
- <tr>
-  <td colspan='2'>
-  <hr color='#ffffff' width='96%'>
-  </td>
- </tr>
- <tr>
-  <td colspan='2'>
-
-  <table border='0' cellpadding='1' cellspacing='0'>
-   <tr align='center'>
-    <td><img src='<c:url value="/images/blank.gif"/>' height='1'
-     width='60'></td>
-    <td><font size='4'>Run #</font></td>
-    <td><img src='<c:url value="/images/blank.gif"/>' width='20'
-     height='1'></td>
-    <td><font size='4'>Score</font></td>
-   </tr>
-   <%
-             int prevNum = rs.getInt("TeamNumber");
-             do {
+    %>
+    <td width='25%' bgcolor='<%=headerColor%>'><font size='2'><b>&nbsp;&nbsp;Division:&nbsp;<%=divisionStr%>&nbsp;&nbsp;</b></font>
+    </td>
+    <td align='right'><font size='2'><b>Team&nbsp;#:&nbsp;<%=rs.getInt("TeamNumber")%>&nbsp;&nbsp;</b></font>
+    </td>
+  </tr>
+  <tr align='left'>
+    <td colspan='2'><font size='4'>&nbsp;&nbsp;<%=rs.getString("Organization")%></font>
+    </td>
+  </tr>
+  <tr align='left'>
+    <td colspan='2'><font size='4'>&nbsp;&nbsp;<%=rs.getString("TeamName")%></font>
+    </td>
+  </tr>
+  <tr>
+    <td colspan='2'>
+      <hr color='#ffffff' width='96%'/>
+    </td>
+  </tr>
+  <tr>
+    <td colspan='2'>
+      <table border='0' cellpadding='1' cellspacing='0'>
+        <tr align='center'>
+          <td><img src='<c:url value="/images/blank.gif"/>' height='1' width='60'/></td>
+          <td><font size='4'>Run #</font></td>
+          <td><img src='<c:url value="/images/blank.gif"/>' width='20' height='1'/></td>
+          <td><font size='4'>Score</font></td>
+        </tr>
+  <%
+    int prevNum = rs.getInt("TeamNumber");
+    do {
    %>
-   <tr align='right'>
-    <td><img src='<c:url value="/images/blank.gif"/>' height='1'
-     width='60'></td>
-    <td><font size='4'><%=rs.getInt("RunNumber")%></font></td>
-    <td><img src='<c:url value="/images/blank.gif"/>' width='20'
-     height='1'></td>
-    <td><font size='4'> <%
- if (rs.getBoolean("NoShow")) {
- %> No Show <%
- } else if (rs.getBoolean("Bye")) {
- %> Bye <%
-               } else {
-               out.println(Utilities.NUMBER_FORMAT_INSTANCE.format(rs.getDouble("ComputedTotal")));
-             }
-             if (!rs.next()) {
-               done = true;
-             }
-           } while (!done && prevNum == rs.getInt("TeamNumber"));
- %> </font></td>
-  </table>
-
-  </td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
+        <tr align='right'>
+          <td><img src='<c:url value="/images/blank.gif"/>' height='1' width='60'/></td>
+          <td><font size='4'><%=rs.getInt("RunNumber")%></font></td>
+          <td><img src='<c:url value="/images/blank.gif"/>' width='20' height='1'/></td>
+          <td><font size='4'> <%
+      if (rs.getBoolean("NoShow")) {%> No Show <%
+      } else if (rs.getBoolean("Bye")) {%> Bye <%
+      } else {out.print(Utilities.NUMBER_FORMAT_INSTANCE.format(rs.getDouble("ComputedTotal")));
+      }
+      if (!rs.next()) {
+        done = true;
+      }
+    } while (!done && prevNum == rs.getInt("TeamNumber"));%></font></td>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
 </table>
 
 <c:choose>
- <c:when test="${'A' == colorStr}">
-  <c:set var="colorStr" value="B" />
- </c:when>
- <c:otherwise>
-  <c:set var="colorStr" value="A" />
- </c:otherwise>
+  <c:when test="${'A' == colorStr}">
+    <c:set var="colorStr" value="B" />
+  </c:when>
+  <c:otherwise>
+    <c:set var="colorStr" value="A" />
+  </c:otherwise>
 </c:choose>
 
 <%
-      } //end while(!done)
-      }//end if
+  } //end while(!done)
+}//end if
 %>
 
-<table border='0' cellpadding='0' cellspacing='0' width='99%' />
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
- <tr>
-  <td colspan='2'><img src='<c:url value="/images/blank.gif"/>'
-   width='1' height='15'></td>
- </tr>
+<table border='0' cellpadding='0' cellspacing='0' width='99%'>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
+  <tr>
+    <td colspan='2'><img src='<c:url value="/images/blank.gif"/>' width='1' height='15'/></td>
+  </tr>
 </table>
 
 
