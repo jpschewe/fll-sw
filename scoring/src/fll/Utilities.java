@@ -309,7 +309,7 @@ public final class Utilities {
   private static final FilenameFilter GRAPHICS_FILTER = new FilenameFilter() {
     public boolean accept(final File dir, final String name) {
       if (name.endsWith(".png")
-          || name.endsWith(".jpg") || name.endsWith(".jpeg")) {
+          || name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".gif")) {
         return true;
       } else {
         return false;
