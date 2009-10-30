@@ -34,6 +34,7 @@ if(numLogos < 1) {
   </script>
 </head>
 <body>
+<% if (numLogos > 0) { %>
 <table align="center">
   <tr>
     <td width="50%" style="text-align:right; vertical-align:middle">
@@ -46,5 +47,6 @@ if(numLogos < 1) {
     </td>
   </tr>
 </table>
+<% } // end if %>
 </body>
 </html>
