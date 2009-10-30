@@ -194,7 +194,7 @@ if (rs.next()) {
 	  // display the next logo
 %>
   <tr style='background-color:white'>
-    <td width='50%' style='vertical-align:middle; text-align:right'>MN FLL sponsored by:</td>
+    <td width='50%' style='vertical-align:middle; text-align:right'>This tournament sponsored by:</td>
     <td width='50%' style='vertical-align:middle; text-align:left; padding:3px'><%
     lastLogoIndex = (lastLogoIndex + 1) % numLogos;
     out.print("<img src='../" + logoFiles.get(lastLogoIndex) + "'/>");

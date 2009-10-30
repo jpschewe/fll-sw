@@ -67,8 +67,7 @@
 
 <html>
 <head>
-<link rel="stylesheet" type="text/css"
- href="<c:url value='/style/style.jsp'/>" />
+<link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
 <title><x:out select="$challengeDocument/fll/@title" />
 (Playoff Round <%=playoffRoundNumber%>, Division <%=division%>)</title>
 </head>
@@ -154,25 +153,21 @@ function start() {
 
 <body onload='start()'>
 <!-- dummy tag and some blank lines for scolling -->
-<div id="dummy" style="position: absolute"><br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+<div id="dummy" style="position: absolute"><br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 
-<h2><x:out select="$challengeDocument/fll/@title" /> (Playoff
-Round <%=playoffRoundNumber%>, Division <%=division%>)</h2>
-
-<table align='center' width='100%' border='0' cellpadding='3'
- cellspacing='0'>
+<table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>
  <%
    if (playoffRoundNumber <= numPlayoffRounds) {
 
@@ -194,6 +189,8 @@ Round <%=playoffRoundNumber%>, Division <%=division%>)</h2>
    }
    }//end if we have more than 2 teams
  %>
+</table>
+</div>
 
 </body>
 </html>

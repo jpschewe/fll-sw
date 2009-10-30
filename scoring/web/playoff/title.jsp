@@ -57,7 +57,7 @@
   <meta http-equiv='refresh' content='90'>
         
 </head>
-  <body>
+  <body style="background:white">
 
 
 
