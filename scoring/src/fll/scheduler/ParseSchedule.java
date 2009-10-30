@@ -119,7 +119,7 @@ public class ParseSchedule {
   private static final ThreadLocal<DateFormat> DATE_FORMAT_AM_PM = new ThreadLocal<DateFormat>() {
     @Override
     protected DateFormat initialValue() {
-      return new SimpleDateFormat("hh:mm a");  
+      return new SimpleDateFormat("hh:mm a");
     }
   };
 
@@ -130,7 +130,7 @@ public class ParseSchedule {
     }
   };
 
-  private static final ThreadLocal<DateFormat> OUTPUT_DATE_FORMAT = new ThreadLocal<DateFormat> () {
+  private static final ThreadLocal<DateFormat> OUTPUT_DATE_FORMAT = new ThreadLocal<DateFormat>() {
     @Override
     protected DateFormat initialValue() {
       return new SimpleDateFormat("H:mm");
@@ -1059,14 +1059,16 @@ public class ParseSchedule {
         + PERFORMANCE_DURATION + changetime > ti.perf[1].getTime()) {
       LOGGER.error(new Formatter().format("Team %d doesn't have enough time (%d minutes) between performance 1 and performance 2: %s - %s", ti.teamNumber,
                                           changetime
-                                              / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.get().format(ti.perf[0]), OUTPUT_DATE_FORMAT.get().format(ti.perf[1])));
+                                              / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.get().format(ti.perf[0]), OUTPUT_DATE_FORMAT.get()
+                                                                                                                                          .format(ti.perf[1])));
     }
 
     if (ti.perf[1].getTime()
         + PERFORMANCE_DURATION + PERFORMANCE_CHANGETIME > ti.perf[2].getTime()) {
       LOGGER.error(new Formatter().format("Team %d doesn't have enough time (%d minutes) between performance 2 and performance 3: %s - %s", ti.teamNumber,
                                           changetime
-                                              / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.get().format(ti.perf[1]), OUTPUT_DATE_FORMAT.get().format(ti.perf[2])));
+                                              / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.get().format(ti.perf[1]), OUTPUT_DATE_FORMAT.get()
+                                                                                                                                          .format(ti.perf[2])));
     }
 
     // constraint set 4
@@ -1089,9 +1091,22 @@ public class ParseSchedule {
     for (int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
       final TeamScheduleInfo opponent = findOpponent(ti, round);
       if (null != opponent) {
-        if (opponent.perfTableSide[round] == ti.perfTableSide[round]) {
-          LOGGER.error(new Formatter().format("Team %d and team %d are both on table %s side %d at the same time for round %d", ti.teamNumber,
-                                              opponent.teamNumber, ti.perfTableColor[round], ti.perfTableSide[round], (round + 1)));
+        int opponentSide = -1;
+        // figure out which round matches up
+        for (int oround = 0; oround < NUMBER_OF_ROUNDS; ++oround) {
+          if (opponent.perf[oround].equals(ti.perf[round])) {
+            opponentSide = opponent.perfTableSide[oround];
+            break;
+          }
+        }
+        if (-1 == opponentSide) {
+          LOGGER.error(new Formatter().format("Unable to find time match for rounds between team %d and team %d at time %s", ti.teamNumber,
+                                              opponent.teamNumber, OUTPUT_DATE_FORMAT.get().format(ti.perf[round])));
+        } else {
+          if (opponentSide == ti.perfTableSide[round]) {
+            LOGGER.error(new Formatter().format("Team %d and team %d are both on table %s side %d at the same time for round %d", ti.teamNumber,
+                                                opponent.teamNumber, ti.perfTableColor[round], ti.perfTableSide[round], (round + 1)));
+          }
         }
 
         for (int r = round + 1; r < NUMBER_OF_ROUNDS; ++r) {
@@ -1124,12 +1139,10 @@ public class ParseSchedule {
         if (round + 1 < NUMBER_OF_ROUNDS) {
           if (next.perf[round].getTime()
               + PERFORMANCE_DURATION + PERFORMANCE_CHANGETIME > ti.perf[round + 1].getTime()) {
-            LOGGER.error(String.format("Team %d doesn't have enough time (%d minutes) between performance %d and performance extra: %s - %s",
-                                                ti.teamNumber, changetime
-                                                    / 1000 / SECONDS_PER_MINUTE,
-                                                    round,
-                                                    OUTPUT_DATE_FORMAT.get().format(next.perf[round]),
-                                                OUTPUT_DATE_FORMAT.get().format(ti.perf[round + 1])));
+            LOGGER.error(String.format("Team %d doesn't have enough time (%d minutes) between performance %d and performance extra: %s - %s", ti.teamNumber,
+                                       changetime
+                                           / 1000 / SECONDS_PER_MINUTE, round, OUTPUT_DATE_FORMAT.get().format(next.perf[round]),
+                                       OUTPUT_DATE_FORMAT.get().format(ti.perf[round + 1])));
           }
         }
 
@@ -1289,7 +1302,7 @@ public class ParseSchedule {
     public int hashCode() {
       return teamNumber;
     }
-    
+
     @Override
     public boolean equals(final Object o) {
       if (o == this) {
