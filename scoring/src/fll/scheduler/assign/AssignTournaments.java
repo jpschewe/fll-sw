@@ -8,6 +8,7 @@ package fll.scheduler.assign;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.prefs.Preferences;
 
 import javax.swing.JFileChooser;
@@ -29,6 +31,7 @@ import net.mtu.eggplant.util.BasicFileFilter;
 import org.apache.log4j.Logger;
 
 import au.com.bytecode.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVWriter;
 
 /**
  * 
@@ -39,12 +42,10 @@ public class AssignTournaments {
 
   /**
    * @param args
-   * @throws ParseException 
-   * @throws IOException 
+   * @throws ParseException
+   * @throws IOException
    */
   public static void main(String[] args) throws IOException, ParseException {
-    // FIXME load in the teams and their preferences
-
     // define the tournaments
     final Map<String, Map<String, TournamentInfo>> tournaments = new HashMap<String, Map<String, TournamentInfo>>();
 
@@ -58,7 +59,7 @@ public class AssignTournaments {
     div1Tournaments.put(tournament.getName(), tournament);
     tournament = new TournamentInfo("12-12 Sanford Middle", "1", 10, 16);
     div1Tournaments.put(tournament.getName(), tournament);
-    tournament = new TournamentInfo("12-13 Benjamin E. Mays International Magnet", "1", 10, 16); 
+    tournament = new TournamentInfo("12-13 Benjamin E. Mays International Magnet", "1", 10, 16);
     div1Tournaments.put(tournament.getName(), tournament);
     tournament = new TournamentInfo("12-5 Crosswinds East Metro Arts & Science", "1", 10, 16);
     div1Tournaments.put(tournament.getName(), tournament);
@@ -83,16 +84,17 @@ public class AssignTournaments {
     div2Tournaments.put(tournament.getName(), tournament);
     tournament = new TournamentInfo("12-12 Sanford Middle", "2", 10, 16);
     div2Tournaments.put(tournament.getName(), tournament);
-    tournament = new TournamentInfo("12-13 Benjamin E. Mays International Magnet", "2", 10, 16); 
-    div2Tournaments.put(tournament.getName(), tournament);    
+    tournament = new TournamentInfo("12-13 Benjamin E. Mays International Magnet", "2", 10, 16);
+    div2Tournaments.put(tournament.getName(), tournament);
     tournament = new TournamentInfo("12-5 Crosswinds East Metro Arts & Science", "2", 10, 16);
     div2Tournaments.put(tournament.getName(), tournament);
     tournament = new TournamentInfo("12-5 Eagleview Community", "2", 10, 16);
     div2Tournaments.put(tournament.getName(), tournament);
     tournament = new TournamentInfo("12-5 North St. Paul High", "2", 10, 16);
     div2Tournaments.put(tournament.getName(), tournament);
-//    tournament = new TournamentInfo("12-5 St. Louis Park Junior High", "2", 10, 16);
-//    div2Tournaments.put(tournament.getName(), tournament);
+    // tournament = new TournamentInfo("12-5 St. Louis Park Junior High", "2",
+    // 10, 16);
+    // div2Tournaments.put(tournament.getName(), tournament);
     tournament = new TournamentInfo("12-6 North St. Paul High", "2", 10, 16);
     div2Tournaments.put(tournament.getName(), tournament);
     tournaments.put("2", div2Tournaments);
@@ -102,6 +104,10 @@ public class AssignTournaments {
       final AssignTournaments assign = new AssignTournaments(file, tournaments);
       final List<TeamInfo> allTeams = assign.loadTeamInformation();
       assign.schedule(allTeams);
+      
+      final File outputFile = new File("assignments.csv");
+      assign.writeSchedule(outputFile);
+      LOGGER.info("Wrote assignments to " + outputFile.getAbsolutePath());
     }
 
   }
@@ -162,21 +168,21 @@ public class AssignTournaments {
 
     return parseData(csvreader);
   }
-  
+
   private List<TeamInfo> parseData(final CSVReader csvReader) throws IOException, ParseException {
     final List<TeamInfo> teams = new LinkedList<TeamInfo>();
     String[] line = csvReader.readNext();
-    while(null != line) {
+    while (null != line) {
       final TeamInfo team = parseLine(line);
-      if(null != team) {
+      if (null != team) {
         teams.add(team);
       }
       line = csvReader.readNext();
     }
-    
+
     return teams;
   }
-  
+
   private TeamInfo parseLine(final String[] line) throws ParseException {
     final Date signupDate = parseSignupDate(line[columnAssignments.get(signupDateHeader)]);
     final int teamNumber = Integer.valueOf(line[columnAssignments.get(teamNumHeader)]);
@@ -185,22 +191,24 @@ public class AssignTournaments {
     final String pref1 = line[columnAssignments.get(pref1Header)];
     final String pref2 = line[columnAssignments.get(pref2Header)];
     final String pref3 = line[columnAssignments.get(pref3Header)];
-    
+
     return new TeamInfo(signupDate, teamNumber, name, division, pref1, pref2, pref3);
   }
-  
+
   private static Date parseSignupDate(final String str) throws ParseException {
     return SIGNUP_DATE_FORMAT.get().parse(str);
   }
-  
-  private static final ThreadLocal<DateFormat> SIGNUP_DATE_FORMAT = new ThreadLocal<DateFormat> () {
+
+  private static String formatSignupDate(final Date d) throws ParseException {
+    return SIGNUP_DATE_FORMAT.get().format(d);
+  }
+
+  private static final ThreadLocal<DateFormat> SIGNUP_DATE_FORMAT = new ThreadLocal<DateFormat>() {
     @Override
     protected DateFormat initialValue() {
       return new SimpleDateFormat("MM/dd/yy hh:mm a");
     }
   };
-
-     
 
   private void initializeColumnAssignments() {
     columnAssignments.clear();
@@ -256,6 +264,36 @@ public class AssignTournaments {
   public AssignTournaments(final File file, final Map<String, Map<String, TournamentInfo>> tournaments) {
     this.file = file;
     this.tournaments = tournaments;
+  }
+
+  public void writeSchedule(final File file) throws IOException, ParseException {
+    final CSVWriter writer = new CSVWriter(new FileWriter(file));
+    final String[] header = { "Tournament", "Team Name", "Team Number", "Division", "Registration Date", "Pref 1", "Pref 2", "Pref 3" };
+
+    writer.writeNext(header);
+    for (final Map<String, TournamentInfo> tournamentMap : tournaments.values()) {
+      for (final TournamentInfo tournament : tournamentMap.values()) {
+        final Set<TeamInfo> teams = tournament.getTeams();
+        LOGGER.info(tournament.getName()
+            + " div: " + tournament.getDivision() + " min: " + tournament.getMin() + " max: " + tournament.getMax() + " teams: " + teams.size());
+        for(final TeamInfo team : teams) {
+          String[] line = 
+          {
+           tournament.getName(),
+           team.getName(),
+           String.valueOf(team.getNumber()),
+           team.getDivision(),
+           formatSignupDate(team.getRegistrationDate()),
+           team.getPref1(),
+           team.getPref2(),
+           team.getPref3()
+          };
+          writer.writeNext(line);
+        }
+      }
+    }
+    writer.close();
+
   }
 
   /**
