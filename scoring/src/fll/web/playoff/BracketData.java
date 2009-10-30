@@ -503,7 +503,7 @@ public class BracketData {
   /**
    * Formats the HTML code to insert for a single table cell of one of the
    * playoff bracket display pages (both administrative and scrolling). All
-   * cells are generated with a specified width of 200 pixels. If the cell
+   * cells are generated with a specified width of 400 pixels. If the cell
    * contains text, the \<td\>element will have attribute class='Leaf'. Font
    * tags for team number, team name, and score have classes of 'TeamNumber',
    * 'TeamName', and 'TeamScore', respectively.
@@ -524,7 +524,7 @@ public class BracketData {
     final StringBuffer sb = new StringBuffer();
     final BracketDataType d = roundData.get(new Integer(row));
     if (d == null) {
-      sb.append("<td width='200'>&nbsp;</td>");
+      sb.append("<td width='400'>&nbsp;</td>");
     } else if (d instanceof SpannedOverBracketCell) {
       final String comment = ((SpannedOverBracketCell) d).getComment();
       if (comment != null) {
@@ -532,7 +532,7 @@ public class BracketData {
             + comment + "-->");
       }
     } else if (d instanceof TeamBracketCell) {
-      sb.append("<td width='200' class='Leaf'>");
+      sb.append("<td width='400' class='Leaf'>");
       if (round == _finalsRound) {
         sb.append(getDisplayString(connection, tournament, round
             + _numSeedingRounds, ((TeamBracketCell) d).getTeam(), _showFinalScores, _showOnlyVerifiedScores));
@@ -544,13 +544,13 @@ public class BracketData {
       sb.append("</td>");
 
     } else if (d instanceof BracketLabelCell) {
-      sb.append("<td width='200'><font size='4'>");
+      sb.append("<td width='400'><font size='4'>");
       sb.append(((BracketLabelCell) d).getLabel()
           + "</font>");
       sb.append("</td>");
     } else if (d instanceof ScoreSheetFormBracketCell) {
       final ScoreSheetFormBracketCell myD = (ScoreSheetFormBracketCell) d;
-      sb.append("<td width='200' valign='middle'");
+      sb.append("<td width='400' valign='middle'");
       if (myD.getTeamA().getTeamNumber() > 0
           && myD.getTeamB().getTeamNumber() > 0) {
         sb.append(" rowspan='"
