@@ -28,9 +28,9 @@ body {
       
       <br />
       <br />
-      <img align='center' src='<c:url value="/images/logo.gif"/>' /><br />
+      <img height="50%" align='center' src='<c:url value="/images/logo.gif"/>' /><br />
 
-      <img align='center' src='<c:url value="/images/fll_logo.gif"/>' /><br />
+      <img height="20%" align='center' src='<c:url value="/images/fll_logo.gif"/>' /><br />
           
           <br/>
 
