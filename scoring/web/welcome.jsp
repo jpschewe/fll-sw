@@ -14,7 +14,7 @@ Utilities.buildGraphicFileList("", directories, logoFiles);
 
 // truncate will keep it smaller
 int imagePercentage = 80 / (logoFiles.size() + 1);
-
+int fllPercentage = Math.min(20, imagePercentage);
 %>
 
 <html>
@@ -46,7 +46,7 @@ body {
       <img height="40%" align='center' src='<c:url value="/images/logo.gif"/>' /><br />
 
      <%
-      out.print("<img width='" + imagePercentage + "%' src='images/fll_logo.gif' />");
+      out.print("<img width='" + fllPercentage + "%' src='images/fll_logo.gif' />");
       for(final String file : logoFiles) {
         out.print("<img width='" + imagePercentage + "%' src='" + file + "' />");
      }
