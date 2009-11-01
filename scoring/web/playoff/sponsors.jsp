@@ -42,7 +42,7 @@ if(numLogos < 1) {
     </td>
     <td width="50%" style="text-align:left; vertical-align:middle">
       <% lastLogoIndex = (lastLogoIndex + 1) % numLogos; %>
-      <% out.print("<img src='../" + logoFiles.get(lastLogoIndex) + "'/>"); %>
+     <% out.print("<img src='../" + logoFiles.get(lastLogoIndex) + "'/>"); %>
       <% session.setAttribute("lastLogoIndex",lastLogoIndex); %>
     </td>
   </tr>

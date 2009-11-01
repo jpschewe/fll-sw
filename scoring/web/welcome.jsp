@@ -1,5 +1,22 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
+<%@ page import="java.io.File"%>
+<%@ page import="java.util.ArrayList"%>
+<%@ page import="java.util.List"%>
+<%@ page import="fll.Utilities"%>
+
+<%
+//All logos shall be located under sponsor_logos in the fll web folder.
+String imagePath = application.getRealPath("sponsor_logos");
+File[] directories = {new  File(imagePath)};
+List<String> logoFiles = new ArrayList<String>();
+Utilities.buildGraphicFileList("", directories, logoFiles);
+
+// truncate will keep it smaller
+int imagePercentage = 80 / (logoFiles.size() + 1);
+
+%>
+
 <html>
   <head>
     <meta http-equiv='refresh' content='90' />
@@ -26,14 +43,14 @@ body {
         
       <h2><x:out select="$challengeDocument/fll/@title"/></h2>
       
-      <br />
-      <br />
-      <img height="50%" align='center' src='<c:url value="/images/logo.gif"/>' /><br />
+      <img height="40%" align='center' src='<c:url value="/images/logo.gif"/>' /><br />
 
-      <img height="20%" align='center' src='<c:url value="/images/fll_logo.gif"/>' /><br />
-          
-          <br/>
-
+     <%
+      out.print("<img width='" + imagePercentage + "%' src='images/fll_logo.gif' />");
+      for(final String file : logoFiles) {
+        out.print("<img width='" + imagePercentage + "%' src='" + file + "' />");
+     }
+      %>
             
     </center>
         
