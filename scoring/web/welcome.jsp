@@ -39,9 +39,7 @@ body {
   <body>
 
     <center>
-      <h1>Boston Scientific MN <i>FIRST</i> LEGO League Tournament</h1>
-        
-      <h2><x:out select="$challengeDocument/fll/@title"/></h2>
+     <h1><x:out select="$challengeDocument/fll/@title"/></h1>
       
       <img height="40%" align='center' src='<c:url value="/images/logo.gif"/>' /><br />
 
