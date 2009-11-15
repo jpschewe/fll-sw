@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,6 +38,7 @@ import org.apache.log4j.Logger;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fll.db.GenerateDB;
+import fll.util.FLLRuntimeException;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
@@ -116,8 +118,6 @@ public final class UploadTeams extends BaseFLLServlet {
       csvReader = new CSVReader(new FileReader(file));
     }
 
-    // parse file into table AllTeams
-
     // stores <option value='columnName'>columnName</option> for each column
     final StringBuffer selectOptions = new StringBuffer();
 
@@ -191,24 +191,7 @@ public final class UploadTeams extends BaseFLLServlet {
 
       insertPrep = connection.prepareStatement(insertPrepSQL.toString());
 
-      // loop over the rest of the rows and insert them into the temporary table
-      String[] values;
-      while (null != (values = csvReader.readNext())) {
-        if (values.length > 0) { // skip empty lines
-          int column = 1;
-          for (final String value : values) {
-            if(column <= columnNamesSeen.size()) {
-              insertPrep.setString(column, null == value ? null : value.trim());
-              ++column;
-            }
-          }
-          for (; column <= columnNamesSeen.size(); column++) {
-            insertPrep.setString(column, null);
-          }
-
-          insertPrep.executeUpdate();
-        }
-      }
+      insertLinesIntoAllTeams(csvReader, columnNamesSeen, insertPrep);
     } finally {
       SQLFunctions.closePreparedStatement(insertPrep);
       SQLFunctions.closeStatement(stmt);
@@ -216,6 +199,38 @@ public final class UploadTeams extends BaseFLLServlet {
 
     // save this for other pages to use
     session.setAttribute("columnSelectOptions", selectOptions.toString());
+  }
+
+  private static void insertLinesIntoAllTeams(final CSVReader csvReader, final List<String> columnNamesSeen, final PreparedStatement insertPrep)
+      throws IOException, SQLException {
+    try {
+      // loop over the rest of the rows and insert them into AllTeams
+      String[] values;
+      while (null != (values = csvReader.readNext())) {
+        if (values.length > 0) { // skip empty lines
+
+          try {
+            int column = 1;
+            for (final String value : values) {
+              if (column <= columnNamesSeen.size()) {
+                insertPrep.setString(column, null == value ? null : value.trim());
+                ++column;
+              }
+            }
+            for (; column <= columnNamesSeen.size(); column++) {
+              insertPrep.setString(column, null);
+            }
+
+            insertPrep.executeUpdate();
+          } catch (final SQLException e) {
+            throw new FLLRuntimeException("Error inserting row in to AllTeam: "
+                + Arrays.toString(values));
+          }
+        }
+      }
+    } finally {
+      SQLFunctions.closePreparedStatement(insertPrep);
+    }
   }
 
   /**
@@ -411,9 +426,8 @@ public final class UploadTeams extends BaseFLLServlet {
         try {
           prep.executeUpdate();
         } catch (final SQLException sqle) {
-          LOGGER.error("Got error inserting teamNumber "
-              + teamNumStr + " into Teams table");
-          throw sqle;
+          throw new FLLRuntimeException("Got error inserting teamNumber "
+              + teamNumStr + " into Teams table, probably have two teams with the same team number", sqle);
         }
       }
 
