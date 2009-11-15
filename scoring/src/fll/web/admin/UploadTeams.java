@@ -197,8 +197,10 @@ public final class UploadTeams extends BaseFLLServlet {
         if (values.length > 0) { // skip empty lines
           int column = 1;
           for (final String value : values) {
-            insertPrep.setString(column, null == value ? null : value.trim());
-            ++column;
+            if(column <= columnNamesSeen.size()) {
+              insertPrep.setString(column, null == value ? null : value.trim());
+              ++column;
+            }
           }
           for (; column <= columnNamesSeen.size(); column++) {
             insertPrep.setString(column, null);
