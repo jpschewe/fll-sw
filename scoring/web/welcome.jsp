@@ -43,12 +43,28 @@ body {
       
       <img height="40%" align='center' src='<c:url value="/images/logo.gif"/>' /><br />
 
+<table>
+<tr><td>
      <%
-      out.print("<img width='" + fllPercentage + "%' src='images/fll_logo.gif' />");
+      //out.print("<img width='" + fllPercentage + "%' src='images/fll_logo.gif' />");
+      out.print("<img height='100%' src='images/fll_logo.gif' />");
+     %>
+</td>
+<td align="center">
+<table>
+      <tr><td align="center" style="padding:20px">Sponsored by:</td></tr>
+      <%
       for(final String file : logoFiles) {
-        out.print("<img width='" + imagePercentage + "%' src='" + file + "' />");
+        out.print("<tr><td align='center'><img src='" + file + "' /></td></tr>");
+      //for(final String file : logoFiles) {
+      //  out.print("<img width='" + imagePercentage + "%' src='" + file + "' />");
+        out.println("<tr><td>&nbsp;</td></tr>");
      }
       %>
+</table>
+</td>
+</tr>
+</table>
             
     </center>
         
