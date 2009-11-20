@@ -175,12 +175,23 @@ public final class ImportDB {
       memRS = memStmt.executeQuery("SELECT TeamNumber, TeamName, Organization, Division, Region FROM Teams");
       destPrep = destConnection.prepareStatement("INSERT INTO Teams (TeamNumber, TeamName, Organization, Division, Region) VALUES (?, ?, ?, ?, ?)");
       while (memRS.next()) {
-        destPrep.setInt(1, memRS.getInt(1));
-        destPrep.setString(2, memRS.getString(2));
-        destPrep.setString(3, memRS.getString(3));
-        destPrep.setString(4, memRS.getString(4));
-        destPrep.setString(5, memRS.getString(5));
-        destPrep.executeUpdate();
+        final int num = memRS.getInt(1);
+        final String name = memRS.getString(2);
+        final String org = memRS.getString(3);
+        final String div = memRS.getString(4);
+        final String region = memRS.getString(5);
+        if (!GenerateDB.INTERNAL_TOURNAMENT.equals(region)) {
+          if (LOG.isDebugEnabled()) {
+            LOG.debug("Inserting into teams: "
+                + num + ", " + name + ", " + org + ", " + div + ", " + region);
+          }
+          destPrep.setInt(1, num);
+          destPrep.setString(2, name);
+          destPrep.setString(3, org);
+          destPrep.setString(4, div);
+          destPrep.setString(5, region);
+          destPrep.executeUpdate();
+        }
       }
 
       // for each tournament listed in the dump file, import it
