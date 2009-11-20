@@ -41,7 +41,7 @@ if [ -z "$JAVACMD" ] ; then
       JAVACMD="$JAVA_HOME/bin/java"
     fi
   else
-    JAVACMD=java
+    JAVACMD=`type -p java`
   fi
 fi
 
