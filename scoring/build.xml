@@ -223,7 +223,7 @@
 		<!-- build scripts -->
 		<antcall target="-buildscripts">
 			<param name="app.name" value="subjective" />
-			<param name="class.main" value="fll.gui.SubjectiveFrame" />
+			<param name="class.main" value="fll.subjective.SubjectiveFrame" />
 			<param name="-scripts.dir" value="${dir.tmp.subjective}" />
 			<param name="-scripts.root" value="." />
 			<param name="-java.args" value="-Dapp.name=subjective -Dlogroot=./" />
@@ -263,7 +263,7 @@
 		</path>
 		<antcall target="-buildscripts">
 			<param name="app.name" value="subjective" />
-			<param name="class.main" value="fll.gui.SubjectiveFrame" />
+			<param name="class.main" value="fll.subjective.SubjectiveFrame" />
 			<param name="-scripts.dir" value="${dir.build}/bin" />
 			<param name="-scripts.root" value=".." />
 			<param name="-java.args" value="-Dapp.name=subjective -Dlogroot=./" />
