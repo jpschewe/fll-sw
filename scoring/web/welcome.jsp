@@ -50,6 +50,9 @@ body {
       out.print("<img height='100%' src='images/fll_logo.gif' />");
      %>
 </td>
+     <%
+     if(!logoFiles.isEmpty()) {
+     %>
 <td align="center">
 <table>
       <tr><td align="center" style="padding:20px">Sponsored by:</td></tr>
@@ -63,6 +66,9 @@ body {
       %>
 </table>
 </td>
+   <%
+   }
+   %>
 </tr>
 </table>
             
