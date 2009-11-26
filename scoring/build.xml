@@ -252,9 +252,13 @@
 		</chmod>
 
 		<zip zipfile="${dir.web}/subjective.zip">
-			<zipfileset prefix="subjective" dir="${dir.tmp.subjective}" />
+			<zipfileset prefix="subjective" dir="${dir.tmp.subjective}" filemode="755">
+                          <include name="**/*.sh"/>
+                        </zipfileset>
+			<zipfileset prefix="subjective" dir="${dir.tmp.subjective}">
+                          <exclude name="**/*.sh"/>
+                        </zipfileset>
 		</zip>
-
 
 		<!-- build scripts for testing -->
 		<path id="application.build.classpath">
@@ -573,22 +577,26 @@
 		</chmod>
 
 		<copy tofile="${dir.dist}/subjective.zip" file="${dir.web}/subjective.zip" />
+		<copy tofile="${dir.dist}/subjective.tar.gz" file="${dir.web}/subjective.subjective.tar.gz" />
 
 
-		<!-- src zip file -->
-		<zip zipfile="${app.name}-${app.version}-src.zip">
-			<zipfileset dir="${basedir}">
+		<!-- src tar file -->
+		<tar tarfile="${app.name}-${app.version}-src.tar.gz" compression="gzip">
+			<tarfileset dir="${basedir}">
 				<exclude name="build/**" />
 				<exclude name="override.properties" />
 				<exclude name="tmp/**" />
-			</zipfileset>
-		</zip>
+			</tarfileset>
+		</tar>
 
-		<!-- release without jdk -->
 		<zip zipfile="${app.name}-${app.version}.zip">
-			<zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version}" />
+			<zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version}" filemode="755">
+                          <include name="**/*.sh"/>
+                        </zipfileset>
+			<zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version}">
+                          <exclude name="**/*.sh"/>
+                        </zipfileset>
 		</zip>
-
 		<echo message="The distribution file is ${app.name}-${app.version}.zip" />
 	</target>
 
