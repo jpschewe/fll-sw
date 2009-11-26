@@ -32,4 +32,4 @@ popd > /dev/null 2>&1
 #Make sure that the right ant is being used
 unset ANT_HOME
 
-${mypath}/tools/ant/bin/ant $*
+${mypath}/tools/ant/bin/ant --noconfig $*
