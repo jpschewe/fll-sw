@@ -305,6 +305,14 @@
 			<param name="-java.args" value="-Dapp.name=challengeParser -Dlogroot=./" />
 			<reference torefid="-scripts.path" refid="application.build.classpath" />
 		</antcall>
+		<antcall target="-buildscripts">
+			<param name="app.name" value="ParseSchedule" />
+			<param name="class.main" value="fll.scheduler.ParseSchedule" />
+			<param name="-scripts.dir" value="${dir.build}/bin" />
+			<param name="-scripts.root" value=".." />
+			<param name="-java.args" value="-Dapp.name=parse_schedule -Dlogroot=./" />
+			<reference torefid="-scripts.path" refid="application.build.classpath" />
+		</antcall>
 
 		<!-- copy libraries over -->
 		<copy todir="${dir.build}/lib">
