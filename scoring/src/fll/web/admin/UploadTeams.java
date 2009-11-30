@@ -390,6 +390,9 @@ public final class UploadTeams extends BaseFLLServlet {
       }
 
       // clean out Teams table first
+      prep = connection.prepareStatement("DELETE FROM TournamentTeams");
+      prep.executeUpdate();
+      
       prep = connection.prepareStatement("DELETE FROM Teams WHERE Region <> ?");
       prep.setString(1, GenerateDB.INTERNAL_TOURNAMENT);
       prep.executeUpdate();
