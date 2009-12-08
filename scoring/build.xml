@@ -596,17 +596,16 @@
     </chmod>
 
     <copy tofile="${dir.dist}/subjective.zip" file="${dir.web}/subjective.zip" />
-    <copy tofile="${dir.dist}/subjective.tar.gz" file="${dir.web}/subjective.subjective.tar.gz" />
 
 
-    <!-- src tar file -->
-    <tar tarfile="${app.name}-${app.version}-src.tar.gz" compression="gzip">
-      <tarfileset dir="${basedir}">
+    <!-- src zip file -->
+    <zip zipfile="${app.name}-${app.version}-src.zip">
+      <zipfileset dir="${basedir}">
         <exclude name="build/**" />
         <exclude name="override.properties" />
         <exclude name="tmp/**" />
-      </tarfileset>
-    </tar>
+      </zipfileset>
+    </zip>
 
     <zip zipfile="${app.name}-${app.version}.zip">
       <zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version}" filemode="755">
