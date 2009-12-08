@@ -27,9 +27,9 @@ final Connection connection = datasource.getConnection();
 
       <li>Current Tournament -&gt; <%=Queries.getCurrentTournament(connection)%></li>
 
-      <li><a href="wiki/fll-sw/instructions.html">Instructions (from Wiki)</a></li>
+      <li><a href="wiki/wiki/InstructionsForRunningTheSoftware">Instructions (from Wiki)</a></li>
 
-      <li><a href="wiki/fll-sw/home.html">Wiki Documentation</a></li>
+      <li><a href="wiki/wiki/WikiStart">Wiki Documentation</a></li>
 
       <li><a href="scoreEntry/select_team.jsp">Score Entry</a></li>
 

@@ -326,7 +326,7 @@ public final class Queries {
     query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
     query.append(" ORDER BY FinalScores.OverallScore "
         + ascDesc + ", Teams.TeamNumber");
-    computeRanking(connection, tournament, divisions, rankingMap, query.toString());
+    computeRanking(connection, tournament, divisions, rankingMap, query.toString(), OVERALL_CATEGORY_NAME);
   }
 
   /**
@@ -338,7 +338,8 @@ public final class Queries {
                                      final String tournament,
                                      final List<String> divisions,
                                      final Map<String, Map<Integer, Map<String, Integer>>> rankingMap,
-                                     final String query) throws SQLException {
+                                     final String query,
+                                     final String categoryTitle) throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -355,7 +356,7 @@ public final class Queries {
 
         prep.setString(2, division);
         rs = prep.executeQuery();
-        processTeamRankings(teamMap, PERFORMANCE_CATEGORY_NAME, rs);
+        processTeamRankings(teamMap, categoryTitle, rs);
       }
     } finally {
       SQLFunctions.closeResultSet(rs);
@@ -432,7 +433,7 @@ public final class Queries {
     query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
     query.append(" ORDER BY FinalScores.performance "
         + ascDesc + ", Teams.TeamNumber");
-    computeRanking(connection, tournament, divisions, rankingMap, query.toString());
+    computeRanking(connection, tournament, divisions, rankingMap, query.toString(), PERFORMANCE_CATEGORY_NAME);
   }
 
   /**

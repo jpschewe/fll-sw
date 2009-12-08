@@ -1,8 +1,8 @@
 <project name="buildscript-imports">
-<!--  macrodefs for building scripts -->
-<dirname property="buildscript.basedir" file="${ant.file.buildscript-imports}"/>
+	<!--  macrodefs for building scripts -->
+	<dirname property="buildscript.basedir" file="${ant.file.buildscript-imports}" />
 
-  <!--
+	<!--
   scripts.dir - where the scripts go
   scripts.basedir - the base directory in the classpath that should be replaced with scripts.root
   scripts.root - see scripts.basedir
@@ -11,44 +11,46 @@
   class.main - name of class the script will execute
   java_args - extra arguments to pass to the JVM run by the script
 -->
-<macrodef name="buildscript" description="Create scripts for Windows and Unix">
-	<attribute name="scripts.dir" />
-        <attribute name="scripts.basedir" />
-	<attribute name="scripts.root" />
-	<attribute name="scripts.path" />
-	<attribute name="script.name" />
-	<attribute name="class.main" />
-        <attribute name="java.args" default=""/>
+	<macrodef name="buildscript" description="Create scripts for Windows and Unix">
+		<attribute name="scripts.dir" />
+		<attribute name="scripts.basedir" />
+		<attribute name="scripts.root" />
+		<attribute name="scripts.path" />
+		<attribute name="script.name" />
+		<attribute name="class.main" />
+		<attribute name="java.args" default="" />
 
-	<sequential>
-		<mkdir dir="@{scripts.dir}" />
+		<sequential>
+			<mkdir dir="@{scripts.dir}" />
 
-		<pathconvert targetos="unix" property="classpath.unix"
-			refid="@{scripts.path}">
-			<map from="@{scripts.basedir}" to="@{scripts.root}" />
-		</pathconvert>
-		<pathconvert targetos="windows" property="classpath.windows"
-			refid="@{scripts.path}">
-			<map from="@{scripts.basedir}" to="@{scripts.root}" />
-		</pathconvert>
+			<pathconvert targetos="unix" property="classpath.unix.@{scripts.path}" refid="@{scripts.path}">
+				<map from="@{scripts.basedir}" to="@{scripts.root}" />
+			</pathconvert>
+			<pathconvert targetos="windows" property="classpath.windows.${scripts.path}" refid="@{scripts.path}">
+				<map from="@{scripts.basedir}" to="@{scripts.root}" />
+			</pathconvert>
 
-		<copy file="${buildscript.basedir}/run.sh.template" tofile="@{scripts.dir}/@{script.name}.sh"
-			overwrite="true">
-			<filterset>
-				<filter token="CLASSPATH" value="${classpath.unix}" />
-				<filter token="CLASSNAME" value="@{class.main}" />
-				<filter token="JAVA_ARGS" value="@{java.args}" />
-			</filterset>
-		</copy>
-		<copy file="${buildscript.basedir}/run.bat.template" tofile="@{scripts.dir}/@{script.name}.bat"
-			overwrite="true">
-			<filterset>
-				<filter token="CLASSPATH" value="${classpath.windows}" />
-				<filter token="CLASSNAME" value="@{class.main}" />
-				<filter token="JAVA_ARGS" value="@{java.args}" />
-			</filterset>
-		</copy>
-	</sequential>
+			<copy file="${buildscript.basedir}/run.sh.template" tofile="@{scripts.dir}/@{script.name}.sh" overwrite="true">
+				<filterset>
+					<filter token="CLASSPATH" value="${classpath.unix.@{scripts.path}}" />
+					<filter token="CLASSNAME" value="@{class.main}" />
+					<filter token="JAVA_ARGS" value="@{java.args}" />
+				</filterset>
+			</copy>
+			<copy file="${buildscript.basedir}/run.bat.template" tofile="@{scripts.dir}/@{script.name}.bat" overwrite="true">
+				<filterset>
+					<filter token="CLASSPATH" value="${classpath.windows.@{scripts.path}}" />
+					<filter token="CLASSNAME" value="@{class.main}" />
+					<filter token="JAVA_ARGS" value="@{java.args}" />
+				</filterset>
+			</copy>
+			<chmod perm="+x">
+				<fileset dir="@{scripts.dir}">
+					<include name="@{script.name}.sh" />
+					<include name="@{script.name}.bat" />
+				</fileset>
+			</chmod>
+		</sequential>
 
-</macrodef>
+	</macrodef>
 </project>
