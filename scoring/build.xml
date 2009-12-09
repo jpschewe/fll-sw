@@ -872,4 +872,27 @@
     <antcall target="checkstyle" />
   </target>
 
+  
+  <property name="findbugs.home" value="${dir.lib}/findbugs-1.3.9" />
+  <taskdef name="findbugs"
+	   classpath="${findbugs.home}/lib/findbugs-ant.jar"
+	   classname="edu.umd.cs.findbugs.anttask.FindBugsTask"
+	   />
+
+  <target name="findbugs"
+	  depends="compile"
+	  description="Executes findbugs to look for problems in the source.">
+    <mkdir dir="${dir.build}/findbugs"/>
+    <findbugs home="${findbugs.home}"
+	      output="xml"
+	      outputFile="${dir.build}/findbugs/report.xml"
+	      effort="max"
+	      jvmargs="-Xmx512m"
+	      >
+      <auxClasspath refid="compile.classpath" />
+      <sourcePath path="${dir.src}" />
+      <class location="${dir.classes}" />
+    </findbugs>
+  </target>
+  
 </project>
