@@ -870,6 +870,7 @@
     <antcall target="test.all" />
     <antcall target="coverage.report" />
     <antcall target="checkstyle" />
+    <antcall target="findbugs" />
   </target>
 
   
