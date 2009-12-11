@@ -889,6 +889,7 @@
 	      outputFile="${dir.build}/findbugs/report.xml"
 	      effort="max"
 	      jvmargs="-Xmx512m"
+          reportLevel="low"
 	      >
       <auxClasspath refid="compile.classpath" />
       <sourcePath path="${dir.src}" />
