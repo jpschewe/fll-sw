@@ -30,7 +30,7 @@ if(null == session.getAttribute("columnSelectOptions")) {
   
 <html>
   <head>
-    <title><x:out select="$challengeDocument/fll/@title"/> (Filter Teams)</title>
+    <title>Filter Teams</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 

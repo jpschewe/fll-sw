@@ -86,7 +86,7 @@ function confirmChangeTournament() {
 }
         
 </script>  
-    <title><x:out select="$challengeDocument/fll/@title"/> (Edit Team)</title>
+    <title>Edit Team</title>
   </head>
 
   <body onload='init()'>

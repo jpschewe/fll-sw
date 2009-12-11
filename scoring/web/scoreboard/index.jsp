@@ -3,7 +3,7 @@
 <HTML>
   <HEAD>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument/fll/@title"/> (Scoreboard)</title>
+    <title>Scoreboard</title>
   </HEAD>
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Scoreboard)</h1>

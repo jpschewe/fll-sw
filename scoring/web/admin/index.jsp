@@ -81,8 +81,7 @@ final Connection connection = datasource.getConnection();
 
 <html>
 <head>
-<title><x:out select="$challengeDocument/fll/@title" />
-(Administration)</title>
+<title>Administration</title>
 <link rel="stylesheet" type="text/css"
 	href="<c:url value='/style/style.jsp'/>" />
 <script type="text/javascript">

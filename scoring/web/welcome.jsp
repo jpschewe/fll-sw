@@ -21,7 +21,7 @@ int fllPercentage = Math.min(20, imagePercentage);
   <head>
     <meta http-equiv='refresh' content='90' />
     
-    <title><x:out select="$challengeDocument/fll/@title"/></title>
+    <title>Welcome</title>
 <style type='text/css'>
 html {
   margin-top: 5px;

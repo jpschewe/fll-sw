@@ -24,7 +24,7 @@ pageContext.setAttribute("divisions", divisions);
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument/fll/@title"/> (Finalist Scheduling)</title>
+    <title>Finalist Scheduling</title>
     <script type='text/javascript'>
       function lookup_name(num_field, name_field) {
         var team_data = new Array();

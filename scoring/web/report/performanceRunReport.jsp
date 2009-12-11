@@ -16,7 +16,7 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument/fll/@title"/> (Performance Run <c:out value="${param.RunNumber}"/>)</title>
+    <title>Performance Run <c:out value="${param.RunNumber}"/></title>
   </head>
 
   <body>

@@ -17,8 +17,7 @@ final Connection connection = datasource.getConnection();
 <head>
 <link rel="stylesheet" type="text/css"
  href="<c:url value='/style/style.jsp'/>" />
-<title><x:out select="$challengeDocument/fll/@title" />
-(Tournament Initialization)</title>
+<title>Tournament Initialization</title>
 </head>
 
 <body>

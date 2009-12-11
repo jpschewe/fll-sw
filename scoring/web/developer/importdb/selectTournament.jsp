@@ -16,8 +16,7 @@
 <head>
 <link rel="stylesheet" type="text/css"
  href="<c:url value='/style/style.jsp'/>" />
-<title><x:out select="$challengeDocument/fll/@title" /> (Select
-Tournament to import)</title>
+<title>Select Tournament to import</title>
 </head>
 
 <body>

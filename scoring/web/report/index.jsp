@@ -34,7 +34,7 @@ SQLFunctions.closeStatement(stmt);
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument/fll/@title"/> (Reporting)</title>
+    <title>Reporting</title>
   </head>
 
   <body>

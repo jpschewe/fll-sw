@@ -68,8 +68,7 @@
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-<title><x:out select="$challengeDocument/fll/@title" />
-(Playoff Round <%=playoffRoundNumber%>, Division <%=division%>)</title>
+<title>Playoff Round <%=playoffRoundNumber%>, Division <%=division%></title>
 </head>
 <style type='text/css'>
 TD.Leaf {

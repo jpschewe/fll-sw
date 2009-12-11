@@ -34,7 +34,7 @@ SQLFunctions.closeStatement(stmt);
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-  <title>Score Entry [Select Team] - <x:out select="$challengeDocument/fll/@title"/></title>
+  <title>Score Entry [Select Team]</title>
 
   <style title='local_style' type='text/css'>
    SELECT {line-height:150%; font-size:10pt; font-weight:bold; background:black; color:#e0e0e0; }

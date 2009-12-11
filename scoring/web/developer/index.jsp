@@ -32,8 +32,7 @@
 <head>
 <link rel="stylesheet" type="text/css"
  href="<c:url value='/style/style.jsp'/>" />
-<title><x:out select="$challengeDocument/fll/@title" />
-(Developer Commands)</title>
+<title>Developer Commands</title>
 </head>
 
 <body>

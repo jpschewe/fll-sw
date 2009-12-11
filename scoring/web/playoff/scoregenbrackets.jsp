@@ -65,7 +65,7 @@ final Connection connection = datasource.getConnection();
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument/fll/@title"/> (Playoff Brackets) Division: <%=divisionStr%></title>
+    <title>Playoff Brackets - Division: <%=divisionStr%></title>
   </head>
   <style type='text/css'>
       TD.Leaf {font-family:Arial;border-bottom: solid}

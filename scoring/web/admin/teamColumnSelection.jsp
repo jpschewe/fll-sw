@@ -21,7 +21,7 @@ if(null == errorMessage || "".equals(errorMessage)) {
 %>
 <html>
   <head>
-    <title><x:out select="$challengeDocument/fll/@title"/> (Team Column Selection)</title>
+    <title>Team Column Selection</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 

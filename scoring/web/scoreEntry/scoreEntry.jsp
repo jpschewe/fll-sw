@@ -102,10 +102,10 @@ pageContext.setAttribute("isNoShow", Boolean.valueOf(Queries.isNoShow(connection
 <html>
   <head>
     <c:if test="${not empty param.EditFlag}" var="editFlag">
-      <title><x:out select="$challengeDocument/fll/@title"/> (Score Edit)</title>
+      <title>Score Edit</title>
     </c:if>
     <c:if test="${not editFlag}">
-      <title><x:out select="$challengeDocument/fll/@title"/> (Score Entry)</title>
+      <title>Score Entry</title>
       <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     </c:if>
 

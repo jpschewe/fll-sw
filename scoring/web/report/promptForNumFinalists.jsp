@@ -3,7 +3,7 @@
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument/fll/@title"/> (Finalist Scheduling)</title>
+    <title>Finalist Scheduling</title>
     <script type='text/javascript'>
       function check_text() {
         var value = document.getElementById('num-finalists').value;

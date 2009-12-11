@@ -4,8 +4,7 @@
 
 <html>
 <head>
-<title><x:out select="$challengeDocument/fll/@title" /> (Judge
-Assignments)</title>
+<title>Judge Assignments</title>
 <link rel="stylesheet" type="text/css"
  href="<c:url value='/style/style.jsp'/>" />
 </head>

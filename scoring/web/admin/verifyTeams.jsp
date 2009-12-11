@@ -17,7 +17,7 @@ if(null == session.getAttribute("columnSelectOptions")) {
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument/fll/@title"/> (Verify Teams)</title>
+    <title>Verify Teams</title>
   </head>
 
   <body>

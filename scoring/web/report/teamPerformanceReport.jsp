@@ -17,7 +17,7 @@ pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection))
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument/fll/@title"/> (Team <c:out value="${param.TeamNumber}"/> Performance Scores)</title>
+    <title>Team <c:out value="${param.TeamNumber}"/> Performance Scores</title>
   </head>
 
   <body>

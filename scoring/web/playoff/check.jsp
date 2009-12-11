@@ -20,7 +20,7 @@ final String division = request.getParameter("division");
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument/fll/@title"/> (Team Playoff check)</title>
+    <title>Team Playoff check</title>
   </head>
 
   <body>

@@ -16,7 +16,7 @@ final Connection connection = datasource.getConnection();
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-  <title>Edit Team [Select Team] - <x:out select="$challengeDocument/fll/@title"/></title>
+  <title>Edit Team [Select Team]</title>
 
   <!--<style type='text/css'>
    SELECT {line-height: 150%; font-size: 10pt; font-weight: bold; background-color: black }

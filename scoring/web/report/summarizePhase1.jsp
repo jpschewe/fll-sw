@@ -32,7 +32,7 @@ ScoreStandardization.summarizeScores(connection, challengeDocument, currentTourn
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument/fll/@title"/> (Summarize Scores)</title>
+    <title>Summarize Scores</title>
   </head>
 
   <body>

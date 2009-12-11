@@ -33,7 +33,7 @@ pageContext.setAttribute("numPlayoffRounds", Queries.getNumPlayoffRounds(connect
       
 <html>
   <head>
-    <title><x:out select="$challengeDocument/fll/@title"/> (Display Controller)</title>
+    <title>Display Controller</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     
 <script type="text/javascript">

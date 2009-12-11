@@ -14,8 +14,7 @@ final Connection connection = datasource.getConnection();
 
 <html>
 <head>
-<title><x:out select="$challengeDocument/fll/@title" />
-(Categorized Scores)</title>
+<title>Categorized Scores</title>
 </head>
 
 <body>

@@ -8,7 +8,7 @@
     <meta http-equiv='refresh' content='60' />
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     
-    <title><x:out select="$challengeDocument/fll/@title"/></title>
+    <title>Display</title>
           
     <script type='text/javascript'>
       var width = screen.width-10;

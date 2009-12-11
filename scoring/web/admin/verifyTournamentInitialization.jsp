@@ -34,7 +34,7 @@ pageContext.setAttribute("regions", Queries.getRegions(connection));
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument/fll/@title"/> (Verify Tournament Initialization)</title>
+    <title>Verify Tournament Initialization</title>
   </head>
 
   <body>

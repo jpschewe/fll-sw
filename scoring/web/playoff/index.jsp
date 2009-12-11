@@ -18,7 +18,7 @@ final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title><x:out select="$challengeDocument/fll/@title"/> (Playoff's)</title>
+    <title>Playoff's</title>
   </head>
 
   <body>

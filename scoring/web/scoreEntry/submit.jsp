@@ -19,7 +19,7 @@ final Connection connection = datasource.getConnection();
 
 <html>
   <head>
-    <title><x:out select="$challengeDocument/fll/@title"/> (Submit Scores)</title>
+    <title>Submit Scores</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 

@@ -4,7 +4,7 @@
   
 <html>
   <head>
-    <title><x:out select="$challengeDocument/fll/@title"/> (Table Labels)</title>
+    <title>Table Labels</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
