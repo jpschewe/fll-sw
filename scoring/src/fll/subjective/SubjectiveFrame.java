@@ -52,6 +52,7 @@ import javax.swing.text.StyledDocument;
 import net.mtu.eggplant.util.BasicFileFilter;
 import net.mtu.eggplant.util.gui.SortableTable;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -66,19 +67,30 @@ import fll.xml.XMLWriter;
  */
 public final class SubjectiveFrame extends JFrame {
 
+  private static final Logger LOGGER = Logger.getLogger(SubjectiveFrame.class);
+
   public static void main(final String[] args) {
     try {
       final File file = chooseSubjectiveFile("Please choose the subjective data file");
-      if (null != file) {
-        final SubjectiveFrame frame = new SubjectiveFrame(file);
-        frame.pack();
-        frame.setVisible(true);
-      } else {
-        System.exit(0);
+      try {
+        if (null != file) {
+          final SubjectiveFrame frame = new SubjectiveFrame(file);
+          frame.pack();
+          frame.setVisible(true);
+        } else {
+          System.exit(0);
+        }
+      } catch (final IOException ioe) {
+        JOptionPane.showMessageDialog(null, "Error reading data file: "
+            + file.getAbsolutePath() + " - " + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        LOGGER.fatal("Error reading datafile: "
+            + file.getAbsolutePath(), ioe);
+        System.exit(1);
       }
-    } catch (final IOException ioe) {
-      JOptionPane.showMessageDialog(null, "Error reading data file: "
-          + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    } catch (final Exception e) {
+      JOptionPane.showMessageDialog(null, "Unexpected error: "
+          + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      LOGGER.fatal("Unexpected error", e);
       System.exit(1);
     }
   }
@@ -95,11 +107,19 @@ public final class SubjectiveFrame extends JFrame {
     getContentPane().setLayout(new BorderLayout());
 
     final ZipFile zipfile = new ZipFile(file);
-    final InputStream challengeStream = zipfile.getInputStream(zipfile.getEntry("challenge.xml"));
+    final ZipEntry challengeEntry = zipfile.getEntry("challenge.xml");
+    if (null == challengeEntry) {
+      throw new RuntimeException("Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
+    }
+    final InputStream challengeStream = zipfile.getInputStream(challengeEntry);
     _challengeDocument = ChallengeParser.parse(new InputStreamReader(challengeStream));
     challengeStream.close();
 
-    final InputStream scoreStream = zipfile.getInputStream(zipfile.getEntry("score.xml"));
+    final ZipEntry scoreEntry = zipfile.getEntry("score.xml");
+    if(null == scoreEntry) {
+      throw new RuntimeException("Unable to find score data in file, you probably choose the wrong file or it is corrupted");      
+    }
+    final InputStream scoreStream = zipfile.getInputStream(scoreEntry);
     _scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
     scoreStream.close();
 
@@ -155,20 +175,20 @@ public final class SubjectiveFrame extends JFrame {
           }
 
           try {
-          final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareSubjectiveFiles(_file, compareFile);
-          if (null == diffs) {
-            JOptionPane.showMessageDialog(null, "Challenge descriptors are different, comparison failed", "Error", JOptionPane.ERROR_MESSAGE);
+            final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareSubjectiveFiles(_file, compareFile);
+            if (null == diffs) {
+              JOptionPane.showMessageDialog(null, "Challenge descriptors are different, comparison failed", "Error", JOptionPane.ERROR_MESSAGE);
 
-          } else if (!diffs.isEmpty()) {
-            showDifferencesDialog(diffs);
-          } else {
-            JOptionPane.showMessageDialog(null, "No differences found", "No Differences", JOptionPane.INFORMATION_MESSAGE);
+            } else if (!diffs.isEmpty()) {
+              showDifferencesDialog(diffs);
+            } else {
+              JOptionPane.showMessageDialog(null, "No differences found", "No Differences", JOptionPane.INFORMATION_MESSAGE);
 
-          }
-          } catch(final IOException e) {
+            }
+          } catch (final IOException e) {
             JOptionPane.showMessageDialog(null, "Error reading compare file: "
-                                          + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            
+                + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
           }
         }
       }
@@ -217,7 +237,8 @@ public final class SubjectiveFrame extends JFrame {
    * Show differences.
    */
   private void showDifferencesDialog(final Collection<SubjectiveScoreDifference> diffs) {
-    // TODO make the be hot links to the correct tab and entry that is referenced
+    // TODO make the be hot links to the correct tab and entry that is
+    // referenced
     final SubjectiveDiffTableModel model = new SubjectiveDiffTableModel(diffs);
     final JTable table = new JTable(model);
     final JDialog dialog = new JDialog(this, false);
