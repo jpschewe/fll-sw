@@ -15,11 +15,18 @@ pageContext.setAttribute("regions", Queries.getRegions(connection));
 <c:if test='${"true" == param.verified}'>
   <c:forEach var="parameter" items="${paramValues}">
     <c:if test='${"nochange" != parameter.value[0] && "verified" != parameter.key && "submit" != parameter.key}'>
+      <c:set var="decodedRegion">
+        ${fn:replace(parameter.key, "&amp;", "&")}
+      </c:set>    
+      
+      <c:set var="decodedTournament">
+        ${fn:replace(parameter.value[0], "&amp;", "&")}
+      </c:set>    
       <sql:update dataSource="${datasource}">
-        DELETE FROM TournamentTeams WHERE TeamNumber IN ( SELECT TeamNumber FROM Teams WHERE Region = '<c:out value="${parameter.key}"/>' )
+        DELETE FROM TournamentTeams WHERE TeamNumber IN ( SELECT TeamNumber FROM Teams WHERE Region = '${decodedRegion}' )
       </sql:update>
       <sql:update dataSource="${datasource}">
-        INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division) SELECT Teams.TeamNumber, '<c:out value="${parameter.value[0]}"/>', Teams.Division FROM Teams WHERE Teams.Region = '<c:out value="${parameter.key}"/>'
+        INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division) SELECT Teams.TeamNumber, '${decodedTournament}', Teams.Division FROM Teams WHERE Teams.Region = '${decodedRegion}'
       </sql:update>
     </c:if>
   </c:forEach>
@@ -51,11 +58,14 @@ pageContext.setAttribute("regions", Queries.getRegions(connection));
                  name='<c:out value="${parameter.key}" />'
                  value='<c:out value="${parameter.value[0]}" />'
                  />
+          <c:set var="decodedTournament">
+            ${fn:replace(parameter.value[0], "&amp;", "&")}
+          </c:set>
           <c:if test='${"nochange" != parameter.value[0]}'>
             <sql:query var="result" dataSource="${datasource}">
               SELECT DISTINCT Teams.TeamNumber AS TeamNumber, Teams.TeamName AS TeamName, Teams.Region AS Region
                 FROM Teams,TournamentTeams
-                WHERE Teams.Region = '<c:out value="${parameter.key}"/>'
+                WHERE Teams.Region = '${decodedTournament}'
                 AND TournamentTeams.TeamNumber = Teams.TeamNumber
                 ORDER BY Teams.TeamNumber
             </sql:query>

@@ -1,5 +1,5 @@
 #FindBugs User Preferences
-#Tue Jun 23 15:06:29 CDT 2009
+#Fri Dec 11 21:56:17 CST 2009
 detectorAppendingToAnObjectOutputStream=AppendingToAnObjectOutputStream|true
 detectorBCPMethodReturnCheck=BCPMethodReturnCheck|false
 detectorBadAppletConstructor=BadAppletConstructor|false
@@ -23,6 +23,7 @@ detectorConfusionBetweenInheritedAndOuterMethod=ConfusionBetweenInheritedAndOute
 detectorCrossSiteScripting=CrossSiteScripting|true
 detectorDoInsideDoPrivileged=DoInsideDoPrivileged|true
 detectorDontCatchIllegalMonitorStateException=DontCatchIllegalMonitorStateException|true
+detectorDontIgnoreResultOfPutIfAbsent=DontIgnoreResultOfPutIfAbsent|true
 detectorDontUseEnum=DontUseEnum|true
 detectorDroppedException=DroppedException|true
 detectorDumbMethodInvocations=DumbMethodInvocations|true
@@ -95,6 +96,7 @@ detectorIteratorIdioms=IteratorIdioms|true
 detectorLazyInit=LazyInit|true
 detectorLoadOfKnownNullValue=LoadOfKnownNullValue|true
 detectorLockedFields=LockedFields|false
+detectorLostLoggerDueToWeakReference=LostLoggerDueToWeakReference|true
 detectorMethodReturnCheck=MethodReturnCheck|true
 detectorMethods=Methods|true
 detectorMultithreadedInstanceAccess=MultithreadedInstanceAccess|true
@@ -117,6 +119,7 @@ detectorOverridingEqualsNotSymmetrical=OverridingEqualsNotSymmetrical|true
 detectorPreferZeroLengthArrays=PreferZeroLengthArrays|true
 detectorPublicSemaphores=PublicSemaphores|false
 detectorQuestionableBooleanAssignment=QuestionableBooleanAssignment|true
+detectorReadOfInstanceFieldInMethodInvokedByConstructorInSuperclass=ReadOfInstanceFieldInMethodInvokedByConstructorInSuperclass|true
 detectorReadReturnShouldBeChecked=ReadReturnShouldBeChecked|true
 detectorRedundantInterfaces=RedundantInterfaces|true
 detectorReflectiveClasses=ReflectiveClasses|true
@@ -154,5 +157,5 @@ detectorXMLFactoryBypass=XMLFactoryBypass|true
 detector_threshold=2
 effort=default
 filter_settings=Medium|BAD_PRACTICE,CORRECTNESS,MT_CORRECTNESS,PERFORMANCE,STYLE|false
-filter_settings_neg=I18N,NOISE,MALICIOUS_CODE,SECURITY,EXPERIMENTAL|
+filter_settings_neg=MALICIOUS_CODE,NOISE,I18N,SECURITY,EXPERIMENTAL|
 run_at_full_build=false
