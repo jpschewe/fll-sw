@@ -21,6 +21,7 @@ import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.web.playoff.TeamScore;
+import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 
 /**
@@ -155,17 +156,17 @@ public final class ScoreUtils {
     }
 
     if ("less-than".equals(ineqEle.getNodeName())) {
-      return leftVal < rightVal;
+      return FP.lessThan(leftVal, rightVal, ChallengeParser.INITIAL_VALUE_TOLERANCE);
     } else if ("less-than-or-equal".equals(ineqEle.getNodeName())) {
-      return leftVal <= rightVal;
+      return FP.lessThanOrEqual(leftVal, rightVal, ChallengeParser.INITIAL_VALUE_TOLERANCE);
     } else if ("greater-than".equals(ineqEle.getNodeName())) {
-      return leftVal > rightVal;
+      return FP.greaterThan(leftVal, rightVal, ChallengeParser.INITIAL_VALUE_TOLERANCE);
     } else if ("greater-than-or-equal".equals(ineqEle.getNodeName())) {
-      return leftVal >= rightVal;
+      return FP.greaterThanOrEqual(leftVal, rightVal, ChallengeParser.INITIAL_VALUE_TOLERANCE);
     } else if ("equal-to".equals(ineqEle.getNodeName())) {
-      return leftVal == rightVal;
+      return FP.equals(leftVal, rightVal, ChallengeParser.INITIAL_VALUE_TOLERANCE);
     } else if ("no-equal-to".equals(ineqEle.getNodeName())) {
-      return leftVal != rightVal;
+      return !FP.equals(leftVal, rightVal, ChallengeParser.INITIAL_VALUE_TOLERANCE);
     } else {
       throw new RuntimeException("Unexpected inequality found in condition: "
           + ineqEle.getNodeName());

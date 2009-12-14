@@ -43,11 +43,26 @@ public final class FP {
   }
 
   /**
+   * Check for greater than or equal
+   */
+  public static boolean greaterThanOrEqual(final double a, final double b, final double tolerance) {
+    return greaterThan(a, b, tolerance) || equals(a, b, tolerance);
+  }
+
+  /**
    * Check for less than, calls greater than with params swapped.
    */
   public static boolean lessThan(final double a, final double b, final double tolerance) {
     return greaterThan(b, a, tolerance);
   }
+  
+  /**
+   * Check for less than or equal
+   */
+  public static boolean lessThanOrEqual(final double a, final double b, final double tolerance) {
+    return lessThan(a, b, tolerance) || equals(a, b, tolerance);
+  }
+
 
   /**
    * Check that the value is not {@link Double#NaN} and is
