@@ -150,6 +150,9 @@ public class ParseSchedule {
 
   public static final long SUBJECTIVE_DURATION = 20 * SECONDS_PER_MINUTE * 1000;
 
+  /**
+   * This is the time required between events.
+   */
   public static final long CHANGETIME = 15 * SECONDS_PER_MINUTE * 1000;
 
   /**
