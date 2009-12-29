@@ -10,6 +10,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Stores schedule information about a team at a tournament.
+ */
 class TournamentInfo {
   public TournamentInfo(final String name, final String division, final int min, final int max) {
     this.name = name;

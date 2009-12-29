@@ -93,7 +93,7 @@ public class Top10 extends BaseFLLServlet {
       if (divisionIndex >= divisions.size()) {
         divisionIndex = 0;
       }
-      session.setAttribute("divisionIndex", new Integer(divisionIndex));
+      session.setAttribute("divisionIndex", Integer.valueOf(divisionIndex));
 
       formatter.format("<html>");
       formatter.format("<head>");

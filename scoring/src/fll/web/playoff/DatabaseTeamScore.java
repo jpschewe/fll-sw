@@ -137,7 +137,7 @@ public class DatabaseTeamScore extends TeamScore {
    * Cleanup resources.
    */
   @Override
-  public void finalize() {
+  protected void finalize() {
     cleanup();
   }
 

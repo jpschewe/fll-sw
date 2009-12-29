@@ -133,12 +133,19 @@ public final class UploadTeams extends BaseFLLServlet {
       // first line for tabs and if they aren't found, assume it's comma
       // separated
       final BufferedReader breader = new BufferedReader(new FileReader(file));
-      final String firstLine = breader.readLine();
-      breader.close();
-      if (firstLine.indexOf("\t") != -1) {
-        reader = new CSVCellReader(file, '\t');
-      } else {
-        reader = new CSVCellReader(file);
+      try {
+        final String firstLine = breader.readLine();
+        if (null == firstLine) {
+          LOGGER.error("Empty file");
+          return;
+        }
+        if (firstLine.indexOf("\t") != -1) {
+          reader = new CSVCellReader(file, '\t');
+        } else {
+          reader = new CSVCellReader(file);
+        }
+      } finally {
+        breader.close();
       }
     }
 
@@ -238,9 +245,9 @@ public final class UploadTeams extends BaseFLLServlet {
             int column = 1;
             for (final String value : values) {
               if (column <= columnNamesSeen.size()) {
-                if(null != value) {
+                if (null != value) {
                   final String trimmed = value.trim();
-                  if(trimmed.length() > 0) {
+                  if (trimmed.length() > 0) {
                     allEmpty = false;
                   }
                 } else {
@@ -254,7 +261,7 @@ public final class UploadTeams extends BaseFLLServlet {
               insertPrep.setString(column, null);
             }
 
-            if(!allEmpty) {
+            if (!allEmpty) {
               insertPrep.executeUpdate();
             }
           } catch (final SQLException e) {
@@ -494,8 +501,7 @@ public final class UploadTeams extends BaseFLLServlet {
       // put all teams in the DUMMY tournament by default and make the event
       // division the same as the team division
       stmt.executeUpdate("DELETE FROM TournamentTeams");
-      stmt
-          .executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) SELECT 'DUMMY', Teams.TeamNumber, Teams.Division FROM Teams");
+      stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) SELECT 'DUMMY', Teams.TeamNumber, Teams.Division FROM Teams");
 
       return true;
     } finally {

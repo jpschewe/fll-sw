@@ -83,7 +83,7 @@ public class SchedulerUI extends JFrame {
     violationTable.getSelectionModel().addListSelectionListener(violationSelectionListener);
   }
 
-  private final ListSelectionListener violationSelectionListener = new ListSelectionListener() {
+  private transient final ListSelectionListener violationSelectionListener = new ListSelectionListener() {
     public void valueChanged(final ListSelectionEvent e) {
       // single selection only uses the last index
       final ConstraintViolation selected = violationsModel.getViolation(e.getLastIndex());

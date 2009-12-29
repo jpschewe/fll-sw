@@ -14,6 +14,9 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
+/**
+ * Table model for scheduler information used in {@link SchedulerUI}.
+ */
 /*package*/ class SchedulerTableModel extends AbstractTableModel {
 
   private final List<TeamScheduleInfo> scheduleData;

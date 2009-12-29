@@ -18,12 +18,12 @@ public interface CellFileReader extends Closeable {
    * 
    * @return The most recent line read (0-based)
    */
-  public int getLineNumber();
+  int getLineNumber();
   /**
    * Read the next line
    * @return the line as an array of Strings
    * @throws IOException
    */
-  public String[] readNext() throws IOException;
+  String[] readNext() throws IOException;
   
 }
