@@ -216,7 +216,7 @@ public class SchedulerUI extends JFrame {
   private static final Logger LOGGER = Logger.getLogger(SchedulerUI.class);
 
   private TableCellRenderer schedTableRenderer = new DefaultTableCellRenderer() {
-    private final Color ERROR_COLOR = Color.RED;
+    private final Color errorColor = Color.RED;
 
     @Override
     public Component getTableCellRendererComponent(final JTable table,
@@ -235,13 +235,13 @@ public class SchedulerUI extends JFrame {
         if (violation.getTeam() == schedInfo.teamNumber) {
           if (SchedulerTableModel.TEAM_NUMBER_COLUMN == column
               && null == violation.getPresentation() && null == violation.getTechnical() && null == violation.getPerformance()) {
-            setBackground(ERROR_COLOR);
+            setBackground(errorColor);
           } else if (SchedulerTableModel.PRESENTATION_COLUMN == column
               && null != violation.getPresentation()) {
-            setBackground(ERROR_COLOR);
+            setBackground(errorColor);
           } else if (SchedulerTableModel.TECHNICAL_COLUMN == column
               && null != violation.getTechnical()) {
-            setBackground(ERROR_COLOR);
+            setBackground(errorColor);
           } else if (null != violation.getPerformance()) {
             // need to check round
             for (int idx = 0; idx < schedInfo.perf.length; ++idx) {
@@ -249,7 +249,7 @@ public class SchedulerUI extends JFrame {
               final int lastIdx = firstIdx + SchedulerTableModel.NUM_COLUMNS_PER_ROUND - 1;
               if (violation.getPerformance().equals(schedInfo.perf[idx])) {
                 if(firstIdx <= column && column <= lastIdx) {
-                  setBackground(ERROR_COLOR);
+                  setBackground(errorColor);
                 }
               }
             }

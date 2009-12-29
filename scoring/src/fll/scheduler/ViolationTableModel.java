@@ -81,7 +81,7 @@ import javax.swing.table.AbstractTableModel;
     }
   }
 
-  public ConstraintViolation getViolation(int index) {
+  public ConstraintViolation getViolation(final int index) {
     return violations.get(index);
   }
 

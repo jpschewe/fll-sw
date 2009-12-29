@@ -20,6 +20,16 @@ public class CSVCellReader implements CellFileReader {
 
   private final CSVReader delegate;
 
+  /**
+   * @see CSVReader#CSVReader(java.io.Reader, char)
+   */
+  public CSVCellReader(final File file, final char separator) throws FileNotFoundException {
+    delegate = new CSVReader(new FileReader(file), separator);
+  }
+  
+  /**
+   * @see CSVReader#CSVReader(java.io.Reader)
+   */
   public CSVCellReader(final File file) throws FileNotFoundException {
     delegate = new CSVReader(new FileReader(file));
   }

@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -35,13 +36,19 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-import au.com.bytecode.opencsv.CSVReader;
 import fll.db.GenerateDB;
+import fll.db.Queries;
+import fll.util.CSVCellReader;
+import fll.util.CellFileReader;
+import fll.util.ExcelCellReader;
 import fll.util.FLLRuntimeException;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
+import fll.xml.XMLUtils;
 
 /**
  * Java code for uploading team data to the database. Called from
@@ -64,7 +71,18 @@ public final class UploadTeams extends BaseFLLServlet {
       final Connection connection = datasource.getConnection();
       UploadProcessor.processUpload(request);
       final FileItem teamsFileItem = (FileItem) request.getAttribute("teamsFile");
-      final File file = File.createTempFile("fll", null);
+      final int dotIndex = teamsFileItem.getName().lastIndexOf('.');
+      final String extension;
+      if (-1 != dotIndex) {
+        extension = teamsFileItem.getName().substring(dotIndex);
+      } else {
+        extension = null;
+      }
+      final File file = File.createTempFile("fll", extension);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Wrote teams data to: "
+            + file.getAbsolutePath());
+      }
       teamsFileItem.write(file);
       parseFile(file, connection, session);
       file.delete();
@@ -106,16 +124,22 @@ public final class UploadTeams extends BaseFLLServlet {
    * @throws IOException if an error occurs reading from file
    */
   public static void parseFile(final File file, final Connection connection, final HttpSession session) throws SQLException, IOException {
-    // determine if the file is tab separated or comma separated, check the
-    // first line for tabs and if they aren't found, assume it's comma separated
-    final BufferedReader reader = new BufferedReader(new FileReader(file));
-    final CSVReader csvReader;
-    final String firstLine = reader.readLine();
-    reader.close();
-    if (firstLine.indexOf("\t") != -1) {
-      csvReader = new CSVReader(new FileReader(file), '\t');
+    final CellFileReader reader;
+    if (file.getName().endsWith(".xls")
+        || file.getName().endsWith(".xslx")) {
+      reader = new ExcelCellReader(file);
     } else {
-      csvReader = new CSVReader(new FileReader(file));
+      // determine if the file is tab separated or comma separated, check the
+      // first line for tabs and if they aren't found, assume it's comma
+      // separated
+      final BufferedReader breader = new BufferedReader(new FileReader(file));
+      final String firstLine = breader.readLine();
+      breader.close();
+      if (firstLine.indexOf("\t") != -1) {
+        reader = new CSVCellReader(file, '\t');
+      } else {
+        reader = new CSVCellReader(file);
+      }
     }
 
     // stores <option value='columnName'>columnName</option> for each column
@@ -123,7 +147,7 @@ public final class UploadTeams extends BaseFLLServlet {
 
     // parse out the first line as the names of the columns
     // final List<String> columnNames = splitLine(reader.readLine());
-    final String[] columnNames = csvReader.readNext();
+    final String[] columnNames = reader.readNext();
 
     // build the SQL for inserting a row into the temporary table
     final StringBuffer insertPrepSQL = new StringBuffer();
@@ -191,7 +215,7 @@ public final class UploadTeams extends BaseFLLServlet {
 
       insertPrep = connection.prepareStatement(insertPrepSQL.toString());
 
-      insertLinesIntoAllTeams(csvReader, columnNamesSeen, insertPrep);
+      insertLinesIntoAllTeams(reader, columnNamesSeen, insertPrep);
     } finally {
       SQLFunctions.closePreparedStatement(insertPrep);
       SQLFunctions.closeStatement(stmt);
@@ -201,18 +225,27 @@ public final class UploadTeams extends BaseFLLServlet {
     session.setAttribute("columnSelectOptions", selectOptions.toString());
   }
 
-  private static void insertLinesIntoAllTeams(final CSVReader csvReader, final List<String> columnNamesSeen, final PreparedStatement insertPrep)
+  private static void insertLinesIntoAllTeams(final CellFileReader reader, final List<String> columnNamesSeen, final PreparedStatement insertPrep)
       throws IOException, SQLException {
     try {
       // loop over the rest of the rows and insert them into AllTeams
       String[] values;
-      while (null != (values = csvReader.readNext())) {
+      while (null != (values = reader.readNext())) {
         if (values.length > 0) { // skip empty lines
 
+          boolean allEmpty = true;
           try {
             int column = 1;
             for (final String value : values) {
               if (column <= columnNamesSeen.size()) {
+                if(null != value) {
+                  final String trimmed = value.trim();
+                  if(trimmed.length() > 0) {
+                    allEmpty = false;
+                  }
+                } else {
+                  insertPrep.setString(column, null);
+                }
                 insertPrep.setString(column, null == value ? null : value.trim());
                 ++column;
               }
@@ -221,7 +254,9 @@ public final class UploadTeams extends BaseFLLServlet {
               insertPrep.setString(column, null);
             }
 
-            insertPrep.executeUpdate();
+            if(!allEmpty) {
+              insertPrep.executeUpdate();
+            }
           } catch (final SQLException e) {
             throw new FLLRuntimeException("Error inserting row in to AllTeam: "
                 + Arrays.toString(values));
@@ -389,10 +424,24 @@ public final class UploadTeams extends BaseFLLServlet {
         }
       }
 
-      // clean out Teams table first
+      // clean out some data first
       prep = connection.prepareStatement("DELETE FROM TournamentTeams");
       prep.executeUpdate();
-      
+      prep = connection.prepareStatement("DELETE FROM PlayoffData");
+      prep.executeUpdate();
+      prep = connection.prepareStatement("DELETE FROM Performance");
+      prep.executeUpdate();
+      prep = connection.prepareStatement("DELETE FROM FinalScores");
+      prep.executeUpdate();
+      final Document challenge = Queries.getChallengeDocument(connection);
+      final Element rootElement = challenge.getDocumentElement();
+      for (final Element categoryElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
+        final String tableName = categoryElement.getAttribute("name");
+        prep = connection.prepareStatement("DELETE FROM "
+            + tableName);
+        prep.executeUpdate();
+      }
+
       prep = connection.prepareStatement("DELETE FROM Teams WHERE Region <> ?");
       prep.setString(1, GenerateDB.INTERNAL_TOURNAMENT);
       prep.executeUpdate();
@@ -414,8 +463,17 @@ public final class UploadTeams extends BaseFLLServlet {
               + teamNumStr + " into Teams");
         }
         try {
-          final int teamNum = Integer.parseInt(teamNumStr);
+          final NumberFormat format = NumberFormat.getNumberInstance();
+          final Number num = format.parse(teamNumStr);
+          // TODO perhaps should check for double vs. int, but this works for
+          // now
+          final int teamNum = num.intValue();
           prep.setInt(1, teamNum);
+        } catch (final ParseException e) {
+          out.println("<font color='red'>Error, "
+              + teamNumStr + " is not numeric.<br/>");
+          out.println("Go back and check your input file for errors.<br/></font>");
+          return false;
         } catch (final NumberFormatException nfe) {
           out.println("<font color='red'>Error, "
               + teamNumStr + " is not numeric.<br/>");
@@ -438,8 +496,7 @@ public final class UploadTeams extends BaseFLLServlet {
       // division the same as the team division
       stmt.executeUpdate("DELETE FROM TournamentTeams");
       stmt
-          .executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) SELECT 'DUMMY', Teams.TeamNumber, Teams.Division  FROM FilteredTeams, Teams WHERE Teams.TeamNumber = FilteredTeams."
-              + teamNumberColumn);
+          .executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) SELECT 'DUMMY', Teams.TeamNumber, Teams.Division FROM Teams");
 
       return true;
     } finally {
