@@ -20,9 +20,9 @@ import javax.swing.table.AbstractTableModel;
   
   private static final Comparator<TeamScheduleInfo> TEAM_NUMBER_COMPARATOR = new Comparator<TeamScheduleInfo>() {
     public int compare(final TeamScheduleInfo one, final TeamScheduleInfo two) {
-      if(one.teamNumber < two.teamNumber) {
+      if(one.getTeamNumber() < two.getTeamNumber()) {
         return -1;
-      } else if(one.teamNumber > two.teamNumber) {
+      } else if(one.getTeamNumber() > two.getTeamNumber()) {
         return 1;
       } else {
         return 0;
@@ -62,21 +62,21 @@ import javax.swing.table.AbstractTableModel;
     final TeamScheduleInfo schedInfo = scheduleData.get(rowIndex);
     switch(columnIndex) {
     case TEAM_NUMBER_COLUMN:
-      return schedInfo.teamNumber;
+      return schedInfo.getTeamNumber();
     case PRESENTATION_COLUMN:
-      return schedInfo.presentation;
+      return schedInfo.getPresentation();
     case TECHNICAL_COLUMN:
-      return schedInfo.technical;
+      return schedInfo.getTechnical();
     default:
       final int round = (columnIndex-FIRST_PERFORMANCE_COLUMN) / NUM_COLUMNS_PER_ROUND;
       switch((columnIndex-FIRST_PERFORMANCE_COLUMN) % NUM_COLUMNS_PER_ROUND) {
       case 0:
       case 3:
-        return schedInfo.perf[round];
+        return schedInfo.getPerf(round);
       case 1:
-        return schedInfo.perfTableColor[round];
+        return schedInfo.getPerfTableColor(round);
       case 2:
-        return schedInfo.perfTableSide[round];
+        return schedInfo.getPerfTableSide(round);
       default:
         return null;
       }
@@ -137,7 +137,7 @@ import javax.swing.table.AbstractTableModel;
    */
   public int getIndexOfTeam(final int teamNumber) {
     for(int idx=0; idx<scheduleData.size(); ++idx) {
-      if(scheduleData.get(idx).teamNumber == teamNumber) {
+      if(scheduleData.get(idx).getTeamNumber() == teamNumber) {
         return idx;
       }
     }

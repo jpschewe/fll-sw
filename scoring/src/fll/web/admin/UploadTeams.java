@@ -14,7 +14,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -39,6 +38,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.util.CSVCellReader;
@@ -463,8 +463,7 @@ public final class UploadTeams extends BaseFLLServlet {
               + teamNumStr + " into Teams");
         }
         try {
-          final NumberFormat format = NumberFormat.getNumberInstance();
-          final Number num = format.parse(teamNumStr);
+          final Number num = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumStr);
           // TODO perhaps should check for double vs. int, but this works for
           // now
           final int teamNum = num.intValue();

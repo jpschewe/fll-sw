@@ -9,25 +9,43 @@ import java.util.Date;
  * @version $Revision$
  */
 final class TeamScheduleInfo {
-  int teamNumber;
+  private int teamNumber;
 
-  String teamName;
+  private String teamName;
 
-  String organization;
+  private String organization;
 
-  String division;
+  private String division;
 
-  Date presentation;
+  private Date presentation;
 
-  Date technical;
+  private Date technical;
 
-  String judge;
+  private String judge;
 
-  Date[] perf = new Date[ParseSchedule.NUMBER_OF_ROUNDS];
+  private Date[] perf = new Date[ParseSchedule.NUMBER_OF_ROUNDS];
+  void setPerf(final int idx, final Date d) {
+    perf[idx] = d;
+  }
+  Date getPerf(final int idx) {
+    return perf[idx];
+  }
 
-  String[] perfTableColor = new String[ParseSchedule.NUMBER_OF_ROUNDS];
+  private String[] perfTableColor = new String[ParseSchedule.NUMBER_OF_ROUNDS];
+  void setPerfTableColor(final int idx, final String v) {
+    perfTableColor[idx] = v;
+  }
+  String getPerfTableColor(final int idx) {
+    return perfTableColor[idx];
+  }
 
-  int[] perfTableSide = new int[ParseSchedule.NUMBER_OF_ROUNDS];
+  private int[] perfTableSide = new int[ParseSchedule.NUMBER_OF_ROUNDS];
+  void setPerfTableSide(final int idx, final int v) {
+    perfTableSide[idx] = v;
+  }
+  int getPerfTableSide(final int idx) {
+    return perfTableSide[idx];
+  }
   
   private final int lineNumber;
   public int getLineNumber() { return lineNumber; }
@@ -54,12 +72,12 @@ final class TeamScheduleInfo {
   @Override
   public String toString() {
     return "[ScheduleInfo for "
-        + teamNumber + "]";
+        + getTeamNumber() + "]";
   }
 
   @Override
   public int hashCode() {
-    return teamNumber;
+    return getTeamNumber();
   }
 
   @Override
@@ -67,9 +85,107 @@ final class TeamScheduleInfo {
     if (o == this) {
       return true;
     } else if (o instanceof TeamScheduleInfo) {
-      return ((TeamScheduleInfo) o).teamNumber == this.teamNumber;
+      return ((TeamScheduleInfo) o).getTeamNumber() == this.getTeamNumber();
     } else {
       return false;
     }
+  }
+
+  /**
+   * @param teamNumber the teamNumber to set
+   */
+  void setTeamNumber(int teamNumber) {
+    this.teamNumber = teamNumber;
+  }
+
+  /**
+   * @return the teamNumber
+   */
+  int getTeamNumber() {
+    return teamNumber;
+  }
+
+  /**
+   * @param teamName the teamName to set
+   */
+  void setTeamName(String teamName) {
+    this.teamName = teamName;
+  }
+
+  /**
+   * @return the teamName
+   */
+  String getTeamName() {
+    return teamName;
+  }
+
+  /**
+   * @param organization the organization to set
+   */
+  void setOrganization(String organization) {
+    this.organization = organization;
+  }
+
+  /**
+   * @return the organization
+   */
+  String getOrganization() {
+    return organization;
+  }
+
+  /**
+   * @param division the division to set
+   */
+  void setDivision(String division) {
+    this.division = division;
+  }
+
+  /**
+   * @return the division
+   */
+  String getDivision() {
+    return division;
+  }
+
+  /**
+   * @param presentation the presentation to set
+   */
+  void setPresentation(Date presentation) {
+    this.presentation = presentation;
+  }
+
+  /**
+   * @return the presentation
+   */
+  Date getPresentation() {
+    return presentation;
+  }
+
+  /**
+   * @param technical the technical to set
+   */
+  void setTechnical(Date technical) {
+    this.technical = technical;
+  }
+
+  /**
+   * @return the technical
+   */
+  Date getTechnical() {
+    return technical;
+  }
+
+  /**
+   * @param judge the judge to set
+   */
+  void setJudge(String judge) {
+    this.judge = judge;
+  }
+
+  /**
+   * @return the judge
+   */
+  String getJudge() {
+    return judge;
   }
 }

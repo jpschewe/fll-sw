@@ -145,10 +145,10 @@ public class SchedulerUI extends JFrame {
       final String startingDirectory = PREFS.get(STARTING_DIRECTORY_PREF, null);
 
       final JFileChooser fileChooser = new JFileChooser();
-      final FileFilter filter = new BasicFileFilter("csv or directory", new String[]{"csv", "xls", "xslx"});
+      final FileFilter filter = new BasicFileFilter("Excel Spreadsheet", new String[]{"xls", "xslx"});
       fileChooser.setFileFilter(filter);
-      fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-      fileChooser.setMultiSelectionEnabled(false);
+//      fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+//      fileChooser.setMultiSelectionEnabled(false);
       if (null != startingDirectory) {
         fileChooser.setCurrentDirectory(new File(startingDirectory));
       }
@@ -187,6 +187,11 @@ public class SchedulerUI extends JFrame {
       }
     }
   };
+  
+  public void writeFile() throws IOException {
+    
+  }
+
 
   private static final Preferences PREFS = Preferences.userNodeForPackage(ParseSchedule.class);
 
@@ -232,7 +237,7 @@ public class SchedulerUI extends JFrame {
       // set the background based on the error state
       setBackground(null);
       for (final ConstraintViolation violation : violationsModel.getViolations()) {
-        if (violation.getTeam() == schedInfo.teamNumber) {
+        if (violation.getTeam() == schedInfo.getTeamNumber()) {
           if (SchedulerTableModel.TEAM_NUMBER_COLUMN == column
               && null == violation.getPresentation() && null == violation.getTechnical() && null == violation.getPerformance()) {
             setBackground(errorColor);
@@ -244,10 +249,10 @@ public class SchedulerUI extends JFrame {
             setBackground(errorColor);
           } else if (null != violation.getPerformance()) {
             // need to check round
-            for (int idx = 0; idx < schedInfo.perf.length; ++idx) {
+            for (int idx = 0; idx < ParseSchedule.NUMBER_OF_ROUNDS; ++idx) {
               final int firstIdx = SchedulerTableModel.FIRST_PERFORMANCE_COLUMN + (idx * SchedulerTableModel.NUM_COLUMNS_PER_ROUND);
               final int lastIdx = firstIdx + SchedulerTableModel.NUM_COLUMNS_PER_ROUND - 1;
-              if (violation.getPerformance().equals(schedInfo.perf[idx])) {
+              if (violation.getPerformance().equals(schedInfo.getPerf(idx))) {
                 if(firstIdx <= column && column <= lastIdx) {
                   setBackground(errorColor);
                 }
