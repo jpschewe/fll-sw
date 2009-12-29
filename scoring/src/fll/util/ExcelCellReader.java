@@ -51,6 +51,8 @@ public class ExcelCellReader implements CellFileReader {
       workbook = new XSSFWorkbook(stream);
       formulaEvaluator = new XSSFFormulaEvaluator((XSSFWorkbook)workbook);
     }
+    stream.close();
+    
     if(workbook.getNumberOfSheets() > 1) {
       LOGGER.warn("Multiple sheets in workbook, just using the first sheet");
     }

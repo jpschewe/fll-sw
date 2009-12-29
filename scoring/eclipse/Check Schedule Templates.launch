@@ -10,6 +10,8 @@
 <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="fll.scheduler.ParseSchedule"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="${workspace_loc:fll-sw}/scheduling/blank-schedules/"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="fll-sw"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dapp.name=check-blank-schedules -Dlogroot=."/>
 <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc:fll-sw}/scoring/build"/>
 </launchConfiguration>

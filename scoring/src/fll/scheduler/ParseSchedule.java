@@ -7,6 +7,7 @@ package fll.scheduler;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -140,31 +141,30 @@ public class ParseSchedule {
 
   public static final long SECONDS_PER_MINUTE = 60;
 
-  public static final long PERFORMANCE_DURATION = 5 * SECONDS_PER_MINUTE * 1000;
+  public static final long SECONDS_PER_MILLISECOND = 1000;
 
-  public static final long SUBJECTIVE_DURATION = 20 * SECONDS_PER_MINUTE * 1000;
+  private long performanceDuration = 5
+      * SECONDS_PER_MINUTE * SECONDS_PER_MILLISECOND;
 
-  /**
-   * This is the time required between events.
-   */
-  public static final long CHANGETIME = 15 * SECONDS_PER_MINUTE * 1000;
+  private long subjectiveDuration = 20
+      * SECONDS_PER_MINUTE * SECONDS_PER_MILLISECOND;
 
-  /**
-   * This is the time required between performance runs for each team.
-   */
-  public static final long PERFORMANCE_CHANGETIME = 45 * SECONDS_PER_MINUTE * 1000;
+  private long changetime = 15
+      * SECONDS_PER_MINUTE * SECONDS_PER_MILLISECOND;
 
-  /**
-   * This is the time required between performance runs for the two teams in
-   * involved in the performance run that crosses round 1 and round 2 when there
-   * is an odd number of teams.
-   */
-  public static final long SPECIAL_PERFORMANCE_CHANGETIME = 30 * SECONDS_PER_MINUTE * 1000;
+  private long performanceChangetime = 45
+      * SECONDS_PER_MINUTE * SECONDS_PER_MILLISECOND;
+
+  private long specialPerformanceChangetime = 30
+      * SECONDS_PER_MINUTE * SECONDS_PER_MILLISECOND;
 
   private final Map<Date, Map<String, List<TeamScheduleInfo>>> _matches = new HashMap<Date, Map<String, List<TeamScheduleInfo>>>();
 
   private final File _file;
-  public File getFile() { return _file; }
+
+  public File getFile() {
+    return _file;
+  }
 
   private final Set<String> _tableColors = new HashSet<String>();
 
@@ -185,19 +185,33 @@ public class ParseSchedule {
    * @param args files to parse
    */
   public static void main(final String[] args) {
-    if(args.length < 1) {
+    if (args.length < 1) {
       LOGGER.error("No files specified, nothing to do");
       System.exit(1);
     }
-    
+
     for (final String arg : args) {
       final File f = new File(arg);
-      checkFile(f);
+      if (f.isDirectory()) {
+        final File[] files = f.listFiles(EXCEL_FILE_FILTER);
+        for (final File f2 : files) {
+          checkFile(f2);
+        }
+      } else {
+        checkFile(f);
+      }
     }
 
     LOGGER.info("Finished, if no errors found, you're good");
     System.exit(0);
   }
+
+  public static final FileFilter EXCEL_FILE_FILTER = new FileFilter() {
+    public boolean accept(final File f) {
+      return f.getName().endsWith(".xls")
+          || f.getName().endsWith(".xslx");
+    }
+  };
 
   /**
    * Parse, verify, compute the general schedule and output the detailed
@@ -249,6 +263,7 @@ public class ParseSchedule {
    * @throws RuntimeException if a column cannot be found
    */
   private void findColumns(final CellFileReader reader) throws IOException {
+    _teamNumColumn = -1;
 
     while (_teamNumColumn == -1) {
       final String[] line = reader.readNext();
@@ -396,18 +411,17 @@ public class ParseSchedule {
 
     if (!_file.canRead()
         || !_file.isFile()) {
-      LOGGER.fatal("File is not readable or not a file: "
+      throw new RuntimeException("File is not readable or not a file: "
           + _file.getAbsolutePath());
-      return;
     }
 
     final CellFileReader reader = new ExcelCellReader(_file);
-    
+
     findColumns(reader);
     parseData(reader);
     reader.close();
   }
-  
+
   /**
    * Find the team that is competing earliest after the specified time on the
    * specified table and side in the specified round.
@@ -824,10 +838,8 @@ public class ParseSchedule {
   /**
    * Verify that there are no more than <code>numberOfTables</code> teams
    * performing at the same time.
-   * 
    */
-  private void verifyPerformanceAtTime(final Collection<ConstraintViolation> violations,
-                                       final int numberOfTableColors) {
+  private void verifyPerformanceAtTime(final Collection<ConstraintViolation> violations, final int numberOfTableColors) {
     // constraint set 6
     final Map<Date, Set<TeamScheduleInfo>> teamsAtTime = new HashMap<Date, Set<TeamScheduleInfo>>();
     for (final TeamScheduleInfo si : _schedule) {
@@ -854,8 +866,7 @@ public class ParseSchedule {
   /**
    * Ensure that no more than 1 team is in presentation judging at once.
    */
-  private void verifyPresentationAtTime(final Collection<ConstraintViolation> violations,
-                                           final int numJudges) {
+  private void verifyPresentationAtTime(final Collection<ConstraintViolation> violations, final int numJudges) {
     // constraint set 7
     final Map<Date, Set<TeamScheduleInfo>> teamsAtTime = new HashMap<Date, Set<TeamScheduleInfo>>();
     for (final TeamScheduleInfo si : _schedule) {
@@ -878,7 +889,8 @@ public class ParseSchedule {
       final Set<String> judges = new HashSet<String>();
       for (final TeamScheduleInfo ti : entry.getValue()) {
         if (!judges.add(ti.getJudge())) {
-          final String message = String.format("Presentation judge %s cannot see more than one team at %s in presentation", ti.getJudge(), OUTPUT_DATE_FORMAT.get().format(ti.getPresentation()));
+          final String message = String.format("Presentation judge %s cannot see more than one team at %s in presentation", ti.getJudge(),
+                                               OUTPUT_DATE_FORMAT.get().format(ti.getPresentation()));
           violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
         }
       }
@@ -888,10 +900,8 @@ public class ParseSchedule {
 
   /**
    * Ensure that no more than 1 team is in technical judging at once.
-   * 
    */
-  private void verifyTechnicalAtTime(final Collection<ConstraintViolation> violations,
-                                        final int numJudges) {
+  private void verifyTechnicalAtTime(final Collection<ConstraintViolation> violations, final int numJudges) {
     // constraint set 7
     final Map<Date, Set<TeamScheduleInfo>> teamsAtTime = new HashMap<Date, Set<TeamScheduleInfo>>();
     for (final TeamScheduleInfo si : _schedule) {
@@ -914,7 +924,8 @@ public class ParseSchedule {
       final Set<String> judges = new HashSet<String>();
       for (final TeamScheduleInfo ti : entry.getValue()) {
         if (!judges.add(ti.getJudge())) {
-          final String message = String.format("Technical judge %s cannot see more than one team at %s in presentation", ti.getJudge(), OUTPUT_DATE_FORMAT.get().format(ti.getPresentation()));
+          final String message = String.format("Technical judge %s cannot see more than one team at %s in presentation", ti.getJudge(),
+                                               OUTPUT_DATE_FORMAT.get().format(ti.getPresentation()));
           violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
         }
       }
@@ -964,25 +975,22 @@ public class ParseSchedule {
   }
 
   /**
-   * 
    * @return null if ok, message if not ok
    */
   private String verifyPerformanceVsSubjective(final int teamNumber,
-                                                final Date subjectiveTime,
-                                                final String subjectiveName,
-                                                final Date performanceTime,
-                                                final String performanceName) {
+                                               final Date subjectiveTime,
+                                               final String subjectiveName,
+                                               final Date performanceTime,
+                                               final String performanceName) {
     if (subjectiveTime.before(performanceTime)) {
       if (subjectiveTime.getTime()
-          + SUBJECTIVE_DURATION + CHANGETIME > performanceTime.getTime()) {
-        return String.format("Team %d has doesn't have enough time between %s and performance round %s", teamNumber, subjectiveName,
-                                            performanceName);
+          + getSubjectiveDuration() + getChangetime() > performanceTime.getTime()) {
+        return String.format("Team %d has doesn't have enough time between %s and performance round %s", teamNumber, subjectiveName, performanceName);
       }
     } else {
       if (performanceTime.getTime()
-          + PERFORMANCE_DURATION + CHANGETIME > subjectiveTime.getTime()) {
-        return String.format("Team %d has doesn't have enough time between %s and performance round %s", teamNumber, subjectiveName,
-                                            performanceName);
+          + getPerformanceDuration() + getChangetime() > subjectiveTime.getTime()) {
+        return String.format("Team %d has doesn't have enough time between %s and performance round %s", teamNumber, subjectiveName, performanceName);
       }
     }
     return null;
@@ -992,14 +1000,14 @@ public class ParseSchedule {
     // constraint set 1
     if (ti.getPresentation().before(ti.getTechnical())) {
       if (ti.getPresentation().getTime()
-          + SUBJECTIVE_DURATION + CHANGETIME > ti.getTechnical().getTime()) {
+          + getSubjectiveDuration() + getChangetime() > ti.getTechnical().getTime()) {
         final String message = String.format("Team %d has doesn't have enough time between presentation and technical", ti.getTeamNumber());
         violations.add(new ConstraintViolation(ti.getTeamNumber(), ti.getPresentation(), ti.getTechnical(), null, message));
         return;
       }
     } else {
       if (ti.getTechnical().getTime()
-          + SUBJECTIVE_DURATION + CHANGETIME > ti.getPresentation().getTime()) {
+          + getSubjectiveDuration() + getChangetime() > ti.getPresentation().getTime()) {
         final String message = String.format("Team %d has doesn't have enough time between presentation and technical", ti.getTeamNumber());
         violations.add(new ConstraintViolation(ti.getTeamNumber(), ti.getPresentation(), ti.getTechnical(), null, message));
         return;
@@ -1012,32 +1020,33 @@ public class ParseSchedule {
     final int round2OpponentRound = findOpponentRound(ti, 1);
     if (round1OpponentRound != 0
         || round2OpponentRound != 1) {
-      changetime = SPECIAL_PERFORMANCE_CHANGETIME;
+      changetime = getSpecialPerformanceChangetime();
     } else {
-      changetime = PERFORMANCE_CHANGETIME;
+      changetime = getPerformanceChangetime();
     }
     if (ti.getPerf(0).getTime()
-        + PERFORMANCE_DURATION + changetime > ti.getPerf(1).getTime()) {
-      final String message= String.format("Team %d doesn't have enough time (%d minutes) between performance 1 and performance 2: %s - %s", ti.getTeamNumber(),
-                                          changetime
-                                              / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.get().format(ti.getPerf(0)), OUTPUT_DATE_FORMAT.get()
-                                                                                                                                          .format(ti.getPerf(1)));
+        + getPerformanceDuration() + changetime > ti.getPerf(1).getTime()) {
+      final String message = String.format("Team %d doesn't have enough time (%d minutes) between performance 1 and performance 2: %s - %s",
+                                           ti.getTeamNumber(), changetime
+                                               / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.get().format(ti.getPerf(0)),
+                                           OUTPUT_DATE_FORMAT.get().format(ti.getPerf(1)));
       violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, ti.getPerf(1), message));
     }
 
     if (ti.getPerf(1).getTime()
-        + PERFORMANCE_DURATION + PERFORMANCE_CHANGETIME > ti.getPerf(2).getTime()) {
-      final String message = String.format("Team %d doesn't have enough time (%d minutes) between performance 2 and performance 3: %s - %s", ti.getTeamNumber(),
-                                          changetime
-                                              / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.get().format(ti.getPerf(1)), OUTPUT_DATE_FORMAT.get()
-                                                                                                                                          .format(ti.getPerf(2)));
+        + getPerformanceDuration() + getPerformanceChangetime() > ti.getPerf(2).getTime()) {
+      final String message = String.format("Team %d doesn't have enough time (%d minutes) between performance 2 and performance 3: %s - %s",
+                                           ti.getTeamNumber(), changetime
+                                               / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.get().format(ti.getPerf(1)),
+                                           OUTPUT_DATE_FORMAT.get().format(ti.getPerf(2)));
       violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, ti.getPerf(2), message));
     }
 
     // constraint set 4
     for (int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
-      final String message = verifyPerformanceVsSubjective(ti.getTeamNumber(), ti.getPresentation(), "presentation", ti.getPerf(round), String.valueOf(round + 1));
-      if(null != message) {
+      final String message = verifyPerformanceVsSubjective(ti.getTeamNumber(), ti.getPresentation(), "presentation", ti.getPerf(round),
+                                                           String.valueOf(round + 1));
+      if (null != message) {
         violations.add(new ConstraintViolation(ti.getTeamNumber(), ti.getPresentation(), null, ti.getPerf(round), message));
       }
     }
@@ -1045,7 +1054,7 @@ public class ParseSchedule {
     // constraint set 5
     for (int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
       final String message = verifyPerformanceVsSubjective(ti.getTeamNumber(), ti.getTechnical(), "technical", ti.getPerf(round), String.valueOf(round + 1));
-      if(null != message) {
+      if (null != message) {
         violations.add(new ConstraintViolation(ti.getTeamNumber(), null, ti.getTechnical(), ti.getPerf(round), message));
       }
     }
@@ -1064,7 +1073,7 @@ public class ParseSchedule {
         }
         if (-1 == opponentSide) {
           final String message = String.format("Unable to find time match for rounds between team %d and team %d at time %s", ti.getTeamNumber(),
-                                              opponent.getTeamNumber(), OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round)));
+                                               opponent.getTeamNumber(), OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round)));
           violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, ti.getPerf(round), message));
         } else {
           if (opponentSide == ti.getPerfTableSide(round)) {
@@ -1083,6 +1092,12 @@ public class ParseSchedule {
             violations.add(new ConstraintViolation(opponent.getTeamNumber(), null, null, null, message));
           }
         }
+      } else {
+        // only a problem if this is not the last round and we don't have an odd number of teams
+        if (!(round == NUMBER_OF_ROUNDS - 1 && (_schedule.size() % 2) == 1)) {
+          final String message = String.format("Team %d has no opponent for round %d", ti.getTeamNumber(), (round + 1));
+          violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, ti.getPerf(round), message));
+        }
       }
     }
 
@@ -1093,23 +1108,23 @@ public class ParseSchedule {
         // everything else checked out, only only need to check the end time
         // against subjective and the next round
         String message = verifyPerformanceVsSubjective(ti.getTeamNumber(), ti.getPresentation(), "presentation", next.getPerf(round), "extra");
-        if(null != message) {
+        if (null != message) {
           violations.add(new ConstraintViolation(ti.getTeamNumber(), ti.getPresentation(), null, ti.getPerf(round), message));
         }
 
         message = verifyPerformanceVsSubjective(ti.getTeamNumber(), ti.getTechnical(), "technical", next.getPerf(round), "extra");
-        if(null != message) {
+        if (null != message) {
           violations.add(new ConstraintViolation(ti.getTeamNumber(), null, ti.getTechnical(), ti.getPerf(round), message));
         }
 
         if (round + 1 < NUMBER_OF_ROUNDS) {
           if (next.getPerf(round).getTime()
-              + PERFORMANCE_DURATION + PERFORMANCE_CHANGETIME > ti.getPerf(round + 1).getTime()) {
+              + getPerformanceDuration() + getPerformanceChangetime() > ti.getPerf(round + 1).getTime()) {
             message = String.format("Team %d doesn't have enough time (%d minutes) between performance %d and performance extra: %s - %s", ti.getTeamNumber(),
-                                       changetime
-                                           / 1000 / SECONDS_PER_MINUTE, round, OUTPUT_DATE_FORMAT.get().format(next.getPerf(round)),
-                                       OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round + 1)));
-            violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, ti.getPerf(round+1), message));
+                                    changetime
+                                        / 1000 / SECONDS_PER_MINUTE, round, OUTPUT_DATE_FORMAT.get().format(next.getPerf(round)),
+                                    OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round + 1)));
+            violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, ti.getPerf(round + 1), message));
           }
         }
 
@@ -1137,23 +1152,23 @@ public class ParseSchedule {
       ti.setOrganization(line[_organizationColumn]);
       ti.setDivision(line[_divisionColumn]);
       final String presentationStr = line[_presentationColumn];
-      if("".equals(presentationStr)) {
+      if ("".equals(presentationStr)) {
         // If we got an empty string, then we must have hit the end
         return null;
       }
       ti.setPresentation(parseDate(presentationStr));
-      
+
       final String technicalStr = line[_technicalColumn];
-      if("".equals(technicalStr)) {
+      if ("".equals(technicalStr)) {
         // If we got an empty string, then we must have hit the end
         return null;
       }
       ti.setTechnical(parseDate(technicalStr));
-      
+
       ti.setJudge(line[_judgeGroupColumn]);
-      
+
       final String perf1Str = line[_perf1Column];
-      if("".equals(perf1Str)) {
+      if ("".equals(perf1Str)) {
         // If we got an empty string, then we must have hit the end
         return null;
       }
@@ -1162,18 +1177,17 @@ public class ParseSchedule {
       String[] tablePieces = table.split(" ");
       if (tablePieces.length != 2) {
         throw new RuntimeException("Error parsing table information from: "
-                                   + table);
+            + table);
       }
       ti.setPerfTableColor(0, tablePieces[0]);
       ti.setPerfTableSide(0, Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue());
       if (ti.getPerfTableSide(0) > 2
           || ti.getPerfTableSide(0) < 1) {
-      //FIXME need to do something more serious here so the GUI catches it
+        // FIXME need to do something more serious here so the GUI catches it
         LOGGER.error("There are only two sides to the table, number must be 1 or 2 team: "
-                     + ti.getTeamNumber() + " round 1");
+            + ti.getTeamNumber() + " round 1");
       }
-      
-      
+
       table = line[_perf2TableColumn];
       tablePieces = table.split(" ");
       if (tablePieces.length != 2) {
@@ -1184,16 +1198,16 @@ public class ParseSchedule {
       ti.setPerfTableSide(1, Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue());
       if (ti.getPerfTableSide(1) > 2
           || ti.getPerfTableSide(1) < 1) {
-        //FIXME need to do something more serious here so the GUI catches it
+        // FIXME need to do something more serious here so the GUI catches it
         LOGGER.error("There are only two sides to the table, number must be 1 or 2 team: "
             + ti.getTeamNumber() + " round 2");
       }
       final String perf2Str = line[_perf2Column];
-      if("".equals(perf2Str)) {
+      if ("".equals(perf2Str)) {
         // If we got an empty string, then we must have hit the end
         return null;
       }
-      ti.setPerf(1,  parseDate(perf2Str));
+      ti.setPerf(1, parseDate(perf2Str));
 
       table = line[_perf3TableColumn];
       tablePieces = table.split(" ");
@@ -1205,12 +1219,12 @@ public class ParseSchedule {
       ti.setPerfTableSide(2, Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue());
       if (ti.getPerfTableSide(2) > 2
           || ti.getPerfTableSide(2) < 1) {
-        //FIXME need to do something more serious here so the GUI catches it
+        // FIXME need to do something more serious here so the GUI catches it
         LOGGER.error("There are only two sides to the table, number must be 1 or 2 team: "
             + ti.getTeamNumber() + " round 2");
       }
       final String perf3Str = line[_perf3Column];
-      if("".equals(perf3Str)) {
+      if ("".equals(perf3Str)) {
         // If we got an empty string, then we must have hit the end
         return null;
       }
@@ -1244,6 +1258,88 @@ public class ParseSchedule {
         return OUTPUT_DATE_FORMAT.get().parse(s);
       }
     }
+  }
+
+  /**
+   * Time to allocate for a performance run.
+   * 
+   * @return the performanceDuration (milliseconds)
+   */
+  public long getPerformanceDuration() {
+    return performanceDuration;
+  }
+
+  /**
+   * Time to allocate for either presentation or technical judging.
+   * 
+   * @return the subjectiveDuration (milliseconds)
+   */
+  public long getSubjectiveDuration() {
+    return subjectiveDuration;
+  }
+
+  /**
+   * This is the time required between events.
+   * 
+   * @return the changetime (milliseconds)
+   */
+  public long getChangetime() {
+    return changetime;
+  }
+
+  /**
+   * This is the time required between performance runs for each team.
+   * 
+   * @return the performanceChangetime (milliseconds)
+   */
+  public long getPerformanceChangetime() {
+    return performanceChangetime;
+  }
+
+  /**
+   * This is the time required between performance runs for the two teams in
+   * involved in the performance run that crosses round 1 and round 2 when there
+   * is an odd number of teams.
+   * 
+   * @return the specialPerformanceChangetime (milliseconds)
+   */
+  public long getSpecialPerformanceChangetime() {
+    return specialPerformanceChangetime;
+  }
+
+  /**
+   * @param specialPerformanceChangetime the specialPerformanceChangetime to set
+   */
+  public void setSpecialPerformanceChangetime(long specialPerformanceChangetime) {
+    this.specialPerformanceChangetime = specialPerformanceChangetime;
+  }
+
+  /**
+   * @param performanceChangetime the performanceChangetime to set
+   */
+  public void setPerformanceChangetime(long performanceChangetime) {
+    this.performanceChangetime = performanceChangetime;
+  }
+
+  /**
+   * @param changetime the changetime to set
+   */
+  public void setChangetime(long changetime) {
+    this.changetime = changetime;
+  }
+
+  /**
+   * @param subjectiveDuration the subjectiveDuration to set
+   */
+  public void setSubjectiveDuration(long subjectiveDuration) {
+    this.subjectiveDuration = subjectiveDuration;
+  }
+
+  /**
+   * @param performanceDuration the performanceDuration to set
+   */
+  public void setPerformanceDuration(long performanceDuration) {
+    this.performanceDuration = performanceDuration;
   }
 
   /**

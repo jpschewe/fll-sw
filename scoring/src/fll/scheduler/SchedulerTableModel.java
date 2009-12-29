@@ -42,13 +42,14 @@ import javax.swing.table.AbstractTableModel;
    * @see javax.swing.table.TableModel#getColumnCount()
    */
   public int getColumnCount() {
-    return 3 + ParseSchedule.NUMBER_OF_ROUNDS * NUM_COLUMNS_PER_ROUND;
+    return (TECHNICAL_COLUMN + 1) + (ParseSchedule.NUMBER_OF_ROUNDS * NUM_COLUMNS_PER_ROUND);
   }
 
   public static final int TEAM_NUMBER_COLUMN = 0;
-  public static final int PRESENTATION_COLUMN = 1;
-  public static final int TECHNICAL_COLUMN = 2;
-  public static final int FIRST_PERFORMANCE_COLUMN = 3;
+  public static final int JUDGE_COLUMN = TEAM_NUMBER_COLUMN + 1; 
+  public static final int PRESENTATION_COLUMN = JUDGE_COLUMN + 1;
+  public static final int TECHNICAL_COLUMN = PRESENTATION_COLUMN + 1;
+  public static final int FIRST_PERFORMANCE_COLUMN = TECHNICAL_COLUMN + 1;
   public static final int NUM_COLUMNS_PER_ROUND = 3;
   
   /**
@@ -66,13 +67,16 @@ import javax.swing.table.AbstractTableModel;
     switch(columnIndex) {
     case TEAM_NUMBER_COLUMN:
       return schedInfo.getTeamNumber();
+    case JUDGE_COLUMN:
+      return schedInfo.getJudge();
     case PRESENTATION_COLUMN:
       return schedInfo.getPresentation();
     case TECHNICAL_COLUMN:
       return schedInfo.getTechnical();
     default:
-      final int round = (columnIndex-FIRST_PERFORMANCE_COLUMN) / NUM_COLUMNS_PER_ROUND;
-      switch((columnIndex-FIRST_PERFORMANCE_COLUMN) % NUM_COLUMNS_PER_ROUND) {
+      final int perfColIdx = columnIndex - FIRST_PERFORMANCE_COLUMN;
+      final int round = perfColIdx / NUM_COLUMNS_PER_ROUND;
+      switch(perfColIdx % NUM_COLUMNS_PER_ROUND) {
       case 0:
       case 3:
         return schedInfo.getPerf(round);
@@ -91,12 +95,15 @@ import javax.swing.table.AbstractTableModel;
     switch(columnIndex) {
     case TEAM_NUMBER_COLUMN:
       return Integer.class;
+    case JUDGE_COLUMN:
+      return String.class;
     case PRESENTATION_COLUMN:
       return Date.class;
     case TECHNICAL_COLUMN:
       return Date.class;
     default:
-      switch(columnIndex % NUM_COLUMNS_PER_ROUND) {
+      final int perfColIdx = columnIndex - FIRST_PERFORMANCE_COLUMN;
+      switch(perfColIdx % NUM_COLUMNS_PER_ROUND) {
       case 0:
         return Date.class;
       case 1:
@@ -114,13 +121,16 @@ import javax.swing.table.AbstractTableModel;
     switch(columnIndex) {
     case TEAM_NUMBER_COLUMN:
       return "Team #";
+    case JUDGE_COLUMN:
+      return "Judge";
     case PRESENTATION_COLUMN:
       return "Presentation";
     case TECHNICAL_COLUMN:
       return "Technical";
     default:
-      final int round = (columnIndex-FIRST_PERFORMANCE_COLUMN) / NUM_COLUMNS_PER_ROUND;
-      switch(columnIndex % NUM_COLUMNS_PER_ROUND) {
+      final int perfColIdx = columnIndex - FIRST_PERFORMANCE_COLUMN;
+      final int round = perfColIdx / NUM_COLUMNS_PER_ROUND;
+      switch(perfColIdx % NUM_COLUMNS_PER_ROUND) {
       case 0:
         return "Perf #" + (round + 1);
       case 1:

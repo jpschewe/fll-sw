@@ -71,10 +71,10 @@ public class SchedulerUI extends JFrame {
     final Container cpane = getContentPane();
     cpane.setLayout(new BorderLayout());
     cpane.add(createToolbar(), BorderLayout.PAGE_START);
-    scheduledTable = new JTable();
-    scheduledTable.setDefaultRenderer(Date.class, schedTableRenderer);
+    scheduleTable = new JTable();
+    scheduleTable.setDefaultRenderer(Date.class, schedTableRenderer);
 
-    final JScrollPane dataScroller = new JScrollPane(scheduledTable);
+    final JScrollPane dataScroller = new JScrollPane(scheduleTable);
     cpane.add(dataScroller, BorderLayout.CENTER);
 
     violationTable = new JTable();
@@ -85,11 +85,10 @@ public class SchedulerUI extends JFrame {
 
   private transient final ListSelectionListener violationSelectionListener = new ListSelectionListener() {
     public void valueChanged(final ListSelectionEvent e) {
-      // single selection only uses the last index
-      final ConstraintViolation selected = violationsModel.getViolation(e.getLastIndex());
+      final ConstraintViolation selected = violationsModel.getViolation(violationTable.getSelectedRow());
       if (ConstraintViolation.NO_TEAM != selected.getTeam()) {
         final int teamIndex = scheduleModel.getIndexOfTeam(selected.getTeam());
-        scheduledTable.getSelectionModel().setSelectionInterval(teamIndex, teamIndex);
+        scheduleTable.getSelectionModel().setSelectionInterval(teamIndex, teamIndex);
       }
     }
   };
@@ -98,7 +97,8 @@ public class SchedulerUI extends JFrame {
     final JToolBar toolbar = new JToolBar("SchedulerUI Main Toolbar");
 
     toolbar.add(_openAction);
-    toolbar.add(_exitAction);
+    toolbar.add(reloadFileAction);
+    toolbar.add(_preferencesAction);
 
     return toolbar;
   }
@@ -106,7 +106,7 @@ public class SchedulerUI extends JFrame {
   private JMenuBar createMenubar() {
     final JMenuBar menubar = new JMenuBar();
 
-    menubar.add(createFileMenu());
+    menubar.add(createFileMenu());    
 
     return menubar;
   }
@@ -116,10 +116,50 @@ public class SchedulerUI extends JFrame {
     menu.setMnemonic('f');
 
     menu.add(_openAction);
+    menu.add(reloadFileAction);
     menu.add(_exitAction);
 
     return menu;
   }
+
+  private final Action reloadFileAction = new AbstractAction("Reload File") {
+    {
+      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Refresh16.gif"));
+      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Refresh24.gif"));
+      putValue(SHORT_DESCRIPTION, "Reload the file");
+//      putValue(MNEMONIC_KEY, KeyEvent.VK_X);
+    }
+
+    public void actionPerformed(final ActionEvent ae) {
+      try {
+        final ParseSchedule newData = new ParseSchedule(scheduleData.getFile());
+        newData.parseFile();
+        setScheduleData(newData);
+      } catch (final IOException e) {
+        final Formatter errorFormatter = new Formatter();
+        errorFormatter.format("Error reloading file: %s", e.getMessage());
+        LOGGER.error(errorFormatter, e);
+        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reloading file", JOptionPane.ERROR_MESSAGE);
+      } catch (ParseException e) {
+        final Formatter errorFormatter = new Formatter();
+        errorFormatter.format("Error reloading file: %s", e.getMessage());
+        LOGGER.error(errorFormatter, e);
+        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reloading file", JOptionPane.ERROR_MESSAGE);      }
+    }
+  };
+
+  private final Action _preferencesAction = new AbstractAction("Preferences") {
+    {
+      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Preferences16.gif"));
+      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Preferences24.gif"));
+      putValue(SHORT_DESCRIPTION, "Set scheduling preferences");
+//      putValue(MNEMONIC_KEY, KeyEvent.VK_X);
+    }
+
+    public void actionPerformed(final ActionEvent ae) {
+      JOptionPane.showMessageDialog(SchedulerUI.this, "Not implemented yet");
+    }
+  };
 
   private final Action _exitAction = new AbstractAction("Exit") {
     {
@@ -133,6 +173,7 @@ public class SchedulerUI extends JFrame {
       System.exit(0);
     }
   };
+  
 
   private final Action _openAction = new AbstractAction("Open") {
     {
@@ -147,8 +188,6 @@ public class SchedulerUI extends JFrame {
       final JFileChooser fileChooser = new JFileChooser();
       final FileFilter filter = new BasicFileFilter("Excel Spreadsheet", new String[]{"xls", "xslx"});
       fileChooser.setFileFilter(filter);
-//      fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-//      fileChooser.setMultiSelectionEnabled(false);
       if (null != startingDirectory) {
         fileChooser.setCurrentDirectory(new File(startingDirectory));
       }
@@ -188,10 +227,6 @@ public class SchedulerUI extends JFrame {
     }
   };
   
-  public void writeFile() throws IOException {
-    
-  }
-
 
   private static final Preferences PREFS = Preferences.userNodeForPackage(ParseSchedule.class);
 
@@ -204,17 +239,26 @@ public class SchedulerUI extends JFrame {
   private ViolationTableModel violationsModel;
 
   private void setScheduleData(final ParseSchedule sd) {
+    scheduleTable.clearSelection();
+    
     scheduleData = sd;
     scheduleModel = new SchedulerTableModel(scheduleData.getSchedule());
-    scheduledTable.setModel(scheduleModel);
+    scheduleTable.setModel(scheduleModel);
 
+    checkSchedule();
+  }
+  
+  /**
+   * Verify the existing schedule and update the violations.
+   */
+  private void checkSchedule() {
+    violationTable.clearSelection();
+    
     violationsModel = new ViolationTableModel(scheduleData.verifySchedule());
-    violationTable.setModel(violationsModel);
-
-    pack();
+    violationTable.setModel(violationsModel);    
   }
 
-  private final JTable scheduledTable;
+  private final JTable scheduleTable;
 
   private final JTable violationTable;
 
@@ -249,7 +293,8 @@ public class SchedulerUI extends JFrame {
             setBackground(errorColor);
           } else if (null != violation.getPerformance()) {
             // need to check round
-            for (int idx = 0; idx < ParseSchedule.NUMBER_OF_ROUNDS; ++idx) {
+            //FIXME this isn't highlighting all of the performance columns
+            for (int idx = 0; idx < ParseSchedule.NUMBER_OF_ROUNDS; ++idx) {              
               final int firstIdx = SchedulerTableModel.FIRST_PERFORMANCE_COLUMN + (idx * SchedulerTableModel.NUM_COLUMNS_PER_ROUND);
               final int lastIdx = firstIdx + SchedulerTableModel.NUM_COLUMNS_PER_ROUND - 1;
               if (violation.getPerformance().equals(schedInfo.getPerf(idx))) {
