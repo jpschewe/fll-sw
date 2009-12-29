@@ -86,7 +86,7 @@ public class SchedulerUI extends JFrame {
     
   }
 
-  private transient final ListSelectionListener violationSelectionListener = new ListSelectionListener() {
+  private final transient ListSelectionListener violationSelectionListener = new ListSelectionListener() {
     public void valueChanged(final ListSelectionEvent e) {
       final int selectedRow = violationTable.getSelectedRow();
       if(selectedRow == -1) {
@@ -141,7 +141,6 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       try {
         final ParseSchedule newData = new ParseSchedule(scheduleData.getFile());
-        newData.parseFile();
         setScheduleData(newData);
       } catch (final IOException e) {
         final Formatter errorFormatter = new Formatter();
@@ -208,9 +207,9 @@ public class SchedulerUI extends JFrame {
         final File selectedFile = fileChooser.getSelectedFile();
         if (selectedFile.isFile()
             && selectedFile.canRead()) {
-          final ParseSchedule schedule = new ParseSchedule(selectedFile);
           try {
-            schedule.parseFile();
+            final ParseSchedule schedule = new ParseSchedule(selectedFile);
+            setScheduleData(schedule);
           } catch (final ParseException e) {
             final Formatter errorFormatter = new Formatter();
             errorFormatter.format("Error reading file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
@@ -224,8 +223,6 @@ public class SchedulerUI extends JFrame {
             JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file", JOptionPane.ERROR_MESSAGE);
             return;
           }
-
-          setScheduleData(schedule);
 
         } else {
           JOptionPane.showMessageDialog(SchedulerUI.this, new Formatter().format("%s is not a file or is not readable", selectedFile.getAbsolutePath()),

@@ -223,10 +223,8 @@ public class ParseSchedule {
    * @see #outputDetailedSchedules()
    */
   private static void checkFile(final File f) {
-    final ParseSchedule ps = new ParseSchedule(f);
-
     try {
-      ps.parseFile();
+      final ParseSchedule ps = new ParseSchedule(f);
 
       final Collection<ConstraintViolation> violations = ps.verifySchedule();
 
@@ -252,8 +250,22 @@ public class ParseSchedule {
     }
   }
 
-  public ParseSchedule(final File f) {
+  public ParseSchedule(final File f) throws IOException, ParseException {
     _file = f;
+    
+    LOGGER.info(new Formatter().format("Reading file %s", _file.getAbsoluteFile()));
+
+    if (!_file.canRead()
+        || !_file.isFile()) {
+      throw new RuntimeException("File is not readable or not a file: "
+          + _file.getAbsolutePath());
+    }
+
+    final CellFileReader reader = new ExcelCellReader(_file);
+
+    findColumns(reader);
+    parseData(reader);
+    reader.close();
   }
 
   /**
@@ -404,22 +416,6 @@ public class ParseSchedule {
     verifyTechnicalAtTime(constraintViolations, numJudges);
 
     return constraintViolations;
-  }
-
-  public void parseFile() throws IOException, ParseException {
-    LOGGER.info(new Formatter().format("Reading file %s", _file.getAbsoluteFile()));
-
-    if (!_file.canRead()
-        || !_file.isFile()) {
-      throw new RuntimeException("File is not readable or not a file: "
-          + _file.getAbsolutePath());
-    }
-
-    final CellFileReader reader = new ExcelCellReader(_file);
-
-    findColumns(reader);
-    parseData(reader);
-    reader.close();
   }
 
   /**
