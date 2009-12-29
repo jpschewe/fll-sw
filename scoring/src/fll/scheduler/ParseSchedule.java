@@ -8,7 +8,6 @@ package fll.scheduler;
 import java.awt.Color;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -28,8 +27,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import au.com.bytecode.opencsv.CSVReader;
-
 import com.lowagie.text.BadElementException;
 import com.lowagie.text.Cell;
 import com.lowagie.text.Chunk;
@@ -47,6 +44,9 @@ import com.lowagie.text.pdf.PdfPageEventHelper;
 import com.lowagie.text.pdf.PdfWriter;
 
 import fll.Utilities;
+import fll.util.CSVCellReader;
+import fll.util.CellFileReader;
+import fll.util.ExcelCellReader;
 
 /**
  * Parse a CSV file representing the detailed schedule for a tournament.
@@ -118,14 +118,14 @@ public class ParseSchedule {
     }
   };
 
-  private static final ThreadLocal<DateFormat> DATE_FORMAT_AM_PM_SS = new ThreadLocal<DateFormat>() {
+  public static final ThreadLocal<DateFormat> DATE_FORMAT_AM_PM_SS = new ThreadLocal<DateFormat>() {
     @Override
     protected DateFormat initialValue() {
       return new SimpleDateFormat("hh:mm:ss a");
     }
   };
 
-  /* package */static final ThreadLocal<DateFormat> OUTPUT_DATE_FORMAT = new ThreadLocal<DateFormat>() {
+  public static final ThreadLocal<DateFormat> OUTPUT_DATE_FORMAT = new ThreadLocal<DateFormat>() {
     @Override
     protected DateFormat initialValue() {
       return new SimpleDateFormat("H:mm");
@@ -248,10 +248,10 @@ public class ParseSchedule {
    * @throws IOException
    * @throws RuntimeException if a column cannot be found
    */
-  private void findColumns(final CSVReader csvreader) throws IOException {
+  private void findColumns(final CellFileReader reader) throws IOException {
 
     while (_teamNumColumn == -1) {
-      final String[] line = csvreader.readNext();
+      final String[] line = reader.readNext();
       if (null == line) {
         throw new RuntimeException("Cannot find header line and reached EOF");
       }
@@ -350,9 +350,9 @@ public class ParseSchedule {
    * 
    * @throws IOException
    */
-  private void parseData(final CSVReader csvreader) throws IOException, ParseException {
+  private void parseData(final CellFileReader reader) throws IOException, ParseException {
     TeamScheduleInfo ti;
-    while (null != (ti = parseLine(csvreader))) {
+    while (null != (ti = parseLine(reader))) {
       _schedule.add(ti);
 
       // keep track of some meta information
@@ -401,10 +401,18 @@ public class ParseSchedule {
       return;
     }
 
-    final CSVReader csvreader = new CSVReader(new FileReader(_file));
-    findColumns(csvreader);
-
-    parseData(csvreader);
+    final CellFileReader reader;
+    if(_file.getName().endsWith("xls") || _file.getName().endsWith("xslx")) {
+      LOGGER.info("Reading as XLS");
+      reader = new ExcelCellReader(_file);
+    } else {
+      LOGGER.info("Reading as CSV");
+      reader = new CSVCellReader(_file);
+    }
+    
+    findColumns(reader);
+    parseData(reader);
+    reader.close();
   }
 
   /**
@@ -844,7 +852,7 @@ public class ParseSchedule {
 
     for (final Map.Entry<Date, Set<TeamScheduleInfo>> entry : teamsAtTime.entrySet()) {
       if (entry.getValue().size() > numberOfTableColors * 2) {
-        final String message = String.format("There are too many teams at %s", entry.getKey());
+        final String message = String.format("There are too many teams in performance at %s", OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
         violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
       }
     }
@@ -870,14 +878,14 @@ public class ParseSchedule {
 
     for (final Map.Entry<Date, Set<TeamScheduleInfo>> entry : teamsAtTime.entrySet()) {
       if (entry.getValue().size() > numJudges) {
-        final String message = String.format("There are too many teams at %s in presentation", entry.getKey());
+        final String message = String.format("There are too many teams in presentation at %s in presentation", OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
         violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
       }
 
       final Set<String> judges = new HashSet<String>();
       for (final TeamScheduleInfo ti : entry.getValue()) {
         if (!judges.add(ti.judge)) {
-          final String message = String.format("Judges %s cannot see more than one team at %s in presentation", ti.judge, ti.presentation);
+          final String message = String.format("Presentation judge %s cannot see more than one team at %s in presentation", ti.judge, OUTPUT_DATE_FORMAT.get().format(ti.presentation));
           violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
         }
       }
@@ -906,14 +914,14 @@ public class ParseSchedule {
 
     for (final Map.Entry<Date, Set<TeamScheduleInfo>> entry : teamsAtTime.entrySet()) {
       if (entry.getValue().size() > numJudges) {
-        final String message = String.format("There are too many teams at %s in technical", entry.getKey());
+        final String message = String.format("There are too many teams in technical at %s in technical", OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
         violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
       }
 
       final Set<String> judges = new HashSet<String>();
       for (final TeamScheduleInfo ti : entry.getValue()) {
         if (!judges.add(ti.judge)) {
-          final String message = String.format("Judge %s cannot see more than one team at %s in presentation", ti.judge, ti.presentation);
+          final String message = String.format("Technical judge %s cannot see more than one team at %s in presentation", ti.judge, OUTPUT_DATE_FORMAT.get().format(ti.presentation));
           violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
         }
       }
@@ -1120,8 +1128,8 @@ public class ParseSchedule {
    * @return the schedule info or null if there was an error, or the last line
    *         is hit
    */
-  private TeamScheduleInfo parseLine(final CSVReader csvReader) throws IOException, ParseException {
-    final String[] line = csvReader.readNext();
+  private TeamScheduleInfo parseLine(final CellFileReader reader) throws IOException, ParseException {
+    final String[] line = reader.readNext();
 
     try {
 
@@ -1130,30 +1138,48 @@ public class ParseSchedule {
         // hit empty row
         return null;
       }
-      final TeamScheduleInfo ti = new TeamScheduleInfo(csvReader.getLineNumber());
+      final TeamScheduleInfo ti = new TeamScheduleInfo(reader.getLineNumber());
       ti.teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
       ti.teamName = line[_teamNameColumn];
       ti.organization = line[_organizationColumn];
       ti.division = line[_divisionColumn];
-      ti.presentation = parseDate(line[_presentationColumn]);
-      ti.technical = parseDate(line[_technicalColumn]);
+      final String presentationStr = line[_presentationColumn];
+      if("".equals(presentationStr)) {
+        // If we got an empty string, then we must have hit the end
+        return null;
+      }
+      ti.presentation = parseDate(presentationStr);
+      
+      final String technicalStr = line[_technicalColumn];
+      if("".equals(technicalStr)) {
+        // If we got an empty string, then we must have hit the end
+        return null;
+      }
+      ti.technical = parseDate(technicalStr);
+      
       ti.judge = line[_judgeGroupColumn];
-      ti.perf[0] = parseDate(line[_perf1Column]);
+      
+      final String perf1Str = line[_perf1Column];
+      if("".equals(perf1Str)) {
+        // If we got an empty string, then we must have hit the end
+        return null;
+      }
+      ti.perf[0] = parseDate(perf1Str);
       String table = line[_perf1TableColumn];
       String[] tablePieces = table.split(" ");
       if (tablePieces.length != 2) {
         throw new RuntimeException("Error parsing table information from: "
-            + table);
+                                   + table);
       }
       ti.perfTableColor[0] = tablePieces[0];
       ti.perfTableSide[0] = Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue();
       if (ti.perfTableSide[0] > 2
           || ti.perfTableSide[0] < 1) {
         LOGGER.error("There are only two sides to the table, number must be 1 or 2 team: "
-            + ti.teamNumber + " round 1");
+                     + ti.teamNumber + " round 1");
       }
-      ti.perf[0] = parseDate(line[_perf1Column]);
-
+      
+      
       table = line[_perf2TableColumn];
       tablePieces = table.split(" ");
       if (tablePieces.length != 2) {
@@ -1167,7 +1193,12 @@ public class ParseSchedule {
         LOGGER.error("There are only two sides to the table, number must be 1 or 2 team: "
             + ti.teamNumber + " round 2");
       }
-      ti.perf[1] = parseDate(line[_perf2Column]);
+      final String perf2Str = line[_perf2Column];
+      if("".equals(perf2Str)) {
+        // If we got an empty string, then we must have hit the end
+        return null;
+      }
+      ti.perf[1] = parseDate(perf2Str);
 
       table = line[_perf3TableColumn];
       tablePieces = table.split(" ");
@@ -1182,7 +1213,12 @@ public class ParseSchedule {
         LOGGER.error("There are only two sides to the table, number must be 1 or 2 team: "
             + ti.teamNumber + " round 2");
       }
-      ti.perf[2] = parseDate(line[_perf3Column]);
+      final String perf3Str = line[_perf3Column];
+      if("".equals(perf3Str)) {
+        // If we got an empty string, then we must have hit the end
+        return null;
+      }
+      ti.perf[2] = parseDate(perf3Str);
 
       return ti;
     } catch (final ParseException pe) {

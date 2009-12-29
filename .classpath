@@ -57,5 +57,7 @@
 	<classpathentry kind="lib" path="scoring/tools/tomcat/lib/servlet-api.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/jlfgr-1_0.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/opencsv-2.1-jps.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/poi-3.6-20091214.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-3.6-20091214.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>

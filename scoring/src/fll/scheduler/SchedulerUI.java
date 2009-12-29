@@ -145,7 +145,7 @@ public class SchedulerUI extends JFrame {
       final String startingDirectory = PREFS.get(STARTING_DIRECTORY_PREF, null);
 
       final JFileChooser fileChooser = new JFileChooser();
-      final FileFilter filter = new BasicFileFilter("csv or directory", "csv");
+      final FileFilter filter = new BasicFileFilter("csv or directory", new String[]{"csv", "xls", "xslx"});
       fileChooser.setFileFilter(filter);
       fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
       fileChooser.setMultiSelectionEnabled(false);
@@ -169,11 +169,13 @@ public class SchedulerUI extends JFrame {
             errorFormatter.format("Error reading file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
             LOGGER.error(errorFormatter, e);
             JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file", JOptionPane.ERROR_MESSAGE);
+            return;
           } catch (final IOException e) {
             final Formatter errorFormatter = new Formatter();
             errorFormatter.format("Error reading file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
             LOGGER.error(errorFormatter, e);
             JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file", JOptionPane.ERROR_MESSAGE);
+            return;
           }
 
           setScheduleData(schedule);
