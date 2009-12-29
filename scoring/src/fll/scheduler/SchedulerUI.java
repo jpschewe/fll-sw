@@ -27,6 +27,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
@@ -75,17 +76,24 @@ public class SchedulerUI extends JFrame {
     scheduleTable.setDefaultRenderer(Date.class, schedTableRenderer);
 
     final JScrollPane dataScroller = new JScrollPane(scheduleTable);
-    cpane.add(dataScroller, BorderLayout.CENTER);
 
     violationTable = new JTable();
     final JScrollPane violationScroller = new JScrollPane(violationTable);
-    cpane.add(violationScroller, BorderLayout.PAGE_END);
     violationTable.getSelectionModel().addListSelectionListener(violationSelectionListener);
+    
+    final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, dataScroller, violationScroller);
+    cpane.add(splitPane, BorderLayout.CENTER);
+    
   }
 
   private transient final ListSelectionListener violationSelectionListener = new ListSelectionListener() {
     public void valueChanged(final ListSelectionEvent e) {
-      final ConstraintViolation selected = violationsModel.getViolation(violationTable.getSelectedRow());
+      final int selectedRow = violationTable.getSelectedRow();
+      if(selectedRow == -1) {
+        return;
+      }
+      
+      final ConstraintViolation selected = violationsModel.getViolation(selectedRow);
       if (ConstraintViolation.NO_TEAM != selected.getTeam()) {
         final int teamIndex = scheduleModel.getIndexOfTeam(selected.getTeam());
         scheduleTable.getSelectionModel().setSelectionInterval(teamIndex, teamIndex);
