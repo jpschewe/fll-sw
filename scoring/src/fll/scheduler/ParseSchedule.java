@@ -252,7 +252,7 @@ public class ParseSchedule {
 
   public ParseSchedule(final File f) throws IOException, ParseException {
     _file = f;
-    
+
     LOGGER.info(new Formatter().format("Reading file %s", _file.getAbsoluteFile()));
 
     if (!_file.canRead()
@@ -385,7 +385,7 @@ public class ParseSchedule {
       // keep track of some meta information
       for (int round = 0; round < ParseSchedule.NUMBER_OF_ROUNDS; ++round) {
         _tableColors.add(ti.getPerfTableColor(round));
-        addToMatches(_matches, ti, round);
+        addToMatches(ti, round);
       }
       _divisions.add(ti.getDivision());
       _judges.add(ti.getJudge());
@@ -409,11 +409,10 @@ public class ParseSchedule {
       verifyTeam(constraintViolations, verify);
     }
 
-    final int numberOfTableColors = _tableColors.size();
-    final int numJudges = _judges.size();
-    verifyPerformanceAtTime(constraintViolations, numberOfTableColors);
-    verifyPresentationAtTime(constraintViolations, numJudges);
-    verifyTechnicalAtTime(constraintViolations, numJudges);
+    verifyPerformanceAtTime(constraintViolations);
+    verifyNumTeamsAtTable(constraintViolations);
+    verifyPresentationAtTime(constraintViolations);
+    verifyTechnicalAtTime(constraintViolations);
 
     return constraintViolations;
   }
@@ -797,19 +796,16 @@ public class ParseSchedule {
    * Add the data from the specified round of the specified TeamScheduleInfo to
    * matches.
    * 
-   * @param matches the list of matches
    * @param ti the schedule info
    * @param round the round we care about
-   * @return true if this succeeds, false if this shows too many teams on the
-   *         table
    */
-  private static boolean addToMatches(final Map<Date, Map<String, List<TeamScheduleInfo>>> matches, final TeamScheduleInfo ti, final int round) {
+  private void addToMatches(final TeamScheduleInfo ti, final int round) {
     final Map<String, List<TeamScheduleInfo>> timeMatches;
-    if (matches.containsKey(ti.getPerf(round))) {
-      timeMatches = matches.get(ti.getPerf(round));
+    if (_matches.containsKey(ti.getPerf(round))) {
+      timeMatches = _matches.get(ti.getPerf(round));
     } else {
       timeMatches = new HashMap<String, List<TeamScheduleInfo>>();
-      matches.put(ti.getPerf(round), timeMatches);
+      _matches.put(ti.getPerf(round), timeMatches);
     }
 
     final List<TeamScheduleInfo> tableMatches;
@@ -822,12 +818,18 @@ public class ParseSchedule {
 
     tableMatches.add(ti);
 
-    if (tableMatches.size() > 2) {
-      LOGGER.error(new Formatter().format("Too many teams competing on table: %s at time: %s. Teams: %s", ti.getPerfTableColor(round),
-                                          OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round)), tableMatches));
-      return false;
-    } else {
-      return true;
+  }
+
+  private void verifyNumTeamsAtTable(final Collection<ConstraintViolation> violations) {
+    for (final Map.Entry<Date, Map<String, List<TeamScheduleInfo>>> dateEntry : _matches.entrySet()) {
+      for (final Map.Entry<String, List<TeamScheduleInfo>> timeEntry : dateEntry.getValue().entrySet()) {
+        final List<TeamScheduleInfo> tableMatches = timeEntry.getValue();
+        if (tableMatches.size() > 2) {
+          final String message = String.format("Too many teams competing on table: %s at time: %s. Teams: %s", timeEntry.getKey(),
+                                               OUTPUT_DATE_FORMAT.get().format(dateEntry.getKey()), tableMatches);
+          violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
+        }
+      }
     }
   }
 
@@ -835,7 +837,7 @@ public class ParseSchedule {
    * Verify that there are no more than <code>numberOfTables</code> teams
    * performing at the same time.
    */
-  private void verifyPerformanceAtTime(final Collection<ConstraintViolation> violations, final int numberOfTableColors) {
+  private void verifyPerformanceAtTime(final Collection<ConstraintViolation> violations) {
     // constraint set 6
     final Map<Date, Set<TeamScheduleInfo>> teamsAtTime = new HashMap<Date, Set<TeamScheduleInfo>>();
     for (final TeamScheduleInfo si : _schedule) {
@@ -852,7 +854,7 @@ public class ParseSchedule {
     }
 
     for (final Map.Entry<Date, Set<TeamScheduleInfo>> entry : teamsAtTime.entrySet()) {
-      if (entry.getValue().size() > numberOfTableColors * 2) {
+      if (entry.getValue().size() > _tableColors.size() * 2) {
         final String message = String.format("There are too many teams in performance at %s", OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
         violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
       }
@@ -862,7 +864,7 @@ public class ParseSchedule {
   /**
    * Ensure that no more than 1 team is in presentation judging at once.
    */
-  private void verifyPresentationAtTime(final Collection<ConstraintViolation> violations, final int numJudges) {
+  private void verifyPresentationAtTime(final Collection<ConstraintViolation> violations) {
     // constraint set 7
     final Map<Date, Set<TeamScheduleInfo>> teamsAtTime = new HashMap<Date, Set<TeamScheduleInfo>>();
     for (final TeamScheduleInfo si : _schedule) {
@@ -877,7 +879,7 @@ public class ParseSchedule {
     }
 
     for (final Map.Entry<Date, Set<TeamScheduleInfo>> entry : teamsAtTime.entrySet()) {
-      if (entry.getValue().size() > numJudges) {
+      if (entry.getValue().size() > _judges.size()) {
         final String message = String.format("There are too many teams in presentation at %s in presentation", OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
         violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
       }
@@ -897,7 +899,7 @@ public class ParseSchedule {
   /**
    * Ensure that no more than 1 team is in technical judging at once.
    */
-  private void verifyTechnicalAtTime(final Collection<ConstraintViolation> violations, final int numJudges) {
+  private void verifyTechnicalAtTime(final Collection<ConstraintViolation> violations) {
     // constraint set 7
     final Map<Date, Set<TeamScheduleInfo>> teamsAtTime = new HashMap<Date, Set<TeamScheduleInfo>>();
     for (final TeamScheduleInfo si : _schedule) {
@@ -912,7 +914,7 @@ public class ParseSchedule {
     }
 
     for (final Map.Entry<Date, Set<TeamScheduleInfo>> entry : teamsAtTime.entrySet()) {
-      if (entry.getValue().size() > numJudges) {
+      if (entry.getValue().size() > _judges.size()) {
         final String message = String.format("There are too many teams in technical at %s in technical", OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
         violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
       }
@@ -1089,7 +1091,8 @@ public class ParseSchedule {
           }
         }
       } else {
-        // only a problem if this is not the last round and we don't have an odd number of teams
+        // only a problem if this is not the last round and we don't have an odd
+        // number of teams
         if (!(round == NUMBER_OF_ROUNDS - 1 && (_schedule.size() % 2) == 1)) {
           final String message = String.format("Team %d has no opponent for round %d", ti.getTeamNumber(), (round + 1));
           violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, ti.getPerf(round), message));
