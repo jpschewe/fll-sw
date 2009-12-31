@@ -56,12 +56,6 @@ import fll.xml.XMLUtils;
 public class FullTournamentTest {
 
   private static final Logger LOGGER = Logger.getLogger(FullTournamentTest.class);
-
-  //FIXME just for debugging
-  public static void main(final String[] args) throws MalformedURLException, IOException, SAXException, InterruptedException {
-    printPlayoffScoresheets("DivI/Gr4-6");
-    printPlayoffScoresheets("DivII/Gr7-9");
-  }
   
   /**
    * Test a full tournament as a single thread. This tests to make sure
