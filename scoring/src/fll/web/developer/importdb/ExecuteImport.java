@@ -20,19 +20,19 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
-import fll.db.Queries;
+import fll.db.ImportDB;
 import fll.web.BaseFLLServlet;
 import fll.web.Init;
 import fll.web.SessionAttributes;
 
 /**
- * Servlet to check if the tournament exists in the dest database.
+ * Servlet to do the actual import.
  * 
  * @author jpschewe
  */
-public class CheckTournamentExists extends BaseFLLServlet {
+public class ExecuteImport extends BaseFLLServlet {
 
-  private static final Logger LOG = Logger.getLogger(CheckTournamentExists.class);
+  private static final Logger LOG = Logger.getLogger(ExecuteImport.class);
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -40,32 +40,34 @@ public class CheckTournamentExists extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
 
-    Connection connection = null;
+    Connection sourceConnection = null;
+    Connection destConnection = null;
     try {
       Init.initialize(request, response);
+      final String tournament = SessionAttributes.getNonNullAttribute(session, "selectedTournament", String.class);
+      final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
+      sourceConnection = sourceDataSource.getConnection();
+      
+      final DataSource destDataSource = SessionAttributes.getDataSource(session);
+      destConnection = destDataSource.getConnection();
 
-      final String selectedTournament = request.getParameter("tournament");
-      if (null != selectedTournament) {
-        session.setAttribute("selectedTournament", selectedTournament);
-
-        // Check if the tournament exists
-        final DataSource datasource = SessionAttributes.getDataSource(session);
-        connection = datasource.getConnection();
-        final boolean exists = Queries.checkTournamentExists(connection, selectedTournament);        
-        if (!exists) {
-          session.setAttribute(SessionAttributes.REDIRECT_URL, "promptCreateTournament.jsp");
-        } else {
-          session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTeamInfo");
-        }
-
+      final boolean differences = ImportDB.checkForDifferences(sourceConnection, destConnection, tournament);
+      if(differences) {
+        message.append("<p class='error'>Error, there are still differences, cannot import. Try starting the workflow again.</p>");
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
       } else {
-        message.append("<p class='error'>Can't find the 'tournament' parameter</p>");
+        ImportDB.importDatabase(sourceConnection, destConnection, tournament);
+        
+        message.append(String.format("<p>Import of tournament %s successful. You may now optionally select another tournament to import.</p>", tournament));
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
       }
+      
     } catch (final SQLException sqle) {
       LOG.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
     } finally {
-      SQLFunctions.closeConnection(connection);
+      SQLFunctions.closeConnection(sourceConnection);
+      SQLFunctions.closeConnection(destConnection);
     }
 
     session.setAttribute("message", message.toString());

@@ -13,7 +13,6 @@ import javax.sql.DataSource;
  * well that helps with type safety.
  * 
  * @author jpschewe
- * @version $Revision$
  */
 public final class SessionAttributes {
 
@@ -50,7 +49,12 @@ public final class SessionAttributes {
   public static String getSessionDisplayPage(final HttpSession session) {
     return getAttribute(session, SESSION_DISPLAY_PAGE, String.class);
   }
-
+  
+  public static final String REDIRECT_URL = "redirect_url";
+  public static String getRedirectURL(final HttpSession session) {
+    return getAttribute(session, REDIRECT_URL, String.class);
+  }
+  
   /**
    * Get session attribute and send appropriate error if type is wrong. Note
    * that null is always valid.
@@ -65,7 +69,21 @@ public final class SessionAttributes {
         || clazz.isInstance(o)) {
       return clazz.cast(o);
     } else {
-      throw new RuntimeException(String.format("Expecting session attribute '%s' to be of type '%s', but was of type '%s'", attribute, clazz, o.getClass()));
+      throw new ClassCastException(String.format("Expecting session attribute '%s' to be of type '%s', but was of type '%s'", attribute, clazz, o.getClass()));
     }
   }
+  
+  /**
+   * Get a session attribute and throw a {@link NullPointerException} if it's null.
+   * 
+   *  @see #getAttribute(HttpSession, String, Class)
+   */
+  public static <T> T getNonNullAttribute(final HttpSession session, final String attribute, final Class<T> clazz) {
+    final T retval = getAttribute(session, attribute, clazz);
+    if(null == retval) {
+      throw new NullPointerException(String.format("Session attribute %s is null when it's not expected to be", attribute));
+    }
+    return retval;
+  }
+  
 }

@@ -1920,22 +1920,16 @@ public final class Queries {
   public static void insertTournamentsForRegions(final Connection connection) throws SQLException {
     ResultSet rs = null;
     Statement stmt = null;
-    PreparedStatement insertPrep = null;
     try {
-      insertPrep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location) VALUES(?, ?)");
-
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT DISTINCT Teams.Region FROM Teams LEFT JOIN Tournaments ON Teams.REgion = Tournaments.Name WHERE Tournaments.Name IS NULL");
+      rs = stmt.executeQuery("SELECT DISTINCT Teams.Region FROM Teams LEFT JOIN Tournaments ON Teams.Region = Tournaments.Name WHERE Tournaments.Name IS NULL");
       while (rs.next()) {
         final String region = rs.getString(1);
-        insertPrep.setString(1, region);
-        insertPrep.setString(2, region);
-        insertPrep.executeUpdate();
+        createTournament(connection, region, region, null);
       }
     } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closeStatement(stmt);
-      SQLFunctions.closePreparedStatement(insertPrep);
     }
   }
 
@@ -2335,5 +2329,39 @@ public final class Queries {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closePreparedStatement(prep);
     }
+  }
+
+  /**
+   * Check that a given tournament exists in the specified database.
+   * @param connection the database
+   * @param tournament the tournament name to look for
+   * @return if the tournament exists
+   * @throws SQLException
+   */
+  public static boolean checkTournamentExists(final Connection connection, final String tournament) throws SQLException {   
+    final List<String> existingTournaments = getTournamentNames(connection);
+  
+    return existingTournaments.contains(tournament);
+  }
+  
+  /**
+   * Create a tournament.
+   */
+
+  public static void createTournament(final Connection connection, 
+                                      final String tournament, 
+                                      final String location, 
+                                      final String nextTournament) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location, NextTournament) VALUES (?, ?, ?)");
+      prep.setString(1, tournament);
+      prep.setString(2, location);
+      //FIXME will need to be modified when tournament_id branch is merged in
+      prep.setString(3, nextTournament);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.closePreparedStatement(prep);
+    }    
   }
 }

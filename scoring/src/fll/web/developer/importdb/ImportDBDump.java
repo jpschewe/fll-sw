@@ -6,7 +6,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletContext;
@@ -51,9 +50,6 @@ public class ImportDBDump extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
 
-    Connection memConnection = null;
-    Statement memStmt = null;
-
     Utilities.loadDBDriver();
 
     try {
@@ -64,88 +60,36 @@ public class ImportDBDump extends BaseFLLServlet {
 
       if (null != request.getAttribute("importdb")) {
 
-        final String url = "jdbc:hsqldb:mem:dbimport"
-            + String.valueOf(_importdbCount++);
-        memConnection = DriverManager.getConnection(url);
-        memStmt = memConnection.createStatement();
+        final String databaseName = "dbimport" + String.valueOf(_importdbCount++); 
+        final String url = "jdbc:hsqldb:mem:" + databaseName;
+        // FIXME should figure out how to clean up this database
+        final DataSource importDataSource = Utilities.createDataSource(databaseName, url);
+
+        // let other pages know where the connection is 
+        session.setAttribute("dbimport", importDataSource);
+
+        final Connection memConnection = importDataSource.getConnection();        
 
         // import the database
         final FileItem dumpFileItem = (FileItem) request.getAttribute("dbdump");
         final ZipInputStream zipfile = new ZipInputStream(dumpFileItem.getInputStream());
         ImportDB.loadDatabaseDump(zipfile, memConnection);
 
-        // let the jsp code know where to find the database
-        session.setAttribute("dbimport_url", url);
-        session.setAttribute("redirect_url", "selectTournament.jsp");
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
       } else {
         message.append("<p class='error'>Unknown form state, expected form fields not seen: "
             + request + "</p>");
       }
     } catch (final FileUploadException fue) {
-      message.append("<p class='error'>Error handling the file upload: "
-          + fue.getMessage() + "</p>");
       LOG.error(fue);
+      throw new RuntimeException("Error handling the file upload", fue);
     } catch (final SQLException sqle) {
-      message.append("<p class='error'>Error loading data into the database: "
-          + sqle.getMessage() + "</p>");
-      LOG.error(sqle);
-    } finally {
-      SQLFunctions.closeStatement(memStmt);
-      SQLFunctions.closeConnection(memConnection);
-    }
-
-    session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL((String) session.getAttribute("redirect_url")));
-  }
-
-  /**
-   * Create the tournament that is in the session variable
-   * <code>selected_tournament</code>.
-   * 
-   * @param session the session
-   * @throws SQLException
-   */
-  public static void createSelectedTournament(final HttpSession session) throws SQLException {
-    final StringBuilder message = new StringBuilder();
-
-    final String selectedTournament = (String) session.getAttribute("selected_tournament");
-    final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
-    final Connection connection = datasource.getConnection();
-
-    Utilities.loadDBDriver();
-    Connection memConnection = null;
-    PreparedStatement memPrep = null;
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      memConnection = DriverManager.getConnection((String) session.getAttribute("dbimport_url"));
-      memPrep = memConnection.prepareStatement("SELECT Name, Location, NextTournament FROM Tournaments WHERE Name = ?");
-      memPrep.setString(1, selectedTournament);
-      rs = memPrep.executeQuery();
-      if (rs.next()) {
-        prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location, NextTournament) VALUES (?, ?, ?)");
-        prep.setString(1, rs.getString(1));
-        prep.setString(2, rs.getString(2));
-        prep.setString(3, rs.getString(3));
-        prep.executeUpdate();
-      } else {
-        message.append("Cannot find tournament "
-            + selectedTournament + " in imported database!");
-        session.setAttribute("redirect_url", "selectTournament.jsp");
-      }
-
-    } catch (final SQLException sqle) {
-      message.append("<p class='error'>Error adding tournament to database: "
-          + sqle.getMessage() + "</p>");
       LOG.error(sqle, sqle);
-      session.setAttribute("redirect_url", "selectTournament.jsp");
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(memPrep);
-      SQLFunctions.closeConnection(memConnection);
-      SQLFunctions.closePreparedStatement(prep);
+      throw new RuntimeException("Error loading data into the database", sqle);
     }
 
-    session.setAttribute("message", message.toString());
+    session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+    response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));    
   }
+
 }

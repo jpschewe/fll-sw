@@ -260,7 +260,17 @@ public final class Utilities {
       LOGGER.debug("myURL: "
           + myURL);
     }
-
+    return createDataSource(database, myURL);
+  }
+  
+  /**
+   * Create a {@link DataSource} attached to the specified database with the specified URL.
+   * 
+   * @param database the name of the database, for debugging
+   * @param myURL the URL to the database
+   * @return the DataSource
+   */
+  public static DataSource createDataSource(final String database, final String myURL) {    
     final jdbcDataSource dataSource = new jdbcDataSource();
     dataSource.setDatabase(myURL);
     dataSource.setUser("sa");

@@ -100,7 +100,7 @@ public class CreateDB extends BaseFLLServlet {
     }
 
     session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL((String) session.getAttribute("redirect_url")));
+    response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
   }
 
 }

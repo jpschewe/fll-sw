@@ -56,6 +56,7 @@
   <url-pattern>/setup/CreateDB</url-pattern>
  </servlet-mapping>
 
+ <!--  DB import -->
  <servlet>
   <servlet-name>ImportDBDump</servlet-name>
   <servlet-class>fll.web.developer.importdb.ImportDBDump</servlet-class>
@@ -73,6 +74,34 @@
   <servlet-name>CheckTournamentExists</servlet-name>
   <url-pattern>/developer/importdb/CheckTournamentExists</url-pattern>
  </servlet-mapping>
+
+ <servlet>
+  <servlet-name>CheckTeamInfo</servlet-name>
+  <servlet-class>fll.web.developer.importdb.CheckTeamInfo</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>CheckTeamInfo</servlet-name>
+  <url-pattern>/developer/importdb/CheckTeamInfo</url-pattern>
+ </servlet-mapping>
+
+ <servlet>
+  <servlet-name>CheckTournamentTeams</servlet-name>
+  <servlet-class>fll.web.developer.importdb.CheckTournamentTeams</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>CheckTournamentTeams</servlet-name>
+  <url-pattern>/developer/importdb/CheckTournamentTeams</url-pattern>
+ </servlet-mapping>
+
+ <servlet>
+  <servlet-name>ExecuteImport</servlet-name>
+  <servlet-class>fll.web.developer.importdb.ExecuteImport</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>ExecuteImport</servlet-name>
+  <url-pattern>/developer/importdb/ExecuteImport</url-pattern>
+ </servlet-mapping>
+
 
  <!--  reports -->
  <servlet>
@@ -140,8 +169,8 @@
   <servlet-name>Top10</servlet-name>
   <url-pattern>/scoreboard/Top10</url-pattern>
  </servlet-mapping>
- 
-  <servlet>
+
+ <servlet>
   <servlet-name>Last8</servlet-name>
   <servlet-class>fll.web.scoreboard.Last8</servlet-class>
  </servlet>
@@ -149,5 +178,5 @@
   <servlet-name>Last8</servlet-name>
   <url-pattern>/scoreboard/Last8</url-pattern>
  </servlet-mapping>
- 
+
 </web-app>

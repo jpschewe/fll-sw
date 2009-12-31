@@ -1,14 +1,10 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.Utilities"%>
-
-<c:if test="${empty dbimport_url}">
+<c:if test="${empty dbimport}">
  <c:set var="message" scope="session">
-  <p class='error'>You cannot goto the selectTournament for dbimport
-  without first importing a database dump</p>
+  <p class='error'>Error <tt>dbimport</tt> parameter missing from session (from selectTournament)</p>
  </c:set>
- <c:redirect url='index.jsp' />
-
+ <c:redirect url='/developer/index.jsp' />
 </c:if>
 <%-- end if not proper workflow --%>
 
@@ -20,24 +16,11 @@
 </head>
 
 <body>
-<h1><x:out select="$challengeDocument/fll/@title" /> (Select
-Tournament to Import)</h1>
-
 ${message}
 <%-- clear out the message, so that we don't see it again --%>
 <c:remove var="message" />
 
-<c:set var="redirect_url" scope="session">
- <c:url value="selectTournament.jsp" />
-</c:set>
-
-<%
-pageContext.setAttribute("driverName", Utilities.getDBDriverName());
-%>
-<sql:setDataSource scope="session" var="dbimport_datasource"
- url="${dbimport_url}" driver="${driverName}" />
-
-<sql:query dataSource="${dbimport_datasource}" var="query_result"
+<sql:query dataSource="${dbimport}" var="query_result"
  scope="page">
   SELECT Name, Location from Tournaments ORDER BY Name
 </sql:query>
@@ -49,9 +32,12 @@ pageContext.setAttribute("driverName", Utilities.getDBDriverName());
 </c:forEach>
 </select>
 	
-	<input type='submit'/>
+	<input name='submit' type='submit' value='Select Tournament'/>
 </form>
 
+<p>If you're don't want to import any of these tournaments you can 
+<a href="<c:url value='/developer/index.jsp'/>">return to the developer index</a>.
+</p>
 
 <%@ include file="/WEB-INF/jspf/footer.jspf"%>
 </body>

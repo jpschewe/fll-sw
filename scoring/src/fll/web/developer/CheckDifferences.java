@@ -13,6 +13,7 @@ import javax.servlet.http.HttpSession;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.Utilities;
 import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
 
 /**
  * Check for differences in team information between two databases.
@@ -47,6 +48,6 @@ public final class CheckDifferences extends BaseFLLServlet {
     }
 
     session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL((String) session.getAttribute("redirect_url")));
+    response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
   }
 }
