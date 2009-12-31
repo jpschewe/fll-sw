@@ -141,22 +141,22 @@ public class ParseSchedule {
 
   public static final long SECONDS_PER_MINUTE = 60;
 
-  public static final long SECONDS_PER_MILLISECOND = 1000;
+  public static final long MILLISECONDS_PER_SECOND = 1000;
 
   private long performanceDuration = 5
-      * SECONDS_PER_MINUTE * SECONDS_PER_MILLISECOND;
+      * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
 
   private long subjectiveDuration = 20
-      * SECONDS_PER_MINUTE * SECONDS_PER_MILLISECOND;
+      * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
 
   private long changetime = 15
-      * SECONDS_PER_MINUTE * SECONDS_PER_MILLISECOND;
+      * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
 
   private long performanceChangetime = 45
-      * SECONDS_PER_MINUTE * SECONDS_PER_MILLISECOND;
+      * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
 
   private long specialPerformanceChangetime = 30
-      * SECONDS_PER_MINUTE * SECONDS_PER_MILLISECOND;
+      * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
 
   private final Map<Date, Map<String, List<TeamScheduleInfo>>> _matches = new HashMap<Date, Map<String, List<TeamScheduleInfo>>>();
 
@@ -825,8 +825,12 @@ public class ParseSchedule {
       for (final Map.Entry<String, List<TeamScheduleInfo>> timeEntry : dateEntry.getValue().entrySet()) {
         final List<TeamScheduleInfo> tableMatches = timeEntry.getValue();
         if (tableMatches.size() > 2) {
+          final List<Integer> teams = new LinkedList<Integer>();
+          for (final TeamScheduleInfo team : tableMatches) {
+            teams.add(team.getTeamNumber());
+          }
           final String message = String.format("Too many teams competing on table: %s at time: %s. Teams: %s", timeEntry.getKey(),
-                                               OUTPUT_DATE_FORMAT.get().format(dateEntry.getKey()), tableMatches);
+                                               OUTPUT_DATE_FORMAT.get().format(dateEntry.getKey()), teams);
           violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
         }
       }
@@ -983,12 +987,14 @@ public class ParseSchedule {
     if (subjectiveTime.before(performanceTime)) {
       if (subjectiveTime.getTime()
           + getSubjectiveDuration() + getChangetime() > performanceTime.getTime()) {
-        return String.format("Team %d has doesn't have enough time between %s and performance round %s", teamNumber, subjectiveName, performanceName);
+        return String.format("Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)", teamNumber, subjectiveName,
+                             performanceName, getChangetimeAsMinutes());
       }
     } else {
       if (performanceTime.getTime()
           + getPerformanceDuration() + getChangetime() > subjectiveTime.getTime()) {
-        return String.format("Team %d has doesn't have enough time between %s and performance round %s", teamNumber, subjectiveName, performanceName);
+        return String.format("Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)", teamNumber, subjectiveName,
+                             performanceName, getChangetimeAsMinutes());
       }
     }
     return null;
@@ -999,14 +1005,16 @@ public class ParseSchedule {
     if (ti.getPresentation().before(ti.getTechnical())) {
       if (ti.getPresentation().getTime()
           + getSubjectiveDuration() + getChangetime() > ti.getTechnical().getTime()) {
-        final String message = String.format("Team %d has doesn't have enough time between presentation and technical", ti.getTeamNumber());
+        final String message = String.format("Team %d has doesn't have enough time between presentation and technical (need %d minutes)", ti.getTeamNumber(),
+                                             getChangetimeAsMinutes());
         violations.add(new ConstraintViolation(ti.getTeamNumber(), ti.getPresentation(), ti.getTechnical(), null, message));
         return;
       }
     } else {
       if (ti.getTechnical().getTime()
           + getSubjectiveDuration() + getChangetime() > ti.getPresentation().getTime()) {
-        final String message = String.format("Team %d has doesn't have enough time between presentation and technical", ti.getTeamNumber());
+        final String message = String.format("Team %d has doesn't have enough time between presentation and technical (need %d minutes)", ti.getTeamNumber(),
+                                             getChangetimeAsMinutes());
         violations.add(new ConstraintViolation(ti.getTeamNumber(), ti.getPresentation(), ti.getTechnical(), null, message));
         return;
       }
@@ -1284,6 +1292,11 @@ public class ParseSchedule {
    */
   public long getChangetime() {
     return changetime;
+  }
+
+  public long getChangetimeAsMinutes() {
+    return getChangetime()
+        / SECONDS_PER_MINUTE / MILLISECONDS_PER_SECOND;
   }
 
   /**

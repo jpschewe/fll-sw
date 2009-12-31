@@ -101,7 +101,9 @@ public class SchedulerUI extends JFrame {
       final ConstraintViolation selected = violationsModel.getViolation(selectedRow);
       if (ConstraintViolation.NO_TEAM != selected.getTeam()) {
         final int teamIndex = scheduleModel.getIndexOfTeam(selected.getTeam());
-        scheduleTable.getSelectionModel().setSelectionInterval(teamIndex, teamIndex);
+        scheduleTable.setRowSelectionInterval(teamIndex, teamIndex);
+        //FIXME need to figure out how to scroll to visible correctly
+        scheduleTable.scrollRectToVisible(scheduleTable.getCellRect(selectedRow, 1, true));
       }
     }
   };
@@ -379,6 +381,8 @@ public class SchedulerUI extends JFrame {
           setBackground(errorColor);
         }
       }
+      
+      //TODO would be nice to set foreground color when selected
 
       if (value instanceof Date) {
         final String strValue = ParseSchedule.OUTPUT_DATE_FORMAT.get().format((Date) value);
