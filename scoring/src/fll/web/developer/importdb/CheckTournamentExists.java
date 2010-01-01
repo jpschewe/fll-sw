@@ -44,7 +44,15 @@ public class CheckTournamentExists extends BaseFLLServlet {
     try {
       Init.initialize(request, response);
 
-      final String selectedTournament = request.getParameter("tournament");
+      // support finding the selected tournament in the session as well
+      final String selectedTournamentParam = request.getParameter("tournament");
+      final String selectedTournament;
+      if(null == selectedTournamentParam) {
+        selectedTournament = SessionAttributes.getAttribute(session, "selectedTournament", String.class);
+      } else {
+        selectedTournament = selectedTournamentParam;
+      }
+      
       if (null != selectedTournament) {
         session.setAttribute("selectedTournament", selectedTournament);
 
@@ -55,7 +63,7 @@ public class CheckTournamentExists extends BaseFLLServlet {
         if (!exists) {
           session.setAttribute(SessionAttributes.REDIRECT_URL, "promptCreateTournament.jsp");
         } else {
-          session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTeamInfo");
+          session.setAttribute(SessionAttributes.REDIRECT_URL, "FindMissingTeams");
         }
 
       } else {

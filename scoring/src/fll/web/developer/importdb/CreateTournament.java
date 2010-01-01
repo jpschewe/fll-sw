@@ -7,7 +7,6 @@ package fll.web.developer.importdb;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,7 +22,6 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
-import fll.Utilities;
 import fll.db.Queries;
 import fll.web.BaseFLLServlet;
 import fll.web.Init;
@@ -94,7 +92,7 @@ public class CreateTournament extends BaseFLLServlet {
         // in
         final String nextTournament = sourceRS.getString(2);
         Queries.createTournament(destConnection, tournament, location, nextTournament);
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTeamInfo");
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentExists");
       } else {
         message.append("<p class='error'>Cannot find tournament "
             + tournament + " in imported database!</p>");

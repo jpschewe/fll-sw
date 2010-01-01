@@ -33,14 +33,12 @@ ${message}
 <%-- clear out the message, so that we don't see it again --%>
 <c:remove var="message" />
 
-<form name="resolveTeamDifferences" action="applyTeamChanges">
+<form name="resolveTeamDifferences" action="CommitTeamChanges">
 <p>There are differences in the team information between the
  source (imported) database and the destination database. 
  You need to choose to accept the value from the source database
  or the value from the destination database.</p>
 
-<p>The tournament '${selectedTournament}' does not exist in the destination database, create it?</p>
-	
  <c:forEach items="${teamDifferences}" var="difference" varStatus="loopStatus">
    <p>The ${difference.property} for team ${difference.teamNumber} differs<br/>
    <input type='radio' name='${loopStatus.index}' value='source' checked/> Use source value of '${difference.sourceValue}'<br/>

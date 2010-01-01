@@ -21,20 +21,20 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
+import fll.Team;
 import fll.db.ImportDB;
-import fll.db.TeamPropertyDifference;
 import fll.web.BaseFLLServlet;
 import fll.web.Init;
 import fll.web.SessionAttributes;
 
 /**
- * Servlet to check team information between the source and dest database.
+ * Servlet to find teams that are missing via {@link ImportDB#findMissingTeams(Connection, Connection, String)}.
  * 
  * @author jpschewe
  */
-public class CheckTeamInfo extends BaseFLLServlet {
+public class FindMissingTeams extends BaseFLLServlet {
 
-  private static final Logger LOG = Logger.getLogger(CheckTeamInfo.class);
+  private static final Logger LOG = Logger.getLogger(FindMissingTeams.class);
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -53,12 +53,12 @@ public class CheckTeamInfo extends BaseFLLServlet {
       final DataSource destDataSource = SessionAttributes.getDataSource(session);
       destConnection = destDataSource.getConnection();
 
-      final List<TeamPropertyDifference> teamDifferences = ImportDB.checkTeamInfo(sourceConnection, destConnection, tournament);
-      if(teamDifferences.isEmpty()) {
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentTeams");
+      final List<Team> missingTeams = ImportDB.findMissingTeams(sourceConnection, destConnection, tournament);
+      if(missingTeams.isEmpty()) {
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTeamInfo");
       } else {
-        session.setAttribute("teamDifferences", teamDifferences);
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "resolveTeamInfoDifferences.jsp");
+        session.setAttribute("missingTeams", missingTeams);       
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "promptCreateMissingTeams.jsp");
       }
     } catch (final SQLException sqle) {
       LOG.error(sqle, sqle);
@@ -69,7 +69,7 @@ public class CheckTeamInfo extends BaseFLLServlet {
     }
 
     session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
+    response.sendRedirect(response.encodeRedirectURL((String) session.getAttribute("redirect_url")));
   }
 
 }

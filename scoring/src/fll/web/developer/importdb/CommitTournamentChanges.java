@@ -21,20 +21,19 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
-import fll.db.ImportDB;
-import fll.db.TeamPropertyDifference;
+import fll.db.Queries;
 import fll.web.BaseFLLServlet;
 import fll.web.Init;
 import fll.web.SessionAttributes;
 
 /**
- * Servlet to check team information between the source and dest database.
+ * Commit changes made on resolveMissingTeams.jsp.
  * 
  * @author jpschewe
  */
-public class CheckTeamInfo extends BaseFLLServlet {
+public class CommitTournamentChanges extends BaseFLLServlet {
 
-  private static final Logger LOG = Logger.getLogger(CheckTeamInfo.class);
+  private static final Logger LOG = Logger.getLogger(CommitTournamentChanges.class);
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -46,20 +45,31 @@ public class CheckTeamInfo extends BaseFLLServlet {
     Connection destConnection = null;
     try {
       Init.initialize(request, response);
-      final String tournament = SessionAttributes.getNonNullAttribute(session, "selectedTournament", String.class);
+      
       final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
       sourceConnection = sourceDataSource.getConnection();
-      
+
       final DataSource destDataSource = SessionAttributes.getDataSource(session);
       destConnection = destDataSource.getConnection();
 
-      final List<TeamPropertyDifference> teamDifferences = ImportDB.checkTeamInfo(sourceConnection, destConnection, tournament);
-      if(teamDifferences.isEmpty()) {
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentTeams");
-      } else {
-        session.setAttribute("teamDifferences", teamDifferences);
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "resolveTeamInfoDifferences.jsp");
+      @SuppressWarnings(value = "unchecked")
+      final List<TournamentDifference> tournamentDifferences = SessionAttributes.getNonNullAttribute(session, "tournamentDifferences", List.class);
+      for(int idx=0; idx<tournamentDifferences.size(); ++idx) {
+        final TournamentDifference difference = tournamentDifferences.get(idx);
+        final String userChoice = request.getParameter(String.valueOf(idx));
+        if(null == userChoice) {
+          throw new RuntimeException("Missing paramter '" + idx + "' when committing tournament change");
+        } else if("source".equals(userChoice)) {
+          Queries.changeTeamCurrentTournament(destConnection, difference.getTeamNumber(), difference.getSourceTournament());
+        } else if("dest".equals(userChoice)) {
+          Queries.changeTeamCurrentTournament(sourceConnection, difference.getTeamNumber(), difference.getDestTournament());
+        } else {
+          throw new RuntimeException(String.format("Unknown value '%s' for choice of parameter '%d'", userChoice, idx));
+        }                  
       }
+      
+      session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentTeams");
+      
     } catch (final SQLException sqle) {
       LOG.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);

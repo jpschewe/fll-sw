@@ -14,7 +14,7 @@ public class TeamPropertyDifference {
    * Team string properties that can differ.
    */
   public enum TeamProperty {
-    NAME, ORGANIZATION, REGION, DIVISION, /** The team is in the source, but not the dest, source and dest value will be null */ MISSING
+    NAME, ORGANIZATION, REGION, DIVISION
   };
 
   public TeamPropertyDifference(final int teamNumber, final TeamProperty property, final String sourceValue, final String destValue) {
@@ -47,5 +47,5 @@ public class TeamPropertyDifference {
   public TeamProperty getProperty() {
     return property;
   }
-  
+
 }

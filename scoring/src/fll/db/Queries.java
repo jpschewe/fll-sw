@@ -1678,13 +1678,13 @@ public final class Queries {
    * the team in it's current tournament.
    * 
    * @param connection db connection
-   * @param document the description of the tournament, used to determine what
-   *          tables scores exist in
    * @param teamNumber the team
    * @param newTournament the new current tournament for this team
    */
-  public static void changeTeamCurrentTournament(final Connection connection, final Document document, final int teamNumber, final String newTournament)
+  public static void changeTeamCurrentTournament(final Connection connection, final int teamNumber, final String newTournament)
       throws SQLException {
+    
+    final Document document = getChallengeDocument(connection);
 
     final String currentTournament = getTeamCurrentTournament(connection, teamNumber);
 
@@ -1848,6 +1848,16 @@ public final class Queries {
                                final String organization,
                                final String region,
                                final String division) throws SQLException {
+    return addTeam(connection, number, name, organization, region, division, getCurrentTournament(connection));
+  }
+  
+  public static String addTeam(final Connection connection,
+                               final int number,
+                               final String name,
+                               final String organization,
+                               final String region,
+                               final String division,
+                               final String tournament) throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
     PreparedStatement prep = null;
@@ -1875,7 +1885,7 @@ public final class Queries {
       SQLFunctions.closePreparedStatement(prep);
 
       prep = connection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) VALUES(?, ?, ?)");
-      prep.setString(1, getCurrentTournament(connection));
+      prep.setString(1, tournament);
       prep.setInt(2, number);
       prep.setString(3, division);
       prep.executeUpdate();
@@ -1907,6 +1917,66 @@ public final class Queries {
       prep.setString(3, region);
       prep.setString(4, division);
       prep.setInt(5, number);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+  
+  /**
+   * Update a team region.
+   */
+  public static void updateTeamDivision(final Connection connection, final int number, final String division) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE Teams SET Division = ? WHERE TeamNumber = ?");
+      prep.setString(1, division);
+      prep.setInt(2, number);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+  
+  /**
+   * Update a team name.
+   */
+  public static void updateTeamName(final Connection connection, final int number, final String name) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE Teams SET TeamName = ? WHERE TeamNumber = ?");
+      prep.setString(1, name);
+      prep.setInt(2, number);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+
+  /**
+   * Update a team organization.
+   */
+  public static void updateTeamOrganization(final Connection connection, final int number, final String organization) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE Teams SET Organization = ? WHERE TeamNumber = ?");
+      prep.setString(1, organization);
+      prep.setInt(2, number);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+
+  /**
+   * Update a team region.
+   */
+  public static void updateTeamRegion(final Connection connection, final int number, final String region) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE Teams SET Region = ? WHERE TeamNumber = ?");
+      prep.setString(1, region);
+      prep.setInt(2, number);
       prep.executeUpdate();
     } finally {
       SQLFunctions.closePreparedStatement(prep);

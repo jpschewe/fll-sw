@@ -18,8 +18,10 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Formatter;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -30,8 +32,10 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.Team;
 import fll.Utilities;
 import fll.db.TeamPropertyDifference.TeamProperty;
+import fll.web.developer.importdb.TournamentDifference;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 
@@ -298,9 +302,8 @@ public final class ImportDB {
    * @param destinationConnection a connection to the destination database
    * @param tournament the tournament that the scores are for
    */
-  public static void importDatabase(final Connection sourceConnection, final Connection destinationConnection, final String tournament)
-      throws SQLException {
-    
+  public static void importDatabase(final Connection sourceConnection, final Connection destinationConnection, final String tournament) throws SQLException {
+
     final Document document = Queries.getChallengeDocument(destinationConnection);
     final Element rootElement = document.getDocumentElement();
 
@@ -621,36 +624,32 @@ public final class ImportDB {
     }
 
     boolean differencesFound = false;
+    // check for missing teams
+    final List<Team> missingTeams = findMissingTeams(sourceConnection, destConnection, tournament);
+    if (!missingTeams.isEmpty()) {
+      for (final Team team : missingTeams) {
+        LOG.error(new Formatter().format("Team %d is in the source database, but not the dest database", team.getTeamNumber()));
+      }
+      differencesFound = true;
+    }
 
     // check team info
     final List<TeamPropertyDifference> teamDifferences = checkTeamInfo(sourceConnection, destConnection, tournament);
     if (!teamDifferences.isEmpty()) {
       for (final TeamPropertyDifference diff : teamDifferences) {
-        if (diff.getProperty() == TeamProperty.MISSING) {
-          LOG.error(new Formatter().format("Team %d is in the source database, but not the dest database", diff.getTeamNumber()));
-        } else {
-          LOG.error(new Formatter().format("%s is different for team %d source value: %s dest value: %s", diff.getProperty(), diff.getTeamNumber(),
-                                           diff.getSourceValue(), diff.getDestValue()));
-        }
+        LOG.error(new Formatter().format("%s is different for team %d source value: %s dest value: %s", diff.getProperty(), diff.getTeamNumber(),
+                                         diff.getSourceValue(), diff.getDestValue()));
       }
       differencesFound = true;
     }
 
     // check tournament teams
-    final List<Integer> destMissing = new LinkedList<Integer>();
-    final List<Integer> sourceMissing = new LinkedList<Integer>();
-    computeMissingFromTournamentTeams(sourceConnection, destConnection, tournament, destMissing, sourceMissing);
-    if (!destMissing.isEmpty()) {
+    final List<TournamentDifference> tournamentDifferences = computeMissingFromTournamentTeams(sourceConnection, destConnection, tournament);
+    if (!tournamentDifferences.isEmpty()) {
       differencesFound = true;
-      for (final int teamNumber : destMissing) {
-        LOG.error(new Formatter().format("%d is in tournament %s the source database, but not the dest database", tournament, teamNumber));
-      }
-    }
-    if (!sourceMissing.isEmpty()) {
-      differencesFound = true;
-
-      for (final int teamNumber : sourceMissing) {
-        LOG.error(new Formatter().format("%d is in tournament %s the dest database, but not the source database", tournament, teamNumber));
+      for (final TournamentDifference diff : tournamentDifferences) {
+        LOG.error(new Formatter().format("%d is in tournament %s in the source database and tournament %s in the dest database", diff.getTeamNumber(),
+                                         diff.getSourceTournament(), diff.getDestTournament()));
       }
     }
 
@@ -666,30 +665,39 @@ public final class ImportDB {
    * @param sourceConnection
    * @param destConnection
    * @param tournament
-   * @param destMissing return value that will contain the list of teams in the
-   *          source database and not in the dest database
-   * @param sourceMissing return value that will contain the list of teams in
-   *          the dest database and not in the source database
+   * @return the differences
    * @throws SQLException
    */
-  public static void computeMissingFromTournamentTeams(final Connection sourceConnection,
-                                                       final Connection destConnection,
-                                                       final String tournament,
-                                                       final List<Integer> destMissing,
-                                                       final List<Integer> sourceMissing) throws SQLException {
+  public static List<TournamentDifference> computeMissingFromTournamentTeams(final Connection sourceConnection,
+                                                                             final Connection destConnection,
+                                                                             final String tournament) throws SQLException {
+    final Set<Integer> sourceMissing = new HashSet<Integer>();
+    final Set<Integer> destMissing = new HashSet<Integer>();
+
     // check that tournament teams is the same for both databases
-    final List<Integer> sourceTeams = getTournamentTeams(sourceConnection, tournament);
-    final List<Integer> destTeams = getTournamentTeams(destConnection, tournament);
+    final Set<Integer> sourceTeams = getTournamentTeams(sourceConnection, tournament);
+    final Set<Integer> destTeams = getTournamentTeams(destConnection, tournament);
 
     // diff the lists
     destMissing.addAll(sourceTeams);
     sourceMissing.addAll(destTeams);
     destMissing.removeAll(destTeams);
     sourceMissing.removeAll(sourceTeams);
+
+    final Set<Integer> differences = new HashSet<Integer>();
+    differences.addAll(sourceMissing);
+    differences.addAll(destMissing);
+    final List<TournamentDifference> tournamentDifferences = new LinkedList<TournamentDifference>();
+    for (final int teamNumber : differences) {
+      final String sourceTournament = Queries.getTeamCurrentTournament(sourceConnection, teamNumber);
+      final String destTournament = Queries.getTeamCurrentTournament(destConnection, teamNumber);
+      tournamentDifferences.add(new TournamentDifference(teamNumber, sourceTournament, destTournament));
+    }
+    return tournamentDifferences;
   }
 
-  private static List<Integer> getTournamentTeams(final Connection connection, final String tournament) throws SQLException {
-    final List<Integer> teams = new LinkedList<Integer>();
+  private static Set<Integer> getTournamentTeams(final Connection connection, final String tournament) throws SQLException {
+    final Set<Integer> teams = new HashSet<Integer>();
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -757,7 +765,7 @@ public final class ImportDB {
             differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.ORGANIZATION, sourceOrganization, destOrganization));
           }
         } else {
-          differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.MISSING, null, null));
+          // handled by findMissingTeams
         }
         SQLFunctions.closeResultSet(destRS);
       }
@@ -768,6 +776,49 @@ public final class ImportDB {
       SQLFunctions.closePreparedStatement(sourcePrep);
     }
     return differences;
+  }
+
+  /**
+   * Find teams in the source database and not in the dest database. Only checks
+   * for teams associated with the specified tournament.
+   * 
+   * @param sourceConnection source connection
+   * @param destConnection destination connection
+   * @param tournament the tournament to check
+   * @return the teams in the source database and not in the dest database
+   * @throws SQLException
+   */
+  public static List<Team> findMissingTeams(final Connection sourceConnection, final Connection destConnection, final String tournament) throws SQLException {
+    final List<Team> missingTeams = new LinkedList<Team>();
+
+    PreparedStatement sourcePrep = null;
+    PreparedStatement destPrep = null;
+    ResultSet sourceRS = null;
+    ResultSet destRS = null;
+    try {
+      destPrep = destConnection.prepareStatement("SELECT Teams.TeamName"
+          + " FROM Teams WHERE Teams.TeamNumber = ?");
+
+      sourcePrep = sourceConnection.prepareStatement("SELECT Teams.TeamNumber FROM Teams, TournamentTeams"
+          + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber" + " AND TournamentTeams.Tournament = ?");
+      sourcePrep.setString(1, tournament);
+      sourceRS = sourcePrep.executeQuery();
+      while (sourceRS.next()) {
+        final int teamNumber = sourceRS.getInt(1);
+        destPrep.setInt(1, teamNumber);
+        destRS = destPrep.executeQuery();
+        if (!destRS.next()) {
+          missingTeams.add(Team.getTeamFromDatabase(sourceConnection, teamNumber));
+        }
+        SQLFunctions.closeResultSet(destRS);
+      }
+    } finally {
+      SQLFunctions.closeResultSet(destRS);
+      SQLFunctions.closeResultSet(sourceRS);
+      SQLFunctions.closePreparedStatement(destPrep);
+      SQLFunctions.closePreparedStatement(sourcePrep);
+    }
+    return missingTeams;
   }
 
   private static final SimpleDateFormat CSV_TIMESTAMP_FORMATTER = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");

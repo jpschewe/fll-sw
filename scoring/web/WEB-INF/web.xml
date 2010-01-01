@@ -76,6 +76,24 @@
  </servlet-mapping>
 
  <servlet>
+  <servlet-name>FindMissingTeams</servlet-name>
+  <servlet-class>fll.web.developer.importdb.FindMissingTeams</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>FindMissingTeams</servlet-name>
+  <url-pattern>/developer/importdb/FindMissingTeams</url-pattern>
+ </servlet-mapping>
+
+ <servlet>
+  <servlet-name>AddMissingTeams</servlet-name>
+  <servlet-class>fll.web.developer.importdb.AddMissingTeams</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>AddMissingTeams</servlet-name>
+  <url-pattern>/developer/importdb/AddMissingTeams</url-pattern>
+ </servlet-mapping>
+
+ <servlet>
   <servlet-name>CheckTeamInfo</servlet-name>
   <servlet-class>fll.web.developer.importdb.CheckTeamInfo</servlet-class>
  </servlet>
@@ -85,12 +103,30 @@
  </servlet-mapping>
 
  <servlet>
+  <servlet-name>CommitTeamChanges</servlet-name>
+  <servlet-class>fll.web.developer.importdb.CommitTeamChanges</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>CommitTeamChanges</servlet-name>
+  <url-pattern>/developer/importdb/CommitTeamChanges</url-pattern>
+ </servlet-mapping>
+
+ <servlet>
   <servlet-name>CheckTournamentTeams</servlet-name>
   <servlet-class>fll.web.developer.importdb.CheckTournamentTeams</servlet-class>
  </servlet>
  <servlet-mapping>
   <servlet-name>CheckTournamentTeams</servlet-name>
   <url-pattern>/developer/importdb/CheckTournamentTeams</url-pattern>
+ </servlet-mapping>
+
+ <servlet>
+  <servlet-name>CommitTournamentChanges</servlet-name>
+  <servlet-class>fll.web.developer.importdb.CommitTournamentChanges</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>CommitTournamentChanges</servlet-name>
+  <url-pattern>/developer/importdb/CommitTournamentChanges</url-pattern>
  </servlet-mapping>
 
  <servlet>

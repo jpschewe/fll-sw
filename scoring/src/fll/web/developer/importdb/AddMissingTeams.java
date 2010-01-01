@@ -21,20 +21,20 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
-import fll.db.ImportDB;
-import fll.db.TeamPropertyDifference;
+import fll.Team;
+import fll.db.Queries;
 import fll.web.BaseFLLServlet;
 import fll.web.Init;
 import fll.web.SessionAttributes;
 
 /**
- * Servlet to check team information between the source and dest database.
+ * Add teams after promptCreateMissingTeams.jsp.
  * 
  * @author jpschewe
  */
-public class CheckTeamInfo extends BaseFLLServlet {
+public class AddMissingTeams extends BaseFLLServlet {
 
-  private static final Logger LOG = Logger.getLogger(CheckTeamInfo.class);
+  private static final Logger LOG = Logger.getLogger(AddMissingTeams.class);
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -49,17 +49,26 @@ public class CheckTeamInfo extends BaseFLLServlet {
       final String tournament = SessionAttributes.getNonNullAttribute(session, "selectedTournament", String.class);
       final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
       sourceConnection = sourceDataSource.getConnection();
-      
+
       final DataSource destDataSource = SessionAttributes.getDataSource(session);
       destConnection = destDataSource.getConnection();
 
-      final List<TeamPropertyDifference> teamDifferences = ImportDB.checkTeamInfo(sourceConnection, destConnection, tournament);
-      if(teamDifferences.isEmpty()) {
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentTeams");
-      } else {
-        session.setAttribute("teamDifferences", teamDifferences);
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "resolveTeamInfoDifferences.jsp");
+      @SuppressWarnings(value = "unchecked")
+      final List<Team> missingTeams = SessionAttributes.getNonNullAttribute(session, "missingTeams", List.class);
+      for (final Team team : missingTeams) {
+        final String dup = Queries.addTeam(destConnection, team.getTeamNumber(), team.getTeamName(), team.getOrganization(), team.getRegion(),
+                                           team.getDivision(), tournament);
+        if (null != dup) {
+          throw new RuntimeException(
+                                     String
+                                           .format(
+                                                   "Internal error, team with number %d should not exist in the destination database, found match with team with name: %s",
+                                                   team.getTeamNumber(), dup));
+        }
       }
+      
+      session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTeamInfo");
+      
     } catch (final SQLException sqle) {
       LOG.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
@@ -71,5 +80,4 @@ public class CheckTeamInfo extends BaseFLLServlet {
     session.setAttribute("message", message.toString());
     response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
   }
-
 }

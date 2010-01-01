@@ -104,7 +104,7 @@ public class CommitTeam extends BaseFLLServlet {
           if (null != newTournament) {
             final String teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
             if (!Functions.safeEquals(teamCurrentTournament, newTournament)) {
-              Queries.changeTeamCurrentTournament(connection, challengeDocument, teamNumber, request.getParameter("currentTournament"));
+              Queries.changeTeamCurrentTournament(connection, teamNumber, newTournament);
             }
           }
         }

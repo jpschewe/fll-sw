@@ -8,7 +8,6 @@ package fll.web.developer.importdb;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -53,21 +52,13 @@ public class CheckTournamentTeams extends BaseFLLServlet {
       final DataSource destDataSource = SessionAttributes.getDataSource(session);
       destConnection = destDataSource.getConnection();
 
-      final List<Integer> destMissing = new LinkedList<Integer>();
-      final List<Integer> sourceMissing = new LinkedList<Integer>();
-      ImportDB.computeMissingFromTournamentTeams(sourceConnection, destConnection, tournament, destMissing, sourceMissing);
-      if (!destMissing.isEmpty()) {
-        session.setAttribute("destMissing", destMissing);
-      }
-      if (!sourceMissing.isEmpty()) {
-        session.setAttribute("sourceMissing", sourceMissing);
-      }
+      final List<TournamentDifference> tournamentDifferences = ImportDB.computeMissingFromTournamentTeams(sourceConnection, destConnection, tournament);
+      session.setAttribute("tournamentDifferences", tournamentDifferences);
       
-      if(sourceMissing.isEmpty() && destMissing.isEmpty()) {
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "Executeimport");
+      if(tournamentDifferences.isEmpty()) {
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "ExecuteImport");
       } else {
-        //FIXME need to create resolve...
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "resolveMissingTeams.jsp");
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "resolveTournamentDifferences.jsp");
       }
 
     } catch (final SQLException sqle) {
