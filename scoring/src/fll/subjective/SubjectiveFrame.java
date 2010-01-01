@@ -50,7 +50,6 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyledDocument;
 
 import net.mtu.eggplant.util.BasicFileFilter;
-import net.mtu.eggplant.util.gui.SortableTable;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -199,7 +198,8 @@ public final class SubjectiveFrame extends JFrame {
 
     for (final Element subjectiveElement : XMLUtils.filterToElements(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       final SubjectiveTableModel tableModel = new SubjectiveTableModel(_scoreDocument, subjectiveElement);
-      final JTable table = new SortableTable(tableModel);
+      final JTable table = new JTable(tableModel);
+      table.setAutoCreateRowSorter(true);
       final String title = subjectiveElement.getAttribute("title");
       _tables.put(title, table);
       final JScrollPane tableScroller = new JScrollPane(table);

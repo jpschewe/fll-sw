@@ -75,6 +75,7 @@ public class SchedulerUI extends JFrame {
     cpane.setLayout(new BorderLayout());
     cpane.add(createToolbar(), BorderLayout.PAGE_START);
     scheduleTable = new JTable();
+    scheduleTable.setAutoCreateRowSorter(true);
     scheduleTable.setDefaultRenderer(Date.class, schedTableRenderer);
     scheduleTable.setDefaultRenderer(String.class, schedTableRenderer);
     scheduleTable.setDefaultRenderer(Integer.class, schedTableRenderer);

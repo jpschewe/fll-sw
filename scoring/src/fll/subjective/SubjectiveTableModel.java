@@ -6,14 +6,9 @@
 package fll.subjective;
 
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
-
-import net.mtu.eggplant.util.gui.SortableTableModel;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -29,13 +24,13 @@ import fll.xml.XMLUtils;
  * 
  * @version $Revision$
  */
-public final class SubjectiveTableModel extends AbstractTableModel implements SortableTableModel {
+public final class SubjectiveTableModel extends AbstractTableModel {
 
   private static final Logger LOG = Logger.getLogger(SubjectiveTableModel.class);
 
   /**
    * @param scoreDocument XML document that represents the teams that are being
-   *          scored alnog with the judges and the current set of scores
+   *          scored along with the judges and the current set of scores
    * @param subjectiveElement subjective category
    */
   public SubjectiveTableModel(final Document scoreDocument, final Element subjectiveElement) {
@@ -48,11 +43,6 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
     for (int i = 0; i < scoreElements.size(); i++) {
       _scoreElements[i] = scoreElements.get(i);
     }
-
-    // by default sort by team number
-    _sortedColumn = 0;
-    _ascending = true;
-    Arrays.sort(_scoreElements, _comparator);
   }
 
   @Override
@@ -376,85 +366,9 @@ public final class SubjectiveTableModel extends AbstractTableModel implements So
 
   private final List<Element> _goals;
 
-  private int _sortedColumn = 0;
-
-  public int getSortedColumn() {
-    return _sortedColumn;
-  }
-
-  private boolean _ascending = true;
-
-  public boolean isAscending() {
-    return _ascending;
-  }
-
-  public void sort(final int column) {
-    // only sort first 4 columns and the total score
-    if (column < 4
-        || column == getNumGoals() + 5) {
-      if (column == _sortedColumn) {
-        _ascending = !_ascending;
-      } else {
-        _sortedColumn = column;
-      }
-
-      if (isAscending()) {
-        Arrays.sort(_scoreElements, _comparator);
-      } else {
-        Arrays.sort(_scoreElements, _inverseComparator);
-      }
-      fireTableDataChanged();
-    }
-  }
-
   /**
    * The backing for the model
    */
   private final Document _scoreDocument;
 
-  private final Comparator<Element> _comparator = new Comparator<Element>() {
-    public int compare(final Element e1, final Element e2) {
-      try {
-        switch (getSortedColumn()) {
-        case 0:
-          final int team1 = Utilities.NUMBER_FORMAT_INSTANCE.parse(e1.getAttribute("teamNumber")).intValue();
-          final int team2 = Utilities.NUMBER_FORMAT_INSTANCE.parse(e2.getAttribute("teamNumber")).intValue();
-          if (team1 == team2) {
-            return 0;
-          } else if (team1 < team2) {
-            return -1;
-          } else {
-            return 1;
-          }
-        case 1:
-          final String name1 = e1.getAttribute("teamName");
-          final String name2 = e2.getAttribute("teamName");
-          return name1.compareTo(name2);
-        case 2:
-          final String division1 = e1.getAttribute("division");
-          final String division2 = e2.getAttribute("division");
-          return division1.compareTo(division2);
-        case 3:
-          final String judge1 = e1.getAttribute("judge");
-          final String judge2 = e2.getAttribute("judge");
-          return judge1.compareTo(judge2);
-        default:
-          if (getSortedColumn() == getNumGoals() + 5) {
-            final SubjectiveTeamScore scoreOne = new SubjectiveTeamScore(_subjectiveElement, e1);
-            final SubjectiveTeamScore scoreTwo = new SubjectiveTeamScore(_subjectiveElement, e2);
-            final double score1 = ScoreUtils.computeTotalScore(scoreOne);
-            final double score2 = ScoreUtils.computeTotalScore(scoreTwo);
-            return Double.compare(score1, score2);
-          } else {
-            // don't sort other columns
-            return 0;
-          }
-        }
-      } catch (final ParseException pe) {
-        throw new RuntimeException(pe);
-      }
-    }
-  };
-
-  private final Comparator<Element> _inverseComparator = Collections.reverseOrder(_comparator);
 }
