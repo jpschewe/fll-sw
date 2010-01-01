@@ -270,6 +270,7 @@
 		<buildscript scripts.dir="${dir.build}/bin" scripts.basedir="${basedir}" scripts.root=".." scripts.path="application.build.classpath" script.name="ImportDB" class.main="fll.db.ImportDB" java.args="-Dapp.name=importDB -Dlogroot=./" />
 		<buildscript scripts.dir="${dir.build}/bin" scripts.basedir="${basedir}" scripts.root=".." scripts.path="application.build.classpath" script.name="ChallengeParser" class.main="fll.xml.ChallengeParser" java.args="-Dapp.name=challengeParser -Dlogroot=./" />
 		<buildscript scripts.dir="${dir.build}/bin" scripts.basedir="${basedir}" scripts.root=".." scripts.path="application.build.classpath" script.name="ParseSchedule" class.main="fll.scheduler.ParseSchedule" java.args="-Dapp.name=parseSchedule -Dlogroot=./" />
+		<buildscript scripts.dir="${dir.build}/bin" scripts.basedir="${basedir}" scripts.root=".." scripts.path="application.build.classpath" script.name="SchedulerUI" class.main="fll.scheduler.SchedulerUI" java.args="-Dapp.name=scheduler-ui -Dlogroot=./" />
 
 		<!-- copy libraries over -->
 		<copy todir="${dir.build}/lib">
