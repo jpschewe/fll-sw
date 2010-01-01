@@ -114,6 +114,7 @@ public class SchedulerUI extends JFrame {
     toolbar.add(openAction);
     toolbar.add(reloadFileAction);
     toolbar.add(writeSchedulesAction);
+    toolbar.add(displayGeneralScheduleAction);
     toolbar.add(preferencesAction);
 
     return toolbar;
@@ -187,6 +188,21 @@ public class SchedulerUI extends JFrame {
 
     public void actionPerformed(final ActionEvent ae) {
       System.exit(0);
+    }
+  };
+  
+  private final Action displayGeneralScheduleAction = new AbstractAction("General Schedule") {
+    {
+      putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/History16.gif"));
+      putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/History24.gif"));
+      putValue(SHORT_DESCRIPTION, "Display the general schedule");
+//      putValue(MNEMONIC_KEY, KeyEvent.VK_X);
+    }
+
+    public void actionPerformed(final ActionEvent ae) {
+      final String schedule = scheduleData.computeGeneralSchedule();
+      JOptionPane.showMessageDialog(SchedulerUI.this, schedule, "General Schedule",
+                                    JOptionPane.INFORMATION_MESSAGE);      
     }
   };
 

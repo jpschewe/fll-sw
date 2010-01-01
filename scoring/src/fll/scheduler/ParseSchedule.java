@@ -229,8 +229,8 @@ public class ParseSchedule {
       final Collection<ConstraintViolation> violations = ps.verifySchedule();
 
       if (violations.isEmpty()) {
-        ps.computeGeneralSchedule();
-
+        LOGGER.info(ps.computeGeneralSchedule());
+        
         try {
           ps.outputDetailedSchedules();
         } catch (final DocumentException e) {
@@ -722,9 +722,9 @@ public class ParseSchedule {
   }
 
   /**
-   * Compute the general schedule and output it into the log.
+   * Compute the general schedule and return it as a string
    */
-  public void computeGeneralSchedule() {
+  public String computeGeneralSchedule() {
     Date minTechnical = null;
     Date maxTechnical = null;
     Date minPresentation = null;
@@ -775,21 +775,16 @@ public class ParseSchedule {
     }
 
     // print out the general schedule
-    LOGGER.info("min technical: "
-        + OUTPUT_DATE_FORMAT.get().format(minTechnical));
-    LOGGER.info("max technical: "
-        + OUTPUT_DATE_FORMAT.get().format(maxTechnical));
-    LOGGER.info("min presentation: "
-        + OUTPUT_DATE_FORMAT.get().format(minPresentation));
-    LOGGER.info("max presentation: "
-        + OUTPUT_DATE_FORMAT.get().format(maxPresentation));
+    final Formatter output = new Formatter();
+    output.format("min technical: %s%n", OUTPUT_DATE_FORMAT.get().format(minTechnical));
+    output.format("max technical: %s%n", OUTPUT_DATE_FORMAT.get().format(maxTechnical));
+    output.format("min presentation: %s%n", OUTPUT_DATE_FORMAT.get().format(minPresentation));
+    output.format("max presentation: %s%n", OUTPUT_DATE_FORMAT.get().format(maxPresentation));
     for (int i = 0; i < NUMBER_OF_ROUNDS; ++i) {
-      LOGGER.info("min performance round "
-          + (i + 1) + ": " + OUTPUT_DATE_FORMAT.get().format(minPerf[i]));
-      LOGGER.info("max performance round "
-          + (i + 1) + ": " + OUTPUT_DATE_FORMAT.get().format(maxPerf[i]));
+      output.format("min performance round %d: %s%n", (i + 1), OUTPUT_DATE_FORMAT.get().format(minPerf[i]));
+      output.format("max performance round %d: %s%n", (i + 1), OUTPUT_DATE_FORMAT.get().format(maxPerf[i]));
     }
-
+    return output.toString();
   }
 
   /**
