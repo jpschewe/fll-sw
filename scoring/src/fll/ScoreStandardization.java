@@ -75,6 +75,7 @@ public final class ScoreStandardization {
     Statement stmt = null;
     PreparedStatement prep = null;
     ResultSet rs = null;
+    PreparedStatement updatePrep = null;
     try {
       stmt = connection.createStatement();
 
@@ -86,12 +87,17 @@ public final class ScoreStandardization {
       final double mean = getStandardizedMean(connection);
       final double sigma = getStandardizedSigma(connection);
       
-      prep = connection.prepareStatement("INSERT INTO FinalScores "
-          + " ( TeamNumber, Tournament, performance ) " + " SELECT TeamNumber" + ", Tournament" + ", ((Score - ?) * (" + sigma + " / ?)" + " ) + " + mean
-          + " FROM performance_seeding_max" + " WHERE Tournament = '" + tournament + "'");
+      prep = connection.prepareStatement("INSERT INTO FinalScores " //
+          + " ( TeamNumber, Tournament, performance ) " //
+          + " SELECT TeamNumber" // 
+          + ", Tournament" //
+          + ", ((Score - ?) * ?" + " ) +  ?"//
+          + " FROM performance_seeding_max" + " WHERE Tournament = ?");
       rs = stmt.executeQuery("SELECT "
           + " Avg(Score) AS sg_mean," + " Count(Score) AS sg_count," + " stddev_pop(Score) AS sg_stdev" + " FROM performance_seeding_max"
           + " WHERE Tournament = '" + tournament + "'");
+      prep.setDouble(3, mean);
+      prep.setString(4, tournament);
       if (rs.next()) {
         final int sgCount = rs.getInt(2);
         if (0 == sgCount) {
@@ -100,9 +106,8 @@ public final class ScoreStandardization {
         } else if (sgCount > 1) {
           final double sgMean = rs.getDouble(1);
           final double sgStdev = rs.getDouble(3);
-
           prep.setDouble(1, sgMean);
-          prep.setDouble(2, sgStdev);
+          prep.setDouble(2, sigma / sgStdev);
           prep.executeUpdate();
         } else {
           throw new RuntimeException("Not enough scores for in category: Performance");
@@ -116,9 +121,17 @@ public final class ScoreStandardization {
           // insert rows from the current tournament and category, keeping team
           // number and score group as well as computing the average (across
           // judges)
-          stmt.executeUpdate("UPDATE FinalScores"
-              + " SET " + catName + " = " + " ( SELECT " + "   Avg(StandardizedScore)" + "   FROM " + catName + "   WHERE Tournament = '" + tournament + "'"
-              + "   AND StandardizedScore IS NOT NULL" + "   AND FinalScores.TeamNumber = " + catName + ".TeamNumber" + "   GROUP BY TeamNumber )");
+          updatePrep = connection.prepareStatement("UPDATE FinalScores" //
+              + " SET " + catName + " = " //
+              + " ( SELECT " //
+              + "   Avg(StandardizedScore)" //
+              + "   FROM " + catName //
+              + "   WHERE Tournament = ?" //
+              + "   AND StandardizedScore IS NOT NULL" //
+              + "   AND FinalScores.TeamNumber = " + catName + ".TeamNumber" //
+              + "   GROUP BY TeamNumber )");
+          updatePrep.setString(1, tournament);
+          updatePrep.executeUpdate();
         }
 
       } else {
@@ -146,11 +159,9 @@ public final class ScoreStandardization {
    */
   public static void standardizeSubjectiveScores(final Connection connection, final Document document, final String tournament) throws SQLException {
     ResultSet rs = null;
-    Statement stmt = null;
     PreparedStatement updatePrep = null;
+    PreparedStatement selectPrep = null;
     try {
-      stmt = connection.createStatement();
-      
       final double mean = getStandardizedMean(connection);
       final double sigma = getStandardizedSigma(connection);
 
@@ -171,12 +182,21 @@ public final class ScoreStandardization {
         // 2 - sg_stdev
         // 3 - judge
         updatePrep = connection.prepareStatement("UPDATE "
-            + category + " SET StandardizedScore =" + " ((ComputedTotal - ?) * (" + sigma + " / ?)" + " ) + " + mean + " WHERE Judge = ?"
-            + " AND Tournament = '" + tournament + "'");
+            + category + " SET StandardizedScore =" + " ((ComputedTotal - ?) * ?" + " ) + ?  WHERE Judge = ?"
+            + " AND Tournament = ?");
 
-        rs = stmt.executeQuery("SELECT Judge,"
-            + " Avg(ComputedTotal) AS sg_mean," + " Count(ComputedTotal) AS sg_count," + " stddev_pop(ComputedTotal) AS sg_stdev" + " FROM " + category
-            + " WHERE Tournament = '" + tournament + "'" + " and ComputedTotal IS NOT NULL AND NoShow = false GROUP BY Judge");
+        selectPrep = connection.prepareStatement("SELECT Judge," //
+            + " Avg(ComputedTotal) AS sg_mean," //
+            + " Count(ComputedTotal) AS sg_count," //
+            + " stddev_pop(ComputedTotal) AS sg_stdev" //
+            + " FROM " + category //
+            + " WHERE Tournament = ?" //
+            + " and ComputedTotal IS NOT NULL AND NoShow = false GROUP BY Judge");
+        selectPrep.setString(1, tournament);
+        rs = selectPrep.executeQuery();
+        
+        updatePrep.setDouble(3, mean);
+        updatePrep.setString(5, tournament);
         while (rs.next()) {
           final String judge = rs.getString(1);
           final int sgCount = rs.getInt(3);
@@ -184,8 +204,8 @@ public final class ScoreStandardization {
             final double sgMean = rs.getDouble(2);
             final double sgStdev = rs.getDouble(4);
             updatePrep.setDouble(1, sgMean);
-            updatePrep.setDouble(2, sgStdev);
-            updatePrep.setString(3, judge);
+            updatePrep.setDouble(2, sigma / sgStdev);
+            updatePrep.setString(4, judge);
             updatePrep.executeUpdate();
           } else { // if(sgCount == 1) {
             throw new RuntimeException("Not enough scores for Judge: "
@@ -198,7 +218,7 @@ public final class ScoreStandardization {
 
     } finally {
       SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(selectPrep);
       SQLFunctions.closePreparedStatement(updatePrep);
     }
 

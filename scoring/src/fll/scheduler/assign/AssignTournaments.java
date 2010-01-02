@@ -322,7 +322,7 @@ public class AssignTournaments {
     for (final TeamInfo team : unassigned) {
       final Map<String, TournamentInfo> divTournaments = tournaments.get(team.getDivision());
       if (null == divTournaments) {
-        throw new RuntimeException(String.format("No tournaments for division: %d team: %d", team.getDivision(), team.getNumber()));
+        throw new RuntimeException(String.format("No tournaments for division: %s team: %d", team.getDivision(), team.getNumber()));
       } else {
         boolean assigned = false;
         for (final TournamentInfo tournament : divTournaments.values()) {
