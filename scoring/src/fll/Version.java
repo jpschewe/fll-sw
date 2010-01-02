@@ -32,11 +32,18 @@ public final class Version {
       String version;
       try {
         versionProps.load(stream);
-        stream.close();
         version = versionProps.getProperty("version", "NO-PROPERTY");
       } catch (final IOException ioe) {
         LOG.error("Error loading version properties", ioe);
         version = "EXCEPTION";
+      } finally {
+        try {
+          stream.close();
+        } catch(final IOException e) {
+          if(LOG.isDebugEnabled()) {
+            LOG.debug("Error closing stream", e);
+          }
+        }
       }
 
       VERSION = version;
