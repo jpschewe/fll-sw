@@ -24,6 +24,13 @@
   <location>/errorHandler.jsp</location>
  </error-page>
 
+   <!-- Define application events listeners -->
+  <!-- listener>
+    <listener-class>
+      com.listeners.MyContextListener
+    </listener-class>
+  </listener-->
+  
  <!-- servlets -->
  <servlet>
   <servlet-name>log4j-init</servlet-name>
