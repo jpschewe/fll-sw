@@ -17,8 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.Functions;
-
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
@@ -100,10 +98,11 @@ public class CommitTeam extends BaseFLLServlet {
           Queries.updateTeam(connection, teamNumber, request.getParameter("teamName"), request.getParameter("organization"), request.getParameter("region"),
                              division);
           // this will be null if the tournament can't be changed
-          final String newTournament = request.getParameter("currentTournament");
-          if (null != newTournament) {
-            final String teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
-            if (!Functions.safeEquals(teamCurrentTournament, newTournament)) {
+          final String newTournamentStr = request.getParameter("currentTournament");
+          if (null != newTournamentStr) {
+            final int newTournament = Utilities.NUMBER_FORMAT_INSTANCE.parse(newTournamentStr).intValue();
+            final int teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
+            if (teamCurrentTournament != newTournament) {
               Queries.changeTeamCurrentTournament(connection, teamNumber, newTournament);
             }
           }

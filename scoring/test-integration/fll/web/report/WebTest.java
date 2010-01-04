@@ -33,8 +33,8 @@ public class WebTest {
   @Test
   public void testPages() throws SAXException, MalformedURLException, IOException {
     final String[] pages = new String[] { "index.jsp",
-    // "categorizedScores.jsp",
-    // "scoreGroupScores.jsp",
+    // "CategorizedScores",
+    // "ScoreGroupScores",
 
     };
     final WebConversation conversation = new WebConversation();

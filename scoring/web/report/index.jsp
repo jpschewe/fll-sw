@@ -10,18 +10,10 @@
 <%@ page import="java.sql.Connection" %>
   
 <%
-final StringBuffer message = new StringBuffer();
-final String messageReq = request.getParameter("message");
-if(null != messageReq) {
-  message.append("<i>");
-  message.append(messageReq);
-  message.append("</i><br>");
-}
-
 final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
 final Statement stmt = connection.createStatement();
-final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = '" + Queries.getCurrentTournament(connection) + "'");
+final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = " + Queries.getCurrentTournament(connection));
 final int maxRunNumber;
 if(rs.next()) {
   maxRunNumber = rs.getInt(1);
@@ -40,7 +32,7 @@ SQLFunctions.closeStatement(stmt);
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Reporting)</h1>
 
-    <p><%=message.toString()%></p>
+${message}
 
     <ol>
       <li><a href="summarizePhase1.jsp">Compute summarized scores</a>.  This
@@ -52,9 +44,9 @@ SQLFunctions.closeStatement(stmt);
                    </c:url>' target='_new'>Final Computed Scores</a>
         </li>
 
-      <li><a href="categorizedScores.jsp">Categorized Scores</a></li>
+      <li><a href="CategorizedScores">Categorized Scores</a></li>
 
-      <li><a href="categoryScoresByJudge.jsp">Categorized Scores by judge</a></li>
+      <li><a href="CategoryScoresByJudge">Categorized Scores by judge</a></li>
 
       <li><a href="CategoryScoresByScoreGroup">Categorized Scores by Score Group</a>.  This displays the scaled scores for each category by score group (all judges that saw a team).</li>
 

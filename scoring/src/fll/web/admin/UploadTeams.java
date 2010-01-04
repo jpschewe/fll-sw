@@ -450,7 +450,7 @@ public final class UploadTeams extends BaseFLLServlet {
       }
 
       prep = connection.prepareStatement("DELETE FROM Teams WHERE Region <> ?");
-      prep.setString(1, GenerateDB.INTERNAL_TOURNAMENT);
+      prep.setString(1, GenerateDB.INTERNAL_REGION);
       prep.executeUpdate();
 
       // now copy the data over converting the team number to an integer
@@ -501,8 +501,10 @@ public final class UploadTeams extends BaseFLLServlet {
       // put all teams in the DUMMY tournament by default and make the event
       // division the same as the team division
       stmt.executeUpdate("DELETE FROM TournamentTeams");
-      stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) SELECT 'DUMMY', Teams.TeamNumber, Teams.Division FROM Teams");
-
+      final int dummyTournamentID = Queries.getTournamentID(connection, "DUMMY");
+      stmt
+          .executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) SELECT " + dummyTournamentID + ", Teams.TeamNumber, Teams.Division FROM Teams");
+              
       return true;
     } finally {
       SQLFunctions.closeStatement(stmt);

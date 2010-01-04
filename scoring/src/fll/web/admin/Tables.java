@@ -41,7 +41,7 @@ public final class Tables {
       throws SQLException, IOException, ParseException {
     final DataSource datasource = SessionAttributes.getDataSource(session);
     final Connection connection = datasource.getConnection();
-    final String tournament = Queries.getCurrentTournament(connection);
+    final int tournament = Queries.getCurrentTournament(connection);
     final String submitButton = request.getParameter("submit");
 
     int rowIndex = 0;
@@ -64,7 +64,7 @@ public final class Tables {
 
     String errorString = null;
     if ("Finished".equals(submitButton)) {
-      errorString = commitData(request, response, connection, Queries.getCurrentTournament(connection));
+      errorString = commitData(request, response, session, connection, Queries.getCurrentTournament(connection));
     }
 
     if (null == submitButton
@@ -87,9 +87,10 @@ public final class Tables {
         ResultSet rs = null;
         Statement stmt = null;
         try {
+          //TODO make prepared statement
           stmt = connection.createStatement();
-          rs = stmt.executeQuery("SELECT SideA,SideB FROM tablenames WHERE Tournament = '"
-              + tournament + "' ORDER BY PairID");
+          rs = stmt.executeQuery("SELECT SideA,SideB FROM tablenames WHERE Tournament = "
+              + tournament + " ORDER BY PairID");
           for (row = 0; rs.next(); row++) {
             final String sideA = rs.getString(1);
             final String sideB = rs.getString(2);
@@ -175,7 +176,7 @@ public final class Tables {
    * 
    * @param tournament the current tournament
    */
-  private static String commitData(final HttpServletRequest request, final HttpServletResponse response, final Connection connection, final String tournament)
+  private static String commitData(final HttpServletRequest request, final HttpServletResponse response, final HttpSession session, final Connection connection, final int tournament)
       throws SQLException, IOException {
     Statement stmt = null;
     PreparedStatement prep = null;
@@ -183,12 +184,14 @@ public final class Tables {
       stmt = connection.createStatement();
 
       // delete old data in tablenames
-      stmt.executeUpdate("DELETE FROM tablenames where Tournament = '"
-          + tournament + "'");
+      prep = connection.prepareStatement("DELETE FROM tablenames where Tournament = ?");
+      prep.setInt(1, tournament);
+      prep.executeUpdate();
+      SQLFunctions.closePreparedStatement(prep);
 
       // walk request parameters and insert data into database
-      prep = connection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) VALUES('"
-          + tournament + "',?, ?, ?)");
+      prep = connection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) VALUES(?,?, ?, ?)");
+      prep.setInt(1, tournament);
       int row = 0;
       String sideA = request.getParameter("SideA"
           + row);
@@ -201,9 +204,9 @@ public final class Tables {
             || delete.equals("")) {
           // Don't put blank entries in the database
           if (!(sideA.trim().equals("") && sideB.trim().equals(""))) {
-            prep.setInt(1, row);
-            prep.setString(2, sideA);
-            prep.setString(3, sideB);
+            prep.setInt(2, row);
+            prep.setString(3, sideA);
+            prep.setString(4, sideB);
             prep.executeUpdate();
           }
         }
@@ -223,7 +226,8 @@ public final class Tables {
     }
 
     // finally redirect to index.jsp
-    response.sendRedirect(response.encodeRedirectURL("index.jsp?message=Successfully+assigned+tables."));
+    session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'><i>Successfully assigned tables</i></p>");
+    response.sendRedirect(response.encodeRedirectURL("index.jsp"));
     return null;
   }
 

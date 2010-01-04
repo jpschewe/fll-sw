@@ -60,9 +60,13 @@ public class CommitTournamentChanges extends BaseFLLServlet {
         if(null == userChoice) {
           throw new RuntimeException("Missing paramter '" + idx + "' when committing tournament change");
         } else if("source".equals(userChoice)) {
-          Queries.changeTeamCurrentTournament(destConnection, difference.getTeamNumber(), difference.getSourceTournament());
+          final String sourceName = difference.getSourceTournament();
+          final int tournamentID = Queries.getTournamentID(destConnection, sourceName);
+          Queries.changeTeamCurrentTournament(destConnection, difference.getTeamNumber(), tournamentID);
         } else if("dest".equals(userChoice)) {
-          Queries.changeTeamCurrentTournament(sourceConnection, difference.getTeamNumber(), difference.getDestTournament());
+          final String name = difference.getDestTournament();
+          final int tournamentID = Queries.getTournamentID(sourceConnection, name);
+          Queries.changeTeamCurrentTournament(sourceConnection, difference.getTeamNumber(), tournamentID);
         } else {
           throw new RuntimeException(String.format("Unknown value '%s' for choice of parameter '%d'", userChoice, idx));
         }                  

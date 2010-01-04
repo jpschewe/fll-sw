@@ -14,11 +14,11 @@ import java.text.ParseException;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.db.Queries;
+import fll.db.TournamentParameters;
 import fll.xml.XMLUtils;
 
 /**
@@ -27,36 +27,6 @@ import fll.xml.XMLUtils;
  * @version $Revision$
  */
 public final class ScoreStandardization {
-
-  private static final Logger LOG = Logger.getLogger(ScoreStandardization.class);
-
-  /**
-   * For debugging
-   * 
-   * @param args ignored
-   */
-  public static void main(final String[] args) {
-    try {
-      final String tournament = "state";
-      final Connection connection = Utilities.createDataSource("tomcat/webapps/fll-sw/WEB-INF/flldb").getConnection();
-      final Document challengeDocument = Queries.getChallengeDocument(connection);
-      Queries.updateScoreTotals(challengeDocument, connection);
-
-      standardizeSubjectiveScores(connection, challengeDocument, tournament);
-      summarizeScores(connection, challengeDocument, tournament);
-
-      updateTeamTotalScores(connection, challengeDocument, tournament);
-      final String error = checkDataConsistency(connection);
-      if (null != error) {
-        LOG.error("data consistency error: "
-            + error);
-      }
-    } catch (final Exception e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-    System.exit(0);
-  }
 
   private ScoreStandardization() {
     // no instances
@@ -71,7 +41,7 @@ public final class ScoreStandardization {
    * @param document the challenge document
    * @param tournament which tournament to summarize scores for
    */
-  public static void summarizeScores(final Connection connection, final Document document, final String tournament) throws SQLException, ParseException {
+  public static void summarizeScores(final Connection connection, final Document document, final int tournament) throws SQLException, ParseException {
     Statement stmt = null;
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -87,17 +57,20 @@ public final class ScoreStandardization {
       final double mean = getStandardizedMean(connection);
       final double sigma = getStandardizedSigma(connection);
       
-      prep = connection.prepareStatement("INSERT INTO FinalScores " //
+      prep = connection.prepareStatement("INSERT INTO FinalScores "//
           + " ( TeamNumber, Tournament, performance ) " //
-          + " SELECT TeamNumber" // 
-          + ", Tournament" //
-          + ", ((Score - ?) * ?" + " ) +  ?"//
-          + " FROM performance_seeding_max" + " WHERE Tournament = ?");
-      rs = stmt.executeQuery("SELECT "
-          + " Avg(Score) AS sg_mean," + " Count(Score) AS sg_count," + " stddev_pop(Score) AS sg_stdev" + " FROM performance_seeding_max"
-          + " WHERE Tournament = '" + tournament + "'");
+          + " SELECT TeamNumber" + ", Tournament" //
+          + ", ((Score - ?) * ?) + ? "//
+          + " FROM performance_seeding_max" //
+          + " WHERE Tournament = ?");
       prep.setDouble(3, mean);
-      prep.setString(4, tournament);
+      prep.setInt(4, tournament);
+      rs = stmt.executeQuery("SELECT "
+          + " Avg(Score) AS sg_mean," //
+          + " Count(Score) AS sg_count," //
+          + " stddev_pop(Score) AS sg_stdev" //
+          + " FROM performance_seeding_max"//
+          + " WHERE Tournament = " + tournament);
       if (rs.next()) {
         final int sgCount = rs.getInt(2);
         if (0 == sgCount) {
@@ -130,7 +103,7 @@ public final class ScoreStandardization {
               + "   AND StandardizedScore IS NOT NULL" //
               + "   AND FinalScores.TeamNumber = " + catName + ".TeamNumber" //
               + "   GROUP BY TeamNumber )");
-          updatePrep.setString(1, tournament);
+          updatePrep.setInt(1, tournament);
           updatePrep.executeUpdate();
         }
 
@@ -147,17 +120,17 @@ public final class ScoreStandardization {
   }
 
   private static double getStandardizedMean(final Connection connection) throws SQLException {
-    return Queries.getDoubleTournamentParameter(connection, "StandardizedMean");
+    return Queries.getDoubleTournamentParameter(connection, TournamentParameters.STANDARDIZED_MEAN);
   }
 
   private static double getStandardizedSigma(final Connection connection) throws SQLException {
-    return Queries.getDoubleTournamentParameter(connection, "StandardizedSigma");
+    return Queries.getDoubleTournamentParameter(connection, TournamentParameters.STANDARDIZED_SIGMA);
   }
 
   /**
    * Populate the StandardizedScore column of each subjective table.
    */
-  public static void standardizeSubjectiveScores(final Connection connection, final Document document, final String tournament) throws SQLException {
+  public static void standardizeSubjectiveScores(final Connection connection, final Document document, final int tournament) throws SQLException {
     ResultSet rs = null;
     PreparedStatement updatePrep = null;
     PreparedStatement selectPrep = null;
@@ -182,8 +155,10 @@ public final class ScoreStandardization {
         // 2 - sg_stdev
         // 3 - judge
         updatePrep = connection.prepareStatement("UPDATE "
-            + category + " SET StandardizedScore =" + " ((ComputedTotal - ?) * ?" + " ) + ?  WHERE Judge = ?"
+            + category + " SET StandardizedScore = ((ComputedTotal - ?) * ? ) + ?  WHERE Judge = ?"
             + " AND Tournament = ?");
+        updatePrep.setDouble(3, mean);
+        updatePrep.setInt(5, tournament);
 
         selectPrep = connection.prepareStatement("SELECT Judge," //
             + " Avg(ComputedTotal) AS sg_mean," //
@@ -192,11 +167,8 @@ public final class ScoreStandardization {
             + " FROM " + category //
             + " WHERE Tournament = ?" //
             + " and ComputedTotal IS NOT NULL AND NoShow = false GROUP BY Judge");
-        selectPrep.setString(1, tournament);
-        rs = selectPrep.executeQuery();
-        
-        updatePrep.setDouble(3, mean);
-        updatePrep.setString(5, tournament);
+        selectPrep.setInt(1, tournament);
+        rs = selectPrep.executeQuery();        
         while (rs.next()) {
           final String judge = rs.getString(1);
           final int sgCount = rs.getInt(3);
@@ -233,7 +205,7 @@ public final class ScoreStandardization {
    * @param tournament the tournament to add scores for
    * @throws SQLException on an error talking to the database
    */
-  public static void updateTeamTotalScores(final Connection connection, final Document document, final String tournament) throws SQLException, ParseException {
+  public static void updateTeamTotalScores(final Connection connection, final Document document, final int tournament) throws SQLException, ParseException {
     Statement stmt = null;
     try {
       final StringBuilder sql = new StringBuilder();
@@ -256,8 +228,8 @@ public final class ScoreStandardization {
             + catName + " * " + catWeight);
       }
 
-      sql.append(" ) WHERE Tournament = '"
-          + tournament + "'");
+      sql.append(" ) WHERE Tournament = "
+          + tournament);
 
       stmt = connection.createStatement();
 

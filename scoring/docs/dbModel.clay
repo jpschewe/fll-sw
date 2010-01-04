@@ -6,15 +6,21 @@
 <table-list>
 <table id="1f769f17:1248908e683:-7fff" name="Tournaments">
 <column-list>
+<column auto-increment="true" column-size="0" decimal-digits="0" default-value="" id="54999098:1258091eeb9:-7fdc" mandatory="true" name="tournament_id">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
 <column auto-increment="false" column-size="128" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7ffa" mandatory="true" name="Name">
 <data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
 </column>
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="NULL" id="1f769f17:1248908e683:-7ff7" mandatory="false" name="Location">
 <data-type name="LONGVARCHAR" selected-variant-pattern="LONGVARCHAR"/>
 </column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="27d8ed7a:125858e0e0b:-7f98" mandatory="false" name="NextTournament">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
 </column-list>
 <primary-key id="1f769f17:1248908e683:-7ffe" name="PK_TOURNAMENTS">
-<primary-key-column name="Name"/>
+<primary-key-column name="tournament_id"/>
 </primary-key>
 </table>
 <table id="1f769f17:1248908e683:-7ff6" name="Teams">
@@ -41,8 +47,8 @@
 </table>
 <table id="1f769f17:1248908e683:-7fdf" name="tablenames">
 <column-list>
-<column auto-increment="false" column-size="128" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7fdb" mandatory="true" name="Tournament">
-<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7fdb" mandatory="true" name="Tournament">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
 </column>
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7fda" mandatory="true" name="PairID">
 <data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
@@ -60,7 +66,7 @@
 </primary-key>
 <foreign-key-list>
 <foreign-key id="1f769f17:1248908e683:-7f37" name="FK_tablenames_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
-<foreign-key-column column-name="Tournament" referenced-key-column-name="Name"/>
+<foreign-key-column column-name="Tournament" referenced-key-column-name="tournament_id"/>
 </foreign-key>
 </foreign-key-list>
 </table>
@@ -69,8 +75,8 @@
 <column auto-increment="false" column-size="32" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7eeb" mandatory="true" name="event_division">
 <data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
 </column>
-<column auto-increment="false" column-size="128" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7ee8" mandatory="true" name="Tournament">
-<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7ee8" mandatory="true" name="Tournament">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
 </column>
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7ee7" mandatory="true" name="PlayoffRound">
 <data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
@@ -95,11 +101,11 @@
 <primary-key-column name="LineNumber"/>
 </primary-key>
 <foreign-key-list>
-<foreign-key id="1f769f17:1248908e683:-7ed6" name="FK_PlayoffData_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
-<foreign-key-column column-name="Tournament" referenced-key-column-name="Name"/>
-</foreign-key>
 <foreign-key id="1f769f17:1248908e683:-7e97" name="FK_PlayoffData_2" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TEAMS" referenced-table="Teams" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
 <foreign-key-column column-name="Team" referenced-key-column-name="TeamNumber"/>
+</foreign-key>
+<foreign-key id="1f769f17:1248908e683:-7ed6" name="FK_PlayoffData_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key-column column-name="Tournament" referenced-key-column-name="tournament_id"/>
 </foreign-key>
 </foreign-key-list>
 </table>
@@ -108,8 +114,8 @@
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7e35" mandatory="true" name="TeamNumber">
 <data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
 </column>
-<column auto-increment="false" column-size="128" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7e34" mandatory="true" name="Tournament">
-<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7e34" mandatory="true" name="Tournament">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
 </column>
 <column auto-increment="false" column-size="32" decimal-digits="0" default-value="'1'" id="1f769f17:1248908e683:-7e31" mandatory="true" name="event_division">
 <data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
@@ -124,7 +130,7 @@
 <foreign-key-column column-name="TeamNumber" referenced-key-column-name="TeamNumber"/>
 </foreign-key>
 <foreign-key id="1f769f17:1248908e683:-7db1" name="FK_TournamentTeams_2" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
-<foreign-key-column column-name="Tournament" referenced-key-column-name="Name"/>
+<foreign-key-column column-name="Tournament" referenced-key-column-name="tournament_id"/>
 </foreign-key>
 </foreign-key-list>
 </table>
@@ -135,9 +141,6 @@
 </column>
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d66" mandatory="true" name="Value">
 <data-type name="LONGVARCHAR" selected-variant-pattern="LONGVARCHAR"/>
-</column>
-<column auto-increment="false" column-size="255" decimal-digits="0" default-value="NULL" id="1f769f17:1248908e683:-7d65" mandatory="false" name="Description">
-<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
 </column>
 </column-list>
 <primary-key id="1f769f17:1248908e683:-7d6a" name="PK_TOURNAMENTPARAMETERS">
@@ -152,8 +155,8 @@
 <column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d5f" mandatory="true" name="category">
 <data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
 </column>
-<column auto-increment="false" column-size="128" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d5e" mandatory="true" name="Tournament">
-<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d5e" mandatory="true" name="Tournament">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
 </column>
 <column auto-increment="false" column-size="32" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d5d" mandatory="true" name="event_division">
 <data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
@@ -167,7 +170,7 @@
 </primary-key>
 <foreign-key-list>
 <foreign-key id="1f769f17:1248908e683:-7d2d" name="FK_Judges_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
-<foreign-key-column column-name="Tournament" referenced-key-column-name="Name"/>
+<foreign-key-column column-name="Tournament" referenced-key-column-name="tournament_id"/>
 </foreign-key>
 </foreign-key-list>
 </table>
@@ -176,8 +179,8 @@
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7cf4" mandatory="true" name="TeamNumber">
 <data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
 </column>
-<column auto-increment="false" column-size="128" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7cf3" mandatory="true" name="Tournament">
-<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7cf3" mandatory="true" name="Tournament">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
 </column>
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7cf2" mandatory="true" name="RunNumber">
 <data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
@@ -217,7 +220,7 @@
 <foreign-key-column column-name="TeamNumber" referenced-key-column-name="TeamNumber"/>
 </foreign-key>
 <foreign-key id="1f769f17:1248908e683:-7c3c" name="FK_Performance_2" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
-<foreign-key-column column-name="Tournament" referenced-key-column-name="Name"/>
+<foreign-key-column column-name="Tournament" referenced-key-column-name="tournament_id"/>
 </foreign-key>
 </foreign-key-list>
 </table>
@@ -226,8 +229,8 @@
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7c10" mandatory="true" name="TeamNumber">
 <data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
 </column>
-<column auto-increment="false" column-size="128" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7c0f" mandatory="true" name="Tournament">
-<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7c0f" mandatory="true" name="Tournament">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
 </column>
 <column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7c0e" mandatory="true" name="Judge">
 <data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
@@ -252,7 +255,7 @@
 <foreign-key-column column-name="TeamNumber" referenced-key-column-name="TeamNumber"/>
 </foreign-key>
 <foreign-key id="1f769f17:1248908e683:-7b5c" name="FK_&lt;subjective category&gt;_2" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
-<foreign-key-column column-name="Tournament" referenced-key-column-name="Name"/>
+<foreign-key-column column-name="Tournament" referenced-key-column-name="tournament_id"/>
 </foreign-key>
 </foreign-key-list>
 </table>
@@ -261,8 +264,8 @@
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7b3b" mandatory="true" name="TeamNumber">
 <data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
 </column>
-<column auto-increment="false" column-size="128" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7b3a" mandatory="true" name="Tournament">
-<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7b3a" mandatory="true" name="Tournament">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
 </column>
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="NULL" id="1f769f17:1248908e683:-7b39" mandatory="false" name="&lt;subjective category name&gt;">
 <data-type name="FLOAT" selected-variant-pattern="FLOAT"/>
@@ -283,24 +286,38 @@
 <foreign-key-column column-name="TeamNumber" referenced-key-column-name="TeamNumber"/>
 </foreign-key>
 <foreign-key id="1f769f17:1248908e683:-7af8" name="FK_FinalScores_2" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
-<foreign-key-column column-name="Tournament" referenced-key-column-name="Name"/>
+<foreign-key-column column-name="Tournament" referenced-key-column-name="tournament_id"/>
 </foreign-key>
 </foreign-key-list>
+</table>
+<table id="7ad99991:125ecd3d8cf:-7f78" name="global_parameters">
+<column-list>
+<column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="7ad99991:125ecd3d8cf:-7f76" mandatory="true" name="param">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="7ad99991:125ecd3d8cf:-7f75" mandatory="true" name="value">
+<data-type name="LONGVARCHAR" selected-variant-pattern="LONGVARCHAR"/>
+</column>
+</column-list>
+<primary-key id="7ad99991:125ecd3d8cf:-7f73" name="PK_GLOBAL_PARAMETERS">
+<primary-key-column name="param"/>
+</primary-key>
 </table>
 </table-list>
 </schema>
 </schema-list>
 </database-model>
 <diagram>
-<table-figure refid="1f769f17:1248908e683:-7fff" x="302" y="216"/>
-<table-figure refid="1f769f17:1248908e683:-7ff6" x="926" y="255"/>
-<table-figure refid="1f769f17:1248908e683:-7fdf" x="223" y="38"/>
-<table-figure refid="1f769f17:1248908e683:-7ef3" x="597" y="167"/>
-<table-figure refid="1f769f17:1248908e683:-7e39" x="625" y="5"/>
-<table-figure refid="1f769f17:1248908e683:-7d6b" x="19" y="521"/>
-<table-figure refid="1f769f17:1248908e683:-7d64" x="10" y="318"/>
-<table-figure refid="1f769f17:1248908e683:-7cf8" x="876" y="508"/>
-<table-figure refid="1f769f17:1248908e683:-7c14" x="382" y="616"/>
-<table-figure refid="1f769f17:1248908e683:-7b41" x="76" y="618"/>
+<table-figure refid="1f769f17:1248908e683:-7fff" x="70" y="568"/>
+<table-figure refid="1f769f17:1248908e683:-7ff6" x="937" y="256"/>
+<table-figure refid="1f769f17:1248908e683:-7fdf" x="301" y="5"/>
+<table-figure refid="1f769f17:1248908e683:-7ef3" x="440" y="552"/>
+<table-figure refid="1f769f17:1248908e683:-7e39" x="723" y="53"/>
+<table-figure refid="1f769f17:1248908e683:-7d6b" x="5" y="776"/>
+<table-figure refid="1f769f17:1248908e683:-7d64" x="27" y="74"/>
+<table-figure refid="1f769f17:1248908e683:-7cf8" x="760" y="945"/>
+<table-figure refid="1f769f17:1248908e683:-7c14" x="466" y="371"/>
+<table-figure refid="1f769f17:1248908e683:-7b41" x="578" y="792"/>
+<table-figure refid="7ad99991:125ecd3d8cf:-7f78" x="16" y="868"/>
 </diagram>
 </clay-model>

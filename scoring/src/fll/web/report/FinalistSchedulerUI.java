@@ -302,7 +302,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
       formatter.format("<form action='FinalistSchedulerUI' method='POST'>");
 
       // display the teams by division and score group
-      final String currentTournament = Queries.getCurrentTournament(connection);
+      final int currentTournament = Queries.getCurrentTournament(connection);
 
       formatter.format("<form method='post' action='FinalistSchedulerUI'>");
 
@@ -330,7 +330,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
                 + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
                 + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " " + ascDesc
                 + " LIMIT " + numFinalists);
-            prep.setString(1, currentTournament);
+            prep.setInt(1, currentTournament);
             rs = prep.executeQuery();
             while (rs.next()) {
               final int teamNum = rs.getInt(1);

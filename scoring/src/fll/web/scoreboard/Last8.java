@@ -75,7 +75,7 @@ public class Last8 extends BaseFLLServlet {
     try {
       final Connection connection = datasource.getConnection();
 
-      final String currentTournament = Queries.getCurrentTournament(connection);
+      final int currentTournament = Queries.getCurrentTournament(connection);
 
       formatter.format("<html>");
       formatter.format("<head>");
@@ -102,7 +102,7 @@ public class Last8 extends BaseFLLServlet {
           + " FROM Teams,verified_performance,current_tournament_teams WHERE verified_performance.Tournament = ?"
           + "  AND Teams.TeamNumber = verified_performance.TeamNumber AND Teams.TeamNumber = current_tournament_teams.TeamNumber"
           + "  AND verified_performance.Bye = False ORDER BY verified_performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 8");
-      prep.setString(1, currentTournament);
+      prep.setInt(1, currentTournament);
       rs = prep.executeQuery();
 
       while (rs.next()) {

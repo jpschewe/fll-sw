@@ -346,14 +346,14 @@ public class BracketData {
       _bracketData.put(new Integer(i), new TreeMap<Integer, BracketDataType>());
     }
 
-    final String tournament = Queries.getCurrentTournament(pConnection);
+    final int tournament = Queries.getCurrentTournament(pConnection);
 
     Statement stmt = null;
     ResultSet rs = null;
     try {
       stmt = pConnection.createStatement();
       rs = stmt.executeQuery("SELECT PlayoffRound,LineNumber,Team,AssignedTable,Printed"
-          + " FROM PlayoffData" + " WHERE Tournament='" + tournament + "'" + " AND event_division='" + pDivision + "'" + " AND PlayoffRound>=" + _firstRound
+          + " FROM PlayoffData" + " WHERE Tournament=" + tournament + " AND event_division='" + pDivision + "'" + " AND PlayoffRound>=" + _firstRound
           + " AND PlayoffRound<=" + _lastRound);
       while (rs.next()) {
         final Integer round = new Integer(rs.getInt(1));
@@ -515,7 +515,7 @@ public class BracketData {
    * @return Properly formed \<td\>element.
    * @throws SQLException If database access fails.
    */
-  public String getHtmlCell(final Connection connection, final String tournament, final int row, final int round) throws SQLException {
+  public String getHtmlCell(final Connection connection, final int tournament, final int row, final int round) throws SQLException {
     final SortedMap<Integer, BracketDataType> roundData = _bracketData.get(new Integer(round));
     if (roundData == null) {
       return "<td>ERROR: No data for round "
@@ -830,7 +830,7 @@ public class BracketData {
    * @param eventDivision
    * @throws SQLException
    */
-  public void addStaticTableLabels(final Connection connection, final String tournament, final String eventDivision) throws SQLException {
+  public void addStaticTableLabels(final Connection connection, final int tournament, final String eventDivision) throws SQLException {
     if (_rowsPerTeam < 4) {
       LOG.warn(new String("Table labels cannot be added to bracket data because there are too few lines per team for them to fit."));
       return; // if there aren't enough rows-per-team to include table labels,
@@ -877,7 +877,7 @@ public class BracketData {
    * @throws RuntimeException if playoffData table has mismatched teams in the
    *           brackets.
    */
-  public int addBracketLabelsAndScoreGenFormElements(final Connection pConnection, final String tournament, final String division) throws SQLException {
+  public int addBracketLabelsAndScoreGenFormElements(final Connection pConnection, final int tournament, final String division) throws SQLException {
     // Get the list of tournament tables
     final List<String[]> tournamentTables = Queries.getTournamentTables(pConnection);
     final Vector<String> tables = new Vector<String>();
@@ -1012,7 +1012,7 @@ public class BracketData {
    * @throws SQLException on a database error
    */
   public static String getDisplayString(final Connection connection,
-                                        final String currentTournament,
+                                        final int currentTournament,
                                         final int runNumber,
                                         final Team team,
                                         final boolean showScore,

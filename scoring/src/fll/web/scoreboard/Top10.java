@@ -79,7 +79,7 @@ public class Top10 extends BaseFLLServlet {
     try {
       final Connection connection = datasource.getConnection();
 
-      final String currentTournament = Queries.getCurrentTournament(connection);
+      final int currentTournament = Queries.getCurrentTournament(connection);
 
       final Integer divisionIndexObj = (Integer) session.getAttribute("divisionIndex");
       int divisionIndex;
@@ -121,7 +121,7 @@ public class Top10 extends BaseFLLServlet {
           + " AND NoShow = False AND Bye = False GROUP BY TeamNumber) AS T2" + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams"
           + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber AND current_tournament_teams.event_division = ?"
           + " ORDER BY T2.MaxOfComputedScore " + winnerCriteria.getSortString() + " LIMIT 10");
-      prep.setString(1, currentTournament);
+      prep.setInt(1, currentTournament);
       prep.setString(2, divisions.get(divisionIndex));
       rs = prep.executeQuery();
 

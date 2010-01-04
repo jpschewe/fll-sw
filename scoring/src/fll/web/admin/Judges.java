@@ -58,7 +58,7 @@ public final class Judges {
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
     final DataSource datasource = SessionAttributes.getDataSource(session);
     final Connection connection = datasource.getConnection();
-    final String tournament = Queries.getCurrentTournament(connection);
+    final int tournament = Queries.getCurrentTournament(connection);
 
     final List<Element> subjectiveCategories = XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"));
 
@@ -98,7 +98,7 @@ public final class Judges {
         return;
       }
     } else if (null != request.getParameter("commit")) {
-      commitData(request, response, connection, Queries.getCurrentTournament(connection));
+      commitData(request, response, session, connection, Queries.getCurrentTournament(connection));
       return;
     }
 
@@ -125,8 +125,8 @@ public final class Judges {
       Statement stmt = null;
       try {
         stmt = connection.createStatement();
-        rs = stmt.executeQuery("SELECT id, category, event_division FROM Judges WHERE Tournament = '"
-            + tournament + "'");
+        rs = stmt.executeQuery("SELECT id, category, event_division FROM Judges WHERE Tournament = "
+            + tournament);
         for (row = 0; rs.next(); row++) {
           final String id = rs.getString(1);
           final String category = rs.getString(2);
@@ -345,7 +345,7 @@ public final class Judges {
    * 
    * @param tournament the current tournament
    */
-  private static void commitData(final HttpServletRequest request, final HttpServletResponse response, final Connection connection, final String tournament)
+  private static void commitData(final HttpServletRequest request, final HttpServletResponse response, final HttpSession session, final Connection connection, final int tournament)
       throws SQLException, IOException {
     Statement stmt = null;
     PreparedStatement prep = null;
@@ -353,12 +353,12 @@ public final class Judges {
       stmt = connection.createStatement();
 
       // delete old data in judges
-      stmt.executeUpdate("DELETE FROM Judges where Tournament = '"
-          + tournament + "'");
+      stmt.executeUpdate("DELETE FROM Judges where Tournament = "
+          + tournament);
 
       // walk request parameters and insert data into database
       prep = connection.prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES(?, ?, ?, ?)");
-      prep.setString(4, tournament);
+      prep.setInt(4, tournament);
       int row = 0;
       String id = request.getParameter("id"
           + row);
@@ -387,7 +387,8 @@ public final class Judges {
     }
 
     // finally redirect to index.jsp
-    response.sendRedirect(response.encodeRedirectURL("index.jsp?message=Successfully+assigned+judges."));
+    session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'><i>Successfully assigned judges</i></p>");
+    response.sendRedirect(response.encodeRedirectURL("index.jsp"));
   }
 
 }

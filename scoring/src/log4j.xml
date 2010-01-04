@@ -64,6 +64,7 @@
  <!-- logger name="fll.web.admin.UploadTeams">
    <level value="TRACE"/>
  </logger-->
+ <!-- logger name="fll.db.DumpDB"><level value="TRACE"/></logger-->
  <!-- end stuff for debugging -->
 
  <root>

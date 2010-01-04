@@ -66,8 +66,9 @@ public class TestComputedScores {
       final Element rootElement = document.getDocumentElement();
       final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
 
+      final int tournamentID = Queries.getTournamentID(connection, tournament);
       selectPrep = connection.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? and TeamNumber = ? AND RunNumber = ?");
-      selectPrep.setString(1, tournament);
+      selectPrep.setInt(1, tournamentID);
       selectPrep.setInt(2, teamNumber);
       selectPrep.setInt(3, runNumber);
       rs = selectPrep.executeQuery();

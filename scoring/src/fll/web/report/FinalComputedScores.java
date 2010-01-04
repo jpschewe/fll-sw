@@ -50,7 +50,8 @@ import fll.xml.XMLUtils;
  */
 public final class FinalComputedScores extends PdfPageEventHelper {
 
-  private final String _tournament;
+  private final int _tournament;
+  private final String _tournamentName;
 
   private final String _challengeTitle;
 
@@ -64,14 +65,15 @@ public final class FinalComputedScores extends PdfPageEventHelper {
 
   private final org.w3c.dom.Document _challengeDocument;
 
-  public FinalComputedScores(final org.w3c.dom.Document challengeDoc, final String tournament) {
+  public FinalComputedScores(final org.w3c.dom.Document challengeDoc, final int tournament, final String tournamentName) {
     _challengeDocument = challengeDoc;
     final Element root = challengeDoc.getDocumentElement();
     _challengeTitle = root.getAttribute("title");
     _tournament = tournament;
+    _tournamentName = tournamentName;
   }
 
-  private void updateHeader(final PdfWriter writer, final Document document) {
+  private void updateHeader() {
     // initialization of the header table
     _header = new PdfPTable(2);
     final Phrase p = new Phrase();
@@ -82,7 +84,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
     _header.addCell(p);
     _header.getDefaultCell().setHorizontalAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
     _header.addCell(new Phrase(new Chunk("Tournament: "
-        + _tournament + "\nDivision: " + _division, TIMES_12PT_NORMAL)));
+        + _tournamentName + "\nDivision: " + _division, TIMES_12PT_NORMAL)));
     final PdfPCell blankCell = new PdfPCell();
     blankCell.setBorder(0);
     blankCell.setBorderWidthTop(1.0f);
@@ -104,7 +106,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
     final PdfContentByte cb = writer.getDirectContent();
     cb.saveState();
     // write the headertable
-    updateHeader(writer, document); // creates the header table with current
+    updateHeader(); // creates the header table with current
                                     // division, etc.
     _header.setTotalWidth(document.right()
         - document.left());
@@ -300,10 +302,11 @@ public final class FinalComputedScores extends PdfPageEventHelper {
                 + catName);
           }
         }
+        //TODO make prepared statement
         query.append(" FROM Teams,FinalScores,current_tournament_teams");
         query.append(" WHERE FinalScores.TeamNumber = Teams.TeamNumber");
-        query.append(" AND FinalScores.Tournament = '"
-            + _tournament + "'");
+        query.append(" AND FinalScores.Tournament = "
+            + _tournament);
         query.append(" AND current_tournament_teams.event_division = ?");
         query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
         query.append(" ORDER BY FinalScores.OverallScore "
@@ -350,7 +353,8 @@ public final class FinalComputedScores extends PdfPageEventHelper {
               final String catName = catElement.getAttribute("name");
               rawScoreRS = stmt
                                .executeQuery("SELECT ComputedTotal"
-                                   + " FROM " + catName + " WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + _tournament + "'"
+                                           //TODO make prepared statement
+                                   + " FROM " + catName + " WHERE TeamNumber = " + teamNumber + " AND Tournament = " + _tournament
                                    + " ORDER BY ComputedTotal " + ascDesc);
               boolean scoreSeen = false;
               String rawScoreText = "";
@@ -375,7 +379,8 @@ public final class FinalComputedScores extends PdfPageEventHelper {
 
           // Column for the highest performance score of the seeding rounds
           rawScoreRS = stmt.executeQuery("SELECT score FROM performance_seeding_max"
-              + " WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + _tournament + "'");
+                                       //TODO make prepared statement
+              + " WHERE TeamNumber = " + teamNumber + " AND Tournament = " + _tournament);
           final double rawScore;
           if (rawScoreRS.next()) {
             final double v = rawScoreRS.getDouble(1);

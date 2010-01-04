@@ -53,11 +53,13 @@ public class AddMissingTeams extends BaseFLLServlet {
       final DataSource destDataSource = SessionAttributes.getDataSource(session);
       destConnection = destDataSource.getConnection();
 
+      final int tournamentID = Queries.getTournamentID(destConnection, tournament);
+
       @SuppressWarnings(value = "unchecked")
       final List<Team> missingTeams = SessionAttributes.getNonNullAttribute(session, "missingTeams", List.class);
       for (final Team team : missingTeams) {
         final String dup = Queries.addTeam(destConnection, team.getTeamNumber(), team.getTeamName(), team.getOrganization(), team.getRegion(),
-                                           team.getDivision(), tournament);
+                                           team.getDivision(), tournamentID);
         if (null != dup) {
           throw new RuntimeException(
                                      String

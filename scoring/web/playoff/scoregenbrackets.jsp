@@ -16,7 +16,7 @@
 final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
   final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
-  final String currentTournament = Queries.getCurrentTournament(connection);
+  final int currentTournament = Queries.getCurrentTournament(connection);
 
   final String divisionStr = request.getParameter("division");
   if(null == divisionStr) {

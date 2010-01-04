@@ -41,7 +41,7 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
                      WHERE Performance.RunNumber = <c:out value="${param.RunNumber}"/>
                        AND Teams.TeamNumber = Performance.TeamNumber
                        AND current_tournament_teams.TeamNumber = Teams.TeamNumber
-                       AND Performance.Tournament = '<c:out value="${tournament}"/>'
+                       AND Performance.Tournament = <c:out value="${tournament}"/>
                        AND current_tournament_teams.event_division  = '<c:out value="${division}"/>'
                        ORDER BY ComputedTotal DESC
           </sql:query>

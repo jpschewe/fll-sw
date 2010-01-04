@@ -52,7 +52,7 @@ public class DatabaseTeamScore extends TeamScore {
   public DatabaseTeamScore(final Element categoryDescription, final int teamNumber, final int runNumber, final Connection connection) throws SQLException {
     super(categoryDescription, teamNumber, runNumber);
 
-    final String tournament = Queries.getCurrentTournament(connection);
+    final int tournament = Queries.getCurrentTournament(connection);
     _result = createResultSet(connection, tournament);
     _scoreExists = _result.next();
   }
@@ -154,7 +154,7 @@ public class DatabaseTeamScore extends TeamScore {
    * 
    * @return
    */
-  private ResultSet createResultSet(final Connection connection, final String tournament) throws SQLException {
+  private ResultSet createResultSet(final Connection connection, final int tournament) throws SQLException {
     ResultSet result;
     final String categoryName = getCategoryName();
     if (NON_PERFORMANCE_RUN_NUMBER == getRunNumber()) {
@@ -166,7 +166,7 @@ public class DatabaseTeamScore extends TeamScore {
       _prep.setInt(3, getRunNumber());
     }
     _prep.setInt(1, getTeamNumber());
-    _prep.setString(2, tournament);
+    _prep.setInt(2, tournament);
     result = _prep.executeQuery();
     return result;
   }

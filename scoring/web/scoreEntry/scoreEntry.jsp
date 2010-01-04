@@ -21,7 +21,7 @@ final Document challengeDocument = ApplicationAttributes.getChallengeDocument(ap
 
 final String lTeamNum = request.getParameter("TeamNumber");
 if(null == lTeamNum) {
-  //FIX error, redirect to error page
+  //FIXME error, redirect to error page
   //Response.Redirect("ScoreError.asp?Text=Attempted+to+load+score+entry+page+without+providing+a+team+number.")
   //response.sendError(response.SC_BAD_REQUEST, "Attempted to load score entry page without providing a team number.");
   //out.print("<!-- Error no team number -->");
@@ -35,7 +35,7 @@ final Connection connection = datasource.getConnection();
 final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
 final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
 if(!tournamentTeams.containsKey(new Integer(teamNumber))) {
-  //FIX error, redirect to error page
+  //FIXME error, redirect to error page
   //response.sendError(response.SC_BAD_REQUEST, "Team number selected is not valid.");
   //out.print("<!-- Invalid team number -->");
   //throw exception for now
@@ -94,7 +94,7 @@ final int maxRunCompleted = Queries.getMaxRunNumber(connection, teamNumber);
 pageContext.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == maxRunCompleted));
 
 //check if the score being edited is a bye
-final String tournament = Queries.getCurrentTournament(connection);
+final int tournament = Queries.getCurrentTournament(connection);
 pageContext.setAttribute("isBye", Boolean.valueOf(Queries.isBye(connection, tournament, teamNumber, lRunNumber)));
 pageContext.setAttribute("isNoShow", Boolean.valueOf(Queries.isNoShow(connection, tournament, teamNumber, lRunNumber)));
 %>
@@ -335,7 +335,7 @@ return m;
               </tr>
             </c:when>
             <c:otherwise>
-              <%ScoreEntry.generateScoreEntry(out, challengeDocument, request);%>
+              <%ScoreEntry.generateScoreEntry(out, challengeDocument);%>
 
               <!-- Total Score -->
               <tr>
@@ -347,7 +347,7 @@ return m;
                 </td>
               </tr>
               <input type='hidden' name='NoShow'/>
-              <%ScoreEntry.generateVerificationInput(out, challengeDocument, request);%>
+              <%ScoreEntry.generateVerificationInput(out);%>
             </c:otherwise>
             </c:choose>  <!-- end check for bye -->
 

@@ -5,22 +5,25 @@
  */
 package fll.db;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Formatter;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import fll.xml.XMLUtils;
+import fll.Utilities;
 import fll.xml.XMLWriter;
 
 /**
@@ -29,6 +32,17 @@ import fll.xml.XMLWriter;
  */
 public final class DumpDB {
 
+  private static final Logger LOGGER = Logger.getLogger(DumpDB.class);
+  
+  public static void main(final String[] args) throws SQLException, IOException {
+    final String database = "/home/jpschewe/projects/fll-sw/working-dir/scoring/build/tomcat/webapps/fll-sw/WEB-INF/flldb";
+    final Connection connection = Utilities.createDataSource(database).getConnection();
+    final ZipOutputStream output = new ZipOutputStream(new FileOutputStream("/home/jpschewe/download/foo/database.zip"));
+    final Document challengeDocument = Queries.getChallengeDocument(connection);
+    dumpDatabase(output, connection, challengeDocument);
+    output.close();
+  }
+  
   private DumpDB() {
     // no instances
   }
@@ -55,97 +69,63 @@ public final class DumpDB {
       xmlwriter.write(challengeDocument);
       output.closeEntry();
 
-      CSVWriter csvwriter;
-
-      // TODO output TournamentParameters once 1853081 is completed
-
-      // teams
-      output.putNextEntry(new ZipEntry("Teams.csv"));
-      csvwriter = new CSVWriter(outputWriter);
-      rs = stmt.executeQuery("SELECT * FROM Teams");
-      csvwriter.writeAll(rs, true);
-      csvwriter.flush();
-      SQLFunctions.closeResultSet(rs);
-      output.closeEntry();
-
-      // judges
-      output.putNextEntry(new ZipEntry("Judges.csv"));
-      csvwriter = new CSVWriter(outputWriter);
-      rs = stmt.executeQuery("SELECT * FROM Judges");
-      csvwriter.writeAll(rs, true);
-      csvwriter.flush();
-      SQLFunctions.closeResultSet(rs);
-      output.closeEntry();
-
-      // TournamentTeams
-      output.putNextEntry(new ZipEntry("TournamentTeams.csv"));
-      csvwriter = new CSVWriter(outputWriter);
-      rs = stmt.executeQuery("SELECT * FROM TournamentTeams");
-      csvwriter.writeAll(rs, true);
-      csvwriter.flush();
-      SQLFunctions.closeResultSet(rs);
-      output.closeEntry();
-
-      // Tournaments
-      output.putNextEntry(new ZipEntry("Tournaments.csv"));
-      csvwriter = new CSVWriter(outputWriter);
-      rs = stmt.executeQuery("SELECT * FROM Tournaments");
-      csvwriter.writeAll(rs, true);
-      csvwriter.flush();
-      SQLFunctions.closeResultSet(rs);
-      output.closeEntry();
-
-      // performance
-      output.putNextEntry(new ZipEntry("Performance.csv"));
-      csvwriter = new CSVWriter(outputWriter);
-      rs = stmt.executeQuery("SELECT * FROM Performance");
-      csvwriter.writeAll(rs, true);
-      csvwriter.flush();
-      SQLFunctions.closeResultSet(rs);
-      output.closeEntry();
-
-      // each subjective category
-      final Element rootElement = challengeDocument.getDocumentElement();
-      for (final Element categoryElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
-        final String tableName = categoryElement.getAttribute("name");
-        output.putNextEntry(new ZipEntry(tableName
-            + ".csv"));
-        csvwriter = new CSVWriter(outputWriter);
-        rs = stmt.executeQuery("SELECT * FROM "
-            + tableName);
-        csvwriter.writeAll(rs, true);
-        csvwriter.flush();
-        SQLFunctions.closeResultSet(rs);
-        output.closeEntry();
+      // can't use Queries.getTablesInDB because it lowercases names and we need
+      // all names to be the same as the database is expecting them
+      final DatabaseMetaData metadata = connection.getMetaData();
+      rs = metadata.getTables(null, null, "%", new String[]{"TABLE"});
+      while (rs.next()) {
+        final String tableName = rs.getString("TABLE_NAME"); 
+        dumpTable(output, connection, metadata, outputWriter, tableName);        
       }
+      SQLFunctions.closeResultSet(rs);
+      
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
+    }
+  }
 
-      // PlayoffData
-      output.putNextEntry(new ZipEntry("PlayoffData.csv"));
+  private static void dumpTable(final ZipOutputStream output,
+                                final Connection connection,
+                                final DatabaseMetaData metadata,
+                                final OutputStreamWriter outputWriter,
+                                final String tableName) throws IOException, SQLException {
+    ResultSet rs = null;
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+      CSVWriter csvwriter;
+      
+      // write table type information
+      if(LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Dumping type information for " + tableName);
+      }
+      output.putNextEntry(new ZipEntry(tableName + ".types"));      
       csvwriter = new CSVWriter(outputWriter);
-      rs = stmt.executeQuery("SELECT * FROM PlayoffData");
+      rs = metadata.getColumns(null, null, tableName, "%");
+      while(rs.next()) {
+        final String typeName = rs.getString("TYPE_NAME");
+        final String columnName = rs.getString("COLUMN_NAME");
+        csvwriter.writeNext(new String[] {columnName, typeName});
+        if(LOGGER.isTraceEnabled()) {
+          final String name = rs.getString("TABLE_NAME"); 
+          LOGGER.trace(new Formatter().format("Table %s Column %s has type %s", name, columnName, typeName));
+        }
+      }
+      csvwriter.flush();
+      output.closeEntry();
+      SQLFunctions.closeResultSet(rs);
+      rs = null;
+
+      output.putNextEntry(new ZipEntry(tableName + ".csv"));
+      csvwriter = new CSVWriter(outputWriter);
+      rs = stmt.executeQuery("SELECT * FROM " + tableName);
       csvwriter.writeAll(rs, true);
       csvwriter.flush();
-      SQLFunctions.closeResultSet(rs);
       output.closeEntry();
-
-      // tablenames
-      output.putNextEntry(new ZipEntry("tablenames.csv"));
-      csvwriter = new CSVWriter(outputWriter);
-      rs = stmt.executeQuery("SELECT * FROM tablenames");
-      csvwriter.writeAll(rs, true);
-      csvwriter.flush();
       SQLFunctions.closeResultSet(rs);
-      output.closeEntry();
-
-      // FinalScores
-      output.putNextEntry(new ZipEntry("FinalScores.csv"));
-      csvwriter = new CSVWriter(outputWriter);
-      rs = stmt.executeQuery("SELECT * FROM FinalScores");
-      csvwriter.writeAll(rs, true);
-      csvwriter.flush();
-      SQLFunctions.closeResultSet(rs);
-      output.closeEntry();
-
+      rs = null;
+            
     } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closeStatement(stmt);

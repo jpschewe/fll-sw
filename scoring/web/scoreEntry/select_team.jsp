@@ -19,6 +19,7 @@ final String lEditFlag = request.getParameter("EditFlag");
 final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
 final Statement stmt = connection.createStatement();
+//FIXME handle tournament ids
 final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = '" + Queries.getCurrentTournament(connection) + "'");
 final int maxRunNumber;
 if(rs.next()) {

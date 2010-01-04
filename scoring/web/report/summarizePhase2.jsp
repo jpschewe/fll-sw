@@ -12,7 +12,7 @@
 final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
-final String currentTournament = Queries.getCurrentTournament(connection);
+final int currentTournament = Queries.getCurrentTournament(connection);
   
 ScoreStandardization.updateTeamTotalScores(connection, challengeDocument, currentTournament);
 final String errorMsg = ScoreStandardization.checkDataConsistency(connection);
@@ -30,7 +30,10 @@ final String errorMsg = ScoreStandardization.checkDataConsistency(connection);
 
 <%if(null == errorMsg) {%>
   <a href="index.jsp">Normally you'd be redirected here</a>
-  <% response.sendRedirect(response.encodeRedirectURL("index.jsp?message=Successfully+summarized+scores")); %>
+  <%
+  session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'><i>Successfully summarized scores</i></p>");
+  response.sendRedirect(response.encodeRedirectURL("index.jsp")); 
+  %>
 <%} else {%>
 <p><font color='red'><%=errorMsg%></font></p>
 <%}%>

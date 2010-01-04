@@ -9,74 +9,35 @@
 
 <%@ page import="java.text.NumberFormat"%>
 
+<%-- TODO pull this out into servlet --%>
 <%
-final DataSource datasource = SessionAttributes.getDataSource(session);
-final Connection connection = datasource.getConnection();
-	final StringBuffer message = new StringBuffer();
-	final String messageReq = request.getParameter("message");
-	if (null != messageReq) {
-		message.append("<i>");
-		message.append(messageReq);
-		message.append("</i><br>");
-	}
+  final DataSource datasource = SessionAttributes.getDataSource(session);
+  final Connection connection = datasource.getConnection();
 
-	final String messageSess = (String)session.getAttribute("message");
-	if (null != messageSess) {
-		message.append("<i>");
-		message.append(messageSess);
-		message.append("</i><br>");
-	}
+  if (null != request.getParameter("changeSeedingRounds")) {
+    final String newSeedingRoundsStr = request.getParameter("seedingRounds");
+    final int newSeedingRounds = NumberFormat.getInstance().parse(newSeedingRoundsStr).intValue();
+    Queries.setNumSeedingRounds(connection, newSeedingRounds);
+    session.setAttribute(SessionAttributes.MESSAGE, "<i id='success'>Changed number of seeding arounds to "
+        + newSeedingRounds + "</i><br>");
+  }
 
-	final String currentTournamentParam = request
-			.getParameter("currentTournament");
-	if (null != currentTournamentParam
-			&& !"".equals(currentTournamentParam)) {
-		if (!Queries.setCurrentTournament(connection,
-				currentTournamentParam)) {
-			response
-					.sendRedirect(response
-							.encodeRedirectURL("tournaments.jsp?unknownTournament="
-									+ currentTournamentParam));
-		} else {
-			message.append("<i id='success'>Tournament changed to "
-					+ currentTournamentParam + "</i><br>");
-		}
-	}
+  if (null != request.getParameter("changeScoresheetLayoutNUp")) {
+    final String newNupStr = request.getParameter("scoresheetsPerPage");
+    final int newNup = NumberFormat.getInstance().parse(newNupStr).intValue();
+    Queries.setScoresheetLayoutNUp(connection, newNup);
+    session.setAttribute(SessionAttributes.MESSAGE, "<i id='success'>Changed number of scoresheets per page to "
+        + newNup + "</i><br>");
+  }
 
-	if (null != request.getParameter("changeSeedingRounds")) {
-		final String newSeedingRoundsStr = request
-				.getParameter("seedingRounds");
-		final int newSeedingRounds = NumberFormat.getInstance().parse(
-				newSeedingRoundsStr).intValue();
-		Queries.setNumSeedingRounds(connection, newSeedingRounds);
-		message
-				.append("<i id='success'>Changed number of seeding arounds to "
-						+ newSeedingRounds + "</i><br>");
-	}
+  if (null != request.getParameter("addTournamentsForRegions")) {
+    Queries.insertTournamentsForRegions(connection);
+    session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'><i>Successfully added tournaments for regions</i></p>");
+  }
 
-	if (null != request.getParameter("changeScoresheetLayoutNUp")) {
-		final String newNupStr = request
-				.getParameter("scoresheetsPerPage");
-		final int newNup = NumberFormat.getInstance().parse(newNupStr)
-				.intValue();
-		Queries.setScoresheetLayoutNUp(connection, newNup);
-		message
-				.append("<i id='success'>Changed number of scoresheets per page to "
-						+ newNup + "</i><br>");
-	}
-
-	if (null != request.getParameter("addTournamentsForRegions")) {
-		Queries.insertTournamentsForRegions(connection);
-		message
-				.append("<i id='success'>Successfully added tournaments for regions</i>");
-	}
-
-	final int numSeedingRounds = Queries
-			.getNumSeedingRounds(connection);
-	final int scoresheetsPerPage = Queries
-			.getScoresheetLayoutNUp(connection);
-	final String currentTournament = Queries
-			.getCurrentTournament(connection);
+  final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
+  final int scoresheetsPerPage = Queries.getScoresheetLayoutNUp(connection);
+  final int currentTournamentID = Queries.getCurrentTournament(connection);
 %>
 
 <html>
@@ -98,7 +59,7 @@ final Connection connection = datasource.getConnection();
 <h1><x:out select="$challengeDocument/fll/@title" />
 (Administration)</h1>
 
-<p><%=message.toString()%></p>
+${message}
 <%-- clear out the message, so that we don't see it again --%>
 <c:remove var="message" />
 
@@ -152,26 +113,26 @@ final Connection connection = datasource.getConnection();
 	</li>
 
 	<li>
-	<form id='currentTournament' action='<c:url value="index.jsp"/>'
+	<form id='currentTournament' action='SetCurrentTournament'
 		method="post">Current Tournament: <select
 		name='currentTournament'>
 		<%
-			final Statement stmt = connection.createStatement();
-			final ResultSet rs = stmt
-					.executeQuery("Select Name,Location from Tournaments ORDER BY Name");
-			while (rs.next()) {
-				final String tournament = rs.getString(1);
-				final String location = rs.getString(2);
-				out.print("<option value='" + tournament + "'");
-				if (currentTournament.equals(tournament)) {
-					out.print(" selected");
-				}
-				out
-						.println(">" + location + " [ " + tournament
-								+ " ]</option>");
-			}
-			rs.close();
-			stmt.close();
+		  final Statement stmt = connection.createStatement();
+		  final ResultSet rs = stmt.executeQuery("Select tournament_id,Name,Location from Tournaments ORDER BY Name");
+		  while (rs.next()) {
+		    final int tournamentID = rs.getInt(1);
+		    final String tournament = rs.getString(2);
+		    final String location = rs.getString(3);
+		    out.print("<option value='"
+		        + tournamentID + "'");
+		    if (currentTournamentID == tournamentID) {
+		      out.print(" selected");
+		    }
+		    out.println(">"
+		        + location + " [ " + tournament + " ]</option>");
+		  }
+		  rs.close();
+		  stmt.close();
 		%>
 	</select> <input type='submit' value='Change tournament'></form>
 	</li>
@@ -200,13 +161,15 @@ final Connection connection = datasource.getConnection();
 	number of scoresheets per printed page. <select
 		name='scoresheetsPerPage'>
 		<%
-			for (int i = 1; i <= 2; i++) {
-				out.print("<option value='" + i + "'");
-				if (scoresheetsPerPage == i) {
-					out.print(" selected");
-				}
-				out.println(">" + i + "</option>");
-			}
+		  for (int i = 1; i <= 2; i++) {
+		    out.print("<option value='"
+		        + i + "'");
+		    if (scoresheetsPerPage == i) {
+		      out.print(" selected");
+		    }
+		    out.println(">"
+		        + i + "</option>");
+		  }
 		%>
 	</select> <input type='submit' name='changeScoresheetLayoutNUp' value='Commit'>
 	</form>
@@ -217,13 +180,15 @@ final Connection connection = datasource.getConnection();
 		method='post'>Select the number of seeding runs. <select
 		name='seedingRounds'>
 		<%
-			for (int i = 0; i <= 10; i++) {
-				out.print("<option value='" + i + "'");
-				if (numSeedingRounds == i) {
-					out.print(" selected");
-				}
-				out.println(">" + i + "</option>");
-			}
+		  for (int i = 0; i <= 10; i++) {
+		    out.print("<option value='"
+		        + i + "'");
+		    if (numSeedingRounds == i) {
+		      out.print(" selected");
+		    }
+		    out.println(">"
+		        + i + "</option>");
+		  }
 		%>
 	</select> <input type='submit' name='changeSeedingRounds' value='Commit'>
 	</form>

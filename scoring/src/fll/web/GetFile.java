@@ -55,7 +55,7 @@ public final class GetFile extends BaseFLLServlet {
   public static void writeSubjectiveScores(final Connection connection, final Document challengeDocument, final OutputStream stream) throws IOException,
       SQLException {
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-    final String tournament = Queries.getCurrentTournament(connection);
+    final int tournament = Queries.getCurrentTournament(connection);
 
     final XMLWriter xmlwriter = new XMLWriter();
 
@@ -102,7 +102,7 @@ public final class GetFile extends BaseFLLServlet {
         final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
         if (Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
           final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-          final String tournament = Queries.getCurrentTournament(connection);
+          final int tournament = Queries.getCurrentTournament(connection);
 
           final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument, tournamentTeams.values(), connection, tournament);
           final XMLWriter xmlwriter = new XMLWriter();
@@ -163,11 +163,12 @@ public final class GetFile extends BaseFLLServlet {
         final DataSource datasource = SessionAttributes.getDataSource(session);
         final Connection connection = datasource.getConnection();
         final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
-        final String tournament = Queries.getCurrentTournament(connection);
+        final int tournament = Queries.getCurrentTournament(connection);
+        final String tournamentName = Queries.getTournamentName(connection, tournament);
         response.reset();
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "filename=finalComputedScores.pdf");
-        final FinalComputedScores fcs = new FinalComputedScores(challengeDocument, tournament);
+        final FinalComputedScores fcs = new FinalComputedScores(challengeDocument, tournament, tournamentName);
         fcs.generateReport(connection, response.getOutputStream());
       } else if ("teamScoreSheet.pdf".equals(filename)) {
         final DataSource datasource = SessionAttributes.getDataSource(session);
@@ -187,7 +188,7 @@ public final class GetFile extends BaseFLLServlet {
         final DataSource datasource = SessionAttributes.getDataSource(session);
         final Connection connection = datasource.getConnection();
         final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
-        final String tournament = Queries.getCurrentTournament(connection);
+        final int tournament = Queries.getCurrentTournament(connection);
         response.reset();
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");

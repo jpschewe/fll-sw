@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -78,16 +79,14 @@ public final class XMLUtils {
   public static Document createSubjectiveScoresDocument(final Document challengeDocument,
                                                         final Collection<Team> teams,
                                                         final Connection connection,
-                                                        final String tournament) throws SQLException {
+                                                        final int currentTournament) throws SQLException {
     ResultSet rs = null;
     ResultSet rs2 = null;
     PreparedStatement prep = null;
     PreparedStatement prep2 = null;
     try {
       prep = connection.prepareStatement("SELECT id, event_division FROM Judges WHERE category = ? AND Tournament = ?");
-      prep.setString(2, tournament);
-
-      final String currentTournament = Queries.getCurrentTournament(connection);
+      prep.setInt(2, currentTournament);
 
       final Document document = DOCUMENT_BUILDER.newDocument();
       final Element top = document.createElement("scores");
@@ -121,7 +120,7 @@ public final class XMLUtils {
               prep2 = connection.prepareStatement("SELECT * FROM "
                   + categoryName + " WHERE TeamNumber = ? AND Tournament = ? AND Judge = ?");
               prep2.setInt(1, team.getTeamNumber());
-              prep2.setString(2, currentTournament);
+              prep2.setInt(2, currentTournament);
               prep2.setString(3, judge);
               rs2 = prep2.executeQuery();
               if (rs2.next()) {
@@ -400,5 +399,14 @@ public final class XMLUtils {
   public static boolean compareDocuments(final Document controlDoc, final Document testDoc) {
     final Diff xmldiff = new Diff(controlDoc, testDoc);
     return xmldiff.similar();
+  }
+
+  public static List<String> getSubjectiveCategoryNames(final Document challengeDocument) {
+    final List<String> subjectiveCategories = new LinkedList<String>();
+    for (final Element categoryElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+      final String categoryName = categoryElement.getAttribute("name");
+      subjectiveCategories.add(categoryName);
+    }
+    return subjectiveCategories;
   }
 }

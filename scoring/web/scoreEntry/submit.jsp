@@ -28,20 +28,18 @@ final Connection connection = datasource.getConnection();
     <%-- save to database --%>
     <c:choose>
       <c:when test="${not empty param.delete}">
-        <%pageContext.setAttribute("sql", Queries.deletePerformanceScore(connection, request));%>
+        <%Queries.deletePerformanceScore(connection, request);%>
       </c:when>
       <c:when test="${not empty param.EditFlag}">
-        <%pageContext.setAttribute("sql", Queries.updatePerformanceScore(challengeDocument, connection, request));%>
+        <%Queries.updatePerformanceScore(challengeDocument, connection, request);%>
       </c:when>
       <c:otherwise>
-        <%pageContext.setAttribute("sql", Queries.insertPerformanceScore(challengeDocument, connection, request));%>
+        <%Queries.insertPerformanceScore(challengeDocument, connection, request);%>
       </c:otherwise>
     </c:choose>
 
     <h1>Submitted Scores</h1>
 
-    <p>SQL executed: <br>&nbsp;&nbsp;<c:out value="${sql}"/></p>
-      
     <table border='1'>          
        <tr>
          <td>Team Number</td>

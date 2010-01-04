@@ -326,17 +326,20 @@ public final class Playoff {
    * @throws SQLException on a database error
    */
   public static void insertBye(final Connection connection, final Team team, final int runNumber) throws SQLException {
-    final String tournament = Queries.getCurrentTournament(connection);
-    Statement stmt = null;
+    final int tournament = Queries.getCurrentTournament(connection);
+    PreparedStatement prep = null;
     try {
-      stmt = connection.createStatement();
       if(LOGGER.isDebugEnabled()) {
         LOGGER.debug("Inserting bye for team: " + team.getTeamNumber() + " run: " + runNumber);
       }
-      stmt.executeUpdate("INSERT INTO Performance(TeamNumber, Tournament, RunNumber, Bye, Verified)"
-          + " VALUES( " + team.getTeamNumber() + ", '" + tournament + "', " + runNumber + ", 1, 1)");
+      prep = connection.prepareStatement("INSERT INTO Performance(TeamNumber, Tournament, RunNumber, Bye, Verified)"
+          + " VALUES( ?, ?, ?, 1, 1)");
+      prep.setInt(1, team.getTeamNumber());
+      prep.setInt(2, tournament);
+      prep.setInt(3, runNumber);
+      prep.executeUpdate();
     } finally {
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -361,18 +364,21 @@ public final class Playoff {
    * @throws SQLException on a database error
    */
   public static boolean performanceScoreExists(final Connection connection, final int teamNumber, final int runNumber) throws SQLException {
-    final String tournament = Queries.getCurrentTournament(connection);
+    final int tournament = Queries.getCurrentTournament(connection);
 
-    Statement stmt = null;
+    PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT ComputedTotal FROM Performance"
-          + " WHERE TeamNumber = " + teamNumber + " AND Tournament = '" + tournament + "'" + " AND RunNumber = " + runNumber);
+      prep = connection.prepareStatement("SELECT ComputedTotal FROM Performance"
+          + " WHERE TeamNumber = ? AND Tournament = ? AND RunNumber = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, tournament);
+      prep.setInt(3, runNumber);
+      rs = prep.executeQuery();
       return rs.next();
     } finally {
       SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -382,7 +388,7 @@ public final class Playoff {
    * @throws SQLException on a database error
    * @throws IllegalArgumentException if no score exists
    */
-  public static double getPerformanceScore(final Connection connection, final String tournament, final Team team, final int runNumber) throws SQLException,
+  public static double getPerformanceScore(final Connection connection, final int tournament, final Team team, final int runNumber) throws SQLException,
       IllegalArgumentException {
     if (null == team) {
       throw new IllegalArgumentException("Cannot get score for null team");
@@ -392,7 +398,7 @@ public final class Playoff {
       try {
         stmt = connection.createStatement();
         rs = stmt.executeQuery("SELECT ComputedTotal FROM Performance WHERE TeamNumber = "
-            + team.getTeamNumber() + " AND Tournament = '" + tournament + "' AND RunNumber = " + runNumber);
+            + team.getTeamNumber() + " AND Tournament = " + tournament + " AND RunNumber = " + runNumber);
         if (rs.next()) {
           return rs.getDouble(1);
         } else {
@@ -412,24 +418,8 @@ public final class Playoff {
    * @throws SQLException on a database error
    * @throws IllegalArgumentException if no score exists
    */
-  public static boolean isNoShow(final Connection connection, final String tournament, final Team team, final int runNumber) throws SQLException,
-      IllegalArgumentException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT NoShow FROM Performance"
-          + " WHERE TeamNumber = " + team.getTeamNumber() + " AND Tournament = '" + tournament + "'" + " AND RunNumber = " + runNumber);
-      if (rs.next()) {
-        return rs.getBoolean(1);
-      } else {
-        throw new RuntimeException("No score exists for tournament: "
-            + tournament + " teamNumber: " + team.getTeamNumber() + " runNumber: " + runNumber);
-      }
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
-    }
+  public static boolean isNoShow(final Connection connection, final int tournament, final Team team, final int runNumber) throws SQLException {
+    return Queries.isNoShow(connection, tournament, team.getTeamNumber(), runNumber);
   }
 
   /**
@@ -438,47 +428,15 @@ public final class Playoff {
    * @throws SQLException on a database error
    * @throws IllegalArgumentException if no score exists
    */
-  public static boolean isBye(final Connection connection, final String tournament, final Team team, final int runNumber) throws SQLException,
-      IllegalArgumentException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Bye FROM Performance WHERE TeamNumber = "
-          + team.getTeamNumber() + " AND Tournament = '" + tournament + "'" + " AND RunNumber = " + runNumber);
-      if (rs.next()) {
-        return rs.getBoolean(1);
-      } else {
-        throw new RuntimeException("No score exists for tournament: "
-            + tournament + " teamNumber: " + team.getTeamNumber() + " runNumber: " + runNumber);
-      }
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
-    }
+  public static boolean isBye(final Connection connection, final int tournament, final Team team, final int runNumber) throws SQLException {
+    return Queries.isBye(connection, tournament, team.getTeamNumber(), runNumber);      
   }
 
   /**
    * Returns true if the score has been verified, i.e. double-checked.
    */
-  public static boolean isVerified(final Connection connection, final String tournament, final Team team, final int runNumber) throws SQLException,
-      IllegalArgumentException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Verified FROM Performance WHERE TeamNumber = "
-          + team.getTeamNumber() + " AND Tournament = '" + tournament + "'" + " AND RunNumber = " + runNumber);
-      if (rs.next()) {
-        return rs.getBoolean(1);
-      } else {
-        throw new RuntimeException("No score exists for tournament: "
-            + tournament + " teamNumber: " + team.getTeamNumber() + " runNumber: " + runNumber);
-      }
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
-    }
+  public static boolean isVerified(final Connection connection, final int tournament, final Team team, final int runNumber) throws SQLException      {
+    return Queries.isVerified(connection, tournament, team.getTeamNumber(), runNumber);
   }
 
   /**
@@ -507,7 +465,7 @@ public final class Playoff {
                                               final JspWriter out) throws IOException, SQLException, ParseException {
 
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-    final String currentTournament = Queries.getCurrentTournament(connection);
+    final int currentTournament = Queries.getCurrentTournament(connection);
 
     final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
 
@@ -754,7 +712,7 @@ public final class Playoff {
     final Element tiebreakerElement = (Element) performanceElement.getElementsByTagName("tiebreaker").item(0);
 
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-    final String currentTournament = Queries.getCurrentTournament(connection);
+    final int currentTournament = Queries.getCurrentTournament(connection);
     final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
     final List<String[]> tournamentTables = Queries.getTournamentTables(connection);
     if (tournamentTables.size() == 0) {
@@ -950,15 +908,14 @@ public final class Playoff {
   public static void initializeBrackets(final Connection connection,
                                         final Document challengeDocument,
                                         final String division,
-                                        final boolean enableThird,
-                                        final JspWriter out) throws IOException, SQLException, ParseException {
+                                        final boolean enableThird) throws IOException, SQLException, ParseException {
 
     if(LOGGER.isDebugEnabled()) {
       LOGGER.debug("initializing brackets for division: " + division + " enableThird: " + enableThird);
     }
     
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-    final String currentTournament = Queries.getCurrentTournament(connection);
+    final int currentTournament = Queries.getCurrentTournament(connection);
     final List<String[]> tournamentTables = Queries.getTournamentTables(connection);
 
     final BracketSortType bracketSort = XMLUtils.getBracketSort(challengeDocument);
@@ -988,7 +945,7 @@ public final class Playoff {
     PreparedStatement stmt = null;
     try {
       stmt = connection.prepareStatement("INSERT INTO PlayoffData"
-          + " (Tournament, event_division, PlayoffRound, LineNumber, Team)" + " VALUES ('" + currentTournament + "', '" + division + "', 1, ?, ?)");
+          + " (Tournament, event_division, PlayoffRound, LineNumber, Team)" + " VALUES (" + currentTournament + ", '" + division + "', 1, ?, ?)");
       int lineNbr = 1;
       while (it.hasNext()) {
         stmt.setInt(1, lineNbr);
@@ -1007,7 +964,7 @@ public final class Playoff {
     int roundNumber = 2;
     try {
       stmt = connection.prepareStatement("INSERT INTO PlayoffData"
-          + " (Tournament, event_division, PlayoffRound, LineNumber) VALUES ('" + currentTournament + "', '" + division + "', ?, ?)");
+          + " (Tournament, event_division, PlayoffRound, LineNumber) VALUES (" + currentTournament + ", '" + division + "', ?, ?)");
       while (currentRoundSize > 0) {
         stmt.setInt(1, roundNumber);
         int lineNbr = currentRoundSize;
@@ -1044,7 +1001,7 @@ public final class Playoff {
     final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
     try {
       final String sql = "SELECT PlayoffRound,LineNumber,Team FROM PlayoffData"
-          + " WHERE Tournament='" + currentTournament + "'" + " AND event_division='" + division + "'" + " ORDER BY PlayoffRound,LineNumber";
+          + " WHERE Tournament=" + currentTournament + " AND event_division='" + division + "'" + " ORDER BY PlayoffRound,LineNumber";
       selStmt = connection.createStatement();
       rs = selStmt.executeQuery(sql);
       // Condition must look at roundnumber because we don't need to assign
@@ -1091,7 +1048,7 @@ public final class Playoff {
 
           try {
             stmt = connection.prepareStatement("UPDATE PlayoffData SET Team=?"
-                + " WHERE Tournament='" + currentTournament + "'" + " AND event_division='" + division + "'" + " AND PlayoffRound=" + (round1 + 1)
+                + " WHERE Tournament=" + currentTournament + " AND event_division='" + division + "'" + " AND PlayoffRound=" + (round1 + 1)
                 + " AND LineNumber=?");
             stmt.setInt(1, teamToAdvance);
             stmt.setInt(2, line2 / 2); // technically (line2+1)/2 but we know
@@ -1108,21 +1065,7 @@ public final class Playoff {
           } finally {
             SQLFunctions.closePreparedStatement(stmt);
           }
-        }/*
-          * Don't assign tables at initialization anymore - now we'll do this on
-          * the fly and only put the table assignments in the DB at the time we
-          * mark the scoresheet "Printed" else { // Assign tables and update
-          * database try { stmt = connection.prepareStatement("UPDATE
-          * PlayoffData SET AssignedTable=?" + " WHERE Tournament='" +
-          * currentTournament + "'" + " AND event_division='" + division + "'" +
-          * " AND PlayoffRound=" + round1 + " AND LineNumber=?");
-          * if(!tableIt.hasNext()) { tableIt = tournamentTables.iterator(); }
-          * final String[] tblNames = tableIt.next(); stmt.setString(1,
-          * tblNames[0]); stmt.setInt(2, line1); stmt.execute();
-          * stmt.setString(1, tblNames[1]); stmt.setInt(2, line2);
-          * stmt.execute(); } finally {
-          * SQLFunctions.closePreparedStatement(stmt); } }
-          */
+        }
       }
     } finally {
       SQLFunctions.closeResultSet(rs);

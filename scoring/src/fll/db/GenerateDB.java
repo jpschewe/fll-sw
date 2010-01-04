@@ -10,13 +10,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -38,19 +36,17 @@ import fll.xml.XMLWriter;
  */
 public final class GenerateDB {
 
+  /**
+   * Version of the database that will be created.
+   */
+  public static final int DATABASE_VERSION = 1;
+  
   private static final Logger LOGGER = Logger.getLogger(GenerateDB.class);
 
   /**
-   * sql datatype for tournament columns. Until we change the tournament
-   * references to be all integers, let's just use a constant to make it easy to
-   * change the size.
+   * Region name for internal teams. These teams should not be deleted.
    */
-  private static final String TOURNAMENT_DATATYPE = "varchar(128)";
-
-  /**
-   * Tournament name for internal teams. These teams should not be deleted.
-   */
-  public static final String INTERNAL_TOURNAMENT = "INTERNAL";
+  public static final String INTERNAL_REGION = "INTERNAL";
 
   /**
    * Generate a new database
@@ -104,8 +100,12 @@ public final class GenerateDB {
     }
   }
 
+  public static final String DEFAULT_TEAM_NAME = "<No Name>";
+  public static final String DEFAULT_TEAM_DIVISION = "1";
+  public static final String DEFAULT_TEAM_REGION = "DUMMY";
+  
   /**
-   * Generate a completly new DB from document. This also stores the document in
+   * Generate a completely new DB from document. This also stores the document in
    * the database for later use.
    * 
    * @param document and XML document that describes a tournament
@@ -124,44 +124,13 @@ public final class GenerateDB {
 
       stmt.executeUpdate("SET WRITE_DELAY 100 MILLIS");
 
-      // get list of tables that already exist
-      final DatabaseMetaData metadata = connection.getMetaData();
-      rs = metadata.getTables(null, null, "%", null);
-      final Collection<String> tables = new LinkedList<String>();
-      while (rs.next()) {
-        tables.add(rs.getString(3).toLowerCase());
-      }
-      rs.close();
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Tables:"
-            + tables);
-      }
-
+      final Collection<String> tables = Queries.getTablesInDB(connection);
+      
+      globalParameters(connection, forceRebuild, tables);
+        
       // Table structure for table 'Tournaments'
-      if (forceRebuild) {
-        stmt.executeUpdate("DROP TABLE IF EXISTS Tournaments CASCADE");
-      }
-
-      if (forceRebuild
-          || !tables.contains("Tournaments".toLowerCase())) {
-
-        stmt.executeUpdate("CREATE TABLE Tournaments ("
-            + "Name " + TOURNAMENT_DATATYPE + " NOT NULL," + "Location longvarchar," + "NextTournament " + TOURNAMENT_DATATYPE + " default NULL," // Tournament
-                                                                                                                                                  // that
-                                                                                                                                                  // teams
-                                                                                                                                                  // may
-                                                                                                                                                  // advance
-                                                                                                                                                  // to
-                                                                                                                                                  // from
-                                                                                                                                                  // this
-                                                                                                                                                  // one
-            + "CONSTRAINT tournaments_pk PRIMARY KEY (Name)" + ")");
-        stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DUMMY', 'Default dummy tournament')");
-        stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DROP', 'Dummy tournament for teams that drop out')");
-        // TODO can we add a constraint that NextTournament must refer to Name
-        // and still handle null?
-      }
-
+      tournaments(connection, forceRebuild, tables);
+      
       // Table structure for table 'Teams'
       if (forceRebuild) {
         stmt.executeUpdate("DROP TABLE IF EXISTS Teams CASCADE");
@@ -169,15 +138,18 @@ public final class GenerateDB {
       if (forceRebuild
           || !tables.contains("Teams".toLowerCase())) {
         stmt.executeUpdate("CREATE TABLE Teams ("
-            + "  TeamNumber integer NOT NULL," + "  TeamName varchar(255) default '<No Name>' NOT NULL," + "  Organization varchar(255),"
-            + "  Division varchar(32) default '1' NOT NULL," + "  Region varchar(255) default 'DUMMY' NOT NULL,"
+            + "  TeamNumber integer NOT NULL," //
+            + "  TeamName varchar(255) default '" + DEFAULT_TEAM_NAME + "' NOT NULL," //
+            + "  Organization varchar(255)," //
+            + "  Division varchar(32) default '" + DEFAULT_TEAM_DIVISION + "' NOT NULL," //
+            + "  Region varchar(255) default '" + DEFAULT_TEAM_REGION + "' NOT NULL," //
             + "  CONSTRAINT teams_pk PRIMARY KEY (TeamNumber)" + ")");
 
         // add the bye team so that references work
         prep = connection.prepareStatement("INSERT INTO Teams(TeamNumber, TeamName, Region) VALUES(?, ?, ?)");
         prep.setInt(1, Team.BYE.getTeamNumber());
         prep.setString(2, Team.BYE.getTeamName());
-        prep.setString(3, INTERNAL_TOURNAMENT);
+        prep.setString(3, INTERNAL_REGION);
         prep.executeUpdate();
 
         // add the tie team so that references work
@@ -193,22 +165,24 @@ public final class GenerateDB {
         prep.setString(2, Team.NULL.getTeamName());
         prep.setString(3, "INTERNAL");
         prep.executeUpdate();
+        
+        SQLFunctions.closePreparedStatement(prep);
       }
 
       // Table structure for table 'tablenames'
       stmt.executeUpdate("DROP TABLE IF EXISTS tablenames CASCADE");
       stmt.executeUpdate("CREATE TABLE tablenames ("
-          + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL," + "  PairID INTEGER NOT NULL," + "  SideA varchar(64) NOT NULL,"
+          + "  Tournament INTEGER NOT NULL," + "  PairID INTEGER NOT NULL," + "  SideA varchar(64) NOT NULL,"
           + "  SideB varchar(64) NOT NULL," + "  CONSTRAINT tablenames_pk PRIMARY KEY (Tournament,PairID)"
-          + " ,CONSTRAINT tablenames_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(Name)" + ")");
+          + " ,CONSTRAINT tablenames_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" + ")");
 
       // table to hold head-to-head playoff meta-data
       stmt.executeUpdate("DROP TABLE IF EXISTS PlayoffData CASCADE");
       stmt.executeUpdate("CREATE TABLE PlayoffData ("
-          + " event_division varchar(32) NOT NULL," + " Tournament " + TOURNAMENT_DATATYPE + " NOT NULL," + " PlayoffRound integer NOT NULL,"
+          + " event_division varchar(32) NOT NULL," + " Tournament INTEGER  NOT NULL," + " PlayoffRound integer NOT NULL,"
           + " LineNumber integer NOT NULL," + " Team integer default " + Team.NULL_TEAM_NUMBER + "," + " AssignedTable varchar(64) default NULL,"
           + " Printed boolean default FALSE," + " CONSTRAINT playoff_data_pk PRIMARY KEY (event_division, Tournament, PlayoffRound, LineNumber)"
-          + ",CONSTRAINT playoff_data_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(Name)"
+          + ",CONSTRAINT playoff_data_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)"
           + ",CONSTRAINT playoff_data_fk2 FOREIGN KEY(Team) REFERENCES Teams(TeamNumber)" + ")");
 
       // table to hold team numbers of teams in this tournament
@@ -218,10 +192,12 @@ public final class GenerateDB {
       if (forceRebuild
           || !tables.contains("TournamentTeams".toLowerCase())) {
         stmt.executeUpdate("CREATE TABLE TournamentTeams ("
-            + "  TeamNumber integer NOT NULL," + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL," + "  event_division varchar(32) default '1' NOT NULL,"
-            + "  CONSTRAINT tournament_teams_pk PRIMARY KEY (TeamNumber, Tournament)"
-            + " ,CONSTRAINT tournament_teams_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)"
-            + " ,CONSTRAINT tournament_teams_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(Name)" + ")");
+            + "  TeamNumber integer NOT NULL," //
+            + "  Tournament INTEGER NOT NULL," //
+            + "  event_division varchar(32) default '" + DEFAULT_TEAM_DIVISION + "' NOT NULL," //
+            + "  CONSTRAINT tournament_teams_pk PRIMARY KEY (TeamNumber, Tournament)" //
+            + " ,CONSTRAINT tournament_teams_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)" //
+            + " ,CONSTRAINT tournament_teams_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" + ")");
       }
 
       // Table structure for table 'TournamentParameters'
@@ -231,25 +207,36 @@ public final class GenerateDB {
       if (forceRebuild
           || !tables.contains("TournamentParameters".toLowerCase())) {
         stmt.executeUpdate("CREATE TABLE TournamentParameters ("
-            + "  Param varchar(64) NOT NULL," + "  Value longvarchar NOT NULL," + "  Description varchar(255) default NULL,"
+            + "  Param varchar(64) NOT NULL," //
+            + "  Value longvarchar NOT NULL," //
             + "  CONSTRAINT tournament_parameters_pk PRIMARY KEY  (Param)" + ")");
 
         // populate tournament parameters with default values
-        stmt
-            .executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('CurrentTournament', 'DUMMY', 'This is the currently running tournament name - see Tournaments table')");
-        stmt
-            .executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('SeedingRounds', 3, 'Number of seeding rounds before elimination round - used to downselect top performance scores in queries')");
-        stmt
-            .executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('StandardizedMean', 100, 'Standard mean for computing the standardized scores')");
-        stmt
-            .executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('StandardizedSigma', 20, 'Standard deviation for computing the standardized scores')");
-        stmt
-            .executeUpdate("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('ScoresheetLayoutNUp', 2, 'Controls scoresheet layout by specifying number of scoresheets per page. Valid values are 1 or 2.')");
+        
+        // inverted order of Value and Param so that the update statement and
+        // the insert statement both have the same order of parameters
+        prep = connection        
+        .prepareStatement("INSERT INTO TournamentParameters (Value, Param) VALUES (?, ?)");
+        prep.setString(2, TournamentParameters.CURRENT_TOURNAMENT);
+        prep.setInt(1, Queries.getTournamentID(connection, "DUMMY"));
+        prep.executeUpdate();
 
-        prep = connection
-                         .prepareStatement("INSERT INTO TournamentParameters (Param, Value, Description) VALUES ('ChallengeDocument', ?, 'The XML document describing the challenge')");
+        prep.setString(2, TournamentParameters.SEEDING_ROUNDS);
+        prep.setInt(1, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
+        prep.executeUpdate();
+
+        prep.setString(2, TournamentParameters.STANDARDIZED_MEAN);
+        prep.setDouble(1, TournamentParameters.STANDARDIZED_MEAN_DEFAULT);
+        prep.executeUpdate();
+        
+        prep.setString(2, TournamentParameters.STANDARDIZED_SIGMA);
+        prep.setDouble(1, TournamentParameters.STANDARDIZED_SIGMA_DEFAULT);
+        prep.executeUpdate();
+
+        prep.setString(2, TournamentParameters.CHALLENGE_DOCUMENT);
       } else {
-        prep = connection.prepareStatement("UPDATE TournamentParameters SET Value = ? WHERE Param = 'ChallengeDocument'");
+        prep = connection.prepareStatement("UPDATE TournamentParameters SET Value = ? WHERE Param = ?");
+        prep.setString(2, TournamentParameters.CHALLENGE_DOCUMENT);
       }
 
       // dump the document into a byte array so we can push it into the database
@@ -261,13 +248,15 @@ public final class GenerateDB {
       final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
       prep.setAsciiStream(1, bais, bytes.length);
       prep.executeUpdate();
-
+      SQLFunctions.closePreparedStatement(prep);
+      
       // Table structure for table 'Judges'
       stmt.executeUpdate("DROP TABLE IF EXISTS Judges CASCADE");
       stmt.executeUpdate("CREATE TABLE Judges ("
-          + "  id varchar(64) NOT NULL," + "  category varchar(64) NOT NULL," + "  Tournament " + TOURNAMENT_DATATYPE + " NOT NULL,"
+          + "  id varchar(64) NOT NULL," + "  category varchar(64) NOT NULL," + "  Tournament INTEGER NOT NULL,"
           + "  event_division varchar(32) NOT NULL," + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,event_division)"
-          + " ,CONSTRAINT judges_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(Name)" + ")");
+          + " ,CONSTRAINT judges_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
+          + ")");
 
       final Element rootElement = document.getDocumentElement();
       final StringBuilder createStatement = new StringBuilder();
@@ -287,8 +276,7 @@ public final class GenerateDB {
         performanceColumns.append("TeamNumber,");
         createStatement.append(" TeamNumber INTEGER NOT NULL,");
         performanceColumns.append("Tournament,");
-        createStatement.append(" Tournament "
-            + TOURNAMENT_DATATYPE + " NOT NULL,");
+        createStatement.append(" Tournament INTEGER NOT NULL,");
         performanceColumns.append("RunNumber,");
         createStatement.append(" RunNumber INTEGER NOT NULL,");
         performanceColumns.append("TimeStamp,");
@@ -314,7 +302,7 @@ public final class GenerateDB {
         createStatement.append(",CONSTRAINT "
             + tableName + "_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)");
         createStatement.append(",CONSTRAINT "
-            + tableName + "_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(Name)");
+            + tableName + "_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)");
         createStatement.append(");");
         stmt.executeUpdate(createStatement.toString());
 
@@ -324,8 +312,7 @@ public final class GenerateDB {
       final StringBuilder finalScores = new StringBuilder();
       finalScores.append("CREATE TABLE FinalScores (");
       finalScores.append("TeamNumber integer NOT NULL,");
-      finalScores.append("Tournament "
-          + TOURNAMENT_DATATYPE + " NOT NULL,");
+      finalScores.append("Tournament INTEGER NOT NULL,");
       for (final Element categoryElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
         createStatement.setLength(0);
 
@@ -336,8 +323,7 @@ public final class GenerateDB {
         createStatement.append("CREATE TABLE "
             + tableName + " (");
         createStatement.append(" TeamNumber INTEGER NOT NULL,");
-        createStatement.append(" Tournament "
-            + TOURNAMENT_DATATYPE + " NOT NULL,");
+        createStatement.append(" Tournament INTEGER NOT NULL,");
         createStatement.append(" Judge VARCHAR(64) NOT NULL,");
         createStatement.append(" NoShow boolean DEFAULT FALSE NOT NULL,");
         for (final Element element : XMLUtils.filterToElements(categoryElement.getElementsByTagName("goal"))) {
@@ -352,7 +338,7 @@ public final class GenerateDB {
         createStatement.append(",CONSTRAINT "
             + tableName + "_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)");
         createStatement.append(",CONSTRAINT "
-            + tableName + "_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(Name)");
+            + tableName + "_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)");
         createStatement.append(");");
         stmt.executeUpdate(createStatement.toString());
 
@@ -365,7 +351,7 @@ public final class GenerateDB {
       finalScores.append(" OverallScore float,");
       finalScores.append("CONSTRAINT final_scores_pk PRIMARY KEY (TeamNumber, Tournament)");
       finalScores.append(",CONSTRAINT final_scores_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)");
-      finalScores.append(",CONSTRAINT final_scores_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(Name)");
+      finalScores.append(",CONSTRAINT final_scores_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)");
       finalScores.append(")");
       stmt.executeUpdate("DROP TABLE IF EXISTS FinalScores CASCADE");
       if (LOGGER.isDebugEnabled()) {
@@ -398,6 +384,73 @@ public final class GenerateDB {
 
   }
 
+  /*package*/ static void tournaments(Connection connection, boolean forceRebuild, Collection<String> tables) throws SQLException {
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+
+      if (forceRebuild) {
+        stmt.executeUpdate("DROP TABLE IF EXISTS Tournaments CASCADE");
+      }
+
+      if (forceRebuild
+          || !tables.contains("Tournaments".toLowerCase())) {
+        stmt.executeUpdate("CREATE TABLE Tournaments ("
+            + "tournament_id INTEGER GENERATED BY DEFAULT AS IDENTITY" //
+            + ",Name varchar(128) NOT NULL" //
+            + ",Location longvarchar" //
+            + ",NextTournament INTEGER default NULL" //
+            + ",CONSTRAINT tournaments_pk PRIMARY KEY (tournament_id)" //
+            + ",CONSTRAINT name_unique UNIQUE(Name)" //
+            + ")");
+        stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DUMMY', 'Default dummy tournament')");
+        stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DROP', 'Dummy tournament for teams that drop out')");
+        // TODO can we add a constraint that NextTournament must refer to Name
+        // and still handle null?
+      }
+    } finally {
+      SQLFunctions.closeStatement(stmt);
+    }
+  }
+
+  /*package*/ static void globalParameters(final Connection connection, 
+                                       final boolean forceRebuild, 
+                                       final Collection<String> tables) throws SQLException {
+    Statement stmt = null;
+    PreparedStatement insertPrep = null;
+    PreparedStatement deletePrep = null;
+    try {
+      stmt = connection.createStatement();
+      if (forceRebuild) {
+        stmt.executeUpdate("DROP TABLE IF EXISTS global_parameters CASCADE");
+      }
+      if (forceRebuild
+          || !tables.contains("global_parameters".toLowerCase())) {
+        stmt.executeUpdate("CREATE TABLE global_parameters (" //
+            + "  param varchar(64) NOT NULL" //
+            + " ,param_value longvarchar NOT NULL" //
+            + " ,CONSTRAINT global_parameters_pk PRIMARY KEY (param)" //
+            + ")");
+      }
+      
+      insertPrep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
+      deletePrep = connection.prepareStatement("DELETE FROM global_parameters WHERE param = ?");
+      
+      // set database version
+      deletePrep.setString(1, GlobalParameters.DATABASE_VERSION);
+      deletePrep.executeUpdate();
+      insertPrep.setInt(1, DATABASE_VERSION);
+      insertPrep.setString(2, GlobalParameters.DATABASE_VERSION);
+      insertPrep.executeUpdate();
+      
+    } finally {
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(insertPrep);
+      SQLFunctions.closePreparedStatement(deletePrep);
+    }
+  }
+  
+
   /**
    * Generate the definition of a column for the given goal element.
    * 
@@ -427,5 +480,6 @@ public final class GenerateDB {
 
     return definition;
   }
+
 
 }

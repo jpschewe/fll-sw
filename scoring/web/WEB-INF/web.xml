@@ -156,6 +156,25 @@
   <url-pattern>/report/CategoryScoresByScoreGroup</url-pattern>
  </servlet-mapping>
 
+<servlet>
+  <servlet-name>CategoryScoresByJudge</servlet-name>
+  <servlet-class>fll.web.report.CategoryScoresByJudge</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>CategoryScoresByJudge</servlet-name>
+  <url-pattern>/report/CategoryScoresByJudge</url-pattern>
+ </servlet-mapping>
+
+ <servlet>
+  <servlet-name>CategorizedScores</servlet-name>
+  <servlet-class>fll.web.report.CategorizedScores</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>CategorizedScores</servlet-name>
+  <url-pattern>/report/CategorizedScores</url-pattern>
+ </servlet-mapping>
+
+
  <servlet>
   <servlet-name>FinalistSchedulerUI</servlet-name>
   <servlet-class>fll.web.report.FinalistSchedulerUI</servlet-class>
@@ -184,6 +203,23 @@
   <url-pattern>/admin/CommitTeam</url-pattern>
  </servlet-mapping>
 
+ <servlet>
+  <servlet-name>SetCurrentTournament</servlet-name>
+  <servlet-class>fll.web.admin.SetCurrentTournament</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>SetCurrentTournament</servlet-name>
+  <url-pattern>/admin/SetCurrentTournament</url-pattern>
+ </servlet-mapping>
+
+ <servlet>
+  <servlet-name>CommitTournamentInitialization</servlet-name>
+  <servlet-class>fll.web.admin.CommitTournamentInitialization</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>CommitTournamentInitialization</servlet-name>
+  <url-pattern>/admin/CommitTournamentInitialization</url-pattern>
+ </servlet-mapping>
 
  <servlet>
   <servlet-name>UploadSubjectiveData</servlet-name>

@@ -83,7 +83,7 @@ public class ScoresheetGenerator {
    * @param document DOM document containing the challenge info used to generate
    *          the scoresheet.
    */
-  public ScoresheetGenerator(final Map<?, ?> formParms, final Connection connection, final String tournament, final org.w3c.dom.Document document)
+  public ScoresheetGenerator(final Map<?, ?> formParms, final Connection connection, final int tournament, final org.w3c.dom.Document document)
       throws SQLException {
     final int numMatches = Integer.parseInt(((String[]) formParms.get("numMatches"))[0]);
     final boolean[] checkedMatches = new boolean[numMatches + 1]; // ignore slot
@@ -113,7 +113,7 @@ public class ScoresheetGenerator {
           + " WHERE event_division=? AND Tournament=? AND PlayoffRound=? AND Team=?");
       // could do division here, too, but since getting it from Team object,
       // will defer to same place as other
-      updatePrep.setString(3, tournament);
+      updatePrep.setInt(3, tournament);
 
       int j = 0;
       for (int i = 1; i <= numMatches; i++) {

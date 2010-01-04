@@ -33,7 +33,7 @@ final Connection connection = datasource.getConnection();
     ,RunNumber
      FROM Performance
      WHERE Verified <> TRUE 
-       AND Tournament = '<c:out value="${currentTournament}" />'
+       AND Tournament = <c:out value="${currentTournament}" />
        ORDER BY RunNumber
  </sql:query>
  <c:forEach var="row" items="${result.rowsByIndex}">

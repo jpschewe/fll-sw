@@ -11,7 +11,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +23,6 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
-import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -42,7 +40,7 @@ import fll.xml.XMLUtils;
  * @author jpschewe
  * @version $Revision$
  */
-public class CategoryScoresByScoreGroup extends BaseFLLServlet {
+public class CategoryScoresByJudge extends BaseFLLServlet {
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -57,7 +55,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
     final PrintWriter writer = response.getWriter();
     writer.write("<html><body>");
-    writer.write("<h1>FLL Categorized Score Summary by score group</h1>");
+    writer.write("<h1>FLL Categorized Score Summary by judge</h1>");
     writer.write("<hr/>");
 
     // cache the subjective categories title->dbname
@@ -70,6 +68,8 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
     ResultSet rs = null;
     PreparedStatement prep = null;
+    PreparedStatement judgesPrep = null;
+    ResultSet judgesRS = null;
     try {
       final Connection connection = datasource.getConnection();
 
@@ -77,24 +77,46 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
       // foreach division
       for (final String division : Queries.getDivisions(connection)) {
+        
         // foreach subjective category
-        for (final String categoryTitle : subjectiveCategories.keySet()) {
-          final String categoryName = subjectiveCategories.get(categoryTitle);
+        for(final Map.Entry<String, String> entry : subjectiveCategories.entrySet()) {
+          final String categoryTitle = entry.getKey();
+          final String categoryName = entry.getValue();
 
-          final Map<String, Collection<Integer>> scoreGroups = Queries.computeScoreGroups(connection, currentTournament, division, categoryName);
-
+          judgesPrep = connection.prepareStatement("SELECT DISTINCT " + categoryName + ".Judge"//
+                                                  + " FROM " + categoryName + ",current_tournament_teams"//
+                                                  + " WHERE " + categoryName + ".TeamNumber = current_tournament_teams.TeamNumber"
+                                                  + " AND " + categoryName + ".Tournament = ?"
+                                                  + " AND current_tournament_teams.event_division = ?");          
+          judgesPrep.setInt(1, currentTournament);
+          judgesPrep.setString(2, division);
+          judgesRS = judgesPrep.executeQuery();
+                    
           // select from FinalScores
-          for (final String scoreGroup : scoreGroups.keySet()) {
+          while(judgesRS.next()) {
+            final String judge = judgesRS.getString(1);
+            
             writer.write("<h3>"
-                + categoryTitle + " Division: " + division + " Score Group: " + scoreGroup + "</h3>");
+                + categoryTitle + " Division: " + division + " Judge: " + judge+ "</h3>");
+            
             writer.write("<table border='0'>");
-            writer.write("<tr><th colspan='3'>Team # / Organization / Team Name</th><th>Scaled Score</th></tr>");
-
-            final String teamSelect = StringUtils.join(scoreGroups.get(scoreGroup).iterator(), ", ");
-            prep = connection.prepareStatement("SELECT Teams.TeamNumber,Teams.Organization,Teams.TeamName,FinalScores."
-                + categoryName + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
-                + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " " + ascDesc);
+            writer.write("<tr><th colspan='3'>Team # / Organization / Team Name</th><th>Raw Score</th><th>Scaled Score</th></tr>");
+            
+            prep = connection.prepareStatement("SELECT"//
+                +" Teams.TeamNumber"//
+                + ",Teams.Organization"//
+                + ",Teams.TeamName"//
+                + "," + categoryName + ".ComputedTotal"//
+                + "," + categoryName + ".StandardizedScore"//
+                + " FROM Teams, " + categoryName//
+                + " WHERE Teams.TeamNumber = " + categoryName + ".TeamNumber"//
+                + " AND Tournament = ?"//
+                + " AND Judge = ?"//
+                + " AND " + categoryName + ".ComputedTotal IS NOT NULL"//
+                + " ORDER BY " + categoryName + ".ComputedTotal " + ascDesc // get best score first
+                                               ); 
             prep.setInt(1, currentTournament);
+            prep.setString(2, judge);
             rs = prep.executeQuery();
             while (rs.next()) {
               final int teamNum = rs.getInt(1);
@@ -102,6 +124,9 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
               final String name = rs.getString(3);
               final double score = rs.getDouble(4);
               final boolean scoreWasNull = rs.wasNull();
+              final double rawScore = rs.getDouble(5);
+              final boolean rawScoreWasNull = rs.wasNull();
+              
               writer.write("<tr>");
               writer.write("<td>");
               writer.write(teamNum);
@@ -120,6 +145,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                 writer.write(name);
               }
               writer.write("</td>");
+              
               if (!scoreWasNull) {
                 writer.write("<td>");
                 writer.write(Utilities.NUMBER_FORMAT_INSTANCE.format(score));
@@ -127,18 +153,35 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                 writer.write("<td align='center' class='warn'>No Score");
               }
               writer.write("</td>");
+              
+              if (!rawScoreWasNull) {
+                writer.write("<td>");
+                writer.write(Utilities.NUMBER_FORMAT_INSTANCE.format(rawScore));
+              } else {
+                writer.write("<td align='center' class='warn'>No Score");
+              }
+              writer.write("</td>");
+              
               writer.write("</tr>");
-            }
+            }// foreach team
+            writer.write("<tr><td colspan='5'><hr/></td></tr>");
             writer.write("</table");
-          }
-        }
-      }
+            SQLFunctions.closeResultSet(rs);
+            SQLFunctions.closePreparedStatement(prep);
+          }// foreach judge
+          SQLFunctions.closeResultSet(judgesRS);
+          SQLFunctions.closePreparedStatement(judgesPrep);
+        }// foreach category
+        
+      }// foreach division
 
     } catch (final SQLException sqle) {
       throw new RuntimeException(sqle);
     } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(judgesRS);
+      SQLFunctions.closePreparedStatement(judgesPrep);
     }
 
     writer.write("</body></html>");

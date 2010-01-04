@@ -9,7 +9,6 @@
   <%
   final DataSource datasource = SessionAttributes.getDataSource(session);
   final Connection connection = datasource.getConnection();
- final String currentTournament = Queries.getCurrentTournament(connection);
 
  final String divisionKey = "playoffDivision";
  final String roundNumberKey = "playoffRoundNumber";

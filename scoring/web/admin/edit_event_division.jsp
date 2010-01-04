@@ -9,7 +9,7 @@
 <%
 final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
-      pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
+pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
 %>
 <%-- check for form submission --%>
 <c:if test="${param.submit == 'Cancel'}">
@@ -54,7 +54,7 @@ final Connection connection = datasource.getConnection();
     UPDATE TournamentTeams 
       SET event_division = '<c:out value="${new_division}" />' 
       WHERE TeamNumber = <c:out value="${teamNumber}" />
-      AND Tournament = '<c:out value="${currentTournament}" />'
+      AND Tournament = <c:out value="${currentTournament}" />
   </sql:update>
   </c:if>
  </c:forEach>

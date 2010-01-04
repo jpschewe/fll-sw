@@ -1,43 +1,5 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
       
-<%@ page import="fll.db.Queries" %>
-<%@ page import="java.sql.Connection" %>    
-<%@ page import="fll.web.SessionAttributes" %>
-<%@ page import="javax.sql.DataSource" %>
-
-<%
-final DataSource datasource = SessionAttributes.getDataSource(session);
-final Connection connection = datasource.getConnection();
-
-pageContext.setAttribute("regions", Queries.getRegions(connection));
-%>
-
-<c:if test='${"true" == param.verified}'>
-  <c:forEach var="parameter" items="${paramValues}">
-    <c:if test='${"nochange" != parameter.value[0] && "verified" != parameter.key && "submit" != parameter.key}'>
-      <c:set var="decodedRegion">
-        ${fn:replace(parameter.key, "&amp;", "&")}
-      </c:set>    
-      
-      <c:set var="decodedTournament">
-        ${fn:replace(parameter.value[0], "&amp;", "&")}
-      </c:set>    
-      <sql:update dataSource="${datasource}">
-        DELETE FROM TournamentTeams WHERE TeamNumber IN ( SELECT TeamNumber FROM Teams WHERE Region = '${decodedRegion}' )
-      </sql:update>
-      <sql:update dataSource="${datasource}">
-        INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division) SELECT Teams.TeamNumber, '${decodedTournament}', Teams.Division FROM Teams WHERE Teams.Region = '${decodedRegion}'
-      </sql:update>
-    </c:if>
-  </c:forEach>
-  
-  <c:redirect url="index.jsp" >
-    <c:param name="message">
-      Successfully initialized tournament for teams based on region.
-    </c:param>
-  </c:redirect>
-</c:if>
-      
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
@@ -49,7 +11,7 @@ pageContext.setAttribute("regions", Queries.getRegions(connection));
 
     <p>The following teams will have their tournament changed if you continue:</p>
 
-    <form name="verify" action="verifyTournamentInitialization.jsp" method="post">
+    <form name="verify" action="CommitTournamentInitialization" method="post">
       <table border='1'>
         <tr><th>Team Number</th><th>Team Name</th><th>Region</th><th>New Tournament</th></tr>
               
@@ -64,9 +26,8 @@ pageContext.setAttribute("regions", Queries.getRegions(connection));
           <c:if test='${"nochange" != parameter.value[0]}'>
             <sql:query var="result" dataSource="${datasource}">
               SELECT DISTINCT Teams.TeamNumber AS TeamNumber, Teams.TeamName AS TeamName, Teams.Region AS Region
-                FROM Teams,TournamentTeams
+                FROM Teams
                 WHERE Teams.Region = '${decodedTournament}'
-                AND TournamentTeams.TeamNumber = Teams.TeamNumber
                 ORDER BY Teams.TeamNumber
             </sql:query>
             <c:forEach items="${result.rows}" var="row">

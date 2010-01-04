@@ -75,7 +75,7 @@ public class RankingReport extends BaseFLLServlet {
       final ByteArrayOutputStream baos = new ByteArrayOutputStream();
       final PdfWriter writer = PdfWriter.getInstance(document, baos);
       final Element root = challengeDocument.getDocumentElement();
-      writer.setPageEvent(new PageEventHandler(root.getAttribute("title"), Queries.getCurrentTournament(connection)));
+      writer.setPageEvent(new PageEventHandler(root.getAttribute("title"), Queries.getCurrentTournamentName(connection)));
 
       document.open();
 

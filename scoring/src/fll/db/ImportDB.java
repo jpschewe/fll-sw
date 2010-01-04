@@ -18,9 +18,11 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -32,6 +34,8 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import au.com.bytecode.opencsv.CSVReader;
+
 import fll.Team;
 import fll.Utilities;
 import fll.db.TeamPropertyDifference.TeamProperty;
@@ -40,7 +44,9 @@ import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 
 /**
- * Import scores from a tournament database into a master score database.
+ * FIXME check if the tournament_id column exists and if not, handle as old
+ * database, otherwise need to map... Import scores from a tournament database
+ * into a master score database.
  * <p>
  * Example arguments: jdbc:hsqldb:file:/source;shutdown=true "Centennial Dec10"
  * jdbc:hsqldb:file:/destination;shutdown=true
@@ -169,12 +175,13 @@ public final class ImportDB {
       final String url = "jdbc:hsqldb:mem:dbimport"
           + String.valueOf(_importdbCount++);
       memConnection = DriverManager.getConnection(url);
-      memStmt = memConnection.createStatement();
 
       final Document challengeDocument = loadDatabaseDump(zipfile, memConnection);
       GenerateDB.generateDB(challengeDocument, database, true);
 
       destConnection = Utilities.createDataSource(database).getConnection();
+
+      memStmt = memConnection.createStatement();
 
       // load the teams table into the destination database
       destStmt = destConnection.createStatement();
@@ -186,40 +193,40 @@ public final class ImportDB {
         final String org = memRS.getString(3);
         final String div = memRS.getString(4);
         final String region = memRS.getString(5);
-        if (!GenerateDB.INTERNAL_TOURNAMENT.equals(region)) {
+        if (!GenerateDB.INTERNAL_REGION.equals(region)) {
           if (LOG.isDebugEnabled()) {
             LOG.debug("Inserting into teams: "
                 + num + ", " + name + ", " + org + ", " + div + ", " + region);
           }
           destPrep.setInt(1, num);
-          destPrep.setString(2, name);
+          destPrep.setString(2, name == null ? GenerateDB.DEFAULT_TEAM_NAME : name);
           destPrep.setString(3, org);
-          destPrep.setString(4, div);
-          destPrep.setString(5, region);
+          destPrep.setString(4, div == null ? GenerateDB.DEFAULT_TEAM_DIVISION : div);
+          destPrep.setString(5, region == null ? GenerateDB.DEFAULT_TEAM_REGION : region);
           destPrep.executeUpdate();
         }
       }
 
-      // for each tournament listed in the dump file, import it
-      insertPrep = destConnection.prepareStatement("INSERT INTO Tournaments (Name, Location, NextTournament) VALUES(?, ?, ?)");
-      checkPrep = destConnection.prepareStatement("SELECT Name FROM Tournaments WHERE Name = ?");
+      // load all of the tournaments
+      final List<String> initialTournaments = Queries.getTournamentNames(destConnection);
       memRS = memStmt.executeQuery("SELECT Name, Location, NextTournament FROM Tournaments");
       while (memRS.next()) {
         final String tournament = memRS.getString(1);
         final String location = memRS.getString(2);
-        final String nextTournament = memRS.getString(3);
+        final int nextTournament = memRS.getInt(3);
 
         // add the tournament to the tournaments table if it doesn't already
         // exist
-        checkPrep.setString(1, tournament);
-        checkRS = checkPrep.executeQuery();
-        if (!checkRS.next()) {
-          insertPrep.setString(1, tournament);
-          insertPrep.setString(2, location);
-          insertPrep.setString(3, nextTournament);
-          insertPrep.executeUpdate();
+        if (!initialTournaments.contains(tournament)) {
+          Queries.createTournament(destConnection, tournament, location, nextTournament);
         }
-        SQLFunctions.closeResultSet(checkRS);
+      }
+      SQLFunctions.closeResultSet(memRS);
+
+      // for each tournament listed in the dump file, import it
+      memRS = memStmt.executeQuery("SELECT Name, Location, NextTournament FROM Tournaments");
+      while (memRS.next()) {
+        final String tournament = memRS.getString(1);
 
         // import the data from the tournament
         importDatabase(memConnection, destConnection, tournament);
@@ -253,9 +260,15 @@ public final class ImportDB {
   private static int _importdbCount = 0;
 
   /**
+   * <p>
    * Load a database dumped as a zipfile into an existing empty database. No
    * checks are done, csv files are expected to be in the zipfile and they are
    * used as table names and table data in the database.
+   * </p>
+   * <p>
+   * Once the database has been loaded it will be upgraded to the current
+   * version using {@link GenerateDB#upgradeDatabase(Connection)}.
+   * </p>
    * 
    * @param zipfile the database dump
    * @return the challenge document
@@ -266,6 +279,7 @@ public final class ImportDB {
   public static Document loadDatabaseDump(final ZipInputStream zipfile, final Connection connection) throws IOException, SQLException {
     Document challengeDocument = null;
 
+    final Map<String, Map<String, String>> typeInfo = new HashMap<String, Map<String, String>>();
     ZipEntry entry;
     while (null != (entry = zipfile.getNextEntry())) {
       final String name = entry.getName();
@@ -276,6 +290,22 @@ public final class ImportDB {
         final String tablename = name.substring(0, name.indexOf(".csv"));
         final Reader reader = new InputStreamReader(zipfile);
         Utilities.loadCSVFile(connection, tablename, reader);
+      } else if (name.endsWith(".types")) {
+        final String tablename = name.substring(0, name.indexOf(".types"));
+        final Reader reader = new InputStreamReader(zipfile);
+        final CSVReader csvreader = new CSVReader(reader);
+        final Map<String, String> columnTypes = new HashMap<String, String>();
+
+        String[] line;
+        while (null != (line = csvreader.readNext())) {
+          if (line.length != 2) {
+            throw new RuntimeException(name
+                + " has incorrect number of columns, should be 2");
+          }
+          columnTypes.put(line[0], line[1]);
+        }
+
+        typeInfo.put(tablename, columnTypes);
       } else {
         LOG.warn("Unexpected file found in imported zip file, skipping: "
             + name);
@@ -283,10 +313,163 @@ public final class ImportDB {
       zipfile.closeEntry();
     }
 
+    fixTableTypes(connection, typeInfo);
+
+    upgradeDatabase(connection, challengeDocument);
+
     if (null == challengeDocument) {
       throw new RuntimeException("Cannot find challenge document in the zipfile");
     }
     return challengeDocument;
+  }
+
+  private static void fixTableTypes(final Connection connection, final Map<String, Map<String, String>> typeInfo) throws SQLException {
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+
+      for (final Map.Entry<String, Map<String, String>> tableEntry : typeInfo.entrySet()) {
+        final String tableName = tableEntry.getKey();
+
+        for (final Map.Entry<String, String> columnEntry : tableEntry.getValue().entrySet()) {
+          final String columnName = columnEntry.getKey();
+          final String columnType = columnEntry.getValue();
+          
+          // convert empty strings to null
+          final String nullSQL = String.format("UPDATE %s SET %s = NULL WHERE %s = ''", tableName, columnName, columnName);
+          stmt.executeUpdate(nullSQL);
+          
+          final String typeSQL = String.format("ALTER TABLE %s ALTER COLUMN %s %s", tableName, columnName, columnType);
+          stmt.executeUpdate(typeSQL);
+        }
+      }
+    } finally {
+      SQLFunctions.closeStatement(stmt);
+    }
+  }
+
+  /**
+   * Upgrade the specified database to the current version. This is working
+   * under the assumption that the current database is loaded from a set of CSV
+   * files and therefore don't have any referential integrity constraints, so
+   * we're only fixing up column names and the data in the column.
+   * 
+   * @param connection the database to upgrade
+   * @throws SQLException on an error
+   * @throws IllegalArgumentException if the database cannot be upgraded for
+   *           some reason
+   */
+  private static void upgradeDatabase(final Connection connection, final Document challengeDocument) throws SQLException, IllegalArgumentException {
+    final int dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 1) {
+      upgrade0To1(connection, challengeDocument);
+    }
+    final int newVersion = Queries.getDatabaseVersion(connection);
+    if (newVersion < GenerateDB.DATABASE_VERSION) {
+      throw new RuntimeException("Internal error, database version not updated to current instead was: "
+          + newVersion);
+    }
+  }
+
+  private static void upgrade0To1(final Connection connection, final Document challengeDocument) throws SQLException {
+    Statement stmt = null;
+    ResultSet rs = null;
+    PreparedStatement setVersion = null;
+    PreparedStatement stringsToInts = null;
+    try {
+      stmt = connection.createStatement();
+
+      // add the global_parameters table
+      GenerateDB.globalParameters(connection, true, Queries.getTablesInDB(connection));
+
+      // ---- switch from string tournament names to integers ----
+
+      // get all data from Tournaments table
+      final Map<String, String> nameLocation = new HashMap<String, String>();
+      final Map<String, String> nameNext = new HashMap<String, String>();
+      rs = stmt.executeQuery("SELECT Name, Location, NextTournament FROM Tournaments");
+      while (rs.next()) {
+        final String name = rs.getString(1);
+        final String location = rs.getString(2);
+        final String nextName = rs.getString(3);
+        nameLocation.put(name, location);
+        nameNext.put(name, nextName);
+      }
+      SQLFunctions.closeResultSet(rs);
+
+      // drop Tournaments table
+      stmt.executeUpdate("DROP TABLE Tournaments");
+
+      // create Tournaments table
+      GenerateDB.tournaments(connection, true, Queries.getTablesInDB(connection));
+
+      // add all tournaments back
+      final List<String> defaultTournaments = Queries.getTournamentNames(connection);
+      for (final Map.Entry<String, String> entry : nameLocation.entrySet()) {
+        if (!defaultTournaments.contains(entry.getKey())) {
+          Queries.createTournament(connection, entry.getKey(), entry.getValue());
+        }
+      }
+      // set next tournaments
+      for (final Map.Entry<String, String> entry : nameNext.entrySet()) {
+        if (!defaultTournaments.contains(entry.getKey())) {
+          Queries.setNextTournament(connection, entry.getKey(), entry.getValue());
+        }
+      }
+
+      // get map of names to ids
+      final Map<String, Integer> nameID = new HashMap<String, Integer>();
+      rs = stmt.executeQuery("SELECT Name, tournament_id FROM Tournaments");
+      while (rs.next()) {
+        final String name = rs.getString(1);
+        final int id = rs.getInt(2);
+        nameID.put(name, id);
+      }
+      SQLFunctions.closeResultSet(rs);
+
+      // update all table columns
+      final List<String> tablesToModify = new LinkedList<String>();
+      tablesToModify.add("Judges");
+      tablesToModify.add("tablenames");
+      tablesToModify.add("TournamentTeams");
+      tablesToModify.add("FinalScores");
+      tablesToModify.add("Performance");
+      tablesToModify.add("PlayoffData");
+      tablesToModify.addAll(XMLUtils.getSubjectiveCategoryNames(challengeDocument));
+      for (final String table : tablesToModify) {
+        stringsToInts = connection.prepareStatement(String.format("UPDATE %s SET Tournament = ? WHERE Tournament = ?", table));
+        for (final Map.Entry<String, Integer> entry : nameID.entrySet()) {
+          stringsToInts.setInt(1, entry.getValue());
+          stringsToInts.setString(2, entry.getKey());
+          stringsToInts.executeUpdate();
+        }
+        SQLFunctions.closePreparedStatement(stringsToInts);
+      }
+
+      // set the version to 1 - this will have been set while creating
+      // global_parameters, but we need to set it to 1 for later upgrade
+      // functions to not be confused
+      setDBVersion(connection, 1);
+
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(setVersion);
+      SQLFunctions.closePreparedStatement(stringsToInts);
+    }
+  }
+
+  private static void setDBVersion(final Connection connection, final int version) throws SQLException {
+    PreparedStatement setVersion = null;
+    try {
+      setVersion = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?");
+      setVersion.setInt(1, version);
+      setVersion.setString(2, GlobalParameters.DATABASE_VERSION);
+      setVersion.executeUpdate();
+    } finally {
+      SQLFunctions.closePreparedStatement(setVersion);
+    }
+
   }
 
   /**
@@ -300,27 +483,33 @@ public final class ImportDB {
    * 
    * @param sourceConnection a connection to the source database
    * @param destinationConnection a connection to the destination database
-   * @param tournament the tournament that the scores are for
+   * @param tournamentName the tournament that the scores are for
    */
-  public static void importDatabase(final Connection sourceConnection, final Connection destinationConnection, final String tournament) throws SQLException {
+  public static void importDatabase(final Connection sourceConnection, final Connection destinationConnection, final String tournamentName) throws SQLException {
 
     final Document document = Queries.getChallengeDocument(destinationConnection);
     final Element rootElement = document.getDocumentElement();
 
-    importJudges(sourceConnection, destinationConnection, tournament);
+    final int sourceTournamentID = Queries.getTournamentID(sourceConnection, tournamentName);
+    final int destTournamentID = Queries.getTournamentID(destinationConnection, tournamentName);
 
-    importTournamentTeams(sourceConnection, destinationConnection, tournament);
+    importJudges(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
-    importPerformance(sourceConnection, destinationConnection, tournament, rootElement);
+    importTournamentTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
-    importSubjective(sourceConnection, destinationConnection, tournament, rootElement);
+    importPerformance(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, rootElement);
 
-    importTableNames(sourceConnection, destinationConnection, tournament);
+    importSubjective(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, rootElement);
 
-    importPlayoffData(sourceConnection, destinationConnection, tournament);
+    importTableNames(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+
+    importPlayoffData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
   }
 
-  private static void importPlayoffData(final Connection sourceConnection, final Connection destinationConnection, final String tournament) throws SQLException {
+  private static void importPlayoffData(final Connection sourceConnection,
+                                        final Connection destinationConnection,
+                                        final int sourceTournamentID,
+                                        final int destTournamentID) throws SQLException {
     LOG.info("Importing PlayoffData");
 
     PreparedStatement destPrep = null;
@@ -328,13 +517,13 @@ public final class ImportDB {
     ResultSet sourceRS = null;
     try {
       destPrep = destinationConnection.prepareStatement("DELETE FROM PlayoffData WHERE Tournament = ?");
-      destPrep.setString(1, tournament);
+      destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
       SQLFunctions.closePreparedStatement(destPrep);
 
       sourcePrep = sourceConnection.prepareStatement("SELECT event_division, Tournament, PlayoffRound, LineNumber, Team, AssignedTable, Printed "
           + "FROM PlayoffData WHERE Tournament=?");
-      sourcePrep.setString(1, tournament);
+      sourcePrep.setInt(1, sourceTournamentID);
       destPrep = destinationConnection.prepareStatement("INSERT INTO PlayoffData (event_division, Tournament, PlayoffRound,"
           + "LineNumber, Team, AssignedTable, Printed) VALUES (?, ?, ?, ?, ?, ?, ?)");
       sourceRS = sourcePrep.executeQuery();
@@ -355,20 +544,23 @@ public final class ImportDB {
     }
   }
 
-  private static void importTableNames(final Connection sourceConnection, final Connection destinationConnection, final String tournament) throws SQLException {
+  private static void importTableNames(final Connection sourceConnection,
+                                       final Connection destinationConnection,
+                                       final int sourceTournamentID,
+                                       final int destTournamentID) throws SQLException {
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
     try {
       LOG.info("Importing tablenames");
       destPrep = destinationConnection.prepareStatement("DELETE FROM tablenames WHERE Tournament = ?");
-      destPrep.setString(1, tournament);
+      destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
       SQLFunctions.closePreparedStatement(destPrep);
 
       sourcePrep = sourceConnection.prepareStatement("SELECT Tournament, PairID, SideA, SideB "
           + "FROM tablenames WHERE Tournament=?");
-      sourcePrep.setString(1, tournament);
+      sourcePrep.setInt(1, sourceTournamentID);
       destPrep = destinationConnection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) "
           + "VALUES (?, ?, ?, ?)");
       sourceRS = sourcePrep.executeQuery();
@@ -391,7 +583,8 @@ public final class ImportDB {
 
   private static void importSubjective(final Connection sourceConnection,
                                        final Connection destinationConnection,
-                                       final String tournament,
+                                       final int sourceTournamentID,
+                                       final int destTournamentID,
                                        final Element rootElement) throws SQLException {
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
@@ -405,7 +598,7 @@ public final class ImportDB {
 
         destPrep = destinationConnection.prepareStatement("DELETE FROM "
             + tableName + " WHERE Tournament = ?");
-        destPrep.setString(1, tournament);
+        destPrep.setInt(1, destTournamentID);
         destPrep.executeUpdate();
         SQLFunctions.closePreparedStatement(destPrep);
 
@@ -437,7 +630,7 @@ public final class ImportDB {
 
         sourcePrep = sourceConnection.prepareStatement("SELECT "
             + columns.toString() + " FROM " + tableName + " WHERE Tournament = ?");
-        sourcePrep.setString(1, tournament);
+        sourcePrep.setInt(1, sourceTournamentID);
         sourceRS = sourcePrep.executeQuery();
         while (sourceRS.next()) {
           for (int i = 0; i < numColumns; i++) {
@@ -462,7 +655,8 @@ public final class ImportDB {
 
   private static void importPerformance(final Connection sourceConnection,
                                         final Connection destinationConnection,
-                                        final String tournament,
+                                        final int sourceTournamentID,
+                                        final int destTournamentID,
                                         final Element rootElement) throws SQLException {
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
@@ -473,7 +667,7 @@ public final class ImportDB {
       final String tableName = "Performance";
       destPrep = destinationConnection.prepareStatement("DELETE FROM "
           + tableName + " WHERE Tournament = ?");
-      destPrep.setString(1, tournament);
+      destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
       SQLFunctions.closePreparedStatement(destPrep);
 
@@ -511,7 +705,7 @@ public final class ImportDB {
 
       sourcePrep = sourceConnection.prepareStatement("SELECT "
           + columns.toString() + " FROM " + tableName + " WHERE Tournament = ?");
-      sourcePrep.setString(1, tournament);
+      sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
         for (int i = 0; i < numColumns; i++) {
@@ -542,25 +736,29 @@ public final class ImportDB {
     }
   }
 
-  private static void importTournamentTeams(final Connection sourceConnection, final Connection destinationConnection, final String tournament)
-      throws SQLException {
+  private static void importTournamentTeams(final Connection sourceConnection,
+                                            final Connection destinationConnection,
+                                            final int sourceTournamentID,
+                                            final int destTournamentID) throws SQLException {
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
     try {
       LOG.info("Importing TournamentTeams");
       destPrep = destinationConnection.prepareStatement("DELETE FROM TournamentTeams WHERE Tournament = ?");
-      destPrep.setString(1, tournament);
+      destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
       SQLFunctions.closePreparedStatement(destPrep);
       sourcePrep = sourceConnection.prepareStatement("SELECT TeamNumber, event_division FROM TournamentTeams WHERE Tournament = ?");
-      sourcePrep.setString(1, tournament);
-      destPrep = destinationConnection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) VALUeS (?, ?, ?)");
-      destPrep.setString(1, tournament);
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep = destinationConnection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) VALUES (?, ?, ?)");
+      destPrep.setInt(1, destTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
-        destPrep.setInt(2, sourceRS.getInt(1));
-        destPrep.setString(3, sourceRS.getString(2));
+        final int teamNumber = sourceRS.getInt(1);
+        final String eventDivision = sourceRS.getString(2);
+        destPrep.setInt(2, teamNumber);
+        destPrep.setString(3, eventDivision == null ? GenerateDB.DEFAULT_TEAM_DIVISION : eventDivision);
         destPrep.executeUpdate();
       }
     } finally {
@@ -570,7 +768,10 @@ public final class ImportDB {
     }
   }
 
-  private static void importJudges(final Connection sourceConnection, final Connection destinationConnection, final String tournament) throws SQLException {
+  private static void importJudges(final Connection sourceConnection,
+                                   final Connection destinationConnection,
+                                   final int sourceTournamentID,
+                                   final int destTournamentID) throws SQLException {
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
@@ -578,15 +779,15 @@ public final class ImportDB {
       LOG.info("Importing Judges");
 
       destPrep = destinationConnection.prepareStatement("DELETE FROM Judges WHERE Tournament = ?");
-      destPrep.setString(1, tournament);
+      destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
       SQLFunctions.closePreparedStatement(destPrep);
 
       destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES (?, ?, ?, ?)");
-      destPrep.setString(4, tournament);
+      destPrep.setInt(4, destTournamentID);
 
       sourcePrep = sourceConnection.prepareStatement("SELECT id, category, event_division FROM Judges WHERE Tournament = ?");
-      sourcePrep.setString(1, tournament);
+      sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
         destPrep.setString(1, sourceRS.getString(1));
@@ -689,9 +890,11 @@ public final class ImportDB {
     differences.addAll(destMissing);
     final List<TournamentDifference> tournamentDifferences = new LinkedList<TournamentDifference>();
     for (final int teamNumber : differences) {
-      final String sourceTournament = Queries.getTeamCurrentTournament(sourceConnection, teamNumber);
-      final String destTournament = Queries.getTeamCurrentTournament(destConnection, teamNumber);
-      tournamentDifferences.add(new TournamentDifference(teamNumber, sourceTournament, destTournament));
+      final int sourceTournament = Queries.getTeamCurrentTournament(sourceConnection, teamNumber);
+      final String sourceName = Queries.getTournamentName(sourceConnection, sourceTournament);
+      final int destTournament = Queries.getTeamCurrentTournament(destConnection, teamNumber);
+      final String destName = Queries.getTournamentName(destConnection, destTournament);
+      tournamentDifferences.add(new TournamentDifference(teamNumber, sourceName, destName));
     }
     return tournamentDifferences;
   }

@@ -37,7 +37,7 @@ public final class ScoreGroupScores {
   /**
    * Generate the actual report for category scores
    */
-  public static void generateReport(final String tournament, final Document document, final Connection connection, final JspWriter out) throws SQLException,
+  public static void generateReport(final int tournament, final Document document, final Connection connection, final JspWriter out) throws SQLException,
       IOException {
 
     final List<Element> subjectiveCategories = XMLUtils.filterToElements(document.getDocumentElement().getElementsByTagName("subjectiveCategory"));
@@ -65,7 +65,7 @@ public final class ScoreGroupScores {
   /**
    * Generate the table for a category
    */
-  private static void generateCategoryTable(final String tournament,
+  private static void generateCategoryTable(final int tournament,
                                             final Connection connection,
                                             final JspWriter out,
                                             final String categoryName,
@@ -80,7 +80,7 @@ public final class ScoreGroupScores {
       prep = connection.prepareStatement("SELECT DISTINCT ScoreGroup FROM SummarizedScores,Teams,current_tournament_teams"
           + " WHERE SummarizedScores.Tournament = ?" + " AND Teams.TeamNumber = SummarizedScores.TeamNumber" + " AND SummarizedScores.Category = ?"
           + " AND current_tournament_teams.event_division = ?");
-      prep.setString(1, tournament);
+      prep.setInt(1, tournament);
       prep.setString(2, categoryName);
       prep.setString(3, division);
       groupRS = prep.executeQuery();
@@ -99,12 +99,16 @@ public final class ScoreGroupScores {
         out.println("  <tr><td colspan='4'><hr></td></tr>");
 
         // display all team scores
-        prep2 = connection.prepareStatement("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,SummarizedScores.StandardizedScore"
-            + " FROM SummarizedScores,Teams,current_tournament_teams" + " WHERE Teams.TeamNumber = SummarizedScores.TeamNumber"
-            + " AND current_tournament_teams.TeamNumber = Teams.TeamNumber" + " AND SummarizedScores.Tournament = ?"
-            + " AND current_tournament_teams.event_division = ?" + " AND SummarizedScores.Category = ?" + " AND SummarizedScores.ScoreGroup = ?"
+        prep2 = connection.prepareStatement("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,SummarizedScores.StandardizedScore"//
+            + " FROM SummarizedScores,Teams,current_tournament_teams" //
+            + " WHERE Teams.TeamNumber = SummarizedScores.TeamNumber"//
+            + " AND current_tournament_teams.TeamNumber = Teams.TeamNumber" //
+            + " AND SummarizedScores.Tournament = ?"//
+            + " AND current_tournament_teams.event_division = ?" //
+            + " AND SummarizedScores.Category = ?" //
+            + " AND SummarizedScores.ScoreGroup = ?"//
             + " ORDER BY SummarizedScores.StandardizedScore DESC, Teams.TeamNumber");
-        prep2.setString(1, tournament);
+        prep2.setInt(1, tournament);
         prep2.setString(2, division);
         prep2.setString(3, categoryName);
         prep2.setString(4, scoreGroup);

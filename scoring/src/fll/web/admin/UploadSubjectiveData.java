@@ -72,7 +72,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
         file.deleteOnExit();
       }
 
-      message.append("Subjective data uploaded successfully");
+      message.append("<p id='success'><i>Subjective data uploaded successfully</i></p>");
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error saving subjective data into the database: "
           + sqle.getMessage() + "</p>");
@@ -108,7 +108,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
    *          information about the subjective categories.
    * @param connection the database connection to write to
    */
-  public static void saveSubjectiveData(final File file, final String currentTournament, final Document challengeDocument, final Connection connection)
+  public static void saveSubjectiveData(final File file, final int currentTournament, final Document challengeDocument, final Connection connection)
       throws SQLException, IOException, ParseException {
     final ZipFile zipfile = new ZipFile(file);
     // read in score data
@@ -167,8 +167,8 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
         insertPrep = connection.prepareStatement(insertSQLColumns.toString()
             + insertSQLValues.toString() + ")");
         // initialze the tournament
-        insertPrep.setString(2, currentTournament);
-        updatePrep.setString(numGoals + 3, currentTournament);
+        insertPrep.setInt(2, currentTournament);
+        updatePrep.setInt(numGoals + 3, currentTournament);
 
         for (final Element scoreElement : XMLUtils.filterToElements(scoreCategoryElement.getElementsByTagName("score"))) {
 

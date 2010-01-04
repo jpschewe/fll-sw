@@ -70,7 +70,7 @@ public class CreateDB extends BaseFLLServlet {
         // import a database from a dump
         final FileItem dumpFileItem = (FileItem) request.getAttribute("dbdump");
 
-        final String database = getServletConfig().getServletContext().getRealPath("/WEB-INF/flldb");
+        final String database = application.getRealPath("/WEB-INF/flldb");
 
         ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileItem.getInputStream()), database);
 
@@ -87,15 +87,15 @@ public class CreateDB extends BaseFLLServlet {
     } catch (final FileUploadException fue) {
       message.append("<p class='error'>Error handling the file upload: "
           + fue.getMessage() + "</p>");
-      LOG.error(fue);
+      LOG.error(fue, fue);
     } catch (final IOException ioe) {
       message.append("<p class='error'>Error reading challenge descriptor: "
           + ioe.getMessage() + "</p>");
-      LOG.error(ioe);
+      LOG.error(ioe, ioe);
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error loading data into the database: "
           + sqle.getMessage() + "</p>");
-      LOG.error(sqle);
+      LOG.error(sqle, sqle);
       throw new RuntimeException("Error loading data into the database", sqle);
     }
 

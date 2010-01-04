@@ -32,9 +32,9 @@ final Connection connection = datasource.getConnection();
 final List<String> tournamentNames = Queries.getTournamentNames(connection);
 
 int teamNumber = -1;
-String currentTournament = null;
-String prevTournament = null;
-String nextTournament = null;
+int currentTournament = -1;
+Integer prevTournament = null;
+Integer nextTournament = null;
 %>
 <c:if test="${empty param.addTeam}">
 <%

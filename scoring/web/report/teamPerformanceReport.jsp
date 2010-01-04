@@ -22,12 +22,11 @@ pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection))
 
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Team <c:out value="${param.TeamNumber}"/> Performance Scores)</h1>
-
     <sql:query var="result" dataSource="${datasource}">
       SELECT RunNumber, ComputedTotal, NoShow
         FROM Performance
         WHERE TeamNumber = <c:out value="${param.TeamNumber}"/>
-          AND Performance.Tournament = '<c:out value="${tournament}"/>'
+          AND Performance.Tournament = <c:out value="${tournament}"/>
         ORDER By RunNumber
     </sql:query>
     <table border='1'>

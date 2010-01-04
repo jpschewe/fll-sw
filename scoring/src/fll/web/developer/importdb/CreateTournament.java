@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -88,10 +89,19 @@ public class CreateTournament extends BaseFLLServlet {
 
       if (sourceRS.next()) {
         final String location = sourceRS.getString(1);
-        // FIXME will need to be changed for tournament_id when branch is merged
-        // in
         final String nextTournament = sourceRS.getString(2);
-        Queries.createTournament(destConnection, tournament, location, nextTournament);
+        if(null != nextTournament) {
+          final List<String> knownTournaments = Queries.getTournamentNames(destConnection);
+          if(!knownTournaments.contains(nextTournament)) {
+            Queries.createTournament(destConnection, nextTournament, null);
+            //FIXME need to create next tournament if it doesn't exist
+            throw new RuntimeException("Need to create next tournament here also!");
+          }
+          final int next = Queries.getTournamentID(destConnection, nextTournament);
+          Queries.createTournament(destConnection, tournament, location, next);
+        } else {
+          Queries.createTournament(destConnection, tournament, location);  
+        }        
         session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentExists");
       } else {
         message.append("<p class='error'>Cannot find tournament "

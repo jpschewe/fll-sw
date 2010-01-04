@@ -8,9 +8,9 @@ package fll.web.scoreEntry;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Formatter;
@@ -19,10 +19,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
+
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -392,7 +393,7 @@ public final class ScoreEntry {
    * @param request
    * @throws IOException
    */
-  public static void generateVerificationInput(final JspWriter writer, final Document document, final HttpServletRequest request) throws IOException {
+  public static void generateVerificationInput(final JspWriter writer) throws IOException {
     writer.println("<!-- Score Verification -->");
     writer.println("    <tr>");
     writer.println("      <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size='4' color='red'>Score entry verified:</font></td>");
@@ -406,7 +407,7 @@ public final class ScoreEntry {
   /**
    * Generate the score entry form.
    */
-  public static void generateScoreEntry(final JspWriter writer, final Document document, final HttpServletRequest request) throws IOException {
+  public static void generateScoreEntry(final JspWriter writer, final Document document) throws IOException {
     final Formatter formatter = new Formatter(writer);
 
     final Element rootElement = document.getDocumentElement();
@@ -564,11 +565,20 @@ public final class ScoreEntry {
                                               final int runNumber) throws SQLException, IOException {
     final DataSource datasource = SessionAttributes.getDataSource(session);
     final Connection connection = datasource.getConnection();
-    final String tournament = Queries.getCurrentTournament(connection);
-    final Statement stmt = connection.createStatement();
-    final ResultSet rs = stmt.executeQuery("SELECT * from Performance"
-        + " WHERE TeamNumber = " + teamNumber + " AND RunNumber = " + runNumber + " AND Tournament = '" + tournament + "'");
+    final int tournament = Queries.getCurrentTournament(connection);
+    
+    PreparedStatement prep = null;
+    ResultSet rs = null;
     try {
+      prep = connection.prepareStatement("SELECT * from Performance"
+                                         + " WHERE TeamNumber = ?" //
+                                         + " AND RunNumber = ?"//
+                                         + " AND Tournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, runNumber);
+      prep.setInt(3, tournament);
+      
+      rs = prep.executeQuery();
       if (rs.next()) {
         // writer.println("  gbl_NoShow = " + rs.getString("NoShow") + ";");
 
@@ -609,8 +619,8 @@ public final class ScoreEntry {
             + " TeamNumber: " + teamNumber + " RunNumber: " + runNumber);
       }
     } finally {
-      rs.close();
-      stmt.close();
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
