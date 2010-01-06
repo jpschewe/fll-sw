@@ -428,7 +428,7 @@ public final class ScoreEntry {
           writer.println("  </td>");
 
           if ("computedGoal".equals(goalEleName)) {
-            writer.println("  <td colspan='2'>&nbsp;</td>");
+            writer.println("  <td colspan='2' align='center'><b>Computed Goal</b></td>");
           } else if ("goal".equals(goalEleName)) {
             if (XMLUtils.isEnumeratedGoal(goalEle)) {
               // enumerated
