@@ -20,7 +20,6 @@ final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
       final int currentTournament = Queries.getCurrentTournament(connection);
 
-      //FIXME handle tournament ids
       final PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, current_tournament_teams.event_division,"
           + " verified_performance.Tournament, verified_performance.RunNumber, verified_performance.Bye, verified_performance.NoShow, verified_performance.ComputedTotal FROM Teams,verified_performance,current_tournament_teams"
           + " WHERE verified_performance.Tournament = ? AND current_tournament_teams.TeamNumber = Teams.TeamNumber"

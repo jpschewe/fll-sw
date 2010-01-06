@@ -44,7 +44,6 @@ import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 
 /**
- * FIXME check if the tournament_id column exists and if not, handle as old
  * database, otherwise need to map... Import scores from a tournament database
  * into a master score database.
  * <p>
