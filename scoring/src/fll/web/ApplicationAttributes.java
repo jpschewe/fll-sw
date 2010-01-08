@@ -9,11 +9,10 @@ import javax.servlet.ServletContext;
 
 import org.w3c.dom.Document;
 
-
 /**
  * Keys for all attributes in the application. These are initialized from
- * 'jspf/init.jspf', unless otherwise noted. Each key has an associated accessor function as
- * well that helps with type safety.
+ * 'jspf/init.jspf', unless otherwise noted. Each key has an associated accessor
+ * function as well that helps with type safety.
  * 
  * @author jpschewe
  * @version $Revision$
@@ -29,13 +28,19 @@ public final class ApplicationAttributes {
    */
   public static final String DATABASE = "database";
 
+  public static final String getDatabase(final ServletContext application) {
+    return getAttribute(application, DATABASE, String.class);
+  }
+
   /**
    * {@link org.w3c.dom.Document} that holds the current challenge descriptor.
    */
   public static final String CHALLENGE_DOCUMENT = "challengeDocument";
+
   public static Document getChallengeDocument(final ServletContext application) {
     return getAttribute(application, CHALLENGE_DOCUMENT, Document.class);
   }
+
   /**
    * {@link String} that is displayed on the big screen display.
    */
