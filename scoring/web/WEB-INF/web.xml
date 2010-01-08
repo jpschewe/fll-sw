@@ -1,261 +1,270 @@
 <web-app id="fll-sw" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
- <display-name>FLL</display-name>
+	<display-name>FLL</display-name>
 
- <description>
+	<description>
     This is the web application for First Lego League
   </description>
 
- <session-config>
-  <session-timeout>30</session-timeout> <!-- 30 minutes -->
- </session-config>
+	<session-config>
+		<session-timeout>30</session-timeout> <!-- 30 minutes -->
+	</session-config>
 
- <welcome-file-list>
-  <welcome-file>
+	<welcome-file-list>
+		<welcome-file>
             index.jsp
     </welcome-file>
- </welcome-file-list>
+	</welcome-file-list>
 
- <!-- at some point we may want to specialize this by exception -->
- <error-page>
-  <exception-type>java.lang.Exception</exception-type>
-  <location>/errorHandler.jsp</location>
- </error-page>
+	<!-- at some point we may want to specialize this by exception -->
+	<error-page>
+		<exception-type>java.lang.Exception</exception-type>
+		<location>/errorHandler.jsp</location>
+	</error-page>
 
-   <!-- Define application events listeners -->
-  <listener>
-    <listener-class>
-      fll.web.FLLContextListener
-    </listener-class>
-  </listener>
-  
- <!-- servlets -->
- <servlet>
-  <servlet-name>log4j-init</servlet-name>
-  <servlet-class>fll.web.Log4jInit</servlet-class>
+	<!-- Define application events listeners -->
+	<listener>
+		<listener-class>fll.web.FLLContextListener</listener-class>
+	</listener>
 
-  <init-param>
-   <param-name>log4j-init-file</param-name>
-   <param-value>WEB-INF/classes/log4j.xml</param-value>
-  </init-param>
-
-  <load-on-startup>1</load-on-startup>
- </servlet>
-
- <servlet>
-  <servlet-name>GetFile</servlet-name>
-  <servlet-class>fll.web.GetFile</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>GetFile</servlet-name>
-  <url-pattern>/GetFile</url-pattern>
- </servlet-mapping>
-
- <!--  setup -->
- <servlet>
-  <servlet-name>CreateDB</servlet-name>
-  <servlet-class>fll.web.setup.CreateDB</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>CreateDB</servlet-name>
-  <url-pattern>/setup/CreateDB</url-pattern>
- </servlet-mapping>
-
- <!--  DB import -->
- <servlet>
-  <servlet-name>ImportDBDump</servlet-name>
-  <servlet-class>fll.web.developer.importdb.ImportDBDump</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>ImportDBDump</servlet-name>
-  <url-pattern>/developer/importdb/ImportDBDump</url-pattern>
- </servlet-mapping>
-
- <servlet>
-  <servlet-name>CheckTournamentExists</servlet-name>
-  <servlet-class>fll.web.developer.importdb.CheckTournamentExists</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>CheckTournamentExists</servlet-name>
-  <url-pattern>/developer/importdb/CheckTournamentExists</url-pattern>
- </servlet-mapping>
-
- <servlet>
-  <servlet-name>FindMissingTeams</servlet-name>
-  <servlet-class>fll.web.developer.importdb.FindMissingTeams</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>FindMissingTeams</servlet-name>
-  <url-pattern>/developer/importdb/FindMissingTeams</url-pattern>
- </servlet-mapping>
-
- <servlet>
-  <servlet-name>AddMissingTeams</servlet-name>
-  <servlet-class>fll.web.developer.importdb.AddMissingTeams</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>AddMissingTeams</servlet-name>
-  <url-pattern>/developer/importdb/AddMissingTeams</url-pattern>
- </servlet-mapping>
-
- <servlet>
-  <servlet-name>CheckTeamInfo</servlet-name>
-  <servlet-class>fll.web.developer.importdb.CheckTeamInfo</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>CheckTeamInfo</servlet-name>
-  <url-pattern>/developer/importdb/CheckTeamInfo</url-pattern>
- </servlet-mapping>
-
- <servlet>
-  <servlet-name>CommitTeamChanges</servlet-name>
-  <servlet-class>fll.web.developer.importdb.CommitTeamChanges</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>CommitTeamChanges</servlet-name>
-  <url-pattern>/developer/importdb/CommitTeamChanges</url-pattern>
- </servlet-mapping>
-
- <servlet>
-  <servlet-name>CheckTournamentTeams</servlet-name>
-  <servlet-class>fll.web.developer.importdb.CheckTournamentTeams</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>CheckTournamentTeams</servlet-name>
-  <url-pattern>/developer/importdb/CheckTournamentTeams</url-pattern>
- </servlet-mapping>
-
- <servlet>
-  <servlet-name>CommitTournamentChanges</servlet-name>
-  <servlet-class>fll.web.developer.importdb.CommitTournamentChanges</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>CommitTournamentChanges</servlet-name>
-  <url-pattern>/developer/importdb/CommitTournamentChanges</url-pattern>
- </servlet-mapping>
-
- <servlet>
-  <servlet-name>ExecuteImport</servlet-name>
-  <servlet-class>fll.web.developer.importdb.ExecuteImport</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>ExecuteImport</servlet-name>
-  <url-pattern>/developer/importdb/ExecuteImport</url-pattern>
- </servlet-mapping>
+	<!-- filters -->
+	<filter>
+		<filter-name>Footer Filter</filter-name>
+		<filter-class>fll.web.FooterFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>Footer Filter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
 
 
- <!--  reports -->
- <servlet>
-  <servlet-name>CategoryScoresByScoreGroup</servlet-name>
-  <servlet-class>fll.web.report.CategoryScoresByScoreGroup</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>CategoryScoresByScoreGroup</servlet-name>
-  <url-pattern>/report/CategoryScoresByScoreGroup</url-pattern>
- </servlet-mapping>
+	<!-- servlets -->
+	<servlet>
+		<servlet-name>log4j-init</servlet-name>
+		<servlet-class>fll.web.Log4jInit</servlet-class>
 
-<servlet>
-  <servlet-name>CategoryScoresByJudge</servlet-name>
-  <servlet-class>fll.web.report.CategoryScoresByJudge</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>CategoryScoresByJudge</servlet-name>
-  <url-pattern>/report/CategoryScoresByJudge</url-pattern>
- </servlet-mapping>
+		<init-param>
+			<param-name>log4j-init-file</param-name>
+			<param-value>WEB-INF/classes/log4j.xml</param-value>
+		</init-param>
 
- <servlet>
-  <servlet-name>CategorizedScores</servlet-name>
-  <servlet-class>fll.web.report.CategorizedScores</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>CategorizedScores</servlet-name>
-  <url-pattern>/report/CategorizedScores</url-pattern>
- </servlet-mapping>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet>
+		<servlet-name>GetFile</servlet-name>
+		<servlet-class>fll.web.GetFile</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GetFile</servlet-name>
+		<url-pattern>/GetFile</url-pattern>
+	</servlet-mapping>
+
+	<!--  setup -->
+	<servlet>
+		<servlet-name>CreateDB</servlet-name>
+		<servlet-class>fll.web.setup.CreateDB</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CreateDB</servlet-name>
+		<url-pattern>/setup/CreateDB</url-pattern>
+	</servlet-mapping>
+
+	<!--  DB import -->
+	<servlet>
+		<servlet-name>ImportDBDump</servlet-name>
+		<servlet-class>fll.web.developer.importdb.ImportDBDump</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ImportDBDump</servlet-name>
+		<url-pattern>/developer/importdb/ImportDBDump</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>CheckTournamentExists</servlet-name>
+		<servlet-class>fll.web.developer.importdb.CheckTournamentExists</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CheckTournamentExists</servlet-name>
+		<url-pattern>/developer/importdb/CheckTournamentExists</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>FindMissingTeams</servlet-name>
+		<servlet-class>fll.web.developer.importdb.FindMissingTeams</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FindMissingTeams</servlet-name>
+		<url-pattern>/developer/importdb/FindMissingTeams</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>AddMissingTeams</servlet-name>
+		<servlet-class>fll.web.developer.importdb.AddMissingTeams</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AddMissingTeams</servlet-name>
+		<url-pattern>/developer/importdb/AddMissingTeams</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>CheckTeamInfo</servlet-name>
+		<servlet-class>fll.web.developer.importdb.CheckTeamInfo</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CheckTeamInfo</servlet-name>
+		<url-pattern>/developer/importdb/CheckTeamInfo</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>CommitTeamChanges</servlet-name>
+		<servlet-class>fll.web.developer.importdb.CommitTeamChanges</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CommitTeamChanges</servlet-name>
+		<url-pattern>/developer/importdb/CommitTeamChanges</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>CheckTournamentTeams</servlet-name>
+		<servlet-class>fll.web.developer.importdb.CheckTournamentTeams</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CheckTournamentTeams</servlet-name>
+		<url-pattern>/developer/importdb/CheckTournamentTeams</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>CommitTournamentChanges</servlet-name>
+		<servlet-class>fll.web.developer.importdb.CommitTournamentChanges</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CommitTournamentChanges</servlet-name>
+		<url-pattern>/developer/importdb/CommitTournamentChanges</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ExecuteImport</servlet-name>
+		<servlet-class>fll.web.developer.importdb.ExecuteImport</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ExecuteImport</servlet-name>
+		<url-pattern>/developer/importdb/ExecuteImport</url-pattern>
+	</servlet-mapping>
 
 
- <servlet>
-  <servlet-name>FinalistSchedulerUI</servlet-name>
-  <servlet-class>fll.web.report.FinalistSchedulerUI</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>FinalistSchedulerUI</servlet-name>
-  <url-pattern>/report/FinalistSchedulerUI</url-pattern>
- </servlet-mapping>
+	<!--  reports -->
+	<servlet>
+		<servlet-name>CategoryScoresByScoreGroup</servlet-name>
+		<servlet-class>fll.web.report.CategoryScoresByScoreGroup</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CategoryScoresByScoreGroup</servlet-name>
+		<url-pattern>/report/CategoryScoresByScoreGroup</url-pattern>
+	</servlet-mapping>
 
- <servlet>
-  <servlet-name>RankingReport</servlet-name>
-  <servlet-class>fll.web.report.RankingReport</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>RankingReport</servlet-name>
-  <url-pattern>/report/RankingReport</url-pattern>
- </servlet-mapping>
+	<servlet>
+		<servlet-name>CategoryScoresByJudge</servlet-name>
+		<servlet-class>fll.web.report.CategoryScoresByJudge</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CategoryScoresByJudge</servlet-name>
+		<url-pattern>/report/CategoryScoresByJudge</url-pattern>
+	</servlet-mapping>
 
- <!--  admin pages -->
- <servlet>
-  <servlet-name>CommitTeam</servlet-name>
-  <servlet-class>fll.web.admin.CommitTeam</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>CommitTeam</servlet-name>
-  <url-pattern>/admin/CommitTeam</url-pattern>
- </servlet-mapping>
+	<servlet>
+		<servlet-name>CategorizedScores</servlet-name>
+		<servlet-class>fll.web.report.CategorizedScores</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CategorizedScores</servlet-name>
+		<url-pattern>/report/CategorizedScores</url-pattern>
+	</servlet-mapping>
 
- <servlet>
-  <servlet-name>SetCurrentTournament</servlet-name>
-  <servlet-class>fll.web.admin.SetCurrentTournament</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>SetCurrentTournament</servlet-name>
-  <url-pattern>/admin/SetCurrentTournament</url-pattern>
- </servlet-mapping>
 
- <servlet>
-  <servlet-name>CommitTournamentInitialization</servlet-name>
-  <servlet-class>fll.web.admin.CommitTournamentInitialization</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>CommitTournamentInitialization</servlet-name>
-  <url-pattern>/admin/CommitTournamentInitialization</url-pattern>
- </servlet-mapping>
+	<servlet>
+		<servlet-name>FinalistSchedulerUI</servlet-name>
+		<servlet-class>fll.web.report.FinalistSchedulerUI</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FinalistSchedulerUI</servlet-name>
+		<url-pattern>/report/FinalistSchedulerUI</url-pattern>
+	</servlet-mapping>
 
- <servlet>
-  <servlet-name>UploadSubjectiveData</servlet-name>
-  <servlet-class>fll.web.admin.UploadSubjectiveData</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>UploadSubjectiveData</servlet-name>
-  <url-pattern>/admin/UploadSubjectiveData</url-pattern>
- </servlet-mapping>
+	<servlet>
+		<servlet-name>RankingReport</servlet-name>
+		<servlet-class>fll.web.report.RankingReport</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RankingReport</servlet-name>
+		<url-pattern>/report/RankingReport</url-pattern>
+	</servlet-mapping>
 
- <servlet>
-  <servlet-name>UploadTeams</servlet-name>
-  <servlet-class>fll.web.admin.UploadTeams</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>UploadTeams</servlet-name>
-  <url-pattern>/admin/UploadTeams</url-pattern>
- </servlet-mapping>
+	<!--  admin pages -->
+	<servlet>
+		<servlet-name>CommitTeam</servlet-name>
+		<servlet-class>fll.web.admin.CommitTeam</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CommitTeam</servlet-name>
+		<url-pattern>/admin/CommitTeam</url-pattern>
+	</servlet-mapping>
 
- <!--  scoreboard -->
- <servlet>
-  <servlet-name>Top10</servlet-name>
-  <servlet-class>fll.web.scoreboard.Top10</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>Top10</servlet-name>
-  <url-pattern>/scoreboard/Top10</url-pattern>
- </servlet-mapping>
+	<servlet>
+		<servlet-name>SetCurrentTournament</servlet-name>
+		<servlet-class>fll.web.admin.SetCurrentTournament</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SetCurrentTournament</servlet-name>
+		<url-pattern>/admin/SetCurrentTournament</url-pattern>
+	</servlet-mapping>
 
- <servlet>
-  <servlet-name>Last8</servlet-name>
-  <servlet-class>fll.web.scoreboard.Last8</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>Last8</servlet-name>
-  <url-pattern>/scoreboard/Last8</url-pattern>
- </servlet-mapping>
+	<servlet>
+		<servlet-name>CommitTournamentInitialization</servlet-name>
+		<servlet-class>fll.web.admin.CommitTournamentInitialization</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CommitTournamentInitialization</servlet-name>
+		<url-pattern>/admin/CommitTournamentInitialization</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>UploadSubjectiveData</servlet-name>
+		<servlet-class>fll.web.admin.UploadSubjectiveData</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UploadSubjectiveData</servlet-name>
+		<url-pattern>/admin/UploadSubjectiveData</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>UploadTeams</servlet-name>
+		<servlet-class>fll.web.admin.UploadTeams</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UploadTeams</servlet-name>
+		<url-pattern>/admin/UploadTeams</url-pattern>
+	</servlet-mapping>
+
+	<!--  scoreboard -->
+	<servlet>
+		<servlet-name>Top10</servlet-name>
+		<servlet-class>fll.web.scoreboard.Top10</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Top10</servlet-name>
+		<url-pattern>/scoreboard/Top10</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>Last8</servlet-name>
+		<servlet-class>fll.web.scoreboard.Last8</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Last8</servlet-name>
+		<url-pattern>/scoreboard/Last8</url-pattern>
+	</servlet-mapping>
 
 </web-app>
