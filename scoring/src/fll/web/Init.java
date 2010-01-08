@@ -70,23 +70,22 @@ public final class Init {
     final HttpSession session = request.getSession();
     final ServletContext application = session.getServletContext();
 
-    if (null == application.getAttribute(ApplicationAttributes.DATABASE)) {
-      final boolean dbok = Utilities.testHSQLDB(application.getRealPath("/WEB-INF/flldb"));
-      if (!dbok) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Database files not ok, redirecting to setup");
-        }
-        session
-               .setAttribute(SessionAttributes.MESSAGE,
-                             "<p class='error'>The database does not exist yet or there is a problem with the database files. Please create the database.<br/></p>");
-        return request.getContextPath()
-            + "/setup";
+    final String database = ApplicationAttributes.getDatabase(application);
+    
+    // FIXME put all of this in a filter and don't put the filter on setup/*
+    
+    final boolean dbok = Utilities.testHSQLDB(database);
+    if (!dbok) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Database files not ok, redirecting to setup");
       }
+      session
+      .setAttribute(SessionAttributes.MESSAGE,
+                    "<p class='error'>The database does not exist yet or there is a problem with the database files. Please create the database.<br/></p>");
+      return request.getContextPath()
+      + "/setup";
+    }      
 
-      application.setAttribute(ApplicationAttributes.DATABASE, application.getRealPath("/WEB-INF/flldb"));
-    }
-
-    final String database = (String) application.getAttribute(ApplicationAttributes.DATABASE);
 
     // initialize the datasource
     final DataSource datasource;
@@ -124,11 +123,6 @@ public final class Init {
         throw new RuntimeException("Could not find xml challenge description in the database!");
       }
       application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, document);
-    }
-
-    // set some default text
-    if (null == application.getAttribute(ApplicationAttributes.SCORE_PAGE_TEXT)) {
-      application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "FLL");
     }
 
     // keep browser from caching any content

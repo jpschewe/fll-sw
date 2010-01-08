@@ -25,11 +25,11 @@
  </error-page>
 
    <!-- Define application events listeners -->
-  <!-- listener>
+  <listener>
     <listener-class>
-      com.listeners.MyContextListener
+      fll.web.FLLContextListener
     </listener-class>
-  </listener-->
+  </listener>
   
  <!-- servlets -->
  <servlet>
