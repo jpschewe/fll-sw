@@ -46,6 +46,6 @@ pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection))
         </tr>
       </c:forEach>
     </table>
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </body>
 </html>

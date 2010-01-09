@@ -82,6 +82,6 @@ pageContext.setAttribute("divisions", divisions);
       <input type='submit' name='done' value='done'/>
     </form>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </body>
 </html>

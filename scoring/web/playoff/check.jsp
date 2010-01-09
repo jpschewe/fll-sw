@@ -66,6 +66,6 @@ if(moreIter.hasNext()) {
       </p>
       <p><a href="index.jsp">Back to Playoff menu</a></p>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </body>
 </html>

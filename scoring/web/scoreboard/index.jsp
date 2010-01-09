@@ -17,6 +17,6 @@
       <li><a href='<c:url value="Top10"/>'>Top 10 scores</a></li>
         
     </ul>
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </BODY>
 </HTML>

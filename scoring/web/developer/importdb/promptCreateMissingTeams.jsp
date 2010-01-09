@@ -51,6 +51,6 @@ ${message}
 
 <p>Return to the <a href="selectTournament.jsp">tournament selection page</a> if you do not want to add the teams.</p>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf"%>
+
 </body>
 </html>

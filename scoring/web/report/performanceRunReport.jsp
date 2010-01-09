@@ -62,6 +62,6 @@ pageContext.setAttribute("divisions", Queries.getDivisions(connection));
       </c:forEach>
     </c:if>
       
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </body>
 </html>

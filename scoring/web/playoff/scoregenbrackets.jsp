@@ -102,6 +102,6 @@ final Connection connection = datasource.getConnection();
     </table>
     <p><a href="index.jsp">Return to Playoff menu</a></p>
     </form>
-    <%@ include file="/WEB-INF/jspf/footer.jspf" %>
+    
   </body>
 </html>

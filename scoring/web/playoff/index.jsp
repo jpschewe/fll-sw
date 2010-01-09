@@ -156,6 +156,6 @@ for(int numRounds = 2; numRounds <= numPlayoffRounds+1; numRounds++) {
 
 
 
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </body>
 </html>

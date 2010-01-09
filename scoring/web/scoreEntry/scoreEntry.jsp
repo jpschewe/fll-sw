@@ -376,6 +376,6 @@ return m;
       </tr>
     </table> <!-- end table to center everything -->
     </form> <!-- end score entry form -->
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </body>
 </html>

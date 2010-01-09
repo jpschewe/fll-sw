@@ -232,6 +232,6 @@ ${message}
 	<li><a href="advanceTeams.jsp">Advance teams</a></li>
 </ul>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf"%>
+
 </body>
 </html>

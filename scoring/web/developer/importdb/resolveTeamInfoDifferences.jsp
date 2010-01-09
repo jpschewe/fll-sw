@@ -52,6 +52,6 @@ ${message}
 
 <p>Return to the <a href="selectTournament.jsp">tournament selection page</a>.</p>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf"%>
+
 </body>
 </html>

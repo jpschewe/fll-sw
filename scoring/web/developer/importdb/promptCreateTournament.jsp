@@ -34,6 +34,6 @@ ${message}
     <input name='submit' type='submit' value="No"/>
 </form>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf"%>
+
 </body>
 </html>

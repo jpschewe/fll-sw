@@ -11,5 +11,5 @@
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Edit Tournaments)</h1>
 <% Tournaments.generatePage(out, session, request, response); %>
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
 </body></html>

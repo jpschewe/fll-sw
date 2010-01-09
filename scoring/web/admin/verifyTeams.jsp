@@ -28,6 +28,6 @@ if(null == session.getAttribute("columnSelectOptions")) {
     <a href="index.jsp">administration menu</a> now.</p>
     <% } %>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </body>
 </html>

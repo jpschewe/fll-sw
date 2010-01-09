@@ -52,6 +52,6 @@
       <input type='submit' value='Execute Update'/>
     </form>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </body>
 </html>

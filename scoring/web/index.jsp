@@ -65,6 +65,6 @@ final Connection connection = datasource.getConnection();
 
       <li>Using database: ${database}</li>
     </ul>
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </body>
 </html>

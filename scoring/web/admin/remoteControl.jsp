@@ -239,6 +239,6 @@ pageContext.setAttribute("numPlayoffRounds", Queries.getNumPlayoffRounds(connect
     </form>
             
 
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </body>
 </html>
