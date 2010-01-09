@@ -25,7 +25,6 @@ import org.apache.log4j.Logger;
 
 import fll.db.Queries;
 import fll.web.BaseFLLServlet;
-import fll.web.Init;
 import fll.web.SessionAttributes;
 
 /**
@@ -44,8 +43,6 @@ public class CreateTournament extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
 
     try {
-      Init.initialize(request, response);
-
       final String answer = (String) request.getAttribute("submit");
       if ("Yes".equals(answer)) {
         createSelectedTournament(session);

@@ -25,7 +25,6 @@ import fll.db.Queries;
 import fll.db.TeamPropertyDifference;
 import fll.db.TeamPropertyDifference.TeamProperty;
 import fll.web.BaseFLLServlet;
-import fll.web.Init;
 import fll.web.SessionAttributes;
 
 /**
@@ -45,9 +44,7 @@ public class CommitTeamChanges extends BaseFLLServlet {
 
     Connection sourceConnection = null;
     Connection destConnection = null;
-    try {
-      Init.initialize(request, response);
-      
+    try {      
       final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
       sourceConnection = sourceDataSource.getConnection();
 

@@ -88,7 +88,7 @@ public class FooterFilter implements Filter {
         out.write(origData);
         out.close();
       } else {
-        LOGGER.error("No output stream used, this is odd, just returning");
+        LOGGER.error("No output stream used, this is odd, just returning page: " + httpRequest.getRequestURL());
       }
     } else {
       chain.doFilter(request, response);

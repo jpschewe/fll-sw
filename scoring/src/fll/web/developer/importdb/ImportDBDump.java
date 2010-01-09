@@ -19,7 +19,6 @@ import org.apache.log4j.Logger;
 import fll.Utilities;
 import fll.db.ImportDB;
 import fll.web.BaseFLLServlet;
-import fll.web.Init;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 
@@ -48,8 +47,6 @@ public class ImportDBDump extends BaseFLLServlet {
     Utilities.loadDBDriver();
 
     try {
-      Init.initialize(request, response);
-
       // must be first to ensure the form parameters are set
       UploadProcessor.processUpload(request);
 

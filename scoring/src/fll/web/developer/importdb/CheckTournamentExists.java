@@ -22,7 +22,6 @@ import org.apache.log4j.Logger;
 
 import fll.db.Queries;
 import fll.web.BaseFLLServlet;
-import fll.web.Init;
 import fll.web.SessionAttributes;
 
 /**
@@ -42,8 +41,6 @@ public class CheckTournamentExists extends BaseFLLServlet {
 
     Connection connection = null;
     try {
-      Init.initialize(request, response);
-
       // support finding the selected tournament in the session as well
       final String selectedTournamentParam = request.getParameter("tournament");
       final String selectedTournament;

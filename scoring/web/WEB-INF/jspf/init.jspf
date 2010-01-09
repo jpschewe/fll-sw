@@ -3,14 +3,3 @@
 <%@ taglib prefix="x" uri="http://java.sun.com/jsp/jstl/xml" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-
-<%-- initialize some application variables --%>
-<%
-{ // separate scope so we don't end up with trouble
-  final String url = fll.web.Init.initialize(request, response);
-  if(null != url) {
-    response.sendRedirect(response.encodeRedirectURL(url));
-    return;
-  }
-}
-%>

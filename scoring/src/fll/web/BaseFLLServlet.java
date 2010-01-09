@@ -7,7 +7,6 @@
 package fll.web;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -28,12 +27,6 @@ public abstract class BaseFLLServlet extends HttpServlet {
 
   @Override
   protected final void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
-    try {
-      Init.initialize(request, response);
-    } catch (final SQLException e) {
-      throw new RuntimeException("Error in initialization", e);
-    }
-
     final ServletContext application = getServletContext();
     final HttpSession session = request.getSession();
 
