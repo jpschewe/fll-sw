@@ -70,6 +70,11 @@ public final class Init {
     final HttpSession session = request.getSession();
     final ServletContext application = session.getServletContext();
 
+    application.setAttribute(ApplicationAttributes.DATABASE, application.getRealPath("/WEB-INF/flldb"));
+    
+    // set some default text
+    application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "FLL");
+
     final String database = ApplicationAttributes.getDatabase(application);
     
     // FIXME put all of this in a filter and don't put the filter on setup/*

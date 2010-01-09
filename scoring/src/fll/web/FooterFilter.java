@@ -8,6 +8,7 @@ package fll.web;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Formatter;
 
 import javax.servlet.Filter;
@@ -35,7 +36,7 @@ public class FooterFilter implements Filter {
    * @see javax.servlet.Filter#destroy()
    */
   public void destroy() {
-    filterConfig = null;
+    // nothing
   }
 
   /**
@@ -43,34 +44,52 @@ public class FooterFilter implements Filter {
    *      javax.servlet.ServletResponse, javax.servlet.FilterChain)
    */
   public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
-    if (response instanceof HttpServletResponse && request instanceof HttpServletRequest) {
-      final HttpServletResponse httpResponse = (HttpServletResponse)response;
-      final HttpServletRequest httpRequest = (HttpServletRequest)request;
-      final CharResponseWrapper wrapper = new CharResponseWrapper(httpResponse);
+    if (response instanceof HttpServletResponse
+        && request instanceof HttpServletRequest) {
+      final HttpServletResponse httpResponse = (HttpServletResponse) response;
+      final HttpServletRequest httpRequest = (HttpServletRequest) request;
+      final ByteResponseWrapper wrapper = new ByteResponseWrapper(httpResponse);
       chain.doFilter(request, wrapper);
-      
-      
-      final String origData = wrapper.getString();
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace(new Formatter().format("page: %s content type: %s ###%s###", httpRequest.getRequestURL(), wrapper.getContentType(), origData));
-      }
-      
-      final ServletOutputStream out = response.getOutputStream();
-      if ("text/html".equals(wrapper.getContentType())) {
-        final CharArrayWriter caw = new CharArrayWriter();
-        final int bodyIndex = origData.indexOf("</body>");
-        if (-1 != bodyIndex) {
-          caw.write(origData.substring(0, bodyIndex - 1));
-          addFooter(caw, httpRequest);
-          response.setContentLength(caw.toString().length());
-          out.print(caw.toString());
+
+      if (wrapper.isStringUsed()) {
+        final String contentType = wrapper.getContentType();
+        if ("text/html".equals(contentType)) {
+          final String origStr = wrapper.getString();
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace(new Formatter().format("page: %s content type: %s ###%s###", httpRequest.getRequestURL(), contentType, origStr));
+          }
+
+          final PrintWriter writer = response.getWriter();
+
+          final CharArrayWriter caw = new CharArrayWriter();
+          final int bodyIndex = origStr.indexOf("</body>");
+          if (-1 != bodyIndex) {
+            caw.write(origStr.substring(0, bodyIndex - 1));
+            addFooter(caw, httpRequest);
+            response.setContentLength(caw.toString().length());
+            writer.print(caw.toString());
+          } else {
+            writer.print(origStr);
+          }
+          writer.close();
         } else {
-          out.print(origData);
+          final String origStr = wrapper.getString();
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace(new Formatter().format("page: %s content type: %s ###%s###", httpRequest.getRequestURL(), contentType, origStr));
+          }
+
+          final PrintWriter writer = response.getWriter();
+          writer.print(origStr);
+          writer.close();
         }
+      } else if (wrapper.isBinaryUsed()) {
+        final byte[] origData = wrapper.getBinary();
+        final ServletOutputStream out = response.getOutputStream();
+        out.write(origData);
+        out.close();
       } else {
-        out.print(origData);
+        LOGGER.error("No output stream used, this is odd, just returning");
       }
-      out.close();
     } else {
       chain.doFilter(request, response);
     }
@@ -89,7 +108,7 @@ public class FooterFilter implements Filter {
     formatter.format("    <td><a href='%s/admin/index.jsp' target='_top'>Admin Index</a></td>", contextPath);
     formatter.format("  </tr>");
     formatter.format("  <tr><td>Software version: %s</td></tr>", Version.getVersion());
-    formatter.format("</table>");    
+    formatter.format("</table>");
     formatter.format("\n</body></html>");
   }
 
@@ -97,8 +116,7 @@ public class FooterFilter implements Filter {
    * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
    */
   public void init(final FilterConfig filterConfig) throws ServletException {
-    this.filterConfig = filterConfig;
+    // nothing
   }
 
-  private FilterConfig filterConfig;
 }
