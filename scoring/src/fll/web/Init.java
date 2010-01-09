@@ -125,6 +125,8 @@ public final class Init {
       application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, document);
     }
 
+    // TODO put this in a separate filter to turn off caching
+    
     // keep browser from caching any content
     response.setHeader("Cache-Control", "no-store"); // HTTP 1.1
     response.setHeader("Pragma", "no-cache"); // HTTP 1.0

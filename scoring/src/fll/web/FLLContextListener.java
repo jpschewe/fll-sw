@@ -27,6 +27,7 @@ public class FLLContextListener implements ServletContextListener {
    */
   public void contextInitialized(final ServletContextEvent event) {
     final ServletContext application = event.getServletContext();
+    application.setAttribute("testing", "it worked");
     
     application.setAttribute(ApplicationAttributes.DATABASE, application.getRealPath("/WEB-INF/flldb"));
     
