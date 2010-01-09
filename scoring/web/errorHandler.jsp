@@ -7,6 +7,8 @@
   </head>
 
   <body>
+  ${message}
+  
     <h1>An error has occurred</h1>
 
     <p><font color="red">An error has occurred!</font><br/>  Error messages:</p>
