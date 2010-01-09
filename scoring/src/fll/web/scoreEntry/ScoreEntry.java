@@ -387,11 +387,6 @@ public final class ScoreEntry {
   /**
    * Generates the portion of the score entry form where the user checks whether
    * the score has been double-checked or not.
-   * 
-   * @param writer
-   * @param document
-   * @param request
-   * @throws IOException
    */
   public static void generateVerificationInput(final JspWriter writer) throws IOException {
     writer.println("<!-- Score Verification -->");
