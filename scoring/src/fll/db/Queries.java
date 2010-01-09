@@ -2673,7 +2673,7 @@ public final class Queries {
    * @return the names of the tables that are of type "TABLE", the names will also be all lowercase
    * @see DatabaseMetaData#getTables(String, String, String, String[])
    */
-  public static Collection<String> getTablesInDB(Connection connection) throws SQLException {
+  public static Collection<String> getTablesInDB(final Connection connection) throws SQLException {
     final Collection<String> tables = new LinkedList<String>();
     ResultSet rs = null;
     try {

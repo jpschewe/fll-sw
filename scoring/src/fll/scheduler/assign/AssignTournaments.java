@@ -45,7 +45,7 @@ public class AssignTournaments {
    * @throws ParseException
    * @throws IOException
    */
-  public static void main(String[] args) throws IOException, ParseException {
+  public static void main(final String[] args) throws IOException, ParseException {
     // define the tournaments
     final Map<String, Map<String, TournamentInfo>> tournaments = new HashMap<String, Map<String, TournamentInfo>>();
 

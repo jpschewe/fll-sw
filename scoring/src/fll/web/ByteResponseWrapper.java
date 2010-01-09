@@ -31,7 +31,7 @@ public class ByteResponseWrapper extends HttpServletResponseWrapper {
 
   private final ServletOutputStream stream;
 
-  boolean binaryUsed = false;
+  private boolean binaryUsed = false;
 
   /**
    * Was {@link #getOutputStream()} used for output. 
@@ -40,7 +40,7 @@ public class ByteResponseWrapper extends HttpServletResponseWrapper {
     return binaryUsed;
   }
 
-  boolean stringUsed = false;
+  private boolean stringUsed = false;
 
   /**
    * Was {@link #getWriter()} used for output.

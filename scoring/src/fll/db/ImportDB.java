@@ -966,9 +966,9 @@ public final class ImportDB {
           if (!Functions.safeEquals(destOrganization, sourceOrganization)) {
             differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.ORGANIZATION, sourceOrganization, destOrganization));
           }
-        } else {
-          // handled by findMissingTeams
         }
+        // else handled by findMissingTeams
+        
         SQLFunctions.closeResultSet(destRS);
       }
     } finally {
