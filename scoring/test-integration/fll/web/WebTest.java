@@ -40,8 +40,8 @@ public class WebTest {
     };
     final WebConversation conversation = new WebConversation();
     for (final String page : pages) {
-      LOG.info("Testing page "
-          + page);
+      LOG.info("Testing page #"
+          + page + "#");
       TestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
 
       final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
