@@ -8,18 +8,21 @@ package fll.web;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Formatter;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
+
+import fll.Version;
 
 /**
  * Ensure that all HTML pages get the same footer.
@@ -40,33 +43,54 @@ public class FooterFilter implements Filter {
    *      javax.servlet.ServletResponse, javax.servlet.FilterChain)
    */
   public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
-    if (response instanceof HttpServletResponse) {
-      final PrintWriter out = response.getWriter();
-      final CharResponseWrapper wrapper = new CharResponseWrapper((HttpServletResponse) response);
+    if (response instanceof HttpServletResponse && request instanceof HttpServletRequest) {
+      final HttpServletResponse httpResponse = (HttpServletResponse)response;
+      final HttpServletRequest httpRequest = (HttpServletRequest)request;
+      final CharResponseWrapper wrapper = new CharResponseWrapper(httpResponse);
       chain.doFilter(request, wrapper);
+      
+      
       final String origData = wrapper.getString();
       if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace(new Formatter().format("Got content type: %s html ###%s###", wrapper.getContentType(), origData));
+        LOGGER.trace(new Formatter().format("page: %s content type: %s ###%s###", httpRequest.getRequestURL(), wrapper.getContentType(), origData));
       }
+      
+      final ServletOutputStream out = response.getOutputStream();
       if ("text/html".equals(wrapper.getContentType())) {
         final CharArrayWriter caw = new CharArrayWriter();
         final int bodyIndex = origData.indexOf("</body>");
         if (-1 != bodyIndex) {
           caw.write(origData.substring(0, bodyIndex - 1));
-          caw.write("\n<p>My custom footer</p>");
-          caw.write("\n</body></html>");
+          addFooter(caw, httpRequest);
           response.setContentLength(caw.toString().length());
-          out.write(caw.toString());
+          out.print(caw.toString());
         } else {
-          out.write(origData);
+          out.print(origData);
         }
       } else {
-        out.write(origData);
+        out.print(origData);
       }
       out.close();
     } else {
       chain.doFilter(request, response);
     }
+  }
+
+  /**
+   * Writer the footer to the char array writer.
+   */
+  private static void addFooter(final CharArrayWriter caw, final HttpServletRequest request) throws IOException {
+    final String contextPath = request.getContextPath();
+    final Formatter formatter = new Formatter(caw);
+    formatter.format("<hr />");
+    formatter.format("<table>");
+    formatter.format("  <tr>");
+    formatter.format("    <td><a href='%s/index.jsp' target='_top'>Main Index</a></td>", contextPath);
+    formatter.format("    <td><a href='%s/admin/index.jsp' target='_top'>Admin Index</a></td>", contextPath);
+    formatter.format("  </tr>");
+    formatter.format("  <tr><td>Software version: %s</td></tr>", Version.getVersion());
+    formatter.format("</table>");    
+    formatter.format("\n</body></html>");
   }
 
   /**
