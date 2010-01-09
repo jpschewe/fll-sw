@@ -98,6 +98,6 @@ bracketInfo.addStaticTableLabels(connection, currentTournament, divisionStr);
 <%  } %>
     </table>
     <!--  % Playoff.displayPrintableBrackets(connection, challengeDocument, divisionStr, out); % -->
-    <%@ include file="/WEB-INF/jspf/footer.jspf" %>
+    
   </body>
 </html>

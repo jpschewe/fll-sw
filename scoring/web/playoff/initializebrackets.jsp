@@ -42,6 +42,6 @@ else
     <% Playoff.initializeBrackets(connection, challengeDocument, divisionStr, enableThird); %>
     Playoff table has been successfully initialized for division <%=divisionStr%>.<br/>
     <a href="index.jsp">Return to the Playoff page</a> to view brackets.
-    <%@ include file="/WEB-INF/jspf/footer.jspf" %>
+    
   </body>
 </html>

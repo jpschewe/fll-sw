@@ -38,6 +38,6 @@ final String errorMsg = ScoreStandardization.checkDataConsistency(connection);
 <p><font color='red'><%=errorMsg%></font></p>
 <%}%>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </body>
 </html>

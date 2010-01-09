@@ -15,6 +15,6 @@ Assignments)</h1>
 <%
 Judges.generatePage(out, application, request, response);
 %>
-<%@ include file="/WEB-INF/jspf/footer.jspf"%>
+
 </body>
 </html>

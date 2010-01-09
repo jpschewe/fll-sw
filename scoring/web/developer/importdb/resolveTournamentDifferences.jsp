@@ -49,6 +49,6 @@ In most cases this should be the source database, otherwise the scores will not 
 
 <p>Return to the <a href="selectTournament.jsp">tournament selection page</a>.</p>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf"%>
+
 </body>
 </html>

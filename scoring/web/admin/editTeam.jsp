@@ -205,6 +205,6 @@ function confirmChangeTournament() {
       <input type='submit' value='Cancel'>
     </form>
       
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>    
+    
   </body>
 </html>

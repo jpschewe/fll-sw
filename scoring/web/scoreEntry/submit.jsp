@@ -67,6 +67,6 @@ final Connection connection = datasource.getConnection();
      <a href="select_team.jsp">Normally you'd be redirected here</a>
      <c:redirect url="select_team.jsp"/>
                         
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </body>
 </html>

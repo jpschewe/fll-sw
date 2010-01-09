@@ -76,6 +76,6 @@ ${message}
  <li>inside.test: <%=System.getProperty("inside.test")%> -- <%=Boolean.getBoolean("inside.test")%></li>
  </ul>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf"%>
+
 </body>
 </html>

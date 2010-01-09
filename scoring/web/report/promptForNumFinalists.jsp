@@ -26,6 +26,6 @@
       <input type='submit' />
     </form>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </body>
 </html>

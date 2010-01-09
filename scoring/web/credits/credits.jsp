@@ -65,6 +65,6 @@
         <li><a href="http://poi.apache.org/">POI</a> (Used for reading Excel files) - <a href="poi-license.txt">License</a></li>
     </ul>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </body>
 </html>

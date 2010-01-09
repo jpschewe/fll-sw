@@ -125,6 +125,6 @@ SELECT Teams.TeamNumber, Teams.TeamName, current_tournament_teams.event_division
 <input type='submit' name='submit' value='Commit' /> <input
  type='submit' name='submit' value='Cancel' /></form>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf"%>
+
 </body>
 </html>

@@ -39,6 +39,6 @@ ${message}
 <a href="<c:url value='/developer/index.jsp'/>">return to the developer index</a>.
 </p>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf"%>
+
 </body>
 </html>

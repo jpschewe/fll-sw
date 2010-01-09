@@ -66,6 +66,6 @@ final Connection connection = datasource.getConnection();
         <input type='submit' name='submit' value='Advance Selected Teams' />
       </form>
       
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </body>
 </html>

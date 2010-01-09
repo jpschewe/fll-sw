@@ -53,6 +53,6 @@ assignments for the selected teams will be removed</p>
 
 <input type='submit' value='Submit' /></form>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf"%>
+
 </body>
 </html>

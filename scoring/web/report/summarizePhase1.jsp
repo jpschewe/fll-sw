@@ -64,6 +64,6 @@ ScoreStandardization.summarizeScores(connection, challengeDocument, currentTourn
     the second phase of computing the scores.  This page will return you to
     the reporting menu if everything is ok.</p>
         
-<%@ include file="/WEB-INF/jspf/footer.jspf" %>
+
   </body>
 </html>

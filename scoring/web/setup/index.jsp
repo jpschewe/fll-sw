@@ -42,7 +42,7 @@ whole database, including team data?<br />
 <input type='file' size='32' name='dbdump'> <input type='submit'
  name='createdb' value='Create Database' /></form>
 
-<%@ include file="/WEB-INF/jspf/footer.jspf"%>
+
 
 </body>
 </html>
