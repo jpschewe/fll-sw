@@ -23,7 +23,6 @@ import org.apache.log4j.Logger;
 
 import fll.db.Queries;
 import fll.web.BaseFLLServlet;
-import fll.web.Init;
 import fll.web.SessionAttributes;
 
 /**
@@ -44,8 +43,6 @@ public class CommitTournamentChanges extends BaseFLLServlet {
     Connection sourceConnection = null;
     Connection destConnection = null;
     try {
-      Init.initialize(request, response);
-      
       final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
       sourceConnection = sourceDataSource.getConnection();
 

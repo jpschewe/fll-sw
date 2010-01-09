@@ -31,7 +31,13 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -45,17 +51,67 @@ import fll.db.Queries;
 
 /**
  * Initialize web attributes.
- * 
- * @author jpschewe
  */
-public final class Init {
+public class InitFilter implements Filter {
 
-  private static final Logger LOGGER = Logger.getLogger(Init.class);
+  private static final Logger LOGGER = Logger.getLogger(InitFilter.class);
 
-  private Init() {
-    // no instances
+  /**
+   * @see javax.servlet.Filter#destroy()
+   */
+  public void destroy() {
+    // nothing
   }
-  
+
+  /**
+   * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest,
+   *      javax.servlet.ServletResponse, javax.servlet.FilterChain)
+   */
+  public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
+    if (response instanceof HttpServletResponse
+        && request instanceof HttpServletRequest) {
+      final HttpServletResponse httpResponse = (HttpServletResponse) response;
+      final HttpServletRequest httpRequest = (HttpServletRequest) request;
+
+      final String path = httpRequest.getRequestURI();
+      if (null != path
+          && (path.startsWith(httpRequest.getContextPath() + "/setup")
+              || path.startsWith(httpRequest.getContextPath() + "/style")
+              || path.startsWith(httpRequest.getContextPath() + "/images") 
+              || path.startsWith(httpRequest.getContextPath() + "/sponsor_logos") 
+              || path.startsWith(httpRequest.getContextPath() + "/wiki") 
+              || path.endsWith(".jpg")
+              || path.endsWith(".gif")
+              || path.endsWith(".png")
+              || path.endsWith(".pdf")
+              || path.endsWith(".html")                               
+          )) {
+        // don't do init on the setup pages
+        chain.doFilter(request, response);
+      } else {
+        try {
+          final String redirect = initialize(httpRequest, httpResponse);
+          if (null != redirect) {
+            httpResponse.sendRedirect(httpResponse.encodeRedirectURL(redirect));
+          } else {
+            chain.doFilter(request, response);
+          }
+        } catch (final SQLException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    } else {
+      chain.doFilter(request, response);
+    }
+  }
+
+  /**
+   * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
+   */
+  public void init(final FilterConfig filterConfig) throws ServletException {
+    // nothing
+  }
+
   /**
    * @param request
    * @param response
@@ -66,31 +122,30 @@ public final class Init {
    * @throws RuntimeException
    * @throws SQLException
    */
-  public static String initialize(final HttpServletRequest request, final HttpServletResponse response) throws IOException, SQLException, RuntimeException {
+  private String initialize(final HttpServletRequest request, final HttpServletResponse response) throws IOException, SQLException, RuntimeException {
+    // FIXME should check if database connections need to be recreated
+
     final HttpSession session = request.getSession();
     final ServletContext application = session.getServletContext();
 
     application.setAttribute(ApplicationAttributes.DATABASE, application.getRealPath("/WEB-INF/flldb"));
-    
+
     // set some default text
     application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "FLL");
 
     final String database = ApplicationAttributes.getDatabase(application);
-    
-    // FIXME put all of this in a filter and don't put the filter on setup/*
-    
+
     final boolean dbok = Utilities.testHSQLDB(database);
     if (!dbok) {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Database files not ok, redirecting to setup");
       }
       session
-      .setAttribute(SessionAttributes.MESSAGE,
-                    "<p class='error'>The database does not exist yet or there is a problem with the database files. Please create the database.<br/></p>");
+             .setAttribute(SessionAttributes.MESSAGE,
+                           "<p class='error'>The database does not exist yet or there is a problem with the database files. Please create the database.<br/></p>");
       return request.getContextPath()
-      + "/setup";
-    }      
-
+          + "/setup";
+    }
 
     // initialize the datasource
     final DataSource datasource;
@@ -131,7 +186,7 @@ public final class Init {
     }
 
     // TODO put this in a separate filter to turn off caching
-    
+
     // keep browser from caching any content
     response.setHeader("Cache-Control", "no-store"); // HTTP 1.1
     response.setHeader("Pragma", "no-cache"); // HTTP 1.0

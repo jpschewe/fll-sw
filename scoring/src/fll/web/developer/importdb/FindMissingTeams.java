@@ -24,7 +24,6 @@ import org.apache.log4j.Logger;
 import fll.Team;
 import fll.db.ImportDB;
 import fll.web.BaseFLLServlet;
-import fll.web.Init;
 import fll.web.SessionAttributes;
 
 /**
@@ -45,7 +44,6 @@ public class FindMissingTeams extends BaseFLLServlet {
     Connection sourceConnection = null;
     Connection destConnection = null;
     try {
-      Init.initialize(request, response);
       final String tournament = SessionAttributes.getNonNullAttribute(session, "selectedTournament", String.class);
       final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
       sourceConnection = sourceDataSource.getConnection();
