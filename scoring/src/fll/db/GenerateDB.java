@@ -384,7 +384,7 @@ public final class GenerateDB {
 
   }
 
-  /*package*/ static void tournaments(Connection connection, boolean forceRebuild, Collection<String> tables) throws SQLException {
+  /*package*/ static void tournaments(final Connection connection, final boolean forceRebuild, final Collection<String> tables) throws SQLException {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();

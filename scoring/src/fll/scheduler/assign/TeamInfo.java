@@ -8,6 +8,9 @@ package fll.scheduler.assign;
 
 import java.util.Date;
 
+/**
+ * Represents the scheduling information for a team.
+ */
 class TeamInfo {
   
   private final String pref1;

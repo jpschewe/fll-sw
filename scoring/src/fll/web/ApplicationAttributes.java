@@ -28,7 +28,7 @@ public final class ApplicationAttributes {
    */
   public static final String DATABASE = "database";
 
-  public static final String getDatabase(final ServletContext application) {
+  public static String getDatabase(final ServletContext application) {
     return getAttribute(application, DATABASE, String.class);
   }
 

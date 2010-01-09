@@ -13,6 +13,9 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
+/**
+ * Table model for constraint violations.
+ */
 /*package*/class ViolationTableModel extends AbstractTableModel {
 
   private final List<ConstraintViolation> violations;

@@ -94,7 +94,7 @@ final class TeamScheduleInfo {
   /**
    * @param teamNumber the teamNumber to set
    */
-  void setTeamNumber(int teamNumber) {
+  void setTeamNumber(final int teamNumber) {
     this.teamNumber = teamNumber;
   }
 
@@ -108,7 +108,7 @@ final class TeamScheduleInfo {
   /**
    * @param teamName the teamName to set
    */
-  void setTeamName(String teamName) {
+  void setTeamName(final String teamName) {
     this.teamName = teamName;
   }
 
@@ -122,7 +122,7 @@ final class TeamScheduleInfo {
   /**
    * @param organization the organization to set
    */
-  void setOrganization(String organization) {
+  void setOrganization(final String organization) {
     this.organization = organization;
   }
 
@@ -136,7 +136,7 @@ final class TeamScheduleInfo {
   /**
    * @param division the division to set
    */
-  void setDivision(String division) {
+  void setDivision(final String division) {
     this.division = division;
   }
 
@@ -150,7 +150,7 @@ final class TeamScheduleInfo {
   /**
    * @param presentation the presentation to set
    */
-  void setPresentation(Date presentation) {
+  void setPresentation(final Date presentation) {
     this.presentation = presentation;
   }
 
@@ -164,7 +164,7 @@ final class TeamScheduleInfo {
   /**
    * @param technical the technical to set
    */
-  void setTechnical(Date technical) {
+  void setTechnical(final Date technical) {
     this.technical = technical;
   }
 
@@ -178,7 +178,7 @@ final class TeamScheduleInfo {
   /**
    * @param judge the judge to set
    */
-  void setJudge(String judge) {
+  void setJudge(final String judge) {
     this.judge = judge;
   }
 

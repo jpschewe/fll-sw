@@ -6,13 +6,12 @@
 
 package fll.web.developer.importdb;
 
-import fll.db.TeamPropertyDifference;
 
 /**
  * Represents a difference in the tournament that a team is in.
  * <p>
  * Implementation note. This class could be combined with
- * {@link TeamPropertyDifference}, however I wanted to ensure that the pages
+ * {@link fll.db.TeamPropertyDifference}, however I wanted to ensure that the pages
  * that handle differences in team information don't have to handle tournament
  * differences. I see tournament differences as a differnt class of difference
  * that needs special handling.

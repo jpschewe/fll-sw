@@ -1317,35 +1317,35 @@ public class ParseSchedule {
   /**
    * @param specialPerformanceChangetime the specialPerformanceChangetime to set
    */
-  public void setSpecialPerformanceChangetime(long specialPerformanceChangetime) {
+  public void setSpecialPerformanceChangetime(final long specialPerformanceChangetime) {
     this.specialPerformanceChangetime = specialPerformanceChangetime;
   }
 
   /**
    * @param performanceChangetime the performanceChangetime to set
    */
-  public void setPerformanceChangetime(long performanceChangetime) {
+  public void setPerformanceChangetime(final long performanceChangetime) {
     this.performanceChangetime = performanceChangetime;
   }
 
   /**
    * @param changetime the changetime to set
    */
-  public void setChangetime(long changetime) {
+  public void setChangetime(final long changetime) {
     this.changetime = changetime;
   }
 
   /**
    * @param subjectiveDuration the subjectiveDuration to set
    */
-  public void setSubjectiveDuration(long subjectiveDuration) {
+  public void setSubjectiveDuration(final long subjectiveDuration) {
     this.subjectiveDuration = subjectiveDuration;
   }
 
   /**
    * @param performanceDuration the performanceDuration to set
    */
-  public void setPerformanceDuration(long performanceDuration) {
+  public void setPerformanceDuration(final long performanceDuration) {
     this.performanceDuration = performanceDuration;
   }
 
