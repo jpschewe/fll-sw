@@ -2,3 +2,4 @@ scoring/build
 scoring/tmp
 scheduling/blank-schedules/*.pdf
 scoring/fll.log
+fll.log
