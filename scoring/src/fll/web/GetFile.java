@@ -114,6 +114,7 @@ public final class GetFile extends BaseFLLServlet {
           xmlwriter.setNeedsIndent(true);
           xmlwriter.write(scoreDocument);
         } else {
+          //TODO should use redirect to send to error page
           response.reset();
           response.setContentType("text/plain");
           final ServletOutputStream os = response.getOutputStream();

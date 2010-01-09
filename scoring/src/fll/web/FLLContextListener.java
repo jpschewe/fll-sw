@@ -6,7 +6,6 @@
 
 package fll.web;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -26,14 +25,8 @@ public class FLLContextListener implements ServletContextListener {
    * @see javax.servlet.ServletContextListener#contextInitialized(javax.servlet.ServletContextEvent)
    */
   public void contextInitialized(final ServletContextEvent event) {
-    final ServletContext application = event.getServletContext();
-    application.setAttribute("testing", "it worked");
-    
-    application.setAttribute(ApplicationAttributes.DATABASE, application.getRealPath("/WEB-INF/flldb"));
-    
-    // set some default text
-    application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "FLL");
-
+    // final ServletContext application = event.getServletContext();    
+    // nothing for now
   }
 
 }
