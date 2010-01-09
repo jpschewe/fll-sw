@@ -72,7 +72,7 @@ public final class XMLUtils {
    * @param teams the teams for this tournament
    * @param connection the database connection used to retrieve the judge
    *          information
-   * @param tournament the tournament to generate the document for, used for
+   * @param currentTournament the tournament to generate the document for, used for
    *          deciding which set of judges to use
    * @return the document
    */

@@ -896,7 +896,6 @@ public final class Queries {
    * Delete a performance score in the database. All of the values are expected
    * to be in request.
    * 
-   * @return the SQL executed
    * @throws RuntimeException if a parameter is missing or if the playoff meta
    *           data would become inconsistent due to the deletion.
    */
@@ -1449,7 +1448,7 @@ public final class Queries {
    * Set the current tournament in the database.
    * 
    * @param connection db connection
-   * @param currentTournament the new value for the current tournament
+   * @param tournamentID the new value for the current tournament
    */
   public static void setCurrentTournament(final Connection connection, final int tournamentID) throws SQLException {
     final int currentID = getCurrentTournament(connection);

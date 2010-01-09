@@ -266,7 +266,7 @@ public final class ImportDB {
    * </p>
    * <p>
    * Once the database has been loaded it will be upgraded to the current
-   * version using {@link GenerateDB#upgradeDatabase(Connection)}.
+   * version using {@link #upgradeDatabase(Connection, Document)}.
    * </p>
    * 
    * @param zipfile the database dump
