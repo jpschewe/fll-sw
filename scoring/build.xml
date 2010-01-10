@@ -474,8 +474,9 @@
 		<!-- ensure things are clean before testing -->
 		<antcall target="clean" />
 		<!-- make sure the tests pass -->
-		<antcall target="test.all" />
+		<antcall target="test.all.pass" />
 
+    
 		<!--
     create & copy the coverage & test reports to the side so that the
     clean doesn't remove it
@@ -562,7 +563,7 @@
 				<exclude name="**/*.sh" />
 			</zipfileset>
 		</zip>
-		<echo message="The distribution file is ${dir.build/${app.name}-${app.version}.zip" />
+		<echo message="The distribution file is ${dir.build}/${app.name}-${app.version}.zip" />
 	</target>
 
 	<!--
@@ -636,6 +637,10 @@
 	<!-- ==================== Tests  ==================== -->
 	<target name="test.all" depends="test.integration,test.unit" description="Run all tests" />
 
+	<target name="test.all.pass" depends="test.all" description="Run all tests and fail if any tests fail">
+    <fail message="Some tests failed. Use test.report to generate a nice report to check" if="test.failed" />
+    </target>
+  
 	<target name="test.report" description="Generate the test report">
 		<mkdir dir="${dir.reports}/junit" />
 		<junitreport todir="${dir.reports}">
@@ -700,7 +705,7 @@
 
       <mkdir dir="${dir.build}/test-results" />
 
-			<junit fork="yes" haltonfailure="false" dir="@{working-dir}">
+			<junit fork="yes" haltonfailure="false" dir="@{working-dir}" failureproperty="test.failed">
 				<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/cobertura.ser" />
 
         <classpath>
@@ -732,7 +737,7 @@
 		<antcall target="tomcat.start.test" />
 		<antcall target="selenium.start" />
 
-    <junit fork="yes" haltonfailure="false" dir="${dir.build}">
+    <junit fork="yes" haltonfailure="false" dir="${dir.build}" failureproperty="test.failed">
 
       <classpath>
         <path refid="test.classpath" />
