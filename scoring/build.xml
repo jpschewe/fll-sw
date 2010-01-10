@@ -546,7 +546,7 @@
 
 
 		<!-- src zip file -->
-		<zip zipfile="${app.name}-${app.version}-src.zip">
+		<zip zipfile="${dir.build}/${app.name}-${app.version}-src.zip">
 			<zipfileset dir="${basedir}">
 				<exclude name="build/**" />
 				<exclude name="override.properties" />
@@ -554,7 +554,7 @@
 			</zipfileset>
 		</zip>
 
-		<zip zipfile="${app.name}-${app.version}.zip">
+		<zip zipfile="${dir.build}/${app.name}-${app.version}.zip">
 			<zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version}" filemode="755">
 				<include name="**/*.sh" />
 			</zipfileset>
@@ -562,7 +562,7 @@
 				<exclude name="**/*.sh" />
 			</zipfileset>
 		</zip>
-		<echo message="The distribution file is ${app.name}-${app.version}.zip" />
+		<echo message="The distribution file is ${dir.build/${app.name}-${app.version}.zip" />
 	</target>
 
 	<!--
