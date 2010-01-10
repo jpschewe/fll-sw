@@ -3,3 +3,5 @@ scoring/tmp
 scheduling/blank-schedules/*.pdf
 scoring/fll.log
 fll.log
+scoring/dist
+scoring/web/wiki/*
