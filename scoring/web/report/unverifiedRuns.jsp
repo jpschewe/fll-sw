@@ -14,7 +14,7 @@ final Connection connection = datasource.getConnection();
 
 <html>
 <head>
-<title>Categorized Scores</title>
+<title>Unverified Runs</title>
 </head>
 
 <body>
