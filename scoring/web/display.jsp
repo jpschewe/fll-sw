@@ -5,7 +5,7 @@
 
 <html>
   <head>
-    <meta http-equiv='refresh' content='60' />
+    <meta http-equiv='refresh' content='30' />
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     
     <title>Display</title>
