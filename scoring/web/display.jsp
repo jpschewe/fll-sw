@@ -108,7 +108,7 @@
     opened window to remove the titlebar and make it fullscreen.</p>
     
     <form action="display.jsp" method="POST">
-      Name this display computer: <input name="name" type="text" size="40"/><br/>
+      Name this display computer: <input name="name" type="text" size="40" value="${displayName}"/><br/>
       <input type='submit' value='Submit'/>
     </form>
 
