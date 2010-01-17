@@ -1088,7 +1088,7 @@ public class ParseSchedule {
           final TeamScheduleInfo otherOpponent = findOpponent(ti, r);
           if (otherOpponent != null
               && opponent.equals(otherOpponent)) {
-            final String message = String.format("Team %d competes against %d more than once", ti.getTeamNumber(), opponent.getTeamNumber());
+            final String message = String.format("Team %d competes against %d more than once rounds: %d, %d", ti.getTeamNumber(), opponent.getTeamNumber(), (round+1), (r+1));
             violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, null, message));
             violations.add(new ConstraintViolation(opponent.getTeamNumber(), null, null, null, message));
           }
