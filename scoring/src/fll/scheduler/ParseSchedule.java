@@ -69,7 +69,8 @@ public class ParseSchedule {
 
   public static final String TECHNICAL_HEADER = "Technical";
 
-  public static final String JUDGE_GROUP_HEADER = "Judging Station";
+  public static final String JUDGE_GROUP_HEADER = "Judging Group";
+  public static final String JUDGE_GROUP_HEADER_OLD = "Judging Station";
 
   public static final String PERF_1_HEADER = "Perf #1";
 
@@ -310,7 +311,7 @@ public class ParseSchedule {
           _presentationColumn = i;
         } else if (line[i].equals(TECHNICAL_HEADER)) {
           _technicalColumn = i;
-        } else if (line[i].equals(JUDGE_GROUP_HEADER)) {
+        } else if (line[i].equals(JUDGE_GROUP_HEADER) || JUDGE_GROUP_HEADER_OLD.equals(line[i])) {
           _judgeGroupColumn = i;
         } else if (line[i].equals(PERF_1_HEADER)) {
           _perf1Column = i;
@@ -521,8 +522,8 @@ public class ParseSchedule {
       table.setWidths(new float[] { 2, 1, 3, 3, 2, 1 });
 
       int row = 0;
-      table.addCell(createHeaderCell("Team #"), row, 0);
-      table.addCell(createHeaderCell("Div"), row, 1);
+      table.addCell(createHeaderCell(TEAM_NUMBER_HEADER), row, 0);
+      table.addCell(createHeaderCell(DIVISION_HEADER), row, 1);
       table.addCell(createHeaderCell("School or Organization"), row, 2);
       table.addCell(createHeaderCell("Team Name"), row, 3);
       table.addCell(createHeaderCell(new Formatter().format("Perf #%d", (round + 1)).toString()), row, 4);
@@ -610,12 +611,12 @@ public class ParseSchedule {
 
     Collections.sort(_schedule, PRESENTATION_COMPARATOR);
     int row = 0;
-    table.addCell(createHeaderCell("Team #"), row, 0);
-    table.addCell(createHeaderCell("Div"), row, 1);
+    table.addCell(createHeaderCell(TEAM_NUMBER_HEADER), row, 0);
+    table.addCell(createHeaderCell(DIVISION_HEADER), row, 1);
     table.addCell(createHeaderCell("School or Organization"), row, 2);
     table.addCell(createHeaderCell("Team Name"), row, 3);
-    table.addCell(createHeaderCell("Presentation"), row, 4);
-    table.addCell(createHeaderCell("Judging Station"), row, 5);
+    table.addCell(createHeaderCell(PRESENTATION_HEADER), row, 4);
+    table.addCell(createHeaderCell(JUDGE_GROUP_HEADER), row, 5);
     table.endHeaders();
     ++row;
 
@@ -648,7 +649,7 @@ public class ParseSchedule {
     table.addCell(createHeaderCell("School or Organization"), row, 2);
     table.addCell(createHeaderCell("Team Name"), row, 3);
     table.addCell(createHeaderCell("Technical"), row, 4);
-    table.addCell(createHeaderCell("Judging Station"), row, 5);
+    table.addCell(createHeaderCell("Judging Group"), row, 5);
     table.endHeaders();
     ++row;
 
