@@ -3,10 +3,11 @@
 # Based on the script used to start ant.  Original copyright:
 # Copyright (c) 2001-2002 The Apache Software Foundation.  All rights reserved.
 
-## this may not be portable:
+OPWD="${PWD}"
 mypath=`dirname $0`
-## this sed expression emulates the dirname command
-#mypath="`echo $0 | sed -e 's,[^/]*$,,;s,/$,,;s,^$,.,'`"
+cd "${mypath}"
+mypath="${PWD}"
+cd "${OPWD}"
 
 if [ -e ${mypath}/setenv.sh ]; then
   . ${mypath}/setenv.sh
