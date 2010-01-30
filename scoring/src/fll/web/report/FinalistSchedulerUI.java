@@ -144,7 +144,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
               for (int i = 1; i <= numFinalists; ++i) {
                 final String numStr = request.getParameter(division
                     + "-finalist-" + i);
-                if (null != numStr) {
+                if (null != numStr && !"".equals(numStr)) {
                   try {
                     finalistNums.add(Integer.valueOf(numStr));
                   } catch (final NumberFormatException e) {
