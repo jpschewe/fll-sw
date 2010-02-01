@@ -36,7 +36,7 @@ ${message}
 <%-- clear out the message, so that we don't see it again --%>
 <c:remove var="message" />
   
-    <form action="editTeam.jsp" method="POST" name="selectTeam">
+    <form action="GatherTeamData" method="POST" name="selectTeam">
       <!-- top info bar -->
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>
@@ -62,7 +62,7 @@ ${message}
           <!-- pick team from a list -->
           <td>
             <font face='arial' size='4'>Select Team to Edit From List:</font><br>
-            <select size='20' name='TeamNumber' ondblclick='selectTeam.submit()'>
+            <select size='20' name='teamNumber' ondblclick='selectTeam.submit()'>
               <%
               final Statement stmt = connection.createStatement();
               final ResultSet rs = stmt.executeQuery("SELECT TeamNumber,TeamName,Organization,Division FROM Teams ORDER BY TeamNumber ASC");

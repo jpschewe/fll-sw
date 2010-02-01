@@ -77,7 +77,7 @@ public class CommitTeam extends BaseFLLServlet {
         }
         Queries.demoteTeam(connection, challengeDocument, teamNumber);
       } else if (null != request.getParameter("commit")) {
-        if (null != request.getParameter("addTeam")) {
+        if(SessionAttributes.getNonNullAttribute(session, "addTeam", Boolean.class)) {
           if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Adding "
                 + teamNumber);
@@ -97,14 +97,15 @@ public class CommitTeam extends BaseFLLServlet {
           }
           Queries.updateTeam(connection, teamNumber, request.getParameter("teamName"), request.getParameter("organization"), request.getParameter("region"),
                              division);
-          // this will be null if the tournament can't be changed
-          final String newTournamentStr = request.getParameter("currentTournament");
-          if (null != newTournamentStr) {
-            final int newTournament = Utilities.NUMBER_FORMAT_INSTANCE.parse(newTournamentStr).intValue();
-            final int teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
-            if (teamCurrentTournament != newTournament) {
-              Queries.changeTeamCurrentTournament(connection, teamNumber, newTournament);
-            }
+        }
+        
+        // this will be null if the tournament can't be changed
+        final String newTournamentStr = request.getParameter("currentTournament");
+        if (null != newTournamentStr) {
+          final int newTournament = Utilities.NUMBER_FORMAT_INSTANCE.parse(newTournamentStr).intValue();
+          final int teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
+          if (teamCurrentTournament != newTournament) {
+            Queries.changeTeamCurrentTournament(connection, teamNumber, newTournament);
           }
         }
       }
@@ -125,7 +126,7 @@ public class CommitTeam extends BaseFLLServlet {
       session.setAttribute("message", message.toString());
     }
 
-    if ("1".equals(request.getParameter("addTeam"))) {
+    if(SessionAttributes.getNonNullAttribute(session, "addTeam", Boolean.class)) {
       response.sendRedirect(response.encodeRedirectURL("index.jsp"));
     } else {
       response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
