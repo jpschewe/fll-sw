@@ -169,7 +169,33 @@ public final class Queries {
   }
 
   /**
-   * Get the list of divisions at this tournament as a List of Strings. Uses
+   * Get the list of divisions of all teams.
+   * 
+   * @param connection the database connection
+   * @return the List of divisions. List of strings.
+   * @throws SQLException on a database error
+   */
+  public static List<String> getDivisions(final Connection connection) throws SQLException {
+    final List<String> list = new LinkedList<String>();
+
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT DISTINCT Division FROM Teams ORDER BY Division");
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final String division = rs.getString(1);
+        list.add(division);
+      }
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
+    }
+    return list;
+  }
+  
+  /**
+   * Get the list of event divisions at this tournament as a List of Strings. Uses
    * getCurrentTournament to determine the tournament.
    * 
    * @param connection the database connection
@@ -177,7 +203,7 @@ public final class Queries {
    * @throws SQLException on a database error
    * @see #getCurrentTournament(Connection)
    */
-  public static List<String> getDivisions(final Connection connection) throws SQLException {
+  public static List<String> getEventDivisions(final Connection connection) throws SQLException {
     final List<String> list = new LinkedList<String>();
 
     PreparedStatement prep = null;
@@ -222,7 +248,7 @@ public final class Queries {
       throws SQLException {
     final Map<String, Map<Integer, Map<String, Integer>>> rankingMap = new HashMap<String, Map<Integer, Map<String, Integer>>>();
     final int tournament = getCurrentTournament(connection);
-    final List<String> divisions = getDivisions(connection);
+    final List<String> divisions = getEventDivisions(connection);
 
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
     final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
@@ -1395,7 +1421,7 @@ public final class Queries {
       if (rs.next()) {
         return rs.getInt(1);
       } else {
-        throw new IllegalArgumentException("Tournament Name " + tournamentName + " is unknown");
+        throw new IllegalArgumentException("Tournament Name '" + tournamentName + "' is unknown");
       }
     } finally {
       SQLFunctions.closeResultSet(rs);
@@ -1457,6 +1483,25 @@ public final class Queries {
     }
   }
 
+  public static Map<Integer, String> getTournamentIDsAndNames(final Connection connection) throws SQLException {
+    final Map<Integer, String> retval = new HashMap<Integer, String>();
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT tournament_id, Name FROM Tournaments ORDER BY Name");
+      while (rs.next()) {
+        final int tournamentID = rs.getInt(1);        
+        final String tournamentName = rs.getString(2);        
+        retval.put(tournamentID, tournamentName);
+      }
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
+    }
+    return retval;    
+  }
+  
   /**
    * Get a list of tournament names in the DB ordered by name.
    * 
@@ -1538,8 +1583,15 @@ public final class Queries {
    */
   public static void deleteTeam(final int teamNumber, final Document document, final Connection connection) throws SQLException {
     Statement stmt = null;
+    final boolean autoCommit = connection.getAutoCommit();
     try {
+      connection.setAutoCommit(false);
+      
       stmt = connection.createStatement();
+
+      // delete from TournamentTeams
+      stmt.executeUpdate("DELETE FROM TournamentTeams WHERE TeamNumber = "
+          + teamNumber);
 
       // delete from subjective categories
       for (final Element category : XMLUtils.filterToElements(document.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
@@ -1556,15 +1608,13 @@ public final class Queries {
       stmt.executeUpdate("DELETE FROM Teams WHERE TeamNumber = "
           + teamNumber);
 
-      // delete from TournamentTeams
-      stmt.executeUpdate("DELETE FROM TournamentTeams WHERE TeamNumber = "
-          + teamNumber);
-
       // delete from FinalScores
       stmt.executeUpdate("DELETE FROM FinalScores WHERE TeamNumber = "
           + teamNumber);
 
+      connection.commit();
     } finally {
+      connection.setAutoCommit(autoCommit);
       SQLFunctions.closeStatement(stmt);
     }
   }
@@ -2452,7 +2502,7 @@ public final class Queries {
    */
   public static int getNumPlayoffRounds(final Connection connection) throws SQLException {
     int numRounds = 0;
-    for (final String division : getDivisions(connection)) {
+    for (final String division : getEventDivisions(connection)) {
       final int x = getFirstPlayoffRoundSize(connection, division);
       if (x > 0) {
         numRounds = Math.max((int) Math.round(Math.log(x)

@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
+import org.hsqldb.Types;
 
 import fll.Utilities;
 import fll.db.Queries;
@@ -394,10 +395,17 @@ public final class Tournaments {
       while (null != keyStr) {
         if (null != name
             && !"".equals(name)) {
+          
+        
           final int tournamentID = Queries.getTournamentID(connection, name);
-          final int nextTournamentID = Queries.getTournamentID(connection, next);
-          setNextPrep.setInt(1, tournamentID);
-          setNextPrep.setInt(2, nextTournamentID);
+          setNextPrep.setInt(2, tournamentID);
+          if(null != next
+              && !"".equals(next)) {
+            final int nextTournamentID = Queries.getTournamentID(connection, next);            
+            setNextPrep.setInt(1, nextTournamentID);
+          } else {
+            setNextPrep.setNull(1, Types.INTEGER);
+          }
           setNextPrep.executeUpdate();
         }
 

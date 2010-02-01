@@ -7,11 +7,11 @@
 <%@ page import="javax.sql.DataSource" %>
   
 <%
-final DataSource datasource = SessionAttributes.getDataSource(session);
-final Connection connection = datasource.getConnection();
-pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection));
-pageContext.setAttribute("divisions", Queries.getDivisions(connection)); 
-%>
+  	final DataSource datasource = SessionAttributes.getDataSource(session);
+  final Connection connection = datasource.getConnection();
+  pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection));
+  pageContext.setAttribute("divisions", Queries.getEventDivisions(connection));
+  %>
 
 <html>
   <head>

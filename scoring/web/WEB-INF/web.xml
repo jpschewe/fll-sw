@@ -212,6 +212,15 @@
  </servlet-mapping>
 
  <!--  admin pages -->
+  <servlet>
+  <servlet-name>GatherTeamData</servlet-name>
+  <servlet-class>fll.web.admin.GatherTeamData</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>GatherTeamData</servlet-name>
+  <url-pattern>/admin/GatherTeamData</url-pattern>
+ </servlet-mapping>
+ 
  <servlet>
   <servlet-name>CommitTeam</servlet-name>
   <servlet-class>fll.web.admin.CommitTeam</servlet-class>
@@ -255,6 +264,24 @@
  <servlet-mapping>
   <servlet-name>UploadTeams</servlet-name>
   <url-pattern>/admin/UploadTeams</url-pattern>
+ </servlet-mapping>
+
+ <servlet>
+  <servlet-name>DumpDB</servlet-name>
+  <servlet-class>fll.db.DumpDB</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>DumpDB</servlet-name>
+  <url-pattern>/admin/database.flldb</url-pattern>
+ </servlet-mapping>
+
+ <servlet>
+  <servlet-name>DownloadSubjectiveData</servlet-name>
+  <servlet-class>fll.web.admin.DownloadSubjectiveData</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>DownloadSubjectiveData</servlet-name>
+  <url-pattern>/admin/subjective-data.fll</url-pattern>
  </servlet-mapping>
 
  <!--  scoreboard -->

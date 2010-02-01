@@ -199,17 +199,14 @@ ${message}
 <p>Tournament day:</p>
 <ol>
 	<li><a
-		href='<c:url value="editTeam.jsp">
+		href='<c:url value="GatherTeamData">
                      <c:param name="addTeam" value="1"/>
                    </c:url>'>Add
 	a team</a></li>
 
 	<li><a href='<c:url value="select_team.jsp"/>'>Edit team data</a></li>
 
-	<li><a
-		href='<c:url value="/GetFile">
-                     <c:param name="filename" value="subjective-data.zip"/>
-                   </c:url>'>Download
+	<li><a href="subjective-data.fll">Download
 	the datafile for subjective score entry.</a> Should be downloaded after
 	each subjective score upload to lessen chance of data loss due to
 	overwrite.</li>
@@ -226,9 +223,7 @@ ${message}
 
 <p>After the tournament</p>
 <ul>
-	<li><a
-		href='<c:url value="/GetFile"><c:param name="filename" value="database.zip"/></c:url>'>Download
-	database</a></li>
+	<li><a href='database.flldb'>Download database</a></li>
 	<li><a href="advanceTeams.jsp">Advance teams</a></li>
 </ul>
 

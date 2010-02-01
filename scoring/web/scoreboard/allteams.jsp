@@ -16,7 +16,7 @@
 <%@ page import="fll.web.SessionAttributes"%>
 
 <%
-final DataSource datasource = SessionAttributes.getDataSource(session);
+	final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
       final int currentTournament = Queries.getCurrentTournament(connection);
 
@@ -26,7 +26,7 @@ final Connection connection = datasource.getConnection();
           + " AND Teams.TeamNumber = verified_performance.TeamNumber ORDER BY Teams.Organization, Teams.TeamNumber, verified_performance.RunNumber");
       prep.setInt(1, currentTournament);
       final ResultSet rs = prep.executeQuery();
-      final List<String> divisions = Queries.getDivisions(connection);
+      final List<String> divisions = Queries.getEventDivisions(connection);
 %>
 
 <%
