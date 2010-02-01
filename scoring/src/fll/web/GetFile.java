@@ -28,7 +28,6 @@ import com.lowagie.text.DocumentException;
 
 import fll.Team;
 import fll.Utilities;
-import fll.db.DumpDB;
 import fll.db.Queries;
 import fll.web.report.FinalComputedScores;
 import fll.web.scoreEntry.ScoresheetGenerator;
@@ -148,18 +147,6 @@ public final class GetFile extends BaseFLLServlet {
           final ServletOutputStream os = response.getOutputStream();
           os.println("Judges are not properly assigned, please go back to the administration page and assign judges");
         }
-      } else if ("database.zip".equals(filename)) {
-        final DataSource datasource = SessionAttributes.getDataSource(session);
-        final Connection connection = datasource.getConnection();
-        final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
-
-        response.reset();
-        response.setContentType("application/zip");
-        response.setHeader("Content-Disposition", "filename=database.zip");
-
-        final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
-        DumpDB.dumpDatabase(zipOut, connection, challengeDocument);
-        zipOut.close();
       } else if ("finalComputedScores.pdf".equals(filename)) {
         final DataSource datasource = SessionAttributes.getDataSource(session);
         final Connection connection = datasource.getConnection();

@@ -266,6 +266,15 @@
   <url-pattern>/admin/UploadTeams</url-pattern>
  </servlet-mapping>
 
+ <servlet>
+  <servlet-name>DumpDB</servlet-name>
+  <servlet-class>fll.db.DumpDB</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>DumpDB</servlet-name>
+  <url-pattern>/admin/database.flldb</url-pattern>
+ </servlet-mapping>
+
  <!--  scoreboard -->
  <servlet>
   <servlet-name>Top10</servlet-name>

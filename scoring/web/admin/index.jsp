@@ -226,9 +226,7 @@ ${message}
 
 <p>After the tournament</p>
 <ul>
-	<li><a
-		href='<c:url value="/GetFile"><c:param name="filename" value="database.zip"/></c:url>'>Download
-	database</a></li>
+	<li><a href='database.flldb'>Download database</a></li>
 	<li><a href="advanceTeams.jsp">Advance teams</a></li>
 </ul>
 
