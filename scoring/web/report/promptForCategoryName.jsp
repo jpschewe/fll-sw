@@ -15,9 +15,9 @@ Prompt for how many teams should be considered from each scored category.
 
 
 <%
-final DataSource datasource = SessionAttributes.getDataSource(session);
+	final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
-final List<String> divisions = Queries.getDivisions(connection);
+final List<String> divisions = Queries.getEventDivisions(connection);
 pageContext.setAttribute("divisions", divisions);
 %>
 

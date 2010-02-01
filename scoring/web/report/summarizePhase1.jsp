@@ -44,18 +44,33 @@ ScoreStandardization.summarizeScores(connection, challengeDocument, currentTourn
       <tr>
         <th>Judge</th>
         <th>Category</th>
-        <td>Num Teams Scored</th>
+        <th>Num Teams Scored</th>
+        <th>Division</th>
       </tr>
       <x:forEach select="$challengeDocument/fll/subjectiveCategory">
         <sql:query var="result" dataSource="${datasource}">
-          SELECT Judge, COUNT(ComputedTotal) AS numTeams FROM <x:out select="./@name"/> WHERE Tournament = <%=currentTournament%> AND NoShow = false AND ComputedTotal IS NOT NULL GROUP BY Judge
+          SELECT Judge, COUNT(ComputedTotal) AS numTeams 
+          FROM <x:out select="./@name"/> 
+          WHERE Tournament = <%=currentTournament%> 
+          AND NoShow = false 
+          AND ComputedTotal IS NOT NULL 
+          GROUP BY Judge
         </sql:query>
         <c:forEach items="${result.rows}" var="row">
-        <tr>
-          <td><c:out value="${row.Judge}"/></td>
-          <td><x:out select="./@title"/></td>
-          <td><c:out value="${row.numTeams}"/></td>
-        <tr>
+          <sql:query var="divResult" dataSource="${datasource}">
+            SELECT event_division 
+            FROM Judges 
+            WHERE id = '${row.Judge}'
+            AND Tournament = <%=currentTournament %>
+          </sql:query>
+          <c:forEach items="${divResult.rows }" var="divRow">
+            <tr>
+              <td>${row.Judge}</td>
+              <td><x:out select="./@title"/></td>
+              <td>${row.numTeams}</td>
+              <td>${divRow.event_division }</td>
+            <tr>
+          </c:forEach>
         </c:forEach>
       </x:forEach>
     </table>

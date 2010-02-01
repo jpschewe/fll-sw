@@ -17,6 +17,13 @@ import java.util.Formatter;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
+
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
@@ -24,16 +31,18 @@ import org.w3c.dom.Document;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import fll.Utilities;
+import fll.web.ApplicationAttributes;
+import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
 import fll.xml.XMLWriter;
 
 /**
- * @author jpschewe
- * @version $Revision$
+ * Dump the database.
  */
-public final class DumpDB {
+public final class DumpDB extends BaseFLLServlet {
 
   private static final Logger LOGGER = Logger.getLogger(DumpDB.class);
-  
+
   public static void main(final String[] args) throws SQLException, IOException {
     final String database = "/home/jpschewe/projects/fll-sw/working-dir/scoring/build/tomcat/webapps/fll-sw/WEB-INF/flldb";
     final Connection connection = Utilities.createDataSource(database).getConnection();
@@ -42,9 +51,26 @@ public final class DumpDB {
     dumpDatabase(output, connection, challengeDocument);
     output.close();
   }
-  
-  private DumpDB() {
-    // no instances
+
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session) throws IOException, ServletException {
+    final DataSource datasource = SessionAttributes.getDataSource(session);
+    try {
+      final Connection connection = datasource.getConnection();
+      final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+
+      response.reset();
+      response.setContentType("application/zip");
+      response.setHeader("Content-Disposition", "filename=database.flldb");
+
+      final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
+      DumpDB.dumpDatabase(zipOut, connection, challengeDocument);
+      zipOut.close();
+    } catch (final SQLException sqle) {
+      throw new RuntimeException(sqle);
+    }
   }
 
   /**
@@ -72,13 +98,13 @@ public final class DumpDB {
       // can't use Queries.getTablesInDB because it lowercases names and we need
       // all names to be the same as the database is expecting them
       final DatabaseMetaData metadata = connection.getMetaData();
-      rs = metadata.getTables(null, null, "%", new String[]{"TABLE"});
+      rs = metadata.getTables(null, null, "%", new String[] { "TABLE" });
       while (rs.next()) {
-        final String tableName = rs.getString("TABLE_NAME"); 
-        dumpTable(output, connection, metadata, outputWriter, tableName);        
+        final String tableName = rs.getString("TABLE_NAME");
+        dumpTable(output, connection, metadata, outputWriter, tableName);
       }
       SQLFunctions.closeResultSet(rs);
-      
+
     } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closeStatement(stmt);
@@ -95,20 +121,22 @@ public final class DumpDB {
     try {
       stmt = connection.createStatement();
       CSVWriter csvwriter;
-      
+
       // write table type information
-      if(LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Dumping type information for " + tableName);
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Dumping type information for "
+            + tableName);
       }
-      output.putNextEntry(new ZipEntry(tableName + ".types"));      
+      output.putNextEntry(new ZipEntry(tableName
+          + ".types"));
       csvwriter = new CSVWriter(outputWriter);
       rs = metadata.getColumns(null, null, tableName, "%");
-      while(rs.next()) {
+      while (rs.next()) {
         final String typeName = rs.getString("TYPE_NAME");
         final String columnName = rs.getString("COLUMN_NAME");
-        csvwriter.writeNext(new String[] {columnName, typeName});
-        if(LOGGER.isTraceEnabled()) {
-          final String name = rs.getString("TABLE_NAME"); 
+        csvwriter.writeNext(new String[] { columnName, typeName });
+        if (LOGGER.isTraceEnabled()) {
+          final String name = rs.getString("TABLE_NAME");
           LOGGER.trace(new Formatter().format("Table %s Column %s has type %s", name, columnName, typeName));
         }
       }
@@ -117,15 +145,17 @@ public final class DumpDB {
       SQLFunctions.closeResultSet(rs);
       rs = null;
 
-      output.putNextEntry(new ZipEntry(tableName + ".csv"));
+      output.putNextEntry(new ZipEntry(tableName
+          + ".csv"));
       csvwriter = new CSVWriter(outputWriter);
-      rs = stmt.executeQuery("SELECT * FROM " + tableName);
+      rs = stmt.executeQuery("SELECT * FROM "
+          + tableName);
       csvwriter.writeAll(rs, true);
       csvwriter.flush();
       output.closeEntry();
       SQLFunctions.closeResultSet(rs);
       rs = null;
-            
+
     } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closeStatement(stmt);

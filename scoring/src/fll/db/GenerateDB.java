@@ -253,8 +253,11 @@ public final class GenerateDB {
       // Table structure for table 'Judges'
       stmt.executeUpdate("DROP TABLE IF EXISTS Judges CASCADE");
       stmt.executeUpdate("CREATE TABLE Judges ("
-          + "  id varchar(64) NOT NULL," + "  category varchar(64) NOT NULL," + "  Tournament INTEGER NOT NULL,"
-          + "  event_division varchar(32) NOT NULL," + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,event_division)"
+          + "  id varchar(64) NOT NULL,"//
+          + "  category varchar(64) NOT NULL," //
+          + "  Tournament INTEGER NOT NULL," //
+          + "  event_division varchar(32) NOT NULL," //
+          + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,event_division)"//
           + " ,CONSTRAINT judges_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
           + ")");
 

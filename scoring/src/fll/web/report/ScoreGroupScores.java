@@ -50,7 +50,7 @@ public final class ScoreGroupScores {
         + tournament + "</h2>");
 
     // get the list of divisions
-    for (final String division : Queries.getDivisions(connection)) {
+    for (final String division : Queries.getEventDivisions(connection)) {
       // foreach category
       for (final Element catElement : subjectiveCategories) {
         final String catName = catElement.getAttribute("name");

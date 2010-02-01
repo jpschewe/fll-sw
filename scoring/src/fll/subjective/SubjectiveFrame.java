@@ -261,8 +261,7 @@ public final class SubjectiveFrame extends JFrame {
     final File initialDirectory = getInitialDirectory();
     final JFileChooser fileChooser = new JFileChooser(initialDirectory);
     fileChooser.setDialogTitle(title);
-    // NOTE: Should get JonsInfra fixed for this
-    fileChooser.setFileFilter(new BasicFileFilter("Zip files", "zip"));
+    fileChooser.setFileFilter(new BasicFileFilter("FLL Subjective Data Files", "fll"));
     final int state = fileChooser.showOpenDialog(null);
     if (JFileChooser.APPROVE_OPTION == state) {
       final File file = fileChooser.getSelectedFile();

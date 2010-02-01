@@ -131,7 +131,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
 
             final int numFinalists = (Integer) session.getAttribute("numFinalists");
 
-            for (final String division : Queries.getDivisions(connection)) {
+            for (final String division : Queries.getEventDivisions(connection)) {
               final Map<String, List<Integer>> divisionFinalists;
               if (extraCategoryFinalists.containsKey(division)) {
                 divisionFinalists = extraCategoryFinalists.get(division);
@@ -144,7 +144,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
               for (int i = 1; i <= numFinalists; ++i) {
                 final String numStr = request.getParameter(division
                     + "-finalist-" + i);
-                if (null != numStr) {
+                if (null != numStr && !"".equals(numStr)) {
                   try {
                     finalistNums.add(Integer.valueOf(numStr));
                   } catch (final NumberFormatException e) {
@@ -195,7 +195,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
       formatter.format("<html><body>");
       formatter.format("<h1>Finalists Schedule</h1>");
 
-      for (final String division : Queries.getDivisions(connection)) {
+      for (final String division : Queries.getEventDivisions(connection)) {
         formatter.format("<h2>Division: %s</h2>", division);
 
         // build input for schedule
@@ -307,7 +307,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
       formatter.format("<form method='post' action='FinalistSchedulerUI'>");
 
       // foreach division
-      for (final String division : Queries.getDivisions(connection)) {
+      for (final String division : Queries.getEventDivisions(connection)) {
         formatter.format("<h2>Division: %s</h2>", division);
 
         for (final Element subjectiveElement : subjectiveCategoryElements) {
