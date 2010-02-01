@@ -518,8 +518,7 @@ public class FullTournamentTest {
 
       // download subjective zip
       WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "GetFile");
-      request.setParameter("filename", "subjective-data.fll");
+          + "admin/subjective-data.fll");
       WebResponse response = conversation.getResponse(request);
       Assert.assertEquals("application/zip", response.getContentType());
       final InputStream zipStream = response.getInputStream();
