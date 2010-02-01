@@ -1395,7 +1395,7 @@ public final class Queries {
       if (rs.next()) {
         return rs.getInt(1);
       } else {
-        throw new IllegalArgumentException("Tournament Name " + tournamentName + " is unknown");
+        throw new IllegalArgumentException("Tournament Name '" + tournamentName + "' is unknown");
       }
     } finally {
       SQLFunctions.closeResultSet(rs);
@@ -1457,6 +1457,25 @@ public final class Queries {
     }
   }
 
+  public static Map<Integer, String> getTournamentIDsAndNames(final Connection connection) throws SQLException {
+    final Map<Integer, String> retval = new HashMap<Integer, String>();
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT tournament_id, Name FROM Tournaments ORDER BY Name");
+      while (rs.next()) {
+        final int tournamentID = rs.getInt(1);        
+        final String tournamentName = rs.getString(2);        
+        retval.put(tournamentID, tournamentName);
+      }
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
+    }
+    return retval;    
+  }
+  
   /**
    * Get a list of tournament names in the DB ordered by name.
    * 
@@ -1538,8 +1557,15 @@ public final class Queries {
    */
   public static void deleteTeam(final int teamNumber, final Document document, final Connection connection) throws SQLException {
     Statement stmt = null;
+    final boolean autoCommit = connection.getAutoCommit();
     try {
+      connection.setAutoCommit(false);
+      
       stmt = connection.createStatement();
+
+      // delete from TournamentTeams
+      stmt.executeUpdate("DELETE FROM TournamentTeams WHERE TeamNumber = "
+          + teamNumber);
 
       // delete from subjective categories
       for (final Element category : XMLUtils.filterToElements(document.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
@@ -1556,15 +1582,13 @@ public final class Queries {
       stmt.executeUpdate("DELETE FROM Teams WHERE TeamNumber = "
           + teamNumber);
 
-      // delete from TournamentTeams
-      stmt.executeUpdate("DELETE FROM TournamentTeams WHERE TeamNumber = "
-          + teamNumber);
-
       // delete from FinalScores
       stmt.executeUpdate("DELETE FROM FinalScores WHERE TeamNumber = "
           + teamNumber);
 
+      connection.commit();
     } finally {
+      connection.setAutoCommit(autoCommit);
       SQLFunctions.closeStatement(stmt);
     }
   }
