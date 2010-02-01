@@ -212,6 +212,15 @@
  </servlet-mapping>
 
  <!--  admin pages -->
+  <servlet>
+  <servlet-name>GatherTeamData</servlet-name>
+  <servlet-class>fll.web.admin.GatherTeamData</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>GatherTeamData</servlet-name>
+  <url-pattern>/admin/GatherTeamData</url-pattern>
+ </servlet-mapping>
+ 
  <servlet>
   <servlet-name>CommitTeam</servlet-name>
   <servlet-class>fll.web.admin.CommitTeam</servlet-class>

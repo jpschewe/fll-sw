@@ -199,7 +199,7 @@ ${message}
 <p>Tournament day:</p>
 <ol>
 	<li><a
-		href='<c:url value="editTeam.jsp">
+		href='<c:url value="GatherTeamData">
                      <c:param name="addTeam" value="1"/>
                    </c:url>'>Add
 	a team</a></li>
