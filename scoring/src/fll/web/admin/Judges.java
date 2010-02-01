@@ -108,7 +108,7 @@ public final class Judges {
     }
 
     // get list of divisions and add "All" as a possible value
-    final List<String> divisions = Queries.getDivisions(connection);
+    final List<String> divisions = Queries.getEventDivisions(connection);
     divisions.add(0, "All");
 
     out

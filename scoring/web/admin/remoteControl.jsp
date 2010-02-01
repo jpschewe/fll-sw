@@ -11,25 +11,24 @@
 <%@ page import="javax.sql.DataSource" %>
       
 <%
-final DataSource datasource = SessionAttributes.getDataSource(session);
-final Connection connection = datasource.getConnection();
-      
-final List<String> divisions = Queries.getDivisions(connection);
-pageContext.setAttribute("divisions", divisions);
+      	final DataSource datasource = SessionAttributes.getDataSource(session);
+      final Connection connection = datasource.getConnection();
+            
+      final List<String> divisions = Queries.getEventDivisions(connection);
+      pageContext.setAttribute("divisions", divisions);
 
-if(null == application.getAttribute("playoffDivision") && !divisions.isEmpty()) {
-  application.setAttribute("playoffDivision", divisions.get(0));
-}
-if(null == application.getAttribute("playoffRoundNumber")) {
-  application.setAttribute("playoffRoundNumber", new Integer(1));
-}
-if(null == application.getAttribute("slideShowInterval")) {
-  application.setAttribute("slideShowInterval", new Integer(10));
-}
+      if(null == application.getAttribute("playoffDivision") && !divisions.isEmpty()) {
+        application.setAttribute("playoffDivision", divisions.get(0));
+      }
+      if(null == application.getAttribute("playoffRoundNumber")) {
+        application.setAttribute("playoffRoundNumber", new Integer(1));
+      }
+      if(null == application.getAttribute("slideShowInterval")) {
+        application.setAttribute("slideShowInterval", new Integer(10));
+      }
 
-pageContext.setAttribute("numPlayoffRounds", Queries.getNumPlayoffRounds(connection));
-
-%>
+      pageContext.setAttribute("numPlayoffRounds", Queries.getNumPlayoffRounds(connection));
+      %>
       
 <html>
   <head>

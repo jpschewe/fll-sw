@@ -100,10 +100,11 @@ SELECT Teams.TeamNumber, Teams.TeamName, current_tournament_teams.event_division
    <td><c:out value="${row.TeamNumber}" /></td>
    <td><c:out value="${row.TeamName}" /></td>
    <%
-   pageContext.setAttribute("divisions", Queries.getDivisions(connection));
+   	pageContext.setAttribute("divisions", Queries.getEventDivisions(connection));
    %>
 
-   <td><c:forEach items="${divisions}" var="division">
+   <td>
+   <c:forEach items="${divisions}" var="division">
     <c:choose>
      <c:when test="${row.event_division == division}">
       <input type='radio' name='<c:out value="${row.TeamNumber}"/>'
@@ -115,9 +116,11 @@ SELECT Teams.TeamNumber, Teams.TeamName, current_tournament_teams.event_division
      </c:otherwise>
     </c:choose>
     <c:out value="${division}" />
-   </c:forEach> <input type='radio' name='<c:out value="${row.TeamNumber}"/>'
+   </c:forEach>
+   <input type='radio' name='<c:out value="${row.TeamNumber}"/>'
     value='text' /> <input type='text'
-    name='<c:out value="${row.TeamNumber}"/>_text' /></td>
+    name='<c:out value="${row.TeamNumber}"/>_text' />
+    </td>
   </tr>
  </c:forEach>
 </table>

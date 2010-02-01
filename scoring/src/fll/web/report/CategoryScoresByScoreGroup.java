@@ -76,7 +76,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
       final int currentTournament = Queries.getCurrentTournament(connection);
 
       // foreach division
-      for (final String division : Queries.getDivisions(connection)) {
+      for (final String division : Queries.getEventDivisions(connection)) {
         // foreach subjective category
         for (final String categoryTitle : subjectiveCategories.keySet()) {
           final String categoryName = subjectiveCategories.get(categoryTitle);

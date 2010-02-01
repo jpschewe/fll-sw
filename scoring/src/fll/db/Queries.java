@@ -169,7 +169,33 @@ public final class Queries {
   }
 
   /**
-   * Get the list of divisions at this tournament as a List of Strings. Uses
+   * Get the list of divisions of all teams.
+   * 
+   * @param connection the database connection
+   * @return the List of divisions. List of strings.
+   * @throws SQLException on a database error
+   */
+  public static List<String> getDivisions(final Connection connection) throws SQLException {
+    final List<String> list = new LinkedList<String>();
+
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT DISTINCT Division FROM Teams ORDER BY Division");
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final String division = rs.getString(1);
+        list.add(division);
+      }
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
+    }
+    return list;
+  }
+  
+  /**
+   * Get the list of event divisions at this tournament as a List of Strings. Uses
    * getCurrentTournament to determine the tournament.
    * 
    * @param connection the database connection
@@ -177,7 +203,7 @@ public final class Queries {
    * @throws SQLException on a database error
    * @see #getCurrentTournament(Connection)
    */
-  public static List<String> getDivisions(final Connection connection) throws SQLException {
+  public static List<String> getEventDivisions(final Connection connection) throws SQLException {
     final List<String> list = new LinkedList<String>();
 
     PreparedStatement prep = null;
@@ -222,7 +248,7 @@ public final class Queries {
       throws SQLException {
     final Map<String, Map<Integer, Map<String, Integer>>> rankingMap = new HashMap<String, Map<Integer, Map<String, Integer>>>();
     final int tournament = getCurrentTournament(connection);
-    final List<String> divisions = getDivisions(connection);
+    final List<String> divisions = getEventDivisions(connection);
 
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
     final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
@@ -2476,7 +2502,7 @@ public final class Queries {
    */
   public static int getNumPlayoffRounds(final Connection connection) throws SQLException {
     int numRounds = 0;
-    for (final String division : getDivisions(connection)) {
+    for (final String division : getEventDivisions(connection)) {
       final int x = getFirstPlayoffRoundSize(connection, division);
       if (x > 0) {
         numRounds = Math.max((int) Math.round(Math.log(x)

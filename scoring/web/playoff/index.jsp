@@ -9,11 +9,11 @@
 <%@ page import="java.sql.Connection" %>
   
 <%
-final DataSource datasource = SessionAttributes.getDataSource(session);
-final Connection connection = datasource.getConnection();
-final List<String> divisions = Queries.getDivisions(connection);
-final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
-%>
+  	final DataSource datasource = SessionAttributes.getDataSource(session);
+  final Connection connection = datasource.getConnection();
+  final List<String> divisions = Queries.getEventDivisions(connection);
+  final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
+  %>
   
 <html>
   <head>

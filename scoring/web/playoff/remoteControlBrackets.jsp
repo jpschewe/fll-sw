@@ -8,7 +8,7 @@
 <%@ page import="java.sql.Connection" %>
 
 <%
-  /*
+	/*
   application parameters
   playoffDivision - String for the division
   playoffRoundNumber - Integer for the playoff round number, counted from the 1st playoff round
@@ -38,7 +38,7 @@
   if (null != sessionDivision) {
     division = sessionDivision;
   } else if (null == application.getAttribute(divisionKey)) {
-    final List<String> divisions = Queries.getDivisions(connection);
+    final List<String> divisions = Queries.getEventDivisions(connection);
     if (!divisions.isEmpty()) {
       division = divisions.get(0);
     } else {
