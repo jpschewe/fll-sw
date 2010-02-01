@@ -43,15 +43,6 @@ public final class DumpDB extends BaseFLLServlet {
 
   private static final Logger LOGGER = Logger.getLogger(DumpDB.class);
 
-  public static void main(final String[] args) throws SQLException, IOException {
-    final String database = "/home/jpschewe/projects/fll-sw/working-dir/scoring/build/tomcat/webapps/fll-sw/WEB-INF/flldb";
-    final Connection connection = Utilities.createDataSource(database).getConnection();
-    final ZipOutputStream output = new ZipOutputStream(new FileOutputStream("/home/jpschewe/download/foo/database.zip"));
-    final Document challengeDocument = Queries.getChallengeDocument(connection);
-    dumpDatabase(output, connection, challengeDocument);
-    output.close();
-  }
-
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
