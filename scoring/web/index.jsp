@@ -25,7 +25,7 @@ final Connection connection = datasource.getConnection();
     <h1><x:out select="$challengeDocument/fll/@title"/></h1>
     <ul>
 
-      <li>Current Tournament -&gt; <%=Queries.getCurrentTournament(connection)%></li>
+      <li>Current Tournament -&gt; <%=Queries.getCurrentTournamentName(connection)%></li>
 
       <li><a href="wiki/wiki/InstructionsForRunningTheSoftware">Instructions (from Wiki)</a></li>
 
