@@ -51,7 +51,7 @@ public class CommitTeam extends BaseFLLServlet {
       final Connection connection = datasource.getConnection();
       // parse the numbers first so that we don't get a partial commit
       final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("teamNumber")).intValue();
-      final String division = request.getParameter("division");
+      final String division = resolveDivision(request);
 
       if (null != request.getParameter("delete")) {
         if (LOGGER.isInfoEnabled()) {
@@ -77,7 +77,7 @@ public class CommitTeam extends BaseFLLServlet {
         }
         Queries.demoteTeam(connection, challengeDocument, teamNumber);
       } else if (null != request.getParameter("commit")) {
-        if(SessionAttributes.getNonNullAttribute(session, "addTeam", Boolean.class)) {
+        if (SessionAttributes.getNonNullAttribute(session, "addTeam", Boolean.class)) {
           if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Adding "
                 + teamNumber);
@@ -98,7 +98,7 @@ public class CommitTeam extends BaseFLLServlet {
           Queries.updateTeam(connection, teamNumber, request.getParameter("teamName"), request.getParameter("organization"), request.getParameter("region"),
                              division);
         }
-        
+
         // this will be null if the tournament can't be changed
         final String newTournamentStr = request.getParameter("currentTournament");
         if (null != newTournamentStr) {
@@ -126,10 +126,23 @@ public class CommitTeam extends BaseFLLServlet {
       session.setAttribute("message", message.toString());
     }
 
-    if(SessionAttributes.getNonNullAttribute(session, "addTeam", Boolean.class)) {
+    if (SessionAttributes.getNonNullAttribute(session, "addTeam", Boolean.class)) {
       response.sendRedirect(response.encodeRedirectURL("index.jsp"));
     } else {
       response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
+    }
+  }
+
+  /**
+   * Figure out what the division is based on the value of the "division"
+   * parameter and possibly teh "division_text" parameter.
+   */
+  private String resolveDivision(final HttpServletRequest request) {
+    final String div = request.getParameter("division");
+    if ("text".equals(div)) {
+      return request.getParameter("division_text");
+    } else {
+      return div;
     }
   }
 }

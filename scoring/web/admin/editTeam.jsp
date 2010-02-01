@@ -84,7 +84,21 @@ function confirmChangeTournament() {
       </tr>
       <tr>
         <td>Division (required)</td>
-        <td><input type='text' name='division' value='${division }'></td>
+        <td>
+          <c:forEach items="${divisions}" var="possibleDivision">
+    <c:choose>
+     <c:when test="${division == possibleDivision}">
+      <input type='radio' name='division' value='${possibleDivision}' checked />
+     </c:when>
+     <c:otherwise>
+      <input type='radio' name='division' value='${possibleDivision}' />
+     </c:otherwise>
+    </c:choose>
+    ${possibleDivision}
+   </c:forEach> 
+   <input type='radio' name='division' value='text' /> 
+   <input type='text' name='division_text' />
+        </td>
       </tr>
 
         <tr>

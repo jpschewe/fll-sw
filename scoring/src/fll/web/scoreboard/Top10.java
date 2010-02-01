@@ -89,7 +89,7 @@ public class Top10 extends BaseFLLServlet {
         divisionIndex = divisionIndexObj.intValue();
       }
       ++divisionIndex;
-      final List<String> divisions = Queries.getDivisions(connection);
+      final List<String> divisions = Queries.getEventDivisions(connection);
       if (divisionIndex >= divisions.size()) {
         divisionIndex = 0;
       }
