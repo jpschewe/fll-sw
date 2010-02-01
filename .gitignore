@@ -5,3 +5,4 @@ scoring/fll.log
 fll.log
 scoring/dist
 scoring/web/wiki/*
+scoring/override.properties
