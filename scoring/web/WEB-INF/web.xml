@@ -275,6 +275,15 @@
   <url-pattern>/admin/database.flldb</url-pattern>
  </servlet-mapping>
 
+ <servlet>
+  <servlet-name>DownloadSubjectiveData</servlet-name>
+  <servlet-class>fll.web.admin.DownloadSubjectiveData</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>DownloadSubjectiveData</servlet-name>
+  <url-pattern>/admin/subjective-data.fll</url-pattern>
+ </servlet-mapping>
+
  <!--  scoreboard -->
  <servlet>
   <servlet-name>Top10</servlet-name>
