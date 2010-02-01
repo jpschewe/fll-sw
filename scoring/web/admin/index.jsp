@@ -206,10 +206,7 @@ ${message}
 
 	<li><a href='<c:url value="select_team.jsp"/>'>Edit team data</a></li>
 
-	<li><a
-		href='<c:url value="/GetFile">
-                     <c:param name="filename" value="subjective-data.zip"/>
-                   </c:url>'>Download
+	<li><a href="subjective-data.fll">Download
 	the datafile for subjective score entry.</a> Should be downloaded after
 	each subjective score upload to lessen chance of data loss due to
 	overwrite.</li>

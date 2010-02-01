@@ -6,13 +6,10 @@
 package fll.web;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -43,35 +40,6 @@ public final class GetFile extends BaseFLLServlet {
 
   public GetFile() {
 
-  }
-
-  /**
-   * Write out the subjective scores data for the current tournament.
-   * 
-   * @param stream where to write the scores file
-   * @throws IOException
-   */
-  public static void writeSubjectiveScores(final Connection connection, final Document challengeDocument, final OutputStream stream) throws IOException,
-      SQLException {
-    final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-    final int tournament = Queries.getCurrentTournament(connection);
-
-    final XMLWriter xmlwriter = new XMLWriter();
-
-    final ZipOutputStream zipOut = new ZipOutputStream(stream);
-    xmlwriter.setOutput(zipOut, "UTF8");
-
-    zipOut.putNextEntry(new ZipEntry("challenge.xml"));
-    xmlwriter.write(challengeDocument);
-    zipOut.closeEntry();
-
-    zipOut.putNextEntry(new ZipEntry("score.xml"));
-    xmlwriter.setNeedsIndent(true);
-    final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument, tournamentTeams.values(), connection, tournament);
-    xmlwriter.write(scoreDocument);
-    zipOut.closeEntry();
-
-    zipOut.close();
   }
 
   /**
@@ -131,22 +99,6 @@ public final class GetFile extends BaseFLLServlet {
         xmlwriter.setNeedsIndent(true);
         xmlwriter.setStyleSheet("fll.css");
         xmlwriter.write(challengeDocument);
-
-      } else if ("subjective-data.zip".equals(filename)) {
-        final DataSource datasource = SessionAttributes.getDataSource(session);
-        final Connection connection = datasource.getConnection();
-        final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
-        if (Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
-          response.reset();
-          response.setContentType("application/zip");
-          response.setHeader("Content-Disposition", "filename=subjective-data.zip");
-          writeSubjectiveScores(connection, challengeDocument, response.getOutputStream());
-        } else {
-          response.reset();
-          response.setContentType("text/plain");
-          final ServletOutputStream os = response.getOutputStream();
-          os.println("Judges are not properly assigned, please go back to the administration page and assign judges");
-        }
       } else if ("finalComputedScores.pdf".equals(filename)) {
         final DataSource datasource = SessionAttributes.getDataSource(session);
         final Connection connection = datasource.getConnection();
