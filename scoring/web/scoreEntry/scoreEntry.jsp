@@ -19,6 +19,7 @@
 <%
 final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
+// support the unverified runs select box
 final String lTeamNum = request.getParameter("TeamNumber");
 if(null == lTeamNum) {
   //FIXME error, redirect to error page
@@ -28,8 +29,18 @@ if(null == lTeamNum) {
   //throw exception for now
   throw new RuntimeException("Attempted to load score entry page without providing a team number.");
 }
-
-final int teamNumber = Integer.parseInt(lTeamNum);
+final int dashIndex = lTeamNum.indexOf('-');
+final int teamNumber;
+final String runNumberStr;
+if(dashIndex > 0) {
+  // teamNumber - runNumber
+  final String teamStr = lTeamNum.substring(0, dashIndex);
+  teamNumber = Integer.parseInt(teamStr);
+  runNumberStr = lTeamNum.substring(dashIndex+1);
+} else {
+  runNumberStr = request.getParameter("RunNumber");
+  teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(lTeamNum).intValue();	
+}
 final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
 final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
@@ -47,9 +58,8 @@ final Team team = (Team)tournamentTeams.get(new Integer(teamNumber));
 final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumber());
 
 //what run number we're going to edit/enter
-final int lRunNumber;
-if("1".equals(request.getParameter("EditFlag"))) {
-  final String runNumberStr = request.getParameter("RunNumber");
+int lRunNumber;
+if("1".equals(request.getParameter("EditFlag"))) {  
   if(null == runNumberStr) {
     throw new RuntimeException("Please choose a run number when editing scores");
   }

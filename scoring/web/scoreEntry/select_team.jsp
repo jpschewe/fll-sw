@@ -4,7 +4,7 @@
 <%@ page import="fll.web.SessionAttributes"%>
 <%@ page import="fll.db.Queries"%>
 
-<%@ page import="java.util.Iterator" %>
+<%@ page import="java.util.Collection" %>
 
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.ResultSet" %>
@@ -19,17 +19,21 @@ final String lEditFlag = request.getParameter("EditFlag");
 final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
 final Statement stmt = connection.createStatement();
-//FIXME handle tournament ids
-final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = '" + Queries.getCurrentTournament(connection) + "'");
+final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = " + Queries.getCurrentTournament(connection));
 final int maxRunNumber;
 if(rs.next()) {
   maxRunNumber = rs.getInt(1);
 } else {
   maxRunNumber = 1;
 }
+pageContext.setAttribute("maxRunNumber", maxRunNumber);
 SQLFunctions.closeResultSet(rs);
 SQLFunctions.closeStatement(stmt);
 
+final Collection<Team> tournamentTeams = Queries.getTournamentTeams(connection).values();
+pageContext.setAttribute("tournamentTeams", tournamentTeams);
+
+pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
 %>
 
 <html>
@@ -60,8 +64,6 @@ function editFlagBoxClicked() {
   </head>
   <body onload="editFlagBoxClicked()">
 
-    <form action="scoreEntry.jsp" method="POST" name="selectTeam">
-
       <!-- top info bar -->
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>
@@ -84,31 +86,21 @@ function editFlagBoxClicked() {
         </tr>
       </table>
 
-      <table> <!-- outer table -->
-        <tr><td>
-
-      <table>
+      <table> <!-- outer table -->        
+        <tr>
+        <td>
+        <form action="scoreEntry.jsp" method="POST" name="selectTeam">
+        <table> <!-- left table -->
+        
         <tr align='left' valign='top'>
           <!-- pick team from a list -->
           <td>
             <br>
             <font face='arial' size='4'>Select team for this scorecard:</font><br>
             <select size='20' name='TeamNumber' ondblclick='selectTeam.submit()'>
-              <%
-              final Iterator<Team> iter = Queries.getTournamentTeams(connection).values().iterator();
-              while(iter.hasNext()) {
-                final Team team = iter.next();
-                out.print("<option value=");
-                out.print(String.valueOf(team.getTeamNumber()));
-                out.print(">");
-                out.print(String.valueOf(team.getTeamNumber()));
-                out.print(" &nbsp;&nbsp;&nbsp;[");
-                out.print(team.getTeamName());
-                out.print("] ");
-                out.print(team.getOrganization());
-                out.print("</option>\n");
-              }
-              %>
+              <c:forEach items="${tournamentTeams }" var="team">
+                <option value="${team.teamNumber }">${team.teamNumber }&nbsp;&nbsp;&nbsp;[${team.teamName }]</option>
+              </c:forEach>
             </select>
           </td>
         </tr>
@@ -128,10 +120,10 @@ function editFlagBoxClicked() {
            <!-- pick run number -->
           <td align='left'>
             <select name='RunNumber' disabled='true'>
-							<option value='0'>Last Run</option>
-              <% for(int i=0; i<maxRunNumber; i++) { %>
-                <option value='<%=(i+1)%>'><%=(i+1)%></option>
-              <% } %>
+			  <option value='0'>Last Run</option>
+	          <c:forEach var="index" begin="1" end="${maxRunNumber}">
+			    <option value='${index }'>${index }</option>
+			  </c:forEach>			
             </select>
             <b><span id='select_number_text'>Select Run Number for editing</span></b>
           </td>
@@ -144,14 +136,55 @@ function editFlagBoxClicked() {
             <input class='dark_bg' type="submit" value="Submit">
           </td>
         </tr>
-
+      
       </table>
-
-</td></tr>
+      </form>
+      </td> <!-- left table -->
+      
+      <td valign='top'> <!-- right table -->
+      <form action="scoreEntry.jsp" method="POST" name="verify">
+      <input type="hidden" name='EditFlag' value="1" />
+      
+      <table>
+        <tr align='left' valign='top'>
+          <td>
+            <!-- pick team from a list -->
+            <br>
+            <font face='arial' size='4'>Unverified Runs:</font><br>
+            <select size='20' name='TeamNumber' ondblclick='verify.submit()'>
+             <sql:query var="result" dataSource="${datasource}">
+   SELECT
+     Performance.TeamNumber
+    ,Performance.RunNumber
+    ,Teams.TeamName
+     FROM Performance, Teams
+     WHERE Verified <> TRUE 
+       AND Tournament = ${currentTournament}
+       AND Teams.TeamNumber = Performance.TeamNumber
+       ORDER BY RunNumber
+ </sql:query>
+              <c:forEach var="row" items="${result.rowsByIndex}">
+                <option value="${row[0]}-${row[1]}">${row[0]}&nbsp;&nbsp;&nbsp;[${row[2]}]</option>
+              </c:forEach>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <!-- submit button -->
+          <td align='left'>
+            <!--<font face='arial' size='4'><b>Submit</b></font>-->
+            <input class='dark_bg' type="submit" value="Submit">
+          </td>
+        </tr>
+        
+      </table>
+      </form>
+      </td> <!-- right table -->     
+      </tr> 
 
 </table> <!-- outer table -->
 
-    </form>
+    
     
   </body>
 </html>
