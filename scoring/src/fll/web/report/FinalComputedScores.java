@@ -44,9 +44,7 @@ import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
 /**
- * Code for finalComputedScores_pdf.jsp
- * 
- * @version $Revision$
+ * Final computed scores report.
  */
 public final class FinalComputedScores extends PdfPageEventHelper {
 
