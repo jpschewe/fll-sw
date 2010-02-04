@@ -20,6 +20,7 @@ if(rs.next()) {
 } else {
   maxRunNumber = 1;
 }
+pageContext.setAttribute("maxRunNumber", maxRunNumber);
 SQLFunctions.closeResultSet(rs);
 SQLFunctions.closeStatement(stmt);
 %>
@@ -63,9 +64,9 @@ ${message}
       <li>
         <form ACTION='performanceRunReport.jsp' METHOD='POST'>
         Show scores for performance run <select name='RunNumber'>
-<% for(int i=0; i<maxRunNumber; i++) { %>
-  <option value='<%=(i+1)%>'><%=(i+1)%></option>
-<% } %>
+        <c:forEach var="index" begin="1" end="${maxRunNumber}">
+		  <option value='${index }'>${index }</option>
+	    </c:forEach>			
         </select>
         <input type='submit' value='Show Scores'>
         </form>
