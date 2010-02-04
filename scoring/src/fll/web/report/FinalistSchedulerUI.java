@@ -109,6 +109,11 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
         // just store the number of finalists and prompt for extra categories
         final int numFinalists = Integer.valueOf(request.getParameter("num-finalists"));
         session.setAttribute("numFinalists", numFinalists);
+        
+        // store the division
+        final String division = request.getParameter("division");
+        session.setAttribute("division", division);
+        
         response.sendRedirect(response.encodeRedirectURL("promptForCategoryName.jsp"));
         return;
       } else if (null != request.getParameter("create-category")) {
@@ -303,8 +308,6 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
 
       // display the teams by division and score group
       final int currentTournament = Queries.getCurrentTournament(connection);
-
-      formatter.format("<form method='post' action='FinalistSchedulerUI'>");
 
       // foreach division
       for (final String division : Queries.getEventDivisions(connection)) {

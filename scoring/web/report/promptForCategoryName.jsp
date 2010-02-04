@@ -56,8 +56,8 @@ pageContext.setAttribute("divisions", divisions);
     <c:remove var="message"/>
     
 
-    <p>Would you like to define another category to schedule finalists for? Note that the team numbers entered are checked against the current tournament, but not against the appropriate division.<br/>
     <form action='FinalistSchedulerUI' method='POST'>
+    <p>Would you like to define another category to schedule finalists for? Note that the team numbers entered are checked against the current tournament, but not against the appropriate division.<br/>
       Category name: <input type="text" name="new-category" size="30"/><br/>      
       <c:forEach var="division" items="${divisions}">
       <h2>Division ${division}</h2>
