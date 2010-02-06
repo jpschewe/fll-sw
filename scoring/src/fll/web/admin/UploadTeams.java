@@ -85,7 +85,9 @@ public final class UploadTeams extends BaseFLLServlet {
       }
       teamsFileItem.write(file);
       parseFile(file, connection, session);
-      file.delete();
+      if(!file.delete()) {
+        file.deleteOnExit();
+      }
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error saving team data into the database: "
           + sqle.getMessage() + "</p>");
