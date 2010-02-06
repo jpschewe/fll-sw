@@ -373,8 +373,7 @@ public class FullTournamentTest {
 
       // PDF reports
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "GetFile");
-      request.setParameter("filename", "finalComputedScores.pdf");
+          + "report/finalComputedScores.pdf");
       response = conversation.getResponse(request);
       Assert.assertEquals("application/pdf", response.getContentType());
 
