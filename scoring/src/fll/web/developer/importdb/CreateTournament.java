@@ -80,31 +80,7 @@ public class CreateTournament extends BaseFLLServlet {
       final DataSource destDataSource = SessionAttributes.getDataSource(session);
       destConnection = destDataSource.getConnection();
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT Location, NextTournament FROM Tournaments WHERE Name = ?");
-      sourcePrep.setString(1, tournament);
-      sourceRS = sourcePrep.executeQuery();
-
-      if (sourceRS.next()) {
-        final String location = sourceRS.getString(1);
-        final String nextTournament = sourceRS.getString(2);
-        if(null != nextTournament) {
-          final List<String> knownTournaments = Queries.getTournamentNames(destConnection);
-          if(!knownTournaments.contains(nextTournament)) {
-            Queries.createTournament(destConnection, nextTournament, null);
-            //FIXME need to create next tournament if it doesn't exist
-            throw new RuntimeException("Need to create next tournament here also!");
-          }
-          final int next = Queries.getTournamentID(destConnection, nextTournament);
-          Queries.createTournament(destConnection, tournament, location, next);
-        } else {
-          Queries.createTournament(destConnection, tournament, location);  
-        }        
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentExists");
-      } else {
-        message.append("<p class='error'>Cannot find tournament "
-            + tournament + " in imported database!</p>");
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
-      }
+      createTournament(sourceConnection, destConnection, tournament, message, session);
 
       session.setAttribute("message", message.toString());
     } finally {
@@ -114,4 +90,49 @@ public class CreateTournament extends BaseFLLServlet {
       SQLFunctions.closeConnection(destConnection);
     }
   }
+
+  /**
+   * Create a tournament from the source in the dest. This recurses on
+   * nextTournament if needed.
+   * @throws SQLException 
+   */
+  private static void createTournament(final Connection sourceConnection,
+                                final Connection destConnection,
+                                final String tournamentName,
+                                final StringBuilder message,
+                                final HttpSession session) throws SQLException {
+    PreparedStatement sourcePrep = null;
+    ResultSet sourceRS = null;
+    try {
+      sourcePrep = sourceConnection.prepareStatement("SELECT Location, NextTournament FROM Tournaments WHERE Name = ?");
+      sourcePrep.setString(1, tournamentName);
+      sourceRS = sourcePrep.executeQuery();
+
+      if (sourceRS.next()) {
+        final String location = sourceRS.getString(1);
+        final int nextTournament = sourceRS.getInt(2);
+        final boolean nextIsNull = sourceRS.wasNull();
+        
+        Queries.createTournament(destConnection, tournamentName, location);
+
+        if (!nextIsNull) {
+          final String nextName = Queries.getTournamentName(destConnection, nextTournament);
+          final List<String> knownTournaments = Queries.getTournamentNames(destConnection);
+          if (!knownTournaments.contains(nextName)) {
+            createTournament(sourceConnection, destConnection, nextName, message, session);
+          }
+          Queries.setNextTournament(destConnection, tournamentName, nextName);
+        }
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentExists");
+      } else {
+        message.append("<p class='error'>Cannot find tournament "
+            + tournamentName + " in imported database!</p>");
+        session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
+      }
+    } finally {
+      SQLFunctions.closeResultSet(sourceRS);
+      SQLFunctions.closePreparedStatement(sourcePrep);
+    }
+  }
+
 }
