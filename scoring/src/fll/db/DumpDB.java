@@ -5,7 +5,6 @@
  */
 package fll.db;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.sql.Connection;
@@ -30,7 +29,6 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import fll.Utilities;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
