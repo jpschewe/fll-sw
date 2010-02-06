@@ -55,7 +55,7 @@ final Connection connection = datasource.getConnection();
 
       <li><a href='<c:url value="GetFile"><c:param name="filename" value="blankScoreSheet.pdf"/></c:url>' target="_new">Blank scoresheet for printing (PDF format)</a></li>
 
-      <li><a href='<c:url value="GetFile"><c:param name="filename" value="challenge.xml"/></c:url>'>Challenge Descriptor</a></li>
+      <li><a href='challenge.xml'>Challenge Descriptor</a></li>
       
       <li><a href="developer/index.jsp">Developer page</a></li>
 

@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -23,13 +22,10 @@ import org.w3c.dom.Document;
 
 import com.lowagie.text.DocumentException;
 
-import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.web.report.FinalComputedScores;
 import fll.web.scoreEntry.ScoresheetGenerator;
-import fll.xml.XMLUtils;
-import fll.xml.XMLWriter;
 
 /**
  * Used to generate various files for download.
@@ -51,55 +47,7 @@ public final class GetFile extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
     try {
       final String filename = request.getParameter("filename");
-      if ("teams.xml".equals(filename)) {
-        final DataSource datasource = SessionAttributes.getDataSource(session);
-        final Connection connection = datasource.getConnection();
-        final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-        final Document teamsDocument = XMLUtils.createTeamsDocument(connection, tournamentTeams.values());
-        final XMLWriter xmlwriter = new XMLWriter();
-
-        response.reset();
-        response.setContentType("text/xml");
-        response.setHeader("Content-Disposition", "filename=teams.xml");
-        xmlwriter.setOutput(response.getOutputStream(), null);
-        xmlwriter.write(teamsDocument);
-      } else if ("score.xml".equals(filename)) {
-        final DataSource datasource = SessionAttributes.getDataSource(session);
-        final Connection connection = datasource.getConnection();
-        final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
-        if (Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
-          final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-          final int tournament = Queries.getCurrentTournament(connection);
-
-          final Document scoreDocument = XMLUtils.createSubjectiveScoresDocument(challengeDocument, tournamentTeams.values(), connection, tournament);
-          final XMLWriter xmlwriter = new XMLWriter();
-
-          response.reset();
-          response.setContentType("text/xml");
-          response.setHeader("Content-Disposition", "filename=score.xml");
-          xmlwriter.setOutput(response.getOutputStream(), null);
-          xmlwriter.setNeedsIndent(true);
-          xmlwriter.write(scoreDocument);
-        } else {
-          //TODO should use redirect to send to error page
-          response.reset();
-          response.setContentType("text/plain");
-          final ServletOutputStream os = response.getOutputStream();
-          os.println("Judges are not properly assigned, please go back to the administration page and assign judges");
-        }
-      } else if ("challenge.xml".equals(filename)) {
-        final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
-
-        final XMLWriter xmlwriter = new XMLWriter();
-
-        response.reset();
-        response.setContentType("text/xml");
-        response.setHeader("Content-Disposition", "filename=challenge.xml");
-        xmlwriter.setOutput(response.getOutputStream(), null);
-        xmlwriter.setNeedsIndent(true);
-        xmlwriter.setStyleSheet("fll.css");
-        xmlwriter.write(challengeDocument);
-      } else if ("finalComputedScores.pdf".equals(filename)) {
+      if ("finalComputedScores.pdf".equals(filename)) {
         final DataSource datasource = SessionAttributes.getDataSource(session);
         final Connection connection = datasource.getConnection();
         final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
