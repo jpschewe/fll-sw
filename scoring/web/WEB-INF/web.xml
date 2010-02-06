@@ -62,15 +62,6 @@
   <load-on-startup>1</load-on-startup>
  </servlet>
 
- <servlet>
-  <servlet-name>GetFile</servlet-name>
-  <servlet-class>fll.web.GetFile</servlet-class>
- </servlet>
- <servlet-mapping>
-  <servlet-name>GetFile</servlet-name>
-  <url-pattern>/GetFile</url-pattern>
- </servlet-mapping>
-
  <!--  root -->
  <servlet>
   <servlet-name>DisplayChallengeDescriptor</servlet-name>
@@ -230,7 +221,7 @@
  </servlet-mapping>
 
  <!--  admin pages -->
-  <servlet>
+ <servlet>
   <servlet-name>GatherTeamData</servlet-name>
   <servlet-class>fll.web.admin.GatherTeamData</servlet-class>
  </servlet>
@@ -238,7 +229,7 @@
   <servlet-name>GatherTeamData</servlet-name>
   <url-pattern>/admin/GatherTeamData</url-pattern>
  </servlet-mapping>
- 
+
  <servlet>
   <servlet-name>CommitTeam</servlet-name>
   <servlet-class>fll.web.admin.CommitTeam</servlet-class>
@@ -319,6 +310,16 @@
  <servlet-mapping>
   <servlet-name>Last8</servlet-name>
   <url-pattern>/scoreboard/Last8</url-pattern>
+ </servlet-mapping>
+
+ <!--  playoff -->
+ <servlet>
+  <servlet-name>ScoresheetGenerator</servlet-name>
+  <servlet-class>fll.web.playoff.ScoresheetGenerator</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>ScoresheetGenerator</servlet-name>
+  <url-pattern>/playoff/ScoresheetGenerator</url-pattern>
  </servlet-mapping>
 
 </web-app>
