@@ -24,7 +24,6 @@ import com.lowagie.text.DocumentException;
 
 import fll.Utilities;
 import fll.db.Queries;
-import fll.web.report.FinalComputedScores;
 import fll.web.scoreEntry.ScoresheetGenerator;
 
 /**
@@ -47,18 +46,7 @@ public final class GetFile extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
     try {
       final String filename = request.getParameter("filename");
-      if ("finalComputedScores.pdf".equals(filename)) {
-        final DataSource datasource = SessionAttributes.getDataSource(session);
-        final Connection connection = datasource.getConnection();
-        final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
-        final int tournament = Queries.getCurrentTournament(connection);
-        final String tournamentName = Queries.getTournamentName(connection, tournament);
-        response.reset();
-        response.setContentType("application/pdf");
-        response.setHeader("Content-Disposition", "filename=finalComputedScores.pdf");
-        final FinalComputedScores fcs = new FinalComputedScores(challengeDocument, tournament, tournamentName);
-        fcs.generateReport(connection, response.getOutputStream());
-      } else if ("teamScoreSheet.pdf".equals(filename)) {
+      if ("teamScoreSheet.pdf".equals(filename)) {
         final DataSource datasource = SessionAttributes.getDataSource(session);
         final Connection connection = datasource.getConnection();
         final Document challengeDocument = (Document) application.getAttribute("challengeDocument");

@@ -17,11 +17,17 @@ import java.text.ParseException;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
+
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.w3c.dom.Element;
 
-import com.lowagie.text.Chunk;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Font;
@@ -29,114 +35,53 @@ import com.lowagie.text.FontFactory;
 import com.lowagie.text.PageSize;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.Phrase;
-import com.lowagie.text.Rectangle;
-import com.lowagie.text.pdf.BaseFont;
-import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfPageEventHelper;
-import com.lowagie.text.pdf.PdfTemplate;
 import com.lowagie.text.pdf.PdfWriter;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.web.ApplicationAttributes;
+import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
 /**
  * Final computed scores report.
  */
-public final class FinalComputedScores extends PdfPageEventHelper {
+public final class FinalComputedScores extends BaseFLLServlet {
 
-  private final int _tournament;
-  private final String _tournamentName;
+  private int _tournament;
 
-  private final String _challengeTitle;
+  private org.w3c.dom.Document _challengeDocument;
 
-  private String _division;
-
-  private PdfPTable _header;
-
-  private PdfTemplate _tpl;
-
-  private BaseFont _headerFooterFont;
-
-  private final org.w3c.dom.Document _challengeDocument;
-
-  public FinalComputedScores(final org.w3c.dom.Document challengeDoc, final int tournament, final String tournamentName) {
-    _challengeDocument = challengeDoc;
-    final Element root = challengeDoc.getDocumentElement();
-    _challengeTitle = root.getAttribute("title");
-    _tournament = tournament;
-    _tournamentName = tournamentName;
-  }
-
-  private void updateHeader() {
-    // initialization of the header table
-    _header = new PdfPTable(2);
-    final Phrase p = new Phrase();
-    final Chunk ck = new Chunk(_challengeTitle
-        + "\nFinal Computed Scores", TIMES_12PT_NORMAL);
-    p.add(ck);
-    _header.getDefaultCell().setBorderWidth(0);
-    _header.addCell(p);
-    _header.getDefaultCell().setHorizontalAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
-    _header.addCell(new Phrase(new Chunk("Tournament: "
-        + _tournamentName + "\nDivision: " + _division, TIMES_12PT_NORMAL)));
-    final PdfPCell blankCell = new PdfPCell();
-    blankCell.setBorder(0);
-    blankCell.setBorderWidthTop(1.0f);
-    blankCell.setColspan(2);
-    _header.addCell(blankCell);
-  }
+  private FinalScoresPageHandler pageHandler;
 
   @Override
-  public void onOpenDocument(final PdfWriter writer, final Document document) {
-    _headerFooterFont = TIMES_12PT_NORMAL.getBaseFont();
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session) throws IOException, ServletException {
+    try {
+      final DataSource datasource = SessionAttributes.getDataSource(session);
+      final Connection connection = datasource.getConnection();
+      final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+      final int tournament = Queries.getCurrentTournament(connection);
+      final String tournamentName = Queries.getTournamentName(connection, tournament);
+      response.reset();
+      response.setContentType("application/pdf");
+      response.setHeader("Content-Disposition", "filename=finalComputedScores.pdf");
 
-    // initialization of the footer template
-    _tpl = writer.getDirectContent().createTemplate(100, 100);
-    _tpl.setBoundingBox(new Rectangle(-20, -20, 100, 100));
-  }
+      _challengeDocument = challengeDocument;
+      final Element root = _challengeDocument.getDocumentElement();
+      _tournament = tournament;
+      pageHandler = new FinalScoresPageHandler(root.getAttribute("title"), tournamentName);
 
-  @Override
-  public void onEndPage(final PdfWriter writer, final Document document) {
-    final PdfContentByte cb = writer.getDirectContent();
-    cb.saveState();
-    // write the headertable
-    updateHeader(); // creates the header table with current
-                                    // division, etc.
-    _header.setTotalWidth(document.right()
-        - document.left());
-    _header.writeSelectedRows(0, -1, document.left(), document.getPageSize().getHeight() - 10, cb);
-
-    // compose the footer
-    final String text = "Page "
-        + writer.getPageNumber() + " of ";
-    final float textSize = _headerFooterFont.getWidthPoint(text, 12);
-    final float textBase = document.bottom() - 20;
-    cb.beginText();
-    cb.setFontAndSize(_headerFooterFont, 12);
-
-    final float adjust = _headerFooterFont.getWidthPoint("0", 12);
-    cb.setTextMatrix(document.right()
-        - textSize - adjust, textBase);
-    cb.showText(text);
-    cb.endText();
-    cb.addTemplate(_tpl, document.right()
-        - adjust, textBase);
-
-    cb.restoreState();
-  }
-
-  @Override
-  public void onCloseDocument(final PdfWriter writer, final Document document) {
-    _tpl.beginText();
-    _tpl.setFontAndSize(_headerFooterFont, 12);
-    _tpl.setTextMatrix(0, 0);
-    _tpl.showText(""
-        + (writer.getPageNumber() - 1));
-    _tpl.endText();
+      generateReport(connection, response.getOutputStream());
+    } catch (final SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private static final Font ARIAL_8PT_BOLD = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.BOLD);
@@ -144,8 +89,6 @@ public final class FinalComputedScores extends PdfPageEventHelper {
   private static final Font ARIAL_8PT_NORMAL = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL);
 
   private static final Font ARIAL_8PT_NORMAL_RED = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, Color.RED);
-
-  private static final Font TIMES_12PT_NORMAL = FontFactory.getFont(FontFactory.TIMES, 12, Font.NORMAL);
 
   /**
    * Generate the actual report.
@@ -165,7 +108,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
       // orientation
       final Document pdfDoc = new Document(PageSize.LETTER);
       final PdfWriter writer = PdfWriter.getInstance(pdfDoc, out);
-      writer.setPageEvent(this);
+      writer.setPageEvent(pageHandler);
 
       // Measurements are always in points (72 per inch) - This sets up 1/2 inch
       // margins
@@ -180,7 +123,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
 
       final Iterator<String> divisionIter = Queries.getEventDivisions(connection).iterator();
       while (divisionIter.hasNext()) {
-        _division = divisionIter.next();
+        pageHandler.setDivision(divisionIter.next());
 
         // Figure out how many subjective categories have weights > 0.
         final double[] weights = new double[subjectiveCategories.size()];
@@ -300,7 +243,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
                 + catName);
           }
         }
-        //TODO make prepared statement
+        // TODO make prepared statement
         query.append(" FROM Teams,FinalScores,current_tournament_teams");
         query.append(" WHERE FinalScores.TeamNumber = Teams.TeamNumber");
         query.append(" AND FinalScores.Tournament = "
@@ -310,7 +253,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
         query.append(" ORDER BY FinalScores.OverallScore "
             + ascDesc + ", Teams.TeamNumber");
         prep = connection.prepareStatement(query.toString());
-        prep.setString(1, _division);
+        prep.setString(1, pageHandler.getDivision());
         teamsRS = prep.executeQuery();
         while (teamsRS.next()) {
           final int teamNumber = teamsRS.getInt(3);
@@ -349,11 +292,9 @@ public final class FinalComputedScores extends PdfPageEventHelper {
             final double catWeight = weights[cat];
             if (catWeight > 0.0) {
               final String catName = catElement.getAttribute("name");
-              rawScoreRS = stmt
-                               .executeQuery("SELECT ComputedTotal"
-                                           //TODO make prepared statement
-                                   + " FROM " + catName + " WHERE TeamNumber = " + teamNumber + " AND Tournament = " + _tournament
-                                   + " ORDER BY ComputedTotal " + ascDesc);
+              rawScoreRS = stmt.executeQuery("SELECT ComputedTotal"
+                  // TODO make prepared statement
+                  + " FROM " + catName + " WHERE TeamNumber = " + teamNumber + " AND Tournament = " + _tournament + " ORDER BY ComputedTotal " + ascDesc);
               boolean scoreSeen = false;
               String rawScoreText = "";
               while (rawScoreRS.next()) {
@@ -377,7 +318,7 @@ public final class FinalComputedScores extends PdfPageEventHelper {
 
           // Column for the highest performance score of the seeding rounds
           rawScoreRS = stmt.executeQuery("SELECT score FROM performance_seeding_max"
-                                       //TODO make prepared statement
+              // TODO make prepared statement
               + " WHERE TeamNumber = " + teamNumber + " AND Tournament = " + _tournament);
           final double rawScore;
           if (rawScoreRS.next()) {
@@ -390,8 +331,8 @@ public final class FinalComputedScores extends PdfPageEventHelper {
           } else {
             rawScore = Double.NaN;
           }
-          PdfPCell pCell = new PdfPCell((Double.isNaN(rawScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED) : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(rawScore),
-                                                                                                                            ARIAL_8PT_NORMAL)));
+          PdfPCell pCell = new PdfPCell((Double.isNaN(rawScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)
+              : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(rawScore), ARIAL_8PT_NORMAL)));
           pCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
           pCell.setBorder(0);
           curteam.addCell(pCell);
@@ -443,16 +384,16 @@ public final class FinalComputedScores extends PdfPageEventHelper {
               scaledScore = v;
             }
 
-            pCell = new PdfPCell((Double.isNaN(scaledScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED) : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(scaledScore),
-                                                                                                                        ARIAL_8PT_NORMAL)));
+            pCell = new PdfPCell((Double.isNaN(scaledScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)
+                : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(scaledScore), ARIAL_8PT_NORMAL)));
             pCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
             pCell.setBorder(0);
             curteam.addCell(pCell);
           }
 
           // Last column contains the overall scaled score
-          pCell = new PdfPCell((Double.isNaN(totalScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED) : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(totalScore),
-                                                                                                                     ARIAL_8PT_NORMAL)));
+          pCell = new PdfPCell((Double.isNaN(totalScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)
+              : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(totalScore), ARIAL_8PT_NORMAL)));
           pCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
           pCell.setBorder(0);
           curteam.addCell(pCell);

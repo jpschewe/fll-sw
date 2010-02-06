@@ -202,6 +202,14 @@
   <url-pattern>/report/CategorizedScores</url-pattern>
  </servlet-mapping>
 
+ <servlet>
+  <servlet-name>FinalComputedScores</servlet-name>
+  <servlet-class>fll.web.report.FinalComputedScores</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>FinalComputedScores</servlet-name>
+  <url-pattern>/report/finalComputedScores.pdf</url-pattern>
+ </servlet-mapping>
 
  <servlet>
   <servlet-name>FinalistSchedulerUI</servlet-name>
