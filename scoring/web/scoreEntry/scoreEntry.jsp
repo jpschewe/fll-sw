@@ -22,11 +22,6 @@ final Document challengeDocument = ApplicationAttributes.getChallengeDocument(ap
 // support the unverified runs select box
 final String lTeamNum = request.getParameter("TeamNumber");
 if(null == lTeamNum) {
-  //FIXME error, redirect to error page
-  //Response.Redirect("ScoreError.asp?Text=Attempted+to+load+score+entry+page+without+providing+a+team+number.")
-  //response.sendError(response.SC_BAD_REQUEST, "Attempted to load score entry page without providing a team number.");
-  //out.print("<!-- Error no team number -->");
-  //throw exception for now
   throw new RuntimeException("Attempted to load score entry page without providing a team number.");
 }
 final int dashIndex = lTeamNum.indexOf('-');
@@ -46,10 +41,6 @@ final Connection connection = datasource.getConnection();
 final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
 final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
 if(!tournamentTeams.containsKey(new Integer(teamNumber))) {
-  //FIXME error, redirect to error page
-  //response.sendError(response.SC_BAD_REQUEST, "Team number selected is not valid.");
-  //out.print("<!-- Invalid team number -->");
-  //throw exception for now
   throw new RuntimeException("Selected team number is not valid: " + teamNumber);
 }
 final Team team = (Team)tournamentTeams.get(new Integer(teamNumber));
