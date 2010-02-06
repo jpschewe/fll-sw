@@ -824,6 +824,7 @@
 	      effort="max"
 	      jvmargs="-Xmx512m"
           reportLevel="low"
+    	  exclude="${basedir}/findbugs-filters.xml"
 	      >
       <auxClasspath refid="compile.classpath" />
       <sourcePath path="${dir.src}" />

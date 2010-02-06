@@ -1,0 +1,9 @@
+<FindBugsFilter>
+
+ <!-- ignore errors about missing serial version ids -->
+ <Match>
+  <Bug pattern="SE_NO_SERIALVERSIONID" />
+ </Match>
+ 
+</FindBugsFilter>
+
