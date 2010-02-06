@@ -71,6 +71,16 @@
   <url-pattern>/GetFile</url-pattern>
  </servlet-mapping>
 
+ <!--  root -->
+ <servlet>
+  <servlet-name>DisplayChallengeDescriptor</servlet-name>
+  <servlet-class>fll.web.DisplayChallengeDescriptor</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>DisplayChallengeDescriptor</servlet-name>
+  <url-pattern>/challenge.xml</url-pattern>
+ </servlet-mapping>
+
  <!--  setup -->
  <servlet>
   <servlet-name>CreateDB</servlet-name>
