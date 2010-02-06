@@ -114,7 +114,8 @@ public class CreateTournament extends BaseFLLServlet {
         final boolean nextIsNull = sourceRS.wasNull();
         
         Queries.createTournament(destConnection, tournamentName, location);
-
+        message.append("<p>Created tournament " + tournamentName + "</p>");
+        
         if (!nextIsNull) {
           final String nextName = Queries.getTournamentName(destConnection, nextTournament);
           final List<String> knownTournaments = Queries.getTournamentNames(destConnection);
