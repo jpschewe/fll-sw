@@ -98,6 +98,15 @@ pageContext.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == maxRunComple
 final int tournament = Queries.getCurrentTournament(connection);
 pageContext.setAttribute("isBye", Boolean.valueOf(Queries.isBye(connection, tournament, teamNumber, lRunNumber)));
 pageContext.setAttribute("isNoShow", Boolean.valueOf(Queries.isNoShow(connection, tournament, teamNumber, lRunNumber)));
+
+// check if previous run is verified
+final boolean previousVerified;
+if(lRunNumber > 1) {
+  previousVerified = Queries.isVerified(connection, tournament, teamNumber, lRunNumber-1);
+} else {
+  previousVerified = true;
+}
+pageContext.setAttribute("previousVerified", previousVerified);
 %>
 
 <html>
@@ -264,7 +273,7 @@ return m;
       <input type='hidden' name='RunNumber' value='<%=lRunNumber%>' readonly>
       <input type='hidden' name='TeamNumber' value='<%=team.getTeamNumber()%>' readonly>
 
-      <table width='100%' border="0" cellpadding="0" cellspacing="0" align="center">
+      <table width='100%' border="0" cellpadding="0" cellspacing="0" align="center"> <!-- info bar -->
         <tr>
           <td align="center" valign="middle">
           <!-- top info bar (team name etc) -->
@@ -276,7 +285,7 @@ return m;
               <table border="1" cellpadding="0" cellspacing="0" width="100%" bgcolor='#e0e0e0'>
             </c:if>
 <%} else {%>
-            <table border="1" cellpadding="0" cellspacing="0" width="100%" bgcolor='red'>
+            <table border="1" cellpadding="0" cellspacing="0" width="100%" bgcolor='#00FF00'>
 <%}%>
               <tr align="center" valign="middle"><td>
 
@@ -298,8 +307,15 @@ return m;
                     </tr>
                   </table> <!--  end inner box on title -->
 
-                </td></tr>
-            </table> <!--  end top info bar -->
+                </td></tr> <!-- team info -->
+                
+                <c:if test="${not previousVerified }">
+                  <!--  warning -->
+                  <tr><td bgcolor='red' align='center'>
+                  <font face="Arial" size="4">Warning: Previous run for this team has not been verified!</font>                  
+                </c:if>
+                
+            </table> <!--  end info bar -->
 
           </td></tr>
 
