@@ -831,5 +831,23 @@
       <class location="${dir.classes}" />
     </findbugs>
   </target>
-  
+
+	  <target name="findbugs.html"
+		  depends="compile"
+		  description="Executes findbugs to look for problems in the source.">
+	    <mkdir dir="${dir.build}/findbugs"/>
+	    <findbugs home="${findbugs.home}"
+		      output="html"
+		      outputFile="${dir.build}/findbugs/report.html"
+		      effort="max"
+		      jvmargs="-Xmx512m"
+	          reportLevel="low"
+	    	  excludeFilter="${basedir}/findbugs-filters.xml"
+		      >
+	      <auxClasspath refid="compile.classpath" />
+	      <sourcePath path="${dir.src}" />
+	      <class location="${dir.classes}" />
+	    </findbugs>
+	  </target>
+
 </project>

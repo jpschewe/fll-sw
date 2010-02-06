@@ -4,6 +4,42 @@
  <Match>
   <Bug pattern="SE_NO_SERIALVERSIONID" />
  </Match>
- 
+
+
+ <!--  fll.web.admin.UploadTeams -->
+ <Match>
+  <Class name="fll.web.admin.UploadTeams" />
+  <Method name="parseFile" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+   <Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" />
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
+
+
+ <Match>
+  <Class name="fll.web.admin.UploadTeams" />
+  <Method name="verifyTeams" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+   <Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" />
+  </Or>
+ </Match>
+
+ <Match>
+  <Class name="fll.web.admin.UploadTeams" />
+  <Method name="applyFilters" />
+  <Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" />
+ </Match>
+
+ <Match>
+  <Class name="fll.web.admin.UploadTeams" />
+  <Method name="copyFilteredTeams" />
+  <Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" />
+ </Match>
+
+
+
 </FindBugsFilter>
 
