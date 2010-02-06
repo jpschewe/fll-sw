@@ -1,16 +1,23 @@
 /**
  * 
  */
-package fll.web.scoreEntry;
+package fll.web.playoff;
 
 import java.awt.Color;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.List;
-import java.util.Map;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -35,19 +42,48 @@ import fll.Utilities;
 import fll.Version;
 import fll.db.Queries;
 import fll.util.FP;
+import fll.web.ApplicationAttributes;
+import fll.web.BaseFLLServlet;
+import fll.web.SessionAttributes;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 
 /**
  * @author Dan Churchill
  */
-public class ScoresheetGenerator {
+public class ScoresheetGenerator extends BaseFLLServlet {
 
   private static final Logger LOGGER = Logger.getLogger(ScoresheetGenerator.class);
 
   private static final String LONG_BLANK = "_________________________";
 
   private static final String SHORT_BLANK = "___________";
+
+  @Override
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session) throws IOException, ServletException {
+    try {
+      final DataSource datasource = SessionAttributes.getDataSource(session);
+      final Connection connection = datasource.getConnection();
+      final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+      final int tournament = Queries.getCurrentTournament(connection);
+      response.reset();
+      response.setContentType("application/pdf");
+      response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
+
+      // Create the scoresheet generator - must provide correct number of
+      // scoresheets
+      initialize(request, connection, tournament, challengeDocument);
+
+      writeFile(connection, response.getOutputStream());
+    } catch (final SQLException e) {
+      throw new RuntimeException(e);
+    } catch (final DocumentException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   /**
    * Create a new ScoresheetGenerator object populated with form header data
@@ -75,129 +111,98 @@ public class ScoresheetGenerator {
    * printed, so table assignments are stored into the database and the match is
    * marked as printed. It is very questionable whether this is where this
    * should happen, but I don't feel like breaking it out.
-   * 
-   * @param formParms java.util.Map object containing objects as described
-   *          above.
-   * @param connection java.sql.Connection object with open connection to the
-   *          database.
-   * @param document DOM document containing the challenge info used to generate
-   *          the scoresheet.
    */
-  public ScoresheetGenerator(final Map<?, ?> formParms, final Connection connection, final int tournament, final org.w3c.dom.Document document)
+  protected void initialize(final HttpServletRequest request, final Connection connection, final int tournament, final org.w3c.dom.Document document)
       throws SQLException {
-    final int numMatches = Integer.parseInt(((String[]) formParms.get("numMatches"))[0]);
-    final boolean[] checkedMatches = new boolean[numMatches + 1]; // ignore slot
-    // index 0
-    int checkedMatchCount = 0;
-    // Build array of out how many matches we are printing
-    for (int i = 1; i <= numMatches; i++) {
-      final String checkX = "print"
-          + i;
-      checkedMatches[i] = null != formParms.get(checkX);
-      if (checkedMatches[i]) {
-        checkedMatchCount++;
+    final String numMatchesStr = request.getParameter("numMatches");
+    if (null == numMatchesStr) {
+      // must have been called asking for blank
+      m_numTeams = Queries.getScoresheetLayoutNUp(connection);
+      initializeArrays();
+
+      setPageTitle("");
+      for (int i = 0; i < m_numTeams; i++) {
+        m_table[i] = SHORT_BLANK;
+        m_name[i] = LONG_BLANK;
+        m_round[i] = SHORT_BLANK;
+        m_number[i] = null;
       }
-    }
-
-    m_numTeams = checkedMatchCount * 2;
-
-    initializeArrays();
-    setPageTitle(m_pageTitle);
-
-    // Loop through checked matches, populate data, and update database to track
-    // printed status and remember assigned tables.
-    PreparedStatement updatePrep = null;
-    try {
-      // build up the SQL
-      updatePrep = connection.prepareStatement("UPDATE PlayoffData SET Printed=true, AssignedTable=?"
-          + " WHERE event_division=? AND Tournament=? AND PlayoffRound=? AND Team=?");
-      // could do division here, too, but since getting it from Team object,
-      // will defer to same place as other
-      updatePrep.setInt(3, tournament);
-
-      int j = 0;
+    } else {
+      // called with specific sheets to print
+      final int numMatches = Integer.parseInt(numMatchesStr);
+      final boolean[] checkedMatches = new boolean[numMatches + 1]; // ignore
+      // slot
+      // index 0
+      int checkedMatchCount = 0;
+      // Build array of out how many matches we are printing
       for (int i = 1; i <= numMatches; i++) {
+        final String checkX = "print"
+            + i;
+        checkedMatches[i] = null != request.getParameter(checkX);
         if (checkedMatches[i]) {
-          final String round = ((String[]) formParms.get("round"
-              + i))[0];
-          final int iRound = Integer.parseInt(round);
-          // Get teamA info
-          final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(((String[]) formParms.get(new String("teamA"
-              + i)))[0]));
-          m_name[j] = teamA.getTeamName();
-          m_number[j] = teamA.getTeamNumber();
-          m_round[j] = "Playoff Round "
-              + round;
-          m_table[j] = ((String[]) formParms.get(new String("tableA"
-              + i)))[0];
-          updatePrep.setString(1, m_table[j]);
-          updatePrep.setString(2, Queries.getEventDivision(connection, teamA.getTeamNumber()));
-          updatePrep.setInt(4, iRound);
-          updatePrep.setInt(5, teamA.getTeamNumber());
-          updatePrep.executeUpdate();
-          j++;
-          // Get teamB info
-          final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(((String[]) formParms.get(new String("teamB"
-              + i)))[0]));
-          m_name[j] = teamB.getTeamName();
-          m_number[j] = teamB.getTeamNumber();
-          m_round[j] = "Playoff Round "
-              + round;
-          m_table[j] = ((String[]) formParms.get(new String("tableB"
-              + i)))[0];
-          updatePrep.setString(1, m_table[j]);
-          updatePrep.setString(2, Queries.getEventDivision(connection, teamB.getTeamNumber()));
-          updatePrep.setInt(4, iRound);
-          updatePrep.setInt(5, teamB.getTeamNumber());
-          updatePrep.executeUpdate();
-          j++;
+          checkedMatchCount++;
         }
       }
-    } finally {
-      SQLFunctions.closePreparedStatement(updatePrep);
+
+      m_numTeams = checkedMatchCount * 2;
+
+      initializeArrays();
+      setPageTitle(m_pageTitle);
+
+      // Loop through checked matches, populate data, and update database to
+      // track
+      // printed status and remember assigned tables.
+      PreparedStatement updatePrep = null;
+      try {
+        // build up the SQL
+        updatePrep = connection.prepareStatement("UPDATE PlayoffData SET Printed=true, AssignedTable=?"
+            + " WHERE event_division=? AND Tournament=? AND PlayoffRound=? AND Team=?");
+        // could do division here, too, but since getting it from Team object,
+        // will defer to same place as other
+        updatePrep.setInt(3, tournament);
+
+        int j = 0;
+        for (int i = 1; i <= numMatches; i++) {
+          if (checkedMatches[i]) {
+            final String round = request.getParameter("round"
+                + i);
+            final int iRound = Integer.parseInt(round);
+            // Get teamA info
+            final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamA"
+                + i)));
+            m_name[j] = teamA.getTeamName();
+            m_number[j] = teamA.getTeamNumber();
+            m_round[j] = "Playoff Round "
+                + round;
+            m_table[j] = request.getParameter("tableA"
+                + i);
+            updatePrep.setString(1, m_table[j]);
+            updatePrep.setString(2, Queries.getEventDivision(connection, teamA.getTeamNumber()));
+            updatePrep.setInt(4, iRound);
+            updatePrep.setInt(5, teamA.getTeamNumber());
+            updatePrep.executeUpdate();
+            j++;
+            // Get teamB info
+            final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamB"
+                + i)));
+            m_name[j] = teamB.getTeamName();
+            m_number[j] = teamB.getTeamNumber();
+            m_round[j] = "Playoff Round "
+                + round;
+            m_table[j] = request.getParameter("tableB"
+                + i);
+            updatePrep.setString(1, m_table[j]);
+            updatePrep.setString(2, Queries.getEventDivision(connection, teamB.getTeamNumber()));
+            updatePrep.setInt(4, iRound);
+            updatePrep.setInt(5, teamB.getTeamNumber());
+            updatePrep.executeUpdate();
+            j++;
+          }
+        }
+      } finally {
+        SQLFunctions.closePreparedStatement(updatePrep);
+      }
     }
-
-    setChallengeInfo(document);
-  }
-
-  /**
-   * Print blank scoresheets.
-   * 
-   * @param numTeams number of scoresheets to print
-   * @param document the challenge document
-   */
-  public ScoresheetGenerator(final int numTeams, final org.w3c.dom.Document document) {
-    m_numTeams = numTeams;
-    initializeArrays();
-
-    setPageTitle("");
-    for (int i = 0; i < m_numTeams; i++) {
-      m_table[i] = SHORT_BLANK;
-      m_name[i] = LONG_BLANK;
-      m_round[i] = SHORT_BLANK;
-      m_number[i] = null;
-    }
-    setChallengeInfo(document);
-  }
-
-  /**
-   * Print a single scoresheet for a team.
-   * 
-   * @param teamNumber the team to print the scoresheet for
-   * @param document the challenge document
-   * @param connection the database connection
-   */
-  public ScoresheetGenerator(final int teamNumber, final org.w3c.dom.Document document, final Connection connection) throws SQLException {
-    m_numTeams = 1;
-    initializeArrays();
-
-    final Team teamA = Team.getTeamFromDatabase(connection, teamNumber);
-
-    setPageTitle("");
-    m_table[0] = SHORT_BLANK;
-    m_name[0] = teamA.getTeamName();
-    m_round[0] = SHORT_BLANK;
-    m_number[0] = teamA.getTeamNumber();
     setChallengeInfo(document);
   }
 
@@ -335,7 +340,7 @@ public class ScoresheetGenerator {
 
       final PdfPTable teamInfo = new PdfPTable(4);
       teamInfo.setWidthPercentage(100);
-      
+
       // Table label cell
       final Paragraph tblP = new Paragraph("Table:", ARIAL_10PT_NORMAL);
       tblP.setAlignment(Element.ALIGN_RIGHT);
@@ -384,7 +389,7 @@ public class ScoresheetGenerator {
       teamInfo.addCell(divlc);
       // Team division value cell
       final String divStr;
-      if(null != m_number[i]) {
+      if (null != m_number[i]) {
         divStr = Queries.getEventDivision(connection, m_number[i]);
       } else {
         divStr = SHORT_BLANK;
@@ -393,7 +398,7 @@ public class ScoresheetGenerator {
       final PdfPCell divVc = new PdfPCell(team[i].getDefaultCell());
       divVc.addElement(divV);
       teamInfo.addCell(divVc);
-      
+
       // Team name label cell
       final Paragraph nameP = new Paragraph("Team Name:", ARIAL_10PT_NORMAL);
       nameP.setAlignment(Element.ALIGN_RIGHT);
@@ -412,9 +417,9 @@ public class ScoresheetGenerator {
       final PdfPCell teamInfoCell = new PdfPCell(team[i].getDefaultCell());
       teamInfoCell.addElement(teamInfo);
       teamInfoCell.setColspan(2);
-      
+
       team[i].addCell(teamInfoCell);
-      
+
       final PdfPCell blankRow = new PdfPCell(new Phrase(""));
       blankRow.setColspan(2);
       blankRow.setBorder(0);
@@ -566,7 +571,7 @@ public class ScoresheetGenerator {
     }
   }
 
-  private final int m_numTeams;
+  private int m_numTeams;
 
   private String m_revision;
 
