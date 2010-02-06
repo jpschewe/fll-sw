@@ -1,5 +1,5 @@
 #FindBugs User Preferences
-#Fri Jan 01 19:39:43 CST 2010
+#Sat Feb 06 17:11:06 CST 2010
 detectorAppendingToAnObjectOutputStream=AppendingToAnObjectOutputStream|true
 detectorBCPMethodReturnCheck=BCPMethodReturnCheck|false
 detectorBadAppletConstructor=BadAppletConstructor|false
@@ -154,8 +154,9 @@ detectorVolatileUsage=VolatileUsage|true
 detectorWaitInLoop=WaitInLoop|true
 detectorWrongMapIterator=WrongMapIterator|true
 detectorXMLFactoryBypass=XMLFactoryBypass|true
-detector_threshold=1
+detector_threshold=3
 effort=default
-filter_settings=High|BAD_PRACTICE,CORRECTNESS,EXPERIMENTAL,MALICIOUS_CODE,MT_CORRECTNESS,PERFORMANCE,SECURITY,STYLE|false
+excludefilter0=scoring/findbugs-filters.xml
+filter_settings=Low|BAD_PRACTICE,CORRECTNESS,EXPERIMENTAL,MALICIOUS_CODE,MT_CORRECTNESS,PERFORMANCE,SECURITY,STYLE|false
 filter_settings_neg=NOISE,I18N|
 run_at_full_build=false
