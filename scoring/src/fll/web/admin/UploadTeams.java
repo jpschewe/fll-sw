@@ -85,7 +85,7 @@ public final class UploadTeams extends BaseFLLServlet {
       }
       teamsFileItem.write(file);
       parseFile(file, connection, session);
-      if(!file.delete()) {
+      if (!file.delete()) {
         file.deleteOnExit();
       }
     } catch (final SQLException sqle) {
@@ -268,7 +268,7 @@ public final class UploadTeams extends BaseFLLServlet {
             }
           } catch (final SQLException e) {
             throw new FLLRuntimeException("Error inserting row in to AllTeam: "
-                + Arrays.toString(values));
+                + Arrays.toString(values), e);
           }
         }
       }
@@ -481,11 +481,17 @@ public final class UploadTeams extends BaseFLLServlet {
           out.println("<font color='red'>Error, "
               + teamNumStr + " is not numeric.<br/>");
           out.println("Go back and check your input file for errors.<br/></font>");
+          if(LOGGER.isTraceEnabled()) {
+            LOGGER.trace(e, e);
+          }
           return false;
         } catch (final NumberFormatException nfe) {
           out.println("<font color='red'>Error, "
               + teamNumStr + " is not numeric.<br/>");
           out.println("Go back and check your input file for errors.<br/></font>");
+          if(LOGGER.isTraceEnabled()) {
+            LOGGER.trace(nfe, nfe);
+          }
           return false;
         }
 
@@ -504,9 +510,9 @@ public final class UploadTeams extends BaseFLLServlet {
       // division the same as the team division
       stmt.executeUpdate("DELETE FROM TournamentTeams");
       final int dummyTournamentID = Queries.getTournamentID(connection, "DUMMY");
-      stmt
-          .executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) SELECT " + dummyTournamentID + ", Teams.TeamNumber, Teams.Division FROM Teams");
-              
+      stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) SELECT "
+          + dummyTournamentID + ", Teams.TeamNumber, Teams.Division FROM Teams");
+
       return true;
     } finally {
       SQLFunctions.closeStatement(stmt);
