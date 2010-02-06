@@ -161,10 +161,10 @@ function editFlagBoxClicked() {
      WHERE Verified <> TRUE 
        AND Tournament = ${currentTournament}
        AND Teams.TeamNumber = Performance.TeamNumber
-       ORDER BY RunNumber
+       ORDER BY Performance.RunNumber, Teams.TeamNumber
  </sql:query>
               <c:forEach var="row" items="${result.rowsByIndex}">
-                <option value="${row[0]}-${row[1]}">${row[0]}&nbsp;&nbsp;&nbsp;[${row[2]}]</option>
+                <option value="${row[0]}-${row[1]}">Run ${row[1]}&nbsp;-&nbsp;${row[0]}&nbsp;&nbsp;&nbsp;[${row[2]}]</option>
               </c:forEach>
             </select>
           </td>
