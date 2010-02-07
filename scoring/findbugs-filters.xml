@@ -151,5 +151,15 @@
   </Or>
  </Match>
 
+
+<!--  fll.web.scoreboard.Top10 -->
+<Match>
+  <Class name="fll.web.scoreboard.Top10" />
+  <Method name="processRequest" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
+
 </FindBugsFilter>
 

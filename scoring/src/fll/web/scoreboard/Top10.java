@@ -49,6 +49,7 @@ import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.util.FP;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.xml.WinnerType;
@@ -130,7 +131,7 @@ public class Top10 extends BaseFLLServlet {
       int rank = 0;
       while (rs.next()) {
         final double score = rs.getDouble("MaxOfComputedScore");
-        if (score != prevScore) {
+        if (!FP.equals(score, prevScore, 1E-6)) {
           rank = i;
         }
 
