@@ -40,7 +40,7 @@ public final class GenerateDB {
    * Version of the database that will be created.
    */
   public static final int DATABASE_VERSION = 1;
-  
+
   private static final Logger LOGGER = Logger.getLogger(GenerateDB.class);
 
   /**
@@ -101,12 +101,14 @@ public final class GenerateDB {
   }
 
   public static final String DEFAULT_TEAM_NAME = "<No Name>";
+
   public static final String DEFAULT_TEAM_DIVISION = "1";
+
   public static final String DEFAULT_TEAM_REGION = "DUMMY";
-  
+
   /**
-   * Generate a completely new DB from document. This also stores the document in
-   * the database for later use.
+   * Generate a completely new DB from document. This also stores the document
+   * in the database for later use.
    * 
    * @param document and XML document that describes a tournament
    * @param connection connection to the database to create the tables in
@@ -125,12 +127,12 @@ public final class GenerateDB {
       stmt.executeUpdate("SET WRITE_DELAY 100 MILLIS");
 
       final Collection<String> tables = Queries.getTablesInDB(connection);
-      
+
       globalParameters(connection, forceRebuild, tables);
-        
+
       // Table structure for table 'Tournaments'
       tournaments(connection, forceRebuild, tables);
-      
+
       // Table structure for table 'Teams'
       if (forceRebuild) {
         stmt.executeUpdate("DROP TABLE IF EXISTS Teams CASCADE");
@@ -165,25 +167,30 @@ public final class GenerateDB {
         prep.setString(2, Team.NULL.getTeamName());
         prep.setString(3, "INTERNAL");
         prep.executeUpdate();
-        
+
         SQLFunctions.closePreparedStatement(prep);
       }
 
       // Table structure for table 'tablenames'
       stmt.executeUpdate("DROP TABLE IF EXISTS tablenames CASCADE");
       stmt.executeUpdate("CREATE TABLE tablenames ("
-          + "  Tournament INTEGER NOT NULL," + "  PairID INTEGER NOT NULL," + "  SideA varchar(64) NOT NULL,"
-          + "  SideB varchar(64) NOT NULL," + "  CONSTRAINT tablenames_pk PRIMARY KEY (Tournament,PairID)"
+          + "  Tournament INTEGER NOT NULL," + "  PairID INTEGER NOT NULL," + "  SideA varchar(64) NOT NULL," + "  SideB varchar(64) NOT NULL,"
+          + "  CONSTRAINT tablenames_pk PRIMARY KEY (Tournament,PairID)"
           + " ,CONSTRAINT tablenames_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" + ")");
 
       // table to hold head-to-head playoff meta-data
       stmt.executeUpdate("DROP TABLE IF EXISTS PlayoffData CASCADE");
       stmt.executeUpdate("CREATE TABLE PlayoffData ("
-          + " event_division varchar(32) NOT NULL," + " Tournament INTEGER  NOT NULL," + " PlayoffRound integer NOT NULL,"
-          + " LineNumber integer NOT NULL," + " Team integer default " + Team.NULL_TEAM_NUMBER + "," + " AssignedTable varchar(64) default NULL,"
-          + " Printed boolean default FALSE," + " CONSTRAINT playoff_data_pk PRIMARY KEY (event_division, Tournament, PlayoffRound, LineNumber)"
-          + ",CONSTRAINT playoff_data_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)"
-          + ",CONSTRAINT playoff_data_fk2 FOREIGN KEY(Team) REFERENCES Teams(TeamNumber)" + ")");
+          + " event_division varchar(32) NOT NULL," //
+          + " Tournament INTEGER  NOT NULL," //
+          + " PlayoffRound integer NOT NULL," //
+          + " LineNumber integer NOT NULL," //
+          + " Team integer default " + Team.NULL_TEAM_NUMBER + "," //
+          + " AssignedTable varchar(64) default NULL," //
+          + " Printed boolean default FALSE," //
+          + " CONSTRAINT playoff_data_pk PRIMARY KEY (event_division, Tournament, PlayoffRound, LineNumber)" //
+          + ",CONSTRAINT playoff_data_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
+          + ",CONSTRAINT playoff_data_fk2 FOREIGN KEY(Team) REFERENCES Teams(TeamNumber)" + ")"); //
 
       // table to hold team numbers of teams in this tournament
       if (forceRebuild) {
@@ -212,11 +219,10 @@ public final class GenerateDB {
             + "  CONSTRAINT tournament_parameters_pk PRIMARY KEY  (Param)" + ")");
 
         // populate tournament parameters with default values
-        
+
         // inverted order of Value and Param so that the update statement and
         // the insert statement both have the same order of parameters
-        prep = connection        
-        .prepareStatement("INSERT INTO TournamentParameters (Value, Param) VALUES (?, ?)");
+        prep = connection.prepareStatement("INSERT INTO TournamentParameters (Value, Param) VALUES (?, ?)");
         prep.setString(2, TournamentParameters.CURRENT_TOURNAMENT);
         prep.setInt(1, Queries.getTournamentID(connection, "DUMMY"));
         prep.executeUpdate();
@@ -228,7 +234,7 @@ public final class GenerateDB {
         prep.setString(2, TournamentParameters.STANDARDIZED_MEAN);
         prep.setDouble(1, TournamentParameters.STANDARDIZED_MEAN_DEFAULT);
         prep.executeUpdate();
-        
+
         prep.setString(2, TournamentParameters.STANDARDIZED_SIGMA);
         prep.setDouble(1, TournamentParameters.STANDARDIZED_SIGMA_DEFAULT);
         prep.executeUpdate();
@@ -249,7 +255,7 @@ public final class GenerateDB {
       prep.setAsciiStream(1, bais, bytes.length);
       prep.executeUpdate();
       SQLFunctions.closePreparedStatement(prep);
-      
+
       // Table structure for table 'Judges'
       stmt.executeUpdate("DROP TABLE IF EXISTS Judges CASCADE");
       stmt.executeUpdate("CREATE TABLE Judges ("
@@ -266,8 +272,8 @@ public final class GenerateDB {
 
       // performance
       final StringBuilder performanceColumns = new StringBuilder(); // used for
-                                                                    // view
-                                                                    // below
+      // view
+      // below
       {
         final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
         final String tableName = "Performance";
@@ -387,7 +393,7 @@ public final class GenerateDB {
 
   }
 
-  /*package*/ static void tournaments(final Connection connection, final boolean forceRebuild, final Collection<String> tables) throws SQLException {
+  /* package */static void tournaments(final Connection connection, final boolean forceRebuild, final Collection<String> tables) throws SQLException {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
@@ -416,9 +422,7 @@ public final class GenerateDB {
     }
   }
 
-  /*package*/ static void globalParameters(final Connection connection, 
-                                       final boolean forceRebuild, 
-                                       final Collection<String> tables) throws SQLException {
+  /* package */static void globalParameters(final Connection connection, final boolean forceRebuild, final Collection<String> tables) throws SQLException {
     Statement stmt = null;
     PreparedStatement insertPrep = null;
     PreparedStatement deletePrep = null;
@@ -435,24 +439,23 @@ public final class GenerateDB {
             + " ,CONSTRAINT global_parameters_pk PRIMARY KEY (param)" //
             + ")");
       }
-      
+
       insertPrep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
       deletePrep = connection.prepareStatement("DELETE FROM global_parameters WHERE param = ?");
-      
+
       // set database version
       deletePrep.setString(1, GlobalParameters.DATABASE_VERSION);
       deletePrep.executeUpdate();
       insertPrep.setInt(1, DATABASE_VERSION);
       insertPrep.setString(2, GlobalParameters.DATABASE_VERSION);
       insertPrep.executeUpdate();
-      
+
     } finally {
       SQLFunctions.closeStatement(stmt);
       SQLFunctions.closePreparedStatement(insertPrep);
       SQLFunctions.closePreparedStatement(deletePrep);
     }
   }
-  
 
   /**
    * Generate the definition of a column for the given goal element.
@@ -476,13 +479,12 @@ public final class GenerateDB {
       definition += " float";
     }
 
-    if(LOGGER.isDebugEnabled()) {
+    if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("GoalColumnDefinition: "
-                   + definition);
+          + definition);
     }
 
     return definition;
   }
-
 
 }
