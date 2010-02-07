@@ -5,6 +5,10 @@
   <Bug pattern="SE_NO_SERIALVERSIONID" />
  </Match>
 
+ <!--  Ignore I8N -->
+ <Match>
+  <Bug code="I18N" />
+ </Match>
 
  <!--  fll.web.admin.UploadTeams -->
  <Match>
@@ -143,7 +147,7 @@
   </Or>
  </Match>
 
-<Match>
+ <Match>
   <Class name="fll.db.Queries" />
   <Method name="deleteTeam" />
   <Or>
@@ -152,8 +156,8 @@
  </Match>
 
 
-<!--  fll.web.scoreboard.Top10 -->
-<Match>
+ <!--  fll.web.scoreboard.Top10 -->
+ <Match>
   <Class name="fll.web.scoreboard.Top10" />
   <Method name="processRequest" />
   <Or>
