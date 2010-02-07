@@ -481,16 +481,16 @@ public final class UploadTeams extends BaseFLLServlet {
           out.println("<font color='red'>Error, "
               + teamNumStr + " is not numeric.<br/>");
           out.println("Go back and check your input file for errors.<br/></font>");
-          if(LOGGER.isTraceEnabled()) {
-            LOGGER.trace(e, e);
+          if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug(e, e);
           }
           return false;
         } catch (final NumberFormatException nfe) {
           out.println("<font color='red'>Error, "
               + teamNumStr + " is not numeric.<br/>");
           out.println("Go back and check your input file for errors.<br/></font>");
-          if(LOGGER.isTraceEnabled()) {
-            LOGGER.trace(nfe, nfe);
+          if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug(nfe, nfe);
           }
           return false;
         }

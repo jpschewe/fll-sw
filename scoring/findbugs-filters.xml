@@ -39,36 +39,117 @@
   <Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" />
  </Match>
 
-<!--  fll.ScoreStandardization -->
-<Match>
-<Class name="fll.ScoreStandardization"/>
-<Method name="summarizeScores"/>
-<Or>
-<Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING"/>
-<Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE"/>
-</Or>
-</Match>
+ <!--  fll.ScoreStandardization -->
+ <Match>
+  <Class name="fll.ScoreStandardization" />
+  <Method name="summarizeScores" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+   <Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" />
+  </Or>
+ </Match>
+
+ <Match>
+  <Class name="fll.ScoreStandardization" />
+  <Method name="updateTeamTotalScores" />
+  <Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" />
+ </Match>
+
+ <Match>
+  <Class name="fll.ScoreStandardization" />
+  <Method name="standardizeSubjectiveScores" />
+  <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+ </Match>
+
+
+ <!--  fll.db.Queries -->
+ <Match>
+  <Class name="fll.db.Queries" />
+  <Method name="determineSubjectiveRanking" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
+
+ <Match>
+  <Class name="fll.db.Queries" />
+  <Method name="getPlayoffSeedingOrder" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
+
+ <Match>
+  <Class name="fll.db.Queries" />
+  <Method name="getTeamsNeedingSeedingRuns" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
+
+ <Match>
+  <Class name="fll.db.Queries" />
+  <Method name="getTeamsWithExtraRuns" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
+
+ <Match>
+  <Class name="fll.db.Queries" />
+  <Method name="computeRanking" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
+
+ <Match>
+  <Class name="fll.db.Queries" />
+  <Method name="computeScoreGroups" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
+
+ <Match>
+  <Class name="fll.db.Queries" />
+  <Method name="deleteTeamFromTournamet" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
+
+ <Match>
+  <Class name="fll.db.Queries" />
+  <Method name="updateSubjectiveScoreTotals" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
+
+ <Match>
+  <Class name="fll.db.Queries" />
+  <Method name="insertPerformanceScore" />
+  <Or>
+   <Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" />
+  </Or>
+ </Match>
+
+ <Match>
+  <Class name="fll.db.Queries" />
+  <Method name="updatePerformanceScore" />
+  <Or>
+   <Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" />
+  </Or>
+ </Match>
 
 <Match>
-<Class name="fll.ScoreStandardization"/>
-<Method name="updateTeamTotalScores"/>
-<Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE"/>
-</Match>
-
-<Match>
-<Class name="fll.ScoreStandardization"/>
-<Method name="standardizeSubjectiveScores"/>
-<Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING"/>
-</Match>
-
-<!--  fll.db.Queries -->
-<Match>
-<Class name="fll.db.Queries"/>
-<Method name="determineSubjectiveRanking"/>
-<Or>
-<Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING"/>
-</Or>
-</Match>
+  <Class name="fll.db.Queries" />
+  <Method name="deleteTeam" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
 
 </FindBugsFilter>
 
