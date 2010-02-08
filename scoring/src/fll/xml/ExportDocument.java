@@ -16,6 +16,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 
 import fll.Utilities;
@@ -68,17 +70,19 @@ public final class ExportDocument {
       if (rs.next()) {
         final Reader reader = rs.getCharacterStream(1);
         final FileWriter writer = new FileWriter(challengeFile);
-
-        // copy to the file
-        final CharBuffer buffer = CharBuffer.allocate(32 * 1024);
-        while (reader.read(buffer) != -1
-            || buffer.position() > 0) {
-          buffer.flip();
-          writer.append(buffer);
-          buffer.clear();
+        try {
+          // copy to the file
+          final CharBuffer buffer = CharBuffer.allocate(32 * 1024);
+          while (reader.read(buffer) != -1
+              || buffer.position() > 0) {
+            buffer.flip();
+            writer.append(buffer);
+            buffer.clear();
+          }
+        } finally {
+          reader.close();
+          writer.close();
         }
-        reader.close();
-        writer.close();
 
       } else {
         throw new RuntimeException("Could not find challenge document in database");
@@ -90,6 +94,10 @@ public final class ExportDocument {
     } catch (final SQLException sqle) {
       LOG.fatal("Error talking to database", sqle);
       System.exit(1);
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closeConnection(connection);
     }
     System.exit(0);
   }

@@ -174,5 +174,41 @@
 		</Or>
 	</Match>
 
+	<!--  fll.web.playoff.DatabaseTeamScore -->
+	<Match>
+		<Class name="fll.web.playoff.DatabaseTeamScore" />
+		<Method name="createResultSet" />
+		<Or>
+			<Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+		</Or>
+	</Match>
+
+<!-- fll.Utilities -->
+	<Match>
+		<Class name="fll.Utilities" />
+		<Method name="loadCSVFile" />
+		<Or>
+			<Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" />
+			<Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING"/>
+		</Or>
+	</Match>
+
+<!-- fll.xml.XMLUtils -->
+	<Match>
+		<Class name="fll.xml.XMLUtils" />
+		<Method name="getBooleanAttributeValue" />
+		<Or>
+			<Bug pattern="NP_BOOLEAN_RETURN_NULL" />
+		</Or>
+	</Match>
+
+	<Match>
+		<Class name="fll.xml.XMLUtils" />
+		<Method name="createSubjectiveScoresDocument" />
+		<Or>
+			<Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+		</Or>
+	</Match>
+
 </FindBugsFilter>
 

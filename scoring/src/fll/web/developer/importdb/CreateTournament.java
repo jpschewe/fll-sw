@@ -70,7 +70,6 @@ public class CreateTournament extends BaseFLLServlet {
 
     Connection sourceConnection = null;
     PreparedStatement sourcePrep = null;
-    ResultSet sourceRS = null;
     Connection destConnection = null;
     try {
       final String tournament = SessionAttributes.getNonNullAttribute(session, "selectedTournament", String.class);
@@ -84,7 +83,6 @@ public class CreateTournament extends BaseFLLServlet {
 
       session.setAttribute("message", message.toString());
     } finally {
-      SQLFunctions.closeResultSet(sourceRS);
       SQLFunctions.closePreparedStatement(sourcePrep);
       SQLFunctions.closeConnection(sourceConnection);
       SQLFunctions.closeConnection(destConnection);
