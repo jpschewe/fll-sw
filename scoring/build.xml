@@ -92,9 +92,11 @@
     <pathelement location="${dir.lib}/xercesImpl.jar" />
     <pathelement location="${dir.lib}/xml-apis.jar" />
 
-		<!-- Read and Write Excell files -->
+		<!-- Read and Write Excel files -->
 		<pathelement location="${dir.lib}/poi-3.6-20091214.jar" />
 		<pathelement location="${dir.lib}/poi-ooxml-3.6-20091214.jar" />
+  		<pathelement location="${dir.lib}/poi-ooxml-schemas-3.6-20091214.jar" />
+		<pathelement location="${dir.lib}/xmlbeans-2.3.0.jar" />
 
 		<pathelement location="${dir.classes}" />
 
@@ -802,10 +804,10 @@
 	<target name="continuous" description="Runs the continuous integration build">
 		<antcall target="clean" />
 		<antcall target="javadoc" />
-		<antcall target="test.all" />
-		<antcall target="coverage.report" />
 		<antcall target="checkstyle" />
 		<antcall target="findbugs" />
+		<antcall target="test.all" />
+		<antcall target="coverage.report" />
 	</target>
   
   <property name="findbugs.home" value="${dir.lib}/findbugs-1.3.9" />
@@ -822,7 +824,7 @@
 	      output="xml"
 	      outputFile="${dir.build}/findbugs/report.xml"
 	      effort="max"
-	      jvmargs="-Xmx512m"
+	      jvmargs="-Xmx1024m"
           reportLevel="low"
     	  excludeFilter="${basedir}/findbugs-filters.xml"
 	      >
