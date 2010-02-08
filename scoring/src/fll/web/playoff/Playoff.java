@@ -942,65 +942,66 @@ public final class Playoff {
     }
 
     PreparedStatement insertStmt = null;
-    insertStmt = connection.prepareStatement("INSERT INTO PlayoffData"
-        + " (Tournament, event_division, PlayoffRound, LineNumber, Team)" + " VALUES (?, ?, ?, ?, ?)");
-
-    // Insert those teams into the database.
-    // At this time we let the table assignment field default to NULL.
-    final Iterator<Team> it = firstRound.iterator();
-    insertStmt.setInt(1, currentTournament);
-    insertStmt.setString(2, division);
-    insertStmt.setInt(3, 1);
-    int lineNbr = 1;
-    while (it.hasNext()) {
-      insertStmt.setInt(4, lineNbr);
-      insertStmt.setInt(5, it.next().getTeamNumber());
-      insertStmt.executeUpdate();
-
-      lineNbr++;
-    }
-
-    // Create the remaining entries for the playoff data table using Null team
-    // number
-    int currentRoundSize = firstRound.size() / 2;
-    int roundNumber = 2;
-    insertStmt.setInt(1, currentTournament);
-    insertStmt.setString(2, division);
-    while (currentRoundSize > 0) {
-      insertStmt.setInt(3, roundNumber);
-      lineNbr = currentRoundSize;
-      if (enableThird
-          && currentRoundSize <= 2) {
-        lineNbr = lineNbr * 2;
-      }
-      while (lineNbr >= 1) {
-        insertStmt.setInt(4, lineNbr);
-        insertStmt.setInt(5, Team.NULL.getTeamNumber());
-        insertStmt.executeUpdate();
-        lineNbr--;
-      }
-      roundNumber++;
-      currentRoundSize = currentRoundSize / 2;
-    }
-    SQLFunctions.closePreparedStatement(insertStmt);
-    insertStmt = null;
-
-    // Now get all entries, ordered by PlayoffRound and LineNumber, and do table
-    // assignments in order of their occurrence in the database. Additionally,
-    // for
-    // any byes in the first round, populate the "winner" in the second round,
-    // and
-    // enter a BYE in the Performance table (I think score entry depends on a
-    // "score"
-    // being present for every round.)
     PreparedStatement selStmt = null;
     ResultSet rs = null;
-    // Number of rounds is the log base 2 of the number of teams in round1
-    // (including "bye" teams)
-    final int numPlayoffRounds = (int) Math.round(Math.log(firstRound.size())
-        / Math.log(2));
-    final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
     try {
+      insertStmt = connection.prepareStatement("INSERT INTO PlayoffData"
+          + " (Tournament, event_division, PlayoffRound, LineNumber, Team)" + " VALUES (?, ?, ?, ?, ?)");
+
+      // Insert those teams into the database.
+      // At this time we let the table assignment field default to NULL.
+      final Iterator<Team> it = firstRound.iterator();
+      insertStmt.setInt(1, currentTournament);
+      insertStmt.setString(2, division);
+      insertStmt.setInt(3, 1);
+      int lineNbr = 1;
+      while (it.hasNext()) {
+        insertStmt.setInt(4, lineNbr);
+        insertStmt.setInt(5, it.next().getTeamNumber());
+        insertStmt.executeUpdate();
+
+        lineNbr++;
+      }
+
+      // Create the remaining entries for the playoff data table using Null team
+      // number
+      int currentRoundSize = firstRound.size() / 2;
+      int roundNumber = 2;
+      insertStmt.setInt(1, currentTournament);
+      insertStmt.setString(2, division);
+      while (currentRoundSize > 0) {
+        insertStmt.setInt(3, roundNumber);
+        lineNbr = currentRoundSize;
+        if (enableThird
+            && currentRoundSize <= 2) {
+          lineNbr = lineNbr * 2;
+        }
+        while (lineNbr >= 1) {
+          insertStmt.setInt(4, lineNbr);
+          insertStmt.setInt(5, Team.NULL.getTeamNumber());
+          insertStmt.executeUpdate();
+          lineNbr--;
+        }
+        roundNumber++;
+        currentRoundSize = currentRoundSize / 2;
+      }
+      SQLFunctions.closePreparedStatement(insertStmt);
+      insertStmt = null;
+
+      // Now get all entries, ordered by PlayoffRound and LineNumber, and do
+      // table
+      // assignments in order of their occurrence in the database. Additionally,
+      // for
+      // any byes in the first round, populate the "winner" in the second round,
+      // and
+      // enter a BYE in the Performance table (I think score entry depends on a
+      // "score"
+      // being present for every round.)
+      // Number of rounds is the log base 2 of the number of teams in round1
+      // (including "bye" teams)
+      final int numPlayoffRounds = (int) Math.round(Math.log(firstRound.size())
+          / Math.log(2));
+      final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
       selStmt = connection.prepareStatement("SELECT PlayoffRound,LineNumber,Team FROM PlayoffData"//
           + " WHERE Tournament= ?" //
           + " AND event_division= ?" //
