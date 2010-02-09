@@ -219,6 +219,13 @@
    <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
   </Or>
  </Match>
+ <Match>
+  <Class name="fll.xml.XMLUtils" />
+  <Method name="getBooleanAttributeValue" />
+  <Or>
+   <Bug pattern="NP_BOOLEAN_RETURN_NULL" />
+  </Or>
+ </Match>
 
 </FindBugsFilter>
 
