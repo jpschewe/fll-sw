@@ -70,17 +70,19 @@ public final class ExportDocument {
       if (rs.next()) {
         final Reader reader = rs.getCharacterStream(1);
         final FileWriter writer = new FileWriter(challengeFile);
-
-        // copy to the file
-        final CharBuffer buffer = CharBuffer.allocate(32 * 1024);
-        while (reader.read(buffer) != -1
-            || buffer.position() > 0) {
-          buffer.flip();
-          writer.append(buffer);
-          buffer.clear();
+        try {
+          // copy to the file
+          final CharBuffer buffer = CharBuffer.allocate(32 * 1024);
+          while (reader.read(buffer) != -1
+              || buffer.position() > 0) {
+            buffer.flip();
+            writer.append(buffer);
+            buffer.clear();
+          }
+        } finally {
+          reader.close();
+          writer.close();
         }
-        reader.close();
-        writer.close();
 
       } else {
         throw new RuntimeException("Could not find challenge document in database");

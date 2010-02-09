@@ -276,11 +276,10 @@ public final class XMLUtils {
     final Element root = challengeDocument.getDocumentElement();
     if (root.hasAttribute("bracketSort")) {
       final String sortStr = root.getAttribute("bracketSort");
-      final BracketSortType sort = Enum.valueOf(BracketSortType.class, sortStr);
-      if (null == sort) {
+      if(null == sortStr) {
         return BracketSortType.SEEDING;
-      } else {
-        return sort;
+      } else{
+        return Enum.valueOf(BracketSortType.class, sortStr);
       }
     } else {
       return BracketSortType.SEEDING;
@@ -307,12 +306,7 @@ public final class XMLUtils {
       } else {
         sortStr = "HIGH";
       }
-      final WinnerType sort = Enum.valueOf(WinnerType.class, sortStr);
-      if (null == sort) {
-        return WinnerType.HIGH;
-      } else {
-        return sort;
-      }
+      return Enum.valueOf(WinnerType.class, sortStr);
     } else {
       return WinnerType.HIGH;
     }
@@ -330,12 +324,7 @@ public final class XMLUtils {
       } else {
         sortStr = "INTEGER";
       }
-      final ScoreType sort = Enum.valueOf(ScoreType.class, sortStr);
-      if (null == sort) {
-        return ScoreType.INTEGER;
-      } else {
-        return sort;
-      }
+      return Enum.valueOf(ScoreType.class, sortStr);
     } else {
       return ScoreType.INTEGER;
     }
