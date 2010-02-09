@@ -33,7 +33,10 @@ public class ScoresheetServlet extends BaseFLLServlet {
    * @see fll.web.BaseFLLServlet#processRequest(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, javax.servlet.ServletContext, javax.servlet.http.HttpSession)
    */
   @Override
-  protected void processRequest(HttpServletRequest request, HttpServletResponse response, ServletContext application, HttpSession session) throws IOException,
+  protected void processRequest(final HttpServletRequest request, 
+                                final HttpServletResponse response, 
+                                final ServletContext application, 
+                                final HttpSession session) throws IOException,
       ServletException {
     try {
       final DataSource datasource = SessionAttributes.getDataSource(session);

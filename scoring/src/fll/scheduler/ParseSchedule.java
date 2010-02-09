@@ -1247,8 +1247,8 @@ public class ParseSchedule {
    * @throws ParseException if the date cannot be parsed
    */
   private static Date parseDate(final String s) throws ParseException {
-    if (s.indexOf("AM") > 0
-        || s.indexOf("PM") > 0) {
+    if (s.indexOf("AM") >= 0
+        || s.indexOf("PM") >= 0) {
       if (s.split(":").length > 2) {
         return DATE_FORMAT_AM_PM_SS.get().parse(s);
       } else {

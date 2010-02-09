@@ -55,8 +55,11 @@ public final class DumpDB extends BaseFLLServlet {
       response.setHeader("Content-Disposition", "filename=database.flldb");
 
       final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
+      try {
       DumpDB.dumpDatabase(zipOut, connection, challengeDocument);
-      zipOut.close();
+      } finally {
+        zipOut.close();
+      }
     } catch (final SQLException sqle) {
       throw new RuntimeException(sqle);
     }
