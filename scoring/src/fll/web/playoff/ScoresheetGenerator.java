@@ -4,7 +4,6 @@
 package fll.web.playoff;
 
 import java.awt.Color;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,12 +11,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.List;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -42,48 +36,19 @@ import fll.Utilities;
 import fll.Version;
 import fll.db.Queries;
 import fll.util.FP;
-import fll.web.ApplicationAttributes;
-import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 
 /**
  * @author Dan Churchill
  */
-public class ScoresheetGenerator extends BaseFLLServlet {
+public class ScoresheetGenerator {
 
   private static final Logger LOGGER = Logger.getLogger(ScoresheetGenerator.class);
 
   private static final String LONG_BLANK = "_________________________";
 
   private static final String SHORT_BLANK = "___________";
-
-  @Override
-  protected void processRequest(final HttpServletRequest request,
-                                final HttpServletResponse response,
-                                final ServletContext application,
-                                final HttpSession session) throws IOException, ServletException {
-    try {
-      final DataSource datasource = SessionAttributes.getDataSource(session);
-      final Connection connection = datasource.getConnection();
-      final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
-      final int tournament = Queries.getCurrentTournament(connection);
-      response.reset();
-      response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
-
-      // Create the scoresheet generator - must provide correct number of
-      // scoresheets
-      initialize(request, connection, tournament, challengeDocument);
-
-      writeFile(connection, response.getOutputStream());
-    } catch (final SQLException e) {
-      throw new RuntimeException(e);
-    } catch (final DocumentException e) {
-      throw new RuntimeException(e);
-    }
-  }
 
   /**
    * Create a new ScoresheetGenerator object populated with form header data
@@ -112,7 +77,7 @@ public class ScoresheetGenerator extends BaseFLLServlet {
    * marked as printed. It is very questionable whether this is where this
    * should happen, but I don't feel like breaking it out.
    */
-  protected void initialize(final HttpServletRequest request, final Connection connection, final int tournament, final org.w3c.dom.Document document)
+  public ScoresheetGenerator(final HttpServletRequest request, final Connection connection, final int tournament, final org.w3c.dom.Document document)
       throws SQLException {
     final String numMatchesStr = request.getParameter("numMatches");
     if (null == numMatchesStr) {
@@ -521,17 +486,14 @@ public class ScoresheetGenerator extends BaseFLLServlet {
             // of choices. Otherwise it is either yes/no or a numeric field.
             if (element.hasChildNodes()) {
               final List<org.w3c.dom.Element> posValues = XMLUtils.filterToElements(element.getElementsByTagName("value"));
-              String choices = posValues.get(0).getAttribute("title").replace(" ", "\u00a0"); // replace
-              // spaces
-              // with
-              // "no-break"
-              // spaces
+              // replace spaces with "no-break" spaces
+              final StringBuilder choices = new StringBuilder(posValues.get(0).getAttribute("title").replace(" ", "\u00a0"));
               for (int v = 1; v < posValues.size(); v++) {
-                choices = choices
-                    + " /\u00a0" + posValues.get(v).getAttribute("title").replace(" ", "\u00a0");
+                choices.append(" /\u00a0");
+                choices.append(posValues.get(v).getAttribute("title").replace(" ", "\u00a0"));
               }
               final Chunk c = new Chunk("", COURIER_10PT_NORMAL);
-              c.append(choices.toUpperCase());
+              c.append(choices.toString().toUpperCase());
               m_goalValue[realI] = new PdfPCell();
               m_goalValue[realI].addElement(c);
 

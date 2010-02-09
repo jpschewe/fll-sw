@@ -633,7 +633,7 @@ public final class Playoff {
     final String formName = "genScoresheet_"
         + teamA.getTeamNumber() + "_" + teamB.getTeamNumber();
     out.println("<form name='"
-        + formName + "' action='ScoresheetGenerator' method='POST' target='_new'>");
+        + formName + "' action='ScoresheetServlet' method='POST' target='_new'>");
 
     out.println("  <input type='hidden' name='numTeams' value='2'>");
 

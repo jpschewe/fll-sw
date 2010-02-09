@@ -53,7 +53,7 @@ final Connection connection = datasource.getConnection();
 
       <li><a href="subjective.zip">Subjective Scoring Application</a></li>
 
-      <li><a href='playoff/ScoresheetGenerator'>Blank scoresheet for printing (PDF format)</a></li>
+      <li><a href='playoff/ScoresheetServlet'>Blank scoresheet for printing (PDF format)</a></li>
 
       <li><a href='challenge.xml'>Challenge Descriptor</a></li>
       

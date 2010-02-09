@@ -314,12 +314,12 @@
 
  <!--  playoff -->
  <servlet>
-  <servlet-name>ScoresheetGenerator</servlet-name>
-  <servlet-class>fll.web.playoff.ScoresheetGenerator</servlet-class>
+  <servlet-name>ScoresheetServlet</servlet-name>
+  <servlet-class>fll.web.playoff.ScoresheetServlet</servlet-class>
  </servlet>
  <servlet-mapping>
-  <servlet-name>ScoresheetGenerator</servlet-name>
-  <url-pattern>/playoff/ScoresheetGenerator</url-pattern>
+  <servlet-name>ScoresheetServlet</servlet-name>
+  <url-pattern>/playoff/ScoresheetServlet</url-pattern>
  </servlet-mapping>
 
 </web-app>
