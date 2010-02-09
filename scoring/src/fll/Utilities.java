@@ -46,7 +46,8 @@ public final class Utilities {
   private static final Logger LOGGER = Logger.getLogger(Utilities.class);
 
   /**
-   * Single instance of the default NumberFormat instance to save on overhead and to use for consistency of formatting.
+   * Single instance of the default NumberFormat instance to save on overhead
+   * and to use for consistency of formatting.
    */
   public static final NumberFormat NUMBER_FORMAT_INSTANCE = NumberFormat.getInstance();
   static {
@@ -61,9 +62,9 @@ public final class Utilities {
   /**
    * Load a CSV file into an SQL table. Assumes that the first line in the CSV
    * file specifies the column names. This method is meant as the inverse of
-   * {@link au.com.bytecode.opencsv.CSVWriter#writeAll(ResultSet, boolean)} with includeColumnNames set
-   * to true. This method assumes that the table to be created does not exist,
-   * an error will be reported if it does.
+   * {@link au.com.bytecode.opencsv.CSVWriter#writeAll(ResultSet, boolean)} with
+   * includeColumnNames set to true. This method assumes that the table to be
+   * created does not exist, an error will be reported if it does.
    * 
    * @param connection the database connection to create the table within
    * @param tablename name of the table to create
@@ -239,6 +240,8 @@ public final class Utilities {
 
   private static Server _testDatabaseServer = null;
 
+  private static final Object _testDatabaseServerLock = new Object();
+
   /**
    * Create a datasource for the specified database
    * 
@@ -262,39 +265,42 @@ public final class Utilities {
     }
     return createDataSource(database, myURL);
   }
-  
+
   /**
-   * Create a {@link DataSource} attached to the specified database with the specified URL.
+   * Create a {@link DataSource} attached to the specified database with the
+   * specified URL.
    * 
    * @param database the name of the database, for debugging
    * @param myURL the URL to the database
    * @return the DataSource
    */
-  public static DataSource createDataSource(final String database, final String myURL) {    
+  public static DataSource createDataSource(final String database, final String myURL) {
     final jdbcDataSource dataSource = new jdbcDataSource();
     dataSource.setDatabase(myURL);
     dataSource.setUser("sa");
 
     // startup test database server
     if (Boolean.getBoolean("inside.test")) {
-      if (null == _testDatabaseServer) {
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Configuring test database server");
+      synchronized (_testDatabaseServerLock) {
+        if (null == _testDatabaseServer) {
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Configuring test database server");
+          }
+          _testDatabaseServer = new Server();
+          _testDatabaseServer.setPort(9042);
+          _testDatabaseServer.setDatabasePath(0, database);
+          _testDatabaseServer.setDatabaseName(0, "fll");
+          _testDatabaseServer.setNoSystemExit(true);
+          _testDatabaseServer.setErrWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"), LogWriter.LogLevel.ERROR)));
+          _testDatabaseServer.setLogWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"), LogWriter.LogLevel.INFO)));
+          _testDatabaseServer.setTrace(true);
         }
-        _testDatabaseServer = new Server();
-        _testDatabaseServer.setPort(9042);
-        _testDatabaseServer.setDatabasePath(0, database);
-        _testDatabaseServer.setDatabaseName(0, "fll");
-        _testDatabaseServer.setNoSystemExit(true);
-        _testDatabaseServer.setErrWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"), LogWriter.LogLevel.ERROR)));
-        _testDatabaseServer.setLogWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"), LogWriter.LogLevel.INFO)));
-        _testDatabaseServer.setTrace(true);
-      }
-      if (1 != _testDatabaseServer.getState()) {
-        if (LOGGER.isInfoEnabled()) {
-          LOGGER.info("Starting database server for testing");
+        if (1 != _testDatabaseServer.getState()) {
+          if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Starting database server for testing");
+          }
+          _testDatabaseServer.start();
         }
-        _testDatabaseServer.start();
       }
     }
 

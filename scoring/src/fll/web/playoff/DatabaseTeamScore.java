@@ -20,7 +20,6 @@ import fll.db.Queries;
  * TeamScore implementation for a performance score in the database.
  * 
  * @author jpschewe
- * @version $Revision$
  */
 public class DatabaseTeamScore extends TeamScore {
 
