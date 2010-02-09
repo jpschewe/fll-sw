@@ -405,6 +405,9 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
     }
   }
 
+  /**
+   * Class to encapsulate choosing of colors for the scheduler.
+   */
   private static final class ColorChooser {
     /**
      * Get the next color available to use for the background of proposed

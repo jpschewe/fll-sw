@@ -48,34 +48,6 @@ public final class GenerateDB {
    */
   public static final String INTERNAL_REGION = "INTERNAL";
 
-  /**
-   * Generate a new database
-   * 
-   * @param args ignored
-   */
-  public static void main(final String[] args) {
-    try {
-      if (args.length != 3) {
-        System.err.println("You must specify <hostname> <root user> <root password>");
-        System.exit(1);
-      } else {
-        final ClassLoader classLoader = ChallengeParser.class.getClassLoader();
-        final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(classLoader.getResourceAsStream("resources/challenge-state-2005.xml")));
-        // final String db = "tomcat/webapps/fll-sw/WEB-INF/fll";
-        final String db = "fll";
-        generateDB(challengeDocument, db, true);
-
-        final Connection connection = Utilities.createDataSource(db).getConnection();
-        final Document document = Queries.getChallengeDocument(connection);
-        LOGGER.info("Title: "
-            + document.getDocumentElement().getAttribute("title"));
-        connection.close();
-      }
-    } catch (final Exception e) {
-      e.printStackTrace();
-    }
-  }
-
   private GenerateDB() {
 
   }
@@ -120,7 +92,6 @@ public final class GenerateDB {
 
     Statement stmt = null;
     PreparedStatement prep = null;
-    ResultSet rs = null;
     try {
       stmt = connection.createStatement();
 
@@ -386,7 +357,6 @@ public final class GenerateDB {
           + performanceColumns.toString() + " FROM Performance WHERE Verified = TRUE");
 
     } finally {
-      SQLFunctions.closeResultSet(rs);
       SQLFunctions.closeStatement(stmt);
       SQLFunctions.closePreparedStatement(prep);
     }

@@ -240,7 +240,7 @@ public final class Utilities {
 
   private static Server _testDatabaseServer = null;
 
-  private static final Object _testDatabaseServerLock = new Object();
+  private static final Object TEST_DATABASE_SERVER_LOCK = new Object();
 
   /**
    * Create a datasource for the specified database
@@ -281,7 +281,7 @@ public final class Utilities {
 
     // startup test database server
     if (Boolean.getBoolean("inside.test")) {
-      synchronized (_testDatabaseServerLock) {
+      synchronized (TEST_DATABASE_SERVER_LOCK) {
         if (null == _testDatabaseServer) {
           if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Configuring test database server");

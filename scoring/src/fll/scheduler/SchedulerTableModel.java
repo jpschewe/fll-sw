@@ -98,7 +98,6 @@ import javax.swing.table.AbstractTableModel;
     case JUDGE_COLUMN:
       return String.class;
     case PRESENTATION_COLUMN:
-      return Date.class;
     case TECHNICAL_COLUMN:
       return Date.class;
     default:
