@@ -85,12 +85,11 @@ public final class Tables {
         // this is the first time the page has been visited so we need to read
         // the table labels out of the DB
         ResultSet rs = null;
-        Statement stmt = null;
+        PreparedStatement stmt = null;
         try {
-          //TODO make prepared statement
-          stmt = connection.createStatement();
-          rs = stmt.executeQuery("SELECT SideA,SideB FROM tablenames WHERE Tournament = "
-              + tournament + " ORDER BY PairID");
+          stmt = connection.prepareStatement("SELECT SideA,SideB FROM tablenames WHERE Tournament = ? ORDER BY PairID");
+          stmt.setInt(1, tournament);
+          rs = stmt.executeQuery();
           for (row = 0; rs.next(); row++) {
             final String sideA = rs.getString(1);
             final String sideB = rs.getString(2);
@@ -98,7 +97,7 @@ public final class Tables {
           }
         } finally {
           SQLFunctions.closeResultSet(rs);
-          SQLFunctions.closeStatement(stmt);
+          SQLFunctions.closePreparedStatement(stmt);
         }
       } else {
         // need to walk the parameters to see what we've been passed

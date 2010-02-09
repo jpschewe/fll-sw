@@ -52,12 +52,6 @@ import fll.xml.XMLUtils;
  */
 public final class FinalComputedScores extends BaseFLLServlet {
 
-  private int _tournament;
-
-  private org.w3c.dom.Document _challengeDocument;
-
-  private FinalScoresPageHandler pageHandler;
-
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -73,12 +67,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=finalComputedScores.pdf");
 
-      _challengeDocument = challengeDocument;
-      final Element root = _challengeDocument.getDocumentElement();
-      _tournament = tournament;
-      pageHandler = new FinalScoresPageHandler(root.getAttribute("title"), tournamentName);
+      final Element root = challengeDocument.getDocumentElement();
+      final FinalScoresPageHandler pageHandler = new FinalScoresPageHandler(root.getAttribute("title"), tournamentName);
 
-      generateReport(connection, response.getOutputStream());
+      generateReport(connection, response.getOutputStream(), challengeDocument, tournament, pageHandler);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     }
@@ -93,9 +85,13 @@ public final class FinalComputedScores extends BaseFLLServlet {
   /**
    * Generate the actual report.
    */
-  public void generateReport(final Connection connection, final OutputStream out) throws SQLException, IOException {
+  public void generateReport(final Connection connection, 
+                             final OutputStream out, 
+                             final org.w3c.dom.Document challengeDocument,
+                             final int tournament, 
+                             final FinalScoresPageHandler pageHandler) throws SQLException, IOException {
 
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(_challengeDocument);
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
     final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
 
     Statement stmt = null;
@@ -115,7 +111,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       pdfDoc.setMargins(0.5f * 72, 0.5f * 72, 0.5f * 72, 0.5f * 72);
       pdfDoc.open();
 
-      final Element rootElement = _challengeDocument.getDocumentElement();
+      final Element rootElement = challengeDocument.getDocumentElement();
 
       final List<Element> subjectiveCategories = XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"));
       stmt = connection.createStatement();
@@ -247,7 +243,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         query.append(" FROM Teams,FinalScores,current_tournament_teams");
         query.append(" WHERE FinalScores.TeamNumber = Teams.TeamNumber");
         query.append(" AND FinalScores.Tournament = "
-            + _tournament);
+            + tournament);
         query.append(" AND current_tournament_teams.event_division = ?");
         query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
         query.append(" ORDER BY FinalScores.OverallScore "
@@ -294,21 +290,21 @@ public final class FinalComputedScores extends BaseFLLServlet {
               final String catName = catElement.getAttribute("name");
               rawScoreRS = stmt.executeQuery("SELECT ComputedTotal"
                   // TODO make prepared statement
-                  + " FROM " + catName + " WHERE TeamNumber = " + teamNumber + " AND Tournament = " + _tournament + " ORDER BY ComputedTotal " + ascDesc);
+                  + " FROM " + catName + " WHERE TeamNumber = " + teamNumber + " AND Tournament = " + tournament + " ORDER BY ComputedTotal " + ascDesc);
               boolean scoreSeen = false;
-              String rawScoreText = "";
+              final StringBuilder rawScoreText = new StringBuilder();
               while (rawScoreRS.next()) {
                 final double v = rawScoreRS.getDouble(1);
                 if (!rawScoreRS.wasNull()) {
                   if (scoreSeen) {
-                    rawScoreText += ", ";
+                    rawScoreText.append(", ");
                   } else {
                     scoreSeen = true;
                   }
-                  rawScoreText += Utilities.NUMBER_FORMAT_INSTANCE.format(v);
+                  rawScoreText.append(Utilities.NUMBER_FORMAT_INSTANCE.format(v));
                 }
               }
-              final PdfPCell subjCell = new PdfPCell((!scoreSeen ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED) : new Phrase(rawScoreText, ARIAL_8PT_NORMAL)));
+              final PdfPCell subjCell = new PdfPCell((!scoreSeen ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED) : new Phrase(rawScoreText.toString(), ARIAL_8PT_NORMAL)));
               subjCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
               subjCell.setBorder(0);
               curteam.addCell(subjCell);
@@ -319,7 +315,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           // Column for the highest performance score of the seeding rounds
           rawScoreRS = stmt.executeQuery("SELECT score FROM performance_seeding_max"
               // TODO make prepared statement
-              + " WHERE TeamNumber = " + teamNumber + " AND Tournament = " + _tournament);
+              + " WHERE TeamNumber = " + teamNumber + " AND Tournament = " + tournament);
           final double rawScore;
           if (rawScoreRS.next()) {
             final double v = rawScoreRS.getDouble(1);

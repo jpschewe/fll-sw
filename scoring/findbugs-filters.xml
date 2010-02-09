@@ -165,5 +165,60 @@
   </Or>
  </Match>
 
+
+ <!-- fll.web.report.FinalistSchedulerUI -->
+ <Match>
+  <Class name="fll.web.report.FinalistSchedulerUI" />
+  <Method name="displayProposedFinalists" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
+
+ <!-- fll.web.report.CategoryScoresByScoreGroup -->
+ <Match>
+  <Class name="fll.web.report.CategoryScoresByScoreGroup" />
+  <Method name="processRequest" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
+
+
+ <!-- fll.web.report.CategorizedScores -->
+ <Match>
+  <Class name="fll.web.report.CategorizedScores" />
+  <Method name="processRequest" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
+
+ <!-- fll.web.report.CategoryScoresByJudge -->
+ <Match>
+  <Class name="fll.web.report.CategoryScoresByJudge" />
+  <Method name="processRequest" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
+
+ <!-- fll.web.admin.UploadSubjectiveData -->
+ <Match>
+  <Class name="fll.web.admin.UploadSubjectiveData" />
+  <Method name="saveSubjectiveData" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
+
+ <Match>
+  <Class name="fll.xml.XMLUtils" />
+  <Method name="createSubjectiveScoresDocument" />
+  <Or>
+   <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" />
+  </Or>
+ </Match>
+
 </FindBugsFilter>
 
