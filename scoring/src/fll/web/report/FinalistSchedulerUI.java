@@ -60,7 +60,6 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
 
   private static final Logger LOG = Logger.getLogger(FinalistSchedulerUI.class);
 
-
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -144,7 +143,8 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
               for (int i = 1; i <= numFinalists; ++i) {
                 final String numStr = request.getParameter(division
                     + "-finalist-" + i);
-                if (null != numStr && !"".equals(numStr)) {
+                if (null != numStr
+                    && !"".equals(numStr)) {
                   try {
                     finalistNums.add(Integer.valueOf(numStr));
                   } catch (final NumberFormatException e) {
@@ -163,7 +163,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
         } // new category to add
       } else if (null != request.getParameter("done")) {
         final int numFinalists = (Integer) session.getAttribute("numFinalists");
-        displayProposedFinalists(response, connection, challengeDocument, numFinalists, extraCategoryFinalists);
+        displayProposedFinalists(response, connection, challengeDocument, numFinalists, extraCategoryFinalists, new ColorChooser());
         return;
       } else if (null != request.getParameter("submit-finalists")) {
         // display the schedule
@@ -277,7 +277,8 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
                                         final Connection connection,
                                         final Document challengeDocument,
                                         final int numFinalists,
-                                        final Map<String, Map<String, List<Integer>>> finalists) throws IOException {
+                                        final Map<String, Map<String, List<Integer>>> finalists,
+                                        final ColorChooser colorChooser) throws IOException {
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
     final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
 
@@ -324,8 +325,9 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
           formatter.format("<tr><th colspan='3'>%s</th></tr>", categoryTitle);
           formatter.format("<tr><th>Score Group</th><th>Team #</th><th>Finalist?</th></tr>");
 
-          for (final String scoreGroup : scoreGroups.keySet()) {
-            final String teamSelect = StringUtils.join(scoreGroups.get(scoreGroup).iterator(), ", ");
+          for (final Map.Entry<String, Collection<Integer>> scoreGroupEntry : scoreGroups.entrySet()) {
+            final String scoreGroup = scoreGroupEntry.getKey();
+            final String teamSelect = StringUtils.join(scoreGroupEntry.getValue().iterator(), ", ");
             prep = connection.prepareStatement("SELECT Teams.TeamNumber"
                 + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
                 + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " " + ascDesc
@@ -335,7 +337,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
             while (rs.next()) {
               final int teamNum = rs.getInt(1);
               if (teamColors.containsKey(teamNum)) {
-                teamColors.put(teamNum, getNextAvailableTeamColor());
+                teamColors.put(teamNum, colorChooser.getNextAvailableTeamColor());
               } else {
                 teamColors.put(teamNum, null);
               }
@@ -362,7 +364,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
           formatter.format("<tr><th>Team #</th><th>Finalist?</th></tr>");
           for (final Integer teamNum : teams) {
             if (teamColors.containsKey(teamNum)) {
-              teamColors.put(teamNum, getNextAvailableTeamColor());
+              teamColors.put(teamNum, colorChooser.getNextAvailableTeamColor());
             } else {
               teamColors.put(teamNum, null);
             }
@@ -403,27 +405,30 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
     }
   }
 
-  /**
-   * Get the next color available to use for the background of proposed
-   * finalists.
-   * 
-   * @return HTML color code
-   */
-  private String getNextAvailableTeamColor() {
-    if (_teamColorIndex >= _teamColors.length) {
-      LOG.error("Ran out of team colors at index "
-          + _teamColorIndex);
-      _teamColorIndex = 0;
+  private static final class ColorChooser {
+    /**
+     * Get the next color available to use for the background of proposed
+     * finalists.
+     * 
+     * @return HTML color code
+     */
+    public String getNextAvailableTeamColor() {
+      if (_teamColorIndex >= _teamColors.length) {
+        LOG.error("Ran out of team colors at index "
+            + _teamColorIndex);
+        _teamColorIndex = 0;
+      }
+      final String color = _teamColors[_teamColorIndex];
+      ++_teamColorIndex;
+      return color;
     }
-    final String color = _teamColors[_teamColorIndex];
-    ++_teamColorIndex;
-    return color;
+
+    private int _teamColorIndex = 0;
+
+    private final String[] _teamColors = { "#CD5555", "#EE0000", "#FF6347", "#00FFAA", "#D19275", "#00B2EE", "#FF7D40", "#FFDAB9", "#FCB514", "#FFEC8B",
+                                          "#C8F526", "#7CFC00", "#4AC948", "#62B1F6", "#AAAAFF", "#8470FF", "#AB82FF", "#A020F0", "#E066FF", "#DB70DB",
+                                          "#FF00CC", "#FF34B3", "#FF0066", "#FF0033", "#FF030D", };
+
   }
-
-  private int _teamColorIndex = 0;
-
-  private final String[] _teamColors = { "#CD5555", "#EE0000", "#FF6347", "#00FFAA", "#D19275", "#00B2EE", "#FF7D40", "#FFDAB9", "#FCB514", "#FFEC8B",
-                                        "#C8F526", "#7CFC00", "#4AC948", "#62B1F6", "#AAAAFF", "#8470FF", "#AB82FF", "#A020F0", "#E066FF", "#DB70DB",
-                                        "#FF00CC", "#FF34B3", "#FF0066", "#FF0033", "#FF030D", };
-
+  
 }

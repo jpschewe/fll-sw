@@ -78,19 +78,21 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
       // foreach division
       for (final String division : Queries.getEventDivisions(connection)) {
         // foreach subjective category
-        for (final String categoryTitle : subjectiveCategories.keySet()) {
-          final String categoryName = subjectiveCategories.get(categoryTitle);
+        for(final Map.Entry<String, String> entry : subjectiveCategories.entrySet()) {
+          final String categoryTitle = entry.getKey();
+          final String categoryName = entry.getValue();
 
           final Map<String, Collection<Integer>> scoreGroups = Queries.computeScoreGroups(connection, currentTournament, division, categoryName);
 
           // select from FinalScores
-          for (final String scoreGroup : scoreGroups.keySet()) {
+          for(final Map.Entry<String, Collection<Integer>> scoreGroupEntry : scoreGroups.entrySet()) {
+            final String scoreGroup = scoreGroupEntry.getKey();
             writer.write("<h3>"
                 + categoryTitle + " Division: " + division + " Score Group: " + scoreGroup + "</h3>");
             writer.write("<table border='0'>");
             writer.write("<tr><th colspan='3'>Team # / Organization / Team Name</th><th>Scaled Score</th></tr>");
 
-            final String teamSelect = StringUtils.join(scoreGroups.get(scoreGroup).iterator(), ", ");
+            final String teamSelect = StringUtils.join(scoreGroupEntry.getValue().iterator(), ", ");
             prep = connection.prepareStatement("SELECT Teams.TeamNumber,Teams.Organization,Teams.TeamName,FinalScores."
                 + categoryName + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
                 + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " " + ascDesc);

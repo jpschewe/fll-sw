@@ -16,6 +16,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 
 import fll.Utilities;
@@ -90,6 +92,10 @@ public final class ExportDocument {
     } catch (final SQLException sqle) {
       LOG.fatal("Error talking to database", sqle);
       System.exit(1);
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closeConnection(connection);
     }
     System.exit(0);
   }

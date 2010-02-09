@@ -122,11 +122,11 @@ public final class Judges {
       // this is the first time the page has been visited so we need to read
       // the judges out of the DB
       ResultSet rs = null;
-      Statement stmt = null;
-      try {
-        stmt = connection.createStatement();
-        rs = stmt.executeQuery("SELECT id, category, event_division FROM Judges WHERE Tournament = "
-            + tournament);
+      PreparedStatement stmt = null;
+      try {        
+        stmt = connection.prepareStatement("SELECT id, category, event_division FROM Judges WHERE Tournament = ?");
+        stmt.setInt(1, tournament);
+        rs = stmt.executeQuery();
         for (row = 0; rs.next(); row++) {
           final String id = rs.getString(1);
           final String category = rs.getString(2);
@@ -135,7 +135,7 @@ public final class Judges {
         }
       } finally {
         SQLFunctions.closeResultSet(rs);
-        SQLFunctions.closeStatement(stmt);
+        SQLFunctions.closePreparedStatement(stmt);
       }
     } else {
       // need to walk the parameters to see what we've been passed
@@ -281,8 +281,9 @@ public final class Judges {
 
     // now walk the keys of the hash and make sure that all values have a list
     // of size > 0, otherwise append an error to error.
-    for (final String categoryName : hash.keySet()) {
-      final Set<String> set = hash.get(categoryName);
+    for(final Map.Entry<String, Set<String>> entry : hash.entrySet()) {
+      final String categoryName = entry.getKey();
+      final Set<String> set = entry.getValue();
       if (set.isEmpty()) {
         error.append("You must specify at least one judge for "
             + categoryName + "<br>");
@@ -347,14 +348,13 @@ public final class Judges {
    */
   private static void commitData(final HttpServletRequest request, final HttpServletResponse response, final HttpSession session, final Connection connection, final int tournament)
       throws SQLException, IOException {
-    Statement stmt = null;
     PreparedStatement prep = null;
     try {
-      stmt = connection.createStatement();
-
       // delete old data in judges
-      stmt.executeUpdate("DELETE FROM Judges where Tournament = "
-          + tournament);
+      prep = connection.prepareStatement("DELETE FROM Judges where Tournament = ?");
+      prep.executeUpdate();
+      SQLFunctions.closePreparedStatement(prep);
+      prep = null;
 
       // walk request parameters and insert data into database
       prep = connection.prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES(?, ?, ?, ?)");
@@ -382,7 +382,6 @@ public final class Judges {
       }
 
     } finally {
-      SQLFunctions.closeStatement(stmt);
       SQLFunctions.closePreparedStatement(prep);
     }
 
