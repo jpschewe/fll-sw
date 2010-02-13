@@ -86,14 +86,14 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         // Total Score
         return Double.class;
       } else {
-        return String.class;
-        /*
-         * TODO bug: 1830392 this isn't working so well, we need to look closer
-         * at this final Element goalEle = getGoalDescription(column -4);
-         * if(XMLUtils.isEnumeratedGoal(goalEle)) { return String.class; } else
-         * if(XMLUtils.isComputedGoal(goalEle)) { return Double.class; } else {
-         * return Integer.class; }
-         */
+        final Element goalEle = getGoalDescription(column - 4);
+        if (XMLUtils.isEnumeratedGoal(goalEle)) {
+          return String.class;
+        } else if (XMLUtils.isComputedGoal(goalEle)) {
+          return Double.class;
+        } else {
+          return Integer.class;
+        }
       }
     }
   }
