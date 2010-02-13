@@ -51,6 +51,8 @@ import fll.xml.XMLUtils;
 
     final TableModel[] models = buildTableModels(owner.getChallengeDocument(), owner.getScoreDocument());
     final JTable teamTable = new JTable(models[0]);
+    teamTable.setAutoCreateRowSorter(true);
+
     teamTable.setDefaultRenderer(Integer.class, CustomCellRenderer.INSTANCE);
     final JPanel teamPanel = new JPanel(new BorderLayout());
     final JLabel teamLabel = new JLabel("# of scores for each team in each category");
@@ -60,6 +62,8 @@ import fll.xml.XMLUtils;
     cpane.add(teamPanel, BorderLayout.CENTER);
 
     final JTable summaryTable = new JTable(models[1]);
+    summaryTable.setAutoCreateRowSorter(true);
+
     final JLabel summaryLabel = new JLabel("# of teams in each category with the specified # of scores");
     final JPanel summaryPanel = new JPanel(new BorderLayout());
     summaryPanel.add(summaryLabel, BorderLayout.NORTH);
@@ -88,7 +92,7 @@ import fll.xml.XMLUtils;
     final Map<Integer, Integer[]> data = new HashMap<Integer, Integer[]>();
 
     final List<String> columnNames = new LinkedList<String>();
-
+    final Map<Integer, String> teamNumberToDivision = new HashMap<Integer, String>();
     final List<Element> subjectiveCategories = XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"));
     for (int catIdx = 0; catIdx < subjectiveCategories.size(); catIdx++) {
       final Element subjectiveElement = subjectiveCategories.get(catIdx);
@@ -116,6 +120,7 @@ import fll.xml.XMLUtils;
           Arrays.fill(counts, 0);
           data.put(teamNumber, counts);
         }
+        teamNumberToDivision.put(teamNumber, scoreElement.getAttribute("division"));
 
         if (numValues > 0
             || Boolean.parseBoolean(scoreElement.getAttribute("NoShow"))) {
@@ -130,7 +135,7 @@ import fll.xml.XMLUtils;
     // sort the data and map it into an easier form for table consumption
     final List<Integer[]> summaryData = new ArrayList<Integer[]>();
 
-    final List<List<Integer>> tableData = new LinkedList<List<Integer>>();
+    final List<TeamSummaryData> tableData = new LinkedList<TeamSummaryData>();
     final List<Integer> teamNumbers = new ArrayList<Integer>(data.keySet());
     Collections.sort(teamNumbers);
     for (final Integer teamNumber : teamNumbers) {
@@ -145,12 +150,12 @@ import fll.xml.XMLUtils;
         final Integer[] summaryRow = summaryData.get(counts[column]);
         ++summaryRow[column];
       }
-      final List<Integer> row = new LinkedList<Integer>();
-      row.add(teamNumber);
+      final List<Integer> scoreData = new LinkedList<Integer>();
       for (final Integer value : counts) {
-        row.add(value);
+        scoreData.add(value);
       }
-      tableData.add(row);
+      final TeamSummaryData teamSummaryData = new TeamSummaryData(teamNumber, teamNumberToDivision.get(teamNumber), scoreData);
+      tableData.add(teamSummaryData);
     }
 
     return new TableModel[] { new CountTableModel(tableData, columnNames), new SummaryTableModel(summaryData, columnNames) };
@@ -171,11 +176,7 @@ import fll.xml.XMLUtils;
 
     @Override
     public Class<?> getColumnClass(final int column) {
-      if (0 == column) {
-        return String.class;
-      } else {
-        return Integer.class;
-      }
+      return Integer.class;
     }
 
     public int getRowCount() {
@@ -209,20 +210,26 @@ import fll.xml.XMLUtils;
    * Table model for the counts of scores for each team.
    */
   private static final class CountTableModel extends AbstractTableModel {
-    public CountTableModel(final List<List<Integer>> data, final List<String> columnNames) {
+    /**
+     * 
+     * @param data the summary data
+     * @param categoryColumnNames names of category columns
+     */
+    public CountTableModel(final List<TeamSummaryData> data, final List<String> categoryColumnNames) {
       _data = data;
-      _columnNames = columnNames;
+      _categoryColumnNames = categoryColumnNames;
     }
 
-    private final List<List<Integer>> _data;
+    private final List<TeamSummaryData> _data;
 
-    private final List<String> _columnNames;
+    private final List<String> _categoryColumnNames;
 
     @Override
     public Class<?> getColumnClass(final int column) {
-      if (0 == column) {
+      switch (column) {
+      case 1:
         return String.class;
-      } else {
+      default:
         return Integer.class;
       }
     }
@@ -232,22 +239,31 @@ import fll.xml.XMLUtils;
     }
 
     public int getColumnCount() {
-      return _columnNames.size() + 1;
+      return _categoryColumnNames.size() + 2;
     }
 
     @Override
     public String getColumnName(final int column) {
-      if (column == 0) {
+      switch (column) {
+      case 0:
         return "Team Number";
-      } else {
-
-        return _columnNames.get(column - 1);
+      case 1:
+        return "Division";
+      default:
+        return _categoryColumnNames.get(column - 2);
       }
     }
 
     public Object getValueAt(final int row, final int column) {
-      final List<Integer> rowData = _data.get(row);
-      return rowData.get(column);
+      final TeamSummaryData rowData = _data.get(row);
+      switch(column) {
+      case 0:
+        return rowData.getTeamNumber();
+      case 1:
+        return rowData.getDivision();
+      default:
+        return rowData.getScoreData().get(column-2);  
+      }
     }
   }
 
@@ -272,6 +288,25 @@ import fll.xml.XMLUtils;
         comp.setForeground(Color.BLACK);
       }
       return comp;
+    }
+  }
+
+
+  /**
+   * Contains summary information about a team, used by {@link CountTableModel}.
+   */
+  private static final class TeamSummaryData {
+    private final int teamNumber;
+    public int getTeamNumber() { return teamNumber; }
+    private final String division;
+    public String getDivision() { return division; }
+    private final List<Integer> scoreData;
+    public List<Integer> getScoreData() { return scoreData; }
+     
+    public TeamSummaryData(final int teamNumber, final String division, final List<Integer> scoreData) {
+      this.teamNumber = teamNumber;
+      this.division = division;
+      this.scoreData = scoreData;
     }
   }
 }
