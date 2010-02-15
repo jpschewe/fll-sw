@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Comparator;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -62,6 +63,20 @@ public final class Team {
     NULL.setTeamName("NULL");
   }
 
+  public static Comparator<Team> TEAM_NUMBER_COMPARATOR = new Comparator<Team>() {
+    public int compare(final Team one, final Team two) {
+      final int oneNum = one.getTeamNumber();
+      final int twoNum = two.getTeamNumber();
+      if(oneNum < twoNum) {
+        return -1;
+      } else if(oneNum > twoNum) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+  };
+  
   public Team() {
 
   }

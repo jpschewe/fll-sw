@@ -17,10 +17,12 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -1599,7 +1601,7 @@ public final class Queries {
       for (final Element category : XMLUtils.filterToElements(document.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
         final String name = category.getAttribute("name");
         prep = connection.prepareStatement("DELETE FROM "
-                                           + name + " WHERE TeamNumber = ?");
+            + name + " WHERE TeamNumber = ?");
         prep.setInt(1, teamNumber);
         prep.executeUpdate();
         SQLFunctions.closePreparedStatement(prep);
@@ -2793,6 +2795,29 @@ public final class Queries {
     } finally {
       SQLFunctions.closePreparedStatement(prep);
     }
+  }
+
+  /**
+   * Get all team numbers.
+   * 
+   * @param connection
+   * @return all team numbers
+   */
+  public static Collection<Integer> getAllTeamNumbers(final Connection connection) throws SQLException {
+    final Set<Integer> allTeamNumbers = new HashSet<Integer>();
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT TeamNumber FROM Teams");
+      while (rs.next()) {
+        allTeamNumbers.add(rs.getInt(1));
+      }
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closeStatement(stmt);
+    }
+    return allTeamNumbers;
   }
 
 }

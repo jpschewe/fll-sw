@@ -230,6 +230,15 @@
   <url-pattern>/admin/GatherTeamData</url-pattern>
  </servlet-mapping>
 
+<servlet>
+  <servlet-name>GatherAdvancementData</servlet-name>
+  <servlet-class>fll.web.admin.GatherAdvancementData</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>GatherAdvancementData</servlet-name>
+  <url-pattern>/admin/GatherAdvancementData</url-pattern>
+ </servlet-mapping>
+
  <servlet>
   <servlet-name>CommitTeam</servlet-name>
   <servlet-class>fll.web.admin.CommitTeam</servlet-class>
