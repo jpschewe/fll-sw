@@ -281,7 +281,6 @@ public final class Utilities {
    */
   public static DataSource createDataSource(final String database, final String myURL) {
     final jdbcDataSource dataSource = new jdbcDataSource();
-    LOGGER.fatal("TESTING CI creating datasource " + myURL, new RuntimeException());
     dataSource.setDatabase(myURL);
     dataSource.setUser("sa");
 
