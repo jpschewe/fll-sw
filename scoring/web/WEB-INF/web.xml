@@ -239,6 +239,15 @@
   <url-pattern>/admin/GatherAdvancementData</url-pattern>
  </servlet-mapping>
 
+<servlet>
+  <servlet-name>AdvanceTeams</servlet-name>
+  <servlet-class>fll.web.admin.AdvanceTeams</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>AdvanceTeams</servlet-name>
+  <url-pattern>/admin/AdvanceTeams</url-pattern>
+ </servlet-mapping>
+
  <servlet>
   <servlet-name>CommitTeam</servlet-name>
   <servlet-class>fll.web.admin.CommitTeam</servlet-class>

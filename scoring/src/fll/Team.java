@@ -239,4 +239,12 @@ public final class Team {
     return "["
         + getTeamNumber() + ": " + getTeamName() + "]";
   }
+
+  /**
+   * 
+   * @return if this is an internal team
+   */
+  public boolean isInternal() {
+    return getTeamNumber() < 0;
+  }
 }

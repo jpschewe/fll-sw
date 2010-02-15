@@ -7,11 +7,9 @@ package fll.db;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
@@ -25,7 +23,6 @@ import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Utilities;
-import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 import fll.xml.XMLWriter;
 

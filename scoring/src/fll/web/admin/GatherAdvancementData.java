@@ -28,7 +28,6 @@ import org.apache.log4j.Logger;
 
 import fll.Team;
 import fll.Utilities;
-import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -72,7 +71,7 @@ public class GatherAdvancementData extends BaseFLLServlet {
       final List<Team> advancingTeams = new LinkedList<Team>();
       for (final int teamNum : teamNumbers) {
         final Team team = Team.getTeamFromDatabase(connection, teamNum);
-        if (!GenerateDB.INTERNAL_REGION.equals(team.getRegion())) {
+        if(!team.isInternal()) {
           final int current = Queries.getTeamCurrentTournament(connection, teamNum);
           final String currentName = Queries.getTournamentName(connection, current);
 
