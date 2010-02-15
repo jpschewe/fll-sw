@@ -510,6 +510,7 @@ public class FullTournamentTest {
   private void enterSubjectiveScores(final Connection testDataConn, final Document challengeDocument, final String testTournament) throws SQLException,
       IOException, MalformedURLException, SAXException, ParseException {
 
+    final File subjectiveZip = File.createTempFile("fll", "zip");
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -521,8 +522,6 @@ public class FullTournamentTest {
       WebResponse response = conversation.getResponse(request);
       Assert.assertEquals("application/zip", response.getContentType());
       final InputStream zipStream = response.getInputStream();
-      final File subjectiveZip = File.createTempFile("fll", "zip");
-      subjectiveZip.deleteOnExit();
       final FileOutputStream outputStream = new FileOutputStream(subjectiveZip);
       final byte[] buffer = new byte[512];
       int bytesRead = 0;
@@ -600,6 +599,9 @@ public class FullTournamentTest {
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull(response.getElementWithID("success"));
     } finally {
+      if(!subjectiveZip.delete()) {
+        subjectiveZip.deleteOnExit();
+      }
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closePreparedStatement(prep);
     }

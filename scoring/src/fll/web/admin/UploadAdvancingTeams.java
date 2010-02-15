@@ -42,11 +42,11 @@ public final class UploadAdvancingTeams extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
+    final FileItem advanceFileItem = (FileItem) request.getAttribute("advanceFile");      
+    final String extension = Utilities.determineExtension(advanceFileItem);
+    final File file = File.createTempFile("fll", extension);
     try {
       UploadProcessor.processUpload(request);
-      final FileItem advanceFileItem = (FileItem) request.getAttribute("advanceFile");      
-      final String extension = Utilities.determineExtension(advanceFileItem);
-      final File file = File.createTempFile("fll", extension);
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Wrote advancing teams data to: "
             + file.getAbsolutePath());
@@ -81,6 +81,10 @@ public final class UploadAdvancingTeams extends BaseFLLServlet {
           + e.getMessage() + "</p>");
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving advancment data into the database", e);
+    } finally {
+      if(!file.delete()) {
+        file.deleteOnExit();
+      }
     }
     session.setAttribute("message", message.toString());
     response.sendRedirect(response.encodeRedirectURL("chooseAdvancementColumns.jsp"));

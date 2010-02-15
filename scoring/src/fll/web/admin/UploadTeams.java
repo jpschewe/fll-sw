@@ -65,21 +65,18 @@ public final class UploadTeams extends BaseFLLServlet {
 
     final StringBuilder message = new StringBuilder();
     final DataSource datasource = SessionAttributes.getDataSource(session);
+    final FileItem teamsFileItem = (FileItem) request.getAttribute("teamsFile");
+    final String extension = Utilities.determineExtension(teamsFileItem);
+    final File file = File.createTempFile("fll", extension);
     try {
       final Connection connection = datasource.getConnection();
       UploadProcessor.processUpload(request);
-      final FileItem teamsFileItem = (FileItem) request.getAttribute("teamsFile");
-      final String extension = Utilities.determineExtension(teamsFileItem);
-      final File file = File.createTempFile("fll", extension);
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Wrote teams data to: "
             + file.getAbsolutePath());
       }
       teamsFileItem.write(file);
       parseFile(file, connection, session);
-      if (!file.delete()) {
-        file.deleteOnExit();
-      }
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error saving team data into the database: "
           + sqle.getMessage() + "</p>");
@@ -100,6 +97,10 @@ public final class UploadTeams extends BaseFLLServlet {
           + e.getMessage() + "</p>");
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving team data into the database", e);
+    } finally {
+      if (!file.delete()) {
+        file.deleteOnExit();
+      }
     }
     session.setAttribute("message", message.toString());
     response.sendRedirect(response.encodeRedirectURL("filterTeams.jsp"));
