@@ -248,6 +248,24 @@
   <url-pattern>/admin/AdvanceTeams</url-pattern>
  </servlet-mapping>
 
+<servlet>
+  <servlet-name>UploadAdvancingTeams</servlet-name>
+  <servlet-class>fll.web.admin.UploadAdvancingTeams</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>UploadAdvancingTeams</servlet-name>
+  <url-pattern>/admin/UploadAdvancingTeams</url-pattern>
+ </servlet-mapping>
+
+<servlet>
+  <servlet-name>ProcessAdvancingTeamsUpload</servlet-name>
+  <servlet-class>fll.web.admin.ProcessAdvancingTeamsUpload</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>ProcessAdvancingTeamsUpload</servlet-name>
+  <url-pattern>/admin/ProcessAdvancingTeamsUpload</url-pattern>
+ </servlet-mapping>
+ 
  <servlet>
   <servlet-name>CommitTeam</servlet-name>
   <servlet-class>fll.web.admin.CommitTeam</servlet-class>

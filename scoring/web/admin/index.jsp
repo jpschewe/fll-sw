@@ -225,6 +225,14 @@ ${message}
 <ul>
 	<li><a href='database.flldb'>Download database</a></li>
 	<li><a href="GatherAdvancementData">Advance teams</a></li>
+	<li>
+	<form id='uploadAdvancingTeams' ACTION='UploadAdvancingTeams'
+		METHOD="POST" ENCTYPE="multipart/form-data">
+		Upload CSV or Excel of teams to advance 
+		<input type="file" size="32" name="advanceFile">
+		<input type="submit" value="Upload">
+	</form>
+	</li>
 </ul>
 
 
