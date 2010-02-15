@@ -224,7 +224,7 @@ ${message}
 <p>After the tournament</p>
 <ul>
 	<li><a href='database.flldb'>Download database</a></li>
-	<li><a href="advanceTeams.jsp">Advance teams</a></li>
+	<li><a href="selectTeamsToAdvance.jsp">Advance teams</a></li>
 </ul>
 
 
