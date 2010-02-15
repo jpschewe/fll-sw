@@ -2,6 +2,7 @@
 
 <%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
 
+<%@ page import="fll.Team" %>
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.ResultSet" %>
@@ -68,6 +69,7 @@ ${message}
               final ResultSet rs = stmt.executeQuery("SELECT TeamNumber,TeamName,Organization,Division FROM Teams ORDER BY TeamNumber ASC");
               while(rs.next()) {
                 final int teamNumber = rs.getInt(1);
+                if(!Team.isInternalTeamNumber(teamNumber)) {
                 final String teamName = rs.getString(2);
                 final String organization = rs.getString(3);
                 final String division = rs.getString(4);
@@ -83,6 +85,7 @@ ${message}
                 out.print(division);
                 out.print(")");
                 out.print("</option>\n");
+                }
               }
               SQLFunctions.closeResultSet(rs);
               SQLFunctions.closeStatement(stmt);
