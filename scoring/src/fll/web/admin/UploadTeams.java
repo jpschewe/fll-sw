@@ -65,12 +65,14 @@ public final class UploadTeams extends BaseFLLServlet {
 
     final StringBuilder message = new StringBuilder();
     final DataSource datasource = SessionAttributes.getDataSource(session);
-    final FileItem teamsFileItem = (FileItem) request.getAttribute("teamsFile");
-    final String extension = Utilities.determineExtension(teamsFileItem);
-    final File file = File.createTempFile("fll", extension);
+
+    File file = null;
     try {
       final Connection connection = datasource.getConnection();
       UploadProcessor.processUpload(request);
+      final FileItem teamsFileItem = (FileItem) request.getAttribute("teamsFile");
+      final String extension = Utilities.determineExtension(teamsFileItem);
+      file = File.createTempFile("fll", extension);
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Wrote teams data to: "
             + file.getAbsolutePath());
@@ -98,8 +100,10 @@ public final class UploadTeams extends BaseFLLServlet {
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving team data into the database", e);
     } finally {
-      if (!file.delete()) {
-        file.deleteOnExit();
+      if (null != file) {
+        if (!file.delete()) {
+          file.deleteOnExit();
+        }
       }
     }
     session.setAttribute("message", message.toString());
@@ -474,7 +478,7 @@ public final class UploadTeams extends BaseFLLServlet {
           out.println("<font color='red'>Error, "
               + teamNumStr + " is not numeric.<br/>");
           out.println("Go back and check your input file for errors.<br/></font>");
-          if(LOGGER.isDebugEnabled()) {
+          if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(e, e);
           }
           return false;
@@ -482,7 +486,7 @@ public final class UploadTeams extends BaseFLLServlet {
           out.println("<font color='red'>Error, "
               + teamNumStr + " is not numeric.<br/>");
           out.println("Go back and check your input file for errors.<br/></font>");
-          if(LOGGER.isDebugEnabled()) {
+          if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(nfe, nfe);
           }
           return false;
