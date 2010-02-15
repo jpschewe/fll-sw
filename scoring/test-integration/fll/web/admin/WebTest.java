@@ -37,7 +37,7 @@ public class WebTest {
   @Test
   public void testPages() throws SAXException, MalformedURLException, IOException {
     final String[] pages = new String[] { "", "index.jsp", "edit_event_division.jsp", "tournaments.jsp", "judges.jsp", "tables.jsp", "select_team.jsp",
-                                         "remoteControl.jsp", "advanceTeams.jsp", };
+                                         "remoteControl.jsp", };
     final WebConversation conversation = new WebConversation();
     for (final String page : pages) {
       if (LOGGER.isInfoEnabled()) {
