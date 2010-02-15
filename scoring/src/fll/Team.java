@@ -63,7 +63,7 @@ public final class Team {
     NULL.setTeamName("NULL");
   }
 
-  public static Comparator<Team> TEAM_NUMBER_COMPARATOR = new Comparator<Team>() {
+  public static final Comparator<Team> TEAM_NUMBER_COMPARATOR = new Comparator<Team>() {
     public int compare(final Team one, final Team two) {
       final int oneNum = one.getTeamNumber();
       final int twoNum = two.getTeamNumber();
