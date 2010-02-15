@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.TestUtils;
 import fll.Utilities;
 import fll.util.ScoreUtils;
 import fll.web.playoff.DatabaseTeamScore;
@@ -51,12 +52,12 @@ public class TestComputedScores {
     ResultSet rs = null;
     Connection connection = null;
 
+    final File tempFile = File.createTempFile("flltest", null);
+    final String database = tempFile.getAbsolutePath();
     try {
       final InputStream dumpFileIS = TestComputedScores.class.getResourceAsStream("data/plymouth-2009-11-21.zip");
       Assert.assertNotNull("Cannot find test data", dumpFileIS);
       
-      final File tempFile = File.createTempFile("flltest", null);
-      final String database = tempFile.getAbsolutePath();
 
       ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), database);
 
@@ -79,6 +80,7 @@ public class TestComputedScores {
       Assert.assertEquals(expectedTotal, computedTotal, 0D);
       
     } finally {
+      TestUtils.deleteDatabase(database);
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closePreparedStatement(selectPrep);   
       SQLFunctions.closeConnection(connection);

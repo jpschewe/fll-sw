@@ -207,4 +207,18 @@ public final class TestUtils {
     inputStream.close();
   }
 
+  /**
+   * Delete all files that would be associated with the specified database. 
+   */
+  public static void deleteDatabase(final String database) {
+    for(final String extension : Utilities.HSQL_DB_EXTENSIONS) {
+      final String filename = database + extension;
+      final File file = new File(filename);
+      if(file.exists()) {
+        if(!file.delete()) {
+          file.deleteOnExit();
+        }
+      }
+    }
+  }
 }

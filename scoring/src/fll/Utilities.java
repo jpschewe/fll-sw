@@ -167,8 +167,8 @@ public final class Utilities {
       return false;
     }
 
-    final String[] extensions = new String[] { ".properties", ".script", ".log", ".data", ".backup", };
-    for (final String extension : extensions) {
+    
+    for (final String extension : HSQL_DB_EXTENSIONS) {
       final File file = new File(baseFilename
           + extension);
       if (file.exists()
@@ -187,6 +187,10 @@ public final class Utilities {
 
     return true;
   }
+  /**
+   * Extensions used by HSQL for it's database files. These extensions include the dot.
+   */
+  public static final String[] HSQL_DB_EXTENSIONS = new String[] { ".properties", ".script", ".log", ".data", ".backup", };
 
   /**
    * Test that the database behind the connection is initialized. Checks for the
