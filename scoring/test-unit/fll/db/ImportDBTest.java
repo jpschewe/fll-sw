@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import fll.TestUtils;
 import fll.Utilities;
 
 /**
@@ -50,27 +51,31 @@ public class ImportDBTest {
 
     final File tempFile = File.createTempFile("flltest", null);
     final String database = tempFile.getAbsolutePath();
-
-    ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), database);
-    
-    // dump to temp file
     final File temp = File.createTempFile("fll", ".zip");
-    temp.deleteOnExit();
-    final FileOutputStream fos = new FileOutputStream(temp);
-    final ZipOutputStream zipOut = new ZipOutputStream(fos);
-    
-    final Connection connection = Utilities.createDataSource(database).getConnection();
-    final Document challengeDocument = Queries.getChallengeDocument(connection);
-    Assert.assertNotNull(challengeDocument);
-    DumpDB.dumpDatabase(zipOut, connection, challengeDocument);   
-    fos.close();
-    connection.close();
-    
-    // load from temp file
-    final FileInputStream fis = new FileInputStream(temp);
-    ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(fis), database);
-    fis.close();
-    
-    temp.delete();
+
+    try {
+      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), database);
+
+      // dump to temp file
+      final FileOutputStream fos = new FileOutputStream(temp);
+      final ZipOutputStream zipOut = new ZipOutputStream(fos);
+
+      final Connection connection = Utilities.createDataSource(database).getConnection();
+      final Document challengeDocument = Queries.getChallengeDocument(connection);
+      Assert.assertNotNull(challengeDocument);
+      DumpDB.dumpDatabase(zipOut, connection, challengeDocument);
+      fos.close();
+      connection.close();
+
+      // load from temp file
+      final FileInputStream fis = new FileInputStream(temp);
+      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(fis), database);
+      fis.close();
+    } finally {
+      if (!temp.delete()) {
+        temp.deleteOnExit();
+      }
+      TestUtils.deleteDatabase(database);
+    }
   }
 }
