@@ -66,7 +66,7 @@ ${message}
 <p>Before tournament day:</p>
 <ol>
 	<li>
-	<form id='uploadTeams' ACTION='<c:url value="UploadTeams"/>'
+	<form id='uploadTeams' ACTION='UploadTeams'
 		METHOD="POST" ENCTYPE="multipart/form-data">Upload the datafile
 	for teams. This file can be tab separated or comma separated or 
     an Excel file (xls and xslx supported - although only the first sheet is read). The
@@ -224,7 +224,7 @@ ${message}
 <p>After the tournament</p>
 <ul>
 	<li><a href='database.flldb'>Download database</a></li>
-	<li><a href="selectTeamsToAdvance.jsp">Advance teams</a></li>
+	<li><a href="GatherAdvancementData">Advance teams</a></li>
 </ul>
 
 

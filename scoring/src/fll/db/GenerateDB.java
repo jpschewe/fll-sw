@@ -129,14 +129,14 @@ public final class GenerateDB {
         prep = connection.prepareStatement("INSERT INTO Teams(TeamNumber, TeamName, Region) VALUES(?, ?, ?)");
         prep.setInt(1, Team.TIE.getTeamNumber());
         prep.setString(2, Team.TIE.getTeamName());
-        prep.setString(3, "INTERNAL");
+        prep.setString(3, INTERNAL_REGION);
         prep.executeUpdate();
 
         // add the null team so that references work
         prep = connection.prepareStatement("INSERT INTO Teams(TeamNumber, TeamName, Region) VALUES(?, ?, ?)");
         prep.setInt(1, Team.NULL.getTeamNumber());
         prep.setString(2, Team.NULL.getTeamName());
-        prep.setString(3, "INTERNAL");
+        prep.setString(3, INTERNAL_REGION);
         prep.executeUpdate();
 
         SQLFunctions.closePreparedStatement(prep);
