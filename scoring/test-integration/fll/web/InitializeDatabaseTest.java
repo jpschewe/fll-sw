@@ -28,7 +28,8 @@ public class InitializeDatabaseTest extends SeleneseTestCase {
     
     final InputStream challengeStream = getClass().getResourceAsStream("data/challenge-ft.xml");
     assertNotNull(challengeStream);
-    final File challengeFile = storeInputStreamToFile(challengeStream);
+    final File challengeFile = storeInputStreamToFile(challengeStream); 
+    try {
     selenium.type("xmldocument", challengeFile.getAbsolutePath());
     selenium.click("force_rebuild");
     selenium.click("reinitializeDatabase");
@@ -41,16 +42,21 @@ public class InitializeDatabaseTest extends SeleneseTestCase {
       LOGGER.error("Screenshot saved to " + screenshot.getAbsolutePath());
     }
     assertTrue("Database was not successfully initialized", success);
+    } finally {
+      if(!challengeFile.delete()) {
+        challengeFile.deleteOnExit();
+      }
+    }
   }
   
   /**
-   * Copy the contents of a stream to a temporary file. The file will be marked to delete on exit.
+   * Copy the contents of a stream to a temporary file.
    * 
    * @param inputStream the data to store in the temporary file
-   * @return the temporary file
+   * @return the temporary file, you need to delete it
    * @throws IOException
    */
-  public static File storeInputStreamToFile(final InputStream inputStream) throws IOException {
+  private static File storeInputStreamToFile(final InputStream inputStream) throws IOException {
     final File tempFile = File.createTempFile("fll", null);
     final FileOutputStream outputStream = new FileOutputStream(tempFile);
     final byte[] buffer = new byte[1042];
@@ -59,8 +65,6 @@ public class InitializeDatabaseTest extends SeleneseTestCase {
       outputStream.write(buffer, 0, bytesRead);
     }
     outputStream.close();
-    
-    tempFile.deleteOnExit();
     
     return tempFile;
   }

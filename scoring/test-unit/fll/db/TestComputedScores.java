@@ -80,6 +80,9 @@ public class TestComputedScores {
       Assert.assertEquals(expectedTotal, computedTotal, 0D);
       
     } finally {
+      if(!tempFile.delete()) {
+        tempFile.deleteOnExit();
+      }
       TestUtils.deleteDatabase(database);
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closePreparedStatement(selectPrep);   

@@ -56,22 +56,17 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
 
     final StringBuilder message = new StringBuilder();
 
+    final File file = File.createTempFile("fll", null);
     try {
       // must be first to ensure the form parameters are set
       UploadProcessor.processUpload(request);
 
       final FileItem subjectiveFileItem = (FileItem) request.getAttribute("subjectiveFile");
-      final File file = File.createTempFile("fll", null);
       subjectiveFileItem.write(file);
 
       final DataSource datasource = SessionAttributes.getDataSource(session);
       final Connection connection = datasource.getConnection();
       saveSubjectiveData(file, Queries.getCurrentTournament(connection), ApplicationAttributes.getChallengeDocument(application), connection);
-      if(!file.delete()) {
-        LOGGER.warn("Unable to delete file " + file.getAbsolutePath() + ", setting to delete on exit");
-        file.deleteOnExit();
-      }
-
       message.append("<p id='success'><i>Subjective data uploaded successfully</i></p>");
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error saving subjective data into the database: "
@@ -93,6 +88,11 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
           + e.getMessage() + "</p>");
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving subjective data into the database", e);
+    } finally {
+      if(!file.delete()) {
+        LOGGER.warn("Unable to delete file " + file.getAbsolutePath() + ", setting to delete on exit");
+        file.deleteOnExit();
+      }
     }
 
     session.setAttribute("message", message.toString());

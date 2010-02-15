@@ -190,7 +190,7 @@ public final class Utilities {
   /**
    * Extensions used by HSQL for it's database files. These extensions include the dot.
    */
-  public static final String[] HSQL_DB_EXTENSIONS = new String[] { ".properties", ".script", ".log", ".data", ".backup", };
+  public static final String[] HSQL_DB_EXTENSIONS = new String[] { ".properties", ".script", ".log", ".data", ".backup", "", };
 
   /**
    * Test that the database behind the connection is initialized. Checks for the
