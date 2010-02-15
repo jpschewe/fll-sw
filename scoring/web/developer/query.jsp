@@ -32,7 +32,16 @@
           <c:forEach var="row" items="${query_result.rowsByIndex}">
             <tr>
               <c:forEach var="column" items="${row}">
-                <td><c:out value="${column}"/></td>
+                <td>
+                <c:choose>
+                <c:when test="${empty column }">
+                --NULL--
+                </c:when>
+                <c:otherwise>
+                ${column }
+                </c:otherwise>
+                </c:choose>
+                </td>
               </c:forEach>
             </tr>
           </c:forEach>
