@@ -29,6 +29,7 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.io.LogWriter;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
+import org.apache.commons.fileupload.FileItem;
 import org.apache.log4j.Logger;
 import org.hsqldb.Server;
 import org.hsqldb.jdbc.jdbcDataSource;
@@ -403,5 +404,21 @@ public final class Utilities {
     }
     displayNames.add(name);
     application.setAttribute("displayNames", displayNames);
+  }
+
+  /**
+   * Determine the extension of a {@link FileItem}
+   * @param fileItem the file item
+   * @return the extension, or null if there isn't one
+   */
+  public static String determineExtension(final FileItem fileItem) {
+    final int dotIndex = fileItem.getName().lastIndexOf('.');
+    final String extension;
+    if (-1 != dotIndex) {
+      extension = fileItem.getName().substring(dotIndex);
+    } else {
+      extension = null;
+    }
+    return extension;
   }
 }

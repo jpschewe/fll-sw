@@ -53,8 +53,6 @@ import fll.xml.XMLUtils;
 /**
  * Java code for uploading team data to the database. Called from
  * filterTeams.jsp and columnSelection.jsp.
- * 
- * @version $Revision$
  */
 public final class UploadTeams extends BaseFLLServlet {
 
@@ -71,13 +69,7 @@ public final class UploadTeams extends BaseFLLServlet {
       final Connection connection = datasource.getConnection();
       UploadProcessor.processUpload(request);
       final FileItem teamsFileItem = (FileItem) request.getAttribute("teamsFile");
-      final int dotIndex = teamsFileItem.getName().lastIndexOf('.');
-      final String extension;
-      if (-1 != dotIndex) {
-        extension = teamsFileItem.getName().substring(dotIndex);
-      } else {
-        extension = null;
-      }
+      final String extension = Utilities.determineExtension(teamsFileItem);
       final File file = File.createTempFile("fll", extension);
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Wrote teams data to: "

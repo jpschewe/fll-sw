@@ -47,7 +47,6 @@ public class GatherAdvancementData extends BaseFLLServlet {
       LOGGER.trace("Top of GatherAdvancementData.doPost");
     }
 
-    final StringBuilder message = new StringBuilder();
     final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
 
     final String[] teamsToAdvance = request.getParameterValues("advance");
@@ -66,35 +65,7 @@ public class GatherAdvancementData extends BaseFLLServlet {
         teamNumbers = Queries.getAllTeamNumbers(connection);
       }
 
-      final Map<Integer, String> currentTournament = new HashMap<Integer, String>();
-      final Map<Integer, String> nextTournament = new HashMap<Integer, String>();
-      final List<Team> advancingTeams = new LinkedList<Team>();
-      for (final int teamNum : teamNumbers) {
-        final Team team = Team.getTeamFromDatabase(connection, teamNum);
-        if(!team.isInternal()) {
-          final int current = Queries.getTeamCurrentTournament(connection, teamNum);
-          final String currentName = Queries.getTournamentName(connection, current);
-
-          final Integer next = Queries.getNextTournament(connection, current);
-          if (null == next) {
-            if (LOGGER.isDebugEnabled()) {
-              LOGGER.debug("Cannot advance team "
-                  + teamNum + " as the current tournament " + currentName + " does not have a next tournament");
-            }
-          } else {
-            advancingTeams.add(team);
-            currentTournament.put(teamNum, currentName);
-            final String nextName = Queries.getTournamentName(connection, next);
-            nextTournament.put(teamNum, nextName);
-          }
-        }
-
-      }
-
-      Collections.sort(advancingTeams, Team.TEAM_NUMBER_COMPARATOR);
-      session.setAttribute("advancingTeams", advancingTeams);
-      session.setAttribute("currentTournament", currentTournament);
-      session.setAttribute("nextTournament", nextTournament);
+      processAdvancementData(response, session, null == teamsToAdvance, connection, teamNumbers);
 
     } catch (final ParseException pe) {
       LOGGER.error("Error parsing team number, this is an internal error", pe);
@@ -104,6 +75,50 @@ public class GatherAdvancementData extends BaseFLLServlet {
       throw new RuntimeException("There was an error talking to the database", e);
     }
 
+  }
+
+  /**
+   * Process the form data.
+   * 
+   * @param sendToSelect if true, send to selectTeamsToAdvance.jsp, else send to
+   *          verifyAdvancingTeams.jsp
+   */
+  /* package */static void processAdvancementData(final HttpServletResponse response,
+                                                  final HttpSession session,
+                                                  final boolean sendToSelect,
+                                                  final Connection connection,
+                                                  final Collection<Integer> teamNumbers) throws SQLException, IOException {
+    final StringBuilder message = new StringBuilder();
+    final Map<Integer, String> currentTournament = new HashMap<Integer, String>();
+    final Map<Integer, String> nextTournament = new HashMap<Integer, String>();
+    final List<Team> advancingTeams = new LinkedList<Team>();
+    for (final int teamNum : teamNumbers) {
+      final Team team = Team.getTeamFromDatabase(connection, teamNum);
+      if (!team.isInternal()) {
+        final int current = Queries.getTeamCurrentTournament(connection, teamNum);
+        final String currentName = Queries.getTournamentName(connection, current);
+
+        final Integer next = Queries.getNextTournament(connection, current);
+        if (null == next) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Cannot advance team "
+                + teamNum + " as the current tournament " + currentName + " does not have a next tournament");
+          }
+        } else {
+          advancingTeams.add(team);
+          currentTournament.put(teamNum, currentName);
+          final String nextName = Queries.getTournamentName(connection, next);
+          nextTournament.put(teamNum, nextName);
+        }
+      }
+
+    }
+
+    Collections.sort(advancingTeams, Team.TEAM_NUMBER_COMPARATOR);
+    session.setAttribute("advancingTeams", advancingTeams);
+    session.setAttribute("currentTournament", currentTournament);
+    session.setAttribute("nextTournament", nextTournament);
+
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Bottom of GatherAdvancementData.doPost");
     }
@@ -112,7 +127,7 @@ public class GatherAdvancementData extends BaseFLLServlet {
       session.setAttribute("message", message.toString());
     }
 
-    if (null == teamsToAdvance) {
+    if (sendToSelect) {
       response.sendRedirect(response.encodeRedirectURL("selectTeamsToAdvance.jsp"));
     } else {
       response.sendRedirect(response.encodeRedirectURL("verifyAdvancingTeams.jsp"));
