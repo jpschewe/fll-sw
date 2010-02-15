@@ -187,7 +187,9 @@ public final class Queries {
       rs = prep.executeQuery();
       while (rs.next()) {
         final String division = rs.getString(1);
-        list.add(division);
+        if(null != division && !"".equals(division)) {
+          list.add(division);
+        }
       }
     } finally {
       SQLFunctions.closeResultSet(rs);
@@ -2065,6 +2067,10 @@ public final class Queries {
                                final String region,
                                final String division,
                                final int tournament) throws SQLException {
+    if(Team.isInternalTeamNumber(number)) {
+      throw new RuntimeException("Cannot create team with an internal number: " + number);
+    }
+    
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {

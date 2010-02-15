@@ -192,7 +192,7 @@ public final class ImportDB {
         final String org = memRS.getString(3);
         final String div = memRS.getString(4);
         final String region = memRS.getString(5);
-        if (!GenerateDB.INTERNAL_REGION.equals(region)) {
+        if (!Team.isInternalTeamNumber(num)) {
           if (LOG.isDebugEnabled()) {
             LOG.debug("Inserting into teams: "
                 + num + ", " + name + ", " + org + ", " + div + ", " + region);
@@ -213,11 +213,16 @@ public final class ImportDB {
         final String tournament = memRS.getString(1);
         final String location = memRS.getString(2);
         final int nextTournament = memRS.getInt(3);
+        final boolean nextNull = memRS.wasNull();
 
         // add the tournament to the tournaments table if it doesn't already
         // exist
         if (!initialTournaments.contains(tournament)) {
-          Queries.createTournament(destConnection, tournament, location, nextTournament);
+          if(nextNull) {
+            Queries.createTournament(destConnection, tournament, location);
+          } else {
+            Queries.createTournament(destConnection, tournament, location, nextTournament);
+          }
         }
       }
       SQLFunctions.closeResultSet(memRS);
@@ -412,6 +417,9 @@ public final class ImportDB {
       // set next tournaments
       for (final Map.Entry<String, String> entry : nameNext.entrySet()) {
         if (!defaultTournaments.contains(entry.getKey())) {
+          if(LOG.isDebugEnabled()) {
+            LOG.debug("Setting next tournament of #" + entry.getKey() + "# to #" + entry.getValue() + "#");
+          }
           Queries.setNextTournament(connection, entry.getKey(), entry.getValue());
         }
       }
@@ -755,10 +763,12 @@ public final class ImportDB {
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
         final int teamNumber = sourceRS.getInt(1);
-        final String eventDivision = sourceRS.getString(2);
-        destPrep.setInt(2, teamNumber);
-        destPrep.setString(3, eventDivision == null ? GenerateDB.DEFAULT_TEAM_DIVISION : eventDivision);
-        destPrep.executeUpdate();
+        if(!Team.isInternalTeamNumber(teamNumber)) {
+          final String eventDivision = sourceRS.getString(2);
+          destPrep.setInt(2, teamNumber);
+          destPrep.setString(3, eventDivision == null ? GenerateDB.DEFAULT_TEAM_DIVISION : eventDivision);
+          destPrep.executeUpdate();
+        }
       }
     } finally {
       SQLFunctions.closeResultSet(sourceRS);
