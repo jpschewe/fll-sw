@@ -72,6 +72,9 @@ public class ImportDBTest {
       ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(fis), database);
       fis.close();
     } finally {
+      if(!tempFile.delete()) {
+        tempFile.deleteOnExit();
+      }
       if (!temp.delete()) {
         temp.deleteOnExit();
       }
