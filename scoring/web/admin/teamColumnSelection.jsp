@@ -30,7 +30,7 @@ if(null == errorMessage || "".equals(errorMessage)) {
 
     <p>Do not use the forward and back buttons!  Use the supplied links/buttons.</p>
 
-    <p>Select which columns in your data coorespond to the ones the database
+    <p>Select which columns in your data correspond to the ones the database
     understands.  Highlighted columns are required, all others are optional.
     The datatype column specifies the type of data expected in this column.
     <b>If a number is expected and you specify a column with text that doesn't
