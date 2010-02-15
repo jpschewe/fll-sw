@@ -192,7 +192,7 @@ public final class ImportDB {
         final String org = memRS.getString(3);
         final String div = memRS.getString(4);
         final String region = memRS.getString(5);
-        if (!GenerateDB.INTERNAL_REGION.equals(region)) {
+        if (!Team.isInternalTeamNumber(num)) {
           if (LOG.isDebugEnabled()) {
             LOG.debug("Inserting into teams: "
                 + num + ", " + name + ", " + org + ", " + div + ", " + region);
@@ -755,10 +755,12 @@ public final class ImportDB {
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
         final int teamNumber = sourceRS.getInt(1);
-        final String eventDivision = sourceRS.getString(2);
-        destPrep.setInt(2, teamNumber);
-        destPrep.setString(3, eventDivision == null ? GenerateDB.DEFAULT_TEAM_DIVISION : eventDivision);
-        destPrep.executeUpdate();
+        if(!Team.isInternalTeamNumber(teamNumber)) {
+          final String eventDivision = sourceRS.getString(2);
+          destPrep.setInt(2, teamNumber);
+          destPrep.setString(3, eventDivision == null ? GenerateDB.DEFAULT_TEAM_DIVISION : eventDivision);
+          destPrep.executeUpdate();
+        }
       }
     } finally {
       SQLFunctions.closeResultSet(sourceRS);

@@ -245,6 +245,13 @@ public final class Team {
    * @return if this is an internal team
    */
   public boolean isInternal() {
-    return getTeamNumber() < 0;
+    return isInternalTeamNumber(getTeamNumber());
+  }
+  
+  /**
+   * Check if this an internal team number.
+   */
+  public static boolean isInternalTeamNumber(final int number) {
+    return number < 0;
   }
 }
