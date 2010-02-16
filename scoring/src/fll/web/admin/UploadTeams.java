@@ -32,9 +32,8 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
 import org.apache.log4j.Logger;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -47,7 +46,6 @@ import fll.util.ExcelCellReader;
 import fll.util.FLLRuntimeException;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
-import fll.web.UploadProcessor;
 import fll.xml.XMLUtils;
 
 /**
@@ -66,34 +64,25 @@ public final class UploadTeams extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
     final DataSource datasource = SessionAttributes.getDataSource(session);
 
+    final String fileName = SessionAttributes.getNonNullAttribute(session, "spreadsheetFile", String.class);
+
     File file = null;
     try {
       final Connection connection = datasource.getConnection();
-      UploadProcessor.processUpload(request);
-      final FileItem teamsFileItem = (FileItem) request.getAttribute("teamsFile");
-      final String extension = Utilities.determineExtension(teamsFileItem);
-      file = File.createTempFile("fll", extension);
+      file = new File(fileName);
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Wrote teams data to: "
             + file.getAbsolutePath());
       }
-      teamsFileItem.write(file);
-      parseFile(file, connection, session);
+      
+      final String sheetName = SessionAttributes.getAttribute(session, "sheetName", String.class);
+
+      parseFile(file, sheetName, connection, session);
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error saving team data into the database: "
           + sqle.getMessage() + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving team data into the database", sqle);
-    } catch (final ParseException e) {
-      message.append("<p class='error'>Error saving team data into the database: "
-          + e.getMessage() + "</p>");
-      LOGGER.error(e, e);
-      throw new RuntimeException("Error saving team data into the database", e);
-    } catch (final FileUploadException e) {
-      message.append("<p class='error'>Error processing team data upload: "
-          + e.getMessage() + "</p>");
-      LOGGER.error(e, e);
-      throw new RuntimeException("Error processing team data upload", e);
     } catch (final Exception e) {
       message.append("<p class='error'>Error saving team data into the database: "
           + e.getMessage() + "</p>");
@@ -121,12 +110,12 @@ public final class UploadTeams extends BaseFLLServlet {
    *          columnSelectOptions.
    * @throws SQLException if an error occurs talking to the database
    * @throws IOException if an error occurs reading from file
+   * @throws InvalidFormatException 
    */
-  public static void parseFile(final File file, final Connection connection, final HttpSession session) throws SQLException, IOException {
+  public static void parseFile(final File file, final String sheetName, final Connection connection, final HttpSession session) throws SQLException, IOException, InvalidFormatException {
     final CellFileReader reader;
-    if (file.getName().endsWith(".xls")
-        || file.getName().endsWith(".xslx")) {
-      reader = new ExcelCellReader(file);
+    if(ExcelCellReader.isExcelFile(file)) {
+      reader = new ExcelCellReader(file, sheetName);
     } else {
       // determine if the file is tab separated or comma separated, check the
       // first line for tabs and if they aren't found, assume it's comma

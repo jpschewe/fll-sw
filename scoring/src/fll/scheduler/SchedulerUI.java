@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
@@ -41,8 +42,11 @@ import net.mtu.eggplant.util.gui.BasicWindowMonitor;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import com.lowagie.text.DocumentException;
+
+import fll.util.ExcelCellReader;
 
 /**
  * UI for the scheduler.
@@ -103,7 +107,7 @@ public class SchedulerUI extends JFrame {
       if (ConstraintViolation.NO_TEAM != selected.getTeam()) {
         final int teamIndex = scheduleModel.getIndexOfTeam(selected.getTeam());
         scheduleTable.setRowSelectionInterval(teamIndex, teamIndex);
-        //FIXME need to figure out how to scroll to visible correctly
+        // FIXME need to figure out how to scroll to visible correctly
         scheduleTable.scrollRectToVisible(scheduleTable.getCellRect(selectedRow, 1, true));
       }
     }
@@ -150,7 +154,7 @@ public class SchedulerUI extends JFrame {
 
     public void actionPerformed(final ActionEvent ae) {
       try {
-        final ParseSchedule newData = new ParseSchedule(scheduleData.getFile());
+        final ParseSchedule newData = new ParseSchedule(scheduleData.getFile(), scheduleData.getSheetName());
         setScheduleData(newData);
       } catch (final IOException e) {
         final Formatter errorFormatter = new Formatter();
@@ -158,6 +162,11 @@ public class SchedulerUI extends JFrame {
         LOGGER.error(errorFormatter, e);
         JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reloading file", JOptionPane.ERROR_MESSAGE);
       } catch (ParseException e) {
+        final Formatter errorFormatter = new Formatter();
+        errorFormatter.format("Error reloading file: %s", e.getMessage());
+        LOGGER.error(errorFormatter, e);
+        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reloading file", JOptionPane.ERROR_MESSAGE);
+      } catch (final InvalidFormatException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error reloading file: %s", e.getMessage());
         LOGGER.error(errorFormatter, e);
@@ -191,19 +200,18 @@ public class SchedulerUI extends JFrame {
       System.exit(0);
     }
   };
-  
+
   private final Action displayGeneralScheduleAction = new AbstractAction("General Schedule") {
     {
       putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/History16.gif"));
       putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/History24.gif"));
       putValue(SHORT_DESCRIPTION, "Display the general schedule");
-//      putValue(MNEMONIC_KEY, KeyEvent.VK_X);
+      // putValue(MNEMONIC_KEY, KeyEvent.VK_X);
     }
 
     public void actionPerformed(final ActionEvent ae) {
       final String schedule = scheduleData.computeGeneralSchedule();
-      JOptionPane.showMessageDialog(SchedulerUI.this, schedule, "General Schedule",
-                                    JOptionPane.INFORMATION_MESSAGE);      
+      JOptionPane.showMessageDialog(SchedulerUI.this, schedule, "General Schedule", JOptionPane.INFORMATION_MESSAGE);
     }
   };
 
@@ -263,7 +271,11 @@ public class SchedulerUI extends JFrame {
         if (selectedFile.isFile()
             && selectedFile.canRead()) {
           try {
-            final ParseSchedule schedule = new ParseSchedule(selectedFile);
+            final String sheetName = promptForSheetName(selectedFile);
+            if(null == sheetName) {
+              return;
+            }
+            final ParseSchedule schedule = new ParseSchedule(selectedFile, sheetName);
             setScheduleData(schedule);
           } catch (final ParseException e) {
             final Formatter errorFormatter = new Formatter();
@@ -277,6 +289,12 @@ public class SchedulerUI extends JFrame {
             LOGGER.error(errorFormatter, e);
             JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file", JOptionPane.ERROR_MESSAGE);
             return;
+          } catch (final InvalidFormatException e) {
+            final Formatter errorFormatter = new Formatter();
+            errorFormatter.format("Unknown file format %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
+            LOGGER.error(errorFormatter, e);
+            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file", JOptionPane.ERROR_MESSAGE);
+            return;
           }
 
         } else {
@@ -286,6 +304,28 @@ public class SchedulerUI extends JFrame {
       }
     }
   };
+
+  /**
+   * If there is more than 1 sheet, prompt, otherwise just use the sheet.
+   * 
+   * @return the sheet name or null if the user canceled
+   * @throws IOException 
+   * @throws InvalidFormatException 
+   */
+  private String promptForSheetName(final File selectedFile) throws InvalidFormatException, IOException {
+    final List<String> sheetNames = ExcelCellReader.getAllSheetNames(selectedFile);
+    if (sheetNames.size() == 1) {
+      return sheetNames.get(0);
+    } else {
+      final String[] options = sheetNames.toArray(new String[sheetNames.size()]);
+      final int choosenOption = JOptionPane.showOptionDialog(null, "Choose which sheet to work with", "Choose Sheet", JOptionPane.DEFAULT_OPTION,
+                                                             JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+      if(JOptionPane.CLOSED_OPTION == choosenOption) {
+        return null;
+      }
+      return options[choosenOption];
+    }
+  }
 
   private static final Preferences PREFS = Preferences.userNodeForPackage(ParseSchedule.class);
 
@@ -342,7 +382,7 @@ public class SchedulerUI extends JFrame {
             + " column: " + column //
         );
       }
-      
+
       boolean error = false;
       for (final ConstraintViolation violation : violationsModel.getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
@@ -398,8 +438,8 @@ public class SchedulerUI extends JFrame {
           setBackground(errorColor);
         }
       }
-      
-      //TODO would be nice to set foreground color when selected
+
+      // TODO would be nice to set foreground color when selected
 
       if (value instanceof Date) {
         final String strValue = ParseSchedule.OUTPUT_DATE_FORMAT.get().format((Date) value);

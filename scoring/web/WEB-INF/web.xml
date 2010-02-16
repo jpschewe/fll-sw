@@ -72,6 +72,24 @@
   <url-pattern>/challenge.xml</url-pattern>
  </servlet-mapping>
 
+<servlet>
+  <servlet-name>UploadSpreadsheet</servlet-name>
+  <servlet-class>fll.web.UploadSpreadsheet</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>UploadSpreadsheet</servlet-name>
+  <url-pattern>/UploadSpreadsheet</url-pattern>
+ </servlet-mapping>
+
+<servlet>
+  <servlet-name>ProcessSelectedSheet</servlet-name>
+  <servlet-class>fll.web.ProcessSelectedSheet</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>ProcessSelectedSheet</servlet-name>
+  <url-pattern>/ProcessSelectedSheet</url-pattern>
+ </servlet-mapping>
+
  <!--  setup -->
  <servlet>
   <servlet-name>CreateDB</servlet-name>

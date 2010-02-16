@@ -66,15 +66,20 @@ ${message}
 <p>Before tournament day:</p>
 <ol>
 	<li>
-	<form id='uploadTeams' ACTION='UploadTeams'
-		METHOD="POST" ENCTYPE="multipart/form-data">Upload the datafile
+	<form id='uploadTeams' 
+	    ACTION="<c:url value='/UploadSpreadsheet'/>"
+		METHOD="POST" 
+		ENCTYPE="multipart/form-data">
+		Upload the datafile
 	for teams. This file can be tab separated or comma separated or 
     an Excel file (xls and xslx supported - although only the first sheet is read). The
 	filter functionality provided here is very basic and has very limited
 	feedback. It's suggested that you edit the input file before upload to
-	contain only the teams for your tournament(s). <input type="file"
-		size="32" name="teamsFile"> <input type="submit"
-		value="Upload"></form>
+	contain only the teams for your tournament(s).
+	  <input type="file" size="32" name="file">
+	  <input type='hidden' name='uploadRedirect' value="<c:url value='/admin/UploadTeams'/>" />
+	  <input type="submit" value="Upload">
+	</form>
 	</li>
 
 	<li><a
@@ -226,10 +231,13 @@ ${message}
 	<li><a href='database.flldb'>Download database</a></li>
 	<li><a href="GatherAdvancementData">Advance teams</a></li>
 	<li>
-	<form id='uploadAdvancingTeams' ACTION='UploadAdvancingTeams'
-		METHOD="POST" ENCTYPE="multipart/form-data">
-		Upload CSV or Excel of teams to advance 
-		<input type="file" size="32" name="advanceFile">
+	<form id='uploadAdvancingTeams' 
+	    ACTION="<c:url value='/UploadSpreadsheet'/>"
+		METHOD="POST" 
+		ENCTYPE="multipart/form-data">
+		Upload CSV or Excel of teams to advance		 
+		<input type="file" size="32" name="file">
+		<input type='hidden' name='uploadRedirect' value="<c:url value='/admin/UploadAdvancingTeams'/>" />
 		<input type="submit" value="Upload">
 	</form>
 	</li>

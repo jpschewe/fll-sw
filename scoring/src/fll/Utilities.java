@@ -415,11 +415,11 @@ public final class Utilities {
    * @param fileItem the file item
    * @return the extension, or null if there isn't one
    */
-  public static String determineExtension(final FileItem fileItem) {
-    final int dotIndex = fileItem.getName().lastIndexOf('.');
+  public static String determineExtension(final String filename) {
+    final int dotIndex = filename.lastIndexOf('.');
     final String extension;
     if (-1 != dotIndex) {
-      extension = fileItem.getName().substring(dotIndex);
+      extension = filename.substring(dotIndex);
     } else {
       extension = null;
     }

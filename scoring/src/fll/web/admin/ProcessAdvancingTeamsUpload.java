@@ -24,6 +24,7 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import fll.Utilities;
 import fll.util.CSVCellReader;
@@ -45,10 +46,9 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
+    final String advanceFile = SessionAttributes.getNonNullAttribute(session, "advanceFile", String.class);      
+    final File file = new File(advanceFile);
     try {
-      final String advanceFile = SessionAttributes.getNonNullAttribute(session, "advanceFile", String.class);
-      
-      final File file = new File(advanceFile);
       if(!file.exists() || !file.canRead()) {
         throw new RuntimeException("Cannot read file: " + advanceFile);
       }
@@ -58,7 +58,9 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
         throw new RuntimeException("Cannot find 'teamNumber' request parameter");
       }
       
-      final Collection<Integer> teams = processFile(file, teamNumberColumnName);
+      final String sheetName = SessionAttributes.getAttribute(session, "sheetName", String.class);
+
+      final Collection<Integer> teams = processFile(file, sheetName, teamNumberColumnName);
       
       if(!file.delete()) {
         if(LOGGER.isDebugEnabled()) {
@@ -85,17 +87,22 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
           + e.getMessage() + "</p>");
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving advancment data into the database", e);
+    } finally {
+      if(!file.delete()) {
+        file.deleteOnExit();
+      }
     }
   }
 
   /**
    * Get the team numbers of advancing teams.
+   * @throws InvalidFormatException 
    */
-  public static Collection<Integer> processFile(final File file, final String teamNumberColumnName) throws SQLException, IOException, ParseException {
+  public static Collection<Integer> processFile(final File file, final String sheetName, final String teamNumberColumnName) throws SQLException, IOException, ParseException, InvalidFormatException {
     final CellFileReader reader;
     if (file.getName().endsWith(".xls")
         || file.getName().endsWith(".xslx")) {
-      reader = new ExcelCellReader(file);
+      reader = new ExcelCellReader(file, sheetName);
     } else {
       // determine if the file is tab separated or comma separated, check the
       // first line for tabs and if they aren't found, assume it's comma
