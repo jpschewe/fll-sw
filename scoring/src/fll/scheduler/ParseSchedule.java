@@ -7,7 +7,6 @@ package fll.scheduler;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -27,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import com.lowagie.text.BadElementException;
 import com.lowagie.text.Cell;
@@ -70,6 +70,7 @@ public class ParseSchedule {
   public static final String TECHNICAL_HEADER = "Technical";
 
   public static final String JUDGE_GROUP_HEADER = "Judging Group";
+
   public static final String JUDGE_GROUP_HEADER_OLD = "Judging Station";
 
   public static final String PERF_1_HEADER = "Perf #1";
@@ -161,6 +162,12 @@ public class ParseSchedule {
 
   private final Map<Date, Map<String, List<TeamScheduleInfo>>> _matches = new HashMap<Date, Map<String, List<TeamScheduleInfo>>>();
 
+  private final String _sheetName;
+
+  public String getSheetName() {
+    return _sheetName;
+  }
+
   private final File _file;
 
   public File getFile() {
@@ -182,77 +189,9 @@ public class ParseSchedule {
     return Collections.unmodifiableList(_schedule);
   }
 
-  /**
-   * @param args files to parse
-   */
-  public static void main(final String[] args) {
-    if (args.length < 1) {
-      LOGGER.error("No files specified, nothing to do");
-      System.exit(1);
-    }
-
-    for (final String arg : args) {
-      final File f = new File(arg);
-      if (f.isDirectory()) {
-        final File[] files = f.listFiles(EXCEL_FILE_FILTER);
-        for (final File f2 : files) {
-          checkFile(f2);
-        }
-      } else {
-        checkFile(f);
-      }
-    }
-
-    LOGGER.info("Finished, if no errors found, you're good");
-    System.exit(0);
-  }
-
-  public static final FileFilter EXCEL_FILE_FILTER = new FileFilter() {
-    public boolean accept(final File f) {
-      return f.getName().endsWith(".xls")
-          || f.getName().endsWith(".xslx");
-    }
-  };
-
-  /**
-   * Parse, verify, compute the general schedule and output the detailed
-   * schedules.
-   * 
-   * @see #parseFile()
-   * @see #verifySchedule()
-   * @see #computeGeneralSchedule()
-   * @see #outputDetailedSchedules()
-   */
-  private static void checkFile(final File f) {
-    try {
-      final ParseSchedule ps = new ParseSchedule(f);
-
-      final Collection<ConstraintViolation> violations = ps.verifySchedule();
-
-      if (violations.isEmpty()) {
-        LOGGER.info(ps.computeGeneralSchedule());
-        
-        try {
-          ps.outputDetailedSchedules();
-        } catch (final DocumentException e) {
-          throw new RuntimeException("Error creating PDF document", e);
-        }
-      } else {
-        for (final ConstraintViolation violation : violations) {
-          LOGGER.error(violation.getMessage());
-        }
-      }
-    } catch (final ParseException ioe) {
-      LOGGER.fatal(ioe, ioe);
-      System.exit(1);
-    } catch (final IOException ioe) {
-      LOGGER.fatal(ioe, ioe);
-      System.exit(1);
-    }
-  }
-
-  public ParseSchedule(final File f) throws IOException, ParseException {
+  public ParseSchedule(final File f, final String sheetName) throws IOException, ParseException, InvalidFormatException {
     _file = f;
+    _sheetName = sheetName;
 
     LOGGER.info(new Formatter().format("Reading file %s", _file.getAbsoluteFile()));
 
@@ -262,7 +201,7 @@ public class ParseSchedule {
           + _file.getAbsolutePath());
     }
 
-    final CellFileReader reader = new ExcelCellReader(_file);
+    final CellFileReader reader = new ExcelCellReader(_file, _sheetName);
 
     findColumns(reader);
     parseData(reader);
@@ -311,7 +250,8 @@ public class ParseSchedule {
           _presentationColumn = i;
         } else if (line[i].equals(TECHNICAL_HEADER)) {
           _technicalColumn = i;
-        } else if (line[i].equals(JUDGE_GROUP_HEADER) || JUDGE_GROUP_HEADER_OLD.equals(line[i])) {
+        } else if (line[i].equals(JUDGE_GROUP_HEADER)
+            || JUDGE_GROUP_HEADER_OLD.equals(line[i])) {
           _judgeGroupColumn = i;
         } else if (line[i].equals(PERF_1_HEADER)) {
           _perf1Column = i;
@@ -1089,7 +1029,8 @@ public class ParseSchedule {
           final TeamScheduleInfo otherOpponent = findOpponent(ti, r);
           if (otherOpponent != null
               && opponent.equals(otherOpponent)) {
-            final String message = String.format("Team %d competes against %d more than once rounds: %d, %d", ti.getTeamNumber(), opponent.getTeamNumber(), (round+1), (r+1));
+            final String message = String.format("Team %d competes against %d more than once rounds: %d, %d", ti.getTeamNumber(), opponent.getTeamNumber(),
+                                                 (round + 1), (r + 1));
             violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, null, message));
             violations.add(new ConstraintViolation(opponent.getTeamNumber(), null, null, null, message));
           }
