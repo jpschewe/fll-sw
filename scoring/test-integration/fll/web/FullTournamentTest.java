@@ -135,7 +135,7 @@ public class FullTournamentTest {
       final InputStream teamsIS = FullTournamentTest.class.getResourceAsStream("data/teams-ft.csv");
       Assert.assertNotNull(teamsIS);
       final UploadFileSpec teamsUpload = new UploadFileSpec("teams.csv", teamsIS, "text/plain");
-      form.setParameter("teamsFile", new UploadFileSpec[] { teamsUpload });
+      form.setParameter("file", new UploadFileSpec[] { teamsUpload });
       request = form.getRequest();
       response = conversation.getResponse(request);
       Assert.assertTrue(response.isHTML());
