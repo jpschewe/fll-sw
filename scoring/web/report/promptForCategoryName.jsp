@@ -17,8 +17,6 @@ Prompt for how many teams should be considered from each scored category.
 <%
 	final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
-final List<String> divisions = Queries.getEventDivisions(connection);
-pageContext.setAttribute("divisions", divisions);
 %>
 
 <html>
@@ -59,7 +57,6 @@ pageContext.setAttribute("divisions", divisions);
     <form action='FinalistSchedulerUI' method='POST'>
     <p>Would you like to define another category to schedule finalists for? Note that the team numbers entered are checked against the current tournament, but not against the appropriate division.<br/>
       Category name: <input type="text" name="new-category" size="30"/><br/>      
-      <c:forEach var="division" items="${divisions}">
       <h2>Division ${division}</h2>
       <table>
       <tr><th>Place</th><th>Team Number</th><th>Team Name</th></tr>
@@ -67,16 +64,15 @@ pageContext.setAttribute("divisions", divisions);
         <tr>
           <td>${i}</td>
           <td>
-            <input id='${division}-finalist-${i}' name='${division}-finalist-${i}' type='text' size='10' onblur="lookup_name('${division}-finalist-${i}', '${division}-name-${i}')"/>
+            <input id='finalist-${i}' name='finalist-${i}' type='text' size='10' onblur="lookup_name('finalist-${i}', 'name-${i}')"/>
           </td>
           <td>
-            <input id='${division}-name-${i}' type='text' size='30' readonly/>
+            <input id='name-${i}' type='text' size='30' readonly/>
           </td>
         </tr>
       </c:forEach> <%-- numFinalists --%>
 
       </table>
-      </c:forEach> <%-- divisions --%>
       
       <input type='submit' name='create-category' value='Add To Finalists'/><br/>
       <input type='submit' name='done' value='done'/>
