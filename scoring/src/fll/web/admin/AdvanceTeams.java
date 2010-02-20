@@ -26,6 +26,8 @@ import fll.web.SessionAttributes;
 
 /**
  * Advance teams to the next tournament.
+ * @web.servlet name="AdvanceTeams"
+ * @web.servlet-mapping url-pattern="/admin/AdvanceTeams"
  */
 public class AdvanceTeams extends BaseFLLServlet {
 

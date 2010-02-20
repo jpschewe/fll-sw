@@ -28,8 +28,8 @@ import fll.web.SessionAttributes;
 /**
  * Commit the changes made by editTeam.jsp.
  * 
- * @author jpschewe
- * @version $Revision$
+ * @web.servlet name="CommitTeam"
+ * @web.servlet-mapping url-pattern="/admin/CommitTeam"
  */
 public class CommitTeam extends BaseFLLServlet {
 

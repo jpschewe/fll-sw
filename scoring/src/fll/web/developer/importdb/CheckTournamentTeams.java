@@ -29,6 +29,8 @@ import fll.web.SessionAttributes;
  * Servlet to check that all of the teams are in the right tournament.
  * 
  * @author jpschewe
+ * @web.servlet name="CheckTournamentTeams"
+ * @web.servlet-mapping url-pattern="/developer/importdb/CheckTournamentTeams"
  */
 public class CheckTournamentTeams extends BaseFLLServlet {
 

@@ -46,7 +46,8 @@ import fll.web.SessionAttributes;
 
 /**
  * @author jpschewe
- * @version $Revision$
+ * @web.servlet name="RankingReport"
+ * @web.servlet-mapping url-pattern="/report/RankingReport"
  */
 public class RankingReport extends BaseFLLServlet {
 

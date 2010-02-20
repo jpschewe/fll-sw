@@ -33,8 +33,8 @@ import fll.xml.XMLWriter;
 /**
  * Commit the changes made by editTeam.jsp.
  * 
- * @author jpschewe
- * @version $Revision$
+ * @web.servlet name="DownloadSubjectiveData"
+ * @web.servlet-mapping url-pattern="/admin/subjective-data.fll"
  */
 public class DownloadSubjectiveData extends BaseFLLServlet {
 

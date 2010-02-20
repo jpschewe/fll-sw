@@ -28,6 +28,8 @@ import fll.web.SessionAttributes;
 
 /**
  * Upload the teams to be advanced.
+ * @web.servlet name="UploadAdvancingTeams"
+ * @web.servlet-mapping url-pattern="/admin/UploadAdvancingTeams"
  */
 public final class UploadAdvancingTeams extends BaseFLLServlet {
 

@@ -28,6 +28,8 @@ import fll.web.SessionAttributes;
  * Servlet to do the actual import.
  * 
  * @author jpschewe
+ * @web.servlet name="ExecuteImport"
+ * @web.servlet-mapping url-pattern="/developer/importdb/ExecuteImport"
  */
 public class ExecuteImport extends BaseFLLServlet {
 

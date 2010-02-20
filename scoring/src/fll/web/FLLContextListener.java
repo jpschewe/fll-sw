@@ -11,6 +11,8 @@ import javax.servlet.ServletContextListener;
 
 /**
  * Take care of initializing some variables in the servlet context.
+ * 
+ * @web.listener
  */
 public class FLLContextListener implements ServletContextListener {
 
