@@ -26,8 +26,8 @@ import fll.web.SessionAttributes;
 /**
  * Set the current tournament.
  * 
- * @author jpschewe
- * @version $Revision$
+ * @web.servlet name="SetCurrentTournament"
+ * @web.servlet-mapping url-pattern="/admin/SetCurrentTournament"
  */
 public class SetCurrentTournament extends BaseFLLServlet {
 

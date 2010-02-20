@@ -27,6 +27,9 @@ import fll.Version;
 
 /**
  * Ensure that all HTML pages get the same footer.
+ * 
+ * @web.filter name="Footer Filter"
+ * @web.filter-mapping url-pattern="/*"
  */
 public class FooterFilter implements Filter {
 

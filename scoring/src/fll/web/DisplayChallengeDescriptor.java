@@ -19,19 +19,21 @@ import org.w3c.dom.Document;
 import fll.xml.XMLWriter;
 
 /**
- * 
+ * @web.servlet name="DisplayChallengeDescriptor"
+ * @web.servlet-mapping url-pattern="/challenge.xml"
  */
 public class DisplayChallengeDescriptor extends BaseFLLServlet {
 
   /**
-   * @see fll.web.BaseFLLServlet#processRequest(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, javax.servlet.ServletContext, javax.servlet.http.HttpSession)
+   * @see fll.web.BaseFLLServlet#processRequest(javax.servlet.http.HttpServletRequest,
+   *      javax.servlet.http.HttpServletResponse, javax.servlet.ServletContext,
+   *      javax.servlet.http.HttpSession)
    */
   @Override
-  protected void processRequest(final HttpServletRequest request, 
-                                final HttpServletResponse response, 
-                                final ServletContext application, 
-                                final HttpSession session) throws IOException,
-      ServletException {
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session) throws IOException, ServletException {
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
     final XMLWriter xmlwriter = new XMLWriter();

@@ -29,8 +29,8 @@ import fll.web.SessionAttributes;
 /**
  * Set the current tournament.
  * 
- * @author jpschewe
- * @version $Revision$
+ * @web.servlet name="CommitTournamentInitialization"
+ * @web.servlet-mapping url-pattern="/admin/CommitTournamentInitialization"
  */
 public class CommitTournamentInitialization extends BaseFLLServlet {
 

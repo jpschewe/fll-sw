@@ -43,7 +43,8 @@ import fll.xml.XMLUtils;
 /**
  * Java code behind uploading subjective scores
  * 
- * @version $Revision$
+ * @web.servlet name="UploadSubjectiveData"
+ * @web.servlet-mapping url-pattern="/admin/UploadSubjectiveData"
  */
 public final class UploadSubjectiveData extends BaseFLLServlet {
 

@@ -49,6 +49,8 @@ import fll.xml.XMLUtils;
 
 /**
  * Final computed scores report.
+ * @web.servlet name="FinalComputedScores"
+ * @web.servlet-mapping url-pattern="/report/finalComputedScores.pdf"
  */
 public final class FinalComputedScores extends BaseFLLServlet {
 

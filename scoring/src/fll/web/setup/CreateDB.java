@@ -33,7 +33,8 @@ import fll.xml.ChallengeParser;
  * Create a new database either from an xml descriptor or from a database dump.
  * 
  * @author jpschewe
- * @version $Revision$
+ * @web.servlet name="CreateDB"
+ * @web.servlet-mapping url-pattern="/setup/CreateDB"
  */
 public class CreateDB extends BaseFLLServlet {
 

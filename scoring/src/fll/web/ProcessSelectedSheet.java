@@ -15,6 +15,10 @@ import javax.servlet.http.HttpSession;
 
 /**
  * Grap the sheetName parameter and put it into the session.
+ * 
+ * @web.servlet name="ProcessSelectedSheet"
+ * @web.servlet-mapping url-pattern="/ProcessSelectedSheet"
+ * 
  */
 public final class ProcessSelectedSheet extends BaseFLLServlet {
 
