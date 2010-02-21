@@ -54,12 +54,12 @@ public class FooterFilter implements Filter {
       final ByteResponseWrapper wrapper = new ByteResponseWrapper(httpResponse);
       chain.doFilter(request, wrapper);
 
+      final String contentType = wrapper.getContentType();
       if (wrapper.isStringUsed()) {
-        final String contentType = wrapper.getContentType();
         if ("text/html".equals(contentType)) {
           final String origStr = wrapper.getString();
           if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace(new Formatter().format("page: %s content type: %s ###%s###", httpRequest.getRequestURL(), contentType, origStr));
+            LOGGER.trace(new Formatter().format("html page: %s content type: %s ###%s###", httpRequest.getRequestURL(), contentType, origStr));
           }
 
           final PrintWriter writer = response.getWriter();
@@ -78,7 +78,7 @@ public class FooterFilter implements Filter {
         } else {
           final String origStr = wrapper.getString();
           if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace(new Formatter().format("page: %s content type: %s ###%s###", httpRequest.getRequestURL(), contentType, origStr));
+            LOGGER.trace(new Formatter().format("non-html text page: %s content type: %s ###%s###", httpRequest.getRequestURL(), contentType, origStr));
           }
 
           final PrintWriter writer = response.getWriter();
@@ -86,6 +86,10 @@ public class FooterFilter implements Filter {
           writer.close();
         }
       } else if (wrapper.isBinaryUsed()) {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace(new Formatter().format("binary page: %s content type: %s", httpRequest.getRequestURL(), contentType));
+        }
+
         final byte[] origData = wrapper.getBinary();
         final ServletOutputStream out = response.getOutputStream();
         out.write(origData);
