@@ -28,6 +28,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.w3c.dom.Element;
 
 import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Font;
@@ -70,9 +71,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
       response.setHeader("Content-Disposition", "filename=finalComputedScores.pdf");
 
       final Element root = challengeDocument.getDocumentElement();
-      final FinalScoresPageHandler pageHandler = new FinalScoresPageHandler(root.getAttribute("title"), tournamentName);
+      final String challengeTitle = root.getAttribute("title");
+      final SimpleFooterHandler pageHandler = new SimpleFooterHandler();
 
-      generateReport(connection, response.getOutputStream(), challengeDocument, tournament, pageHandler);
+      generateReport(connection, response.getOutputStream(), challengeDocument, challengeTitle, tournamentName, tournament, pageHandler);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     }
@@ -84,14 +86,18 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
   private static final Font ARIAL_8PT_NORMAL_RED = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, BaseColor.RED);
 
+  private static final Font TIMES_12PT_NORMAL = FontFactory.getFont(FontFactory.TIMES, 12, Font.NORMAL);
+
   /**
    * Generate the actual report.
    */
   public void generateReport(final Connection connection, 
                              final OutputStream out, 
                              final org.w3c.dom.Document challengeDocument,
+                             final String challengeTitle,
+                             final String tournamentName,
                              final int tournament, 
-                             final FinalScoresPageHandler pageHandler) throws SQLException, IOException {
+                             final SimpleFooterHandler pageHandler) throws SQLException, IOException {
 
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
     final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
@@ -121,7 +127,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
       final Iterator<String> divisionIter = Queries.getEventDivisions(connection).iterator();
       while (divisionIter.hasNext()) {
-        pageHandler.setDivision(divisionIter.next());
+        final String division = divisionIter.next();
 
         // Figure out how many subjective categories have weights > 0.
         final double[] weights = new double[subjectiveCategories.size()];
@@ -151,6 +157,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
         divTable.getDefaultCell().setBorder(0);
         divTable.setWidthPercentage(100);
 
+        final PdfPTable header = createHeader(challengeTitle, tournamentName, division);
+        final PdfPCell headerCell = new PdfPCell(header);
+        headerCell.setColspan(relativeWidths.length);
+        divTable.addCell(headerCell);
+        
         // /////////////////////////////////////////////////////////////////////
         // Write the table column headers
         // /////////////////////////////////////////////////////////////////////
@@ -182,7 +193,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
         perfCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
         divTable.addCell(perfCell);
 
-        final Paragraph overallScore = new Paragraph("Overall\nScore", ARIAL_8PT_BOLD);
+        final Paragraph overallScore = new Paragraph("Overall", ARIAL_8PT_BOLD);
+        overallScore.add(Chunk.NEWLINE);
+        overallScore.add(new Chunk("Score"));
         final PdfPCell osCell = new PdfPCell(overallScore);
         osCell.setBorder(0);
         osCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
@@ -228,7 +241,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         blankCell.setColspan(4 + nonZeroWeights);
         divTable.addCell(blankCell);
 
-        divTable.setHeaderRows(3); // Cause the first 3 rows to be repeated on
+        divTable.setHeaderRows(4); // Cause the first 3 rows to be repeated on
         // each page - 2 rows text headers and 1 for
         // the horizontal line.
 
@@ -251,7 +264,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         query.append(" ORDER BY FinalScores.OverallScore "
             + ascDesc + ", Teams.TeamNumber");
         prep = connection.prepareStatement(query.toString());
-        prep.setString(1, pageHandler.getDivision());
+        prep.setString(1, division);
         teamsRS = prep.executeQuery();
         while (teamsRS.next()) {
           final int teamNumber = teamsRS.getInt(3);
@@ -438,5 +451,26 @@ public final class FinalComputedScores extends BaseFLLServlet {
       SQLFunctions.closeStatement(teamsStmt);
       SQLFunctions.closePreparedStatement(prep);
     }
+  }
+  
+  private PdfPTable createHeader(final String challengeTitle, final String tournamentName, final String division) {    
+    // initialization of the header table
+    final PdfPTable header = new PdfPTable(2);
+    
+    final Phrase p = new Phrase();
+    p.add(new Chunk(challengeTitle, TIMES_12PT_NORMAL));
+    p.add(Chunk.NEWLINE);
+    p.add(new Chunk("Final Computed Scores", TIMES_12PT_NORMAL));
+    header.getDefaultCell().setBorderWidth(0);
+    header.addCell(p);
+    header.getDefaultCell().setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
+    
+    final Phrase p2 = new Phrase();
+    p2.add(new Chunk("Tournament: " + tournamentName, TIMES_12PT_NORMAL));
+    p2.add(Chunk.NEWLINE);
+    p2.add(new Chunk("Division: " + division, TIMES_12PT_NORMAL));
+    header.addCell(p2);
+
+    return header;
   }
 }

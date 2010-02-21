@@ -6,70 +6,29 @@
 
 package fll.web.report;
 
-import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.Phrase;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.PdfWriter;
 
 /**
- * Put the challenge title, tournament and division in header. Put page number
+ * Put page number
  * in the footer.
  */
-class FinalScoresPageHandler extends PdfPageEventHelper {
+class SimpleFooterHandler extends PdfPageEventHelper {
 
   private PdfTemplate _tpl;
 
   private BaseFont _headerFooterFont;
 
-  private PdfPTable _header;
-
-  private final String _tournamentName;
-
-  private final String _challengeTitle;
-
-  private String _division;
-
-  public String getDivision() {
-    return _division;
-  }
-
-  public void setDivision(final String division) {
-    this._division = division;
-  }
-
   private static final Font TIMES_12PT_NORMAL = FontFactory.getFont(FontFactory.TIMES, 12, Font.NORMAL);
 
-  public FinalScoresPageHandler(final String challengeTitle, final String tournamentName) {
-    _challengeTitle = challengeTitle;
-    _tournamentName = tournamentName;
-  }
-
-  private void updateHeader() {
-    // initialization of the header table
-    _header = new PdfPTable(2);
-    final Phrase p = new Phrase();
-    final Chunk ck = new Chunk(_challengeTitle
-        + "\nFinal Computed Scores", TIMES_12PT_NORMAL);
-    p.add(ck);
-    _header.getDefaultCell().setBorderWidth(0);
-    _header.addCell(p);
-    _header.getDefaultCell().setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-    _header.addCell(new Phrase(new Chunk("Tournament: "
-        + _tournamentName + "\nDivision: " + _division, TIMES_12PT_NORMAL)));
-    final PdfPCell blankCell = new PdfPCell();
-    blankCell.setBorder(0);
-    blankCell.setBorderWidthTop(1.0f);
-    blankCell.setColspan(2);
-    _header.addCell(blankCell);
+  public SimpleFooterHandler() {
   }
 
   @Override
@@ -85,13 +44,7 @@ class FinalScoresPageHandler extends PdfPageEventHelper {
   public void onEndPage(final PdfWriter writer, final Document document) {
     final PdfContentByte cb = writer.getDirectContent();
     cb.saveState();
-    // write the headertable
-    updateHeader(); // creates the header table with current
-    // division, etc.
-    _header.setTotalWidth(document.right()
-        - document.left());
-    _header.writeSelectedRows(0, -1, document.left(), document.getPageSize().getHeight() - 10, cb);
-
+    
     // compose the footer
     final String text = "Page "
         + writer.getPageNumber() + " of ";
