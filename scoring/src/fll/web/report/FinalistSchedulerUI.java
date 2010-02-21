@@ -11,6 +11,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.HashMap;
@@ -35,6 +39,7 @@ import org.w3c.dom.Element;
 import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.util.FLLRuntimeException;
 import fll.util.ScoreUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -43,12 +48,20 @@ import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
 /**
- * @author jpschewe
+ * Handle scheduling of finalists.
+ * 
  * @web.servlet name="FinalistSchedulerUI"
  * @web.servlet-mapping url-pattern="/report/FinalistSchedulerUI"
  */
 public class FinalistSchedulerUI extends BaseFLLServlet {
 
+  private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm");
+  
+  /**
+   * Key into session that contains the division finalists Map.
+   */
+  private static final String DIVISION_FINALISTS_KEY = "divisionFinalists";
+  
   /**
    * Key into session that contains the names for the categories.
    */
@@ -167,10 +180,56 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
         displayProposedFinalists(response, connection, challengeDocument, numFinalists, division, extraCategoryFinalists, new ColorChooser());
         return;
       } else if (null != request.getParameter("submit-finalists")) {
+        // store the data
+        final Map<String, Collection<Integer>> divisionFinalists = new HashMap<String, Collection<Integer>>();
+        for (final String categoryTitle : categories) {
+          final Collection<Integer> catFinalists = new LinkedList<Integer>();
+          final String[] teamNumsStr = request.getParameterValues(categoryTitle);
+          for (final String teamNumStr : teamNumsStr) {
+            catFinalists.add(Integer.valueOf(teamNumStr));
+          }
+          divisionFinalists.put(categoryTitle, catFinalists);
+        }
+        session.setAttribute(DIVISION_FINALISTS_KEY, divisionFinalists);
+
+        // prompt for times
+        response.sendRedirect(response.encodeRedirectURL("promptForFinalistTimes.jsp"));        
+        return;
+      } else if(null != request.getParameter("submit-times")) {
+        final String hourStr = request.getParameter("hour");
+        if(null == hourStr) {
+          throw new FLLRuntimeException("Missing 'hour' parameter");
+        }
+        final int hour = Utilities.NUMBER_FORMAT_INSTANCE.parse(hourStr).intValue();
+        if(hour < 0 || hour > 24) {
+          throw new FLLRuntimeException("Hour must be between 0 and 24");
+        }
+        
+        final String minuteStr = request.getParameter("minute");
+        if(null == minuteStr) {
+          throw new FLLRuntimeException("Missing 'minute' parameter");
+        }
+        final int minute = Utilities.NUMBER_FORMAT_INSTANCE.parse(minuteStr).intValue();
+        if(minute < 0 || minute > 59) {
+          throw new FLLRuntimeException("minute must be between 0 and 59");
+        }
+        final Calendar start = Calendar.getInstance();
+        start.set(Calendar.HOUR_OF_DAY, hour);
+        start.set(Calendar.MINUTE, minute);
+        
+        final String intervalStr = request.getParameter("interval");
+        if(null == intervalStr) {
+          throw new FLLRuntimeException("Missing 'interval' parameter");
+        }
+        final int interval = Utilities.NUMBER_FORMAT_INSTANCE.parse(intervalStr).intValue();
+        if(interval < 1) {
+          throw new FLLRuntimeException("interval must be greater than 0");
+        }
+        
         // display the schedule
         final String division = SessionAttributes.getNonNullAttribute(session, "division", String.class);
         response.setContentType("text/html");
-        displayFinalistSchedule(request, response, connection, division, categories);
+        displayFinalistSchedule(session, response, connection, division, categories, start, interval);
 
         // clear out session and return
         session.removeAttribute(CATEGORIES_KEY);
@@ -180,7 +239,9 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
       }
       // done with request parameters
     } catch (final SQLException sqle) {
-      throw new RuntimeException(sqle);
+      throw new FLLRuntimeException(sqle);
+    } catch (final ParseException e) {
+      throw new FLLRuntimeException(e);
     }
 
     // send them back to pick a number
@@ -188,11 +249,13 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
     response.sendRedirect(response.encodeRedirectURL("promptForNumFinalists.jsp"));
   }
 
-  private void displayFinalistSchedule(final HttpServletRequest request,
+  private void displayFinalistSchedule(final HttpSession session,
                                        final HttpServletResponse response,
                                        final Connection connection,
                                        final String division,
-                                       final List<String> categories) throws IOException {
+                                       final List<String> categories,
+                                       final Calendar start,
+                                       final int interval) throws IOException {
 
     final Formatter formatter = new Formatter(response.getWriter());
     formatter.format("<html><body>");
@@ -200,16 +263,9 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
 
     formatter.format("<h2>Division: %s</h2>", division);
 
-    // build input for schedule
-    final Map<String, Collection<Integer>> divisionFinalists = new HashMap<String, Collection<Integer>>();
-    for (final String categoryTitle : categories) {
-      final Collection<Integer> catFinalists = new LinkedList<Integer>();
-      final String[] teamNumsStr = request.getParameterValues(categoryTitle);
-      for (final String teamNumStr : teamNumsStr) {
-        catFinalists.add(Integer.valueOf(teamNumStr));
-      }
-      divisionFinalists.put(categoryTitle, catFinalists);
-    }
+    // can't type inside the session, but we know the type
+    @SuppressWarnings("unchecked")
+    final Map<String, Collection<Integer>> divisionFinalists = (Map<String, Collection<Integer>>)SessionAttributes.getAttribute(session, DIVISION_FINALISTS_KEY, Map.class);
 
     // call schedule
     final List<Map<String, Integer>> schedule = ScoreUtils.scheduleFinalists(divisionFinalists);
@@ -226,11 +282,10 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
       formatter.format("<th>%s</th>", categoryTitle);
     }
     formatter.format("</tr>");
-
-    int slot = 1;
+    
     for (final Map<String, Integer> timeSlot : schedule) {
       formatter.format("<tr>");
-      formatter.format("<td>%s</td>", slot);
+      formatter.format("<td>%s</td>", DATE_FORMAT.format(start.getTime()));
 
       for (final String categoryTitle : categories) {
         formatter.format("<td>");
@@ -251,14 +306,15 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
 
       formatter.format("</tr>");
 
-      ++slot;
+      // increment for next row
+      start.add(Calendar.MINUTE, interval);
     }
 
     formatter.format("</table>");
 
     formatter.format("</body></html>");
   }
-
+  
   /**
    * Display the proposed finalists and allow the user to pick which ones to
    * actually schedule.
