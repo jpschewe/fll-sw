@@ -6,6 +6,7 @@
 package fll.subjective;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -199,6 +200,7 @@ public final class SubjectiveFrame extends JFrame {
     for (final Element subjectiveElement : XMLUtils.filterToElements(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       final SubjectiveTableModel tableModel = new SubjectiveTableModel(_scoreDocument, subjectiveElement);
       final JTable table = new JTable(tableModel);
+      table.setGridColor(Color.BLACK);
       table.setAutoCreateRowSorter(true);
       final String title = subjectiveElement.getAttribute("title");
       _tables.put(title, table);

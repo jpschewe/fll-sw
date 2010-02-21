@@ -26,7 +26,7 @@
 			<pathconvert targetos="unix" property="classpath.unix.@{scripts.path}" refid="@{scripts.path}">
 				<map from="@{scripts.basedir}" to="@{scripts.root}" />
 			</pathconvert>
-			<pathconvert targetos="windows" property="classpath.windows.${scripts.path}" refid="@{scripts.path}">
+			<pathconvert targetos="windows" property="classpath.windows.@{scripts.path}" refid="@{scripts.path}">
 				<map from="@{scripts.basedir}" to="@{scripts.root}" />
 			</pathconvert>
 
