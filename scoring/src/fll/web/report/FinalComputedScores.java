@@ -5,7 +5,6 @@
  */
 package fll.web.report;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -28,16 +27,17 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.w3c.dom.Element;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Font;
-import com.lowagie.text.FontFactory;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.Phrase;
-import com.lowagie.text.pdf.PdfPCell;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfWriter;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Utilities;
 import fll.db.Queries;
@@ -82,7 +82,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
   private static final Font ARIAL_8PT_NORMAL = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL);
 
-  private static final Font ARIAL_8PT_NORMAL_RED = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, Color.RED);
+  private static final Font ARIAL_8PT_NORMAL_RED = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, BaseColor.RED);
 
   /**
    * Generate the actual report.
@@ -156,7 +156,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         // /////////////////////////////////////////////////////////////////////
         final PdfPCell teamCell = new PdfPCell(new Phrase("Organization / Team # / Team Name", ARIAL_8PT_BOLD));
         teamCell.setBorder(0);
-        teamCell.setVerticalAlignment(com.lowagie.text.Element.ALIGN_MIDDLE);
+        teamCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
         divTable.addCell(teamCell);
         divTable.addCell("");
 
@@ -169,8 +169,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
             catPars[cat] = new Paragraph(catTitle, ARIAL_8PT_BOLD);
             catCells[cat] = new PdfPCell(catPars[cat]);
             catCells[cat].setBorder(0);
-            catCells[cat].setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-            catCells[cat].setVerticalAlignment(com.lowagie.text.Element.ALIGN_MIDDLE);
+            catCells[cat].setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+            catCells[cat].setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
             divTable.addCell(catCells[cat]);
           }
         }
@@ -178,15 +178,15 @@ public final class FinalComputedScores extends BaseFLLServlet {
         final Paragraph perfPar = new Paragraph("Performance", ARIAL_8PT_BOLD);
         final PdfPCell perfCell = new PdfPCell(perfPar);
         perfCell.setBorder(0);
-        perfCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-        perfCell.setVerticalAlignment(com.lowagie.text.Element.ALIGN_MIDDLE);
+        perfCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+        perfCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
         divTable.addCell(perfCell);
 
         final Paragraph overallScore = new Paragraph("Overall\nScore", ARIAL_8PT_BOLD);
         final PdfPCell osCell = new PdfPCell(overallScore);
         osCell.setBorder(0);
-        osCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-        osCell.setVerticalAlignment(com.lowagie.text.Element.ALIGN_MIDDLE);
+        osCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+        osCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
         divTable.addCell(osCell);
 
         // /////////////////////////////////////////////////////////////////////
@@ -197,7 +197,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         final PdfPCell wCell = new PdfPCell(wPar);
         wCell.setColspan(2);
         wCell.setBorder(0);
-        wCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
+        wCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
         divTable.addCell(wCell);
 
         final PdfPCell[] wCells = new PdfPCell[subjectiveCategories.size()];
@@ -207,7 +207,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
             wPars[cat] = new Paragraph(Double.toString(weights[cat]), ARIAL_8PT_NORMAL);
             wCells[cat] = new PdfPCell(wPars[cat]);
             wCells[cat].setBorder(0);
-            wCells[cat].setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+            wCells[cat].setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
             divTable.addCell(wCells[cat]);
           }
         }
@@ -216,7 +216,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         final double perfWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(performanceElement.getAttribute("weight")).doubleValue();
         final Paragraph perfWeightPar = new Paragraph(Double.toString(perfWeight), ARIAL_8PT_NORMAL);
         final PdfPCell perfWeightCell = new PdfPCell(perfWeightPar);
-        perfWeightCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+        perfWeightCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
         perfWeightCell.setBorder(0);
         divTable.addCell(perfWeightCell);
 
@@ -276,9 +276,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
           // First column is organization name
           final PdfPCell teamCol = new PdfPCell(new Phrase(organization, ARIAL_8PT_NORMAL));
           teamCol.setBorder(0);
-          teamCol.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_LEFT);
+          teamCol.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_LEFT);
           curteam.addCell(teamCol);
-          curteam.getDefaultCell().setHorizontalAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
+          curteam.getDefaultCell().setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
 
           // Second column is "Raw:"
           curteam.addCell(new Phrase("Raw:", ARIAL_8PT_NORMAL));
@@ -307,7 +307,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                 }
               }
               final PdfPCell subjCell = new PdfPCell((!scoreSeen ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED) : new Phrase(rawScoreText.toString(), ARIAL_8PT_NORMAL)));
-              subjCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+              subjCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
               subjCell.setBorder(0);
               curteam.addCell(subjCell);
               rawScoreRS.close();
@@ -331,7 +331,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           }
           PdfPCell pCell = new PdfPCell((Double.isNaN(rawScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)
               : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(rawScore), ARIAL_8PT_NORMAL)));
-          pCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+          pCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
           pCell.setBorder(0);
           curteam.addCell(pCell);
           rawScoreRS.close();
@@ -344,11 +344,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
           final PdfPCell teamNameCol = new PdfPCell(new Phrase(Integer.toString(teamNumber)
               + " " + teamName, ARIAL_8PT_NORMAL));
           teamNameCol.setBorder(0);
-          teamNameCol.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_LEFT);
+          teamNameCol.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_LEFT);
           curteam.addCell(teamNameCol);
 
           // Second column contains "Scaled:"
-          curteam.getDefaultCell().setHorizontalAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
+          curteam.getDefaultCell().setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
           curteam.addCell(new Phrase("Scaled:", ARIAL_8PT_NORMAL));
 
           // Next, one column containing the scaled score for each subjective
@@ -366,7 +366,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
               final PdfPCell subjCell = new PdfPCell((Double.isNaN(scaledScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)
                   : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(scaledScore), ARIAL_8PT_NORMAL)));
-              subjCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+              subjCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
               subjCell.setBorder(0);
               curteam.addCell(subjCell);
             }
@@ -384,7 +384,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
             pCell = new PdfPCell((Double.isNaN(scaledScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)
                 : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(scaledScore), ARIAL_8PT_NORMAL)));
-            pCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+            pCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
             pCell.setBorder(0);
             curteam.addCell(pCell);
           }
@@ -392,7 +392,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           // Last column contains the overall scaled score
           pCell = new PdfPCell((Double.isNaN(totalScore) ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)
               : new Phrase(Utilities.NUMBER_FORMAT_INSTANCE.format(totalScore), ARIAL_8PT_NORMAL)));
-          pCell.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+          pCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
           pCell.setBorder(0);
           curteam.addCell(pCell);
 
@@ -401,7 +401,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           blankCell = new PdfPCell();
           blankCell.setBorder(0);
           blankCell.setBorderWidthBottom(0.5f);
-          blankCell.setBorderColorBottom(Color.GRAY);
+          blankCell.setBorderColorBottom(BaseColor.GRAY);
           blankCell.setColspan(4 + nonZeroWeights);
           curteam.addCell(blankCell);
 

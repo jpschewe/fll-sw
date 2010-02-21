@@ -24,19 +24,19 @@ import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
-import com.lowagie.text.Chunk;
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Font;
-import com.lowagie.text.FontFactory;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.Phrase;
-import com.lowagie.text.pdf.PdfContentByte;
-import com.lowagie.text.pdf.PdfPCell;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfPageEventHelper;
-import com.lowagie.text.pdf.PdfWriter;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfPageEventHelper;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
 import fll.db.Queries;
@@ -174,7 +174,7 @@ public class RankingReport extends BaseFLLServlet {
       p.add(ck);
       header.getDefaultCell().setBorderWidth(0);
       header.addCell(p);
-      header.getDefaultCell().setHorizontalAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
+      header.getDefaultCell().setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
       header.addCell(new Phrase(new Chunk("Tournament: "
           + _tournament + "\nDate: " + _formattedDate, HEADER_FONT)));
       final PdfPCell blankCell = new PdfPCell();
@@ -188,6 +188,7 @@ public class RankingReport extends BaseFLLServlet {
       header.setTotalWidth(document.right()
           - document.left());
       header.writeSelectedRows(0, -1, document.left(), document.getPageSize().getHeight() - 10, cb);
+      cb.restoreState();
     }
 
   }

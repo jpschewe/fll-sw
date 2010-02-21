@@ -5,7 +5,6 @@
  */
 package fll.scheduler;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,21 +27,20 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import com.lowagie.text.BadElementException;
-import com.lowagie.text.Cell;
-import com.lowagie.text.Chunk;
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Element;
-import com.lowagie.text.Font;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.Phrase;
-import com.lowagie.text.Rectangle;
-import com.lowagie.text.Table;
-import com.lowagie.text.pdf.PdfPCell;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfPageEventHelper;
-import com.lowagie.text.pdf.PdfWriter;
+import com.itextpdf.text.BadElementException;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfPageEventHelper;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Utilities;
 import fll.util.CellFileReader;
@@ -458,38 +456,34 @@ public class ParseSchedule {
       // list of teams staying around to even up the teams
       final List<TeamScheduleInfo> teamsStaying = new LinkedList<TeamScheduleInfo>();
 
-      final Table table = createTable(6);
-      table.setWidths(new float[] { 2, 1, 3, 3, 2, 1 });
+      final PdfPTable table = createTable(6);
+      table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
 
-      int row = 0;
-      table.addCell(createHeaderCell(TEAM_NUMBER_HEADER), row, 0);
-      table.addCell(createHeaderCell(DIVISION_HEADER), row, 1);
-      table.addCell(createHeaderCell("School or Organization"), row, 2);
-      table.addCell(createHeaderCell("Team Name"), row, 3);
-      table.addCell(createHeaderCell(new Formatter().format("Perf #%d", (round + 1)).toString()), row, 4);
-      table.addCell(createHeaderCell(new Formatter().format("Perf %d Table", (round + 1)).toString()), row, 5);
-      table.endHeaders();
-      ++row;
+      table.addCell(createHeaderCell(TEAM_NUMBER_HEADER));
+      table.addCell(createHeaderCell(DIVISION_HEADER));
+      table.addCell(createHeaderCell("School or Organization"));
+      table.addCell(createHeaderCell("Team Name"));
+      table.addCell(createHeaderCell(new Formatter().format("Perf #%d", (round + 1)).toString()));
+      table.addCell(createHeaderCell(new Formatter().format("Perf %d Table", (round + 1)).toString()));
+      table.setHeaderRows(1);
 
       for (final TeamScheduleInfo si : _schedule) {
         // check if team needs to stay and color the cell magenta if they do
-        final Color backgroundColor;
+        final BaseColor backgroundColor;
         if (null != checkIfTeamNeedsToStay(si, round)) {
           teamsStaying.add(si);
-          backgroundColor = Color.MAGENTA;
+          backgroundColor = BaseColor.MAGENTA;
         } else {
           backgroundColor = null;
         }
 
-        table.addCell(createCell(String.valueOf(si.getTeamNumber())), row, 0);
-        table.addCell(createCell(si.getDivision()), row, 1);
-        table.addCell(createCell(si.getOrganization()), row, 2);
-        table.addCell(createCell(si.getTeamName()), row, 3);
-        table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.getPerf(round)), backgroundColor), row, 4);
+        table.addCell(createCell(String.valueOf(si.getTeamNumber())));
+        table.addCell(createCell(si.getDivision()));
+        table.addCell(createCell(si.getOrganization()));
+        table.addCell(createCell(si.getTeamName()));
+        table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.getPerf(round)), backgroundColor));
         table.addCell(createCell(si.getPerfTableColor(round)
-            + " " + si.getPerfTableSide(round), backgroundColor), row, 5);
-
-        ++row;
+            + " " + si.getPerfTableSide(round), backgroundColor));
       }
 
       detailedSchedules.add(table);
@@ -497,9 +491,9 @@ public class ParseSchedule {
       // output teams staying
       if (!teamsStaying.isEmpty()) {
         final String formatString = "Team %d will please stay at the table and compete again - score will not count.";
-        final Table stayingTable = createTable(1);
+        final PdfPTable stayingTable = createTable(1);
         for (final TeamScheduleInfo si : teamsStaying) {
-          stayingTable.addCell(createCell(new Formatter().format(formatString, si.getTeamNumber()).toString(), Color.MAGENTA));
+          stayingTable.addCell(createCell(new Formatter().format(formatString, si.getTeamNumber()).toString(), BaseColor.MAGENTA));
         }
         detailedSchedules.add(stayingTable);
 
@@ -509,66 +503,61 @@ public class ParseSchedule {
     }
   }
 
-  private static Cell createCell(final String text) throws BadElementException {
-    final Cell cell = createBasicCell(new Chunk(text));
+  private static PdfPCell createCell(final String text) throws BadElementException {
+    final PdfPCell cell = createBasicCell(new Chunk(text));
     return cell;
   }
 
-  private static Cell createCell(final String text, final Color backgroundColor) throws BadElementException {
-    final Cell cell = createCell(text);
+  private static PdfPCell createCell(final String text, final BaseColor backgroundColor) throws BadElementException {
+    final PdfPCell cell = createCell(text);
     if (null != backgroundColor) {
       cell.setBackgroundColor(backgroundColor);
     }
     return cell;
   }
 
-  private static Cell createBasicCell(final Chunk chunk) throws BadElementException {
-    final Cell cell = new Cell(chunk);
+  private static PdfPCell createBasicCell(final Chunk chunk) throws BadElementException {
+    final PdfPCell cell = new PdfPCell(new Phrase(chunk));
     cell.setHorizontalAlignment(Element.ALIGN_CENTER);
     cell.setUseDescender(true);
     return cell;
   }
 
-  private static Cell createHeaderCell(final String text) throws BadElementException {
+  private static PdfPCell createHeaderCell(final String text) throws BadElementException {
     final Chunk chunk = new Chunk(text);
     chunk.getFont().setStyle(Font.BOLD);
-    final Cell cell = createBasicCell(chunk);
-    cell.setHeader(true);
+    final PdfPCell cell = createBasicCell(chunk);
 
     return cell;
   }
 
-  private static Table createTable(final int columns) throws BadElementException {
-    final Table table = new Table(columns);
-    table.setCellsFitPage(true);
-    table.setWidth(100);
+  private static PdfPTable createTable(final int columns) throws BadElementException {
+    final PdfPTable table = new PdfPTable(columns);
+//    table.setCellsFitPage(true);
+    table.setWidthPercentage(100);
     return table;
   }
 
   private void outputPresentationSchedule(final Document detailedSchedules) throws DocumentException {
-    final Table table = createTable(6);
-    table.setWidths(new float[] { 2, 1, 3, 3, 2, 1 });
+    final PdfPTable table = createTable(6);
+    table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
 
     Collections.sort(_schedule, PRESENTATION_COMPARATOR);
-    int row = 0;
-    table.addCell(createHeaderCell(TEAM_NUMBER_HEADER), row, 0);
-    table.addCell(createHeaderCell(DIVISION_HEADER), row, 1);
-    table.addCell(createHeaderCell("School or Organization"), row, 2);
-    table.addCell(createHeaderCell("Team Name"), row, 3);
-    table.addCell(createHeaderCell(PRESENTATION_HEADER), row, 4);
-    table.addCell(createHeaderCell(JUDGE_GROUP_HEADER), row, 5);
-    table.endHeaders();
-    ++row;
+    table.addCell(createHeaderCell(TEAM_NUMBER_HEADER));
+    table.addCell(createHeaderCell(DIVISION_HEADER));
+    table.addCell(createHeaderCell("School or Organization"));
+    table.addCell(createHeaderCell("Team Name"));
+    table.addCell(createHeaderCell(PRESENTATION_HEADER));
+    table.addCell(createHeaderCell(JUDGE_GROUP_HEADER));
+    table.setHeaderRows(1);
 
     for (final TeamScheduleInfo si : _schedule) {
-      table.addCell(createCell(String.valueOf(si.getTeamNumber())), row, 0);
-      table.addCell(createCell(si.getDivision()), row, 1);
-      table.addCell(createCell(si.getOrganization()), row, 2);
-      table.addCell(createCell(si.getTeamName()), row, 3);
-      table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.getPresentation())), row, 4);
-      table.addCell(createCell(si.getJudge()), row, 5);
-
-      ++row;
+      table.addCell(createCell(String.valueOf(si.getTeamNumber())));
+      table.addCell(createCell(si.getDivision()));
+      table.addCell(createCell(si.getOrganization()));
+      table.addCell(createCell(si.getTeamName()));
+      table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.getPresentation())));
+      table.addCell(createCell(si.getJudge()));
     }
 
     detailedSchedules.add(table);
@@ -578,30 +567,25 @@ public class ParseSchedule {
   private void outputTechnicalSchedule(final Document detailedSchedules) throws DocumentException {
     Collections.sort(_schedule, TECHNICAL_COMPARATOR);
 
-    final Table table = createTable(6);
-    table.setWidths(new float[] { 2, 1, 3, 3, 2, 1 });
-
-    int row = 0;
+    final PdfPTable table = createTable(6);
+    table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
 
     // header
-    table.addCell(createHeaderCell("Team #"), row, 0);
-    table.addCell(createHeaderCell("Div"), row, 1);
-    table.addCell(createHeaderCell("School or Organization"), row, 2);
-    table.addCell(createHeaderCell("Team Name"), row, 3);
-    table.addCell(createHeaderCell("Technical"), row, 4);
-    table.addCell(createHeaderCell("Judging Group"), row, 5);
-    table.endHeaders();
-    ++row;
+    table.addCell(createHeaderCell("Team #"));
+    table.addCell(createHeaderCell("Div"));
+    table.addCell(createHeaderCell("School or Organization"));
+    table.addCell(createHeaderCell("Team Name"));
+    table.addCell(createHeaderCell("Technical"));
+    table.addCell(createHeaderCell("Judging Group"));
+    table.setHeaderRows(1);
 
     for (final TeamScheduleInfo si : _schedule) {
-      table.addCell(createCell(String.valueOf(si.getTeamNumber())), row, 0);
-      table.addCell(createCell(si.getDivision()), row, 1);
-      table.addCell(createCell(si.getOrganization()), row, 2);
-      table.addCell(createCell(si.getTeamName()), row, 3);
-      table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.getTechnical())), row, 4);
-      table.addCell(createCell(si.getJudge()), row, 5);
-
-      ++row;
+      table.addCell(createCell(String.valueOf(si.getTeamNumber())));
+      table.addCell(createCell(si.getDivision()));
+      table.addCell(createCell(si.getOrganization()));
+      table.addCell(createCell(si.getTeamName()));
+      table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.getTechnical())));
+      table.addCell(createCell(si.getJudge()));
     }
     detailedSchedules.add(table);
 

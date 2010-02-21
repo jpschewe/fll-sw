@@ -3,7 +3,6 @@
  */
 package fll.web.playoff;
 
-import java.awt.Color;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,18 +17,19 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
-import com.lowagie.text.Chunk;
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Element;
-import com.lowagie.text.Font;
-import com.lowagie.text.FontFactory;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.Phrase;
-import com.lowagie.text.pdf.PdfPCell;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfWriter;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
 import fll.Utilities;
@@ -185,7 +185,7 @@ public class ScoresheetGenerator {
     m_goalValue = new PdfPCell[0];
   }
 
-  private static final Font ARIAL_8PT_NORMAL = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, new Color(0, 0, 0));
+  private static final Font ARIAL_8PT_NORMAL = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, new BaseColor(0, 0, 0));
 
   private static final Font ARIAL_10PT_NORMAL = FontFactory.getFont(FontFactory.HELVETICA, 10, Font.NORMAL);
 
@@ -220,18 +220,18 @@ public class ScoresheetGenerator {
 
     // Header cell with challenge title to add to both scoresheets
     final Paragraph titleParagraph = new Paragraph();
-    final Chunk titleChunk = new Chunk(m_pageTitle, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Font.NORMAL, Color.WHITE));
+    final Chunk titleChunk = new Chunk(m_pageTitle, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Font.NORMAL, BaseColor.WHITE));
     titleParagraph.setAlignment(Element.ALIGN_CENTER);
     titleParagraph.add(titleChunk);
 
     titleParagraph.add(Chunk.NEWLINE);
     final Chunk swVersionChunk = new Chunk("SW version: "
-        + Version.getVersion(), FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, Color.WHITE));
+        + Version.getVersion(), FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, BaseColor.WHITE));
     titleParagraph.add(swVersionChunk);
     if (null != m_revision) {
 
       final Chunk revisionChunk = new Chunk(" Descriptor revision: "
-          + m_revision, FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, Color.WHITE));
+          + m_revision, FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, BaseColor.WHITE));
 
       titleParagraph.add(revisionChunk);
     }
@@ -241,7 +241,7 @@ public class ScoresheetGenerator {
     head.setBorder(1);
     head.setPaddingTop(0);
     head.setPaddingBottom(3);
-    head.setBackgroundColor(new Color(64, 64, 64));
+    head.setBackgroundColor(new BaseColor(64, 64, 64));
     head.setVerticalAlignment(Element.ALIGN_TOP);
     head.addElement(titleParagraph);
 
