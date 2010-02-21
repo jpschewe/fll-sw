@@ -163,11 +163,13 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
       } else if (null != request.getParameter("done")) {
         final int numFinalists = SessionAttributes.getNonNullAttribute(session, "numFinalists", Integer.class);
         final String division = SessionAttributes.getNonNullAttribute(session, "division", String.class);
+        response.setContentType("text/html");
         displayProposedFinalists(response, connection, challengeDocument, numFinalists, division, extraCategoryFinalists, new ColorChooser());
         return;
       } else if (null != request.getParameter("submit-finalists")) {
         // display the schedule
         final String division = SessionAttributes.getNonNullAttribute(session, "division", String.class);
+        response.setContentType("text/html");
         displayFinalistSchedule(request, response, connection, division, categories);
 
         // clear out session and return
