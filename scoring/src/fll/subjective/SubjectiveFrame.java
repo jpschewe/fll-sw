@@ -243,6 +243,7 @@ public final class SubjectiveFrame extends JFrame {
     // referenced
     final SubjectiveDiffTableModel model = new SubjectiveDiffTableModel(diffs);
     final JTable table = new JTable(model);
+    table.setGridColor(Color.BLACK);
     final JDialog dialog = new JDialog(this, false);
     final Container cpane = dialog.getContentPane();
     cpane.setLayout(new BorderLayout());

@@ -52,6 +52,7 @@ import fll.xml.XMLUtils;
 
     final TableModel[] models = buildTableModels(owner.getChallengeDocument(), owner.getScoreDocument());
     final JTable teamTable = new JTable(models[0]);
+    teamTable.setGridColor(Color.BLACK);
     teamTable.setAutoCreateRowSorter(true);
 
     teamTable.setDefaultRenderer(Integer.class, CustomCellRenderer.INSTANCE);
@@ -63,6 +64,7 @@ import fll.xml.XMLUtils;
     cpane.add(teamPanel, BorderLayout.CENTER);
 
     final JTable summaryTable = new JTable(models[1]);
+    summaryTable.setGridColor(Color.BLACK);
     summaryTable.setAutoCreateRowSorter(true);
 
     final JLabel summaryLabel = new JLabel("# of teams in each category with the specified # of scores");
