@@ -376,7 +376,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
 
         formatter.format("<table border='1'><tbody>");
         formatter.format("<tr><th colspan='6'>%s</th></tr>", categoryTitle);
-        formatter.format("<tr><th>Score Group</th><th>Team #</th><th>Finalist?</th><th>Combined</th><th>Standardized</th><th>Raw</th></tr>");
+        formatter.format("<tr><th>Score Group</th><th>Team #</th><th>Team Name</th><th>Finalist?</th><th>Combined</th><th>Standardized</th><th>Raw</th></tr>");
 
         for (final String scoreGroup : scoreGroups.keySet()) {
           final String teamSelect = StringUtils.join(scoreGroups.get(scoreGroup).iterator(), ", ");
@@ -426,8 +426,16 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
                 raw.append(Utilities.NUMBER_FORMAT_INSTANCE.format(rawScore));
               }
             }
-            formatter.format("<tr class='team-%s'><td>%s</td><td>%s</td><td><input type='checkbox' name='%s' value='%s' %s/><td>%s</td><td>%s</td><td>%s</td></tr>", teamNum, scoreGroup,
-                             teamNum, categoryTitle, teamNum, first ? "checked" : "", finalScoreNull ? "" : Utilities.NUMBER_FORMAT_INSTANCE.format(finalScore), standardized.toString(), raw.toString());
+            
+            try {
+              final Team team = Team.getTeamFromDatabase(connection, teamNum);
+              formatter.format("<tr class='team-%s'><td>%s</td><td>%s</td><td>%s</td><td><input type='checkbox' name='%s' value='%s' %s/><td>%s</td><td>%s</td><td>%s</td></tr>", teamNum, scoreGroup,
+                               teamNum, team.getTeamName(), categoryTitle, teamNum, first ? "checked" : "", finalScoreNull ? "" : Utilities.NUMBER_FORMAT_INSTANCE.format(finalScore), standardized.toString(), raw.toString());
+            } catch (final SQLException e) {
+              throw new RuntimeException("Error getting information for team "
+                  + teamNum, e);
+            }
+
             
             if(first) {
               first = false;
