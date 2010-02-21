@@ -561,7 +561,18 @@
 	<target name="javadoc" description="Create Javadoc API documentation">
 
 		<mkdir dir="${dir.dist}/docs/api" />
-		<javadoc sourcepath="src" windowtitle="${app.name}" destdir="${dir.dist}/docs/api" packagenames="fll.*" use="true" splitindex="true" additionalparam="-tag beaninfo:a:BeanInfo -tag valid:a:Validity -tag feasible:a:Feasibility -tag test:a:Tests -tag pre:cm:PreConditions -tag post:cm:PostConditions -tag invariant:tc:Invariants -breakiterator">
+		<javadoc sourcepath="src" windowtitle="${app.name}" destdir="${dir.dist}/docs/api" packagenames="fll.*" use="true" splitindex="true" breakiterator="yes">
+			<tag name="test" scope="all" description="tests"/>
+			<tag name="pre" scope="constructors,methods" description="PreConditions"/>
+			<tag name="post" scope="constructors,methods" description="PostConditions"/>
+			<tag name="invariant" scope="types,constructors" description="Invariants"/>
+			<tag name="web.servlet" scope="types"/>
+			<tag name="web.servlet-init-param" scope="types"/>
+			<tag name="web.servlet-mapping" scope="types"/>
+			<tag name="web.listener" scope="types"/>
+			<tag name="web.filter" scope="types"/>
+			<tag name="web.filter-mapping" scope="types"/>
+			
 			<classpath>
 				<path refid="compile.classpath" />
 				<pathelement location="${dir.src}" />
