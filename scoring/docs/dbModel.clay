@@ -244,6 +244,12 @@
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7c0b" mandatory="false" name="&lt;enum goal name&gt;">
 <data-type name="LONGVARCHAR" selected-variant-pattern="LONGVARCHAR"/>
 </column>
+<column auto-increment="false" column-size="10" decimal-digits="0" default-value="" id="767c9c83:126ee2af6fe:-7fd8" mandatory="false" name="ComputedTotal">
+<data-type name="CHAR" selected-variant-pattern="CHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="10" decimal-digits="0" default-value="" id="767c9c83:126ee2af6fe:-7fd5" mandatory="false" name="StandardizedScore">
+<data-type name="CHAR" selected-variant-pattern="CHAR(%n)"/>
+</column>
 </column-list>
 <primary-key id="1f769f17:1248908e683:-7c13" name="PK_&lt;SUBJECTIVE CATEGORY&gt;">
 <primary-key-column name="TeamNumber"/>
