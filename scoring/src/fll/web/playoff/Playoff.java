@@ -41,8 +41,6 @@ import fll.xml.XMLUtils;
 
 /**
  * Add class comment here!
- * 
- * @version $Revision$
  */
 public final class Playoff {
 

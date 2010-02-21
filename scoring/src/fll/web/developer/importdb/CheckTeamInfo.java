@@ -30,6 +30,8 @@ import fll.web.SessionAttributes;
  * Servlet to check team information between the source and dest database.
  * 
  * @author jpschewe
+ * @web.servlet name="CheckTeamInfo"
+ * @web.servlet-mapping url-pattern="/developer/importdb/CheckTeamInfo"
  */
 public class CheckTeamInfo extends BaseFLLServlet {
 

@@ -26,7 +26,8 @@ import fll.web.UploadProcessor;
  * Import a database dump into the existing database.
  * 
  * @author jpschewe
- * @version $Revision$
+ * @web.servlet name="ImportDBDump"
+ * @web.servlet-mapping url-pattern="/developer/importdb/ImportDBDump"
  */
 public class ImportDBDump extends BaseFLLServlet {
 

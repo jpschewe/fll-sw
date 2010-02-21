@@ -29,6 +29,8 @@ import fll.web.SessionAttributes;
  * Commit changes made on resolveMissingTeams.jsp.
  * 
  * @author jpschewe
+ * @web.servlet name="CommitTournamentChanges"
+ * @web.servlet-mapping url-pattern="/developer/importdb/CommitTournamentChanges"
  */
 public class CommitTournamentChanges extends BaseFLLServlet {
 

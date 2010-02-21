@@ -28,6 +28,8 @@ import fll.web.SessionAttributes;
  * Servlet to check if the tournament exists in the dest database.
  * 
  * @author jpschewe
+ * @web.servlet name="CheckTournamentExists"
+ * @web.servlet-mapping url-pattern="/developer/importdb/CheckTournamentExists"
  */
 public class CheckTournamentExists extends BaseFLLServlet {
 

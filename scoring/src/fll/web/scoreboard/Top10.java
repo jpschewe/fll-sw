@@ -56,7 +56,8 @@ import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
 /**
- * @author jpschewe
+ * @web.servlet name="Top10"
+ * @web.servlet-mapping url-pattern="/scoreboard/Top10"
  */
 public class Top10 extends BaseFLLServlet {
 

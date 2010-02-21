@@ -51,6 +51,9 @@ import fll.db.Queries;
 
 /**
  * Initialize web attributes.
+ * 
+ * @web.filter name="Init Filter"
+ * @web.filter-mapping url-pattern="/*"
  */
 public class InitFilter implements Filter {
 

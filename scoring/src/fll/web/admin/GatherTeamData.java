@@ -28,6 +28,8 @@ import fll.web.SessionAttributes;
 
 /**
  * Gather information for editing or adding a team and put it in the session.
+ * @web.servlet name="GatherTeamData"
+ * @web.servlet-mapping url-pattern="/admin/GatherTeamData"
  */
 public class GatherTeamData extends BaseFLLServlet {
 

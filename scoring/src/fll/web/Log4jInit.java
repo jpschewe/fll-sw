@@ -12,7 +12,14 @@ import org.apache.log4j.xml.DOMConfigurator;
 
 /**
  * @author jpschewe
- * @version $Revision$
+ * 
+ *  @web.servlet
+ *     load-on-startup="1"
+ *     name="log4j-init"
+ *     
+ * @web.servlet-init-param
+ *     name="log4j-init-file"
+ *     value="WEB-INF/classes/log4j.xml"
  */
 public class Log4jInit extends HttpServlet {
 

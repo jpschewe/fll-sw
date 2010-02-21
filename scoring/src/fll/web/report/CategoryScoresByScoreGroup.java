@@ -40,7 +40,8 @@ import fll.xml.XMLUtils;
  * Display the report for scores by score group.
  * 
  * @author jpschewe
- * @version $Revision$
+ * @web.servlet name="CategoryScoresByScoreGroup"
+ * @web.servlet-mapping url-pattern="/report/CategoryScoresByScoreGroup"
  */
 public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
