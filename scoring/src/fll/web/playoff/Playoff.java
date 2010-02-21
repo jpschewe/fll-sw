@@ -39,7 +39,7 @@ import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
 /**
- * Add class comment here!
+ * Handle playoff information.
  */
 public final class Playoff {
 
@@ -176,9 +176,8 @@ public final class Playoff {
    * @param tiebreakerElement the XML element representing the tiebreaker
    * @param winnerCriteria the criteria for picking a winner
    * @param teamA First team to check.
-   * @param request The servlet request object containing the form data from a
-   *          scoresheet which is to be tested against the score for teamA and
-   *          the given runNumber in the database.
+   * @param teamB Second team to check
+   * @param teamBScore score for teamB
    * @param runNumber The run number to use for teamA's score.
    * @return The team that is the winner. Team.TIE is returned in the case of a
    *         tie and null when the score for teamA has not yet been entered.
