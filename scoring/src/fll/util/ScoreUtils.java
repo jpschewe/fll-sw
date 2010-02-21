@@ -26,9 +26,6 @@ import fll.xml.XMLUtils;
 
 /**
  * Scoring utilities.
- * 
- * @author jpschewe
- * @version $Revision$
  */
 public final class ScoreUtils {
 
