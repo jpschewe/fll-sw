@@ -25,7 +25,8 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
 /**
- * 
+ * @web.servlet name="ScoresheetServlet"
+ * @web.servlet-mapping url-pattern="/playoff/ScoresheetServlet"
  */
 public class ScoresheetServlet extends BaseFLLServlet {
 

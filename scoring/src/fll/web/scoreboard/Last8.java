@@ -51,7 +51,8 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
 /**
- * @author jpschewe
+ * @web.servlet name="Last8"
+ * @web.servlet-mapping url-pattern="/scoreboard/Last8"
  */
 public class Last8 extends BaseFLLServlet {
 

@@ -35,6 +35,8 @@ import fll.web.SessionAttributes;
 
 /**
  * Process the uploaded data and forward to GatherAdvancementData.
+ * @web.servlet name="ProcessAdvancingTeamsUpload"
+ * @web.servlet-mapping url-pattern="/admin/ProcessAdvancingTeamsUpload"
  */
 public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
 

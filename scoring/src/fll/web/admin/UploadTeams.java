@@ -51,6 +51,9 @@ import fll.xml.XMLUtils;
 /**
  * Java code for uploading team data to the database. Called from
  * filterTeams.jsp and columnSelection.jsp.
+ * 
+ * @web.servlet name="UploadTeams"
+ * @web.servlet-mapping url-pattern="/admin/UploadTeams"
  */
 public final class UploadTeams extends BaseFLLServlet {
 

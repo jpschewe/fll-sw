@@ -30,6 +30,8 @@ import fll.web.SessionAttributes;
  * Add teams after promptCreateMissingTeams.jsp.
  * 
  * @author jpschewe
+ * @web.servlet name="AddMissingTeams"
+ * @web.servlet-mapping url-pattern="/developer/importdb/AddMissingTeams"
  */
 public class AddMissingTeams extends BaseFLLServlet {
 

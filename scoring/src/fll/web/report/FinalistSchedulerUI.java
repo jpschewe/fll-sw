@@ -43,7 +43,8 @@ import fll.xml.XMLUtils;
 
 /**
  * @author jpschewe
- * @version $Revision$
+ * @web.servlet name="FinalistSchedulerUI"
+ * @web.servlet-mapping url-pattern="/report/FinalistSchedulerUI"
  */
 public class FinalistSchedulerUI extends BaseFLLServlet {
 

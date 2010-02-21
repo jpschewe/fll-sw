@@ -29,6 +29,10 @@ import fll.util.ExcelCellReader;
  * The page to redirect to when done is expected to be in the request parameter
  * "uploadRedirect". The sheet name will be stored in the session attribute
  * "sheetName".
+
+ * @web.servlet name="UploadSpreadsheet"
+ * @web.servlet-mapping url-pattern="/UploadSpreadsheet"
+ * 
  */
 public final class UploadSpreadsheet extends BaseFLLServlet {
 

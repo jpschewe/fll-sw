@@ -30,6 +30,8 @@ import fll.web.SessionAttributes;
  * Servlet to find teams that are missing via {@link ImportDB#findMissingTeams(Connection, Connection, String)}.
  * 
  * @author jpschewe
+ * @web.servlet name="FindMissingTeams"
+ * @web.servlet-mapping url-pattern="/developer/importdb/FindMissingTeams"
  */
 public class FindMissingTeams extends BaseFLLServlet {
 

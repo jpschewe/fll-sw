@@ -36,6 +36,9 @@ import fll.xml.XMLWriter;
 
 /**
  * Dump the database.
+
+ * @web.servlet name="DumpDB"
+ * @web.servlet-mapping url-pattern="/admin/database.flldb"
  */
 public final class DumpDB extends BaseFLLServlet {
 

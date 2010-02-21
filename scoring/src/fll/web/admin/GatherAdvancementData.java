@@ -34,6 +34,8 @@ import fll.web.SessionAttributes;
 
 /**
  * Gather data for advancement of teams.
+ * @web.servlet name="GatherAdvancementData"
+ * @web.servlet-mapping url-pattern="/admin/GatherAdvancementData"
  */
 public class GatherAdvancementData extends BaseFLLServlet {
 
