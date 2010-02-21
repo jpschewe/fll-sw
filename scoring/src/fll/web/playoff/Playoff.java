@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspWriter;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
