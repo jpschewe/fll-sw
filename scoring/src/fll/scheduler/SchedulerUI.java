@@ -44,7 +44,7 @@ import net.mtu.eggplant.util.gui.GraphicsUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import com.lowagie.text.DocumentException;
+import com.itextpdf.text.DocumentException;
 
 import fll.util.ExcelCellReader;
 
@@ -228,7 +228,7 @@ public class SchedulerUI extends JFrame {
         scheduleData.outputDetailedSchedules();
         JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedules written to same directory as the schedule", "Information",
                                       JOptionPane.INFORMATION_MESSAGE);
-      } catch (DocumentException e) {
+      } catch (final DocumentException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error writing detailed schedules: %s", e.getMessage());
         LOGGER.error(errorFormatter, e);
