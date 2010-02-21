@@ -324,6 +324,8 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
               + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " " + ascDesc
               + " LIMIT " + numFinalists);
           prep.setInt(1, currentTournament);
+          
+          boolean first = true;
           rs = prep.executeQuery();
           while (rs.next()) {
             final int teamNum = rs.getInt(1);
@@ -332,8 +334,12 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
             } else {
               teamColors.put(teamNum, null);
             }
-            formatter.format("<tr class='team-%s'><td>%s</td><td>%s</td><td><input type='checkbox' name='%s' value='%s'/></tr>", teamNum, scoreGroup,
-                             teamNum, categoryTitle, teamNum);
+            formatter.format("<tr class='team-%s'><td>%s</td><td>%s</td><td><input type='checkbox' name='%s' value='%s' %s/></tr>", teamNum, scoreGroup,
+                             teamNum, categoryTitle, teamNum, first ? "checked" : "");
+            
+            if(first) {
+              first = false;
+            }
           }
         } // score groups
         formatter.format("</tbody></table");
@@ -347,6 +353,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
         formatter.format("<table border='1'><tbody>");
         formatter.format("<tr><th colspan='2'>%s</th></tr>", categoryTitle);
         formatter.format("<tr><th>Team #</th><th>Finalist?</th></tr>");
+        boolean first = true;
         for (final Integer teamNum : teams) {
           if (teamColors.containsKey(teamNum)) {
             teamColors.put(teamNum, colorChooser.getNextAvailableTeamColor());
@@ -354,8 +361,11 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
             teamColors.put(teamNum, null);
           }
 
-          formatter.format("<tr class='team-%s'><td>%s</td><td><input type='checkbox' name='%s' value='%s'/></tr>", teamNum, teamNum,
-                           categoryTitle, teamNum);
+          formatter.format("<tr class='team-%s'><td>%s</td><td><input type='checkbox' name='%s' value='%s' %s/></tr>", teamNum, teamNum,
+                           categoryTitle, teamNum, first ? "checked" : "");
+          if(first) {
+            first = false;
+          }
         }
         formatter.format("</tbody></table");
       } // other categories
