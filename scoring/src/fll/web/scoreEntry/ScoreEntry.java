@@ -539,11 +539,11 @@ public final class ScoreEntry {
     writer.println("        <td>");
     writer.println("          <input type='radio' id='"
         + name + "_yes' name='" + name + "' value='1' onclick='" + getSetMethodName(name) + "(1)'>");
-    writer.println("          Yes");
+    writer.println("          <label for='" + name + "_yes'>Yes</label>");
     writer.println("          &nbsp;&nbsp;");
     writer.println("          <input type='radio' id='"
         + name + "_no' name='" + name + "' value='0' onclick='" + getSetMethodName(name) + "(0)'>");
-    writer.println("          No");
+    writer.println("          <label for='" + name + "_no'>No</label>");
     writer.println("        </td>");
   }
 
