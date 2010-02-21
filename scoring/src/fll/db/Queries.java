@@ -39,7 +39,9 @@ import fll.Team;
 import fll.Utilities;
 import fll.util.ScoreUtils;
 import fll.web.playoff.DatabaseTeamScore;
+import fll.web.playoff.HttpTeamScore;
 import fll.web.playoff.Playoff;
+import fll.web.playoff.TeamScore;
 import fll.xml.ChallengeParser;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
@@ -187,7 +189,8 @@ public final class Queries {
       rs = prep.executeQuery();
       while (rs.next()) {
         final String division = rs.getString(1);
-        if(null != division && !"".equals(division)) {
+        if (null != division
+            && !"".equals(division)) {
           list.add(division);
         }
       }
@@ -581,6 +584,9 @@ public final class Queries {
 
     final int numSeedingRounds = getNumSeedingRounds(connection);
 
+    final Team team = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("TeamNumber")));
+    final TeamScore teamScore = new HttpTeamScore(performanceElement, team.getTeamNumber(), irunNumber, request);
+
     // Perform updates to the playoff data table if in playoff rounds.
     if ((irunNumber > numSeedingRounds)
         && "1".equals(request.getParameter("Verified"))) {
@@ -599,7 +605,7 @@ public final class Queries {
             && Playoff.performanceScoreExists(connection, siblingTeam, irunNumber)
             && Playoff.isVerified(connection, currentTournament, Team.getTeamFromDatabase(connection, siblingTeam), irunNumber)) {
           final Team opponent = Team.getTeamFromDatabase(connection, siblingTeam);
-          final Team winner = Playoff.pickWinner(connection, performanceElement, tiebreakerElement, winnerCriteria, opponent, request, irunNumber);
+          final Team winner = Playoff.pickWinner(connection, performanceElement, tiebreakerElement, winnerCriteria, opponent, team, teamScore, irunNumber);
 
           if (winner != null) {
             final StringBuffer sql = new StringBuffer();
@@ -668,7 +674,7 @@ public final class Queries {
 
     columns.append(", ComputedTotal");
     values.append(", "
-        + request.getParameter("totalScore"));
+        + ScoreUtils.computeTotalScore(teamScore));
 
     columns.append(", RunNumber");
     values.append(", "
@@ -779,6 +785,9 @@ public final class Queries {
     final int irunNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumber).intValue();
     final int numSeedingRounds = getNumSeedingRounds(connection);
 
+    final Team team = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("TeamNumber")));
+    final TeamScore teamScore = new HttpTeamScore(performanceElement, team.getTeamNumber(), irunNumber, request);
+
     final StringBuffer sql = new StringBuffer();
 
     // Check if we need to update the PlayoffData table
@@ -805,7 +814,7 @@ public final class Queries {
                 + teamNumber + " and " + siblingTeam);
           }
           final Team oldWinner = Playoff.pickWinner(connection, performanceElement, tiebreakerElement, winnerCriteria, teamA, teamB, irunNumber);
-          final Team newWinner = Playoff.pickWinner(connection, performanceElement, tiebreakerElement, winnerCriteria, teamB, request, irunNumber);
+          final Team newWinner = Playoff.pickWinner(connection, performanceElement, tiebreakerElement, winnerCriteria, teamB, team, teamScore, irunNumber);
           Statement stmt = null;
           ResultSet rs = null;
           if (oldWinner != null
@@ -878,7 +887,7 @@ public final class Queries {
         + noShow);
 
     sql.append(", ComputedTotal = "
-        + request.getParameter("totalScore"));
+        + ScoreUtils.computeTotalScore(teamScore));
 
     // now do each goal
     for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
@@ -2067,10 +2076,11 @@ public final class Queries {
                                final String region,
                                final String division,
                                final int tournament) throws SQLException {
-    if(Team.isInternalTeamNumber(number)) {
-      throw new RuntimeException("Cannot create team with an internal number: " + number);
+    if (Team.isInternalTeamNumber(number)) {
+      throw new RuntimeException("Cannot create team with an internal number: "
+          + number);
     }
-    
+
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
