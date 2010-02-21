@@ -33,6 +33,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.Team;
+import fll.Utilities;
 import fll.db.Queries;
 import fll.util.ScoreUtils;
 import fll.web.ApplicationAttributes;
@@ -289,6 +290,8 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
 
     PreparedStatement prep = null;
     ResultSet rs = null;
+    PreparedStatement rawPrep = null;
+    ResultSet rawRS = null;
     try {
       formatter.format("<h1>Choose finalists to be scheduled</h1>");
       formatter.format("<hr/>");
@@ -314,28 +317,59 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
         }
 
         formatter.format("<table border='1'><tbody>");
-        formatter.format("<tr><th colspan='3'>%s</th></tr>", categoryTitle);
-        formatter.format("<tr><th>Score Group</th><th>Team #</th><th>Finalist?</th></tr>");
+        formatter.format("<tr><th colspan='6'>%s</th></tr>", categoryTitle);
+        formatter.format("<tr><th>Score Group</th><th>Team #</th><th>Finalist?</th><th>Combined</th><th>Standardized</th><th>Raw</th></tr>");
 
         for (final String scoreGroup : scoreGroups.keySet()) {
           final String teamSelect = StringUtils.join(scoreGroups.get(scoreGroup).iterator(), ", ");
-          prep = connection.prepareStatement("SELECT Teams.TeamNumber"
+          prep = connection.prepareStatement("SELECT Teams.TeamNumber, FinalScores." + categoryName
               + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
               + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " " + ascDesc
               + " LIMIT " + numFinalists);
           prep.setInt(1, currentTournament);
+          rawPrep = connection.prepareStatement("SELECT StandardizedScore,ComputedTotal FROM " + categoryName + " WHERE TeamNumber = ? AND Tournament = ?");
+          rawPrep.setInt(2, currentTournament);
           
           boolean first = true;
           rs = prep.executeQuery();
           while (rs.next()) {
-            final int teamNum = rs.getInt(1);
+            final int teamNum = rs.getInt(1);            
+            final double finalScore = rs.getDouble(2);
+            final boolean finalScoreNull = rs.wasNull();
             if (teamColors.containsKey(teamNum)) {
               teamColors.put(teamNum, colorChooser.getNextAvailableTeamColor());
             } else {
               teamColors.put(teamNum, null);
             }
-            formatter.format("<tr class='team-%s'><td>%s</td><td>%s</td><td><input type='checkbox' name='%s' value='%s' %s/></tr>", teamNum, scoreGroup,
-                             teamNum, categoryTitle, teamNum, first ? "checked" : "");
+            
+            rawPrep.setInt(1, teamNum);
+            rawRS = rawPrep.executeQuery();
+            final StringBuilder standardized = new StringBuilder();
+            final StringBuilder raw = new StringBuilder();
+            boolean rawFirst = true;
+            boolean standardizedFirst = true;
+            while(rawRS.next()) {              
+              final double standardizedScore = rawRS.getDouble(1);
+              if(!rawRS.wasNull()) {
+                if(standardizedFirst) {
+                  standardizedFirst = false;
+                } else {
+                  standardized.append(",");
+                }
+                standardized.append(Utilities.NUMBER_FORMAT_INSTANCE.format(standardizedScore));
+              }
+              final double rawScore = rawRS.getDouble(2);
+              if(!rawRS.wasNull()) {
+                if(rawFirst) {
+                  rawFirst = false;
+                } else {
+                  raw.append(",");
+                }
+                raw.append(Utilities.NUMBER_FORMAT_INSTANCE.format(rawScore));
+              }
+            }
+            formatter.format("<tr class='team-%s'><td>%s</td><td>%s</td><td><input type='checkbox' name='%s' value='%s' %s/><td>%s</td><td>%s</td><td>%s</td></tr>", teamNum, scoreGroup,
+                             teamNum, categoryTitle, teamNum, first ? "checked" : "", finalScoreNull ? "" : Utilities.NUMBER_FORMAT_INSTANCE.format(finalScore), standardized.toString(), raw.toString());
             
             if(first) {
               first = false;
@@ -395,6 +429,8 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
     } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.closeResultSet(rawRS);
+      SQLFunctions.closePreparedStatement(rawPrep);
     }
   }
 
