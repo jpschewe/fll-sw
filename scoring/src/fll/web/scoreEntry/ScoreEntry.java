@@ -39,8 +39,6 @@ import fll.xml.XMLUtils;
 
 /**
  * Java code used in scoreEntry.jsp.
- * 
- * @version $Revision$
  */
 public final class ScoreEntry {
 

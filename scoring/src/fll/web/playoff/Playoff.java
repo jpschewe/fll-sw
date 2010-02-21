@@ -195,11 +195,10 @@ public final class Playoff {
                                 final Element tiebreakerElement,
                                 final WinnerType winnerCriteria,
                                 final Team teamA,
-                                final HttpServletRequest request,
+                                final Team teamB,
+                                final TeamScore teamBScore,
                                 final int runNumber) throws SQLException, ParseException {
     final TeamScore teamAScore = new DatabaseTeamScore(performanceElement, teamA.getTeamNumber(), runNumber, connection);
-    final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("TeamNumber")));
-    final TeamScore teamBScore = new HttpTeamScore(performanceElement, teamB.getTeamNumber(), runNumber, request);
     final Team retval = pickWinner(tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB, teamBScore);
     teamAScore.cleanup();
     teamBScore.cleanup();
