@@ -117,6 +117,8 @@ ${message}
 	<a href='javascript:hide("EditTournamentHelp")'>[hide]</a></div>
 	</li>
 
+    <li><a  href='DisplayTournamentAssignments'>Display Tournament Assignments</a></li>
+    
 	<li>
 	<form id='currentTournament' action='SetCurrentTournament'
 		method="post">Current Tournament: <select

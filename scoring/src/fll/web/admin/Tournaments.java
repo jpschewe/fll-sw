@@ -35,8 +35,6 @@ import fll.web.SessionAttributes;
 
 /**
  * Java code used in tournaments.jsp
- * 
- * @version $Revision$
  */
 public final class Tournaments {
 
