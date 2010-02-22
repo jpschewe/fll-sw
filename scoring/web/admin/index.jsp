@@ -155,9 +155,6 @@ ${message}
 	<a href='javascript:hide("EventDivisionHelp")'>[hide]</a></div>
 	</li>
 
-	<li><a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a>
-	(for scoresheet printing during playoffs)</li>
-
 	<li>
 	<form id='changeScoresheetLayoutNUp'
 		action='<c:url value="index.jsp"/>' method='post'>Select the
@@ -202,6 +199,10 @@ ${message}
 <p>Tournament day:</p>
 <ol>
 	<li><a href='<c:url value="judges.jsp"/>'>Assign Judges</a></li>
+	
+	<li><a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a>
+	(for scoresheet printing during playoffs)</li>
+
 
 	<li><a
 		href='<c:url value="GatherTeamData">
