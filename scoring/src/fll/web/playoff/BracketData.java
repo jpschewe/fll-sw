@@ -713,7 +713,7 @@ public class BracketData {
         }
       }
     } else {
-      // Very brief explaination of the math:
+      // Very brief explanation of the math:
       // Let y = row (this is the key value of the inner Map elements of
       // _bracketData)
       // Let x = the number of rows per team (variable '_rowsPerTeam') in the
