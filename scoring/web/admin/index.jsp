@@ -155,8 +155,6 @@ ${message}
 	<a href='javascript:hide("EventDivisionHelp")'>[hide]</a></div>
 	</li>
 
-	<li><a href='<c:url value="judges.jsp"/>'>Assign Judges</a></li>
-
 	<li><a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a>
 	(for scoresheet printing during playoffs)</li>
 
@@ -203,6 +201,8 @@ ${message}
 
 <p>Tournament day:</p>
 <ol>
+	<li><a href='<c:url value="judges.jsp"/>'>Assign Judges</a></li>
+
 	<li><a
 		href='<c:url value="GatherTeamData">
                      <c:param name="addTeam" value="1"/>
