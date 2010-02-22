@@ -137,17 +137,17 @@ public class Top10 extends BaseFLLServlet {
         }
 
         formatter.format("<tr>");
-        formatter.format("<td class='center' width='7%%'>%d</td>", rank);
-        formatter.format("<td class='right' width='10%%'>%d</td>", rs.getInt("TeamNumber"));
+        formatter.format("<td class='center' width='7%%'><b>%d</b></td>", rank);
+        formatter.format("<td class='right' width='10%%'><b>%d</b></td>", rs.getInt("TeamNumber"));
         String teamName = rs.getString("TeamName");
         teamName = null == teamName ? "&nbsp;" : teamName.substring(0, Math.min(10, teamName.length()));
-        formatter.format("<td class='left' width='28%%'>%s</td>", teamName);
+        formatter.format("<td class='left' width='28%%'><b>%s</b></td>", teamName);
         if (showOrg) {
           String organization = rs.getString("Organization");
           organization = null == organization ? "&nbsp;" : organization.substring(0, Math.min(32, organization.length()));
-          formatter.format("<td class='left'>%s</td>", organization);
+          formatter.format("<td class='left'><b>%s</b></td>", organization);
         }
-        formatter.format("<td class='right' width='8%%'>%s</td>", Utilities.NUMBER_FORMAT_INSTANCE.format(score));
+        formatter.format("<td class='right' width='8%%'><b>%s</b></td>", Utilities.NUMBER_FORMAT_INSTANCE.format(score));
 
         formatter.format("</tr>");
 
