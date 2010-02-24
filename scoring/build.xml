@@ -100,6 +100,10 @@
 
 		<pathelement location="${dir.classes}" />
 
+                <!-- findbugs annotations -->
+		<pathelement location="${dir.lib}/findbugs-1.3.9/annotations.jar" />
+		<pathelement location="${dir.lib}/findbugs-1.3.9/jsr305.jar" />
+    
 
 		<path refid="cobertura.classpath" />
 	</path>
@@ -614,6 +618,12 @@
 		<copy todir="${dir.web}/WEB-INF/lib">
 			<fileset dir="${dir.lib}/cobertura">
 				<include name="*.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${dir.web}/WEB-INF/lib">
+			<fileset dir="${dir.lib}/findbugs-1.3.9">
+				<include name="annotations.jar" />
+				<include name="jsr305.jar" />
 			</fileset>
 		</copy>
 
