@@ -51,7 +51,7 @@ final Connection connection = datasource.getConnection();
         </form>
       </li>
 
-      <li><a href="subjective.zip">Subjective Scoring Application</a></li>
+      <li><a href="subjective-app.jar">Subjective Scoring Application</a> (Executable Jar file) - run with "java -jar subjective-app.jar"</li>
 
       <li><a href='playoff/ScoresheetServlet'>Blank scoresheet for printing (PDF format)</a></li>
 
