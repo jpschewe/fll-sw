@@ -69,8 +69,8 @@ public class SubjectiveCompareTest {
     Assert.assertEquals("There be exactly 1 difference: "
         + diffs, 1, diffs.size());
     final SubjectiveScoreDifference diff = diffs.iterator().next();
-    Assert.assertEquals("teamwork", diff.getCategory());
-    Assert.assertEquals("confidence", diff.getSubcategory());
+    Assert.assertEquals("Teamwork", diff.getCategory());
+    Assert.assertEquals("Confidence & Enthusiasm", diff.getSubcategory());
     Assert.assertEquals("DEB_JOHNSON", diff.getJudge());
     Assert.assertEquals(793, diff.getTeamNumber());
 
