@@ -117,6 +117,8 @@ ${message}
 	<a href='javascript:hide("EditTournamentHelp")'>[hide]</a></div>
 	</li>
 
+    <li><a  href='DisplayTournamentAssignments'>Display Tournament Assignments</a></li>
+    
 	<li>
 	<form id='currentTournament' action='SetCurrentTournament'
 		method="post">Current Tournament: <select
@@ -154,11 +156,6 @@ ${message}
 	teams into the groups in which they will be competing.<br>
 	<a href='javascript:hide("EventDivisionHelp")'>[hide]</a></div>
 	</li>
-
-	<li><a href='<c:url value="judges.jsp"/>'>Assign Judges</a></li>
-
-	<li><a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a>
-	(for scoresheet printing during playoffs)</li>
 
 	<li>
 	<form id='changeScoresheetLayoutNUp'
@@ -203,6 +200,12 @@ ${message}
 
 <p>Tournament day:</p>
 <ol>
+	<li><a href='<c:url value="judges.jsp"/>'>Assign Judges</a></li>
+	
+	<li><a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a>
+	(for scoresheet printing during playoffs)</li>
+
+
 	<li><a
 		href='<c:url value="GatherTeamData">
                      <c:param name="addTeam" value="1"/>
