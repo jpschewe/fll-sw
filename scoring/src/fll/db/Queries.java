@@ -2139,6 +2139,8 @@ public final class Queries {
                                 final String region,
                                 final String division) throws SQLException {
 
+    final String prevDivision = getDivisionOfTeam(connection, number);
+    
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Region = ?, Division = ? WHERE TeamNumber = ?");
@@ -2148,6 +2150,18 @@ public final class Queries {
       prep.setString(4, division);
       prep.setInt(5, number);
       prep.executeUpdate();
+      SQLFunctions.closePreparedStatement(prep);
+      prep = null;
+      
+      // update event divisions that were referencing the old division
+      prep = connection.prepareStatement("UPDATE TournamentTeams SET event_division = ? WHERE TeamNumber = ? AND event_division = ?");
+      prep.setString(1, division);
+      prep.setInt(2, number);
+      prep.setString(3, prevDivision);
+      prep.executeUpdate();
+      SQLFunctions.closePreparedStatement(prep);
+      prep = null;
+      
     } finally {
       SQLFunctions.closePreparedStatement(prep);
     }
