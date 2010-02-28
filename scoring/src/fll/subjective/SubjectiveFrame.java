@@ -12,6 +12,8 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -61,14 +63,13 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.util.FLLRuntimeException;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 import fll.xml.XMLWriter;
 
 /**
  * Application to enter subjective scores with
- * 
- * @version $Revision$
  */
 public final class SubjectiveFrame extends JFrame {
 
@@ -199,7 +200,7 @@ public final class SubjectiveFrame extends JFrame {
       }
     });
 
-    final JTabbedPane tabbedPane = new JTabbedPane();
+    tabbedPane = new JTabbedPane();
     getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
     for (final Element subjectiveElement : XMLUtils.filterToElements(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
@@ -218,21 +219,21 @@ public final class SubjectiveFrame extends JFrame {
   private void createSubjectiveTable(final JTabbedPane tabbedPane, final Element subjectiveElement) {
     final SubjectiveTableModel tableModel = new SubjectiveTableModel(_scoreDocument, subjectiveElement);
     final JTable table = new JTable(tableModel);
-    
+
     // Make grid lines black (needed for Mac)
     table.setGridColor(Color.BLACK);
-    
+
     // auto table sorter
     table.setAutoCreateRowSorter(true);
-    
+
     final String title = subjectiveElement.getAttribute("title");
     _tables.put(title, table);
     final JScrollPane tableScroller = new JScrollPane(table);
     tableScroller.setPreferredSize(new Dimension(640, 480));
     tabbedPane.addTab(title, tableScroller);
-    
+
     table.setSelectionBackground(Color.YELLOW);
-    
+
     setupTabReturnBehavior(table);
 
     int g = 0;
@@ -302,6 +303,22 @@ public final class SubjectiveFrame extends JFrame {
   }
 
   /**
+   * Find tab index for category title.
+   * 
+   * @param category
+   * @return the tab index, -1 on error
+   */
+  private int getTabIndexForCategory(final String category) {
+    final int tabCount = tabbedPane.getTabCount();
+    for (int i = 0; i < tabCount; ++i) {
+      if (category.equals(tabbedPane.getTitleAt(i))) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  /**
    * Show differences.
    */
   private void showDifferencesDialog(final Collection<SubjectiveScoreDifference> diffs) {
@@ -310,11 +327,42 @@ public final class SubjectiveFrame extends JFrame {
     final SubjectiveDiffTableModel model = new SubjectiveDiffTableModel(diffs);
     final JTable table = new JTable(model);
     table.setGridColor(Color.BLACK);
+
+    table.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(final MouseEvent e) {
+        if (e.getClickCount() == 2) {
+          final JTable target = (JTable) e.getSource();
+          final int row = target.getSelectedRow();
+
+          final SubjectiveScoreDifference diff = model.getDiffForRow(row);
+
+          // find correct table
+          final String category = diff.getCategory();
+          final JTable scoreTable = getTableForTitle(category);
+          final int tabIndex = getTabIndexForCategory(category);
+          tabbedPane.setSelectedIndex(tabIndex);
+
+          // get correct row and column
+          final SubjectiveTableModel model = (SubjectiveTableModel) scoreTable.getModel();
+          final int scoreRow = model.getRowForTeamAndJudge(diff.getTeamNumber(), diff.getJudge());
+          final int scoreCol = model.getColForSubcategory(diff.getSubcategory());
+          if (scoreRow == -1
+              || scoreCol == -1) {
+            throw new FLLRuntimeException("Internal error: Cannot find correct row and column for score difference: "
+                + diff);
+          }
+
+          scoreTable.changeSelection(scoreRow, scoreCol, false, false);
+        }
+      }
+    });
+
     final JDialog dialog = new JDialog(this, false);
     final Container cpane = dialog.getContentPane();
     cpane.setLayout(new BorderLayout());
     final JScrollPane tableScroller = new JScrollPane(table);
     cpane.add(tableScroller, BorderLayout.CENTER);
+
     dialog.pack();
     dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     dialog.setVisible(true);
@@ -527,13 +575,22 @@ public final class SubjectiveFrame extends JFrame {
 
   private final Map<String, JTable> _tables = new HashMap<String, JTable>();
 
+  public JTable getTableForTitle(final String title) {
+    final JTable table = _tables.get(title);
+    if (null == table) {
+      return null;
+    } else {
+      return table;
+    }
+  }
+
   /**
    * Get the table model for a given subjective title. Mostly for testing.
    * 
    * @return the table model or null if the specified title is not present
    */
   public TableModel getTableModelForTitle(final String title) {
-    final JTable table = _tables.get(title);
+    final JTable table = getTableForTitle(title);
     if (null == table) {
       return null;
     } else {
@@ -554,5 +611,7 @@ public final class SubjectiveFrame extends JFrame {
   /* package */Document getScoreDocument() {
     return _scoreDocument;
   }
+
+  private final JTabbedPane tabbedPane;
 
 }

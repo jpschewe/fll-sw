@@ -160,7 +160,7 @@ public final class SubjectiveUtils {
                                  final Element categoryDescription,
                                  final Element masterScore,
                                  final Element compareScore) {
-    final String categoryName = categoryDescription.getAttribute("name");
+    final String categoryTitle = categoryDescription.getAttribute("title");
 
     try {
       final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(masterScore.getAttribute("teamNumber")).intValue();
@@ -169,22 +169,23 @@ public final class SubjectiveUtils {
       final Boolean masterNoShow = XMLUtils.getBooleanAttributeValue(masterScore, "NoShow");
       final Boolean compareNoShow = XMLUtils.getBooleanAttributeValue(masterScore, "NoShow");
       if (!Functions.safeEquals(masterNoShow, compareNoShow)) {
-        diffs.add(new BooleanSubjectiveScoreDifference(categoryName, "NoShow", teamNumber, judge, masterNoShow, compareNoShow));
+        diffs.add(new BooleanSubjectiveScoreDifference(categoryTitle, "NoShow", teamNumber, judge, masterNoShow, compareNoShow));
       }
 
       for (final Element goalDescription : goalDescriptions) {
+        final String goalTitle = goalDescription.getAttribute("title");
         final String goalName = goalDescription.getAttribute("name");
         if (XMLUtils.isEnumeratedGoal(goalDescription)) {
           final String masterValueStr = XMLUtils.getStringAttributeValue(masterScore, goalName);
           final String compareValueStr = XMLUtils.getStringAttributeValue(compareScore, goalName);
           if (!Functions.safeEquals(masterValueStr, compareValueStr)) {
-            diffs.add(new StringSubjectiveScoreDifference(categoryName, goalName, teamNumber, judge, masterValueStr, compareValueStr));
+            diffs.add(new StringSubjectiveScoreDifference(categoryTitle, goalTitle, teamNumber, judge, masterValueStr, compareValueStr));
           }
         } else {
           final Double masterValue = XMLUtils.getDoubleAttributeValue(masterScore, goalName);
           final Double compareValue = XMLUtils.getDoubleAttributeValue(compareScore, goalName);
           if (!Functions.safeEquals(masterValue, compareValue)) {
-            diffs.add(new DoubleSubjectiveScoreDifference(categoryName, goalName, teamNumber, judge, masterValue, compareValue));
+            diffs.add(new DoubleSubjectiveScoreDifference(categoryTitle, goalTitle, teamNumber, judge, masterValue, compareValue));
           }
         }
 
