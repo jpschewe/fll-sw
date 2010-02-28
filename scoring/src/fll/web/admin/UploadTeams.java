@@ -77,7 +77,7 @@ public final class UploadTeams extends BaseFLLServlet {
         LOGGER.debug("Wrote teams data to: "
             + file.getAbsolutePath());
       }
-      
+
       final String sheetName = SessionAttributes.getAttribute(session, "sheetName", String.class);
 
       parseFile(file, sheetName, connection, session);
@@ -113,11 +113,14 @@ public final class UploadTeams extends BaseFLLServlet {
    *          columnSelectOptions.
    * @throws SQLException if an error occurs talking to the database
    * @throws IOException if an error occurs reading from file
-   * @throws InvalidFormatException 
+   * @throws InvalidFormatException
    */
-  public static void parseFile(final File file, final String sheetName, final Connection connection, final HttpSession session) throws SQLException, IOException, InvalidFormatException {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
+                                                             "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate the list of columns to create FilteredTeams table")
+  public static void parseFile(final File file, final String sheetName, final Connection connection, final HttpSession session) throws SQLException,
+      IOException, InvalidFormatException {
     final CellFileReader reader;
-    if(ExcelCellReader.isExcelFile(file)) {
+    if (ExcelCellReader.isExcelFile(file)) {
       reader = new ExcelCellReader(file, sheetName);
     } else {
       // determine if the file is tab separated or comma separated, check the
@@ -205,11 +208,11 @@ public final class UploadTeams extends BaseFLLServlet {
       }
       stmt.executeUpdate(createTable.toString()); // create AllTeams
 
-      stmt.executeUpdate("DROP TABLE IF EXISTS FilteredTeams"); // make sure the
-      // table doesn't
-      // yet exist
-      stmt.executeUpdate(createFilteredTable.toString()); // create
-      // FilteredTeams
+      // make sure the table doesn't yet exist
+      stmt.executeUpdate("DROP TABLE IF EXISTS FilteredTeams");
+
+      // create FilteredTeams
+      stmt.executeUpdate(createFilteredTable.toString());
 
       insertPrep = connection.prepareStatement(insertPrepSQL.toString());
 
@@ -274,6 +277,7 @@ public final class UploadTeams extends BaseFLLServlet {
    * @return the number of rows that match
    * @throws SQLException if an error occurs talking to the database
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate where clause with the filters")
   public static long applyFilters(final Connection connection, final HttpServletRequest request) throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
@@ -304,6 +308,7 @@ public final class UploadTeams extends BaseFLLServlet {
    * Copy teams out of AllTeams into FilteredTeams applying the filters in
    * request
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate where clause based on filters")
   public static void copyFilteredTeams(final Connection connection, final HttpServletRequest request) throws SQLException {
     Statement stmt = null;
     try {
@@ -376,6 +381,7 @@ public final class UploadTeams extends BaseFLLServlet {
    * @throws SQLException on error talking to DB
    * @throws IOException on error writing to webpage
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for FilteredTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
   public static boolean verifyTeams(final Connection connection,
                                     final HttpServletRequest request,
                                     final HttpServletResponse response,
