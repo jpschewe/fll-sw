@@ -218,13 +218,21 @@ public final class SubjectiveFrame extends JFrame {
   private void createSubjectiveTable(final JTabbedPane tabbedPane, final Element subjectiveElement) {
     final SubjectiveTableModel tableModel = new SubjectiveTableModel(_scoreDocument, subjectiveElement);
     final JTable table = new JTable(tableModel);
+    
+    // Make grid lines black (needed for Mac)
     table.setGridColor(Color.BLACK);
+    
+    // auto table sorter
     table.setAutoCreateRowSorter(true);
+    
     final String title = subjectiveElement.getAttribute("title");
     _tables.put(title, table);
     final JScrollPane tableScroller = new JScrollPane(table);
     tableScroller.setPreferredSize(new Dimension(640, 480));
     tabbedPane.addTab(title, tableScroller);
+    
+    table.setSelectionBackground(Color.YELLOW);
+    
     setupTabReturnBehavior(table);
 
     int g = 0;
