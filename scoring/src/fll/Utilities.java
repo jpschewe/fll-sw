@@ -328,8 +328,9 @@ public final class Utilities {
    */
   private static final FilenameFilter GRAPHICS_FILTER = new FilenameFilter() {
     public boolean accept(final File dir, final String name) {
-      if (name.endsWith(".png")
-          || name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".gif")) {
+      final String lowerName = name.toLowerCase();
+      if (lowerName.endsWith(".png")
+          || lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg") || lowerName.endsWith(".gif")) {
         return true;
       } else {
         return false;
