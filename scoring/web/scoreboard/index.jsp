@@ -1,10 +1,10 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
   
-<HTML>
-  <HEAD>
+<html>
+  <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     <title>Scoreboard</title>
-  </HEAD>
+  </head>
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Scoreboard)</h1>
     <ul>
@@ -18,5 +18,5 @@
         
     </ul>
 
-  </BODY>
-</HTML>
+  </body>
+</html>

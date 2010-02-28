@@ -108,19 +108,19 @@ public class Last8 extends BaseFLLServlet {
 
       while (rs.next()) {
         formatter.format("<tr>");
-        formatter.format("<td class='left' width='10%%'>%d</td>", rs.getInt("TeamNumber"));
+        formatter.format("<td class='left' width='10%%'><b>%d</b></td>", rs.getInt("TeamNumber"));
         String teamName = rs.getString("TeamName");
         teamName = null == teamName ? "&nbsp;" : teamName.substring(0, Math.min(20, teamName.length()));
-        formatter.format("<td class='left' width='28%%'>%s</td>", teamName);
+        formatter.format("<td class='left' width='28%%'><b>%s</b></td>", teamName);
         if (showOrg) {
           String organization = rs.getString("Organization");
           organization = null == organization ? "&nbsp;" : organization.substring(0, Math.min(35, organization.length()));
-          formatter.format("<td class='left'>%s</td>", organization);
+          formatter.format("<td class='left'><b>%s</b></td>", organization);
         }
-        formatter.format("<td class='right' width='5%%'>%s</td>", rs.getString("event_division"));
-        formatter.format("<td class='right' width='5%%'>%d</td>", rs.getInt("RunNumber"));
+        formatter.format("<td class='right' width='5%%'><b>%s</b></td>", rs.getString("event_division"));
+        formatter.format("<td class='right' width='5%%'><b>%d</b></td>", rs.getInt("RunNumber"));
 
-        formatter.format("<td class='right' width='8%%'>");
+        formatter.format("<td class='right' width='8%%'><b>");
         if (rs.getBoolean("NoShow")) {
           formatter.format("No Show");
         } else if (rs.getBoolean("Bye")) {
@@ -128,7 +128,7 @@ public class Last8 extends BaseFLLServlet {
         } else {
           formatter.format("%s", Utilities.NUMBER_FORMAT_INSTANCE.format(rs.getDouble("ComputedTotal")));
         }
-        formatter.format("</td>");
+        formatter.format("</b></td>");
         formatter.format("</tr>");
 
       }// end while next

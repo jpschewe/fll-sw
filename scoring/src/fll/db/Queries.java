@@ -970,7 +970,8 @@ public final class Queries {
         final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun);
         final String division = getEventDivision(connection, teamNumber);
         if (ptLine > 0) {
-          final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1), playoffRun);
+          final int siblingLine = ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1;
+          final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, siblingLine, playoffRun);
 
           if (siblingTeam != Team.NULL_TEAM_NUMBER) {
             // See if either teamNumber or siblingTeam has a score entered in
@@ -1043,21 +1044,28 @@ public final class Queries {
       // class...
 
       prep = connection
-                       .prepareStatement("UPDATE PlayoffData SET Team = ?  WHERE event_division = ? AND Tournament = ? AND PlayoffRound = ? AND LineNumber = ?");
+                       .prepareStatement("UPDATE PlayoffData SET Team = ?, Printed = ? WHERE event_division = ? AND Tournament = ? AND PlayoffRound = ? AND LineNumber = ?");
       prep.setInt(1, teamNumber);
-      prep.setString(2, division);
-      prep.setInt(3, currentTournament);
-      prep.setInt(4, playoffRound);
-      prep.setInt(5, lineNumber);
+      prep.setBoolean(2, false);
+      prep.setString(3, division);
+      prep.setInt(4, currentTournament);
+      prep.setInt(5, playoffRound);
+      prep.setInt(6, lineNumber);
       prep.executeUpdate();
     } finally {
       SQLFunctions.closePreparedStatement(prep);
     }
   }
 
-  private static void removePlayoffScore(final Connection connection, final String division, final int currentTournament, final int playoffRun, final int ptLine)
+  private static void removePlayoffScore(final Connection connection,
+                                         final String division, 
+                                         final int currentTournament, 
+                                         final int playoffRun, 
+                                         final int ptLine
+                                         )
       throws SQLException {
     updatePlayoffTable(connection, Team.NULL_TEAM_NUMBER, division, currentTournament, (playoffRun + 1), ((ptLine + 1) / 2));
+
     final int semiFinalRound = getNumPlayoffRounds(connection, division) - 1;
     if (playoffRun == semiFinalRound
         && isThirdPlaceEnabled(connection, division)) {
