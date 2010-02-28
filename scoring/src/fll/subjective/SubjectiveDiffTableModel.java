@@ -81,7 +81,7 @@ public class SubjectiveDiffTableModel extends AbstractTableModel {
    * @see javax.swing.table.TableModel#getValueAt(int, int)
    */
   public Object getValueAt(final int rowIndex, final int columnIndex) {
-    final SubjectiveScoreDifference diff = diffs.get(rowIndex);
+    final SubjectiveScoreDifference diff = getDiffForRow(rowIndex);
     switch (columnIndex) {
     case 0:
       return diff.getCategory();
@@ -98,6 +98,10 @@ public class SubjectiveDiffTableModel extends AbstractTableModel {
     default:
       return null;
     }
+  }
+  
+  public SubjectiveScoreDifference getDiffForRow(final int row) {
+    return diffs.get(row);
   }
 
 }

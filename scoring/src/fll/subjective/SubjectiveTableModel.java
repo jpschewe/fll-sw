@@ -21,8 +21,6 @@ import fll.xml.XMLUtils;
 
 /**
  * TableModel for entering subjective scores.
- * 
- * @version $Revision$
  */
 public final class SubjectiveTableModel extends AbstractTableModel {
 
@@ -338,6 +336,30 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   }
 
   /**
+   * Get the row index for a team number and judge
+   * 
+   * @param teamNumber
+   * @param judge
+   * @return the row index, -1 if one cannot be found
+   */
+  public int getRowForTeamAndJudge(final int teamNumber, final String judge) {
+    try {
+      for (int index = 0; index < _scoreElements.length; ++index) {
+        final Element scoreEle = _scoreElements[index];
+        final int num = Utilities.NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber")).intValue();
+        final String j = scoreEle.getAttribute("judge");
+        if (teamNumber == num
+            && judge.equals(j)) {
+          return index;
+        }
+      }
+      return -1;
+    } catch (final ParseException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
    * Get the score element at index.
    */
   private SubjectiveTeamScore getTeamScore(final int index) {
@@ -370,5 +392,20 @@ public final class SubjectiveTableModel extends AbstractTableModel {
    * The backing for the model
    */
   private final Document _scoreDocument;
+
+  /**
+   * Find column for subcategory title.
+   * 
+   * @param subcategory
+   * @return the column, -1 if it cannot be found
+   */
+  public int getColForSubcategory(final String subcategory) {
+    for (int col = 0; col < getColumnCount(); ++col) {
+      if (subcategory.equals(getColumnName(col))) {
+        return col;
+      }
+    }
+    return -1;
+  }
 
 }
