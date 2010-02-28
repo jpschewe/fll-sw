@@ -40,6 +40,15 @@
 
 	<import file="${basedir}/buildscript-imports.xml" />
 
+	<taskdef name="findbugs" classpath="${findbugs.home}/lib/findbugs-ant.jar" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" />
+
+
+	<taskdef name="one-jar" classname="com.simontuffs.onejar.ant.OneJarTask">
+		<classpath>
+			<pathelement location="${dir.lib}/ant/one-jar-ant-task-0.96-jps.jar" />
+		</classpath>
+	</taskdef>
+
 	<!--
   ==================== Compilation Control Options ====================
   -->
@@ -223,11 +232,6 @@
 	<!--
   ==================== Compile Target ==================================
   -->
-	<taskdef name="one-jar" classname="com.simontuffs.onejar.ant.OneJarTask">
-		<classpath>
-			<pathelement location="${dir.lib}/ant/one-jar-ant-task-0.96-jps.jar" />
-		</classpath>
-	</taskdef>
 
 	<target name="compile" depends="prepare,compile.classes,compile.jsp,generate-descriptor" description="Compile Java sources">
 
@@ -255,18 +259,10 @@
 			</lib>
 		</one-jar>
 
-		<!-- build scripts for testing -->
-		<path id="application.build.classpath">
-			<path refid="application.classpath" />
-			<!--  this path doesn't really exist, but it allows the buildscript macro to get the path right
-      -->
-			<pathelement location="${basedir}/tomcat/webapps/${app.name}/WEB-INF/classes" />
-		</path>
-
-		<buildscript scripts.dir="${dir.build}/bin" scripts.basedir="${basedir}" scripts.root=".." scripts.path="application.build.classpath" script.name="subjective" class.main="fll.subjective.SubjectiveFrame" java.args="-Dapp.name=subjective -Dlogroot=./" />
-		<buildscript scripts.dir="${dir.build}/bin" scripts.basedir="${basedir}" scripts.root=".." scripts.path="application.build.classpath" script.name="ImportDocument" class.main="fll.xml.ImportDocument" java.args="-Dapp.name=importDocument -Dlogroot=./" />
-		<buildscript scripts.dir="${dir.build}/bin" scripts.basedir="${basedir}" scripts.root=".." scripts.path="application.build.classpath" script.name="ExportDocument" class.main="fll.xml.ExportDocument" java.args="-Dapp.name=exportDocument -Dlogroot=./" />
-		<buildscript scripts.dir="${dir.build}/bin" scripts.basedir="${basedir}" scripts.root=".." scripts.path="application.build.classpath" script.name="SchedulerUI" class.main="fll.scheduler.SchedulerUI" java.args="-Dapp.name=scheduler-ui -Dlogroot=./" />
+		<buildscript-one-jar scripts.dir="${dir.build}/bin" src.dir="${dir.web}/WEB-INF/classes" scripts.path="base.classpath" script.name="subjective" class.main="fll.subjective.SubjectiveFrame" java.args="-Dapp.name=subjective -Dlogroot=./" />
+		<buildscript-one-jar scripts.dir="${dir.build}/bin" src.dir="${dir.web}/WEB-INF/classes" scripts.path="base.classpath" script.name="ImportDocument" class.main="fll.xml.ImportDocument" java.args="-Dapp.name=importDocument -Dlogroot=./" />
+		<buildscript-one-jar scripts.dir="${dir.build}/bin" src.dir="${dir.web}/WEB-INF/classes" scripts.path="base.classpath" script.name="ExportDocument" class.main="fll.xml.ExportDocument" java.args="-Dapp.name=exportDocument -Dlogroot=./" />
+		<buildscript-one-jar scripts.dir="${dir.build}/bin" src.dir="${dir.web}/WEB-INF/classes" scripts.path="base.classpath" script.name="SchedulerUI" class.main="fll.scheduler.SchedulerUI" java.args="-Dapp.name=scheduler-ui -Dlogroot=./" />
 
 		<!-- copy libraries over -->
 		<copy todir="${dir.build}/lib">
@@ -807,8 +803,6 @@
 		<antcall target="test.all" />
 		<antcall target="coverage.report" />
 	</target>
-
-	<taskdef name="findbugs" classpath="${findbugs.home}/lib/findbugs-ant.jar" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" />
 
 	<target name="findbugs" depends="compile" description="Executes findbugs to look for problems in the source.">
 		<mkdir dir="${dir.build}/findbugs" />
