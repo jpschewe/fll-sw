@@ -11,6 +11,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -30,7 +31,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.DefaultCellEditor;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -42,6 +46,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
@@ -116,8 +121,8 @@ public final class SubjectiveFrame extends JFrame {
     challengeStream.close();
 
     final ZipEntry scoreEntry = zipfile.getEntry("score.xml");
-    if(null == scoreEntry) {
-      throw new RuntimeException("Unable to find score data in file, you probably choose the wrong file or it is corrupted");      
+    if (null == scoreEntry) {
+      throw new RuntimeException("Unable to find score data in file, you probably choose the wrong file or it is corrupted");
     }
     final InputStream scoreStream = zipfile.getInputStream(scoreEntry);
     _scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
@@ -198,32 +203,7 @@ public final class SubjectiveFrame extends JFrame {
     getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
     for (final Element subjectiveElement : XMLUtils.filterToElements(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
-      final SubjectiveTableModel tableModel = new SubjectiveTableModel(_scoreDocument, subjectiveElement);
-      final JTable table = new JTable(tableModel);
-      table.setGridColor(Color.BLACK);
-      table.setAutoCreateRowSorter(true);
-      final String title = subjectiveElement.getAttribute("title");
-      _tables.put(title, table);
-      final JScrollPane tableScroller = new JScrollPane(table);
-      tableScroller.setPreferredSize(new Dimension(640, 480));
-      tabbedPane.addTab(title, tableScroller);
-
-      int g = 0;
-      for (final Element goalDescription : XMLUtils.filterToElements(subjectiveElement.getElementsByTagName("goal"))) {
-        final List<Element> posValuesList = XMLUtils.filterToElements(goalDescription.getElementsByTagName("value"));
-        if (posValuesList.size() > 0) {
-          // enumerated
-          final Vector<String> posValues = new Vector<String>();
-          posValues.add("");
-          for (final Element posValue : posValuesList) {
-            posValues.add(posValue.getAttribute("title"));
-          }
-
-          final TableColumn column = table.getColumnModel().getColumn(g + 4);
-          column.setCellEditor(new DefaultCellEditor(new JComboBox(posValues)));
-        }
-        ++g;
-      }
+      createSubjectiveTable(tabbedPane, subjectiveElement);
     }
 
     addWindowListener(new WindowAdapter() {
@@ -233,6 +213,84 @@ public final class SubjectiveFrame extends JFrame {
       }
     });
     setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+  }
+
+  private void createSubjectiveTable(final JTabbedPane tabbedPane, final Element subjectiveElement) {
+    final SubjectiveTableModel tableModel = new SubjectiveTableModel(_scoreDocument, subjectiveElement);
+    final JTable table = new JTable(tableModel);
+    table.setGridColor(Color.BLACK);
+    table.setAutoCreateRowSorter(true);
+    final String title = subjectiveElement.getAttribute("title");
+    _tables.put(title, table);
+    final JScrollPane tableScroller = new JScrollPane(table);
+    tableScroller.setPreferredSize(new Dimension(640, 480));
+    tabbedPane.addTab(title, tableScroller);
+    setupTabReturnBehavior(table);
+
+    int g = 0;
+    for (final Element goalDescription : XMLUtils.filterToElements(subjectiveElement.getElementsByTagName("goal"))) {
+      final List<Element> posValuesList = XMLUtils.filterToElements(goalDescription.getElementsByTagName("value"));
+      if (posValuesList.size() > 0) {
+        // enumerated
+        final Vector<String> posValues = new Vector<String>();
+        posValues.add("");
+        for (final Element posValue : posValuesList) {
+          posValues.add(posValue.getAttribute("title"));
+        }
+
+        final TableColumn column = table.getColumnModel().getColumn(g + 4);
+        column.setCellEditor(new DefaultCellEditor(new JComboBox(posValues)));
+      }
+      ++g;
+    }
+  }
+
+  /**
+   * Set the tab and return behavior for a table.
+   */
+  private void setupTabReturnBehavior(final JTable table) {
+    final InputMap im = table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+    // Have the enter key work the same as the tab key
+    final KeyStroke tab = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0);
+    final KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
+    im.put(enter, im.get(tab));
+
+    // Override the default tab behavior
+    // Tab to the next editable cell. When no editable cells goto next cell.
+    final Action oldTabAction = table.getActionMap().get(im.get(tab));
+    final Action tabAction = new AbstractAction() {
+      public void actionPerformed(final ActionEvent e) {
+        oldTabAction.actionPerformed(e);
+        final JTable table = (JTable) e.getSource();
+        final int rowCount = table.getRowCount();
+        final int columnCount = table.getColumnCount();
+        int row = table.getSelectedRow();
+        int column = table.getSelectedColumn();
+
+        while (!table.isCellEditable(row, column)) {
+          column += 1;
+
+          if (column == columnCount) {
+            column = 0;
+            row += 1;
+          }
+
+          if (row == rowCount) {
+            row = 0;
+          }
+
+          // Back to where we started, get out.
+          if (row == table.getSelectedRow()
+              && column == table.getSelectedColumn()) {
+            break;
+          }
+        }
+
+        table.changeSelection(row, column, false, false);
+      }
+    };
+    table.getActionMap().put(im.get(tab), tabAction);
   }
 
   /**
