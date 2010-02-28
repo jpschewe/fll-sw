@@ -52,9 +52,6 @@ if [ ! -x "$JAVACMD" ] ; then
   exit 1
 fi
 
-# Jon and Eric disagree about this - for now, Jon wins the argument.
-# Eric thinks the classpath should be built from ALL jars in the lib dir.
-# Jon thinks that it should be explicit.
 LOCALCLASSPATH="@CLASSPATH@"
 
 # For Cygwin, switch paths to Windows format before running java
