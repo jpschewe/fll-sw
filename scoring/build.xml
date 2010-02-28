@@ -27,7 +27,6 @@
 	<property name="dir.test.integration" value="test-integration" />
 
 	<property name="dir.tmp" value="${basedir}/tmp" />
-	<property name="dir.tmp.subjective" value="${dir.tmp}/subjective" />
 	<property name="dir.src.jsp" value="${dir.build}/jsp_source" />
 
 	<property name="dir.tools" value="${basedir}/tools" />
@@ -232,22 +231,6 @@
 
 	<target name="compile" depends="prepare,compile.classes,compile.jsp,generate-descriptor" description="Compile Java sources">
 
-		<!-- stuff for subjective scoring app -->
-		<mkdir dir="${dir.tmp.subjective}" />
-		<mkdir dir="${dir.tmp.subjective}/lib" />
-
-		<jar destfile="${dir.tmp.subjective}/lib/subjective.jar" basedir="${dir.web}/WEB-INF/classes" index="true" />
-		<copy todir="${dir.tmp.subjective}/lib">
-			<fileset dir="${dir.lib}" />
-		</copy>
-		<path id="subjective.dist.classpath">
-			<path refid="application.classpath" />
-			<pathelement location="${dir.lib}/subjective.jar" />
-		</path>
-
-		<!-- build scripts -->
-		<buildscript scripts.dir="${dir.tmp.subjective}" scripts.basedir="${basedir}" scripts.root="." scripts.path="subjective.dist.classpath" script.name="subjective" class.main="fll.subjective.SubjectiveFrame" java.args="-Dapp.name=subjective -Dlogroot=./" />
-
 		<!-- copy scripts -->
 		<copy todir="${dir.build}/bin">
 			<fileset dir="bin" />
@@ -257,26 +240,6 @@
 				<include name="*.sh" />
 			</fileset>
 		</chmod>
-
-		<copy todir="${dir.tmp.subjective}">
-			<fileset dir="bin">
-				<include name="setenv.*" />
-			</fileset>
-		</copy>
-		<chmod perm="+x">
-			<fileset dir="${dir.tmp.subjective}">
-				<include name="*.sh" />
-			</fileset>
-		</chmod>
-
-		<zip zipfile="${dir.web}/subjective.zip">
-			<zipfileset prefix="subjective" dir="${dir.tmp.subjective}" filemode="755">
-				<include name="**/*.sh" />
-			</zipfileset>
-			<zipfileset prefix="subjective" dir="${dir.tmp.subjective}">
-				<exclude name="**/*.sh" />
-			</zipfileset>
-		</zip>
 
 		<one-jar destfile="${dir.web}/subjective-app.jar">
 			<manifest>
@@ -566,7 +529,7 @@
 			</fileset>
 		</chmod>
 
-		<copy tofile="${dir.dist}/subjective.zip" file="${dir.web}/subjective.zip" />
+		<copy tofile="${dir.dist}/subjective-app.jar" file="${dir.web}/subjective-app.jar" />
 
 
 		<!-- src zip file -->
