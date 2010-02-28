@@ -1,6 +1,8 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Utilities" %>
+<%@ page import="fll.web.ApplicationAttributes" %>
+<%@ page import="fll.web.SessionAttributes" %>
   
 <%@ page import="java.io.File" %>
 
@@ -13,7 +15,7 @@ String imagePath = application.getRealPath("/slideshow/images");
 // This varible holds the name of the last image, relative to imagePath
 String lastImage;
 if(null != session.getAttribute("slideShowLastImage")) {
-  lastImage = (String)session.getAttribute("slideShowLastImage");
+  lastImage = SessionAttributes.getAttribute(session, "slideShowLastImage", String.class);
 } else {
   lastImage = "";
 }
@@ -38,14 +40,14 @@ int slideShowInterval;
 if(null == application.getAttribute("slideShowInterval")) {
   slideShowInterval = 10000;
 } else {
-  slideShowInterval = ((Integer)application.getAttribute("slideShowInterval")).intValue() * 1000;
+  slideShowInterval = ApplicationAttributes.getAttribute(application, "slideShowInterval", Integer.class).intValue() * 1000;
 }
 
 // let the display specific value override the default value if it exists
 if(null != session.getAttribute("displayName")) {
   final String displayName = (String)session.getAttribute("displayName");
   if(null != application.getAttribute(displayName + "_slideShowInterval")) {
-    slideShowInterval = ((Integer)application.getAttribute(displayName + "_slideShowInterval")).intValue() * 1000;   
+    slideShowInterval = ApplicationAttributes.getAttribute(application, displayName + "_slideShowInterval", Integer.class).intValue() * 1000;   
   }
 }
 
