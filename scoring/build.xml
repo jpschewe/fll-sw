@@ -35,6 +35,10 @@
 	<property name="dir.reports" value="${dir.build}/docs/reports" />
 	<property name="dir.coverage" value="${dir.build}/coverage" />
 
+	<property name="findbugs.home" value="${dir.lib}/findbugs-1.3.9" />
+	<property name="dir.lib.findbugs" value="${findbugs.home}/lib" />
+
+
 	<import file="${basedir}/buildscript-imports.xml" />
 
 	<!--
@@ -65,7 +69,8 @@
 	</path>
 	<taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
 
-	<path id="application.classpath">
+	<path id="base.classpath">
+		<!-- the classpath without the classes dir -->
 		<pathelement location="${dir.lib}/xmlunit-1.2.jar" />
 		<pathelement location="${dir.lib}/JonsInfra-0.8.jar" />
 
@@ -98,14 +103,18 @@
 		<pathelement location="${dir.lib}/poi-ooxml-schemas-3.6-20091214.jar" />
 		<pathelement location="${dir.lib}/xmlbeans-2.3.0.jar" />
 
-		<pathelement location="${dir.classes}" />
-
-                <!-- findbugs annotations -->
-		<pathelement location="${dir.lib}/findbugs-1.3.9/annotations.jar" />
-		<pathelement location="${dir.lib}/findbugs-1.3.9/jsr305.jar" />
-    
+		<!-- findbugs annotations -->
+		<pathelement location="${dir.lib.findbugs}/annotations.jar" />
+		<pathelement location="${dir.lib.findbugs}/jsr305.jar" />
 
 		<path refid="cobertura.classpath" />
+
+	</path>
+
+	<path id="application.classpath">
+		<path refid="base.classpath" />
+
+		<pathelement location="${dir.classes}" />
 	</path>
 
 	<path id="compile.classpath">
@@ -215,11 +224,18 @@
 	<!--
   ==================== Compile Target ==================================
   -->
+	<taskdef name="one-jar" classname="com.simontuffs.onejar.ant.OneJarTask">
+		<classpath>
+			<pathelement location="${dir.lib}/ant/one-jar-ant-task-0.96-jps.jar" />
+		</classpath>
+	</taskdef>
+
 	<target name="compile" depends="prepare,compile.classes,compile.jsp,generate-descriptor" description="Compile Java sources">
 
 		<!-- stuff for subjective scoring app -->
 		<mkdir dir="${dir.tmp.subjective}" />
 		<mkdir dir="${dir.tmp.subjective}/lib" />
+
 		<jar destfile="${dir.tmp.subjective}/lib/subjective.jar" basedir="${dir.web}/WEB-INF/classes" index="true" />
 		<copy todir="${dir.tmp.subjective}/lib">
 			<fileset dir="${dir.lib}" />
@@ -261,6 +277,20 @@
 				<exclude name="**/*.sh" />
 			</zipfileset>
 		</zip>
+
+		<one-jar destfile="${dir.web}/subjective-app.jar">
+			<manifest>
+				<attribute name="One-Jar-Main-Class" value="fll.subjective.SubjectiveFrame" />
+			</manifest>
+			<main>
+				<fileset dir="${dir.web}/WEB-INF/classes" />
+			</main>
+			<lib>
+				<classpath>
+					<path refid="base.classpath" />
+				</classpath>
+			</lib>
+		</one-jar>
 
 		<!-- build scripts for testing -->
 		<path id="application.build.classpath">
@@ -566,17 +596,17 @@
 
 		<mkdir dir="${dir.dist}/docs/api" />
 		<javadoc sourcepath="src" windowtitle="${app.name}" destdir="${dir.dist}/docs/api" packagenames="fll.*" use="true" splitindex="true" breakiterator="yes">
-			<tag name="test" scope="all" description="tests"/>
-			<tag name="pre" scope="constructors,methods" description="PreConditions"/>
-			<tag name="post" scope="constructors,methods" description="PostConditions"/>
-			<tag name="invariant" scope="types,constructors" description="Invariants"/>
-			<tag name="web.servlet" scope="types"/>
-			<tag name="web.servlet-init-param" scope="types"/>
-			<tag name="web.servlet-mapping" scope="types"/>
-			<tag name="web.listener" scope="types"/>
-			<tag name="web.filter" scope="types"/>
-			<tag name="web.filter-mapping" scope="types"/>
-			
+			<tag name="test" scope="all" description="tests" />
+			<tag name="pre" scope="constructors,methods" description="PreConditions" />
+			<tag name="post" scope="constructors,methods" description="PostConditions" />
+			<tag name="invariant" scope="types,constructors" description="Invariants" />
+			<tag name="web.servlet" scope="types" />
+			<tag name="web.servlet-init-param" scope="types" />
+			<tag name="web.servlet-mapping" scope="types" />
+			<tag name="web.listener" scope="types" />
+			<tag name="web.filter" scope="types" />
+			<tag name="web.filter-mapping" scope="types" />
+
 			<classpath>
 				<path refid="compile.classpath" />
 				<pathelement location="${dir.src}" />
@@ -621,7 +651,7 @@
 			</fileset>
 		</copy>
 		<copy todir="${dir.web}/WEB-INF/lib">
-			<fileset dir="${dir.lib}/findbugs-1.3.9">
+			<fileset dir="${dir.lib.findbugs}">
 				<include name="annotations.jar" />
 				<include name="jsr305.jar" />
 			</fileset>
@@ -818,7 +848,6 @@
 		<antcall target="coverage.report" />
 	</target>
 
-	<property name="findbugs.home" value="${dir.lib}/findbugs-1.3.9" />
 	<taskdef name="findbugs" classpath="${findbugs.home}/lib/findbugs-ant.jar" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" />
 
 	<target name="findbugs" depends="compile" description="Executes findbugs to look for problems in the source.">
