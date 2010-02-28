@@ -53,4 +53,62 @@
 		</sequential>
 
 	</macrodef>
+	
+
+	<!--
+	Build scripts that use one-jar
+  scripts.dir - where the scripts go
+  scripts.path - classpath for the scripts
+  script.name - name of the script to create (without extension)
+  class.main - name of class the script will execute
+  java_args - extra arguments to pass to the JVM run by the script
+  src.dir - directory containing the source files that include the main class
+-->
+	<macrodef name="buildscript-one-jar" description="Create scripts for Windows and Unix">
+		<attribute name="scripts.dir" />
+		<attribute name="scripts.path" />
+		<attribute name="script.name" />
+		<attribute name="class.main" />
+		<attribute name="java.args" default="" />
+		<attribute name="src.dir" />
+
+		<sequential>
+			<mkdir dir="@{scripts.dir}" />
+
+			<one-jar destfile="@{scripts.dir}/@{script.name}.jar">
+				<manifest>
+					<attribute name="One-Jar-Main-Class" value="@{class.main}" />
+				</manifest>
+				<main>
+					<fileset dir="@{src.dir}" />
+				</main>
+				<lib>
+					<classpath>
+						<path refid="@{scripts.path}" />
+					</classpath>
+				</lib>
+			</one-jar>
+
+
+			<copy file="${buildscript.basedir}/run-one-jar.sh.template" tofile="@{scripts.dir}/@{script.name}.sh" overwrite="true">
+				<filterset>
+					<filter token="APP_JAR" value="@{script.name}.jar" />
+					<filter token="JAVA_ARGS" value="@{java.args}" />
+				</filterset>
+			</copy>
+			<copy file="${buildscript.basedir}/run-one-jar.bat.template" tofile="@{scripts.dir}/@{script.name}.bat" overwrite="true">
+				<filterset>
+					<filter token="APP_JAR" value="@{script.name}.jar" />
+					<filter token="JAVA_ARGS" value="@{java.args}" />
+				</filterset>
+			</copy>
+			<chmod perm="+x">
+				<fileset dir="@{scripts.dir}">
+					<include name="@{script.name}.sh" />
+					<include name="@{script.name}.bat" />
+				</fileset>
+			</chmod>
+		</sequential>
+
+	</macrodef>
 </project>
