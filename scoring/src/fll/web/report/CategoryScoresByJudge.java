@@ -37,12 +37,13 @@ import fll.xml.XMLUtils;
 /**
  * Display the report for scores by score group.
  * 
- * @author jpschewe
  * @web.servlet name="CategoryScoresByJudge"
  * @web.servlet-mapping url-pattern="/report/CategoryScoresByJudge"
  */
 public class CategoryScoresByJudge extends BaseFLLServlet {
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = {
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name, winner criteria determines sort")
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,

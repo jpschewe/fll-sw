@@ -36,7 +36,7 @@ import fll.xml.XMLWriter;
 
 /**
  * Dump the database.
-
+ * 
  * @web.servlet name="DumpDB"
  * @web.servlet-mapping url-pattern="/admin/database.flldb"
  */
@@ -59,7 +59,7 @@ public final class DumpDB extends BaseFLLServlet {
 
       final ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
       try {
-      DumpDB.dumpDatabase(zipOut, connection, challengeDocument);
+        DumpDB.dumpDatabase(zipOut, connection, challengeDocument);
       } finally {
         zipOut.close();
       }

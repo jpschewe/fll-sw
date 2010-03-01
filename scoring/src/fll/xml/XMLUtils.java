@@ -76,6 +76,8 @@ public final class XMLUtils {
    *          deciding which set of judges to use
    * @return the document
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   public static Document createSubjectiveScoresDocument(final Document challengeDocument,
                                                         final Collection<Team> teams,
                                                         final Connection connection,
@@ -344,6 +346,8 @@ public final class XMLUtils {
   /**
    * @see #getDoubleAttributeValue(Element, String)
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "NP_BOOLEAN_RETURN_NULL" }, justification = "Need to return Null so that we can determine when there is no score")
   public static Boolean getBooleanAttributeValue(final Element element, final String attributeName) {
     if (null == element) {
       return null;

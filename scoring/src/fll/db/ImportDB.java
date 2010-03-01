@@ -49,8 +49,6 @@ import fll.xml.XMLUtils;
  * <p>
  * Example arguments: jdbc:hsqldb:file:/source;shutdown=true "Centennial Dec10"
  * jdbc:hsqldb:file:/destination;shutdown=true
- * 
- * @version $Revision$
  */
 public final class ImportDB {
 
@@ -218,7 +216,7 @@ public final class ImportDB {
         // add the tournament to the tournaments table if it doesn't already
         // exist
         if (!initialTournaments.contains(tournament)) {
-          if(nextNull) {
+          if (nextNull) {
             Queries.createTournament(destConnection, tournament, location);
           } else {
             Queries.createTournament(destConnection, tournament, location, nextTournament);
@@ -327,6 +325,7 @@ public final class ImportDB {
     return challengeDocument;
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Dynamic based upon tables in the database")
   private static void fixTableTypes(final Connection connection, final Map<String, Map<String, String>> typeInfo) throws SQLException {
     Statement stmt = null;
     try {
@@ -338,11 +337,11 @@ public final class ImportDB {
         for (final Map.Entry<String, String> columnEntry : tableEntry.getValue().entrySet()) {
           final String columnName = columnEntry.getKey();
           final String columnType = columnEntry.getValue();
-          
+
           // convert empty strings to null
           final String nullSQL = String.format("UPDATE %s SET %s = NULL WHERE %s = ''", tableName, columnName, columnName);
           stmt.executeUpdate(nullSQL);
-          
+
           final String typeSQL = String.format("ALTER TABLE %s ALTER COLUMN %s %s", tableName, columnName, columnType);
           stmt.executeUpdate(typeSQL);
         }
@@ -375,6 +374,7 @@ public final class ImportDB {
     }
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon tables in the database")
   private static void upgrade0To1(final Connection connection, final Document challengeDocument) throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
@@ -417,8 +417,9 @@ public final class ImportDB {
       // set next tournaments
       for (final Map.Entry<String, String> entry : nameNext.entrySet()) {
         if (!defaultTournaments.contains(entry.getKey())) {
-          if(LOG.isDebugEnabled()) {
-            LOG.debug("Setting next tournament of #" + entry.getKey() + "# to #" + entry.getValue() + "#");
+          if (LOG.isDebugEnabled()) {
+            LOG.debug("Setting next tournament of #"
+                + entry.getKey() + "# to #" + entry.getValue() + "#");
           }
           Queries.setNextTournament(connection, entry.getKey(), entry.getValue());
         }
@@ -588,6 +589,7 @@ public final class ImportDB {
     }
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon categories and goal")
   private static void importSubjective(final Connection sourceConnection,
                                        final Connection destinationConnection,
                                        final int sourceTournamentID,
@@ -660,6 +662,7 @@ public final class ImportDB {
     }
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon goals")
   private static void importPerformance(final Connection sourceConnection,
                                         final Connection destinationConnection,
                                         final int sourceTournamentID,
@@ -763,7 +766,7 @@ public final class ImportDB {
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
         final int teamNumber = sourceRS.getInt(1);
-        if(!Team.isInternalTeamNumber(teamNumber)) {
+        if (!Team.isInternalTeamNumber(teamNumber)) {
           final String eventDivision = sourceRS.getString(2);
           destPrep.setInt(2, teamNumber);
           destPrep.setString(3, eventDivision == null ? GenerateDB.DEFAULT_TEAM_DIVISION : eventDivision);
@@ -978,7 +981,7 @@ public final class ImportDB {
           }
         }
         // else handled by findMissingTeams
-        
+
         SQLFunctions.closeResultSet(destRS);
       }
     } finally {

@@ -23,8 +23,6 @@ import fll.xml.XMLUtils;
 
 /**
  * Does score standardization routines from the web.
- * 
- * @version $Revision$
  */
 public final class ScoreStandardization {
 
@@ -41,36 +39,44 @@ public final class ScoreStandardization {
    * @param document the challenge document
    * @param tournament which tournament to summarize scores for
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable param for column to set")
   public static void summarizeScores(final Connection connection, final Document document, final int tournament) throws SQLException, ParseException {
     Statement stmt = null;
-    PreparedStatement prep = null;
+    PreparedStatement deletePrep = null;
+    PreparedStatement insertPrep = null;
+    PreparedStatement selectPrep = null;
     ResultSet rs = null;
     PreparedStatement updatePrep = null;
     try {
       stmt = connection.createStatement();
 
       // delete all rows matching this tournament
-      stmt.executeUpdate("DELETE FROM FinalScores WHERE Tournament = '"
-          + tournament + "'");
+      deletePrep = connection.prepareStatement("DELETE FROM FinalScores WHERE Tournament = ?");
+      deletePrep.setInt(1, tournament);
+      deletePrep.executeUpdate();
 
       // performance
       final double mean = getStandardizedMean(connection);
       final double sigma = getStandardizedSigma(connection);
-      
-      prep = connection.prepareStatement("INSERT INTO FinalScores "//
+
+      insertPrep = connection.prepareStatement("INSERT INTO FinalScores "//
           + " ( TeamNumber, Tournament, performance ) " //
-          + " SELECT TeamNumber" + ", Tournament" //
+          + " SELECT TeamNumber" //
+          + ", Tournament" //
           + ", ((Score - ?) * ?) + ? "//
           + " FROM performance_seeding_max" //
           + " WHERE Tournament = ?");
-      prep.setDouble(3, mean);
-      prep.setInt(4, tournament);
-      rs = stmt.executeQuery("SELECT "
+      insertPrep.setDouble(3, mean);
+      insertPrep.setInt(4, tournament);
+
+      selectPrep = connection.prepareStatement("SELECT " //
           + " Avg(Score) AS sg_mean," //
           + " Count(Score) AS sg_count," //
           + " stddev_pop(Score) AS sg_stdev" //
           + " FROM performance_seeding_max"//
-          + " WHERE Tournament = " + tournament);
+          + " WHERE Tournament = ?");
+      selectPrep.setInt(1, tournament);
+      rs = selectPrep.executeQuery();
       if (rs.next()) {
         final int sgCount = rs.getInt(2);
         if (0 == sgCount) {
@@ -79,9 +85,10 @@ public final class ScoreStandardization {
         } else if (sgCount > 1) {
           final double sgMean = rs.getDouble(1);
           final double sgStdev = rs.getDouble(3);
-          prep.setDouble(1, sgMean);
-          prep.setDouble(2, sigma / sgStdev);
-          prep.executeUpdate();
+          insertPrep.setDouble(1, sgMean);
+          insertPrep.setDouble(2, sigma
+              / sgStdev);
+          insertPrep.executeUpdate();
         } else {
           throw new RuntimeException("Not enough scores for in category: Performance");
         }
@@ -115,7 +122,9 @@ public final class ScoreStandardization {
     } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closeStatement(stmt);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.closePreparedStatement(insertPrep);
+      SQLFunctions.closePreparedStatement(deletePrep);
+      SQLFunctions.closePreparedStatement(selectPrep);
     }
   }
 
@@ -130,6 +139,8 @@ public final class ScoreStandardization {
   /**
    * Populate the StandardizedScore column of each subjective table.
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable for column name in update")
   public static void standardizeSubjectiveScores(final Connection connection, final Document document, final int tournament) throws SQLException {
     ResultSet rs = null;
     PreparedStatement updatePrep = null;
@@ -155,8 +166,7 @@ public final class ScoreStandardization {
         // 2 - sg_stdev
         // 3 - judge
         updatePrep = connection.prepareStatement("UPDATE "
-            + category + " SET StandardizedScore = ((ComputedTotal - ?) * ? ) + ?  WHERE Judge = ?"
-            + " AND Tournament = ?");
+            + category + " SET StandardizedScore = ((ComputedTotal - ?) * ? ) + ?  WHERE Judge = ?" + " AND Tournament = ?");
         updatePrep.setDouble(3, mean);
         updatePrep.setInt(5, tournament);
 
@@ -168,7 +178,7 @@ public final class ScoreStandardization {
             + " WHERE Tournament = ?" //
             + " and ComputedTotal IS NOT NULL AND NoShow = false GROUP BY Judge");
         selectPrep.setInt(1, tournament);
-        rs = selectPrep.executeQuery();        
+        rs = selectPrep.executeQuery();
         while (rs.next()) {
           final String judge = rs.getString(1);
           final int sgCount = rs.getInt(3);
@@ -176,7 +186,8 @@ public final class ScoreStandardization {
             final double sgMean = rs.getDouble(2);
             final double sgStdev = rs.getDouble(4);
             updatePrep.setDouble(1, sgMean);
-            updatePrep.setDouble(2, sigma / sgStdev);
+            updatePrep.setDouble(2, sigma
+                / sgStdev);
             updatePrep.setString(4, judge);
             updatePrep.executeUpdate();
           } else { // if(sgCount == 1) {
@@ -205,6 +216,7 @@ public final class ScoreStandardization {
    * @param tournament the tournament to add scores for
    * @throws SQLException on an error talking to the database
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE"}, justification = "Generating columns to update")
   public static void updateTeamTotalScores(final Connection connection, final Document document, final int tournament) throws SQLException, ParseException {
     Statement stmt = null;
     try {

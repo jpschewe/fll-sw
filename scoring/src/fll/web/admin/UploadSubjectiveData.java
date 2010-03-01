@@ -109,6 +109,8 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
    *          information about the subjective categories.
    * @param connection the database connection to write to
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = {
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Generated based upon categories and goals")
   public static void saveSubjectiveData(final File file, final int currentTournament, final Document challengeDocument, final Connection connection)
       throws SQLException, IOException, ParseException {
     final ZipFile zipfile = new ZipFile(file);
