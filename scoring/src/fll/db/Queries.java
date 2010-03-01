@@ -1426,7 +1426,7 @@ public static List<Team> getPlayoffSeedingOrder(final Connection connection,
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Value FROM TournamentParameters WHERE TournamentParameters.Param = 'CurrentTournament'");
+      rs = getGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT); 
       if (rs.next()) {
         return rs.getInt(1);
       } else {
@@ -1473,7 +1473,7 @@ public static List<Team> getPlayoffSeedingOrder(final Connection connection,
    * @return the ResultSet, you are responsible for closing it
    * @throws SQLException
    */
-  private static ResultSet getTournamentParameter(final Connection connection, final String paramName) throws SQLException {
+  public static ResultSet getTournamentParameter(final Connection connection, final String paramName) throws SQLException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -1486,7 +1486,7 @@ public static List<Team> getPlayoffSeedingOrder(final Connection connection,
     }
   }
 
-  private static void setTournamentParameter(final Connection connection, final String paramName, final String paramValue) throws SQLException {
+  public static void setTournamentParameter(final Connection connection, final String paramName, final String paramValue) throws SQLException {
     final ResultSet oldValue = getTournamentParameter(connection, paramName);
     PreparedStatement prep = null;
     try {
@@ -1815,7 +1815,7 @@ public static void updateSubjectiveScoreTotals(final Document document, final Co
   public static Document getChallengeDocument(final Connection connection) throws SQLException, RuntimeException {
     ResultSet rs = null;
     try {
-      rs = getTournamentParameter(connection, TournamentParameters.CHALLENGE_DOCUMENT);
+      rs = getGlobalParameter(connection, GlobalParameters.CHALLENGE_DOCUMENT);
       if (rs.next()) {
         return ChallengeParser.parse(new InputStreamReader(rs.getAsciiStream(1)));
       } else {
@@ -2842,7 +2842,7 @@ private static void deleteTeamFromTournamet(final Connection connection, final D
    * @return the ResultSet, you are responsible for closing it
    * @throws SQLException
    */
-  private static ResultSet getGlobalParameter(final Connection connection, final String paramName) throws SQLException {
+  public static ResultSet getGlobalParameter(final Connection connection, final String paramName) throws SQLException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -2852,6 +2852,29 @@ private static void deleteTeamFromTournamet(final Connection connection, final D
       return rs;
     } finally {
       SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+
+  /**
+   * Get a global parameter from the database that is a double.
+   * 
+   * @param connection the database connection
+   * @param parameter the parameter name
+   * @return the value
+   * @throws SQLException
+   * @throws IllegalArgumentException if the parameter cannot be found
+   */
+  public static double getDoubleGlobalParameter(final Connection connection, final String parameter) throws SQLException {
+    final ResultSet value = getGlobalParameter(connection, parameter);
+    try {
+      if (value.next()) {
+        return value.getDouble(1);
+      } else {
+        throw new IllegalArgumentException("Can't find '"
+            + parameter + "' in TournamentParameters");
+      }
+    } finally {
+      SQLFunctions.closeResultSet(value);
     }
   }
 

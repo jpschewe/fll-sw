@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import fll.Utilities;
+import fll.db.GlobalParameters;
 
 /**
  * Push an XML document into the database without recreating the database. This
@@ -74,8 +75,8 @@ public final class ImportDocument {
     Connection connection = null;
     try {
       connection = Utilities.createDataSource(args[1]).getConnection();
-      prep = connection.prepareStatement("UPDATE TournamentParameters SET Value = ? WHERE Param = ?");
-      prep.setString(2, "ChallengeDocument");
+      prep = connection.prepareStatement("UPDATE global_parameters SET Value = ? WHERE Param = ?");
+      prep.setString(2, GlobalParameters.CHALLENGE_DOCUMENT);
 
       // dump the document into a byte array so we can push it into the database
       final XMLWriter xmlwriter = new XMLWriter();
