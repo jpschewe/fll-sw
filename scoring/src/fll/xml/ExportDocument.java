@@ -21,6 +21,8 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 
 import fll.Utilities;
+import fll.db.GlobalParameters;
+import fll.db.Queries;
 
 /**
  * Dump the challenge document out of a database.
@@ -66,7 +68,7 @@ public final class ExportDocument {
     try {
       connection = Utilities.createDataSource(args[1]).getConnection();
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Value FROM TournamentParameters WHERE Param = 'ChallengeDocument'");
+      rs = Queries.getGlobalParameter(connection, GlobalParameters.CHALLENGE_DOCUMENT);
       if (rs.next()) {
         final Reader reader = rs.getCharacterStream(1);
         final FileWriter writer = new FileWriter(challengeFile);

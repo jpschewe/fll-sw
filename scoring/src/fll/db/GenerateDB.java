@@ -23,6 +23,7 @@ import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Utilities;
+import fll.util.FLLRuntimeException;
 import fll.xml.XMLUtils;
 import fll.xml.XMLWriter;
 
@@ -97,7 +98,7 @@ public final class GenerateDB {
 
       final Collection<String> tables = Queries.getTablesInDB(connection);
 
-      globalParameters(connection, forceRebuild, tables);
+      globalParameters(document, connection, forceRebuild, tables);
 
       // Table structure for table 'Tournaments'
       tournaments(connection, forceRebuild, tables);
@@ -192,38 +193,11 @@ public final class GenerateDB {
         // inverted order of Value and Param so that the update statement and
         // the insert statement both have the same order of parameters
         prep = connection.prepareStatement("INSERT INTO TournamentParameters (Value, Param) VALUES (?, ?)");
-        prep.setString(2, TournamentParameters.CURRENT_TOURNAMENT);
-        prep.setInt(1, Queries.getTournamentID(connection, "DUMMY"));
-        prep.executeUpdate();
 
         prep.setString(2, TournamentParameters.SEEDING_ROUNDS);
         prep.setInt(1, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
         prep.executeUpdate();
-
-        prep.setString(2, TournamentParameters.STANDARDIZED_MEAN);
-        prep.setDouble(1, TournamentParameters.STANDARDIZED_MEAN_DEFAULT);
-        prep.executeUpdate();
-
-        prep.setString(2, TournamentParameters.STANDARDIZED_SIGMA);
-        prep.setDouble(1, TournamentParameters.STANDARDIZED_SIGMA_DEFAULT);
-        prep.executeUpdate();
-
-        prep.setString(2, TournamentParameters.CHALLENGE_DOCUMENT);
-      } else {
-        prep = connection.prepareStatement("UPDATE TournamentParameters SET Value = ? WHERE Param = ?");
-        prep.setString(2, TournamentParameters.CHALLENGE_DOCUMENT);
       }
-
-      // dump the document into a byte array so we can push it into the database
-      final XMLWriter xmlwriter = new XMLWriter();
-      final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      xmlwriter.setOutput(baos, "UTF8");
-      xmlwriter.write(document);
-      final byte[] bytes = baos.toByteArray();
-      final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-      prep.setAsciiStream(1, bais, bytes.length);
-      prep.executeUpdate();
-      SQLFunctions.closePreparedStatement(prep);
 
       // Table structure for table 'Judges'
       stmt.executeUpdate("DROP TABLE IF EXISTS Judges CASCADE");
@@ -390,15 +364,19 @@ public final class GenerateDB {
     }
   }
 
-  /* package */static void globalParameters(final Connection connection, final boolean forceRebuild, final Collection<String> tables) throws SQLException {
+  /* package */static void globalParameters(final Document document, final Connection connection, final boolean forceRebuild, final Collection<String> tables)
+      throws SQLException {
     Statement stmt = null;
     PreparedStatement insertPrep = null;
     PreparedStatement deletePrep = null;
+    PreparedStatement challengePrep = null;
     try {
       stmt = connection.createStatement();
+
       if (forceRebuild) {
         stmt.executeUpdate("DROP TABLE IF EXISTS global_parameters CASCADE");
       }
+
       if (forceRebuild
           || !tables.contains("global_parameters".toLowerCase())) {
         stmt.executeUpdate("CREATE TABLE global_parameters (" //
@@ -406,12 +384,52 @@ public final class GenerateDB {
             + " ,param_value longvarchar NOT NULL" //
             + " ,CONSTRAINT global_parameters_pk PRIMARY KEY (param)" //
             + ")");
+
+        insertPrep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
+
+        // put in default tournament
+        insertPrep.setString(2, GlobalParameters.CURRENT_TOURNAMENT);
+        insertPrep.setInt(1, Queries.getTournamentID(connection, "DUMMY"));
+        insertPrep.executeUpdate();
+
+        insertPrep.setString(2, GlobalParameters.STANDARDIZED_MEAN);
+        insertPrep.setDouble(1, GlobalParameters.STANDARDIZED_MEAN_DEFAULT);
+        insertPrep.executeUpdate();
+
+        insertPrep.setString(2, GlobalParameters.STANDARDIZED_SIGMA);
+        insertPrep.setDouble(1, GlobalParameters.STANDARDIZED_SIGMA_DEFAULT);
+        insertPrep.executeUpdate();
+
+        // insert challenge document
+        challengePrep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
+        challengePrep.setString(2, GlobalParameters.CHALLENGE_DOCUMENT);
+      } else {
+        insertPrep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
+
+        // update challenge document
+        challengePrep = connection.prepareStatement("UPDATE TournamentParameters SET Value = ? WHERE Param = ?");
+        challengePrep.setString(2, GlobalParameters.CHALLENGE_DOCUMENT);
       }
 
-      insertPrep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
-      deletePrep = connection.prepareStatement("DELETE FROM global_parameters WHERE param = ?");
+      // get the challenge descriptor put in the database
+      try {
+        // dump the document into a byte array so we can push it into the
+        // database
+        final XMLWriter xmlwriter = new XMLWriter();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        xmlwriter.setOutput(baos, "UTF8");
+        xmlwriter.write(document);
+        final byte[] bytes = baos.toByteArray();
+        final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+        challengePrep.setAsciiStream(1, bais, bytes.length);
+        challengePrep.executeUpdate();
+        SQLFunctions.closePreparedStatement(challengePrep);
+      } catch (final UnsupportedEncodingException e) {
+        throw new FLLRuntimeException("Internal error, UTF8 not supported as an encoding!", e);
+      }
 
       // set database version
+      deletePrep = connection.prepareStatement("DELETE FROM global_parameters WHERE param = ?");
       deletePrep.setString(1, GlobalParameters.DATABASE_VERSION);
       deletePrep.executeUpdate();
       insertPrep.setInt(1, DATABASE_VERSION);
@@ -422,6 +440,7 @@ public final class GenerateDB {
       SQLFunctions.closeStatement(stmt);
       SQLFunctions.closePreparedStatement(insertPrep);
       SQLFunctions.closePreparedStatement(deletePrep);
+      SQLFunctions.closePreparedStatement(challengePrep);
     }
   }
 

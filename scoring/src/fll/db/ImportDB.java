@@ -383,8 +383,10 @@ public final class ImportDB {
     try {
       stmt = connection.createStatement();
 
+      // Could move current tournament from TournamentParameters to GlobalParameters, but not worth the trouble
+      
       // add the global_parameters table
-      GenerateDB.globalParameters(connection, true, Queries.getTablesInDB(connection));
+      GenerateDB.globalParameters(challengeDocument, connection, true, Queries.getTablesInDB(connection));
 
       // ---- switch from string tournament names to integers ----
 
