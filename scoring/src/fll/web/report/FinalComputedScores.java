@@ -91,6 +91,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
   /**
    * Generate the actual report.
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Sort determined by winner criteria, category name determines table name")
   public void generateReport(final Connection connection, 
                              final OutputStream out, 
                              final org.w3c.dom.Document challengeDocument,

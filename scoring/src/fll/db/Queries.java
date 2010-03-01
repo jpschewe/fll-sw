@@ -48,8 +48,6 @@ import fll.xml.XMLUtils;
 
 /**
  * Does all of our queries.
- * 
- * @version $Revision$
  */
 public final class Queries {
 
@@ -69,7 +67,9 @@ public final class Queries {
    * @return Score groups. Map is name of score group to collection of teams in
    *         that score group
    */
-  public static Map<String, Collection<Integer>> computeScoreGroups(final Connection connection,
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
+public static Map<String, Collection<Integer>> computeScoreGroups(final Connection connection,
                                                                     final int tournament,
                                                                     final String division,
                                                                     final String categoryName) throws SQLException {
@@ -281,7 +281,9 @@ public final class Queries {
    * @param rankingMap
    * @throws SQLException
    */
-  private static void determineSubjectiveRanking(final Connection connection,
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate select statement")
+private static void determineSubjectiveRanking(final Connection connection,
                                                  final String ascDesc,
                                                  final int tournament,
                                                  final List<String> divisions,
@@ -366,6 +368,8 @@ public final class Queries {
    * the result set will have two columns. The first column is the team number
    * and the second is the score.
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "SQL is passed in")
   private static void computeRanking(final Connection connection,
                                      final int tournament,
                                      final List<String> divisions,
@@ -557,6 +561,8 @@ public final class Queries {
    * @throws RuntimeException if a parameter is missing.
    * @throws ParseException if the XML document is invalid.
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Goals determine columns")
   public static String insertPerformanceScore(final Document document, final Connection connection, final HttpServletRequest request) throws SQLException,
       ParseException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
@@ -759,6 +765,8 @@ public final class Queries {
    * @throws ParseException if the XML document is invalid.
    * @throws RuntimeException if a parameter is missing.
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
   public static String updatePerformanceScore(final Document document, final Connection connection, final HttpServletRequest request) throws SQLException,
       ParseException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
@@ -1116,6 +1124,8 @@ public final class Queries {
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to pick view dynamically")
   public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection,
                                                       final Map<Integer, Team> tournamentTeams,
                                                       final String division,
@@ -1177,6 +1187,8 @@ public final class Queries {
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamically pick view.")
   public static List<Team> getTeamsWithExtraRuns(final Connection connection,
                                                  final Map<Integer, Team> tournamentTeams,
                                                  final String division,
@@ -1260,7 +1272,9 @@ public final class Queries {
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
-  public static List<Team> getPlayoffSeedingOrder(final Connection connection,
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to choose ascending or descending order based upon winner criteria")
+public static List<Team> getPlayoffSeedingOrder(final Connection connection,
                                                   final WinnerType winnerCriteria,
                                                   final String divisionStr,
                                                   final Map<Integer, Team> tournamentTeams) throws SQLException, RuntimeException {
@@ -1603,6 +1617,8 @@ public final class Queries {
    * @param connection connection to database, needs delete privileges
    * @throws SQLException on an error talking to the database
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table")
   public static void deleteTeam(final int teamNumber, final Document document, final Connection connection) throws SQLException {
     PreparedStatement prep = null;
     final boolean autoCommit = connection.getAutoCommit();
@@ -1686,7 +1702,9 @@ public final class Queries {
    * @throws SQLException
    * @throws ParseException
    */
-  public static void updateSubjectiveScoreTotals(final Document document, final Connection connection) throws SQLException, ParseException {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
+public static void updateSubjectiveScoreTotals(final Document document, final Connection connection) throws SQLException, ParseException {
     final int tournament = getCurrentTournament(connection);
     final Element rootElement = document.getDocumentElement();
 
@@ -1952,7 +1970,9 @@ public final class Queries {
    * Delete all record of a team from a tournament. This includes the scores and
    * the TournamentTeams table.
    */
-  private static void deleteTeamFromTournamet(final Connection connection, final Document document, final int teamNumber, final int currentTournament)
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
+private static void deleteTeamFromTournamet(final Connection connection, final Document document, final int teamNumber, final int currentTournament)
       throws SQLException {
     // TODO this could be cached
     PreparedStatement prep = null;

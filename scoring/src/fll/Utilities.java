@@ -38,8 +38,6 @@ import au.com.bytecode.opencsv.CSVReader;
 
 /**
  * Some handy utilities.
- * 
- * @version $Revision$
  */
 public final class Utilities {
 
@@ -74,6 +72,8 @@ public final class Utilities {
    * @throws IOException if there is an error reading the data
    * @throws RuntimeException if the first line cannot be read
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Generate columns based upon file loaded")
   public static void loadCSVFile(final Connection connection, final String tablename, final Reader reader) throws IOException, SQLException {
     Statement stmt = null;
     PreparedStatement prep = null;

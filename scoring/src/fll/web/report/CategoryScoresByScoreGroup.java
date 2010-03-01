@@ -45,6 +45,8 @@ import fll.xml.XMLUtils;
  */
 public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name, winner criteria determines sort")
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,

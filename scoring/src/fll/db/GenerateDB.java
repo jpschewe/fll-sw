@@ -84,6 +84,7 @@ public final class GenerateDB {
    * @param forceRebuild recreate all tables from scratch, if false don't
    *          recreate the tables that hold team information
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE", }, justification = "Need dynamic data for default values")
   public static void generateDB(final Document document, final Connection connection, final boolean forceRebuild) throws SQLException,
       UnsupportedEncodingException {
 
