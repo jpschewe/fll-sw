@@ -675,6 +675,7 @@ public class BracketData {
    * @see TopRightCornerStyle
    * @return Properly formatted HTML \<td\>element for a bridge cell.
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "ICAST_IDIV_CAST_TO_DOUBLE" }, justification = "Double cast is OK as we are ok with the rounding")
   public String getHtmlBridgeCell(final int row, final int round, final TopRightCornerStyle cs) {
     final StringBuffer sb = new StringBuffer();
     final int ar = round

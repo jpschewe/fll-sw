@@ -63,6 +63,8 @@ public class Top10 extends BaseFLLServlet {
 
   private static final Logger LOGGER = Logger.getLogger(Top10.class);
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = {
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Determine sort order based upon winner criteria")
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,

@@ -18,8 +18,6 @@ import fll.db.Queries;
 
 /**
  * TeamScore implementation for a performance score in the database.
- * 
- * @author jpschewe
  */
 public class DatabaseTeamScore extends TeamScore {
 
@@ -150,9 +148,9 @@ public class DatabaseTeamScore extends TeamScore {
 
   /**
    * Create the result set.
-   * 
-   * @return
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table")
   private ResultSet createResultSet(final Connection connection, final int tournament) throws SQLException {
     ResultSet result;
     final String categoryName = getCategoryName();

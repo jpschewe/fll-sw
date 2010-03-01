@@ -56,18 +56,19 @@ public class ExcelCellReader implements CellFileReader {
 
   /**
    * Get the names of all sheets in the specified file.
-   * @throws IOException 
-   * @throws InvalidFormatException 
+   * 
+   * @throws IOException
+   * @throws InvalidFormatException
    */
   public static List<String> getAllSheetNames(final File file) throws InvalidFormatException, IOException {
     final List<String> sheetNames = new LinkedList<String>();
-    
+
     final Workbook workbook = createWorkbook(file);
     final int numSheets = workbook.getNumberOfSheets();
-    for(int i=0; i<numSheets; ++i) {
+    for (int i = 0; i < numSheets; ++i) {
       sheetNames.add(workbook.getSheetName(i));
     }
-    
+
     return sheetNames;
   }
 
@@ -104,6 +105,7 @@ public class ExcelCellReader implements CellFileReader {
   /**
    * @see fll.util.CellFileReader#readNext()
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS", justification = "Return null rather than zero length array so that we know when we hit EFO")
   public String[] readNext() throws IOException {
     if (lineNumber >= sheet.getLastRowNum()) {
       return null;
