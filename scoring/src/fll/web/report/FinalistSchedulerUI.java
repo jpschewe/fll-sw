@@ -55,7 +55,12 @@ import fll.xml.XMLUtils;
  */
 public class FinalistSchedulerUI extends BaseFLLServlet {
 
-  private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm");
+  private static final ThreadLocal<DateFormat> DATE_FORMAT = new ThreadLocal<DateFormat>() {
+    @Override 
+    protected DateFormat initialValue() {
+      return new SimpleDateFormat("HH:mm");
+    }
+  };
   
   /**
    * Key into session that contains the division finalists Map.
@@ -285,7 +290,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
     
     for (final Map<String, Integer> timeSlot : schedule) {
       formatter.format("<tr>");
-      formatter.format("<td>%s</td>", DATE_FORMAT.format(start.getTime()));
+      formatter.format("<td>%s</td>", DATE_FORMAT.get().format(start.getTime()));
 
       for (final String categoryTitle : categories) {
         formatter.format("<td>");
@@ -326,6 +331,8 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
    *          team numbers
    * @throws IOException
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
+  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
   private void displayProposedFinalists(final HttpServletResponse response,
                                         final Connection connection,
                                         final Document challengeDocument,
@@ -378,8 +385,9 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
         formatter.format("<tr><th colspan='6'>%s</th></tr>", categoryTitle);
         formatter.format("<tr><th>Score Group</th><th>Team #</th><th>Team Name</th><th>Finalist?</th><th>Combined</th><th>Standardized</th><th>Raw</th></tr>");
 
-        for (final String scoreGroup : scoreGroups.keySet()) {
-          final String teamSelect = StringUtils.join(scoreGroups.get(scoreGroup).iterator(), ", ");
+        for(final Map.Entry<String, Collection<Integer>> entry : scoreGroups.entrySet()) {
+          final String scoreGroup = entry.getKey();
+          final String teamSelect = StringUtils.join(entry.getValue().iterator(), ", ");
           prep = connection.prepareStatement("SELECT Teams.TeamNumber, FinalScores." + categoryName
               + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
               + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " " + ascDesc
