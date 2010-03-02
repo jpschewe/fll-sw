@@ -15,6 +15,4 @@ public final class TournamentParameters {
   }
   public static final String SEEDING_ROUNDS = "SeedingRounds";
   public static final int SEEDING_ROUNDS_DEFAULT = 3;
-  public static final String SCORESHEET_LAYOUT_NUP = "ScoresheetLayoutNUp";
-  public static final int SCORESHEET_LAYOUT_NUP_DEFAULT = 2;
 }

@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
@@ -28,9 +29,7 @@ import fll.xml.XMLUtils;
 import fll.xml.XMLWriter;
 
 /**
- * Generate tables for fll tournament from XML document
- * 
- * @version $Revision$
+ * Generate tables for tournament from XML document
  */
 public final class GenerateDB {
 
@@ -47,7 +46,7 @@ public final class GenerateDB {
   public static final String INTERNAL_REGION = "INTERNAL";
 
   private GenerateDB() {
-
+    // no instances
   }
 
   /**
@@ -98,7 +97,7 @@ public final class GenerateDB {
 
       final Collection<String> tables = Queries.getTablesInDB(connection);
 
-      globalParameters(document, connection, forceRebuild, tables);
+      createGlobalParameters(document, connection, forceRebuild, tables);
 
       // Table structure for table 'Tournaments'
       tournaments(connection, forceRebuild, tables);
@@ -187,8 +186,6 @@ public final class GenerateDB {
             + "  Param varchar(64) NOT NULL," //
             + "  Value longvarchar NOT NULL," //
             + "  CONSTRAINT tournament_parameters_pk PRIMARY KEY  (Param)" + ")");
-
-        // populate tournament parameters with default values
 
         // inverted order of Value and Param so that the update statement and
         // the insert statement both have the same order of parameters
@@ -359,57 +356,92 @@ public final class GenerateDB {
         // TODO can we add a constraint that NextTournament must refer to Name
         // and still handle null?
       }
+
+      setDefaultParameters(connection);
+
     } finally {
       SQLFunctions.closeStatement(stmt);
     }
   }
 
-  /* package */static void globalParameters(final Document document, final Connection connection, final boolean forceRebuild, final Collection<String> tables)
-      throws SQLException {
-    Statement stmt = null;
-    PreparedStatement insertPrep = null;
-    PreparedStatement deletePrep = null;
+  /**
+   * Put the default parameters in the database if they don't already exist.
+   */
+  /*package*/ static void setDefaultParameters(final Connection connection) throws SQLException {
+
+    PreparedStatement globalInsert = null;
+    PreparedStatement tournamentInsert = null;
+    ResultSet check = null;
+    try {
+      globalInsert = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
+
+      check = Queries.getGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT);
+      if (!check.next()) {
+        globalInsert.setString(2, GlobalParameters.CURRENT_TOURNAMENT);
+        globalInsert.setInt(1, Queries.getTournamentID(connection, "DUMMY"));
+        globalInsert.executeUpdate();
+      }
+      SQLFunctions.closeResultSet(check);
+      check = null;
+
+      check = Queries.getGlobalParameter(connection, GlobalParameters.STANDARDIZED_MEAN);
+      if (!check.next()) {
+        globalInsert.setString(2, GlobalParameters.STANDARDIZED_MEAN);
+        globalInsert.setDouble(1, GlobalParameters.STANDARDIZED_MEAN_DEFAULT);
+        globalInsert.executeUpdate();
+      }
+      SQLFunctions.closeResultSet(check);
+      check = null;
+
+      check = Queries.getGlobalParameter(connection, GlobalParameters.STANDARDIZED_SIGMA);
+      if (!check.next()) {
+        globalInsert.setString(2, GlobalParameters.STANDARDIZED_SIGMA);
+        globalInsert.setDouble(1, GlobalParameters.STANDARDIZED_SIGMA_DEFAULT);
+        globalInsert.executeUpdate();
+      }
+      SQLFunctions.closeResultSet(check);
+      check = null;
+
+      check = Queries.getGlobalParameter(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP);
+      if (!check.next()) {
+        globalInsert.setString(2, GlobalParameters.SCORESHEET_LAYOUT_NUP);
+        globalInsert.setInt(1, GlobalParameters.SCORESHEET_LAYOUT_NUP_DEFAULT);
+        globalInsert.executeUpdate();
+      }
+      SQLFunctions.closeResultSet(check);
+      check = null;
+
+      tournamentInsert = connection.prepareStatement("INSERT INTO TournamentParameters (param_value, param) VALUES (?, ?)");
+      check = Queries.getTournamentParameter(connection, TournamentParameters.SEEDING_ROUNDS);
+      if (!check.next()) {
+        tournamentInsert.setString(2, TournamentParameters.SEEDING_ROUNDS);
+        tournamentInsert.setInt(1, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
+        tournamentInsert.executeUpdate();
+      }
+      SQLFunctions.closeResultSet(check);
+      check = null;
+      
+    } finally {
+      SQLFunctions.closeResultSet(check);
+      SQLFunctions.closePreparedStatement(globalInsert);
+      SQLFunctions.closePreparedStatement(tournamentInsert);
+    }
+  }
+
+  private static void insertOrUpdateChallengeDocument(final Document document, final Connection connection) throws SQLException {
+    ResultSet check = null;
     PreparedStatement challengePrep = null;
     try {
-      stmt = connection.createStatement();
-
-      if (forceRebuild) {
-        stmt.executeUpdate("DROP TABLE IF EXISTS global_parameters CASCADE");
-      }
-
-      if (forceRebuild
-          || !tables.contains("global_parameters".toLowerCase())) {
-        stmt.executeUpdate("CREATE TABLE global_parameters (" //
-            + "  param varchar(64) NOT NULL" //
-            + " ,param_value longvarchar NOT NULL" //
-            + " ,CONSTRAINT global_parameters_pk PRIMARY KEY (param)" //
-            + ")");
-
-        insertPrep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
-
-        // put in default tournament
-        insertPrep.setString(2, GlobalParameters.CURRENT_TOURNAMENT);
-        insertPrep.setInt(1, Queries.getTournamentID(connection, "DUMMY"));
-        insertPrep.executeUpdate();
-
-        insertPrep.setString(2, GlobalParameters.STANDARDIZED_MEAN);
-        insertPrep.setDouble(1, GlobalParameters.STANDARDIZED_MEAN_DEFAULT);
-        insertPrep.executeUpdate();
-
-        insertPrep.setString(2, GlobalParameters.STANDARDIZED_SIGMA);
-        insertPrep.setDouble(1, GlobalParameters.STANDARDIZED_SIGMA_DEFAULT);
-        insertPrep.executeUpdate();
-
-        // insert challenge document
-        challengePrep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
-        challengePrep.setString(2, GlobalParameters.CHALLENGE_DOCUMENT);
-      } else {
-        insertPrep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
-
-        // update challenge document
+      check = Queries.getGlobalParameter(connection, GlobalParameters.CHALLENGE_DOCUMENT);
+      if (check.next()) {
         challengePrep = connection.prepareStatement("UPDATE TournamentParameters SET Value = ? WHERE Param = ?");
-        challengePrep.setString(2, GlobalParameters.CHALLENGE_DOCUMENT);
+      } else {
+        challengePrep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
       }
+      SQLFunctions.closeResultSet(check);
+      check = null;
+
+      challengePrep.setString(2, GlobalParameters.CHALLENGE_DOCUMENT);
 
       // get the challenge descriptor put in the database
       try {
@@ -427,20 +459,50 @@ public final class GenerateDB {
       } catch (final UnsupportedEncodingException e) {
         throw new FLLRuntimeException("Internal error, UTF8 not supported as an encoding!", e);
       }
+    } finally {
+      SQLFunctions.closeResultSet(check);
+      SQLFunctions.closePreparedStatement(challengePrep);
+    }
+  }
+
+  /* package */static void createGlobalParameters(final Document document,
+                                                  final Connection connection,
+                                                  final boolean forceRebuild,
+                                                  final Collection<String> tables) throws SQLException {
+    Statement stmt = null;
+    PreparedStatement insertPrep = null;
+    PreparedStatement deletePrep = null;
+    try {
+      stmt = connection.createStatement();
+
+      if (forceRebuild) {
+        stmt.executeUpdate("DROP TABLE IF EXISTS global_parameters CASCADE");
+      }
+
+      if (forceRebuild
+          || !tables.contains("global_parameters".toLowerCase())) {
+        stmt.executeUpdate("CREATE TABLE global_parameters (" //
+            + "  param varchar(64) NOT NULL" //
+            + " ,param_value longvarchar NOT NULL" //
+            + " ,CONSTRAINT global_parameters_pk PRIMARY KEY (param)" //
+            + ")");
+      }
 
       // set database version
       deletePrep = connection.prepareStatement("DELETE FROM global_parameters WHERE param = ?");
       deletePrep.setString(1, GlobalParameters.DATABASE_VERSION);
       deletePrep.executeUpdate();
+      insertPrep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
       insertPrep.setInt(1, DATABASE_VERSION);
       insertPrep.setString(2, GlobalParameters.DATABASE_VERSION);
       insertPrep.executeUpdate();
+
+      insertOrUpdateChallengeDocument(document, connection);
 
     } finally {
       SQLFunctions.closeStatement(stmt);
       SQLFunctions.closePreparedStatement(insertPrep);
       SQLFunctions.closePreparedStatement(deletePrep);
-      SQLFunctions.closePreparedStatement(challengePrep);
     }
   }
 
