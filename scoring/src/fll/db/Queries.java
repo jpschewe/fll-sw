@@ -37,6 +37,7 @@ import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Utilities;
+import fll.util.FLLRuntimeException;
 import fll.util.ScoreUtils;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.HttpTeamScore;
@@ -538,7 +539,7 @@ private static void determineSubjectiveRanking(final Connection connection,
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT VALUE FROM TournamentParameters WHERE Param = 'ScoresheetLayoutNUp'");
+      rs = getGlobalParameter(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP);        
       final int nup;
       if (rs.next()) {
         nup = rs.getInt(1);
@@ -1367,14 +1368,7 @@ public static List<Team> getPlayoffSeedingOrder(final Connection connection,
    * @throws SQLException
    */
   public static void setScoresheetLayoutNUp(final Connection connection, final int newNup) throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
-      stmt.executeUpdate("UPDATE TournamentParameters SET Value = "
-          + newNup + " WHERE Param = 'ScoresheetLayoutNUp'");
-    } finally {
-      SQLFunctions.closeStatement(stmt);
-    }
+    setGlobalParameter(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP, String.valueOf(newNup));
   }
 
   /**
@@ -1809,7 +1803,7 @@ public static void updateSubjectiveScoreTotals(final Document document, final Co
    * 
    * @param connection connection to the database
    * @return the document
-   * @throws RuntimeException if the document cannot be found
+   * @throws FLLRuntimeException if the document cannot be found
    * @throws SQLException on a database error
    */
   public static Document getChallengeDocument(final Connection connection) throws SQLException, RuntimeException {
@@ -1819,7 +1813,7 @@ public static void updateSubjectiveScoreTotals(final Document document, final Co
       if (rs.next()) {
         return ChallengeParser.parse(new InputStreamReader(rs.getAsciiStream(1)));
       } else {
-        throw new RuntimeException("Could not find challenge document in database");
+        throw new FLLRuntimeException("Could not find challenge document in database");
       }
     } finally {
       SQLFunctions.closeResultSet(rs);
@@ -2875,6 +2869,24 @@ private static void deleteTeamFromTournamet(final Connection connection, final D
       }
     } finally {
       SQLFunctions.closeResultSet(value);
+    }
+  }
+
+  public static void setGlobalParameter(final Connection connection, final String paramName, final String paramValue) throws SQLException {
+    final ResultSet oldValue = getGlobalParameter(connection, paramName);
+    PreparedStatement prep = null;
+    try {
+      if (!oldValue.next()) {
+        prep = connection.prepareStatement("INSERT INTO GlobalParameters (Value, Param) VALUES (?, ?)");
+      } else {
+        prep = connection.prepareStatement("UPDATE GlobalParameters SET Value = ? WHERE Param = ?");
+      }
+      prep.setString(1, paramValue);
+      prep.setString(2, paramName);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.closeResultSet(oldValue);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 

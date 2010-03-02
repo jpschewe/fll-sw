@@ -378,15 +378,28 @@ public final class ImportDB {
   private static void upgrade0To1(final Connection connection, final Document challengeDocument) throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
-    PreparedStatement setVersion = null;
     PreparedStatement stringsToInts = null;
+    PreparedStatement deleteParam = null;
     try {
       stmt = connection.createStatement();
 
-      // Could move current tournament from TournamentParameters to GlobalParameters, but not worth the trouble
+      // moving tournament parameters to globals, can just delete the old ones and the defaults will be fine
+      deleteParam = connection.prepareStatement("DELETE FROM TournamentParameters WHERE Name = ?");
+      deleteParam.setString(1, "CurrentTournament");
+      deleteParam.executeUpdate();
+      deleteParam.setString(1, "StandardizedMean");
+      deleteParam.executeUpdate();
+      deleteParam.setString(1, "StandardizedSigma");
+      deleteParam.executeUpdate();
+      deleteParam.setString(1, "ChallengeDocument");
+      deleteParam.executeUpdate();
+      deleteParam.setString(1, "ScoresheetLayoutNUp");
+      deleteParam.executeUpdate();
+      SQLFunctions.closePreparedStatement(deleteParam);
+      deleteParam = null;
       
       // add the global_parameters table
-      GenerateDB.globalParameters(challengeDocument, connection, true, Queries.getTablesInDB(connection));
+      GenerateDB.createGlobalParameters(challengeDocument, connection, true, Queries.getTablesInDB(connection));
 
       // ---- switch from string tournament names to integers ----
 
@@ -455,16 +468,18 @@ public final class ImportDB {
         }
         SQLFunctions.closePreparedStatement(stringsToInts);
       }
+      
+      GenerateDB.setDefaultParameters(connection);
 
       // set the version to 1 - this will have been set while creating
-      // global_parameters, but we need to set it to 1 for later upgrade
+      // global_parameters, but we need to force it to 1 for later upgrade
       // functions to not be confused
       setDBVersion(connection, 1);
 
     } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closeStatement(stmt);
-      SQLFunctions.closePreparedStatement(setVersion);
+      SQLFunctions.closePreparedStatement(deleteParam);
       SQLFunctions.closePreparedStatement(stringsToInts);
     }
   }
