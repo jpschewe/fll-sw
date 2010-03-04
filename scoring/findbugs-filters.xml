@@ -1,8 +1,13 @@
 <FindBugsFilter>
 
-	<!-- ignore errors about missing serial version ids -->
-	<Match>
-		<Bug pattern="SE_NO_SERIALVERSIONID" />
-	</Match>
+ <!-- ignore errors about missing serial version ids -->
+ <Match>
+  <Bug pattern="SE_NO_SERIALVERSIONID" />
+ </Match>
+
+ <!--  not internationalized at this point -->
+ <Match>
+  <Bug pattern="DM_CONVERT_CASE" />
+ </Match>
 </FindBugsFilter>
 

@@ -198,8 +198,6 @@ public class ScoresheetGenerator {
 
     if (nup == 1) {
       orientationIsPortrait = true;
-    } else if (nup == 2) {
-      orientationIsPortrait = false;
     } else {
       orientationIsPortrait = false;
     }

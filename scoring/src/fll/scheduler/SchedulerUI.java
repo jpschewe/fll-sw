@@ -141,7 +141,7 @@ public class SchedulerUI extends JFrame {
 
     menu.add(openAction);
     menu.add(reloadFileAction);
-    menu.add(exitAction);
+    menu.add(EXIT_ACTION);
 
     return menu;
   }
@@ -190,7 +190,7 @@ public class SchedulerUI extends JFrame {
     }
   };
 
-  private static final Action exitAction = new AbstractAction("Exit") {
+  private static final Action EXIT_ACTION = new AbstractAction("Exit") {
     {
       putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Stop16.gif"));
       putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Stop24.gif"));
