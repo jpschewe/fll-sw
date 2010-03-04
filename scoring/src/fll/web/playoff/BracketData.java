@@ -1045,10 +1045,10 @@ public class BracketData {
       sb.append(team.getTeamName());
       sb.append("</font>");
       if (showScore
-          && Playoff.performanceScoreExists(connection, team, runNumber)
-          && (!showOnlyVerifiedScores || Playoff.isVerified(connection, currentTournament, team, runNumber))
+          && Queries.performanceScoreExists(connection, team, runNumber)
+          && (!showOnlyVerifiedScores || Queries.isVerified(connection, currentTournament, team, runNumber))
           && !Playoff.isBye(connection, currentTournament, team, runNumber)) {
-        final boolean scoreVerified = Playoff.isVerified(connection, currentTournament, team, runNumber);
+        final boolean scoreVerified = Queries.isVerified(connection, currentTournament, team, runNumber);
         if (!scoreVerified) {
           sb.append("<span style='color:red'>");
         }

@@ -6,9 +6,9 @@
 package fll;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Comparator;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -19,8 +19,6 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  * attribute represents the division the team is entered in, which may not be
  * the same division that the team is competing in at a tournament (called
  * {@link fll.db.Queries#getEventDivision(Connection, int) event division}).
- * 
- * @version $Revision$
  */
 public final class Team {
 
@@ -102,12 +100,14 @@ public final class Team {
       return BYE;
     }
 
-    Statement stmt = null;
+    PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Division, Organization, Region, TeamName FROM Teams"
-          + " WHERE TeamNumber = " + teamNumber);
+      
+      stmt = connection.prepareStatement("SELECT Division, Organization, Region, TeamName FROM Teams"
+          + " WHERE TeamNumber = ?");
+      stmt.setInt(1, teamNumber);
+      rs = stmt.executeQuery();
       if (rs.next()) {
         final Team x = new Team();
         x._division = rs.getString(1);
@@ -121,7 +121,7 @@ public final class Team {
       }
     } finally {
       SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.closePreparedStatement(stmt);
     }
   }
 

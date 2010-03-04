@@ -66,6 +66,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   }
 
   @Override
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="DB_DUPLICATE_SWITCH_CLAUSES", justification="Duplicate switch clauses causes this method to be consistent with the other methods and adds to clarity")
   public Class<?> getColumnClass(final int column) {
     switch (column) {
     case 0:
@@ -160,6 +161,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   }
 
   @Override
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="DB_DUPLICATE_SWITCH_CLAUSES", justification="Duplicate switch clauses causes this method to be consistent with the other methods and adds to clarity")
   public boolean isCellEditable(final int row, final int column) {
     switch (column) {
     case 0:

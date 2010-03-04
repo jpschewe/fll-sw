@@ -61,7 +61,7 @@ if("1".equals(request.getParameter("EditFlag"))) {
       throw new RuntimeException("Selected team has no performance score for this tournament.");
     }
   } else {
-    if(!Playoff.performanceScoreExists(connection, teamNumber, runNumber)) {
+    if(!Queries.performanceScoreExists(connection, teamNumber, runNumber)) {
       throw new RuntimeException("Team has not yet competed in run " + runNumber + ".  Please choose a valid run number.");
     }
     lRunNumber = runNumber;

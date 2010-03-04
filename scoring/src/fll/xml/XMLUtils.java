@@ -7,20 +7,13 @@ package fll.xml;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.custommonkey.xmlunit.Diff;
 import org.w3c.dom.Document;
@@ -31,124 +24,16 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import fll.Team;
-import fll.db.Queries;
 
 /**
  * Generate some XML documents.
- * 
- * @version $Revision$
  */
 public final class XMLUtils {
 
   private XMLUtils() {
   }
 
-  /**
-   * Create an XML document that represents the data in teams
-   */
-  public static Document createTeamsDocument(final Connection connection, final Collection<Team> teams) throws SQLException {
-    final Document document = DOCUMENT_BUILDER.newDocument();
-    final Element top = document.createElement("teams");
-    document.appendChild(top);
-    for (final Team team : teams) {
-      final Element teamElement = document.createElement("team");
-      teamElement.setAttribute("teamName", team.getTeamName());
-      teamElement.setAttribute("teamNumber", String.valueOf(team.getTeamNumber()));
-      teamElement.setAttribute("division", Queries.getEventDivision(connection, team.getTeamNumber()));
-      teamElement.setAttribute("organization", team.getOrganization());
-      teamElement.setAttribute("region", team.getRegion());
-      top.appendChild(teamElement);
-    }
-
-    return document;
-  }
-
-  /**
-   * Create a document to hold subject scores for the tournament described in
-   * challengeDocument.
-   * 
-   * @param challengeDocument describes the tournament
-   * @param teams the teams for this tournament
-   * @param connection the database connection used to retrieve the judge
-   *          information
-   * @param currentTournament the tournament to generate the document for, used for
-   *          deciding which set of judges to use
-   * @return the document
-   */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
-  public static Document createSubjectiveScoresDocument(final Document challengeDocument,
-                                                        final Collection<Team> teams,
-                                                        final Connection connection,
-                                                        final int currentTournament) throws SQLException {
-    ResultSet rs = null;
-    ResultSet rs2 = null;
-    PreparedStatement prep = null;
-    PreparedStatement prep2 = null;
-    try {
-      prep = connection.prepareStatement("SELECT id, event_division FROM Judges WHERE category = ? AND Tournament = ?");
-      prep.setInt(2, currentTournament);
-
-      final Document document = DOCUMENT_BUILDER.newDocument();
-      final Element top = document.createElement("scores");
-      document.appendChild(top);
-
-      for (final Element categoryDescription : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
-        final String categoryName = categoryDescription.getAttribute("name");
-        final Element categoryElement = document.createElement(categoryName);
-        top.appendChild(categoryElement);
-
-        prep.setString(1, categoryName);
-        rs = prep.executeQuery();
-        while (rs.next()) {
-          final String judge = rs.getString(1);
-          final String division = rs.getString(2);
-
-          for (final Team team : teams) {
-            final String teamDiv = Queries.getEventDivision(connection, team.getTeamNumber());
-            if ("All".equals(division)
-                || division.equals(teamDiv)) {
-              final Element scoreElement = document.createElement("score");
-              categoryElement.appendChild(scoreElement);
-
-              scoreElement.setAttribute("teamName", team.getTeamName());
-              scoreElement.setAttribute("teamNumber", String.valueOf(team.getTeamNumber()));
-              scoreElement.setAttribute("division", teamDiv);
-              scoreElement.setAttribute("organization", team.getOrganization());
-              scoreElement.setAttribute("judge", judge);
-              scoreElement.setAttribute("NoShow", "false");
-
-              prep2 = connection.prepareStatement("SELECT * FROM "
-                  + categoryName + " WHERE TeamNumber = ? AND Tournament = ? AND Judge = ?");
-              prep2.setInt(1, team.getTeamNumber());
-              prep2.setInt(2, currentTournament);
-              prep2.setString(3, judge);
-              rs2 = prep2.executeQuery();
-              if (rs2.next()) {
-                for (final Element goalDescription : XMLUtils.filterToElements(categoryDescription.getElementsByTagName("goal"))) {
-                  final String goalName = goalDescription.getAttribute("name");
-                  final String value = rs2.getString(goalName);
-                  if (!rs2.wasNull()) {
-                    scoreElement.setAttribute(goalName, value);
-                  }
-                }
-                scoreElement.setAttribute("NoShow", rs2.getString("NoShow"));
-              }
-            }
-          }
-        }
-      }
-      return document;
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeResultSet(rs2);
-      SQLFunctions.closePreparedStatement(prep);
-      SQLFunctions.closePreparedStatement(prep2);
-    }
-  }
-
-  private static final DocumentBuilder DOCUMENT_BUILDER;
+  public static final DocumentBuilder DOCUMENT_BUILDER;
 
   // create basic document builder
   static {
@@ -401,5 +286,9 @@ public final class XMLUtils {
       subjectiveCategories.add(categoryName);
     }
     return subjectiveCategories;
+  }
+  
+  public static boolean isValidCategoryName(final Document challengeDocument, final String name) {
+    return getSubjectiveCategoryNames(challengeDocument).contains(name);
   }
 }

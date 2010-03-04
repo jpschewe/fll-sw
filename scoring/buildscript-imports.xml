@@ -10,6 +10,7 @@
   script.name - name of the script to create (without extension)
   class.main - name of class the script will execute
   java_args - extra arguments to pass to the JVM run by the script
+  template.name - the base name of the templates, named ${template.name}.sh.template and ${template.name}.bat.template
 -->
 	<macrodef name="buildscript" description="Create scripts for Windows and Unix">
 		<attribute name="scripts.dir" />
@@ -19,6 +20,7 @@
 		<attribute name="script.name" />
 		<attribute name="class.main" />
 		<attribute name="java.args" default="" />
+		<attribute name="template.name" default="run" />
 
 		<sequential>
 			<mkdir dir="@{scripts.dir}" />
@@ -30,14 +32,14 @@
 				<map from="@{scripts.basedir}" to="@{scripts.root}" />
 			</pathconvert>
 
-			<copy file="${buildscript.basedir}/run.sh.template" tofile="@{scripts.dir}/@{script.name}.sh" overwrite="true">
+			<copy file="${buildscript.basedir}/@{template.name}.sh.template" tofile="@{scripts.dir}/@{script.name}.sh" overwrite="true">
 				<filterset>
 					<filter token="CLASSPATH" value="${classpath.unix.@{scripts.path}}" />
 					<filter token="CLASSNAME" value="@{class.main}" />
 					<filter token="JAVA_ARGS" value="@{java.args}" />
 				</filterset>
 			</copy>
-			<copy file="${buildscript.basedir}/run.bat.template" tofile="@{scripts.dir}/@{script.name}.bat" overwrite="true">
+			<copy file="${buildscript.basedir}/@{template.name}.bat.template" tofile="@{scripts.dir}/@{script.name}.bat" overwrite="true">
 				<filterset>
 					<filter token="CLASSPATH" value="${classpath.windows.@{scripts.path}}" />
 					<filter token="CLASSNAME" value="@{class.main}" />

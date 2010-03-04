@@ -227,6 +227,7 @@ public class AssignTournaments {
    * 
    * @throws IOException
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="DM_EXIT", justification="Method is documented to cause an exit")
   private void findColumns(final CSVReader csvreader) throws IOException {
     initializeColumnAssignments();
 
