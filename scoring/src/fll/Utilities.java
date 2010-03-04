@@ -19,6 +19,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -189,7 +191,7 @@ public final class Utilities {
   /**
    * Extensions used by HSQL for it's database files. These extensions include the dot.
    */
-  public static final String[] HSQL_DB_EXTENSIONS = new String[] { ".properties", ".script", ".log", ".data", ".backup", "", };
+  public static final Collection<String> HSQL_DB_EXTENSIONS = Collections.unmodifiableCollection(Arrays.asList(new String[] { ".properties", ".script", ".log", ".data", ".backup", "", }));
 
   /**
    * Test that the database behind the connection is initialized. Checks for the
@@ -254,15 +256,15 @@ public final class Utilities {
    */
   public static DataSource createDataSource(final String database) {
     final String myURL;
-    if (Boolean.getBoolean("inside.test")) {
-      // TODO disabled until 2724372 is fixed
+//    if (Boolean.getBoolean("inside.test")) {
+      // TODO disabled until ticket:2724372 is fixed
       // myURL = "jdbc:log4jdbc:hsqldb:file:"
+//      myURL = "jdbc:hsqldb:file:"
+//          + database + ";shutdown=true";
+//    } else {
       myURL = "jdbc:hsqldb:file:"
           + database + ";shutdown=true";
-    } else {
-      myURL = "jdbc:hsqldb:file:"
-          + database + ";shutdown=true";
-    }
+//    }
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("myURL: "
           + myURL);

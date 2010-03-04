@@ -93,7 +93,7 @@ public final class SubjectiveFrame extends JFrame {
             + file.getAbsolutePath(), ioe);
         System.exit(1);
       }
-    } catch (final Exception e) {
+    } catch (final Throwable e) {
       JOptionPane.showMessageDialog(null, "Unexpected error: "
           + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
       LOGGER.fatal("Unexpected error", e);
@@ -181,7 +181,7 @@ public final class SubjectiveFrame extends JFrame {
           }
 
           try {
-            final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareSubjectiveFiles(_file, compareFile);
+            final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareSubjectiveFiles(getFile(), compareFile);
             if (null == diffs) {
               JOptionPane.showMessageDialog(null, "Challenge descriptors are different, comparison failed", "Error", JOptionPane.ERROR_MESSAGE);
 
@@ -340,7 +340,7 @@ public final class SubjectiveFrame extends JFrame {
           final String category = diff.getCategory();
           final JTable scoreTable = getTableForTitle(category);
           final int tabIndex = getTabIndexForCategory(category);
-          tabbedPane.setSelectedIndex(tabIndex);
+          getTabbedPane().setSelectedIndex(tabIndex);
 
           // get correct row and column
           final SubjectiveTableModel model = (SubjectiveTableModel) scoreTable.getModel();
@@ -393,7 +393,8 @@ public final class SubjectiveFrame extends JFrame {
    * Prompt the user with yes/no/cancel. Yes exits and saves, no exits without
    * saving and cancel doesn't quit.
    */
-  private void quit() {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="DM_EXIT", justification="This is the exit method for the application")   
+  /*package*/ void quit() {
     if (validateData()) {
 
       final int state = JOptionPane.showConfirmDialog(SubjectiveFrame.this, "Save data?  Data will be saved in same file as it was read from.", "Exit",
@@ -426,6 +427,7 @@ public final class SubjectiveFrame extends JFrame {
    * 
    * @return true if everything is ok
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="SIC_INNER_SHOULD_BE_STATIC_ANON", justification="Static inner class to replace anonomous listener isn't worth the confusion of finding the class definition")
   private boolean validateData() {
     stopCellEditors();
 
@@ -599,6 +601,7 @@ public final class SubjectiveFrame extends JFrame {
   }
 
   private final File _file;
+  File getFile() { return _file; }
 
   private final Document _challengeDocument;
 
@@ -613,5 +616,6 @@ public final class SubjectiveFrame extends JFrame {
   }
 
   private final JTabbedPane tabbedPane;
+  JTabbedPane getTabbedPane() { return tabbedPane; }
 
 }

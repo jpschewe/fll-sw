@@ -90,7 +90,7 @@ public final class Judges {
 
     String errorString = null;
     if (null != request.getParameter("finished")) {
-      errorString = generateVerifyTable(out, subjectiveCategories, request);
+      errorString = generateVerifyTable(out, subjectiveCategories, request, challengeDocument);
       if (null == errorString) {
         // everything is good
         out.println("</form>");
@@ -239,7 +239,8 @@ public final class Judges {
    * 
    * @return null if everything is ok, otherwise the error message
    */
-  private static String generateVerifyTable(final JspWriter out, final List<Element> subjectiveCategories, final HttpServletRequest request)
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="XSS_REQUEST_PARAMETER_TO_JSP_WRITER", justification="Checking category name retrieved from request against valid category names")
+  private static String generateVerifyTable(final JspWriter out, final List<Element> subjectiveCategories, final HttpServletRequest request, final Document challengeDocument)
       throws IOException, ParseException {
     // keep track of any errors
     final StringBuffer error = new StringBuffer();
@@ -306,7 +307,8 @@ public final class Judges {
           + row);
       while (null != category) {
         if (null != id
-            && division != null) {
+            && division != null
+            && XMLUtils.isValidCategoryName(challengeDocument, category)) {
           id = id.trim();
           id = id.toUpperCase();
           if (id.length() > 0) {

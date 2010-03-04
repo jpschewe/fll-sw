@@ -189,6 +189,7 @@ public final class Playoff {
    *           runNumber.
    */
   public static Team pickWinner(final Connection connection,
+                                final int tournament,
                                 final Element performanceElement,
                                 final Element tiebreakerElement,
                                 final WinnerType winnerCriteria,
@@ -196,7 +197,7 @@ public final class Playoff {
                                 final Team teamB,
                                 final TeamScore teamBScore,
                                 final int runNumber) throws SQLException, ParseException {
-    final TeamScore teamAScore = new DatabaseTeamScore(performanceElement, teamA.getTeamNumber(), runNumber, connection);
+    final TeamScore teamAScore = new DatabaseTeamScore(performanceElement, tournament, teamA.getTeamNumber(), runNumber, connection);
     final Team retval = pickWinner(tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB, teamBScore);
     teamAScore.cleanup();
     teamBScore.cleanup();
@@ -223,14 +224,15 @@ public final class Playoff {
    * @throws ParseException if the XML document is invalid
    */
   public static Team pickWinner(final Connection connection,
+                                final int tournament,
                                 final Element performanceElement,
                                 final Element tiebreakerElement,
                                 final WinnerType winnerCriteria,
                                 final Team teamA,
                                 final Team teamB,
                                 final int runNumber) throws SQLException, ParseException {
-    final TeamScore teamAScore = new DatabaseTeamScore(performanceElement, teamA.getTeamNumber(), runNumber, connection);
-    final TeamScore teamBScore = new DatabaseTeamScore(performanceElement, teamB.getTeamNumber(), runNumber, connection);
+    final TeamScore teamAScore = new DatabaseTeamScore(performanceElement, tournament, teamA.getTeamNumber(), runNumber, connection);
+    final TeamScore teamBScore = new DatabaseTeamScore(performanceElement, tournament, teamB.getTeamNumber(), runNumber, connection);
     final Team retval = pickWinner(tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB, teamBScore);
     teamAScore.cleanup();
     teamBScore.cleanup();
@@ -345,38 +347,13 @@ public final class Playoff {
    * If team is not null, calls performanceScoreExists(connection,
    * team.getTeamNumber(), runNumber), otherwise returns false.
    * 
-   * @see #performanceScoreExists(Connection, int, int)
+   * @see Queries#performanceScoreExists(Connection, int, int)
    */
   public static boolean performanceScoreExists(final Connection connection, final Team team, final int runNumber) throws SQLException {
     if (null == team) {
       return false;
     } else {
-      return performanceScoreExists(connection, team.getTeamNumber(), runNumber);
-    }
-  }
-
-  /**
-   * Test if a performance score exists for the given team, tournament and run
-   * number
-   * 
-   * @throws SQLException on a database error
-   */
-  public static boolean performanceScoreExists(final Connection connection, final int teamNumber, final int runNumber) throws SQLException {
-    final int tournament = Queries.getCurrentTournament(connection);
-
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT ComputedTotal FROM Performance"
-          + " WHERE TeamNumber = ? AND Tournament = ? AND RunNumber = ?");
-      prep.setInt(1, teamNumber);
-      prep.setInt(2, tournament);
-      prep.setInt(3, runNumber);
-      rs = prep.executeQuery();
-      return rs.next();
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      return Queries.performanceScoreExists(connection, team.getTeamNumber(), runNumber);
     }
   }
 
@@ -428,13 +405,6 @@ public final class Playoff {
    */
   public static boolean isBye(final Connection connection, final int tournament, final Team team, final int runNumber) throws SQLException {
     return Queries.isBye(connection, tournament, team.getTeamNumber(), runNumber);
-  }
-
-  /**
-   * Returns true if the score has been verified, i.e. double-checked.
-   */
-  public static boolean isVerified(final Connection connection, final int tournament, final Team team, final int runNumber) throws SQLException {
-    return Queries.isVerified(connection, tournament, team.getTeamNumber(), runNumber);
   }
 
   /**
@@ -512,7 +482,7 @@ public final class Playoff {
           final Team teamA = prevIter.next();
           if (prevIter.hasNext()) {
             final Team teamB = prevIter.next();
-            final Team winner = pickWinner(connection, performanceElement, tiebreakerElement, winnerCriteria, teamA, teamB, tempRunNumber
+            final Team winner = pickWinner(connection, currentTournament, performanceElement, tiebreakerElement, winnerCriteria, teamA, teamB, tempRunNumber
                 + numSeedingRounds + 1);
             newCurrentRound.add(winner);
           } else {
@@ -773,7 +743,7 @@ public final class Playoff {
           final Team teamA = (Team) prevIter.next();
           if (prevIter.hasNext()) {
             final Team teamB = (Team) prevIter.next();
-            final Team winner = pickWinner(connection, performanceElement, tiebreakerElement, winnerCriteria, teamA, teamB, tempRunNumber
+            final Team winner = pickWinner(connection, currentTournament, performanceElement, tiebreakerElement, winnerCriteria, teamA, teamB, tempRunNumber
                 + numSeedingRounds + 1);
             newCurrentRound.add(winner);
             if (!((teamA != null && teamA.equals(Team.BYE)) || (teamB != null && teamB.equals(Team.BYE)))) {
