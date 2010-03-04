@@ -72,6 +72,7 @@ public final class ImportDocument {
     }
     PreparedStatement prep = null;
     Connection connection = null;
+    int exitCode = 0;
     try {
       connection = Utilities.createDataSource(args[1]).getConnection();
       prep = connection.prepareStatement("UPDATE TournamentParameters SET Value = ? WHERE Param = ?");
@@ -88,17 +89,17 @@ public final class ImportDocument {
       prep.executeUpdate();
     } catch (final UnsupportedEncodingException uee) {
       LOG.fatal("UTF8 not a supported encoding???", uee);
-      System.exit(1);
+      exitCode = 1;
     } catch (final SQLException sqle) {
       LOG.fatal("Error talking to database", sqle);
-      System.exit(1);
+      exitCode = 1;
     } finally {
       SQLFunctions.closePreparedStatement(prep);
       SQLFunctions.closeConnection(connection);
     }
     LOG.info("Inserted document "
         + args[0] + " into database " + args[1]);
-    System.exit(0);
+    System.exit(exitCode);
   }
 
   private ImportDocument() {

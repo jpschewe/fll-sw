@@ -230,6 +230,7 @@ public final class Tournaments {
    * 
    * @return true if everything is ok, false otherwise and write message to out
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="XSS_REQUEST_PARAMETER_TO_JSP_WRITER", justification="Need to write out the name specified as part of the error message")
   private static boolean verifyData(final JspWriter out, final HttpServletRequest request) throws IOException {
     final Map<String, String> tournamentNames = new HashMap<String, String>();
     boolean retval = true;
