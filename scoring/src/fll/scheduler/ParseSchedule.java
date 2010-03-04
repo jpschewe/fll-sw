@@ -49,9 +49,6 @@ import fll.util.ExcelCellReader;
 
 /**
  * Parse a CSV file representing the detailed schedule for a tournament.
- * 
- * @author jpschewe
- * @version $Revision$
  */
 public class ParseSchedule {
 
@@ -630,6 +627,9 @@ public class ParseSchedule {
     return new PerformanceComparator(round);
   }
 
+  /**
+   * Comparator for TeamScheduleInfo based up the performance times for a specified round.
+   */
   private static final class PerformanceComparator implements Comparator<TeamScheduleInfo>, Serializable {
     private final int round;
 
