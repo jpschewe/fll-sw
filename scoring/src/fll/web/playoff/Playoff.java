@@ -344,20 +344,6 @@ public final class Playoff {
   }
 
   /**
-   * If team is not null, calls performanceScoreExists(connection,
-   * team.getTeamNumber(), runNumber), otherwise returns false.
-   * 
-   * @see Queries#performanceScoreExists(Connection, int, int)
-   */
-  public static boolean performanceScoreExists(final Connection connection, final Team team, final int runNumber) throws SQLException {
-    if (null == team) {
-      return false;
-    } else {
-      return Queries.performanceScoreExists(connection, team.getTeamNumber(), runNumber);
-    }
-  }
-
-  /**
    * Get the performance score for the given team, tournament and run number
    * 
    * @throws SQLException on a database error

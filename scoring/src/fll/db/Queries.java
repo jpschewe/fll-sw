@@ -866,7 +866,7 @@ private static void determineSubjectiveRanking(final Connection connection,
           // If the second-check flag is NO or the opposing team is not
           // verified, we set the match "winner" (possibly back) to NULL.
           if ("0".equals(request.getParameter("Verified"))
-              || !(Playoff.performanceScoreExists(connection, teamB, irunNumber) && Queries.isVerified(connection, currentTournament, teamB, irunNumber))) {
+              || !(Queries.performanceScoreExists(connection, teamB, irunNumber) && Queries.isVerified(connection, currentTournament, teamB, irunNumber))) {
             removePlayoffScore(connection, division, currentTournament, playoffRun, ptLine);
           } else {
             updatePlayoffTable(connection, newWinner.getTeamNumber(), division, currentTournament, (playoffRun + 1), ((ptLine + 1) / 2));
@@ -2909,6 +2909,20 @@ private static void deleteTeamFromTournamet(final Connection connection, final D
    */
   public static boolean isVerified(final Connection connection, final int tournament, final Team team, final int runNumber) throws SQLException {
     return isVerified(connection, tournament, team.getTeamNumber(), runNumber);
+  }
+
+  /**
+   * If team is not null, calls performanceScoreExists(connection,
+   * team.getTeamNumber(), runNumber), otherwise returns false.
+   * 
+   * @see performanceScoreExists
+   */
+  public static boolean performanceScoreExists(final Connection connection, final Team team, final int runNumber) throws SQLException {
+    if (null == team) {
+      return false;
+    } else {
+      return performanceScoreExists(connection, team.getTeamNumber(), runNumber);
+    }
   }
 
 }
