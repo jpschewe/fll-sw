@@ -26,8 +26,6 @@ import fll.db.Queries;
 
 /**
  * Dump the challenge document out of a database.
- * 
- * @version $Revision$
  */
 public final class ExportDocument {
 
@@ -65,6 +63,7 @@ public final class ExportDocument {
     Connection connection = null;
     Statement stmt = null;
     ResultSet rs = null;
+    int exitCode = 0;
     try {
       connection = Utilities.createDataSource(args[1]).getConnection();
       stmt = connection.createStatement();
@@ -82,8 +81,20 @@ public final class ExportDocument {
             buffer.clear();
           }
         } finally {
-          reader.close();
-          writer.close();
+          try {
+            reader.close();
+          } catch(final IOException e) {
+            if(LOG.isDebugEnabled()) {
+              LOG.debug(e);
+            }
+          }
+          try {
+            writer.close();
+          } catch(final IOException e) {
+            if(LOG.isDebugEnabled()) {
+              LOG.debug(e);
+            }
+          }
         }
 
       } else {
@@ -92,16 +103,16 @@ public final class ExportDocument {
 
     } catch (final UnsupportedEncodingException uee) {
       LOG.fatal("UTF8 not a supported encoding???", uee);
-      System.exit(1);
+      exitCode = 1;
     } catch (final SQLException sqle) {
       LOG.fatal("Error talking to database", sqle);
-      System.exit(1);
+      exitCode = 1;
     } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closeStatement(stmt);
       SQLFunctions.closeConnection(connection);
     }
-    System.exit(0);
+    System.exit(exitCode);
   }
 
   private ExportDocument() {

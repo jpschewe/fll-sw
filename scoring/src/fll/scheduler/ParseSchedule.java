@@ -8,6 +8,7 @@ package fll.scheduler;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -48,9 +49,6 @@ import fll.util.ExcelCellReader;
 
 /**
  * Parse a CSV file representing the detailed schedule for a tournament.
- * 
- * @author jpschewe
- * @version $Revision$
  */
 public class ParseSchedule {
 
@@ -533,7 +531,7 @@ public class ParseSchedule {
 
   private static PdfPTable createTable(final int columns) throws BadElementException {
     final PdfPTable table = new PdfPTable(columns);
-//    table.setCellsFitPage(true);
+    // table.setCellsFitPage(true);
     table.setWidthPercentage(100);
     return table;
   }
@@ -625,25 +623,37 @@ public class ParseSchedule {
    * Sort by by time, then by table color, then table side
    */
   private Comparator<TeamScheduleInfo> getPerformanceComparator(final int round) {
-    return new Comparator<TeamScheduleInfo>() {
-      public int compare(final TeamScheduleInfo one, final TeamScheduleInfo two) {
-        if (!one.getPerf(round).equals(two.getPerf(round))) {
-          return one.getPerf(round).compareTo(two.getPerf(round));
-        } else if (!one.getPerfTableColor(round).equals(two.getPerfTableColor(round))) {
-          return one.getPerfTableColor(round).compareTo(two.getPerfTableColor(round));
+    // Should think about caching this
+    return new PerformanceComparator(round);
+  }
+
+  /**
+   * Comparator for TeamScheduleInfo based up the performance times for a specified round.
+   */
+  private static final class PerformanceComparator implements Comparator<TeamScheduleInfo>, Serializable {
+    private final int round;
+
+    public PerformanceComparator(final int round) {
+      this.round = round;
+    }
+
+    public int compare(final TeamScheduleInfo one, final TeamScheduleInfo two) {
+      if (!one.getPerf(round).equals(two.getPerf(round))) {
+        return one.getPerf(round).compareTo(two.getPerf(round));
+      } else if (!one.getPerfTableColor(round).equals(two.getPerfTableColor(round))) {
+        return one.getPerfTableColor(round).compareTo(two.getPerfTableColor(round));
+      } else {
+        final int oneSide = one.getPerfTableSide(round);
+        final int twoSide = two.getPerfTableSide(round);
+        if (oneSide == twoSide) {
+          return 0;
+        } else if (oneSide < twoSide) {
+          return -1;
         } else {
-          final int oneSide = one.getPerfTableSide(round);
-          final int twoSide = two.getPerfTableSide(round);
-          if (oneSide == twoSide) {
-            return 0;
-          } else if (oneSide < twoSide) {
-            return -1;
-          } else {
-            return 1;
-          }
+          return 1;
         }
       }
-    };
+    }
   }
 
   /**
@@ -920,6 +930,7 @@ public class ParseSchedule {
     return null;
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "IM_BAD_CHECK_FOR_ODD", justification = "The size of a container cannot be negative")
   private void verifyTeam(final Collection<ConstraintViolation> violations, final TeamScheduleInfo ti) {
     // constraint set 1
     if (ti.getPresentation().before(ti.getTechnical())) {

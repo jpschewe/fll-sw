@@ -609,10 +609,10 @@ private static void determineSubjectiveRanking(final Connection connection,
         // entered. Also, if the sibling team isn't verified, we shouldn't
         // be updating the playoffdata table.
         if (Team.NULL_TEAM_NUMBER != siblingTeam
-            && Playoff.performanceScoreExists(connection, siblingTeam, irunNumber)
-            && Playoff.isVerified(connection, currentTournament, Team.getTeamFromDatabase(connection, siblingTeam), irunNumber)) {
+            && Queries.performanceScoreExists(connection, siblingTeam, irunNumber)
+            && Queries.isVerified(connection, currentTournament, Team.getTeamFromDatabase(connection, siblingTeam), irunNumber)) {
           final Team opponent = Team.getTeamFromDatabase(connection, siblingTeam);
-          final Team winner = Playoff.pickWinner(connection, performanceElement, tiebreakerElement, winnerCriteria, opponent, team, teamScore, irunNumber);
+          final Team winner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement, winnerCriteria, opponent, team, teamScore, irunNumber);
 
           if (winner != null) {
             final StringBuffer sql = new StringBuffer();
@@ -822,8 +822,8 @@ private static void determineSubjectiveRanking(final Connection connection,
             throw new RuntimeException("Unable to find one of these team numbers in the database: "
                 + teamNumber + " and " + siblingTeam);
           }
-          final Team oldWinner = Playoff.pickWinner(connection, performanceElement, tiebreakerElement, winnerCriteria, teamA, teamB, irunNumber);
-          final Team newWinner = Playoff.pickWinner(connection, performanceElement, tiebreakerElement, winnerCriteria, teamB, team, teamScore, irunNumber);
+          final Team oldWinner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement, winnerCriteria, teamA, teamB, irunNumber);
+          final Team newWinner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement, winnerCriteria, teamB, team, teamScore, irunNumber);
           Statement stmt = null;
           ResultSet rs = null;
           if (oldWinner != null
@@ -867,7 +867,7 @@ private static void determineSubjectiveRanking(final Connection connection,
           // If the second-check flag is NO or the opposing team is not
           // verified, we set the match "winner" (possibly back) to NULL.
           if ("0".equals(request.getParameter("Verified"))
-              || !(Playoff.performanceScoreExists(connection, teamB, irunNumber) && Playoff.isVerified(connection, currentTournament, teamB, irunNumber))) {
+              || !(Queries.performanceScoreExists(connection, teamB, irunNumber) && Queries.isVerified(connection, currentTournament, teamB, irunNumber))) {
             removePlayoffScore(connection, division, currentTournament, playoffRun, ptLine);
           } else {
             updatePlayoffTable(connection, newWinner.getTeamNumber(), division, currentTournament, (playoffRun + 1), ((ptLine + 1) / 2));
@@ -948,6 +948,7 @@ private static void determineSubjectiveRanking(final Connection connection,
    * @throws RuntimeException if a parameter is missing or if the playoff meta
    *           data would become inconsistent due to the deletion.
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="OBL_UNSATISFIED_OBLIGATION", justification="Bug in findbugs - ticket:2924739")
   public static void deletePerformanceScore(final Connection connection, final HttpServletRequest request) throws SQLException, RuntimeException,
       ParseException {
     final int currentTournament = getCurrentTournament(connection);
@@ -2911,6 +2912,52 @@ private static void deleteTeamFromTournamet(final Connection connection, final D
       SQLFunctions.closeStatement(stmt);
     }
     return allTeamNumbers;
+  }
+
+  /**
+   * Test if a performance score exists for the given team, tournament and run
+   * number
+   * 
+   * @throws SQLException on a database error
+   */
+  public static boolean performanceScoreExists(final Connection connection, final int teamNumber, final int runNumber) throws SQLException {
+    final int tournament = getCurrentTournament(connection);
+  
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT ComputedTotal FROM Performance"
+          + " WHERE TeamNumber = ? AND Tournament = ? AND RunNumber = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, tournament);
+      prep.setInt(3, runNumber);
+      rs = prep.executeQuery();
+      return rs.next();
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+
+  /**
+   * Returns true if the score has been verified, i.e. double-checked.
+   */
+  public static boolean isVerified(final Connection connection, final int tournament, final Team team, final int runNumber) throws SQLException {
+    return isVerified(connection, tournament, team.getTeamNumber(), runNumber);
+  }
+
+  /**
+   * If team is not null, calls performanceScoreExists(connection,
+   * team.getTeamNumber(), runNumber), otherwise returns false.
+   * 
+   * @see performanceScoreExists
+   */
+  public static boolean performanceScoreExists(final Connection connection, final Team team, final int runNumber) throws SQLException {
+    if (null == team) {
+      return false;
+    } else {
+      return performanceScoreExists(connection, team.getTeamNumber(), runNumber);
+    }
   }
 
 }

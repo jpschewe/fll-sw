@@ -96,19 +96,21 @@ public class SchedulerUI extends JFrame {
 
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SE_TRANSIENT_FIELD_NOT_RESTORED", justification = "There is no state needed to be kept here")
   private final transient ListSelectionListener violationSelectionListener = new ListSelectionListener() {
     public void valueChanged(final ListSelectionEvent e) {
-      final int selectedRow = violationTable.getSelectedRow();
+      final int selectedRow = getViolationTable().getSelectedRow();
       if (selectedRow == -1) {
         return;
       }
 
-      final ConstraintViolation selected = violationsModel.getViolation(selectedRow);
+      final ConstraintViolation selected = getViolationsModel().getViolation(selectedRow);
       if (ConstraintViolation.NO_TEAM != selected.getTeam()) {
-        final int teamIndex = scheduleModel.getIndexOfTeam(selected.getTeam());
-        scheduleTable.setRowSelectionInterval(teamIndex, teamIndex);
+        final int teamIndex = getScheduleModel().getIndexOfTeam(selected.getTeam());
+        getScheduleTable().setRowSelectionInterval(teamIndex, teamIndex);
         // FIXME need to figure out how to scroll to visible correctly
-        scheduleTable.scrollRectToVisible(scheduleTable.getCellRect(selectedRow, 1, true));
+        // ticket:2963068
+        getScheduleTable().scrollRectToVisible(getScheduleTable().getCellRect(selectedRow, 1, true));
       }
     }
   };
@@ -139,7 +141,7 @@ public class SchedulerUI extends JFrame {
 
     menu.add(openAction);
     menu.add(reloadFileAction);
-    menu.add(exitAction);
+    menu.add(EXIT_ACTION);
 
     return menu;
   }
@@ -154,7 +156,7 @@ public class SchedulerUI extends JFrame {
 
     public void actionPerformed(final ActionEvent ae) {
       try {
-        final ParseSchedule newData = new ParseSchedule(scheduleData.getFile(), scheduleData.getSheetName());
+        final ParseSchedule newData = new ParseSchedule(getScheduleData().getFile(), getScheduleData().getSheetName());
         setScheduleData(newData);
       } catch (final IOException e) {
         final Formatter errorFormatter = new Formatter();
@@ -188,7 +190,7 @@ public class SchedulerUI extends JFrame {
     }
   };
 
-  private final Action exitAction = new AbstractAction("Exit") {
+  private static final Action EXIT_ACTION = new AbstractAction("Exit") {
     {
       putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Stop16.gif"));
       putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Stop24.gif"));
@@ -196,6 +198,7 @@ public class SchedulerUI extends JFrame {
       putValue(MNEMONIC_KEY, KeyEvent.VK_X);
     }
 
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DM_EXIT", justification = "This is the exit method for the application")
     public void actionPerformed(final ActionEvent ae) {
       System.exit(0);
     }
@@ -210,7 +213,7 @@ public class SchedulerUI extends JFrame {
     }
 
     public void actionPerformed(final ActionEvent ae) {
-      final String schedule = scheduleData.computeGeneralSchedule();
+      final String schedule = getScheduleData().computeGeneralSchedule();
       JOptionPane.showMessageDialog(SchedulerUI.this, schedule, "General Schedule", JOptionPane.INFORMATION_MESSAGE);
     }
   };
@@ -225,7 +228,7 @@ public class SchedulerUI extends JFrame {
 
     public void actionPerformed(final ActionEvent ae) {
       try {
-        scheduleData.outputDetailedSchedules();
+        getScheduleData().outputDetailedSchedules();
         JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedules written to same directory as the schedule", "Information",
                                       JOptionPane.INFORMATION_MESSAGE);
       } catch (final DocumentException e) {
@@ -272,7 +275,7 @@ public class SchedulerUI extends JFrame {
             && selectedFile.canRead()) {
           try {
             final String sheetName = promptForSheetName(selectedFile);
-            if(null == sheetName) {
+            if (null == sheetName) {
               return;
             }
             final ParseSchedule schedule = new ParseSchedule(selectedFile, sheetName);
@@ -309,8 +312,8 @@ public class SchedulerUI extends JFrame {
    * If there is more than 1 sheet, prompt, otherwise just use the sheet.
    * 
    * @return the sheet name or null if the user canceled
-   * @throws IOException 
-   * @throws InvalidFormatException 
+   * @throws IOException
+   * @throws InvalidFormatException
    */
   private String promptForSheetName(final File selectedFile) throws InvalidFormatException, IOException {
     final List<String> sheetNames = ExcelCellReader.getAllSheetNames(selectedFile);
@@ -320,7 +323,7 @@ public class SchedulerUI extends JFrame {
       final String[] options = sheetNames.toArray(new String[sheetNames.size()]);
       final int choosenOption = JOptionPane.showOptionDialog(null, "Choose which sheet to work with", "Choose Sheet", JOptionPane.DEFAULT_OPTION,
                                                              JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-      if(JOptionPane.CLOSED_OPTION == choosenOption) {
+      if (JOptionPane.CLOSED_OPTION == choosenOption) {
         return null;
       }
       return options[choosenOption];
@@ -331,11 +334,24 @@ public class SchedulerUI extends JFrame {
 
   private static final String STARTING_DIRECTORY_PREF = "startingDirectory";
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SE_BAD_FIELD", justification = "This calss isn't going to be serialized")
   private ParseSchedule scheduleData;
+
+  /* package */ParseSchedule getScheduleData() {
+    return scheduleData;
+  }
 
   private SchedulerTableModel scheduleModel;
 
+  SchedulerTableModel getScheduleModel() {
+    return scheduleModel;
+  }
+
   private ViolationTableModel violationsModel;
+
+  /* package */ViolationTableModel getViolationsModel() {
+    return violationsModel;
+  }
 
   private void setScheduleData(final ParseSchedule sd) {
     scheduleTable.clearSelection();
@@ -359,7 +375,15 @@ public class SchedulerUI extends JFrame {
 
   private final JTable scheduleTable;
 
+  JTable getScheduleTable() {
+    return scheduleTable;
+  }
+
   private final JTable violationTable;
+
+  JTable getViolationTable() {
+    return violationTable;
+  }
 
   private static final Logger LOGGER = Logger.getLogger(SchedulerUI.class);
 
@@ -375,7 +399,7 @@ public class SchedulerUI extends JFrame {
                                                    final int column) {
       setHorizontalAlignment(CENTER);
 
-      final TeamScheduleInfo schedInfo = scheduleModel.getSchedInfo(row);
+      final TeamScheduleInfo schedInfo = getScheduleModel().getSchedInfo(row);
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Checking for violations against team: "
             + schedInfo.getTeamNumber() //
@@ -384,7 +408,7 @@ public class SchedulerUI extends JFrame {
       }
 
       boolean error = false;
-      for (final ConstraintViolation violation : violationsModel.getViolations()) {
+      for (final ConstraintViolation violation : getViolationsModel().getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
           if ((SchedulerTableModel.TEAM_NUMBER_COLUMN == column || SchedulerTableModel.JUDGE_COLUMN == column)
               && null == violation.getPresentation() && null == violation.getTechnical() && null == violation.getPerformance()) {

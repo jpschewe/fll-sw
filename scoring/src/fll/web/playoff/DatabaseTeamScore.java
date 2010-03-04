@@ -14,8 +14,6 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.w3c.dom.Element;
 
-import fll.db.Queries;
-
 /**
  * TeamScore implementation for a performance score in the database.
  */
@@ -46,10 +44,9 @@ public class DatabaseTeamScore extends TeamScore {
    * @param runNumber passed to superclass
    * @throws SQLException if there is an error getting the current tournament
    */
-  public DatabaseTeamScore(final Element categoryDescription, final int teamNumber, final int runNumber, final Connection connection) throws SQLException {
+  public DatabaseTeamScore(final Element categoryDescription, final int tournament, final int teamNumber, final int runNumber,  final Connection connection) throws SQLException {
     super(categoryDescription, teamNumber, runNumber);
 
-    final int tournament = Queries.getCurrentTournament(connection);
     _result = createResultSet(connection, tournament);
     _scoreExists = _result.next();
   }
