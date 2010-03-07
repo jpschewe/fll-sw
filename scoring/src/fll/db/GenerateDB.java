@@ -41,7 +41,8 @@ public final class GenerateDB {
   private static final Logger LOGGER = Logger.getLogger(GenerateDB.class);
 
   /**
-   * Region name for internal teams. These teams should not be deleted.
+   * Region name for internal teams. These teams should not be deleted. This is
+   * also the name of a special tournament.
    */
   public static final String INTERNAL_REGION = "INTERNAL";
 
@@ -325,6 +326,8 @@ public final class GenerateDB {
       stmt.executeUpdate("CREATE VIEW verified_performance AS SELECT "
           + performanceColumns.toString() + " FROM Performance WHERE Verified = TRUE");
 
+      setDefaultParameters(connection);
+
     } finally {
       SQLFunctions.closeStatement(stmt);
       SQLFunctions.closePreparedStatement(prep);
@@ -332,6 +335,9 @@ public final class GenerateDB {
 
   }
 
+  /**
+   * Create Tournaments table.
+   */
   /* package */static void tournaments(final Connection connection, final boolean forceRebuild, final Collection<String> tables) throws SQLException {
     Statement stmt = null;
     try {
@@ -355,9 +361,11 @@ public final class GenerateDB {
         stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DROP', 'Dummy tournament for teams that drop out')");
         // TODO can we add a constraint that NextTournament must refer to Name
         // and still handle null?
-      }
-
-      setDefaultParameters(connection);
+        
+        // add internal tournament for default values and such
+        //FIXME add internal tournament if it doesn't exist
+        
+      }     
 
     } finally {
       SQLFunctions.closeStatement(stmt);
