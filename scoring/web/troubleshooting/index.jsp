@@ -21,7 +21,7 @@
     </p>
 
     <ul>
-      <li>First make sure that you've got a version of Java equal to or greater than 1.4.0.  Java version -> <%=System.getProperty("java.vm.version")%></li>
+      <li>First make sure that you've got a version of Java equal to or greater than 1.4.0.  Java version -&amp; <%=System.getProperty("java.vm.version")%></li>
 
       <li>When you tell the system to compute summarized scores from the
       reporting page you get an exception that a particular score group

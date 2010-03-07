@@ -9,7 +9,6 @@ Prompt for how many teams should be considered from each scored category.
 <%@ page import="fll.db.Queries" %>
 <%@ page import="fll.web.SessionAttributes"%>
 <%@ page import="javax.sql.DataSource" %>
-<%@ page import="java.util.List" %>
 
 <%@ page import="java.sql.Connection" %>
 

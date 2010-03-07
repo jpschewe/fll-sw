@@ -1,7 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Team" %>
-<%@ page import="fll.web.playoff.Playoff" %>
 <%@ page import="fll.web.scoreEntry.ScoreEntry" %>
 
 <%@ page import="org.w3c.dom.Element" %>

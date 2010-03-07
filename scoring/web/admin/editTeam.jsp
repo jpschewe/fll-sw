@@ -5,21 +5,6 @@
   
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
-
-<%@ page import="fll.db.Queries" %>
-<%@ page import="fll.web.SessionAttributes" %>
-
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.Iterator" %>
-  
-<%@ page import="java.sql.Connection" %>
-<%@ page import="java.sql.Statement" %>
-<%@ page import="java.sql.ResultSet" %>
-<%@ page import="javax.sql.DataSource" %>
-
-<%@ page import="java.text.NumberFormat" %>
-
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
