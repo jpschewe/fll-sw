@@ -301,7 +301,7 @@
 <column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="7ad99991:125ecd3d8cf:-7f76" mandatory="true" name="param">
 <data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
 </column>
-<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="7ad99991:125ecd3d8cf:-7f75" mandatory="true" name="value">
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="7ad99991:125ecd3d8cf:-7f75" mandatory="true" name="param_value">
 <data-type name="LONGVARCHAR" selected-variant-pattern="LONGVARCHAR"/>
 </column>
 </column-list>
