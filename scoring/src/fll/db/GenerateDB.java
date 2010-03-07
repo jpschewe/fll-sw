@@ -318,9 +318,8 @@ public final class GenerateDB {
 
       // current tournament teams
       stmt.executeUpdate("DROP VIEW IF EXISTS current_tournament_teams");
-      stmt
-          .executeUpdate("CREATE VIEW current_tournament_teams AS SELECT * FROM TournamentTeams WHERE Tournament IN (SELECT Value FROM global-parameters WHERE Param = 'CurrentTournament')");
-
+      stmt.executeUpdate("CREATE VIEW current_tournament_teams AS SELECT * FROM TournamentTeams WHERE Tournament IN (SELECT param_value FROM global_parameters WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT + "')");
+      
       // verified performance scores
       stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
       stmt.executeUpdate("CREATE VIEW verified_performance AS SELECT "
@@ -412,11 +411,11 @@ public final class GenerateDB {
       SQLFunctions.closeResultSet(check);
       check = null;
 
-      tournamentInsert = connection.prepareStatement("INSERT INTO TournamentParameters (param_value, param) VALUES (?, ?)");
+      tournamentInsert = connection.prepareStatement("INSERT INTO TournamentParameters (value, param) VALUES (?, ?)");
       check = Queries.getTournamentParameter(connection, TournamentParameters.SEEDING_ROUNDS);
       if (!check.next()) {
-        tournamentInsert.setString(2, TournamentParameters.SEEDING_ROUNDS);
         tournamentInsert.setInt(1, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
+        tournamentInsert.setString(2, TournamentParameters.SEEDING_ROUNDS);
         tournamentInsert.executeUpdate();
       }
       SQLFunctions.closeResultSet(check);
