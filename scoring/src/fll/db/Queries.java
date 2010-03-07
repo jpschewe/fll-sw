@@ -2878,9 +2878,9 @@ private static void deleteTeamFromTournamet(final Connection connection, final D
     PreparedStatement prep = null;
     try {
       if (!oldValue.next()) {
-        prep = connection.prepareStatement("INSERT INTO GlobalParameters (Value, Param) VALUES (?, ?)");
+        prep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
       } else {
-        prep = connection.prepareStatement("UPDATE GlobalParameters SET Value = ? WHERE Param = ?");
+        prep = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?");
       }
       prep.setString(1, paramValue);
       prep.setString(2, paramName);
