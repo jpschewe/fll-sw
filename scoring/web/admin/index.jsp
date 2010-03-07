@@ -7,34 +7,9 @@
 <%@ page import="java.sql.Statement"%>
 <%@ page import="java.sql.ResultSet"%>
 
-<%@ page import="java.text.NumberFormat"%>
-
-<%-- TODO pull this out into servlet --%>
 <%
   final DataSource datasource = SessionAttributes.getDataSource(session);
   final Connection connection = datasource.getConnection();
-
-  if (null != request.getParameter("changeSeedingRounds")) {
-    final String newSeedingRoundsStr = request.getParameter("seedingRounds");
-    final int newSeedingRounds = NumberFormat.getInstance().parse(newSeedingRoundsStr).intValue();
-    Queries.setNumSeedingRounds(connection, newSeedingRounds);
-    session.setAttribute(SessionAttributes.MESSAGE, "<i id='success'>Changed number of seeding arounds to "
-        + newSeedingRounds + "</i><br>");
-  }
-
-  if (null != request.getParameter("changeScoresheetLayoutNUp")) {
-    final String newNupStr = request.getParameter("scoresheetsPerPage");
-    final int newNup = NumberFormat.getInstance().parse(newNupStr).intValue();
-    Queries.setScoresheetLayoutNUp(connection, newNup);
-    session.setAttribute(SessionAttributes.MESSAGE, "<i id='success'>Changed number of scoresheets per page to "
-        + newNup + "</i><br>");
-  }
-
-  if (null != request.getParameter("addTournamentsForRegions")) {
-    Queries.insertTournamentsForRegions(connection);
-    session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'><i>Successfully added tournaments for regions</i></p>");
-  }
-
   final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
   final int scoresheetsPerPage = Queries.getScoresheetLayoutNUp(connection);
   final int currentTournamentID = Queries.getCurrentTournament(connection);
@@ -83,9 +58,7 @@ ${message}
 	</li>
 
 	<li><a
-		href='<c:url value="index.jsp">
-        <c:param name="addTournamentsForRegions" value="1" />
-        </c:url>'>Add
+		href='AddTournamentsForRegions'>Add
 	tournaments for all Regions</a> <a
 		href='javascript:display("AddForAllHelp")'>[help]</a>
 	<div id='AddForAllHelp' class='help' style='display: none'>Click
@@ -159,7 +132,7 @@ ${message}
 
 	<li>
 	<form id='changeScoresheetLayoutNUp'
-		action='<c:url value="index.jsp"/>' method='post'>Select the
+		action='ChangeScoresheetLayout' method='post'>Select the
 	number of scoresheets per printed page. <select
 		name='scoresheetsPerPage'>
 		<%
@@ -178,7 +151,7 @@ ${message}
 	</li>
 
 	<li>
-	<form id='changeSeedingRounds' action='<c:url value="index.jsp"/>'
+	<form id='changeSeedingRounds' action='ChangeSeedingRounds'
 		method='post'>Select the number of seeding runs. <select
 		name='seedingRounds'>
 		<%
