@@ -165,8 +165,7 @@ public class FullTournamentTest {
 
       // create tournaments for all regions
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "admin/index.jsp");
-      request.setParameter("addTournamentsForRegions", "1");
+          + "admin/AddTournamentsForRegions");
       response = conversation.getResponse(request);
       Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
       Assert.assertNotNull(response.getElementWithID("success"));
