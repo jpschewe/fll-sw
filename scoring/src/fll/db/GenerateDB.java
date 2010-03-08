@@ -181,20 +181,7 @@ public final class GenerateDB {
             + " ,CONSTRAINT tournament_teams_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" + ")");
       }
 
-      // Table structure for table 'tournament_parameters'
-      if (forceRebuild) {
-        stmt.executeUpdate("DROP TABLE IF EXISTS tournament_parameters CASCADE");
-      }
-      if (forceRebuild
-          || !tables.contains("tournament_parameters".toLowerCase())) {
-        stmt.executeUpdate("CREATE TABLE tournament_parameters ("
-            + "  param varchar(64) NOT NULL" //
-            + " ,param_value longvarchar NOT NULL" //
-            + " ,CONSTRAINT tournament_parameters_pk PRIMARY KEY  (param)" //
-            + " ,CONSTRAINT tournament_parameters_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)" //
-            + ")");
-
-      }
+      tournamentParameters(connection, forceRebuild, tables);
 
       // Table structure for table 'Judges'
       stmt.executeUpdate("DROP TABLE IF EXISTS Judges CASCADE");
@@ -320,10 +307,10 @@ public final class GenerateDB {
           + " AND RunNumber <= "//
           + " (SELECT param_value FROM tournament_parameters " //
           + "       WHERE tournament_parameters.param = 'SeedingRounds'" // TODO:
-                                                                         // can
-                                                                         // use
-                                                                         // PreparedStatement
-                                                                         // here?
+          // can
+          // use
+          // PreparedStatement
+          // here?
           + " ) GROUP BY TeamNumber, Tournament");
 
       // current tournament teams
@@ -344,6 +331,28 @@ public final class GenerateDB {
       SQLFunctions.closePreparedStatement(prep);
     }
 
+  }
+
+  /** Table structure for table 'tournament_parameters' */
+  /* package */static void tournamentParameters(final Connection connection, final boolean forceRebuild, final Collection<String> tables) throws SQLException {
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+      if (forceRebuild) {
+        stmt.executeUpdate("DROP TABLE IF EXISTS tournament_parameters CASCADE");
+      }
+      if (forceRebuild
+          || !tables.contains("tournament_parameters".toLowerCase())) {
+        stmt.executeUpdate("CREATE TABLE tournament_parameters ("
+            + "  param varchar(64) NOT NULL" //
+            + " ,param_value longvarchar NOT NULL" //
+            + " ,CONSTRAINT tournament_parameters_pk PRIMARY KEY  (param)" //
+            + " ,CONSTRAINT tournament_parameters_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)" //
+            + ")");
+      }
+    } finally {
+      SQLFunctions.closeStatement(stmt);
+    }
   }
 
   /**
