@@ -331,9 +331,12 @@ public class BracketData {
           + " Illegal rows-per-team value specified." + " Value must be a multiple of 2 greater than 0.");
     }
 
+    final int tournament = Queries.getCurrentTournament(pConnection);
+
+
     _rowsPerTeam = pRowsPerTeam;
     _firstRoundSize = Queries.getFirstPlayoffRoundSize(pConnection, pDivision);
-    _numSeedingRounds = Queries.getNumSeedingRounds(pConnection);
+    _numSeedingRounds = Queries.getNumSeedingRounds(pConnection, tournament);
 
     _showFinalScores = true;
     _showOnlyVerifiedScores = true;
@@ -352,8 +355,6 @@ public class BracketData {
     for (int i = _firstRound; i <= _lastRound; i++) {
       _bracketData.put(i, new TreeMap<Integer, BracketDataType>());
     }
-
-    final int tournament = Queries.getCurrentTournament(pConnection);
 
     PreparedStatement stmt = null;
     ResultSet rs = null;

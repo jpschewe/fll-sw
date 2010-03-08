@@ -20,8 +20,6 @@ import org.w3c.dom.Node;
 
 /**
  * Basic XML writer. Based on the sample in xerces-2.0.2 dom.Writer.
- * 
- * @version $Revision$
  */
 public class XMLWriter {
 
