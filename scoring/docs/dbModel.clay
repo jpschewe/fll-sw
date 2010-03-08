@@ -134,18 +134,26 @@
 </foreign-key>
 </foreign-key-list>
 </table>
-<table id="1f769f17:1248908e683:-7d6b" name="TournamentParameters">
+<table id="1f769f17:1248908e683:-7d6b" name="tournament_parameters">
 <column-list>
-<column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d67" mandatory="true" name="Param">
+<column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d67" mandatory="true" name="param">
 <data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
 </column>
-<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d66" mandatory="true" name="Value">
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d66" mandatory="true" name="param_value">
 <data-type name="LONGVARCHAR" selected-variant-pattern="LONGVARCHAR"/>
 </column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="4f91912f:1273b9c1d3f:-7fd9" mandatory="true" name="tournament">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
 </column-list>
-<primary-key id="1f769f17:1248908e683:-7d6a" name="PK_TOURNAMENTPARAMETERS">
-<primary-key-column name="Param"/>
+<primary-key id="1f769f17:1248908e683:-7d6a" name="PK_TOURNAMENT_PARAMETERS">
+<primary-key-column name="param"/>
 </primary-key>
+<foreign-key-list>
+<foreign-key id="4f91912f:1273b9c1d3f:-7fbb" name="FK_tournament_parameters_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key-column column-name="tournament" referenced-key-column-name="tournament_id"/>
+</foreign-key>
+</foreign-key-list>
 </table>
 <table id="1f769f17:1248908e683:-7d64" name="Judges">
 <column-list>
@@ -319,7 +327,7 @@
 <table-figure refid="1f769f17:1248908e683:-7fdf" x="301" y="5"/>
 <table-figure refid="1f769f17:1248908e683:-7ef3" x="440" y="552"/>
 <table-figure refid="1f769f17:1248908e683:-7e39" x="723" y="53"/>
-<table-figure refid="1f769f17:1248908e683:-7d6b" x="5" y="776"/>
+<table-figure refid="1f769f17:1248908e683:-7d6b" x="33" y="774"/>
 <table-figure refid="1f769f17:1248908e683:-7d64" x="27" y="74"/>
 <table-figure refid="1f769f17:1248908e683:-7cf8" x="760" y="945"/>
 <table-figure refid="1f769f17:1248908e683:-7c14" x="466" y="371"/>

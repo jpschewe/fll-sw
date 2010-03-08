@@ -421,7 +421,7 @@ public final class Playoff {
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
     final int currentTournament = Queries.getCurrentTournament(connection);
 
-    final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
+    final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournament);
 
     // initialize currentRound to contain a full bracket setup
     List<Team> tempCurrentRound = buildInitialBracketOrder(connection, bracketSort, winnerCriteria, division, tournamentTeams);
@@ -666,7 +666,7 @@ public final class Playoff {
 
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
     final int currentTournament = Queries.getCurrentTournament(connection);
-    final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
+    final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournament);
     final List<String[]> tournamentTables = Queries.getTournamentTables(connection);
     if (tournamentTables.size() == 0) {
       tournamentTables.add(new String[] { "", "" });
@@ -952,7 +952,7 @@ public final class Playoff {
       // (including "bye" teams)
       final int numPlayoffRounds = (int) Math.round(Math.log(firstRound.size())
           / Math.log(2));
-      final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
+      final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournament);
       selStmt = connection.prepareStatement("SELECT PlayoffRound,LineNumber,Team FROM PlayoffData"//
           + " WHERE Tournament= ?" //
           + " AND event_division= ?" //

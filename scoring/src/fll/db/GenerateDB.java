@@ -76,6 +76,10 @@ public final class GenerateDB {
 
   public static final String DEFAULT_TEAM_REGION = "DUMMY";
 
+  public static final int INTERNAL_TOURNAMENT_ID = -1;
+
+  public static final String INTERNAL_TOURNAMENT_NAME = INTERNAL_REGION;
+
   /**
    * Generate a completely new DB from document. This also stores the document
    * in the database for later use.
@@ -85,7 +89,7 @@ public final class GenerateDB {
    * @param forceRebuild recreate all tables from scratch, if false don't
    *          recreate the tables that hold team information
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = {"SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE", "OBL_UNSATISFIED_OBLIGATION"}, justification = "Need dynamic data for default values, Bug in findbugs - ticket:2924739")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE", "OBL_UNSATISFIED_OBLIGATION" }, justification = "Need dynamic data for default values, Bug in findbugs - ticket:2924739")
   public static void generateDB(final Document document, final Connection connection, final boolean forceRebuild) throws SQLException,
       UnsupportedEncodingException {
 
@@ -177,24 +181,19 @@ public final class GenerateDB {
             + " ,CONSTRAINT tournament_teams_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" + ")");
       }
 
-      // Table structure for table 'TournamentParameters'
+      // Table structure for table 'tournament_parameters'
       if (forceRebuild) {
-        stmt.executeUpdate("DROP TABLE IF EXISTS TournamentParameters CASCADE");
+        stmt.executeUpdate("DROP TABLE IF EXISTS tournament_parameters CASCADE");
       }
       if (forceRebuild
-          || !tables.contains("TournamentParameters".toLowerCase())) {
-        stmt.executeUpdate("CREATE TABLE TournamentParameters ("
-            + "  Param varchar(64) NOT NULL," //
-            + "  Value longvarchar NOT NULL," //
-            + "  CONSTRAINT tournament_parameters_pk PRIMARY KEY  (Param)" + ")");
+          || !tables.contains("tournament_parameters".toLowerCase())) {
+        stmt.executeUpdate("CREATE TABLE tournament_parameters ("
+            + "  param varchar(64) NOT NULL" //
+            + " ,param_value longvarchar NOT NULL" //
+            + " ,CONSTRAINT tournament_parameters_pk PRIMARY KEY  (param)" //
+            + " ,CONSTRAINT tournament_parameters_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)" //
+            + ")");
 
-        // inverted order of Value and Param so that the update statement and
-        // the insert statement both have the same order of parameters
-        prep = connection.prepareStatement("INSERT INTO TournamentParameters (Value, Param) VALUES (?, ?)");
-
-        prep.setString(2, TournamentParameters.SEEDING_ROUNDS);
-        prep.setInt(1, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
-        prep.executeUpdate();
       }
 
       // Table structure for table 'Judges'
@@ -312,15 +311,27 @@ public final class GenerateDB {
       // create views
 
       // max seeding round score
-      //FIXME needs to be updated to check both local and global parameters
+      // FIXME needs to be updated to handle tournament value and default value
       stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
-      stmt
-          .executeUpdate("CREATE VIEW performance_seeding_max AS SELECT TeamNumber, Tournament, Max(ComputedTotal) As Score FROM Performance WHERE NoShow = 0 AND RunNumber <= (SELECT Value FROM TournamentParameters WHERE TournamentParameters.Param = 'SeedingRounds') GROUP BY TeamNumber, Tournament");
+      stmt.executeUpdate("CREATE VIEW performance_seeding_max AS "//
+          + " SELECT TeamNumber, Tournament, Max(ComputedTotal) As Score" //
+          + " FROM Performance" //
+          + " WHERE NoShow = 0" //
+          + " AND RunNumber <= "//
+          + " (SELECT param_value FROM tournament_parameters " //
+          + "       WHERE tournament_parameters.param = 'SeedingRounds'" // TODO:
+                                                                         // can
+                                                                         // use
+                                                                         // PreparedStatement
+                                                                         // here?
+          + " ) GROUP BY TeamNumber, Tournament");
 
       // current tournament teams
       stmt.executeUpdate("DROP VIEW IF EXISTS current_tournament_teams");
-      stmt.executeUpdate("CREATE VIEW current_tournament_teams AS SELECT * FROM TournamentTeams WHERE Tournament IN (SELECT param_value FROM global_parameters WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT + "')");
-      
+      stmt
+          .executeUpdate("CREATE VIEW current_tournament_teams AS SELECT * FROM TournamentTeams WHERE Tournament IN (SELECT param_value FROM global_parameters WHERE param = '"
+              + GlobalParameters.CURRENT_TOURNAMENT + "')");
+
       // verified performance scores
       stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
       stmt.executeUpdate("CREATE VIEW verified_performance AS SELECT "
@@ -361,11 +372,11 @@ public final class GenerateDB {
         stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DROP', 'Dummy tournament for teams that drop out')");
         // TODO can we add a constraint that NextTournament must refer to Name
         // and still handle null?
-        
+
         // add internal tournament for default values and such
-        //FIXME add internal tournament if it doesn't exist
-        
-      }     
+        // FIXME add internal tournament if it doesn't exist
+
+      }
 
     } finally {
       SQLFunctions.closeStatement(stmt);
@@ -373,81 +384,90 @@ public final class GenerateDB {
   }
 
   /**
+   * Create the "internal" tournament used for default parameters, if needed.
+   */
+  /* package */static void createInternalTournament(final Connection connection) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT Name FROM Tournaments WHERE tournament_id = ?");
+      prep.setInt(1, INTERNAL_TOURNAMENT_ID);
+      rs = prep.executeQuery();
+      if (!rs.next()) {
+        SQLFunctions.closePreparedStatement(prep);
+        prep = null;
+        SQLFunctions.closeResultSet(rs);
+        rs = null;
+
+        // need to create
+        prep = connection.prepareStatement("INSERT INTO Tournaments (tournament_id, Name) VALUES(?, ?)");
+        prep.setInt(1, INTERNAL_TOURNAMENT_ID);
+        prep.setString(2, INTERNAL_TOURNAMENT_NAME);
+        prep.executeUpdate();
+
+      }
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+
+  /**
    * Put the default parameters in the database if they don't already exist.
    */
-  /*package*/ static void setDefaultParameters(final Connection connection) throws SQLException {
+  /* package */static void setDefaultParameters(final Connection connection) throws SQLException {
+    createInternalTournament(connection);
 
     PreparedStatement globalInsert = null;
     PreparedStatement tournamentInsert = null;
-    ResultSet check = null;
+    boolean check;
     try {
       globalInsert = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
 
-      check = Queries.getGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT);
-      if (!check.next()) {
+      check = Queries.globalParameterExists(connection, GlobalParameters.CURRENT_TOURNAMENT);
+      if (!check) {
         globalInsert.setString(2, GlobalParameters.CURRENT_TOURNAMENT);
         globalInsert.setInt(1, Queries.getTournamentID(connection, "DUMMY"));
         globalInsert.executeUpdate();
       }
-      SQLFunctions.closeResultSet(check);
-      check = null;
 
-      check = Queries.getGlobalParameter(connection, GlobalParameters.STANDARDIZED_MEAN);
-      if (!check.next()) {
+      check = Queries.globalParameterExists(connection, GlobalParameters.STANDARDIZED_MEAN);
+      if (!check) {
         globalInsert.setString(2, GlobalParameters.STANDARDIZED_MEAN);
         globalInsert.setDouble(1, GlobalParameters.STANDARDIZED_MEAN_DEFAULT);
         globalInsert.executeUpdate();
       }
-      SQLFunctions.closeResultSet(check);
-      check = null;
 
-      check = Queries.getGlobalParameter(connection, GlobalParameters.STANDARDIZED_SIGMA);
-      if (!check.next()) {
+      check = Queries.globalParameterExists(connection, GlobalParameters.STANDARDIZED_SIGMA);
+      if (!check) {
         globalInsert.setString(2, GlobalParameters.STANDARDIZED_SIGMA);
         globalInsert.setDouble(1, GlobalParameters.STANDARDIZED_SIGMA_DEFAULT);
         globalInsert.executeUpdate();
       }
-      SQLFunctions.closeResultSet(check);
-      check = null;
 
-      check = Queries.getGlobalParameter(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP);
-      if (!check.next()) {
+      check = Queries.globalParameterExists(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP);
+      if (!check) {
         globalInsert.setString(2, GlobalParameters.SCORESHEET_LAYOUT_NUP);
         globalInsert.setInt(1, GlobalParameters.SCORESHEET_LAYOUT_NUP_DEFAULT);
         globalInsert.executeUpdate();
       }
-      SQLFunctions.closeResultSet(check);
-      check = null;
 
-      tournamentInsert = connection.prepareStatement("INSERT INTO TournamentParameters (value, param) VALUES (?, ?)");
-      check = Queries.getTournamentParameter(connection, TournamentParameters.SEEDING_ROUNDS);
-      if (!check.next()) {
-        tournamentInsert.setInt(1, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
-        tournamentInsert.setString(2, TournamentParameters.SEEDING_ROUNDS);
-        tournamentInsert.executeUpdate();
-      }
-      SQLFunctions.closeResultSet(check);
-      check = null;
-      
+      Queries.setNumSeedingRounds(connection, INTERNAL_TOURNAMENT_ID, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
     } finally {
-      SQLFunctions.closeResultSet(check);
       SQLFunctions.closePreparedStatement(globalInsert);
       SQLFunctions.closePreparedStatement(tournamentInsert);
     }
   }
 
   private static void insertOrUpdateChallengeDocument(final Document document, final Connection connection) throws SQLException {
-    ResultSet check = null;
     PreparedStatement challengePrep = null;
     try {
-      check = Queries.getGlobalParameter(connection, GlobalParameters.CHALLENGE_DOCUMENT);
-      if (check.next()) {
-        challengePrep = connection.prepareStatement("UPDATE TournamentParameters SET Value = ? WHERE Param = ?");
+      final boolean check = Queries.globalParameterExists(connection, GlobalParameters.CHALLENGE_DOCUMENT);
+      if (check) {
+        challengePrep = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?");
       } else {
         challengePrep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
       }
-      SQLFunctions.closeResultSet(check);
-      check = null;
 
       challengePrep.setString(2, GlobalParameters.CHALLENGE_DOCUMENT);
 
@@ -468,7 +488,6 @@ public final class GenerateDB {
         throw new FLLRuntimeException("Internal error, UTF8 not supported as an encoding!", e);
       }
     } finally {
-      SQLFunctions.closeResultSet(check);
       SQLFunctions.closePreparedStatement(challengePrep);
     }
   }
