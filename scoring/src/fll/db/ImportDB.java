@@ -379,24 +379,10 @@ public final class ImportDB {
     Statement stmt = null;
     ResultSet rs = null;
     PreparedStatement stringsToInts = null;
-    PreparedStatement deleteParam = null;
     try {
       stmt = connection.createStatement();
 
-      // moving tournament parameters to globals, can just delete the old ones and the defaults will be fine
-      deleteParam = connection.prepareStatement("DELETE FROM TournamentParameters WHERE Name = ?");
-      deleteParam.setString(1, "CurrentTournament");
-      deleteParam.executeUpdate();
-      deleteParam.setString(1, "StandardizedMean");
-      deleteParam.executeUpdate();
-      deleteParam.setString(1, "StandardizedSigma");
-      deleteParam.executeUpdate();
-      deleteParam.setString(1, "ChallengeDocument");
-      deleteParam.executeUpdate();
-      deleteParam.setString(1, "ScoresheetLayoutNUp");
-      deleteParam.executeUpdate();
-      SQLFunctions.closePreparedStatement(deleteParam);
-      deleteParam = null;
+      stmt.executeUpdate("DROP Table IF EXISTS TournamentParameters");
       
       // add the global_parameters table
       GenerateDB.createGlobalParameters(challengeDocument, connection, true, Queries.getTablesInDB(connection));
@@ -469,6 +455,9 @@ public final class ImportDB {
         SQLFunctions.closePreparedStatement(stringsToInts);
       }
       
+      // create new tournament parameters table
+      GenerateDB.tournamentParameters(connection, true, Queries.getTablesInDB(connection));
+      
       GenerateDB.setDefaultParameters(connection);
 
       // set the version to 1 - this will have been set while creating
@@ -479,7 +468,6 @@ public final class ImportDB {
     } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closeStatement(stmt);
-      SQLFunctions.closePreparedStatement(deleteParam);
       SQLFunctions.closePreparedStatement(stringsToInts);
     }
   }
