@@ -61,13 +61,12 @@ public class WebTest {
 
     final WebConversation conversation = new WebConversation();
     final WebRequest request = new PostMethodWebRequest(TestUtils.URL_ROOT
-        + "admin/index.jsp");
+        + "admin/SetCurrentTournament");
     request.setParameter("currentTournament", "DUMMY");
     conversation.getResponse(request);
 
     request.setParameter("currentTournament", "State");
     conversation.getResponse(request);
-
   }
 
 }
