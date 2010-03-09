@@ -298,7 +298,8 @@ public final class GenerateDB {
       // create views
 
       // max seeding round score
-      // FIXME needs to be updated to handle tournament value and default value -- make only in the context of the current tournament
+      // FIXME needs to be updated to handle tournament value and default value
+      // -- make only in the context of the current tournament
       stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
       // TODO: can use PreparedStatement here?
       stmt.executeUpdate("CREATE VIEW performance_seeding_max AS "//
@@ -312,14 +313,13 @@ public final class GenerateDB {
 
       // current tournament teams
       stmt.executeUpdate("DROP VIEW IF EXISTS current_tournament_teams");
-      stmt
-          .executeUpdate("CREATE VIEW current_tournament_teams AS "//
-                         + " SELECT * FROM TournamentTeams" //
-                         + " WHERE Tournament IN " //
-                         + " (SELECT param_value " //" +
-                         + "      FROM global_parameters " //
-                         + "      WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'"//
-                         + "  )");
+      stmt.executeUpdate("CREATE VIEW current_tournament_teams AS "//
+          + " SELECT * FROM TournamentTeams" //
+          + " WHERE Tournament IN " //
+          + " (SELECT param_value " // " +
+          + "      FROM global_parameters " //
+          + "      WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'"//
+          + "  )");
 
       // verified performance scores
       stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
@@ -348,6 +348,7 @@ public final class GenerateDB {
         stmt.executeUpdate("CREATE TABLE tournament_parameters ("
             + "  param varchar(64) NOT NULL" //
             + " ,param_value longvarchar NOT NULL" //
+            + " ,tournament integer NOT NULL" //
             + " ,CONSTRAINT tournament_parameters_pk PRIMARY KEY  (param)" //
             + " ,CONSTRAINT tournament_parameters_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)" //
             + ")");
@@ -394,6 +395,20 @@ public final class GenerateDB {
     }
   }
 
+  private static void renameTournament(final Connection connection,
+                                       final int tournament,
+                                       final String newName) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE Tournaments SET Name = ? WHERE tournament_id = ?");
+      prep.setString(1, newName);
+      prep.setInt(2, tournament);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+  
   /**
    * Create the "internal" tournament used for default parameters, if needed.
    */
@@ -401,6 +416,22 @@ public final class GenerateDB {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
+      // make sure another tournament with the internal name doesn't exist
+      prep = connection.prepareStatement("SELECT tournament_id FROM Tournaments WHERE Name = ?");
+      prep.setString(1, INTERNAL_TOURNAMENT_NAME);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        final int importedInternal = rs.getInt(1);
+        if(importedInternal != INTERNAL_TOURNAMENT_ID) {
+          renameTournament(connection, importedInternal, "Imported-" + INTERNAL_TOURNAMENT_NAME);
+        }
+      }
+      SQLFunctions.closeResultSet(rs);
+      rs = null;
+      SQLFunctions.closePreparedStatement(prep);
+      prep = null;
+
+      // check if a tournament exists with the internal id
       prep = connection.prepareStatement("SELECT Name FROM Tournaments WHERE tournament_id = ?");
       prep.setInt(1, INTERNAL_TOURNAMENT_ID);
       rs = prep.executeQuery();
@@ -415,7 +446,6 @@ public final class GenerateDB {
         prep.setInt(1, INTERNAL_TOURNAMENT_ID);
         prep.setString(2, INTERNAL_TOURNAMENT_NAME);
         prep.executeUpdate();
-
       }
     } finally {
       SQLFunctions.closeResultSet(rs);
