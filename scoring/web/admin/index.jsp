@@ -10,9 +10,9 @@
 <%
   final DataSource datasource = SessionAttributes.getDataSource(session);
   final Connection connection = datasource.getConnection();
-  final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
-  final int scoresheetsPerPage = Queries.getScoresheetLayoutNUp(connection);
   final int currentTournamentID = Queries.getCurrentTournament(connection);
+  final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournamentID);
+  final int scoresheetsPerPage = Queries.getScoresheetLayoutNUp(connection);
 %>
 
 <html>
