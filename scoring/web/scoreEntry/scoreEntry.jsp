@@ -43,7 +43,7 @@ final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection
 if(!tournamentTeams.containsKey(new Integer(teamNumber))) {
   throw new RuntimeException("Selected team number is not valid: " + teamNumber);
 }
-final Team team = (Team)tournamentTeams.get(new Integer(teamNumber));
+final Team team = tournamentTeams.get(new Integer(teamNumber));
 
 //the next run the team will be competing in
 final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumber());
