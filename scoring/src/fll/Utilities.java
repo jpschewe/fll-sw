@@ -207,7 +207,7 @@ public final class Utilities {
       final DatabaseMetaData metadata = connection.getMetaData();
       rs = metadata.getTables(null, null, "%", null);
       while (rs.next()) {
-        if ("TournamentParameters".toLowerCase().equals(rs.getString(3).toLowerCase())) {
+        if ("tournament_parameters".toLowerCase().equals(rs.getString(3).toLowerCase())) {
           return true;
         }
       }
