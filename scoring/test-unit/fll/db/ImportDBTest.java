@@ -78,7 +78,7 @@ public class ImportDBTest {
       if (!temp.delete()) {
         temp.deleteOnExit();
       }
-      TestUtils.deleteDatabase(database);
     }
+    TestUtils.deleteDatabase(database);
   }
 }
