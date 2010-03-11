@@ -41,6 +41,6 @@ public class GenerateDBTest {
 
     GenerateDB.generateDB(document, database, true);
 
-    TestUtils.cleanupDB(database);
+    TestUtils.deleteDatabase(database);
   }
 }
