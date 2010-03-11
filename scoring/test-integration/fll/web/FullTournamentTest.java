@@ -121,13 +121,13 @@ public class FullTournamentTest {
 
       // --- initialize database ---
       final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml");
-      TestUtils.initializeDatabase(challengeDocIS);
+      WebTestUtils.initializeDatabase(challengeDocIS);
 
       // --- load teams ---
       // find upload form on admin page
       WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "admin/");
-      WebResponse response = conversation.getResponse(request);
+      WebResponse response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
       WebForm form = response.getFormWithID("uploadTeams");
 
@@ -137,7 +137,7 @@ public class FullTournamentTest {
       final UploadFileSpec teamsUpload = new UploadFileSpec("teams.csv", teamsIS, "text/plain");
       form.setParameter("file", new UploadFileSpec[] { teamsUpload });
       request = form.getRequest();
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue(response.isHTML());
       // Assert.assertNotNull("Error uploading data file: " +
       // response.getText(), response.getElementWithID("success"));
@@ -146,7 +146,7 @@ public class FullTournamentTest {
       // skip past the filter page
       form = response.getFormWithName("filterTeams");
       request = form.getRequest("next");
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue(response.isHTML());
 
       // team column selection
@@ -158,7 +158,7 @@ public class FullTournamentTest {
       form.setParameter("Region", "eve_name");
       form.setParameter("Division", "div_name");
       request = form.getRequest();
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull("Error loading teams: "
           + response.getText(), response.getElementWithID("success"));
@@ -166,24 +166,24 @@ public class FullTournamentTest {
       // create tournaments for all regions
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "admin/AddTournamentsForRegions");
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
       Assert.assertNotNull(response.getElementWithID("success"));
 
       // initialize tournaments by region
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "admin/tournamentInitialization.jsp");
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
       form = response.getFormWithName("form");
       Assert.assertNotNull(form);
       request = form.getRequest();
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue(response.isHTML());
       form = response.getFormWithName("verify");
       Assert.assertNotNull(form);
       request = form.getRequest();
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull(response.getElementWithID("success"));
 
@@ -196,7 +196,7 @@ public class FullTournamentTest {
       // assign judges
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "admin/judges.jsp");
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
       form = response.getFormWithName("judges");
       Assert.assertNotNull(form);
@@ -216,7 +216,7 @@ public class FullTournamentTest {
           LOGGER.debug("Adding a row to the judges entry form");
         }
         request = form.getRequest("submit", "Add Row");
-        response = conversation.getResponse(request);
+        response = WebTestUtils.loadPage(conversation, request);
         Assert.assertTrue(response.isHTML());
         form = response.getFormWithName("judges");
         Assert.assertNotNull(form);
@@ -244,7 +244,7 @@ public class FullTournamentTest {
 
       // submit those values
       request = form.getRequest("finished", "Finished");
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue(response.isHTML());
       Assert.assertNull("Got error from judges assignment", response.getElementWithID("error"));
 
@@ -252,21 +252,21 @@ public class FullTournamentTest {
       form = response.getFormWithName("judges");
       Assert.assertNotNull(form);
       request = form.getRequest("commit", "Commit");
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull("Error assigning judges", response.getElementWithID("success"));
 
       // assign table labels
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "admin/tables.jsp");
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
       form = response.getFormWithName("tables");
       Assert.assertNotNull(form);
       form.setParameter("SideA0", "red");
       form.setParameter("SideB0", "blue");
       request = form.getRequest("submit", "Finished");
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue(response.isHTML());
       Assert.assertNull("Got error from judges assignment", response.getElementWithID("error"));
       Assert.assertNotNull(response.getElementWithID("success"));
@@ -295,7 +295,7 @@ public class FullTournamentTest {
       for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
         request = new GetMethodWebRequest(TestUtils.URL_ROOT
             + "playoff");
-        response = conversation.getResponse(request);
+        response = WebTestUtils.loadPage(conversation, request);
         Assert.assertTrue(response.isHTML());
         form = response.getFormWithName("initialize");
         Assert.assertNotNull(form);
@@ -313,7 +313,7 @@ public class FullTournamentTest {
               }
               form.setParameter("division", divisions[divIdx]);
               request = form.getRequest();
-              response = conversation.getResponse(request);
+              response = WebTestUtils.loadPage(conversation, request);
               Assert.assertTrue(response.isHTML());
             }
             initializedPlayoff = true;
@@ -348,32 +348,32 @@ public class FullTournamentTest {
       // compute final scores
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "report/summarizePhase1.jsp");
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue(response.isHTML());
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "report/summarizePhase2.jsp");
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull(response.getElementWithID("success"));
 
       // generate reports
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "report/CategorizedScores");
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue(response.isHTML());
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "report/CategoryScoresByJudge");
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue(response.isHTML());
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "report/CategoryScoresByScoreGroup");
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue(response.isHTML());
 
       // PDF reports
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "report/finalComputedScores.pdf");
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertEquals("application/pdf", response.getContentType());
 
       // check ranking and scores
@@ -442,7 +442,7 @@ public class FullTournamentTest {
     WebResponse response;
     request = new GetMethodWebRequest(TestUtils.URL_ROOT
         + "admin/index.jsp");
-    response = conversation.getResponse(request);
+    response = WebTestUtils.loadPage(conversation, request);
     Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
     final WebForm form = response.getFormWithID("currentTournament");
     Assert.assertNotNull(form);
@@ -451,7 +451,7 @@ public class FullTournamentTest {
     
     form.setParameter("currentTournament", String.valueOf(testTournamentID));
     request = form.getRequest();
-    response = conversation.getResponse(request);
+    response = WebTestUtils.loadPage(conversation, request);
     Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
     Assert.assertNotNull("Error loading teams: "
         + response.getText(), response.getElementWithID("success"));
@@ -471,7 +471,7 @@ public class FullTournamentTest {
     final WebConversation conversation = new WebConversation();
     WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
         + "playoff/index.jsp");
-    WebResponse response = conversation.getResponse(request);
+    WebResponse response = WebTestUtils.loadPage(conversation, request);
     Assert.assertTrue(response.isHTML());
 
     // find form named 'printable'
@@ -483,7 +483,7 @@ public class FullTournamentTest {
     request.setParameter("division", division);
 
     // click 'Display Brackets'
-    response = conversation.getResponse(request);
+    response = WebTestUtils.loadPage(conversation, request);
     Assert.assertTrue(response.isHTML());
 
     // find form named 'printScoreSheets'
@@ -491,7 +491,7 @@ public class FullTournamentTest {
 
     // click 'Print scoresheets'
     request = form.getRequest();
-    response = conversation.getResponse(request);
+    response = WebTestUtils.loadPage(conversation, request);
 
     // check that result is PDF
     Assert.assertEquals("application/pdf", response.getContentType());
@@ -518,7 +518,7 @@ public class FullTournamentTest {
       // download subjective zip
       WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "admin/subjective-data.fll");
-      WebResponse response = conversation.getResponse(request);
+      WebResponse response = WebTestUtils.loadPage(conversation, request);
       Assert.assertEquals("application/zip", response.getContentType());
       final InputStream zipStream = response.getInputStream();
       final FileOutputStream outputStream = new FileOutputStream(subjectiveZip);
@@ -588,13 +588,13 @@ public class FullTournamentTest {
       // upload scores
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "admin/index.jsp");
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue(response.isHTML());
       final WebForm form = response.getFormWithName("uploadSubjective");
       request = form.getRequest();
       final UploadFileSpec subjectiveUpload = new UploadFileSpec(subjectiveZip);
       form.setParameter("subjectiveFile", new UploadFileSpec[] { subjectiveUpload });
-      response = conversation.getResponse(request);
+      response = WebTestUtils.loadPage(conversation, request);
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull(response.getElementWithID("success"));
     } finally {
@@ -683,13 +683,13 @@ public class FullTournamentTest {
         // need to get the score entry form
         WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
             + "scoreEntry/select_team.jsp");
-        WebResponse response = conversation.getResponse(request);
+        WebResponse response = WebTestUtils.loadPage(conversation, request);
         Assert.assertTrue(response.isHTML());
         WebForm form = response.getFormWithName("selectTeam");
         Assert.assertNotNull(form);
         form.setParameter("TeamNumber", String.valueOf(teamNumber));
         request = form.getRequest();
-        response = conversation.getResponse(request);
+        response = WebTestUtils.loadPage(conversation, request);
         Assert.assertTrue(response.isHTML());
 
         form = response.getFormWithName("scoreEntry");
@@ -723,7 +723,7 @@ public class FullTournamentTest {
 
         // submit score
         request = form.getRequest("submit");
-        response = conversation.getResponse(request);
+        response = WebTestUtils.loadPage(conversation, request);
         Assert.assertTrue(response.isHTML());
         Assert.assertEquals("Errors: "
             + response.getText(), 0, response.getElementsWithName("error").length);

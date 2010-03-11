@@ -8,18 +8,14 @@ package fll.web;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import junit.framework.Assert;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.HttpException;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
-import com.meterware.httpunit.WebResponse;
 
 import fll.TestUtils;
 
@@ -57,28 +53,15 @@ public class WebTest /* extends SeleneseTestCase */{
         // "scoreboard/main.jsp",
         // "scoreboard_800/main.jsp",
         "scoreEntry/select_team.jsp", "setup/index.jsp", "style/style.jsp", "troubleshooting/index.jsp", };
+    final WebConversation conversation = new WebConversation();
     for (final String page : pages) {
-      LOG.info("Testing page #" + page + "#");
-      TestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
+      LOG.info("Testing page #"
+          + page + "#");
+      WebTestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
 
       final String url = TestUtils.URL_ROOT
           + page;
-      loadPage(url);
-    }
-  }
-
-  private void loadPage(final String url) throws IOException, SAXException {
-    final WebConversation conversation = new WebConversation();
-    // conversation.setExceptionsThrownOnErrorStatus(false);
-    final WebRequest request = new GetMethodWebRequest(url);
-    try {
-      final WebResponse response = conversation.getResponse(request);
-      Assert.assertTrue(response.isHTML());
-    } catch (final HttpException e) {
-      final String responseMessage = e.getResponseMessage();
-      final int code = e.getResponseCode();
-      Assert.fail("Error loading page: "
-          + url + " code: " + code + " message: " + responseMessage);
+      WebTestUtils.loadPage(conversation, url);
     }
   }
 
@@ -87,7 +70,7 @@ public class WebTest /* extends SeleneseTestCase */{
    */
   @Test
   public void testChangeTournament() throws MalformedURLException, IOException, SAXException {
-    TestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
+    WebTestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
 
     final WebConversation conversation = new WebConversation();
     final WebRequest request = new PostMethodWebRequest(TestUtils.URL_ROOT
