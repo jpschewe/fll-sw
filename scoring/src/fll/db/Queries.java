@@ -2976,8 +2976,6 @@ public final class Queries {
   /**
    * If team is not null, calls performanceScoreExists(connection,
    * team.getTeamNumber(), runNumber), otherwise returns false.
-   * 
-   * @see performanceScoreExists
    */
   public static boolean performanceScoreExists(final Connection connection, final Team team, final int runNumber) throws SQLException {
     if (null == team) {
