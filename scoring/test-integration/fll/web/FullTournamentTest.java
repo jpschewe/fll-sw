@@ -191,7 +191,7 @@ public class FullTournamentTest {
       Assert.assertNotNull("Could not create test database connection", serverConnection);
 
       // set the tournament
-      setTournament(serverConnection, testTournament, conversation);
+      WebTestUtils.setTournament(conversation, testTournament);
 
       // assign judges
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
@@ -433,29 +433,6 @@ public class FullTournamentTest {
       SQLFunctions.closeConnection(testDataConn);
       // Utilities.closeConnection(connection);
     }
-  }
-
-  private void setTournament(final Connection serverConnection,
-                             final String testTournamentName, 
-                             final WebConversation conversation) throws MalformedURLException, IOException, SAXException, SQLException {
-    WebRequest request;
-    WebResponse response;
-    request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "admin/index.jsp");
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-    final WebForm form = response.getFormWithID("currentTournament");
-    Assert.assertNotNull(form);
-    
-    final int testTournamentID = Queries.getTournamentID(serverConnection, testTournamentName);
-    
-    form.setParameter("currentTournament", String.valueOf(testTournamentID));
-    request = form.getRequest();
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-    Assert.assertNotNull("Error loading teams: "
-        + response.getText(), response.getElementWithID("success"));
-    Assert.assertNotNull(response.getElementWithID("success"));
   }
 
   /**

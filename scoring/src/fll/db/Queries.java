@@ -1490,7 +1490,7 @@ public final class Queries {
     final boolean paramExists = tournamentParameterValueExists(connection, tournament, paramName);
     PreparedStatement prep = null;
     try {
-      if (paramExists) {
+      if (!paramExists) {
         prep = connection.prepareStatement("INSERT INTO tournament_parameters (param, param_value, tournament) VALUES (?, ?, ?)");
       } else {
         prep = connection.prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?");
@@ -1510,7 +1510,7 @@ public final class Queries {
     final boolean paramExists = tournamentParameterValueExists(connection, tournament, paramName);
     PreparedStatement prep = null;
     try {
-      if (paramExists) {
+      if (!paramExists) {
         prep = connection.prepareStatement("INSERT INTO tournament_parameters (param, param_value, tournament) VALUES (?, ?, ?)");
       } else {
         prep = connection.prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?");
