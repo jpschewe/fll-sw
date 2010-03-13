@@ -6,6 +6,8 @@
 
 package fll.web;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -142,8 +144,12 @@ public final class WebTestUtils {
     if(error) {
     final String responseMessage = response.getResponseMessage();
     final String text = response.getText();
+    final File output = File.createTempFile("server-error", ".html", new File("screenshots"));
+    final FileWriter writer = new FileWriter(output);
+    writer.write(text);
+    writer.close();
     Assert.fail("Error loading page: "
-        + response.getURL() + " code: " + code + " message: " + responseMessage + " text: " + text);
+        + response.getURL() + " code: " + code + " message: " + responseMessage + " Contents of error page written to: " + output.getAbsolutePath());
     }
     
   }
