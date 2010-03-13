@@ -62,9 +62,10 @@ public final class ExportDocument {
     Statement stmt = null;
     ResultSet rs = null;
     int exitCode = 0;
+    FileWriter writer = null;
     try {
       connection = Utilities.createDataSource(args[1]).getConnection();
-      final FileWriter writer = new FileWriter(challengeFile);
+      writer = new FileWriter(challengeFile);
       
       final Document doc = Queries.getChallengeDocument(connection);
       final XMLWriter xmlwriter = new XMLWriter();
@@ -79,6 +80,15 @@ public final class ExportDocument {
       LOG.fatal("Error talking to database", sqle);
       exitCode = 1;
     } finally {
+      if(null != writer) {
+        try {
+          writer.close();
+        } catch(final IOException e) {
+          if(LOG.isDebugEnabled()) {
+            LOG.debug(e, e);
+          }
+        }
+      }
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closeStatement(stmt);
       SQLFunctions.closeConnection(connection);
