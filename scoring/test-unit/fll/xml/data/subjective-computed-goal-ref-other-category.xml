@@ -2,7 +2,7 @@
 <fll
 	title="A computed goal in a subjective category referencing a goal in a different category"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="fll.xsd">
+	xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
 
 	<Performance minimumScore="0" weight="1.0">
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fll title="FLL 2007 Challenge: Power Puzzle" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="fll.xsd">
+	xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
 
 	<!-- $Rev: 351 $ -->
 

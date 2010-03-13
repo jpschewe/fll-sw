@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fll title="Science of Speed: 2008" bracketSort="ALPHA_TEAM"
 	revision="$Rev: 351 $" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="fll.xsd">
+	xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
 
 	<Performance minimumScore="-20" weight="1.0">
 
