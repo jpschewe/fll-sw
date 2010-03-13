@@ -322,8 +322,6 @@ public final class SubjectiveFrame extends JFrame {
    * Show differences.
    */
   private void showDifferencesDialog(final Collection<SubjectiveScoreDifference> diffs) {
-    // TODO make the be hot links to the correct tab and entry that is
-    // referenced
     final SubjectiveDiffTableModel model = new SubjectiveDiffTableModel(diffs);
     final JTable table = new JTable(model);
     table.setGridColor(Color.BLACK);
