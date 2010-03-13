@@ -8,14 +8,11 @@ package fll.web;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebRequest;
 
 import fll.TestUtils;
 
@@ -73,13 +70,9 @@ public class WebTest /* extends SeleneseTestCase */{
     WebTestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
 
     final WebConversation conversation = new WebConversation();
-    final WebRequest request = new PostMethodWebRequest(TestUtils.URL_ROOT
-        + "admin/SetCurrentTournament");
-    request.setParameter("currentTournament", "DUMMY");
-    conversation.getResponse(request);
+    WebTestUtils.setTournament(conversation, "DUMMY");
 
-    request.setParameter("currentTournament", "State");
-    conversation.getResponse(request);
+    WebTestUtils.setTournament(conversation, "STATE");
   }
 
 }
