@@ -119,7 +119,7 @@ function editFlagBoxClicked() {
         <tr>
            <!-- pick run number -->
           <td align='left'>
-            <select name='RunNumber' disabled='true'>
+            <select name='RunNumber' disabled='disabled'>
 			  <option value='0'>Last Run</option>
 	          <c:forEach var="index" begin="1" end="${maxRunNumber}">
 			    <option value='${index }'>${index }</option>

@@ -55,7 +55,7 @@ final Connection connection = datasource.getConnection();
 
     <form action='FinalistSchedulerUI' method='POST'>
     <p>Would you like to define another category to schedule finalists for? Note that the team numbers entered are checked against the current tournament, but not against the appropriate division.<br/>
-      Category name: <input type="text" name="new-category" size="30"/><br/>      
+      Category name: <input type="text" name="new-category" size="30"/></p>      
       <h2>Division ${division}</h2>
       <table>
       <tr><th>Place</th><th>Team Number</th><th>Team Name</th></tr>
