@@ -24,8 +24,8 @@
           <td>${team.teamName}</td>
           <td>${currentTournament[team.teamNumber] }</td>
           <td>${nextTournament[team.teamNumber] }</td>
-          </c:forEach>
-		</tr>
+          </tr>
+          </c:forEach>		
         </table>
 
         <input type='submit' name='submit' value='Advance Selected Teams' />

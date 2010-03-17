@@ -8,9 +8,7 @@ package fll.xml;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.nio.CharBuffer;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,8 +17,10 @@ import java.sql.Statement;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
 
 import fll.Utilities;
+import fll.db.Queries;
 
 /**
  * Dump the challenge document out of a database.
@@ -62,42 +62,16 @@ public final class ExportDocument {
     Statement stmt = null;
     ResultSet rs = null;
     int exitCode = 0;
+    FileWriter writer = null;
     try {
       connection = Utilities.createDataSource(args[1]).getConnection();
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Value FROM TournamentParameters WHERE Param = 'ChallengeDocument'");
-      if (rs.next()) {
-        final Reader reader = rs.getCharacterStream(1);
-        final FileWriter writer = new FileWriter(challengeFile);
-        try {
-          // copy to the file
-          final CharBuffer buffer = CharBuffer.allocate(32 * 1024);
-          while (reader.read(buffer) != -1
-              || buffer.position() > 0) {
-            buffer.flip();
-            writer.append(buffer);
-            buffer.clear();
-          }
-        } finally {
-          try {
-            reader.close();
-          } catch(final IOException e) {
-            if(LOG.isDebugEnabled()) {
-              LOG.debug(e);
-            }
-          }
-          try {
-            writer.close();
-          } catch(final IOException e) {
-            if(LOG.isDebugEnabled()) {
-              LOG.debug(e);
-            }
-          }
-        }
-
-      } else {
-        throw new RuntimeException("Could not find challenge document in database");
-      }
+      writer = new FileWriter(challengeFile);
+      
+      final Document doc = Queries.getChallengeDocument(connection);
+      final XMLWriter xmlwriter = new XMLWriter();
+      xmlwriter.setOutput(writer);
+      xmlwriter.write(doc);
+      writer.close();
 
     } catch (final UnsupportedEncodingException uee) {
       LOG.fatal("UTF8 not a supported encoding???", uee);
@@ -106,6 +80,15 @@ public final class ExportDocument {
       LOG.fatal("Error talking to database", sqle);
       exitCode = 1;
     } finally {
+      if(null != writer) {
+        try {
+          writer.close();
+        } catch(final IOException e) {
+          if(LOG.isDebugEnabled()) {
+            LOG.debug(e, e);
+          }
+        }
+      }
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closeStatement(stmt);
       SQLFunctions.closeConnection(connection);

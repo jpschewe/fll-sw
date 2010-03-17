@@ -48,6 +48,7 @@ import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.util.FLLRuntimeException;
 
 /**
  * Initialize web attributes.
@@ -78,17 +79,13 @@ public class InitFilter implements Filter {
 
       final String path = httpRequest.getRequestURI();
       if (null != path
-          && (path.startsWith(httpRequest.getContextPath() + "/setup")
-              || path.startsWith(httpRequest.getContextPath() + "/style")
-              || path.startsWith(httpRequest.getContextPath() + "/images") 
-              || path.startsWith(httpRequest.getContextPath() + "/sponsor_logos") 
-              || path.startsWith(httpRequest.getContextPath() + "/wiki") 
-              || path.endsWith(".jpg")
-              || path.endsWith(".gif")
-              || path.endsWith(".png")
-              || path.endsWith(".pdf")
-              || path.endsWith(".html")                               
-          )) {
+          && (path.startsWith(httpRequest.getContextPath()
+              + "/setup")
+              || path.startsWith(httpRequest.getContextPath()
+                  + "/style") || path.startsWith(httpRequest.getContextPath()
+                  + "/images") || path.startsWith(httpRequest.getContextPath()
+                  + "/sponsor_logos") || path.startsWith(httpRequest.getContextPath()
+                  + "/wiki") || path.endsWith(".jpg") || path.endsWith(".gif") || path.endsWith(".png") || path.endsWith(".pdf") || path.endsWith(".html"))) {
         // don't do init on the setup pages
         chain.doFilter(request, response);
       } else {
@@ -140,9 +137,7 @@ public class InitFilter implements Filter {
 
     final boolean dbok = Utilities.testHSQLDB(database);
     if (!dbok) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Database files not ok, redirecting to setup");
-      }
+      LOGGER.warn("Database files not ok, redirecting to setup");
       session
              .setAttribute(SessionAttributes.MESSAGE,
                            "<p class='error'>The database does not exist yet or there is a problem with the database files. Please create the database.<br/></p>");
@@ -168,10 +163,8 @@ public class InitFilter implements Filter {
     // check if the database is initialized
     final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
     if (!dbinitialized) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Database not initialized, redirecting to setup");
-      }
-      session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>The database is not yet initialized. Please create the database.<br/></p>");
+      LOGGER.warn("Database not initialized, redirecting to setup");
+      session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>The database is not yet initialized. Please create the database.</p>");
       return request.getContextPath()
           + "/setup";
     }
@@ -181,11 +174,23 @@ public class InitFilter implements Filter {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Loading challenge descriptor");
       }
-      final Document document = Queries.getChallengeDocument(connection);
-      if (null == document) {
-        throw new RuntimeException("Could not find xml challenge description in the database!");
+      try {
+        final Document document = Queries.getChallengeDocument(connection);
+        if (null == document) {
+          LOGGER.warn("Could not find challenge descriptor");
+          session.setAttribute(SessionAttributes.MESSAGE,
+                               "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
+          return request.getContextPath()
+              + "/setup";
+        }
+        application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, document);
+      } catch (final FLLRuntimeException e) {
+        LOGGER.error("Error getting challenge document", e);
+        session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>"
+            + e.getMessage() + " Please create the database.</p>");
+        return request.getContextPath()
+            + "/setup";
       }
-      application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, document);
     }
 
     // TODO put this in a separate filter to turn off caching

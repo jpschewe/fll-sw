@@ -650,7 +650,7 @@
 
 	<target name="before-checkin" depends="test.unit,test.report" description="Run before a checkin" />
 
-	<target name="install.testdb" description="install the test database" depends="compile">
+	<target name="install.testdb" description="install the test database">
 		<delete>
 			<fileset dir="${dir.web}/WEB-INF">
 				<include name="flldb.*" />

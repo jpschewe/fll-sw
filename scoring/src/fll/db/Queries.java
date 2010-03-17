@@ -37,6 +37,8 @@ import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Utilities;
+import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 import fll.util.ScoreUtils;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.HttpTeamScore;
@@ -67,9 +69,8 @@ public final class Queries {
    * @return Score groups. Map is name of score group to collection of teams in
    *         that score group
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
-public static Map<String, Collection<Integer>> computeScoreGroups(final Connection connection,
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
+  public static Map<String, Collection<Integer>> computeScoreGroups(final Connection connection,
                                                                     final int tournament,
                                                                     final String division,
                                                                     final String categoryName) throws SQLException {
@@ -281,9 +282,8 @@ public static Map<String, Collection<Integer>> computeScoreGroups(final Connecti
    * @param rankingMap
    * @throws SQLException
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate select statement")
-private static void determineSubjectiveRanking(final Connection connection,
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate select statement")
+  private static void determineSubjectiveRanking(final Connection connection,
                                                  final String ascDesc,
                                                  final int tournament,
                                                  final List<String> divisions,
@@ -368,8 +368,7 @@ private static void determineSubjectiveRanking(final Connection connection,
    * the result set will have two columns. The first column is the team number
    * and the second is the score.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "SQL is passed in")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "SQL is passed in")
   private static void computeRanking(final Connection connection,
                                      final int tournament,
                                      final List<String> divisions,
@@ -529,27 +528,10 @@ private static void determineSubjectiveRanking(final Connection connection,
   }
 
   /**
-   * Get the number of scoresheets to print on a single sheet of paper. Returns
-   * an integer value as stored in TournamentParameters table for the
-   * ScoresheetLayoutNUp parameter. Possible values at this time are 1 and 2.
+   * Get the number of scoresheets to print on a single sheet of paper.
    */
   public static int getScoresheetLayoutNUp(final Connection connection) throws SQLException {
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT VALUE FROM TournamentParameters WHERE Param = 'ScoresheetLayoutNUp'");
-      final int nup;
-      if (rs.next()) {
-        nup = rs.getInt(1);
-      } else {
-        nup = 2; // Default to 2-up layout of parameter doesn't exist in DB
-      }
-      return nup;
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
-    }
+    return getIntGlobalParameter(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP);
   }
 
   /**
@@ -561,8 +543,7 @@ private static void determineSubjectiveRanking(final Connection connection,
    * @throws RuntimeException if a parameter is missing.
    * @throws ParseException if the XML document is invalid.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Goals determine columns")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Goals determine columns")
   public static String insertPerformanceScore(final Document document, final Connection connection, final HttpServletRequest request) throws SQLException,
       ParseException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
@@ -588,7 +569,7 @@ private static void determineSubjectiveRanking(final Connection connection,
 
     final int irunNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumber).intValue();
 
-    final int numSeedingRounds = getNumSeedingRounds(connection);
+    final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
 
     final Team team = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("TeamNumber")));
     final TeamScore teamScore = new HttpTeamScore(performanceElement, team.getTeamNumber(), irunNumber, request);
@@ -611,7 +592,8 @@ private static void determineSubjectiveRanking(final Connection connection,
             && Queries.performanceScoreExists(connection, siblingTeam, irunNumber)
             && Queries.isVerified(connection, currentTournament, Team.getTeamFromDatabase(connection, siblingTeam), irunNumber)) {
           final Team opponent = Team.getTeamFromDatabase(connection, siblingTeam);
-          final Team winner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement, winnerCriteria, opponent, team, teamScore, irunNumber);
+          final Team winner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement, winnerCriteria, opponent, team,
+                                                 teamScore, irunNumber);
 
           if (winner != null) {
             final StringBuffer sql = new StringBuffer();
@@ -765,8 +747,7 @@ private static void determineSubjectiveRanking(final Connection connection,
    * @throws ParseException if the XML document is invalid.
    * @throws RuntimeException if a parameter is missing.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
   public static String updatePerformanceScore(final Document document, final Connection connection, final HttpServletRequest request) throws SQLException,
       ParseException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
@@ -791,7 +772,7 @@ private static void determineSubjectiveRanking(final Connection connection,
     }
 
     final int irunNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumber).intValue();
-    final int numSeedingRounds = getNumSeedingRounds(connection);
+    final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
 
     final Team team = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("TeamNumber")));
     final TeamScore teamScore = new HttpTeamScore(performanceElement, team.getTeamNumber(), irunNumber, request);
@@ -821,8 +802,10 @@ private static void determineSubjectiveRanking(final Connection connection,
             throw new RuntimeException("Unable to find one of these team numbers in the database: "
                 + teamNumber + " and " + siblingTeam);
           }
-          final Team oldWinner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement, winnerCriteria, teamA, teamB, irunNumber);
-          final Team newWinner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement, winnerCriteria, teamB, team, teamScore, irunNumber);
+          final Team oldWinner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement, winnerCriteria, teamA, teamB,
+                                                    irunNumber);
+          final Team newWinner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement, winnerCriteria, teamB, team,
+                                                    teamScore, irunNumber);
           Statement stmt = null;
           ResultSet rs = null;
           if (oldWinner != null
@@ -947,7 +930,7 @@ private static void determineSubjectiveRanking(final Connection connection,
    * @throws RuntimeException if a parameter is missing or if the playoff meta
    *           data would become inconsistent due to the deletion.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="OBL_UNSATISFIED_OBLIGATION", justification="Bug in findbugs - ticket:2924739")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "OBL_UNSATISFIED_OBLIGATION", justification = "Bug in findbugs - ticket:2924739")
   public static void deletePerformanceScore(final Connection connection, final HttpServletRequest request) throws SQLException, RuntimeException,
       ParseException {
     final int currentTournament = getCurrentTournament(connection);
@@ -963,7 +946,7 @@ private static void determineSubjectiveRanking(final Connection connection,
       throw new RuntimeException("Missing parameter: RunNumber");
     }
     final int irunNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumber).intValue();
-    final int numSeedingRounds = getNumSeedingRounds(connection);
+    final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
 
     // Check if we need to update the PlayoffData table
     PreparedStatement prep = null;
@@ -1066,12 +1049,7 @@ private static void determineSubjectiveRanking(final Connection connection,
     }
   }
 
-  private static void removePlayoffScore(final Connection connection,
-                                         final String division, 
-                                         final int currentTournament, 
-                                         final int playoffRun, 
-                                         final int ptLine
-                                         )
+  private static void removePlayoffScore(final Connection connection, final String division, final int currentTournament, final int playoffRun, final int ptLine)
       throws SQLException {
     updatePlayoffTable(connection, Team.NULL_TEAM_NUMBER, division, currentTournament, (playoffRun + 1), ((ptLine + 1) / 2));
 
@@ -1125,8 +1103,7 @@ private static void determineSubjectiveRanking(final Connection connection,
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to pick view dynamically")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to pick view dynamically")
   public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection,
                                                       final Map<Integer, Team> tournamentTeams,
                                                       final String division,
@@ -1147,7 +1124,7 @@ private static void determineSubjectiveRanking(final Connection connection,
         prep = connection.prepareStatement("SELECT TeamNumber,Count(*) FROM "
             + view + " WHERE Tournament = ? GROUP BY TeamNumber" + " HAVING Count(*) < ?");
         prep.setInt(1, currentTournament);
-        prep.setInt(2, getNumSeedingRounds(connection));
+        prep.setInt(2, getNumSeedingRounds(connection, currentTournament));
       } else {
         prep = connection.prepareStatement("SELECT "
             + view + ".TeamNumber,Count(" + view + ".TeamNumber) FROM " + view + ",current_tournament_teams WHERE " + view
@@ -1155,7 +1132,7 @@ private static void determineSubjectiveRanking(final Connection connection,
             + ".Tournament = ? GROUP BY " + view + ".TeamNumber HAVING Count(" + view + ".TeamNumber) < ?");
         prep.setString(1, division);
         prep.setInt(2, currentTournament);
-        prep.setInt(3, getNumSeedingRounds(connection));
+        prep.setInt(3, getNumSeedingRounds(connection, currentTournament));
       }
 
       rs = prep.executeQuery();
@@ -1188,8 +1165,7 @@ private static void determineSubjectiveRanking(final Connection connection,
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamically pick view.")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamically pick view.")
   public static List<Team> getTeamsWithExtraRuns(final Connection connection,
                                                  final Map<Integer, Team> tournamentTeams,
                                                  final String division,
@@ -1210,7 +1186,7 @@ private static void determineSubjectiveRanking(final Connection connection,
         prep = connection.prepareStatement("SELECT TeamNumber,Count(*) FROM "
             + view + " WHERE Tournament = ? GROUP BY TeamNumber" + " HAVING Count(*) > ?");
         prep.setInt(1, currentTournament);
-        prep.setInt(2, getNumSeedingRounds(connection));
+        prep.setInt(2, getNumSeedingRounds(connection, currentTournament));
       } else {
         prep = connection.prepareStatement("SELECT "
             + view + ".TeamNumber,Count(" + view + ".TeamNumber) FROM " + view + ",current_tournament_teams WHERE " + view
@@ -1218,7 +1194,7 @@ private static void determineSubjectiveRanking(final Connection connection,
             + ".Tournament = ? GROUP BY " + view + ".TeamNumber" + " HAVING Count(" + view + ".TeamNumber) > ?");
         prep.setString(1, division);
         prep.setInt(2, currentTournament);
-        prep.setInt(3, getNumSeedingRounds(connection));
+        prep.setInt(3, getNumSeedingRounds(connection, currentTournament));
       }
 
       rs = prep.executeQuery();
@@ -1273,9 +1249,8 @@ private static void determineSubjectiveRanking(final Connection connection,
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to choose ascending or descending order based upon winner criteria")
-public static List<Team> getPlayoffSeedingOrder(final Connection connection,
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to choose ascending or descending order based upon winner criteria")
+  public static List<Team> getPlayoffSeedingOrder(final Connection connection,
                                                   final WinnerType winnerCriteria,
                                                   final String divisionStr,
                                                   final Map<Integer, Team> tournamentTeams) throws SQLException, RuntimeException {
@@ -1315,30 +1290,13 @@ public static List<Team> getPlayoffSeedingOrder(final Connection connection,
   }
 
   /**
-   * Get the number of seeding rounds from the database. This value is stored in
-   * the table TournamentParameters with the Param of SeedingRounds. If no such
-   * value exists a value of 3 is inserted and then returned.
+   * Get the number of seeding rounds from the database.
    * 
    * @return the number of seeding rounds
    * @throws SQLException on a database error
    */
-  public static int getNumSeedingRounds(final Connection connection) throws SQLException {
-    ResultSet rs = null;
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Value FROM TournamentParameters WHERE TournamentParameters.Param = 'SeedingRounds'");
-      if (rs.next()) {
-        return rs.getInt(1);
-      } else {
-        // insert default entry
-        setNumSeedingRounds(connection, 3);
-        return 3;
-      }
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
-    }
+  public static int getNumSeedingRounds(final Connection connection, final int tournament) throws SQLException {
+    return getIntTournamentParameter(connection, tournament, TournamentParameters.SEEDING_ROUNDS);
   }
 
   /**
@@ -1346,17 +1304,9 @@ public static List<Team> getPlayoffSeedingOrder(final Connection connection,
    * 
    * @param connection the connection
    * @param newSeedingRounds the new value of seeding rounds
-   * @see #getNumSeedingRounds(Connection)
    */
-  public static void setNumSeedingRounds(final Connection connection, final int newSeedingRounds) throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
-      stmt.executeUpdate("UPDATE TournamentParameters SET Value = "
-          + newSeedingRounds + " WHERE Param = 'SeedingRounds'");
-    } finally {
-      SQLFunctions.closeStatement(stmt);
-    }
+  public static void setNumSeedingRounds(final Connection connection, final int tournament, final int newSeedingRounds) throws SQLException {
+    setIntTournamentParameter(connection, tournament, TournamentParameters.SEEDING_ROUNDS, newSeedingRounds);
   }
 
   /**
@@ -1368,14 +1318,7 @@ public static List<Team> getPlayoffSeedingOrder(final Connection connection,
    * @throws SQLException
    */
   public static void setScoresheetLayoutNUp(final Connection connection, final int newNup) throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
-      stmt.executeUpdate("UPDATE TournamentParameters SET Value = "
-          + newNup + " WHERE Param = 'ScoresheetLayoutNUp'");
-    } finally {
-      SQLFunctions.closeStatement(stmt);
-    }
+    setGlobalParameter(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP, String.valueOf(newNup));
   }
 
   /**
@@ -1423,23 +1366,7 @@ public static List<Team> getPlayoffSeedingOrder(final Connection connection,
    * @return the tournament ID
    */
   public static int getCurrentTournament(final Connection connection) throws SQLException {
-    ResultSet rs = null;
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Value FROM TournamentParameters WHERE TournamentParameters.Param = 'CurrentTournament'");
-      if (rs.next()) {
-        return rs.getInt(1);
-      } else {
-        // insert DUMMY tournament entry
-        final int dummyTournamentID = getTournamentID(connection, "DUMMY");
-        setCurrentTournament(connection, dummyTournamentID);
-        return dummyTournamentID;
-      }
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
-    }
+    return getIntGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT);
   }
 
   /**
@@ -1471,38 +1398,129 @@ public static List<Team> getPlayoffSeedingOrder(final Connection connection,
    * 
    * @param connection
    * @param paramName
-   * @return the ResultSet, you are responsible for closing it
    * @throws SQLException
    */
-  private static ResultSet getTournamentParameter(final Connection connection, final String paramName) throws SQLException {
+  public static double getDoubleTournamentParameter(final Connection connection, final int tournament, final String paramName) throws SQLException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
-      prep = connection.prepareStatement("SELECT Value FROM TournamentParameters WHERE Param = ?");
-      prep.setString(1, paramName);
+      prep = getTournamentParameterStmt(connection, tournament, paramName);
       rs = prep.executeQuery();
-      return rs;
+      if (rs.next()) {
+        return rs.getDouble(1);
+      } else {
+        throw new FLLInternalException("There is no default value for tournament parameter: "
+            + paramName);
+      }
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+
+  /**
+   * 
+   * @param connection
+   * @return the prepared statement for getting a tournament parameter with the values already filled in
+   * @throws SQLException
+   */
+  private static PreparedStatement getTournamentParameterStmt(final Connection connection, 
+                                                              final int tournament,
+                                                              final String paramName) throws SQLException {
+    //TODO this should really be cached
+    PreparedStatement prep = connection
+    .prepareStatement("SELECT param_value FROM tournament_parameters WHERE param = ? AND (tournament = ? OR tournament = ?) ORDER BY tournament DESC");    
+    prep.setString(1, paramName);
+    prep.setInt(2, tournament);
+    prep.setInt(3, GenerateDB.INTERNAL_TOURNAMENT_ID);
+    return prep;
+  }
+  
+  /**
+   * Get the value of a tournament parameter
+   * 
+   * @param connection
+   * @param paramName
+   * @throws SQLException
+   */
+  public static int getIntTournamentParameter(final Connection connection, final int tournament, final String paramName) throws SQLException {
+    ResultSet rs = null;
+    PreparedStatement prep = null;
+    try {
+      prep = getTournamentParameterStmt(connection, tournament, paramName);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        return rs.getInt(1);
+      } else {
+        throw new FLLInternalException("There is no default value for tournament parameter: "
+            + paramName);
+      }
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+
+  /**
+   * Check if a value exists for a parameter for a tournament.
+   * 
+   * @param connection the database connection
+   * @param tournament the tournament to check
+   * @param paramName the parameter to check for
+   * @return true if there is a tournament specific value set
+   * @throws SQLException
+   */
+  public static boolean tournamentParameterValueExists(final Connection connection, final int tournament, final String paramName) throws SQLException {
+    ResultSet rs = null;
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("SELECT param_value FROM tournament_parameters WHERE param = ? AND tournament = ?");
+      prep.setString(1, paramName);
+      prep.setInt(2, tournament);
+      rs = prep.executeQuery();
+      return rs.next();
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+
+  public static void setDoubleTournamentParameter(final Connection connection, final int tournament, final String paramName, final double paramValue)
+      throws SQLException {
+    final boolean paramExists = tournamentParameterValueExists(connection, tournament, paramName);
+    PreparedStatement prep = null;
+    try {
+      if (!paramExists) {
+        prep = connection.prepareStatement("INSERT INTO tournament_parameters (param, param_value, tournament) VALUES (?, ?, ?)");
+      } else {
+        prep = connection.prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?");
+      }
+      prep.setString(1, paramName);
+      prep.setDouble(2, paramValue);
+      prep.setInt(3, tournament);
+
+      prep.executeUpdate();
     } finally {
       SQLFunctions.closePreparedStatement(prep);
     }
   }
 
-  private static void setTournamentParameter(final Connection connection, final String paramName, final String paramValue) throws SQLException {
-    final ResultSet oldValue = getTournamentParameter(connection, paramName);
+  public static void setIntTournamentParameter(final Connection connection, final int tournament, final String paramName, final int paramValue)
+      throws SQLException {
+    final boolean paramExists = tournamentParameterValueExists(connection, tournament, paramName);
     PreparedStatement prep = null;
     try {
-      if (!oldValue.next()) {
-        prep = connection.prepareStatement("INSERT INTO TournamentParameters (Param, Value) VALUES (?, ?)");
-        prep.setString(1, paramName);
-        prep.setString(2, paramValue);
+      if (!paramExists) {
+        prep = connection.prepareStatement("INSERT INTO tournament_parameters (param, param_value, tournament) VALUES (?, ?, ?)");
       } else {
-        prep = connection.prepareStatement("UPDATE TournamentParameters SET Value = ? WHERE Param = ?");
-        prep.setString(1, paramValue);
-        prep.setString(2, paramName);
+        prep = connection.prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?");
       }
+      prep.setString(1, paramName);
+      prep.setInt(2, paramValue);
+      prep.setInt(3, tournament);
+
       prep.executeUpdate();
     } finally {
-      SQLFunctions.closeResultSet(oldValue);
       SQLFunctions.closePreparedStatement(prep);
     }
   }
@@ -1516,7 +1534,7 @@ public static List<Team> getPlayoffSeedingOrder(final Connection connection,
   public static void setCurrentTournament(final Connection connection, final int tournamentID) throws SQLException {
     final int currentID = getCurrentTournament(connection);
     if (currentID != tournamentID) {
-      setTournamentParameter(connection, "CurrentTournament", String.valueOf(tournamentID));
+      setGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT, String.valueOf(tournamentID));
     }
   }
 
@@ -1618,8 +1636,7 @@ public static List<Team> getPlayoffSeedingOrder(final Connection connection,
    * @param connection connection to database, needs delete privileges
    * @throws SQLException on an error talking to the database
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table")
   public static void deleteTeam(final int teamNumber, final Document document, final Connection connection) throws SQLException {
     PreparedStatement prep = null;
     final boolean autoCommit = connection.getAutoCommit();
@@ -1703,9 +1720,8 @@ public static List<Team> getPlayoffSeedingOrder(final Connection connection,
    * @throws SQLException
    * @throws ParseException
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
-public static void updateSubjectiveScoreTotals(final Document document, final Connection connection) throws SQLException, ParseException {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
+  public static void updateSubjectiveScoreTotals(final Document document, final Connection connection) throws SQLException, ParseException {
     final int tournament = getCurrentTournament(connection);
     final Element rootElement = document.getDocumentElement();
 
@@ -1810,20 +1826,24 @@ public static void updateSubjectiveScoreTotals(final Document document, final Co
    * 
    * @param connection connection to the database
    * @return the document
-   * @throws RuntimeException if the document cannot be found
+   * @throws FLLRuntimeException if the document cannot be found
    * @throws SQLException on a database error
    */
   public static Document getChallengeDocument(final Connection connection) throws SQLException, RuntimeException {
+    PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      rs = getTournamentParameter(connection, TournamentParameters.CHALLENGE_DOCUMENT);
+      
+      prep = getGlobalParameterStmt(connection, GlobalParameters.CHALLENGE_DOCUMENT);
+      rs = prep.executeQuery();
       if (rs.next()) {
         return ChallengeParser.parse(new InputStreamReader(rs.getAsciiStream(1)));
       } else {
-        throw new RuntimeException("Could not find challenge document in database");
+        throw new FLLRuntimeException("Could not find challenge document in database");
       }
     } finally {
       SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
     }
   }
 
@@ -1971,9 +1991,8 @@ public static void updateSubjectiveScoreTotals(final Document document, final Co
    * Delete all record of a team from a tournament. This includes the scores and
    * the TournamentTeams table.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
-private static void deleteTeamFromTournamet(final Connection connection, final Document document, final int teamNumber, final int currentTournament)
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
+  private static void deleteTeamFromTournamet(final Connection connection, final Document document, final int teamNumber, final int currentTournament)
       throws SQLException {
     // TODO this could be cached
     PreparedStatement prep = null;
@@ -2161,7 +2180,7 @@ private static void deleteTeamFromTournamet(final Connection connection, final D
                                 final String division) throws SQLException {
 
     final String prevDivision = getDivisionOfTeam(connection, number);
-    
+
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Region = ?, Division = ? WHERE TeamNumber = ?");
@@ -2173,7 +2192,7 @@ private static void deleteTeamFromTournamet(final Connection connection, final D
       prep.executeUpdate();
       SQLFunctions.closePreparedStatement(prep);
       prep = null;
-      
+
       // update event divisions that were referencing the old division
       prep = connection.prepareStatement("UPDATE TournamentTeams SET event_division = ? WHERE TeamNumber = ? AND event_division = ?");
       prep.setString(1, division);
@@ -2182,7 +2201,7 @@ private static void deleteTeamFromTournamet(final Connection connection, final D
       prep.executeUpdate();
       SQLFunctions.closePreparedStatement(prep);
       prep = null;
-      
+
     } finally {
       SQLFunctions.closePreparedStatement(prep);
     }
@@ -2683,29 +2702,6 @@ private static void deleteTeamFromTournamet(final Connection connection, final D
   }
 
   /**
-   * Get a tournament parameter from the database that is a double.
-   * 
-   * @param connection the database connection
-   * @param parameter the parameter name
-   * @return the value
-   * @throws SQLException
-   * @throws IllegalArgumentException if the parameter cannot be found
-   */
-  public static double getDoubleTournamentParameter(final Connection connection, final String parameter) throws SQLException {
-    final ResultSet value = getTournamentParameter(connection, parameter);
-    try {
-      if (value.next()) {
-        return value.getDouble(1);
-      } else {
-        throw new IllegalArgumentException("Can't find '"
-            + parameter + "' in TournamentParameters");
-      }
-    } finally {
-      SQLFunctions.closeResultSet(value);
-    }
-  }
-
-  /**
    * Check that a given tournament exists in the specified database.
    * 
    * @param connection the database
@@ -2785,22 +2781,7 @@ private static void deleteTeamFromTournamet(final Connection connection, final D
     if (!tables.contains("global_parameters")) {
       return 0;
     } else {
-      ResultSet rs = null;
-      try {
-        rs = getGlobalParameter(connection, GlobalParameters.DATABASE_VERSION);
-        if (rs.next()) {
-          final int version = rs.getInt(1);
-          if (rs.wasNull()) {
-            return 0;
-          } else {
-            return version;
-          }
-        } else {
-          return 0;
-        }
-      } finally {
-        SQLFunctions.closeResultSet(rs);
-      }
+      return getIntGlobalParameter(connection, GlobalParameters.DATABASE_VERSION);
     }
   }
 
@@ -2836,21 +2817,102 @@ private static void deleteTeamFromTournamet(final Connection connection, final D
   }
 
   /**
-   * Get the value of a global parameter
    * 
    * @param connection
-   * @param paramName
-   * @return the ResultSet, you are responsible for closing it
+   * @return the prepared statement for getting a global parameter with the values already filled in
    * @throws SQLException
    */
-  private static ResultSet getGlobalParameter(final Connection connection, final String paramName) throws SQLException {
+  private static PreparedStatement getGlobalParameterStmt(final Connection connection, 
+                                                              final String paramName) throws SQLException {
+    //TODO this should really be cached
+    PreparedStatement prep = connection
+    .prepareStatement("SELECT param_value FROM global_parameters WHERE param = ?");    
+    prep.setString(1, paramName);
+    return prep;
+  }
+
+  /**
+   * Get a global parameter from the database that is a double.
+   * 
+   * @param connection the database connection
+   * @param parameter the parameter name
+   * @return the value
+   * @throws SQLException
+   * @throws IllegalArgumentException if the parameter cannot be found
+   */
+  public static double getDoubleGlobalParameter(final Connection connection, final String parameter) throws SQLException {
+    PreparedStatement prep = null;
     ResultSet rs = null;
+    try {
+      prep = getGlobalParameterStmt(connection, parameter);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        return rs.getDouble(1);
+      } else {
+        throw new IllegalArgumentException("Can't find '"
+            + parameter + "' in global_parameters");
+      }
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+
+  /**
+   * Get a global parameter from the database that is an int.
+   * 
+   * @param connection the database connection
+   * @param parameter the parameter name
+   * @return the value
+   * @throws SQLException
+   * @throws IllegalArgumentException if the parameter cannot be found
+   */
+  public static int getIntGlobalParameter(final Connection connection, final String parameter) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = getGlobalParameterStmt(connection, parameter);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        return rs.getInt(1);
+      } else {
+        throw new IllegalArgumentException("Can't find '"
+            + parameter + "' in global_parameters");
+      }
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+
+  /**
+   * Check if a value exists for a global parameter.
+   */
+  /*package*/ static boolean globalParameterExists(final Connection connection, final String paramName) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = getGlobalParameterStmt(connection, paramName);
+      rs = prep.executeQuery();
+      return rs.next();
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
+    }
+  }
+  
+  public static void setGlobalParameter(final Connection connection, final String paramName, final String paramValue) throws SQLException {
+    final boolean exists = globalParameterExists(connection, paramName);
     PreparedStatement prep = null;
     try {
-      prep = connection.prepareStatement("SELECT param_value FROM global_parameters WHERE param = ?");
-      prep.setString(1, paramName);
-      rs = prep.executeQuery();
-      return rs;
+      if (!exists) {
+        prep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
+      } else {
+        prep = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?");
+      }
+      prep.setString(1, paramValue);
+      prep.setString(2, paramName);
+      prep.executeUpdate();
     } finally {
       SQLFunctions.closePreparedStatement(prep);
     }
@@ -2887,7 +2949,7 @@ private static void deleteTeamFromTournamet(final Connection connection, final D
    */
   public static boolean performanceScoreExists(final Connection connection, final int teamNumber, final int runNumber) throws SQLException {
     final int tournament = getCurrentTournament(connection);
-  
+
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -2914,8 +2976,6 @@ private static void deleteTeamFromTournamet(final Connection connection, final D
   /**
    * If team is not null, calls performanceScoreExists(connection,
    * team.getTeamNumber(), runNumber), otherwise returns false.
-   * 
-   * @see performanceScoreExists
    */
   public static boolean performanceScoreExists(final Connection connection, final Team team, final int runNumber) throws SQLException {
     if (null == team) {

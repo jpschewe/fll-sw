@@ -20,6 +20,7 @@
  <c:url value="/setup/index.jsp" />
 </c:set>
 
+<p>
 This will create a database called fll.
 </p>
 <form id='setup' action='CreateDB' method='post'

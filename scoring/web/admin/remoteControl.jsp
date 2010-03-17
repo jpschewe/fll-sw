@@ -1,7 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="java.util.List" %>
-<%@ page import="java.util.Iterator" %>
 
 <%@ page import="java.sql.Connection" %>      
 

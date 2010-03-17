@@ -17,8 +17,8 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.db.GlobalParameters;
 import fll.db.Queries;
-import fll.db.TournamentParameters;
 import fll.xml.XMLUtils;
 
 /**
@@ -129,11 +129,11 @@ public final class ScoreStandardization {
   }
 
   private static double getStandardizedMean(final Connection connection) throws SQLException {
-    return Queries.getDoubleTournamentParameter(connection, TournamentParameters.STANDARDIZED_MEAN);
+    return Queries.getDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_MEAN);
   }
 
   private static double getStandardizedSigma(final Connection connection) throws SQLException {
-    return Queries.getDoubleTournamentParameter(connection, TournamentParameters.STANDARDIZED_SIGMA);
+    return Queries.getDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_SIGMA);
   }
 
   /**
