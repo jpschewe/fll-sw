@@ -107,10 +107,7 @@ public class SchedulerUI extends JFrame {
       final ConstraintViolation selected = getViolationsModel().getViolation(selectedRow);
       if (ConstraintViolation.NO_TEAM != selected.getTeam()) {
         final int teamIndex = getScheduleModel().getIndexOfTeam(selected.getTeam());
-        getScheduleTable().setRowSelectionInterval(teamIndex, teamIndex);
-        // FIXME need to figure out how to scroll to visible correctly
-        // ticket:2963068
-        getScheduleTable().scrollRectToVisible(getScheduleTable().getCellRect(selectedRow, 1, true));
+        getScheduleTable().changeSelection(teamIndex, 1, false, false);        
       }
     }
   };

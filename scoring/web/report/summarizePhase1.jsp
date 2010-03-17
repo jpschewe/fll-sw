@@ -2,16 +2,11 @@
 
 <%@ page import="fll.ScoreStandardization" %>
 <%@ page import="fll.db.Queries" %>
-<%@ page import="fll.Utilities" %>
 <%@ page import="fll.web.ApplicationAttributes"%>
 <%@ page import="fll.web.SessionAttributes" %>
       
 <%@ page import="org.w3c.dom.Document" %>
 
-<%@ page import="java.util.Map" %>
-
-<%@ page import="java.sql.ResultSet" %>
-<%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.Connection" %>
 <%@ page import="javax.sql.DataSource" %>
 
@@ -69,7 +64,7 @@ ScoreStandardization.summarizeScores(connection, challengeDocument, currentTourn
               <td><x:out select="./@title"/></td>
               <td>${row.numTeams}</td>
               <td>${divRow.event_division }</td>
-            <tr>
+            </tr>
           </c:forEach>
         </c:forEach>
       </x:forEach>

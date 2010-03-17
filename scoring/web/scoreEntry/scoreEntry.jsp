@@ -1,7 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Team" %>
-<%@ page import="fll.web.playoff.Playoff" %>
 <%@ page import="fll.web.scoreEntry.ScoreEntry" %>
 
 <%@ page import="org.w3c.dom.Element" %>
@@ -38,12 +37,13 @@ if(dashIndex > 0) {
 }
 final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
-final int numSeedingRounds = Queries.getNumSeedingRounds(connection);
+final int tournament = Queries.getCurrentTournament(connection);
+final int numSeedingRounds = Queries.getNumSeedingRounds(connection, tournament);
 final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
 if(!tournamentTeams.containsKey(new Integer(teamNumber))) {
   throw new RuntimeException("Selected team number is not valid: " + teamNumber);
 }
-final Team team = (Team)tournamentTeams.get(new Integer(teamNumber));
+final Team team = tournamentTeams.get(new Integer(teamNumber));
 
 //the next run the team will be competing in
 final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumber());
@@ -67,7 +67,7 @@ if("1".equals(request.getParameter("EditFlag"))) {
     lRunNumber = runNumber;
   }
 } else {
-    if(nextRunNumber > Queries.getNumSeedingRounds(connection))
+    if(nextRunNumber > numSeedingRounds)
 	{
       if(!Queries.isPlayoffDataInitialized(connection, Queries.getEventDivision(connection, teamNumber)))
       {
@@ -95,7 +95,6 @@ final int maxRunCompleted = Queries.getMaxRunNumber(connection, teamNumber);
 pageContext.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == maxRunCompleted));
 
 //check if the score being edited is a bye
-final int tournament = Queries.getCurrentTournament(connection);
 pageContext.setAttribute("isBye", Boolean.valueOf(Queries.isBye(connection, tournament, teamNumber, lRunNumber)));
 pageContext.setAttribute("isNoShow", Boolean.valueOf(Queries.isNoShow(connection, tournament, teamNumber, lRunNumber)));
 

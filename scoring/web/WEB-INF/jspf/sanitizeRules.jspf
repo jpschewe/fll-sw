@@ -1,4 +1,4 @@
-    <p>The following modifications are made to column names in the uploaded file:
+    <p>The following modifications are made to column names in the uploaded file:</p>
    <ul>
      <li>Replace '#' with '_'</li>
      <li>Replace ' ' with '_'</li>
@@ -9,4 +9,4 @@
      <li>Replace '?' with '_'</li>
      <li>Replace the string 'constraint' with 'CONSTRAINT_'</li>
    </ul>
-     </p>
+

@@ -378,13 +378,14 @@ public final class ImportDB {
   private static void upgrade0To1(final Connection connection, final Document challengeDocument) throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
-    PreparedStatement setVersion = null;
     PreparedStatement stringsToInts = null;
     try {
       stmt = connection.createStatement();
 
+      stmt.executeUpdate("DROP Table IF EXISTS TournamentParameters");
+      
       // add the global_parameters table
-      GenerateDB.globalParameters(connection, true, Queries.getTablesInDB(connection));
+      GenerateDB.createGlobalParameters(challengeDocument, connection, true, Queries.getTablesInDB(connection));
 
       // ---- switch from string tournament names to integers ----
 
@@ -453,16 +454,20 @@ public final class ImportDB {
         }
         SQLFunctions.closePreparedStatement(stringsToInts);
       }
+      
+      // create new tournament parameters table
+      GenerateDB.tournamentParameters(connection, true, Queries.getTablesInDB(connection));
+      
+      GenerateDB.setDefaultParameters(connection);
 
       // set the version to 1 - this will have been set while creating
-      // global_parameters, but we need to set it to 1 for later upgrade
+      // global_parameters, but we need to force it to 1 for later upgrade
       // functions to not be confused
       setDBVersion(connection, 1);
 
     } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closeStatement(stmt);
-      SQLFunctions.closePreparedStatement(setVersion);
       SQLFunctions.closePreparedStatement(stringsToInts);
     }
   }

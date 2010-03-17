@@ -3,7 +3,6 @@
 <%@ page import="fll.db.Queries" %>
  <%@ page import="fll.web.SessionAttributes" %>
   <%@ page import="javax.sql.DataSource" %>
-<%@ page import="java.util.Iterator" %>
 <%@ page import="java.util.List" %>
 
 <%@ page import="java.sql.Connection" %>
@@ -26,7 +25,7 @@
       <ol>
         <li>If using the automatic table assignment feature for scoresheet generation, make
         certain to set up labels for each of your tables, available from the Admin page or by
-        clicking <a href='/fll-sw/admin/tables.jsp'>here</a>.</li><br/>
+        clicking <a href='/fll-sw/admin/tables.jsp'>here</a>.</li>
 
         <li>Check to make sure all teams have scores entered for each seeding round.<br/>
           <form name='check' action='check.jsp' method='get'>

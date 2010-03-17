@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fll title="Duplicate variable - should fail" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="fll.xsd">
+	xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
 
 	<Performance minimumScore="0" weight="1.0">
 		<!-- comment here at the top -->

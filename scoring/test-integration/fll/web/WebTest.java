@@ -8,47 +8,71 @@ package fll.web;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import junit.framework.Assert;
-
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebRequest;
-import com.meterware.httpunit.WebResponse;
 
 import fll.TestUtils;
 
 /**
- * Basic tests.
- * 
- * @version $Revision$
+ * Basic tests of loading pages.
  */
-public class WebTest {
+public class WebTest /* extends SeleneseTestCase */{
 
   private static final Logger LOG = Logger.getLogger(WebTest.class);
+
+  // @Override
+  // public void setUp() throws Exception {
+  // super.setUp("http://localhost:9080/setup");
+  // }
 
   /**
    * Basic load of the pages.
    */
   @Test
   public void testPages() throws SAXException, MalformedURLException, IOException {
-    final String[] pages = new String[] { "", "display.jsp", "index.jsp", "welcome.jsp",
-
-    };
+    final String[] pages = new String[] { // 
+        "", //
+        "display.jsp", //
+        "index.jsp", //
+        "welcome.jsp", "admin", "admin/index.jsp", "admin/edit_event_division.jsp", "admin/tournaments.jsp", "admin/judges.jsp", "admin/tables.jsp",
+        "admin/select_team.jsp", "admin/remoteControl.jsp", //
+        "credits/credits.jsp", //
+        "developer/index.jsp", "developer/query.jsp", //
+        "playoff/index.jsp", "playoff/check.jsp?division=__all__",
+        // "playoff/remoteMain.jsp",
+        "report/index.jsp",
+        // "report/CategorizedScores",
+        // "report/ScoreGroupScores",
+        // "scoreboard/index.jsp",
+        // "scoreboard/main.jsp",
+        // "scoreboard_800/main.jsp",
+        "scoreEntry/select_team.jsp", "setup/index.jsp", "style/style.jsp", "troubleshooting/index.jsp", };
     final WebConversation conversation = new WebConversation();
     for (final String page : pages) {
       LOG.info("Testing page #"
           + page + "#");
-      TestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
+      WebTestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
 
-      final WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + page);
-      final WebResponse response = conversation.getResponse(request);
-      Assert.assertTrue(response.isHTML());
+      final String url = TestUtils.URL_ROOT
+          + page;
+      WebTestUtils.loadPage(conversation, url);
     }
+  }
+
+  /**
+   * Test changing tournaments to DUMMY and then back to State.
+   */
+  @Test
+  public void testChangeTournament() throws MalformedURLException, IOException, SAXException {
+    WebTestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
+
+    final WebConversation conversation = new WebConversation();
+    WebTestUtils.setTournament(conversation, "DUMMY");
+
+    WebTestUtils.setTournament(conversation, "STATE");
   }
 
 }

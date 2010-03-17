@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="fll.xsd" title="FLL 2003 Challenge: Mission Mars">
+	xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" title="FLL 2003 Challenge: Mission Mars">
 
 	<!-- $Rev$ -->
 

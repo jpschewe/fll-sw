@@ -59,9 +59,6 @@ if "%CLASSPATH%"=="" set _USE_CLASSPATH=no
 
 rem Slurp the command line arguments. This loop allows for an unlimited number
 rem of arguments (up to the command line limit, anyway).
-set ANT_CMD_LINE_ARGS=%1
-if ""%1""=="""" goto doneStart
-shift
 :setupArgs
 if ""%1""=="""" goto doneStart
 if ""%1""==""-noclasspath"" goto clearclasspath
@@ -80,7 +77,7 @@ rem and for NT handling to skip to.
 
 :doneStart
 
-if _USE_CLASSPATH==no goto findAntHome
+if "%_USE_CLASSPATH%"=="no" goto findAntHome
 
 :stripClasspath
 if not _%CLASSPATH:~-1%==_\ goto findAntHome

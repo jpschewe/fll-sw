@@ -41,7 +41,7 @@ body {
     <center>
      <h1><x:out select="$challengeDocument/fll/@title"/></h1>
       
-      <img height="40%" align='center' src='<c:url value="/images/logo.gif"/>' /><br />
+      <img height="40%" align='middle' src='<c:url value="/images/logo.gif"/>' /><br />
 
 <table>
 <tr><td>
