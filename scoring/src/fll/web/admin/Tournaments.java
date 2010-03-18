@@ -80,7 +80,7 @@ public final class Tournaments {
     }
 
     if (verified) {
-      commitData(request, response, connection);
+      commitData(session, request, response, connection);
     } else {
       out
          .println("<p><b>Tournament name's must be unique and next tournament must refer to the name of another tournament listed.  Tournaments can be removed by erasing the name.</b></p>");
@@ -369,11 +369,13 @@ public final class Tournaments {
    * Commit the subjective data from request to the database and redirect
    * response back to index.jsp.
    */
-  private static void commitData(final HttpServletRequest request, final HttpServletResponse response, final Connection connection) throws SQLException,
+  private static void commitData(final HttpSession session, final HttpServletRequest request, final HttpServletResponse response, final Connection connection) throws SQLException,
       IOException {
     createAndInsertTournaments(request, connection);
     setNextTournaments(request, connection);
 
+    session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'>Successfully committed tournament changes.</p>");
+    
     // finally redirect to index.jsp
     // out.println("DEBUG: normally you'd be redirected to <a href='index.jsp'>here</a>");
     response.sendRedirect(response.encodeRedirectURL("index.jsp"));
