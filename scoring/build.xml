@@ -40,7 +40,7 @@
 
 	<import file="${basedir}/buildscript-imports.xml" />
 
-	<taskdef name="findbugs" classpath="${dir.findbugs.lib}/findbugs-ant.jar" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" />
+	<taskdef name="findbugs" classpath="${dir.lib.findbugs}/findbugs-ant.jar" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" />
 
 
 	<taskdef name="one-jar" classname="com.simontuffs.onejar.ant.OneJarTask">
