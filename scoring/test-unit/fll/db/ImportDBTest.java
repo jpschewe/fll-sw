@@ -26,7 +26,6 @@ import fll.Utilities;
 
 /**
  * @author jpschewe
- * @version $Revision$
  */
 public class ImportDBTest {
 
