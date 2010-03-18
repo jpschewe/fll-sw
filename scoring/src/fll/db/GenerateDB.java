@@ -349,7 +349,7 @@ public final class GenerateDB {
             + "  param varchar(64) NOT NULL" //
             + " ,param_value longvarchar NOT NULL" //
             + " ,tournament integer NOT NULL" //
-            + " ,CONSTRAINT tournament_parameters_pk PRIMARY KEY  (param)" //
+            + " ,CONSTRAINT tournament_parameters_pk PRIMARY KEY  (param, tournament)" //
             + " ,CONSTRAINT tournament_parameters_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)" //
             + ")");
       }
