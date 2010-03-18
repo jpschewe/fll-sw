@@ -170,6 +170,11 @@ public class SchedulerUI extends JFrame {
         errorFormatter.format("Error reloading file: %s", e.getMessage());
         LOGGER.error(errorFormatter, e);
         JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reloading file", JOptionPane.ERROR_MESSAGE);
+      } catch (final ScheduleParseException e) {
+        final Formatter errorFormatter = new Formatter();
+        errorFormatter.format("Error parsing file: %s", e.getMessage());
+        LOGGER.error(errorFormatter, e);
+        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
       }
     }
   };
@@ -294,6 +299,12 @@ public class SchedulerUI extends JFrame {
             errorFormatter.format("Unknown file format %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
             LOGGER.error(errorFormatter, e);
             JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file", JOptionPane.ERROR_MESSAGE);
+            return;
+          } catch (final ScheduleParseException e) {
+            final Formatter errorFormatter = new Formatter();
+            errorFormatter.format("Error parsing file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
+            LOGGER.error(errorFormatter, e);
+            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
             return;
           }
 
