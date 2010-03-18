@@ -42,17 +42,31 @@ public class EditTournamentsTest extends SeleneseTestCase {
     selenium.click("link=Edit Tournaments");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
     
-    // FIXME need to figure out how to check for the value of each input box nameX where X is 0..numRows-1
-    Assert.assertFalse("Should not have internal tournament listed", selenium.isTextPresent(GenerateDB.INTERNAL_TOURNAMENT_NAME));
-    
     selenium.click("addRow");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
-    // type in tournament name 
-//    selenium.
+    // get num rows
+    final String numRowsStr = selenium.getValue("numRows");
+    Assert.assertNotNull(numRowsStr);
+    final int numRows = Integer.valueOf(numRowsStr);
+    
+    // type in tournament name
+    final int lastRowIdx = numRows-1;
+    final String lastRowName = "name" + lastRowIdx;
+    final String lastRowValue = selenium.getValue(lastRowName);
+    if(!(null == lastRowValue || "".equals(lastRowValue))) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      Assert.fail("There should not be a value in the last row");
+    }
+    
+    selenium.type(lastRowName, "test tournament");   
     selenium.click("commit");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
+    if(!selenium.isTextPresent("Successfully committed tournament changes")) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      Assert.fail("Didn't get success from commit");  
+    }
   }
 
 }
