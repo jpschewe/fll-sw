@@ -185,7 +185,10 @@ public class ParseSchedule {
     return Collections.unmodifiableList(_schedule);
   }
 
-  public ParseSchedule(final File f, final String sheetName) throws IOException, ParseException, InvalidFormatException {
+  /**
+   * @throws ScheduleParseException if there is an error parsing the schedule
+   */
+  public ParseSchedule(final File f, final String sheetName) throws IOException, ParseException, InvalidFormatException, ScheduleParseException {
     _file = f;
     _sheetName = sheetName;
 
@@ -313,8 +316,9 @@ public class ParseSchedule {
    * Parse the data of the schedule.
    * 
    * @throws IOException
+   * @throws ScheduleParseException  if there is an error with the schedule
    */
-  private void parseData(final CellFileReader reader) throws IOException, ParseException {
+  private void parseData(final CellFileReader reader) throws IOException, ParseException, ScheduleParseException {
     TeamScheduleInfo ti;
     while (null != (ti = parseLine(reader))) {
       _schedule.add(ti);
@@ -628,7 +632,8 @@ public class ParseSchedule {
   }
 
   /**
-   * Comparator for TeamScheduleInfo based up the performance times for a specified round.
+   * Comparator for TeamScheduleInfo based up the performance times for a
+   * specified round.
    */
   private static final class PerformanceComparator implements Comparator<TeamScheduleInfo>, Serializable {
     private final int round;
@@ -1072,10 +1077,11 @@ public class ParseSchedule {
   }
 
   /**
-   * @return the schedule info or null if there was an error, or the last line
-   *         is hit
+   * @return the schedule info or null if the last line is read
+   * @throws ScheduleParseException if there is an error with the schedule being
+   *           read
    */
-  private TeamScheduleInfo parseLine(final CellFileReader reader) throws IOException, ParseException {
+  private TeamScheduleInfo parseLine(final CellFileReader reader) throws IOException, ParseException, ScheduleParseException {
     final String[] line = reader.readNext();
 
     try {
@@ -1122,9 +1128,10 @@ public class ParseSchedule {
       ti.setPerfTableSide(0, Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue());
       if (ti.getPerfTableSide(0) > 2
           || ti.getPerfTableSide(0) < 1) {
-        // FIXME need to do something more serious here so the GUI catches it
-        LOGGER.error("There are only two sides to the table, number must be 1 or 2 team: "
-            + ti.getTeamNumber() + " round 1");
+        final String message = "There are only two sides to the table, number must be 1 or 2 team: "
+          + ti.getTeamNumber() + " round 1"; 
+        LOGGER.error(message);
+        throw new ScheduleParseException(message);
       }
 
       table = line[_perf2TableColumn];
@@ -1137,9 +1144,10 @@ public class ParseSchedule {
       ti.setPerfTableSide(1, Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue());
       if (ti.getPerfTableSide(1) > 2
           || ti.getPerfTableSide(1) < 1) {
-        // FIXME need to do something more serious here so the GUI catches it
-        LOGGER.error("There are only two sides to the table, number must be 1 or 2 team: "
-            + ti.getTeamNumber() + " round 2");
+final String message = "There are only two sides to the table, number must be 1 or 2 team: "
+            + ti.getTeamNumber() + " round 2";
+LOGGER.error(message);
+        throw new ScheduleParseException(message);
       }
       final String perf2Str = line[_perf2Column];
       if ("".equals(perf2Str)) {
@@ -1158,9 +1166,10 @@ public class ParseSchedule {
       ti.setPerfTableSide(2, Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue());
       if (ti.getPerfTableSide(2) > 2
           || ti.getPerfTableSide(2) < 1) {
-        // FIXME need to do something more serious here so the GUI catches it
-        LOGGER.error("There are only two sides to the table, number must be 1 or 2 team: "
-            + ti.getTeamNumber() + " round 2");
+        final String message = "There are only two sides to the table, number must be 1 or 2 team: "
+            + ti.getTeamNumber() + " round 2";
+        LOGGER.error(message);
+        throw new ScheduleParseException(message);
       }
       final String perf3Str = line[_perf3Column];
       if ("".equals(perf3Str)) {
