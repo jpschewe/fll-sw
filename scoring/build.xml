@@ -733,6 +733,8 @@
 		<antcall target="tomcat.start.test" />
 		<antcall target="selenium.start" />
 
+		<mkdir dir="${dir.build}/screenshots" />
+
 		<junit fork="yes" haltonfailure="false" dir="${dir.build}" failureproperty="test.failed">
 
 			<classpath>
