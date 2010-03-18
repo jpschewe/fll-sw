@@ -36,20 +36,21 @@ public class EditTournamentsTest extends SeleneseTestCase {
     final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
     IntegrationTestUtils.initializeDatabase(selenium, challengeStream, true);
     
-    selenium.click("Admin Index");
+    selenium.click("link=Admin Index");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
-    selenium.click("Edit Tournaments");
+    selenium.click("link=Edit Tournaments");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
     
+    // FIXME need to figure out how to check for the value of each input box nameX where X is 0..numRows-1
     Assert.assertFalse("Should not have internal tournament listed", selenium.isTextPresent(GenerateDB.INTERNAL_TOURNAMENT_NAME));
     
-    selenium.click("Add Row");
+    selenium.click("addRow");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
     // type in tournament name 
 //    selenium.
-    selenium.click("Finished");
+    selenium.click("commit");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
   }
