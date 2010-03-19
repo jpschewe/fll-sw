@@ -296,22 +296,29 @@ public final class GenerateDB {
       stmt.executeUpdate(finalScores.toString());
 
       // create views
-
-      // max seeding round score
-      // FIXME needs to be updated to handle tournament value and default value
-      // -- make only in the context of the current tournament
+      
+      // max seeding round score for the current tournament
       stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
       // TODO: can use PreparedStatement here?
       stmt.executeUpdate("CREATE VIEW performance_seeding_max AS "//
           + " SELECT TeamNumber, Tournament, Max(ComputedTotal) As Score" //
           + " FROM Performance" //
           + " WHERE NoShow = 0" //
-          + " AND RunNumber <= "//
-          + " (SELECT param_value FROM tournament_parameters " //
-          + "       WHERE tournament_parameters.param = 'SeedingRounds'" //
+          + " AND RunNumber <= ("//
+          // compute the run number for the current tournament
+          + "   SELECT param_value FROM tournament_parameters" //
+          + "     WHERE param = 'SeedingRounds' AND tournament = (" 
+          + "       SELECT MAX(tournament) FROM tournament_parameters"//
+          + "         WHERE param = 'SeedingRounds'"// 
+          + "           AND ( tournament = -1 OR tournament = ("//
+          // current tournament
+          + "             SELECT param_value FROM global_parameters"//
+          + "               WHERE  param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'  )"//
+          + "        ) )"
           + " ) GROUP BY TeamNumber, Tournament");
 
       // current tournament teams
+      //TODO: can use PreparedStatement here?
       stmt.executeUpdate("DROP VIEW IF EXISTS current_tournament_teams");
       stmt.executeUpdate("CREATE VIEW current_tournament_teams AS "//
           + " SELECT * FROM TournamentTeams" //
