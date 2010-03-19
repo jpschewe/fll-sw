@@ -42,6 +42,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.util.FLLRuntimeException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -100,6 +101,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
                              final String tournamentName,
                              final int tournament, 
                              final SimpleFooterHandler pageHandler) throws SQLException, IOException {
+    if(tournament != Queries.getCurrentTournament(connection)) {
+      throw new FLLRuntimeException("Cannot generate final score report for a tournament other than the current tournament");
+    }
 
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
     final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
