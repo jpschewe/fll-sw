@@ -628,8 +628,8 @@ public final class ImportDB {
         SQLFunctions.closePreparedStatement(destPrep);
 
         final StringBuffer columns = new StringBuffer();
-        columns.append(" TeamNumber,");
         columns.append(" Tournament,");
+        columns.append(" TeamNumber,");
         final List<Element> goals = XMLUtils.filterToElements(categoryElement.getElementsByTagName("goal"));
         final int numColumns = goals.size() + 3;
         for (final Element element : goals) {
@@ -652,13 +652,15 @@ public final class ImportDB {
         }
         sql.append(")");
         destPrep = destinationConnection.prepareStatement(sql.toString());
-
+        destPrep.setInt(1, destTournamentID);
+        
         sourcePrep = sourceConnection.prepareStatement("SELECT "
             + columns.toString() + " FROM " + tableName + " WHERE Tournament = ?");
         sourcePrep.setInt(1, sourceTournamentID);
         sourceRS = sourcePrep.executeQuery();
         while (sourceRS.next()) {
-          for (int i = 0; i < numColumns; i++) {
+          // skip tournament column
+          for (int i = 1; i < numColumns; i++) {
             Object sourceObj = sourceRS.getObject(i + 1);
             if ("".equals(sourceObj)) {
               sourceObj = null;
@@ -696,10 +698,11 @@ public final class ImportDB {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
       SQLFunctions.closePreparedStatement(destPrep);
+      destPrep = null;
 
       final StringBuffer columns = new StringBuffer();
-      columns.append(" TeamNumber,");
       columns.append(" Tournament,");
+      columns.append(" TeamNumber,");
       columns.append(" RunNumber,");
       // Note: If TimeStamp is no longer the 4th element, then the hack below
       // needs to be modified
@@ -728,13 +731,15 @@ public final class ImportDB {
       }
       sql.append(")");
       destPrep = destinationConnection.prepareStatement(sql.toString());
-
+      destPrep.setInt(1, destTournamentID);
+      
       sourcePrep = sourceConnection.prepareStatement("SELECT "
           + columns.toString() + " FROM " + tableName + " WHERE Tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
-        for (int i = 0; i < numColumns; i++) {
+        // skip tournament column
+        for (int i = 1; i < numColumns; i++) {
           Object sourceObj = sourceRS.getObject(i + 1);
           if ("".equals(sourceObj)) {
             sourceObj = null;
