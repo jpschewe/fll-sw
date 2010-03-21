@@ -38,6 +38,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebForm;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.thoughtworks.selenium.SeleneseTestCase;
 
 import fll.TestUtils;
 import fll.Tournament;
@@ -48,13 +49,17 @@ import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 
 /**
- * Do full tournament tests.
+ * Test a full tournament.
  * 
- * @version $Revision$
  */
-public class FullTournamentTest {
+public class FullTournamentTest extends SeleneseTestCase {
 
   private static final Logger LOGGER = Logger.getLogger(FullTournamentTest.class);
+
+  @Override
+  public void setUp() throws Exception {
+    super.setUp("http://localhost:9080/setup");
+  }
 
   /**
    * Test a full tournament as a single thread. This tests to make sure
@@ -65,31 +70,12 @@ public class FullTournamentTest {
   @Test
   public void testSerial() throws MalformedURLException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException,
       ParseException, SQLException, InterruptedException {
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("Starting serial test");
-    }
-    doFullTournament(false);
-  }
-
-  /**
-   * Test a full tournament as multiple threads. This is a more of a stress
-   * test.
-   * 
-   * @throws InterruptedException
-   */
-  @Test
-  public void testParallel() throws MalformedURLException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-      ParseException, SQLException, InterruptedException {
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("Starting parallel test");
-    }
-    doFullTournament(true);
+    doFullTournament();
   }
 
   /**
    * Run a full tournament.
    * 
-   * @param parallel if true run many of the tasks in parallel
    * @throws MalformedURLException
    * @throws IOException
    * @throws SAXException
@@ -100,7 +86,7 @@ public class FullTournamentTest {
    * @throws SQLException
    * @throws InterruptedException
    */
-  private void doFullTournament(final boolean parallel) throws MalformedURLException, IOException, SAXException, ClassNotFoundException,
+  private void doFullTournament() throws MalformedURLException, IOException, SAXException, ClassNotFoundException,
       InstantiationException, IllegalAccessException, ParseException, SQLException, InterruptedException {
     final int numSeedingRounds = 3;
 
@@ -121,7 +107,7 @@ public class FullTournamentTest {
 
       // --- initialize database ---
       final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml");
-      WebTestUtils.initializeDatabase(challengeDocIS);
+      IntegrationTestUtils.initializeDatabase(selenium, challengeDocIS, true);
 
       // --- load teams ---
       // find upload form on admin page
@@ -291,7 +277,7 @@ public class FullTournamentTest {
       prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?");
       boolean initializedPlayoff = false;
       prep.setString(1, testTournamentName);
-      final ScoreEntryQueue scoreEntryQueue = new ScoreEntryQueue(parallel ? 4 : 1, testDataConn, performanceElement, testTournamentName);
+      final ScoreEntryQueue scoreEntryQueue = new ScoreEntryQueue(1, testDataConn, performanceElement, testTournamentName);
       for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
         request = new GetMethodWebRequest(TestUtils.URL_ROOT
             + "playoff");
