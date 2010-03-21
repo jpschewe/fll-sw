@@ -19,6 +19,7 @@ import org.w3c.dom.Element;
 
 import fll.db.GlobalParameters;
 import fll.db.Queries;
+import fll.util.FLLRuntimeException;
 import fll.xml.XMLUtils;
 
 /**
@@ -41,6 +42,10 @@ public final class ScoreStandardization {
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable param for column to set")
   public static void summarizeScores(final Connection connection, final Document document, final int tournament) throws SQLException, ParseException {
+    if(tournament != Queries.getCurrentTournament(connection)) {
+      throw new FLLRuntimeException("Cannot compute summarized scores for a tournament other than the current tournament");
+    }
+    
     Statement stmt = null;
     PreparedStatement deletePrep = null;
     PreparedStatement insertPrep = null;

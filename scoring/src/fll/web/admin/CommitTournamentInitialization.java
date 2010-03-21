@@ -22,7 +22,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
-import fll.db.Queries;
+import fll.Tournament;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -61,7 +61,8 @@ public class CommitTournamentInitialization extends BaseFLLServlet {
             && !"submit".equals(param)) {
           final String value = request.getParameter(param).replaceAll("&amp;", "&");
           if (!"nochange".equals(value)) {
-            final int newTournamentID = Queries.getTournamentID(connection, value);
+            final Tournament tournament = Tournament.findTournamentByName(connection, value);
+            final int newTournamentID = tournament.getTournamentID();
             deletePrep.setString(1, param);
             deletePrep.executeUpdate();
 

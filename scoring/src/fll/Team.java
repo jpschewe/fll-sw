@@ -16,9 +16,11 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 /**
  * The static state of a team. This does not include information about the team
  * at a given tournament. Note that the {@link #getDivision() division}
- * attribute represents the division the team is entered in, which may not be
+ * attribute represents the division the team is registered in, which may not be
  * the same division that the team is competing in at a tournament (called
- * {@link fll.db.Queries#getEventDivision(Connection, int) event division}).
+ * {@link fll.db.Queries#getEventDivision(Connection, int) event division}). If
+ * someone changes the database, this object does not notice the changes. It's a
+ * snapshot in time from when the object was created.
  */
 public final class Team {
 
@@ -65,16 +67,16 @@ public final class Team {
     public int compare(final Team one, final Team two) {
       final int oneNum = one.getTeamNumber();
       final int twoNum = two.getTeamNumber();
-      if(oneNum < twoNum) {
+      if (oneNum < twoNum) {
         return -1;
-      } else if(oneNum > twoNum) {
+      } else if (oneNum > twoNum) {
         return 1;
       } else {
         return 0;
       }
     }
   };
-  
+
   public Team() {
 
   }
@@ -103,7 +105,7 @@ public final class Team {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
-      
+
       stmt = connection.prepareStatement("SELECT Division, Organization, Region, TeamName FROM Teams"
           + " WHERE TeamNumber = ?");
       stmt.setInt(1, teamNumber);
@@ -241,13 +243,12 @@ public final class Team {
   }
 
   /**
-   * 
    * @return if this is an internal team
    */
   public boolean isInternal() {
     return isInternalTeamNumber(getTeamNumber());
   }
-  
+
   /**
    * Check if this an internal team number.
    */

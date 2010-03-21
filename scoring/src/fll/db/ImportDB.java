@@ -35,8 +35,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import au.com.bytecode.opencsv.CSVReader;
-
 import fll.Team;
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.TeamPropertyDifference.TeamProperty;
 import fll.web.developer.importdb.TournamentDifference;
@@ -203,33 +203,22 @@ public final class ImportDB {
           destPrep.executeUpdate();
         }
       }
+      SQLFunctions.closeResultSet(memRS);
+      memRS = null;
+      SQLFunctions.closePreparedStatement(destPrep);
+      destPrep = null;
 
       // load all of the tournaments
-      final List<String> initialTournaments = Queries.getTournamentNames(destConnection);
-      memRS = memStmt.executeQuery("SELECT Name, Location, NextTournament FROM Tournaments");
-      while (memRS.next()) {
-        final String tournament = memRS.getString(1);
-        final String location = memRS.getString(2);
-        final int nextTournament = memRS.getInt(3);
-        final boolean nextNull = memRS.wasNull();
-
-        // add the tournament to the tournaments table if it doesn't already
-        // exist
-        if (!initialTournaments.contains(tournament)) {
-          if (nextNull) {
-            Queries.createTournament(destConnection, tournament, location);
-          } else {
-            Queries.createTournament(destConnection, tournament, location, nextTournament);
-          }
+      for (final Tournament sourceTournament : Tournament.getTournaments(memConnection)) {
+        if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(sourceTournament.getName())
+            && GenerateDB.INTERNAL_TOURNAMENT_ID != sourceTournament.getTournamentID()) {
+          createTournament(sourceTournament, destConnection);
         }
       }
-      SQLFunctions.closeResultSet(memRS);
 
       // for each tournament listed in the dump file, import it
-      memRS = memStmt.executeQuery("SELECT Name, Location, NextTournament FROM Tournaments");
-      while (memRS.next()) {
-        final String tournament = memRS.getString(1);
-
+      for (final Tournament sourceTournament : Tournament.getTournaments(memConnection)) {
+        final String tournament = sourceTournament.getName();
         // import the data from the tournament
         importDatabase(memConnection, destConnection, tournament);
       }
@@ -252,6 +241,24 @@ public final class ImportDB {
       SQLFunctions.closePreparedStatement(destPrep);
       SQLFunctions.closeStatement(destStmt);
       SQLFunctions.closeConnection(destConnection);
+    }
+  }
+
+  /**
+   * Recursively create a tournament and it's next tournament.
+   */
+  private static void createTournament(final Tournament sourceTournament, final Connection destConnection) throws SQLException {
+    // add the tournament to the tournaments table if it doesn't already
+    // exist
+    final Tournament destTournament = Tournament.findTournamentByName(destConnection, sourceTournament.getName());
+    if (null == destTournament) {
+      if (null == sourceTournament.getNextTournament()) {
+        Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getLocation());
+      } else {
+        createTournament(sourceTournament.getNextTournament(), destConnection);
+        final Tournament nextTournament = Tournament.findTournamentByName(destConnection, sourceTournament.getNextTournament().getName());
+        Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getLocation(), nextTournament.getTournamentID());
+      }
     }
   }
 
@@ -383,7 +390,7 @@ public final class ImportDB {
       stmt = connection.createStatement();
 
       stmt.executeUpdate("DROP Table IF EXISTS TournamentParameters");
-      
+
       // add the global_parameters table
       GenerateDB.createGlobalParameters(challengeDocument, connection, true, Queries.getTablesInDB(connection));
 
@@ -409,20 +416,22 @@ public final class ImportDB {
       GenerateDB.tournaments(connection, true, Queries.getTablesInDB(connection));
 
       // add all tournaments back
-      final List<String> defaultTournaments = Queries.getTournamentNames(connection);
       for (final Map.Entry<String, String> entry : nameLocation.entrySet()) {
-        if (!defaultTournaments.contains(entry.getKey())) {
-          Queries.createTournament(connection, entry.getKey(), entry.getValue());
+        if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(entry.getKey())) {
+          final Tournament tournament = Tournament.findTournamentByName(connection, entry.getKey());
+          if (null == tournament) {
+            Tournament.createTournament(connection, entry.getKey(), entry.getValue());
+          }
         }
       }
       // set next tournaments
       for (final Map.Entry<String, String> entry : nameNext.entrySet()) {
-        if (!defaultTournaments.contains(entry.getKey())) {
+        if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(entry.getKey())) {
           if (LOG.isDebugEnabled()) {
             LOG.debug("Setting next tournament of #"
                 + entry.getKey() + "# to #" + entry.getValue() + "#");
           }
-          Queries.setNextTournament(connection, entry.getKey(), entry.getValue());
+          Tournament.setNextTournament(connection, entry.getKey(), entry.getValue());
         }
       }
 
@@ -454,10 +463,10 @@ public final class ImportDB {
         }
         SQLFunctions.closePreparedStatement(stringsToInts);
       }
-      
+
       // create new tournament parameters table
       GenerateDB.tournamentParameters(connection, true, Queries.getTablesInDB(connection));
-      
+
       GenerateDB.setDefaultParameters(connection);
 
       // set the version to 1 - this will have been set while creating
@@ -503,8 +512,10 @@ public final class ImportDB {
     final Document document = Queries.getChallengeDocument(destinationConnection);
     final Element rootElement = document.getDocumentElement();
 
-    final int sourceTournamentID = Queries.getTournamentID(sourceConnection, tournamentName);
-    final int destTournamentID = Queries.getTournamentID(destinationConnection, tournamentName);
+    final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournamentName);
+    final int sourceTournamentID = sourceTournament.getTournamentID();
+    final Tournament destTournament = Tournament.findTournamentByName(destinationConnection, tournamentName);
+    final int destTournamentID = destTournament.getTournamentID();
 
     importJudges(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
@@ -617,8 +628,8 @@ public final class ImportDB {
         SQLFunctions.closePreparedStatement(destPrep);
 
         final StringBuffer columns = new StringBuffer();
-        columns.append(" TeamNumber,");
         columns.append(" Tournament,");
+        columns.append(" TeamNumber,");
         final List<Element> goals = XMLUtils.filterToElements(categoryElement.getElementsByTagName("goal"));
         final int numColumns = goals.size() + 3;
         for (final Element element : goals) {
@@ -641,13 +652,15 @@ public final class ImportDB {
         }
         sql.append(")");
         destPrep = destinationConnection.prepareStatement(sql.toString());
-
+        destPrep.setInt(1, destTournamentID);
+        
         sourcePrep = sourceConnection.prepareStatement("SELECT "
             + columns.toString() + " FROM " + tableName + " WHERE Tournament = ?");
         sourcePrep.setInt(1, sourceTournamentID);
         sourceRS = sourcePrep.executeQuery();
         while (sourceRS.next()) {
-          for (int i = 0; i < numColumns; i++) {
+          // skip tournament column
+          for (int i = 1; i < numColumns; i++) {
             Object sourceObj = sourceRS.getObject(i + 1);
             if ("".equals(sourceObj)) {
               sourceObj = null;
@@ -685,10 +698,11 @@ public final class ImportDB {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
       SQLFunctions.closePreparedStatement(destPrep);
+      destPrep = null;
 
       final StringBuffer columns = new StringBuffer();
-      columns.append(" TeamNumber,");
       columns.append(" Tournament,");
+      columns.append(" TeamNumber,");
       columns.append(" RunNumber,");
       // Note: If TimeStamp is no longer the 4th element, then the hack below
       // needs to be modified
@@ -717,13 +731,15 @@ public final class ImportDB {
       }
       sql.append(")");
       destPrep = destinationConnection.prepareStatement(sql.toString());
-
+      destPrep.setInt(1, destTournamentID);
+      
       sourcePrep = sourceConnection.prepareStatement("SELECT "
           + columns.toString() + " FROM " + tableName + " WHERE Tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
-        for (int i = 0; i < numColumns; i++) {
+        // skip tournament column
+        for (int i = 1; i < numColumns; i++) {
           Object sourceObj = sourceRS.getObject(i + 1);
           if ("".equals(sourceObj)) {
             sourceObj = null;
@@ -827,15 +843,15 @@ public final class ImportDB {
   public static boolean checkForDifferences(final Connection sourceConnection, final Connection destConnection, final String tournament) throws SQLException {
 
     // check that the tournament exists
-    final boolean destExists = Queries.checkTournamentExists(destConnection, tournament);
-    if (!destExists) {
+    final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
+    if (null == destTournament) {
       LOG.error("Tournament: "
           + tournament + " doesn't exist in the destination database!");
       return true;
     }
 
-    final boolean sourceExists = Queries.checkTournamentExists(sourceConnection, tournament);
-    if (!sourceExists) {
+    final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournament);
+    if (null == sourceTournament) {
       LOG.error("Tournament: "
           + tournament + " doesn't exist in the source database!");
       return true;
@@ -908,9 +924,9 @@ public final class ImportDB {
     final List<TournamentDifference> tournamentDifferences = new LinkedList<TournamentDifference>();
     for (final int teamNumber : differences) {
       final int sourceTournament = Queries.getTeamCurrentTournament(sourceConnection, teamNumber);
-      final String sourceName = Queries.getTournamentName(sourceConnection, sourceTournament);
+      final String sourceName = Tournament.findTournamentByID(sourceConnection, sourceTournament).getName();
       final int destTournament = Queries.getTeamCurrentTournament(destConnection, teamNumber);
-      final String destName = Queries.getTournamentName(destConnection, destTournament);
+      final String destName = Tournament.findTournamentByID(destConnection, destTournament).getName();
       tournamentDifferences.add(new TournamentDifference(teamNumber, sourceName, destName));
     }
     return tournamentDifferences;

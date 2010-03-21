@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 
 import fll.Team;
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.web.BaseFLLServlet;
@@ -97,20 +98,18 @@ public class GatherAdvancementData extends BaseFLLServlet {
     for (final int teamNum : teamNumbers) {
       final Team team = Team.getTeamFromDatabase(connection, teamNum);
       if (!team.isInternal()) {
-        final int current = Queries.getTeamCurrentTournament(connection, teamNum);
-        final String currentName = Queries.getTournamentName(connection, current);
+        final int currentID = Queries.getTeamCurrentTournament(connection, teamNum);
+        final Tournament current = Tournament.findTournamentByID(connection, currentID);
 
-        final Integer next = Queries.getNextTournament(connection, current);
-        if (null == next) {
+        if (null == current.getNextTournament()) {
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Cannot advance team "
-                + teamNum + " as the current tournament " + currentName + " does not have a next tournament");
+                + teamNum + " as the current tournament " + current.getName() + " does not have a next tournament");
           }
         } else {
           advancingTeams.add(team);
-          currentTournament.put(teamNum, currentName);
-          final String nextName = Queries.getTournamentName(connection, next);
-          nextTournament.put(teamNum, nextName);
+          currentTournament.put(teamNum, current.getName());
+          nextTournament.put(teamNum, current.getNextTournament().getName());
         }
       }
 
