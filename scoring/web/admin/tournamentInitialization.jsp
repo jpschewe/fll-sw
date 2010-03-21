@@ -12,7 +12,7 @@ final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
 
       pageContext.setAttribute("regions", Queries.getRegions(connection));
-      pageContext.setAttribute("tournamentNames", Tournament.getTournaments(connection));
+      pageContext.setAttribute("tournaments", Tournament.getTournaments(connection));
 %>
 
 <html>
