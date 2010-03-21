@@ -16,21 +16,23 @@ function confirmDeleteTeam() {
         
 //confirm demoting a team
 function confirmDemoteTeam() {
-  return confirm("Are you sure you want to demote team ${teamNumber}?  Any data associated with that team and for the current tournament (${teamCurrentTournamentName}) will be removed from the database, including any scores that have been entered.  You also need to download the files for subjective score entry again.  It is not advisable to do this while the tournament that the team is in is running.");
+  return confirm("Are you sure you want to demote team ${teamNumber}?  Any data associated with that team and for the current tournament (${teamCurrentTournament.name}) will be removed from the database, including any scores that have been entered.  You also need to download the files for subjective score entry again.  It is not advisable to do this while the tournament that the team is in is running.");
 }
 
 //confirm changing the current tournament
 function confirmChangeTournament() {
-  <c:if test="${null == teamPrevTournament}" var="test">
-    if(document.editTeam.currentTournament.value != "${teamCurrentTournament}") {
-      return confirm("Are you sure you want to change the tournament for team ${teamNumber}?  Any data associated with that team and for the current tournament (${teamCurrentTournamentName}) will be removed from the database, including any scores that have been entered.  You also need to download the files for subjective score entry again.  It is not advisable to do this while the tournament that the team is in is running.");
+ <c:choose>
+  <c:when test="${empty teamPrevTournament}">
+    if(document.editTeam.currentTournament.value != "${teamCurrentTournament.tournamentID}") {
+      return confirm("Are you sure you want to change the tournament for team ${teamNumber}?  Any data associated with that team and for the current tournament (${teamCurrentTournament.name}) will be removed from the database, including any scores that have been entered.  You also need to download the files for subjective score entry again.  It is not advisable to do this while the tournament that the team is in is running.");
     } else {
       return true;
     }
-  </c:if>
-  <c:if test="${not test}">
+  </c:when>
+  <c:otherwise>
     return true;
-  </c:if>
+  </c:otherwise>
+  </c:choose>
 }
         
 </script>  
@@ -92,20 +94,20 @@ function confirmChangeTournament() {
           <c:choose>
           <c:when test="${empty teamPrevTournament}">
             <select name='currentTournament'>
-            <c:forEach items='${tournaments}' var='mapEntry'>
+            <c:forEach items='${tournaments}' var='tournament'>
               <c:choose>
-                <c:when test="${mapEntry.key == teamCurrentTournament }">
-                  <option value='${mapEntry.key }' selected>${mapEntry.value }</option>
+                <c:when test="${tournament.tournamentID == teamCurrentTournament.tournamentID }">
+                  <option value='${tournament.tournamentID }' selected>${tournament.name }</option>
                 </c:when>
                 <c:otherwise>
-                  <option value='${mapEntry.key }'>${mapEntry.value }</option>
+                  <option value='${tournament.tournamentID }'>${tournament.name }</option>
                 </c:otherwise>
               </c:choose>
             </c:forEach>
             </select>
           </c:when>
           <c:otherwise>
-            ${teamCurrentTournamentName }
+            ${teamCurrentTournament.name }
           </c:otherwise>
           </c:choose>
           </td>
@@ -121,7 +123,7 @@ function confirmChangeTournament() {
       </c:otherwise>
     </c:choose>
             
-    <c:if test="${not empty teamNextTournament}">
+    <c:if test="${not empty teamCurrentTournament.nextTournament}">
       <input type='submit' name='advance' value='Advance Team To Next Tournament'>
     </c:if>
 

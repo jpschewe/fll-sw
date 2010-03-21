@@ -21,6 +21,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
+import fll.Tournament;
 import fll.db.Queries;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -60,11 +61,13 @@ public class CommitTournamentChanges extends BaseFLLServlet {
           throw new RuntimeException("Missing paramter '" + idx + "' when committing tournament change");
         } else if("source".equals(userChoice)) {
           final String sourceName = difference.getSourceTournament();
-          final int tournamentID = Queries.getTournamentID(destConnection, sourceName);
+          final Tournament destTournament = Tournament.findTournamentByName(destConnection, sourceName);
+          final int tournamentID = destTournament.getTournamentID();
           Queries.changeTeamCurrentTournament(destConnection, difference.getTeamNumber(), tournamentID);
         } else if("dest".equals(userChoice)) {
           final String name = difference.getDestTournament();
-          final int tournamentID = Queries.getTournamentID(sourceConnection, name);
+          final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, name);
+          final int tournamentID = sourceTournament.getTournamentID();
           Queries.changeTeamCurrentTournament(sourceConnection, difference.getTeamNumber(), tournamentID);
         } else {
           throw new RuntimeException(String.format("Unknown value '%s' for choice of parameter '%d'", userChoice, idx));

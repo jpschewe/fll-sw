@@ -8,7 +8,6 @@ package fll.web.admin;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -19,6 +18,7 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 
+import fll.Tournament;
 import fll.db.Queries;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -46,13 +46,13 @@ public class SetCurrentTournament extends BaseFLLServlet {
       final String currentTournamentParam = request.getParameter("currentTournament");
       if (null != currentTournamentParam
           && !"".equals(currentTournamentParam)) {
-        final int newTournament = Integer.valueOf(currentTournamentParam);
-        final List<Integer> knownTournaments = Queries.getTournamentIDs(connection);
-        if(!knownTournaments.contains(newTournament)) {
-          message.append(String.format("<p class='error'>Tournament with id %d is unknown</p>", newTournament));
+        final int newTournamentID = Integer.valueOf(currentTournamentParam);
+        final Tournament newTournament = Tournament.findTournamentByID(connection, newTournamentID);
+        if(null == newTournament) {
+          message.append(String.format("<p class='error'>Tournament with id %d is unknown</p>", newTournamentID));
         } else {
-          Queries.setCurrentTournament(connection, newTournament);
-          message.append(String.format("<p id='success'><i>Tournament changed to %s</i></p>", Queries.getCurrentTournamentName(connection)));
+          Queries.setCurrentTournament(connection, newTournamentID);
+          message.append(String.format("<p id='success'><i>Tournament changed to %s</i></p>", newTournament.getName()));
         }
       } else {
         message.append("<p class='error'>You must specify the new current tournament, ignoring request</p>");

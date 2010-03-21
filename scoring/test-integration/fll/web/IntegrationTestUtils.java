@@ -8,6 +8,7 @@ package fll.web;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -58,10 +59,21 @@ public class IntegrationTestUtils {
   }
 
   public static void storeScreenshot(final Selenium selenium) throws IOException {
-    final File screenshot = File.createTempFile("fll", ".png", new File("screenshots"));
+    final File baseFile = File.createTempFile("fll", null, new File("screenshots"));
+    final File screenshot = new File(baseFile.getAbsolutePath() + ".png");
     selenium.captureScreenshot(screenshot.getAbsolutePath());
     LOGGER.error("Screenshot saved to "
         + screenshot.getAbsolutePath());
+
+    final File htmlFile = new File(baseFile.getAbsolutePath() + ".html");
+    final String html = selenium.getHtmlSource();
+    final FileWriter writer = new FileWriter(htmlFile);
+    writer.write(html);
+    writer.close();
+    LOGGER.error("HTML saved to "
+                 + htmlFile.getAbsolutePath());
+    
+
   }
 
   /**

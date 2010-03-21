@@ -15,7 +15,6 @@ import org.junit.Test;
 
 import com.thoughtworks.selenium.SeleneseTestCase;
 
-import fll.db.GenerateDB;
 import fll.web.InitializeDatabaseTest;
 import fll.web.IntegrationTestUtils;
 
