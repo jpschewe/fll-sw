@@ -15,6 +15,7 @@ import org.xml.sax.SAXException;
 import com.meterware.httpunit.WebConversation;
 
 import fll.TestUtils;
+import fll.db.GenerateDB;
 
 /**
  * Basic tests of loading pages.
@@ -70,7 +71,7 @@ public class WebTest /* extends SeleneseTestCase */{
     WebTestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
 
     final WebConversation conversation = new WebConversation();
-    WebTestUtils.setTournament(conversation, "DUMMY");
+    WebTestUtils.setTournament(conversation, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
     WebTestUtils.setTournament(conversation, "STATE");
   }

@@ -40,8 +40,8 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 
 import fll.TestUtils;
+import fll.Tournament;
 import fll.Utilities;
-import fll.db.Queries;
 import fll.subjective.SubjectiveFrame;
 import fll.util.FP;
 import fll.xml.ChallengeParser;
@@ -112,7 +112,7 @@ public class FullTournamentTest {
     PreparedStatement prep = null;
     try {
       testDataConn = DriverManager.getConnection("jdbc:hsqldb:res:/fll/web/data/flldb-ft");
-      final String testTournament = "Field";
+      final String testTournamentName = "Field";
       Assert.assertNotNull("Error connecting to test data database", testDataConn);
 
       stmt = testDataConn.createStatement();
@@ -191,7 +191,7 @@ public class FullTournamentTest {
       Assert.assertNotNull("Could not create test database connection", serverConnection);
 
       // set the tournament
-      WebTestUtils.setTournament(conversation, testTournament);
+      WebTestUtils.setTournament(conversation, testTournamentName);
 
       // assign judges
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
@@ -204,7 +204,7 @@ public class FullTournamentTest {
       // need to add rows to form if test database has more judges than
       // categories
       prep = testDataConn.prepareStatement("SELECT COUNT(id) FROM Judges WHERE Tournament = ?");
-      prep.setString(1, testTournament);
+      prep.setString(1, testTournamentName);
       rs = prep.executeQuery();
       Assert.assertTrue("Could not find judges information in test data", rs.next());
       final int numJudges = rs.getInt(1);
@@ -225,7 +225,7 @@ public class FullTournamentTest {
       // assign judges from database
       int judgeIndex = 0;
       prep = testDataConn.prepareStatement("SELECT id, category, Division FROM Judges WHERE Tournament = ?");
-      prep.setString(1, testTournament);
+      prep.setString(1, testTournamentName);
       rs = prep.executeQuery();
       while (rs.next()) {
         final String id = rs.getString(1);
@@ -276,7 +276,7 @@ public class FullTournamentTest {
        * converted from Field 2005. Enter 4th run and rest of playoffs
        */
       prep = testDataConn.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?");
-      prep.setString(1, testTournament);
+      prep.setString(1, testTournamentName);
       rs = prep.executeQuery();
       Assert.assertTrue("No performance scores in test data", rs.next());
       final int maxRuns = rs.getInt(1);
@@ -290,8 +290,8 @@ public class FullTournamentTest {
 
       prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?");
       boolean initializedPlayoff = false;
-      prep.setString(1, testTournament);
-      final ScoreEntryQueue scoreEntryQueue = new ScoreEntryQueue(parallel ? 4 : 1, testDataConn, performanceElement, testTournament);
+      prep.setString(1, testTournamentName);
+      final ScoreEntryQueue scoreEntryQueue = new ScoreEntryQueue(parallel ? 4 : 1, testDataConn, performanceElement, testTournamentName);
       for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
         request = new GetMethodWebRequest(TestUtils.URL_ROOT
             + "playoff");
@@ -326,7 +326,7 @@ public class FullTournamentTest {
         // for each score in a run
         while (rs.next()) {
           final int teamNumber = rs.getInt(1);
-          enterPerformanceScore(testDataConn, performanceElement, testTournament, runNumber, teamNumber);
+          enterPerformanceScore(testDataConn, performanceElement, testTournamentName, runNumber, teamNumber);
         }
         LOGGER.info("Waiting for queue to finish");
         scoreEntryQueue.waitForQueueToFinish();
@@ -343,7 +343,7 @@ public class FullTournamentTest {
       }
       scoreEntryQueue.shutdown();
 
-      enterSubjectiveScores(testDataConn, challengeDocument, testTournament);
+      enterSubjectiveScores(testDataConn, challengeDocument, testTournamentName);
 
       // compute final scores
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
@@ -379,7 +379,8 @@ public class FullTournamentTest {
       // check ranking and scores
       final double scoreFP = 1E-1; // just check to one decimal place
 
-      final int testTournamentID = Queries.getTournamentID(serverConnection, testTournament);
+      final Tournament testTournament = Tournament.findTournamentByName(serverConnection, testTournamentName);
+      final int testTournamentID = testTournament.getTournamentID();
       prep = serverConnection.prepareStatement("SELECT FinalScores.TeamNumber, FinalScores.OverallScore FROM"
           + " FinalScores, current_tournament_teams WHERE FinalScores.TeamNumber = "
           + " current_tournament_teams.TeamNumber AND FinalScores.Tournament = ? AND" + " current_tournament_teams.event_division = ? ORDER BY"

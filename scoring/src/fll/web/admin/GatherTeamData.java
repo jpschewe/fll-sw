@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.Map;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -21,6 +21,7 @@ import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 
 import fll.Team;
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.web.BaseFLLServlet;
@@ -50,7 +51,7 @@ public class GatherTeamData extends BaseFLLServlet {
       final Connection connection = datasource.getConnection();
       
       // store map of tournaments in session
-      final Map<Integer, String> tournaments = Queries.getTournamentIDsAndNames(connection);
+      final List<Tournament> tournaments = Tournament.getTournaments(connection);
       session.setAttribute("tournaments", tournaments);
       
       session.setAttribute("divisions", Queries.getDivisions(connection));
@@ -65,8 +66,6 @@ public class GatherTeamData extends BaseFLLServlet {
         session.setAttribute("division", null);
         session.setAttribute("teamPrevTournament", null);
         session.setAttribute("teamCurrentTournament", null);
-        session.setAttribute("teamCurrentTournamentName", null);
-        session.setAttribute("teamNextTournament", null);
       } else {
         session.setAttribute("addTeam", false);
 
@@ -80,13 +79,11 @@ public class GatherTeamData extends BaseFLLServlet {
         session.setAttribute("organization", team.getOrganization());
         session.setAttribute("region", team.getRegion());
         session.setAttribute("division", team.getDivision());
-        final int teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
-        final Integer teamPrevTournament = Queries.getTeamPrevTournament(connection, teamNumber, teamCurrentTournament);
-        final Integer teamNextTournament = Queries.getNextTournament(connection, teamCurrentTournament);
-        session.setAttribute("teamPrevTournament", teamPrevTournament);
+        final int teamCurrentTournamentID = Queries.getTeamCurrentTournament(connection, teamNumber);
+        final Tournament teamCurrentTournament = Tournament.findTournamentByID(connection, teamCurrentTournamentID);
+        final Integer teamPrevTournamentID = Queries.getTeamPrevTournament(connection, teamNumber, teamCurrentTournamentID);
+        session.setAttribute("teamPrevTournament", teamPrevTournamentID);
         session.setAttribute("teamCurrentTournament", teamCurrentTournament);
-        session.setAttribute("teamCurrentTournamentName", Queries.getTournamentName(connection, teamCurrentTournament));
-        session.setAttribute("teamNextTournament", teamNextTournament);
       }      
     } catch (final ParseException pe) {
       LOGGER.error("Error parsing team number, this is an internal error", pe);

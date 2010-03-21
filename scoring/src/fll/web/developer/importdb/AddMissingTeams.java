@@ -22,6 +22,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 
 import fll.Team;
+import fll.Tournament;
 import fll.db.Queries;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -46,14 +47,15 @@ public class AddMissingTeams extends BaseFLLServlet {
     Connection sourceConnection = null;
     Connection destConnection = null;
     try {
-      final String tournament = SessionAttributes.getNonNullAttribute(session, "selectedTournament", String.class);
+      final String tournamentName = SessionAttributes.getNonNullAttribute(session, "selectedTournament", String.class);
       final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
       sourceConnection = sourceDataSource.getConnection();
 
       final DataSource destDataSource = SessionAttributes.getDataSource(session);
       destConnection = destDataSource.getConnection();
 
-      final int tournamentID = Queries.getTournamentID(destConnection, tournament);
+      final Tournament tournament = Tournament.findTournamentByName(destConnection, tournamentName);
+      final int tournamentID = tournament.getTournamentID();
 
       @SuppressWarnings(value = "unchecked")
       final List<Team> missingTeams = SessionAttributes.getNonNullAttribute(session, "missingTeams", List.class);

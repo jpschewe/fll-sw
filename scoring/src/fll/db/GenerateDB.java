@@ -23,6 +23,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.Team;
+import fll.Tournament;
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
 import fll.xml.XMLUtils;
@@ -75,6 +76,10 @@ public final class GenerateDB {
   public static final String DEFAULT_TEAM_DIVISION = "1";
 
   public static final String DEFAULT_TEAM_REGION = "DUMMY";
+  
+  public static final String DUMMY_TOURNAMENT_NAME = DEFAULT_TEAM_REGION;
+
+  public static final String DROP_TOURNAMENT_NAME = "DROP";
 
   public static final int INTERNAL_TOURNAMENT_ID = -1;
 
@@ -320,13 +325,24 @@ public final class GenerateDB {
       // current tournament teams
       //TODO: can use PreparedStatement here?
       stmt.executeUpdate("DROP VIEW IF EXISTS current_tournament_teams");
-      stmt.executeUpdate("CREATE VIEW current_tournament_teams AS "//
-          + " SELECT * FROM TournamentTeams" //
-          + " WHERE Tournament IN " //
-          + " (SELECT param_value " // " +
-          + "      FROM global_parameters " //
-          + "      WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'"//
-          + "  )");
+      prep = connection.prepareStatement("CREATE VIEW current_tournament_teams AS "//
+      + " SELECT * FROM TournamentTeams" //
+      + " WHERE Tournament IN " //
+      + " (SELECT param_value " // " +
+      + "      FROM global_parameters " //
+      + "      WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'"//
+//      + " WHERE param = ?"//
+      + "  )");
+//      prep.setString(1, GlobalParameters.CURRENT_TOURNAMENT);
+      prep.executeUpdate();
+      
+//      stmt.executeUpdate("CREATE VIEW current_tournament_teams AS "//
+//          + " SELECT * FROM TournamentTeams" //
+//          + " WHERE Tournament IN " //
+//          + " (SELECT param_value " // " +
+//          + "      FROM global_parameters " //
+//          + "      WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'"//
+//          + "  )");
 
       // verified performance scores
       stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
@@ -387,14 +403,14 @@ public final class GenerateDB {
             + ",CONSTRAINT tournaments_pk PRIMARY KEY (tournament_id)" //
             + ",CONSTRAINT name_unique UNIQUE(Name)" //
             + ")");
-        stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DUMMY', 'Default dummy tournament')");
-        stmt.executeUpdate("INSERT INTO Tournaments (Name, Location) VALUES ('DROP', 'Dummy tournament for teams that drop out')");
+        Tournament.createTournament(connection, DUMMY_TOURNAMENT_NAME, "Default dummy tournament");
+        Tournament.createTournament(connection, DROP_TOURNAMENT_NAME, "Dummy tournament for teams that drop out");
+        
         // TODO can we add a constraint that NextTournament must refer to Name
         // and still handle null?
 
         // add internal tournament for default values and such
-        // FIXME add internal tournament if it doesn't exist
-
+        createInternalTournament(connection);
       }
 
     } finally {
@@ -474,8 +490,9 @@ public final class GenerateDB {
 
       check = Queries.globalParameterExists(connection, GlobalParameters.CURRENT_TOURNAMENT);
       if (!check) {
+        final Tournament dummyTournament = Tournament.findTournamentByName(connection, DUMMY_TOURNAMENT_NAME);
         globalInsert.setString(2, GlobalParameters.CURRENT_TOURNAMENT);
-        globalInsert.setInt(1, Queries.getTournamentID(connection, "DUMMY"));
+        globalInsert.setInt(1, dummyTournament.getTournamentID());
         globalInsert.executeUpdate();
       }
 

@@ -36,6 +36,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.Team;
+import fll.Tournament;
 import fll.Utilities;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -1329,35 +1330,9 @@ public final class Queries {
    *         current tournament is set to 'DUMMY'
    */
   public static String getCurrentTournamentName(final Connection connection) throws SQLException {
-    final int currentTournament = getCurrentTournament(connection);
-    return getTournamentName(connection, currentTournament);
-  }
-
-  /**
-   * Get the name of a tournament.
-   * 
-   * @param tournamentID the tournament ID
-   * @return the tournament name
-   * @throws SQLException if a database error occurs
-   * @throws IllegalArgumentException if the tournament ID is unknown
-   */
-  public static String getTournamentName(final Connection connection, final int tournamentID) throws SQLException, IllegalArgumentException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT Name FROM Tournaments WHERE tournament_id = ?");
-      prep.setInt(1, tournamentID);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        return rs.getString(1);
-      } else {
-        throw new IllegalArgumentException("Tournament ID "
-            + tournamentID + " is unknown");
-      }
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
-    }
+    final int currentTournamentID = getCurrentTournament(connection);
+    final Tournament currentTournament = Tournament.findTournamentByID(connection, currentTournamentID);
+    return currentTournament.getName();
   }
 
   /**
@@ -1367,30 +1342,6 @@ public final class Queries {
    */
   public static int getCurrentTournament(final Connection connection) throws SQLException {
     return getIntGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT);
-  }
-
-  /**
-   * Get the tournament ID for the specified tournament.
-   * 
-   * @throws IllegalArgumentException if the tournament is not known
-   */
-  public static int getTournamentID(final Connection connection, final String tournamentName) throws SQLException {
-    ResultSet rs = null;
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("SELECT tournament_id FROM Tournaments WHERE Name = ?");
-      prep.setString(1, tournamentName);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        return rs.getInt(1);
-      } else {
-        throw new IllegalArgumentException("Tournament Name '"
-            + tournamentName + "' is unknown");
-      }
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
-    }
   }
 
   /**
@@ -1536,71 +1487,6 @@ public final class Queries {
     if (currentID != tournamentID) {
       setGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT, String.valueOf(tournamentID));
     }
-  }
-
-  public static Map<Integer, String> getTournamentIDsAndNames(final Connection connection) throws SQLException {
-    final Map<Integer, String> retval = new HashMap<Integer, String>();
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT tournament_id, Name FROM Tournaments ORDER BY Name");
-      while (rs.next()) {
-        final int tournamentID = rs.getInt(1);
-        final String tournamentName = rs.getString(2);
-        retval.put(tournamentID, tournamentName);
-      }
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
-    }
-    return retval;
-  }
-
-  /**
-   * Get a list of tournament names in the DB ordered by name.
-   * 
-   * @return list of tournament names as strings
-   */
-  public static List<String> getTournamentNames(final Connection connection) throws SQLException {
-    final List<String> retval = new LinkedList<String>();
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Name FROM Tournaments ORDER BY Name");
-      while (rs.next()) {
-        final String tournamentName = rs.getString(1);
-        retval.add(tournamentName);
-      }
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
-    }
-    return retval;
-  }
-
-  /**
-   * Get a list of tournament IDs in the DB ordered by ID.
-   * 
-   * @return list of tournament IDs
-   */
-  public static List<Integer> getTournamentIDs(final Connection connection) throws SQLException {
-    final List<Integer> retval = new LinkedList<Integer>();
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT tournament_id FROM Tournaments ORDER BY tournament_id");
-      while (rs.next()) {
-        final int tournamentName = rs.getInt(1);
-        retval.add(tournamentName);
-      }
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
-    }
-    return retval;
   }
 
   /**
@@ -1856,12 +1742,12 @@ public final class Queries {
    */
   public static boolean advanceTeam(final Connection connection, final int teamNumber) throws SQLException {
 
-    final int currentTournament = getTeamCurrentTournament(connection, teamNumber);
-    final Integer nextTournament = getNextTournament(connection, currentTournament);
-    if (null == nextTournament) {
+    final int currentTournamentID = getTeamCurrentTournament(connection, teamNumber);
+    final Tournament currentTournament = Tournament.findTournamentByID(connection, currentTournamentID);
+    if (null == currentTournament.getNextTournament()) {
       if (LOGGER.isInfoEnabled()) {
         LOGGER.info("advanceTeam - No next tournament exists for tournament: "
-            + currentTournament + " team: " + teamNumber);
+            + currentTournament.getName() + " team: " + teamNumber);
       }
       return false;
     } else {
@@ -1869,7 +1755,7 @@ public final class Queries {
       try {
         prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division) VALUES (?, ?, ?)");
         prep.setInt(1, teamNumber);
-        prep.setInt(2, nextTournament);
+        prep.setInt(2, currentTournament.getNextTournament().getTournamentID());
         prep.setString(3, getDivisionOfTeam(connection, teamNumber));
         prep.executeUpdate();
 
@@ -1925,7 +1811,11 @@ public final class Queries {
 
       LOGGER.error("getTeamCurrentTournament - Cannot determine current tournament for team: "
           + teamNumber + " tournamentNames: " + tournaments + " nextTournaments: " + nextTournaments + " - using DUMMY tournament as default");
-      return getTournamentID(connection, "DUMMY");
+      final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
+      if(null == dummyTournament) {
+        throw new FLLInternalException("Dummy tournament doesn't exist");
+      }
+      return dummyTournament.getTournamentID();
     } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closePreparedStatement(prep);
@@ -2069,36 +1959,6 @@ public final class Queries {
       SQLFunctions.closePreparedStatement(prep);
     }
 
-  }
-
-  /**
-   * Get the next tournament for the given tournament.
-   * 
-   * @param connection the database connection
-   * @param tournament the tournament to find the next tournament for
-   * @return the next tournament ID or null if no such tournament exists
-   */
-  public static Integer getNextTournament(final Connection connection, final int tournament) throws SQLException {
-    ResultSet rs = null;
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("SELECT NextTournament FROM Tournaments WHERE tournament_id = ?");
-      prep.setInt(1, tournament);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        final int result = rs.getInt(1);
-        if (rs.wasNull()) {
-          return null;
-        } else {
-          return result;
-        }
-      } else {
-        return null;
-      }
-    } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
-    }
   }
 
   /**
@@ -2279,7 +2139,7 @@ public final class Queries {
       rs = stmt.executeQuery("SELECT DISTINCT Teams.Region FROM Teams LEFT JOIN Tournaments ON Teams.Region = Tournaments.Name WHERE Tournaments.Name IS NULL");
       while (rs.next()) {
         final String region = rs.getString(1);
-        createTournament(connection, region, region);
+        Tournament.createTournament(connection, region, region);
       }
     } finally {
       SQLFunctions.closeResultSet(rs);
@@ -2698,73 +2558,6 @@ public final class Queries {
     } finally {
       SQLFunctions.closeResultSet(rs);
       SQLFunctions.closePreparedStatement(prep);
-    }
-  }
-
-  /**
-   * Check that a given tournament exists in the specified database.
-   * 
-   * @param connection the database
-   * @param tournament the tournament name to look for
-   * @return if the tournament exists
-   * @throws SQLException
-   */
-  public static boolean checkTournamentExists(final Connection connection, final String tournament) throws SQLException {
-    final List<String> existingTournaments = getTournamentNames(connection);
-
-    return existingTournaments.contains(tournament);
-  }
-
-  /**
-   * Create a tournament with a next tournament.
-   */
-  public static void createTournament(final Connection connection, final String tournament, final String location, final int nextTournament)
-      throws SQLException {
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location, NextTournament) VALUES (?, ?, ?)");
-      prep.setString(1, tournament);
-      prep.setString(2, location);
-      prep.setInt(3, nextTournament);
-      prep.executeUpdate();
-    } finally {
-      SQLFunctions.closePreparedStatement(prep);
-    }
-  }
-
-  /**
-   * Create a tournament without a next tournament.
-   */
-  public static void createTournament(final Connection connection, final String tournament, final String location) throws SQLException {
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location) VALUES (?, ?)");
-      prep.setString(1, tournament);
-      prep.setString(2, location);
-      prep.executeUpdate();
-    } finally {
-      SQLFunctions.closePreparedStatement(prep);
-    }
-  }
-
-  /**
-   * Set the next tournament for the specified tournament.
-   */
-  public static void setNextTournament(final Connection connection, final String tournamentName, final String nextName) throws SQLException {
-    PreparedStatement setNext = null;
-    try {
-      setNext = connection.prepareStatement("UPDATE Tournaments SET NextTournament = ? WHERE Name = ?");
-      setNext.setString(2, tournamentName);
-      if (null == nextName
-          || "".equals(nextName.trim())) {
-        setNext.setNull(1, Types.INTEGER);
-      } else {
-        final int next = getTournamentID(connection, nextName.trim());
-        setNext.setInt(1, next);
-      }
-      setNext.executeUpdate();
-    } finally {
-      SQLFunctions.closePreparedStatement(setNext);
     }
   }
 

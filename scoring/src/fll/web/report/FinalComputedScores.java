@@ -40,6 +40,7 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
@@ -65,8 +66,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
       final DataSource datasource = SessionAttributes.getDataSource(session);
       final Connection connection = datasource.getConnection();
       final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
-      final int tournament = Queries.getCurrentTournament(connection);
-      final String tournamentName = Queries.getTournamentName(connection, tournament);
+      final int tournamentID = Queries.getCurrentTournament(connection);
+      final Tournament tournament = Tournament.findTournamentByID(connection, tournamentID);
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=finalComputedScores.pdf");
@@ -75,7 +76,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       final String challengeTitle = root.getAttribute("title");
       final SimpleFooterHandler pageHandler = new SimpleFooterHandler();
 
-      generateReport(connection, response.getOutputStream(), challengeDocument, challengeTitle, tournamentName, tournament, pageHandler);
+      generateReport(connection, response.getOutputStream(), challengeDocument, challengeTitle, tournament, pageHandler);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     }
@@ -94,14 +95,13 @@ public final class FinalComputedScores extends BaseFLLServlet {
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
   "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Sort determined by winner criteria, category name determines table name")
-  public void generateReport(final Connection connection, 
+  private void generateReport(final Connection connection, 
                              final OutputStream out, 
                              final org.w3c.dom.Document challengeDocument,
                              final String challengeTitle,
-                             final String tournamentName,
-                             final int tournament, 
+                             final Tournament tournament,
                              final SimpleFooterHandler pageHandler) throws SQLException, IOException {
-    if(tournament != Queries.getCurrentTournament(connection)) {
+    if(tournament.getTournamentID() != Queries.getCurrentTournament(connection)) {
       throw new FLLRuntimeException("Cannot generate final score report for a tournament other than the current tournament");
     }
 
@@ -163,7 +163,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         divTable.getDefaultCell().setBorder(0);
         divTable.setWidthPercentage(100);
 
-        final PdfPTable header = createHeader(challengeTitle, tournamentName, division);
+        final PdfPTable header = createHeader(challengeTitle, tournament.getName(), division);
         final PdfPCell headerCell = new PdfPCell(header);
         headerCell.setColspan(relativeWidths.length);
         divTable.addCell(headerCell);
