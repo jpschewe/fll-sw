@@ -12,6 +12,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 
+import junit.framework.AssertionFailedError;
+
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 
@@ -23,7 +25,7 @@ import com.thoughtworks.selenium.Selenium;
 public class IntegrationTestUtils {
 
   private static final Logger LOGGER = Logger.getLogger(IntegrationTestUtils.class);
-  
+
   public static final String WAIT_FOR_PAGE_TIMEOUT = "60000";
 
   /**
@@ -35,44 +37,56 @@ public class IntegrationTestUtils {
    * @throws IOException
    */
   public static void initializeDatabase(final Selenium selenium, final InputStream challengeStream, final boolean forceRebuild) throws IOException {
-  
-    Assert.assertNotNull(challengeStream);
-    final File challengeFile = IntegrationTestUtils.storeInputStreamToFile(challengeStream);
     try {
-      selenium.type("xmldocument", challengeFile.getAbsolutePath());
-      if (forceRebuild) {
-        selenium.click("force_rebuild");
+      Assert.assertNotNull(challengeStream);
+      final File challengeFile = IntegrationTestUtils.storeInputStreamToFile(challengeStream);
+      try {
+        selenium.open("http://localhost:9080/fll-sw/setup/");
+        selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+        selenium.type("xmldocument", challengeFile.getAbsolutePath());
+        if (forceRebuild) {
+          selenium.click("force_rebuild");
+        }
+        selenium.click("reinitializeDatabase");
+        Assert.assertTrue(selenium.getConfirmation()
+                                  .matches("^This will erase ALL scores in the database fll \\(if it already exists\\), are you sure[\\s\\S]$"));
+        selenium.waitForPageToLoad(WAIT_FOR_PAGE_TIMEOUT);
+        final boolean success = selenium.isTextPresent("Successfully initialized database");
+        Assert.assertTrue("Database was not successfully initialized", success);
+      } finally {
+        if (!challengeFile.delete()) {
+          challengeFile.deleteOnExit();
+        }
       }
-      selenium.click("reinitializeDatabase");
-      Assert.assertTrue(selenium.getConfirmation().matches("^This will erase ALL scores in the database fll \\(if it already exists\\), are you sure[\\s\\S]$"));
-      selenium.waitForPageToLoad(WAIT_FOR_PAGE_TIMEOUT);
-      final boolean success = selenium.isTextPresent("Successfully initialized database");
-      if (!success) {
-        IntegrationTestUtils.storeScreenshot(selenium);
-      }
-      Assert.assertTrue("Database was not successfully initialized", success);
-    } finally {
-      if (!challengeFile.delete()) {
-        challengeFile.deleteOnExit();
-      }
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final AssertionFailedError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
     }
   }
 
   public static void storeScreenshot(final Selenium selenium) throws IOException {
     final File baseFile = File.createTempFile("fll", null, new File("screenshots"));
-    final File screenshot = new File(baseFile.getAbsolutePath() + ".png");
+    final File screenshot = new File(baseFile.getAbsolutePath()
+        + ".png");
     selenium.captureScreenshot(screenshot.getAbsolutePath());
     LOGGER.error("Screenshot saved to "
         + screenshot.getAbsolutePath());
 
-    final File htmlFile = new File(baseFile.getAbsolutePath() + ".html");
+    final File htmlFile = new File(baseFile.getAbsolutePath()
+        + ".html");
     final String html = selenium.getHtmlSource();
     final FileWriter writer = new FileWriter(htmlFile);
     writer.write(html);
     writer.close();
     LOGGER.error("HTML saved to "
-                 + htmlFile.getAbsolutePath());
-    
+        + htmlFile.getAbsolutePath());
 
   }
 
@@ -92,7 +106,7 @@ public class IntegrationTestUtils {
       outputStream.write(buffer, 0, bytesRead);
     }
     outputStream.close();
-  
+
     return tempFile;
   }
 }

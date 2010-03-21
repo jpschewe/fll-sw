@@ -30,8 +30,6 @@ public class EditTournamentsTest extends SeleneseTestCase {
   
   @Test
   public void testAddTournament() throws IOException {
-    selenium.open("http://localhost:9080/fll-sw/setup/");
-    
     final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
     IntegrationTestUtils.initializeDatabase(selenium, challengeStream, true);
     

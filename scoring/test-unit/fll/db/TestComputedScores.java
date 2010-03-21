@@ -75,8 +75,8 @@ public class TestComputedScores {
       selectPrep.setInt(2, teamNumber);
       selectPrep.setInt(3, runNumber);
       rs = selectPrep.executeQuery();
-      Assert.assertNotNull(rs);
-      Assert.assertTrue(rs.next());
+      Assert.assertNotNull("Error getting performance scores", rs);
+      Assert.assertTrue("No scores found", rs.next());
       
       final double computedTotal = ScoreUtils.computeTotalScore(new DatabaseTeamScore(performanceElement, teamNumber, runNumber, rs));
       Assert.assertEquals(expectedTotal, computedTotal, 0D);

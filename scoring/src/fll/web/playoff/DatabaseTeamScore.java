@@ -15,7 +15,9 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.w3c.dom.Element;
 
 /**
- * TeamScore implementation for a performance score in the database.
+ * TeamScore implementation for a performance score in the database. Note that
+ * this object is only valid as long as the {@link ResultSet} used to create it
+ * is valid.
  */
 public class DatabaseTeamScore extends TeamScore {
 
@@ -44,7 +46,8 @@ public class DatabaseTeamScore extends TeamScore {
    * @param runNumber passed to superclass
    * @throws SQLException if there is an error getting the current tournament
    */
-  public DatabaseTeamScore(final Element categoryDescription, final int tournament, final int teamNumber, final int runNumber,  final Connection connection) throws SQLException {
+  public DatabaseTeamScore(final Element categoryDescription, final int tournament, final int teamNumber, final int runNumber, final Connection connection)
+      throws SQLException {
     super(categoryDescription, teamNumber, runNumber);
 
     _result = createResultSet(connection, tournament);
@@ -146,8 +149,7 @@ public class DatabaseTeamScore extends TeamScore {
   /**
    * Create the result set.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table")
   private ResultSet createResultSet(final Connection connection, final int tournament) throws SQLException {
     ResultSet result;
     final String categoryName = getCategoryName();

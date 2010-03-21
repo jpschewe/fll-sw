@@ -19,8 +19,6 @@ public class InitializeDatabaseTest extends SeleneseTestCase {
 
   @Test
   public void testInitializeDatabase() throws IOException {
-    selenium.open("http://localhost:9080/fll-sw/setup/");
-
     final InputStream challengeStream = getClass().getResourceAsStream("data/challenge-ft.xml");
     IntegrationTestUtils.initializeDatabase(selenium, challengeStream, true);
   }
