@@ -264,7 +264,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         query.append(" FROM Teams,FinalScores,current_tournament_teams");
         query.append(" WHERE FinalScores.TeamNumber = Teams.TeamNumber");
         query.append(" AND FinalScores.Tournament = "
-            + tournament);
+            + tournament.getTournamentID());
         query.append(" AND current_tournament_teams.event_division = ?");
         query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
         query.append(" ORDER BY FinalScores.OverallScore "
@@ -311,7 +311,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
               final String catName = catElement.getAttribute("name");
               rawScoreRS = stmt.executeQuery("SELECT ComputedTotal"
                   // TODO make prepared statement
-                  + " FROM " + catName + " WHERE TeamNumber = " + teamNumber + " AND Tournament = " + tournament + " ORDER BY ComputedTotal " + ascDesc);
+                  + " FROM " + catName + " WHERE TeamNumber = " + teamNumber + " AND Tournament = " + tournament.getTournamentID() + " ORDER BY ComputedTotal " + ascDesc);
               boolean scoreSeen = false;
               final StringBuilder rawScoreText = new StringBuilder();
               while (rawScoreRS.next()) {
@@ -336,7 +336,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           // Column for the highest performance score of the seeding rounds
           rawScoreRS = stmt.executeQuery("SELECT score FROM performance_seeding_max"
               // TODO make prepared statement
-              + " WHERE TeamNumber = " + teamNumber + " AND Tournament = " + tournament);
+              + " WHERE TeamNumber = " + teamNumber + " AND Tournament = " + tournament.getTournamentID());
           final double rawScore;
           if (rawScoreRS.next()) {
             final double v = rawScoreRS.getDouble(1);

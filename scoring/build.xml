@@ -695,7 +695,6 @@
 			<!-- copy in test database -->
 			<antcall target="install.testdb" />
 
-			<delete dir="${dir.build}/screenshots" />
 			<mkdir dir="${dir.build}/screenshots" />
 			<touch file="${dir.build}/screenshots/dummy.txt" />
 
