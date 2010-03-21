@@ -20,7 +20,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
-import fll.db.Queries;
+import fll.Tournament;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -58,8 +58,8 @@ public class CheckTournamentExists extends BaseFLLServlet {
         // Check if the tournament exists
         final DataSource datasource = SessionAttributes.getDataSource(session);
         connection = datasource.getConnection();
-        final boolean exists = Queries.checkTournamentExists(connection, selectedTournament);        
-        if (!exists) {
+        final Tournament tournament = Tournament.findTournamentByName(connection, selectedTournament);
+        if (null == tournament) {
           session.setAttribute(SessionAttributes.REDIRECT_URL, "promptCreateTournament.jsp");
         } else {
           session.setAttribute(SessionAttributes.REDIRECT_URL, "FindMissingTeams");

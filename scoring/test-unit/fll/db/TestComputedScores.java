@@ -24,6 +24,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.TestUtils;
+import fll.Tournament;
 import fll.Utilities;
 import fll.util.ScoreUtils;
 import fll.web.playoff.DatabaseTeamScore;
@@ -45,7 +46,7 @@ public class TestComputedScores {
   public void testFPComputation() throws SQLException, ParseException, IOException {
     final int teamNumber = 327;
     final int runNumber = 1;
-    final String tournament = "11-21 Plymouth Middle";
+    final String tournamentName = "11-21 Plymouth Middle";
     final double expectedTotal = 295;
     
     PreparedStatement selectPrep = null;
@@ -67,14 +68,15 @@ public class TestComputedScores {
       final Element rootElement = document.getDocumentElement();
       final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
 
-      final int tournamentID = Queries.getTournamentID(connection, tournament);
+      final Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
+      final int tournamentID = tournament.getTournamentID();
       selectPrep = connection.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? and TeamNumber = ? AND RunNumber = ?");
       selectPrep.setInt(1, tournamentID);
       selectPrep.setInt(2, teamNumber);
       selectPrep.setInt(3, runNumber);
       rs = selectPrep.executeQuery();
-      Assert.assertNotNull(rs);
-      Assert.assertTrue(rs.next());
+      Assert.assertNotNull("Error getting performance scores", rs);
+      Assert.assertTrue("No scores found", rs.next());
       
       final double computedTotal = ScoreUtils.computeTotalScore(new DatabaseTeamScore(performanceElement, teamNumber, runNumber, rs));
       Assert.assertEquals(expectedTotal, computedTotal, 0D);

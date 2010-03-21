@@ -1,5 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<%@ page import="fll.Tournament"%>
+
 <%@ page import="fll.db.Queries"%>
 <%@ page import="fll.web.SessionAttributes" %>
 
@@ -10,7 +12,7 @@ final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
 
       pageContext.setAttribute("regions", Queries.getRegions(connection));
-      pageContext.setAttribute("tournamentNames", Queries.getTournamentNames(connection));
+      pageContext.setAttribute("tournaments", Tournament.getTournaments(connection));
 %>
 
 <html>
@@ -36,13 +38,13 @@ assignments for the selected teams will be removed</p>
    <td><c:out value="${region}" /></td>
    <td><select name='<c:out value="${region}"/>'>
     <option value='nochange'>No Change</option>
-    <c:forEach var="tournament" items="${tournamentNames}">
+    <c:forEach var="tournament" items="${tournaments}">
      <c:choose>
-      <c:when test="${tournament == region}">
-       <option value='${tournament}' selected><c:out value="${tournament}" /></option>
+      <c:when test="${tournament.name == region}">
+       <option value='${tournament.name}' selected><c:out value="${tournament.name}" /></option>
       </c:when>
       <c:otherwise>
-       <option value='${tournament}'><c:out value="${tournament}" /></option>
+       <option value='${tournament.name}'><c:out value="${tournament.name}" /></option>
       </c:otherwise>
      </c:choose>
     </c:forEach>

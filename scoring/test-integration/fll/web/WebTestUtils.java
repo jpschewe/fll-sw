@@ -37,39 +37,6 @@ public final class WebTestUtils {
   }
 
   /**
-   * Initialize a database.
-   * 
-   * @param challengeDocIS input stream that has the tournament descriptor to
-   *          load in it, this input stream is closed by this method upon
-   *          successful completion
-   * @throws SAXException
-   * @throws IOException
-   * @throws MalformedURLException
-   */
-  public static void initializeDatabase(final InputStream challengeDocIS) throws MalformedURLException, IOException, SAXException {
-    Assert.assertNotNull("Challenge descriptor must not be null", challengeDocIS);
-
-    final WebConversation conversation = new WebConversation();
-    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "setup/");
-    WebResponse response = conversation.getResponse(request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-
-    final WebForm form = response.getFormWithID("setup");
-    Assert.assertNotNull(form);
-    form.setCheckbox("force_rebuild", true); // rebuild the whole database
-    final UploadFileSpec challengeUpload = new UploadFileSpec("challenge-test.xml", challengeDocIS, "text/xml");
-    Assert.assertNotNull(challengeUpload);
-    form.setParameter("xmldocument", new UploadFileSpec[] { challengeUpload });
-    request = form.getRequest("reinitializeDatabase");
-    response = conversation.getResponse(request);
-    Assert.assertTrue(response.isHTML());
-    Assert.assertNotNull("Error initializing database: "
-        + response.getText(), response.getElementWithID("success"));
-    challengeDocIS.close();
-  }
-
-  /**
    * Initialize a database from a zip file.
    * 
    * @param inputStream input stream that has database to load in it, this input

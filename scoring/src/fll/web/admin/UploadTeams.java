@@ -37,6 +37,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
@@ -504,7 +505,8 @@ public final class UploadTeams extends BaseFLLServlet {
       // put all teams in the DUMMY tournament by default and make the event
       // division the same as the team division
       stmt.executeUpdate("DELETE FROM TournamentTeams");
-      final int dummyTournamentID = Queries.getTournamentID(connection, "DUMMY");
+      final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
+      final int dummyTournamentID = dummyTournament.getTournamentID();
       stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) SELECT "
           + dummyTournamentID + ", Teams.TeamNumber, Teams.Division FROM Teams");
 

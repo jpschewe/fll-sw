@@ -21,7 +21,7 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import fll.db.Queries;
+import fll.Tournament;
 import fll.util.FLLRuntimeException;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -62,13 +62,12 @@ public class DisplayTournamentAssignments extends BaseFLLServlet {
   + " AND TournamentTeams.TeamNumber = Teams.TeamNumber"//
   + " ORDER BY Teams.TeamNumber" //
 );
-      for(final int tournamentID : Queries.getTournamentIDs(connection)) {
-        final String tournamentName = Queries.getTournamentName(connection, tournamentID);
-        formatter.format("<h1>%s</h1>", tournamentName);
+      for(final Tournament tournament : Tournament.getTournaments(connection)) {
+        formatter.format("<h1>%s</h1>", tournament.getName());
         
         formatter.format("<table border='1'>");
         formatter.format("<tr><th>Number</th><th>Name</th><th>Region</th><th>Division</th><th>Event Division</th></tr>");
-        prep.setInt(1, tournamentID);
+        prep.setInt(1, tournament.getTournamentID());
         rs = prep.executeQuery();
         while(rs.next()) {
           formatter.format("<tr>");

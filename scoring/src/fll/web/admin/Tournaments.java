@@ -8,9 +8,7 @@ package fll.web.admin;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,8 +27,9 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 import org.hsqldb.Types;
 
+import fll.Tournament;
 import fll.Utilities;
-import fll.db.Queries;
+import fll.db.GenerateDB;
 import fll.web.SessionAttributes;
 
 /**
@@ -80,7 +79,7 @@ public final class Tournaments {
     }
 
     if (verified) {
-      commitData(request, response, connection);
+      commitData(session, request, response, connection);
     } else {
       out
          .println("<p><b>Tournament name's must be unique and next tournament must refer to the name of another tournament listed.  Tournaments can be removed by erasing the name.</b></p>");
@@ -92,27 +91,16 @@ public final class Tournaments {
       if (null == request.getParameter("name0")) {
         // this is the first time the page has been visited so we need to read
         // the names out of the DB
-        ResultSet rs = null;
-        Statement stmt = null;
-        try {
-          stmt = connection.createStatement();
-          rs = stmt.executeQuery("SELECT Name, Location, NextTournament, tournament_id FROM Tournaments ORDER BY Name");
-          for (row = 0; rs.next(); row++) {
-            final String name = rs.getString(1);
-            final String location = rs.getString(2);
-            final int next = rs.getInt(3);
-            final String nextName;
-            if (!rs.wasNull()) {
-              nextName = Queries.getTournamentName(connection, next);
-            } else {
-              nextName = null;
-            }
-            final int tournamentID = rs.getInt(4);
-            generateRow(out, row, tournamentID, name, location, nextName);
+        final Iterator<Tournament> tournaments = Tournament.getTournaments(connection).iterator();
+        for (row = 0; tournaments.hasNext(); row++) {
+          final Tournament tournament = tournaments.next();
+          final String nextName;
+          if (null != tournament.getNextTournament()) {
+            nextName = tournament.getNextTournament().getName();
+          } else {
+            nextName = null;
           }
-        } finally {
-          SQLFunctions.closeResultSet(rs);
-          SQLFunctions.closeStatement(stmt);
+          generateRow(out, row, tournament.getTournamentID(), tournament.getName(), tournament.getLocation(), nextName);
         }
       } else {
         // need to walk the parameters to see what we've been passed
@@ -190,8 +178,8 @@ public final class Tournaments {
       out.print(" value='"
           + name + "'");
     }
-    if ("DUMMY".equals(name)
-        || "DROP".equals(name)) {
+    if (GenerateDB.DUMMY_TOURNAMENT_NAME.equals(name)
+        || GenerateDB.DROP_TOURNAMENT_NAME.equals(name)) {
       out.print(" readonly");
     }
     out.println(" maxlength='16' size='16'></td>");
@@ -202,8 +190,8 @@ public final class Tournaments {
       out.print(" value='"
           + location + "'");
     }
-    if ("DUMMY".equals(name)
-        || "DROP".equals(name)) {
+    if (GenerateDB.DUMMY_TOURNAMENT_NAME.equals(name)
+        || GenerateDB.DROP_TOURNAMENT_NAME.equals(name)) {
       out.print(" readonly");
     }
     out.println(" size='64'></td>");
@@ -214,8 +202,8 @@ public final class Tournaments {
       out.print(" value='"
           + nextName + "'");
     }
-    if ("DUMMY".equals(name)
-        || "DROP".equals(name)) {
+    if (GenerateDB.DUMMY_TOURNAMENT_NAME.equals(name)
+        || GenerateDB.DROP_TOURNAMENT_NAME.equals(name)) {
       out.print(" readonly");
     }
     out.println(" size='16'></td>");
@@ -230,7 +218,7 @@ public final class Tournaments {
    * 
    * @return true if everything is ok, false otherwise and write message to out
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="XSS_REQUEST_PARAMETER_TO_JSP_WRITER", justification="Need to write out the name specified as part of the error message")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "XSS_REQUEST_PARAMETER_TO_JSP_WRITER", justification = "Need to write out the name specified as part of the error message")
   private static boolean verifyData(final JspWriter out, final HttpServletRequest request) throws IOException {
     final Map<String, String> tournamentNames = new HashMap<String, String>();
     boolean retval = true;
@@ -369,10 +357,12 @@ public final class Tournaments {
    * Commit the subjective data from request to the database and redirect
    * response back to index.jsp.
    */
-  private static void commitData(final HttpServletRequest request, final HttpServletResponse response, final Connection connection) throws SQLException,
-      IOException {
+  private static void commitData(final HttpSession session, final HttpServletRequest request, final HttpServletResponse response, final Connection connection)
+      throws SQLException, IOException {
     createAndInsertTournaments(request, connection);
     setNextTournaments(request, connection);
+
+    session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'>Successfully committed tournament changes.</p>");
 
     // finally redirect to index.jsp
     // out.println("DEBUG: normally you'd be redirected to <a href='index.jsp'>here</a>");
@@ -389,19 +379,18 @@ public final class Tournaments {
           + row);
       String name = request.getParameter("name"
           + row);
-      String next = request.getParameter("next"
+      String nextName = request.getParameter("next"
           + row);
       while (null != keyStr) {
         if (null != name
             && !"".equals(name)) {
-          
-        
-          final int tournamentID = Queries.getTournamentID(connection, name);
-          setNextPrep.setInt(2, tournamentID);
-          if(null != next
-              && !"".equals(next)) {
-            final int nextTournamentID = Queries.getTournamentID(connection, next);            
-            setNextPrep.setInt(1, nextTournamentID);
+
+          final Tournament tournament = Tournament.findTournamentByName(connection, name);
+          setNextPrep.setInt(2, tournament.getTournamentID());
+          if (null != nextName
+              && !"".equals(nextName)) {
+            final Tournament nextTournament = Tournament.findTournamentByName(connection, nextName);
+            setNextPrep.setInt(1, nextTournament.getTournamentID());
           } else {
             setNextPrep.setNull(1, Types.INTEGER);
           }
@@ -413,7 +402,7 @@ public final class Tournaments {
             + row);
         name = request.getParameter("name"
             + row);
-        next = request.getParameter("next"
+        nextName = request.getParameter("next"
             + row);
       }
     } finally {

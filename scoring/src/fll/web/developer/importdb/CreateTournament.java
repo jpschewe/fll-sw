@@ -7,10 +7,7 @@ package fll.web.developer.importdb;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -23,7 +20,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
-import fll.db.Queries;
+import fll.Tournament;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -90,45 +87,32 @@ public class CreateTournament extends BaseFLLServlet {
   /**
    * Create a tournament from the source in the dest. This recurses on
    * nextTournament if needed.
-   * @throws SQLException 
+   * 
+   * @throws SQLException
    */
   private static void createTournament(final Connection sourceConnection,
-                                final Connection destConnection,
-                                final String tournamentName,
-                                final StringBuilder message,
-                                final HttpSession session) throws SQLException {
-    PreparedStatement sourcePrep = null;
-    ResultSet sourceRS = null;
-    try {
-      sourcePrep = sourceConnection.prepareStatement("SELECT Location, NextTournament FROM Tournaments WHERE Name = ?");
-      sourcePrep.setString(1, tournamentName);
-      sourceRS = sourcePrep.executeQuery();
+                                       final Connection destConnection,
+                                       final String tournamentName,
+                                       final StringBuilder message,
+                                       final HttpSession session) throws SQLException {
+    final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournamentName);
+    Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getLocation());
+    message.append("<p>Created tournament "
+        + sourceTournament.getName() + "</p>");
 
-      if (sourceRS.next()) {
-        final String location = sourceRS.getString(1);
-        final int nextTournament = sourceRS.getInt(2);
-        final boolean nextIsNull = sourceRS.wasNull();
-        
-        Queries.createTournament(destConnection, tournamentName, location);
-        message.append("<p>Created tournament " + tournamentName + "</p>");
-        
-        if (!nextIsNull) {
-          final String nextName = Queries.getTournamentName(destConnection, nextTournament);
-          final List<String> knownTournaments = Queries.getTournamentNames(destConnection);
-          if (!knownTournaments.contains(nextName)) {
-            createTournament(sourceConnection, destConnection, nextName, message, session);
-          }
-          Queries.setNextTournament(destConnection, tournamentName, nextName);
-        }
+    if (null != sourceTournament.getNextTournament()) {
+      final Tournament sourceNextTournament = sourceTournament.getNextTournament();
+      final Tournament destNextTournament = Tournament.findTournamentByName(destConnection, sourceNextTournament.getName());
+      if (null == destNextTournament) {
+        createTournament(sourceConnection, destConnection, sourceNextTournament.getName(), message, session);
+        Tournament.setNextTournament(destConnection, tournamentName, sourceNextTournament.getName());
+
         session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentExists");
       } else {
         message.append("<p class='error'>Cannot find tournament "
             + tournamentName + " in imported database!</p>");
         session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
       }
-    } finally {
-      SQLFunctions.closeResultSet(sourceRS);
-      SQLFunctions.closePreparedStatement(sourcePrep);
     }
   }
 
