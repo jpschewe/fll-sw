@@ -22,12 +22,16 @@ import com.thoughtworks.selenium.Selenium;
 /**
  * Some utilities for integration tests.
  */
-public class IntegrationTestUtils {
+public final class IntegrationTestUtils {
 
   private static final Logger LOGGER = Logger.getLogger(IntegrationTestUtils.class);
 
   public static final String WAIT_FOR_PAGE_TIMEOUT = "60000";
 
+  private IntegrationTestUtils() {
+    // no instances
+  }
+  
   /**
    * Initialize the database using the given challenge descriptor.
    * 
