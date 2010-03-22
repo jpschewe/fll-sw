@@ -79,8 +79,9 @@ ${message}
 	<a href='javascript:hide("InitByRegionHelp")'>[hide]</a></div>
 	</li>
 
-	<li><a href='<c:url value="tournaments.jsp"/>'>Edit
-	Tournaments</a> <a href='javascript:display("EditTournamentHelp")'>[help]</a>
+	<li><a href='<c:url value="tournaments.jsp"/>'>Edit Tournaments</a>
+  
+ <a href='javascript:display("EditTournamentHelp")'>[help]</a>
 	<div id='EditTournamentHelp' class='help' style='display: none'>
 	This is an optional step. Use this page to modify the tournaments
 	created by the &ldquo;Add tournaments for all Regions&rdquo; step
