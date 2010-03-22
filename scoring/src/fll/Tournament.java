@@ -22,7 +22,7 @@ import fll.db.GenerateDB;
  * object does not notice the changes. It's a snapshot in time from when the
  * object was created.
  */
-public class Tournament {
+public final class Tournament {
 
   private Tournament(final int tournamentID, final String name, final String location, final Tournament nextTournament) {
     this.tournamentID = tournamentID;
