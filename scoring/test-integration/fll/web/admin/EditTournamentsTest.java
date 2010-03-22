@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import junit.framework.Assert;
+import junit.framework.AssertionFailedError;
 
 import org.junit.Test;
 
@@ -19,7 +20,7 @@ import fll.web.InitializeDatabaseTest;
 import fll.web.IntegrationTestUtils;
 
 /**
- * Test editing the tournaments list 
+ * Test editing the tournaments list
  */
 public class EditTournamentsTest extends SeleneseTestCase {
 
@@ -27,42 +28,45 @@ public class EditTournamentsTest extends SeleneseTestCase {
   public void setUp() throws Exception {
     super.setUp("http://localhost:9080/setup");
   }
-  
+
   @Test
   public void testAddTournament() throws IOException {
     final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
     IntegrationTestUtils.initializeDatabase(selenium, challengeStream, true);
-    
-    selenium.click("link=Admin Index");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    try {
+      selenium.click("link=Admin Index");
+      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
-    selenium.click("link=Edit Tournaments");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-    
-    selenium.click("addRow");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      selenium.click("link=Edit Tournaments");
+      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
-    // get num rows
-    final String numRowsStr = selenium.getValue("numRows");
-    Assert.assertNotNull(numRowsStr);
-    final int numRows = Integer.valueOf(numRowsStr);
-    
-    // type in tournament name
-    final int lastRowIdx = numRows-1;
-    final String lastRowName = "name" + lastRowIdx;
-    final String lastRowValue = selenium.getValue(lastRowName);
-    if(!(null == lastRowValue || "".equals(lastRowValue))) {
+      selenium.click("addRow");
+      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+      // get num rows
+      final String numRowsStr = selenium.getValue("numRows");
+      Assert.assertNotNull(numRowsStr);
+      final int numRows = Integer.valueOf(numRowsStr);
+
+      // type in tournament name
+      final int lastRowIdx = numRows - 1;
+      final String lastRowName = "name"
+          + lastRowIdx;
+      final String lastRowValue = selenium.getValue(lastRowName);
+      Assert.assertTrue("There should not be a value in the last row", null == lastRowValue || "".equals(lastRowValue));
+
+      selenium.type(lastRowName, "test tournament");
+      selenium.click("commit");
+      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+      
+      Assert.assertTrue("Didn't get success from commit", selenium.isTextPresent("Successfully committed tournament changes"));
+    } catch (final RuntimeException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
-      Assert.fail("There should not be a value in the last row");
-    }
-    
-    selenium.type(lastRowName, "test tournament");   
-    selenium.click("commit");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-
-    if(!selenium.isTextPresent("Successfully committed tournament changes")) {
+      throw e;
+    } catch (final AssertionFailedError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
-      Assert.fail("Didn't get success from commit");  
+      throw e;
     }
   }
 
