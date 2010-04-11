@@ -62,19 +62,9 @@ public class FullTournamentTest extends SeleneseTestCase {
   }
 
   /**
-   * Test a full tournament as a single thread. This tests to make sure
+   * Test a full tournament. This tests to make sure
    * everything works normally.
    * 
-   * @throws InterruptedException
-   */
-  @Test
-  public void testSerial() throws MalformedURLException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-      ParseException, SQLException, InterruptedException {
-    doFullTournament();
-  }
-
-  /**
-   * Run a full tournament.
    * 
    * @throws MalformedURLException
    * @throws IOException
@@ -86,7 +76,8 @@ public class FullTournamentTest extends SeleneseTestCase {
    * @throws SQLException
    * @throws InterruptedException
    */
-  private void doFullTournament() throws MalformedURLException, IOException, SAXException, ClassNotFoundException,
+  @Test
+  public void testFullTournament() throws MalformedURLException, IOException, SAXException, ClassNotFoundException,
       InstantiationException, IllegalAccessException, ParseException, SQLException, InterruptedException {
     final int numSeedingRounds = 3;
 
@@ -277,7 +268,6 @@ public class FullTournamentTest extends SeleneseTestCase {
       prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?");
       boolean initializedPlayoff = false;
       prep.setString(1, testTournamentName);
-      final ScoreEntryQueue scoreEntryQueue = new ScoreEntryQueue(1, testDataConn, performanceElement, testTournamentName);
       for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
         request = new GetMethodWebRequest(TestUtils.URL_ROOT
             + "playoff");
@@ -314,8 +304,6 @@ public class FullTournamentTest extends SeleneseTestCase {
           final int teamNumber = rs.getInt(1);
           enterPerformanceScore(testDataConn, performanceElement, testTournamentName, runNumber, teamNumber);
         }
-        LOGGER.info("Waiting for queue to finish");
-        scoreEntryQueue.waitForQueueToFinish();
 
         if (runNumber > numSeedingRounds
             && runNumber != maxRuns) {
@@ -327,7 +315,6 @@ public class FullTournamentTest extends SeleneseTestCase {
         }
 
       }
-      scoreEntryQueue.shutdown();
 
       enterSubjectiveScores(testDataConn, challengeDocument, testTournamentName);
 
