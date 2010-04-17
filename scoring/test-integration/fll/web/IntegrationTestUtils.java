@@ -19,6 +19,8 @@ import org.junit.Assert;
 
 import com.thoughtworks.selenium.Selenium;
 
+import fll.TestUtils;
+
 /**
  * Some utilities for integration tests.
  */
@@ -45,7 +47,7 @@ public final class IntegrationTestUtils {
       Assert.assertNotNull(challengeStream);
       final File challengeFile = IntegrationTestUtils.storeInputStreamToFile(challengeStream);
       try {
-        selenium.open("http://localhost:9080/fll-sw/setup/");
+        selenium.open(TestUtils.URL_ROOT + "setup/");
         selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
         selenium.type("xmldocument", challengeFile.getAbsolutePath());
