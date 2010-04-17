@@ -50,7 +50,6 @@ import fll.xml.XMLUtils;
 
 /**
  * Test a full tournament.
- * 
  */
 public class FullTournamentTest extends SeleneseTestCase {
 
@@ -62,9 +61,7 @@ public class FullTournamentTest extends SeleneseTestCase {
   }
 
   /**
-   * Test a full tournament. This tests to make sure
-   * everything works normally.
-   * 
+   * Test a full tournament. This tests to make sure everything works normally.
    * 
    * @throws MalformedURLException
    * @throws IOException
@@ -77,8 +74,8 @@ public class FullTournamentTest extends SeleneseTestCase {
    * @throws InterruptedException
    */
   @Test
-  public void testFullTournament() throws MalformedURLException, IOException, SAXException, ClassNotFoundException,
-      InstantiationException, IllegalAccessException, ParseException, SQLException, InterruptedException {
+  public void testFullTournament() throws MalformedURLException, IOException, SAXException, ClassNotFoundException, InstantiationException,
+      IllegalAccessException, ParseException, SQLException, InterruptedException {
     final int numSeedingRounds = 3;
 
     // create connection to database with test data
@@ -303,6 +300,7 @@ public class FullTournamentTest extends SeleneseTestCase {
         while (rs.next()) {
           final int teamNumber = rs.getInt(1);
           enterPerformanceScore(testDataConn, performanceElement, testTournamentName, runNumber, teamNumber);
+          verifyPerformanceScore(testDataConn, performanceElement, testTournamentName, runNumber, teamNumber);
         }
 
         if (runNumber > numSeedingRounds
@@ -549,7 +547,7 @@ public class FullTournamentTest extends SeleneseTestCase {
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull(response.getElementWithID("success"));
     } finally {
-      if(!subjectiveZip.delete()) {
+      if (!subjectiveZip.delete()) {
         subjectiveZip.deleteOnExit();
       }
       SQLFunctions.closeResultSet(rs);
@@ -598,23 +596,12 @@ public class FullTournamentTest extends SeleneseTestCase {
   /**
    * Enter a teams performance score. Data is pulled from testDataConn and
    * pushed to the website.
-   * 
-   * @param testDataConn where to get the test data from
-   * @param performanceElement the challenge description
-   * @param testTournament the name of the tournament to enter data for
-   * @param runNumber the run to enter data for
-   * @param teamNumber the team to enter data for
-   * @throws SQLException
-   * @throws IOException
-   * @throws SAXException
-   * @throws MalformedURLException
-   * @throws ParseException
    */
-  /* package */static void enterPerformanceScore(final Connection testDataConn,
-                                                 final Element performanceElement,
-                                                 final String testTournament,
-                                                 final int runNumber,
-                                                 final int teamNumber) throws SQLException, IOException, SAXException, MalformedURLException, ParseException {
+  private void enterPerformanceScore(final Connection testDataConn,
+                                     final Element performanceElement,
+                                     final String testTournament,
+                                     final int runNumber,
+                                     final int teamNumber) throws SQLException, IOException, SAXException, MalformedURLException, ParseException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -671,6 +658,91 @@ public class FullTournamentTest extends SeleneseTestCase {
           // Set the verified field to yes
           form.setParameter("Verified", "1");
         }
+        
+
+        // submit score
+        request = form.getRequest("submit");
+        response = WebTestUtils.loadPage(conversation, request);
+        Assert.assertTrue(response.isHTML());
+        Assert.assertEquals("Errors: "
+            + response.getText(), 0, response.getElementsWithName("error").length);
+      } else {
+        Assert.fail("Cannot find scores for "
+            + teamNumber + " run " + runNumber);
+      }
+    } finally {
+      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.closePreparedStatement(prep);
+    }
+
+  }
+  
+  /**
+   * Enter a teams performance score. Data is pulled from testDataConn and
+   * pushed to the website.
+   */
+  private void verifyPerformanceScore(final Connection testDataConn,
+                                     final Element performanceElement,
+                                     final String testTournament,
+                                     final int runNumber,
+                                     final int teamNumber) throws SQLException, IOException, SAXException, MalformedURLException, ParseException {
+    ResultSet rs = null;
+    PreparedStatement prep = null;
+    try {
+
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("Verify score for "
+            + teamNumber + " run: " + runNumber);
+      }
+
+      prep = testDataConn.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?");
+      prep.setString(1, testTournament);
+      prep.setInt(2, runNumber);
+      prep.setInt(3, teamNumber);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        // need to get the score entry form
+        selenium.open(TestUtils.URL_ROOT + "scoreEntry/select_team.jsp");
+        selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+        
+        Assert.assertTrue(response.isHTML());
+        WebForm form = response.getFormWithName("verify");
+        Assert.assertNotNull(form);
+        form.setParameter("TeamNumber", String.valueOf(teamNumber));
+        request = form.getRequest();
+        response = WebTestUtils.loadPage(conversation, request);
+        Assert.assertTrue(response.isHTML());
+
+        form = response.getFormWithName("scoreEntry");
+        //FIXME check the values
+//        if (rs.getBoolean("NoShow")) {
+//          form.setParameter("NoShow", "1");
+//        } else {
+//          // walk over challenge descriptor to get all element names and then
+//          // use the values from rs
+//          for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
+//            final String name = element.getAttribute("name");
+//            final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
+//            final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
+//            if (LOGGER.isDebugEnabled()) {
+//              LOGGER.debug("Setting form parameter: "
+//                  + name + " min: " + min + " max: " + max + " readonly: " + form.isReadOnlyParameter(name));
+//            }
+//
+//            if (XMLUtils.isEnumeratedGoal(element)
+//                || (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE) && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE))) {
+//              final String valueStr = rs.getString(name);
+//              form.setParameter(name, valueStr);
+//            } else {
+//              final int value = rs.getInt(name);
+//              setFormScoreElement(form, name, value);
+//            }
+//          }
+//        }
+        
+        // Set the verified field to yes
+        form.setParameter("Verified", "1");
 
         // submit score
         request = form.getRequest("submit");
