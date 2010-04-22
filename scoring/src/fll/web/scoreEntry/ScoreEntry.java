@@ -626,7 +626,7 @@ public final class ScoreEntry {
       writer.println("      <tr>");
       writer.println("        <td>");
       writer.println("          <input type='radio' name='"
-          + goalName + "' value='" + value + "' onclick='" + getSetMethodName(goalName) + "(\"" + value + "\")'>");
+          + goalName + "' value='" + value + "' id='" + getIDForEnumRadio(goalName, value) + "' ' onclick='" + getSetMethodName(goalName) + "(\"" + value + "\")'>");
       writer.println("        </td>");
       writer.println("        <td>");
       writer.println("          "
@@ -637,6 +637,14 @@ public final class ScoreEntry {
 
     writer.println("        </table>");
   }
+
+  /**
+   * The ID assigned to the radio button for a particular value of an enumerated goal.
+   */
+  public static String getIDForEnumRadio(final String goalName, final String value) {
+    return goalName + "_" + value;
+  }
+  
 
   /**
    * The name of the javascript variable that represents the raw score for a

@@ -45,6 +45,7 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.subjective.SubjectiveFrame;
 import fll.util.FP;
+import fll.web.scoreEntry.ScoreEntry;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
 
@@ -684,6 +685,8 @@ public class FullTournamentTest extends SeleneseTestCase {
                                      final String testTournament,
                                      final int runNumber,
                                      final int teamNumber) throws SQLException, IOException, SAXException, MalformedURLException, ParseException {
+    final String selectTeamPage = TestUtils.URL_ROOT + "scoreEntry/select_team.jsp";
+    
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -700,7 +703,7 @@ public class FullTournamentTest extends SeleneseTestCase {
       rs = prep.executeQuery();
       if (rs.next()) {
         // need to get the score entry form
-        selenium.open(TestUtils.URL_ROOT + "scoreEntry/select_team.jsp");
+        selenium.open(selectTeamPage);
         selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
         // verify that teamNumber is in the list
@@ -713,59 +716,64 @@ public class FullTournamentTest extends SeleneseTestCase {
         selenium.click("id=verify_submit");
         selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
         
-        
-        
-//        Assert.assertTrue(response.isHTML());
-//        WebForm form = response.getFormWithName("verify");
-//        Assert.assertNotNull(form);
-//        form.setParameter("TeamNumber", String.valueOf(teamNumber));
-//        request = form.getRequest();
-//        response = WebTestUtils.loadPage(conversation, request);
-//        Assert.assertTrue(response.isHTML());
-//
-//        form = response.getFormWithName("scoreEntry");
-        //FIXME check the values
-//        if (rs.getBoolean("NoShow")) {
-//          form.setParameter("NoShow", "1");
-//        } else {
-//          // walk over challenge descriptor to get all element names and then
-//          // use the values from rs
-//          for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
-//            final String name = element.getAttribute("name");
-//            final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
-//            final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
-//            if (LOGGER.isDebugEnabled()) {
-//              LOGGER.debug("Setting form parameter: "
-//                  + name + " min: " + min + " max: " + max + " readonly: " + form.isReadOnlyParameter(name));
-//            }
-//
-//            if (XMLUtils.isEnumeratedGoal(element)
-//                || (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE) && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE))) {
-//              final String valueStr = rs.getString(name);
-//              form.setParameter(name, valueStr);
-//            } else {
-//              final int value = rs.getInt(name);
-//              setFormScoreElement(form, name, value);
-//            }
-//          }
-//        }
-        
-        // Set the verified field to yes
-        selenium.click("id=Verified_yes");
+        if (rs.getBoolean("NoShow")) {
+         selenium.click("id=no_show");
+        } else {
+          // walk over challenge descriptor to get all element names and then
+          // use the values from rs
+          for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
+            final String name = element.getAttribute("name");
+            final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
+            final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
+            
+            if (XMLUtils.isEnumeratedGoal(element)) {
+              // need check if the right radio button is selected
+              final String value = rs.getString(name);
+              final String id = ScoreEntry.getIDForEnumRadio(name, value);
 
+              final String formValue = selenium.getValue("id=" + id);
+              Assert.assertNotNull("Null value for goal: " + name, formValue);
+              
+              Assert.assertEquals("Wrong enum selected for goal: " + name, "on", formValue);
+            } else if(FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE) && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+              final String formValue = selenium.getValue("name=" + name);
+              Assert.assertNotNull("Null value for goal: " + name, formValue);
 
-        // submit score
-        selenium.click("id=submit");
-        // confirm
+              // yes/no
+              final int value = rs.getInt(name);
+              final String expectedValue;
+              if(value == 0) {
+                expectedValue="off";
+              } else {
+                expectedValue="on";
+              }
+              Assert.assertEquals("Wrong value for goal: " + name, expectedValue, formValue);                
+            } else {
+              final String formValue = selenium.getValue("name=" + name);
+              Assert.assertNotNull("Null value for goal: " + name, formValue);
+
+              final int value = rs.getInt(name);
+              final int formValueInt = Integer.valueOf(formValue);
+              Assert.assertEquals("Wrong value for goal: " + name, value, formValueInt);
+            }
+          }
+          
+          // Set the verified field to yes
+          selenium.click("id=Verified_yes");
+
+          // submit score
+          selenium.click("id=submit");
+        }
+        
+
+        // confirm selection, not going to bother checking the text
         selenium.getConfirmation();
         selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
+        // check for errors
+        Assert.assertEquals(selectTeamPage, selenium.getLocation());
+        Assert.assertTrue("Error submitting form, not on select team page", selenium.isTextPresent("Unverified Runs"));
         
-//        request = form.getRequest("submit");
-//        response = WebTestUtils.loadPage(conversation, request);
-//        Assert.assertTrue(response.isHTML());
-//        Assert.assertEquals("Errors: "
-//            + response.getText(), 0, response.getElementsWithName("error").length);
       } else {
         Assert.fail("Cannot find scores for "
             + teamNumber + " run " + runNumber);
