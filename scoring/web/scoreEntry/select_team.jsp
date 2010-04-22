@@ -173,7 +173,7 @@ function editFlagBoxClicked() {
           <!-- submit button -->
           <td align='left'>
             <!--<font face='arial' size='4'><b>Submit</b></font>-->
-            <input class='dark_bg' type="submit" value="Submit">
+            <input class='dark_bg' type="submit" id="verify_submit" value="Verify Score">
           </td>
         </tr>
         

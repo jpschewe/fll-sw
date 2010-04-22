@@ -377,13 +377,13 @@ return m;
                     <input type='submit' id='submit' name='submit' value='Submit Score' onclick='return confirm("Submit Data -- Are you sure?")'>
                   </c:if>
                 </c:if>
-                <input type='button' value='Cancel' onclick='CancelClicked()'>
+                <input type='button' id='cancel' value='Cancel' onclick='CancelClicked()'>
                 <c:if test="${editFlag and isLastRun}">
-                  <input type='submit' name='delete' value='Delete Score' onclick='return confirm("Are you sure you want to delete this score?")'>
+                  <input type='submit' id='delete' name='delete' value='Delete Score' onclick='return confirm("Are you sure you want to delete this score?")'>
                 </c:if>
               </td>
               <td colspan='2'>
-                <input type='submit' id='submit' name='submit' value='No Show' onclick='return submit_NoShow()'>
+                <input type='submit' id='no_show' name='submit' value='No Show' onclick='return submit_NoShow()'>
               </td>
             </tr>
           </table> <!-- end score entry table  -->
