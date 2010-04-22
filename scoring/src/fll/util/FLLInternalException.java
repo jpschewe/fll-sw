@@ -15,7 +15,7 @@ public class FLLInternalException extends RuntimeException {
    * 
    */
   public FLLInternalException() {
-    // TODO Auto-generated constructor stub
+    super();
   }
 
   /**
@@ -23,7 +23,6 @@ public class FLLInternalException extends RuntimeException {
    */
   public FLLInternalException(final String message) {
     super(message);
-    // TODO Auto-generated constructor stub
   }
 
   /**
@@ -31,7 +30,6 @@ public class FLLInternalException extends RuntimeException {
    */
   public FLLInternalException(final Throwable cause) {
     super(cause);
-    // TODO Auto-generated constructor stub
   }
 
   /**
@@ -40,7 +38,6 @@ public class FLLInternalException extends RuntimeException {
    */
   public FLLInternalException(final String message, final Throwable cause) {
     super(message, cause);
-    // TODO Auto-generated constructor stub
   }
 
 }
