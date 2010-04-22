@@ -655,8 +655,6 @@ public class FullTournamentTest extends SeleneseTestCase {
               setFormScoreElement(form, name, value);
             }
           }
-          // Set the verified field to yes
-          form.setParameter("Verified", "1");
         }
         
 
@@ -705,16 +703,27 @@ public class FullTournamentTest extends SeleneseTestCase {
         selenium.open(TestUtils.URL_ROOT + "scoreEntry/select_team.jsp");
         selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
+        // verify that teamNumber is in the list
+        Assert.assertTrue("Can't find team number: " + teamNumber + " run number: " + runNumber + " in verify list", selenium.isTextPresent("Run " + runNumber + " - " + teamNumber));
         
-        Assert.assertTrue(response.isHTML());
-        WebForm form = response.getFormWithName("verify");
-        Assert.assertNotNull(form);
-        form.setParameter("TeamNumber", String.valueOf(teamNumber));
-        request = form.getRequest();
-        response = WebTestUtils.loadPage(conversation, request);
-        Assert.assertTrue(response.isHTML());
-
-        form = response.getFormWithName("scoreEntry");
+        // select this entry
+        selenium.select("xpath=//form[@name='verify']//select[@name='TeamNumber']", "label=regexp:Run " + runNumber + "\\s-\\s" + teamNumber);
+        
+        // submit the page
+        selenium.click("id=verify_submit");
+        selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+        
+        
+        
+//        Assert.assertTrue(response.isHTML());
+//        WebForm form = response.getFormWithName("verify");
+//        Assert.assertNotNull(form);
+//        form.setParameter("TeamNumber", String.valueOf(teamNumber));
+//        request = form.getRequest();
+//        response = WebTestUtils.loadPage(conversation, request);
+//        Assert.assertTrue(response.isHTML());
+//
+//        form = response.getFormWithName("scoreEntry");
         //FIXME check the values
 //        if (rs.getBoolean("NoShow")) {
 //          form.setParameter("NoShow", "1");
@@ -742,14 +751,21 @@ public class FullTournamentTest extends SeleneseTestCase {
 //        }
         
         // Set the verified field to yes
-        form.setParameter("Verified", "1");
+        selenium.click("id=Verified_yes");
+
 
         // submit score
-        request = form.getRequest("submit");
-        response = WebTestUtils.loadPage(conversation, request);
-        Assert.assertTrue(response.isHTML());
-        Assert.assertEquals("Errors: "
-            + response.getText(), 0, response.getElementsWithName("error").length);
+        selenium.click("id=submit");
+        // confirm
+        selenium.getConfirmation();
+        selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+        
+//        request = form.getRequest("submit");
+//        response = WebTestUtils.loadPage(conversation, request);
+//        Assert.assertTrue(response.isHTML());
+//        Assert.assertEquals("Errors: "
+//            + response.getText(), 0, response.getElementsWithName("error").length);
       } else {
         Assert.fail("Cannot find scores for "
             + teamNumber + " run " + runNumber);
