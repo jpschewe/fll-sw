@@ -305,7 +305,7 @@ public final class GenerateDB {
       // max seeding round score for the current tournament
       stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
       stmt.executeUpdate("CREATE VIEW performance_seeding_max AS "//
-          + " SELECT TeamNumber, Tournament, Max(ComputedTotal) As Score" //
+          + " SELECT TeamNumber, Tournament, Max(ComputedTotal) As Score, AVG(ComputedTotal) As average" //
           + " FROM Performance" //
           + " WHERE NoShow = 0" //
           + " AND RunNumber <= ("//
