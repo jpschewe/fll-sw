@@ -1266,10 +1266,12 @@ public final class Queries {
     try {
       prep = connection.prepareStatement("SELECT performance_seeding_max.TeamNumber, performance_seeding_max.Score, RAND() as random"
           + " FROM performance_seeding_max, current_tournament_teams" //
-          + " WHERE performance_seeding_max.Tournament = ?"//
+          + " WHERE performance_seeding_max.Tournament = ?" //
           + " AND performance_seeding_max.TeamNumber = current_tournament_teams.TeamNumber" //
-          + " AND current_tournament_teams.event_division = ?"//
-          + " ORDER BY performance_seeding_max.Score " + ascDesc + ", random");
+          + " AND current_tournament_teams.event_division = ?" //
+          + " ORDER BY performance_seeding_max.Score " + ascDesc //
+          + ", performance_seeding_max.average " + ascDesc //
+          + ", random");
       prep.setInt(1, currentTournament);
       prep.setString(2, divisionStr);
 
