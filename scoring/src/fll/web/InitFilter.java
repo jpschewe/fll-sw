@@ -123,8 +123,6 @@ public class InitFilter implements Filter {
    * @throws SQLException
    */
   private String initialize(final HttpServletRequest request, final HttpServletResponse response) throws IOException, SQLException, RuntimeException {
-    // FIXME should check if database connections need to be recreated
-
     final HttpSession session = request.getSession();
     final ServletContext application = session.getServletContext();
 
@@ -147,14 +145,14 @@ public class InitFilter implements Filter {
 
     // initialize the datasource
     final DataSource datasource;
-    if (null == session.getAttribute(SessionAttributes.DATASOURCE)) {
+    if (null == SessionAttributes.getDataSource(session)) {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Datasource not available, creating");
       }
       datasource = Utilities.createDataSource(database);
       session.setAttribute(SessionAttributes.DATASOURCE, datasource);
     } else {
-      datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
+      datasource = SessionAttributes.getDataSource(session);
     }
 
     // Initialize the connection
@@ -170,7 +168,7 @@ public class InitFilter implements Filter {
     }
 
     // load the challenge descriptor
-    if (null == application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT)) {
+    if (null == ApplicationAttributes.getChallengeDocument(application)) {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Loading challenge descriptor");
       }
