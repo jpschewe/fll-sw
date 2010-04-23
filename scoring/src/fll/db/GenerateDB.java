@@ -300,11 +300,10 @@ public final class GenerateDB {
       }
       stmt.executeUpdate(finalScores.toString());
 
-      // create views
+      // --------------- create views ---------------
       
       // max seeding round score for the current tournament
       stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
-      // TODO: can use PreparedStatement here?
       stmt.executeUpdate("CREATE VIEW performance_seeding_max AS "//
           + " SELECT TeamNumber, Tournament, Max(ComputedTotal) As Score" //
           + " FROM Performance" //
@@ -323,7 +322,6 @@ public final class GenerateDB {
           + " ) GROUP BY TeamNumber, Tournament");
 
       // current tournament teams
-      //TODO: can use PreparedStatement here?
       stmt.executeUpdate("DROP VIEW IF EXISTS current_tournament_teams");
       prep = connection.prepareStatement("CREATE VIEW current_tournament_teams AS "//
       + " SELECT * FROM TournamentTeams" //
@@ -331,18 +329,8 @@ public final class GenerateDB {
       + " (SELECT param_value " // " +
       + "      FROM global_parameters " //
       + "      WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'"//
-//      + " WHERE param = ?"//
       + "  )");
-//      prep.setString(1, GlobalParameters.CURRENT_TOURNAMENT);
       prep.executeUpdate();
-      
-//      stmt.executeUpdate("CREATE VIEW current_tournament_teams AS "//
-//          + " SELECT * FROM TournamentTeams" //
-//          + " WHERE Tournament IN " //
-//          + " (SELECT param_value " // " +
-//          + "      FROM global_parameters " //
-//          + "      WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'"//
-//          + "  )");
 
       // verified performance scores
       stmt.executeUpdate("DROP VIEW IF EXISTS verified_performance");
