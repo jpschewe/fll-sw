@@ -701,24 +701,25 @@ public class FullTournamentTest extends SeleneseTestCase {
       prep.setInt(2, runNumber);
       prep.setInt(3, teamNumber);
       rs = prep.executeQuery();
-      if (rs.next()) {
-        // need to get the score entry form
-        selenium.open(selectTeamPage);
-        selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-
-        // verify that teamNumber is in the list
-        Assert.assertTrue("Can't find team number: " + teamNumber + " run number: " + runNumber + " in verify list", selenium.isTextPresent("Run " + runNumber + " - " + teamNumber));
-        
-        // select this entry
-        selenium.select("xpath=//form[@name='verify']//select[@name='TeamNumber']", "label=regexp:Run " + runNumber + "\\s-\\s" + teamNumber);
-        
-        // submit the page
-        selenium.click("id=verify_submit");
-        selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-        
+      if (rs.next()) {        
         if (rs.getBoolean("NoShow")) {
-         selenium.click("id=no_show");
+         // no shows don't need verifying
+          return;
         } else {
+          // need to get the score entry form
+          selenium.open(selectTeamPage);
+          selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+          // verify that teamNumber is in the list
+          Assert.assertTrue("Can't find team number: " + teamNumber + " run number: " + runNumber + " in verify list", selenium.isTextPresent("Run " + runNumber + " - " + teamNumber));
+          
+          // select this entry
+          selenium.select("xpath=//form[@name='verify']//select[@name='TeamNumber']", "label=regexp:Run " + runNumber + "\\s-\\s" + teamNumber);
+          
+          // submit the page
+          selenium.click("id=verify_submit");
+          selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
           // walk over challenge descriptor to get all element names and then
           // use the values from rs
           for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
