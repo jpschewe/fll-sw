@@ -135,7 +135,7 @@ public class CommitTeam extends BaseFLLServlet {
 
   /**
    * Figure out what the division is based on the value of the "division"
-   * parameter and possibly teh "division_text" parameter.
+   * parameter and possibly the "division_text" parameter.
    */
   private String resolveDivision(final HttpServletRequest request) {
     final String div = request.getParameter("division");
