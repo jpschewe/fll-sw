@@ -253,8 +253,8 @@ public final class Queries {
    *         is the category name {@link #OVERALL_CATEGORY_NAME} is a special
    *         category and the value is the rank.
    */
-  public static Map<String, Map<Integer, Map<String, Integer>>> getTeamRankings(final Connection connection, final Document challengeDocument)
-      throws SQLException {
+  public static Map<String, Map<Integer, Map<String, Integer>>> getTeamRankings(final Connection connection,
+                                                                                final Document challengeDocument) throws SQLException {
     final Map<String, Map<Integer, Map<String, Integer>>> rankingMap = new HashMap<String, Map<Integer, Map<String, Integer>>>();
     final int tournament = getCurrentTournament(connection);
     final List<String> divisions = getEventDivisions(connection);
@@ -408,7 +408,9 @@ public final class Queries {
    * 
    * @param categoryName the category name to put the ranks into teamRanks as
    */
-  private static void processTeamRankings(final Map<Integer, Map<String, Integer>> teamMap, final String categoryTitle, final ResultSet rs) throws SQLException {
+  private static void processTeamRankings(final Map<Integer, Map<String, Integer>> teamMap,
+                                          final String categoryTitle,
+                                          final ResultSet rs) throws SQLException {
     int tieRank = 1;
     int rank = 1;
     double prevScore = Double.NaN;
@@ -477,7 +479,8 @@ public final class Queries {
    * Figure out the next run number for teamNumber. Does not ignore unverified
    * scores.
    */
-  public static int getNextRunNumber(final Connection connection, final int teamNumber) throws SQLException {
+  public static int getNextRunNumber(final Connection connection,
+                                     final int teamNumber) throws SQLException {
     final int currentTournament = getCurrentTournament(connection);
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -505,7 +508,8 @@ public final class Queries {
    * same as next run number -1, but sometimes we get non-consecutive runs in
    * and this just finds the max run number. Does not ignore unverified scores.
    */
-  public static int getMaxRunNumber(final Connection connection, final int teamNumber) throws SQLException {
+  public static int getMaxRunNumber(final Connection connection,
+                                    final int teamNumber) throws SQLException {
     final int currentTournament = getCurrentTournament(connection);
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -545,8 +549,9 @@ public final class Queries {
    * @throws ParseException if the XML document is invalid.
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Goals determine columns")
-  public static String insertPerformanceScore(final Document document, final Connection connection, final HttpServletRequest request) throws SQLException,
-      ParseException, RuntimeException {
+  public static String insertPerformanceScore(final Document document,
+                                              final Connection connection,
+                                              final HttpServletRequest request) throws SQLException, ParseException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(document);
     final Element performanceElement = (Element) document.getDocumentElement().getElementsByTagName("Performance").item(0);
@@ -712,7 +717,8 @@ public final class Queries {
     return sql;
   }
 
-  public static boolean isThirdPlaceEnabled(final Connection connection, final String division) throws SQLException {
+  public static boolean isThirdPlaceEnabled(final Connection connection,
+                                            final String division) throws SQLException {
     final int finalRound = getNumPlayoffRounds(connection, division);
 
     final int tournament = getCurrentTournament(connection);
@@ -749,8 +755,9 @@ public final class Queries {
    * @throws RuntimeException if a parameter is missing.
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
-  public static String updatePerformanceScore(final Document document, final Connection connection, final HttpServletRequest request) throws SQLException,
-      ParseException, RuntimeException {
+  public static String updatePerformanceScore(final Document document,
+                                              final Connection connection,
+                                              final HttpServletRequest request) throws SQLException, ParseException, RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(document);
     final Element performanceElement = (Element) document.getDocumentElement().getElementsByTagName("Performance").item(0);
@@ -932,8 +939,8 @@ public final class Queries {
    *           data would become inconsistent due to the deletion.
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "OBL_UNSATISFIED_OBLIGATION", justification = "Bug in findbugs - ticket:2924739")
-  public static void deletePerformanceScore(final Connection connection, final HttpServletRequest request) throws SQLException, RuntimeException,
-      ParseException {
+  public static void deletePerformanceScore(final Connection connection,
+                                            final HttpServletRequest request) throws SQLException, RuntimeException, ParseException {
     final int currentTournament = getCurrentTournament(connection);
 
     final String teamNumberStr = request.getParameter("TeamNumber");
@@ -1050,8 +1057,11 @@ public final class Queries {
     }
   }
 
-  private static void removePlayoffScore(final Connection connection, final String division, final int currentTournament, final int playoffRun, final int ptLine)
-      throws SQLException {
+  private static void removePlayoffScore(final Connection connection,
+                                         final String division,
+                                         final int currentTournament,
+                                         final int playoffRun,
+                                         final int ptLine) throws SQLException {
     updatePlayoffTable(connection, Team.NULL_TEAM_NUMBER, division, currentTournament, (playoffRun + 1), ((ptLine + 1) / 2));
 
     final int semiFinalRound = getNumPlayoffRounds(connection, division) - 1;
@@ -1070,7 +1080,8 @@ public final class Queries {
    * @throws RuntimeException if <code>teamNumber</code> cannot be found in
    *           TournamenTeams
    */
-  public static String getEventDivision(final Connection connection, final int teamNumber) throws SQLException, RuntimeException {
+  public static String getEventDivision(final Connection connection,
+                                        final int teamNumber) throws SQLException, RuntimeException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -1148,8 +1159,9 @@ public final class Queries {
    * Convenience function that defaults to querying all scores, not just those
    * that are verified.
    */
-  public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection, final Map<Integer, Team> tournamentTeams, final String division)
-      throws SQLException, RuntimeException {
+  public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection,
+                                                      final Map<Integer, Team> tournamentTeams,
+                                                      final String division) throws SQLException, RuntimeException {
     return getTeamsNeedingSeedingRuns(connection, tournamentTeams, division, false);
   }
 
@@ -1213,7 +1225,8 @@ public final class Queries {
    * 
    * @throws RuntimeException if a team couldn't be found in the map
    */
-  private static List<Team> collectTeamsFromQuery(final Map<Integer, Team> tournamentTeams, final ResultSet rs) throws SQLException {
+  private static List<Team> collectTeamsFromQuery(final Map<Integer, Team> tournamentTeams,
+                                                  final ResultSet rs) throws SQLException {
     final List<Team> list = new LinkedList<Team>();
     while (rs.next()) {
       final int teamNumber = rs.getInt(1);
@@ -1231,8 +1244,9 @@ public final class Queries {
    * Convenience function that defaults to querying all scores, not just those
    * that are verified.
    */
-  public static List<Team> getTeamsWithExtraRuns(final Connection connection, final Map<Integer, Team> tournamentTeams, final String division)
-      throws SQLException, RuntimeException {
+  public static List<Team> getTeamsWithExtraRuns(final Connection connection,
+                                                 final Map<Integer, Team> tournamentTeams,
+                                                 final String division) throws SQLException, RuntimeException {
     return getTeamsWithExtraRuns(connection, tournamentTeams, division, false);
   }
 
@@ -1298,7 +1312,8 @@ public final class Queries {
    * @return the number of seeding rounds
    * @throws SQLException on a database error
    */
-  public static int getNumSeedingRounds(final Connection connection, final int tournament) throws SQLException {
+  public static int getNumSeedingRounds(final Connection connection,
+                                        final int tournament) throws SQLException {
     return getIntTournamentParameter(connection, tournament, TournamentParameters.SEEDING_ROUNDS);
   }
 
@@ -1308,7 +1323,9 @@ public final class Queries {
    * @param connection the connection
    * @param newSeedingRounds the new value of seeding rounds
    */
-  public static void setNumSeedingRounds(final Connection connection, final int tournament, final int newSeedingRounds) throws SQLException {
+  public static void setNumSeedingRounds(final Connection connection,
+                                         final int tournament,
+                                         final int newSeedingRounds) throws SQLException {
     setIntTournamentParameter(connection, tournament, TournamentParameters.SEEDING_ROUNDS, newSeedingRounds);
   }
 
@@ -1320,7 +1337,8 @@ public final class Queries {
    *          must be 1 or 2.
    * @throws SQLException
    */
-  public static void setScoresheetLayoutNUp(final Connection connection, final int newNup) throws SQLException {
+  public static void setScoresheetLayoutNUp(final Connection connection,
+                                            final int newNup) throws SQLException {
     setGlobalParameter(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP, String.valueOf(newNup));
   }
 
@@ -1353,7 +1371,9 @@ public final class Queries {
    * @param paramName
    * @throws SQLException
    */
-  public static double getDoubleTournamentParameter(final Connection connection, final int tournament, final String paramName) throws SQLException {
+  public static double getDoubleTournamentParameter(final Connection connection,
+                                                    final int tournament,
+                                                    final String paramName) throws SQLException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -1372,23 +1392,23 @@ public final class Queries {
   }
 
   /**
-   * 
    * @param connection
-   * @return the prepared statement for getting a tournament parameter with the values already filled in
+   * @return the prepared statement for getting a tournament parameter with the
+   *         values already filled in
    * @throws SQLException
    */
-  private static PreparedStatement getTournamentParameterStmt(final Connection connection, 
+  private static PreparedStatement getTournamentParameterStmt(final Connection connection,
                                                               final int tournament,
                                                               final String paramName) throws SQLException {
-    //TODO this should really be cached
+    // TODO this should really be cached
     PreparedStatement prep = connection
-    .prepareStatement("SELECT param_value FROM tournament_parameters WHERE param = ? AND (tournament = ? OR tournament = ?) ORDER BY tournament DESC");    
+                                       .prepareStatement("SELECT param_value FROM tournament_parameters WHERE param = ? AND (tournament = ? OR tournament = ?) ORDER BY tournament DESC");
     prep.setString(1, paramName);
     prep.setInt(2, tournament);
     prep.setInt(3, GenerateDB.INTERNAL_TOURNAMENT_ID);
     return prep;
   }
-  
+
   /**
    * Get the value of a tournament parameter
    * 
@@ -1396,7 +1416,9 @@ public final class Queries {
    * @param paramName
    * @throws SQLException
    */
-  public static int getIntTournamentParameter(final Connection connection, final int tournament, final String paramName) throws SQLException {
+  public static int getIntTournamentParameter(final Connection connection,
+                                              final int tournament,
+                                              final String paramName) throws SQLException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -1423,7 +1445,9 @@ public final class Queries {
    * @return true if there is a tournament specific value set
    * @throws SQLException
    */
-  public static boolean tournamentParameterValueExists(final Connection connection, final int tournament, final String paramName) throws SQLException {
+  public static boolean tournamentParameterValueExists(final Connection connection,
+                                                       final int tournament,
+                                                       final String paramName) throws SQLException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -1438,8 +1462,10 @@ public final class Queries {
     }
   }
 
-  public static void setDoubleTournamentParameter(final Connection connection, final int tournament, final String paramName, final double paramValue)
-      throws SQLException {
+  public static void setDoubleTournamentParameter(final Connection connection,
+                                                  final int tournament,
+                                                  final String paramName,
+                                                  final double paramValue) throws SQLException {
     final boolean paramExists = tournamentParameterValueExists(connection, tournament, paramName);
     PreparedStatement prep = null;
     try {
@@ -1458,8 +1484,10 @@ public final class Queries {
     }
   }
 
-  public static void setIntTournamentParameter(final Connection connection, final int tournament, final String paramName, final int paramValue)
-      throws SQLException {
+  public static void setIntTournamentParameter(final Connection connection,
+                                               final int tournament,
+                                               final String paramName,
+                                               final int paramValue) throws SQLException {
     final boolean paramExists = tournamentParameterValueExists(connection, tournament, paramName);
     PreparedStatement prep = null;
     try {
@@ -1484,7 +1512,8 @@ public final class Queries {
    * @param connection db connection
    * @param tournamentID the new value for the current tournament
    */
-  public static void setCurrentTournament(final Connection connection, final int tournamentID) throws SQLException {
+  public static void setCurrentTournament(final Connection connection,
+                                          final int tournamentID) throws SQLException {
     final int currentID = getCurrentTournament(connection);
     if (currentID != tournamentID) {
       setGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT, String.valueOf(tournamentID));
@@ -1525,7 +1554,9 @@ public final class Queries {
    * @throws SQLException on an error talking to the database
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table")
-  public static void deleteTeam(final int teamNumber, final Document document, final Connection connection) throws SQLException {
+  public static void deleteTeam(final int teamNumber,
+                                final Document document,
+                                final Connection connection) throws SQLException {
     PreparedStatement prep = null;
     final boolean autoCommit = connection.getAutoCommit();
     try {
@@ -1593,7 +1624,8 @@ public final class Queries {
    * @see #updatePerformanceScoreTotals(Document, Connection)
    * @see #updateSubjectiveScoreTotals(Document, Connection)
    */
-  public static void updateScoreTotals(final Document document, final Connection connection) throws SQLException, ParseException {
+  public static void updateScoreTotals(final Document document,
+                                       final Connection connection) throws SQLException, ParseException {
 
     updatePerformanceScoreTotals(document, connection);
 
@@ -1609,7 +1641,8 @@ public final class Queries {
    * @throws ParseException
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
-  public static void updateSubjectiveScoreTotals(final Document document, final Connection connection) throws SQLException, ParseException {
+  public static void updateSubjectiveScoreTotals(final Document document,
+                                                 final Connection connection) throws SQLException, ParseException {
     final int tournament = getCurrentTournament(connection);
     final Element rootElement = document.getDocumentElement();
 
@@ -1664,7 +1697,8 @@ public final class Queries {
    * @throws SQLException
    * @throws ParseException
    */
-  public static void updatePerformanceScoreTotals(final Document document, final Connection connection) throws SQLException, ParseException {
+  public static void updatePerformanceScoreTotals(final Document document,
+                                                  final Connection connection) throws SQLException, ParseException {
     final int tournament = getCurrentTournament(connection);
     final Element rootElement = document.getDocumentElement();
 
@@ -1721,7 +1755,7 @@ public final class Queries {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      
+
       prep = getGlobalParameterStmt(connection, GlobalParameters.CHALLENGE_DOCUMENT);
       rs = prep.executeQuery();
       if (rs.next()) {
@@ -1742,7 +1776,8 @@ public final class Queries {
    * @param teamNumber the team to advance
    * @return true on success. Failure indicates that no next tournament exists
    */
-  public static boolean advanceTeam(final Connection connection, final int teamNumber) throws SQLException {
+  public static boolean advanceTeam(final Connection connection,
+                                    final int teamNumber) throws SQLException {
 
     final int currentTournamentID = getTeamCurrentTournament(connection, teamNumber);
     final Tournament currentTournament = Tournament.findTournamentByID(connection, currentTournamentID);
@@ -1771,7 +1806,8 @@ public final class Queries {
   /**
    * Get the current tournament that this team is at.
    */
-  public static int getTeamCurrentTournament(final Connection connection, final int teamNumber) throws SQLException {
+  public static int getTeamCurrentTournament(final Connection connection,
+                                             final int teamNumber) throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -1814,7 +1850,7 @@ public final class Queries {
       LOGGER.error("getTeamCurrentTournament - Cannot determine current tournament for team: "
           + teamNumber + " tournamentNames: " + tournaments + " nextTournaments: " + nextTournaments + " - using DUMMY tournament as default");
       final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
-      if(null == dummyTournament) {
+      if (null == dummyTournament) {
         throw new FLLInternalException("Dummy tournament doesn't exist");
       }
       return dummyTournament.getTournamentID();
@@ -1832,7 +1868,9 @@ public final class Queries {
    * @param teamNumber the team
    * @param newTournament the new current tournament for this team
    */
-  public static void changeTeamCurrentTournament(final Connection connection, final int teamNumber, final int newTournament) throws SQLException {
+  public static void changeTeamCurrentTournament(final Connection connection,
+                                                 final int teamNumber,
+                                                 final int newTournament) throws SQLException {
 
     final Document document = getChallengeDocument(connection);
 
@@ -1874,7 +1912,9 @@ public final class Queries {
    *          tables scores exist in
    * @param teamNumber the team
    */
-  public static void demoteTeam(final Connection connection, final Document document, final int teamNumber) throws SQLException {
+  public static void demoteTeam(final Connection connection,
+                                final Document document,
+                                final int teamNumber) throws SQLException {
     final int currentTournament = getTeamCurrentTournament(connection, teamNumber);
     deleteTeamFromTournamet(connection, document, teamNumber, currentTournament);
   }
@@ -1884,8 +1924,10 @@ public final class Queries {
    * the TournamentTeams table.
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
-  private static void deleteTeamFromTournamet(final Connection connection, final Document document, final int teamNumber, final int currentTournament)
-      throws SQLException {
+  private static void deleteTeamFromTournamet(final Connection connection,
+                                              final Document document,
+                                              final int teamNumber,
+                                              final int currentTournament) throws SQLException {
     // TODO this could be cached
     PreparedStatement prep = null;
     try {
@@ -1938,7 +1980,9 @@ public final class Queries {
    * @return the tournament ID, or null if no such tournament exists
    * @see #getTeamCurrentTournament(Connection, int)
    */
-  public static Integer getTeamPrevTournament(final Connection connection, final int teamNumber, final int currentTournament) throws SQLException {
+  public static Integer getTeamPrevTournament(final Connection connection,
+                                              final int teamNumber,
+                                              final int currentTournament) throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -2072,7 +2116,9 @@ public final class Queries {
   /**
    * Update a team region.
    */
-  public static void updateTeamDivision(final Connection connection, final int number, final String division) throws SQLException {
+  public static void updateTeamDivision(final Connection connection,
+                                        final int number,
+                                        final String division) throws SQLException {
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("UPDATE Teams SET Division = ? WHERE TeamNumber = ?");
@@ -2087,7 +2133,9 @@ public final class Queries {
   /**
    * Update a team name.
    */
-  public static void updateTeamName(final Connection connection, final int number, final String name) throws SQLException {
+  public static void updateTeamName(final Connection connection,
+                                    final int number,
+                                    final String name) throws SQLException {
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("UPDATE Teams SET TeamName = ? WHERE TeamNumber = ?");
@@ -2102,7 +2150,9 @@ public final class Queries {
   /**
    * Update a team organization.
    */
-  public static void updateTeamOrganization(final Connection connection, final int number, final String organization) throws SQLException {
+  public static void updateTeamOrganization(final Connection connection,
+                                            final int number,
+                                            final String organization) throws SQLException {
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("UPDATE Teams SET Organization = ? WHERE TeamNumber = ?");
@@ -2117,7 +2167,9 @@ public final class Queries {
   /**
    * Update a team region.
    */
-  public static void updateTeamRegion(final Connection connection, final int number, final String region) throws SQLException {
+  public static void updateTeamRegion(final Connection connection,
+                                      final int number,
+                                      final String region) throws SQLException {
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("UPDATE Teams SET Region = ? WHERE TeamNumber = ?");
@@ -2157,7 +2209,8 @@ public final class Queries {
    * @param document XML document to describe the tournament
    * @return true if everything is ok
    */
-  public static boolean isJudgesProperlyAssigned(final Connection connection, final Document document) throws SQLException {
+  public static boolean isJudgesProperlyAssigned(final Connection connection,
+                                                 final Document document) throws SQLException {
 
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -2194,7 +2247,8 @@ public final class Queries {
    * @throws SQLException if database access fails.
    * @throws RuntimeException if query returns empty results.
    */
-  public static boolean isPlayoffDataInitialized(final Connection connection, final String division) throws SQLException, RuntimeException {
+  public static boolean isPlayoffDataInitialized(final Connection connection,
+                                                 final String division) throws SQLException, RuntimeException {
     final int curTourney = getCurrentTournament(connection);
 
     PreparedStatement prep = null;
@@ -2256,8 +2310,10 @@ public final class Queries {
    *         does not exist
    * @throws SQLException on a database error
    */
-  public static boolean isBye(final Connection connection, final int tournament, final int teamNumber, final int runNumber) throws SQLException,
-      IllegalArgumentException {
+  public static boolean isBye(final Connection connection,
+                              final int tournament,
+                              final int teamNumber,
+                              final int runNumber) throws SQLException, IllegalArgumentException {
     Statement stmt = null;
     ResultSet rs = null;
     try {
@@ -2284,8 +2340,10 @@ public final class Queries {
    *         score does not exist
    * @throws SQLException on a database error
    */
-  public static boolean isNoShow(final Connection connection, final int tournament, final int teamNumber, final int runNumber) throws SQLException,
-      IllegalArgumentException {
+  public static boolean isNoShow(final Connection connection,
+                                 final int tournament,
+                                 final int teamNumber,
+                                 final int runNumber) throws SQLException, IllegalArgumentException {
     Statement stmt = null;
     ResultSet rs = null;
     try {
@@ -2307,7 +2365,10 @@ public final class Queries {
   /**
    * Returns true if the score has been verified, i.e. double-checked.
    */
-  public static boolean isVerified(final Connection connection, final int tournament, final int teamNumber, final int runNumber) throws SQLException {
+  public static boolean isVerified(final Connection connection,
+                                   final int tournament,
+                                   final int teamNumber,
+                                   final int runNumber) throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
     try {
@@ -2339,8 +2400,10 @@ public final class Queries {
    *         round of the PlayoffData table.
    * @throws SQLException on a database error.
    */
-  public static int getPlayoffTableLineNumber(final Connection connection, final int tournament, final int teamNumber, final int playoffRunNumber)
-      throws SQLException {
+  public static int getPlayoffTableLineNumber(final Connection connection,
+                                              final int tournament,
+                                              final int teamNumber,
+                                              final int playoffRunNumber) throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
     try {
@@ -2417,7 +2480,8 @@ public final class Queries {
    * @throws RuntimeException if the team number is not found in the Teams
    *           table.
    */
-  public static String getDivisionOfTeam(final Connection connection, final int teamNumber) throws SQLException, RuntimeException {
+  public static String getDivisionOfTeam(final Connection connection,
+                                         final int teamNumber) throws SQLException, RuntimeException {
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
@@ -2446,7 +2510,8 @@ public final class Queries {
    *         brackets have not been initialized.
    * @throws SQLException on database errors.
    */
-  public static int getNumPlayoffRounds(final Connection connection, final String division) throws SQLException {
+  public static int getNumPlayoffRounds(final Connection connection,
+                                        final String division) throws SQLException {
     final int x = getFirstPlayoffRoundSize(connection, division);
     if (x > 0) {
       return (int) Math.round(Math.log(x)
@@ -2487,7 +2552,8 @@ public final class Queries {
    *         the number of byes in the first round.
    * @throws SQLException on database error.
    */
-  public static int getFirstPlayoffRoundSize(final Connection connection, final String division) throws SQLException {
+  public static int getFirstPlayoffRoundSize(final Connection connection,
+                                             final String division) throws SQLException {
     final int tournament = getCurrentTournament(connection);
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -2510,7 +2576,9 @@ public final class Queries {
     }
   }
 
-  public static int getTableAssignmentCount(final Connection connection, final int tournament, final String division) throws SQLException {
+  public static int getTableAssignmentCount(final Connection connection,
+                                            final int tournament,
+                                            final String division) throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -2537,8 +2605,11 @@ public final class Queries {
    * division, round number, and line number. If the table assignment is NULL,
    * returns null.
    */
-  public static String getAssignedTable(final Connection connection, final int tournament, final String eventDivision, final int round, final int line)
-      throws SQLException {
+  public static String getAssignedTable(final Connection connection,
+                                        final int tournament,
+                                        final String eventDivision,
+                                        final int round,
+                                        final int line) throws SQLException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -2612,16 +2683,15 @@ public final class Queries {
   }
 
   /**
-   * 
    * @param connection
-   * @return the prepared statement for getting a global parameter with the values already filled in
+   * @return the prepared statement for getting a global parameter with the
+   *         values already filled in
    * @throws SQLException
    */
-  private static PreparedStatement getGlobalParameterStmt(final Connection connection, 
-                                                              final String paramName) throws SQLException {
-    //TODO this should really be cached
-    PreparedStatement prep = connection
-    .prepareStatement("SELECT param_value FROM global_parameters WHERE param = ?");    
+  private static PreparedStatement getGlobalParameterStmt(final Connection connection,
+                                                          final String paramName) throws SQLException {
+    // TODO this should really be cached
+    PreparedStatement prep = connection.prepareStatement("SELECT param_value FROM global_parameters WHERE param = ?");
     prep.setString(1, paramName);
     return prep;
   }
@@ -2635,7 +2705,8 @@ public final class Queries {
    * @throws SQLException
    * @throws IllegalArgumentException if the parameter cannot be found
    */
-  public static double getDoubleGlobalParameter(final Connection connection, final String parameter) throws SQLException {
+  public static double getDoubleGlobalParameter(final Connection connection,
+                                                final String parameter) throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -2662,7 +2733,8 @@ public final class Queries {
    * @throws SQLException
    * @throws IllegalArgumentException if the parameter cannot be found
    */
-  public static int getIntGlobalParameter(final Connection connection, final String parameter) throws SQLException {
+  public static int getIntGlobalParameter(final Connection connection,
+                                          final String parameter) throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -2683,7 +2755,8 @@ public final class Queries {
   /**
    * Check if a value exists for a global parameter.
    */
-  /*package*/ static boolean globalParameterExists(final Connection connection, final String paramName) throws SQLException {
+  /* package */static boolean globalParameterExists(final Connection connection,
+                                                    final String paramName) throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -2695,8 +2768,10 @@ public final class Queries {
       SQLFunctions.closePreparedStatement(prep);
     }
   }
-  
-  public static void setGlobalParameter(final Connection connection, final String paramName, final String paramValue) throws SQLException {
+
+  public static void setGlobalParameter(final Connection connection,
+                                        final String paramName,
+                                        final String paramValue) throws SQLException {
     final boolean exists = globalParameterExists(connection, paramName);
     PreparedStatement prep = null;
     try {
@@ -2742,7 +2817,9 @@ public final class Queries {
    * 
    * @throws SQLException on a database error
    */
-  public static boolean performanceScoreExists(final Connection connection, final int teamNumber, final int runNumber) throws SQLException {
+  public static boolean performanceScoreExists(final Connection connection,
+                                               final int teamNumber,
+                                               final int runNumber) throws SQLException {
     final int tournament = getCurrentTournament(connection);
 
     PreparedStatement prep = null;
@@ -2764,7 +2841,10 @@ public final class Queries {
   /**
    * Returns true if the score has been verified, i.e. double-checked.
    */
-  public static boolean isVerified(final Connection connection, final int tournament, final Team team, final int runNumber) throws SQLException {
+  public static boolean isVerified(final Connection connection,
+                                   final int tournament,
+                                   final Team team,
+                                   final int runNumber) throws SQLException {
     return isVerified(connection, tournament, team.getTeamNumber(), runNumber);
   }
 
@@ -2772,7 +2852,9 @@ public final class Queries {
    * If team is not null, calls performanceScoreExists(connection,
    * team.getTeamNumber(), runNumber), otherwise returns false.
    */
-  public static boolean performanceScoreExists(final Connection connection, final Team team, final int runNumber) throws SQLException {
+  public static boolean performanceScoreExists(final Connection connection,
+                                               final Team team,
+                                               final int runNumber) throws SQLException {
     if (null == team) {
       return false;
     } else {
