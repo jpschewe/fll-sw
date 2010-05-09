@@ -1,33 +1,5 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<c:if
- test="${not empty param.changeDatabase || not empty param.resetDatabase}">
- <c:choose>
-  <c:when test="${not empty param.changeDatabase}">
-   <c:set var="database" value="${param.database}" scope="application" />
-  </c:when>
-  <c:otherwise>
-   <%-- just remove the database variable and it'll get recreated on the redirect --%>
-   <c:remove var="database" scope="application" />
-  </c:otherwise>
- </c:choose>
-
- <%-- shutdown the database --%>
- <sql:update dataSource="${datasource}" sql="SHUTDOWN COMPACT"/>
- 
- <%-- just remove the database connections and they'll get recreated on the redirect --%>
- <c:remove var="connection" />
- <c:remove var="datasource" />
- <c:remove var="challengeDocument" />
- <c:redirect url='index.jsp'>
-  <c:param name="message">
-      <p><i>Changed database to <c:out value="${database}" /></i></p>
-  </c:param>
- </c:redirect>
-
-</c:if>
-<%-- end if a form submission --%>
-
 <html>
 <head>
 <link rel="stylesheet" type="text/css"
@@ -52,13 +24,6 @@ ${message}
 </c:set>
 
 <ul>
-
- <li>Current database is <c:out value="${database}" /><br>
- <form action='index.jsp' method='post'><input type='text'
-  name='database' size='50'> <input type='submit'
-  name='changeDatabase' value='Change Database''> <input
-  type='submit' name='resetDatabase' value='Reset to standard database'></form>
- </li>
 
  <li><a href="query.jsp">Do SQL queries and updates</a></li>
 
