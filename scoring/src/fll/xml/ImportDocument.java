@@ -14,24 +14,26 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import fll.Utilities;
+import fll.db.GenerateDB;
 import fll.db.GlobalParameters;
 
 /**
  * Push an XML document into the database without recreating the database. This
  * can be somewhat dangerous and is mostly here for debugging.
- * 
- * @version $Revision$
  */
 public final class ImportDocument {
 
-  private static final Logger LOG = Logger.getLogger(ImportDocument.class);
+  private static final Logger LOGGER = Logger.getLogger(ImportDocument.class);
 
   /**
    * Insert the specified document into the specified database.
@@ -42,33 +44,33 @@ public final class ImportDocument {
    */
   public static void main(final String[] args) throws IOException {
     if (args.length < 2) {
-      LOG.fatal("Usage ImportDocument <xml file> <db>");
+      LOGGER.fatal("Usage ImportDocument <xml file> <db>");
       System.exit(1);
     }
     final File challengeFile = new File(args[0]);
     if (!challengeFile.exists()) {
-      LOG.fatal(challengeFile.getAbsolutePath()
+      LOGGER.fatal(challengeFile.getAbsolutePath()
           + " doesn't exist");
       System.exit(1);
     }
     if (!challengeFile.canRead()) {
-      LOG.fatal(challengeFile.getAbsolutePath()
+      LOGGER.fatal(challengeFile.getAbsolutePath()
           + " is not readable");
       System.exit(1);
     }
     if (!challengeFile.isFile()) {
-      LOG.fatal(challengeFile.getAbsolutePath()
+      LOGGER.fatal(challengeFile.getAbsolutePath()
           + " is not a file");
       System.exit(1);
     }
     final Document document = ChallengeParser.parse(new FileReader(challengeFile));
     if (null == document) {
-      LOG.fatal("Error parsing challenge descriptor");
+      LOGGER.fatal("Error parsing challenge descriptor");
       System.exit(1);
     }
 
     if (!Utilities.testHSQLDB(args[1])) {
-      LOG.fatal("There is a problem with the database, see previous log messages");
+      LOGGER.fatal("There is a problem with the database, see previous log messages");
       System.exit(1);
     }
     PreparedStatement prep = null;
@@ -89,21 +91,70 @@ public final class ImportDocument {
       prep.setAsciiStream(1, bais, bytes.length);
       prep.executeUpdate();
     } catch (final UnsupportedEncodingException uee) {
-      LOG.fatal("UTF8 not a supported encoding???", uee);
+      LOGGER.fatal("UTF8 not a supported encoding???", uee);
       exitCode = 1;
     } catch (final SQLException sqle) {
-      LOG.fatal("Error talking to database", sqle);
+      LOGGER.fatal("Error talking to database", sqle);
       exitCode = 1;
     } finally {
       SQLFunctions.closePreparedStatement(prep);
       SQLFunctions.closeConnection(connection);
     }
-    LOG.info("Inserted document "
+    LOGGER.info("Inserted document "
         + args[0] + " into database " + args[1]);
     System.exit(exitCode);
   }
 
   private ImportDocument() {
+    // no instances
+  }
+
+  /**
+   * If the new document
+   * differs from the current document in a way that the database structure will be
+   * modified.
+   * 
+   * @param curDoc the current document
+   * @param newDoc the document to check against
+   * @return null if everything checks out OK, otherwise the error message
+   */
+  public static String compareStructure(final Document curDoc,
+                                       final Document newDoc)  {
+    final Element curDocRoot = curDoc.getDocumentElement();
+    final Element newDocRoot = newDoc.getDocumentElement();
+    final Element curPerfElement = (Element) curDocRoot.getElementsByTagName("Performance").item(0);
+    final Element newPerfElement = (Element) newDocRoot.getElementsByTagName("Performance").item(0);
+
+    final Map<String, String> curPerGoals = gatherColumnDefinitions(curPerfElement);
+    final Map<String, String> newPerGoals = gatherColumnDefinitions(newPerfElement);
+    if (curPerGoals.size() != newPerGoals.size()) {
+      return "New document has "
+          + newPerGoals.size() + " performance goals, current document has " + curPerGoals.size() + " performance goals";
+    }
+    
+//    final List<Element> curSubCats = XMLUtils.filterToElements(curRootElement.getElementsByTagName("subjectiveCategory"));
+//    final List<Element> newSubCats = XMLUtils.filterToElements(newRootElement.getElementsByTagName("subjectiveCategory"));
+//    if(curSubCats.size() != newSubCats.size()) {
+//      return "New document has "
+//                  + newSubCats.size() + " subjective categories, current document has " + curSubCats.size() + " subjective categories";
+//    }
+    
+    return null;
+  }
+
+  /**
+   * Get the column definitions for all goals in the specified element
+   */
+  private static Map<String, String> gatherColumnDefinitions(final Element element) {
+    final Map<String, String> goalDefs = new HashMap<String, String>();
+    
+    for (final Element goal : XMLUtils.filterToElements(element.getElementsByTagName("goal"))) {
+      final String columnDefinition = GenerateDB.generateGoalColumnDefinition(goal);
+      final String goalName = goal.getAttribute("name");
+      goalDefs.put(goalName, columnDefinition);
+    }
+
+    return goalDefs;
   }
 
 }
