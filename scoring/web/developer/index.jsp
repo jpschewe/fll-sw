@@ -34,8 +34,20 @@ ${message}
   enctype='multipart/form-data'>
 
  <p>Import data from a database dump into the current database.</p>
- <input type='file' size='32' name='dbdump'> <input
+ <input type='file' size='32' name='dbdump'/> <input
   type='submit' name='importdb' value='Import Database' /></form>
+</li>
+
+<li>
+
+<form id='replace-descriptor' action='ReplaceChallengeDescriptor' 
+method='post' enctype='multipart/form-data'>
+<p>Replace the current challenge descriptor. Will succeed if there
+are no changes to the structure of the database.<br/>
+<input type='file' size='32' name='xmldoc'/>
+<input type='submit' value='Submit'/> 
+</p>
+</form>
 </li>
 
  <li>inside.test: <%=System.getProperty("inside.test")%> -- <%=Boolean.getBoolean("inside.test")%></li>
