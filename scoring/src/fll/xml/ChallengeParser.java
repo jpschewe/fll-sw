@@ -150,7 +150,8 @@ public final class ChallengeParser {
       });
 
       parser.setEntityResolver(new EntityResolver() {
-        public InputSource resolveEntity(final String publicID, final String systemID) throws SAXException, IOException {
+        public InputSource resolveEntity(final String publicID,
+                                         final String systemID) throws SAXException, IOException {
           if (LOG.isDebugEnabled()) {
             LOG.debug("resolveEntity("
                 + publicID + ", " + systemID + ")");
@@ -227,7 +228,7 @@ public final class ChallengeParser {
             }
             if (!foundMatch) {
               throw new RuntimeException(String.format("Initial value for %s(%f) does not match the score of any value element within the goal", name,
-                                                                initialValue));
+                                                       initialValue));
             }
 
           } else {
@@ -288,18 +289,16 @@ public final class ChallengeParser {
     } // end foreach child node
   } // end validateDocument
 
-
   /**
-   * If the new document
-   * differs from the current document in a way that the database structure will be
-   * modified.
+   * If the new document differs from the current document in a way that the
+   * database structure will be modified.
    * 
    * @param curDoc the current document
    * @param newDoc the document to check against
    * @return null if everything checks out OK, otherwise the error message
    */
   public static String compareStructure(final Document curDoc,
-                                       final Document newDoc)  {
+                                        final Document newDoc) {
     final Element curDocRoot = curDoc.getDocumentElement();
     final Element newDocRoot = newDoc.getDocumentElement();
     final Element curPerfElement = (Element) curDocRoot.getElementsByTagName("Performance").item(0);
@@ -307,29 +306,63 @@ public final class ChallengeParser {
 
     final Map<String, String> curPerGoals = gatherColumnDefinitions(curPerfElement);
     final Map<String, String> newPerGoals = gatherColumnDefinitions(newPerfElement);
-    if (curPerGoals.size() != newPerGoals.size()) {
-      return "New document has "
-          + newPerGoals.size() + " performance goals, current document has " + curPerGoals.size() + " performance goals";
+    final String goalCompareMessage = compareGoalDefinitions("Performance", curPerGoals, newPerGoals);
+    if (null != goalCompareMessage) {
+      return goalCompareMessage;
     }
-    for(final Map.Entry<String, String> curEntry : curPerGoals.entrySet()) {
-      if(!newPerGoals.containsKey(curEntry.getKey())) {
-        return "New document is missing goal '" + curEntry.getKey() +"'";
+
+    final List<Element> curSubCats = XMLUtils.filterToElements(curDocRoot.getElementsByTagName("subjectiveCategory"));
+    final List<Element> newSubCats = XMLUtils.filterToElements(newDocRoot.getElementsByTagName("subjectiveCategory"));
+    if (curSubCats.size() != newSubCats.size()) {
+      return "New document has "
+          + newSubCats.size() + " subjective categories, current document has " + curSubCats.size() + " subjective categories";
+    }
+    final Map<String, Map<String, String>> curCats = new HashMap<String, Map<String, String>>();
+    for (final Element ele : curSubCats) {
+      final String name = ele.getAttribute("name");
+      final Map<String, String> goalDefs = gatherColumnDefinitions(ele);
+      curCats.put(name, goalDefs);
+    }
+
+    for (final Element ele : newSubCats) {
+      final String name = ele.getAttribute("name");
+      if (!curCats.containsKey(name)) {
+        return "New document has subjective category '"
+            + name + "' which is not in the current document";
+      }
+
+      final Map<String, String> curGoalDefs = curCats.get(name);
+      final Map<String, String> newGoalDefs = gatherColumnDefinitions(ele);
+      final String goalMsg = compareGoalDefinitions(name, curGoalDefs, newGoalDefs);
+      if (null != goalMsg) {
+        return goalMsg;
+      }
+    }
+
+    return null;
+  }
+
+  private static String compareGoalDefinitions(final String category,
+                                               final Map<String, String> curGoals,
+                                               final Map<String, String> newGoals) {
+    if (curGoals.size() != newGoals.size()) {
+      return "New document has "
+          + newGoals.size() + " goals in category '" + category + "', current document has " + curGoals.size() + " goals";
+    }
+
+    for (final Map.Entry<String, String> curEntry : curGoals.entrySet()) {
+      if (!newGoals.containsKey(curEntry.getKey())) {
+        return "New document is missing goal '"
+            + curEntry.getKey() + "'";
       }
       final String curDef = curEntry.getValue();
-      final String newDef = newPerGoals.get(curEntry.getKey());
-      if(!curDef.equals(newDef)) {
-        return "Database definition for goal '" + curEntry.getKey() + "' is different in the new document from the current document"
-        + " '" + curDef + "' vs '" + newDef + "'";
+      final String newDef = newGoals.get(curEntry.getKey());
+      if (!curDef.equals(newDef)) {
+        return "Database definition for goal '"
+            + curEntry.getKey() + "' in category '" + category + "' is different in the new document from the current document" + " '" + curDef + "' vs '"
+            + newDef + "'";
       }
     }
-    
-//    final List<Element> curSubCats = XMLUtils.filterToElements(curRootElement.getElementsByTagName("subjectiveCategory"));
-//    final List<Element> newSubCats = XMLUtils.filterToElements(newRootElement.getElementsByTagName("subjectiveCategory"));
-//    if(curSubCats.size() != newSubCats.size()) {
-//      return "New document has "
-//                  + newSubCats.size() + " subjective categories, current document has " + curSubCats.size() + " subjective categories";
-//    }
-    
     return null;
   }
 
@@ -338,7 +371,7 @@ public final class ChallengeParser {
    */
   private static Map<String, String> gatherColumnDefinitions(final Element element) {
     final Map<String, String> goalDefs = new HashMap<String, String>();
-    
+
     for (final Element goal : XMLUtils.filterToElements(element.getElementsByTagName("goal"))) {
       final String columnDefinition = GenerateDB.generateGoalColumnDefinition(goal);
       final String goalName = goal.getAttribute("name");
@@ -347,6 +380,5 @@ public final class ChallengeParser {
 
     return goalDefs;
   }
-
 
 }
