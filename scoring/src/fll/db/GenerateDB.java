@@ -592,7 +592,7 @@ public final class GenerateDB {
    * @param goalElement element that represents the goal
    * @return the column definition
    */
-  private static String generateGoalColumnDefinition(final Element goalElement) {
+  public static String generateGoalColumnDefinition(final Element goalElement) {
     final String goalName = goalElement.getAttribute("name");
 
     // check if there are any subelements to determine if this goal is
