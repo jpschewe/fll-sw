@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="Boston Scientific MN FIRST LEGO League Tournament: Smart Move" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="$Rev: 351 $">
+
+  <Performance minimumScore="0" weight="1.0">
+
+    <goal name="access_places" title="Gain Access To Places - Drive wheels touching"
+      initialValue="0">
+      <value score="25" title="Target Spot" value="target_spot"/>
+      <value score="25" title="Red Deck" value="vehicle_sharing"/>
+      <value score="20" title="Yellow Bridge Deck" value="bridge_deck"/>
+      <value score="0" title="None" value="none"/>
+    </goal>
+
+    <goal name="access_markers" title="Gain Access To Things: Access Markers Down"
+      multiplier="25"
+      max="4" />
+
+    <goal name="loops" title="Gain Access To Things: Loops in Base"
+      multiplier="10"
+      max="11" />
+
+    <goal name="warning_beacons" title="Avoid Impacts: Warning Beacons Standing"
+      multiplier="10"
+      max="8"
+      initialValue="8"
+      />
+
+    <goal name="walls_remaining_up" title="Number of walls upright"
+      multiplier="0"
+      max="5"
+      initialValue="4"
+      />
+
+    <goal name="vehicle_impact_test" title="Survive Impacts: Vehicle Release Test"
+      multiplier="20"
+      />
+
+    <goal name="passenger_restraint_test" title="Survive Impacts: Single Passenger Restraint Test"
+      multiplier="15"
+      />
+
+    <goal name="multiple_safety_test" title="Passenger Safety Test - 4 People in Target"
+      multiplier="10"
+      />
+
+    <computedGoal name="avoid_sensor_walls" title="Avoid Impacts: Sensor Walls">
+      <switch>
+        <case>
+          <condition>
+            <left>
+              <term scoreType="raw" goal="walls_remaining_up"/>
+            </left>
+            <greater-than/>
+            <right>
+              <term scoreType="raw" goal="access_markers"/>
+            </right>
+          </condition>
+          <result>
+            <term coefficient="10" scoreType="raw" goal="access_markers"/>
+          </result>
+        </case>
+        <default>
+          <term coefficient="10" scoreType="raw" goal="walls_remaining_up"/>
+        </default>
+      </switch>
+    </computedGoal>
+    
+
+    <computedGoal name="survive_sensor_walls" title="Survive Impacts: Sensor Walls">
+      <switch>
+        <case>
+          <condition>
+            <left>
+              <term scoreType="raw" goal="walls_remaining_up"/>
+            </left>
+            <equal-to/>
+            <right>
+              <constant value="0"/>
+            </right>
+          </condition>
+          <result>
+            <constant value="40"/>
+          </result>
+        </case>
+        <default>
+          <constant value="0"/>
+        </default>
+      </switch>
+    </computedGoal>
+
+    <tiebreaker>
+      <test winner='HIGH'>
+        <term goal='access_places' scoreType='computed' />
+      </test>
+      <test winner='HIGH'>
+        <term goal='loops' scoreType='computed' />
+      </test>
+      <test winner='HIGH'>
+        <term goal='survive_sensor_walls' scoreType='computed' />
+      </test>
+      <test winner='HIGH'>
+        <term goal='warning_beacons' scoreType='computed' />
+      </test>
+    </tiebreaker>
+    
+  </Performance>
+
+  <subjectiveCategory name="teamwork" title="Teamwork"
+    weight="1.0">
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="roles"
+      title="Roles and Responsibilities">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="professionalism" title="Gracious Professionalism">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="dynamics"
+      title="Problem Solving &amp; Team Dynamics &amp; Communications">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="confidence"
+      title="Confidence &amp; Enthusiasm">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="fll_values"
+      title="FLL Values">
+    </goal>
+  </subjectiveCategory>
+
+  <subjectiveCategory name="teamwork2" title="Teamwork"
+    weight="1.0">
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="roles"
+      title="Roles and Responsibilities">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="professionalism" title="Gracious Professionalism">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="dynamics"
+      title="Problem Solving &amp; Team Dynamics &amp; Communications">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="confidence"
+      title="Confidence &amp; Enthusiasm">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="fll_values"
+      title="FLL Values">
+    </goal>
+  </subjectiveCategory>
+
+
+  <subjectiveCategory name="robustdesign" title="Design"
+    weight="0.5">
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="strategy"
+      title="Strategy, Process, Problem Solving">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="locomotion"
+      title="Locomotion and Navigation">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="design_kids"
+      title="Kids Did the Work">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="structural"
+      title="Structural">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="overall_design" title="Overall Design">
+    </goal>
+  </subjectiveCategory>
+
+
+  <subjectiveCategory name="programming" title="Programming"
+    weight="0.5">
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="programming_strategy" title="Strategy, Process, Problem Solving" />
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="useoflanguage" title="Language Use, Modularity/Abstraction">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="programming_kids" title="Kids Did the Work">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="sensorcontrol" title="Sensor Control">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="design"
+      title="Overall Design">
+    </goal>
+  </subjectiveCategory>
+
+  <subjectiveCategory name="research"
+    title="Research Project Assessment" weight="1.0">
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="research"
+      title="Research">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="innovative_solution" title="Innovative Solution">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="background"
+      title="Background, Data and Graphics">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="creative"
+      title="Quality of Presentation/Creative Presentation">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="sharing"
+      title="Sharing">
+    </goal>
+  </subjectiveCategory>
+
+
+</fll>

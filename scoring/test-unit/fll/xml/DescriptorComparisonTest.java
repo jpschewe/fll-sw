@@ -23,44 +23,82 @@ public class DescriptorComparisonTest {
    */
   @Test
   public void testDifferentNumPerfGoals() {
-      final InputStream curDocStream = DescriptorComparisonTest.class.getResourceAsStream("data/import-document.xml");
-      Assert.assertNotNull(curDocStream);
-      final Document curDoc = ChallengeParser.parse(new InputStreamReader(curDocStream));
-      Assert.assertNotNull(curDoc);
-      final InputStream newDocStream = DescriptorComparisonTest.class.getResourceAsStream("data/import-document-diff-num-perf-goals.xml");
-      Assert.assertNotNull(newDocStream);
-      final Document newDoc = ChallengeParser.parse(new InputStreamReader(newDocStream));
-      final String message = ChallengeParser.compareStructure(curDoc, newDoc);
-      Assert.assertNotNull("There should be differences", message);
+    doComparison("data/import-document.xml", "data/import-document-diff-num-perf-goals.xml", true);
   }
 
   /**
    * Test that a different performance goal name is an error.
    */
   @Test
-  public void testDifferentGoalName() {
-      final InputStream curDocStream = DescriptorComparisonTest.class.getResourceAsStream("data/import-document.xml");
-      Assert.assertNotNull(curDocStream);
-      final Document curDoc = ChallengeParser.parse(new InputStreamReader(curDocStream));
-      Assert.assertNotNull(curDoc);
-      final InputStream newDocStream = DescriptorComparisonTest.class.getResourceAsStream("data/id-diff-goal.xml");
-      Assert.assertNotNull(newDocStream);
-      final Document newDoc = ChallengeParser.parse(new InputStreamReader(newDocStream));
-      final String message = ChallengeParser.compareStructure(curDoc, newDoc);
-      Assert.assertNotNull("There should be differences", message);
+  public void testDifferentPerfGoalName() {
+    doComparison("data/import-document.xml", "data/id-diff-goal.xml", true);
   }
  
   /**
    * Test that enumerated vs. non-enumerated performance goal name is an error. 
    */
+  @Test
+  public void testDifferentPerfGoalTypes() {
+    doComparison("data/import-document.xml", "data/id-non-enum.xml", true);
+  }
   
   /**
    * Test that number of computed performance goals is NOT an error.
    */
+  @Test
+  public void testDifferentNumComputedGoals() {
+    doComparison("data/import-document.xml", "data/id-diff-computed-goals.xml", false);
+  }
+    
   
   /**
    * Test different number of subjective categories is an error.
    */
+  @Test
+  public void testDifferentNumSubjCats() {
+    doComparison("data/import-document.xml", "data/id-diff-num-subj-cats.xml", true);
+  }
+   
+  /**
+   * Test different name of subjective categories is an error.
+   */
+  @Test
+  public void testDifferentNameSubjCats() {
+    doComparison("data/import-document.xml", "data/id-diff-name-subj-cats.xml", true);
+  }
   
   
+  /**
+   * Test that a different subjective goal name is an error.
+   */
+  @Test
+  public void testDifferentNumSubjGoals() {
+    doComparison("data/import-document.xml", "data/id-diff-num-subj-goal.xml", true);
+  }
+  
+  /**
+   * Test that a different subjective goal type is an error.
+   */
+  @Test
+  public void testDifferentTypeSubjGoals() {
+    doComparison("data/import-document.xml", "data/id-diff-type-subj-goal.xml", true);
+  }
+  
+  private void doComparison(final String curDocRes, final String newDocRes, final boolean differencesExpected) {
+    final InputStream curDocStream = DescriptorComparisonTest.class.getResourceAsStream(curDocRes);
+    Assert.assertNotNull("Could not find '" + curDocRes + "'", curDocStream);
+    final Document curDoc = ChallengeParser.parse(new InputStreamReader(curDocStream));
+    Assert.assertNotNull("Error parsing '" + curDocRes + "'", curDoc);
+    final InputStream newDocStream = DescriptorComparisonTest.class.getResourceAsStream(newDocRes);
+    Assert.assertNotNull("Could not find '" + newDocRes + "'", newDocStream);
+    final Document newDoc = ChallengeParser.parse(new InputStreamReader(newDocStream));    
+    Assert.assertNotNull("Error parsing '" + newDocRes + "'", newDoc);
+    
+    final String message = ChallengeParser.compareStructure(curDoc, newDoc);
+    if(differencesExpected) {
+      Assert.assertNotNull("There should be differences", message);
+    } else {
+      Assert.assertNull("There should NOT be differences", message);
+    }
+  }
 }
