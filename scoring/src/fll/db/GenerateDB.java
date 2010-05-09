@@ -512,7 +512,7 @@ public final class GenerateDB {
     }
   }
 
-  private static void insertOrUpdateChallengeDocument(final Document document, final Connection connection) throws SQLException {
+  public static void insertOrUpdateChallengeDocument(final Document document, final Connection connection) throws SQLException {
     PreparedStatement challengePrep = null;
     try {
       final boolean check = Queries.globalParameterExists(connection, GlobalParameters.CHALLENGE_DOCUMENT);
