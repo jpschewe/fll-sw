@@ -27,7 +27,6 @@
 	<classpathentry kind="lib" path="scoring/lib/slf4j-api-1.5.3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/slf4j-log4j12-1.5.3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/log4jdbc3-1.1.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/test/junit-4.5.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/jakarta-oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/ant/checkstyle-all-5.0.jar"/>
@@ -59,5 +58,6 @@
 	<classpathentry kind="lib" path="scoring/lib/test/js.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/nekohtml.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/Tidy.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/junit-4.5.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
