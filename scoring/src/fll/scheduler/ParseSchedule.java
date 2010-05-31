@@ -24,6 +24,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -46,6 +48,8 @@ import com.itextpdf.text.pdf.PdfWriter;
 import fll.Utilities;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
+import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 
 /**
  * Parse a CSV file representing the detailed schedule for a tournament.
@@ -59,6 +63,10 @@ public class ParseSchedule {
    */
   public static final String TEAM_NUMBER_HEADER = "Team #";
 
+  public static final String TEAM_NAME_HEADER = "Team Name";
+
+  public static final String ORGANIZATION_HEADER = "Organization";
+
   public static final String DIVISION_HEADER = "Div";
 
   public static final String PRESENTATION_HEADER = "Presentation";
@@ -67,19 +75,19 @@ public class ParseSchedule {
 
   public static final String JUDGE_GROUP_HEADER = "Judging Group";
 
-  public static final String JUDGE_GROUP_HEADER_OLD = "Judging Station";
+  public static final String BASE_PERF_HEADER = "Perf #";
 
-  public static final String PERF_1_HEADER = "Perf #1";
+  /**
+   * Used with {@link String#format(String, Object...)} to create a performance
+   * round header.
+   */
+  private static final String PERF_HEADER_FORMAT = "Perf #%d";
 
-  public static final String PERF_1_TABLE_HEADER = "Perf 1 Table";
-
-  public static final String PERF_2_HEADER = "Perf #2";
-
-  public static final String PERF_2_TABLE_HEADER = "Perf 2 Table";
-
-  public static final String PERF_3_HEADER = "Perf #3";
-
-  public static final String PERF_3_TABLE_HEADER = "Perf 3 Table";
+  /**
+   * Used with {@link String#format(String, Object...)} to create a performance
+   * table header.
+   */
+  private static final String TABLE_HEADER_FORMAT = "Perf %d Table";
 
   private int _teamNumColumn = -1;
 
@@ -95,19 +103,16 @@ public class ParseSchedule {
 
   private int _judgeGroupColumn = -1;
 
-  private int _perf1Column = -1;
+  private int[] _perfColumn;
 
-  private int _perf1TableColumn = -1;
+  private int[] _perfTableColumn;
 
-  private int _perf2Column = -1;
-
-  private int _perf2TableColumn = -1;
-
-  private int _perf3Column = -1;
-
-  private int _perf3TableColumn = -1;
-
-  static final int NUMBER_OF_ROUNDS = 3;
+  public int getNumberOfRounds() {
+    if (null == _perfColumn) {
+      throw new FLLInternalException("_perfColumn isn't set yet, it must be set to get the number of rounds");
+    }
+    return _perfColumn.length;
+  }
 
   private static final ThreadLocal<DateFormat> DATE_FORMAT_AM_PM = new ThreadLocal<DateFormat>() {
     @Override
@@ -188,7 +193,8 @@ public class ParseSchedule {
   /**
    * @throws ScheduleParseException if there is an error parsing the schedule
    */
-  public ParseSchedule(final File f, final String sheetName) throws IOException, ParseException, InvalidFormatException, ScheduleParseException {
+  public ParseSchedule(final File f,
+                       final String sheetName) throws IOException, ParseException, InvalidFormatException, ScheduleParseException {
     _file = f;
     _sheetName = sheetName;
 
@@ -208,7 +214,23 @@ public class ParseSchedule {
   }
 
   /**
-   * Find the index of the columns.
+   * Check if this line is a header line. This checks for key headers and
+   * returns true if they are found.
+   */
+  private static boolean isHeaderLine(final String[] line) {
+    boolean retval = false;
+    for (int i = 0; i < line.length; ++i) {
+      if (line[i].equals(TEAM_NUMBER_HEADER)) {
+        retval = true;
+      }
+    }
+
+    return retval;
+  }
+
+  /**
+   * Find the index of the columns. Reads lines until the headers are found or
+   * EOF is reached.
    * 
    * @throws IOException
    * @throws RuntimeException if a column cannot be found
@@ -222,93 +244,115 @@ public class ParseSchedule {
         throw new RuntimeException("Cannot find header line and reached EOF");
       }
 
-      _teamNumColumn = -1;
-      _teamNameColumn = -1;
-      _organizationColumn = -1;
-      _divisionColumn = -1;
-      _presentationColumn = -1;
-      _technicalColumn = -1;
-      _judgeGroupColumn = -1;
-      _perf1Column = -1;
-      _perf1TableColumn = -1;
-      _perf2Column = -1;
-      _perf2TableColumn = -1;
-      _perf3Column = -1;
-      _perf3TableColumn = -1;
+      if (isHeaderLine(line)) {
+        parseHeader(line);
+      }
+    }
+  }
 
-      for (int i = 0; i < line.length; ++i) {
-        if (line[i].equals(TEAM_NUMBER_HEADER)) {
-          _teamNumColumn = i;
-        } else if (line[i].contains("Organization")) {
-          _organizationColumn = i;
-        } else if (line[i].equals("Team Name")) {
-          _teamNameColumn = i;
-        } else if (line[i].equals(DIVISION_HEADER)) {
-          _divisionColumn = i;
-        } else if (line[i].equals(PRESENTATION_HEADER)) {
-          _presentationColumn = i;
-        } else if (line[i].equals(TECHNICAL_HEADER)) {
-          _technicalColumn = i;
-        } else if (line[i].equals(JUDGE_GROUP_HEADER)
-            || JUDGE_GROUP_HEADER_OLD.equals(line[i])) {
-          _judgeGroupColumn = i;
-        } else if (line[i].equals(PERF_1_HEADER)) {
-          _perf1Column = i;
-        } else if (line[i].equals(PERF_1_TABLE_HEADER)) {
-          _perf1TableColumn = i;
-        } else if (line[i].equals(PERF_2_HEADER)) {
-          _perf2Column = i;
-        } else if (line[i].equals(PERF_2_TABLE_HEADER)) {
-          _perf2TableColumn = i;
-        } else if (line[i].equals(PERF_3_HEADER)) {
-          _perf3Column = i;
-        } else if (line[i].equals(PERF_3_TABLE_HEADER)) {
-          _perf3TableColumn = i;
+  /**
+   * Figure out how many performance rounds exist in this header line. This
+   * method also checks that the corresponding table header exists for each
+   * round and that the round numbers are contiguous starting at 1.
+   * 
+   * @throws FLLRuntimeException if there are problems with the performance
+   *           round headers found
+   */
+  private static int countNumRounds(final String[] line) {
+    final SortedSet<Integer> perfRounds = new TreeSet<Integer>();
+    for (int i = 0; i < line.length; ++i) {
+      if (line[i].startsWith(BASE_PERF_HEADER)
+          && line[i].length() > BASE_PERF_HEADER.length()) {
+        final String perfNumberStr = line[i].substring(BASE_PERF_HEADER.length());
+        final Integer perfNumber = Integer.valueOf(perfNumberStr);
+        if (!perfRounds.add(perfNumber)) {
+          throw new FLLRuntimeException("Found performance rounds num "
+              + perfNumber + " twice in the header: " + Arrays.asList(line));
         }
       }
     }
 
-    if (-1 == _teamNumColumn) {
-      throw new RuntimeException("Could not find teamNumColumn");
+    if (perfRounds.isEmpty()) {
+      throw new FLLRuntimeException("No performance rounds found in the header: "
+          + Arrays.asList(line));
     }
 
-    if (-1 == _teamNameColumn) {
-      throw new RuntimeException("Could not find teamNamColumn");
+    /*
+     * check that the values start at 1, are contiguous, and that the
+     * corresponding table header exists
+     */
+    int expectedValue = 1;
+    for (Integer value : perfRounds) {
+      if (null == value) {
+        throw new FLLInternalException("Found null performance round in header!");
+      }
+      if (expectedValue != value.intValue()) {
+        throw new FLLRuntimeException("Performance rounds not contiguous after "
+            + (expectedValue - 1) + " found " + value);
+      }
+
+      final String tableHeader = String.format(TABLE_HEADER_FORMAT, expectedValue);
+      if (!checkHeaderExists(line, tableHeader)) {
+        throw new FLLRuntimeException("Couldn't find header for round "
+            + expectedValue + ". Looking for header '" + tableHeader + "'");
+      }
+
+      ++expectedValue;
     }
 
-    if (-1 == _organizationColumn) {
-      throw new RuntimeException("Could not find organizationColumn");
-    }
+    return perfRounds.size();
+  }
 
-    if (-1 == _divisionColumn) {
-      throw new RuntimeException("Could not find divisionColumn");
+  private static boolean checkHeaderExists(final String[] line,
+                                           final String header) {
+    return null != columnForHeader(line, header);
+  }
+
+  /**
+   * Find the column that contains the specified header.
+   * 
+   * @return the column, null if not found
+   */
+  private static Integer columnForHeader(final String[] line,
+                                         final String header) {
+    for (int i = 0; i < line.length; ++i) {
+      if (header.equals(line[i])) {
+        return i;
+      }
     }
-    if (-1 == _presentationColumn) {
-      throw new RuntimeException("Could not find presentationColumn");
+    return null;
+  }
+
+  /**
+   * Get the column number or throw {@link FLLRuntimeException} if the column it
+   * not found.
+   */
+  private static int getColumnForHeader(final String[] line,
+                                        final String header) {
+    final Integer column = columnForHeader(line, header);
+    if (null == column) {
+      throw new FLLRuntimeException("Unable to find header '"
+          + header + "' in " + Arrays.asList(line));
+    } else {
+      return column;
     }
-    if (-1 == _technicalColumn) {
-      throw new RuntimeException("Could not find technicalColumn");
-    }
-    if (-1 == _judgeGroupColumn) {
-      throw new RuntimeException("Could not find judgeGroupColumn");
-    }
-    if (-1 == _perf1Column) {
-      throw new RuntimeException("Could not find perf1Column");
-    }
-    if (-1 == _perf1TableColumn) {
-      throw new RuntimeException("Could not find perf1TableColumn");
-    }
-    if (-1 == _perf2Column) {
-      throw new RuntimeException("Could not find perf2Column");
-    }
-    if (-1 == _perf2TableColumn) {
-      throw new RuntimeException("Could not find perf2TableColumn");
-    }
-    if (-1 == _perf3Column) {
-      throw new RuntimeException("Could not find perf3Column");
-    }
-    if (-1 == _perf3TableColumn) {
-      throw new RuntimeException("Could not find perf3TableColumn");
+  }
+
+  private void parseHeader(final String[] line) {
+    final int numPerfRounds = countNumRounds(line);
+    _perfColumn = new int[numPerfRounds];
+    _perfTableColumn = new int[numPerfRounds];
+
+    _teamNumColumn = getColumnForHeader(line, TEAM_NUMBER_HEADER);
+    _organizationColumn = getColumnForHeader(line, ORGANIZATION_HEADER);
+    _teamNameColumn = getColumnForHeader(line, TEAM_NAME_HEADER);
+    _divisionColumn = getColumnForHeader(line, DIVISION_HEADER);
+    _presentationColumn = getColumnForHeader(line, PRESENTATION_HEADER);
+    _technicalColumn = getColumnForHeader(line, TECHNICAL_HEADER);
+    _judgeGroupColumn = getColumnForHeader(line, JUDGE_GROUP_HEADER);
+    for (int round = 0; round < numPerfRounds; ++round) {
+      _perfColumn[round] = getColumnForHeader(line, String.format(PERF_HEADER_FORMAT, (round + 1)));
+      _perfTableColumn[round] = getColumnForHeader(line, String.format(TABLE_HEADER_FORMAT, (round + 1)));
     }
   }
 
@@ -316,7 +360,7 @@ public class ParseSchedule {
    * Parse the data of the schedule.
    * 
    * @throws IOException
-   * @throws ScheduleParseException  if there is an error with the schedule
+   * @throws ScheduleParseException if there is an error with the schedule
    */
   private void parseData(final CellFileReader reader) throws IOException, ParseException, ScheduleParseException {
     TeamScheduleInfo ti;
@@ -324,7 +368,7 @@ public class ParseSchedule {
       _schedule.add(ti);
 
       // keep track of some meta information
-      for (int round = 0; round < ParseSchedule.NUMBER_OF_ROUNDS; ++round) {
+      for (int round = 0; round < getNumberOfRounds(); ++round) {
         _tableColors.add(ti.getPerfTableColor(round));
         addToMatches(ti, round);
       }
@@ -367,7 +411,10 @@ public class ParseSchedule {
    * @param side the side
    * @param round the round - zero based index
    */
-  private TeamScheduleInfo findNextTeam(final Date time, final String table, final int side, final int round) {
+  private TeamScheduleInfo findNextTeam(final Date time,
+                                        final String table,
+                                        final int side,
+                                        final int round) {
     TeamScheduleInfo retval = null;
     for (final TeamScheduleInfo si : _schedule) {
       if (table.equals(si.getPerfTableColor(round))
@@ -393,7 +440,8 @@ public class ParseSchedule {
    * @return the team one needs to compete against in an extra round or null if
    *         the team does not need to stay
    */
-  private TeamScheduleInfo checkIfTeamNeedsToStay(final TeamScheduleInfo si, final int round) {
+  private TeamScheduleInfo checkIfTeamNeedsToStay(final TeamScheduleInfo si,
+                                                  final int round) {
     final int otherSide = 2 == si.getPerfTableSide(round) ? 1 : 2;
     final TeamScheduleInfo next = findNextTeam(si.getPerf(round), si.getPerfTableColor(round), otherSide, round);
 
@@ -452,7 +500,7 @@ public class ParseSchedule {
 
   private void outputPerformanceSchedule(final Document detailedSchedules) throws DocumentException {
 
-    for (int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
+    for (int round = 0; round < getNumberOfRounds(); ++round) {
       Collections.sort(_schedule, getPerformanceComparator(round));
 
       // list of teams staying around to even up the teams
@@ -510,7 +558,8 @@ public class ParseSchedule {
     return cell;
   }
 
-  private static PdfPCell createCell(final String text, final BaseColor backgroundColor) throws BadElementException {
+  private static PdfPCell createCell(final String text,
+                                     final BaseColor backgroundColor) throws BadElementException {
     final PdfPCell cell = createCell(text);
     if (null != backgroundColor) {
       cell.setBackgroundColor(backgroundColor);
@@ -597,7 +646,8 @@ public class ParseSchedule {
    * Sort by division, then judge, then by time.
    */
   private static final Comparator<TeamScheduleInfo> PRESENTATION_COMPARATOR = new Comparator<TeamScheduleInfo>() {
-    public int compare(final TeamScheduleInfo one, final TeamScheduleInfo two) {
+    public int compare(final TeamScheduleInfo one,
+                       final TeamScheduleInfo two) {
       if (!one.getDivision().equals(two.getDivision())) {
         return one.getDivision().compareTo(two.getDivision());
       } else if (!one.getJudge().equals(two.getJudge())) {
@@ -612,7 +662,8 @@ public class ParseSchedule {
    * Sort by division, then by time.
    */
   private static final Comparator<TeamScheduleInfo> TECHNICAL_COMPARATOR = new Comparator<TeamScheduleInfo>() {
-    public int compare(final TeamScheduleInfo one, final TeamScheduleInfo two) {
+    public int compare(final TeamScheduleInfo one,
+                       final TeamScheduleInfo two) {
       if (!one.getDivision().equals(two.getDivision())) {
         return one.getDivision().compareTo(two.getDivision());
       } else if (!one.getJudge().equals(two.getJudge())) {
@@ -642,7 +693,8 @@ public class ParseSchedule {
       this.round = round;
     }
 
-    public int compare(final TeamScheduleInfo one, final TeamScheduleInfo two) {
+    public int compare(final TeamScheduleInfo one,
+                       final TeamScheduleInfo two) {
       if (!one.getPerf(round).equals(two.getPerf(round))) {
         return one.getPerf(round).compareTo(two.getPerf(round));
       } else if (!one.getPerfTableColor(round).equals(two.getPerfTableColor(round))) {
@@ -669,8 +721,8 @@ public class ParseSchedule {
     Date maxTechnical = null;
     Date minPresentation = null;
     Date maxPresentation = null;
-    final Date[] minPerf = new Date[NUMBER_OF_ROUNDS];
-    final Date[] maxPerf = new Date[NUMBER_OF_ROUNDS];
+    final Date[] minPerf = new Date[getNumberOfRounds()];
+    final Date[] maxPerf = new Date[getNumberOfRounds()];
 
     for (final TeamScheduleInfo si : _schedule) {
       if (null != si.getTechnical()) {
@@ -694,7 +746,7 @@ public class ParseSchedule {
         }
       }
 
-      for (int i = 0; i < NUMBER_OF_ROUNDS; ++i) {
+      for (int i = 0; i < getNumberOfRounds(); ++i) {
         if (null != si.getPerf(i)) {
           // ignore the teams that cross round boundaries
           final int opponentRound = findOpponentRound(si, i);
@@ -720,7 +772,7 @@ public class ParseSchedule {
     output.format("max technical: %s%n", OUTPUT_DATE_FORMAT.get().format(maxTechnical));
     output.format("min presentation: %s%n", OUTPUT_DATE_FORMAT.get().format(minPresentation));
     output.format("max presentation: %s%n", OUTPUT_DATE_FORMAT.get().format(maxPresentation));
-    for (int i = 0; i < NUMBER_OF_ROUNDS; ++i) {
+    for (int i = 0; i < getNumberOfRounds(); ++i) {
       output.format("min performance round %d: %s%n", (i + 1), OUTPUT_DATE_FORMAT.get().format(minPerf[i]));
       output.format("max performance round %d: %s%n", (i + 1), OUTPUT_DATE_FORMAT.get().format(maxPerf[i]));
     }
@@ -734,7 +786,8 @@ public class ParseSchedule {
    * @param ti the schedule info
    * @param round the round we care about
    */
-  private void addToMatches(final TeamScheduleInfo ti, final int round) {
+  private void addToMatches(final TeamScheduleInfo ti,
+                            final int round) {
     final Map<String, List<TeamScheduleInfo>> timeMatches;
     if (_matches.containsKey(ti.getPerf(round))) {
       timeMatches = _matches.get(ti.getPerf(round));
@@ -780,7 +833,7 @@ public class ParseSchedule {
     // constraint set 6
     final Map<Date, Set<TeamScheduleInfo>> teamsAtTime = new HashMap<Date, Set<TeamScheduleInfo>>();
     for (final TeamScheduleInfo si : _schedule) {
-      for (int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
+      for (int round = 0; round < getNumberOfRounds(); ++round) {
         final Set<TeamScheduleInfo> teams;
         if (teamsAtTime.containsKey(si.getPerf(round))) {
           teams = teamsAtTime.get(si.getPerf(round));
@@ -877,7 +930,8 @@ public class ParseSchedule {
    * @param round
    * @return the round number or -1 if no opponent
    */
-  private int findOpponentRound(final TeamScheduleInfo ti, final int round) {
+  private int findOpponentRound(final TeamScheduleInfo ti,
+                                final int round) {
     final List<TeamScheduleInfo> tableMatches = _matches.get(ti.getPerf(round)).get(ti.getPerfTableColor(round));
     if (tableMatches.size() > 1) {
       if (tableMatches.get(0).equals(ti)) {
@@ -898,7 +952,8 @@ public class ParseSchedule {
    * @param round
    * @return the team number or null if no opponent
    */
-  private TeamScheduleInfo findOpponent(final TeamScheduleInfo ti, final int round) {
+  private TeamScheduleInfo findOpponent(final TeamScheduleInfo ti,
+                                        final int round) {
     final List<TeamScheduleInfo> tableMatches = _matches.get(ti.getPerf(round)).get(ti.getPerfTableColor(round));
     if (tableMatches.size() > 1) {
       if (tableMatches.get(0).equals(ti)) {
@@ -936,7 +991,8 @@ public class ParseSchedule {
   }
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "IM_BAD_CHECK_FOR_ODD", justification = "The size of a container cannot be negative")
-  private void verifyTeam(final Collection<ConstraintViolation> violations, final TeamScheduleInfo ti) {
+  private void verifyTeam(final Collection<ConstraintViolation> violations,
+                          final TeamScheduleInfo ti) {
     // constraint set 1
     if (ti.getPresentation().before(ti.getTechnical())) {
       if (ti.getPresentation().getTime()
@@ -985,7 +1041,7 @@ public class ParseSchedule {
     }
 
     // constraint set 4
-    for (int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
+    for (int round = 0; round < getNumberOfRounds(); ++round) {
       final String message = verifyPerformanceVsSubjective(ti.getTeamNumber(), ti.getPresentation(), "presentation", ti.getPerf(round),
                                                            String.valueOf(round + 1));
       if (null != message) {
@@ -994,7 +1050,7 @@ public class ParseSchedule {
     }
 
     // constraint set 5
-    for (int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
+    for (int round = 0; round < getNumberOfRounds(); ++round) {
       final String message = verifyPerformanceVsSubjective(ti.getTeamNumber(), ti.getTechnical(), "technical", ti.getPerf(round), String.valueOf(round + 1));
       if (null != message) {
         violations.add(new ConstraintViolation(ti.getTeamNumber(), null, ti.getTechnical(), ti.getPerf(round), message));
@@ -1002,12 +1058,12 @@ public class ParseSchedule {
     }
 
     // make sure that all opponents are different & sides are different
-    for (int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
+    for (int round = 0; round < getNumberOfRounds(); ++round) {
       final TeamScheduleInfo opponent = findOpponent(ti, round);
       if (null != opponent) {
         int opponentSide = -1;
         // figure out which round matches up
-        for (int oround = 0; oround < NUMBER_OF_ROUNDS; ++oround) {
+        for (int oround = 0; oround < getNumberOfRounds(); ++oround) {
           if (opponent.getPerf(oround).equals(ti.getPerf(round))) {
             opponentSide = opponent.getPerfTableSide(oround);
             break;
@@ -1025,7 +1081,7 @@ public class ParseSchedule {
           }
         }
 
-        for (int r = round + 1; r < NUMBER_OF_ROUNDS; ++r) {
+        for (int r = round + 1; r < getNumberOfRounds(); ++r) {
           final TeamScheduleInfo otherOpponent = findOpponent(ti, r);
           if (otherOpponent != null
               && opponent.equals(otherOpponent)) {
@@ -1038,7 +1094,7 @@ public class ParseSchedule {
       } else {
         // only a problem if this is not the last round and we don't have an odd
         // number of teams
-        if (!(round == NUMBER_OF_ROUNDS - 1 && (_schedule.size() % 2) == 1)) {
+        if (!(round == getNumberOfRounds() - 1 && (_schedule.size() % 2) == 1)) {
           final String message = String.format("Team %d has no opponent for round %d", ti.getTeamNumber(), (round + 1));
           violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, ti.getPerf(round), message));
         }
@@ -1046,7 +1102,7 @@ public class ParseSchedule {
     }
 
     // check if the team needs to stay for any extra founds
-    for (int round = 0; round < NUMBER_OF_ROUNDS; ++round) {
+    for (int round = 0; round < getNumberOfRounds(); ++round) {
       final TeamScheduleInfo next = checkIfTeamNeedsToStay(ti, round);
       if (null != next) {
         // everything else checked out, only only need to check the end time
@@ -1061,7 +1117,7 @@ public class ParseSchedule {
           violations.add(new ConstraintViolation(ti.getTeamNumber(), null, ti.getTechnical(), ti.getPerf(round), message));
         }
 
-        if (round + 1 < NUMBER_OF_ROUNDS) {
+        if (round + 1 < getNumberOfRounds()) {
           if (next.getPerf(round).getTime()
               + getPerformanceDuration() + getPerformanceChangetime() > ti.getPerf(round + 1).getTime()) {
             message = String.format("Team %d doesn't have enough time (%d minutes) between performance %d and performance extra: %s - %s", ti.getTeamNumber(),
@@ -1091,7 +1147,8 @@ public class ParseSchedule {
         // hit empty row
         return null;
       }
-      final TeamScheduleInfo ti = new TeamScheduleInfo(reader.getLineNumber());
+
+      final TeamScheduleInfo ti = new TeamScheduleInfo(reader.getLineNumber(), getNumberOfRounds());
       ti.setTeamNumber(Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue());
       ti.setTeamName(line[_teamNameColumn]);
       ti.setOrganization(line[_organizationColumn]);
@@ -1112,71 +1169,29 @@ public class ParseSchedule {
 
       ti.setJudge(line[_judgeGroupColumn]);
 
-      final String perf1Str = line[_perf1Column];
-      if ("".equals(perf1Str)) {
-        // If we got an empty string, then we must have hit the end
-        return null;
+      for (int perfNum = 0; perfNum < getNumberOfRounds(); ++perfNum) {
+        final String perf1Str = line[_perfColumn[perfNum]];
+        if ("".equals(perf1Str)) {
+          // If we got an empty string, then we must have hit the end
+          return null;
+        }
+        ti.setPerf(perfNum, parseDate(perf1Str));
+        String table = line[_perfTableColumn[perfNum]];
+        String[] tablePieces = table.split(" ");
+        if (tablePieces.length != 2) {
+          throw new RuntimeException("Error parsing table information from: "
+              + table);
+        }
+        ti.setPerfTableColor(perfNum, tablePieces[0]);
+        ti.setPerfTableSide(perfNum, Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue());
+        if (ti.getPerfTableSide(perfNum) > 2
+            || ti.getPerfTableSide(perfNum) < 1) {
+          final String message = "There are only two sides to the table, number must be 1 or 2 team: "
+              + ti.getTeamNumber() + " round " + (perfNum + 1);
+          LOGGER.error(message);
+          throw new ScheduleParseException(message);
+        }
       }
-      ti.setPerf(0, parseDate(perf1Str));
-      String table = line[_perf1TableColumn];
-      String[] tablePieces = table.split(" ");
-      if (tablePieces.length != 2) {
-        throw new RuntimeException("Error parsing table information from: "
-            + table);
-      }
-      ti.setPerfTableColor(0, tablePieces[0]);
-      ti.setPerfTableSide(0, Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue());
-      if (ti.getPerfTableSide(0) > 2
-          || ti.getPerfTableSide(0) < 1) {
-        final String message = "There are only two sides to the table, number must be 1 or 2 team: "
-          + ti.getTeamNumber() + " round 1"; 
-        LOGGER.error(message);
-        throw new ScheduleParseException(message);
-      }
-
-      table = line[_perf2TableColumn];
-      tablePieces = table.split(" ");
-      if (tablePieces.length != 2) {
-        throw new RuntimeException("Error parsing table information from: "
-            + table);
-      }
-      ti.setPerfTableColor(1, tablePieces[0]);
-      ti.setPerfTableSide(1, Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue());
-      if (ti.getPerfTableSide(1) > 2
-          || ti.getPerfTableSide(1) < 1) {
-final String message = "There are only two sides to the table, number must be 1 or 2 team: "
-            + ti.getTeamNumber() + " round 2";
-LOGGER.error(message);
-        throw new ScheduleParseException(message);
-      }
-      final String perf2Str = line[_perf2Column];
-      if ("".equals(perf2Str)) {
-        // If we got an empty string, then we must have hit the end
-        return null;
-      }
-      ti.setPerf(1, parseDate(perf2Str));
-
-      table = line[_perf3TableColumn];
-      tablePieces = table.split(" ");
-      if (tablePieces.length != 2) {
-        throw new RuntimeException("Error parsing table information from: "
-            + table);
-      }
-      ti.setPerfTableColor(2, tablePieces[0]);
-      ti.setPerfTableSide(2, Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue());
-      if (ti.getPerfTableSide(2) > 2
-          || ti.getPerfTableSide(2) < 1) {
-        final String message = "There are only two sides to the table, number must be 1 or 2 team: "
-            + ti.getTeamNumber() + " round 2";
-        LOGGER.error(message);
-        throw new ScheduleParseException(message);
-      }
-      final String perf3Str = line[_perf3Column];
-      if ("".equals(perf3Str)) {
-        // If we got an empty string, then we must have hit the end
-        return null;
-      }
-      ti.setPerf(2, parseDate(perf3Str));
 
       return ti;
     } catch (final ParseException pe) {
@@ -1300,7 +1315,8 @@ LOGGER.error(message);
    */
   private static final class PageFooter extends PdfPageEventHelper {
     @Override
-    public void onEndPage(final PdfWriter writer, final Document document) {
+    public void onEndPage(final PdfWriter writer,
+                          final Document document) {
       final Rectangle page = document.getPageSize();
       final PdfPTable foot = new PdfPTable(1);
       final PdfPCell cell = new PdfPCell(new Phrase("- "
