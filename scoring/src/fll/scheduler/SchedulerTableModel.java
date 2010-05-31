@@ -33,16 +33,19 @@ import javax.swing.table.AbstractTableModel;
     }
   };
   
-  public SchedulerTableModel(final List<TeamScheduleInfo> schedule) {
-    scheduleData = new ArrayList<TeamScheduleInfo>(schedule);
+  public SchedulerTableModel(final List<TeamScheduleInfo> schedule, final int numberOfRounds) {
+    this.scheduleData = new ArrayList<TeamScheduleInfo>(schedule);
+    this.numberOfRounds = numberOfRounds;
     Collections.sort(scheduleData, TEAM_NUMBER_COMPARATOR);
   }
+  
+  private final int numberOfRounds;
   
   /**
    * @see javax.swing.table.TableModel#getColumnCount()
    */
   public int getColumnCount() {
-    return (TECHNICAL_COLUMN + 1) + (ParseSchedule.NUMBER_OF_ROUNDS * NUM_COLUMNS_PER_ROUND);
+    return (TECHNICAL_COLUMN + 1) + (numberOfRounds * NUM_COLUMNS_PER_ROUND);
   }
 
   public static final int TEAM_NUMBER_COLUMN = 0;
