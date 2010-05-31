@@ -49,6 +49,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
@@ -76,6 +78,19 @@ public final class SubjectiveFrame extends JFrame {
   private static final Logger LOGGER = Logger.getLogger(SubjectiveFrame.class);
 
   public static void main(final String[] args) {
+    // Use cross platform look and feel so that things look right all of the time 
+    try {
+      UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+    } catch (final ClassNotFoundException e) {
+      LOGGER.warn("Could not find cross platform look and feel class", e);
+    } catch (final InstantiationException e) {
+      LOGGER.warn("Could not instantiate cross platform look and feel class", e);
+    } catch (final IllegalAccessException e) {
+      LOGGER.warn("Error loading cross platform look and feel", e);
+    } catch (final UnsupportedLookAndFeelException e) {
+      LOGGER.warn("Cross platform look and feel unsupported?", e);
+    }
+
     try {
       final File file = chooseSubjectiveFile("Please choose the subjective data file");
       try {
