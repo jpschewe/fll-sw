@@ -31,6 +31,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
@@ -54,6 +56,19 @@ import fll.util.ExcelCellReader;
 public class SchedulerUI extends JFrame {
 
   public static void main(final String[] args) {
+    // Use cross platform look and feel so that things look right all of the time 
+    try {
+      UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+    } catch (final ClassNotFoundException e) {
+      LOGGER.warn("Could not find cross platform look and feel class", e);
+    } catch (final InstantiationException e) {
+      LOGGER.warn("Could not instantiate cross platform look and feel class", e);
+    } catch (final IllegalAccessException e) {
+      LOGGER.warn("Error loading cross platform look and feel", e);
+    } catch (final UnsupportedLookAndFeelException e) {
+      LOGGER.warn("Cross platform look and feel unsupported?", e);
+    }
+
     try {
       final SchedulerUI frame = new SchedulerUI();
 
