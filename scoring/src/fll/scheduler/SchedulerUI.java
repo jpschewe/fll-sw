@@ -47,6 +47,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import com.itextpdf.text.DocumentException;
 
 import fll.util.ExcelCellReader;
+import fll.util.FLLRuntimeException;
 
 /**
  * UI for the scheduler.
@@ -306,6 +307,12 @@ public class SchedulerUI extends JFrame {
             LOGGER.error(errorFormatter, e);
             JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
             return;
+          } catch (final FLLRuntimeException e) {
+            final Formatter errorFormatter = new Formatter();
+            errorFormatter.format("Error parsing file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
+            LOGGER.error(errorFormatter, e);
+            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
+            return;
           }
 
         } else {
@@ -365,7 +372,7 @@ public class SchedulerUI extends JFrame {
     scheduleTable.clearSelection();
 
     scheduleData = sd;
-    scheduleModel = new SchedulerTableModel(scheduleData.getSchedule());
+    scheduleModel = new SchedulerTableModel(scheduleData.getSchedule(), scheduleData.getNumberOfRounds());
     scheduleTable.setModel(scheduleModel);
 
     checkSchedule();
@@ -431,9 +438,9 @@ public class SchedulerUI extends JFrame {
             // need to check round which round
             int round = 0;
             while (!violation.getPerformance().equals(schedInfo.getPerf(round))
-                && round < ParseSchedule.NUMBER_OF_ROUNDS) {
+                && round < schedInfo.getNumberOfRounds()) {
               ++round;
-              if (round >= ParseSchedule.NUMBER_OF_ROUNDS) {
+              if (round >= schedInfo.getNumberOfRounds()) {
                 throw new RuntimeException("Internal error, walkd off the end of the round list");
               }
             }

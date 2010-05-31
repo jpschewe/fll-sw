@@ -4,11 +4,9 @@ import java.util.Date;
 
 /**
  * Holds data about the schedule for a team.
- * 
- * @author jpschewe
- * @version $Revision$
  */
 final class TeamScheduleInfo {
+
   private int teamNumber;
 
   private String teamName;
@@ -23,37 +21,54 @@ final class TeamScheduleInfo {
 
   private String judge;
 
-  private Date[] perf = new Date[ParseSchedule.NUMBER_OF_ROUNDS];
-  void setPerf(final int idx, final Date d) {
+  private final Date[] perf;
+
+  void setPerf(final int idx,
+               final Date d) {
     perf[idx] = d;
   }
+
   Date getPerf(final int idx) {
     return perf[idx];
   }
 
-  private String[] perfTableColor = new String[ParseSchedule.NUMBER_OF_ROUNDS];
-  void setPerfTableColor(final int idx, final String v) {
+  private final String[] perfTableColor;
+
+  void setPerfTableColor(final int idx,
+                         final String v) {
     perfTableColor[idx] = v;
   }
+
   String getPerfTableColor(final int idx) {
     return perfTableColor[idx];
   }
 
-  private int[] perfTableSide = new int[ParseSchedule.NUMBER_OF_ROUNDS];
-  void setPerfTableSide(final int idx, final int v) {
+  private final int[] perfTableSide;
+
+  void setPerfTableSide(final int idx,
+                        final int v) {
     perfTableSide[idx] = v;
   }
+
   int getPerfTableSide(final int idx) {
     return perfTableSide[idx];
   }
-  
+
   private final int lineNumber;
-  public int getLineNumber() { return lineNumber; }
-  
-  public TeamScheduleInfo(final int lineNumber) {
-    this.lineNumber = lineNumber;
+
+  public int getLineNumber() {
+    return lineNumber;
   }
-  
+
+  public TeamScheduleInfo(final int lineNumber,
+                          final int numRounds) {
+    this.lineNumber = lineNumber;
+    this.numberOfRounds = numRounds;
+    this.perf = new Date[numRounds];
+    this.perfTableColor = new String[numRounds];
+    this.perfTableSide = new int[numRounds];
+  }
+
   /**
    * Find the performance round for the matching time.
    * 
@@ -61,7 +76,7 @@ final class TeamScheduleInfo {
    * @return the round, -1 if cannot be found
    */
   public int findRoundFortime(final Date time) {
-    for (int round = 0; round < ParseSchedule.NUMBER_OF_ROUNDS; ++round) {
+    for (int round = 0; round < perf.length; ++round) {
       if (perf[round].equals(time)) {
         return round;
       }
@@ -188,4 +203,13 @@ final class TeamScheduleInfo {
   String getJudge() {
     return judge;
   }
+
+  /**
+   * @return
+   */
+  public int getNumberOfRounds() {
+    return numberOfRounds;
+  }
+
+  private final int numberOfRounds;
 }
