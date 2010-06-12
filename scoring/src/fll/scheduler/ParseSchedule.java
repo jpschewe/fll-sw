@@ -52,7 +52,7 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 
 /**
- * Parse a CSV file representing the detailed schedule for a tournament.
+ * Parse a spreadsheet file representing the detailed schedule for a tournament.
  */
 public class ParseSchedule {
 
@@ -191,6 +191,8 @@ public class ParseSchedule {
   }
 
   /**
+   * @param f the spreadsheet file to read
+   * @param sheetName the name of the sheet to look at 
    * @throws ScheduleParseException if there is an error parsing the schedule
    */
   public ParseSchedule(final File f,
@@ -1148,8 +1150,8 @@ public class ParseSchedule {
         return null;
       }
 
-      final TeamScheduleInfo ti = new TeamScheduleInfo(reader.getLineNumber(), getNumberOfRounds());
-      ti.setTeamNumber(Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue());
+      final int teamNumber =Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue(); 
+      final TeamScheduleInfo ti = new TeamScheduleInfo(reader.getLineNumber(), getNumberOfRounds(), teamNumber);
       ti.setTeamName(line[_teamNameColumn]);
       ti.setOrganization(line[_organizationColumn]);
       ti.setDivision(line[_divisionColumn]);
