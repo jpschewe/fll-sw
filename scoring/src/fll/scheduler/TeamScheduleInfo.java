@@ -5,9 +5,9 @@ import java.util.Date;
 /**
  * Holds data about the schedule for a team.
  */
-final class TeamScheduleInfo {
+public final class TeamScheduleInfo {
 
-  private int teamNumber;
+  private final int teamNumber;
 
   private String teamName;
 
@@ -23,50 +23,55 @@ final class TeamScheduleInfo {
 
   private final Date[] perf;
 
-  void setPerf(final int idx,
+  public void setPerf(final int idx,
                final Date d) {
     perf[idx] = d;
   }
 
-  Date getPerf(final int idx) {
+  public Date getPerf(final int idx) {
     return perf[idx];
   }
 
   private final String[] perfTableColor;
 
-  void setPerfTableColor(final int idx,
+  public void setPerfTableColor(final int idx,
                          final String v) {
     perfTableColor[idx] = v;
   }
 
-  String getPerfTableColor(final int idx) {
+  public String getPerfTableColor(final int idx) {
     return perfTableColor[idx];
   }
 
   private final int[] perfTableSide;
 
-  void setPerfTableSide(final int idx,
+  public void setPerfTableSide(final int idx,
                         final int v) {
     perfTableSide[idx] = v;
   }
 
-  int getPerfTableSide(final int idx) {
+  public int getPerfTableSide(final int idx) {
     return perfTableSide[idx];
   }
 
   private final int lineNumber;
 
+  /**
+   * @return Line number that this object corresponds to in the original schedule.
+   */
   public int getLineNumber() {
     return lineNumber;
   }
 
   public TeamScheduleInfo(final int lineNumber,
-                          final int numRounds) {
+                          final int numRounds,
+                          final int teamNumber) {
     this.lineNumber = lineNumber;
     this.numberOfRounds = numRounds;
     this.perf = new Date[numRounds];
     this.perfTableColor = new String[numRounds];
     this.perfTableSide = new int[numRounds];
+    this.teamNumber = teamNumber;
   }
 
   /**
@@ -107,100 +112,93 @@ final class TeamScheduleInfo {
   }
 
   /**
-   * @param teamNumber the teamNumber to set
-   */
-  void setTeamNumber(final int teamNumber) {
-    this.teamNumber = teamNumber;
-  }
-
-  /**
    * @return the teamNumber
    */
-  int getTeamNumber() {
+  public int getTeamNumber() {
     return teamNumber;
   }
 
   /**
    * @param teamName the teamName to set
    */
-  void setTeamName(final String teamName) {
+  public void setTeamName(final String teamName) {
     this.teamName = teamName;
   }
 
   /**
    * @return the teamName
    */
-  String getTeamName() {
+  public String getTeamName() {
     return teamName;
   }
 
   /**
    * @param organization the organization to set
    */
-  void setOrganization(final String organization) {
+  public void setOrganization(final String organization) {
     this.organization = organization;
   }
 
   /**
    * @return the organization
    */
-  String getOrganization() {
+  public String getOrganization() {
     return organization;
   }
 
   /**
    * @param division the division to set
    */
-  void setDivision(final String division) {
+  public void setDivision(final String division) {
     this.division = division;
   }
 
   /**
    * @return the division
    */
-  String getDivision() {
+  public String getDivision() {
     return division;
   }
 
   /**
    * @param presentation the presentation to set
    */
-  void setPresentation(final Date presentation) {
+  public void setPresentation(final Date presentation) {
     this.presentation = presentation;
   }
 
   /**
    * @return the presentation
    */
-  Date getPresentation() {
+  public Date getPresentation() {
     return presentation;
   }
 
   /**
    * @param technical the technical to set
    */
-  void setTechnical(final Date technical) {
+  public void setTechnical(final Date technical) {
     this.technical = technical;
   }
 
   /**
    * @return the technical
    */
-  Date getTechnical() {
+  public Date getTechnical() {
     return technical;
   }
 
   /**
    * @param judge the judge to set
    */
-  void setJudge(final String judge) {
+  public void setJudge(final String judge) {
     this.judge = judge;
   }
 
   /**
    * @return the judge
    */
-  String getJudge() {
+  public String getJudge() {
     return judge;
   }
 
