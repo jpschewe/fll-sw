@@ -29,7 +29,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import fll.scheduler.ParseSchedule;
+import fll.scheduler.TournamentSchedule;
 
 /**
  * Read Excel files.
@@ -128,7 +128,7 @@ public class ExcelCellReader implements CellFileReader {
           final Date date = HSSFDateUtil.getJavaDate(d);
           // TODO make the date formats more visible as they will likely be used
           // elsewhere
-          str = ParseSchedule.DATE_FORMAT_AM_PM_SS.get().format(date);
+          str = TournamentSchedule.DATE_FORMAT_AM_PM_SS.get().format(date);
         } else {
           str = formatter.formatCellValue(cell, formulaEvaluator);
         }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/fll-sw/scoring/src/fll/scheduler/ParseSchedule.java"/>
+<listEntry value="/fll-sw/scoring/src/fll/scheduler/TournamentSchedule.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
@@ -9,7 +9,7 @@
 <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
 <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
 </listAttribute>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="fll.scheduler.ParseSchedule"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="fll.scheduler.TournamentSchedule"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="${workspace_loc:fll-sw}/scheduling/blank-schedules/"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="fll-sw"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dapp.name=check-blank-schedules -Dlogroot=./"/>
