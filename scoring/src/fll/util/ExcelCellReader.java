@@ -126,8 +126,6 @@ public class ExcelCellReader implements CellFileReader {
         if (HSSFDateUtil.isCellDateFormatted(cell)) {
           // format in form of M/D/YY
           final Date date = HSSFDateUtil.getJavaDate(d);
-          // TODO make the date formats more visible as they will likely be used
-          // elsewhere
           str = TournamentSchedule.DATE_FORMAT_AM_PM_SS.get().format(date);
         } else {
           str = formatter.formatCellValue(cell, formulaEvaluator);
