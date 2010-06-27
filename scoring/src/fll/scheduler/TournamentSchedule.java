@@ -52,11 +52,11 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 
 /**
- * Parse a spreadsheet file representing the detailed schedule for a tournament.
+ * Tournament schedule. Can parse the schedule from a spreadsheet.
  */
-public class ParseSchedule {
+public class TournamentSchedule {
 
-  private static final Logger LOGGER = Logger.getLogger(ParseSchedule.class);
+  private static final Logger LOGGER = Logger.getLogger(TournamentSchedule.class);
 
   /**
    * Header on team number column.
@@ -195,7 +195,7 @@ public class ParseSchedule {
    * @param sheetName the name of the sheet to look at 
    * @throws ScheduleParseException if there is an error parsing the schedule
    */
-  public ParseSchedule(final File f,
+  public TournamentSchedule(final File f,
                        final String sheetName) throws IOException, ParseException, InvalidFormatException, ScheduleParseException {
     _file = f;
     _sheetName = sheetName;

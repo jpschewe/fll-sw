@@ -169,7 +169,7 @@ public class SchedulerUI extends JFrame {
 
     public void actionPerformed(final ActionEvent ae) {
       try {
-        final ParseSchedule newData = new ParseSchedule(getScheduleData().getFile(), getScheduleData().getSheetName());
+        final TournamentSchedule newData = new TournamentSchedule(getScheduleData().getFile(), getScheduleData().getSheetName());
         setScheduleData(newData);
       } catch (final IOException e) {
         final Formatter errorFormatter = new Formatter();
@@ -296,7 +296,7 @@ public class SchedulerUI extends JFrame {
             if (null == sheetName) {
               return;
             }
-            final ParseSchedule schedule = new ParseSchedule(selectedFile, sheetName);
+            final TournamentSchedule schedule = new TournamentSchedule(selectedFile, sheetName);
             setScheduleData(schedule);
           } catch (final ParseException e) {
             final Formatter errorFormatter = new Formatter();
@@ -360,14 +360,14 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private static final Preferences PREFS = Preferences.userNodeForPackage(ParseSchedule.class);
+  private static final Preferences PREFS = Preferences.userNodeForPackage(TournamentSchedule.class);
 
   private static final String STARTING_DIRECTORY_PREF = "startingDirectory";
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SE_BAD_FIELD", justification = "This calss isn't going to be serialized")
-  private ParseSchedule scheduleData;
+  private TournamentSchedule scheduleData;
 
-  /* package */ParseSchedule getScheduleData() {
+  /* package */TournamentSchedule getScheduleData() {
     return scheduleData;
   }
 
@@ -383,7 +383,7 @@ public class SchedulerUI extends JFrame {
     return violationsModel;
   }
 
-  private void setScheduleData(final ParseSchedule sd) {
+  private void setScheduleData(final TournamentSchedule sd) {
     scheduleTable.clearSelection();
 
     scheduleData = sd;
@@ -496,7 +496,7 @@ public class SchedulerUI extends JFrame {
       // TODO would be nice to set foreground color when selected
 
       if (value instanceof Date) {
-        final String strValue = ParseSchedule.OUTPUT_DATE_FORMAT.get().format((Date) value);
+        final String strValue = TournamentSchedule.OUTPUT_DATE_FORMAT.get().format((Date) value);
         return super.getTableCellRendererComponent(table, strValue, isSelected, hasFocus, row, column);
       } else {
         return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
