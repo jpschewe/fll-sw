@@ -12,8 +12,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 
-import junit.framework.AssertionFailedError;
-
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 
@@ -65,13 +63,13 @@ public final class IntegrationTestUtils {
           challengeFile.deleteOnExit();
         }
       }
+    } catch(final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;      
     } catch (final RuntimeException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     } catch (final IOException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final AssertionFailedError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     }

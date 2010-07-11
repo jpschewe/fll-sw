@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import junit.framework.Assert;
-import junit.framework.AssertionFailedError;
 
 import org.junit.Test;
 
@@ -64,7 +63,7 @@ public class EditTournamentsTest extends SeleneseTestCase {
     } catch (final RuntimeException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
-    } catch (final AssertionFailedError e) {
+    } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     }
