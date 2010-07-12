@@ -142,17 +142,17 @@ public final class ScoreGroupScores {
 
           out.println("  <tr><td colspan='4'><hr</td></tr>");
         } // end loop over teams
-        SQLFunctions.closeResultSet(teamsRS);
+        SQLFunctions.close(teamsRS);
 
         out.println("</table>");
       }// end loop over score groups
-      SQLFunctions.closeResultSet(groupRS);
+      SQLFunctions.close(groupRS);
 
     } finally {
-      SQLFunctions.closeResultSet(teamsRS);
-      SQLFunctions.closeResultSet(groupRS);
-      SQLFunctions.closePreparedStatement(prep);
-      SQLFunctions.closePreparedStatement(prep2);
+      SQLFunctions.close(teamsRS);
+      SQLFunctions.close(groupRS);
+      SQLFunctions.close(prep);
+      SQLFunctions.close(prep2);
     }
   }
 }

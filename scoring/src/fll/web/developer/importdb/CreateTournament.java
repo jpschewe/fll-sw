@@ -79,8 +79,8 @@ public class CreateTournament extends BaseFLLServlet {
 
       session.setAttribute("message", message.toString());
     } finally {
-      SQLFunctions.closeConnection(sourceConnection);
-      SQLFunctions.closeConnection(destConnection);
+      SQLFunctions.close(sourceConnection);
+      SQLFunctions.close(destConnection);
     }
   }
 

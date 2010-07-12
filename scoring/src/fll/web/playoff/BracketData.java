@@ -430,8 +430,8 @@ public class BracketData {
       }
 
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
     }
   }
 

@@ -612,8 +612,8 @@ public final class ScoreEntry {
             + " TeamNumber: " + teamNumber + " RunNumber: " + runNumber);
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 

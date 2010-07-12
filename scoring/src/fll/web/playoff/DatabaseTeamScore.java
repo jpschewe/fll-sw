@@ -126,7 +126,7 @@ public class DatabaseTeamScore extends TeamScore {
   public void cleanup() {
     // don't close the result set in case it was passed into the constructor,
     // closing the prepared statement will take care of the one we create
-    SQLFunctions.closePreparedStatement(_prep);
+    SQLFunctions.close(_prep);
     _prep = null;
   }
 

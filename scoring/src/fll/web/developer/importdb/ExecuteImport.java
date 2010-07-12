@@ -66,8 +66,8 @@ public class ExecuteImport extends BaseFLLServlet {
       LOG.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
     } finally {
-      SQLFunctions.closeConnection(sourceConnection);
-      SQLFunctions.closeConnection(destConnection);
+      SQLFunctions.close(sourceConnection);
+      SQLFunctions.close(destConnection);
     }
 
     session.setAttribute("message", message.toString());

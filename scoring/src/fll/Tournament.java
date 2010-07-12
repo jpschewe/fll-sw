@@ -73,7 +73,7 @@ public final class Tournament {
       prep.setInt(3, nextTournamentID);
       prep.executeUpdate();
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -88,7 +88,7 @@ public final class Tournament {
       prep.setString(2, location);
       prep.executeUpdate();
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -109,7 +109,7 @@ public final class Tournament {
       }
       setNext.executeUpdate();
     } finally {
-      SQLFunctions.closePreparedStatement(setNext);
+      SQLFunctions.close(setNext);
     }
   }
 
@@ -143,8 +143,8 @@ public final class Tournament {
         retval.add(tournament);
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
     return retval;
   }
@@ -179,8 +179,8 @@ public final class Tournament {
         return null;
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -214,8 +214,8 @@ public final class Tournament {
         return null;
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 

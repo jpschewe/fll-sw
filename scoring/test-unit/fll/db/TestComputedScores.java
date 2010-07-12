@@ -85,9 +85,9 @@ public class TestComputedScores {
       if(!tempFile.delete()) {
         tempFile.deleteOnExit();
       }
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(selectPrep);   
-      SQLFunctions.closeConnection(connection);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(selectPrep);   
+      SQLFunctions.close(connection);
       TestUtils.deleteDatabase(database);
     }
 

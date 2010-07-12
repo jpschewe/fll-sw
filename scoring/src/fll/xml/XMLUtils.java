@@ -5,24 +5,16 @@
  */
 package fll.xml;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.custommonkey.xmlunit.Diff;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 
 /**
@@ -33,68 +25,6 @@ public final class XMLUtils {
   private XMLUtils() {
   }
 
-  public static final DocumentBuilder DOCUMENT_BUILDER;
-
-  // create basic document builder
-  static {
-    try {
-      final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      factory.setNamespaceAware(true);
-      DOCUMENT_BUILDER = factory.newDocumentBuilder();
-      DOCUMENT_BUILDER.setErrorHandler(new ErrorHandler() {
-        public void error(final SAXParseException spe) throws SAXParseException {
-          throw spe;
-        }
-
-        public void fatalError(final SAXParseException spe) throws SAXParseException {
-          throw spe;
-        }
-
-        public void warning(final SAXParseException spe) throws SAXParseException {
-          System.err.println(spe.getMessage());
-        }
-      });
-    } catch (final ParserConfigurationException pce) {
-      throw new RuntimeException(pce.getMessage());
-    }
-  }
-
-  /**
-   * Parse xmlDoc an XML document. Just does basic parsing, no validity checks.
-   */
-  public static Document parseXMLDocument(final InputStream xmlDocStream) {
-    try {
-      final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      factory.setNamespaceAware(true);
-      factory.setIgnoringComments(true);
-      factory.setIgnoringElementContentWhitespace(true);
-
-      final DocumentBuilder parser = factory.newDocumentBuilder();
-      parser.setErrorHandler(new ErrorHandler() {
-        public void error(final SAXParseException spe) throws SAXParseException {
-          throw spe;
-        }
-
-        public void fatalError(final SAXParseException spe) throws SAXParseException {
-          throw spe;
-        }
-
-        public void warning(final SAXParseException spe) throws SAXParseException {
-          System.err.println(spe.getMessage());
-        }
-      });
-
-      final Document document = parser.parse(xmlDocStream);
-      return document;
-    } catch (final ParserConfigurationException pce) {
-      throw new RuntimeException(pce.getMessage());
-    } catch (final SAXException se) {
-      throw new RuntimeException(se.getMessage());
-    } catch (final IOException ioe) {
-      throw new RuntimeException(ioe.getMessage());
-    }
-  }
-
   /**
    * Find a subjective category by name.
    * 
@@ -103,7 +33,7 @@ public final class XMLUtils {
    * @return the element or null if one is not found
    */
   public static Element getSubjectiveCategoryByName(final Document challengeDocument, final String name) {
-    for (final Element categoryElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+    for (final Element categoryElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       final String categoryName = categoryElement.getAttribute("name");
       if (categoryName.equals(name)) {
         return categoryElement;
@@ -124,8 +54,8 @@ public final class XMLUtils {
       return false;
     }
 
-    final List<Element> values = XMLUtils.filterToElements(element.getElementsByTagName("value"));
-    return !values.isEmpty();
+    final Iterator<Element> values = new NodelistElementCollectionAdapter(element.getElementsByTagName("value")).iterator();
+    return values.hasNext();
   }
 
   /**
@@ -136,23 +66,6 @@ public final class XMLUtils {
    */
   public static boolean isComputedGoal(final Element element) {
     return "computedGoal".equals(element.getNodeName());
-  }
-
-  /**
-   * Filter the {@link NodeList} to only Elements.
-   * 
-   * @param nodelist cannot be null
-   * @return the list of {@link Element}s
-   */
-  public static List<Element> filterToElements(final NodeList nodelist) {
-    final List<Element> retval = new ArrayList<Element>(nodelist.getLength());
-    for (int i = 0; i < nodelist.getLength(); ++i) {
-      final Node node = nodelist.item(i);
-      if (node instanceof Element) {
-        retval.add((Element) node);
-      }
-    }
-    return retval;
   }
 
   /**
@@ -281,7 +194,7 @@ public final class XMLUtils {
 
   public static List<String> getSubjectiveCategoryNames(final Document challengeDocument) {
     final List<String> subjectiveCategories = new LinkedList<String>();
-    for (final Element categoryElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+    for (final Element categoryElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       final String categoryName = categoryElement.getAttribute("name");
       subjectiveCategories.add(categoryName);
     }
@@ -290,5 +203,12 @@ public final class XMLUtils {
   
   public static boolean isValidCategoryName(final Document challengeDocument, final String name) {
     return getSubjectiveCategoryNames(challengeDocument).contains(name);
+  }
+
+  /**
+   * @deprecated Use {@link odelistElementIterableAdapter} directly
+   */
+  public static List<Element> filterToElements(final NodeList elementsByTagName) {
+    return new NodelistElementCollectionAdapter(elementsByTagName).asList();
   }
 }

@@ -118,7 +118,7 @@ public final class Utilities {
       insertPrepSQL.append(")");
       valuesSQL.append(")");
       stmt.executeUpdate(createTable.toString());
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(stmt);
 
       // load each line into a row in the table
       prep = connection.prepareStatement(insertPrepSQL.append(valuesSQL).toString());
@@ -130,8 +130,8 @@ public final class Utilities {
       }
 
     } finally {
-      SQLFunctions.closeStatement(stmt);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(stmt);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -213,7 +213,7 @@ public final class Utilities {
       }
       return false;
     } finally {
-      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.close(rs);
     }
   }
 

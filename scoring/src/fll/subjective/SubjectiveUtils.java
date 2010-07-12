@@ -19,13 +19,14 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import net.mtu.eggplant.util.Functions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+import net.mtu.eggplant.xml.XMLUtils;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.xml.ChallengeParser;
-import fll.xml.XMLUtils;
 
 /**
  * Utils for the subjective scoring application.
@@ -79,7 +80,7 @@ public final class SubjectiveUtils {
 
     compareZipfile.close();
     
-    if(!XMLUtils.compareDocuments(masterChallengeDoc, compareChallengeDoc)) {      
+    if(!fll.xml.XMLUtils.compareDocuments(masterChallengeDoc, compareChallengeDoc)) {      
       return null;
     } else {
       return compareScoreDocuments(masterChallengeDoc, masterScoreDocument, compareScoreDocument);
@@ -100,7 +101,7 @@ public final class SubjectiveUtils {
     final Element compareScoresElement = compare.getDocumentElement();
 
     final Collection<SubjectiveScoreDifference> diffs = new LinkedList<SubjectiveScoreDifference>();
-    for (final Element masterScoreCategory : XMLUtils.filterToElements(masterScoresElement.getChildNodes())) {
+    for (final Element masterScoreCategory : new NodelistElementCollectionAdapter(masterScoresElement.getChildNodes())) {
       compareScoreCategory(challengeDocument, masterScoreCategory, compareScoresElement, diffs);
     }
     return diffs;
@@ -117,17 +118,17 @@ public final class SubjectiveUtils {
           + categoryName);
     }
 
-    final Element categoryDescription = XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
+    final Element categoryDescription = fll.xml.XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
     if (null == categoryDescription) {
       throw new RuntimeException("Cannot find subjective category description for category in score document category: "
           + categoryName);
     }
 
-    final List<Element> goalDescriptions = XMLUtils.filterToElements(categoryDescription.getElementsByTagName("goal"));
+    final List<Element> goalDescriptions = new NodelistElementCollectionAdapter(categoryDescription.getElementsByTagName("goal")).asList();
 
     // for each score element
-    final List<Element> masterScores = XMLUtils.filterToElements(masterScoreCategory.getElementsByTagName("score"));
-    final List<Element> compareScores = XMLUtils.filterToElements(compareScoreCategory.getElementsByTagName("score"));
+    final List<Element> masterScores = new NodelistElementCollectionAdapter(masterScoreCategory.getElementsByTagName("score")).asList();
+    final List<Element> compareScores = new NodelistElementCollectionAdapter(compareScoreCategory.getElementsByTagName("score")).asList();
     if (masterScores.size() != compareScores.size()) {
       throw new RuntimeException("Score documents have different number of score elements");
     }
@@ -175,7 +176,7 @@ public final class SubjectiveUtils {
       for (final Element goalDescription : goalDescriptions) {
         final String goalTitle = goalDescription.getAttribute("title");
         final String goalName = goalDescription.getAttribute("name");
-        if (XMLUtils.isEnumeratedGoal(goalDescription)) {
+        if (fll.xml.XMLUtils.isEnumeratedGoal(goalDescription)) {
           final String masterValueStr = XMLUtils.getStringAttributeValue(masterScore, goalName);
           final String compareValueStr = XMLUtils.getStringAttributeValue(compareScore, goalName);
           if (!Functions.safeEquals(masterValueStr, compareValueStr)) {
@@ -201,7 +202,7 @@ public final class SubjectiveUtils {
    * @return null if not found
    */
   private static Element getCategoryNode(final Element scoresElement, final String categoryName) {
-    for (final Element scoreCategory : XMLUtils.filterToElements(scoresElement.getChildNodes())) {
+    for (final Element scoreCategory : new NodelistElementCollectionAdapter(scoresElement.getChildNodes())) {
       if (categoryName.equals(scoreCategory.getNodeName())) {
         return scoreCategory;
       }

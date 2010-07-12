@@ -102,7 +102,7 @@ public final class Queries {
             }
             scoreGroup.append(rs.getString(1));
           }
-          SQLFunctions.closeResultSet(rs);
+          SQLFunctions.close(rs);
 
           final String scoreGroupStr = scoreGroup.toString();
           if (!scoreGroups.containsKey(scoreGroupStr)) {
@@ -112,8 +112,8 @@ public final class Queries {
         }
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
 
     return scoreGroups;
@@ -144,8 +144,8 @@ public final class Queries {
         tournamentTeams.put(Integer.valueOf(team.getTeamNumber()), team);
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
     }
     return tournamentTeams;
   }
@@ -167,8 +167,8 @@ public final class Queries {
         tableList.add(labels);
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
 
     return tableList;
@@ -197,8 +197,8 @@ public final class Queries {
         }
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
     return list;
   }
@@ -225,8 +225,8 @@ public final class Queries {
         list.add(division);
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
     return list;
   }
@@ -333,8 +333,8 @@ public final class Queries {
         } // end foreach category
       } // end foreach division
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -395,8 +395,8 @@ public final class Queries {
         processTeamRankings(teamMap, categoryTitle, rs);
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -445,7 +445,7 @@ public final class Queries {
       // increment rank counter
       ++rank;
     } // end score group rank
-    SQLFunctions.closeResultSet(rs);
+    SQLFunctions.close(rs);
   }
 
   /**
@@ -498,8 +498,8 @@ public final class Queries {
       }
       return runNumber + 1;
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -527,8 +527,8 @@ public final class Queries {
       }
       return runNumber;
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -620,7 +620,7 @@ public final class Queries {
               stmt = connection.createStatement();
               stmt.executeUpdate(sql.toString());
             } finally {
-              SQLFunctions.closeStatement(stmt);
+              SQLFunctions.close(stmt);
             }
             final int semiFinalRound = getNumPlayoffRounds(connection, division) - 1;
             if (playoffRun == semiFinalRound
@@ -646,7 +646,7 @@ public final class Queries {
                 stmt.executeUpdate(sql.toString());
                 sql.append("; ");
               } finally {
-                SQLFunctions.closeStatement(stmt);
+                SQLFunctions.close(stmt);
               }
             }
           }
@@ -711,7 +711,7 @@ public final class Queries {
       stmt = connection.createStatement();
       stmt.executeUpdate(sql);
     } finally {
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(stmt);
     }
 
     return sql;
@@ -740,8 +740,8 @@ public final class Queries {
         return false;
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -833,8 +833,8 @@ public final class Queries {
                       + "Delete those scores and then you may update this score.");
                 }
               } finally {
-                SQLFunctions.closeResultSet(rs);
-                SQLFunctions.closeStatement(stmt);
+                SQLFunctions.close(rs);
+                SQLFunctions.close(stmt);
               }
             }
             if (getPlayoffTableLineNumber(connection, currentTournament, siblingTeam, playoffRun + 1) > 0) {
@@ -849,8 +849,8 @@ public final class Queries {
                       + " has scores in subsequent rounds which would become inconsistent. " + "Delete those scores and then you may update this score.");
                 }
               } finally {
-                SQLFunctions.closeResultSet(rs);
-                SQLFunctions.closeStatement(stmt);
+                SQLFunctions.close(rs);
+                SQLFunctions.close(stmt);
               }
             }
           }
@@ -925,7 +925,7 @@ public final class Queries {
       stmt = connection.createStatement();
       stmt.executeUpdate(sql.toString());
     } finally {
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(stmt);
     }
 
     return sql.toString();
@@ -1011,8 +1011,8 @@ public final class Queries {
         }
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
 
     PreparedStatement deletePrep = null;
@@ -1025,7 +1025,7 @@ public final class Queries {
 
       deletePrep.executeUpdate();
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -1053,7 +1053,7 @@ public final class Queries {
       prep.setInt(6, lineNumber);
       prep.executeUpdate();
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -1095,8 +1095,8 @@ public final class Queries {
             + teamNumber + " in the list of tournament teams!");
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -1150,8 +1150,8 @@ public final class Queries {
       rs = prep.executeQuery();
       return collectTeamsFromQuery(tournamentTeams, rs);
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -1213,8 +1213,8 @@ public final class Queries {
       rs = prep.executeQuery();
       return collectTeamsFromQuery(tournamentTeams, rs);
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -1300,8 +1300,8 @@ public final class Queries {
         retval.add(team);
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
     return retval;
   }
@@ -1386,8 +1386,8 @@ public final class Queries {
             + paramName);
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -1431,8 +1431,8 @@ public final class Queries {
             + paramName);
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -1457,8 +1457,8 @@ public final class Queries {
       rs = prep.executeQuery();
       return rs.next();
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -1480,7 +1480,7 @@ public final class Queries {
 
       prep.executeUpdate();
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -1502,7 +1502,7 @@ public final class Queries {
 
       prep.executeUpdate();
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -1537,8 +1537,8 @@ public final class Queries {
         retval.add(region);
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
     }
     return retval;
   }
@@ -1566,7 +1566,7 @@ public final class Queries {
       prep = connection.prepareStatement("DELETE FROM TournamentTeams WHERE TeamNumber = ?");
       prep.setInt(1, teamNumber);
       prep.executeUpdate();
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
       prep = null;
 
       // delete from subjective categories
@@ -1576,7 +1576,7 @@ public final class Queries {
             + name + " WHERE TeamNumber = ?");
         prep.setInt(1, teamNumber);
         prep.executeUpdate();
-        SQLFunctions.closePreparedStatement(prep);
+        SQLFunctions.close(prep);
         prep = null;
       }
 
@@ -1584,21 +1584,21 @@ public final class Queries {
       prep = connection.prepareStatement("DELETE FROM Performance WHERE TeamNumber = ?");
       prep.setInt(1, teamNumber);
       prep.executeUpdate();
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
       prep = null;
 
       // delete from Teams
       prep = connection.prepareStatement("DELETE FROM Teams WHERE TeamNumber = ?");
       prep.setInt(1, teamNumber);
       prep.executeUpdate();
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
       prep = null;
 
       // delete from FinalScores
       prep = connection.prepareStatement("DELETE FROM FinalScores WHERE TeamNumber = ?");
       prep.setInt(1, teamNumber);
       prep.executeUpdate();
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
       prep = null;
 
       connection.commit();
@@ -1610,7 +1610,7 @@ public final class Queries {
           LOGGER.debug(e, e);
         }
       }
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -1682,9 +1682,9 @@ public final class Queries {
         selectPrep.close();
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(updatePrep);
-      SQLFunctions.closePreparedStatement(selectPrep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(updatePrep);
+      SQLFunctions.close(selectPrep);
     }
   }
 
@@ -1735,9 +1735,9 @@ public final class Queries {
       updatePrep.close();
       selectPrep.close();
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(updatePrep);
-      SQLFunctions.closePreparedStatement(selectPrep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(updatePrep);
+      SQLFunctions.close(selectPrep);
     }
   }
 
@@ -1764,8 +1764,8 @@ public final class Queries {
         throw new FLLRuntimeException("Could not find challenge document in database");
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -1798,7 +1798,7 @@ public final class Queries {
 
         return true;
       } finally {
-        SQLFunctions.closePreparedStatement(prep);
+        SQLFunctions.close(prep);
       }
     }
   }
@@ -1855,8 +1855,8 @@ public final class Queries {
       }
       return dummyTournament.getTournamentID();
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -1896,10 +1896,10 @@ public final class Queries {
       }
       prep.setString(3, division);
       prep.executeUpdate();
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
 
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -1939,7 +1939,7 @@ public final class Queries {
         prep.setInt(1, teamNumber);
         prep.setInt(2, currentTournament);
         prep.executeUpdate();
-        SQLFunctions.closePreparedStatement(prep);
+        SQLFunctions.close(prep);
       }
 
       // delete from Performance
@@ -1947,24 +1947,24 @@ public final class Queries {
       prep.setInt(1, teamNumber);
       prep.setInt(2, currentTournament);
       prep.executeUpdate();
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
 
       // delete from TournamentTeams
       prep = connection.prepareStatement("DELETE FROM TournamentTeams WHERE TeamNumber = ? AND Tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setInt(2, currentTournament);
       prep.executeUpdate();
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
 
       // delete from FinalScores
       prep = connection.prepareStatement("DELETE FROM FinalScores WHERE TeamNumber = ? AND Tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setInt(2, currentTournament);
       prep.executeUpdate();
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
 
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
 
   }
@@ -2001,8 +2001,8 @@ public final class Queries {
       }
 
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
 
   }
@@ -2047,10 +2047,10 @@ public final class Queries {
         final String dup = rs.getString(1);
         return dup;
       } else {
-        SQLFunctions.closeResultSet(rs);
+        SQLFunctions.close(rs);
         rs = null;
       }
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
 
       prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Region, Division, TeamNumber) VALUES (?, ?, ?, ?, ?)");
       prep.setString(1, name);
@@ -2059,19 +2059,19 @@ public final class Queries {
       prep.setString(4, division);
       prep.setInt(5, number);
       prep.executeUpdate();
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
 
       prep = connection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) VALUES(?, ?, ?)");
       prep.setInt(1, tournament);
       prep.setInt(2, number);
       prep.setString(3, division);
       prep.executeUpdate();
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
 
       return null;
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2096,7 +2096,7 @@ public final class Queries {
       prep.setString(4, division);
       prep.setInt(5, number);
       prep.executeUpdate();
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
       prep = null;
 
       // update event divisions that were referencing the old division
@@ -2105,11 +2105,11 @@ public final class Queries {
       prep.setInt(2, number);
       prep.setString(3, prevDivision);
       prep.executeUpdate();
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
       prep = null;
 
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2126,7 +2126,7 @@ public final class Queries {
       prep.setInt(2, number);
       prep.executeUpdate();
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2143,7 +2143,7 @@ public final class Queries {
       prep.setInt(2, number);
       prep.executeUpdate();
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2160,7 +2160,7 @@ public final class Queries {
       prep.setInt(2, number);
       prep.executeUpdate();
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2177,7 +2177,7 @@ public final class Queries {
       prep.setInt(2, number);
       prep.executeUpdate();
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2196,8 +2196,8 @@ public final class Queries {
         Tournament.createTournament(connection, region, region);
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
     }
   }
 
@@ -2225,13 +2225,13 @@ public final class Queries {
         if (!rs.next()) {
           return false;
         }
-        SQLFunctions.closeResultSet(rs);
+        SQLFunctions.close(rs);
         rs = null;
       }
       return true;
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2266,8 +2266,8 @@ public final class Queries {
         return rs.getInt(1) > 0;
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2327,8 +2327,8 @@ public final class Queries {
         return false;
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
     }
   }
 
@@ -2357,8 +2357,8 @@ public final class Queries {
         return false;
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
     }
   }
 
@@ -2382,8 +2382,8 @@ public final class Queries {
             + tournament + " teamNumber: " + teamNumber + " runNumber: " + runNumber);
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
     }
   }
 
@@ -2417,8 +2417,8 @@ public final class Queries {
         return -1; // indicates team not present in this run
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
     }
   }
 
@@ -2462,8 +2462,8 @@ public final class Queries {
         }
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
     return Team.NULL_TEAM_NUMBER;
   }
@@ -2495,8 +2495,8 @@ public final class Queries {
             + teamNumber + "in the database.");
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
     }
   }
 
@@ -2571,8 +2571,8 @@ public final class Queries {
         return 0;
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2595,8 +2595,8 @@ public final class Queries {
         return 0;
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2629,8 +2629,8 @@ public final class Queries {
         return null;
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2677,7 +2677,7 @@ public final class Queries {
             + tables);
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.close(rs);
     }
     return tables;
   }
@@ -2719,8 +2719,8 @@ public final class Queries {
             + parameter + "' in global_parameters");
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2747,8 +2747,8 @@ public final class Queries {
             + parameter + "' in global_parameters");
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2764,8 +2764,8 @@ public final class Queries {
       rs = prep.executeQuery();
       return rs.next();
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2784,7 +2784,7 @@ public final class Queries {
       prep.setString(2, paramName);
       prep.executeUpdate();
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2805,8 +2805,8 @@ public final class Queries {
         allTeamNumbers.add(rs.getInt(1));
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
     }
     return allTeamNumbers;
   }
@@ -2833,8 +2833,8 @@ public final class Queries {
       rs = prep.executeQuery();
       return rs.next();
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 

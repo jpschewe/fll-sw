@@ -95,8 +95,8 @@ public class DisplayTournamentAssignments extends BaseFLLServlet {
     } catch(final SQLException e) {
       throw new FLLRuntimeException(e);
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   
   }

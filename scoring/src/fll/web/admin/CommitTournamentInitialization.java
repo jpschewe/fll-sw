@@ -78,8 +78,8 @@ public class CommitTournamentInitialization extends BaseFLLServlet {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
     } finally {
-      SQLFunctions.closePreparedStatement(deletePrep);
-      SQLFunctions.closePreparedStatement(insertPrep);
+      SQLFunctions.close(deletePrep);
+      SQLFunctions.close(insertPrep);
     }
 
     session.setAttribute("message", message.toString());

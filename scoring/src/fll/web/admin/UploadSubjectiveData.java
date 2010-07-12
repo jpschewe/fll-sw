@@ -25,6 +25,8 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+import net.mtu.eggplant.xml.XMLUtils;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -38,7 +40,6 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
-import fll.xml.XMLUtils;
 
 /**
  * Java code behind uploading subjective scores
@@ -130,18 +131,18 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
           + scoresElement);
     }
 
-    for (final Element scoreCategoryNode : XMLUtils.filterToElements(scoresElement.getChildNodes())) {
+    for (final Element scoreCategoryNode : new NodelistElementCollectionAdapter(scoresElement.getChildNodes())) {
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("An element: "
             + scoreCategoryNode);
       }
       final Element scoreCategoryElement = scoreCategoryNode;
       final String categoryName = scoreCategoryElement.getNodeName();
-      final Element categoryElement = XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
+      final Element categoryElement = fll.xml.XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
       if (null == categoryElement) {
         throw new RuntimeException("Cannot find subjective category description for category in score document category: " + categoryName);
       }
-      final List<Element> goalDescriptions = XMLUtils.filterToElements(categoryElement.getElementsByTagName("goal"));
+      final List<Element> goalDescriptions = new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("goal")).asList();
 
       PreparedStatement insertPrep = null;
       PreparedStatement updatePrep = null;
@@ -173,7 +174,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
         insertPrep.setInt(2, currentTournament);
         updatePrep.setInt(numGoals + 3, currentTournament);
 
-        for (final Element scoreElement : XMLUtils.filterToElements(scoreCategoryElement.getElementsByTagName("score"))) {
+        for (final Element scoreElement : new NodelistElementCollectionAdapter(scoreCategoryElement.getElementsByTagName("score"))) {
 
           if (scoreElement.hasAttribute("modified")
               && "true".equalsIgnoreCase(scoreElement.getAttribute("modified"))) {
@@ -212,7 +213,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
         }
 
       } finally {
-        SQLFunctions.closePreparedStatement(insertPrep);
+        SQLFunctions.close(insertPrep);
       }
 
     }

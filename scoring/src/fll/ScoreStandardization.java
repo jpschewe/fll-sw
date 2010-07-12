@@ -122,14 +122,14 @@ public final class ScoreStandardization {
       } else {
         throw new RuntimeException("No performance scores for standardization");
       }
-      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.close(rs);
 
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
-      SQLFunctions.closePreparedStatement(insertPrep);
-      SQLFunctions.closePreparedStatement(deletePrep);
-      SQLFunctions.closePreparedStatement(selectPrep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
+      SQLFunctions.close(insertPrep);
+      SQLFunctions.close(deletePrep);
+      SQLFunctions.close(selectPrep);
     }
   }
 
@@ -200,14 +200,14 @@ public final class ScoreStandardization {
                 + judge + " in category: " + category);
           } // ignore 0 in a judging group
         }
-        SQLFunctions.closeResultSet(rs);
+        SQLFunctions.close(rs);
 
       }
 
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(selectPrep);
-      SQLFunctions.closePreparedStatement(updatePrep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(selectPrep);
+      SQLFunctions.close(updatePrep);
     }
 
   }
@@ -252,7 +252,7 @@ public final class ScoreStandardization {
 
       stmt.executeUpdate(sql.toString());
     } finally {
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(stmt);
     }
   }
 

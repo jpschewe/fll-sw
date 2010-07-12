@@ -96,8 +96,8 @@ public final class Tables {
             generateRow(out, row, sideA, sideB, "");
           }
         } finally {
-          SQLFunctions.closeResultSet(rs);
-          SQLFunctions.closePreparedStatement(stmt);
+          SQLFunctions.close(rs);
+          SQLFunctions.close(stmt);
         }
       } else {
         // need to walk the parameters to see what we've been passed
@@ -186,7 +186,7 @@ public final class Tables {
       prep = connection.prepareStatement("DELETE FROM tablenames where Tournament = ?");
       prep.setInt(1, tournament);
       prep.executeUpdate();
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
 
       // walk request parameters and insert data into database
       prep = connection.prepareStatement("INSERT INTO tablenames (Tournament, PairID, SideA, SideB) VALUES(?,?, ?, ?)");
@@ -220,8 +220,8 @@ public final class Tables {
       }
 
     } finally {
-      SQLFunctions.closeStatement(stmt);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(stmt);
+      SQLFunctions.close(prep);
     }
 
     // finally redirect to index.jsp

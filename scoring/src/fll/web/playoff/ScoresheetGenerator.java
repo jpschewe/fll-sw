@@ -165,7 +165,7 @@ public class ScoresheetGenerator {
           }
         }
       } finally {
-        SQLFunctions.closePreparedStatement(updatePrep);
+        SQLFunctions.close(updatePrep);
       }
     }
     setChallengeInfo(document);

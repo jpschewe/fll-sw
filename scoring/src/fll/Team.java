@@ -122,8 +122,8 @@ public final class Team {
         return null;
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
     }
   }
 

@@ -7,16 +7,23 @@
 package fll.web;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
+
+import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.XMLUtils;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.ProcessingInstruction;
 
-import fll.xml.XMLWriter;
+import fll.db.Queries;
 
 /**
  * @web.servlet name="DisplayChallengeDescriptor"
@@ -34,16 +41,28 @@ public class DisplayChallengeDescriptor extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+    Connection connection = null;
+    try {
+      final DataSource datasource = SessionAttributes.getDataSource(session);
+      connection = datasource.getConnection();
 
-    final XMLWriter xmlwriter = new XMLWriter();
+      // get challenge document from the database as it will be modified to
+      // include the stylesheet information and I don't want to propagate that.
+      final Document challengeDocument = Queries.getChallengeDocument(connection);
+      final ProcessingInstruction stylesheet = challengeDocument.createProcessingInstruction("xml-stylesheet", "type='text/css' href='fll.css'");
+      challengeDocument.insertBefore(stylesheet, challengeDocument.getDocumentElement());
 
-    response.reset();
-    response.setContentType("text/xml");
-    response.setHeader("Content-Disposition", "filename=challenge.xml");
-    xmlwriter.setOutput(response.getOutputStream(), null);
-    xmlwriter.setStyleSheet("fll.css");
-    xmlwriter.write(challengeDocument);
+      response.reset();
+      response.setContentType("text/xml");
+      response.setHeader("Content-Disposition", "filename=challenge.xml");
+
+      XMLUtils.writeXML(challengeDocument, response.getWriter());
+    } catch (final SQLException sqle) {
+      throw new RuntimeException("Error talking to the database", sqle);
+    } finally {
+      SQLFunctions.close(connection);
+    }
+
   }
 
 }
