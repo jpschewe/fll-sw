@@ -87,8 +87,8 @@ ${message}
                 out.print("</option>\n");
                 }
               }
-              SQLFunctions.closeResultSet(rs);
-              SQLFunctions.closeStatement(stmt);
+              SQLFunctions.close(rs);
+              SQLFunctions.close(stmt);
               %>
             </select>
           </td>

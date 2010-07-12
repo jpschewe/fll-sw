@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
 
+import net.mtu.eggplant.xml.XMLUtils;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,7 +19,6 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 
 import fll.xml.ChallengeParser;
-import fll.xml.XMLUtils;
 
 /**
  * Test comparing subjective score documents.

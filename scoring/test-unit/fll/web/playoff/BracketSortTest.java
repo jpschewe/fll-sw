@@ -115,7 +115,7 @@ public class BracketSortTest {
       Assert.assertEquals(Team.BYE, order.get(7));
 
     } finally {
-      SQLFunctions.closeConnection(connection);
+      SQLFunctions.close(connection);
     }
   }
 }

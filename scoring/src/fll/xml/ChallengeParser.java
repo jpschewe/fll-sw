@@ -91,9 +91,8 @@ public final class ChallengeParser {
           + challengeDocument.getDocumentElement().getAttribute("title"));
       final Element rootElement = challengeDocument.getDocumentElement();
       final Element performanceElement = (org.w3c.dom.Element) rootElement.getElementsByTagName("Performance").item(0);
-      final List<Element> goals = XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"));
       LOG.info("The performance goals are");
-      for (final Element element : goals) {
+      for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
         final String name = element.getAttribute("name");
         LOG.info(name);
       }

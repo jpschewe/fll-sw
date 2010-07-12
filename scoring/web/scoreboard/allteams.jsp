@@ -299,7 +299,7 @@ if (rs.next()) {
 
 </body>
 <%
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
 %>
 </HTML>

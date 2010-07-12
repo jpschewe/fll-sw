@@ -219,8 +219,8 @@ public final class UploadTeams extends BaseFLLServlet {
 
       insertLinesIntoAllTeams(reader, columnNamesSeen, insertPrep);
     } finally {
-      SQLFunctions.closePreparedStatement(insertPrep);
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(insertPrep);
+      SQLFunctions.close(stmt);
     }
 
     // save this for other pages to use
@@ -266,7 +266,7 @@ public final class UploadTeams extends BaseFLLServlet {
         }
       }
     } finally {
-      SQLFunctions.closePreparedStatement(insertPrep);
+      SQLFunctions.close(insertPrep);
     }
   }
 
@@ -300,8 +300,8 @@ public final class UploadTeams extends BaseFLLServlet {
         throw new RuntimeException("Internal error, can't get count");
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
     }
   }
 
@@ -328,7 +328,7 @@ public final class UploadTeams extends BaseFLLServlet {
       }
       stmt.executeUpdate(sql);
     } finally {
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(stmt);
     }
   }
 
@@ -512,9 +512,9 @@ public final class UploadTeams extends BaseFLLServlet {
 
       return true;
     } finally {
-      SQLFunctions.closeStatement(stmt);
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 

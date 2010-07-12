@@ -450,12 +450,12 @@ public final class FinalComputedScores extends BaseFLLServlet {
     } catch (final DocumentException de) {
       throw new RuntimeException("Error creating PDF document!", de);
     } finally {
-      SQLFunctions.closeResultSet(rawScoreRS);
-      SQLFunctions.closeResultSet(teamsRS);
+      SQLFunctions.close(rawScoreRS);
+      SQLFunctions.close(teamsRS);
 
-      SQLFunctions.closeStatement(stmt);
-      SQLFunctions.closeStatement(teamsStmt);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(stmt);
+      SQLFunctions.close(teamsStmt);
+      SQLFunctions.close(prep);
     }
   }
   

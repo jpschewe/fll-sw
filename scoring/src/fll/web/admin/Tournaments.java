@@ -347,9 +347,9 @@ public final class Tournaments {
             + row);
       }
     } finally {
-      SQLFunctions.closePreparedStatement(insertPrep);
-      SQLFunctions.closePreparedStatement(updatePrep);
-      SQLFunctions.closePreparedStatement(deletePrep);
+      SQLFunctions.close(insertPrep);
+      SQLFunctions.close(updatePrep);
+      SQLFunctions.close(deletePrep);
     }
   }
 
@@ -406,7 +406,7 @@ public final class Tournaments {
             + row);
       }
     } finally {
-      SQLFunctions.closePreparedStatement(setNextPrep);
+      SQLFunctions.close(setNextPrep);
     }
   }
 }

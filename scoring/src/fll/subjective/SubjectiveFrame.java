@@ -21,6 +21,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -60,6 +62,8 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyledDocument;
 
 import net.mtu.eggplant.util.BasicFileFilter;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+import net.mtu.eggplant.xml.XMLUtils;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -67,8 +71,6 @@ import org.w3c.dom.Element;
 
 import fll.util.FLLRuntimeException;
 import fll.xml.ChallengeParser;
-import fll.xml.XMLUtils;
-import fll.xml.XMLWriter;
 
 /**
  * Application to enter subjective scores with
@@ -218,7 +220,7 @@ public final class SubjectiveFrame extends JFrame {
     tabbedPane = new JTabbedPane();
     getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
-    for (final Element subjectiveElement : XMLUtils.filterToElements(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       createSubjectiveTable(tabbedPane, subjectiveElement);
     }
 
@@ -252,9 +254,9 @@ public final class SubjectiveFrame extends JFrame {
     setupTabReturnBehavior(table);
 
     int g = 0;
-    for (final Element goalDescription : XMLUtils.filterToElements(subjectiveElement.getElementsByTagName("goal"))) {
-      final List<Element> posValuesList = XMLUtils.filterToElements(goalDescription.getElementsByTagName("value"));
-      if (posValuesList.size() > 0) {
+    for (final Element goalDescription : new NodelistElementCollectionAdapter(subjectiveElement.getElementsByTagName("goal"))) {
+      final NodelistElementCollectionAdapter posValuesList = new NodelistElementCollectionAdapter(goalDescription.getElementsByTagName("value"));
+      if (posValuesList.hasNext()) {
         // enumerated
         final Vector<String> posValues = new Vector<String>();
         posValues.add("");
@@ -445,13 +447,13 @@ public final class SubjectiveFrame extends JFrame {
     stopCellEditors();
 
     final List<String> warnings = new LinkedList<String>();
-    for (final Element subjectiveElement : XMLUtils.filterToElements(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       final String category = subjectiveElement.getAttribute("name");
       final String categoryTitle = subjectiveElement.getAttribute("title");
 
-      final List<Element> goals = XMLUtils.filterToElements(subjectiveElement.getElementsByTagName("goal"));
+      final List<Element> goals = new NodelistElementCollectionAdapter(subjectiveElement.getElementsByTagName("goal")).asList();
       final Element categoryElement = (Element) _scoreDocument.getDocumentElement().getElementsByTagName(category).item(0);
-      for (final Element scoreElement : XMLUtils.filterToElements(categoryElement.getElementsByTagName("score"))) {
+      for (final Element scoreElement : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("score"))) {
         int numValues = 0;
         for (final Element goalElement : goals) {
           final String goalName = goalElement.getAttribute("name");
@@ -527,16 +529,14 @@ public final class SubjectiveFrame extends JFrame {
   public void save() throws IOException {
     if (validateData()) {
 
-      final XMLWriter xmlwriter = new XMLWriter();
-
       final ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(_file));
-      xmlwriter.setOutput(zipOut, "UTF8");
+      final Writer writer = new OutputStreamWriter(zipOut);
 
       zipOut.putNextEntry(new ZipEntry("challenge.xml"));
-      xmlwriter.write(_challengeDocument);
+      XMLUtils.writeXML(_challengeDocument, writer);
       zipOut.closeEntry();
       zipOut.putNextEntry(new ZipEntry("score.xml"));
-      xmlwriter.write(_scoreDocument);
+      XMLUtils.writeXML(_scoreDocument, writer);
       zipOut.closeEntry();
 
       zipOut.close();

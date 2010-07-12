@@ -72,7 +72,7 @@ public class CheckTournamentExists extends BaseFLLServlet {
       LOG.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
     } finally {
-      SQLFunctions.closeConnection(connection);
+      SQLFunctions.close(connection);
     }
 
     session.setAttribute("message", message.toString());

@@ -7,6 +7,8 @@ package fll.web.admin;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,6 +27,8 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+import net.mtu.eggplant.xml.XMLUtils;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -33,8 +37,6 @@ import fll.Team;
 import fll.db.Queries;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
-import fll.xml.XMLUtils;
-import fll.xml.XMLWriter;
 
 /**
  * Commit the changes made by editTeam.jsp.
@@ -76,12 +78,11 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
    * @param teams the teams for this tournament
    * @param connection the database connection used to retrieve the judge
    *          information
-   * @param currentTournament the tournament to generate the document for, used for
-   *          deciding which set of judges to use
+   * @param currentTournament the tournament to generate the document for, used
+   *          for deciding which set of judges to use
    * @return the document
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   public static Document createSubjectiveScoresDocument(final Document challengeDocument,
                                                         final Collection<Team> teams,
                                                         final Connection connection,
@@ -93,36 +94,37 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
     try {
       prep = connection.prepareStatement("SELECT id, event_division FROM Judges WHERE category = ? AND Tournament = ?");
       prep.setInt(2, currentTournament);
-  
+
       final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
       final Element top = document.createElement("scores");
       document.appendChild(top);
-  
-      for (final Element categoryDescription : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+
+      for (final Element categoryDescription : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement()
+                                                                                                     .getElementsByTagName("subjectiveCategory"))) {
         final String categoryName = categoryDescription.getAttribute("name");
         final Element categoryElement = document.createElement(categoryName);
         top.appendChild(categoryElement);
-  
+
         prep.setString(1, categoryName);
         rs = prep.executeQuery();
         while (rs.next()) {
           final String judge = rs.getString(1);
           final String division = rs.getString(2);
-  
+
           for (final Team team : teams) {
             final String teamDiv = Queries.getEventDivision(connection, team.getTeamNumber());
             if ("All".equals(division)
                 || division.equals(teamDiv)) {
               final Element scoreElement = document.createElement("score");
               categoryElement.appendChild(scoreElement);
-  
+
               scoreElement.setAttribute("teamName", team.getTeamName());
               scoreElement.setAttribute("teamNumber", String.valueOf(team.getTeamNumber()));
               scoreElement.setAttribute("division", teamDiv);
               scoreElement.setAttribute("organization", team.getOrganization());
               scoreElement.setAttribute("judge", judge);
               scoreElement.setAttribute("NoShow", "false");
-  
+
               prep2 = connection.prepareStatement("SELECT * FROM "
                   + categoryName + " WHERE TeamNumber = ? AND Tournament = ? AND Judge = ?");
               prep2.setInt(1, team.getTeamNumber());
@@ -130,7 +132,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
               prep2.setString(3, judge);
               rs2 = prep2.executeQuery();
               if (rs2.next()) {
-                for (final Element goalDescription : XMLUtils.filterToElements(categoryDescription.getElementsByTagName("goal"))) {
+                for (final Element goalDescription : new NodelistElementCollectionAdapter(categoryDescription.getElementsByTagName("goal"))) {
                   final String goalName = goalDescription.getAttribute("name");
                   final String value = rs2.getString(goalName);
                   if (!rs2.wasNull()) {
@@ -145,10 +147,10 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
       }
       return document;
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeResultSet(rs2);
-      SQLFunctions.closePreparedStatement(prep);
-      SQLFunctions.closePreparedStatement(prep2);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(rs2);
+      SQLFunctions.close(prep);
+      SQLFunctions.close(prep2);
     }
   }
 
@@ -158,24 +160,22 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
    * @param stream where to write the scores file
    * @throws IOException
    */
-  public static void writeSubjectiveScores(final Connection connection, final Document challengeDocument, final OutputStream stream) throws IOException,
-      SQLException {
+  public static void writeSubjectiveScores(final Connection connection,
+                                           final Document challengeDocument,
+                                           final OutputStream stream) throws IOException, SQLException {
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
     final int tournament = Queries.getCurrentTournament(connection);
 
-    final XMLWriter xmlwriter = new XMLWriter();
-
     final ZipOutputStream zipOut = new ZipOutputStream(stream);
-    xmlwriter.setOutput(zipOut, "UTF8");
+    final Writer writer = new OutputStreamWriter(zipOut);
 
     zipOut.putNextEntry(new ZipEntry("challenge.xml"));
-    xmlwriter.write(challengeDocument);
+    XMLUtils.writeXML(challengeDocument, writer);
     zipOut.closeEntry();
 
     zipOut.putNextEntry(new ZipEntry("score.xml"));
-    xmlwriter.setNeedsIndent(true);
     final Document scoreDocument = DownloadSubjectiveData.createSubjectiveScoresDocument(challengeDocument, tournamentTeams.values(), connection, tournament);
-    xmlwriter.write(scoreDocument);
+    XMLUtils.writeXML(scoreDocument, writer);
     zipOut.closeEntry();
 
     zipOut.close();

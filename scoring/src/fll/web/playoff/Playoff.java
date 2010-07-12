@@ -339,7 +339,7 @@ public final class Playoff {
       prep.setInt(3, runNumber);
       prep.executeUpdate();
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -367,8 +367,8 @@ public final class Playoff {
               + tournament + " teamNumber: " + team.getTeamNumber() + " runNumber: " + runNumber);
         }
       } finally {
-        SQLFunctions.closeResultSet(rs);
-        SQLFunctions.closeStatement(stmt);
+        SQLFunctions.close(rs);
+        SQLFunctions.close(stmt);
       }
     }
   }
@@ -936,7 +936,7 @@ public final class Playoff {
         roundNumber++;
         currentRoundSize = currentRoundSize / 2;
       }
-      SQLFunctions.closePreparedStatement(insertStmt);
+      SQLFunctions.close(insertStmt);
       insertStmt = null;
 
       // Now get all entries, ordered by PlayoffRound and LineNumber, and do
@@ -1022,14 +1022,14 @@ public final class Playoff {
             insertStmt.setInt(1, Team.BYE_TEAM_NUMBER);
             insertStmt.setInt(5, line2 / 2 + 2);
           }
-          SQLFunctions.closePreparedStatement(insertStmt);
+          SQLFunctions.close(insertStmt);
           insertStmt = null;
         }
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(selStmt);
-      SQLFunctions.closePreparedStatement(insertStmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(selStmt);
+      SQLFunctions.close(insertStmt);
     }
   }
 

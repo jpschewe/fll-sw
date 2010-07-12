@@ -347,9 +347,6 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
 
     final Formatter formatter = new Formatter();
 
-    final List<Element> subjectiveCategoryElements = XMLUtils.filterToElements(challengeDocument.getDocumentElement()
-                                                                                                .getElementsByTagName("subjectiveCategory"));
-
     // map of teams to HTML color names
     final Map<Integer, String> teamColors = new HashMap<Integer, String>();
 
@@ -370,7 +367,8 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
 
       formatter.format("<h2>Division: %s</h2>", division);
 
-      for (final Element subjectiveElement : subjectiveCategoryElements) {
+      for (final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement()
+                                                                       .getElementsByTagName("subjectiveCategory"))) {
         final String categoryTitle = subjectiveElement.getAttribute("title");
         final String categoryName = subjectiveElement.getAttribute("name");
 
@@ -501,10 +499,10 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
     } catch (final SQLException e) {
       throw new RuntimeException("Error getting finalist data", e);
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
-      SQLFunctions.closeResultSet(rawRS);
-      SQLFunctions.closePreparedStatement(rawPrep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+      SQLFunctions.close(rawRS);
+      SQLFunctions.close(rawPrep);
     }
   }
 

@@ -139,8 +139,8 @@ public class Last8 extends BaseFLLServlet {
     } catch (final SQLException e) {
       throw new RuntimeException("Error talking to the database", e);
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
 
     if (LOGGER.isTraceEnabled()) {

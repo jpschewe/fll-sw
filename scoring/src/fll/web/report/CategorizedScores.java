@@ -22,6 +22,7 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -62,7 +63,7 @@ public class CategorizedScores extends BaseFLLServlet {
 
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
-    for (final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
       final String title = subjectiveElement.getAttribute("title");
       final String name = subjectiveElement.getAttribute("name");
       subjectiveCategories.put(title, name);
@@ -151,7 +152,7 @@ public class CategorizedScores extends BaseFLLServlet {
                 writer.format(Utilities.NUMBER_FORMAT_INSTANCE.format(rawScore));
               }
             }
-            SQLFunctions.closeResultSet(rawScoreRS);
+            SQLFunctions.close(rawScoreRS);
             writer.format("</td>");
 
             // scaled score
@@ -164,9 +165,9 @@ public class CategorizedScores extends BaseFLLServlet {
             writer.format("</td>");
             writer.format("</tr>");
           }
-          SQLFunctions.closeResultSet(rs);
-          SQLFunctions.closePreparedStatement(prep);
-          SQLFunctions.closePreparedStatement(rawScorePrep);
+          SQLFunctions.close(rs);
+          SQLFunctions.close(prep);
+          SQLFunctions.close(rawScorePrep);
           writer.format("</table");
         }
       }
@@ -174,10 +175,10 @@ public class CategorizedScores extends BaseFLLServlet {
     } catch (final SQLException sqle) {
       throw new RuntimeException(sqle);
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
-      SQLFunctions.closeResultSet(rawScoreRS);
-      SQLFunctions.closePreparedStatement(rawScorePrep);      
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+      SQLFunctions.close(rawScoreRS);
+      SQLFunctions.close(rawScorePrep);      
     }
 
     writer.format("</body></html>");

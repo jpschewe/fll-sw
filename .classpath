@@ -41,7 +41,6 @@
 			<attribute name="javadoc_location" value="http://xmlunit.sourceforge.net/api/index.html"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="scoring/lib/JonsInfra-0.8.jar" sourcepath="scoring/lib/JonsInfra-0.8-src.zip"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/asm-3.0.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/asm-tree-3.0.jar"/>
 	<classpathentry kind="lib" path="scoring/tools/tomcat/lib/jsp-api.jar"/>
@@ -58,6 +57,11 @@
 	<classpathentry kind="lib" path="scoring/lib/test/js.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/nekohtml.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/Tidy.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/test/junit-4.5.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/junit-4.5.jar" sourcepath="/home/jpschewe/.m2/repository/junit/junit/4.5/junit-4.5-sources.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/JonsInfra-1.0.jar" sourcepath="scoring/lib/JonsInfra-1.0-src.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="http://mtu.net/~jpschewe/JonsInfra/1.0/docs/api/index.html"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>

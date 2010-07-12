@@ -7,6 +7,7 @@ package fll.db;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,9 +15,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
-import java.util.List;
+import java.util.Iterator;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+import net.mtu.eggplant.xml.XMLUtils;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -25,9 +28,6 @@ import org.w3c.dom.Element;
 import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
-import fll.util.FLLRuntimeException;
-import fll.xml.XMLUtils;
-import fll.xml.XMLWriter;
 
 /**
  * Generate tables for tournament from XML document
@@ -67,7 +67,7 @@ public final class GenerateDB {
           + connection);
       generateDB(document, connection, forceRebuild);
     } finally {
-      SQLFunctions.closeConnection(connection);
+      SQLFunctions.close(connection);
     }
   }
 
@@ -147,7 +147,7 @@ public final class GenerateDB {
         prep.setString(3, INTERNAL_REGION);
         prep.executeUpdate();
 
-        SQLFunctions.closePreparedStatement(prep);
+        SQLFunctions.close(prep);
       }
 
       // Table structure for table 'tablenames'
@@ -227,7 +227,7 @@ public final class GenerateDB {
         performanceColumns.append("Bye,");
         createStatement.append(" Bye boolean DEFAULT FALSE NOT NULL,");
         createStatement.append(" Verified boolean DEFAULT FALSE NOT NULL,");
-        for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
+        for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
           final String columnDefinition = generateGoalColumnDefinition(element);
           createStatement.append(" "
               + columnDefinition + ",");
@@ -254,7 +254,7 @@ public final class GenerateDB {
       finalScores.append("CREATE TABLE FinalScores (");
       finalScores.append("TeamNumber integer NOT NULL,");
       finalScores.append("Tournament INTEGER NOT NULL,");
-      for (final Element categoryElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
+      for (final Element categoryElement : new NodelistElementCollectionAdapter(rootElement.getElementsByTagName("subjectiveCategory"))) {
         createStatement.setLength(0);
 
         final String tableName = categoryElement.getAttribute("name");
@@ -267,7 +267,7 @@ public final class GenerateDB {
         createStatement.append(" Tournament INTEGER NOT NULL,");
         createStatement.append(" Judge VARCHAR(64) NOT NULL,");
         createStatement.append(" NoShow boolean DEFAULT FALSE NOT NULL,");
-        for (final Element element : XMLUtils.filterToElements(categoryElement.getElementsByTagName("goal"))) {
+        for (final Element element : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("goal"))) {
           final String columnDefinition = generateGoalColumnDefinition(element);
           createStatement.append(" "
               + columnDefinition + ",");
@@ -340,8 +340,8 @@ public final class GenerateDB {
       setDefaultParameters(connection);
 
     } finally {
-      SQLFunctions.closeStatement(stmt);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(stmt);
+      SQLFunctions.close(prep);
     }
 
   }
@@ -365,7 +365,7 @@ public final class GenerateDB {
             + ")");
       }
     } finally {
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(stmt);
     }
   }
 
@@ -402,7 +402,7 @@ public final class GenerateDB {
       }
 
     } finally {
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(stmt);
     }
   }
 
@@ -416,7 +416,7 @@ public final class GenerateDB {
       prep.setInt(2, tournament);
       prep.executeUpdate();
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
   }
   
@@ -437,9 +437,9 @@ public final class GenerateDB {
           renameTournament(connection, importedInternal, "Imported-" + INTERNAL_TOURNAMENT_NAME);
         }
       }
-      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.close(rs);
       rs = null;
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
       prep = null;
 
       // check if a tournament exists with the internal id
@@ -447,9 +447,9 @@ public final class GenerateDB {
       prep.setInt(1, INTERNAL_TOURNAMENT_ID);
       rs = prep.executeQuery();
       if (!rs.next()) {
-        SQLFunctions.closePreparedStatement(prep);
+        SQLFunctions.close(prep);
         prep = null;
-        SQLFunctions.closeResultSet(rs);
+        SQLFunctions.close(rs);
         rs = null;
 
         // need to create
@@ -459,8 +459,8 @@ public final class GenerateDB {
         prep.executeUpdate();
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -507,8 +507,8 @@ public final class GenerateDB {
 
       Queries.setNumSeedingRounds(connection, INTERNAL_TOURNAMENT_ID, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
     } finally {
-      SQLFunctions.closePreparedStatement(globalInsert);
-      SQLFunctions.closePreparedStatement(tournamentInsert);
+      SQLFunctions.close(globalInsert);
+      SQLFunctions.close(tournamentInsert);
     }
   }
 
@@ -525,23 +525,17 @@ public final class GenerateDB {
       challengePrep.setString(2, GlobalParameters.CHALLENGE_DOCUMENT);
 
       // get the challenge descriptor put in the database
-      try {
-        // dump the document into a byte array so we can push it into the
-        // database
-        final XMLWriter xmlwriter = new XMLWriter();
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        xmlwriter.setOutput(baos, "UTF8");
-        xmlwriter.write(document);
-        final byte[] bytes = baos.toByteArray();
-        final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        challengePrep.setAsciiStream(1, bais, bytes.length);
-        challengePrep.executeUpdate();
-        SQLFunctions.closePreparedStatement(challengePrep);
-      } catch (final UnsupportedEncodingException e) {
-        throw new FLLRuntimeException("Internal error, UTF8 not supported as an encoding!", e);
-      }
+      // dump the document into a byte array so we can push it into the
+      // database
+      final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      XMLUtils.writeXML(document, new OutputStreamWriter(baos));
+      final byte[] bytes = baos.toByteArray();
+      final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+      challengePrep.setAsciiStream(1, bais, bytes.length);
+      challengePrep.executeUpdate();
+      SQLFunctions.close(challengePrep);
     } finally {
-      SQLFunctions.closePreparedStatement(challengePrep);
+      SQLFunctions.close(challengePrep);
     }
   }
 
@@ -580,9 +574,9 @@ public final class GenerateDB {
       insertOrUpdateChallengeDocument(document, connection);
 
     } finally {
-      SQLFunctions.closeStatement(stmt);
-      SQLFunctions.closePreparedStatement(insertPrep);
-      SQLFunctions.closePreparedStatement(deletePrep);
+      SQLFunctions.close(stmt);
+      SQLFunctions.close(insertPrep);
+      SQLFunctions.close(deletePrep);
     }
   }
 
@@ -599,8 +593,8 @@ public final class GenerateDB {
     // enumerated or not
 
     String definition = goalName;
-    final List<Element> posValues = XMLUtils.filterToElements(goalElement.getElementsByTagName("value"));
-    if (posValues.size() > 0) {
+    final Iterator<Element> posValues = new NodelistElementCollectionAdapter(goalElement.getElementsByTagName("value"));
+    if (posValues.hasNext()) {
       // enumerated
       // HSQLDB doesn't support enum
       definition += " longvarchar";

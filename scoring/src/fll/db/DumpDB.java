@@ -24,6 +24,7 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.XMLUtils;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -32,7 +33,6 @@ import au.com.bytecode.opencsv.CSVWriter;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
-import fll.xml.XMLWriter;
 
 /**
  * Dump the database.
@@ -85,9 +85,7 @@ public final class DumpDB extends BaseFLLServlet {
 
       // output the challenge descriptor
       output.putNextEntry(new ZipEntry("challenge.xml"));
-      final XMLWriter xmlwriter = new XMLWriter();
-      xmlwriter.setOutput(outputWriter);
-      xmlwriter.write(challengeDocument);
+      XMLUtils.writeXML(challengeDocument, outputWriter);
       output.closeEntry();
 
       // can't use Queries.getTablesInDB because it lowercases names and we need
@@ -98,11 +96,11 @@ public final class DumpDB extends BaseFLLServlet {
         final String tableName = rs.getString("TABLE_NAME");
         dumpTable(output, connection, metadata, outputWriter, tableName);
       }
-      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.close(rs);
 
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
     }
   }
 
@@ -138,7 +136,7 @@ public final class DumpDB extends BaseFLLServlet {
       }
       csvwriter.flush();
       output.closeEntry();
-      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.close(rs);
       rs = null;
 
       output.putNextEntry(new ZipEntry(tableName
@@ -149,12 +147,12 @@ public final class DumpDB extends BaseFLLServlet {
       csvwriter.writeAll(rs, true);
       csvwriter.flush();
       output.closeEntry();
-      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.close(rs);
       rs = null;
 
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
     }
   }
 

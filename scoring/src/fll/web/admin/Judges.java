@@ -133,8 +133,8 @@ public final class Judges {
           generateRow(out, subjectiveCategories, divisions, row, id, category, division);
         }
       } finally {
-        SQLFunctions.closeResultSet(rs);
-        SQLFunctions.closePreparedStatement(stmt);
+        SQLFunctions.close(rs);
+        SQLFunctions.close(stmt);
       }
     } else {
       // need to walk the parameters to see what we've been passed
@@ -354,7 +354,7 @@ public final class Judges {
       // delete old data in judges
       prep = connection.prepareStatement("DELETE FROM Judges where Tournament = ?");
       prep.executeUpdate();
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
       prep = null;
 
       // walk request parameters and insert data into database
@@ -383,7 +383,7 @@ public final class Judges {
       }
 
     } finally {
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(prep);
     }
 
     // finally redirect to index.jsp

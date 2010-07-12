@@ -183,8 +183,8 @@ public class FullTournamentTest extends SeleneseTestCase {
       rs = prep.executeQuery();
       Assert.assertTrue("Could not find judges information in test data", rs.next());
       final int numJudges = rs.getInt(1);
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
       while (!form.hasParameterNamed("id"
           + String.valueOf(numJudges - 1))) {
         if (LOGGER.isDebugEnabled()) {
@@ -214,8 +214,8 @@ public class FullTournamentTest extends SeleneseTestCase {
             + judgeIndex, division);
         ++judgeIndex;
       }
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
 
       // submit those values
       request = form.getRequest("finished", "Finished");
@@ -255,8 +255,8 @@ public class FullTournamentTest extends SeleneseTestCase {
       rs = prep.executeQuery();
       Assert.assertTrue("No performance scores in test data", rs.next());
       final int maxRuns = rs.getInt(1);
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
 
       final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
       Assert.assertNotNull(challengeDocument);
@@ -376,7 +376,7 @@ public class FullTournamentTest extends SeleneseTestCase {
 
         ++rank;
       }
-      SQLFunctions.closeResultSet(rs);
+      SQLFunctions.close(rs);
 
       // division 2
       final int[] division2ExpectedRank = { 3208, 3061, 2863, 2110, 3063, 353, 3129, 2043 };
@@ -395,15 +395,15 @@ public class FullTournamentTest extends SeleneseTestCase {
 
         ++rank;
       }
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
 
       // TODO check scores?
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
-      SQLFunctions.closePreparedStatement(prep);
-      SQLFunctions.closeConnection(testDataConn);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
+      SQLFunctions.close(prep);
+      SQLFunctions.close(testDataConn);
       // Utilities.closeConnection(connection);
     }
   }
@@ -531,8 +531,8 @@ public class FullTournamentTest extends SeleneseTestCase {
           }
         }
       }
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
       subjective.save();
 
       // upload scores
@@ -551,8 +551,8 @@ public class FullTournamentTest extends SeleneseTestCase {
       if (!subjectiveZip.delete()) {
         subjectiveZip.deleteOnExit();
       }
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -670,8 +670,8 @@ public class FullTournamentTest extends SeleneseTestCase {
             + teamNumber + " run " + runNumber);
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
 
   }
@@ -780,8 +780,8 @@ public class FullTournamentTest extends SeleneseTestCase {
             + teamNumber + " run " + runNumber);
       }
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closePreparedStatement(prep);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
 
   }

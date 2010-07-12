@@ -87,9 +87,9 @@ public class UtilitiesTest {
       }
 
     } finally {
-      SQLFunctions.closeResultSet(rs);
-      SQLFunctions.closeStatement(stmt);
-      SQLFunctions.closeConnection(connection);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
+      SQLFunctions.close(connection);
     }
 
   }
