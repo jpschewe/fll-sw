@@ -192,11 +192,12 @@ public class TournamentSchedule {
 
   /**
    * @param f the spreadsheet file to read
-   * @param sheetName the name of the sheet to look at 
+   * @param sheetName the name of the sheet to look at
    * @throws ScheduleParseException if there is an error parsing the schedule
    */
   public TournamentSchedule(final File f,
-                       final String sheetName) throws IOException, ParseException, InvalidFormatException, ScheduleParseException {
+                            final String sheetName) throws IOException, ParseException, InvalidFormatException,
+      ScheduleParseException {
     _file = f;
     _sheetName = sheetName;
 
@@ -545,7 +546,8 @@ public class TournamentSchedule {
         final String formatString = "Team %d will please stay at the table and compete again - score will not count.";
         final PdfPTable stayingTable = createTable(1);
         for (final TeamScheduleInfo si : teamsStaying) {
-          stayingTable.addCell(createCell(new Formatter().format(formatString, si.getTeamNumber()).toString(), BaseColor.MAGENTA));
+          stayingTable.addCell(createCell(new Formatter().format(formatString, si.getTeamNumber()).toString(),
+                                          BaseColor.MAGENTA));
         }
         detailedSchedules.add(stayingTable);
 
@@ -819,9 +821,10 @@ public class TournamentSchedule {
           for (final TeamScheduleInfo team : tableMatches) {
             teams.add(team.getTeamNumber());
           }
-          final String message = String.format("Too many teams competing on table: %s at time: %s. Teams: %s", timeEntry.getKey(),
-                                               OUTPUT_DATE_FORMAT.get().format(dateEntry.getKey()), teams);
-          violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
+          final String message = String.format("Too many teams competing on table: %s at time: %s. Teams: %s",
+                                               timeEntry.getKey(), OUTPUT_DATE_FORMAT.get().format(dateEntry.getKey()),
+                                               teams);
+          violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
         }
       }
     }
@@ -849,8 +852,9 @@ public class TournamentSchedule {
 
     for (final Map.Entry<Date, Set<TeamScheduleInfo>> entry : teamsAtTime.entrySet()) {
       if (entry.getValue().size() > _tableColors.size() * 2) {
-        final String message = String.format("There are too many teams in performance at %s", OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
-        violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
+        final String message = String.format("There are too many teams in performance at %s",
+                                             OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
+        violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
       }
     }
   }
@@ -874,16 +878,19 @@ public class TournamentSchedule {
 
     for (final Map.Entry<Date, Set<TeamScheduleInfo>> entry : teamsAtTime.entrySet()) {
       if (entry.getValue().size() > _judges.size()) {
-        final String message = String.format("There are too many teams in presentation at %s in presentation", OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
-        violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
+        final String message = String.format("There are too many teams in presentation at %s in presentation",
+                                             OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
+        violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
       }
 
       final Set<String> judges = new HashSet<String>();
       for (final TeamScheduleInfo ti : entry.getValue()) {
         if (!judges.add(ti.getJudge())) {
-          final String message = String.format("Presentation judge %s cannot see more than one team at %s in presentation", ti.getJudge(),
-                                               OUTPUT_DATE_FORMAT.get().format(ti.getPresentation()));
-          violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
+          final String message = String
+                                       .format(
+                                               "Presentation judge %s cannot see more than one team at %s in presentation",
+                                               ti.getJudge(), OUTPUT_DATE_FORMAT.get().format(ti.getPresentation()));
+          violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
         }
       }
 
@@ -909,16 +916,19 @@ public class TournamentSchedule {
 
     for (final Map.Entry<Date, Set<TeamScheduleInfo>> entry : teamsAtTime.entrySet()) {
       if (entry.getValue().size() > _judges.size()) {
-        final String message = String.format("There are too many teams in technical at %s in technical", OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
-        violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
+        final String message = String.format("There are too many teams in technical at %s in technical",
+                                             OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
+        violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
       }
 
       final Set<String> judges = new HashSet<String>();
       for (final TeamScheduleInfo ti : entry.getValue()) {
         if (!judges.add(ti.getJudge())) {
-          final String message = String.format("Technical judge %s cannot see more than one team at %s in presentation", ti.getJudge(),
-                                               OUTPUT_DATE_FORMAT.get().format(ti.getPresentation()));
-          violations.add(new ConstraintViolation(ConstraintViolation.NO_TEAM, null, null, null, message));
+          final String message = String
+                                       .format(
+                                               "Technical judge %s cannot see more than one team at %s in presentation",
+                                               ti.getJudge(), OUTPUT_DATE_FORMAT.get().format(ti.getPresentation()));
+          violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
         }
       }
     }
@@ -968,48 +978,44 @@ public class TournamentSchedule {
     }
   }
 
-  /**
-   * @return null if ok, message if not ok
-   */
-  private String verifyPerformanceVsSubjective(final int teamNumber,
-                                               final Date subjectiveTime,
-                                               final String subjectiveName,
-                                               final Date performanceTime,
-                                               final String performanceName) {
-    if (subjectiveTime.before(performanceTime)) {
-      if (subjectiveTime.getTime()
-          + getSubjectiveDuration() + getChangetime() > performanceTime.getTime()) {
-        return String.format("Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)", teamNumber, subjectiveName,
-                             performanceName, getChangetimeAsMinutes());
-      }
-    } else {
-      if (performanceTime.getTime()
-          + getPerformanceDuration() + getChangetime() > subjectiveTime.getTime()) {
-        return String.format("Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)", teamNumber, subjectiveName,
-                             performanceName, getChangetimeAsMinutes());
-      }
-    }
-    return null;
-  }
-
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "IM_BAD_CHECK_FOR_ODD", justification = "The size of a container cannot be negative")
   private void verifyTeam(final Collection<ConstraintViolation> violations,
                           final TeamScheduleInfo ti) {
     // constraint set 1
     if (ti.getPresentation().before(ti.getTechnical())) {
       if (ti.getPresentation().getTime()
+          + getSubjectiveDuration() > ti.getTechnical().getTime()) {
+        final String message = String.format("Team %d is still in presentation when they need to start technical",
+                                             ti.getTeamNumber());
+        violations.add(new ConstraintViolation(true, ti.getTeamNumber(), ti.getPresentation(), ti.getTechnical(), null,
+                                               message));
+        return;
+      } else if (ti.getPresentation().getTime()
           + getSubjectiveDuration() + getChangetime() > ti.getTechnical().getTime()) {
-        final String message = String.format("Team %d has doesn't have enough time between presentation and technical (need %d minutes)", ti.getTeamNumber(),
-                                             getChangetimeAsMinutes());
-        violations.add(new ConstraintViolation(ti.getTeamNumber(), ti.getPresentation(), ti.getTechnical(), null, message));
+        final String message = String
+                                     .format(
+                                             "Team %d has doesn't have enough time between presentation and technical (need %d minutes)",
+                                             ti.getTeamNumber(), getChangetimeAsMinutes());
+        violations.add(new ConstraintViolation(false, ti.getTeamNumber(), ti.getPresentation(), ti.getTechnical(),
+                                               null, message));
         return;
       }
     } else {
       if (ti.getTechnical().getTime()
+          + getSubjectiveDuration() > ti.getPresentation().getTime()) {
+        final String message = String.format("Team %d is still in technical when they need start presentation",
+                                             ti.getTeamNumber());
+        violations.add(new ConstraintViolation(true, ti.getTeamNumber(), ti.getPresentation(), ti.getTechnical(), null,
+                                               message));
+        return;
+      } else if (ti.getTechnical().getTime()
           + getSubjectiveDuration() + getChangetime() > ti.getPresentation().getTime()) {
-        final String message = String.format("Team %d has doesn't have enough time between presentation and technical (need %d minutes)", ti.getTeamNumber(),
-                                             getChangetimeAsMinutes());
-        violations.add(new ConstraintViolation(ti.getTeamNumber(), ti.getPresentation(), ti.getTechnical(), null, message));
+        final String message = String
+                                     .format(
+                                             "Team %d has doesn't have enough time between presentation and technical (need %d minutes)",
+                                             ti.getTeamNumber(), getChangetimeAsMinutes());
+        violations.add(new ConstraintViolation(false, ti.getTeamNumber(), ti.getPresentation(), ti.getTechnical(),
+                                               null, message));
         return;
       }
     }
@@ -1025,38 +1031,56 @@ public class TournamentSchedule {
       changetime = getPerformanceChangetime();
     }
     if (ti.getPerf(0).getTime()
-        + getPerformanceDuration() + changetime > ti.getPerf(1).getTime()) {
-      final String message = String.format("Team %d doesn't have enough time (%d minutes) between performance 1 and performance 2: %s - %s",
-                                           ti.getTeamNumber(), changetime
-                                               / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.get().format(ti.getPerf(0)),
+        + getPerformanceDuration() > ti.getPerf(1).getTime()) {
+      final String message = String
+                                   .format(
+                                           "Team %d is still in performance %d when they are to start performance %d: %s - %s",
+                                           ti.getTeamNumber(), 1, 2, OUTPUT_DATE_FORMAT.get().format(ti.getPerf(0)),
                                            OUTPUT_DATE_FORMAT.get().format(ti.getPerf(1)));
-      violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, ti.getPerf(1), message));
+      violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(1), message));
+    } else if (ti.getPerf(0).getTime()
+        + getPerformanceDuration() + changetime > ti.getPerf(1).getTime()) {
+      final String message = String
+                                   .format(
+                                           "Team %d doesn't have enough time (%d minutes) between performance 1 and performance 2: %s - %s",
+                                           ti.getTeamNumber(), changetime
+                                               / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.get()
+                                                                                              .format(ti.getPerf(0)),
+                                           OUTPUT_DATE_FORMAT.get().format(ti.getPerf(1)));
+      violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, ti.getPerf(1), message));
     }
 
     if (ti.getPerf(1).getTime()
         + getPerformanceDuration() + getPerformanceChangetime() > ti.getPerf(2).getTime()) {
-      final String message = String.format("Team %d doesn't have enough time (%d minutes) between performance 2 and performance 3: %s - %s",
+      final String message = String
+      .format(
+              "Team %d is still in performance %d when they are to start performance %d: %s - %s",
+              ti.getTeamNumber(), 2, 3, OUTPUT_DATE_FORMAT.get().format(ti.getPerf(0)),
+              OUTPUT_DATE_FORMAT.get().format(ti.getPerf(1)));
+      violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(2), message));
+    }
+    else if (ti.getPerf(1).getTime()
+        + getPerformanceDuration() + getPerformanceChangetime() > ti.getPerf(2).getTime()) {
+      final String message = String
+                                   .format(
+                                           "Team %d doesn't have enough time (%d minutes) between performance 2 and performance 3: %s - %s",
                                            ti.getTeamNumber(), changetime
-                                               / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.get().format(ti.getPerf(1)),
+                                               / 1000 / SECONDS_PER_MINUTE, OUTPUT_DATE_FORMAT.get()
+                                                                                              .format(ti.getPerf(1)),
                                            OUTPUT_DATE_FORMAT.get().format(ti.getPerf(2)));
-      violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, ti.getPerf(2), message));
+      violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, ti.getPerf(2), message));
     }
 
     // constraint set 4
     for (int round = 0; round < getNumberOfRounds(); ++round) {
-      final String message = verifyPerformanceVsSubjective(ti.getTeamNumber(), ti.getPresentation(), "presentation", ti.getPerf(round),
-                                                           String.valueOf(round + 1));
-      if (null != message) {
-        violations.add(new ConstraintViolation(ti.getTeamNumber(), ti.getPresentation(), null, ti.getPerf(round), message));
-      }
+      final String performanceName = String.valueOf(round + 1);
+      verifyPerformanceVsPresentation(violations, ti, ti.getPerf(round), performanceName);
     }
 
     // constraint set 5
     for (int round = 0; round < getNumberOfRounds(); ++round) {
-      final String message = verifyPerformanceVsSubjective(ti.getTeamNumber(), ti.getTechnical(), "technical", ti.getPerf(round), String.valueOf(round + 1));
-      if (null != message) {
-        violations.add(new ConstraintViolation(ti.getTeamNumber(), null, ti.getTechnical(), ti.getPerf(round), message));
-      }
+      final String performanceName = String.valueOf(round + 1);
+      verifyPerformanceVsTechnical(violations, ti, performanceName, ti.getPerf(round));
     }
 
     // make sure that all opponents are different & sides are different
@@ -1072,14 +1096,20 @@ public class TournamentSchedule {
           }
         }
         if (-1 == opponentSide) {
-          final String message = String.format("Unable to find time match for rounds between team %d and team %d at time %s", ti.getTeamNumber(),
-                                               opponent.getTeamNumber(), OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round)));
-          violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, ti.getPerf(round), message));
+          final String message = String
+                                       .format(
+                                               "Unable to find time match for rounds between team %d and team %d at time %s",
+                                               ti.getTeamNumber(), opponent.getTeamNumber(),
+                                               OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round)));
+          violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(round), message));
         } else {
           if (opponentSide == ti.getPerfTableSide(round)) {
-            final String message = String.format("Team %d and team %d are both on table %s side %d at the same time for round %d", ti.getTeamNumber(),
-                                                 opponent.getTeamNumber(), ti.getPerfTableColor(round), ti.getPerfTableSide(round), (round + 1));
-            violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, ti.getPerf(round), message));
+            final String message = String
+                                         .format(
+                                                 "Team %d and team %d are both on table %s side %d at the same time for round %d",
+                                                 ti.getTeamNumber(), opponent.getTeamNumber(),
+                                                 ti.getPerfTableColor(round), ti.getPerfTableSide(round), (round + 1));
+            violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(round), message));
           }
         }
 
@@ -1087,10 +1117,10 @@ public class TournamentSchedule {
           final TeamScheduleInfo otherOpponent = findOpponent(ti, r);
           if (otherOpponent != null
               && opponent.equals(otherOpponent)) {
-            final String message = String.format("Team %d competes against %d more than once rounds: %d, %d", ti.getTeamNumber(), opponent.getTeamNumber(),
-                                                 (round + 1), (r + 1));
-            violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, null, message));
-            violations.add(new ConstraintViolation(opponent.getTeamNumber(), null, null, null, message));
+            final String message = String.format("Team %d competes against %d more than once rounds: %d, %d",
+                                                 ti.getTeamNumber(), opponent.getTeamNumber(), (round + 1), (r + 1));
+            violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, null, message));
+            violations.add(new ConstraintViolation(false, opponent.getTeamNumber(), null, null, null, message));
           }
         }
       } else {
@@ -1098,38 +1128,137 @@ public class TournamentSchedule {
         // number of teams
         if (!(round == getNumberOfRounds() - 1 && (_schedule.size() % 2) == 1)) {
           final String message = String.format("Team %d has no opponent for round %d", ti.getTeamNumber(), (round + 1));
-          violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, ti.getPerf(round), message));
+          violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, ti.getPerf(round), message));
         }
       }
     }
 
     // check if the team needs to stay for any extra founds
+    final String performanceName = "extra";
     for (int round = 0; round < getNumberOfRounds(); ++round) {
       final TeamScheduleInfo next = checkIfTeamNeedsToStay(ti, round);
       if (null != next) {
         // everything else checked out, only only need to check the end time
         // against subjective and the next round
-        String message = verifyPerformanceVsSubjective(ti.getTeamNumber(), ti.getPresentation(), "presentation", next.getPerf(round), "extra");
-        if (null != message) {
-          violations.add(new ConstraintViolation(ti.getTeamNumber(), ti.getPresentation(), null, ti.getPerf(round), message));
-        }
+        final Date performanceTime = next.getPerf(round);
+        verifyPerformanceVsPresentation(violations, ti, performanceTime, performanceName);
 
-        message = verifyPerformanceVsSubjective(ti.getTeamNumber(), ti.getTechnical(), "technical", next.getPerf(round), "extra");
-        if (null != message) {
-          violations.add(new ConstraintViolation(ti.getTeamNumber(), null, ti.getTechnical(), ti.getPerf(round), message));
-        }
+        verifyPerformanceVsTechnical(violations, ti, performanceName, performanceTime);
 
         if (round + 1 < getNumberOfRounds()) {
           if (next.getPerf(round).getTime()
-              + getPerformanceDuration() + getPerformanceChangetime() > ti.getPerf(round + 1).getTime()) {
-            message = String.format("Team %d doesn't have enough time (%d minutes) between performance %d and performance extra: %s - %s", ti.getTeamNumber(),
-                                    changetime
-                                        / 1000 / SECONDS_PER_MINUTE, round, OUTPUT_DATE_FORMAT.get().format(next.getPerf(round)),
+              + getPerformanceDuration() > ti.getPerf(round + 1).getTime()) {
+            final String message = String
+                            .format(
+                                    "Team %d will be in performance round %d when it is starting the extra performance round: %s - %s",
+                                    ti.getTeamNumber(), round,
+                                    OUTPUT_DATE_FORMAT.get().format(next.getPerf(round)),
                                     OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round + 1)));
-            violations.add(new ConstraintViolation(ti.getTeamNumber(), null, null, ti.getPerf(round + 1), message));
+            violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(round + 1), message));
+          }
+          else if (next.getPerf(round).getTime()
+              + getPerformanceDuration() + getPerformanceChangetime() > ti.getPerf(round + 1).getTime()) {
+            final String message = String
+                            .format(
+                                    "Team %d doesn't have enough time (%d minutes) between performance %d and performance extra: %s - %s",
+                                    ti.getTeamNumber(), changetime
+                                        / 1000 / SECONDS_PER_MINUTE, round,
+                                    OUTPUT_DATE_FORMAT.get().format(next.getPerf(round)),
+                                    OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round + 1)));
+            violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, ti.getPerf(round + 1), message));
           }
         }
 
+      }
+    }
+  }
+
+  private void verifyPerformanceVsTechnical(final Collection<ConstraintViolation> violations,
+                                            final TeamScheduleInfo ti,
+                                            final String performanceName,
+                                            final Date performanceTime) {
+    if (ti.getTechnical().before(performanceTime)) {
+      if (ti.getTechnical().getTime()
+          + getSubjectiveDuration() > performanceTime.getTime()) {
+        final String message = String
+                     .format(
+                             "Team %d will be in %s when performance round %s starts",
+                             ti.getTeamNumber(), "technical", performanceName);
+        violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, ti.getTechnical(), performanceTime,
+                                               message));
+      }
+      else if (ti.getTechnical().getTime()
+          + getSubjectiveDuration() + getChangetime() > performanceTime.getTime()) {
+        final String message = String
+                     .format(
+                             "Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
+                             ti.getTeamNumber(), "technical", performanceName, getChangetimeAsMinutes());
+        violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, ti.getTechnical(), performanceTime,
+                                               message));
+      }
+    } else {
+      if (performanceTime.getTime()
+          + getPerformanceDuration() > ti.getTechnical().getTime()) {
+        final String message = String
+                     .format(
+                             "Team %d wil be in %s when performance round %s starts",
+                             ti.getTeamNumber(), "technical", performanceName);
+        violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, ti.getTechnical(), performanceTime,
+                                               message));
+      }
+      else if (performanceTime.getTime()
+          + getPerformanceDuration() + getChangetime() > ti.getTechnical().getTime()) {
+        final String message = String
+                     .format(
+                             "Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
+                             ti.getTeamNumber(), "technical", performanceName, getChangetimeAsMinutes());
+        violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, ti.getTechnical(), performanceTime,
+                                               message));
+      }
+    }
+  }
+
+  private void verifyPerformanceVsPresentation(final Collection<ConstraintViolation> violations,
+                                               final TeamScheduleInfo ti,
+                                               final Date performanceTime,
+                                               final String performanceName) {
+    if (ti.getPresentation().before(performanceTime)) {
+      if (ti.getPresentation().getTime()
+          + getSubjectiveDuration() > performanceTime.getTime()) {
+        final String message = String
+                     .format(
+                             "Team %d will be in %s when performance round %s starts",
+                             ti.getTeamNumber(), "presentation", performanceName);
+        violations.add(new ConstraintViolation(true, ti.getTeamNumber(), ti.getPresentation(), null, performanceTime,
+                                               message));
+      }
+      else if (ti.getPresentation().getTime()
+          + getSubjectiveDuration() + getChangetime() > performanceTime.getTime()) {
+        final String message = String
+                     .format(
+                             "Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
+                             ti.getTeamNumber(), "presentation", performanceName, getChangetimeAsMinutes());
+        violations.add(new ConstraintViolation(false, ti.getTeamNumber(), ti.getPresentation(), null, performanceTime,
+                                               message));
+      }
+    } else {
+      if (performanceTime.getTime()
+          + getPerformanceDuration() > ti.getPresentation().getTime()) {
+        final String message = String
+                     .format(
+                             "Team %d wil be in %s when performance round %s starts",
+                             ti.getTeamNumber(), "presentation", performanceName);
+        violations.add(new ConstraintViolation(true, ti.getTeamNumber(), ti.getPresentation(), null, performanceTime,
+                                               message));
+      }
+      else if (performanceTime.getTime()
+          + getPerformanceDuration() + getChangetime() > ti.getPresentation().getTime()) {
+        final String message = String
+                     .format(
+                             "Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
+                             ti.getTeamNumber(), "presentation", performanceName, getChangetimeAsMinutes());
+        violations.add(new ConstraintViolation(false, ti.getTeamNumber(), ti.getPresentation(), null, performanceTime,
+                                               message));
       }
     }
   }
@@ -1139,7 +1268,8 @@ public class TournamentSchedule {
    * @throws ScheduleParseException if there is an error with the schedule being
    *           read
    */
-  private TeamScheduleInfo parseLine(final CellFileReader reader) throws IOException, ParseException, ScheduleParseException {
+  private TeamScheduleInfo parseLine(final CellFileReader reader) throws IOException, ParseException,
+      ScheduleParseException {
     final String[] line = reader.readNext();
 
     try {
@@ -1150,7 +1280,7 @@ public class TournamentSchedule {
         return null;
       }
 
-      final int teamNumber =Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue(); 
+      final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
       final TeamScheduleInfo ti = new TeamScheduleInfo(reader.getLineNumber(), getNumberOfRounds(), teamNumber);
       ti.setTeamName(line[_teamNameColumn]);
       ti.setOrganization(line[_organizationColumn]);

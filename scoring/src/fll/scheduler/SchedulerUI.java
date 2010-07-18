@@ -418,7 +418,8 @@ public class SchedulerUI extends JFrame {
   private static final Logger LOGGER = Logger.getLogger(SchedulerUI.class);
 
   private TableCellRenderer schedTableRenderer = new DefaultTableCellRenderer() {
-    private final Color errorColor = Color.RED;
+    private final Color hardConstraintColor = Color.RED;
+    private final Color softConstraintColor = Color.YELLOW;
 
     @Override
     public Component getTableCellRendererComponent(final JTable table,
@@ -438,17 +439,21 @@ public class SchedulerUI extends JFrame {
       }
 
       boolean error = false;
+      boolean isHard = false;
       for (final ConstraintViolation violation : getViolationsModel().getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
           if ((SchedulerTableModel.TEAM_NUMBER_COLUMN == column || SchedulerTableModel.JUDGE_COLUMN == column)
               && null == violation.getPresentation() && null == violation.getTechnical() && null == violation.getPerformance()) {
             error = true;
+            isHard |= violation.isHard(); 
           } else if (SchedulerTableModel.PRESENTATION_COLUMN == column
               && null != violation.getPresentation()) {
             error = true;
+            isHard |= violation.isHard(); 
           } else if (SchedulerTableModel.TECHNICAL_COLUMN == column
               && null != violation.getTechnical()) {
             error = true;
+            isHard |= violation.isHard(); 
           } else if (null != violation.getPerformance()) {
             // need to check round which round
             int round = 0;
@@ -466,6 +471,7 @@ public class SchedulerUI extends JFrame {
             if (firstIdx <= column
                 && column <= lastIdx) {
               error = true;
+              isHard |= violation.isHard(); 
             }
 
             if (LOGGER.isTraceEnabled()) {
@@ -486,10 +492,11 @@ public class SchedulerUI extends JFrame {
       setForeground(null);
       setBackground(null);
       if (error) {
+        final Color violationColor = isHard ? hardConstraintColor : softConstraintColor;
         if (isSelected) {
-          setForeground(errorColor);
+          setForeground(violationColor);
         } else {
-          setBackground(errorColor);
+          setBackground(violationColor);
         }
       }
 
