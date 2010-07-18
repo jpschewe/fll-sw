@@ -45,7 +45,14 @@ final class ConstraintViolation {
     return message;
   }
 
+  private final boolean isHard;
+
+  public boolean isHard() {
+    return isHard;
+  }
+
   /**
+   * @param isHard is this a hard constraint or a soft constraint violation?
    * @param team the team with the problem, may be {@link #NO_TEAM}
    * @param presentation if a presentation problem, the time of the presentation
    *          judging, may be null
@@ -55,7 +62,13 @@ final class ConstraintViolation {
    *          may be null
    * @param message message to report
    */
-  public ConstraintViolation(final int team, final Date presentation, final Date technical, final Date performance, final String message) {
+  public ConstraintViolation(final boolean isHard,
+                             final int team,
+                             final Date presentation,
+                             final Date technical,
+                             final Date performance,
+                             final String message) {
+    this.isHard = isHard;
     this.team = team;
     this.presentation = presentation;
     this.technical = technical;
