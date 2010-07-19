@@ -107,6 +107,9 @@ public class TournamentSchedule {
 
   private int[] _perfTableColumn;
 
+  /**
+   * Number of rounds in this schedule.
+   */
   public int getNumberOfRounds() {
     if (null == _perfColumn) {
       throw new FLLInternalException("_perfColumn isn't set yet, it must be set to get the number of rounds");
@@ -387,6 +390,10 @@ public class TournamentSchedule {
    * @throws IOException
    */
   public List<ConstraintViolation> verifySchedule() {
+    if (getNumberOfRounds() != 3) {
+      throw new FLLRuntimeException("Schedules with other than 3 performance rounds cannot be properly checked");
+    }
+
     final List<ConstraintViolation> constraintViolations = new LinkedList<ConstraintViolation>();
 
     // create separate local variables for each return so that the function is
@@ -1053,13 +1060,12 @@ public class TournamentSchedule {
     if (ti.getPerf(1).getTime()
         + getPerformanceDuration() + getPerformanceChangetime() > ti.getPerf(2).getTime()) {
       final String message = String
-      .format(
-              "Team %d is still in performance %d when they are to start performance %d: %s - %s",
-              ti.getTeamNumber(), 2, 3, OUTPUT_DATE_FORMAT.get().format(ti.getPerf(0)),
-              OUTPUT_DATE_FORMAT.get().format(ti.getPerf(1)));
+                                   .format(
+                                           "Team %d is still in performance %d when they are to start performance %d: %s - %s",
+                                           ti.getTeamNumber(), 2, 3, OUTPUT_DATE_FORMAT.get().format(ti.getPerf(0)),
+                                           OUTPUT_DATE_FORMAT.get().format(ti.getPerf(1)));
       violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(2), message));
-    }
-    else if (ti.getPerf(1).getTime()
+    } else if (ti.getPerf(1).getTime()
         + getPerformanceDuration() + getPerformanceChangetime() > ti.getPerf(2).getTime()) {
       final String message = String
                                    .format(
@@ -1149,23 +1155,24 @@ public class TournamentSchedule {
           if (next.getPerf(round).getTime()
               + getPerformanceDuration() > ti.getPerf(round + 1).getTime()) {
             final String message = String
-                            .format(
-                                    "Team %d will be in performance round %d when it is starting the extra performance round: %s - %s",
-                                    ti.getTeamNumber(), round,
-                                    OUTPUT_DATE_FORMAT.get().format(next.getPerf(round)),
-                                    OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round + 1)));
-            violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(round + 1), message));
-          }
-          else if (next.getPerf(round).getTime()
+                                         .format(
+                                                 "Team %d will be in performance round %d when it is starting the extra performance round: %s - %s",
+                                                 ti.getTeamNumber(), round,
+                                                 OUTPUT_DATE_FORMAT.get().format(next.getPerf(round)),
+                                                 OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round + 1)));
+            violations
+                      .add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(round + 1), message));
+          } else if (next.getPerf(round).getTime()
               + getPerformanceDuration() + getPerformanceChangetime() > ti.getPerf(round + 1).getTime()) {
             final String message = String
-                            .format(
-                                    "Team %d doesn't have enough time (%d minutes) between performance %d and performance extra: %s - %s",
-                                    ti.getTeamNumber(), changetime
-                                        / 1000 / SECONDS_PER_MINUTE, round,
-                                    OUTPUT_DATE_FORMAT.get().format(next.getPerf(round)),
-                                    OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round + 1)));
-            violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, ti.getPerf(round + 1), message));
+                                         .format(
+                                                 "Team %d doesn't have enough time (%d minutes) between performance %d and performance extra: %s - %s",
+                                                 ti.getTeamNumber(), changetime
+                                                     / 1000 / SECONDS_PER_MINUTE, round,
+                                                 OUTPUT_DATE_FORMAT.get().format(next.getPerf(round)),
+                                                 OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round + 1)));
+            violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, ti.getPerf(round + 1),
+                                                   message));
           }
         }
 
@@ -1180,38 +1187,32 @@ public class TournamentSchedule {
     if (ti.getTechnical().before(performanceTime)) {
       if (ti.getTechnical().getTime()
           + getSubjectiveDuration() > performanceTime.getTime()) {
-        final String message = String
-                     .format(
-                             "Team %d will be in %s when performance round %s starts",
-                             ti.getTeamNumber(), "technical", performanceName);
+        final String message = String.format("Team %d will be in %s when performance round %s starts",
+                                             ti.getTeamNumber(), "technical", performanceName);
         violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, ti.getTechnical(), performanceTime,
                                                message));
-      }
-      else if (ti.getTechnical().getTime()
+      } else if (ti.getTechnical().getTime()
           + getSubjectiveDuration() + getChangetime() > performanceTime.getTime()) {
         final String message = String
-                     .format(
-                             "Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
-                             ti.getTeamNumber(), "technical", performanceName, getChangetimeAsMinutes());
+                                     .format(
+                                             "Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
+                                             ti.getTeamNumber(), "technical", performanceName, getChangetimeAsMinutes());
         violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, ti.getTechnical(), performanceTime,
                                                message));
       }
     } else {
       if (performanceTime.getTime()
           + getPerformanceDuration() > ti.getTechnical().getTime()) {
-        final String message = String
-                     .format(
-                             "Team %d wil be in %s when performance round %s starts",
-                             ti.getTeamNumber(), "technical", performanceName);
+        final String message = String.format("Team %d wil be in %s when performance round %s starts",
+                                             ti.getTeamNumber(), "technical", performanceName);
         violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, ti.getTechnical(), performanceTime,
                                                message));
-      }
-      else if (performanceTime.getTime()
+      } else if (performanceTime.getTime()
           + getPerformanceDuration() + getChangetime() > ti.getTechnical().getTime()) {
         final String message = String
-                     .format(
-                             "Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
-                             ti.getTeamNumber(), "technical", performanceName, getChangetimeAsMinutes());
+                                     .format(
+                                             "Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
+                                             ti.getTeamNumber(), "technical", performanceName, getChangetimeAsMinutes());
         violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, ti.getTechnical(), performanceTime,
                                                message));
       }
@@ -1225,38 +1226,34 @@ public class TournamentSchedule {
     if (ti.getPresentation().before(performanceTime)) {
       if (ti.getPresentation().getTime()
           + getSubjectiveDuration() > performanceTime.getTime()) {
-        final String message = String
-                     .format(
-                             "Team %d will be in %s when performance round %s starts",
-                             ti.getTeamNumber(), "presentation", performanceName);
+        final String message = String.format("Team %d will be in %s when performance round %s starts",
+                                             ti.getTeamNumber(), "presentation", performanceName);
         violations.add(new ConstraintViolation(true, ti.getTeamNumber(), ti.getPresentation(), null, performanceTime,
                                                message));
-      }
-      else if (ti.getPresentation().getTime()
+      } else if (ti.getPresentation().getTime()
           + getSubjectiveDuration() + getChangetime() > performanceTime.getTime()) {
         final String message = String
-                     .format(
-                             "Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
-                             ti.getTeamNumber(), "presentation", performanceName, getChangetimeAsMinutes());
+                                     .format(
+                                             "Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
+                                             ti.getTeamNumber(), "presentation", performanceName,
+                                             getChangetimeAsMinutes());
         violations.add(new ConstraintViolation(false, ti.getTeamNumber(), ti.getPresentation(), null, performanceTime,
                                                message));
       }
     } else {
       if (performanceTime.getTime()
           + getPerformanceDuration() > ti.getPresentation().getTime()) {
-        final String message = String
-                     .format(
-                             "Team %d wil be in %s when performance round %s starts",
-                             ti.getTeamNumber(), "presentation", performanceName);
+        final String message = String.format("Team %d wil be in %s when performance round %s starts",
+                                             ti.getTeamNumber(), "presentation", performanceName);
         violations.add(new ConstraintViolation(true, ti.getTeamNumber(), ti.getPresentation(), null, performanceTime,
                                                message));
-      }
-      else if (performanceTime.getTime()
+      } else if (performanceTime.getTime()
           + getPerformanceDuration() + getChangetime() > ti.getPresentation().getTime()) {
         final String message = String
-                     .format(
-                             "Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
-                             ti.getTeamNumber(), "presentation", performanceName, getChangetimeAsMinutes());
+                                     .format(
+                                             "Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
+                                             ti.getTeamNumber(), "presentation", performanceName,
+                                             getChangetimeAsMinutes());
         violations.add(new ConstraintViolation(false, ti.getTeamNumber(), ti.getPresentation(), null, performanceTime,
                                                message));
       }
