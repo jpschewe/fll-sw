@@ -71,7 +71,7 @@ import javax.swing.table.AbstractTableModel;
     case TEAM_NUMBER_COLUMN:
       return schedInfo.getTeamNumber();
     case JUDGE_COLUMN:
-      return schedInfo.getJudge();
+      return schedInfo.getJudgingStation();
     case PRESENTATION_COLUMN:
       return schedInfo.getPresentation();
     case TECHNICAL_COLUMN:

@@ -19,7 +19,7 @@ public final class TeamScheduleInfo {
 
   private Date technical;
 
-  private String judge;
+  private String judgingStation;
 
   private final Date[] perf;
 
@@ -189,17 +189,17 @@ public final class TeamScheduleInfo {
   }
 
   /**
-   * @param judge the judge to set
+   * @param judge the judging station
    */
-  public void setJudge(final String judge) {
-    this.judge = judge;
+  public void setJudgingStation(final String judge) {
+    this.judgingStation = judge;
   }
 
   /**
-   * @return the judge
+   * @return the judging station
    */
-  public String getJudge() {
-    return judge;
+  public String getJudgingStation() {
+    return judgingStation;
   }
 
   /**
