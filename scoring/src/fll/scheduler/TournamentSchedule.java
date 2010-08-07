@@ -379,7 +379,7 @@ public class TournamentSchedule {
         addToMatches(ti, round);
       }
       _divisions.add(ti.getDivision());
-      _judges.add(ti.getJudge());
+      _judges.add(ti.getJudgingStation());
     }
   }
 
@@ -619,7 +619,7 @@ public class TournamentSchedule {
       table.addCell(createCell(si.getOrganization()));
       table.addCell(createCell(si.getTeamName()));
       table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.getPresentation())));
-      table.addCell(createCell(si.getJudge()));
+      table.addCell(createCell(si.getJudgingStation()));
     }
 
     detailedSchedules.add(table);
@@ -647,7 +647,7 @@ public class TournamentSchedule {
       table.addCell(createCell(si.getOrganization()));
       table.addCell(createCell(si.getTeamName()));
       table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.getTechnical())));
-      table.addCell(createCell(si.getJudge()));
+      table.addCell(createCell(si.getJudgingStation()));
     }
     detailedSchedules.add(table);
 
@@ -661,8 +661,8 @@ public class TournamentSchedule {
                        final TeamScheduleInfo two) {
       if (!one.getDivision().equals(two.getDivision())) {
         return one.getDivision().compareTo(two.getDivision());
-      } else if (!one.getJudge().equals(two.getJudge())) {
-        return one.getJudge().compareTo(two.getJudge());
+      } else if (!one.getJudgingStation().equals(two.getJudgingStation())) {
+        return one.getJudgingStation().compareTo(two.getJudgingStation());
       } else {
         return one.getPresentation().compareTo(two.getPresentation());
       }
@@ -677,8 +677,8 @@ public class TournamentSchedule {
                        final TeamScheduleInfo two) {
       if (!one.getDivision().equals(two.getDivision())) {
         return one.getDivision().compareTo(two.getDivision());
-      } else if (!one.getJudge().equals(two.getJudge())) {
-        return one.getJudge().compareTo(two.getJudge());
+      } else if (!one.getJudgingStation().equals(two.getJudgingStation())) {
+        return one.getJudgingStation().compareTo(two.getJudgingStation());
       } else {
         return one.getTechnical().compareTo(two.getTechnical());
       }
@@ -892,11 +892,11 @@ public class TournamentSchedule {
 
       final Set<String> judges = new HashSet<String>();
       for (final TeamScheduleInfo ti : entry.getValue()) {
-        if (!judges.add(ti.getJudge())) {
+        if (!judges.add(ti.getJudgingStation())) {
           final String message = String
                                        .format(
                                                "Presentation judge %s cannot see more than one team at %s in presentation",
-                                               ti.getJudge(), OUTPUT_DATE_FORMAT.get().format(ti.getPresentation()));
+                                               ti.getJudgingStation(), OUTPUT_DATE_FORMAT.get().format(ti.getPresentation()));
           violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
         }
       }
@@ -930,11 +930,11 @@ public class TournamentSchedule {
 
       final Set<String> judges = new HashSet<String>();
       for (final TeamScheduleInfo ti : entry.getValue()) {
-        if (!judges.add(ti.getJudge())) {
+        if (!judges.add(ti.getJudgingStation())) {
           final String message = String
                                        .format(
                                                "Technical judge %s cannot see more than one team at %s in presentation",
-                                               ti.getJudge(), OUTPUT_DATE_FORMAT.get().format(ti.getPresentation()));
+                                               ti.getJudgingStation(), OUTPUT_DATE_FORMAT.get().format(ti.getPresentation()));
           violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
         }
       }
@@ -1296,7 +1296,7 @@ public class TournamentSchedule {
       }
       ti.setTechnical(parseDate(technicalStr));
 
-      ti.setJudge(line[_judgeGroupColumn]);
+      ti.setJudgingStation(line[_judgeGroupColumn]);
 
       for (int perfNum = 0; perfNum < getNumberOfRounds(); ++perfNum) {
         final String perf1Str = line[_perfColumn[perfNum]];
