@@ -317,7 +317,7 @@
 <primary-key-column name="param"/>
 </primary-key>
 </table>
-<table id="73daf36c:1292a0d6a87:-7fdb" name="team_schedule_info">
+<table id="73daf36c:1292a0d6a87:-7fdb" name="schedule">
 <column-list>
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="73daf36c:1292a0d6a87:-7fd7" mandatory="true" name="tournament">
 <data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
@@ -325,17 +325,17 @@
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="73daf36c:1292a0d6a87:-7fd6" mandatory="true" name="team_number">
 <data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
 </column>
-<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="73daf36c:1292a0d6a87:-7fd1" mandatory="false" name="judge_station">
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="73daf36c:1292a0d6a87:-7fd1" mandatory="false" name="judging_station">
 <data-type name="LONGVARCHAR" selected-variant-pattern="LONGVARCHAR"/>
 </column>
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="73daf36c:1292a0d6a87:-7fce" mandatory="false" name="presentation">
-<data-type name="TIMESTAMP" selected-variant-pattern="TIMESTAMP"/>
+<data-type name="TIME" selected-variant-pattern="TIME"/>
 </column>
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="73daf36c:1292a0d6a87:-7fcb" mandatory="false" name="technical">
-<data-type name="TIMESTAMP" selected-variant-pattern="TIMESTAMP"/>
+<data-type name="TIME" selected-variant-pattern="TIME"/>
 </column>
 </column-list>
-<primary-key id="73daf36c:1292a0d6a87:-7fda" name="PK_TEAM_SCHEDULE_INFO">
+<primary-key id="73daf36c:1292a0d6a87:-7fda" name="PK_SCHEDULE">
 <primary-key-column name="tournament"/>
 <primary-key-column name="team_number"/>
 </primary-key>
@@ -359,8 +359,8 @@
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="73daf36c:1292a0d6a87:-7fc3" mandatory="true" name="round">
 <data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
 </column>
-<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="73daf36c:1292a0d6a87:-7fc2" mandatory="false" name="time">
-<data-type name="TIMESTAMP" selected-variant-pattern="TIMESTAMP"/>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="73daf36c:1292a0d6a87:-7fc2" mandatory="true" name="perf_time">
+<data-type name="TIME" selected-variant-pattern="TIME"/>
 </column>
 </column-list>
 <primary-key id="73daf36c:1292a0d6a87:-7fc8" name="PK_SCHED_PERF_ROUNDS">
@@ -369,7 +369,7 @@
 <primary-key-column name="round"/>
 </primary-key>
 <foreign-key-list>
-<foreign-key id="73daf36c:1292a0d6a87:-7ec9" name="FK_sched_perf_rounds_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TEAM_SCHEDULE_INFO" referenced-table="team_schedule_info" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key id="73daf36c:1292a0d6a87:-7ec9" name="FK_sched_perf_rounds_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_SCHEDULE" referenced-table="schedule" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
 <foreign-key-column column-name="tournament" referenced-key-column-name="tournament"/>
 <foreign-key-column column-name="team_number" referenced-key-column-name="team_number"/>
 </foreign-key>
