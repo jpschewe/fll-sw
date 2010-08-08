@@ -374,6 +374,9 @@ public final class ImportDB {
     if (dbVersion < 1) {
       upgrade0To1(connection, challengeDocument);
     }
+    if(dbVersion < 2) {
+      upgrade1To2(connection);
+    }
     final int newVersion = Queries.getDatabaseVersion(connection);
     if (newVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
@@ -381,6 +384,15 @@ public final class ImportDB {
     }
   }
 
+  private static void upgrade1To2(final Connection connection) throws SQLException {
+    GenerateDB.createScheduleTables(connection, true, Queries.getTablesInDB(connection));
+    
+    // set the version to 2 - this will have been set while creating
+    // global_parameters, but we need to force it to 2 for later upgrade
+    // functions to not be confused
+    setDBVersion(connection, 2);
+  }
+  
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon tables in the database")
   private static void upgrade0To1(final Connection connection, final Document challengeDocument) throws SQLException {
     Statement stmt = null;
