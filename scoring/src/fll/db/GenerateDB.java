@@ -10,11 +10,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.Formatter;
 import java.util.Iterator;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -37,7 +39,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 1;
+  public static final int DATABASE_VERSION = 2;
 
   private static final Logger LOGGER = Logger.getLogger(GenerateDB.class);
 
@@ -57,7 +59,9 @@ public final class GenerateDB {
    * 
    * @param database name for the database to generate
    */
-  public static void generateDB(final Document document, final String database, final boolean forceRebuild) throws SQLException, UnsupportedEncodingException {
+  public static void generateDB(final Document document,
+                                final String database,
+                                final boolean forceRebuild) throws SQLException, UnsupportedEncodingException {
     Connection connection = null;
     try {
       LOGGER.info("Creating database connection to database: "
@@ -76,7 +80,7 @@ public final class GenerateDB {
   public static final String DEFAULT_TEAM_DIVISION = "1";
 
   public static final String DEFAULT_TEAM_REGION = "DUMMY";
-  
+
   public static final String DUMMY_TOURNAMENT_NAME = DEFAULT_TEAM_REGION;
 
   public static final String DROP_TOURNAMENT_NAME = "DROP";
@@ -94,9 +98,11 @@ public final class GenerateDB {
    * @param forceRebuild recreate all tables from scratch, if false don't
    *          recreate the tables that hold team information
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE", "OBL_UNSATISFIED_OBLIGATION" }, justification = "Need dynamic data for default values, Bug in findbugs - ticket:2924739")
-  public static void generateDB(final Document document, final Connection connection, final boolean forceRebuild) throws SQLException,
-      UnsupportedEncodingException {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
+                                                             "OBL_UNSATISFIED_OBLIGATION" }, justification = "Need dynamic data for default values, Bug in findbugs - ticket:2924739")
+  public static void generateDB(final Document document,
+                                final Connection connection,
+                                final boolean forceRebuild) throws SQLException, UnsupportedEncodingException {
 
     Statement stmt = null;
     PreparedStatement prep = null;
@@ -153,8 +159,8 @@ public final class GenerateDB {
       // Table structure for table 'tablenames'
       stmt.executeUpdate("DROP TABLE IF EXISTS tablenames CASCADE");
       stmt.executeUpdate("CREATE TABLE tablenames ("
-          + "  Tournament INTEGER NOT NULL," + "  PairID INTEGER NOT NULL," + "  SideA varchar(64) NOT NULL," + "  SideB varchar(64) NOT NULL,"
-          + "  CONSTRAINT tablenames_pk PRIMARY KEY (Tournament,PairID)"
+          + "  Tournament INTEGER NOT NULL," + "  PairID INTEGER NOT NULL," + "  SideA varchar(64) NOT NULL,"
+          + "  SideB varchar(64) NOT NULL," + "  CONSTRAINT tablenames_pk PRIMARY KEY (Tournament,PairID)"
           + " ,CONSTRAINT tablenames_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" + ")");
 
       // table to hold head-to-head playoff meta-data
@@ -187,6 +193,8 @@ public final class GenerateDB {
       }
 
       tournamentParameters(connection, forceRebuild, tables);
+
+      createScheduleTables(connection, forceRebuild, tables);
 
       // Table structure for table 'Judges'
       stmt.executeUpdate("DROP TABLE IF EXISTS Judges CASCADE");
@@ -227,7 +235,9 @@ public final class GenerateDB {
         performanceColumns.append("Bye,");
         createStatement.append(" Bye boolean DEFAULT FALSE NOT NULL,");
         createStatement.append(" Verified boolean DEFAULT FALSE NOT NULL,");
-        for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
+        for (final Element element : new NodelistElementCollectionAdapter(
+                                                                          performanceElement
+                                                                                            .getElementsByTagName("goal"))) {
           final String columnDefinition = generateGoalColumnDefinition(element);
           createStatement.append(" "
               + columnDefinition + ",");
@@ -254,7 +264,9 @@ public final class GenerateDB {
       finalScores.append("CREATE TABLE FinalScores (");
       finalScores.append("TeamNumber integer NOT NULL,");
       finalScores.append("Tournament INTEGER NOT NULL,");
-      for (final Element categoryElement : new NodelistElementCollectionAdapter(rootElement.getElementsByTagName("subjectiveCategory"))) {
+      for (final Element categoryElement : new NodelistElementCollectionAdapter(
+                                                                                rootElement
+                                                                                           .getElementsByTagName("subjectiveCategory"))) {
         createStatement.setLength(0);
 
         final String tableName = categoryElement.getAttribute("name");
@@ -301,7 +313,7 @@ public final class GenerateDB {
       stmt.executeUpdate(finalScores.toString());
 
       // --------------- create views ---------------
-      
+
       // max seeding round score for the current tournament
       stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max");
       stmt.executeUpdate("CREATE VIEW performance_seeding_max AS "//
@@ -311,25 +323,24 @@ public final class GenerateDB {
           + " AND RunNumber <= ("//
           // compute the run number for the current tournament
           + "   SELECT param_value FROM tournament_parameters" //
-          + "     WHERE param = 'SeedingRounds' AND tournament = (" 
+          + "     WHERE param = 'SeedingRounds' AND tournament = ("
           + "       SELECT MAX(tournament) FROM tournament_parameters"//
           + "         WHERE param = 'SeedingRounds'"// 
           + "           AND ( tournament = -1 OR tournament = ("//
           // current tournament
           + "             SELECT param_value FROM global_parameters"//
           + "               WHERE  param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'  )"//
-          + "        ) )"
-          + " ) GROUP BY TeamNumber, Tournament");
+          + "        ) )" + " ) GROUP BY TeamNumber, Tournament");
 
       // current tournament teams
       stmt.executeUpdate("DROP VIEW IF EXISTS current_tournament_teams");
       prep = connection.prepareStatement("CREATE VIEW current_tournament_teams AS "//
-      + " SELECT * FROM TournamentTeams" //
-      + " WHERE Tournament IN " //
-      + " (SELECT param_value " // " +
-      + "      FROM global_parameters " //
-      + "      WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'"//
-      + "  )");
+          + " SELECT * FROM TournamentTeams" //
+          + " WHERE Tournament IN " //
+          + " (SELECT param_value " // " +
+          + "      FROM global_parameters " //
+          + "      WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'"//
+          + "  )");
       prep.executeUpdate();
 
       // verified performance scores
@@ -347,7 +358,9 @@ public final class GenerateDB {
   }
 
   /** Table structure for table 'tournament_parameters' */
-  /* package */static void tournamentParameters(final Connection connection, final boolean forceRebuild, final Collection<String> tables) throws SQLException {
+  /* package */static void tournamentParameters(final Connection connection,
+                                                final boolean forceRebuild,
+                                                final Collection<String> tables) throws SQLException {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
@@ -372,7 +385,9 @@ public final class GenerateDB {
   /**
    * Create Tournaments table.
    */
-  /* package */static void tournaments(final Connection connection, final boolean forceRebuild, final Collection<String> tables) throws SQLException {
+  /* package */static void tournaments(final Connection connection,
+                                       final boolean forceRebuild,
+                                       final Collection<String> tables) throws SQLException {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
@@ -393,7 +408,7 @@ public final class GenerateDB {
             + ")");
         Tournament.createTournament(connection, DUMMY_TOURNAMENT_NAME, "Default dummy tournament");
         Tournament.createTournament(connection, DROP_TOURNAMENT_NAME, "Dummy tournament for teams that drop out");
-        
+
         // TODO can we add a constraint that NextTournament must refer to Name
         // and still handle null?
 
@@ -419,7 +434,7 @@ public final class GenerateDB {
       SQLFunctions.close(prep);
     }
   }
-  
+
   /**
    * Create the "internal" tournament used for default parameters, if needed.
    */
@@ -433,8 +448,9 @@ public final class GenerateDB {
       rs = prep.executeQuery();
       if (rs.next()) {
         final int importedInternal = rs.getInt(1);
-        if(importedInternal != INTERNAL_TOURNAMENT_ID) {
-          renameTournament(connection, importedInternal, "Imported-" + INTERNAL_TOURNAMENT_NAME);
+        if (importedInternal != INTERNAL_TOURNAMENT_ID) {
+          renameTournament(connection, importedInternal, "Imported-"
+              + INTERNAL_TOURNAMENT_NAME);
         }
       }
       SQLFunctions.close(rs);
@@ -512,7 +528,8 @@ public final class GenerateDB {
     }
   }
 
-  public static void insertOrUpdateChallengeDocument(final Document document, final Connection connection) throws SQLException {
+  public static void insertOrUpdateChallengeDocument(final Document document,
+                                                     final Connection connection) throws SQLException {
     PreparedStatement challengePrep = null;
     try {
       final boolean check = Queries.globalParameterExists(connection, GlobalParameters.CHALLENGE_DOCUMENT);
@@ -608,6 +625,76 @@ public final class GenerateDB {
     }
 
     return definition;
+  }
+
+  /* package */static void createScheduleTables(final Connection connection,
+                                                final boolean forceRebuild,
+                                                final Collection<String> tables) throws SQLException {
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+
+      if (forceRebuild) {
+        stmt.executeUpdate("DROP TABLE IF EXISTS schedule CASCADE");
+      }
+
+      {
+        // debug
+        LOGGER.info("tables: " + tables);
+        final DatabaseMetaData metadata = connection.getMetaData();
+        ResultSet debug_rs = metadata.getColumns(null, null, "Teams", "%");
+        while (debug_rs.next()) {
+          final String typeName = debug_rs.getString("TYPE_NAME");
+          final String columnName = debug_rs.getString("COLUMN_NAME");
+          LOGGER.info("col: " + columnName + " type: " + typeName);
+        }
+        SQLFunctions.close(debug_rs);
+        debug_rs = null;
+        debug_rs = metadata.getColumns(null, null, "TEAMS", "%");
+        while (debug_rs.next()) {
+          final String typeName = debug_rs.getString("TYPE_NAME");
+          final String columnName = debug_rs.getString("COLUMN_NAME");
+          LOGGER.info("col: " + columnName + " type: " + typeName);
+        }
+        SQLFunctions.close(debug_rs);
+        debug_rs = null;
+
+      }
+      
+      if (forceRebuild
+          || !tables.contains("schedule".toLowerCase())) {
+        stmt.executeUpdate("CREATE TABLE schedule (" //
+            + "  tournament INTEGER NOT NULL" //
+            + " ,team_number INTEGER NOT NULL" //
+            + " ,judging_station LONGVARCHAR NOT NULL" //
+            + " ,presentation TIME" //
+            + " ,technical TIME" //
+            + " ,CONSTRAINT schedule_pk PRIMARY KEY (tournament, team_number)" //
+            + " ,CONSTRAINT schedule_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)" //
+            + " ,CONSTRAINT schedule_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)" //
+            + ")");
+      }
+
+      if (forceRebuild) {
+        stmt.executeUpdate("DROP TABLE IF EXISTS sched_perf_rounds CASCADE");
+      }
+
+      if (forceRebuild
+          || !tables.contains("sched_perf_rounds".toLowerCase())) {
+        stmt
+            .executeUpdate("CREATE TABLE sched_perf_rounds (" //
+                + "  tournament INTEGER NOT NULL" //
+                + " ,team_number INTEGER NOT NULL" //
+                + " ,round INTEGER NOT NULL" //
+                + " ,perf_time TIME NOT NULL" //
+                + " ,CONSTRAINT sched_perf_rounds_pk PRIMARY KEY (tournament, team_number, round)"//
+                + " ,CONSTRAINT sched_perf_rounds_fk1 FOREIGN KEY(tournament, team_number) REFERENCES schedule(tournament, team_number)"
+                + ")");
+      }
+    } finally {
+      SQLFunctions.close(stmt);
+      stmt = null;
+    }
   }
 
 }
