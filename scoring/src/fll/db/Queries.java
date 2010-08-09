@@ -2862,4 +2862,33 @@ public final class Queries {
     }
   }
 
+  /**
+   * Check if the schedule exists in the database.
+   * 
+   * @param connection database connection
+   * @param tournamentID ID of the tournament to look for
+   * @return if a schedule exists in the database for the specified tournament
+   * @throws SQLException
+   */
+  public static boolean scheduleExistsInDatabase(final Connection connection,
+                                          final int tournamentID) throws SQLException {
+    ResultSet rs = null;
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("SELECT COUNT(team_number) FROM schedule where tournament = ?");
+      prep.setInt(1, tournamentID);
+      rs = prep.executeQuery();
+      if(rs.next()) {
+        return rs.getInt(1) > 0;
+      } else {
+        return false;
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      rs = null;
+      SQLFunctions.close(prep);
+      prep = null;
+    }
+  }
+
 }
