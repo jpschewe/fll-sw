@@ -10,13 +10,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
-import java.util.Formatter;
 import java.util.Iterator;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -194,7 +192,7 @@ public final class GenerateDB {
 
       tournamentParameters(connection, forceRebuild, tables);
 
-      createScheduleTables(connection, forceRebuild, tables);
+      createScheduleTables(connection, forceRebuild, tables, true);
 
       // Table structure for table 'Judges'
       stmt.executeUpdate("DROP TABLE IF EXISTS Judges CASCADE");
@@ -598,6 +596,22 @@ public final class GenerateDB {
   }
 
   /**
+   * Get SQL type for a given goal.
+   */
+  public static String getTypeForGoalColumn(final Element goalElement) {
+    // check if there are any subelements to determine if this goal is
+    // enumerated or not
+    final Iterator<Element> posValues = new NodelistElementCollectionAdapter(goalElement.getElementsByTagName("value"));
+    if (posValues.hasNext()) {
+      // enumerated
+      // HSQLDB doesn't support enum
+      return "longvarchar";
+    } else {
+      return "float";
+    }
+  }
+
+  /**
    * Generate the definition of a column for the given goal element.
    * 
    * @param goalElement element that represents the goal
@@ -606,18 +620,9 @@ public final class GenerateDB {
   public static String generateGoalColumnDefinition(final Element goalElement) {
     final String goalName = goalElement.getAttribute("name");
 
-    // check if there are any subelements to determine if this goal is
-    // enumerated or not
-
     String definition = goalName;
-    final Iterator<Element> posValues = new NodelistElementCollectionAdapter(goalElement.getElementsByTagName("value"));
-    if (posValues.hasNext()) {
-      // enumerated
-      // HSQLDB doesn't support enum
-      definition += " longvarchar";
-    } else {
-      definition += " float";
-    }
+    definition += " "
+        + getTypeForGoalColumn(goalElement);
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("GoalColumnDefinition: "
@@ -627,9 +632,19 @@ public final class GenerateDB {
     return definition;
   }
 
+  /**
+   * Create tables for schedule data
+   * 
+   * @param connection
+   * @param forceRebuild
+   * @param tables
+   * @param createConstraints if false, don't create foreign key constraints
+   * @throws SQLException
+   */
   /* package */static void createScheduleTables(final Connection connection,
                                                 final boolean forceRebuild,
-                                                final Collection<String> tables) throws SQLException {
+                                                final Collection<String> tables,
+                                                final boolean createConstraints) throws SQLException {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
@@ -637,42 +652,23 @@ public final class GenerateDB {
       if (forceRebuild) {
         stmt.executeUpdate("DROP TABLE IF EXISTS schedule CASCADE");
       }
-
-      {
-        // debug
-        LOGGER.info("tables: " + tables);
-        final DatabaseMetaData metadata = connection.getMetaData();
-        ResultSet debug_rs = metadata.getColumns(null, null, "Teams", "%");
-        while (debug_rs.next()) {
-          final String typeName = debug_rs.getString("TYPE_NAME");
-          final String columnName = debug_rs.getString("COLUMN_NAME");
-          LOGGER.info("col: " + columnName + " type: " + typeName);
-        }
-        SQLFunctions.close(debug_rs);
-        debug_rs = null;
-        debug_rs = metadata.getColumns(null, null, "TEAMS", "%");
-        while (debug_rs.next()) {
-          final String typeName = debug_rs.getString("TYPE_NAME");
-          final String columnName = debug_rs.getString("COLUMN_NAME");
-          LOGGER.info("col: " + columnName + " type: " + typeName);
-        }
-        SQLFunctions.close(debug_rs);
-        debug_rs = null;
-
-      }
-      
       if (forceRebuild
           || !tables.contains("schedule".toLowerCase())) {
-        stmt.executeUpdate("CREATE TABLE schedule (" //
-            + "  tournament INTEGER NOT NULL" //
-            + " ,team_number INTEGER NOT NULL" //
-            + " ,judging_station LONGVARCHAR NOT NULL" //
-            + " ,presentation TIME" //
-            + " ,technical TIME" //
-            + " ,CONSTRAINT schedule_pk PRIMARY KEY (tournament, team_number)" //
-            + " ,CONSTRAINT schedule_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)" //
-            + " ,CONSTRAINT schedule_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)" //
-            + ")");
+        final StringBuilder sql = new StringBuilder();
+        sql.append("CREATE TABLE schedule (");
+        sql.append("  tournament INTEGER NOT NULL");
+        sql.append(" ,team_number INTEGER NOT NULL");
+        sql.append(" ,judging_station LONGVARCHAR NOT NULL");
+        sql.append(" ,presentation TIME");
+        sql.append(" ,technical TIME");
+        sql.append(" ,CONSTRAINT schedule_pk PRIMARY KEY (tournament, team_number)");
+        if (createConstraints) {
+          sql.append(" ,CONSTRAINT schedule_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
+          sql.append(" ,CONSTRAINT schedule_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        }
+        sql.append(")");
+
+        stmt.executeUpdate(sql.toString());
       }
 
       if (forceRebuild) {
@@ -681,15 +677,20 @@ public final class GenerateDB {
 
       if (forceRebuild
           || !tables.contains("sched_perf_rounds".toLowerCase())) {
-        stmt
-            .executeUpdate("CREATE TABLE sched_perf_rounds (" //
-                + "  tournament INTEGER NOT NULL" //
-                + " ,team_number INTEGER NOT NULL" //
-                + " ,round INTEGER NOT NULL" //
-                + " ,perf_time TIME NOT NULL" //
-                + " ,CONSTRAINT sched_perf_rounds_pk PRIMARY KEY (tournament, team_number, round)"//
-                + " ,CONSTRAINT sched_perf_rounds_fk1 FOREIGN KEY(tournament, team_number) REFERENCES schedule(tournament, team_number)"
-                + ")");
+        final StringBuilder sql = new StringBuilder();
+        sql.append("CREATE TABLE sched_perf_rounds (");
+        sql.append("  tournament INTEGER NOT NULL");
+        sql.append(" ,team_number INTEGER NOT NULL");
+        sql.append(" ,round INTEGER NOT NULL");
+        sql.append(" ,perf_time TIME NOT NULL");
+        sql.append(" ,CONSTRAINT sched_perf_rounds_pk PRIMARY KEY (tournament, team_number, round)");
+        if (createConstraints) {
+          sql
+             .append(" ,CONSTRAINT sched_perf_rounds_fk1 FOREIGN KEY(tournament, team_number) REFERENCES schedule(tournament, team_number)");
+        }
+        sql.append(")");
+
+        stmt.executeUpdate(sql.toString());
       }
     } finally {
       SQLFunctions.close(stmt);
