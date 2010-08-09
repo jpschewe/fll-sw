@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
@@ -896,7 +897,8 @@ public class TournamentSchedule {
           final String message = String
                                        .format(
                                                "Presentation judge %s cannot see more than one team at %s in presentation",
-                                               ti.getJudgingStation(), OUTPUT_DATE_FORMAT.get().format(ti.getPresentation()));
+                                               ti.getJudgingStation(), OUTPUT_DATE_FORMAT.get()
+                                                                                         .format(ti.getPresentation()));
           violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
         }
       }
@@ -934,7 +936,8 @@ public class TournamentSchedule {
           final String message = String
                                        .format(
                                                "Technical judge %s cannot see more than one team at %s in presentation",
-                                               ti.getJudgingStation(), OUTPUT_DATE_FORMAT.get().format(ti.getPresentation()));
+                                               ti.getJudgingStation(), OUTPUT_DATE_FORMAT.get()
+                                                                                         .format(ti.getPresentation()));
           violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
         }
       }
@@ -1458,5 +1461,4 @@ public class TournamentSchedule {
       foot.writeSelectedRows(0, -1, document.leftMargin(), document.bottomMargin(), writer.getDirectContent());
     }
   }
-
 }
