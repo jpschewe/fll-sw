@@ -63,7 +63,7 @@ public class ExcelCellReader implements CellFileReader {
   public static List<String> getAllSheetNames(final File file) throws InvalidFormatException, IOException {
     final List<String> sheetNames = new LinkedList<String>();
 
-    final Workbook workbook = createWorkbook(file);
+    final Workbook workbook = createWorkbook(new FileInputStream(file));
     final int numSheets = workbook.getNumberOfSheets();
     for (int i = 0; i < numSheets; ++i) {
       sheetNames.add(workbook.getSheetName(i));
@@ -72,8 +72,8 @@ public class ExcelCellReader implements CellFileReader {
     return sheetNames;
   }
 
-  private static Workbook createWorkbook(final File file) throws IOException, InvalidFormatException {
-    final InputStream stream = new PushbackInputStream(new FileInputStream(file));
+  private static Workbook createWorkbook(final InputStream file) throws IOException, InvalidFormatException {
+    final InputStream stream = new PushbackInputStream(file);
     try {
       final Workbook workbook = WorkbookFactory.create(stream);
       return workbook;
@@ -82,12 +82,24 @@ public class ExcelCellReader implements CellFileReader {
     }
   }
 
-  public ExcelCellReader(final File file, final String sheetName) throws IOException, InvalidFormatException {
+  /**
+   * Read an excel file from the specified stream.
+   * 
+   * @param file where to read the excel file from
+   * @param sheetName the sheet to read
+   * @throws IOException
+   * @throws InvalidFormatException
+   */
+  public ExcelCellReader(final InputStream file,
+                         final String sheetName) throws IOException, InvalidFormatException {
     workbook = createWorkbook(file);
-    if (file.getName().endsWith("xls")) {
+    if (workbook instanceof HSSFWorkbook) {
       formulaEvaluator = new HSSFFormulaEvaluator((HSSFWorkbook) workbook);
-    } else {
+    } else if (workbook instanceof XSSFWorkbook) {
       formulaEvaluator = new XSSFFormulaEvaluator((XSSFWorkbook) workbook);
+    } else {
+      throw new RuntimeException("Unknown wookbook class: "
+          + workbook.getClass().getName());
     }
 
     sheet = workbook.getSheet(sheetName);

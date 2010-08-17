@@ -7,6 +7,7 @@ package fll.web.admin;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -122,7 +123,9 @@ public final class UploadTeams extends BaseFLLServlet {
       IOException, InvalidFormatException {
     final CellFileReader reader;
     if (ExcelCellReader.isExcelFile(file)) {
-      reader = new ExcelCellReader(file, sheetName);
+      final FileInputStream fis = new FileInputStream(file);
+      reader = new ExcelCellReader(fis, sheetName);
+      fis.close();
     } else {
       // determine if the file is tab separated or comma separated, check the
       // first line for tabs and if they aren't found, assume it's comma
