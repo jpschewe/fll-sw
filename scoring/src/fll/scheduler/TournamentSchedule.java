@@ -6,6 +6,7 @@
 package fll.scheduler;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
@@ -26,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -213,7 +213,9 @@ public class TournamentSchedule {
           + _file.getAbsolutePath());
     }
 
-    final CellFileReader reader = new ExcelCellReader(_file, _sheetName);
+    final FileInputStream fis = new FileInputStream(_file);
+    final CellFileReader reader = new ExcelCellReader(fis, _sheetName);
+    fis.close();
 
     findColumns(reader);
     parseData(reader);
