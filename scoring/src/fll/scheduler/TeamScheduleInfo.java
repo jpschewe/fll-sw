@@ -28,28 +28,43 @@ public final class TeamScheduleInfo {
     perf[idx] = d;
   }
 
+  /**
+   * @param idx zero based
+   */
   public Date getPerf(final int idx) {
     return perf[idx];
   }
 
   private final String[] perfTableColor;
 
+  /**
+   * @param idx zero based
+   */
   public void setPerfTableColor(final int idx,
                          final String v) {
     perfTableColor[idx] = v;
   }
 
+  /**
+   * @param idx zero based
+   */
   public String getPerfTableColor(final int idx) {
     return perfTableColor[idx];
   }
 
   private final int[] perfTableSide;
 
+  /**
+   * @param idx zero based
+   */
   public void setPerfTableSide(final int idx,
                         final int v) {
     perfTableSide[idx] = v;
   }
 
+  /**
+   * @param idx zero based
+   */
   public int getPerfTableSide(final int idx) {
     return perfTableSide[idx];
   }

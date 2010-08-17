@@ -12,10 +12,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
 import java.sql.Types;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,6 +40,8 @@ import org.w3c.dom.Element;
 import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
+import fll.scheduler.TeamScheduleInfo;
+import fll.scheduler.TournamentSchedule;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.ScoreUtils;
@@ -218,7 +222,8 @@ public final class Queries {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT DISTINCT event_division FROM current_tournament_teams ORDER BY event_division");
+      prep = connection
+                       .prepareStatement("SELECT DISTINCT event_division FROM current_tournament_teams ORDER BY event_division");
       rs = prep.executeQuery();
       while (rs.next()) {
         final String division = rs.getString(1);
@@ -254,7 +259,8 @@ public final class Queries {
    *         category and the value is the rank.
    */
   public static Map<String, Map<Integer, Map<String, Integer>>> getTeamRankings(final Connection connection,
-                                                                                final Document challengeDocument) throws SQLException {
+                                                                                final Document challengeDocument)
+      throws SQLException {
     final Map<String, Map<Integer, Map<String, Integer>>> rankingMap = new HashMap<String, Map<Integer, Map<String, Integer>>>();
     final int tournament = getCurrentTournament(connection);
     final List<String> divisions = getEventDivisions(connection);
@@ -289,11 +295,16 @@ public final class Queries {
                                                  final int tournament,
                                                  final List<String> divisions,
                                                  final Document challengeDocument,
-                                                 final Map<String, Map<Integer, Map<String, Integer>>> rankingMap) throws SQLException {
+                                                 final Map<String, Map<Integer, Map<String, Integer>>> rankingMap)
+      throws SQLException {
 
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
-    for (final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+    for (final Element subjectiveElement : XMLUtils
+                                                   .filterToElements(challengeDocument
+                                                                                      .getDocumentElement()
+                                                                                      .getElementsByTagName(
+                                                                                                            "subjectiveCategory"))) {
       final String title = subjectiveElement.getAttribute("title");
       final String name = subjectiveElement.getAttribute("name");
       subjectiveCategories.put(title, name);
@@ -316,16 +327,21 @@ public final class Queries {
           final String categoryTitle = entry.getKey();
           final String categoryName = entry.getValue();
 
-          final Map<String, Collection<Integer>> scoreGroups = Queries.computeScoreGroups(connection, tournament, division, categoryName);
+          final Map<String, Collection<Integer>> scoreGroups = Queries.computeScoreGroups(connection, tournament,
+                                                                                          division, categoryName);
 
           // select from FinalScores
           for (final Map.Entry<String, Collection<Integer>> sgEntry : scoreGroups.entrySet()) {
             final Collection<Integer> teamScores = sgEntry.getValue();
 
             final String teamSelect = StringUtils.join(teamScores.iterator(), ", ");
-            prep = connection.prepareStatement("SELECT Teams.TeamNumber,FinalScores."
-                + categoryName + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
-                + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " " + ascDesc);
+            prep = connection
+                             .prepareStatement("SELECT Teams.TeamNumber,FinalScores."
+                                 + categoryName
+                                 + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( "
+                                 + teamSelect
+                                 + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores."
+                                 + categoryName + " " + ascDesc);
             prep.setInt(1, tournament);
             rs = prep.executeQuery();
             processTeamRankings(teamMap, categoryTitle, rs);
@@ -351,7 +367,8 @@ public final class Queries {
                                               final String ascDesc,
                                               final int tournament,
                                               final List<String> divisions,
-                                              final Map<String, Map<Integer, Map<String, Integer>>> rankingMap) throws SQLException {
+                                              final Map<String, Map<Integer, Map<String, Integer>>> rankingMap)
+      throws SQLException {
     final StringBuilder query = new StringBuilder();
     query.append("SELECT Teams.TeamNumber, FinalScores.OverallScore");
     query.append(" FROM Teams,FinalScores,current_tournament_teams");
@@ -461,7 +478,8 @@ public final class Queries {
                                                   final String ascDesc,
                                                   final int tournament,
                                                   final List<String> divisions,
-                                                  final Map<String, Map<Integer, Map<String, Integer>>> rankingMap) throws SQLException {
+                                                  final Map<String, Map<Integer, Map<String, Integer>>> rankingMap)
+      throws SQLException {
 
     final StringBuilder query = new StringBuilder();
     query.append("SELECT Teams.TeamNumber, FinalScores.performance");
@@ -551,10 +569,12 @@ public final class Queries {
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Goals determine columns")
   public static String insertPerformanceScore(final Document document,
                                               final Connection connection,
-                                              final HttpServletRequest request) throws SQLException, ParseException, RuntimeException {
+                                              final HttpServletRequest request) throws SQLException, ParseException,
+      RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(document);
-    final Element performanceElement = (Element) document.getDocumentElement().getElementsByTagName("Performance").item(0);
+    final Element performanceElement = (Element) document.getDocumentElement().getElementsByTagName("Performance")
+                                                         .item(0);
     final Element tiebreakerElement = (Element) performanceElement.getElementsByTagName("tiebreaker").item(0);
 
     final String teamNumberStr = request.getParameter("TeamNumber");
@@ -588,7 +608,8 @@ public final class Queries {
       final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun);
       final String division = getEventDivision(connection, teamNumber);
       if (ptLine > 0) {
-        final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1), playoffRun);
+        final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division,
+                                                           (ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1), playoffRun);
 
         // If sibling team is the NULL team, then no playoff meta data needs
         // updating, since we are still waiting for an earlier round to be
@@ -596,10 +617,11 @@ public final class Queries {
         // be updating the playoffdata table.
         if (Team.NULL_TEAM_NUMBER != siblingTeam
             && Queries.performanceScoreExists(connection, siblingTeam, irunNumber)
-            && Queries.isVerified(connection, currentTournament, Team.getTeamFromDatabase(connection, siblingTeam), irunNumber)) {
+            && Queries.isVerified(connection, currentTournament, Team.getTeamFromDatabase(connection, siblingTeam),
+                                  irunNumber)) {
           final Team opponent = Team.getTeamFromDatabase(connection, siblingTeam);
-          final Team winner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement, winnerCriteria, opponent, team,
-                                                 teamScore, irunNumber);
+          final Team winner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement,
+                                                 winnerCriteria, opponent, team, teamScore, irunNumber);
 
           if (winner != null) {
             final StringBuffer sql = new StringBuffer();
@@ -653,7 +675,8 @@ public final class Queries {
         }
       } else {
         throw new RuntimeException("Unable to find team "
-            + teamNumber + " in the playoff brackets for playoff round " + playoffRun + ". Maybe someone deleted their score from the previous run?");
+            + teamNumber + " in the playoff brackets for playoff round " + playoffRun
+            + ". Maybe someone deleted their score from the previous run?");
       }
     }
 
@@ -757,10 +780,12 @@ public final class Queries {
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
   public static String updatePerformanceScore(final Document document,
                                               final Connection connection,
-                                              final HttpServletRequest request) throws SQLException, ParseException, RuntimeException {
+                                              final HttpServletRequest request) throws SQLException, ParseException,
+      RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(document);
-    final Element performanceElement = (Element) document.getDocumentElement().getElementsByTagName("Performance").item(0);
+    final Element performanceElement = (Element) document.getDocumentElement().getElementsByTagName("Performance")
+                                                         .item(0);
     final Element tiebreakerElement = (Element) performanceElement.getElementsByTagName("tiebreaker").item(0);
 
     final String teamNumberStr = request.getParameter("TeamNumber");
@@ -794,7 +819,8 @@ public final class Queries {
       final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun);
       final String division = getEventDivision(connection, teamNumber);
       if (ptLine > 0) {
-        final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, (ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1), playoffRun);
+        final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division,
+                                                           (ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1), playoffRun);
 
         // If sibling team is the NULL team, then updating this score is okay,
         // and no playoff meta data needs updating.
@@ -810,10 +836,11 @@ public final class Queries {
             throw new RuntimeException("Unable to find one of these team numbers in the database: "
                 + teamNumber + " and " + siblingTeam);
           }
-          final Team oldWinner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement, winnerCriteria, teamA, teamB,
+          final Team oldWinner = Playoff.pickWinner(connection, currentTournament, performanceElement,
+                                                    tiebreakerElement, winnerCriteria, teamA, teamB, irunNumber);
+          final Team newWinner = Playoff.pickWinner(connection, currentTournament, performanceElement,
+                                                    tiebreakerElement, winnerCriteria, teamB, team, teamScore,
                                                     irunNumber);
-          final Team newWinner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement, winnerCriteria, teamB, team,
-                                                    teamScore, irunNumber);
           Statement stmt = null;
           ResultSet rs = null;
           if (oldWinner != null
@@ -825,7 +852,8 @@ public final class Queries {
                 stmt = connection.createStatement();
                 // TODO make prepared statement
                 rs = stmt.executeQuery("SELECT TeamNumber FROM Performance"
-                    + " WHERE TeamNumber = " + teamNumber + " AND RunNumber > " + irunNumber + " AND Tournament = " + currentTournament);
+                    + " WHERE TeamNumber = " + teamNumber + " AND RunNumber > " + irunNumber + " AND Tournament = "
+                    + currentTournament);
                 if (rs.next()) {
                   throw new RuntimeException("Unable to update score for team number "
                       + teamNumber + " in playoff round " + playoffRun
@@ -842,11 +870,13 @@ public final class Queries {
                 stmt = connection.createStatement();
                 // TODO make prepared statement
                 rs = stmt.executeQuery("SELECT TeamNumber FROM Performance"
-                    + " WHERE TeamNumber = " + siblingTeam + " AND RunNumber > " + irunNumber + " AND Tournament = " + currentTournament);
+                    + " WHERE TeamNumber = " + siblingTeam + " AND RunNumber > " + irunNumber + " AND Tournament = "
+                    + currentTournament);
                 if (rs.next()) {
                   throw new RuntimeException("Unable to update score for team number "
                       + teamNumber + " in playoff round " + playoffRun + " because opponent team " + siblingTeam
-                      + " has scores in subsequent rounds which would become inconsistent. " + "Delete those scores and then you may update this score.");
+                      + " has scores in subsequent rounds which would become inconsistent. "
+                      + "Delete those scores and then you may update this score.");
                 }
               } finally {
                 SQLFunctions.close(rs);
@@ -857,10 +887,16 @@ public final class Queries {
           // If the second-check flag is NO or the opposing team is not
           // verified, we set the match "winner" (possibly back) to NULL.
           if ("0".equals(request.getParameter("Verified"))
-              || !(Queries.performanceScoreExists(connection, teamB, irunNumber) && Queries.isVerified(connection, currentTournament, teamB, irunNumber))) {
+              || !(Queries.performanceScoreExists(connection, teamB, irunNumber) && Queries
+                                                                                           .isVerified(
+                                                                                                       connection,
+                                                                                                       currentTournament,
+                                                                                                       teamB,
+                                                                                                       irunNumber))) {
             removePlayoffScore(connection, division, currentTournament, playoffRun, ptLine);
           } else {
-            updatePlayoffTable(connection, newWinner.getTeamNumber(), division, currentTournament, (playoffRun + 1), ((ptLine + 1) / 2));
+            updatePlayoffTable(connection, newWinner.getTeamNumber(), division, currentTournament, (playoffRun + 1),
+                               ((ptLine + 1) / 2));
             final int semiFinalRound = getNumPlayoffRounds(connection, division) - 1;
             if (playoffRun == semiFinalRound
                 && isThirdPlaceEnabled(connection, division)) {
@@ -870,7 +906,8 @@ public final class Queries {
               } else {
                 newLoser = teamA;
               }
-              updatePlayoffTable(connection, newLoser.getTeamNumber(), division, currentTournament, (playoffRun + 1), ((ptLine + 5) / 2));
+              updatePlayoffTable(connection, newLoser.getTeamNumber(), division, currentTournament, (playoffRun + 1),
+                                 ((ptLine + 5) / 2));
             }
           }
         }
@@ -940,7 +977,8 @@ public final class Queries {
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "OBL_UNSATISFIED_OBLIGATION", justification = "Bug in findbugs - ticket:2924739")
   public static void deletePerformanceScore(final Connection connection,
-                                            final HttpServletRequest request) throws SQLException, RuntimeException, ParseException {
+                                            final HttpServletRequest request) throws SQLException, RuntimeException,
+      ParseException {
     final int currentTournament = getCurrentTournament(connection);
 
     final String teamNumberStr = request.getParameter("TeamNumber");
@@ -971,7 +1009,8 @@ public final class Queries {
         final String division = getEventDivision(connection, teamNumber);
         if (ptLine > 0) {
           final int siblingLine = ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1;
-          final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, siblingLine, playoffRun);
+          final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, siblingLine,
+                                                             playoffRun);
 
           if (siblingTeam != Team.NULL_TEAM_NUMBER) {
             // See if either teamNumber or siblingTeam has a score entered in
@@ -984,7 +1023,8 @@ public final class Queries {
               if (rs.next()) {
                 throw new RuntimeException("Unable to delete score for team number "
                     + teamNumber + " in playoff round " + playoffRun + " because that team "
-                    + " has scores in subsequent rounds which would become inconsistent. " + "Delete those scores and then you may delete this score.");
+                    + " has scores in subsequent rounds which would become inconsistent. "
+                    + "Delete those scores and then you may delete this score.");
               }
             }
             if (getPlayoffTableLineNumber(connection, currentTournament, siblingTeam, playoffRun + 1) > 0) {
@@ -995,7 +1035,8 @@ public final class Queries {
               if (rs.next()) {
                 throw new RuntimeException("Unable to delete score for team number "
                     + teamNumber + " in playoff round " + playoffRun + " because opposing team " + siblingTeam
-                    + " has scores in subsequent rounds which would become inconsistent. " + "Delete those scores and then you may delete this score.");
+                    + " has scores in subsequent rounds which would become inconsistent. "
+                    + "Delete those scores and then you may delete this score.");
               }
             }
             // No dependent score was found, so we can update the playoff table
@@ -1062,12 +1103,14 @@ public final class Queries {
                                          final int currentTournament,
                                          final int playoffRun,
                                          final int ptLine) throws SQLException {
-    updatePlayoffTable(connection, Team.NULL_TEAM_NUMBER, division, currentTournament, (playoffRun + 1), ((ptLine + 1) / 2));
+    updatePlayoffTable(connection, Team.NULL_TEAM_NUMBER, division, currentTournament, (playoffRun + 1),
+                       ((ptLine + 1) / 2));
 
     final int semiFinalRound = getNumPlayoffRounds(connection, division) - 1;
     if (playoffRun == semiFinalRound
         && isThirdPlaceEnabled(connection, division)) {
-      updatePlayoffTable(connection, Team.NULL_TEAM_NUMBER, division, currentTournament, (playoffRun + 1), ((ptLine + 5) / 2));
+      updatePlayoffTable(connection, Team.NULL_TEAM_NUMBER, division, currentTournament, (playoffRun + 1),
+                         ((ptLine + 5) / 2));
     }
   }
 
@@ -1119,7 +1162,8 @@ public final class Queries {
   public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection,
                                                       final Map<Integer, Team> tournamentTeams,
                                                       final String division,
-                                                      final boolean verifiedScoresOnly) throws SQLException, RuntimeException {
+                                                      final boolean verifiedScoresOnly) throws SQLException,
+      RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
     final String view;
 
@@ -1139,9 +1183,11 @@ public final class Queries {
         prep.setInt(2, getNumSeedingRounds(connection, currentTournament));
       } else {
         prep = connection.prepareStatement("SELECT "
-            + view + ".TeamNumber,Count(" + view + ".TeamNumber) FROM " + view + ",current_tournament_teams WHERE " + view
-            + ".TeamNumber = current_tournament_teams.TeamNumber AND current_tournament_teams.event_division = ?" + " AND " + view
-            + ".Tournament = ? GROUP BY " + view + ".TeamNumber HAVING Count(" + view + ".TeamNumber) < ?");
+            + view + ".TeamNumber,Count(" + view + ".TeamNumber) FROM " + view + ",current_tournament_teams WHERE "
+            + view
+            + ".TeamNumber = current_tournament_teams.TeamNumber AND current_tournament_teams.event_division = ?"
+            + " AND " + view + ".Tournament = ? GROUP BY " + view + ".TeamNumber HAVING Count(" + view
+            + ".TeamNumber) < ?");
         prep.setString(1, division);
         prep.setInt(2, currentTournament);
         prep.setInt(3, getNumSeedingRounds(connection, currentTournament));
@@ -1182,7 +1228,8 @@ public final class Queries {
   public static List<Team> getTeamsWithExtraRuns(final Connection connection,
                                                  final Map<Integer, Team> tournamentTeams,
                                                  final String division,
-                                                 final boolean verifiedScoresOnly) throws SQLException, RuntimeException {
+                                                 final boolean verifiedScoresOnly) throws SQLException,
+      RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
     final String view;
 
@@ -1202,9 +1249,10 @@ public final class Queries {
         prep.setInt(2, getNumSeedingRounds(connection, currentTournament));
       } else {
         prep = connection.prepareStatement("SELECT "
-            + view + ".TeamNumber,Count(" + view + ".TeamNumber) FROM " + view + ",current_tournament_teams WHERE " + view
-            + ".TeamNumber = current_tournament_teams.TeamNumber" + " AND current_tournament_teams.event_division = ? AND " + view
-            + ".Tournament = ? GROUP BY " + view + ".TeamNumber" + " HAVING Count(" + view + ".TeamNumber) > ?");
+            + view + ".TeamNumber,Count(" + view + ".TeamNumber) FROM " + view + ",current_tournament_teams WHERE "
+            + view + ".TeamNumber = current_tournament_teams.TeamNumber"
+            + " AND current_tournament_teams.event_division = ? AND " + view + ".Tournament = ? GROUP BY " + view
+            + ".TeamNumber" + " HAVING Count(" + view + ".TeamNumber) > ?");
         prep.setString(1, division);
         prep.setInt(2, currentTournament);
         prep.setInt(3, getNumSeedingRounds(connection, currentTournament));
@@ -1268,7 +1316,8 @@ public final class Queries {
   public static List<Team> getPlayoffSeedingOrder(final Connection connection,
                                                   final WinnerType winnerCriteria,
                                                   final String divisionStr,
-                                                  final Map<Integer, Team> tournamentTeams) throws SQLException, RuntimeException {
+                                                  final Map<Integer, Team> tournamentTeams) throws SQLException,
+      RuntimeException {
 
     final List<Team> retval = new ArrayList<Team>();
     final int currentTournament = getCurrentTournament(connection);
@@ -1278,14 +1327,15 @@ public final class Queries {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT performance_seeding_max.TeamNumber, performance_seeding_max.Score, RAND() as random"
-          + " FROM performance_seeding_max, current_tournament_teams" //
-          + " WHERE performance_seeding_max.Tournament = ?" //
-          + " AND performance_seeding_max.TeamNumber = current_tournament_teams.TeamNumber" //
-          + " AND current_tournament_teams.event_division = ?" //
-          + " ORDER BY performance_seeding_max.Score " + ascDesc //
-          + ", performance_seeding_max.average " + ascDesc //
-          + ", random");
+      prep = connection
+                       .prepareStatement("SELECT performance_seeding_max.TeamNumber, performance_seeding_max.Score, RAND() as random"
+                           + " FROM performance_seeding_max, current_tournament_teams" //
+                           + " WHERE performance_seeding_max.Tournament = ?" //
+                           + " AND performance_seeding_max.TeamNumber = current_tournament_teams.TeamNumber" //
+                           + " AND current_tournament_teams.event_division = ?" //
+                           + " ORDER BY performance_seeding_max.Score " + ascDesc //
+                           + ", performance_seeding_max.average " + ascDesc //
+                           + ", random");
       prep.setInt(1, currentTournament);
       prep.setString(2, divisionStr);
 
@@ -1451,7 +1501,8 @@ public final class Queries {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
-      prep = connection.prepareStatement("SELECT param_value FROM tournament_parameters WHERE param = ? AND tournament = ?");
+      prep = connection
+                       .prepareStatement("SELECT param_value FROM tournament_parameters WHERE param = ? AND tournament = ?");
       prep.setString(1, paramName);
       prep.setInt(2, tournament);
       rs = prep.executeQuery();
@@ -1470,9 +1521,11 @@ public final class Queries {
     PreparedStatement prep = null;
     try {
       if (!paramExists) {
-        prep = connection.prepareStatement("INSERT INTO tournament_parameters (param, param_value, tournament) VALUES (?, ?, ?)");
+        prep = connection
+                         .prepareStatement("INSERT INTO tournament_parameters (param, param_value, tournament) VALUES (?, ?, ?)");
       } else {
-        prep = connection.prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?");
+        prep = connection
+                         .prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?");
       }
       prep.setString(1, paramName);
       prep.setDouble(2, paramValue);
@@ -1492,9 +1545,11 @@ public final class Queries {
     PreparedStatement prep = null;
     try {
       if (!paramExists) {
-        prep = connection.prepareStatement("INSERT INTO tournament_parameters (param, param_value, tournament) VALUES (?, ?, ?)");
+        prep = connection
+                         .prepareStatement("INSERT INTO tournament_parameters (param, param_value, tournament) VALUES (?, ?, ?)");
       } else {
-        prep = connection.prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?");
+        prep = connection
+                         .prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?");
       }
       prep.setString(1, paramName);
       prep.setInt(2, paramValue);
@@ -1570,7 +1625,8 @@ public final class Queries {
       prep = null;
 
       // delete from subjective categories
-      for (final Element category : XMLUtils.filterToElements(document.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+      for (final Element category : XMLUtils.filterToElements(document.getDocumentElement()
+                                                                      .getElementsByTagName("subjectiveCategory"))) {
         final String name = category.getAttribute("name");
         prep = connection.prepareStatement("DELETE FROM "
             + name + " WHERE TeamNumber = ?");
@@ -1651,7 +1707,9 @@ public final class Queries {
     ResultSet rs = null;
     try {
       // Subjective ---
-      for (final Element subjectiveElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
+      for (final Element subjectiveElement : XMLUtils
+                                                     .filterToElements(rootElement
+                                                                                  .getElementsByTagName("subjectiveCategory"))) {
         final String categoryName = subjectiveElement.getAttribute("name");
 
         // build up the SQL
@@ -1666,7 +1724,8 @@ public final class Queries {
         rs = selectPrep.executeQuery();
         while (rs.next()) {
           final int teamNumber = rs.getInt("TeamNumber");
-          final double computedTotal = ScoreUtils.computeTotalScore(new DatabaseTeamScore(subjectiveElement, teamNumber, rs));
+          final double computedTotal = ScoreUtils.computeTotalScore(new DatabaseTeamScore(subjectiveElement,
+                                                                                          teamNumber, rs));
           if (Double.isNaN(computedTotal)) {
             updatePrep.setNull(1, Types.DOUBLE);
           } else {
@@ -1708,19 +1767,25 @@ public final class Queries {
     try {
 
       // build up the SQL
-      updatePrep = connection.prepareStatement("UPDATE Performance SET ComputedTotal = ? WHERE TeamNumber = ? AND Tournament = ? AND RunNumber = ?");
+      updatePrep = connection
+                             .prepareStatement("UPDATE Performance SET ComputedTotal = ? WHERE TeamNumber = ? AND Tournament = ? AND RunNumber = ?");
       updatePrep.setInt(3, tournament);
       selectPrep = connection.prepareStatement("SELECT * FROM Performance WHERE Tournament = ?");
       selectPrep.setInt(1, tournament);
 
       final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
-      final double minimumPerformanceScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(performanceElement.getAttribute("minimumScore")).doubleValue();
+      final double minimumPerformanceScore = Utilities.NUMBER_FORMAT_INSTANCE
+                                                                             .parse(
+                                                                                    performanceElement
+                                                                                                      .getAttribute("minimumScore"))
+                                                                             .doubleValue();
       rs = selectPrep.executeQuery();
       while (rs.next()) {
         if (!rs.getBoolean("Bye")) {
           final int teamNumber = rs.getInt("TeamNumber");
           final int runNumber = rs.getInt("RunNumber");
-          final double computedTotal = ScoreUtils.computeTotalScore(new DatabaseTeamScore(performanceElement, teamNumber, runNumber, rs));
+          final double computedTotal = ScoreUtils.computeTotalScore(new DatabaseTeamScore(performanceElement,
+                                                                                          teamNumber, runNumber, rs));
           if (!Double.isNaN(computedTotal)) {
             updatePrep.setDouble(1, Math.max(computedTotal, minimumPerformanceScore));
           } else {
@@ -1790,7 +1855,8 @@ public final class Queries {
     } else {
       PreparedStatement prep = null;
       try {
-        prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division) VALUES (?, ?, ?)");
+        prep = connection
+                         .prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division) VALUES (?, ?, ?)");
         prep.setInt(1, teamNumber);
         prep.setInt(2, currentTournament.getNextTournament().getTournamentID());
         prep.setString(3, getDivisionOfTeam(connection, teamNumber));
@@ -1848,7 +1914,8 @@ public final class Queries {
       }
 
       LOGGER.error("getTeamCurrentTournament - Cannot determine current tournament for team: "
-          + teamNumber + " tournamentNames: " + tournaments + " nextTournaments: " + nextTournaments + " - using DUMMY tournament as default");
+          + teamNumber + " tournamentNames: " + tournaments + " nextTournaments: " + nextTournaments
+          + " - using DUMMY tournament as default");
       final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
       if (null == dummyTournament) {
         throw new FLLInternalException("Dummy tournament doesn't exist");
@@ -1886,7 +1953,8 @@ public final class Queries {
       deleteTeamFromTournamet(connection, document, teamNumber, currentTournament);
 
       // set new tournament
-      prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division) VALUES (?, ?, ?)");
+      prep = connection
+                       .prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division) VALUES (?, ?, ?)");
       prep.setInt(1, teamNumber);
       prep.setInt(2, newTournament);
       final String division = getDivisionOfTeam(connection, teamNumber);
@@ -1932,7 +2000,8 @@ public final class Queries {
     PreparedStatement prep = null;
     try {
       // delete from subjective categories
-      for (final Element category : XMLUtils.filterToElements(document.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+      for (final Element category : XMLUtils.filterToElements(document.getDocumentElement()
+                                                                      .getElementsByTagName("subjectiveCategory"))) {
         final String name = category.getAttribute("name");
         prep = connection.prepareStatement("DELETE FROM "
             + name + " WHERE TeamNumber = ? AND Tournament = ?");
@@ -2052,7 +2121,8 @@ public final class Queries {
       }
       SQLFunctions.close(prep);
 
-      prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Region, Division, TeamNumber) VALUES (?, ?, ?, ?, ?)");
+      prep = connection
+                       .prepareStatement("INSERT INTO Teams (TeamName, Organization, Region, Division, TeamNumber) VALUES (?, ?, ?, ?, ?)");
       prep.setString(1, name);
       prep.setString(2, organization);
       prep.setString(3, region);
@@ -2061,7 +2131,8 @@ public final class Queries {
       prep.executeUpdate();
       SQLFunctions.close(prep);
 
-      prep = connection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) VALUES(?, ?, ?)");
+      prep = connection
+                       .prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) VALUES(?, ?, ?)");
       prep.setInt(1, tournament);
       prep.setInt(2, number);
       prep.setString(3, division);
@@ -2089,7 +2160,8 @@ public final class Queries {
 
     PreparedStatement prep = null;
     try {
-      prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Region = ?, Division = ? WHERE TeamNumber = ?");
+      prep = connection
+                       .prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Region = ?, Division = ? WHERE TeamNumber = ?");
       prep.setString(1, name);
       prep.setString(2, organization);
       prep.setString(3, region);
@@ -2100,7 +2172,8 @@ public final class Queries {
       prep = null;
 
       // update event divisions that were referencing the old division
-      prep = connection.prepareStatement("UPDATE TournamentTeams SET event_division = ? WHERE TeamNumber = ? AND event_division = ?");
+      prep = connection
+                       .prepareStatement("UPDATE TournamentTeams SET event_division = ? WHERE TeamNumber = ? AND event_division = ?");
       prep.setString(1, division);
       prep.setInt(2, number);
       prep.setString(3, prevDivision);
@@ -2190,7 +2263,8 @@ public final class Queries {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT DISTINCT Teams.Region FROM Teams LEFT JOIN Tournaments ON Teams.Region = Tournaments.Name WHERE Tournaments.Name IS NULL");
+      rs = stmt
+               .executeQuery("SELECT DISTINCT Teams.Region FROM Teams LEFT JOIN Tournaments ON Teams.Region = Tournaments.Name WHERE Tournaments.Name IS NULL");
       while (rs.next()) {
         final String region = rs.getString(1);
         Tournament.createTournament(connection, region, region);
@@ -2218,7 +2292,8 @@ public final class Queries {
       prep = connection.prepareStatement("SELECT id FROM Judges WHERE Tournament = ? AND category = ?");
       prep.setInt(1, getCurrentTournament(connection));
 
-      for (final Element element : XMLUtils.filterToElements(document.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+      for (final Element element : XMLUtils.filterToElements(document.getDocumentElement()
+                                                                     .getElementsByTagName("subjectiveCategory"))) {
         final String categoryName = element.getAttribute("name");
         prep.setString(2, categoryName);
         rs = prep.executeQuery();
@@ -2410,7 +2485,8 @@ public final class Queries {
       stmt = connection.createStatement();
       // TODO make prepared statement
       rs = stmt.executeQuery("SELECT LineNumber FROM PlayoffData"
-          + " WHERE Team = " + teamNumber + " AND Tournament = " + tournament + " AND PlayoffRound = " + playoffRunNumber);
+          + " WHERE Team = " + teamNumber + " AND Tournament = " + tournament + " AND PlayoffRound = "
+          + playoffRunNumber);
       if (rs.next()) {
         return rs.getInt(1);
       } else {
@@ -2871,14 +2947,14 @@ public final class Queries {
    * @throws SQLException
    */
   public static boolean scheduleExistsInDatabase(final Connection connection,
-                                          final int tournamentID) throws SQLException {
+                                                 final int tournamentID) throws SQLException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("SELECT COUNT(team_number) FROM schedule where tournament = ?");
       prep.setInt(1, tournamentID);
       rs = prep.executeQuery();
-      if(rs.next()) {
+      if (rs.next()) {
         return rs.getInt(1) > 0;
       } else {
         return false;
@@ -2888,6 +2964,78 @@ public final class Queries {
       rs = null;
       SQLFunctions.close(prep);
       prep = null;
+    }
+  }
+
+  /**
+   * Store a tournament schedule in the database. This will delete any previous
+   * schedule for the same tournament.
+   * 
+   * @param tournamentID the ID of the tournament
+   * @param schedule the schedule to save
+   */
+  public static void storeSchedule(final Connection connection,
+                                   final int tournamentID,
+                                   final TournamentSchedule schedule) throws SQLException {
+    PreparedStatement deletePerfRounds = null;
+    PreparedStatement deleteSchedule = null;
+    PreparedStatement insertSchedule = null;
+    PreparedStatement insertPerfRounds = null;
+    try {
+      // delete previous tournament schedule
+      deletePerfRounds = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE tournament = ?");
+      deletePerfRounds.setInt(1, tournamentID);
+      deletePerfRounds.executeUpdate();
+
+      deleteSchedule = connection.prepareStatement("DELETE FROM schedule WHERE tournament = ?");
+      deleteSchedule.setInt(1, tournamentID);
+      deleteSchedule.executeUpdate();
+
+      // insert new tournament schedule
+      insertSchedule = connection.prepareStatement("INSERT INTO schedule"//
+          + " (tournament, team_number, judging_station, presentation, technical)"//
+          + " VALUES(?, ?, ?, ?, ?)");
+      insertSchedule.setInt(1, tournamentID);
+
+      insertPerfRounds = connection.prepareStatement("INSERT INTO sched_perf_rounds"//
+          + " (tournament, team_number, round, perf_time, table_color, table_side)"//
+          + " VALUES(?, ?, ?, ?, ?, ?)");
+      insertPerfRounds.setInt(1, tournamentID);
+
+      for (final TeamScheduleInfo si : schedule.getSchedule()) {
+        insertSchedule.setInt(2, si.getTeamNumber());
+        insertSchedule.setString(3, si.getJudgingStation());
+        insertSchedule.setTime(4, dateToTime(si.getPresentation()));
+        insertSchedule.setTime(5, dateToTime(si.getTechnical()));
+        insertSchedule.executeUpdate();
+
+        insertPerfRounds.setInt(2, si.getTeamNumber());
+        for (int round = 0; round < si.getNumberOfRounds(); ++round) {
+          insertPerfRounds.setInt(3, round);
+          insertPerfRounds.setTime(4, dateToTime(si.getPerf(round)));
+          insertPerfRounds.setString(5, si.getPerfTableColor(round));
+          insertPerfRounds.setInt(6, si.getPerfTableSide(round));
+          insertPerfRounds.executeUpdate();
+        }
+      }
+
+    } finally {
+      SQLFunctions.close(deletePerfRounds);
+      deletePerfRounds = null;
+      SQLFunctions.close(deleteSchedule);
+      deleteSchedule = null;
+      SQLFunctions.close(insertSchedule);
+      insertSchedule = null;
+      SQLFunctions.close(insertPerfRounds);
+      insertPerfRounds = null;
+    }
+  }
+
+  private static Time dateToTime(final Date date) {
+    if (null == date) {
+      return null;
+    } else {
+      return new Time(date.getTime());
     }
   }
 

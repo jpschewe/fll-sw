@@ -362,6 +362,12 @@
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="73daf36c:1292a0d6a87:-7fc2" mandatory="true" name="perf_time">
 <data-type name="TIME" selected-variant-pattern="TIME"/>
 </column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="226a0daf:12a7d6c62cc:-7fcd" mandatory="false" name="table_color">
+<data-type name="LONGVARCHAR" selected-variant-pattern="LONGVARCHAR"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="226a0daf:12a7d6c62cc:-7fcc" mandatory="false" name="table_side">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
 </column-list>
 <primary-key id="73daf36c:1292a0d6a87:-7fc8" name="PK_SCHED_PERF_ROUNDS">
 <primary-key-column name="tournament"/>

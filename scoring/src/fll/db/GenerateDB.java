@@ -683,6 +683,8 @@ public final class GenerateDB {
         sql.append(" ,team_number INTEGER NOT NULL");
         sql.append(" ,round INTEGER NOT NULL");
         sql.append(" ,perf_time TIME NOT NULL");
+        sql.append(" ,table_color LONGVARCHAR NOT NULL");
+        sql.append(" ,table_side INTEGER NOT NULL");
         sql.append(" ,CONSTRAINT sched_perf_rounds_pk PRIMARY KEY (tournament, team_number, round)");
         if (createConstraints) {
           sql
