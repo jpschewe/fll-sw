@@ -13,6 +13,8 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
@@ -169,7 +171,9 @@ public class SchedulerUI extends JFrame {
 
     public void actionPerformed(final ActionEvent ae) {
       try {
-        final TournamentSchedule newData = new TournamentSchedule(getScheduleData().getFile(), getScheduleData().getSheetName());
+        final FileInputStream fis = new FileInputStream(currentFile);
+        final TournamentSchedule newData = new TournamentSchedule(fis, getScheduleData().getSheetName());
+        fis.close();
         setScheduleData(newData);
       } catch (final IOException e) {
         final Formatter errorFormatter = new Formatter();
@@ -246,7 +250,22 @@ public class SchedulerUI extends JFrame {
 
     public void actionPerformed(final ActionEvent ae) {
       try {
-        getScheduleData().outputDetailedSchedules();
+        final String filename = currentFile.getPath();
+        final int dotIdx = filename.lastIndexOf('.');
+        final String baseFilename;
+        if (-1 == dotIdx) {
+          baseFilename = filename;
+        } else {
+          baseFilename = filename.substring(0, dotIdx);
+        }
+        final File pdfFile = new File(baseFilename
+            + "-detailed.pdf");
+        LOGGER.info("Writing detailed schedules to "
+            + pdfFile.getAbsolutePath());
+
+        final FileOutputStream fos = new FileOutputStream(pdfFile);
+        getScheduleData().outputDetailedSchedules(fos);
+        fos.close();
         JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedules written to same directory as the schedule", "Information",
                                       JOptionPane.INFORMATION_MESSAGE);
       } catch (final DocumentException e) {
@@ -296,7 +315,10 @@ public class SchedulerUI extends JFrame {
             if (null == sheetName) {
               return;
             }
-            final TournamentSchedule schedule = new TournamentSchedule(selectedFile, sheetName);
+            final FileInputStream fis = new FileInputStream(selectedFile);
+            final TournamentSchedule schedule = new TournamentSchedule(fis, sheetName);
+            fis.close();
+            currentFile = selectedFile;
             setScheduleData(schedule);
           } catch (final ParseException e) {
             final Formatter errorFormatter = new Formatter();
@@ -510,4 +532,7 @@ public class SchedulerUI extends JFrame {
       }
     }
   };
+  
+  private File currentFile;
+  
 }
