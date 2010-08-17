@@ -5,10 +5,10 @@
  */
 package fll.scheduler;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -173,12 +173,6 @@ public class TournamentSchedule {
     return _sheetName;
   }
 
-  private final File _file;
-
-  public File getFile() {
-    return _file;
-  }
-
   private final Set<String> _tableColors = new HashSet<String>();
 
   private final Set<String> _divisions = new HashSet<String>();
@@ -195,27 +189,16 @@ public class TournamentSchedule {
   }
 
   /**
-   * @param f the spreadsheet file to read
+   * @param stream where to read the schedule from, must be an excel spreadsheet
    * @param sheetName the name of the sheet to look at
    * @throws ScheduleParseException if there is an error parsing the schedule
    */
-  public TournamentSchedule(final File f,
+  public TournamentSchedule(final InputStream stream,
                             final String sheetName) throws IOException, ParseException, InvalidFormatException,
       ScheduleParseException {
-    _file = f;
     _sheetName = sheetName;
 
-    LOGGER.info(new Formatter().format("Reading file %s", _file.getAbsoluteFile()));
-
-    if (!_file.canRead()
-        || !_file.isFile()) {
-      throw new RuntimeException("File is not readable or not a file: "
-          + _file.getAbsolutePath());
-    }
-
-    final FileInputStream fis = new FileInputStream(_file);
-    final CellFileReader reader = new ExcelCellReader(fis, _sheetName);
-    fis.close();
+    final CellFileReader reader = new ExcelCellReader(stream, _sheetName);
 
     findColumns(reader);
     parseData(reader);
@@ -470,20 +453,14 @@ public class TournamentSchedule {
     }
   }
 
-  public void outputDetailedSchedules() throws DocumentException, IOException {
-    final String filename = _file.getPath();
-    final int dotIdx = filename.lastIndexOf('.');
-    final String baseFilename;
-    if (-1 == dotIdx) {
-      baseFilename = filename;
-    } else {
-      baseFilename = filename.substring(0, dotIdx);
-    }
-    final File pdfFile = new File(baseFilename
-        + "-detailed.pdf");
-    LOGGER.info("Writing detailed schedules to "
-        + pdfFile.getAbsolutePath());
-
+  /**
+   * Output the detailed schedule.
+   * 
+   * @param output where to write the detailed schedule
+   * @throws DocumentException
+   * @throws IOException
+   */
+  public void outputDetailedSchedules(final OutputStream output) throws DocumentException, IOException {
     // print out detailed schedules
     final Document detailedSchedules = new Document(PageSize.LETTER); // portrait
 
@@ -492,7 +469,6 @@ public class TournamentSchedule {
     detailedSchedules.setMargins(0.25f * 72, 0.25f * 72, 0.35f * 72, 0.35f * 72);
 
     // output to a PDF
-    final FileOutputStream output = new FileOutputStream(pdfFile);
     final PdfWriter writer = PdfWriter.getInstance(detailedSchedules, output);
     writer.setPageEvent(new PageFooter());
 
@@ -507,8 +483,6 @@ public class TournamentSchedule {
     outputPerformanceSchedule(detailedSchedules);
 
     detailedSchedules.close();
-    output.close();
-
   }
 
   private void outputPerformanceSchedule(final Document detailedSchedules) throws DocumentException {
