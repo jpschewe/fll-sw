@@ -10,6 +10,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -47,6 +53,7 @@ import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Utilities;
+import fll.db.Queries;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
@@ -1416,6 +1423,99 @@ public class TournamentSchedule {
    */
   public void setPerformanceDuration(final long performanceDuration) {
     this.performanceDuration = performanceDuration;
+  }
+
+  /**
+   * Check if the schedule exists in the database.
+   * 
+   * @param connection database connection
+   * @param tournamentID ID of the tournament to look for
+   * @return if a schedule exists in the database for the specified tournament
+   * @throws SQLException
+   */
+  public static boolean scheduleExistsInDatabase(final Connection connection,
+                                                 final int tournamentID) throws SQLException {
+    ResultSet rs = null;
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("SELECT COUNT(team_number) FROM schedule where tournament = ?");
+      prep.setInt(1, tournamentID);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        return rs.getInt(1) > 0;
+      } else {
+        return false;
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      rs = null;
+      SQLFunctions.close(prep);
+      prep = null;
+    }
+  }
+
+  /**
+   * Store a tournament schedule in the database. This will delete any previous
+   * schedule for the same tournament.
+   * 
+   * @param tournamentID the ID of the tournament
+   * @param schedule the schedule to save
+   */
+  public static void storeSchedule(final Connection connection,
+                                   final int tournamentID,
+                                   final TournamentSchedule schedule) throws SQLException {
+    PreparedStatement deletePerfRounds = null;
+    PreparedStatement deleteSchedule = null;
+    PreparedStatement insertSchedule = null;
+    PreparedStatement insertPerfRounds = null;
+    try {
+      // delete previous tournament schedule
+      deletePerfRounds = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE tournament = ?");
+      deletePerfRounds.setInt(1, tournamentID);
+      deletePerfRounds.executeUpdate();
+  
+      deleteSchedule = connection.prepareStatement("DELETE FROM schedule WHERE tournament = ?");
+      deleteSchedule.setInt(1, tournamentID);
+      deleteSchedule.executeUpdate();
+  
+      // insert new tournament schedule
+      insertSchedule = connection.prepareStatement("INSERT INTO schedule"//
+          + " (tournament, team_number, judging_station, presentation, technical)"//
+          + " VALUES(?, ?, ?, ?, ?)");
+      insertSchedule.setInt(1, tournamentID);
+  
+      insertPerfRounds = connection.prepareStatement("INSERT INTO sched_perf_rounds"//
+          + " (tournament, team_number, round, perf_time, table_color, table_side)"//
+          + " VALUES(?, ?, ?, ?, ?, ?)");
+      insertPerfRounds.setInt(1, tournamentID);
+  
+      for (final TeamScheduleInfo si : schedule.getSchedule()) {
+        insertSchedule.setInt(2, si.getTeamNumber());
+        insertSchedule.setString(3, si.getJudgingStation());
+        insertSchedule.setTime(4, Queries.dateToTime(si.getPresentation()));
+        insertSchedule.setTime(5, Queries.dateToTime(si.getTechnical()));
+        insertSchedule.executeUpdate();
+  
+        insertPerfRounds.setInt(2, si.getTeamNumber());
+        for (int round = 0; round < si.getNumberOfRounds(); ++round) {
+          insertPerfRounds.setInt(3, round);
+          insertPerfRounds.setTime(4, Queries.dateToTime(si.getPerf(round)));
+          insertPerfRounds.setString(5, si.getPerfTableColor(round));
+          insertPerfRounds.setInt(6, si.getPerfTableSide(round));
+          insertPerfRounds.executeUpdate();
+        }
+      }
+  
+    } finally {
+      SQLFunctions.close(deletePerfRounds);
+      deletePerfRounds = null;
+      SQLFunctions.close(deleteSchedule);
+      deleteSchedule = null;
+      SQLFunctions.close(insertSchedule);
+      insertSchedule = null;
+      SQLFunctions.close(insertPerfRounds);
+      insertPerfRounds = null;
+    }
   }
 
   /**
