@@ -301,10 +301,11 @@ public final class Queries {
 
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
-    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(challengeDocument
-                                                                                      .getDocumentElement()
-                                                                                      .getElementsByTagName(
-                                                                                                            "subjectiveCategory"))) {
+    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
+                                                                                challengeDocument
+                                                                                                 .getDocumentElement()
+                                                                                                 .getElementsByTagName(
+                                                                                                                       "subjectiveCategory"))) {
       final String title = subjectiveElement.getAttribute("title");
       final String name = subjectiveElement.getAttribute("name");
       subjectiveCategories.put(title, name);
@@ -716,7 +717,9 @@ public final class Queries {
       }
       columns.append(", "
           + name);
-      final Iterator<Element> valueChildren = new NodelistElementCollectionAdapter(element.getElementsByTagName("value"));
+      final Iterator<Element> valueChildren = new NodelistElementCollectionAdapter(
+                                                                                   element
+                                                                                          .getElementsByTagName("value"));
       if (valueChildren.hasNext()) {
         // enumerated
         values.append(", '"
@@ -934,7 +937,9 @@ public final class Queries {
         throw new RuntimeException("Missing parameter: "
             + name);
       }
-      final Iterator<Element> valueChildren = new NodelistElementCollectionAdapter(element.getElementsByTagName("value"));
+      final Iterator<Element> valueChildren = new NodelistElementCollectionAdapter(
+                                                                                   element
+                                                                                          .getElementsByTagName("value"));
       if (valueChildren.hasNext()) {
         // enumerated
         sql.append(", "
@@ -1625,8 +1630,11 @@ public final class Queries {
       prep = null;
 
       // delete from subjective categories
-      for (final Element category : new NodelistElementCollectionAdapter(document.getDocumentElement()
-                                                                      .getElementsByTagName("subjectiveCategory"))) {
+      for (final Element category : new NodelistElementCollectionAdapter(
+                                                                         document
+                                                                                 .getDocumentElement()
+                                                                                 .getElementsByTagName(
+                                                                                                       "subjectiveCategory"))) {
         final String name = category.getAttribute("name");
         prep = connection.prepareStatement("DELETE FROM "
             + name + " WHERE TeamNumber = ?");
@@ -1707,8 +1715,9 @@ public final class Queries {
     ResultSet rs = null;
     try {
       // Subjective ---
-      for (final Element subjectiveElement : new NodelistElementCollectionAdapter(rootElement
-                                                                                  .getElementsByTagName("subjectiveCategory"))) {
+      for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
+                                                                                  rootElement
+                                                                                             .getElementsByTagName("subjectiveCategory"))) {
         final String categoryName = subjectiveElement.getAttribute("name");
 
         // build up the SQL
@@ -1999,8 +2008,11 @@ public final class Queries {
     PreparedStatement prep = null;
     try {
       // delete from subjective categories
-      for (final Element category : new NodelistElementCollectionAdapter(document.getDocumentElement()
-                                                                      .getElementsByTagName("subjectiveCategory"))) {
+      for (final Element category : new NodelistElementCollectionAdapter(
+                                                                         document
+                                                                                 .getDocumentElement()
+                                                                                 .getElementsByTagName(
+                                                                                                       "subjectiveCategory"))) {
         final String name = category.getAttribute("name");
         prep = connection.prepareStatement("DELETE FROM "
             + name + " WHERE TeamNumber = ? AND Tournament = ?");
@@ -2291,8 +2303,11 @@ public final class Queries {
       prep = connection.prepareStatement("SELECT id FROM Judges WHERE Tournament = ? AND category = ?");
       prep.setInt(1, getCurrentTournament(connection));
 
-      for (final Element element : new NodelistElementCollectionAdapter(document.getDocumentElement()
-                                                                     .getElementsByTagName("subjectiveCategory"))) {
+      for (final Element element : new NodelistElementCollectionAdapter(
+                                                                        document
+                                                                                .getDocumentElement()
+                                                                                .getElementsByTagName(
+                                                                                                      "subjectiveCategory"))) {
         final String categoryName = element.getAttribute("name");
         prep.setString(2, categoryName);
         rs = prep.executeQuery();
@@ -3035,6 +3050,53 @@ public final class Queries {
       return null;
     } else {
       return new Time(date.getTime());
+    }
+  }
+
+  /**
+   * Create a tournament in the database.
+   * 
+   * @param name the name of the tournament, must not be null
+   * @param location the location of the tournament, may be null
+   */
+  public static void createTournament(final Connection connection,
+                                      final String name,
+                                      final String location) throws SQLException {
+    PreparedStatement insertPrep = null;
+    try {
+      insertPrep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location) VALUES(?, ?)");
+      insertPrep.setString(1, name);
+      insertPrep.setString(2, location);
+      insertPrep.executeUpdate();
+    } finally {
+      SQLFunctions.close(insertPrep);
+    }
+  }
+
+  public static void deleteTournament(final Connection connection,
+                                      final int tournamentID) throws SQLException {
+    PreparedStatement deletePrep = null;
+    try {
+      deletePrep = connection.prepareStatement("DELETE FROM Tournaments WHERE tournament_id = ?");
+      deletePrep.setInt(1, tournamentID);
+    } finally {
+      SQLFunctions.close(deletePrep);
+    }
+  }
+
+  public static void updateTournament(final Connection connection,
+                                      final int tournamentID,
+                                      final String name,
+                                      final String location) throws SQLException {
+    PreparedStatement updatePrep = null;
+    try {
+      updatePrep = connection.prepareStatement("UPDATE Tournaments SET Name = ?, Location = ? WHERE tournament_id = ?");
+      updatePrep.setString(1, name);
+      updatePrep.setString(2, location);
+      updatePrep.setInt(3, tournamentID);
+      updatePrep.executeUpdate();
+    } finally {
+      SQLFunctions.close(updatePrep);
     }
   }
 

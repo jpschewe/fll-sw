@@ -6,22 +6,30 @@
 
 package fll.scheduler;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.util.List;
 
 import junit.framework.Assert;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
+import fll.util.ExcelCellReader;
 import fll.xml.ChallengeParser;
 
 /**
@@ -32,7 +40,7 @@ public class TournamentScheduleTest {
   @Test
   public void testForNoSchedule() throws SQLException, UnsupportedEncodingException {
     Utilities.loadDBDriver();
-    
+
     final String url = "jdbc:hsqldb:mem:ut_ts_test_no1";
     Connection memConnection = null;
     try {
@@ -41,15 +49,78 @@ public class TournamentScheduleTest {
       final Document document = ChallengeParser.parse(new InputStreamReader(stream));
 
       memConnection = DriverManager.getConnection(url);
-      
+
       GenerateDB.generateDB(document, memConnection, true);
       final boolean exists = Queries.scheduleExistsInDatabase(memConnection, 1);
       Assert.assertFalse(exists);
-      
+
     } finally {
       SQLFunctions.close(memConnection);
       memConnection = null;
     }
   }
 
+  @Test
+  public void testStoreSchedule() throws SQLException, IOException, InvalidFormatException, ParseException,
+      ScheduleParseException {
+    Utilities.loadDBDriver();
+
+    final String tournamentName = "ut_ts_test_ss1";
+    final String url = "jdbc:hsqldb:mem:ut_ts_test_ss1";
+    Connection memConnection = null;
+    try {
+      final InputStream stream = TournamentScheduleTest.class.getResourceAsStream("/fll/db/data/challenge-test.xml");
+      Assert.assertNotNull(stream);
+      final Document document = ChallengeParser.parse(new InputStreamReader(stream));
+
+      memConnection = DriverManager.getConnection(url);
+
+      GenerateDB.generateDB(document, memConnection, true);
+
+      Queries.createTournament(memConnection, tournamentName, null);
+      final Tournament tournament = Tournament.findTournamentByName(memConnection, tournamentName);
+      Assert.assertNotNull(tournament);
+
+      Queries.setCurrentTournament(memConnection, tournament.getTournamentID());
+
+      final boolean existsBefore = Queries.scheduleExistsInDatabase(memConnection, 1);
+      Assert.assertFalse(existsBefore);
+
+      // load teams into the database
+      final String testRegion = "test region";
+      for (int teamNumber = 1; teamNumber <= 32; ++teamNumber) {
+        final String division;
+        if (teamNumber < 17) {
+          division = "1";
+        } else {
+          division = "2";
+        }
+        final String dup = Queries.addTeam(memConnection, teamNumber, teamNumber
+            + " Name", teamNumber
+            + " School", testRegion, division, tournament.getTournamentID());
+        Assert.assertNull(dup);
+      }
+
+      // load schedule with matching team numbers
+      final URL scheduleResource = TournamentSchedule.class.getResource("data/16-16-test.xls");
+      Assert.assertNotNull(scheduleResource);
+      InputStream scheduleStream = scheduleResource.openStream();
+      final List<String> sheetNames = ExcelCellReader.getAllSheetNames(scheduleStream);
+      scheduleStream.close();
+      Assert.assertEquals("Expecting exactly 1 sheet in schedule spreadsheet", 1, sheetNames.size());
+
+      scheduleStream = scheduleResource.openStream();
+      final TournamentSchedule schedule = new TournamentSchedule(scheduleStream, sheetNames.get(0));
+      scheduleStream.close();
+
+      Queries.storeSchedule(memConnection, tournament.getTournamentID(), schedule);
+
+      final boolean existsAfter = Queries.scheduleExistsInDatabase(memConnection, tournament.getTournamentID());
+      Assert.assertTrue("Schedule should exist now that it's been stored", existsAfter);
+
+    } finally {
+      SQLFunctions.close(memConnection);
+      memConnection = null;
+    }
+  }
 }
