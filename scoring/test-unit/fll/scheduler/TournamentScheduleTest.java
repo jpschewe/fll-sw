@@ -50,7 +50,7 @@ public class TournamentScheduleTest {
       memConnection = DriverManager.getConnection(url);
 
       GenerateDB.generateDB(document, memConnection, true);
-      final boolean exists = Queries.scheduleExistsInDatabase(memConnection, 1);
+      final boolean exists = TournamentSchedule.scheduleExistsInDatabase(memConnection, 1);
       Assert.assertFalse(exists);
 
     } finally {
@@ -82,7 +82,7 @@ public class TournamentScheduleTest {
 
       Queries.setCurrentTournament(memConnection, tournament.getTournamentID());
 
-      final boolean existsBefore = Queries.scheduleExistsInDatabase(memConnection, 1);
+      final boolean existsBefore = TournamentSchedule.scheduleExistsInDatabase(memConnection, 1);
       Assert.assertFalse(existsBefore);
 
       // load teams into the database
@@ -112,9 +112,9 @@ public class TournamentScheduleTest {
       final TournamentSchedule schedule = new TournamentSchedule(scheduleStream, sheetNames.get(0));
       scheduleStream.close();
 
-      Queries.storeSchedule(memConnection, tournament.getTournamentID(), schedule);
+      TournamentSchedule.storeSchedule(memConnection, tournament.getTournamentID(), schedule);
 
-      final boolean existsAfter = Queries.scheduleExistsInDatabase(memConnection, tournament.getTournamentID());
+      final boolean existsAfter = TournamentSchedule.scheduleExistsInDatabase(memConnection, tournament.getTournamentID());
       Assert.assertTrue("Schedule should exist now that it's been stored", existsAfter);
 
     } finally {
