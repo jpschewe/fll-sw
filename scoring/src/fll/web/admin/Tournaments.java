@@ -30,6 +30,7 @@ import org.hsqldb.Types;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;
+import fll.db.Queries;
 import fll.web.SessionAttributes;
 
 /**
@@ -288,14 +289,6 @@ public final class Tournaments {
   }
 
   private static void createAndInsertTournaments(final HttpServletRequest request, final Connection connection) throws SQLException {
-    PreparedStatement updatePrep = null;
-    PreparedStatement insertPrep = null;
-    PreparedStatement deletePrep = null;
-    try {
-      insertPrep = connection.prepareStatement("INSERT INTO Tournaments (Name, Location) VALUES(?, ?)");
-      updatePrep = connection.prepareStatement("UPDATE Tournaments SET Name = ?, Location = ? WHERE tournament_id = ?");
-      deletePrep = connection.prepareStatement("DELETE FROM Tournaments WHERE tournament_id = ?");
-
       int row = 0;
       String keyStr = request.getParameter("key"
           + row);
@@ -309,9 +302,7 @@ public final class Tournaments {
           if (null != name
               && !"".equals(name)) {
             // new tournament
-            insertPrep.setString(1, name);
-            insertPrep.setString(2, location);
-            insertPrep.executeUpdate();
+            Queries.createTournament(connection, name, location);
             if (LOGGER.isDebugEnabled()) {
               LOGGER.debug("Adding a new tournament "
                   + name);
@@ -320,18 +311,14 @@ public final class Tournaments {
         } else if (null == name
             || "".equals(name)) {
           // delete if no name
-          deletePrep.setInt(1, key);
-          deletePrep.executeUpdate();
+          Queries.deleteTournament(connection, key);
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Deleting a tournament "
                 + key);
           }
         } else {
           // update with new values
-          updatePrep.setString(1, name);
-          updatePrep.setString(2, location);
-          updatePrep.setInt(3, key);
-          updatePrep.executeUpdate();
+          Queries.updateTournament(connection, key, name, location);
           if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Updating a tournament "
                 + key + " to " + name);
@@ -346,11 +333,6 @@ public final class Tournaments {
         location = request.getParameter("location"
             + row);
       }
-    } finally {
-      SQLFunctions.close(insertPrep);
-      SQLFunctions.close(updatePrep);
-      SQLFunctions.close(deletePrep);
-    }
   }
 
   /**

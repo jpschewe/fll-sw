@@ -54,16 +54,23 @@ public class ExcelCellReader implements CellFileReader {
         || file.getName().endsWith(".xslx");
   }
 
+  public static List<String> getAllSheetNames(final File file) throws InvalidFormatException, IOException {
+    final FileInputStream fis = new FileInputStream(file);
+    final List<String> result = getAllSheetNames(fis);
+    fis.close();
+    return result;
+  }
+  
   /**
-   * Get the names of all sheets in the specified file.
+   * Get the names of all sheets in the specified stream.
    * 
    * @throws IOException
    * @throws InvalidFormatException
    */
-  public static List<String> getAllSheetNames(final File file) throws InvalidFormatException, IOException {
+  public static List<String> getAllSheetNames(final InputStream stream) throws InvalidFormatException, IOException {
     final List<String> sheetNames = new LinkedList<String>();
 
-    final Workbook workbook = createWorkbook(new FileInputStream(file));
+    final Workbook workbook = createWorkbook(stream);
     final int numSheets = workbook.getNumberOfSheets();
     for (int i = 0; i < numSheets; ++i) {
       sheetNames.add(workbook.getSheetName(i));
