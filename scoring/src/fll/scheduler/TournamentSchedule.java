@@ -5,7 +5,6 @@
  */
 package fll.scheduler;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -52,6 +51,7 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
 
+import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.CellFileReader;
@@ -1473,29 +1473,29 @@ public class TournamentSchedule {
       deletePerfRounds = connection.prepareStatement("DELETE FROM sched_perf_rounds WHERE tournament = ?");
       deletePerfRounds.setInt(1, tournamentID);
       deletePerfRounds.executeUpdate();
-  
+
       deleteSchedule = connection.prepareStatement("DELETE FROM schedule WHERE tournament = ?");
       deleteSchedule.setInt(1, tournamentID);
       deleteSchedule.executeUpdate();
-  
+
       // insert new tournament schedule
       insertSchedule = connection.prepareStatement("INSERT INTO schedule"//
           + " (tournament, team_number, judging_station, presentation, technical)"//
           + " VALUES(?, ?, ?, ?, ?)");
       insertSchedule.setInt(1, tournamentID);
-  
+
       insertPerfRounds = connection.prepareStatement("INSERT INTO sched_perf_rounds"//
           + " (tournament, team_number, round, perf_time, table_color, table_side)"//
           + " VALUES(?, ?, ?, ?, ?, ?)");
       insertPerfRounds.setInt(1, tournamentID);
-  
+
       for (final TeamScheduleInfo si : schedule.getSchedule()) {
         insertSchedule.setInt(2, si.getTeamNumber());
         insertSchedule.setString(3, si.getJudgingStation());
         insertSchedule.setTime(4, Queries.dateToTime(si.getPresentation()));
         insertSchedule.setTime(5, Queries.dateToTime(si.getTechnical()));
         insertSchedule.executeUpdate();
-  
+
         insertPerfRounds.setInt(2, si.getTeamNumber());
         for (int round = 0; round < si.getNumberOfRounds(); ++round) {
           insertPerfRounds.setInt(3, round);
@@ -1505,7 +1505,7 @@ public class TournamentSchedule {
           insertPerfRounds.executeUpdate();
         }
       }
-  
+
     } finally {
       SQLFunctions.close(deletePerfRounds);
       deletePerfRounds = null;
@@ -1516,6 +1516,37 @@ public class TournamentSchedule {
       SQLFunctions.close(insertPerfRounds);
       insertPerfRounds = null;
     }
+  }
+
+  /**
+   * Check if the current schedule is consistent with the specified tournament
+   * in the database.
+   * 
+   * @param connection the database connection
+   * @param tournament the tournament to check
+   * @return the constraint violations, empty if no violations
+   * @throws SQLException
+   */
+  public Collection<ConstraintViolation> compareWithDatabase(final Connection connection,
+                                                             final int tournamentID) throws SQLException {
+    final Collection<ConstraintViolation> violations = new LinkedList<ConstraintViolation>();
+    final Map<Integer, Team> dbTeams = Queries.getTournamentTeams(connection, tournamentID);
+    final Set<Integer> scheduleTeamNumbers = new HashSet<Integer>();
+    for (final TeamScheduleInfo si : _schedule) {
+      scheduleTeamNumbers.add(si.getTeamNumber());
+      if (!dbTeams.containsKey(si.getTeamNumber())) {
+        violations.add(new ConstraintViolation(true, si.getTeamNumber(), null, null, null,
+                                               "Team is in schedule, but not in database"));
+      }
+    }
+    for (final Integer dbNum : dbTeams.keySet()) {
+      if (!scheduleTeamNumbers.contains(dbNum)) {
+        violations.add(new ConstraintViolation(true, dbNum, null, null, null,
+                                               "Team is in database, but not in schedule"));
+      }
+    }
+
+    return violations;
   }
 
   /**
