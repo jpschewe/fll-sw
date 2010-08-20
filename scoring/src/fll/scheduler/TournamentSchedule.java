@@ -342,16 +342,24 @@ public class TournamentSchedule {
                          final ColumnInformation ci) throws IOException, ParseException, ScheduleParseException {
     TeamScheduleInfo ti;
     while (null != (ti = parseLine(reader, ci))) {
-      _schedule.add(ti);
-
-      // keep track of some meta information
-      for (int round = 0; round < getNumberOfRounds(); ++round) {
-        _tableColors.add(ti.getPerfTableColor(round));
-        addToMatches(ti, round);
-      }
-      _divisions.add(ti.getDivision());
-      _judges.add(ti.getJudgingStation());
+      cacheTeamScheduleInformation(ti);
     }
+  }
+
+  /**
+   * Populate internal caches with the data from this newly created
+   * {@link TeamScheduleInfo}.
+   */
+  private void cacheTeamScheduleInformation(final TeamScheduleInfo ti) {
+    _schedule.add(ti);
+
+    // keep track of some meta information
+    for (int round = 0; round < getNumberOfRounds(); ++round) {
+      _tableColors.add(ti.getPerfTableColor(round));
+      addToMatches(ti, round);
+    }
+    _divisions.add(ti.getDivision());
+    _judges.add(ti.getJudgingStation());
   }
 
   /**
