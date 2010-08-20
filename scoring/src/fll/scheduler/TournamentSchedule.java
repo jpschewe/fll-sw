@@ -174,12 +174,6 @@ public class TournamentSchedule {
 
   private final Map<Date, Map<String, List<TeamScheduleInfo>>> _matches = new HashMap<Date, Map<String, List<TeamScheduleInfo>>>();
 
-  private final String _sheetName;
-
-  public String getSheetName() {
-    return _sheetName;
-  }
-
   private final Set<String> _tableColors = new HashSet<String>();
 
   private final Set<String> _divisions = new HashSet<String>();
@@ -203,9 +197,7 @@ public class TournamentSchedule {
   public TournamentSchedule(final InputStream stream,
                             final String sheetName) throws IOException, ParseException, InvalidFormatException,
       ScheduleParseException {
-    _sheetName = sheetName;
-
-    final CellFileReader reader = new ExcelCellReader(stream, _sheetName);
+    final CellFileReader reader = new ExcelCellReader(stream, sheetName);
 
     findColumns(reader);
     parseData(reader);
