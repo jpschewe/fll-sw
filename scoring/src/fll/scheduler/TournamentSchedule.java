@@ -170,7 +170,8 @@ public class TournamentSchedule {
   }
 
   /**
-   * @param stream where to read the schedule from, must be an excel spreadsheet
+   * @param stream where to read the schedule from, must be an excel
+   *          spreadsheet, will be closed by this method if no exception occurs
    * @param sheetName the name of the sheet to look at
    * @throws ScheduleParseException if there is an error parsing the schedule
    */
