@@ -127,15 +127,30 @@ public final class Queries {
    * TournamentTeams to determine which teams should be included.
    */
   public static Map<Integer, Team> getTournamentTeams(final Connection connection) throws SQLException {
+    return getTournamentTeams(connection, getCurrentTournament(connection));
+  }
+
+  /**
+   * Get a map of teams for the specified tournament keyed on team number. Uses
+   * the table TournamentTeams to determine which teams should be included.
+   */
+  public static Map<Integer, Team> getTournamentTeams(final Connection connection,
+                                                      final int tournamentID) throws SQLException {
     final SortedMap<Integer, Team> tournamentTeams = new TreeMap<Integer, Team>();
     Statement stmt = null;
     ResultSet rs = null;
+    PreparedStatement prep = null;
     try {
       stmt = connection.createStatement();
 
-      final String sql = "SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, Teams.Region, Teams.Division, current_tournament_teams.event_division"
-          + " FROM Teams, current_tournament_teams" + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber";
-      rs = stmt.executeQuery(sql);
+      prep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.Organization"//
+          + ", Teams.TeamName, Teams.Region"//
+          + ", Teams.Division, TournamentTeams.event_division" //
+          + " FROM Teams, TournamentTeams" //
+          + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber"//
+          + " AND TournamentTeams.Tournament = ?");
+      prep.setInt(1, tournamentID);
+      rs = prep.executeQuery();
       while (rs.next()) {
         final Team team = new Team();
         team.setTeamNumber(rs.getInt("TeamNumber"));
