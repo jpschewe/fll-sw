@@ -172,7 +172,7 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       try {
         final FileInputStream fis = new FileInputStream(currentFile);
-        final TournamentSchedule newData = new TournamentSchedule(fis, getScheduleData().getSheetName());
+        final TournamentSchedule newData = new TournamentSchedule(fis, currentSheetName);
         fis.close();
         setScheduleData(newData);
       } catch (final IOException e) {
@@ -319,6 +319,7 @@ public class SchedulerUI extends JFrame {
             final TournamentSchedule schedule = new TournamentSchedule(fis, sheetName);
             fis.close();
             currentFile = selectedFile;
+            currentSheetName = sheetName;
             setScheduleData(schedule);
           } catch (final ParseException e) {
             final Formatter errorFormatter = new Formatter();
@@ -534,5 +535,6 @@ public class SchedulerUI extends JFrame {
   };
   
   private File currentFile;
+  private String currentSheetName;
   
 }
