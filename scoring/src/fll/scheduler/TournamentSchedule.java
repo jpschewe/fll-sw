@@ -13,6 +13,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -184,6 +185,101 @@ public class TournamentSchedule {
     numRounds = ci.getNumPerfs();
     parseData(reader, ci);
     reader.close();
+  }
+
+  /**
+   * Load a tournament from the database.
+   * 
+   * @param connection
+   * @param tournamentID
+   * @throws SQLException
+   */
+  public TournamentSchedule(final Connection connection,
+                            final int tournamentID) throws SQLException {
+    PreparedStatement getSched = null;
+    ResultSet sched = null;
+    PreparedStatement getPerfRounds = null;
+    ResultSet perfRounds = null;
+    PreparedStatement getNumRounds = null;
+    ResultSet numRounds = null;
+    try {
+      getNumRounds = connection.prepareStatement("SELECT MAX(round) FROM sched_perf_rounds WHERE tournament = ?");
+      getNumRounds.setInt(1, tournamentID);
+      numRounds = getNumRounds.executeQuery();
+      if(numRounds.next()) {
+        this.numRounds = numRounds.getInt(1);
+      } else {
+        throw new RuntimeException("No rounds found for tournament: " + tournamentID);
+      }
+      
+      getSched = connection.prepareStatement("SELECT team_number, judging_stat" +
+      		"ion, presentation, technical" //
+          + " FROM schedule"//
+          + " WHERE tournament = ?");
+      getSched.setInt(1, tournamentID);
+
+      getPerfRounds = connection.prepareStatement("SELECT round, perf_time, table_color, table_side" //
+          + " FROM sched_perf_rounds" //
+          + " WHERE tournamnet = ? AND team_number = ?" //
+          + " ORDER BY round ASC");
+      getPerfRounds.setInt(1, tournamentID);
+
+      sched = getSched.executeQuery();
+      while (sched.next()) {
+        final int teamNumber = sched.getInt(1);
+        final String judgingStation = sched.getString(2);
+        final Time presentation = sched.getTime(3);
+        final Time technical = sched.getTime(4);
+
+        final TeamScheduleInfo ti = new TeamScheduleInfo(this.numRounds, teamNumber);
+        ti.setJudgingStation(judgingStation);
+        ti.setPresentation(Queries.timeToDate(presentation));
+        ti.setTechnical(Queries.timeToDate(technical));
+        
+
+        getPerfRounds.setInt(2, teamNumber);
+        perfRounds = getPerfRounds.executeQuery();
+        int prevRound = 0;
+        while (perfRounds.next()) {
+          final int round = perfRounds.getInt(1);
+          if (round != prevRound + 1) {
+            throw new RuntimeException("Rounds must be consecutive and start at 1. Tournament: "
+                + tournamentID + " team: " + teamNumber + " round: " + round);
+          }
+          final Time perfTime = perfRounds.getTime(2);
+          final String tableColor = perfRounds.getString(3);
+          final int tableSide = perfRounds.getInt(4);
+          if (tableSide != 1
+              && tableSide != 2) {
+            throw new RuntimeException("Tables sides must be 1 or 2. Tournament: "
+                + tournamentID + " team: " + teamNumber);
+          }
+          ti.setPerf(round-1, Queries.timeToDate(perfTime));
+          ti.setPerfTableColor(round-1, tableColor);
+          ti.setPerfTableSide(round-1, prevRound);
+        }
+        final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournamentID);
+        ti.setDivision(eventDivision);
+        
+        final Team team = Team.getTeamFromDatabase(connection, teamNumber);
+        ti.setOrganization(team.getOrganization());
+        ti.setTeamName(team.getTeamName());        
+      }
+
+    } finally {
+      SQLFunctions.close(sched);
+      sched = null;
+      SQLFunctions.close(getSched);
+      getSched = null;
+      SQLFunctions.close(perfRounds);
+      perfRounds = null;
+      SQLFunctions.close(getPerfRounds);
+      getPerfRounds = null;
+      SQLFunctions.close(numRounds);
+      numRounds = null;
+      SQLFunctions.close(getNumRounds);
+      getNumRounds = null;
+    }
   }
 
   /**
@@ -1251,7 +1347,7 @@ public class TournamentSchedule {
       }
 
       final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
-      final TeamScheduleInfo ti = new TeamScheduleInfo(reader.getLineNumber(), getNumberOfRounds(), teamNumber);
+      final TeamScheduleInfo ti = new TeamScheduleInfo(getNumberOfRounds(), teamNumber);
       ti.setTeamName(line[ci.getTeamNameColumn()]);
       ti.setOrganization(line[ci.getOrganizationColumn()]);
       ti.setDivision(line[ci.getDivisionColumn()]);

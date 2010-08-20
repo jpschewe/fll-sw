@@ -1139,21 +1139,39 @@ public final class Queries {
    * @return the event division for the team
    * @throws SQLException on a database error
    * @throws RuntimeException if <code>teamNumber</code> cannot be found in
-   *           TournamenTeams
+   *           TournamenTeams for the current tournament
    */
   public static String getEventDivision(final Connection connection,
                                         final int teamNumber) throws SQLException, RuntimeException {
+    return getEventDivision(connection, teamNumber, getCurrentTournament(connection));
+  }
+
+  /**
+   * Get the division that a team is in for the specified tournament.
+   * 
+   * @param teamNumber the team's number
+   * @param tournamentID ID of tournament
+   * @return the event division for the team
+   * @throws SQLException on a database error
+   * @throws RuntimeException if <code>teamNumber</code> cannot be found in
+   *           TournamenTeams for the specified tournament
+   */
+  public static String getEventDivision(final Connection connection,
+                                        final int teamNumber,
+                                        final int tournamentID) throws SQLException, RuntimeException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT event_division FROM current_tournament_teams WHERE TeamNumber = ?");
+      prep = connection
+                       .prepareStatement("SELECT event_division FROM TournamentTeams WHERE TeamNumber = ? AND Tournament = ?");
       prep.setInt(1, teamNumber);
+      prep.setInt(2, tournamentID);
       rs = prep.executeQuery();
       if (rs.next()) {
         return rs.getString(1);
       } else {
         throw new RuntimeException("Couldn't find team number "
-            + teamNumber + " in the list of tournament teams!");
+            + teamNumber + " in the list of tournament teams! Tournament: " + tournamentID);
       }
     } finally {
       SQLFunctions.close(rs);
@@ -2973,6 +2991,17 @@ public final class Queries {
       return null;
     } else {
       return new Time(date.getTime());
+    }
+  }
+
+  /**
+   * Convert {@link java.sql.Time} to {@link java.util.Date}.
+   */
+  public static Date timeToDate(final Time t) {
+    if (null == t) {
+      return null;
+    } else {
+      return new Date(t.getTime());
     }
   }
 

@@ -69,19 +69,8 @@ public final class TeamScheduleInfo {
     return perfTableSide[idx];
   }
 
-  private final int lineNumber;
-
-  /**
-   * @return Line number that this object corresponds to in the original schedule.
-   */
-  public int getLineNumber() {
-    return lineNumber;
-  }
-
-  public TeamScheduleInfo(final int lineNumber,
-                          final int numRounds,
+  public TeamScheduleInfo(final int numRounds,
                           final int teamNumber) {
-    this.lineNumber = lineNumber;
     this.numberOfRounds = numRounds;
     this.perf = new Date[numRounds];
     this.perfTableColor = new String[numRounds];
