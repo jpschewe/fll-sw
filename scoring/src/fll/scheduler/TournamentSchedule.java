@@ -63,7 +63,6 @@ import fll.util.FLLRuntimeException;
  * Tournament schedule. Can parse the schedule from a spreadsheet.
  */
 public class TournamentSchedule {
-
   private static final Logger LOGGER = Logger.getLogger(TournamentSchedule.class);
 
   /**
@@ -97,32 +96,13 @@ public class TournamentSchedule {
    */
   private static final String TABLE_HEADER_FORMAT = "Perf %d Table";
 
-  private int _teamNumColumn = -1;
-
-  private int _teamNameColumn = -1;
-
-  private int _organizationColumn = -1;
-
-  private int _divisionColumn = -1;
-
-  private int _presentationColumn = -1;
-
-  private int _technicalColumn = -1;
-
-  private int _judgeGroupColumn = -1;
-
-  private int[] _perfColumn;
-
-  private int[] _perfTableColumn;
+  private final int numRounds;
 
   /**
    * Number of rounds in this schedule.
    */
   public int getNumberOfRounds() {
-    if (null == _perfColumn) {
-      throw new FLLInternalException("_perfColumn isn't set yet, it must be set to get the number of rounds");
-    }
-    return _perfColumn.length;
+    return numRounds;
   }
 
   private static final ThreadLocal<DateFormat> DATE_FORMAT_AM_PM = new ThreadLocal<DateFormat>() {
@@ -199,8 +179,9 @@ public class TournamentSchedule {
       ScheduleParseException {
     final CellFileReader reader = new ExcelCellReader(stream, sheetName);
 
-    findColumns(reader);
-    parseData(reader);
+    final ColumnInformation ci = findColumns(reader);
+    numRounds = ci.getNumPerfs();
+    parseData(reader, ci);
     reader.close();
   }
 
@@ -223,20 +204,19 @@ public class TournamentSchedule {
    * Find the index of the columns. Reads lines until the headers are found or
    * EOF is reached.
    * 
+   * @return the column information
    * @throws IOException
-   * @throws RuntimeException if a column cannot be found
+   * @throws RuntimeException if a header row cannot be found
    */
-  private void findColumns(final CellFileReader reader) throws IOException {
-    _teamNumColumn = -1;
-
-    while (_teamNumColumn == -1) {
+  private static ColumnInformation findColumns(final CellFileReader reader) throws IOException {
+    while (true) {
       final String[] line = reader.readNext();
       if (null == line) {
         throw new RuntimeException("Cannot find header line and reached EOF");
       }
 
       if (isHeaderLine(line)) {
-        parseHeader(line);
+        return parseHeader(line);
       }
     }
   }
@@ -329,22 +309,26 @@ public class TournamentSchedule {
     }
   }
 
-  private void parseHeader(final String[] line) {
+  private static ColumnInformation parseHeader(final String[] line) {
     final int numPerfRounds = countNumRounds(line);
-    _perfColumn = new int[numPerfRounds];
-    _perfTableColumn = new int[numPerfRounds];
 
-    _teamNumColumn = getColumnForHeader(line, TEAM_NUMBER_HEADER);
-    _organizationColumn = getColumnForHeader(line, ORGANIZATION_HEADER);
-    _teamNameColumn = getColumnForHeader(line, TEAM_NAME_HEADER);
-    _divisionColumn = getColumnForHeader(line, DIVISION_HEADER);
-    _presentationColumn = getColumnForHeader(line, PRESENTATION_HEADER);
-    _technicalColumn = getColumnForHeader(line, TECHNICAL_HEADER);
-    _judgeGroupColumn = getColumnForHeader(line, JUDGE_GROUP_HEADER);
+    final int[] perfColumn = new int[numPerfRounds];
+    final int[] perfTableColumn = new int[numPerfRounds];
+
+    final int teamNumColumn = getColumnForHeader(line, TEAM_NUMBER_HEADER);
+    final int organizationColumn = getColumnForHeader(line, ORGANIZATION_HEADER);
+    final int teamNameColumn = getColumnForHeader(line, TEAM_NAME_HEADER);
+    final int divisionColumn = getColumnForHeader(line, DIVISION_HEADER);
+    final int presentationColumn = getColumnForHeader(line, PRESENTATION_HEADER);
+    final int technicalColumn = getColumnForHeader(line, TECHNICAL_HEADER);
+    final int judgeGroupColumn = getColumnForHeader(line, JUDGE_GROUP_HEADER);
     for (int round = 0; round < numPerfRounds; ++round) {
-      _perfColumn[round] = getColumnForHeader(line, String.format(PERF_HEADER_FORMAT, (round + 1)));
-      _perfTableColumn[round] = getColumnForHeader(line, String.format(TABLE_HEADER_FORMAT, (round + 1)));
+      perfColumn[round] = getColumnForHeader(line, String.format(PERF_HEADER_FORMAT, (round + 1)));
+      perfTableColumn[round] = getColumnForHeader(line, String.format(TABLE_HEADER_FORMAT, (round + 1)));
     }
+
+    return new ColumnInformation(teamNumColumn, organizationColumn, teamNameColumn, divisionColumn, presentationColumn,
+                                 technicalColumn, judgeGroupColumn, perfColumn, perfTableColumn);
   }
 
   /**
@@ -353,9 +337,10 @@ public class TournamentSchedule {
    * @throws IOException
    * @throws ScheduleParseException if there is an error with the schedule
    */
-  private void parseData(final CellFileReader reader) throws IOException, ParseException, ScheduleParseException {
+  private void parseData(final CellFileReader reader,
+                         final ColumnInformation ci) throws IOException, ParseException, ScheduleParseException {
     TeamScheduleInfo ti;
-    while (null != (ti = parseLine(reader))) {
+    while (null != (ti = parseLine(reader, ci))) {
       _schedule.add(ti);
 
       // keep track of some meta information
@@ -1243,13 +1228,14 @@ public class TournamentSchedule {
    * @throws ScheduleParseException if there is an error with the schedule being
    *           read
    */
-  private TeamScheduleInfo parseLine(final CellFileReader reader) throws IOException, ParseException,
+  private TeamScheduleInfo parseLine(final CellFileReader reader,
+                                     final ColumnInformation ci) throws IOException, ParseException,
       ScheduleParseException {
     final String[] line = reader.readNext();
 
     try {
 
-      final String teamNumberStr = line[_teamNumColumn];
+      final String teamNumberStr = line[ci.getTeamNumColumn()];
       if (teamNumberStr.length() < 1) {
         // hit empty row
         return null;
@@ -1257,33 +1243,33 @@ public class TournamentSchedule {
 
       final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
       final TeamScheduleInfo ti = new TeamScheduleInfo(reader.getLineNumber(), getNumberOfRounds(), teamNumber);
-      ti.setTeamName(line[_teamNameColumn]);
-      ti.setOrganization(line[_organizationColumn]);
-      ti.setDivision(line[_divisionColumn]);
-      final String presentationStr = line[_presentationColumn];
+      ti.setTeamName(line[ci.getTeamNameColumn()]);
+      ti.setOrganization(line[ci.getOrganizationColumn()]);
+      ti.setDivision(line[ci.getDivisionColumn()]);
+      final String presentationStr = line[ci.getPresentationColumn()];
       if ("".equals(presentationStr)) {
         // If we got an empty string, then we must have hit the end
         return null;
       }
       ti.setPresentation(parseDate(presentationStr));
 
-      final String technicalStr = line[_technicalColumn];
+      final String technicalStr = line[ci.getTechnicalColumn()];
       if ("".equals(technicalStr)) {
         // If we got an empty string, then we must have hit the end
         return null;
       }
       ti.setTechnical(parseDate(technicalStr));
 
-      ti.setJudgingStation(line[_judgeGroupColumn]);
+      ti.setJudgingStation(line[ci.getJudgeGroupColumn()]);
 
       for (int perfNum = 0; perfNum < getNumberOfRounds(); ++perfNum) {
-        final String perf1Str = line[_perfColumn[perfNum]];
+        final String perf1Str = line[ci.getPerfColumn(perfNum)];
         if ("".equals(perf1Str)) {
           // If we got an empty string, then we must have hit the end
           return null;
         }
         ti.setPerf(perfNum, parseDate(perf1Str));
-        String table = line[_perfTableColumn[perfNum]];
+        String table = line[ci.getPerfTableColumn(perfNum)];
         String[] tablePieces = table.split(" ");
         if (tablePieces.length != 2) {
           throw new RuntimeException("Error parsing table information from: "
@@ -1560,4 +1546,88 @@ public class TournamentSchedule {
       foot.writeSelectedRows(0, -1, document.leftMargin(), document.bottomMargin(), writer.getDirectContent());
     }
   }
+
+  /**
+   * Keep track of column information from a spreadsheet.
+   */
+  private static final class ColumnInformation {
+    private final int teamNumColumn;
+
+    public int getTeamNumColumn() {
+      return teamNumColumn;
+    }
+
+    private final int organizationColumn;
+
+    public int getOrganizationColumn() {
+      return organizationColumn;
+    }
+
+    private final int teamNameColumn;
+
+    public int getTeamNameColumn() {
+      return teamNameColumn;
+    }
+
+    private final int divisionColumn;
+
+    public int getDivisionColumn() {
+      return divisionColumn;
+    }
+
+    private final int presentationColumn;
+
+    public int getPresentationColumn() {
+      return presentationColumn;
+    }
+
+    private final int technicalColumn;
+
+    public int getTechnicalColumn() {
+      return technicalColumn;
+    }
+
+    private final int judgeGroupColumn;
+
+    public int getJudgeGroupColumn() {
+      return judgeGroupColumn;
+    }
+
+    private final int[] perfColumn;
+
+    public int getNumPerfs() {
+      return perfColumn.length;
+    }
+
+    public int getPerfColumn(final int round) {
+      return perfColumn[round];
+    }
+
+    private final int[] perfTableColumn;
+
+    public int getPerfTableColumn(final int round) {
+      return perfTableColumn[round];
+    }
+
+    public ColumnInformation(int teamNumColumn,
+                             int organizationColumn,
+                             int teamNameColumn,
+                             int divisionColumn,
+                             int presentationColumn,
+                             int technicalColumn,
+                             int judgeGroupColumn,
+                             int[] perfColumn,
+                             int[] perfTableColumn) {
+      this.teamNumColumn = teamNumColumn;
+      this.organizationColumn = organizationColumn;
+      this.teamNameColumn = teamNameColumn;
+      this.divisionColumn = divisionColumn;
+      this.presentationColumn = presentationColumn;
+      this.technicalColumn = technicalColumn;
+      this.judgeGroupColumn = judgeGroupColumn;
+      this.perfColumn = perfColumn;
+      this.perfTableColumn = perfTableColumn;
+    }
+  }
+
 }
