@@ -1,11 +1,12 @@
 package fll.scheduler;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Holds data about the schedule for a team.
  */
-public final class TeamScheduleInfo {
+public final class TeamScheduleInfo implements Serializable {
 
   private final int teamNumber;
 

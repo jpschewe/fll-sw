@@ -112,7 +112,7 @@ public class TournamentScheduleTest {
       final TournamentSchedule schedule = new TournamentSchedule(scheduleStream, sheetNames.get(0));
       scheduleStream.close();
 
-      TournamentSchedule.storeSchedule(memConnection, tournament.getTournamentID(), schedule);
+      schedule.storeSchedule(memConnection, tournament.getTournamentID());
 
       final boolean existsAfter = TournamentSchedule.scheduleExistsInDatabase(memConnection, tournament.getTournamentID());
       Assert.assertTrue("Schedule should exist now that it's been stored", existsAfter);
