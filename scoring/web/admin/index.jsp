@@ -117,8 +117,24 @@ ${message}
 		%>
 	</select> <input type='submit' value='Change tournament'></form>
 	</li>
+ 
+    <li>Upload schedule for current tournament.
+    <a href='javascript:display("ScheduleHelp")'>[help]</a>
+    <div id='ScheduleHelp' class='help' style='display: none'>
+    Uploading the schedule isn't required, but if uploaded will be 
+    used when displaying information in final reports.
+    <a href='javascript:hide("ScheduleHelp")'>[hide]</a></div>
+    <form id='uploadSchedule'
+    action='<c:url value="/schedule/UploadSchedule"/>'
+    METHOD="POST"
+    ENCTYPE="multipart/form-data"
+    >
+    <input type="file" size="32" name="scheduleFile"/>
+    <input type="submit" value="Upload Schedule"/>
+    </form>
+    </li>
 
-	<li><a href='<c:url value="edit_event_division.jsp"/>'> Assign
+	<li><a href='edit_event_division.jsp'> Assign
 	event divisions to teams in current tournament</a>. <a
 		href='javascript:display("EventDivisionHelp")'>[help]</a>
 	<div id='EventDivisionHelp' class='help' style='display: none'>
@@ -196,8 +212,8 @@ ${message}
 	<form name='uploadSubjective'
 		ACTION='<c:url value="UploadSubjectiveData"/>' METHOD="POST"
 		ENCTYPE="multipart/form-data">Upload the datafile for
-	subjective scores. <input type="file" size="32" name="subjectiveFile">
-	<input type="submit" value="Upload"></form>
+	subjective scores. <input type="file" size="32" name="subjectiveFile"/>
+	<input type="submit" value="Upload"/></form>
 	</li>
 
 	<li><a href='remoteControl.jsp'>Remote control of display</a></li>
@@ -213,9 +229,9 @@ ${message}
 		METHOD="POST" 
 		ENCTYPE="multipart/form-data">
 		Upload CSV or Excel of teams to advance		 
-		<input type="file" size="32" name="file">
+		<input type="file" size="32" name="file"/>
 		<input type='hidden' name='uploadRedirect' value="<c:url value='/admin/UploadAdvancingTeams'/>" />
-		<input type="submit" value="Upload">
+		<input type="submit" value="Upload"/>
 	</form>
 	</li>
 </ul>

@@ -63,7 +63,7 @@ import fll.util.FLLRuntimeException;
 /**
  * Tournament schedule. Can parse the schedule from a spreadsheet.
  */
-public class TournamentSchedule {
+public class TournamentSchedule implements Serializable {
   private static final Logger LOGGER = Logger.getLogger(TournamentSchedule.class);
 
   /**
@@ -206,14 +206,15 @@ public class TournamentSchedule {
       getNumRounds = connection.prepareStatement("SELECT MAX(round) FROM sched_perf_rounds WHERE tournament = ?");
       getNumRounds.setInt(1, tournamentID);
       numRounds = getNumRounds.executeQuery();
-      if(numRounds.next()) {
+      if (numRounds.next()) {
         this.numRounds = numRounds.getInt(1);
       } else {
-        throw new RuntimeException("No rounds found for tournament: " + tournamentID);
+        throw new RuntimeException("No rounds found for tournament: "
+            + tournamentID);
       }
-      
-      getSched = connection.prepareStatement("SELECT team_number, judging_stat" +
-      		"ion, presentation, technical" //
+
+      getSched = connection.prepareStatement("SELECT team_number, judging_stat"
+          + "ion, presentation, technical" //
           + " FROM schedule"//
           + " WHERE tournament = ?");
       getSched.setInt(1, tournamentID);
@@ -235,7 +236,6 @@ public class TournamentSchedule {
         ti.setJudgingStation(judgingStation);
         ti.setPresentation(Queries.timeToDate(presentation));
         ti.setTechnical(Queries.timeToDate(technical));
-        
 
         getPerfRounds.setInt(2, teamNumber);
         perfRounds = getPerfRounds.executeQuery();
@@ -254,16 +254,16 @@ public class TournamentSchedule {
             throw new RuntimeException("Tables sides must be 1 or 2. Tournament: "
                 + tournamentID + " team: " + teamNumber);
           }
-          ti.setPerf(round-1, Queries.timeToDate(perfTime));
-          ti.setPerfTableColor(round-1, tableColor);
-          ti.setPerfTableSide(round-1, prevRound);
+          ti.setPerf(round - 1, Queries.timeToDate(perfTime));
+          ti.setPerfTableColor(round - 1, tableColor);
+          ti.setPerfTableSide(round - 1, prevRound);
         }
         final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournamentID);
         ti.setDivision(eventDivision);
-        
+
         final Team team = Team.getTeamFromDatabase(connection, teamNumber);
         ti.setOrganization(team.getOrganization());
-        ti.setTeamName(team.getTeamName());        
+        ti.setTeamName(team.getTeamName());
       }
 
     } finally {
@@ -1544,9 +1544,8 @@ public class TournamentSchedule {
    * @param tournamentID the ID of the tournament
    * @param schedule the schedule to save
    */
-  public static void storeSchedule(final Connection connection,
-                                   final int tournamentID,
-                                   final TournamentSchedule schedule) throws SQLException {
+  public void storeSchedule(final Connection connection,
+                            final int tournamentID) throws SQLException {
     PreparedStatement deletePerfRounds = null;
     PreparedStatement deleteSchedule = null;
     PreparedStatement insertSchedule = null;
@@ -1572,7 +1571,7 @@ public class TournamentSchedule {
           + " VALUES(?, ?, ?, ?, ?, ?)");
       insertPerfRounds.setInt(1, tournamentID);
 
-      for (final TeamScheduleInfo si : schedule.getSchedule()) {
+      for (final TeamScheduleInfo si : getSchedule()) {
         insertSchedule.setInt(2, si.getTeamNumber());
         insertSchedule.setString(3, si.getJudgingStation());
         insertSchedule.setTime(4, Queries.dateToTime(si.getPresentation()));
@@ -1618,14 +1617,14 @@ public class TournamentSchedule {
     for (final TeamScheduleInfo si : _schedule) {
       scheduleTeamNumbers.add(si.getTeamNumber());
       if (!dbTeams.containsKey(si.getTeamNumber())) {
-        violations.add(new ConstraintViolation(true, si.getTeamNumber(), null, null, null,
-                                               "Team is in schedule, but not in database"));
+        violations.add(new ConstraintViolation(true, si.getTeamNumber(), null, null, null, "Team "
+            + si.getTeamNumber() + " is in schedule, but not in database"));
       }
     }
     for (final Integer dbNum : dbTeams.keySet()) {
       if (!scheduleTeamNumbers.contains(dbNum)) {
-        violations.add(new ConstraintViolation(true, dbNum, null, null, null,
-                                               "Team is in database, but not in schedule"));
+        violations.add(new ConstraintViolation(true, dbNum, null, null, null, "Team "
+            + dbNum + " is in database, but not in schedule"));
       }
     }
 

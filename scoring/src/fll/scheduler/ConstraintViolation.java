@@ -11,7 +11,7 @@ import java.util.Date;
 /**
  * Constraint violation during scheduling.
  */
-final class ConstraintViolation {
+public final class ConstraintViolation {
 
   public static final int NO_TEAM = -1;
 
