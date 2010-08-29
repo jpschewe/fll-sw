@@ -366,6 +366,12 @@
 		</copy>
 	</target>
 
+	<target name="tomcat.reload" description="Load new code into tomcat">
+		<antcall target="tomcat.stop"/>
+		<antcall target="compile"/>
+		<antcall target="tomcat.start.test"/>
+	</target>
+		
 	<target name="tomcat.start.test" description="start up tomcat for testing - starts the database in server mode">
 		<run-tomcat operation="start" spawn="true" inside.test="true" />
 	</target>
