@@ -19,3 +19,11 @@ BODY {
   color: red;
   font-weight: bold;
 }
+
+.hard-violation {
+  background-color: red;
+}
+
+.soft-violation {
+  background-color: yellow;
+}
