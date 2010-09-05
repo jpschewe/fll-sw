@@ -169,6 +169,20 @@ public class TournamentSchedule implements Serializable {
   public List<TeamScheduleInfo> getSchedule() {
     return Collections.unmodifiableList(_schedule);
   }
+  
+  /**
+   * Get the {@link TeamScheduleInfo} for the specified team number.
+   * 
+   * @return null if cannot be found
+   */
+  public TeamScheduleInfo getSchedInfoForTeam(final int teamNumber) {
+    for(final TeamScheduleInfo si : _schedule) {
+      if(si.getTeamNumber() == teamNumber) {
+        return si;
+      }
+    }
+    return null;
+  }
 
   /**
    * @param stream where to read the schedule from, must be an excel
@@ -221,7 +235,7 @@ public class TournamentSchedule implements Serializable {
 
       getPerfRounds = connection.prepareStatement("SELECT round, perf_time, table_color, table_side" //
           + " FROM sched_perf_rounds" //
-          + " WHERE tournamnet = ? AND team_number = ?" //
+          + " WHERE tournament = ? AND team_number = ?" //
           + " ORDER BY round ASC");
       getPerfRounds.setInt(1, tournamentID);
 
