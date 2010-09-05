@@ -221,7 +221,7 @@ public class TournamentSchedule implements Serializable {
       getNumRounds.setInt(1, tournamentID);
       numRounds = getNumRounds.executeQuery();
       if (numRounds.next()) {
-        this.numRounds = numRounds.getInt(1);
+        this.numRounds = numRounds.getInt(1) + 1;
       } else {
         throw new RuntimeException("No rounds found for tournament: "
             + tournamentID);
@@ -253,12 +253,12 @@ public class TournamentSchedule implements Serializable {
 
         getPerfRounds.setInt(2, teamNumber);
         perfRounds = getPerfRounds.executeQuery();
-        int prevRound = 0;
+        int prevRound = -1;
         while (perfRounds.next()) {
           final int round = perfRounds.getInt(1);
           if (round != prevRound + 1) {
             throw new RuntimeException("Rounds must be consecutive and start at 1. Tournament: "
-                + tournamentID + " team: " + teamNumber + " round: " + round);
+                + tournamentID + " team: " + teamNumber + " round: " + (round+1) + " prevRound: " + (prevRound+1));
           }
           final Time perfTime = perfRounds.getTime(2);
           final String tableColor = perfRounds.getString(3);
@@ -268,9 +268,11 @@ public class TournamentSchedule implements Serializable {
             throw new RuntimeException("Tables sides must be 1 or 2. Tournament: "
                 + tournamentID + " team: " + teamNumber);
           }
-          ti.setPerf(round - 1, Queries.timeToDate(perfTime));
-          ti.setPerfTableColor(round - 1, tableColor);
-          ti.setPerfTableSide(round - 1, prevRound);
+          ti.setPerf(round, Queries.timeToDate(perfTime));
+          ti.setPerfTableColor(round, tableColor);
+          ti.setPerfTableSide(round, prevRound);
+          
+          prevRound = round;
         }
         final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournamentID);
         ti.setDivision(eventDivision);
@@ -278,6 +280,8 @@ public class TournamentSchedule implements Serializable {
         final Team team = Team.getTeamFromDatabase(connection, teamNumber);
         ti.setOrganization(team.getOrganization());
         ti.setTeamName(team.getTeamName());
+        
+        _schedule.add(ti);
       }
 
     } finally {
