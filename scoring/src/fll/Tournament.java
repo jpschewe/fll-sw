@@ -6,6 +6,7 @@
 
 package fll;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,7 +23,7 @@ import fll.db.GenerateDB;
  * object does not notice the changes. It's a snapshot in time from when the
  * object was created.
  */
-public final class Tournament {
+public final class Tournament implements Serializable {
 
   private Tournament(final int tournamentID, final String name, final String location, final Tournament nextTournament) {
     this.tournamentID = tournamentID;
