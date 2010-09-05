@@ -14,19 +14,24 @@ ${message}
 <c:remove var="message" />
 
 <p>
-There are some warnings in the schedule.  
+There are some errors with this schedule, please correct them and try again.  
 </p>
  
 <ul>
 <c:forEach items="${uploadSchedule_violations}" var="violation">
-  <li class='soft-violation'>${violation.message }</li>
+  <c:choose>
+    <c:when test="${violation.hard }">
+      <li class='hard-violation'>${violation.message }</li>
+    </c:when>
+    <c:otherwise>
+      <li class='soft-violation'>${violation.message }</li>
+    </c:otherwise>
+  </c:choose>
 </c:forEach> 
 </ul>
 
 <p>
-Do you want to proceed and use this schedule?
-<a href='<c:url value="/schedule/CommitSchedule"/>'>Yes</a><br/>
-<a href='<c:url value="/admin/index.jsp"/>'>No</a><br/>
+<a href='<c:url value="/admin/index.jsp"/>'>Return to admin page</a><br/>
 </p>
 
 </body>
