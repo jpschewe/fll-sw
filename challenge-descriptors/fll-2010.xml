@@ -16,6 +16,13 @@
       multiplier="25"
       />
 
+    <!-- FIXME if goal_scored, must have bone_bridge_inserted -->
+    <restriction lowerBound="0" upperBound="1"
+      message="You cannot have the Goal Scoed without the Bone Bridge Inserted">
+      <term coefficient="-1" goal="goal_scored" scoreType="raw"/>
+      <term coefficient="1" goal="bone_bridge_inserted" scoreType="raw"/>
+    </restriction>
+
     <goal name="rapid_blood_screening_syringe" title="Rapid Blood Screening: Syringe In Base"
       multiplier="25"
       />
