@@ -7,8 +7,14 @@
 package fll.web;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.LinkedList;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -38,12 +44,13 @@ public final class WebUtils {
    * path is prepended to the URL. Takes care of encoding the URL and if it
    * starts with a slash, the context path is prepended to ensure the correct
    * URL is created.
-   * 
-   * <p>The method calling this method should return right away.</p>
+   * <p>
+   * The method calling this method should return right away.
+   * </p>
    * 
    * @param application
    * @param url
-   * @throws IOException See {@link HttpServletResponse#sendRedirect(String)} 
+   * @throws IOException See {@link HttpServletResponse#sendRedirect(String)}
    * @see #makeAbsoluteURL(ServletContext, String)
    * @see HttpServletResponse#sendRedirect(String)
    */
@@ -51,12 +58,46 @@ public final class WebUtils {
                                   final HttpServletResponse response,
                                   final String url) throws IOException {
     final String newURL;
-    if(null != url && url.startsWith("/")) {
+    if (null != url
+        && url.startsWith("/")) {
       newURL = makeAbsoluteURL(application, url);
     } else {
       newURL = url;
     }
-   
+
     response.sendRedirect(response.encodeRedirectURL(newURL));
   }
+
+  /**
+   * Get a list of the URLs that can be used to access the server. This gets all
+   * network interfaces and their IP addresses and filters out localhost.
+   * 
+   * @return the list of URLs, will be empty if no interfaces (other than
+   *         localhost) are found
+   */
+  public static Collection<String> getAllURLs(final HttpServletRequest request) throws IOException {
+    final Collection<String> urls = new LinkedList<String>();
+    final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+    if (null != interfaces) {
+      while (interfaces.hasMoreElements()) {
+        final NetworkInterface ifce = interfaces.nextElement();
+        final Enumeration<InetAddress> addresses = ifce.getInetAddresses();
+        while (addresses.hasMoreElements()) {
+          final InetAddress addr = addresses.nextElement();
+          final String addrStr = addr.getHostAddress();
+          if (!addrStr.contains(":")) {
+            // skip IPv6 for now, need to figure out how to encode and get
+            // Tomcat to listen on IPv6
+            if (!addr.isLoopbackAddress()) {
+              final String url = "http://"
+                  + addr.getHostAddress() + ":" + request.getLocalPort() + "/" + request.getContextPath();
+              urls.add(url);
+            }
+          }
+        }
+      }
+    }
+    return urls;
+  }
+
 }
