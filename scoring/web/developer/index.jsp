@@ -51,6 +51,10 @@ are no changes to the structure of the database.<br/>
 </li>
 
  <li>inside.test: <%=System.getProperty("inside.test")%> -- <%=Boolean.getBoolean("inside.test")%></li>
+
+ <li>Database is located at: ${database}</li>
+      
+ 
  </ul>
 
 
