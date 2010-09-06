@@ -66,8 +66,6 @@ pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
 
       <li><a href="credits/credits.jsp">Credits</a></li>
 
-      <li>Using database: ${database}</li>
-      
       <li>Addresses to access this page:
         <ul>
           <c:forEach items="${urls}" var="url">
