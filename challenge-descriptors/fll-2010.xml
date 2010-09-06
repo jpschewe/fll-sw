@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="Boston Scientific MN FIRST LEGO League Tournament: Body Forward" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 1">
+
+  <Performance minimumScore="0" weight="1.0">
+
+    <goal name="common_bone_repair" title="Common Bone Repair"
+      multiplier="25"
+      />
+
+    <goal name="bone_bridge_inserted" title="Bone Bridge Inserted"
+      multiplier="15"
+      />
+
+    <goal name="goal_scored" title="Goal Scored"
+      multiplier="25"
+      />
+
+    <goal name="rapid_blood_screening_syringe" title="Rapid Blood Screening: Syringe In Base"
+      multiplier="25"
+      />
+
+    <goal name="rapid_blood_screening_cells" title="Rapid Blood Screening: White Blood Cells in Patient's Area"
+      multiplier="15"
+      />
+
+    <goal name="red_blood_cells" title="Red Blood Cells"
+      multiplier="5"
+      max="8"
+      />
+
+    <goal name="bad_cell_destruction" title="Bad Cell Destruction"
+      initialValue="0">
+      <value score="25" title="Destruction" value="destruction"/>
+      <value score="20" title="Identification" value="identification"/>
+      <value score="0" title="None" value="none"/>
+    </goal>
+
+    <goal name="mechanical_arm_patent" title="Mechanical Arm Patent"
+      multiplier="25"
+      />
+
+    <goal name="cardiac_patch" title="Cardiac Patch"
+      multiplier="20"
+      />
+
+    <goal name="pace_maker" title="Pace Maker"
+      multiplier="25"
+      />
+
+    <goal name="nerve_mapping" title="Nerve Mapping"
+      multiplier="15"
+      />
+
+    <goal name="object_control" title="Object Control Through Thought"
+      multiplier="20"
+      />
+
+    <goal name="medicine_part1" title="Medicine Auto-dispensing: Blue and Whites off, pinks on"
+      multiplier="25"
+      />
+
+    <goal name="medicine_part2" title="Medicine Auto-dispensing: Blue and White in Patient Area"
+      multiplier="5"
+      />
+
+    <goal name="sensitivity" title="Robotic Sensitivity"
+      multiplier="25"
+      />
+
+    <goal name="professional_teamwork" title="Professional Teamwork"
+      multiplier="25"
+      />
+
+    <goal name="bionic_eyes" title="Bionic Eyes"
+      multiplier="20"
+      />
+
+    <goal name="stent" title="Stent"
+      multiplier="25"
+      />
+
+
+    <tiebreaker>
+      <test winner='HIGH'>
+        <term goal='stent' scoreType='computed' />
+      </test>
+    </tiebreaker>
+
+  </Performance>
+
+  <subjectiveCategory name="teamwork" title="Teamwork"
+    weight="1.0">
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="roles"
+      title="Roles and Responsibilities">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="professionalism" title="Gracious Professionalism">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="dynamics"
+      title="Problem Solving &amp; Team Dynamics &amp; Communications">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="confidence"
+      title="Confidence &amp; Enthusiasm">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="fll_values"
+      title="FLL Values">
+    </goal>
+  </subjectiveCategory>
+
+
+  <subjectiveCategory name="robustdesign" title="Design"
+    weight="0.5">
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="strategy"
+      title="Strategy, Process, Problem Solving">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="locomotion"
+      title="Locomotion and Navigation">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="design_kids"
+      title="Kids Did the Work">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="structural"
+      title="Structural">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="overall_design" title="Overall Design">
+    </goal>
+  </subjectiveCategory>
+
+
+  <subjectiveCategory name="programming" title="Programming"
+    weight="0.5">
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="programming_strategy" title="Strategy, Process, Problem Solving" />
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="useoflanguage" title="Language Use, Modularity/Abstraction">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="programming_kids" title="Kids Did the Work">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="sensorcontrol" title="Sensor Control">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="design"
+      title="Overall Design">
+    </goal>
+  </subjectiveCategory>
+
+  <subjectiveCategory name="research"
+    title="Research Project Assessment" weight="1.0">
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="research"
+      title="Research">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="innovative_solution" title="Innovative Solution">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="background"
+      title="Background, Data and Graphics">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="creative"
+      title="Quality of Presentation/Creative Presentation">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="sharing"
+      title="Sharing">
+    </goal>
+  </subjectiveCategory>
+
+
+</fll>
