@@ -1731,15 +1731,15 @@ public class TournamentSchedule implements Serializable {
       return perfTableColumn[round];
     }
 
-    public ColumnInformation(int teamNumColumn,
-                             int organizationColumn,
-                             int teamNameColumn,
-                             int divisionColumn,
-                             int presentationColumn,
-                             int technicalColumn,
-                             int judgeGroupColumn,
-                             int[] perfColumn,
-                             int[] perfTableColumn) {
+    public ColumnInformation(final int teamNumColumn,
+                             final int organizationColumn,
+                             final int teamNameColumn,
+                             final int divisionColumn,
+                             final int presentationColumn,
+                             final int technicalColumn,
+                             final int judgeGroupColumn,
+                             final int[] perfColumn,
+                             final int[] perfTableColumn) {
       this.teamNumColumn = teamNumColumn;
       this.organizationColumn = organizationColumn;
       this.teamNameColumn = teamNameColumn;

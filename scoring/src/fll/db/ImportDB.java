@@ -354,8 +354,8 @@ public final class ImportDB {
    * Setup typeInfo for a version 0 database (before type information was
    * stored).
    */
-  private static void createVersion0TypeInfo(Map<String, Map<String, String>> typeInfo,
-                                             Document challengeDocument) {
+  private static void createVersion0TypeInfo(final Map<String, Map<String, String>> typeInfo,
+                                             final Document challengeDocument) {
     final Map<String, String> tournaments = new HashMap<String, String>();
     tournaments.put("Name", "varchar(128)");
     tournaments.put("Location", "longvarchar");
