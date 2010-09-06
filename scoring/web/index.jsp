@@ -5,17 +5,20 @@
 
 <%@ page import="fll.db.Queries" %>
 <%@ page import="fll.web.SessionAttributes"%>
+<%@ page import="fll.web.WebUtils"%>
 
 <%
 final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
+pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
 %>
 
 <c:if test="${not empty param.ScorePageText}">
   <c:set var="ScorePageText" value="${param.ScorePageText}" scope="application"/>
 </c:if>
 
-<html>
+
+<%@page import="fll.web.WebUtils"%><html>
   <head>
     <title>FLL-SW</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
@@ -64,6 +67,14 @@ final Connection connection = datasource.getConnection();
       <li><a href="credits/credits.jsp">Credits</a></li>
 
       <li>Using database: ${database}</li>
+      
+      <li>Addresses to access this page:
+        <ul>
+          <c:forEach items="${urls}" var="url">
+            <li><a href="${url }">${url }</a></li>
+          </c:forEach>
+        </ul>
+      </li>
     </ul>
 
   </body>
