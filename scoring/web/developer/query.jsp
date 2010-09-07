@@ -18,7 +18,8 @@
 
     <form name='query' method='post'>
       <p>Enter query
-      <textarea name='query' rows='5' cols='60'><c:out value="${param.query}"/></textarea>
+      <textarea name='query' rows='5' cols='60'><c:out value="${param.query}"/></textarea><br/>
+      <input type='submit' value='Execute Query'/>      
       </p>
       <c:if test="${not empty param.query}">
         <sql:query dataSource="${datasource}" var="query_result" scope="page" sql="${param.query}"/>
@@ -47,7 +48,6 @@
           </c:forEach>
         </table>
       </c:if>
-      <input type='submit' value='Execute Query'/>
     </form>
         
     <form name='update' method='post'>
