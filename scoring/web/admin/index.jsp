@@ -13,6 +13,10 @@
   final int currentTournamentID = Queries.getCurrentTournament(connection);
   final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournamentID);
   final int scoresheetsPerPage = Queries.getScoresheetLayoutNUp(connection);
+  
+  session.setAttribute("playoffsInitialized",
+                       Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
+
 %>
 
 <html>
@@ -196,12 +200,14 @@ ${message}
 	(for scoresheet printing during playoffs)</li>
 
 
+    <c:if test="${not playoffsInitialized}">
 	<li><a
 		href='<c:url value="GatherTeamData">
                      <c:param name="addTeam" value="1"/>
                    </c:url>'>Add
 	a team</a></li>
-
+    </c:if>
+    
 	<li><a href='<c:url value="select_team.jsp"/>'>Edit team data</a></li>
 
 	<li><a href="subjective-data.fll">Download
