@@ -37,6 +37,7 @@ import org.hsqldb.jdbc.jdbcDataSource;
 import org.slf4j.LoggerFactory;
 
 import au.com.bytecode.opencsv.CSVReader;
+import fll.db.DataSourceSpy;
 
 /**
  * Some handy utilities.
@@ -75,8 +76,10 @@ public final class Utilities {
    * @throws RuntimeException if the first line cannot be read
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Generate columns based upon file loaded")
-  public static void loadCSVFile(final Connection connection, final String tablename, final Reader reader) throws IOException, SQLException {
+                                                             "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Generate columns based upon file loaded")
+  public static void loadCSVFile(final Connection connection,
+                                 final String tablename,
+                                 final Reader reader) throws IOException, SQLException {
     Statement stmt = null;
     PreparedStatement prep = null;
     try {
@@ -168,7 +171,6 @@ public final class Utilities {
       return false;
     }
 
-    
     for (final String extension : HSQL_DB_EXTENSIONS) {
       final File file = new File(baseFilename
           + extension);
@@ -188,10 +190,20 @@ public final class Utilities {
 
     return true;
   }
+
   /**
-   * Extensions used by HSQL for it's database files. These extensions include the dot.
+   * Extensions used by HSQL for it's database files. These extensions include
+   * the dot.
    */
-  public static final Collection<String> HSQL_DB_EXTENSIONS = Collections.unmodifiableCollection(Arrays.asList(new String[] { ".properties", ".script", ".log", ".data", ".backup", "", }));
+  public static final Collection<String> HSQL_DB_EXTENSIONS = Collections
+                                                                         .unmodifiableCollection(Arrays
+                                                                                                       .asList(new String[] {
+                                                                                                                             ".properties",
+                                                                                                                             ".script",
+                                                                                                                             ".log",
+                                                                                                                             ".data",
+                                                                                                                             ".backup",
+                                                                                                                             "", }));
 
   /**
    * Test that the database behind the connection is initialized. Checks for the
@@ -256,15 +268,8 @@ public final class Utilities {
    */
   public static DataSource createDataSource(final String database) {
     final String myURL;
-//    if (Boolean.getBoolean("inside.test")) {
-      // TODO disabled until ticket:2724372 is fixed
-      // myURL = "jdbc:log4jdbc:hsqldb:file:"
-//      myURL = "jdbc:hsqldb:file:"
-//          + database + ";shutdown=true";
-//    } else {
-      myURL = "jdbc:hsqldb:file:"
-          + database + ";shutdown=true";
-//    }
+    myURL = "jdbc:hsqldb:file:"
+        + database + ";shutdown=true";
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("myURL: "
           + myURL);
@@ -280,7 +285,8 @@ public final class Utilities {
    * @param myURL the URL to the database
    * @return the DataSource
    */
-  public static DataSource createDataSource(final String database, final String myURL) {
+  public static DataSource createDataSource(final String database,
+                                            final String myURL) {
     final jdbcDataSource dataSource = new jdbcDataSource();
     dataSource.setDatabase(myURL);
     dataSource.setUser("sa");
@@ -297,8 +303,10 @@ public final class Utilities {
           _testDatabaseServer.setDatabasePath(0, database);
           _testDatabaseServer.setDatabaseName(0, "fll");
           _testDatabaseServer.setNoSystemExit(true);
-          _testDatabaseServer.setErrWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"), LogWriter.LogLevel.ERROR)));
-          _testDatabaseServer.setLogWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"), LogWriter.LogLevel.INFO)));
+          _testDatabaseServer.setErrWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"),
+                                                                         LogWriter.LogLevel.ERROR)));
+          _testDatabaseServer.setLogWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"),
+                                                                         LogWriter.LogLevel.INFO)));
           _testDatabaseServer.setTrace(true);
         }
         if (1 != _testDatabaseServer.getState()) {
@@ -308,28 +316,21 @@ public final class Utilities {
           _testDatabaseServer.start();
         }
       }
+      
+      System.setProperty("log4jdbc.enabled", "true");
+      final DataSourceSpy debugDatasource = new DataSourceSpy(dataSource);      
+      return debugDatasource;
+    } else {
+      return dataSource;
     }
-
-    return dataSource;
-  }
-
-  /**
-   * Creates a database connection.
-   * 
-   * @param database name of the database to connect to
-   * @throws SQLException
-   * @deprecated use {@link #createDataSource(String)} instead.
-   */
-  @Deprecated
-  public static Connection createDBConnection(final String database) throws SQLException {
-    return createDataSource(database).getConnection();
   }
 
   /**
    * Filter used to select only graphics files
    */
   private static final FilenameFilter GRAPHICS_FILTER = new FilenameFilter() {
-    public boolean accept(final File dir, final String name) {
+    public boolean accept(final File dir,
+                          final String name) {
       final String lowerName = name.toLowerCase();
       if (lowerName.endsWith(".png")
           || lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg") || lowerName.endsWith(".gif")) {
@@ -353,7 +354,9 @@ public final class Utilities {
     }
   };
 
-  public static void buildGraphicFileList(final String p, final File[] d, final List<String> f) {
+  public static void buildGraphicFileList(final String p,
+                                          final File[] d,
+                                          final List<String> f) {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("buildGraphicFileList("
           + p + "," + Arrays.toString(d) + "," + f.toString() + ")");
@@ -401,7 +404,8 @@ public final class Utilities {
    * @param application
    * @param name
    */
-  public static synchronized void appendDisplayName(final ServletContext application, final String name) {
+  public static synchronized void appendDisplayName(final ServletContext application,
+                                                    final String name) {
     // ServletContext isn't type safe
     @SuppressWarnings("unchecked")
     Set<String> displayNames = (Set<String>) application.getAttribute("displayNames");
@@ -414,6 +418,7 @@ public final class Utilities {
 
   /**
    * Determine the extension given a filename
+   * 
    * @param filename the filename
    * @return the extension, or null if there isn't one
    */
