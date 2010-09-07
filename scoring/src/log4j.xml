@@ -46,27 +46,12 @@
  </logger>
 
  <!-- stuff for debugging -->
- <!-- logger name="fll.web">
-    <level value="TRACE"/>
-  </logger-->
- <!--
-  logger name="fll.db.Queries"> <level value="TRACE"/> </logger
- -->
- <!--
-  logger name="fll.web.scoreboard"> <level value="TRACE"/> </logger
- -->
- <!-- logger name="fll.Utilities">
-  <level value="TRACE" />
- </logger-->
- <!-- logger name="fll.web.playoff">
-   <level value="TRACE"/>
- </logger-->
- <!-- logger name="fll.web.admin.UploadTeams">
-   <level value="TRACE"/>
- </logger-->
  <!-- logger name="fll.db.DumpDB"><level value="TRACE"/></logger-->
  <!-- logger name="fll.web.FooterFilter"><level value="TRACE"/></logger-->
  <!-- logger name="fll.web.report.FinalComputedScores"><level value="TRACE"/></logger-->
+ <!-- logger name="fll.web.admin.GatherTeamData"><level value="TRACE"/></logger-->
+ <!-- logger name="fll.db.ImportDB"><level value="TRACE"/></logger-->
+ <!-- logger name="database"><level value="TRACE"/></logger-->
  <!-- end stuff for debugging -->
 
  <root>
