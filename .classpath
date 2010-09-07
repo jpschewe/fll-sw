@@ -26,7 +26,6 @@
 	<classpathentry kind="lib" path="scoring/lib/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/slf4j-api-1.5.3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/slf4j-log4j12-1.5.3.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/log4jdbc3-1.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/jakarta-oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/ant/checkstyle-all-5.0.jar"/>
@@ -63,5 +62,6 @@
 			<attribute name="javadoc_location" value="http://mtu.net/~jpschewe/JonsInfra/1.0/docs/api/index.html"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="scoring/lib/log4jdbc4-1.2beta2.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
