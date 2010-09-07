@@ -1,5 +1,5 @@
 <%--
-  This page is used for editing and adding teams.  The request parameter
+  This page is used for editing and adding teams.  The session attribute
   addTeam is set when this page is being used to add a team.
   --%>
   
@@ -88,30 +88,37 @@ function confirmChangeTournament() {
         </td>
       </tr>
 
-        <tr>
-          <td>Current Tournament</td>
-          <td>
+      <tr>
+        <td>Current Tournament</td>
+        <td>
+        <c:choose>
+        <c:when test="${empty teamPrevTournament}">
           <c:choose>
-          <c:when test="${empty teamPrevTournament}">
+          <c:when test="${playoffsInitialized}">
+            <p>Playoffs are initialized for the team's current tournament, the current tournament may not be modified now.</p>
+          </c:when>
+          <c:otherwise>
             <select name='currentTournament'>
             <c:forEach items='${tournaments}' var='tournament'>
               <c:choose>
-                <c:when test="${tournament.tournamentID == teamCurrentTournament.tournamentID }">
-                  <option value='${tournament.tournamentID }' selected>${tournament.name }</option>
-                </c:when>
-                <c:otherwise>
-                  <option value='${tournament.tournamentID }'>${tournament.name }</option>
-                </c:otherwise>
+              <c:when test="${tournament.tournamentID == teamCurrentTournament.tournamentID }">
+                <option value='${tournament.tournamentID }' selected>${tournament.name }</option>
+              </c:when>
+              <c:otherwise>
+                <option value='${tournament.tournamentID }'>${tournament.name }</option>
+              </c:otherwise>
               </c:choose>
             </c:forEach>
             </select>
-          </c:when>
-          <c:otherwise>
-            ${teamCurrentTournament.name }
           </c:otherwise>
           </c:choose>
-          </td>
-        </tr>            
+        </c:when>
+        <c:otherwise>
+          ${teamCurrentTournament.name }
+        </c:otherwise>
+        </c:choose>
+        </td>
+      </tr>            
     </table>
     
     <c:choose>
@@ -130,11 +137,17 @@ function confirmChangeTournament() {
     <c:if test="${not empty teamPrevTournament}">
       <input type='submit' name='demote' value='Demote Team To Previous Tournament' onclick='return confirmDemoteTeam()'>
 	</c:if>
-	                
+	        
     <c:if test="${not addTeam}">
-      <input type='submit' name='delete' value='Delete Team' onclick='return confirmDeleteTeam()'>
+      <c:choose>        
+        <c:when test="${inPlayoffs}">
+          <p>Teams cannot be deleted once they are in the playoff data table for tournament.</p>
+        </c:when>
+        <c:otherwise>
+          <input type='submit' name='delete' value='Delete Team' onclick='return confirmDeleteTeam()'>
+        </c:otherwise>
+      </c:choose>
     </c:if>
-
     </form>
       
     <form action="index.jsp" method='post'>

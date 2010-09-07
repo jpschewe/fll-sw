@@ -2370,14 +2370,30 @@ public final class Queries {
   public static boolean isPlayoffDataInitialized(final Connection connection,
                                                  final String division) throws SQLException, RuntimeException {
     final int curTourney = getCurrentTournament(connection);
+    return isPlayoffDataInitialized(connection, curTourney, division);
+  }
 
+  /**
+   * Check if playoff data is initialized for the specified tournament and division.
+   * 
+   * @param connection The database connection to use.
+   * @param tournamentID The tournament to check
+   * @param division The division to check in the current tournament.
+   * @return A boolean, true if the PlayoffData table has been initialized,
+   *         false if it has not.
+   * @throws SQLException if database access fails.
+   * @throws RuntimeException if query returns empty results.
+   */
+  public static boolean isPlayoffDataInitialized(final Connection connection,
+                                                 final int tournamentID,
+                                                 final String division) throws SQLException, RuntimeException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
       prep = connection.prepareStatement("SELECT Count(*) FROM PlayoffData"
           + " WHERE Tournament = ?"//
           + " AND event_division = ?");
-      prep.setInt(1, curTourney);
+      prep.setInt(1, tournamentID);
       prep.setString(2, division);
       rs = prep.executeQuery();
       if (!rs.next()) {
@@ -2391,6 +2407,26 @@ public final class Queries {
     }
   }
 
+  public static boolean isPlayoffDataInitialized(final Connection connection,
+                                                 final int tournamentID) throws SQLException, RuntimeException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT Count(*) FROM PlayoffData"
+          + " WHERE Tournament = ?");
+      prep.setInt(1, tournamentID);
+      rs = prep.executeQuery();
+      if (!rs.next()) {
+        throw new RuntimeException("Query to obtain count of PlayoffData entries returned no data");
+      } else {
+        return rs.getInt(1) > 0;
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+  
   /**
    * Get the color for a division index. Below are the colors used.
    * <table>
