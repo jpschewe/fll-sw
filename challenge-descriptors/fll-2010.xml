@@ -4,11 +4,11 @@
 
   <Performance minimumScore="0" weight="1.0">
 
-    <goal name="common_bone_repair" title="Common Bone Repair"
+    <goal name="common_bone_repair" title="Common Arm Bone Repair"
       multiplier="25"
       />
 
-    <goal name="bone_bridge_inserted" title="Bone Bridge Inserted"
+    <goal name="bone_bridge_inserted" title="Leg Bone Bridge Inserted"
       multiplier="15"
       />
 
@@ -27,7 +27,7 @@
       multiplier="25"
       />
 
-    <goal name="rapid_blood_screening_cells" title="Rapid Blood Screening: White Blood Cells in Patient's Area"
+    <goal name="rapid_blood_screening_cells" title="White Blood Cells in Patient (Brian) Area"
       multiplier="15"
       />
 
@@ -43,7 +43,7 @@
       <value score="0" title="None" value="none"/>
     </goal>
 
-    <goal name="mechanical_arm_patent" title="Mechanical Arm Patent"
+    <goal name="mechanical_arm_patent" title="Mechanical Arm Holding Patent"
       multiplier="25"
       />
 
@@ -59,7 +59,7 @@
       multiplier="15"
       />
 
-    <goal name="object_control" title="Object Control Through Thought"
+    <goal name="object_control" title="Door Control Through Thought"
       multiplier="20"
       />
 
@@ -71,7 +71,7 @@
       multiplier="5"
       />
 
-    <goal name="sensitivity" title="Robotic Sensitivity"
+    <goal name="sensitivity" title="Robotic Sensitivity - Weight Up"
       multiplier="25"
       />
 
@@ -79,11 +79,11 @@
       multiplier="25"
       />
 
-    <goal name="bionic_eyes" title="Bionic Eyes"
+    <goal name="bionic_eyes" title="Bionic Eye Touching Upper Body"
       multiplier="20"
       />
 
-    <goal name="stent" title="Stent"
+    <goal name="stent" title="Stent Inserted"
       multiplier="25"
       />
 
