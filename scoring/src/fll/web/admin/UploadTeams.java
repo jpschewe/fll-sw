@@ -32,6 +32,7 @@ import javax.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -48,7 +49,6 @@ import fll.util.ExcelCellReader;
 import fll.util.FLLRuntimeException;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
-import fll.xml.XMLUtils;
 
 /**
  * Java code for uploading team data to the database. Called from
@@ -443,7 +443,7 @@ public final class UploadTeams extends BaseFLLServlet {
       prep.executeUpdate();
       final Document challenge = Queries.getChallengeDocument(connection);
       final Element rootElement = challenge.getDocumentElement();
-      for (final Element categoryElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
+      for (final Element categoryElement : new NodelistElementCollectionAdapter(rootElement.getElementsByTagName("subjectiveCategory"))) {
         final String tableName = categoryElement.getAttribute("name");
         prep = connection.prepareStatement("DELETE FROM "
             + tableName);

@@ -25,6 +25,7 @@ import javax.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -59,7 +60,7 @@ public final class Judges {
     final Connection connection = datasource.getConnection();
     final int tournament = Queries.getCurrentTournament(connection);
 
-    final List<Element> subjectiveCategories = XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"));
+    final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory")).asList();
 
     // count the number of rows present
     int rowIndex = 0;

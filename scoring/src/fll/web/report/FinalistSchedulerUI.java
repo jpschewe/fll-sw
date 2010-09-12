@@ -30,6 +30,7 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -96,7 +97,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
           || null == session.getAttribute(CATEGORIES_KEY)) {
         // no categories cache, need to compute them
         final List<String> subjectiveCategories = new LinkedList<String>();
-        for (final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+        for (final Element subjectiveElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
           final String categoryTitle = subjectiveElement.getAttribute("title");
           subjectiveCategories.add(categoryTitle);
         }
@@ -367,7 +368,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
 
       formatter.format("<h2>Division: %s</h2>", division);
 
-      for (final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement()
+      for (final Element subjectiveElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement()
                                                                        .getElementsByTagName("subjectiveCategory"))) {
         final String categoryTitle = subjectiveElement.getAttribute("title");
         final String categoryName = subjectiveElement.getAttribute("name");

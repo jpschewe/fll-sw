@@ -16,13 +16,13 @@ import java.util.List;
 import java.util.Map;
 
 import net.mtu.eggplant.util.Functions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.web.playoff.TeamScore;
 import fll.xml.ChallengeParser;
-import fll.xml.XMLUtils;
 
 /**
  * Scoring utilities.
@@ -50,7 +50,7 @@ public final class ScoreUtils {
     }
 
     double computedTotal = 0;
-    for (final Element goal : XMLUtils.filterToElements(categoryElement.getElementsByTagName("goal"))) {
+    for (final Element goal : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("goal"))) {
       final String goalName = goal.getAttribute("name");
       final Double val = teamScore.getComputedScore(goalName);
       if (null == val) {
@@ -60,7 +60,7 @@ public final class ScoreUtils {
     }
 
     // do computed goals
-    for (final Element computedGoalEle : XMLUtils.filterToElements(categoryElement.getElementsByTagName("computedGoal"))) {
+    for (final Element computedGoalEle : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("computedGoal"))) {
       final Double val = evalComputedGoal(computedGoalEle, teamScore);
       if (null == val) {
         return Double.NaN;
@@ -83,7 +83,7 @@ public final class ScoreUtils {
     final String computedGoalName = computedGoalEle.getAttribute("name");
     final Map<String, Double> variableValues = new HashMap<String, Double>();
 
-    for (final Element childElement : XMLUtils.filterToElements(computedGoalEle.getChildNodes())) {
+    for (final Element childElement : new NodelistElementCollectionAdapter(computedGoalEle.getChildNodes())) {
       if ("variable".equals(childElement.getNodeName())) {
         final String variableName = childElement.getAttribute("name");
         final Double variableValue = evalPoly(childElement, teamScore, variableValues);
@@ -109,9 +109,9 @@ public final class ScoreUtils {
    * @throws ParseException
    */
   private static Double evalSwitch(final Element switchElement, final TeamScore teamScore, final Map<String, Double> variableValues) throws ParseException {
-    for (final Element caseElement : XMLUtils.filterToElements(switchElement.getChildNodes())) {
+    for (final Element caseElement : new NodelistElementCollectionAdapter(switchElement.getChildNodes())) {
       if ("case".equals(caseElement.getNodeName())) {
-        final List<Element> children = XMLUtils.filterToElements(caseElement.getChildNodes());
+        final List<Element> children = new NodelistElementCollectionAdapter(caseElement.getChildNodes()).asList();
         final Element conditionEle = children.get(0);
         if (evalCondition(conditionEle, teamScore, variableValues)) {
           final Element resultElement = children.get(1);
@@ -180,8 +180,8 @@ public final class ScoreUtils {
    * @return
    */
   private static boolean evalEnumCond(final Element leftEle, final Element ineqEle, final Element rightEle, final TeamScore teamScore) {
-    final String leftStr = evalStrOrGoalRef(XMLUtils.filterToElements(leftEle.getChildNodes()).get(0), teamScore);
-    final String rightStr = evalStrOrGoalRef(XMLUtils.filterToElements(rightEle.getChildNodes()).get(0), teamScore);
+    final String leftStr = evalStrOrGoalRef(new NodelistElementCollectionAdapter(leftEle.getChildNodes()).asList().get(0), teamScore);
+    final String rightStr = evalStrOrGoalRef(new NodelistElementCollectionAdapter(rightEle.getChildNodes()).asList().get(0), teamScore);
     if ("equal-to".equals(ineqEle.getNodeName())) {
       return Functions.safeEquals(leftStr, rightStr);
     } else if ("no-equal-to".equals(ineqEle.getNodeName())) {
@@ -216,7 +216,7 @@ public final class ScoreUtils {
    * @see #evalEnumCond(Element, Element, Element, TeamScore)
    */
   private static boolean evalCondition(final Element conditionEle, final TeamScore teamScore, final Map<String, Double> variableValues) throws ParseException {
-    final List<Element> children = XMLUtils.filterToElements(conditionEle.getChildNodes());
+    final List<Element> children = new NodelistElementCollectionAdapter(conditionEle.getChildNodes()).asList();
     final Element leftEle = children.get(0);
     final Element ineqEle = children.get(1);
     final Element rightEle = children.get(2);
@@ -241,7 +241,7 @@ public final class ScoreUtils {
    */
   public static Double evalPoly(final Element ele, final TeamScore teamScore, final Map<String, Double> variableValues) throws ParseException {
     double value = 0;
-    for (final Element child : XMLUtils.filterToElements(ele.getChildNodes())) {
+    for (final Element child : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
       if ("constant".equals(child.getNodeName())) {
         final String valueStr = child.getAttribute("value");
         final double val = Utilities.NUMBER_FORMAT_INSTANCE.parse(valueStr).doubleValue();

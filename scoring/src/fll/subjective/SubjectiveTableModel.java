@@ -10,6 +10,8 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -34,9 +36,9 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   public SubjectiveTableModel(final Document scoreDocument, final Element subjectiveElement) {
     _scoreDocument = scoreDocument;
     _subjectiveElement = subjectiveElement;
-    _goals = XMLUtils.filterToElements(subjectiveElement.getChildNodes());
+    _goals = new NodelistElementCollectionAdapter(subjectiveElement.getChildNodes()).asList();
     final Element categoryScoreElement = (Element) (_scoreDocument.getDocumentElement()).getElementsByTagName(subjectiveElement.getAttribute("name")).item(0);
-    final List<Element> scoreElements = XMLUtils.filterToElements(categoryScoreElement.getElementsByTagName("score"));
+    final List<Element> scoreElements = new NodelistElementCollectionAdapter(categoryScoreElement.getElementsByTagName("score")).asList();
     _scoreElements = new Element[scoreElements.size()];
     for (int i = 0; i < scoreElements.size(); i++) {
       _scoreElements[i] = scoreElements.get(i);
@@ -245,7 +247,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           element.setAttribute("modified", Boolean.TRUE.toString());
         }
       } else {
-        final List<Element> posValues = XMLUtils.filterToElements(goalDescription.getElementsByTagName("value"));
+        final List<Element> posValues = new NodelistElementCollectionAdapter(goalDescription.getElementsByTagName("value")).asList();
         if (posValues.size() > 0) {
           // enumerated, convert from title to value
           boolean found = false;

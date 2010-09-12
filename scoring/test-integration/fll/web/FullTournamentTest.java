@@ -18,11 +18,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
-import java.util.List;
 
 import javax.swing.table.TableModel;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
@@ -482,13 +482,12 @@ public class FullTournamentTest extends SeleneseTestCase {
       final SubjectiveFrame subjective = new SubjectiveFrame(subjectiveZip);
 
       // insert scores into zip
-      for (final Element subjectiveElement : XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+      for (final Element subjectiveElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
         final String category = subjectiveElement.getAttribute("name");
         final String title = subjectiveElement.getAttribute("title");
         // find appropriate table model
         final TableModel tableModel = subjective.getTableModelForTitle(title);
 
-        final List<Element> goals = XMLUtils.filterToElements(subjectiveElement.getElementsByTagName("goal"));
         prep = testDataConn.prepareStatement("SELECT * FROM "
             + category + " WHERE Tournament = ?");
         prep.setString(1, testTournament);
@@ -517,7 +516,7 @@ public class FullTournamentTest extends SeleneseTestCase {
             Assert.assertTrue("Can't find No Show column in subjective table model", columnIndex >= 0);
             tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);
           } else {
-            for (final Element goalElement : goals) {
+            for (final Element goalElement : new NodelistElementCollectionAdapter(subjectiveElement.getElementsByTagName("goal"))) {
               final String goalName = goalElement.getAttribute("name");
               final String goalTitle = goalElement.getAttribute("title");
 
@@ -638,7 +637,7 @@ public class FullTournamentTest extends SeleneseTestCase {
         } else {
           // walk over challenge descriptor to get all element names and then
           // use the values from rs
-          for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
+          for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
             final String name = element.getAttribute("name");
             final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
             final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
@@ -722,7 +721,7 @@ public class FullTournamentTest extends SeleneseTestCase {
 
           // walk over challenge descriptor to get all element names and then
           // use the values from rs
-          for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
+          for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
             final String name = element.getAttribute("name");
             final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
             final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();

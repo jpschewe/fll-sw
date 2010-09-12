@@ -8,6 +8,8 @@ package fll.web.playoff;
 import java.text.ParseException;
 import java.util.List;
 
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
@@ -100,7 +102,7 @@ public abstract class TeamScore {
         return ScoreUtils.evalComputedGoal(goalDescription, this);
       } else {
         final double multiplier = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalDescription.getAttribute("multiplier")).doubleValue();
-        final List<Element> values = XMLUtils.filterToElements(goalDescription.getElementsByTagName("value"));
+        final List<Element> values = new NodelistElementCollectionAdapter(goalDescription.getElementsByTagName("value")).asList();
         if (values.size() == 0) {
           final Double score = getRawScore(goalName);
           if (null == score) {
@@ -191,7 +193,7 @@ public abstract class TeamScore {
    * @return the goal description, null if none found
    */
   public final Element getGoalDescription(final String name) {
-    for (final Element child : XMLUtils.filterToElements(getCategoryDescription().getChildNodes())) {
+    for (final Element child : new NodelistElementCollectionAdapter(getCategoryDescription().getChildNodes())) {
       if (("goal".equals(child.getNodeName()) || "computedGoal".equals(child.getNodeName()))
           && name.equals(child.getAttribute("name"))) {
         return child;
