@@ -27,11 +27,11 @@ public class DataSourceSpy implements DataSource, Serializable {
   public DataSourceSpy() {
   }
 
-  public DataSourceSpy(DataSource realDataSource) {
+  public DataSourceSpy(final DataSource realDataSource) {
     this.realDataSource = realDataSource;
   }
 
-  public void setRealDataSource(DataSource realDataSource) {
+  public void setRealDataSource(final DataSource realDataSource) {
     this.realDataSource = realDataSource;
   }
 
@@ -39,7 +39,7 @@ public class DataSourceSpy implements DataSource, Serializable {
     return enabled;
   }
 
-  public void setEnabled(boolean enabled) {
+  public void setEnabled(final boolean enabled) {
     this.enabled = enabled;
   }
 
@@ -51,8 +51,8 @@ public class DataSourceSpy implements DataSource, Serializable {
     }
   }
 
-  public Connection getConnection(String username,
-                                  String password) throws SQLException {
+  public Connection getConnection(final String username,
+                                  final String password) throws SQLException {
     if (enabled) {
       return new ConnectionSpy(realDataSource.getConnection(username, password));
     } else {
@@ -68,19 +68,19 @@ public class DataSourceSpy implements DataSource, Serializable {
     return realDataSource.getLogWriter();
   }
 
-  public boolean isWrapperFor(Class<?> iface) throws SQLException {
+  public boolean isWrapperFor(final Class<?> iface) throws SQLException {
     return realDataSource.isWrapperFor(iface);
   }
 
-  public void setLoginTimeout(int seconds) throws SQLException {
+  public void setLoginTimeout(final int seconds) throws SQLException {
     realDataSource.setLoginTimeout(seconds);
   }
 
-  public void setLogWriter(PrintWriter out) throws SQLException {
+  public void setLogWriter(final PrintWriter out) throws SQLException {
     realDataSource.setLogWriter(out);
   }
 
-  public <T> T unwrap(Class<T> iface) throws SQLException {
+  public <T> T unwrap(final Class<T> iface) throws SQLException {
     return realDataSource.unwrap(iface);
   }
 
