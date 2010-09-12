@@ -27,8 +27,6 @@ ${message}
 
  <li><a href="query.jsp">Do SQL queries and updates</a></li>
 
- <li><a href="<c:url value='/setup'/>">Go to database setup</a></li>
-
 <li>
  <form id='import' action='importdb/ImportDBDump' method='post'
   enctype='multipart/form-data'>
