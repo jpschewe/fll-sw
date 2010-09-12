@@ -13,6 +13,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
@@ -37,7 +38,6 @@ import fll.Version;
 import fll.db.Queries;
 import fll.util.FP;
 import fll.xml.ChallengeParser;
-import fll.xml.XMLUtils;
 
 /**
  * @author Dan Churchill
@@ -456,13 +456,12 @@ public class ScoresheetGenerator {
     }
 
     final org.w3c.dom.Element performanceElement = (org.w3c.dom.Element) rootElement.getElementsByTagName("Performance").item(0);
-    final List<org.w3c.dom.Element> goals = XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"));
-    final List<org.w3c.dom.Element> children = XMLUtils.filterToElements(performanceElement.getChildNodes());
+    final List<org.w3c.dom.Element> goals = new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal")).asList();
 
     m_goalLabel = new PdfPCell[goals.size()];
     m_goalValue = new PdfPCell[goals.size()];
     int realI = 0;
-    for (final org.w3c.dom.Element element : children) {
+    for (final org.w3c.dom.Element element : new NodelistElementCollectionAdapter(performanceElement.getChildNodes())) {
       if (element.getNodeType() == Node.ELEMENT_NODE) {
         if (element.getNodeName().equals("goal")) {
           final String name = element.getAttribute("name");
@@ -483,12 +482,16 @@ public class ScoresheetGenerator {
             // If element has child nodes, then we have an enumerated list
             // of choices. Otherwise it is either yes/no or a numeric field.
             if (element.hasChildNodes()) {
-              final List<org.w3c.dom.Element> posValues = XMLUtils.filterToElements(element.getElementsByTagName("value"));
               // replace spaces with "no-break" spaces
-              final StringBuilder choices = new StringBuilder(posValues.get(0).getAttribute("title").replace(" ", "\u00a0"));
-              for (int v = 1; v < posValues.size(); v++) {
+              boolean first =true;
+              final StringBuilder choices = new StringBuilder();
+              for(final org.w3c.dom.Element value : new NodelistElementCollectionAdapter(element.getElementsByTagName("value"))) {
+                if(!first) {
                 choices.append(" /\u00a0");
-                choices.append(posValues.get(v).getAttribute("title").replace(" ", "\u00a0"));
+                } else {
+                  first = true;
+                }
+                choices.append(value.getAttribute("title").replace(" ", "\u00a0"));
               }
               final Chunk c = new Chunk("", COURIER_10PT_NORMAL);
               c.append(choices.toString().toUpperCase());
