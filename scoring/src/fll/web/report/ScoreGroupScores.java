@@ -10,18 +10,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 import javax.servlet.jsp.JspWriter;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.db.Queries;
-import fll.xml.XMLUtils;
 
 /**
  * Code for soreGroupScores.jsp.
@@ -40,8 +39,6 @@ public final class ScoreGroupScores {
   public static void generateReport(final int tournament, final Document document, final Connection connection, final JspWriter out) throws SQLException,
       IOException {
 
-    final List<Element> subjectiveCategories = XMLUtils.filterToElements(document.getDocumentElement().getElementsByTagName("subjectiveCategory"));
-
     out.println("<h1>FLL Categorized Score Summary by score group</h1>");
 
     out.println("<hr>");
@@ -52,7 +49,7 @@ public final class ScoreGroupScores {
     // get the list of divisions
     for (final String division : Queries.getEventDivisions(connection)) {
       // foreach category
-      for (final Element catElement : subjectiveCategories) {
+      for (final Element catElement : new NodelistElementCollectionAdapter(document.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
         final String catName = catElement.getAttribute("name");
         final String catTitle = catElement.getAttribute("title");
 

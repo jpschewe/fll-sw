@@ -13,6 +13,7 @@ import java.sql.Statement;
 import java.text.ParseException;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -20,7 +21,6 @@ import org.w3c.dom.Element;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
-import fll.xml.XMLUtils;
 
 /**
  * Does score standardization routines from the web.
@@ -100,7 +100,7 @@ public final class ScoreStandardization {
 
         // subjective
         final Element rootElement = document.getDocumentElement();
-        for (final Element catElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
+        for (final Element catElement : new NodelistElementCollectionAdapter(rootElement.getElementsByTagName("subjectiveCategory"))) {
           final String catName = catElement.getAttribute("name");
 
           // insert rows from the current tournament and category, keeping team
@@ -157,7 +157,7 @@ public final class ScoreStandardization {
       final Element rootElement = document.getDocumentElement();
 
       // subjective categories
-      for (final Element catElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
+      for (final Element catElement : new NodelistElementCollectionAdapter(rootElement.getElementsByTagName("subjectiveCategory"))) {
         final String category = catElement.getAttribute("name");
 
         /*
@@ -237,7 +237,7 @@ public final class ScoreStandardization {
           + performanceWeight);
 
       // subjective categories
-      for (final Element catElement : XMLUtils.filterToElements(rootElement.getElementsByTagName("subjectiveCategory"))) {
+      for (final Element catElement : new NodelistElementCollectionAdapter(rootElement.getElementsByTagName("subjectiveCategory"))) {
         final String catName = catElement.getAttribute("name");
         final double catWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(catElement.getAttribute("weight")).doubleValue();
 

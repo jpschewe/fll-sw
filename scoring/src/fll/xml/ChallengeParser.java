@@ -25,6 +25,8 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -92,7 +94,7 @@ public final class ChallengeParser {
       final Element rootElement = challengeDocument.getDocumentElement();
       final Element performanceElement = (org.w3c.dom.Element) rootElement.getElementsByTagName("Performance").item(0);
       LOG.info("The performance goals are");
-      for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
+      for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
         final String name = element.getAttribute("name");
         LOG.info(name);
       }
@@ -204,14 +206,14 @@ public final class ChallengeParser {
       throw new RuntimeException("Not a fll challenge description file");
     }
 
-    for (final Element childNode : XMLUtils.filterToElements(rootElement.getChildNodes())) {
+    for (final Element childNode : new NodelistElementCollectionAdapter(rootElement.getChildNodes())) {
       if ("Performance".equals(childNode.getNodeName())
           || "SubjectiveCategory".equals(childNode.getNodeName())) {
         final Element childElement = childNode;
 
         // get all nodes named goal at any level under category element
         final Map<String, Element> goals = new HashMap<String, Element>();
-        for (final Element element : XMLUtils.filterToElements(childElement.getElementsByTagName("goal"))) {
+        for (final Element element : new NodelistElementCollectionAdapter(childElement.getElementsByTagName("goal"))) {
           final String name = element.getAttribute("name");
           goals.put(name, element);
 
@@ -219,7 +221,7 @@ public final class ChallengeParser {
           final double initialValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("initialValue")).doubleValue();
           if (XMLUtils.isEnumeratedGoal(element)) {
             boolean foundMatch = false;
-            for (final Element valueEle : XMLUtils.filterToElements(element.getChildNodes())) {
+            for (final Element valueEle : new NodelistElementCollectionAdapter(element.getChildNodes())) {
               final double score = Utilities.NUMBER_FORMAT_INSTANCE.parse(valueEle.getAttribute("score")).doubleValue();
               if (FP.equals(score, initialValue, INITIAL_VALUE_TOLERANCE)) {
                 foundMatch = true;
@@ -243,10 +245,10 @@ public final class ChallengeParser {
         }
 
         // for all computedGoals
-        for (final Element computedGoalElement : XMLUtils.filterToElements(childElement.getElementsByTagName("computedGoal"))) {
+        for (final Element computedGoalElement : new NodelistElementCollectionAdapter(childElement.getElementsByTagName("computedGoal"))) {
 
           // for all termElements
-          for (final Element termElement : XMLUtils.filterToElements(computedGoalElement.getElementsByTagName("term"))) {
+          for (final Element termElement : new NodelistElementCollectionAdapter(computedGoalElement.getElementsByTagName("term"))) {
 
             // check that the computed goal only references goals
             final String referencedGoalName = termElement.getAttribute("goal");
@@ -257,7 +259,7 @@ public final class ChallengeParser {
           }
 
           // for all goalRef elements
-          for (final Element goalRefElement : XMLUtils.filterToElements(computedGoalElement.getElementsByTagName("goalRef"))) {
+          for (final Element goalRefElement : new NodelistElementCollectionAdapter(computedGoalElement.getElementsByTagName("goalRef"))) {
 
             // can't reference a non-enum goal with goalRef in enumCond
             final String referencedGoalName = goalRefElement.getAttribute("goal");
@@ -272,7 +274,7 @@ public final class ChallengeParser {
         } // end foreach computed goal
 
         // for all terms
-        for (final Element termElement : XMLUtils.filterToElements(childElement.getElementsByTagName("term"))) {
+        for (final Element termElement : new NodelistElementCollectionAdapter(childElement.getElementsByTagName("term"))) {
           final String goalValueType = termElement.getAttribute("scoreType");
           final String referencedGoalName = termElement.getAttribute("goal");
           final Element referencedGoalElement = goals.get(referencedGoalName);
@@ -310,8 +312,8 @@ public final class ChallengeParser {
       return goalCompareMessage;
     }
 
-    final List<Element> curSubCats = XMLUtils.filterToElements(curDocRoot.getElementsByTagName("subjectiveCategory"));
-    final List<Element> newSubCats = XMLUtils.filterToElements(newDocRoot.getElementsByTagName("subjectiveCategory"));
+    final List<Element> curSubCats = new NodelistElementCollectionAdapter(curDocRoot.getElementsByTagName("subjectiveCategory")).asList();
+    final List<Element> newSubCats = new NodelistElementCollectionAdapter(newDocRoot.getElementsByTagName("subjectiveCategory")).asList();
     if (curSubCats.size() != newSubCats.size()) {
       return "New document has "
           + newSubCats.size() + " subjective categories, current document has " + curSubCats.size() + " subjective categories";
@@ -371,7 +373,7 @@ public final class ChallengeParser {
   private static Map<String, String> gatherColumnDefinitions(final Element element) {
     final Map<String, String> goalDefs = new HashMap<String, String>();
 
-    for (final Element goal : XMLUtils.filterToElements(element.getElementsByTagName("goal"))) {
+    for (final Element goal : new NodelistElementCollectionAdapter(element.getElementsByTagName("goal"))) {
       final String columnDefinition = GenerateDB.generateGoalColumnDefinition(goal);
       final String goalName = goal.getAttribute("name");
       goalDefs.put(goalName, columnDefinition);

@@ -24,6 +24,7 @@ import javax.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -63,7 +64,7 @@ public final class ScoreEntry {
     writer.println("function isConsistent() {");
 
     // check all goal min and max values
-    for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
+    for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
       final String name = element.getAttribute("name");
       final String min = element.getAttribute("min");
       final String max = element.getAttribute("max");
@@ -99,7 +100,7 @@ public final class ScoreEntry {
     final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
     final Formatter formatter = new Formatter(writer);
 
-    for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
+    for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
       final String name = element.getAttribute("name");
       final String min = element.getAttribute("min");
       final String max = element.getAttribute("max");
@@ -163,7 +164,7 @@ public final class ScoreEntry {
     formatter.format("}%n%n%n");
 
     // generate the methods to update the computed goal variables
-    for (final Element ele : XMLUtils.filterToElements(performanceElement.getElementsByTagName("computedGoal"))) {
+    for (final Element ele : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("computedGoal"))) {
       final String goalName = ele.getAttribute("name");
       formatter.format("<!-- %s -->%n", goalName);
       formatter.format("var %s;%n", getVarNameForComputedScore(goalName));
@@ -185,7 +186,7 @@ public final class ScoreEntry {
     final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
 
     // output the assignments of each element
-    for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
+    for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
       final String name = element.getAttribute("name");
       final String multiplier = element.getAttribute("multiplier");
       final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
@@ -206,7 +207,7 @@ public final class ScoreEntry {
 
       formatter.format("<!-- %s -->%n", name);
 
-      final List<Element> posValues = XMLUtils.filterToElements(element.getElementsByTagName("value"));
+      final List<Element> posValues = new NodelistElementCollectionAdapter(element.getElementsByTagName("value")).asList();
       if (posValues.size() > 0) {
         // enumerated
         for (int valueIdx = 0; valueIdx < posValues.size(); valueIdx++) {
@@ -256,7 +257,7 @@ public final class ScoreEntry {
     formatter.format("}%n");
 
     // output calls to the computed goal methods
-    for (final Element ele : XMLUtils.filterToElements(performanceElement.getElementsByTagName("computedGoal"))) {
+    for (final Element ele : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("computedGoal"))) {
       final String goalName = ele.getAttribute("name");
       final String computedVarName = getVarNameForComputedScore(goalName);
       formatter.format("%s();%n", getComputedMethodName(goalName));
@@ -288,7 +289,7 @@ public final class ScoreEntry {
     final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
 
     final Collection<String> goalsWithRestrictions = new LinkedList<String>();
-    final List<Element> restrictions = XMLUtils.filterToElements(performanceElement.getElementsByTagName("restriction"));
+    final List<Element> restrictions = new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("restriction")).asList();
 
     // find out which goals are involved in restrictions
     for (final Element restrictEle : restrictions) {
@@ -334,7 +335,7 @@ public final class ScoreEntry {
 
   private static Set<String> getGoalsInRestriction(final Element restrictEle) {
     final Set<String> goals = new HashSet<String>();
-    for (final Element termEle : XMLUtils.filterToElements(restrictEle.getElementsByTagName("term"))) {
+    for (final Element termEle : new NodelistElementCollectionAdapter(restrictEle.getElementsByTagName("term"))) {
       final String goalName = termEle.getAttribute("goal");
       goals.add(goalName);
     }
@@ -350,12 +351,12 @@ public final class ScoreEntry {
     final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
     writer.println("function reset() {");
 
-    for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
+    for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
       final String name = element.getAttribute("name");
       final double initialValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("initialValue")).doubleValue();
       if (XMLUtils.isEnumeratedGoal(element)) {
         // find score that matches initialValue or is min
-        final List<Element> values = XMLUtils.filterToElements(element.getElementsByTagName("value"));
+        final List<Element> values = new NodelistElementCollectionAdapter(element.getElementsByTagName("value")).asList();
         boolean found = false;
         for (final Element valueEle : values) {
           final String value = valueEle.getAttribute("value");
@@ -405,7 +406,7 @@ public final class ScoreEntry {
 
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
-    for (final Element goalEle : XMLUtils.filterToElements(performanceElement.getChildNodes())) {
+    for (final Element goalEle : new NodelistElementCollectionAdapter(performanceElement.getChildNodes())) {
       final String goalEleName = goalEle.getNodeName();
       if ("computedGoal".equals(goalEleName)
           || "goal".equals(goalEleName)) {
@@ -577,9 +578,9 @@ public final class ScoreEntry {
 
         final Element rootElement = document.getDocumentElement();
         final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
-        for (final Element element : XMLUtils.filterToElements(performanceElement.getElementsByTagName("goal"))) {
+        for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
           final String name = element.getAttribute("name");
-          final List<Element> values = XMLUtils.filterToElements(element.getElementsByTagName("value"));
+          final List<Element> values = new NodelistElementCollectionAdapter(element.getElementsByTagName("value")).asList();
           final String rawVarName = getVarNameForRawScore(name);
 
           if (values.size() > 0) {
@@ -620,7 +621,7 @@ public final class ScoreEntry {
   private static void generateEnumeratedGoalButtons(final Element goal, final String goalName, final JspWriter writer) throws IOException, ParseException {
     writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='100%'>");
 
-    for (final Element valueEle : XMLUtils.filterToElements(goal.getElementsByTagName("value"))) {
+    for (final Element valueEle : new NodelistElementCollectionAdapter(goal.getElementsByTagName("value"))) {
       final String valueTitle = valueEle.getAttribute("title");
       final String value = valueEle.getAttribute("value");
       writer.println("      <tr>");
@@ -713,7 +714,7 @@ public final class ScoreEntry {
     final String goalName = ele.getAttribute("name");
 
     formatter.format("function %s() {%n", getComputedMethodName(goalName));
-    for (final Element childEle : XMLUtils.filterToElements(ele.getChildNodes())) {
+    for (final Element childEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
       if ("variable".equals(childEle.getNodeName())) {
         final String varName = getComputedGoalLocalVarName(childEle.getAttribute("name"));
         final String varValue = polyToString(childEle);
@@ -739,20 +740,20 @@ public final class ScoreEntry {
   }
 
   private static void generateSwitch(final Formatter formatter, final Element ele, final String goalName, final int indent) throws ParseException {
-    final List<Element> children = XMLUtils.filterToElements(ele.getChildNodes());
     // keep track if there are any case statements
+    boolean first = true;
     boolean hasCase = false;
-    for (int childIdx = 0; childIdx < children.size(); ++childIdx) {
-      final Element childEle = (Element) children.get(childIdx);
+    for(final Element childEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
       final String childName = childEle.getNodeName();
       if ("case".equals(childName)) {
         hasCase = true;
-        final List<Element> childChildren = XMLUtils.filterToElements(childEle.getChildNodes());
+        final List<Element> childChildren = new NodelistElementCollectionAdapter(childEle.getChildNodes()).asList();
         final Element conditionEle = childChildren.get(0);
         final String ifPrefix;
-        if (childIdx > 0) {
+        if (!first) {
           ifPrefix = " else ";
         } else {
+          first = false;
           ifPrefix = generateIndentSpace(indent);
         }
         generateCondition(formatter, ifPrefix, conditionEle);
@@ -810,12 +811,12 @@ public final class ScoreEntry {
    */
   private static String polyToString(final Element ele) throws ParseException {
     final Formatter formatter = new Formatter();
-    final List<Element> children = XMLUtils.filterToElements(ele.getChildNodes());
-    for (int childIdx = 0; childIdx < children.size(); ++childIdx) {
-      final Element childEle = (Element) children.get(childIdx);
-
-      if (childIdx > 0) {
+    boolean first = true;
+    for(final Element childEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
+      if (!first) {
         formatter.format(" + ");
+      } else {
+        first = false;
       }
 
       if ("term".equals(childEle.getNodeName())) {
@@ -903,12 +904,12 @@ public final class ScoreEntry {
   private static void generateCondition(final Formatter formatter, final String ifPrefix, final Element ele) throws ParseException {
     formatter.format("%sif(", ifPrefix);
 
-    final List<Element> elementChildren = XMLUtils.filterToElements(ele.getChildNodes());
+    final List<Element> elementChildren = new NodelistElementCollectionAdapter(ele.getChildNodes()).asList();
     final Element leftEle = elementChildren.get(0);
-    final Element leftVal = XMLUtils.filterToElements(leftEle.getChildNodes()).get(0);
+    final Element leftVal = new NodelistElementCollectionAdapter(leftEle.getChildNodes()).asList().get(0);
     final Element ineqEle = elementChildren.get(1);
     final Element rightEle = elementChildren.get(2);
-    final Element rightVal = XMLUtils.filterToElements(rightEle.getChildNodes()).get(0);
+    final Element rightVal = new NodelistElementCollectionAdapter(rightEle.getChildNodes()).asList().get(0);
     final String nodeName = ele.getNodeName();
     if ("condition".equals(nodeName)) {
       formatter.format("%s %s %s", polyToString(leftEle), ineqToString(ineqEle), polyToString(rightEle));

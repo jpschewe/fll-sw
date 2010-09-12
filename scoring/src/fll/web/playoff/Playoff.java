@@ -25,6 +25,7 @@ import java.util.Random;
 import javax.servlet.jsp.JspWriter;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -302,7 +303,7 @@ public final class Playoff {
                                          final TeamScore teamBScore) throws ParseException {
 
     // walk test elements in tiebreaker to decide who wins
-    for (final Element testElement : XMLUtils.filterToElements(tiebreakerElement.getChildNodes())) {
+    for (final Element testElement : new NodelistElementCollectionAdapter(tiebreakerElement.getChildNodes())) {
       if ("test".equals(testElement.getTagName())) {
         final Map<String, Double> variableValues = Collections.emptyMap();
         final double sumA = ScoreUtils.evalPoly(testElement, teamAScore, variableValues);

@@ -31,10 +31,10 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
+import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import fll.xml.XMLUtils;
 
 /**
  * Summary dialog for subjective scores.
@@ -96,16 +96,16 @@ import fll.xml.XMLUtils;
 
     final List<String> columnNames = new LinkedList<String>();
     final Map<Integer, String> teamNumberToDivision = new HashMap<Integer, String>();
-    final List<Element> subjectiveCategories = XMLUtils.filterToElements(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"));
+    final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory")).asList();
     for (int catIdx = 0; catIdx < subjectiveCategories.size(); catIdx++) {
       final Element subjectiveElement = subjectiveCategories.get(catIdx);
       final String category = subjectiveElement.getAttribute("name");
       final String categoryTitle = subjectiveElement.getAttribute("title");
       columnNames.add(categoryTitle);
 
-      final List<Element> goals = XMLUtils.filterToElements(subjectiveElement.getElementsByTagName("goal"));
+      final List<Element> goals = new NodelistElementCollectionAdapter(subjectiveElement.getElementsByTagName("goal")).asList();
       final Element categoryElement = (Element) scoreDocument.getDocumentElement().getElementsByTagName(category).item(0);
-      for (final Element scoreElement : XMLUtils.filterToElements(categoryElement.getElementsByTagName("score"))) {
+      for (final Element scoreElement : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("score"))) {
         int numValues = 0;
         for (final Element goalElement : goals) {
           final String goalName = goalElement.getAttribute("name");

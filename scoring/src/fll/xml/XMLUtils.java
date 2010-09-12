@@ -14,7 +14,6 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import org.custommonkey.xmlunit.Diff;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 
 /**
@@ -205,10 +204,4 @@ public final class XMLUtils {
     return getSubjectiveCategoryNames(challengeDocument).contains(name);
   }
 
-  /**
-   * @deprecated Use {@link odelistElementIterableAdapter} directly
-   */
-  public static List<Element> filterToElements(final NodeList elementsByTagName) {
-    return new NodelistElementCollectionAdapter(elementsByTagName).asList();
-  }
 }
