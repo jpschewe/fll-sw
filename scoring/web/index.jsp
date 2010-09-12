@@ -59,6 +59,8 @@ pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
       <li><a href='playoff/ScoresheetServlet'>Blank scoresheet for printing (PDF format)</a></li>
 
       <li><a href='challenge.xml'>Challenge Descriptor</a></li>
+
+      <li><a href="<c:url value='/setup'/>">Go to database setup</a></li>
       
       <li><a href="developer/index.jsp">Developer page</a></li>
 
