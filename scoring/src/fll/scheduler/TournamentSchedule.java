@@ -1560,7 +1560,6 @@ public class TournamentSchedule implements Serializable {
    * schedule for the same tournament.
    * 
    * @param tournamentID the ID of the tournament
-   * @param schedule the schedule to save
    */
   public void storeSchedule(final Connection connection,
                             final int tournamentID) throws SQLException {
@@ -1623,7 +1622,7 @@ public class TournamentSchedule implements Serializable {
    * in the database.
    * 
    * @param connection the database connection
-   * @param tournament the tournament to check
+   * @param tournamentID the tournament to check
    * @return the constraint violations, empty if no violations
    * @throws SQLException
    */

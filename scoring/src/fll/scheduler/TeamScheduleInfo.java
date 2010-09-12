@@ -207,9 +207,6 @@ public final class TeamScheduleInfo implements Serializable {
     return judgingStation;
   }
 
-  /**
-   * @return
-   */
   public int getNumberOfRounds() {
     return numberOfRounds;
   }
