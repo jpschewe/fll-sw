@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import org.apache.log4j.Logger;
+
 import com.itextpdf.text.DocumentException;
 
 import fll.db.Queries;
@@ -30,6 +32,8 @@ import fll.web.SessionAttributes;
  */
 public class ScoresheetServlet extends BaseFLLServlet {
 
+  private static final Logger LOGGER = Logger.getLogger(ScoresheetServlet.class);
+  
   /**
    * @see fll.web.BaseFLLServlet#processRequest(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, javax.servlet.ServletContext, javax.servlet.http.HttpSession)
    */
@@ -55,8 +59,10 @@ public class ScoresheetServlet extends BaseFLLServlet {
       gen.writeFile(connection, response.getOutputStream());
       
     } catch (final SQLException e) {
+      LOGGER.error(e, e);
       throw new RuntimeException(e);
     } catch (final DocumentException e) {
+      LOGGER.error(e, e);
       throw new RuntimeException(e);
     }
   }
