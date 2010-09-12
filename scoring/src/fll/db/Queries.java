@@ -2772,7 +2772,7 @@ public final class Queries {
     try {
       prep = connection.prepareStatement("SELECT AssignedTable FROM PlayoffData WHERE Tournament= ?" //
           + " AND event_division= ?" //
-          + "'" + " AND PlayoffRound= ?"//
+          + " AND PlayoffRound= ?"//
           + " AND LineNumber= ?" //
           + " AND AssignedTable IS NOT NULL");
       prep.setInt(1, tournament);
