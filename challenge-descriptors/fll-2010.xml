@@ -23,11 +23,11 @@
       <term coefficient="1" goal="bone_bridge_inserted" scoreType="raw"/>
     </restriction>
 
-    <goal name="rapid_blood_screening_syringe" title="Rapid Blood Screening: Syringe In Base"
+    <goal name="rapid_blood_screening_syringe" title="Syringe In Base"
       multiplier="25"
       />
 
-    <goal name="rapid_blood_screening_cells" title="White Blood Cells in Patient (Brian) Area"
+    <goal name="rapid_blood_screening_cells" title="White Blood Cells in Patient Area"
       multiplier="15"
       />
 
@@ -67,7 +67,7 @@
       multiplier="25"
       />
 
-    <goal name="medicine_part2" title="Medicine Auto-dispensing: Blue and White in Patient Area"
+    <goal name="medicine_part2" title="Blue and White in Patient Area"
       multiplier="5"
       />
 
