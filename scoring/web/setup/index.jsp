@@ -10,8 +10,6 @@
 <body>
 <h1>FLL (Database setup)</h1>
 
-<p>Testing context listener: ${testing }</p>
-
 <p>${message}</p>
 <%-- clear out the message, so that we don't see it again --%>
 <c:remove var="message" />
