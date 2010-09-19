@@ -34,7 +34,9 @@ if(null == errorMessage || "".equals(errorMessage)) {
     understands.  Highlighted columns are required, all others are optional.
     The datatype column specifies the type of data expected in this column.
     <b>If a number is expected and you specify a column with text that doesn't
-    convert to a number an error will be printed specifying the invalid value.</b></p>
+    convert to a number an error will be printed specifying the invalid value.</b>
+        You can select the same column for multiple pieces of data.
+      </p>
 
 <%@ include file="/WEB-INF/jspf/sanitizeRules.jspf" %>
       
