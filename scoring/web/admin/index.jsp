@@ -51,10 +51,23 @@ ${message}
 		ENCTYPE="multipart/form-data">
 		Upload the datafile
 	for teams. This file can be tab separated or comma separated or 
-    an Excel file (xls and xslx supported - although only the first sheet is read). The
+    an Excel file (xls and xslx supported). The
 	filter functionality provided here is very basic and has very limited
 	feedback. It's suggested that you edit the input file before upload to
 	contain only the teams for your tournament(s).
+
+              <a href='javascript:display("UploadTeamsHelp")'>[help]</a>
+	<div id='UploadTeamsHelp' class='help' style='display: none'>
+          Each column of the input file needs to matched against the
+          required data for teams. This information includes: team number,
+          team name, organization, region, division. The team number
+          must be a number and is required. The other columns are
+          not required, but are a good idea to include. You will be prompted
+          to pick a column from your data file to match against each piece
+          of team data that the software uses. You can select the same column
+          for multiple pieces of data.
+	<a href='javascript:hide("UploadTeamsHelp")'>[hide]</a></div>
+        
 	  <input type="file" size="32" name="file">
 	  <input type='hidden' name='uploadRedirect' value="<c:url value='/admin/UploadTeams'/>" />
 	  <input type="submit" value="Upload">
