@@ -50,6 +50,8 @@ public class ScoresheetGenerator {
 
   private static final String SHORT_BLANK = "___________";
 
+  private static final char NON_BREAKING_SPACE = '\u00a0';
+  
   /**
    * Create a new ScoresheetGenerator object populated with form header data
    * provided in the given Map. The map should contain String[] objects, each of
@@ -77,8 +79,10 @@ public class ScoresheetGenerator {
    * marked as printed. It is very questionable whether this is where this
    * should happen, but I don't feel like breaking it out.
    */
-  public ScoresheetGenerator(final HttpServletRequest request, final Connection connection, final int tournament, final org.w3c.dom.Document document)
-      throws SQLException {
+  public ScoresheetGenerator(final HttpServletRequest request,
+                             final Connection connection,
+                             final int tournament,
+                             final org.w3c.dom.Document document) throws SQLException {
     final String numMatchesStr = request.getParameter("numMatches");
     if (null == numMatchesStr) {
       // must have been called asking for blank
@@ -185,17 +189,20 @@ public class ScoresheetGenerator {
     m_goalValue = new PdfPCell[0];
   }
 
-  private static final Font ARIAL_8PT_NORMAL = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL, new BaseColor(0, 0, 0));
+  private static final Font ARIAL_8PT_NORMAL = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL,
+                                                                   new BaseColor(0, 0, 0));
 
   private static final Font ARIAL_10PT_NORMAL = FontFactory.getFont(FontFactory.HELVETICA, 10, Font.NORMAL);
 
   private static final Font COURIER_10PT_NORMAL = FontFactory.getFont(FontFactory.COURIER, 10, Font.NORMAL);
 
-  public void writeFile(final Connection connection, final OutputStream out) throws DocumentException, SQLException {
+  private static final int POINTS_PER_INCH = 72;
+  
+  public void writeFile(final Connection connection,
+                        final OutputStream out) throws DocumentException, SQLException {
 
     final int nup = Queries.getScoresheetLayoutNUp(connection);
-    boolean orientationIsPortrait;
-
+    final boolean orientationIsPortrait;
     if (nup == 1) {
       orientationIsPortrait = true;
     } else {
@@ -212,13 +219,15 @@ public class ScoresheetGenerator {
     PdfWriter.getInstance(pdfDoc, out);
 
     // Measurements are always in points (72 per inch)
-    // This sets up 1/2 inch margins
-    pdfDoc.setMargins(0.5f * 72, 0.5f * 72, 0.35f * 72, 0.35f * 72);
+    // This sets up 1/2 inch margins side margins and 0.35in top and bottom
+    // margins
+    pdfDoc.setMargins(0.5f * POINTS_PER_INCH, 0.5f * POINTS_PER_INCH, 0.35f * POINTS_PER_INCH, 0.35f * POINTS_PER_INCH);
     pdfDoc.open();
 
     // Header cell with challenge title to add to both scoresheets
     final Paragraph titleParagraph = new Paragraph();
-    final Chunk titleChunk = new Chunk(m_pageTitle, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Font.NORMAL, BaseColor.WHITE));
+    final Chunk titleChunk = new Chunk(m_pageTitle, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Font.NORMAL,
+                                                                        BaseColor.WHITE));
     titleParagraph.setAlignment(Element.ALIGN_CENTER);
     titleParagraph.add(titleChunk);
 
@@ -338,7 +347,8 @@ public class ScoresheetGenerator {
       nbrlc.addElement(nbrP);
       teamInfo.addCell(nbrlc);
       // Team number value cell
-      final Paragraph nbrV = new Paragraph(null == m_number[i] ? SHORT_BLANK : String.valueOf(m_number[i]), COURIER_10PT_NORMAL);
+      final Paragraph nbrV = new Paragraph(null == m_number[i] ? SHORT_BLANK : String.valueOf(m_number[i]),
+                                           COURIER_10PT_NORMAL);
       final PdfPCell nbrVc = new PdfPCell(team[i].getDefaultCell());
       nbrVc.addElement(nbrV);
       teamInfo.addCell(nbrVc);
@@ -382,13 +392,7 @@ public class ScoresheetGenerator {
       teamInfoCell.setColspan(2);
 
       team[i].addCell(teamInfoCell);
-
-      final PdfPCell blankRow = new PdfPCell(new Phrase(""));
-      blankRow.setColspan(2);
-      blankRow.setBorder(0);
-      blankRow.setMinimumHeight(9);
-      team[i].addCell(blankRow);
-
+      
       for (int j = 0; j < m_goalLabel.length; j++) {
         team[i].addCell(m_goalLabel[j]);
         team[i].addCell(m_goalValue[j]);
@@ -410,9 +414,9 @@ public class ScoresheetGenerator {
       // Interior borders between scoresheets on a page
       if (nup > 1) {
         if (i % 2 == 0) {
-          cell[i].setPaddingRight(36);
+          cell[i].setPaddingRight(0.1f * POINTS_PER_INCH);
         } else {
-          cell[i].setPaddingLeft(36);
+          cell[i].setPaddingLeft(0.1f * POINTS_PER_INCH);
         }
       }
 
@@ -455,8 +459,13 @@ public class ScoresheetGenerator {
       setRevisionInfo(rootElement.getAttribute("revision"));
     }
 
-    final org.w3c.dom.Element performanceElement = (org.w3c.dom.Element) rootElement.getElementsByTagName("Performance").item(0);
-    final List<org.w3c.dom.Element> goals = new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal")).asList();
+    final org.w3c.dom.Element performanceElement = (org.w3c.dom.Element) rootElement
+                                                                                    .getElementsByTagName("Performance")
+                                                                                    .item(0);
+    final List<org.w3c.dom.Element> goals = new NodelistElementCollectionAdapter(
+                                                                                 performanceElement
+                                                                                                   .getElementsByTagName("goal"))
+                                                                                                                                 .asList();
 
     m_goalLabel = new PdfPCell[goals.size()];
     m_goalValue = new PdfPCell[goals.size()];
@@ -481,28 +490,27 @@ public class ScoresheetGenerator {
 
             // If element has child nodes, then we have an enumerated list
             // of choices. Otherwise it is either yes/no or a numeric field.
+            m_goalValue[realI] = new PdfPCell();
+            final Chunk choices = new Chunk("", COURIER_10PT_NORMAL);
             if (element.hasChildNodes()) {
               // replace spaces with "no-break" spaces
-              boolean first =true;
-              final StringBuilder choices = new StringBuilder();
-              for(final org.w3c.dom.Element value : new NodelistElementCollectionAdapter(element.getElementsByTagName("value"))) {
-                if(!first) {
-                choices.append(" /\u00a0");
+              boolean first = true;
+              for (final org.w3c.dom.Element value : new NodelistElementCollectionAdapter(
+                                                                                          element
+                                                                                                 .getElementsByTagName("value"))) {
+                if (!first) {
+                  choices.append(" /" + NON_BREAKING_SPACE);
                 } else {
-                  first = true;
+                  first = false;
                 }
-                choices.append(value.getAttribute("title").replace(" ", "\u00a0"));
+                choices.append(value.getAttribute("title").toUpperCase().replace(' ', NON_BREAKING_SPACE));
               }
-              final Chunk c = new Chunk("", COURIER_10PT_NORMAL);
-              c.append(choices.toString().toUpperCase());
-              m_goalValue[realI] = new PdfPCell();
-              m_goalValue[realI].addElement(c);
+              m_goalValue[realI].addElement(choices);
 
             } else {
               if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
                   && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
                 final Paragraph q = new Paragraph("YES / NO", COURIER_10PT_NORMAL);
-                m_goalValue[realI] = new PdfPCell();
                 m_goalValue[realI].addElement(q);
 
               } else {
@@ -510,13 +518,12 @@ public class ScoresheetGenerator {
                     + min + " - " + max + ")";
                 final PdfPTable t = new PdfPTable(2);
                 t.setHorizontalAlignment(Element.ALIGN_LEFT);
-                t.setTotalWidth(72);
+                t.setTotalWidth(1 * POINTS_PER_INCH);
                 t.setLockedWidth(true);
                 final Phrase r = new Phrase("", ARIAL_8PT_NORMAL);
                 t.addCell(new PdfPCell(r));
                 final Phrase q = new Phrase(range, ARIAL_8PT_NORMAL);
                 t.addCell(new PdfPCell(q));
-                m_goalValue[realI] = new PdfPCell();
                 m_goalValue[realI].setPaddingTop(9);
                 m_goalValue[realI].addElement(t);
               }
@@ -568,7 +575,8 @@ public class ScoresheetGenerator {
    * @param table A string with the table label for the specified scoresheet.
    * @throws IllegalArgumentException Thrown if the index is out of valid range.
    */
-  public void setTable(final int i, final String table) throws IllegalArgumentException {
+  public void setTable(final int i,
+                       final String table) throws IllegalArgumentException {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
@@ -587,7 +595,8 @@ public class ScoresheetGenerator {
    * @param name A string with the team name for the specified scoresheet.
    * @throws IllegalArgumentException Thrown if the index is out of valid range.
    */
-  public void setName(final int i, final String name) throws IllegalArgumentException {
+  public void setName(final int i,
+                      final String name) throws IllegalArgumentException {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
@@ -606,7 +615,8 @@ public class ScoresheetGenerator {
    * @param number A string with the team number for the specified scoresheet.
    * @throws IllegalArgumentException Thrown if the index is out of valid range.
    */
-  public void setNumber(final int i, final Integer number) throws IllegalArgumentException {
+  public void setNumber(final int i,
+                        final Integer number) throws IllegalArgumentException {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
@@ -626,7 +636,8 @@ public class ScoresheetGenerator {
    *          scoresheet.
    * @throws IllegalArgumentException Thrown if the index is out of valid range.
    */
-  public void setRound(final int i, final String round) throws IllegalArgumentException {
+  public void setRound(final int i,
+                       final String round) throws IllegalArgumentException {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
