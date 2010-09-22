@@ -89,7 +89,7 @@
 		<pathelement location="${dir.lib}/log4jdbc4-1.2beta2.jar" />
 
 		<!-- pdf library -->
-		<pathelement location="${dir.lib}/iText-5.0.1.jar" />
+		<pathelement location="${dir.lib}/iText-5.0.4.jar" />
 
 		<pathelement location="${dir.lib}/opencsv-2.1-jps.jar" />
 
