@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fll title="Boston Scientific MN FIRST LEGO League Tournament: Body Forward" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 1">
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 4">
 
   <Performance minimumScore="0" weight="1.0">
 
@@ -67,7 +67,7 @@
       multiplier="25"
       />
 
-    <goal name="medicine_part2" title="Blue and White in Patient Area"
+    <goal name="medicine_part2" title="Blue/White/Container in Patient Area"
       multiplier="5"
       />
 
