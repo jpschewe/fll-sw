@@ -504,6 +504,11 @@
 		<copy todir="${dir.dist}/bin">
 			<fileset dir="bin" />
 		</copy>
+    <copy todir="${dir.dist}/bin">
+        <fileset dir="${dir.build}/bin">
+        <include name="SchedulerUI.*"/>
+        </fileset>
+      </copy>
 		<chmod perm="+x">
 			<fileset dir="${dir.dist}/bin">
 				<include name="*.sh" />
