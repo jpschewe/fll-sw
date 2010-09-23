@@ -59,16 +59,16 @@
  <!-- logger name="jdbc.sqlonly"><level value="TRACE"/></logger-->
  
  <!--  log SQL timing -->
- <!--  logger name="jdbc.sqltiming"><level value="TRACE"/></logger>
+ <!--  logger name="jdbc.sqltiming"><level value="TRACE"/></logger-->
  
  <!--  log everything, except result sets - this can be lots of information -->
- <!--  logger name="jdbc.audit"><level value="TRACE"/></logger>
+ <!--  logger name="jdbc.audit"><level value="TRACE"/></logger-->
  
  <!--  log result sets -->
- <!--  logger name="jdbc.resultset"><level value="TRACE"/></logger>
+ <!--  logger name="jdbc.resultset"><level value="TRACE"/></logger-->
   
  <!--  log connection open/close - helps tracking down leaks -->
- <!--  logger name="jdbc.connection"><level value="TRACE"/></logger>
+ <!--  logger name="jdbc.connection"><level value="TRACE"/></logger-->
  
  <!-- end stuff for debugging -->
 
