@@ -50,4 +50,4 @@ if [ ! -x "$JAVACMD" ] ; then
   exit 1
 fi
 
-exec "$JAVACMD" @JAVA_ARGS@ -jar "${mypath}/@APP_JAR@" $*
+exec "$JAVACMD" @JAVA_ARGS@ -jar "${mypath}/@APP_JAR@" "$@"
