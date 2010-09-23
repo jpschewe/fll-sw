@@ -1,0 +1,18 @@
+#!/bin/bash -ex
+
+if [ -z "${WORKSPACE}" ]; then
+    echo "WORKSPACE not defined, cannot continue"
+fi
+
+cd "${WORKSPACE}"
+
+#clean up from previous run
+git clean -xdf
+
+cd scoring
+
+# setup version identifier
+echo "app.version=devel-${BUILD_ID}" > override.properties
+
+./ant.sh dist
+
