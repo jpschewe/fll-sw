@@ -11,8 +11,12 @@ git clean -xdf
 
 cd scoring
 
+
 # setup version identifier
 echo "app.version=devel-${BUILD_ID}" > override.properties
+
+# get wiki documentation
+./get-wiki
 
 ./ant.sh dist
 
