@@ -73,7 +73,7 @@
 		<fileset dir="${dir.lib}/cobertura">
 			<include name="*.jar" />
 		</fileset>
-		<pathelement location="${dir.lib}/log4j-1.2.14.jar" />
+		<pathelement location="${dir.lib}/log4j-1.2.16.jar" />
 	</path>
 	<taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
 
@@ -94,7 +94,7 @@
 		<pathelement location="${dir.lib}/opencsv-2.1-jps.jar" />
 
 		<!-- logging -->
-		<pathelement location="${dir.lib}/log4j-1.2.14.jar" />
+		<pathelement location="${dir.lib}/log4j-1.2.16.jar" />
 		<pathelement location="${dir.lib}/slf4j-api-1.5.3.jar" />
 		<pathelement location="${dir.lib}/slf4j-log4j12-1.5.3.jar" />
 
