@@ -50,6 +50,7 @@ import org.w3c.dom.Document;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FP;
+import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.xml.WinnerType;
@@ -61,7 +62,7 @@ import fll.xml.XMLUtils;
  */
 public class Top10 extends BaseFLLServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(Top10.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = {
   "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Determine sort order based upon winner criteria")

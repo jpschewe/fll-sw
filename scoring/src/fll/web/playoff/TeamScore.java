@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
 import fll.Utilities;
+import fll.util.LogUtils;
 import fll.util.ScoreUtils;
 import fll.xml.XMLUtils;
 
@@ -24,7 +25,7 @@ import fll.xml.XMLUtils;
  */
 public abstract class TeamScore {
 
-  private static final Logger LOG = Logger.getLogger(TeamScore.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   /**
    * Run number used for team scores that are not performance scores.

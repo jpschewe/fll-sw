@@ -17,6 +17,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.Utilities;
+import fll.util.LogUtils;
 import fll.util.ScoreUtils;
 import fll.xml.ScoreType;
 import fll.xml.XMLUtils;
@@ -26,7 +27,7 @@ import fll.xml.XMLUtils;
  */
 public final class SubjectiveTableModel extends AbstractTableModel {
 
-  private static final Logger LOG = Logger.getLogger(SubjectiveTableModel.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   /**
    * @param scoreDocument XML document that represents the teams that are being

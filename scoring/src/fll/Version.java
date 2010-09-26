@@ -11,6 +11,8 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import fll.util.LogUtils;
+
 /**
  * Get version information about the FLL software.
  * 
@@ -19,7 +21,7 @@ import org.apache.log4j.Logger;
  */
 public final class Version {
 
-  private static final Logger LOG = Logger.getLogger(Version.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   private static final String VERSION;
   static {
@@ -58,6 +60,8 @@ public final class Version {
    * @param args
    */
   public static void main(final String[] args) {
+    LogUtils.initializeLogging();
+
     LOG.info("Version is: "
         + getVersion());
   }

@@ -21,6 +21,7 @@ import junit.framework.Assert;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -29,12 +30,18 @@ import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.util.ExcelCellReader;
+import fll.util.LogUtils;
 import fll.xml.ChallengeParser;
 
 /**
  * Tests for {@link TournamentSchedule}.
  */
 public class TournamentScheduleTest {
+
+  @Before
+  public void setUp() {
+    LogUtils.initializeLogging();
+  }
 
   @Test
   public void testForNoSchedule() throws SQLException, UnsupportedEncodingException {

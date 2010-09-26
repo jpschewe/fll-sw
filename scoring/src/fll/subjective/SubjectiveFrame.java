@@ -70,6 +70,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.util.FLLRuntimeException;
+import fll.util.LogUtils;
 import fll.xml.ChallengeParser;
 
 /**
@@ -77,9 +78,11 @@ import fll.xml.ChallengeParser;
  */
 public final class SubjectiveFrame extends JFrame {
 
-  private static final Logger LOGGER = Logger.getLogger(SubjectiveFrame.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   public static void main(final String[] args) {
+    LogUtils.initializeLogging();
+
     // Use cross platform look and feel so that things look right all of the time 
     try {
       UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());

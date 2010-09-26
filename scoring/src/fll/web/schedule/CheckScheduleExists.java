@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
+import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
@@ -34,7 +35,7 @@ import fll.web.WebUtils;
  */
 public class CheckScheduleExists extends BaseFLLServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(CheckScheduleExists.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   @Override
   protected void processRequest(final HttpServletRequest request,

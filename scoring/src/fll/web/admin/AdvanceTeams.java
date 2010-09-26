@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 
 import fll.Team;
 import fll.db.Queries;
+import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -31,7 +32,7 @@ import fll.web.SessionAttributes;
  */
 public class AdvanceTeams extends BaseFLLServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(AdvanceTeams.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

@@ -48,6 +48,7 @@ import fll.db.Queries;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
+import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -62,7 +63,7 @@ import fll.xml.XMLUtils;
  */
 public final class FinalComputedScores extends BaseFLLServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(FinalComputedScores.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
   
   @Override
   protected void processRequest(final HttpServletRequest request,

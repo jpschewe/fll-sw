@@ -32,6 +32,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.db.Queries;
+import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import fll.xml.XMLUtils;
@@ -43,7 +44,7 @@ import fll.xml.XMLUtils;
  */
 public final class Judges {
 
-  private static final Logger LOG = Logger.getLogger(Judges.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   private Judges() {
 

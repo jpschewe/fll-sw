@@ -59,12 +59,13 @@ import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
+import fll.util.LogUtils;
 
 /**
  * Tournament schedule. Can parse the schedule from a spreadsheet.
  */
 public class TournamentSchedule implements Serializable {
-  private static final Logger LOGGER = Logger.getLogger(TournamentSchedule.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   /**
    * Header on team number column.

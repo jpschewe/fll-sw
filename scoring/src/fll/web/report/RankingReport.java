@@ -40,6 +40,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
 import fll.db.Queries;
+import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -51,7 +52,7 @@ import fll.web.SessionAttributes;
  */
 public class RankingReport extends BaseFLLServlet {
 
-  private static final Logger LOG = Logger.getLogger(RankingReport.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   private static final Font RANK_TITLE_FONT = FontFactory.getFont(FontFactory.HELVETICA, 10, Font.BOLD);
 

@@ -30,6 +30,8 @@ import net.mtu.eggplant.util.BasicFileFilter;
 
 import org.apache.log4j.Logger;
 
+import fll.util.LogUtils;
+
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -38,7 +40,7 @@ import au.com.bytecode.opencsv.CSVWriter;
  */
 public class AssignTournaments {
 
-  private static final Logger LOGGER = Logger.getLogger(AssignTournaments.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   /**
    * @param args
@@ -46,6 +48,8 @@ public class AssignTournaments {
    * @throws IOException
    */
   public static void main(final String[] args) throws IOException, ParseException {
+    LogUtils.initializeLogging();
+
     // define the tournaments
     final Map<String, Map<String, TournamentInfo>> tournaments = new HashMap<String, Map<String, TournamentInfo>>();
 

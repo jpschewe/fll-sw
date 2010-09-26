@@ -10,13 +10,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
+
+import fll.util.LogUtils;
 
 /**
  * Tests for comparing documents.
  */
 public class DescriptorComparisonTest {
+
+  @Before
+  public void setUp() {
+    LogUtils.initializeLogging();
+  }
 
   /**
    * Test that a different number of performance goals is caught as an error.

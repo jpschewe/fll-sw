@@ -36,6 +36,7 @@ import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -49,7 +50,7 @@ import fll.web.UploadProcessor;
  */
 public final class UploadSubjectiveData extends BaseFLLServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(UploadSubjectiveData.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

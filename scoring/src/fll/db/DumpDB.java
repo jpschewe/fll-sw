@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -42,7 +43,7 @@ import fll.web.SessionAttributes;
  */
 public final class DumpDB extends BaseFLLServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(DumpDB.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

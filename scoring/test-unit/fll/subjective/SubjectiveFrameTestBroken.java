@@ -20,17 +20,19 @@ import org.uispec4j.interception.FileChooserHandler;
 import org.uispec4j.interception.WindowInterceptor;
 import org.w3c.dom.Element;
 
+import fll.util.LogUtils;
+
 /**
  * @author jpschewe
  * @version $Revision$
  */
 public class SubjectiveFrameTestBroken extends UISpecTestCase {
 
-//  static {
-    // ensurre UISpec4J can intercept windows
-    // TODO need to figure out how to fix this
-    // UISpec4J.init();
-//  }
+  // static {
+  // ensurre UISpec4J can intercept windows
+  // TODO need to figure out how to fix this
+  // UISpec4J.init();
+  // }
 
   private Window _mainWindow;
 
@@ -38,6 +40,8 @@ public class SubjectiveFrameTestBroken extends UISpecTestCase {
 
   @Override
   protected void setUp() throws Exception {
+    LogUtils.initializeLogging();
+
     super.setUp();
     UISpec4J.setWindowInterceptionTimeLimit(100);
   }
@@ -79,7 +83,7 @@ public class SubjectiveFrameTestBroken extends UISpecTestCase {
     return _tabbedPane.getSelectedTab().getTable();
   }
 
-  //@XTest
+  // @XTest
   public void testStartupState() throws SQLException, IOException {
     // create a database
     // final InputStream stream =

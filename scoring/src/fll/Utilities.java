@@ -38,13 +38,14 @@ import org.slf4j.LoggerFactory;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fll.db.DataSourceSpy;
+import fll.util.LogUtils;
 
 /**
  * Some handy utilities.
  */
 public final class Utilities {
 
-  private static final Logger LOGGER = Logger.getLogger(Utilities.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   /**
    * Single instance of the default NumberFormat instance to save on overhead

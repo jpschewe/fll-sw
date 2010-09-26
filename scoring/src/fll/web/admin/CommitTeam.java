@@ -22,6 +22,7 @@ import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -33,7 +34,7 @@ import fll.web.SessionAttributes;
  */
 public class CommitTeam extends BaseFLLServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(CommitTeam.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

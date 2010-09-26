@@ -52,6 +52,7 @@ import com.itextpdf.text.DocumentException;
 
 import fll.util.ExcelCellReader;
 import fll.util.FLLRuntimeException;
+import fll.util.LogUtils;
 
 /**
  * UI for the scheduler.
@@ -59,6 +60,8 @@ import fll.util.FLLRuntimeException;
 public class SchedulerUI extends JFrame {
 
   public static void main(final String[] args) {
+    LogUtils.initializeLogging();
+
     // Use cross platform look and feel so that things look right all of the time 
     try {
       UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
@@ -438,7 +441,7 @@ public class SchedulerUI extends JFrame {
     return violationTable;
   }
 
-  private static final Logger LOGGER = Logger.getLogger(SchedulerUI.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   private TableCellRenderer schedTableRenderer = new DefaultTableCellRenderer() {
     private final Color hardConstraintColor = Color.RED;

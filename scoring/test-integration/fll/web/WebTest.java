@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 import org.apache.log4j.Logger;
+import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -16,13 +17,19 @@ import com.meterware.httpunit.WebConversation;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
+import fll.util.LogUtils;
 
 /**
  * Basic tests of loading pages.
  */
 public class WebTest /* extends SeleneseTestCase */{
 
-  private static final Logger LOG = Logger.getLogger(WebTest.class);
+  private static final Logger LOG = LogUtils.getLogger();
+
+  @Before
+  public void setUp() {
+    LogUtils.initializeLogging();
+  }
 
   // @Override
   // public void setUp() throws Exception {

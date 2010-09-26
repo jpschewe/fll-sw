@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 
 import fll.Tournament;
 import fll.db.Queries;
+import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -35,7 +36,7 @@ import fll.web.SessionAttributes;
  */
 public class CommitTournamentChanges extends BaseFLLServlet {
 
-  private static final Logger LOG = Logger.getLogger(CommitTournamentChanges.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

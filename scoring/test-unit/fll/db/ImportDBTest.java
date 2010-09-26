@@ -15,25 +15,23 @@ import java.sql.SQLException;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
 import fll.TestUtils;
 import fll.Utilities;
+import fll.util.LogUtils;
 
 /**
  * @author jpschewe
  */
 public class ImportDBTest {
 
-  /**
-   * To allow ant to find the unit tests
-   */
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(ImportDBTest.class);
+  @Before
+  public void setUp() {
+    LogUtils.initializeLogging();
   }
 
   /**
@@ -71,7 +69,7 @@ public class ImportDBTest {
       ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(fis), database);
       fis.close();
     } finally {
-      if(!tempFile.delete()) {
+      if (!tempFile.delete()) {
         tempFile.deleteOnExit();
       }
       if (!temp.delete()) {

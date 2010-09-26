@@ -19,6 +19,7 @@ import java.util.zip.ZipInputStream;
 import junit.framework.Assert;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,6 +27,7 @@ import org.w3c.dom.Element;
 import fll.TestUtils;
 import fll.Tournament;
 import fll.Utilities;
+import fll.util.LogUtils;
 import fll.util.ScoreUtils;
 import fll.web.playoff.DatabaseTeamScore;
 
@@ -33,6 +35,11 @@ import fll.web.playoff.DatabaseTeamScore;
  * 
  */
 public class TestComputedScores {
+
+  @Before
+  public void setUp() {
+    LogUtils.initializeLogging();
+  }
 
   /**
    * Check the score computation that was a problem in 2009 where 0 != 0.

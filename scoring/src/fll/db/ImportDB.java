@@ -40,6 +40,7 @@ import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.TeamPropertyDifference.TeamProperty;
+import fll.util.LogUtils;
 import fll.web.developer.importdb.TournamentDifference;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
@@ -61,6 +62,8 @@ public final class ImportDB {
    * @param args source tournament destination
    */
   public static void main(final String[] args) {
+    LogUtils.initializeLogging();
+
     try {
       if (args.length != 3) {
         LOG.error("You must specify <source uri> <tournament> <destination uri>");

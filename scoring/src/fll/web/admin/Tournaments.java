@@ -31,6 +31,7 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
+import fll.util.LogUtils;
 import fll.web.SessionAttributes;
 
 /**
@@ -38,7 +39,7 @@ import fll.web.SessionAttributes;
  */
 public final class Tournaments {
 
-  private static final Logger LOGGER = Logger.getLogger(Tournaments.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   private static final int NEW_TOURNAMENT_KEY = -1;
 

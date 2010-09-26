@@ -10,8 +10,11 @@ import java.io.InputStreamReader;
 
 import junit.framework.Assert;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
+
+import fll.util.LogUtils;
 
 /**
  * Test various aspects of the XML document parsing.
@@ -20,6 +23,11 @@ import org.w3c.dom.Document;
  * @version $Revision$
  */
 public class ChallengeParserTest {
+
+  @Before
+  public void setUp() {
+    LogUtils.initializeLogging();
+  }
 
   /**
    * Load illegal-restriction.xml and ensure an exception is thrown on the

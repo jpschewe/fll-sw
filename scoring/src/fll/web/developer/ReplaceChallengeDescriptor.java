@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import fll.db.GenerateDB;
+import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -36,7 +37,7 @@ import fll.xml.ChallengeParser;
  */
 public class ReplaceChallengeDescriptor extends BaseFLLServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(ReplaceChallengeDescriptor.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

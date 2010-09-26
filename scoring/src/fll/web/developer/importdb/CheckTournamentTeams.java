@@ -22,6 +22,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 
 import fll.db.ImportDB;
+import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -34,7 +35,7 @@ import fll.web.SessionAttributes;
  */
 public class CheckTournamentTeams extends BaseFLLServlet {
 
-  private static final Logger LOG = Logger.getLogger(CheckTournamentTeams.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

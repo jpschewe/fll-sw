@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 
 import fll.Utilities;
 import fll.db.ImportDB;
+import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
@@ -31,7 +32,7 @@ import fll.web.UploadProcessor;
  */
 public class ImportDBDump extends BaseFLLServlet {
 
-  private static final Logger LOG = Logger.getLogger(ImportDBDump.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   /**
    * Keep track of the number of database imports so that the database names are

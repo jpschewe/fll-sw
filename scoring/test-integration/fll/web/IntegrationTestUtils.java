@@ -18,13 +18,14 @@ import org.junit.Assert;
 import com.thoughtworks.selenium.Selenium;
 
 import fll.TestUtils;
+import fll.util.LogUtils;
 
 /**
  * Some utilities for integration tests.
  */
 public final class IntegrationTestUtils {
 
-  private static final Logger LOGGER = Logger.getLogger(IntegrationTestUtils.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   public static final String WAIT_FOR_PAGE_TIMEOUT = "60000";
 

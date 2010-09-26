@@ -49,6 +49,7 @@ import org.w3c.dom.Document;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
+import fll.util.LogUtils;
 
 /**
  * Initialize web attributes.
@@ -58,7 +59,7 @@ import fll.util.FLLRuntimeException;
  */
 public class InitFilter implements Filter {
 
-  private static final Logger LOGGER = Logger.getLogger(InitFilter.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   /**
    * @see javax.servlet.Filter#destroy()
