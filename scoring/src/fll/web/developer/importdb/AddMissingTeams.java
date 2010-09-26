@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import fll.Team;
 import fll.Tournament;
 import fll.db.Queries;
+import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -36,7 +37,7 @@ import fll.web.SessionAttributes;
  */
 public class AddMissingTeams extends BaseFLLServlet {
 
-  private static final Logger LOG = Logger.getLogger(AddMissingTeams.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

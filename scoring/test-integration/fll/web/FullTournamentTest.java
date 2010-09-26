@@ -45,6 +45,7 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.subjective.SubjectiveFrame;
 import fll.util.FP;
+import fll.util.LogUtils;
 import fll.web.scoreEntry.ScoreEntry;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
@@ -54,10 +55,11 @@ import fll.xml.XMLUtils;
  */
 public class FullTournamentTest extends SeleneseTestCase {
 
-  private static final Logger LOGGER = Logger.getLogger(FullTournamentTest.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   @Override
   public void setUp() throws Exception {
+    LogUtils.initializeLogging();
     super.setUp("http://localhost:9080/setup");
   }
 

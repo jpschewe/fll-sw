@@ -34,6 +34,7 @@ import org.w3c.dom.Element;
 import fll.Team;
 import fll.db.Queries;
 import fll.util.FP;
+import fll.util.LogUtils;
 import fll.util.ScoreUtils;
 import fll.xml.BracketSortType;
 import fll.xml.WinnerType;
@@ -44,7 +45,7 @@ import fll.xml.XMLUtils;
  */
 public final class Playoff {
 
-  private static final Logger LOGGER = Logger.getLogger(Playoff.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   /**
    * Tolerance for comparing floating point numbers in the tiebreaker.

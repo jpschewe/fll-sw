@@ -13,13 +13,15 @@ import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 
+import fll.util.LogUtils;
+
 
 /**
  * Some utilities for writing tests.
  */
 public final class TestUtils {
 
-  private static final Logger LOG = Logger.getLogger(TestUtils.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   /**
    * Root URL for the software with trailing slash.

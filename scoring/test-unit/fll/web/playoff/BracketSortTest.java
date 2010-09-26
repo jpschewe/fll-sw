@@ -39,12 +39,14 @@ import java.util.Map;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
 import fll.Team;
 import fll.db.GenerateDB;
 import fll.db.Queries;
+import fll.util.LogUtils;
 import fll.xml.BracketSortType;
 import fll.xml.ChallengeParser;
 import fll.xml.WinnerType;
@@ -56,6 +58,11 @@ import fll.xml.XMLUtils;
  * @author jpschewe
  */
 public class BracketSortTest {
+
+  @Before
+  public void setUp() {
+    LogUtils.initializeLogging();
+  }
 
   /**
    * Test sorting alphabetically by team name.

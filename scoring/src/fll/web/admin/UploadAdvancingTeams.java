@@ -24,6 +24,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
+import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -34,7 +35,7 @@ import fll.web.SessionAttributes;
  */
 public final class UploadAdvancingTeams extends BaseFLLServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(UploadAdvancingTeams.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

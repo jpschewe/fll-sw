@@ -20,6 +20,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.log4j.Logger;
 
 import fll.util.FLLRuntimeException;
+import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
@@ -34,7 +35,7 @@ import fll.web.WebUtils;
  */
 public class UploadSchedule extends BaseFLLServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(UploadSchedule.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   @Override
   protected void processRequest(final HttpServletRequest request,

@@ -39,6 +39,7 @@ import org.xml.sax.SAXParseException;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.util.FP;
+import fll.util.LogUtils;
 
 /**
  * Parse challenge description and generate script/text for scoreEntry page.
@@ -52,7 +53,7 @@ public final class ChallengeParser {
    */
   public static final String FLL_NAMESPACE = "http://www.hightechkids.org";
 
-  private static final Logger LOG = Logger.getLogger(ChallengeParser.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   /**
    * Parse the specified XML document and report errors.
@@ -61,6 +62,8 @@ public final class ChallengeParser {
    * </ul>
    */
   public static void main(final String[] args) {
+    LogUtils.initializeLogging();
+
     if (args.length < 1) {
       LOG.fatal("Usage: ChallengeParser <xml file>");
       System.exit(1);

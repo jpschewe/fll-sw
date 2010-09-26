@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import com.thoughtworks.selenium.SeleneseTestCase;
 
+import fll.util.LogUtils;
 import fll.web.InitializeDatabaseTest;
 import fll.web.IntegrationTestUtils;
 
@@ -25,6 +26,7 @@ public class EditTournamentsTest extends SeleneseTestCase {
 
   @Override
   public void setUp() throws Exception {
+    LogUtils.initializeLogging();
     super.setUp("http://localhost:9080/setup");
   }
 

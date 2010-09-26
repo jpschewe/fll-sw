@@ -28,6 +28,7 @@ import org.w3c.dom.Element;
 import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
+import fll.util.LogUtils;
 
 /**
  * Generate tables for tournament from XML document
@@ -39,7 +40,7 @@ public final class GenerateDB {
    */
   public static final int DATABASE_VERSION = 2;
 
-  private static final Logger LOGGER = Logger.getLogger(GenerateDB.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   /**
    * Region name for internal teams. These teams should not be deleted. This is

@@ -16,13 +16,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 
-import junit.framework.JUnit4TestAdapter;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import fll.util.LogUtils;
 
 /**
  * Tests for {@link Utilities}.
@@ -32,11 +33,9 @@ import au.com.bytecode.opencsv.CSVWriter;
  */
 public class UtilitiesTest {
 
-  /**
-   * To allow ant to find the unit tests
-   */
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(UtilitiesTest.class);
+  @Before
+  public void setUp() {
+    LogUtils.initializeLogging();
   }
 
   /**
@@ -49,7 +48,8 @@ public class UtilitiesTest {
     ResultSet rs = null;
     try {
       // create a csv file in memory
-      final String[][] data = new String[][] { { "column1", "column2", "column3" }, { "row1 - column1", "row1 - column2", "row1 - column3" },
+      final String[][] data = new String[][] { { "column1", "column2", "column3" },
+                                              { "row1 - column1", "row1 - column2", "row1 - column3" },
                                               { "row2 - column1", "row2 - column2", "row2 - column3" }, };
 
       final StringWriter writer = new StringWriter();

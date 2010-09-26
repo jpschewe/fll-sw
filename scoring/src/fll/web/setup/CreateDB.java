@@ -23,6 +23,7 @@ import org.w3c.dom.Document;
 
 import fll.db.GenerateDB;
 import fll.db.ImportDB;
+import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -38,7 +39,7 @@ import fll.xml.ChallengeParser;
  */
 public class CreateDB extends BaseFLLServlet {
 
-  private static final Logger LOG = Logger.getLogger(CreateDB.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   protected void processRequest(final HttpServletRequest request, final HttpServletResponse response, final ServletContext application, final HttpSession session)throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();

@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 
 import fll.db.ImportDB;
 import fll.db.TeamPropertyDifference;
+import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -35,7 +36,7 @@ import fll.web.SessionAttributes;
  */
 public class CheckTeamInfo extends BaseFLLServlet {
 
-  private static final Logger LOG = Logger.getLogger(CheckTeamInfo.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

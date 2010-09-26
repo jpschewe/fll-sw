@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import fll.util.LogUtils;
 import fll.xml.ChallengeParser;
 
 /**
@@ -29,6 +30,8 @@ public class SubjectiveCompareTest {
 
   @Before
   public void setUp() {
+    LogUtils.initializeLogging();
+    
     final InputStream stream = SubjectiveCompareTest.class.getResourceAsStream("challenge.xml");
     Assert.assertNotNull(stream);
     challengeDocument = ChallengeParser.parse(new InputStreamReader(stream));

@@ -33,6 +33,7 @@ import org.w3c.dom.Element;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FP;
+import fll.util.LogUtils;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeParser;
 import fll.xml.ScoreType;
@@ -43,7 +44,7 @@ import fll.xml.XMLUtils;
  */
 public final class ScoreEntry {
 
-  private static final Logger LOG = Logger.getLogger(ScoreEntry.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   /**
    * Number of spaces to indent code at each level.

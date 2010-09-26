@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 
 import fll.Version;
+import fll.util.LogUtils;
 
 /**
  * Ensure that all HTML pages get the same footer.
@@ -33,7 +34,7 @@ import fll.Version;
  */
 public class FooterFilter implements Filter {
 
-  private static final Logger LOGGER = Logger.getLogger(FooterFilter.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   /**
    * @see javax.servlet.Filter#destroy()

@@ -43,6 +43,7 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
+import fll.util.LogUtils;
 import fll.util.ScoreUtils;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.HttpTeamScore;
@@ -57,7 +58,7 @@ import fll.xml.XMLUtils;
  */
 public final class Queries {
 
-  private static final Logger LOGGER = Logger.getLogger(Queries.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   private Queries() {
     // no instances

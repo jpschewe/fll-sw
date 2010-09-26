@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 
 import fll.Team;
 import fll.db.Queries;
+import fll.util.LogUtils;
 
 /**
  * Class to provide convenient access to the contents of the PlayoffData table.
@@ -35,7 +36,7 @@ import fll.db.Queries;
  */
 public class BracketData {
 
-  private static final Logger LOG = Logger.getLogger(BracketData.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   /**
    * Data type for brackets.

@@ -93,9 +93,9 @@ public class BufferedAppender extends AppenderSkeleton {
       if (!closed) {
         if (!events.isEmpty()) {
           if (!LogUtils.isLog4jConfigured()) {
-            // add default appender to stdout
-            LOGGER.warn("Closing down appender and log4j is not configured! Flushing to System.err");
+            removeSelf();           
             Logger.getRootLogger().addAppender(new ConsoleAppender(new SimpleLayout(), ConsoleAppender.SYSTEM_ERR));
+            LOGGER.warn("Closing down appender and log4j is not configured! Flushing to System.err");
           }
           flushEvents();
         }

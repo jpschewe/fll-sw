@@ -12,10 +12,12 @@ import java.sql.SQLException;
 
 import junit.framework.Assert;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
 import fll.TestUtils;
+import fll.util.LogUtils;
 import fll.xml.ChallengeParser;
 
 /**
@@ -24,6 +26,11 @@ import fll.xml.ChallengeParser;
  * @version $Revision$
  */
 public class GenerateDBTest {
+
+  @Before
+  public void setUp() {
+    LogUtils.initializeLogging();
+  }
 
   /**
    * Test creating a new database from scratch and creating over an existing

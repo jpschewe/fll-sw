@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 
 import fll.Utilities;
 import fll.util.ExcelCellReader;
+import fll.util.LogUtils;
 
 /**
  * Handle uploading a spreadsheet (csv or Excel). The filename is stored in the
@@ -36,7 +37,7 @@ import fll.util.ExcelCellReader;
  */
 public final class UploadSpreadsheet extends BaseFLLServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(UploadSpreadsheet.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

@@ -41,6 +41,7 @@ import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
+import fll.util.LogUtils;
 import fll.util.ScoreUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -79,7 +80,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
    */
   private static final String EXTRA_CATEGORIES_FINALISTS_KEY = "extraCategories";
 
-  private static final Logger LOG = Logger.getLogger(FinalistSchedulerUI.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

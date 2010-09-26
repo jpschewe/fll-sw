@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -32,7 +33,12 @@ import fll.xml.ChallengeParser;
  */
 public class ScoreTest {
 
-  private static final Logger LOG = Logger.getLogger(ScoreTest.class);
+  private static final Logger LOG = LogUtils.getLogger();
+
+  @Before
+  public void setUp() {
+    LogUtils.initializeLogging();
+  }
 
   private Element loadDocumentAndGetPerformanceElemnt(final InputStream stream) {
     Assert.assertNotNull(stream);

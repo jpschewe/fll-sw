@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import fll.db.Queries;
 import fll.db.TeamPropertyDifference;
 import fll.db.TeamPropertyDifference.TeamProperty;
+import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -36,7 +37,7 @@ import fll.web.SessionAttributes;
  */
 public class CommitTeamChanges extends BaseFLLServlet {
 
-  private static final Logger LOG = Logger.getLogger(CommitTeamChanges.class);
+  private static final Logger LOG = LogUtils.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

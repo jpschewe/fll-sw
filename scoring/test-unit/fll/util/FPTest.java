@@ -8,6 +8,7 @@ package fll.util;
 
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -15,6 +16,11 @@ import org.junit.Test;
  */
 public class FPTest {
   
+  @Before
+  public void setUp() {
+    LogUtils.initializeLogging();
+  }
+
   @Test
   public void testIsFinite0() {
     Assert.assertTrue(FP.isFinite(10D));

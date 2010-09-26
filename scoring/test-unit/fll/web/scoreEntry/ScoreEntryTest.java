@@ -12,9 +12,11 @@ import java.io.StringWriter;
 import java.text.ParseException;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import fll.util.LogUtils;
 import fll.xml.ChallengeParser;
 import fll.xml.ChallengeParserTest;
 
@@ -23,6 +25,11 @@ import fll.xml.ChallengeParserTest;
  * @version $Revision$
  */
 public class ScoreEntryTest {
+
+  @Before
+  public void setUp() {
+    LogUtils.initializeLogging();
+  }
 
   /**
    * Test method for

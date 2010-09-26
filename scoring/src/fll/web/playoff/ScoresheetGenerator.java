@@ -37,6 +37,7 @@ import fll.Utilities;
 import fll.Version;
 import fll.db.Queries;
 import fll.util.FP;
+import fll.util.LogUtils;
 import fll.xml.ChallengeParser;
 
 /**
@@ -44,7 +45,7 @@ import fll.xml.ChallengeParser;
  */
 public class ScoresheetGenerator {
 
-  private static final Logger LOGGER = Logger.getLogger(ScoresheetGenerator.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   private static final String LONG_BLANK = "_________________________";
 

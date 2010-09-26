@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import com.itextpdf.text.DocumentException;
 
 import fll.db.Queries;
+import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -32,7 +33,7 @@ import fll.web.SessionAttributes;
  */
 public class ScoresheetServlet extends BaseFLLServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(ScoresheetServlet.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
   
   /**
    * @see fll.web.BaseFLLServlet#processRequest(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, javax.servlet.ServletContext, javax.servlet.http.HttpSession)

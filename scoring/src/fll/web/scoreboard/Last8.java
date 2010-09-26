@@ -47,6 +47,7 @@ import org.apache.log4j.Logger;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -56,7 +57,7 @@ import fll.web.SessionAttributes;
  */
 public class Last8 extends BaseFLLServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(Last8.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

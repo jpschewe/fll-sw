@@ -30,6 +30,7 @@ import fll.scheduler.ConstraintViolation;
 import fll.scheduler.ScheduleParseException;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
+import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
@@ -44,7 +45,7 @@ import fll.web.WebUtils;
  */
 public class CheckViolations extends BaseFLLServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(CheckViolations.class);
+  private static final Logger LOGGER = LogUtils.getLogger();
   
   @Override
   protected void processRequest(final HttpServletRequest request,
