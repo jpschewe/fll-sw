@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
 import warnings
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    import re
-    import os
-    import os.path
-    from subprocess import call
-    import sys
+#'with' isn't supported in python 2.5.2 on mtu.net with warnings.catch_warnings():
+warnings.simplefilter("ignore")
+import re
+import os
+import os.path
+from subprocess import call
+import sys
+warnings.resetwarnings()
 
 def clean_file(filename):
     f = file(filename)
