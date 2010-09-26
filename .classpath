@@ -23,7 +23,6 @@
 			<attribute name="javadoc_location" value="http://xerces.apache.org/xerces2-j/javadocs/api"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="scoring/lib/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/slf4j-api-1.5.3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/slf4j-log4j12-1.5.3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura.jar"/>
@@ -59,5 +58,6 @@
 	<classpathentry kind="lib" path="scoring/lib/JonsInfra-1.0.jar" sourcepath="scoring/lib/source/JonsInfra-1.0-src.zip"/>
 	<classpathentry kind="lib" path="scoring/lib/log4jdbc4-1.2beta2.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/iText-5.0.4.jar" sourcepath="scoring/lib/source/iText-src-5.0.4.zip"/>
+	<classpathentry kind="lib" path="scoring/lib/log4j-1.2.16.jar" sourcepath="scoring/lib/source/apache-log4j-1.2.16.zip"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
