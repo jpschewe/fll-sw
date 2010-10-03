@@ -1,2 +1,2 @@
-echo "Use rsync -avP -e ssh fll-sw-* <user>@frs.sourceforge.net:uploads/"
+echo "Use rsync -avP -e ssh build/fll-sw-* <user>,fll-sw@frs.sourceforge.net:/home/frs/project/f/fl/fll-sw/scoring/5.6"
 echo "You will need your SF.net password"
