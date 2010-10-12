@@ -32,7 +32,7 @@ public final class IntegrationTestUtils {
   private IntegrationTestUtils() {
     // no instances
   }
-  
+
   /**
    * Initialize the database using the given challenge descriptor.
    * 
@@ -41,12 +41,15 @@ public final class IntegrationTestUtils {
    * @param forceRebuild if true, then force the database to be rebuilt
    * @throws IOException
    */
-  public static void initializeDatabase(final Selenium selenium, final InputStream challengeStream, final boolean forceRebuild) throws IOException {
+  public static void initializeDatabase(final Selenium selenium,
+                                        final InputStream challengeStream,
+                                        final boolean forceRebuild) throws IOException {
     try {
       Assert.assertNotNull(challengeStream);
       final File challengeFile = IntegrationTestUtils.storeInputStreamToFile(challengeStream);
       try {
-        selenium.open(TestUtils.URL_ROOT + "setup/");
+        selenium.open(TestUtils.URL_ROOT
+            + "setup/");
         selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
         selenium.type("xmldocument", challengeFile.getAbsolutePath());
@@ -54,8 +57,11 @@ public final class IntegrationTestUtils {
           selenium.click("force_rebuild");
         }
         selenium.click("reinitializeDatabase");
-        Assert.assertTrue(selenium.getConfirmation()
-                                  .matches("^This will erase ALL scores in the database fll \\(if it already exists\\), are you sure[\\s\\S]$"));
+        Assert
+              .assertTrue(selenium
+                                  .getConfirmation()
+                                  .matches(
+                                           "^This will erase ALL scores in the database fll \\(if it already exists\\), are you sure[\\s\\S]$"));
         selenium.waitForPageToLoad(WAIT_FOR_PAGE_TIMEOUT);
         final boolean success = selenium.isTextPresent("Successfully initialized database");
         Assert.assertTrue("Database was not successfully initialized", success);
@@ -64,9 +70,9 @@ public final class IntegrationTestUtils {
           challengeFile.deleteOnExit();
         }
       }
-    } catch(final AssertionError e) {
+    } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;      
+      throw e;
     } catch (final RuntimeException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
@@ -113,5 +119,23 @@ public final class IntegrationTestUtils {
     outputStream.close();
 
     return tempFile;
+  }
+
+  /**
+   * Login to fll
+   */
+  public static void login(final Selenium selenium) {
+    selenium.open(TestUtils.URL_ROOT
+        + "setup/existingdb.jsp");
+
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    if (selenium.isTextPresent("Login to FLL")) {
+
+      // login
+      selenium.type("j_username", "fll");
+      selenium.type("j_password", "LegoLeague");
+      selenium.click("submit_login");
+      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    }
   }
 }

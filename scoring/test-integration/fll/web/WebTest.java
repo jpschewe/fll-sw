@@ -58,7 +58,7 @@ public class WebTest /* extends SeleneseTestCase */{
         // "scoreboard/main.jsp",
         // "scoreboard_800/main.jsp",
         "scoreEntry/select_team.jsp", "setup/index.jsp", "style/style.jsp", "troubleshooting/index.jsp", };
-    final WebConversation conversation = new WebConversation();
+    final WebConversation conversation = WebTestUtils.getConversation();
     for (final String page : pages) {
       LOG.info("Testing page #"
           + page + "#");
@@ -77,7 +77,7 @@ public class WebTest /* extends SeleneseTestCase */{
   public void testChangeTournament() throws MalformedURLException, IOException, SAXException {
     WebTestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
 
-    final WebConversation conversation = new WebConversation();
+    final WebConversation conversation = WebTestUtils.getConversation();
     WebTestUtils.setTournament(conversation, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
     WebTestUtils.setTournament(conversation, "STATE");
