@@ -33,11 +33,11 @@ import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.Button;
 import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.UploadFileSpec;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebForm;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.meterware.httpunit.protocol.UploadFileSpec;
 import com.thoughtworks.selenium.SeleneseTestCase;
 
 import fll.TestUtils;
@@ -60,7 +60,8 @@ public class FullTournamentTest extends SeleneseTestCase {
   @Override
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    super.setUp("http://localhost:9080/setup");
+    super.setUp(TestUtils.URL_ROOT + "setup");
+    IntegrationTestUtils.login(selenium);    
   }
 
   /**
@@ -94,7 +95,7 @@ public class FullTournamentTest extends SeleneseTestCase {
 
       stmt = testDataConn.createStatement();
 
-      final WebConversation conversation = new WebConversation();
+      final WebConversation conversation = WebTestUtils.getConversation();
 
       // --- initialize database ---
       final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml");
@@ -420,7 +421,7 @@ public class FullTournamentTest extends SeleneseTestCase {
    * @throws InterruptedException
    */
   private static void printPlayoffScoresheets(final String division) throws MalformedURLException, IOException, SAXException, InterruptedException {
-    final WebConversation conversation = new WebConversation();
+    final WebConversation conversation = WebTestUtils.getConversation();
     WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
         + "playoff/index.jsp");
     WebResponse response = WebTestUtils.loadPage(conversation, request);
@@ -465,7 +466,7 @@ public class FullTournamentTest extends SeleneseTestCase {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      final WebConversation conversation = new WebConversation();
+      final WebConversation conversation = WebTestUtils.getConversation();
 
       // download subjective zip
       WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
@@ -612,7 +613,7 @@ public class FullTournamentTest extends SeleneseTestCase {
         LOGGER.info("Setting score for "
             + teamNumber + " run: " + runNumber);
       }
-      final WebConversation conversation = new WebConversation();
+      final WebConversation conversation = WebTestUtils.getConversation();
 
       prep = testDataConn.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?");
       prep.setString(1, testTournament);

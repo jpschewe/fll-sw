@@ -33,4 +33,6 @@
   <user username="both" password="tomcat" roles="tomcat,role1"/>
   <user username="role1" password="tomcat" roles="role1"/>
 -->
+<role rolename="fll"/>
+<user username="fll" password="LegoLeague" roles="fll"/>
 </tomcat-users>

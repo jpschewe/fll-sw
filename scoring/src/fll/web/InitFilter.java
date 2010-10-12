@@ -123,7 +123,7 @@ public class InitFilter implements Filter {
    * @throws RuntimeException
    * @throws SQLException
    */
-  private String initialize(final HttpServletRequest request, final HttpServletResponse response) throws IOException, SQLException, RuntimeException {
+  public static String initialize(final HttpServletRequest request, final HttpServletResponse response) throws IOException, SQLException, RuntimeException {
     final HttpSession session = request.getSession();
     final ServletContext application = session.getServletContext();
 
