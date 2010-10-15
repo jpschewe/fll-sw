@@ -19,11 +19,11 @@ import junit.framework.Assert;
 import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.UploadFileSpec;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebForm;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.meterware.httpunit.protocol.UploadFileSpec;
 
 import fll.TestUtils;
 
