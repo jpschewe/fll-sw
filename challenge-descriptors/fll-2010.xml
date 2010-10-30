@@ -16,7 +16,7 @@
       multiplier="25"
       />
 
-    <!-- FIXME if goal_scored, must have bone_bridge_inserted -->
+    <!-- if goal_scored, must have bone_bridge_inserted -->
     <restriction lowerBound="0" upperBound="1"
       message="You cannot have the Goal Scored without the Bone Bridge Inserted">
       <term coefficient="-1" goal="goal_scored" scoreType="raw"/>
@@ -90,8 +90,25 @@
 
     <tiebreaker>
       <test winner='HIGH'>
-        <term goal='stent' scoreType='computed' />
+        <term goal='goal_scored' scoreType='computed' />
       </test>
+
+      <test winner='HIGH'>
+        <term goal='pace_maker' scoreType='computed' />
+      </test>
+
+      <test winner='HIGH'>
+        <term goal='professional_teamwork' scoreType='computed' />
+      </test>
+
+      <test winner='HIGH'>
+        <term goal='bad_cell_destruction' scoreType='computed' />
+      </test>
+
+      <test winner='HIGH'>
+        <term goal='mechanical_arm_patent' scoreType='computed' />
+      </test>
+      
     </tiebreaker>
 
   </Performance>
