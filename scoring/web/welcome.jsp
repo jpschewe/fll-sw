@@ -41,13 +41,20 @@ body {
     <center>
      <h1><x:out select="$challengeDocument/fll/@title"/></h1>
       
-      <img height="40%" align='middle' src='<c:url value="/images/logo.gif"/>' /><br />
+      <!--img height="40%" align='middle' src='<c:url value="/images/logo.gif"/>' /><br /-->
+      <img height="20%" align='middle' src='<c:url value="/images/htk_logo.jpg"/>' /><br/>
 
 <table>
-<tr><td>
+<tr>
+
+<td>
+<img width='100%' src='<c:url value="/images/body_forward.jpg"/>' />
+</td>
+
+<td>
      <%
       //out.print("<img width='" + fllPercentage + "%' src='images/fll_logo.gif' />");
-      out.print("<img height='100%' src='images/fll_logo.gif' />");
+      out.print("<img width='100%' src='images/fll_logo.gif' />");
      %>
 </td>
      <%

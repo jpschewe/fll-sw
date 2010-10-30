@@ -58,6 +58,8 @@ public class FooterFilter implements Filter {
       final String contentType = wrapper.getContentType();
       if (wrapper.isStringUsed()) {
         if ("text/html".equals(contentType)) {
+          final String url = httpRequest.getRequestURI();
+          
           final String origStr = wrapper.getString();
           if (LOGGER.isTraceEnabled()) {
             LOGGER.trace(new Formatter().format("html page: %s content type: %s ###%s###", httpRequest.getRequestURL(), contentType, origStr));
@@ -67,7 +69,7 @@ public class FooterFilter implements Filter {
 
           final CharArrayWriter caw = new CharArrayWriter();
           final int bodyIndex = origStr.indexOf("</body>");
-          if (-1 != bodyIndex) {
+          if (-1 != bodyIndex && !url.endsWith("welcome.jsp")) {
             caw.write(origStr.substring(0, bodyIndex - 1));
             addFooter(caw, httpRequest);
             response.setContentLength(caw.toString().length());
