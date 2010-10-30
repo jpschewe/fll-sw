@@ -286,7 +286,7 @@
 				</fileset>
 			</copy>
 
-			<javac srcdir="@{dir.src}" destdir="@{dir.dest}" debug="${compile.debug}" deprecation="${compile.deprecation}" optimize="${compile.optimize}">
+			<javac includeantruntime="false" srcdir="@{dir.src}" destdir="@{dir.dest}" debug="${compile.debug}" deprecation="${compile.deprecation}" optimize="${compile.optimize}">
 				<classpath>
 					<classpath-elements />
 				</classpath>
