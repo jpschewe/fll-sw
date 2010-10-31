@@ -244,6 +244,11 @@
 				<include name="*.sh" />
 			</fileset>
 		</chmod>
+		<chmod perm="+x">
+			<fileset dir="${dir.build}/tomcat/bin">
+				<include name="*.sh" />
+			</fileset>
+		</chmod>
 
 		<one-jar destfile="${dir.web}/subjective-app.jar">
 			<manifest>
