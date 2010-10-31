@@ -1,0 +1,16 @@
+This directory contains directory structure to create an FLL-SW menu in
+Gnome and KDE and to add the applications to the XFCE menu under "Other".
+To install:
+
+1) Edit the desktop files in local/share/applications/fll-sw and replace
+"/home/flluser/fll-sw" with the path to the directory that you
+installed the software into.
+
+2) Copy all files and from config into ~/.config
+
+3) Copy all files and directories from local into ~/.local
+
+The directories ~/.config and ~/.local should already exist, so you'll just
+be copying files into these directories. You can do this with:
+rsync -rv config/ ~/.config
+rsync -rv local/ ~/.local
