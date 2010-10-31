@@ -1,0 +1,16 @@
+<!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"
+"http://www.freedesktop.org/standards/menu-spec/menu-1.0.dtd">
+<Menu>
+  <Name>Applications</Name>
+
+  <Menu>
+    <Name>FLL-SW</Name>
+    <Directory>fll-sw.directory</Directory>
+    <Include>
+      <Filename>fllsw-start_tomcat.desktop</Filename>
+      <Filename>fllsw-stop_tomcat.desktop</Filename>
+      <Filename>fllsw-ip_info.desktop</Filename>
+      <Filename>fllsw-subjective.desktop</Filename>
+    </Include>
+  </Menu>
+</Menu>
