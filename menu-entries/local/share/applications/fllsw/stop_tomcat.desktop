@@ -1,0 +1,5 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Exec=/home/flluser/fll-sw/bin/stop-tomcat.sh
+Name=Stop Tomcat
