@@ -7,10 +7,7 @@
     <Name>FLL-SW</Name>
     <Directory>fll-sw.directory</Directory>
     <Include>
-      <Filename>fllsw-start_tomcat.desktop</Filename>
-      <Filename>fllsw-stop_tomcat.desktop</Filename>
-      <Filename>fllsw-ip_info.desktop</Filename>
-      <Filename>fllsw-subjective.desktop</Filename>
+      <Category>X-fllsw</Category>
     </Include>
   </Menu>
 </Menu>
