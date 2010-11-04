@@ -1,15 +1,15 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="java.io.File"%>
-<%@ page import="java.util.ArrayList"%>
-<%@ page import="java.util.List"%>
+<%@ page import="java.util.SortedSet"%>
+<%@ page import="java.util.TreeSet"%>
 <%@ page import="fll.Utilities"%>
 
 <%
 //All logos shall be located under sponsor_logos in the fll web folder.
 String imagePath = application.getRealPath("sponsor_logos");
 File[] directories = {new  File(imagePath)};
-List<String> logoFiles = new ArrayList<String>();
+SortedSet<String> logoFiles = new TreeSet<String>();
 Utilities.buildGraphicFileList("", directories, logoFiles);
 
 // truncate will keep it smaller
@@ -47,20 +47,14 @@ body {
 <table>
 <tr>
 
-<td>
+<td valign="bottom">
 <img width='100%' src='<c:url value="/images/body_forward.jpg"/>' />
 </td>
 
-<td>
-     <%
-      //out.print("<img width='" + fllPercentage + "%' src='images/fll_logo.gif' />");
-      out.print("<img width='100%' src='images/fll_logo.gif' />");
-     %>
-</td>
      <%
      if(!logoFiles.isEmpty()) {
      %>
-<td align="center">
+<td align="center" width="50%">
 <table>
       <tr><td align="center" style="padding:20px">Sponsored by:</td></tr>
       <%
@@ -76,6 +70,14 @@ body {
    <%
    }
    %>
+   
+   <td valign="bottom">
+     <%
+      //out.print("<img width='" + fllPercentage + "%' src='images/fll_logo.gif' />");
+      out.print("<img width='100%' src='images/fll_logo.gif' />");
+     %>
+</td>
+   
 </tr>
 </table>
             

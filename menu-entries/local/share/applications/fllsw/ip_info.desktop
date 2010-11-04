@@ -3,4 +3,4 @@ Encoding=UTF-8
 Type=Application
 Exec=xterm -hold -e /sbin/ifconfig
 Name=IP Address Info
-
+Categories=X-fllsw;

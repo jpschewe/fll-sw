@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -357,7 +356,7 @@ public final class Utilities {
 
   public static void buildGraphicFileList(final String p,
                                           final File[] d,
-                                          final List<String> f) {
+                                          final Collection<String> f) {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("buildGraphicFileList("
           + p + "," + Arrays.toString(d) + "," + f.toString() + ")");
