@@ -3,3 +3,5 @@ Encoding=UTF-8
 Type=Application
 Exec="/home/flluser/fll-sw/bin/start-tomcat.sh"
 Name=Start Tomcat
+Categories=X-fllsw;
+Icon=tomcat.png
