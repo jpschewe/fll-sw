@@ -1,6 +1,5 @@
 [Desktop Entry]
-Encoding=UTF-8
 Type=Application
 Exec=/home/flluser/fll-sw/bin/subjective.sh
 Name=Subjective App
-Categories=X-fllsw;
+Categories=Education;X-fllsw;
