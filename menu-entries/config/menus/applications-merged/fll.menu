@@ -4,7 +4,7 @@
   <Name>Applications</Name>
 
   <Menu>
-    <Name>FLL-SW</Name>
+    <Name>fllsw</Name>
     <Directory>fll-sw.directory</Directory>
     <Include>
       <Category>X-fllsw</Category>
