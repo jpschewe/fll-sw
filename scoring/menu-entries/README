@@ -1,0 +1,3 @@
+This directory contains directory structure to create an FLL-SW menu in
+Gnome and KDE and to add the applications to the XFCE menu under "Other".
+To install run install.sh
