@@ -538,6 +538,13 @@
 			</fileset>
 		</chmod>
 
+    <!-- copy menu entry stuff -->
+    <copy todir="${dir.dist}">
+      <fileset dir="${basedir}">
+        <include name="menu-entries"/>
+      </fileset>
+    </copy>
+
 		<copy tofile="${dir.dist}/subjective-app.jar" file="${dir.web}/subjective-app.jar" />
 
 
