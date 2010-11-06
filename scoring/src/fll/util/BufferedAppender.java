@@ -21,7 +21,7 @@ import org.apache.log4j.spi.LoggingEvent;
  * 
  * @see LogUtils#isLog4jConfigured()
  */
-public class BufferedAppender extends AppenderSkeleton {
+public final class BufferedAppender extends AppenderSkeleton {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
