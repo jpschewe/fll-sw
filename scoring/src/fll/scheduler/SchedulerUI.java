@@ -62,7 +62,8 @@ public class SchedulerUI extends JFrame {
   public static void main(final String[] args) {
     LogUtils.initializeLogging();
 
-    // Use cross platform look and feel so that things look right all of the time 
+    // Use cross platform look and feel so that things look right all of the
+    // time
     try {
       UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
     } catch (final ClassNotFoundException e) {
@@ -128,7 +129,7 @@ public class SchedulerUI extends JFrame {
       final ConstraintViolation selected = getViolationsModel().getViolation(selectedRow);
       if (ConstraintViolation.NO_TEAM != selected.getTeam()) {
         final int teamIndex = getScheduleModel().getIndexOfTeam(selected.getTeam());
-        getScheduleTable().changeSelection(teamIndex, 1, false, false);        
+        getScheduleTable().changeSelection(teamIndex, 1, false, false);
       }
     }
   };
@@ -173,31 +174,46 @@ public class SchedulerUI extends JFrame {
     }
 
     public void actionPerformed(final ActionEvent ae) {
+      FileInputStream fis = null;
       try {
-        final FileInputStream fis = new FileInputStream(currentFile);
-        final TournamentSchedule newData = new TournamentSchedule(fis, currentSheetName);
-        fis.close();
+        fis = new FileInputStream(getCurrentFile());
+        final TournamentSchedule newData = new TournamentSchedule(fis, getCurrentSheetName());
         setScheduleData(newData);
       } catch (final IOException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error reloading file: %s", e.getMessage());
         LOGGER.error(errorFormatter, e);
-        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reloading file", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reloading file",
+                                      JOptionPane.ERROR_MESSAGE);
       } catch (ParseException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error reloading file: %s", e.getMessage());
         LOGGER.error(errorFormatter, e);
-        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reloading file", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reloading file",
+                                      JOptionPane.ERROR_MESSAGE);
       } catch (final InvalidFormatException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error reloading file: %s", e.getMessage());
         LOGGER.error(errorFormatter, e);
-        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reloading file", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reloading file",
+                                      JOptionPane.ERROR_MESSAGE);
       } catch (final ScheduleParseException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error parsing file: %s", e.getMessage());
         LOGGER.error(errorFormatter, e);
-        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
+        JOptionPane
+                   .showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
+      } finally {
+        try {
+          if (null != fis) {
+            fis.close();
+          }
+        } catch (final IOException e) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Exception closing stream", e);
+          }
+        }
+
       }
     }
   };
@@ -252,8 +268,9 @@ public class SchedulerUI extends JFrame {
     }
 
     public void actionPerformed(final ActionEvent ae) {
+      FileOutputStream fos = null;
       try {
-        final String filename = currentFile.getPath();
+        final String filename = getCurrentFile().getPath();
         final int dotIdx = filename.lastIndexOf('.');
         final String baseFilename;
         if (-1 == dotIdx) {
@@ -266,11 +283,10 @@ public class SchedulerUI extends JFrame {
         LOGGER.info("Writing detailed schedules to "
             + pdfFile.getAbsolutePath());
 
-        final FileOutputStream fos = new FileOutputStream(pdfFile);
+        fos = new FileOutputStream(pdfFile);
         getScheduleData().outputDetailedSchedules(fos);
-        fos.close();
-        JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedules written to same directory as the schedule", "Information",
-                                      JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedules written to same directory as the schedule",
+                                      "Information", JOptionPane.INFORMATION_MESSAGE);
       } catch (final DocumentException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error writing detailed schedules: %s", e.getMessage());
@@ -283,6 +299,16 @@ public class SchedulerUI extends JFrame {
         LOGGER.error(errorFormatter, e);
         JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
         return;
+      } finally {
+        if (null != fos) {
+          try {
+            fos.close();
+          } catch (final IOException e) {
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("Exception closing stream", e);
+            }
+          }
+        }
       }
     }
   };
@@ -313,14 +339,14 @@ public class SchedulerUI extends JFrame {
         final File selectedFile = fileChooser.getSelectedFile();
         if (selectedFile.isFile()
             && selectedFile.canRead()) {
+          FileInputStream fis = null;
           try {
             final String sheetName = promptForSheetName(selectedFile);
             if (null == sheetName) {
               return;
             }
-            final FileInputStream fis = new FileInputStream(selectedFile);
+            fis = new FileInputStream(selectedFile);
             final TournamentSchedule schedule = new TournamentSchedule(fis, sheetName);
-            fis.close();
             currentFile = selectedFile;
             currentSheetName = sheetName;
             setScheduleData(schedule);
@@ -328,36 +354,52 @@ public class SchedulerUI extends JFrame {
             final Formatter errorFormatter = new Formatter();
             errorFormatter.format("Error reading file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
             LOGGER.error(errorFormatter, e);
-            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file",
+                                          JOptionPane.ERROR_MESSAGE);
             return;
           } catch (final IOException e) {
             final Formatter errorFormatter = new Formatter();
             errorFormatter.format("Error reading file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
             LOGGER.error(errorFormatter, e);
-            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file",
+                                          JOptionPane.ERROR_MESSAGE);
             return;
           } catch (final InvalidFormatException e) {
             final Formatter errorFormatter = new Formatter();
             errorFormatter.format("Unknown file format %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
             LOGGER.error(errorFormatter, e);
-            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file",
+                                          JOptionPane.ERROR_MESSAGE);
             return;
           } catch (final ScheduleParseException e) {
             final Formatter errorFormatter = new Formatter();
             errorFormatter.format("Error parsing file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
             LOGGER.error(errorFormatter, e);
-            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file",
+                                          JOptionPane.ERROR_MESSAGE);
             return;
           } catch (final FLLRuntimeException e) {
             final Formatter errorFormatter = new Formatter();
             errorFormatter.format("Error parsing file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
             LOGGER.error(errorFormatter, e);
-            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file",
+                                          JOptionPane.ERROR_MESSAGE);
             return;
+          } finally {
+            try {
+              if (null != fis) {
+                fis.close();
+              }
+            } catch (final IOException e) {
+              if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Error closing stream", e);
+              }
+            }
           }
 
         } else {
-          JOptionPane.showMessageDialog(SchedulerUI.this, new Formatter().format("%s is not a file or is not readable", selectedFile.getAbsolutePath()),
+          JOptionPane.showMessageDialog(SchedulerUI.this, new Formatter().format("%s is not a file or is not readable",
+                                                                                 selectedFile.getAbsolutePath()),
                                         "Error reading file", JOptionPane.ERROR_MESSAGE);
         }
       }
@@ -377,8 +419,9 @@ public class SchedulerUI extends JFrame {
       return sheetNames.get(0);
     } else {
       final String[] options = sheetNames.toArray(new String[sheetNames.size()]);
-      final int choosenOption = JOptionPane.showOptionDialog(null, "Choose which sheet to work with", "Choose Sheet", JOptionPane.DEFAULT_OPTION,
-                                                             JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+      final int choosenOption = JOptionPane.showOptionDialog(null, "Choose which sheet to work with", "Choose Sheet",
+                                                             JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                                                             null, options, options[0]);
       if (JOptionPane.CLOSED_OPTION == choosenOption) {
         return null;
       }
@@ -445,6 +488,7 @@ public class SchedulerUI extends JFrame {
 
   private TableCellRenderer schedTableRenderer = new DefaultTableCellRenderer() {
     private final Color hardConstraintColor = Color.RED;
+
     private final Color softConstraintColor = Color.YELLOW;
 
     @Override
@@ -469,17 +513,18 @@ public class SchedulerUI extends JFrame {
       for (final ConstraintViolation violation : getViolationsModel().getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
           if ((SchedulerTableModel.TEAM_NUMBER_COLUMN == column || SchedulerTableModel.JUDGE_COLUMN == column)
-              && null == violation.getPresentation() && null == violation.getTechnical() && null == violation.getPerformance()) {
+              && null == violation.getPresentation() && null == violation.getTechnical()
+              && null == violation.getPerformance()) {
             error = true;
-            isHard |= violation.isHard(); 
+            isHard |= violation.isHard();
           } else if (SchedulerTableModel.PRESENTATION_COLUMN == column
               && null != violation.getPresentation()) {
             error = true;
-            isHard |= violation.isHard(); 
+            isHard |= violation.isHard();
           } else if (SchedulerTableModel.TECHNICAL_COLUMN == column
               && null != violation.getTechnical()) {
             error = true;
-            isHard |= violation.isHard(); 
+            isHard |= violation.isHard();
           } else if (null != violation.getPerformance()) {
             // need to check round which round
             int round = 0;
@@ -497,7 +542,7 @@ public class SchedulerUI extends JFrame {
             if (firstIdx <= column
                 && column <= lastIdx) {
               error = true;
-              isHard |= violation.isHard(); 
+              isHard |= violation.isHard();
             }
 
             if (LOGGER.isTraceEnabled()) {
@@ -536,8 +581,17 @@ public class SchedulerUI extends JFrame {
       }
     }
   };
-  
+
   private File currentFile;
+
+  protected File getCurrentFile() {
+    return currentFile;
+  }
+
   private String currentSheetName;
-  
+
+  protected String getCurrentSheetName() {
+    return currentSheetName;
+  }
+
 }

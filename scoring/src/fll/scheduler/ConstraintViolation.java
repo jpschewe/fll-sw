@@ -24,19 +24,19 @@ public final class ConstraintViolation {
   private final Date presentation;
 
   public Date getPresentation() {
-    return presentation;
+    return new Date(presentation.getTime());
   }
 
   private final Date technical;
 
   public Date getTechnical() {
-    return technical;
+    return new Date(technical.getTime());
   }
 
   private final Date performance;
 
   public Date getPerformance() {
-    return performance;
+    return new Date(performance.getTime());
   }
 
   private final String message;
@@ -70,9 +70,9 @@ public final class ConstraintViolation {
                              final String message) {
     this.isHard = isHard;
     this.team = team;
-    this.presentation = presentation;
-    this.technical = technical;
-    this.performance = performance;
+    this.presentation = new Date(presentation.getTime());
+    this.technical = new Date(technical.getTime());
+    this.performance = new Date(performance.getTime());
     this.message = message;
   }
 

@@ -120,13 +120,21 @@ public final class UploadTeams extends BaseFLLServlet {
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
                                                              "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate the list of columns to create FilteredTeams table")
-  public static void parseFile(final File file, final String sheetName, final Connection connection, final HttpSession session) throws SQLException,
-      IOException, InvalidFormatException {
+  public static void parseFile(final File file,
+                               final String sheetName,
+                               final Connection connection,
+                               final HttpSession session) throws SQLException, IOException, InvalidFormatException {
     final CellFileReader reader;
     if (ExcelCellReader.isExcelFile(file)) {
-      final FileInputStream fis = new FileInputStream(file);
-      reader = new ExcelCellReader(fis, sheetName);
-      fis.close();
+      FileInputStream fis = null;
+      try {
+        fis = new FileInputStream(file);
+        reader = new ExcelCellReader(fis, sheetName);
+      } finally {
+        if (null != fis) {
+          fis.close();
+        }
+      }
     } else {
       // determine if the file is tab separated or comma separated, check the
       // first line for tabs and if they aren't found, assume it's comma
@@ -231,8 +239,9 @@ public final class UploadTeams extends BaseFLLServlet {
     session.setAttribute("columnSelectOptions", selectOptions.toString());
   }
 
-  private static void insertLinesIntoAllTeams(final CellFileReader reader, final List<String> columnNamesSeen, final PreparedStatement insertPrep)
-      throws IOException, SQLException {
+  private static void insertLinesIntoAllTeams(final CellFileReader reader,
+                                              final List<String> columnNamesSeen,
+                                              final PreparedStatement insertPrep) throws IOException, SQLException {
     try {
       // loop over the rest of the rows and insert them into AllTeams
       String[] values;
@@ -283,7 +292,8 @@ public final class UploadTeams extends BaseFLLServlet {
    * @throws SQLException if an error occurs talking to the database
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate where clause with the filters")
-  public static long applyFilters(final Connection connection, final HttpServletRequest request) throws SQLException {
+  public static long applyFilters(final Connection connection,
+                                  final HttpServletRequest request) throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
     try {
@@ -314,7 +324,8 @@ public final class UploadTeams extends BaseFLLServlet {
    * request
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate where clause based on filters")
-  public static void copyFilteredTeams(final Connection connection, final HttpServletRequest request) throws SQLException {
+  public static void copyFilteredTeams(final Connection connection,
+                                       final HttpServletRequest request) throws SQLException {
     Statement stmt = null;
     try {
       final String whereClause = createFilterWhereClauseFromRequest(request);
@@ -386,7 +397,9 @@ public final class UploadTeams extends BaseFLLServlet {
    * @throws SQLException on error talking to DB
    * @throws IOException on error writing to webpage
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING", "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for FilteredTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = {
+                                                             "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
+                                                             "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for FilteredTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
   public static boolean verifyTeams(final Connection connection,
                                     final HttpServletRequest request,
                                     final HttpServletResponse response,
@@ -444,7 +457,9 @@ public final class UploadTeams extends BaseFLLServlet {
       prep.executeUpdate();
       final Document challenge = Queries.getChallengeDocument(connection);
       final Element rootElement = challenge.getDocumentElement();
-      for (final Element categoryElement : new NodelistElementCollectionAdapter(rootElement.getElementsByTagName("subjectiveCategory"))) {
+      for (final Element categoryElement : new NodelistElementCollectionAdapter(
+                                                                                rootElement
+                                                                                           .getElementsByTagName("subjectiveCategory"))) {
         final String tableName = categoryElement.getAttribute("name");
         prep = connection.prepareStatement("DELETE FROM "
             + tableName);

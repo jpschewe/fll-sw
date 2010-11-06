@@ -16,9 +16,9 @@ public final class TeamScheduleInfo implements Serializable {
 
   private String division;
 
-  private Date presentation;
+  private Date presentation = null;
 
-  private Date technical;
+  private Date technical = null;
 
   private String judgingStation;
 
@@ -169,28 +169,28 @@ public final class TeamScheduleInfo implements Serializable {
    * @param presentation the presentation to set
    */
   public void setPresentation(final Date presentation) {
-    this.presentation = presentation;
+    this.presentation = new Date(presentation.getTime());
   }
 
   /**
    * @return the presentation
    */
   public Date getPresentation() {
-    return presentation;
+    return new Date(presentation.getTime());
   }
 
   /**
    * @param technical the technical to set
    */
   public void setTechnical(final Date technical) {
-    this.technical = technical;
+    this.technical = new Date(technical.getTime());
   }
 
   /**
    * @return the technical
    */
   public Date getTechnical() {
-    return technical;
+    return new Date(technical.getTime());
   }
 
   /**
