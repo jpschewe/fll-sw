@@ -21,6 +21,7 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -431,5 +432,16 @@ public final class Utilities {
       extension = null;
     }
     return extension;
+  }
+  
+  /**
+   * Copy a Date handling null.
+   * 
+   * TODO put in JonsInfra
+   * 
+   * @return a new date, unless the paramter is null, then null is returned
+   */
+  public static Date copyDate(final Date d) {
+    return null == d ? null : new Date(d);
   }
 }
