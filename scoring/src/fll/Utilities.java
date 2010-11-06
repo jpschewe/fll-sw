@@ -442,6 +442,6 @@ public final class Utilities {
    * @return a new date, unless the paramter is null, then null is returned
    */
   public static Date copyDate(final Date d) {
-    return null == d ? null : new Date(d);
+    return null == d ? null : new Date(d.getTime());
   }
 }
