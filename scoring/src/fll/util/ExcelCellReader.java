@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -36,6 +37,8 @@ import fll.scheduler.TournamentSchedule;
  */
 public class ExcelCellReader implements CellFileReader {
 
+  private static final Logger LOGGER = Logger.getLogger(ExcelCellReader.class);
+
   private final DataFormatter formatter;
 
   private final FormulaEvaluator formulaEvaluator;
@@ -55,12 +58,19 @@ public class ExcelCellReader implements CellFileReader {
   }
 
   public static List<String> getAllSheetNames(final File file) throws InvalidFormatException, IOException {
-    final FileInputStream fis = new FileInputStream(file);
-    final List<String> result = getAllSheetNames(fis);
-    fis.close();
-    return result;
+    FileInputStream fis = null;
+    try {
+      fis = new FileInputStream(file);
+      final List<String> result = getAllSheetNames(fis);
+      fis.close();
+      return result;
+    } finally {
+      if (null != fis) {
+        fis.close();
+      }
+    }
   }
-  
+
   /**
    * Get the names of all sheets in the specified stream.
    * 

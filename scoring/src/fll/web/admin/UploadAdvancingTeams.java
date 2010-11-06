@@ -30,6 +30,7 @@ import fll.web.SessionAttributes;
 
 /**
  * Upload the teams to be advanced.
+ * 
  * @web.servlet name="UploadAdvancingTeams"
  * @web.servlet-mapping url-pattern="/admin/UploadAdvancingTeams"
  */
@@ -43,16 +44,16 @@ public final class UploadAdvancingTeams extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
-    
+
     final String fileName = SessionAttributes.getNonNullAttribute(session, "spreadsheetFile", String.class);
     final File file = new File(fileName);
-    try {      
+    try {
       // keep track of for later
       session.setAttribute("advanceFile", file.getAbsolutePath());
-      
+
       final String sheetName = SessionAttributes.getAttribute(session, "sheetName", String.class);
 
-      putHeadersInSession(file, sheetName, session);            
+      putHeadersInSession(file, sheetName, session);
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error saving advancment data into the database: "
           + sqle.getMessage() + "</p>");
@@ -73,17 +74,27 @@ public final class UploadAdvancingTeams extends BaseFLLServlet {
    * Get the headers from the file.
    * 
    * @param file the file that the data is in
-   * @param session used to store the headers, attribute is "fileHeaders" and is of type String[]
+   * @param session used to store the headers, attribute is "fileHeaders" and is
+   *          of type String[]
    * @throws IOException if an error occurs reading from file
-   * @throws InvalidFormatException 
+   * @throws InvalidFormatException
    */
-  public static void putHeadersInSession(final File file, final String sheetName, final HttpSession session) throws SQLException, IOException, InvalidFormatException {
+  public static void putHeadersInSession(final File file,
+                                         final String sheetName,
+                                         final HttpSession session) throws SQLException, IOException,
+      InvalidFormatException {
     final CellFileReader reader;
     if (file.getName().endsWith(".xls")
         || file.getName().endsWith(".xslx")) {
-      final FileInputStream fis = new FileInputStream(file);
-      reader = new ExcelCellReader(fis, sheetName);
-      fis.close();
+      FileInputStream fis = null;
+      try {
+        fis = new FileInputStream(file);
+        reader = new ExcelCellReader(fis, sheetName);
+      } finally {
+        if (null != fis) {
+          fis.close();
+        }
+      }
     } else {
       // determine if the file is tab separated or comma separated, check the
       // first line for tabs and if they aren't found, assume it's comma
@@ -107,10 +118,9 @@ public final class UploadAdvancingTeams extends BaseFLLServlet {
 
     // parse out the first non-blank line as the names of the columns
     String[] columnNames = reader.readNext();
-    while(columnNames.length < 1) {
-      columnNames = reader.readNext();  
+    while (columnNames.length < 1) {
+      columnNames = reader.readNext();
     }
-    
 
     // save this for other pages to use
     session.setAttribute("fileHeaders", columnNames);
