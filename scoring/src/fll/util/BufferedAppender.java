@@ -19,7 +19,7 @@ import org.apache.log4j.spi.LoggingEvent;
  * Appender that buffers up all logging events until log4j is configured, at
  * which point the logging events are passed onto the configured log4j.
  * 
- * @see Logutils#isLog4jConfigured()
+ * @see LogUtils#isLog4jConfigured()
  */
 public class BufferedAppender extends AppenderSkeleton {
 
