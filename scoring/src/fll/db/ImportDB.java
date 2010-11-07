@@ -516,7 +516,7 @@ public final class ImportDB {
   }
 
   private static void upgrade1To2(final Connection connection) throws SQLException {
-    GenerateDB.createScheduleTables(connection, true, Queries.getTablesInDB(connection), false);
+    GenerateDB.createScheduleTables(connection, true, SQLFunctions.getTablesInDB(connection), false);
 
     // set the version to 2 - this will have been set while creating
     // global_parameters, but we need to force it to 2 for later upgrade
@@ -536,7 +536,7 @@ public final class ImportDB {
       stmt.executeUpdate("DROP Table IF EXISTS TournamentParameters");
 
       // add the global_parameters table
-      GenerateDB.createGlobalParameters(challengeDocument, connection, true, Queries.getTablesInDB(connection));
+      GenerateDB.createGlobalParameters(challengeDocument, connection, true, SQLFunctions.getTablesInDB(connection));
 
       // ---- switch from string tournament names to integers ----
 
@@ -557,7 +557,7 @@ public final class ImportDB {
       stmt.executeUpdate("DROP TABLE Tournaments");
 
       // create Tournaments table
-      GenerateDB.tournaments(connection, true, Queries.getTablesInDB(connection));
+      GenerateDB.tournaments(connection, true, SQLFunctions.getTablesInDB(connection));
 
       // add all tournaments back
       for (final Map.Entry<String, String> entry : nameLocation.entrySet()) {
@@ -615,7 +615,7 @@ public final class ImportDB {
       }
 
       // create new tournament parameters table
-      GenerateDB.tournamentParameters(connection, true, Queries.getTablesInDB(connection));
+      GenerateDB.tournamentParameters(connection, true, SQLFunctions.getTablesInDB(connection));
 
       GenerateDB.setDefaultParameters(connection);
 
