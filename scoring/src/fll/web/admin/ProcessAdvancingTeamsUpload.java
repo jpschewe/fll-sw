@@ -37,6 +37,7 @@ import fll.web.SessionAttributes;
 
 /**
  * Process the uploaded data and forward to GatherAdvancementData.
+ * 
  * @web.servlet name="ProcessAdvancingTeamsUpload"
  * @web.servlet-mapping url-pattern="/admin/ProcessAdvancingTeamsUpload"
  */
@@ -50,29 +51,32 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
-    final String advanceFile = SessionAttributes.getNonNullAttribute(session, "advanceFile", String.class);      
+    final String advanceFile = SessionAttributes.getNonNullAttribute(session, "advanceFile", String.class);
     final File file = new File(advanceFile);
     try {
-      if(!file.exists() || !file.canRead()) {
-        throw new RuntimeException("Cannot read file: " + advanceFile);
+      if (!file.exists()
+          || !file.canRead()) {
+        throw new RuntimeException("Cannot read file: "
+            + advanceFile);
       }
-      
+
       final String teamNumberColumnName = request.getParameter("teamNumber");
-      if(null == teamNumberColumnName) {
+      if (null == teamNumberColumnName) {
         throw new RuntimeException("Cannot find 'teamNumber' request parameter");
       }
-      
+
       final String sheetName = SessionAttributes.getAttribute(session, "sheetName", String.class);
 
       final Collection<Integer> teams = processFile(file, sheetName, teamNumberColumnName);
-      
-      if(!file.delete()) {
-        if(LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Error deleting file, will need to wait until exit. Filename: " + file.getAbsolutePath());
+
+      if (!file.delete()) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Error deleting file, will need to wait until exit. Filename: "
+              + file.getAbsolutePath());
         }
       }
-      
-      // process as if the user had selected these teams 
+
+      // process as if the user had selected these teams
       final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
       final Connection connection = datasource.getConnection();
       GatherAdvancementData.processAdvancementData(response, session, false, connection, teams);
@@ -92,7 +96,7 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving advancment data into the database", e);
     } finally {
-      if(!file.delete()) {
+      if (!file.delete()) {
         file.deleteOnExit();
       }
     }
@@ -100,15 +104,25 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
 
   /**
    * Get the team numbers of advancing teams.
-   * @throws InvalidFormatException 
+   * 
+   * @throws InvalidFormatException
    */
-  public static Collection<Integer> processFile(final File file, final String sheetName, final String teamNumberColumnName) throws SQLException, IOException, ParseException, InvalidFormatException {
+  public static Collection<Integer> processFile(final File file,
+                                                final String sheetName,
+                                                final String teamNumberColumnName) throws SQLException, IOException,
+      ParseException, InvalidFormatException {
     final CellFileReader reader;
     if (file.getName().endsWith(".xls")
         || file.getName().endsWith(".xslx")) {
-      final FileInputStream fis = new FileInputStream(file);
-      reader = new ExcelCellReader(fis, sheetName);
-      fis.close();
+      FileInputStream fis = null;
+      try {
+        fis = new FileInputStream(file);
+        reader = new ExcelCellReader(fis, sheetName);
+      } finally {
+        if (null != fis) {
+          fis.close();
+        }
+      }
     } else {
       // determine if the file is tab separated or comma separated, check the
       // first line for tabs and if they aren't found, assume it's comma
@@ -129,26 +143,26 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
         breader.close();
       }
     }
-    
+
     // parse out the first non-blank line as the names of the columns
     String[] columnNames = reader.readNext();
-    while(columnNames.length < 1) {
-      columnNames = reader.readNext();  
+    while (columnNames.length < 1) {
+      columnNames = reader.readNext();
     }
-    
+
     int teamNumColumnIdx = 0;
-    while(!teamNumberColumnName.equals(columnNames[teamNumColumnIdx])) {
+    while (!teamNumberColumnName.equals(columnNames[teamNumColumnIdx])) {
       ++teamNumColumnIdx;
     }
-    
+
     final Collection<Integer> teams = new LinkedList<Integer>();
     String[] data = reader.readNext();
-    while(null != data) {
-      if(teamNumColumnIdx < data.length) {
+    while (null != data) {
+      if (teamNumColumnIdx < data.length) {
         final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(data[teamNumColumnIdx]).intValue();
         teams.add(teamNumber);
       }
-      
+
       data = reader.readNext();
     }
     return teams;

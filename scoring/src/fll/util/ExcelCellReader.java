@@ -55,12 +55,19 @@ public class ExcelCellReader implements CellFileReader {
   }
 
   public static List<String> getAllSheetNames(final File file) throws InvalidFormatException, IOException {
-    final FileInputStream fis = new FileInputStream(file);
-    final List<String> result = getAllSheetNames(fis);
-    fis.close();
-    return result;
+    FileInputStream fis = null;
+    try {
+      fis = new FileInputStream(file);
+      final List<String> result = getAllSheetNames(fis);
+      fis.close();
+      return result;
+    } finally {
+      if (null != fis) {
+        fis.close();
+      }
+    }
   }
-  
+
   /**
    * Get the names of all sheets in the specified stream.
    * 

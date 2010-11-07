@@ -8,6 +8,8 @@ package fll.scheduler;
 
 import java.util.Date;
 
+import net.mtu.eggplant.util.DateUtils;
+
 /**
  * Constraint violation during scheduling.
  */
@@ -24,19 +26,19 @@ public final class ConstraintViolation {
   private final Date presentation;
 
   public Date getPresentation() {
-    return presentation;
+    return DateUtils.copyDate(presentation);
   }
 
   private final Date technical;
 
   public Date getTechnical() {
-    return technical;
+    return DateUtils.copyDate(technical);
   }
 
   private final Date performance;
 
   public Date getPerformance() {
-    return performance;
+    return DateUtils.copyDate(performance);
   }
 
   private final String message;
@@ -70,9 +72,9 @@ public final class ConstraintViolation {
                              final String message) {
     this.isHard = isHard;
     this.team = team;
-    this.presentation = presentation;
-    this.technical = technical;
-    this.performance = performance;
+    this.presentation = DateUtils.copyDate(presentation);
+    this.technical = DateUtils.copyDate(technical);
+    this.performance = DateUtils.copyDate(performance);
     this.message = message;
   }
 

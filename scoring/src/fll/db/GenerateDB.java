@@ -110,7 +110,7 @@ public final class GenerateDB {
 
       stmt.executeUpdate("SET WRITE_DELAY 100 MILLIS");
 
-      final Collection<String> tables = Queries.getTablesInDB(connection);
+      final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
 
       createGlobalParameters(document, connection, forceRebuild, tables);
 
