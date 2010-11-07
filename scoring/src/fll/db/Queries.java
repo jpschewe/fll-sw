@@ -7,7 +7,6 @@ package fll.db;
 
 import java.io.InputStreamReader;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -2801,43 +2800,12 @@ public final class Queries {
    * @throws SQLException
    */
   public static int getDatabaseVersion(final Connection connection) throws SQLException {
-    final Collection<String> tables = getTablesInDB(connection);
+    final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
     if (!tables.contains("global_parameters")) {
       return 0;
     } else {
       return getIntGlobalParameter(connection, GlobalParameters.DATABASE_VERSION);
     }
-  }
-
-  /**
-   * Get the tables in the database. TODO move this to JonsInfra.
-   * 
-   * @param connection
-   * @return the names of the tables that are of type "TABLE", the names will
-   *         also be all lowercase
-   * @see DatabaseMetaData#getTables(String, String, String, String[])
-   */
-  public static Collection<String> getTablesInDB(final Connection connection) throws SQLException {
-    final Collection<String> tables = new LinkedList<String>();
-    ResultSet rs = null;
-    try {
-      // get list of tables that already exist
-      final DatabaseMetaData metadata = connection.getMetaData();
-      rs = metadata.getTables(null, null, "%", new String[] { "TABLE" });
-      while (rs.next()) {
-        // final String schema = rs.getString("TABLE_SCHEM");
-        // final String tableType = rs.getString("TABLE_TYPE");
-        final String tableName = rs.getString("TABLE_NAME").toLowerCase();
-        tables.add(tableName);
-      }
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Tables:"
-            + tables);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-    }
-    return tables;
   }
 
   /**
