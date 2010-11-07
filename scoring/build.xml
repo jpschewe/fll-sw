@@ -80,7 +80,7 @@
 	<path id="base.classpath">
 		<!-- the classpath without the classes dir -->
 		<pathelement location="${dir.lib}/xmlunit-1.2.jar" />
-		<pathelement location="${dir.lib}/JonsInfra-1.0.jar" />
+		<pathelement location="${dir.lib}/JonsInfra-1.1.jar" />
 
 		<pathelement location="${dir.lib}/commons-lang-2.0.jar" />
 
