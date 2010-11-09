@@ -78,7 +78,7 @@ public class TournamentSchedule implements Serializable {
 
   public static final String DIVISION_HEADER = "Div";
 
-  public static final String PRESENTATION_HEADER = "Presentation";
+  public static final String RESEARCH_HEADER = "Research";
 
   public static final String TECHNICAL_HEADER = "Technical";
 
@@ -435,7 +435,11 @@ public class TournamentSchedule implements Serializable {
     final int organizationColumn = getColumnForHeader(line, ORGANIZATION_HEADER);
     final int teamNameColumn = getColumnForHeader(line, TEAM_NAME_HEADER);
     final int divisionColumn = getColumnForHeader(line, DIVISION_HEADER);
-    final int presentationColumn = getColumnForHeader(line, PRESENTATION_HEADER);
+    int presentationColumn = getColumnForHeader(line, RESEARCH_HEADER);
+    if(-1 == presentationColumn) {
+      // support old schedules
+      presentationColumn = getColumnForHeader(line, "Presentation");
+    }
     final int technicalColumn = getColumnForHeader(line, TECHNICAL_HEADER);
     final int judgeGroupColumn = getColumnForHeader(line, JUDGE_GROUP_HEADER);
     for (int round = 0; round < numPerfRounds; ++round) {
@@ -694,7 +698,7 @@ public class TournamentSchedule implements Serializable {
     table.addCell(createHeaderCell(DIVISION_HEADER));
     table.addCell(createHeaderCell("School or Organization"));
     table.addCell(createHeaderCell("Team Name"));
-    table.addCell(createHeaderCell(PRESENTATION_HEADER));
+    table.addCell(createHeaderCell(RESEARCH_HEADER));
     table.addCell(createHeaderCell(JUDGE_GROUP_HEADER));
     table.setHeaderRows(1);
 
