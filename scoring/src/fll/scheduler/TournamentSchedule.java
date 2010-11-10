@@ -170,15 +170,15 @@ public class TournamentSchedule implements Serializable {
   public List<TeamScheduleInfo> getSchedule() {
     return Collections.unmodifiableList(_schedule);
   }
-  
+
   /**
    * Get the {@link TeamScheduleInfo} for the specified team number.
    * 
    * @return null if cannot be found
    */
   public TeamScheduleInfo getSchedInfoForTeam(final int teamNumber) {
-    for(final TeamScheduleInfo si : _schedule) {
-      if(si.getTeamNumber() == teamNumber) {
+    for (final TeamScheduleInfo si : _schedule) {
+      if (si.getTeamNumber() == teamNumber) {
         return si;
       }
     }
@@ -259,7 +259,7 @@ public class TournamentSchedule implements Serializable {
           final int round = perfRounds.getInt(1);
           if (round != prevRound + 1) {
             throw new RuntimeException("Rounds must be consecutive and start at 1. Tournament: "
-                + tournamentID + " team: " + teamNumber + " round: " + (round+1) + " prevRound: " + (prevRound+1));
+                + tournamentID + " team: " + teamNumber + " round: " + (round + 1) + " prevRound: " + (prevRound + 1));
           }
           final Time perfTime = perfRounds.getTime(2);
           final String tableColor = perfRounds.getString(3);
@@ -272,7 +272,7 @@ public class TournamentSchedule implements Serializable {
           ti.setPerf(round, Queries.timeToDate(perfTime));
           ti.setPerfTableColor(round, tableColor);
           ti.setPerfTableSide(round, prevRound);
-          
+
           prevRound = round;
         }
         final String eventDivision = Queries.getEventDivision(connection, teamNumber, tournamentID);
@@ -281,7 +281,7 @@ public class TournamentSchedule implements Serializable {
         final Team team = Team.getTeamFromDatabase(connection, teamNumber);
         ti.setOrganization(team.getOrganization());
         ti.setTeamName(team.getTeamName());
-        
+
         _schedule.add(ti);
       }
 
@@ -435,8 +435,10 @@ public class TournamentSchedule implements Serializable {
     final int organizationColumn = getColumnForHeader(line, ORGANIZATION_HEADER);
     final int teamNameColumn = getColumnForHeader(line, TEAM_NAME_HEADER);
     final int divisionColumn = getColumnForHeader(line, DIVISION_HEADER);
-    int presentationColumn = getColumnForHeader(line, RESEARCH_HEADER);
-    if(-1 == presentationColumn) {
+    int presentationColumn;
+    try {
+      presentationColumn = getColumnForHeader(line, RESEARCH_HEADER);
+    } catch (final FLLRuntimeException e) {
       // support old schedules
       presentationColumn = getColumnForHeader(line, "Presentation");
     }
