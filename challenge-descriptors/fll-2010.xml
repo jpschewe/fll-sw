@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fll title="MN FIRST LEGO League Tournament" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 4">
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 5">
 
   <Performance minimumScore="0" weight="1.0">
 
@@ -23,11 +23,11 @@
       <term coefficient="1" goal="bone_bridge_inserted" scoreType="raw"/>
     </restriction>
 
-    <goal name="rapid_blood_screening_syringe" title="Syringe In Base"
+    <goal name="rapid_blood_screening_syringe" title="Syringe Ever In Base"
       multiplier="25"
       />
 
-    <goal name="rapid_blood_screening_cells" title="White Blood Cells in Patient Area"
+    <goal name="rapid_blood_screening_cells" title="White and No Red Blood Cells in Patient Area"
       multiplier="15"
       />
 
@@ -39,7 +39,7 @@
     <goal name="bad_cell_destruction" title="Bad Cell Destruction"
       initialValue="0">
       <value score="25" title="Destruction" value="destruction"/>
-      <value score="20" title="Identification" value="identification"/>
+      <value score="20" title="Id" value="identification"/>
       <value score="0" title="None" value="none"/>
     </goal>
 
