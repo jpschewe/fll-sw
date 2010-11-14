@@ -6,5 +6,6 @@ fll.log*
 scoring/dist
 scoring/web/wiki/*
 scoring/override.properties
-scoring/*.log
+scoring/*.log*
 scoring/web/sponsor_logos/*.jpg
+cobertura.ser
