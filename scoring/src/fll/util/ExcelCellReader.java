@@ -26,6 +26,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -144,22 +145,27 @@ public class ExcelCellReader implements CellFileReader {
     }
 
     final List<String> data = new LinkedList<String>();
-    for (final Cell cell : row) {
-      final String str;
-      if (Cell.CELL_TYPE_NUMERIC == cell.getCellType()) {
-        final double d = cell.getNumericCellValue();
-        // test if a date!
-        if (HSSFDateUtil.isCellDateFormatted(cell)) {
-          // format in form of M/D/YY
-          final Date date = HSSFDateUtil.getJavaDate(d);
-          str = TournamentSchedule.DATE_FORMAT_AM_PM_SS.get().format(date);
+    for (int cellIdx = row.getFirstCellNum(); cellIdx < row.getLastCellNum(); ++cellIdx) {
+      final Cell cell = row.getCell(cellIdx, Row.RETURN_NULL_AND_BLANK);
+      if (null == cell) {
+        data.add(null);
+      } else {
+        final String str;
+        if (Cell.CELL_TYPE_NUMERIC == cell.getCellType()) {
+          final double d = cell.getNumericCellValue();
+          // test if a date!
+          if (HSSFDateUtil.isCellDateFormatted(cell)) {
+            // format in form of M/D/YY
+            final Date date = HSSFDateUtil.getJavaDate(d);
+            str = TournamentSchedule.DATE_FORMAT_AM_PM_SS.get().format(date);
+          } else {
+            str = formatter.formatCellValue(cell, formulaEvaluator);
+          }
         } else {
           str = formatter.formatCellValue(cell, formulaEvaluator);
         }
-      } else {
-        str = formatter.formatCellValue(cell, formulaEvaluator);
+        data.add(str);
       }
-      data.add(str);
     }
     return data.toArray(new String[data.size()]);
   }
