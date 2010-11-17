@@ -11,7 +11,6 @@ import java.io.InputStream;
 
 import junit.framework.Assert;
 
-import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import com.thoughtworks.selenium.SeleneseTestCase;
@@ -25,8 +24,6 @@ import fll.web.IntegrationTestUtils;
  * 
  */
 public class SlideshowTest extends SeleneseTestCase {
-
-  private static final Logger LOGGER = LogUtils.getLogger();
 
   @Override
   public void setUp() throws Exception {
