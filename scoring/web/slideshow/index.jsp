@@ -40,7 +40,7 @@ int slideShowInterval;
 if(null == application.getAttribute("slideShowInterval")) {
   slideShowInterval = 10000;
 } else {
-  slideShowInterval = ApplicationAttributes.getAttribute(application, "slideShowInterval", Integer.class).intValue() * 1000;
+  slideShowInterval = ApplicationAttributes.getAttribute(application, "slideShowInterval", Number.class).intValue() * 1000;
 }
 
 // let the display specific value override the default value if it exists
