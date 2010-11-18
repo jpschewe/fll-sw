@@ -541,9 +541,14 @@
     <!-- copy menu entry stuff -->
     <copy todir="${dir.dist}">
       <fileset dir="${basedir}">
-        <include name="menu-entries"/>
+        <include name="menu-entries/**"/>
       </fileset>
     </copy>
+		<chmod perm="+x">
+			<fileset dir="${dir.dist}/menu-entries">
+				<include name="*.sh" />
+			</fileset>
+		</chmod>
 
 		<copy tofile="${dir.dist}/subjective-app.jar" file="${dir.web}/subjective-app.jar" />
 
@@ -551,6 +556,7 @@
 		<!-- src zip file -->
 		<zip zipfile="${dir.build}/${app.name}-${app.version}-src.zip">
 			<zipfileset dir="${basedir}">
+				<exclude name="dist/**" />
 				<exclude name="build/**" />
 				<exclude name="override.properties" />
 				<exclude name="tmp/**" />
