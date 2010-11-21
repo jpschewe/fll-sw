@@ -40,7 +40,6 @@ import fll.xml.XMLUtils;
 /**
  * Java code used in judges.jsp
  * 
- * @version $Revision$
  */
 public final class Judges {
 
@@ -355,6 +354,7 @@ public final class Judges {
     try {
       // delete old data in judges
       prep = connection.prepareStatement("DELETE FROM Judges where Tournament = ?");
+      prep.setInt(1, tournament);
       prep.executeUpdate();
       SQLFunctions.close(prep);
       prep = null;
