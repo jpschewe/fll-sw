@@ -23,7 +23,7 @@ temp_dir=`mktemp -d`
 cp -r ${mypath}/config ${temp_dir}
 cp -r ${mypath}/local ${temp_dir}
 for file in `find ${temp_dir}/local/share/applications/fllsw -type f -name '*.desktop'`; do
-    cat ${file} | sed -e "s:/home/flluser:${HOME}:" > ${file}.new
+    cat ${file} | sed -e "s:/home/flluser/fll-sw:${mypath}/..:" > ${file}.new
     mv -f ${file}.new ${file}
 done
 
