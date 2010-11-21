@@ -1,0 +1,18 @@
+#!/bin/bash -ex
+
+if [ -z "${WORKSPACE}" ]; then
+    echo "WORKSPACE not defined, cannot continue"
+fi
+
+cd "${WORKSPACE}"
+
+#clean up from previous run
+git clean -xdf
+
+cd scoring
+
+# get wiki documentation
+./get-wiki
+
+./ant.sh dist
+
