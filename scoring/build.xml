@@ -488,10 +488,10 @@
 		</copy>
 		<delete dir="dist-save" />
 
-		<antcall target="-dist.real" />
+		<antcall target="dist.real" />
 	</target>
 
-	<target name="-dist.real" depends="compile,javadoc">
+	<target name="dist.real" depends="compile,javadoc">
 		<!-- copy docs -->
 		<mkdir dir="${dir.dist}/docs" />
 		<copy todir="${dir.dist}/docs">
@@ -511,7 +511,7 @@
 		</copy>
     <copy todir="${dir.dist}/bin">
         <fileset dir="${dir.build}/bin">
-        <include name="SchedulerUI.*"/>
+        <include name="*"/>
         </fileset>
       </copy>
 		<chmod perm="+x">
@@ -541,9 +541,14 @@
     <!-- copy menu entry stuff -->
     <copy todir="${dir.dist}">
       <fileset dir="${basedir}">
-        <include name="menu-entries"/>
+        <include name="menu-entries/**"/>
       </fileset>
     </copy>
+		<chmod perm="+x">
+			<fileset dir="${dir.dist}/menu-entries">
+				<include name="*.sh" />
+			</fileset>
+		</chmod>
 
 		<copy tofile="${dir.dist}/subjective-app.jar" file="${dir.web}/subjective-app.jar" />
 
@@ -551,6 +556,7 @@
 		<!-- src zip file -->
 		<zip zipfile="${dir.build}/${app.name}-${app.version}-src.zip">
 			<zipfileset dir="${basedir}">
+				<exclude name="dist/**" />
 				<exclude name="build/**" />
 				<exclude name="override.properties" />
 				<exclude name="tmp/**" />
