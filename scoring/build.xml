@@ -488,10 +488,10 @@
 		</copy>
 		<delete dir="dist-save" />
 
-		<antcall target="-dist.real" />
+		<antcall target="dist.real" />
 	</target>
 
-	<target name="-dist.real" depends="compile,javadoc">
+	<target name="dist.real" depends="compile,javadoc">
 		<!-- copy docs -->
 		<mkdir dir="${dir.dist}/docs" />
 		<copy todir="${dir.dist}/docs">
@@ -511,7 +511,7 @@
 		</copy>
     <copy todir="${dir.dist}/bin">
         <fileset dir="${dir.build}/bin">
-        <include name="SchedulerUI.*"/>
+        <include name="*"/>
         </fileset>
       </copy>
 		<chmod perm="+x">
