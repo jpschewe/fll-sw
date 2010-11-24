@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -341,9 +342,8 @@ public final class ImportDB {
     if (typeInfo.isEmpty()) {
       // before types were added, assume version 0 types
       createVersion0TypeInfo(typeInfo, challengeDocument);
-    } else {
-      fixTableTypes(connection, typeInfo);
     }
+    fixTableTypes(connection, typeInfo);
 
     upgradeDatabase(connection, challengeDocument);
 
@@ -395,12 +395,6 @@ public final class ImportDB {
     tournamentTeams.put("Tournament", "varchar(128)");
     tournamentTeams.put("event_division", "varchar(32)");
     typeInfo.put("TournamentTeams", tournamentTeams);
-
-    final Map<String, String> tournamentParameters = new HashMap<String, String>();
-    tournamentParameters.put("Param", "varchar(64)");
-    tournamentParameters.put("Value", "longvarchar");
-    tournamentParameters.put("Description", "varchar(255)");
-    typeInfo.put("TournamentParameters", tournamentParameters);
 
     final Map<String, String> judges = new HashMap<String, String>();
     judges.put("id", "varchar(64)");
@@ -864,7 +858,7 @@ public final class ImportDB {
       columns.append(" Tournament,");
       columns.append(" TeamNumber,");
       columns.append(" RunNumber,");
-      // Note: If TimeStamp is no longer the 4th element, then the hack below
+      // Note: If TimeStamp is no longer the 3rd element, then the hack below
       // needs to be modified
       columns.append(" TimeStamp,");
       final List<Element> goals = new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))
@@ -911,7 +905,7 @@ public final class ImportDB {
             if (sourceObj instanceof String) {
 
               try {
-                sourceObj = new Timestamp(CSV_TIMESTAMP_FORMATTER.parse((String) sourceObj).getTime());
+                sourceObj = new Timestamp(CSV_TIMESTAMP_FORMATTER.get().parse((String) sourceObj).getTime());
               } catch (final ParseException pe) {
                 LOG.warn("Got an error parsing performance timestamps, this is probably because of the hack in here.",
                          pe);
@@ -1238,6 +1232,15 @@ public final class ImportDB {
     return missingTeams;
   }
 
-  private static final SimpleDateFormat CSV_TIMESTAMP_FORMATTER = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
+  private static final ThreadLocal<DateFormat> CSV_TIMESTAMP_FORMATTER = new ThreadLocal<DateFormat>() {
+    protected DateFormat initialValue() {
+      return new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
+    }
+  };
+  private static final ThreadLocal<DateFormat> HSQL_TIMESTAMP_FORMATTER = new ThreadLocal<DateFormat>() {
+    protected DateFormat initialValue() {
+      return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    }
+  };
 
 }
