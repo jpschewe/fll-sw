@@ -467,14 +467,16 @@ public final class ImportDB {
         for (final Map.Entry<String, String> columnEntry : tableEntry.getValue().entrySet()) {
           final String columnName = columnEntry.getKey();
           final String columnType = columnEntry.getValue();
-
           // convert empty strings to null
           final String nullSQL = String.format("UPDATE %s SET %s = NULL WHERE %s = ''", tableName, columnName,
                                                columnName);
           stmt.executeUpdate(nullSQL);
 
-          final String typeSQL = String.format("ALTER TABLE %s ALTER COLUMN %s %s", tableName, columnName, columnType);
-          stmt.executeUpdate(typeSQL);
+          if (!"varchar".equalsIgnoreCase(columnType) && !"longvarchar".equalsIgnoreCase(columnType)) {
+            final String typeSQL = String
+                                         .format("ALTER TABLE %s ALTER COLUMN %s %s", tableName, columnName, columnType);
+            stmt.executeUpdate(typeSQL);
+          }
         }
       }
     } finally {
@@ -1237,6 +1239,7 @@ public final class ImportDB {
       return new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
     }
   };
+
   private static final ThreadLocal<DateFormat> HSQL_TIMESTAMP_FORMATTER = new ThreadLocal<DateFormat>() {
     protected DateFormat initialValue() {
       return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
