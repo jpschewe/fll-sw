@@ -85,6 +85,11 @@ function editFlagBoxClicked() {
           </td>
         </tr>
       </table>
+      
+      ${message}
+      <%-- clear out the message, so that we don't see it again --%>
+      <c:remove var="message" />
+      
 
       <table> <!-- outer table -->        
         <tr>

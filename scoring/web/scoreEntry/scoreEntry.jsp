@@ -21,7 +21,9 @@ final Document challengeDocument = ApplicationAttributes.getChallengeDocument(ap
 // support the unverified runs select box
 final String lTeamNum = request.getParameter("TeamNumber");
 if(null == lTeamNum) {
-  throw new RuntimeException("Attempted to load score entry page without providing a team number.");
+  session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>Attempted to load score entry page without providing a team number.</p>");
+  response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
+  return;
 }
 final int dashIndex = lTeamNum.indexOf('-');
 final int teamNumber;
