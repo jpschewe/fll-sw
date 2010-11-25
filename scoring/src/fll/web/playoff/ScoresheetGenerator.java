@@ -311,7 +311,7 @@ public class ScoresheetGenerator {
 
       team[i].addCell(head);
 
-      final PdfPTable teamInfo = new PdfPTable(4);
+      final PdfPTable teamInfo = new PdfPTable(5);
       teamInfo.setWidthPercentage(100);
 
       // Table label cell
@@ -337,11 +337,12 @@ public class ScoresheetGenerator {
       // Round number value cell
       final Paragraph rndV = new Paragraph(m_round[i], COURIER_10PT_NORMAL);
       final PdfPCell rndVc = new PdfPCell(team[i].getDefaultCell());
+      rndVc.setColspan(2);
       rndVc.addElement(rndV);
       teamInfo.addCell(rndVc);
 
       // Team number label cell
-      final Paragraph nbrP = new Paragraph("Team Number:", ARIAL_10PT_NORMAL);
+      final Paragraph nbrP = new Paragraph("Team #:", ARIAL_10PT_NORMAL);
       nbrP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell nbrlc = new PdfPCell(team[i].getDefaultCell());
       nbrlc.setPaddingRight(9);
@@ -370,6 +371,7 @@ public class ScoresheetGenerator {
       }
       final Paragraph divV = new Paragraph(divStr, COURIER_10PT_NORMAL);
       final PdfPCell divVc = new PdfPCell(team[i].getDefaultCell());
+      divVc.setColspan(2);
       divVc.addElement(divV);
       teamInfo.addCell(divVc);
 
@@ -383,7 +385,7 @@ public class ScoresheetGenerator {
       // Team name value cell
       final Paragraph nameV = new Paragraph(m_name[i], COURIER_10PT_NORMAL);
       final PdfPCell nameVc = new PdfPCell(team[i].getDefaultCell());
-      nameVc.setColspan(3);
+      nameVc.setColspan(4);
       nameVc.addElement(nameV);
       teamInfo.addCell(nameVc);
 
