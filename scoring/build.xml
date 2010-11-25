@@ -80,7 +80,7 @@
 	<path id="base.classpath">
 		<!-- the classpath without the classes dir -->
 		<pathelement location="${dir.lib}/xmlunit-1.2.jar" />
-		<pathelement location="${dir.lib}/JonsInfra-1.1.jar" />
+		<pathelement location="${dir.lib}/JonsInfra-1.2.jar" />
 
 		<pathelement location="${dir.lib}/commons-lang-2.0.jar" />
 
@@ -372,11 +372,11 @@
 	</target>
 
 	<target name="tomcat.reload" description="Load new code into tomcat">
-		<antcall target="tomcat.stop"/>
-		<antcall target="compile"/>
-		<antcall target="tomcat.start.test"/>
+		<antcall target="tomcat.stop" />
+		<antcall target="compile" />
+		<antcall target="tomcat.start.test" />
 	</target>
-		
+
 	<target name="tomcat.start.test" description="start up tomcat for testing - starts the database in server mode">
 		<run-tomcat operation="start" spawn="true" inside.test="true" />
 	</target>
@@ -509,11 +509,11 @@
 		<copy todir="${dir.dist}/bin">
 			<fileset dir="bin" />
 		</copy>
-    <copy todir="${dir.dist}/bin">
-        <fileset dir="${dir.build}/bin">
-        <include name="*"/>
-        </fileset>
-      </copy>
+		<copy todir="${dir.dist}/bin">
+			<fileset dir="${dir.build}/bin">
+				<include name="*" />
+			</fileset>
+		</copy>
 		<chmod perm="+x">
 			<fileset dir="${dir.dist}/bin">
 				<include name="*.sh" />
@@ -538,12 +538,12 @@
 			</fileset>
 		</chmod>
 
-    <!-- copy menu entry stuff -->
-    <copy todir="${dir.dist}">
-      <fileset dir="${basedir}">
-        <include name="menu-entries/**"/>
-      </fileset>
-    </copy>
+		<!-- copy menu entry stuff -->
+		<copy todir="${dir.dist}">
+			<fileset dir="${basedir}">
+				<include name="menu-entries/**" />
+			</fileset>
+		</copy>
 		<chmod perm="+x">
 			<fileset dir="${dir.dist}/menu-entries">
 				<include name="*.sh" />
