@@ -345,7 +345,6 @@ public final class ImportDB {
       // before types were added, assume version 0 types
       createVersion0TypeInfo(typeInfo, challengeDocument);
     }
-    // FIXME load data into database now
     for(Map.Entry<String, String> tableEntry : tableData.entrySet()) {
       final String tablename = tableEntry.getKey();
       final String content = tableEntry.getValue();
@@ -354,8 +353,6 @@ public final class ImportDB {
       Utilities.loadCSVFile(connection, tablename, tableTypes, new StringReader(content));
     }
     
-//    fixTableTypes(connection, typeInfo);
-
     upgradeDatabase(connection, challengeDocument);
 
     if (null == challengeDocument) {
