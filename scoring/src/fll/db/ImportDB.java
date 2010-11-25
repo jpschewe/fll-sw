@@ -15,9 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -880,23 +878,7 @@ public final class ImportDB {
       while (sourceRS.next()) {
         // skip tournament column
         for (int i = 1; i < numColumns; i++) {
-          Object sourceObj = sourceRS.getObject(i + 1);
-          if ("".equals(sourceObj)) {
-            sourceObj = null;
-          }
-          // FIXME Hack for timestamps - need a better solution
-          if (3 == i) {
-            // timestamp column of the performance table
-            if (sourceObj instanceof String) {
-
-              try {
-                sourceObj = new Timestamp(CSV_TIMESTAMP_FORMATTER.get().parse((String) sourceObj).getTime());
-              } catch (final ParseException pe) {
-                LOG.warn("Got an error parsing performance timestamps, this is probably because of the hack in here.",
-                         pe);
-              }
-            }
-          }
+          final Object sourceObj = sourceRS.getObject(i + 1);
           destPrep.setObject(i + 1, sourceObj);
         }
         destPrep.executeUpdate();
