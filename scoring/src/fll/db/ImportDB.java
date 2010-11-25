@@ -8,6 +8,7 @@ package fll.db;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -27,6 +28,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import net.mtu.eggplant.io.IOUtils;
 import net.mtu.eggplant.util.Functions;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
@@ -307,6 +309,7 @@ public final class ImportDB {
 
     final Map<String, Map<String, String>> typeInfo = new HashMap<String, Map<String, String>>();
     ZipEntry entry;
+    final Map<String, String> tableData = new HashMap<String, String>();
     while (null != (entry = zipfile.getNextEntry())) {
       final String name = entry.getName();
       if ("challenge.xml".equals(name)) {
@@ -315,7 +318,8 @@ public final class ImportDB {
       } else if (name.endsWith(".csv")) {
         final String tablename = name.substring(0, name.indexOf(".csv"));
         final Reader reader = new InputStreamReader(zipfile);
-        Utilities.loadCSVFile(connection, tablename, reader);
+        final String content = IOUtils.readIntoString(reader);
+        tableData.put(tablename, content);
       } else if (name.endsWith(".types")) {
         final String tablename = name.substring(0, name.indexOf(".types"));
         final Reader reader = new InputStreamReader(zipfile);
@@ -343,7 +347,16 @@ public final class ImportDB {
       // before types were added, assume version 0 types
       createVersion0TypeInfo(typeInfo, challengeDocument);
     }
-    fixTableTypes(connection, typeInfo);
+    // FIXME load data into database now
+    for(Map.Entry<String, String> tableEntry : tableData.entrySet()) {
+      final String tablename = tableEntry.getKey();
+      final String content = tableEntry.getValue();
+      final Map<String, String> tableTypes = typeInfo.get(tablename);
+            
+      Utilities.loadCSVFile(connection, tablename, tableTypes, new StringReader(content));
+    }
+    
+//    fixTableTypes(connection, typeInfo);
 
     upgradeDatabase(connection, challengeDocument);
 
@@ -452,36 +465,6 @@ public final class ImportDB {
     }
     typeInfo.put("FinalScores", finalScores);
 
-  }
-
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Dynamic based upon tables in the database")
-  private static void fixTableTypes(final Connection connection,
-                                    final Map<String, Map<String, String>> typeInfo) throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
-
-      for (final Map.Entry<String, Map<String, String>> tableEntry : typeInfo.entrySet()) {
-        final String tableName = tableEntry.getKey();
-
-        for (final Map.Entry<String, String> columnEntry : tableEntry.getValue().entrySet()) {
-          final String columnName = columnEntry.getKey();
-          final String columnType = columnEntry.getValue();
-          // convert empty strings to null
-          final String nullSQL = String.format("UPDATE %s SET %s = NULL WHERE %s = ''", tableName, columnName,
-                                               columnName);
-          stmt.executeUpdate(nullSQL);
-
-          if (!"varchar".equalsIgnoreCase(columnType) && !"longvarchar".equalsIgnoreCase(columnType)) {
-            final String typeSQL = String
-                                         .format("ALTER TABLE %s ALTER COLUMN %s %s", tableName, columnName, columnType);
-            stmt.executeUpdate(typeSQL);
-          }
-        }
-      }
-    } finally {
-      SQLFunctions.close(stmt);
-    }
   }
 
   /**
@@ -1234,15 +1217,12 @@ public final class ImportDB {
     return missingTeams;
   }
 
-  private static final ThreadLocal<DateFormat> CSV_TIMESTAMP_FORMATTER = new ThreadLocal<DateFormat>() {
+  /**
+   * Datetime format found in the CSV dump files.
+   */
+  public static final ThreadLocal<DateFormat> CSV_TIMESTAMP_FORMATTER = new ThreadLocal<DateFormat>() {
     protected DateFormat initialValue() {
       return new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
-    }
-  };
-
-  private static final ThreadLocal<DateFormat> HSQL_TIMESTAMP_FORMATTER = new ThreadLocal<DateFormat>() {
-    protected DateFormat initialValue() {
-      return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     }
   };
 
