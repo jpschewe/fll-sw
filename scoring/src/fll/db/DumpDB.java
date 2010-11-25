@@ -127,8 +127,11 @@ public final class DumpDB extends BaseFLLServlet {
       csvwriter = new CSVWriter(outputWriter);
       rs = metadata.getColumns(null, null, tableName, "%");
       while (rs.next()) {
-        final String typeName = rs.getString("TYPE_NAME");
+        String typeName = rs.getString("TYPE_NAME");
         final String columnName = rs.getString("COLUMN_NAME");
+        if("varchar".equalsIgnoreCase(typeName)) {
+          typeName = typeName + "(" + rs.getInt("COLUMN_SIZE") + ")";
+        }
         csvwriter.writeNext(new String[] { columnName, typeName });
         if (LOGGER.isTraceEnabled()) {
           final String name = rs.getString("TABLE_NAME");

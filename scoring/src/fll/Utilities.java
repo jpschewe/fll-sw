@@ -17,11 +17,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -37,6 +43,8 @@ import org.slf4j.LoggerFactory;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fll.db.DataSourceSpy;
+import fll.db.ImportDB;
+import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 
 /**
@@ -79,6 +87,7 @@ public final class Utilities {
                                                              "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Generate columns based upon file loaded")
   public static void loadCSVFile(final Connection connection,
                                  final String tablename,
+                                 final Map<String, String> types,
                                  final Reader reader) throws IOException, SQLException {
     Statement stmt = null;
     PreparedStatement prep = null;
@@ -102,18 +111,25 @@ public final class Utilities {
         throw new RuntimeException("Cannot find the header line");
       }
       stmt = connection.createStatement();
-      boolean first = true;
-      for (final String columnName : line) {
-        if (first) {
-          first = false;
-        } else {
+      final String[] columnTypes = new String[line.length];
+      for (int columnIndex = 0; columnIndex < line.length; ++columnIndex) {
+        final String columnName = line[columnIndex];
+        if (columnIndex > 0) {
           createTable.append(", ");
           insertPrepSQL.append(", ");
           valuesSQL.append(", ");
         }
-
+        String type = types.get(columnName);
+        if (null == type) {
+          type = "longvarchar";
+        }
+        if (type.equalsIgnoreCase("varchar")) {
+          type = "varchar(255)";
+        }
+        columnTypes[columnIndex] = type;
         createTable.append(columnName);
-        createTable.append(" longvarchar");
+        createTable.append(" "
+            + type);
         insertPrepSQL.append(columnName);
         valuesSQL.append("?");
       }
@@ -126,8 +142,8 @@ public final class Utilities {
       // load each line into a row in the table
       prep = connection.prepareStatement(insertPrepSQL.append(valuesSQL).toString());
       while (null != (line = csvreader.readNext())) {
-        for (int i = 0; i < line.length; ++i) {
-          prep.setString(i + 1, line[i]);
+        for (int columnIndex = 0; columnIndex < line.length; ++columnIndex) {
+          coerceData(line[columnIndex], columnTypes[columnIndex], prep, columnIndex + 1);
         }
         prep.executeUpdate();
       }
@@ -135,6 +151,85 @@ public final class Utilities {
     } finally {
       SQLFunctions.close(stmt);
       SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Convert data to type and put in prepared statement at index.
+   * 
+   * @param data the data as a string
+   * @param type the sql type that the data is to be converted to
+   * @param prep the prepared statement to insert into
+   * @param index which index in the prepared statement to put the data in
+   * @throws SQLException
+   * @throws ParseException
+   */
+  private static void coerceData(final String data,
+                                 final String type,
+                                 final PreparedStatement prep,
+                                 final int index) throws SQLException {
+    final String typeLower = type.toLowerCase();
+    if ("longvarchar".equals(typeLower)
+        || typeLower.startsWith("varchar")) {
+      if (null == data
+          || "".equals(data.trim())) {
+        prep.setNull(index, Types.VARCHAR);
+      } else {
+        prep.setString(index, data);
+      }
+    } else if ("integer".equals(typeLower)) {
+      if (null == data
+          || "".equals(data.trim())) {
+        prep.setNull(index, Types.INTEGER);
+      } else {
+        final long value = Long.valueOf(data);
+        prep.setLong(index, value);
+      }
+    } else if ("float".equals(typeLower)) {
+      if (null == data
+          || "".equals(data.trim())) {
+        prep.setNull(index, Types.DOUBLE);
+      } else {
+        final double value = Double.valueOf(data);
+        prep.setDouble(index, value);
+      }
+    } else if ("boolean".equals(typeLower)) {
+      if (null == data
+          || "".equals(data.trim())) {
+        prep.setNull(index, Types.BOOLEAN);
+      } else {
+        final boolean value = Boolean.valueOf(data);
+        prep.setBoolean(index, value);
+      }
+    } else if ("time".equals(typeLower)) {
+      if (null == data
+          || "".equals(data.trim())) {
+        prep.setNull(index, Types.TIME);
+      } else {
+        try {
+          final Date value = ImportDB.CSV_TIMESTAMP_FORMATTER.get().parse(data);
+          final Time time = new Time(value.getTime());
+          prep.setTime(index, time);
+        } catch (final ParseException e) {
+          throw new FLLRuntimeException("Problem parsing time in database dump", e);
+        }
+      }
+    } else if ("timestamp".equals(typeLower)) {
+      if (null == data
+          || "".equals(data.trim())) {
+        prep.setNull(index, Types.TIMESTAMP);
+      } else {
+        try {
+          final Date value = ImportDB.CSV_TIMESTAMP_FORMATTER.get().parse(data);
+          final Timestamp time = new Timestamp(value.getTime());
+          prep.setTimestamp(index, time);
+        } catch (final ParseException e) {
+          throw new FLLRuntimeException("Problem parsing timestamp in database dump", e);
+        }
+      }
+    } else {
+      throw new FLLRuntimeException("Unhandled SQL data type '"
+          + type + "'");
     }
   }
 
@@ -316,9 +411,9 @@ public final class Utilities {
           _testDatabaseServer.start();
         }
       }
-      
+
       System.setProperty("log4jdbc.enabled", "true");
-      final DataSourceSpy debugDatasource = new DataSourceSpy(dataSource);      
+      final DataSourceSpy debugDatasource = new DataSourceSpy(dataSource);
       return debugDatasource;
     } else {
       return dataSource;
@@ -432,5 +527,5 @@ public final class Utilities {
     }
     return extension;
   }
-  
+
 }
