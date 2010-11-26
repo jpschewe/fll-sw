@@ -113,7 +113,7 @@ public final class Utilities {
       stmt = connection.createStatement();
       final String[] columnTypes = new String[line.length];
       for (int columnIndex = 0; columnIndex < line.length; ++columnIndex) {
-        final String columnName = line[columnIndex];
+        final String columnName = line[columnIndex].toLowerCase();
         if (columnIndex > 0) {
           createTable.append(", ");
           insertPrepSQL.append(", ");
