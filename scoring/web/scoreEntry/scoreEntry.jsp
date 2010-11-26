@@ -213,7 +213,7 @@ function replaceText(sId, sText) {
   var el;
   if(document.getElementById
      && (el = document.getElementById(sId))) {
-     if(el.hasChildNodes) { // check for support for has child nodes, which isn't in httpunit, TODO figure out how to make this work for the unit tests as well
+     if(el.hasChildNodes) { // check for support for has child nodes, which isn't in httpunit, although using selenium to test this now
       while (el.hasChildNodes()) {
         el.removeChild(el.lastChild);
       }
