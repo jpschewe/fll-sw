@@ -15,6 +15,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -63,8 +65,12 @@ public class UtilitiesTest {
       final String url = "jdbc:hsqldb:mem:loadCSVFileTest";
       connection = DriverManager.getConnection(url, "sa", "");
 
+      final Map<String, String> types = new HashMap<String, String>();
+      types.put("column1", "varchar(255)");
+      types.put("column2", "longvarchar");
+      
       // load the csv file
-      Utilities.loadCSVFile(connection, "testtable", new StringReader(writer.toString()));
+      Utilities.loadCSVFile(connection, "testtable", types, new StringReader(writer.toString()));
 
       // check the databsae
       stmt = connection.createStatement();

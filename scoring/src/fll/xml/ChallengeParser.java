@@ -10,7 +10,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +24,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import net.mtu.eggplant.io.IOUtils;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
@@ -172,14 +172,8 @@ public final class ChallengeParser {
       });
 
       // pull the whole stream into a string
-      final StringWriter writer = new StringWriter();
-      final char[] buffer = new char[1024];
-      int bytesRead;
-      while ((bytesRead = stream.read(buffer)) != -1) {
-        writer.write(buffer, 0, bytesRead);
-      }
-
-      final Document document = parser.parse(new InputSource(new StringReader(writer.toString())));
+      final String content = IOUtils.readIntoString(stream);
+      final Document document = parser.parse(new InputSource(new StringReader(content)));
       validateDocument(document);
       return document;
     } catch (final SAXParseException spe) {
