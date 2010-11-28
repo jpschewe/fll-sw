@@ -103,7 +103,7 @@ public final class LogUtils {
   public static Logger getLogger() {
     addBufferedAppenderIfNeeded();
 
-    // TODO put this in JonsInfra
+    // TODO put this in JonsInfra - should this use slf4j, then all of FLL needs slf4j
     final StackTraceElement[] elements = new RuntimeException().getStackTrace();
     boolean useNextElement = false;
     for (final StackTraceElement element : elements) {
@@ -117,7 +117,7 @@ public final class LogUtils {
       }
     }
     // cannot find logger, this is odd, return Root Logger
-    LOGGER.warn("Cannot find logger for calling class with stack trace:"
+    LOGGER.warn("Cannot find logger for calling class with stack trace, returning root logger:"
         + Arrays.asList(elements));
     return Logger.getRootLogger();
   }

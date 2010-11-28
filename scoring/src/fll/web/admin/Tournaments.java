@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,7 +26,6 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.hsqldb.Types;
 
 import fll.Tournament;
 import fll.Utilities;

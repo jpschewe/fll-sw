@@ -21,7 +21,9 @@ final Document challengeDocument = ApplicationAttributes.getChallengeDocument(ap
 // support the unverified runs select box
 final String lTeamNum = request.getParameter("TeamNumber");
 if(null == lTeamNum) {
-  throw new RuntimeException("Attempted to load score entry page without providing a team number.");
+  session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>Attempted to load score entry page without providing a team number.</p>");
+  response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
+  return;
 }
 final int dashIndex = lTeamNum.indexOf('-');
 final int teamNumber;
@@ -211,7 +213,7 @@ function replaceText(sId, sText) {
   var el;
   if(document.getElementById
      && (el = document.getElementById(sId))) {
-     if(el.hasChildNodes) { // check for support for has child nodes, which isn't in httpunit, TODO figure out how to make this work for the unit tests as well
+     if(el.hasChildNodes) { // check for support for has child nodes, which isn't in httpunit, although using selenium to test this now
       while (el.hasChildNodes()) {
         el.removeChild(el.lastChild);
       }

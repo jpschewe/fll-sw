@@ -511,7 +511,12 @@ public final class UploadTeams extends BaseFLLServlet {
         }
 
         for (int i = 1; i < numValues; i++) { // skip TeamNumber
-          prep.setString(i + 1, rs.getString(i + 1));
+          String value = rs.getString(i+1);
+          if(null == value) {
+            // handle empty data as empty string instead of null, handled better elsewhere
+            value = "";
+          }
+          prep.setString(i + 1, value);
         }
         try {
           prep.executeUpdate();

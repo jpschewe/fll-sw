@@ -95,7 +95,7 @@ public final class DumpDB extends BaseFLLServlet {
       rs = metadata.getTables(null, null, "%", new String[] { "TABLE" });
       while (rs.next()) {
         final String tableName = rs.getString("TABLE_NAME");
-        dumpTable(output, connection, metadata, outputWriter, tableName);
+        dumpTable(output, connection, metadata, outputWriter, tableName.toLowerCase());
       }
       SQLFunctions.close(rs);
 
@@ -127,9 +127,12 @@ public final class DumpDB extends BaseFLLServlet {
       csvwriter = new CSVWriter(outputWriter);
       rs = metadata.getColumns(null, null, tableName, "%");
       while (rs.next()) {
-        final String typeName = rs.getString("TYPE_NAME");
+        String typeName = rs.getString("TYPE_NAME");
         final String columnName = rs.getString("COLUMN_NAME");
-        csvwriter.writeNext(new String[] { columnName, typeName });
+        if("varchar".equalsIgnoreCase(typeName)) {
+          typeName = typeName + "(" + rs.getInt("COLUMN_SIZE") + ")";
+        }
+        csvwriter.writeNext(new String[] { columnName.toLowerCase(), typeName });
         if (LOGGER.isTraceEnabled()) {
           final String name = rs.getString("TABLE_NAME");
           LOGGER.trace(new Formatter().format("Table %s Column %s has type %s", name, columnName, typeName));

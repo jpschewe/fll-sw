@@ -8,14 +8,14 @@ package fll.db;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
-import java.text.ParseException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import net.mtu.eggplant.io.IOUtils;
 import net.mtu.eggplant.util.Functions;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
@@ -306,17 +307,19 @@ public final class ImportDB {
 
     final Map<String, Map<String, String>> typeInfo = new HashMap<String, Map<String, String>>();
     ZipEntry entry;
+    final Map<String, String> tableData = new HashMap<String, String>();
     while (null != (entry = zipfile.getNextEntry())) {
       final String name = entry.getName();
       if ("challenge.xml".equals(name)) {
         final Reader reader = new InputStreamReader(zipfile);
         challengeDocument = ChallengeParser.parse(reader);
       } else if (name.endsWith(".csv")) {
-        final String tablename = name.substring(0, name.indexOf(".csv"));
+        final String tablename = name.substring(0, name.indexOf(".csv")).toLowerCase();
         final Reader reader = new InputStreamReader(zipfile);
-        Utilities.loadCSVFile(connection, tablename, reader);
+        final String content = IOUtils.readIntoString(reader);
+        tableData.put(tablename, content);
       } else if (name.endsWith(".types")) {
-        final String tablename = name.substring(0, name.indexOf(".types"));
+        final String tablename = name.substring(0, name.indexOf(".types")).toLowerCase();
         final Reader reader = new InputStreamReader(zipfile);
         final CSVReader csvreader = new CSVReader(reader);
         final Map<String, String> columnTypes = new HashMap<String, String>();
@@ -327,7 +330,7 @@ public final class ImportDB {
             throw new RuntimeException(name
                 + " has incorrect number of columns, should be 2");
           }
-          columnTypes.put(line[0], line[1]);
+          columnTypes.put(line[0].toLowerCase(), line[1]);
         }
 
         typeInfo.put(tablename, columnTypes);
@@ -341,10 +344,15 @@ public final class ImportDB {
     if (typeInfo.isEmpty()) {
       // before types were added, assume version 0 types
       createVersion0TypeInfo(typeInfo, challengeDocument);
-    } else {
-      fixTableTypes(connection, typeInfo);
     }
-
+    for(Map.Entry<String, String> tableEntry : tableData.entrySet()) {
+      final String tablename = tableEntry.getKey();
+      final String content = tableEntry.getValue();
+      final Map<String, String> tableTypes = typeInfo.get(tablename);
+            
+      Utilities.loadCSVFile(connection, tablename, tableTypes, new StringReader(content));
+    }
+    
     upgradeDatabase(connection, challengeDocument);
 
     if (null == challengeDocument) {
@@ -360,63 +368,57 @@ public final class ImportDB {
   private static void createVersion0TypeInfo(final Map<String, Map<String, String>> typeInfo,
                                              final Document challengeDocument) {
     final Map<String, String> tournaments = new HashMap<String, String>();
-    tournaments.put("Name", "varchar(128)");
-    tournaments.put("Location", "longvarchar");
-    tournaments.put("NextTournament", "varchar(128)");
-    typeInfo.put("Tournaments", tournaments);
+    tournaments.put("Name".toLowerCase(), "varchar(128)");
+    tournaments.put("Location".toLowerCase(), "longvarchar");
+    tournaments.put("NextTournament".toLowerCase(), "varchar(128)");
+    typeInfo.put("Tournaments".toLowerCase(), tournaments);
 
     final Map<String, String> teams = new HashMap<String, String>();
-    teams.put("TeamNumber", "integer");
-    teams.put("TeamName", "varchar(255)");
-    teams.put("Organization", "varchar(255)");
-    teams.put("Division", "varchar(32)");
-    teams.put("Region", "varchar(255)");
-    typeInfo.put("Teams", teams);
+    teams.put("TeamNumber".toLowerCase(), "integer");
+    teams.put("TeamName".toLowerCase(), "varchar(255)");
+    teams.put("Organization".toLowerCase(), "varchar(255)");
+    teams.put("Division".toLowerCase(), "varchar(32)");
+    teams.put("Region".toLowerCase(), "varchar(255)");
+    typeInfo.put("Teams".toLowerCase(), teams);
 
     final Map<String, String> tablenames = new HashMap<String, String>();
-    tablenames.put("Tournament", "varchar(128)");
-    tablenames.put("PairID", "integer");
-    tablenames.put("SideA", "varchar(64)");
-    tablenames.put("SideB", "varchar(64)");
-    typeInfo.put("tablenames", tablenames);
+    tablenames.put("Tournament".toLowerCase(), "varchar(128)");
+    tablenames.put("PairID".toLowerCase(), "integer");
+    tablenames.put("SideA".toLowerCase(), "varchar(64)");
+    tablenames.put("SideB".toLowerCase(), "varchar(64)");
+    typeInfo.put("tablenames".toLowerCase(), tablenames);
 
     final Map<String, String> playoffData = new HashMap<String, String>();
-    playoffData.put("event_division", "varchar(32)");
-    playoffData.put("Tournament", "varchar(128)");
-    playoffData.put("PlayoffRound", "integer");
-    playoffData.put("LineNumber", "integer");
-    playoffData.put("Team", "integer");
-    playoffData.put("AssignedTable", "varchar(64)");
-    playoffData.put("Printed", "boolean");
-    typeInfo.put("PlayoffData", playoffData);
+    playoffData.put("event_division".toLowerCase(), "varchar(32)");
+    playoffData.put("Tournament".toLowerCase(), "varchar(128)");
+    playoffData.put("PlayoffRound".toLowerCase(), "integer");
+    playoffData.put("LineNumber".toLowerCase(), "integer");
+    playoffData.put("Team".toLowerCase(), "integer");
+    playoffData.put("AssignedTable".toLowerCase(), "varchar(64)");
+    playoffData.put("Printed".toLowerCase(), "boolean");
+    typeInfo.put("PlayoffData".toLowerCase(), playoffData);
 
     final Map<String, String> tournamentTeams = new HashMap<String, String>();
-    tournamentTeams.put("TeamNumber", "integer");
-    tournamentTeams.put("Tournament", "varchar(128)");
-    tournamentTeams.put("event_division", "varchar(32)");
-    typeInfo.put("TournamentTeams", tournamentTeams);
-
-    final Map<String, String> tournamentParameters = new HashMap<String, String>();
-    tournamentParameters.put("Param", "varchar(64)");
-    tournamentParameters.put("Value", "longvarchar");
-    tournamentParameters.put("Description", "varchar(255)");
-    typeInfo.put("TournamentParameters", tournamentParameters);
+    tournamentTeams.put("TeamNumber".toLowerCase(), "integer");
+    tournamentTeams.put("Tournament".toLowerCase(), "varchar(128)");
+    tournamentTeams.put("event_division".toLowerCase(), "varchar(32)");
+    typeInfo.put("TournamentTeams".toLowerCase(), tournamentTeams);
 
     final Map<String, String> judges = new HashMap<String, String>();
-    judges.put("id", "varchar(64)");
-    judges.put("category", "varchar(64)");
-    judges.put("Tournament", "varchar(128)");
-    judges.put("event_division", "varchar(32)");
-    typeInfo.put("Judges", judges);
+    judges.put("id".toLowerCase(), "varchar(64)");
+    judges.put("category".toLowerCase(), "varchar(64)");
+    judges.put("Tournament".toLowerCase(), "varchar(128)");
+    judges.put("event_division".toLowerCase(), "varchar(32)");
+    typeInfo.put("Judges".toLowerCase(), judges);
 
     final Map<String, String> performance = new HashMap<String, String>();
-    performance.put("TeamNumber", "integer");
-    performance.put("Tournament", "varchar(128)");
-    performance.put("RunNumber", "integer");
-    performance.put("TimeStamp", "timestamp");
-    performance.put("NoShow", "boolean");
-    performance.put("Bye", "boolean");
-    performance.put("Verified", "boolean");
+    performance.put("TeamNumber".toLowerCase(), "integer");
+    performance.put("Tournament".toLowerCase(), "varchar(128)");
+    performance.put("RunNumber".toLowerCase(), "integer");
+    performance.put("TimeStamp".toLowerCase(), "timestamp");
+    performance.put("NoShow".toLowerCase(), "boolean");
+    performance.put("Bye".toLowerCase(), "boolean");
+    performance.put("Verified".toLowerCase(), "boolean");
     final Element rootElement = challengeDocument.getDocumentElement();
     final Element performanceElement = new NodelistElementCollectionAdapter(
                                                                             rootElement
@@ -425,67 +427,39 @@ public final class ImportDB {
     for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
       final String goalName = element.getAttribute("name");
       final String type = GenerateDB.getTypeForGoalColumn(element);
-      performance.put(goalName, type);
+      performance.put(goalName.toLowerCase(), type);
     }
-    performance.put("ComputedTotal", "float");
-    performance.put("StandardizedScore", "float");
-    typeInfo.put("Performance", performance);
+    performance.put("ComputedTotal".toLowerCase(), "float");
+    performance.put("StandardizedScore".toLowerCase(), "float");
+    typeInfo.put("Performance".toLowerCase(), performance);
 
     final Map<String, String> finalScores = new HashMap<String, String>();
-    finalScores.put("TeamNumber", "integer");
-    finalScores.put("Tournament", "varchar(128)");
+    finalScores.put("TeamNumber".toLowerCase(), "integer");
+    finalScores.put("Tournament".toLowerCase(), "varchar(128)");
     for (final Element categoryElement : new NodelistElementCollectionAdapter(
                                                                               rootElement
                                                                                          .getElementsByTagName("subjectiveCategory"))) {
       final String tableName = categoryElement.getAttribute("name");
 
       final Map<String, String> subjective = new HashMap<String, String>();
-      subjective.put("TeamNumber", "integer");
-      subjective.put("Tournament", "varchar(128)");
-      subjective.put("Judge", "varchar(64)");
-      subjective.put("NoShow", "boolean");
+      subjective.put("TeamNumber".toLowerCase(), "integer");
+      subjective.put("Tournament".toLowerCase(), "varchar(128)");
+      subjective.put("Judge".toLowerCase(), "varchar(64)");
+      subjective.put("NoShow".toLowerCase(), "boolean");
 
       for (final Element element : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("goal"))) {
         final String goalName = element.getAttribute("name");
         final String type = GenerateDB.getTypeForGoalColumn(element);
-        subjective.put(goalName, type);
+        subjective.put(goalName.toLowerCase(), type);
       }
-      subjective.put("ComputedTotal", "float");
-      subjective.put("StandardizedScore", "float");
-      typeInfo.put(tableName, subjective);
+      subjective.put("ComputedTotal".toLowerCase(), "float");
+      subjective.put("StandardizedScore".toLowerCase(), "float");
+      typeInfo.put(tableName.toLowerCase(), subjective);
 
-      finalScores.put(tableName, "float");
+      finalScores.put(tableName.toLowerCase(), "float");
     }
-    typeInfo.put("FinalScores", finalScores);
+    typeInfo.put("FinalScores".toLowerCase(), finalScores);
 
-  }
-
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Dynamic based upon tables in the database")
-  private static void fixTableTypes(final Connection connection,
-                                    final Map<String, Map<String, String>> typeInfo) throws SQLException {
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
-
-      for (final Map.Entry<String, Map<String, String>> tableEntry : typeInfo.entrySet()) {
-        final String tableName = tableEntry.getKey();
-
-        for (final Map.Entry<String, String> columnEntry : tableEntry.getValue().entrySet()) {
-          final String columnName = columnEntry.getKey();
-          final String columnType = columnEntry.getValue();
-
-          // convert empty strings to null
-          final String nullSQL = String.format("UPDATE %s SET %s = NULL WHERE %s = ''", tableName, columnName,
-                                               columnName);
-          stmt.executeUpdate(nullSQL);
-
-          final String typeSQL = String.format("ALTER TABLE %s ALTER COLUMN %s %s", tableName, columnName, columnType);
-          stmt.executeUpdate(typeSQL);
-        }
-      }
-    } finally {
-      SQLFunctions.close(stmt);
-    }
   }
 
   /**
@@ -864,7 +838,7 @@ public final class ImportDB {
       columns.append(" Tournament,");
       columns.append(" TeamNumber,");
       columns.append(" RunNumber,");
-      // Note: If TimeStamp is no longer the 4th element, then the hack below
+      // Note: If TimeStamp is no longer the 3rd element, then the hack below
       // needs to be modified
       columns.append(" TimeStamp,");
       final List<Element> goals = new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))
@@ -901,24 +875,12 @@ public final class ImportDB {
       while (sourceRS.next()) {
         // skip tournament column
         for (int i = 1; i < numColumns; i++) {
-          Object sourceObj = sourceRS.getObject(i + 1);
-          if ("".equals(sourceObj)) {
-            sourceObj = null;
-          }
-          // FIXME Hack for timestamps - need a better solution
-          if (3 == i) {
-            // timestamp column of the performance table
-            if (sourceObj instanceof String) {
-
-              try {
-                sourceObj = new Timestamp(CSV_TIMESTAMP_FORMATTER.parse((String) sourceObj).getTime());
-              } catch (final ParseException pe) {
-                LOG.warn("Got an error parsing performance timestamps, this is probably because of the hack in here.",
-                         pe);
-              }
-            }
-          }
+          final Object sourceObj = sourceRS.getObject(i + 1);
+          try {
           destPrep.setObject(i + 1, sourceObj);
+          } catch(final SQLException e) {
+            throw e;
+          }
         }
         destPrep.executeUpdate();
       }
@@ -1238,6 +1200,13 @@ public final class ImportDB {
     return missingTeams;
   }
 
-  private static final SimpleDateFormat CSV_TIMESTAMP_FORMATTER = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
+  /**
+   * Datetime format found in the CSV dump files.
+   */
+  public static final ThreadLocal<DateFormat> CSV_TIMESTAMP_FORMATTER = new ThreadLocal<DateFormat>() {
+    protected DateFormat initialValue() {
+      return new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
+    }
+  };
 
 }
