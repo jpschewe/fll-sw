@@ -49,7 +49,7 @@ public class ScoresheetGenerator {
 
   private static final String LONG_BLANK = "_________________________";
 
-  private static final String SHORT_BLANK = "___________";
+  private static final String SHORT_BLANK = "______";
 
   private static final char NON_BREAKING_SPACE = '\u00a0';
   
