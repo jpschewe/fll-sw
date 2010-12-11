@@ -18,7 +18,7 @@ pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
 </c:if>
 
 
-<%@page import="fll.web.WebUtils"%><html>
+<html>
   <head>
     <title>FLL-SW</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
