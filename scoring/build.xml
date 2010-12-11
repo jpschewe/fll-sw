@@ -550,9 +550,6 @@
 			</fileset>
 		</chmod>
 
-		<copy tofile="${dir.dist}/subjective-app.jar" file="${dir.web}/subjective-app.jar" />
-
-
 		<!-- src zip file -->
 		<zip zipfile="${dir.build}/${app.name}-${app.version}-src.zip">
 			<zipfileset dir="${basedir}">
