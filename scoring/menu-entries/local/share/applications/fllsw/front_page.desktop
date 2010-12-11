@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Exec=xdg-open http://localhost:9080/fll-sw
+Name=Main Page
+Categories=Education;X-fllsw;
