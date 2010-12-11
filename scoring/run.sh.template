@@ -47,7 +47,7 @@ if [ -z "$JAVACMD" ] ; then
 fi
 
 if [ ! -x "$JAVACMD" ] ; then
-  echo "Error: JAVA_HOME is not defined correctly."
+  echo "Error: JAVA_HOME is not defined and java is not in your path"
   echo "  We cannot execute $JAVACMD"
   exit 1
 fi
