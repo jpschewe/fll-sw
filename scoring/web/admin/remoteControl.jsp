@@ -120,7 +120,9 @@
 
     <h1><x:out select="$challengeDocument/fll/@title"/> (Display Controller)</h1>
 
+<c:if test="${not empty param.whichDisplay}">
     <p><i>Just set parameters for display ${param.whichDisplay}.</i></p>
+</c:if>
     
     <p>This page is used to control what page is currently visible on the
     display screen.  Note that it takes some time for the display to
