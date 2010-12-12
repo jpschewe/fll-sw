@@ -308,7 +308,7 @@ public class TournamentSchedule implements Serializable {
   private static boolean isHeaderLine(final String[] line) {
     boolean retval = false;
     for (int i = 0; i < line.length; ++i) {
-      if (line[i].equals(TEAM_NUMBER_HEADER)) {
+      if (TEAM_NUMBER_HEADER.equals(line[i])) {
         retval = true;
       }
     }
