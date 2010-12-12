@@ -550,19 +550,6 @@
 			</fileset>
 		</chmod>
 
-		<copy tofile="${dir.dist}/subjective-app.jar" file="${dir.web}/subjective-app.jar" />
-
-
-		<!-- src zip file -->
-		<zip zipfile="${dir.build}/${app.name}-${app.version}-src.zip">
-			<zipfileset dir="${basedir}">
-				<exclude name="dist/**" />
-				<exclude name="build/**" />
-				<exclude name="override.properties" />
-				<exclude name="tmp/**" />
-			</zipfileset>
-		</zip>
-
 		<zip zipfile="${dir.build}/${app.name}-${app.version}.zip">
 			<zipfileset dir="${dir.dist}" prefix="${app.name}-${app.version}" filemode="755">
 				<include name="**/*.sh" />

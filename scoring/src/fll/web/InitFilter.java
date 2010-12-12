@@ -72,7 +72,9 @@ public class InitFilter implements Filter {
    * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest,
    *      javax.servlet.ServletResponse, javax.servlet.FilterChain)
    */
-  public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
+  public void doFilter(final ServletRequest request,
+                       final ServletResponse response,
+                       final FilterChain chain) throws IOException, ServletException {
     if (response instanceof HttpServletResponse
         && request instanceof HttpServletRequest) {
       final HttpServletResponse httpResponse = (HttpServletResponse) response;
@@ -86,7 +88,8 @@ public class InitFilter implements Filter {
                   + "/style") || path.startsWith(httpRequest.getContextPath()
                   + "/images") || path.startsWith(httpRequest.getContextPath()
                   + "/sponsor_logos") || path.startsWith(httpRequest.getContextPath()
-                  + "/wiki") || path.endsWith(".jpg") || path.endsWith(".gif") || path.endsWith(".png") || path.endsWith(".pdf") || path.endsWith(".html"))) {
+                  + "/wiki") || path.endsWith(".jpg") || path.endsWith(".gif") || path.endsWith(".png")
+              || path.endsWith(".pdf") || path.endsWith(".html"))) {
         // don't do init on the setup pages
         chain.doFilter(request, response);
       } else {
@@ -123,14 +126,17 @@ public class InitFilter implements Filter {
    * @throws RuntimeException
    * @throws SQLException
    */
-  public static String initialize(final HttpServletRequest request, final HttpServletResponse response) throws IOException, SQLException, RuntimeException {
+  public static String initialize(final HttpServletRequest request,
+                                  final HttpServletResponse response) throws IOException, SQLException, RuntimeException {
     final HttpSession session = request.getSession();
     final ServletContext application = session.getServletContext();
 
     application.setAttribute(ApplicationAttributes.DATABASE, application.getRealPath("/WEB-INF/flldb"));
 
     // set some default text
-    application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "FLL");
+    if (null == application.getAttribute(ApplicationAttributes.SCORE_PAGE_TEXT)) {
+      application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "FLL");
+    }
 
     final String database = ApplicationAttributes.getDatabase(application);
 
@@ -138,7 +144,8 @@ public class InitFilter implements Filter {
     if (!dbok) {
       LOGGER.warn("Database files not ok, redirecting to setup");
       session
-             .setAttribute(SessionAttributes.MESSAGE,
+             .setAttribute(
+                           SessionAttributes.MESSAGE,
                            "<p class='error'>The database does not exist yet or there is a problem with the database files. Please create the database.<br/></p>");
       return request.getContextPath()
           + "/setup";
@@ -163,7 +170,8 @@ public class InitFilter implements Filter {
     final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
     if (!dbinitialized) {
       LOGGER.warn("Database not initialized, redirecting to setup");
-      session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>The database is not yet initialized. Please create the database.</p>");
+      session.setAttribute(SessionAttributes.MESSAGE,
+                           "<p class='error'>The database is not yet initialized. Please create the database.</p>");
       return request.getContextPath()
           + "/setup";
     }
@@ -177,7 +185,8 @@ public class InitFilter implements Filter {
         final Document document = Queries.getChallengeDocument(connection);
         if (null == document) {
           LOGGER.warn("Could not find challenge descriptor");
-          session.setAttribute(SessionAttributes.MESSAGE,
+          session
+                 .setAttribute(SessionAttributes.MESSAGE,
                                "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
           return request.getContextPath()
               + "/setup";

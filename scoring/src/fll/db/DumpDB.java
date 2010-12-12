@@ -75,7 +75,9 @@ public final class DumpDB extends BaseFLLServlet {
    * @param output where to dump the database
    * @param connection the database connection to dump
    */
-  public static void dumpDatabase(final ZipOutputStream output, final Connection connection, final Document challengeDocument) throws SQLException, IOException {
+  public static void dumpDatabase(final ZipOutputStream output,
+                                  final Connection connection,
+                                  final Document challengeDocument) throws SQLException, IOException {
     ResultSet rs = null;
     Statement stmt = null;
 
@@ -105,6 +107,46 @@ public final class DumpDB extends BaseFLLServlet {
     }
   }
 
+  /**
+   * Dump the type information for a table to outputWriter.
+   * 
+   * @param tableName
+   * @param metadata
+   * @param outputWriter
+   * @return true if column information for the specified table name was found
+   * @throws SQLException
+   * @throws IOException 
+   */
+  private static boolean dumpTableTypes(final String tableName, 
+                                     final DatabaseMetaData metadata,
+                                     final OutputStreamWriter outputWriter) throws SQLException, IOException {
+    boolean retval = false;
+    ResultSet rs = null;
+    try {
+      final CSVWriter csvwriter = new CSVWriter(outputWriter);
+      rs = metadata.getColumns(null, null, tableName, "%");
+      while (rs.next()) {
+        retval = true;
+        
+        String typeName = rs.getString("TYPE_NAME");
+        final String columnName = rs.getString("COLUMN_NAME");
+        if ("varchar".equalsIgnoreCase(typeName)) {
+          typeName = typeName
+              + "(" + rs.getInt("COLUMN_SIZE") + ")";
+        }
+        csvwriter.writeNext(new String[] { columnName.toLowerCase(), typeName });
+        if (LOGGER.isTraceEnabled()) {
+          final String name = rs.getString("TABLE_NAME");
+          LOGGER.trace(new Formatter().format("Table %s Column %s has type %s", name, columnName, typeName));
+        }
+      }
+      csvwriter.flush();
+    } finally {
+      SQLFunctions.close(rs);
+    }
+    return retval;
+  }
+
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE", justification = "Dynamic based upon tables in the database")
   private static void dumpTable(final ZipOutputStream output,
                                 final Connection connection,
@@ -124,21 +166,13 @@ public final class DumpDB extends BaseFLLServlet {
       }
       output.putNextEntry(new ZipEntry(tableName
           + ".types"));
-      csvwriter = new CSVWriter(outputWriter);
-      rs = metadata.getColumns(null, null, tableName, "%");
-      while (rs.next()) {
-        String typeName = rs.getString("TYPE_NAME");
-        final String columnName = rs.getString("COLUMN_NAME");
-        if("varchar".equalsIgnoreCase(typeName)) {
-          typeName = typeName + "(" + rs.getInt("COLUMN_SIZE") + ")";
-        }
-        csvwriter.writeNext(new String[] { columnName.toLowerCase(), typeName });
-        if (LOGGER.isTraceEnabled()) {
-          final String name = rs.getString("TABLE_NAME");
-          LOGGER.trace(new Formatter().format("Table %s Column %s has type %s", name, columnName, typeName));
-        }
+      boolean dumpedTypes = dumpTableTypes(tableName, metadata, outputWriter);
+      if(!dumpedTypes) {
+        dumpedTypes = dumpTableTypes(tableName.toUpperCase(), metadata, outputWriter);
       }
-      csvwriter.flush();
+      if(!dumpedTypes) {
+        dumpedTypes = dumpTableTypes(tableName.toLowerCase(), metadata, outputWriter);
+      }
       output.closeEntry();
       SQLFunctions.close(rs);
       rs = null;
