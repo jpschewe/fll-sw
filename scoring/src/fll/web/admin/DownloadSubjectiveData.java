@@ -113,7 +113,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
 
           for (final Team team : teams) {
             final String teamDiv = Queries.getEventDivision(connection, team.getTeamNumber());
-            if ("All".equals(division)
+            if (Judges.ALL_DIVISIONS.equals(division)
                 || division.equals(teamDiv)) {
               final Element scoreElement = document.createElement("score");
               categoryElement.appendChild(scoreElement);

@@ -39,7 +39,6 @@ import fll.xml.XMLUtils;
 
 /**
  * Java code used in judges.jsp
- * 
  */
 public final class Judges {
 
@@ -50,17 +49,29 @@ public final class Judges {
   }
 
   /**
+   * String used for all divisions when assigning judges.
+   */
+  public static final String ALL_DIVISIONS = "All";
+  
+  /**
    * Generate the judges page
    */
-  public static void generatePage(final JspWriter out, final ServletContext application, final HttpServletRequest request, final HttpServletResponse response)
-      throws SQLException, IOException, ParseException {
+  public static void generatePage(final JspWriter out,
+                                  final ServletContext application,
+                                  final HttpServletRequest request,
+                                  final HttpServletResponse response) throws SQLException, IOException, ParseException {
     final HttpSession session = request.getSession();
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
     final DataSource datasource = SessionAttributes.getDataSource(session);
     final Connection connection = datasource.getConnection();
     final int tournament = Queries.getCurrentTournament(connection);
 
-    final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory")).asList();
+    final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
+                                                                                    challengeDocument
+                                                                                                     .getDocumentElement()
+                                                                                                     .getElementsByTagName(
+                                                                                                                           "subjectiveCategory"))
+                                                                                                                                                 .asList();
 
     // count the number of rows present
     int rowIndex = 0;
@@ -109,7 +120,7 @@ public final class Judges {
 
     // get list of divisions and add "All" as a possible value
     final List<String> divisions = Queries.getEventDivisions(connection);
-    divisions.add(0, "All");
+    divisions.add(0, ALL_DIVISIONS);
 
     out
        .println("<p>Judges ID's must be unique.  They can be just the name of the judge.  Keep in mind that this ID needs to be entered on the judging forms.  There must be at least 1 judge for each category.</p>");
@@ -123,7 +134,7 @@ public final class Judges {
       // the judges out of the DB
       ResultSet rs = null;
       PreparedStatement stmt = null;
-      try {        
+      try {
         stmt = connection.prepareStatement("SELECT id, category, event_division FROM Judges WHERE Tournament = ?");
         stmt.setInt(1, tournament);
         rs = stmt.executeQuery();
@@ -240,9 +251,11 @@ public final class Judges {
    * 
    * @return null if everything is ok, otherwise the error message
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="XSS_REQUEST_PARAMETER_TO_JSP_WRITER", justification="Checking category name retrieved from request against valid category names")
-  private static String generateVerifyTable(final JspWriter out, final List<Element> subjectiveCategories, final HttpServletRequest request, final Document challengeDocument)
-      throws IOException, ParseException {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "XSS_REQUEST_PARAMETER_TO_JSP_WRITER", justification = "Checking category name retrieved from request against valid category names")
+  private static String generateVerifyTable(final JspWriter out,
+                                            final List<Element> subjectiveCategories,
+                                            final HttpServletRequest request,
+                                            final Document challengeDocument) throws IOException, ParseException {
     // keep track of any errors
     final StringBuffer error = new StringBuffer();
 
@@ -282,7 +295,7 @@ public final class Judges {
 
     // now walk the keys of the hash and make sure that all values have a list
     // of size > 0, otherwise append an error to error.
-    for(final Map.Entry<String, Set<String>> entry : hash.entrySet()) {
+    for (final Map.Entry<String, Set<String>> entry : hash.entrySet()) {
       final String categoryName = entry.getKey();
       final Set<String> set = entry.getValue();
       if (set.isEmpty()) {
@@ -294,7 +307,8 @@ public final class Judges {
     if (error.length() > 0) {
       return error.toString();
     } else {
-      out.println("<p>If everything looks ok, click Commit, otherwise click Cancel and you'll go back to the edit page.</p>");
+      out
+         .println("<p>If everything looks ok, click Commit, otherwise click Cancel and you'll go back to the edit page.</p>");
       // generate final table with submit button
       out.println("<table border='1'><tr><th>ID</th><th>Category</th><th>Division</th></tr>");
 
@@ -308,8 +322,7 @@ public final class Judges {
           + row);
       while (null != category) {
         if (null != id
-            && division != null
-            && XMLUtils.isValidCategoryName(challengeDocument, category)) {
+            && division != null && XMLUtils.isValidCategoryName(challengeDocument, category)) {
           id = id.trim();
           id = id.toUpperCase();
           if (id.length() > 0) {
@@ -348,10 +361,16 @@ public final class Judges {
    * 
    * @param tournament the current tournament
    */
-  private static void commitData(final HttpServletRequest request, final HttpServletResponse response, final HttpSession session, final Connection connection, final int tournament)
-      throws SQLException, IOException {
+  private static void commitData(final HttpServletRequest request,
+                                 final HttpServletResponse response,
+                                 final HttpSession session,
+                                 final Connection connection,
+                                 final int tournament) throws SQLException, IOException {
     PreparedStatement prep = null;
     try {
+      // FIXME save old judge information
+      
+      
       // delete old data in judges
       prep = connection.prepareStatement("DELETE FROM Judges where Tournament = ?");
       prep.setInt(1, tournament);
@@ -360,7 +379,8 @@ public final class Judges {
       prep = null;
 
       // walk request parameters and insert data into database
-      prep = connection.prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES(?, ?, ?, ?)");
+      prep = connection
+                       .prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES(?, ?, ?, ?)");
       prep.setInt(4, tournament);
       int row = 0;
       String id = request.getParameter("id"
