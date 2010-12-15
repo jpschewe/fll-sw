@@ -52,7 +52,7 @@ public final class Judges {
    * String used for all divisions when assigning judges.
    */
   public static final String ALL_DIVISIONS = "All";
-  
+
   /**
    * Generate the judges page
    */
@@ -125,6 +125,10 @@ public final class Judges {
     out
        .println("<p>Judges ID's must be unique.  They can be just the name of the judge.  Keep in mind that this ID needs to be entered on the judging forms.  There must be at least 1 judge for each category.</p>");
 
+    if (checkForEnteredSubjectiveScores(connection, subjectiveCategories, tournament)) {
+      out
+         .println("<p class='error'>Subjective scores have already been entered for this tournament, changing the judges may cause some scores to be deleted</p>");
+    }
     out.println("<table border='1'><tr><th>ID</th><th>Category</th><th>Division</th></tr>");
 
     int row = 0; // keep track of which row we're generating
@@ -185,6 +189,29 @@ public final class Judges {
     out.println("</form>");
   }
 
+  private static boolean checkForEnteredSubjectiveScores(final Connection connection,
+                                                         List<Element> subjectiveCategories,
+                                                         final int tournament) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      for (final Element category : subjectiveCategories) {
+        final String categoryName = category.getAttribute("name");
+        prep = connection.prepareStatement(String.format("SELECT * FROM %s WHERE Tournament = ?", categoryName));
+        prep.setInt(1, tournament);
+        rs = prep.executeQuery();
+        if (rs.next()) {
+          return true;
+        }
+      }
+      return false;
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+
+  }
+
   /**
    * Generate a row in the judges table defaulting the form elemenets to the
    * given information.
@@ -218,13 +245,14 @@ public final class Judges {
         + row + "'>");
     for (final Element category : subjectiveCategories) {
       final String categoryName = category.getAttribute("name");
+      final String categoryTitle = category.getAttribute("title");
       out.print("  <option value='"
           + categoryName + "'");
       if (categoryName.equals(cat)) {
         out.print(" selected");
       }
       out.println(">"
-          + categoryName + "</option>");
+          + categoryTitle + "</option>");
     }
     out.println("  </select></td>");
 
@@ -367,10 +395,20 @@ public final class Judges {
                                  final Connection connection,
                                  final int tournament) throws SQLException, IOException {
     PreparedStatement prep = null;
+    ResultSet rs = null;
     try {
-      // FIXME save old judge information
-      
-      
+      // save old judge information
+      final Set<JudgeInformation> oldJudgeInfo = new HashSet<JudgeInformation>();
+      prep = connection.prepareStatement("SELECT id, category, event_division FROM Judges WHERE Tournament = ?");
+      prep.setInt(1, tournament);
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final String id = rs.getString(1);
+        final String category = rs.getString(2);
+        final String division = rs.getString(3);
+        oldJudgeInfo.add(new JudgeInformation(id, category, division));
+      }
+
       // delete old data in judges
       prep = connection.prepareStatement("DELETE FROM Judges where Tournament = ?");
       prep.setInt(1, tournament);
@@ -389,11 +427,14 @@ public final class Judges {
           + row);
       String division = request.getParameter("div"
           + row);
+      final Set<JudgeInformation> newJudgeInfo = new HashSet<JudgeInformation>();
       while (null != category) {
         prep.setString(1, id);
         prep.setString(2, category);
         prep.setString(3, division);
         prep.executeUpdate();
+        final JudgeInformation info = new JudgeInformation(id, category, division);
+        newJudgeInfo.add(info);
 
         row++;
         id = request.getParameter("id"
@@ -404,8 +445,20 @@ public final class Judges {
             + row);
       }
 
+      // figure out which ones are no longer there and remove all of their old
+      // scores
+      oldJudgeInfo.removeAll(newJudgeInfo);
+      for (final JudgeInformation oldInfo : oldJudgeInfo) {
+        prep = connection.prepareStatement(String.format("DELETE FROM %s WHERE Judge = ? AND Tournament = ?",
+                                                         oldInfo.getCategory()));
+        prep.setString(1, oldInfo.getId());
+        prep.setInt(2, tournament);
+        prep.executeUpdate();
+      }
+
     } finally {
       SQLFunctions.close(prep);
+      SQLFunctions.close(rs);
     }
 
     // finally redirect to index.jsp
@@ -413,4 +466,51 @@ public final class Judges {
     response.sendRedirect(response.encodeRedirectURL("index.jsp"));
   }
 
+  private static final class JudgeInformation {
+    private final String id;
+
+    public String getId() {
+      return id;
+    }
+
+    private final String category;
+
+    public String getCategory() {
+      return category;
+    }
+
+    private final String division;
+
+    public String getDivision() {
+      return division;
+    }
+
+    public JudgeInformation(final String id,
+                            final String category,
+                            final String division) {
+      this.id = id;
+      this.category = category;
+      this.division = division;
+    }
+
+    @Override
+    public int hashCode() {
+      return id.hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (null == o) {
+        return false;
+      } else if (o == this) {
+        return true;
+      } else if (o.getClass().equals(JudgeInformation.class)) {
+        final JudgeInformation other = (JudgeInformation) o;
+        return getId().equals(other.getId())
+            && getCategory().equals(other.getCategory()) && getDivision().equals(other.getDivision());
+      } else {
+        return false;
+      }
+    }
+  }
 }
