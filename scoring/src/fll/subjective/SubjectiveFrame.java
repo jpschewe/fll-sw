@@ -49,6 +49,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
@@ -83,7 +84,8 @@ public final class SubjectiveFrame extends JFrame {
   public static void main(final String[] args) {
     LogUtils.initializeLogging();
 
-    // Use cross platform look and feel so that things look right all of the time 
+    // Use cross platform look and feel so that things look right all of the
+    // time
     try {
       UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
     } catch (final ClassNotFoundException e) {
@@ -135,7 +137,8 @@ public final class SubjectiveFrame extends JFrame {
     final ZipFile zipfile = new ZipFile(file);
     final ZipEntry challengeEntry = zipfile.getEntry("challenge.xml");
     if (null == challengeEntry) {
-      throw new RuntimeException("Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
+      throw new RuntimeException(
+                                 "Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
     }
     final InputStream challengeStream = zipfile.getInputStream(challengeEntry);
     _challengeDocument = ChallengeParser.parse(new InputStreamReader(challengeStream));
@@ -143,7 +146,8 @@ public final class SubjectiveFrame extends JFrame {
 
     final ZipEntry scoreEntry = zipfile.getEntry("score.xml");
     if (null == scoreEntry) {
-      throw new RuntimeException("Unable to find score data in file, you probably choose the wrong file or it is corrupted");
+      throw new RuntimeException(
+                                 "Unable to find score data in file, you probably choose the wrong file or it is corrupted");
     }
     final InputStream scoreStream = zipfile.getInputStream(scoreEntry);
     _scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
@@ -201,14 +205,17 @@ public final class SubjectiveFrame extends JFrame {
           }
 
           try {
-            final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareSubjectiveFiles(getFile(), compareFile);
+            final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareSubjectiveFiles(getFile(),
+                                                                                                       compareFile);
             if (null == diffs) {
-              JOptionPane.showMessageDialog(null, "Challenge descriptors are different, comparison failed", "Error", JOptionPane.ERROR_MESSAGE);
+              JOptionPane.showMessageDialog(null, "Challenge descriptors are different, comparison failed", "Error",
+                                            JOptionPane.ERROR_MESSAGE);
 
             } else if (!diffs.isEmpty()) {
               showDifferencesDialog(diffs);
             } else {
-              JOptionPane.showMessageDialog(null, "No differences found", "No Differences", JOptionPane.INFORMATION_MESSAGE);
+              JOptionPane.showMessageDialog(null, "No differences found", "No Differences",
+                                            JOptionPane.INFORMATION_MESSAGE);
 
             }
           } catch (final IOException e) {
@@ -223,7 +230,11 @@ public final class SubjectiveFrame extends JFrame {
     tabbedPane = new JTabbedPane();
     getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
-    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
+                                                                                _challengeDocument
+                                                                                                  .getDocumentElement()
+                                                                                                  .getElementsByTagName(
+                                                                                                                        "subjectiveCategory"))) {
       createSubjectiveTable(tabbedPane, subjectiveElement);
     }
 
@@ -236,7 +247,8 @@ public final class SubjectiveFrame extends JFrame {
     setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
   }
 
-  private void createSubjectiveTable(final JTabbedPane tabbedPane, final Element subjectiveElement) {
+  private void createSubjectiveTable(final JTabbedPane tabbedPane,
+                                     final Element subjectiveElement) {
     final SubjectiveTableModel tableModel = new SubjectiveTableModel(_scoreDocument, subjectiveElement);
     final JTable table = new JTable(tableModel);
 
@@ -257,8 +269,13 @@ public final class SubjectiveFrame extends JFrame {
     setupTabReturnBehavior(table);
 
     int g = 0;
-    for (final Element goalDescription : new NodelistElementCollectionAdapter(subjectiveElement.getElementsByTagName("goal"))) {
-      final NodelistElementCollectionAdapter posValuesList = new NodelistElementCollectionAdapter(goalDescription.getElementsByTagName("value"));
+    for (final Element goalDescription : new NodelistElementCollectionAdapter(
+                                                                              subjectiveElement
+                                                                                               .getElementsByTagName("goal"))) {
+      final NodelistElementCollectionAdapter posValuesList = new NodelistElementCollectionAdapter(
+                                                                                                  goalDescription
+                                                                                                                 .getElementsByTagName("value"));
+      final TableColumn column = table.getColumnModel().getColumn(g + 4);
       if (posValuesList.hasNext()) {
         // enumerated
         final Vector<String> posValues = new Vector<String>();
@@ -267,8 +284,10 @@ public final class SubjectiveFrame extends JFrame {
           posValues.add(posValue.getAttribute("title"));
         }
 
-        final TableColumn column = table.getColumnModel().getColumn(g + 4);
         column.setCellEditor(new DefaultCellEditor(new JComboBox(posValues)));
+      } else {
+        final JTextField editor = new SelectTextField();
+        column.setCellEditor(new DefaultCellEditor(editor));
       }
       ++g;
     }
@@ -411,12 +430,15 @@ public final class SubjectiveFrame extends JFrame {
    * Prompt the user with yes/no/cancel. Yes exits and saves, no exits without
    * saving and cancel doesn't quit.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="DM_EXIT", justification="This is the exit method for the application")   
-  /*package*/ void quit() {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DM_EXIT", justification = "This is the exit method for the application")
+  /* package */void quit() {
     if (validateData()) {
 
-      final int state = JOptionPane.showConfirmDialog(SubjectiveFrame.this, "Save data?  Data will be saved in same file as it was read from.", "Exit",
-                                                      JOptionPane.YES_NO_CANCEL_OPTION);
+      final int state = JOptionPane
+                                   .showConfirmDialog(
+                                                      SubjectiveFrame.this,
+                                                      "Save data?  Data will be saved in same file as it was read from.",
+                                                      "Exit", JOptionPane.YES_NO_CANCEL_OPTION);
       if (JOptionPane.YES_OPTION == state) {
         try {
           save();
@@ -445,18 +467,26 @@ public final class SubjectiveFrame extends JFrame {
    * 
    * @return true if everything is ok
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="SIC_INNER_SHOULD_BE_STATIC_ANON", justification="Static inner class to replace anonomous listener isn't worth the confusion of finding the class definition")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SIC_INNER_SHOULD_BE_STATIC_ANON", justification = "Static inner class to replace anonomous listener isn't worth the confusion of finding the class definition")
   private boolean validateData() {
     stopCellEditors();
 
     final List<String> warnings = new LinkedList<String>();
-    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(_challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
+                                                                                _challengeDocument
+                                                                                                  .getDocumentElement()
+                                                                                                  .getElementsByTagName(
+                                                                                                                        "subjectiveCategory"))) {
       final String category = subjectiveElement.getAttribute("name");
       final String categoryTitle = subjectiveElement.getAttribute("title");
 
-      final List<Element> goals = new NodelistElementCollectionAdapter(subjectiveElement.getElementsByTagName("goal")).asList();
-      final Element categoryElement = (Element) _scoreDocument.getDocumentElement().getElementsByTagName(category).item(0);
-      for (final Element scoreElement : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("score"))) {
+      final List<Element> goals = new NodelistElementCollectionAdapter(subjectiveElement.getElementsByTagName("goal"))
+                                                                                                                      .asList();
+      final Element categoryElement = (Element) _scoreDocument.getDocumentElement().getElementsByTagName(category)
+                                                              .item(0);
+      for (final Element scoreElement : new NodelistElementCollectionAdapter(
+                                                                             categoryElement
+                                                                                            .getElementsByTagName("score"))) {
         int numValues = 0;
         for (final Element goalElement : goals) {
           final String goalName = goalElement.getAttribute("name");
@@ -469,7 +499,8 @@ public final class SubjectiveFrame extends JFrame {
         if (numValues != goals.size()
             && numValues != 0) {
           warnings.add(categoryTitle
-              + ": " + scoreElement.getAttribute("teamNumber") + " has too few scores (needs all or none): " + numValues);
+              + ": " + scoreElement.getAttribute("teamNumber") + " has too few scores (needs all or none): "
+              + numValues);
         }
 
       }
@@ -617,7 +648,10 @@ public final class SubjectiveFrame extends JFrame {
   }
 
   private final File _file;
-  File getFile() { return _file; }
+
+  File getFile() {
+    return _file;
+  }
 
   private final Document _challengeDocument;
 
@@ -632,6 +666,24 @@ public final class SubjectiveFrame extends JFrame {
   }
 
   private final JTabbedPane tabbedPane;
-  JTabbedPane getTabbedPane() { return tabbedPane; }
 
+  JTabbedPane getTabbedPane() {
+    return tabbedPane;
+  }
+
+  /**
+   * {@link JTextField} that selects all text when {@link #setText(String)} is
+   * called.
+   */
+  private static final class SelectTextField extends JTextField {
+    public SelectTextField() {
+      super();
+    }
+
+    @Override
+    public void setText(final String str) {
+      super.setText(str);
+      selectAll();
+    }
+  }
 }
