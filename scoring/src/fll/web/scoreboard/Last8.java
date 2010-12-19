@@ -111,11 +111,11 @@ public class Last8 extends BaseFLLServlet {
         formatter.format("<tr>");
         formatter.format("<td class='left' width='10%%'><b>%d</b></td>", rs.getInt("TeamNumber"));
         String teamName = rs.getString("TeamName");
-        teamName = null == teamName ? "&nbsp;" : teamName.substring(0, Math.min(20, teamName.length()));
+        teamName = null == teamName ? "&nbsp;" : teamName.substring(0, Math.min(Top10.MAX_TEAM_NAME, teamName.length()));
         formatter.format("<td class='left' width='28%%'><b>%s</b></td>", teamName);
         if (showOrg) {
           String organization = rs.getString("Organization");
-          organization = null == organization ? "&nbsp;" : organization.substring(0, Math.min(35, organization.length()));
+          organization = null == organization ? "&nbsp;" : organization.substring(0, Math.min(Top10.MAX_ORG_NAME, organization.length()));
           formatter.format("<td class='left'><b>%s</b></td>", organization);
         }
         formatter.format("<td class='right' width='5%%'><b>%s</b></td>", rs.getString("event_division"));
