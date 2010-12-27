@@ -43,7 +43,7 @@ END DEBUG --%>
   <c:set var='slideShowInterval' value='10' scope='application' />
  </c:when>
  <c:otherwise>
-  <c:set var='slideShowInterval' value='param.slideInterval'
+  <c:set var='slideShowInterval' value='${Integer.valueOf(param.slideInterval)}'
    scope='application' />
  </c:otherwise>
 </c:choose>
@@ -90,8 +90,8 @@ END DEBUG --%>
                   + "_playoffDivision", request.getParameter(displayName
                   + "_playoffDivision"));
               application.setAttribute(displayName
-                  + "_playoffRoundNumber", request.getParameter(displayName
-                  + "_playoffRoundNumber"));
+                  + "_playoffRoundNumber", Integer.valueOf(request.getParameter(displayName
+                  + "_playoffRoundNumber")));
     %>
    </c:otherwise>
   </c:choose>
