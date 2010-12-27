@@ -22,62 +22,96 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
 /**
- * 
  * @web.servlet name="RemoteControlPost"
  * @web.servlet-mapping url-pattern="/admin/RemoteControlPost"
  */
 public class RemoteControlPost extends BaseFLLServlet {
 
   private static final Logger LOGGER = Logger.getLogger(RemoteControlPost.class.getName());
-  
+
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    final Collection<String> displayNames = (Collection<String>)ApplicationAttributes.getAttribute(application, "displayNames", Collection.class);
-    
-    if(LOGGER.isTraceEnabled()) {
-      LOGGER.trace("remotePage " + request.getParameter("remotePage"));
-      LOGGER.trace("remoteURL " + request.getParameter("remoteURL"));
-      LOGGER.trace("playoffDivision " + request.getParameter("playoffDivision"));
-      LOGGER.trace("playoffRoundNumber " + request.getParameter("playoffRoundNumber"));
-      
-      
-      if(null != displayNames) {
-        for(final String displayName : displayNames) {
-          LOGGER.trace("display " + displayName);
-          LOGGER.trace("\tremotePage " + request.getParameter(displayName + "_remotePage"));
-          LOGGER.trace("\tremoteURL " + request.getParameter(displayName + "_remoteURL"));
-          LOGGER.trace("\tplayoffDivision " + request.getParameter(displayName + "_playoffDivision"));
-          LOGGER.trace("\tplayoffRoundNumber " + request.getParameter(displayName + "_playoffRoundNumber"));          
+    @SuppressWarnings("unchecked")
+    final Collection<String> displayNames = (Collection<String>) ApplicationAttributes.getAttribute(application,
+                                                                                                    "displayNames",
+                                                                                                    Collection.class);
+
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("remotePage "
+          + request.getParameter("remotePage"));
+      LOGGER.trace("remoteURL "
+          + request.getParameter("remoteURL"));
+      LOGGER.trace("playoffDivision "
+          + request.getParameter("playoffDivision"));
+      LOGGER.trace("playoffRoundNumber "
+          + request.getParameter("playoffRoundNumber"));
+
+      if (null != displayNames) {
+        for (final String displayName : displayNames) {
+          LOGGER.trace("display "
+              + displayName);
+          LOGGER.trace("\tremotePage "
+              + request.getParameter(displayName
+                  + "_remotePage"));
+          LOGGER.trace("\tremoteURL "
+              + request.getParameter(displayName
+                  + "_remoteURL"));
+          LOGGER.trace("\tplayoffDivision "
+              + request.getParameter(displayName
+                  + "_playoffDivision"));
+          LOGGER.trace("\tplayoffRoundNumber "
+              + request.getParameter(displayName
+                  + "_playoffRoundNumber"));
         }
       }
     }
 
     // default display
-    application.setAttribute("slideShowInterval", Integer.valueOf(request.getParameter("slideInterval")));
+    final String slideIntervalStr = request.getParameter("slideInterval");
+    if (null != slideIntervalStr) {
+      application.setAttribute("slideShowInterval", Integer.valueOf(slideIntervalStr));
+    }
     application.setAttribute("displayPage", request.getParameter("remotePage"));
     application.setAttribute("displayURL", request.getParameter("remoteURL"));
-    application.setAttribute("playoffRoundNumber", Integer.valueOf(request.getParameter("playoffRoundNumber")))
-    ;
+    final String playoffRoundNumberStr = request.getParameter("playoffRoundNumber");
+    if (null != playoffRoundNumberStr) {
+      application.setAttribute("playoffRoundNumber", Integer.valueOf(playoffRoundNumberStr));
+    }
     application.setAttribute("playoffDivision", request.getParameter("playoffDivision"));
-      
+
     // named displays
-    if(null != displayNames) {
-      for(final String displayName : displayNames) {
-        if("default".equals(request.getParameter(displayName + "_remotePage"))) {
-          application.removeAttribute(displayName + "_displayPage");
-          application.removeAttribute(displayName + "_displayURL");
-          application.removeAttribute(displayName + "_playoffRoundNumber");
+    if (null != displayNames) {
+      for (final String displayName : displayNames) {
+        if ("default".equals(request.getParameter(displayName
+            + "_remotePage"))) {
+          application.removeAttribute(displayName
+              + "_displayPage");
+          application.removeAttribute(displayName
+              + "_displayURL");
+          application.removeAttribute(displayName
+              + "_playoffRoundNumber");
           ;
-          application.removeAttribute(displayName + "_playoffDivision");          
+          application.removeAttribute(displayName
+              + "_playoffDivision");
         } else {
-        application.setAttribute(displayName + "_displayPage", request.getParameter(displayName + "_remotePage"));
-        application.setAttribute(displayName + "_displayURL", request.getParameter("remoteURL"));
-        application.setAttribute(displayName + "_playoffRoundNumber", Integer.valueOf(request.getParameter(displayName + "_playoffRoundNumber")))
-        ;
-        application.setAttribute(displayName + "_playoffDivision", request.getParameter(displayName + "_playoffDivision"));
+          application.setAttribute(displayName
+              + "_displayPage", request.getParameter(displayName
+              + "_remotePage"));
+          application.setAttribute(displayName
+              + "_displayURL", request.getParameter("remoteURL"));
+          final String displayPlayoffRoundNumberStr = request.getParameter(displayName
+              + "_playoffRoundNumber");
+          if (null != displayPlayoffRoundNumberStr) {
+
+            application.setAttribute(displayName
+                + "_playoffRoundNumber", Integer.valueOf(displayPlayoffRoundNumberStr));
+          }
+          application.setAttribute(displayName
+              + "_playoffDivision", request.getParameter(displayName
+              + "_playoffDivision"));
         }
       }
     }
