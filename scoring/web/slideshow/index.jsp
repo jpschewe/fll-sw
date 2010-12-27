@@ -43,14 +43,6 @@ if(null == application.getAttribute("slideShowInterval")) {
   slideShowInterval = ApplicationAttributes.getAttribute(application, "slideShowInterval", Number.class).intValue() * 1000;
 }
 
-// let the display specific value override the default value if it exists
-if(null != session.getAttribute("displayName")) {
-  final String displayName = (String)session.getAttribute("displayName");
-  if(null != application.getAttribute(displayName + "_slideShowInterval")) {
-    slideShowInterval = ApplicationAttributes.getAttribute(application, displayName + "_slideShowInterval", Integer.class).intValue() * 1000;   
-  }
-}
-
 if(slideShowInterval < 1) {
   slideShowInterval = 1 * 1000;
 }
