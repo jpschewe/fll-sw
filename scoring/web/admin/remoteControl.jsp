@@ -25,6 +25,9 @@
       if(null == application.getAttribute("slideShowInterval")) {
         application.setAttribute("slideShowInterval", new Integer(10));
       }
+      if(null == application.getAttribute("displayPage")) {
+        application.setAttribute("displayPage", "welcome");
+      }
 
       pageContext.setAttribute("numPlayoffRounds", Queries.getNumPlayoffRounds(connection));
       %>
@@ -83,7 +86,7 @@ ${message}
 <%-- clear out the message, so that we don't see it again --%>
 <c:remove var="message" />
 
-    <form name='remote' action='remoteControlPost.jsp' method='post'>
+    <form name='remote' action='RemoteControlPost' method='post'>
     
     <table border='1'>
     <tr>
