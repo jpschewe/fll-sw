@@ -228,8 +228,8 @@ public class TournamentSchedule implements Serializable {
             + tournamentID);
       }
 
-      getSched = connection.prepareStatement("SELECT team_number, judging_stat"
-          + "ion, presentation, technical" //
+      getSched = connection.prepareStatement("SELECT team_number, judging_station"
+          + ", presentation, technical" //
           + " FROM schedule"//
           + " WHERE tournament = ?");
       getSched.setInt(1, tournamentID);
@@ -872,8 +872,8 @@ public class TournamentSchedule implements Serializable {
     final Formatter output = new Formatter();
     output.format("min technical: %s%n", OUTPUT_DATE_FORMAT.get().format(minTechnical));
     output.format("max technical: %s%n", OUTPUT_DATE_FORMAT.get().format(maxTechnical));
-    output.format("min presentation: %s%n", OUTPUT_DATE_FORMAT.get().format(minPresentation));
-    output.format("max presentation: %s%n", OUTPUT_DATE_FORMAT.get().format(maxPresentation));
+    output.format("min research: %s%n", OUTPUT_DATE_FORMAT.get().format(minPresentation));
+    output.format("max research: %s%n", OUTPUT_DATE_FORMAT.get().format(maxPresentation));
     for (int i = 0; i < getNumberOfRounds(); ++i) {
       output.format("min performance round %d: %s%n", (i + 1), OUTPUT_DATE_FORMAT.get().format(minPerf[i]));
       output.format("max performance round %d: %s%n", (i + 1), OUTPUT_DATE_FORMAT.get().format(maxPerf[i]));
@@ -976,7 +976,7 @@ public class TournamentSchedule implements Serializable {
 
     for (final Map.Entry<Date, Set<TeamScheduleInfo>> entry : teamsAtTime.entrySet()) {
       if (entry.getValue().size() > _judges.size()) {
-        final String message = String.format("There are too many teams in presentation at %s in presentation",
+        final String message = String.format("There are too many teams in research at %s",
                                              OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
         violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
       }
@@ -986,7 +986,7 @@ public class TournamentSchedule implements Serializable {
         if (!judges.add(ti.getJudgingStation())) {
           final String message = String
                                        .format(
-                                               "Presentation judge %s cannot see more than one team at %s in presentation",
+                                               "Research judge %s cannot see more than one team at %s",
                                                ti.getJudgingStation(), OUTPUT_DATE_FORMAT.get()
                                                                                          .format(ti.getPresentation()));
           violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
@@ -1025,7 +1025,7 @@ public class TournamentSchedule implements Serializable {
         if (!judges.add(ti.getJudgingStation())) {
           final String message = String
                                        .format(
-                                               "Technical judge %s cannot see more than one team at %s in presentation",
+                                               "Technical judge %s cannot see more than one team at %s",
                                                ti.getJudgingStation(), OUTPUT_DATE_FORMAT.get()
                                                                                          .format(ti.getPresentation()));
           violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
@@ -1085,7 +1085,7 @@ public class TournamentSchedule implements Serializable {
     if (ti.getPresentation().before(ti.getTechnical())) {
       if (ti.getPresentation().getTime()
           + getSubjectiveDuration() > ti.getTechnical().getTime()) {
-        final String message = String.format("Team %d is still in presentation when they need to start technical",
+        final String message = String.format("Team %d is still in reserach when they need to start technical",
                                              ti.getTeamNumber());
         violations.add(new ConstraintViolation(true, ti.getTeamNumber(), ti.getPresentation(), ti.getTechnical(), null,
                                                message));
@@ -1094,7 +1094,7 @@ public class TournamentSchedule implements Serializable {
           + getSubjectiveDuration() + getChangetime() > ti.getTechnical().getTime()) {
         final String message = String
                                      .format(
-                                             "Team %d has doesn't have enough time between presentation and technical (need %d minutes)",
+                                             "Team %d has doesn't have enough time between research and technical (need %d minutes)",
                                              ti.getTeamNumber(), getChangetimeAsMinutes());
         violations.add(new ConstraintViolation(false, ti.getTeamNumber(), ti.getPresentation(), ti.getTechnical(),
                                                null, message));
@@ -1103,7 +1103,7 @@ public class TournamentSchedule implements Serializable {
     } else {
       if (ti.getTechnical().getTime()
           + getSubjectiveDuration() > ti.getPresentation().getTime()) {
-        final String message = String.format("Team %d is still in technical when they need start presentation",
+        final String message = String.format("Team %d is still in technical when they need start research",
                                              ti.getTeamNumber());
         violations.add(new ConstraintViolation(true, ti.getTeamNumber(), ti.getPresentation(), ti.getTechnical(), null,
                                                message));
@@ -1112,7 +1112,7 @@ public class TournamentSchedule implements Serializable {
           + getSubjectiveDuration() + getChangetime() > ti.getPresentation().getTime()) {
         final String message = String
                                      .format(
-                                             "Team %d has doesn't have enough time between presentation and technical (need %d minutes)",
+                                             "Team %d has doesn't have enough time between research and technical (need %d minutes)",
                                              ti.getTeamNumber(), getChangetimeAsMinutes());
         violations.add(new ConstraintViolation(false, ti.getTeamNumber(), ti.getPresentation(), ti.getTechnical(),
                                                null, message));
@@ -1320,7 +1320,7 @@ public class TournamentSchedule implements Serializable {
       if (ti.getPresentation().getTime()
           + getSubjectiveDuration() > performanceTime.getTime()) {
         final String message = String.format("Team %d will be in %s when performance round %s starts",
-                                             ti.getTeamNumber(), "presentation", performanceName);
+                                             ti.getTeamNumber(), "research", performanceName);
         violations.add(new ConstraintViolation(true, ti.getTeamNumber(), ti.getPresentation(), null, performanceTime,
                                                message));
       } else if (ti.getPresentation().getTime()
@@ -1328,7 +1328,7 @@ public class TournamentSchedule implements Serializable {
         final String message = String
                                      .format(
                                              "Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
-                                             ti.getTeamNumber(), "presentation", performanceName,
+                                             ti.getTeamNumber(), "research", performanceName,
                                              getChangetimeAsMinutes());
         violations.add(new ConstraintViolation(false, ti.getTeamNumber(), ti.getPresentation(), null, performanceTime,
                                                message));
@@ -1337,7 +1337,7 @@ public class TournamentSchedule implements Serializable {
       if (performanceTime.getTime()
           + getPerformanceDuration() > ti.getPresentation().getTime()) {
         final String message = String.format("Team %d wil be in %s when performance round %s starts",
-                                             ti.getTeamNumber(), "presentation", performanceName);
+                                             ti.getTeamNumber(), "research", performanceName);
         violations.add(new ConstraintViolation(true, ti.getTeamNumber(), ti.getPresentation(), null, performanceTime,
                                                message));
       } else if (performanceTime.getTime()
@@ -1345,7 +1345,7 @@ public class TournamentSchedule implements Serializable {
         final String message = String
                                      .format(
                                              "Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
-                                             ti.getTeamNumber(), "presentation", performanceName,
+                                             ti.getTeamNumber(), "research", performanceName,
                                              getChangetimeAsMinutes());
         violations.add(new ConstraintViolation(false, ti.getTeamNumber(), ti.getPresentation(), null, performanceTime,
                                                message));
@@ -1365,7 +1365,7 @@ public class TournamentSchedule implements Serializable {
 
     try {
 
-      if(ci.getTeamNumColumn() >= line.length) {
+      if (ci.getTeamNumColumn() >= line.length) {
         return null;
       }
       final String teamNumberStr = line[ci.getTeamNumColumn()];
