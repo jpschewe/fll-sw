@@ -51,7 +51,7 @@ public class SlideshowTest extends SeleneseTestCase {
       selenium.click("submit");
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
       
-      Assert.assertTrue("Didn't get success from commit", selenium.isTextPresent("Just set parameters for display"));
+      Assert.assertTrue("Didn't get success from commit", selenium.isTextPresent("Successfully set remote control parameters"));
       
       selenium.open(TestUtils.URL_ROOT + "/slideshow/index.jsp");
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
