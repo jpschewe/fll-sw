@@ -57,7 +57,6 @@
         <% 
         application.removeAttribute(pageContext.getAttribute("displayName") + "_displayPage");
         application.removeAttribute(pageContext.getAttribute("displayName") + "_displayURL");
-        application.removeAttribute(pageContext.getAttribute("displayName") + "_slideShowInterval");
         %>
       </c:forEach>
     </c:if>
@@ -68,14 +67,12 @@
     <c:when test='${param.whichDisplay == "ALL" || param.whichDisplay == "DEFAULT"}'>
       <c:set var="displayPageKey" value="displayPage"/>
       <c:set var="displayURLKey" value="displayURL"/>
-      <c:set var="slideShowIntervalKey" value="slideShowInterval"/>
       <c:set var="playoffDivisionKey" value="playoffDivision"/>
       <c:set var="playoffRoundNumberKey" value="playoffRoundNumber"/>
     </c:when>
     <c:otherwise>
       <c:set var="displayPageKey" value="${param.whichDisplay}_displayPage"/>
       <c:set var="displayURLKey" value="${param.whichDisplay}_displayURL"/>
-      <c:set var="slideShowIntervalKey" value="${param.whichDisplay}_slideShowInterval"/>
       <c:set var="playoffDivisionKey" value="${param.whichDisplay}_playoffDivision"/>
       <c:set var="playoffRoundNumberKey" value="${param.whichDisplay}_playoffRoundNumber"/>
     </c:otherwise>
@@ -97,19 +94,7 @@
     <% application.setAttribute((String)pageContext.getAttribute("displayURLKey"), request.getParameter("remoteURL")); %>
     
   </c:if>
-  
-  <%-- slide show parameters --%>
-  <c:choose>
-    <c:when test="${empty param.slideInterval}">
-      <%--<c:set var='${pageScope[slideShowIntervalKey]}' value='10' scope='application'/>--%>
-      <% application.setAttribute((String)pageContext.getAttribute("slideShowIntervalKey"), 10); %>
-    </c:when>
-    <c:otherwise>
-      <%--<c:set var='${pageScope[slideShowIntervalKey]}' value='${param.slideInterval}' scope='application'/>--%>
-      <% application.setAttribute((String)pageContext.getAttribute("slideShowIntervalKey"), Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("slideInterval"))); %>
-    </c:otherwise>
-  </c:choose>
-  
+    
   <%-- Playoff parameters --%>
   <c:if test="${not empty param.division}">
     <% application.setAttribute((String)pageContext.getAttribute("playoffDivisionKey"), request.getParameter("division")); %>
@@ -117,6 +102,18 @@
   <c:if test="${not empty param.playoffRoundNumber}">
     <% application.setAttribute((String)pageContext.getAttribute("playoffRoundNumberKey"), Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("playoffRoundNumber"))); %>
   </c:if>
+
+  <%-- slide show parameters --%>
+  <c:choose>
+    <c:when test="${empty param.slideInterval}">
+      <%--<c:set var='${pageScope[slideShowIntervalKey]}' value='10' scope='application'/>--%>
+      <% application.setAttribute("slideShowInterval", 10); %>
+    </c:when>
+    <c:otherwise>
+      <%--<c:set var='${pageScope[slideShowIntervalKey]}' value='${param.slideInterval}' scope='application'/>--%>
+      <% application.setAttribute("slideShowInterval", Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("slideInterval"))); %>
+    </c:otherwise>
+  </c:choose>
 
     <h1><x:out select="$challengeDocument/fll/@title"/> (Display Controller)</h1>
 
