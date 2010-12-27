@@ -46,135 +46,179 @@
   </head>          
   <body>
 
-  <c:if test='${param.whichDisplay == "ALL"}'>
-    <%-- Unset all specific display variables --%>  
-    <c:if test="${not empty displayNames}">
-      <c:forEach items="${displayNames}" var="displayName">
-        <%-- Can't use EL inside the "var" attribute.
-        <c:remove var='${displayName}-displayPage' scope='application'/>
-        <c:remove var='${displayName}-displayURL' scope='application'/>
-        --%>
-        <% 
-        application.removeAttribute(pageContext.getAttribute("displayName") + "_displayPage");
-        application.removeAttribute(pageContext.getAttribute("displayName") + "_displayURL");
-        %>
-      </c:forEach>
-    </c:if>
-  </c:if>
-  
-  <%-- decide if we're working with a specific display or the default --%>
-  <c:choose>
-    <c:when test='${param.whichDisplay == "ALL" || param.whichDisplay == "DEFAULT"}'>
-      <c:set var="displayPageKey" value="displayPage"/>
-      <c:set var="displayURLKey" value="displayURL"/>
-      <c:set var="playoffDivisionKey" value="playoffDivision"/>
-      <c:set var="playoffRoundNumberKey" value="playoffRoundNumber"/>
-    </c:when>
-    <c:otherwise>
-      <c:set var="displayPageKey" value="${param.whichDisplay}_displayPage"/>
-      <c:set var="displayURLKey" value="${param.whichDisplay}_displayURL"/>
-      <c:set var="playoffDivisionKey" value="${param.whichDisplay}_playoffDivision"/>
-      <c:set var="playoffRoundNumberKey" value="${param.whichDisplay}_playoffRoundNumber"/>
-    </c:otherwise>
-  </c:choose>
-    
-  <%-- set the appropriate application variables --%>
-  <c:if test="${empty pageScope[displayPageKey]}">
-    <%--<c:set var='${pageScope[displayPageKey]}' value='welcome' scope='application'/>--%>
-    <% application.setAttribute((String)pageContext.getAttribute("displayPageKey"), "welcome"); %>
-  </c:if>
-  
-  <%-- common parameters --%>        
-  <c:if test="${not empty param.remotePage}">
-    <%--<c:set var='${pageScope[displayPageKey]}' value='${param.remotePage}' scope='application'/>--%>
-    <% application.setAttribute((String)pageContext.getAttribute("displayPageKey"), request.getParameter("remotePage")); %>
-  </c:if>
-  <c:if test="${not empty param.remoteURL}">
-    <%--<c:set var='${pageScope[displayURLKey]}' value='${param.remoteURL}' scope='application'/>--%>
-    <% application.setAttribute((String)pageContext.getAttribute("displayURLKey"), request.getParameter("remoteURL")); %>
-    
-  </c:if>
-    
-  <%-- Playoff parameters --%>
-  <c:if test="${not empty param.division}">
-    <% application.setAttribute((String)pageContext.getAttribute("playoffDivisionKey"), request.getParameter("division")); %>
-  </c:if>
-  <c:if test="${not empty param.playoffRoundNumber}">
-    <% application.setAttribute((String)pageContext.getAttribute("playoffRoundNumberKey"), Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("playoffRoundNumber"))); %>
-  </c:if>
-
-  <%-- slide show parameters --%>
-  <c:choose>
-    <c:when test="${empty param.slideInterval}">
-      <%--<c:set var='${pageScope[slideShowIntervalKey]}' value='10' scope='application'/>--%>
-      <% application.setAttribute("slideShowInterval", 10); %>
-    </c:when>
-    <c:otherwise>
-      <%--<c:set var='${pageScope[slideShowIntervalKey]}' value='${param.slideInterval}' scope='application'/>--%>
-      <% application.setAttribute("slideShowInterval", Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("slideInterval"))); %>
-    </c:otherwise>
-  </c:choose>
-
     <h1><x:out select="$challengeDocument/fll/@title"/> (Display Controller)</h1>
 
-<c:if test="${not empty param.whichDisplay}">
-    <p><i>Just set parameters for display ${param.whichDisplay}.</i></p>
-</c:if>
-    
     <p>This page is used to control what page is currently visible on the
     display screen.  Note that it takes some time for the display to
     change, up to 2 minutes.</p>
     
-    <p>The information below shows the values for the "default" context.</p>
+<%-- DEBUG
+<ul>
+<li>displayPage - ${applicationScope.displayPage }</li>
+<li>displayURL - ${applicationScope.displayURL }</li>
+<li>playoffDivision - ${applicationScope.playoffDivision }</li>
+<li>playoffRoundNumber - ${applicationScope.playoffRoundNumber }</li>
+    <c:if test="${not empty displayNames}">
+      <c:forEach items="${displayNames}" var="displayName">
+  <c:set var="displayPageKey" value="${displayName}_displayPage" />
+  <c:set var="displayURLKey" value="${displayName}_displayURL" />
+                <c:set var="playoffDivisionKey" value="${displayName}_playoffDivision" />
+              <c:set var="playoffRoundNumberKey" value="${displayName}_playoffRoundNumber" />
+  
+<li>Display - ${displayName}
+<ul>
+<li>displayPage - ${applicationScope[displayPageKey]}</li>
+<li>displayURL - ${applicationScope[displayURLKey] }</li>
+<li>playoffDivision - ${applicationScope[playoffDivisionKey] }</li>
+<li>playoffRoundNumber - ${applicationScope[playoffRoundNumberKey] }</li>
+</ul>
+</li>
+</c:forEach>
+</c:if>
 
-    <form name='remote' action='remoteControl.jsp' method='post'>
+</ul>
+END DEBUG --%>
+
+${message}
+<%-- clear out the message, so that we don't see it again --%>
+<c:remove var="message" />
+
+    <form name='remote' action='remoteControlPost.jsp' method='post'>
     
-      <!-- welcome -->
-      <label for="welcome">Welcome</label>
-      <c:if test='${displayPage == "welcome"}'  var='welcomePage'>
-        <input type='radio' id='welcome' name='remotePage' value='welcome' checked /><br/>
-      </c:if>
-      <c:if test='${not welcomePage}'>
-        <input type='radio' id='welcome' name='remotePage' value='welcome' /><br/>
-      </c:if>
+    <table border='1'>
+    <tr>
+    <td>&nbsp;</td>
+    <th>Default</th>
+    <c:if test="${not empty displayNames}">
+      <c:forEach items="${displayNames}" var="displayName">
+        <th>${displayName}</th>
+      </c:forEach>
+    </c:if>    
+    </tr>
 
+    <tr>
+    <th>Follow Default</th>
+    <td>&nbsp;</td>
+    <c:if test="${not empty displayNames}">
+      <c:forEach items="${displayNames}" var="displayName">
+        <c:set var="displayPageKey" value="${displayName}_displayPage" />     
+        <td>
+        
+                <c:choose>
+    <c:when test="${empty applicationScope[displayPageKey]}">        
+   <input type='radio' name="${displayName}_remotePage" value='default' checked />
+   </c:when>
+   <c:otherwise>
+   <input type='radio' name="${displayName}_remotePage" value='default' />
+   </c:otherwise>
+   </c:choose>
+                
+        </td>
+      </c:forEach>
+    </c:if>        
+    </tr>
+    
+    <tr>
+    <th>Welcome</th>
+    <td>  
+   <input type='radio' id='welcome' name='remotePage' value='welcome'
+    <c:if test='${displayPage == "welcome"}'>
+    checked
+    </c:if>
+      />
+    </td>
+    
+    <c:if test="${not empty displayNames}">
+      <c:forEach items="${displayNames}" var="displayName">
+        <td>
+        <c:set var="displayPageKey" value="${displayName}_displayPage" />        
+        <c:choose>
+    <c:when test="${applicationScope[displayPageKey] == 'welcome'}">        
+   <input type='radio' name="${displayName}_remotePage" value='welcome' checked />
+   </c:when>
+   <c:otherwise>
+   <input type='radio' name="${displayName}_remotePage" value='welcome' />
+   </c:otherwise>
+   </c:choose>   
+        </td>
+      </c:forEach>
+    </c:if>        
+     </tr>
 
-      <!--  scoreboard -->
-      <label for='scoreboard'>Scoreboard</label>
+      <tr>
+    <th>Scoreboard</th>
+      <td>
       <c:if test='${displayPage == "scoreboard"}'  var='scoreboardPage'>
         <input type='radio' id='scoreboard' name='remotePage' value='scoreboard'
-        checked /> Note that when the scoreboard comes up the All
-        Teams column will be blank until any scores are entered<br/>
+        checked />
       </c:if>
       <c:if test='${not scoreboardPage}'>
         <input type='radio' id='scoreboard' name='remotePage' value='scoreboard' /><br/>
       </c:if>
+      </td>
+    <c:if test="${not empty displayNames}">
+      <c:forEach items="${displayNames}" var="displayName">
+      <td>
+              <c:set var="displayPageKey" value="${displayName}_displayPage" />        
+        <c:choose>
+    <c:when test="${applicationScope[displayPageKey] == 'scoreboard'}">        
+   <input type='radio' name="${displayName}_remotePage" value='scoreboard' checked />
+   </c:when>
+   <c:otherwise>
+   <input type='radio' name="${displayName}_remotePage" value='scoreboard' />
+   </c:otherwise>
+   </c:choose>   
+      </td>
+      </c:forEach>
+    </c:if>        
+</tr>
 
-
-      <!--  slide show -->
-      <label for="slideshow">Slide show</label>
+<tr>
+    <th>
+    Slide show<br/>
+    Seconds to show a slide:      
+      <input type='text' name='slideInterval' value='<c:out value="${slideShowInterval}"/>' size='3'/>             
+    </th>
+      <td>
       <c:if test='${displayPage eq "slideshow"}' var='slideshowPage'>
         <input type='radio' id="slideshow" name='remotePage' value='slideshow' checked />
       </c:if>
       <c:if test='${not slideshowPage}'>
         <input type='radio' id="slideshow" name='remotePage' value='slideshow' />
-      </c:if>
+      </c:if>      
+      </td>
       
-      Seconds to show a slide:      
-      <input type='text' name='slideInterval' value='<c:out value="${slideShowInterval}"/>' size='3'/>
-      <br/>
+    <c:if test="${not empty displayNames}">
+      <c:forEach items="${displayNames}" var="displayName">
+            <td>
+              <c:set var="displayPageKey" value="${displayName}_displayPage" />        
+        <c:choose>
+    <c:when test="${applicationScope[displayPageKey] == 'slideshow'}">        
+   <input type='radio' name="${displayName}_remotePage" value='slideshow' checked />
+   </c:when>
+   <c:otherwise>
+   <input type='radio' name="${displayName}_remotePage" value='slideshow' />
+   </c:otherwise>
+   </c:choose>   
+      </td>      
+      </c:forEach>
+    </c:if>        
       
+    </tr>  
       
-      <!--  playoffs -->
-      <label for='playoffs'>Playoffs</label>
+      <tr>
+    <th>Playoffs
+          <i>WARNING: Do not select brackets until all seeding runs have been recorded!</i>
+    </th>
+      <td>
       <c:if test='${displayPage == "playoffs"}'  var='playoffsPage'>
         <input type='radio' id='playoffs' name='remotePage' value='playoffs' checked />
       </c:if>
       <c:if test='${not playoffsPage}'>
         <input type='radio' id='playoffs' name='remotePage' value='playoffs' />
       </c:if>
-      <b>WARNING: Do not select brackets until all seeding runs have been recorded!</b><br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Division: <select name='division'>
+
+          Division: <select name='playoffDivision'>
             <c:forEach items="${divisions}" var="division">
               <c:choose>
                 <c:when test="${division == playoffDivision}">
@@ -186,6 +230,7 @@
               </c:choose>
             </c:forEach> 
             </select>
+            <br/>
             
             Playoff Round: <select name='playoffRoundNumber'>
             <c:forEach begin="1" end="${numPlayoffRounds}" var="numRounds">
@@ -198,39 +243,94 @@
                 </c:otherwise>
               </c:choose>
             </c:forEach>
-            </select><br/>
-
-
-      <!-- special page -->
-      <label for='special'>Specify page relative to /fll-sw</label>
-      <c:if test='${displayPage == "special"}'  var='specialPage'>
-        <input type='radio' id='special' name='remotePage' value='special' checked /> <input type='text' name='remoteURL' value='<c:out value="${displayURL}"/>'>
-      </c:if>
-      <c:if test='${not specialPage}'>
-        <input type='radio' id='special' name='remotePage' value='special' /> <input type='text' name='remoteURL' value='<c:out value="${displayURL}"/>'>
-      </c:if>
-      <br/>
-          
-      Apply changes to display:
-      <select name="whichDisplay">
-        <option value="DEFAULT">Default</option>
-        <option value="ALL">All</option>
-        <c:if test="${not empty displayNames}">
-          <c:forEach items="${displayNames}" var="displayName">
-            <option value="${displayName}">${displayName}</option>
-          </c:forEach>
-        </c:if>
-      </select>
-      <a href='javascript:display("whichDisplayHelp")'>[help]</a>
- <div id='whichDisplayHelp' class='help' style='display:none'>
- "Default" will change the display for all displays that haven't had a
- specific value set previously (this is what you want most of the time).
- "All" will reset all displays to follow the default values.
- Selecting another display name will set the values for that display.<br/>
- <a href='javascript:hide("whichDisplayHelp")'>[hide]</a></div> 
-       
-      <br/>
+            </select>
+            
+            </td>
+            
+    <c:if test="${not empty displayNames}">
+      <c:forEach items="${displayNames}" var="displayName">
+            <td>
+              <c:set var="displayPageKey" value="${displayName}_displayPage" />        
+              <c:set var="playoffDivisionKey" value="${displayName}_playoffDivision" />
+              <c:set var="playoffRoundNumberKey" value="${displayName}_playoffRoundNumber" />
+              
+        <c:choose>
+    <c:when test="${applicationScope[displayPageKey] == 'playoffs'}">        
+   <input type='radio' name="${displayName}_remotePage" value='playoffs' checked />
+   </c:when>
+   <c:otherwise>
+   <input type='radio' name="${displayName}_remotePage" value='playoffs' />
+   </c:otherwise>
+   </c:choose>   
+   
+             Division: <select name='${displayName}_playoffDivision'>
+            <c:forEach items="${divisions}" var="division">
+              <c:choose>
+                <c:when test="${division == applicationScope[playoffDivisionKey]}">
+                  <option value="${division}" selected>${division}</option>
+                </c:when>
+                <c:otherwise>
+                  <option value="${division}">${division}</option>
+                </c:otherwise>
+              </c:choose>
+            </c:forEach> 
+            </select>
+            <br/>
+            
+            Playoff Round: <select name='${displayName}_playoffRoundNumber'>
+            <c:forEach begin="1" end="${numPlayoffRounds}" var="numRounds">
+              <c:choose>
+                <c:when test="${numRounds == applicationScope[playoffRoundNumberKey]}">
+                  <option value="${numRounds}" selected>${numRounds}</option>
+                </c:when>
+                <c:otherwise>
+                  <option value="${numRounds}">${numRounds}</option>
+                </c:otherwise>
+              </c:choose>
+            </c:forEach>
+            </select>
+   
+      </td>
       
+      </c:forEach>
+    </c:if>        
+            
+</tr>
+
+<tr>
+    <th>Specify page relative to /fll-sw</th>
+<td>
+      <c:choose>      
+      <c:when test='${displayPage == "special"}'>
+        <input type='radio' id='special' name='remotePage' value='special' checked /> <input type='text' name='remoteURL' value="${appliationScope.displayURL}">
+      </c:when>
+      <c:otherwise>
+        <input type='radio' id='special' name='remotePage' value='special' /> <input type='text' name='remoteURL' value="${applicationScope.displayURL}">
+      </c:otherwise>
+      </c:choose>
+      </td>
+      
+    <c:if test="${not empty displayNames}">
+      <c:forEach items="${displayNames}" var="displayName">
+        <td>
+                      <c:set var="displayPageKey" value="${displayName}_displayPage" />        
+        <c:choose>
+    <c:when test="${applicationScope[displayPageKey] == 'special'}">        
+   <input type='radio' name="${displayName}_remotePage" value='special' checked />
+   </c:when>
+   <c:otherwise>
+   <input type='radio' name="${displayName}_remotePage" value='special' />
+   </c:otherwise>
+   </c:choose>   
+        <input type='text' name='${displayName}_remoteURL' value="${applicationScope.displayURL}">
+        </td>
+      </c:forEach>
+    </c:if>        
+      
+      </tr>
+          
+          </table>
+                
       <input type='submit' name='submit' value='Submit'/>
       
     </form>
