@@ -500,11 +500,14 @@ public class SchedulerUI extends JFrame {
                                                    final int column) {
       setHorizontalAlignment(CENTER);
 
-      final TeamScheduleInfo schedInfo = getScheduleModel().getSchedInfo(row);
+      final int tmRow = table.convertRowIndexToModel(row);
+      final int tmCol = table.convertColumnIndexToModel(column);
+      final TeamScheduleInfo schedInfo = getScheduleModel().getSchedInfo(tmRow);
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Checking for violations against team: "
             + schedInfo.getTeamNumber() //
-            + " column: " + column //
+            + " column: " + tmCol //
+            + " row: " + tmRow //
         );
       }
 
@@ -512,16 +515,16 @@ public class SchedulerUI extends JFrame {
       boolean isHard = false;
       for (final ConstraintViolation violation : getViolationsModel().getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
-          if ((SchedulerTableModel.TEAM_NUMBER_COLUMN == column || SchedulerTableModel.JUDGE_COLUMN == column)
+          if ((SchedulerTableModel.TEAM_NUMBER_COLUMN == tmCol || SchedulerTableModel.JUDGE_COLUMN == tmCol)
               && null == violation.getPresentation() && null == violation.getTechnical()
               && null == violation.getPerformance()) {
             error = true;
             isHard |= violation.isHard();
-          } else if (SchedulerTableModel.PRESENTATION_COLUMN == column
+          } else if (SchedulerTableModel.PRESENTATION_COLUMN == tmCol
               && null != violation.getPresentation()) {
             error = true;
             isHard |= violation.isHard();
-          } else if (SchedulerTableModel.TECHNICAL_COLUMN == column
+          } else if (SchedulerTableModel.TECHNICAL_COLUMN == tmCol
               && null != violation.getTechnical()) {
             error = true;
             isHard |= violation.isHard();
@@ -539,8 +542,8 @@ public class SchedulerUI extends JFrame {
                 + (round * SchedulerTableModel.NUM_COLUMNS_PER_ROUND);
             final int lastIdx = firstIdx
                 + SchedulerTableModel.NUM_COLUMNS_PER_ROUND - 1;
-            if (firstIdx <= column
-                && column <= lastIdx) {
+            if (firstIdx <= tmCol
+                && tmCol <= lastIdx) {
               error = true;
               isHard |= violation.isHard();
             }
@@ -551,7 +554,7 @@ public class SchedulerUI extends JFrame {
                   + " team: " + schedInfo.getTeamNumber() // 
                   + " firstIdx: " + firstIdx // 
                   + " lastIdx: " + lastIdx //
-                  + " column: " + column //
+                  + " column: " + tmCol //
                   + " error: " + error //
               );
             }
