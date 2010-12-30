@@ -1071,7 +1071,10 @@ public final class ImportDB {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT TeamNumber FROM TournamentTeams WHERE Tournament = ?");
+      prep = connection.prepareStatement("SELECT TeamNumber" //
+                                         + " FROM TournamentTeams, Tournaments" //
+                                         + " WHERE TournamentTeams.Tournament = Tournaments.tournament_id"//
+                                         + " AND Tournaments.Name = ?");
       prep.setString(1, tournament);
       rs = prep.executeQuery();
       while (rs.next()) {
@@ -1108,9 +1111,10 @@ public final class ImportDB {
 
       sourcePrep = sourceConnection
                                    .prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Region, Teams.Division, Teams.Organization"
-                                       + " FROM Teams, TournamentTeams"
+                                       + " FROM Teams, TournamentTeams, Tournaments"
                                        + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber"
-                                       + " AND TournamentTeams.Tournament = ?");
+                                       + " AND TournamentTeams.Tournament = Tournaments.tournament_id" //
+                                       + " AND Tournaments.Name = ?");
 
       sourcePrep.setString(1, tournament);
       sourceRS = sourcePrep.executeQuery();
@@ -1178,8 +1182,11 @@ public final class ImportDB {
       destPrep = destConnection.prepareStatement("SELECT Teams.TeamName"
           + " FROM Teams WHERE Teams.TeamNumber = ?");
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT Teams.TeamNumber FROM Teams, TournamentTeams"
-          + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber" + " AND TournamentTeams.Tournament = ?");
+      sourcePrep = sourceConnection.prepareStatement("SELECT Teams.TeamNumber FROM Teams, TournamentTeams, Tournaments"
+          + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber" //
+          + " AND TournamentTeams.Tournament = Tournaments.tournament_id" //
+          + " AND Tournaments.Name = ?"
+          );
       sourcePrep.setString(1, tournament);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
