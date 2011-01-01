@@ -1321,6 +1321,19 @@ public class TournamentSchedule implements Serializable {
     for (int round = 0; round < getNumberOfRounds(); ++round) {
       final TeamScheduleInfo next = checkIfTeamNeedsToStay(ti, round);
       if (null != next) {
+        
+        // check for competing against a team twice with this extra run
+        for (int r = 0; r < getNumberOfRounds(); ++r) {
+          final TeamScheduleInfo otherOpponent = findOpponent(ti, r);
+          if (otherOpponent != null
+              && next.equals(otherOpponent)) {
+            final String message = String.format("Team %d competes against %d more than once rounds: %d, extra",
+                                                 ti.getTeamNumber(), next.getTeamNumber(), (r + 1));
+            violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, null, message));
+            violations.add(new ConstraintViolation(false, next.getTeamNumber(), null, null, null, message));
+          }
+        }
+        
         // everything else checked out, only only need to check the end time
         // against subjective and the next round
         final Date performanceTime = next.getPerf(round);
