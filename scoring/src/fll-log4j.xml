@@ -68,7 +68,7 @@
  <!--  logger name="jdbc.resultset"><level value="TRACE"/></logger-->
   
  <!--  log connection open/close - helps tracking down leaks -->
- <!--  logger name="jdbc.connection"><level value="TRACE"/></logger-->
+ <logger name="jdbc.connection"><level value="WARN"/></logger>
  
  <!-- end stuff for debugging -->
 
