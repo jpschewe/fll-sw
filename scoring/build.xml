@@ -160,10 +160,6 @@
 	<target name="coverage.instr" depends="compile" description="Instrument files for code coverage">
 		<mkdir dir="${dir.coverage}" />
 
-		<delete file="${dir.coverage}/cobertura.ser" />
-		<delete file="${dir.coverage}/tomcat-cobertura.ser" />
-		<delete file="${dir.coverage}/merge-cobertura.ser" />
-
 		<cobertura-instrument datafile="${dir.coverage}/cobertura.ser">
 			<fileset dir="${dir.classes}">
 				<include name="**/*.class" />
