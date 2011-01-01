@@ -401,7 +401,7 @@ public final class Utilities {
           _testDatabaseServer.setErrWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"),
                                                                          LogWriter.LogLevel.ERROR)));
           _testDatabaseServer.setLogWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"),
-                                                                         LogWriter.LogLevel.INFO)));
+                                                                         LogWriter.LogLevel.DEBUG)));
           _testDatabaseServer.setTrace(true);
         }
         if (1 != _testDatabaseServer.getState()) {
