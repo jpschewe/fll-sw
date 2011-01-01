@@ -32,8 +32,6 @@ public class Log4jInit extends HttpServlet {
     LogUtils.initializeLogging();
 
     LOGGER.info("Logging initialized");
-
-    LOGGER.info("Cobertura data file is " + System.getProperty("net.sourceforge.cobertura.datafile"));
   }
 
 }
