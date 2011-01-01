@@ -94,8 +94,10 @@ public class SchedulerUI extends JFrame {
     }
   }
 
+  private static final String BASE_TITLE = "FLL Scheduler";
+
   public SchedulerUI() {
-    super("FLL Scheduler");
+    super(BASE_TITLE);
     setJMenuBar(createMenubar());
 
     final Container cpane = getContentPane();
@@ -352,6 +354,9 @@ public class SchedulerUI extends JFrame {
             currentFile = selectedFile;
             currentSheetName = sheetName;
             setScheduleData(schedule);
+
+            setTitle(BASE_TITLE
+                + " - " + currentFile.getName() + ":" + currentSheetName);
           } catch (final ParseException e) {
             final Formatter errorFormatter = new Formatter();
             errorFormatter.format("Error reading file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
@@ -608,7 +613,7 @@ public class SchedulerUI extends JFrame {
       } else {
         setBackground(violationColor);
       }
-      
+
       setHorizontalAlignment(SwingConstants.LEFT);
 
       return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
