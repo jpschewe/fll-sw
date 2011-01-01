@@ -24,8 +24,10 @@ import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
@@ -33,6 +35,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ListSelectionEvent;
@@ -110,6 +113,7 @@ public class SchedulerUI extends JFrame {
     final JScrollPane dataScroller = new JScrollPane(scheduleTable);
 
     violationTable = new JTable();
+    violationTable.setDefaultRenderer(String.class, violationTableRenderer);
     final JScrollPane violationScroller = new JScrollPane(violationTable);
     violationTable.getSelectionModel().addListSelectionListener(violationSelectionListener);
 
@@ -486,10 +490,11 @@ public class SchedulerUI extends JFrame {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private TableCellRenderer schedTableRenderer = new DefaultTableCellRenderer() {
-    private final Color hardConstraintColor = Color.RED;
+  private static final Color hardConstraintColor = Color.RED;
 
-    private final Color softConstraintColor = Color.YELLOW;
+  private static final Color softConstraintColor = Color.YELLOW;
+
+  private TableCellRenderer schedTableRenderer = new DefaultTableCellRenderer() {
 
     @Override
     public Component getTableCellRendererComponent(final JTable table,
@@ -574,14 +579,41 @@ public class SchedulerUI extends JFrame {
         }
       }
 
-      // TODO would be nice to set foreground color when selected
-
       if (value instanceof Date) {
         final String strValue = TournamentSchedule.OUTPUT_DATE_FORMAT.get().format((Date) value);
         return super.getTableCellRendererComponent(table, strValue, isSelected, hasFocus, row, column);
       } else {
         return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
       }
+    }
+  };
+
+  private TableCellRenderer violationTableRenderer = new DefaultTableCellRenderer() {
+    @Override
+    public Component getTableCellRendererComponent(final JTable table,
+                                                   final Object value,
+                                                   final boolean isSelected,
+                                                   final boolean hasFocus,
+                                                   final int row,
+                                                   final int column) {
+      setHorizontalAlignment(CENTER);
+
+      final int tmRow = table.convertRowIndexToModel(row);
+
+      final ConstraintViolation violation = getViolationsModel().getViolation(tmRow);
+
+      final Color violationColor = violation.isHard() ? hardConstraintColor : softConstraintColor;
+      setForeground(null);
+      setBackground(null);
+      if (isSelected) {
+        setForeground(violationColor);
+      } else {
+        setBackground(violationColor);
+      }
+      
+      setHorizontalAlignment(SwingConstants.LEFT);
+
+      return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
     }
   };
 
@@ -596,5 +628,4 @@ public class SchedulerUI extends JFrame {
   protected String getCurrentSheetName() {
     return currentSheetName;
   }
-
 }
