@@ -116,10 +116,14 @@ public final class ImportDB {
 
         final boolean differences = checkForDifferences(sourceConnection, destinationConnection, tournament);
         if (!differences) {
-          LOG.info("Importing data for "
-              + tournament + " from " + sourceURI + " to " + destinationURI);
+          if(LOG.isDebugEnabled()) {
+            LOG.debug("Importing data for "
+                      + tournament + " from " + sourceURI + " to " + destinationURI);
+          }
           importDatabase(sourceConnection, destinationConnection, tournament);
-          LOG.info("Data successfully imported");
+          if(LOG.isDebugEnabled()) {
+            LOG.debug("Data successfully imported");
+          }
         } else {
           LOG.error("Import aborted due to differences in databases");
         }
@@ -661,7 +665,9 @@ public final class ImportDB {
                                         final Connection destinationConnection,
                                         final int sourceTournamentID,
                                         final int destTournamentID) throws SQLException {
-    LOG.info("Importing PlayoffData");
+    if(LOG.isDebugEnabled()) {
+      LOG.debug("Importing PlayoffData");
+    }
 
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
@@ -706,7 +712,9 @@ public final class ImportDB {
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
     try {
-      LOG.info("Importing tablenames");
+      if(LOG.isDebugEnabled()) {
+        LOG.debug("Importing tablenames");
+      }
       destPrep = destinationConnection.prepareStatement("DELETE FROM tablenames WHERE Tournament = ?");
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
@@ -751,8 +759,9 @@ public final class ImportDB {
                                                                                 rootElement
                                                                                            .getElementsByTagName("subjectiveCategory"))) {
         final String tableName = categoryElement.getAttribute("name");
-        LOG.info("Importing "
-            + tableName);
+        if(LOG.isDebugEnabled()) {
+          LOG.debug("Importing " + tableName);
+        }
 
         destPrep = destinationConnection.prepareStatement("DELETE FROM "
             + tableName + " WHERE Tournament = ?");
@@ -824,7 +833,9 @@ public final class ImportDB {
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
     try {
-      LOG.info("Importing performance scores");
+      if(LOG.isDebugEnabled()) {
+        LOG.debug("Importing performance scores");
+      }
       final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
       final String tableName = "Performance";
       destPrep = destinationConnection.prepareStatement("DELETE FROM "
@@ -899,7 +910,9 @@ public final class ImportDB {
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
     try {
-      LOG.info("Importing TournamentTeams");
+      if(LOG.isDebugEnabled()) {
+        LOG.debug("Importing TournamentTeams");
+      }
       destPrep = destinationConnection.prepareStatement("DELETE FROM TournamentTeams WHERE Tournament = ?");
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
@@ -935,7 +948,9 @@ public final class ImportDB {
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
     try {
-      LOG.info("Importing Judges");
+      if(LOG.isDebugEnabled()) {
+        LOG.debug("Importing Judges");
+      }
 
       destPrep = destinationConnection.prepareStatement("DELETE FROM Judges WHERE Tournament = ?");
       destPrep.setInt(1, destTournamentID);
