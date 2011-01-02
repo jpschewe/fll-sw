@@ -493,9 +493,9 @@ public class SchedulerUI extends JFrame {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private static final Color hardConstraintColor = Color.RED;
+  private static final Color HARD_CONSTRAINT_COLOR = Color.RED;
 
-  private static final Color softConstraintColor = Color.YELLOW;
+  private static final Color SOFT_CONSTRAINT_COLOR = Color.YELLOW;
 
   private TableCellRenderer schedTableRenderer = new DefaultTableCellRenderer() {
 
@@ -574,7 +574,7 @@ public class SchedulerUI extends JFrame {
       setForeground(null);
       setBackground(null);
       if (error) {
-        final Color violationColor = isHard ? hardConstraintColor : softConstraintColor;
+        final Color violationColor = isHard ? HARD_CONSTRAINT_COLOR : SOFT_CONSTRAINT_COLOR;
         if (isSelected) {
           setForeground(violationColor);
         } else {
@@ -605,7 +605,7 @@ public class SchedulerUI extends JFrame {
 
       final ConstraintViolation violation = getViolationsModel().getViolation(tmRow);
 
-      final Color violationColor = violation.isHard() ? hardConstraintColor : softConstraintColor;
+      final Color violationColor = violation.isHard() ? HARD_CONSTRAINT_COLOR : SOFT_CONSTRAINT_COLOR;
       setForeground(null);
       setBackground(null);
       if (isSelected) {
