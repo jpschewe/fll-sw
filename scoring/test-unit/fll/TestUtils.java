@@ -6,12 +6,13 @@
 package fll;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-
 import org.apache.log4j.Logger;
+import org.fest.swing.image.ScreenshotTaker;
 
 import fll.util.LogUtils;
 
@@ -82,5 +83,13 @@ public final class TestUtils {
         }
       }
     }
+  }
+  
+  private static final ScreenshotTaker screenshotTaker = new ScreenshotTaker();
+  public static void saveScreenshot() throws IOException {
+    final File screenshot = File.createTempFile("fll", "png", new File("screenshots"));
+    LOG.error("Screenshot saved to "
+        + screenshot.getAbsolutePath());
+    screenshotTaker.saveDesktopAsPng(screenshot.getAbsolutePath());
   }
 }

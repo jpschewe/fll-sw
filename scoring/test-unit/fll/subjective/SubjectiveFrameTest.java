@@ -53,56 +53,73 @@ public class SubjectiveFrameTest {
   }
 
   private FrameFixture window;
+
   private String database;
+
   private File subjectiveScores;
+
   private Document document;
-  
+
   @Before
   public void setUp() throws IOException, SQLException {
-    LogUtils.initializeLogging();
-    
-    // create a database
-    final InputStream dumpFileIS = ImportDBTest.class.getResourceAsStream("data/plymouth-2009-11-21.zip");
-    Assert.assertNotNull("Cannot find test data", dumpFileIS);
+    try {
+      LogUtils.initializeLogging();
 
-    final File tempFile = File.createTempFile("flltest", null);
-    database = tempFile.getAbsolutePath();
+      // create a database
+      final InputStream dumpFileIS = ImportDBTest.class.getResourceAsStream("data/plymouth-2009-11-21.zip");
+      Assert.assertNotNull("Cannot find test data", dumpFileIS);
 
-    ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), database);
+      final File tempFile = File.createTempFile("flltest", null);
+      database = tempFile.getAbsolutePath();
 
-    final Connection connection = Utilities.createDataSource(database).getConnection();
+      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), database);
 
-    document = Queries.getChallengeDocument(connection);
+      final Connection connection = Utilities.createDataSource(database).getConnection();
 
-    // set the right tournament
-    final String tournamentName = "11-21 Plymouth Middle";
-    int tournamentID = -1;
-    final Statement stmt = connection.createStatement();
-    final ResultSet rs = stmt.executeQuery("Select tournament_id,Name from Tournaments ORDER BY Name");
-    while (rs.next()) {
-      final int id = rs.getInt(1);
-      final String name = rs.getString(2);
-      if (tournamentName.equals(name)) {
-        tournamentID = id;
+      document = Queries.getChallengeDocument(connection);
+
+      // set the right tournament
+      final String tournamentName = "11-21 Plymouth Middle";
+      int tournamentID = -1;
+      final Statement stmt = connection.createStatement();
+      final ResultSet rs = stmt.executeQuery("Select tournament_id,Name from Tournaments ORDER BY Name");
+      while (rs.next()) {
+        final int id = rs.getInt(1);
+        final String name = rs.getString(2);
+        if (tournamentName.equals(name)) {
+          tournamentID = id;
+        }
       }
+      Assert.assertTrue("Could find tournament "
+          + tournamentName + " in database dump", tournamentID != -1);
+      Queries.setCurrentTournament(connection, tournamentID);
+
+      // create the subjective datafile
+      subjectiveScores = File.createTempFile("testStartupState", ".fll");
+      subjectiveScores.deleteOnExit();
+      final FileOutputStream fileStream = new FileOutputStream(subjectiveScores);
+      DownloadSubjectiveData.writeSubjectiveScores(connection, document, fileStream);
+      fileStream.close();
+
+      final SubjectiveFrame frame = GuiActionRunner.execute(new GuiQuery<SubjectiveFrame>() {
+        protected SubjectiveFrame executeInEDT() throws IOException {
+          return new SubjectiveFrame(subjectiveScores);
+        }
+      });
+      window = new FrameFixture(frame);
+    } catch (final AssertionError e) {
+      TestUtils.saveScreenshot();
+      throw e;
+    } catch (final RuntimeException e) {
+      TestUtils.saveScreenshot();
+      throw e;
+    } catch (final IOException e) {
+      TestUtils.saveScreenshot();
+      throw e;
+    } catch (final SQLException e) {
+      TestUtils.saveScreenshot();
+      throw e;
     }
-    Assert.assertTrue("Could find tournament "
-        + tournamentName + " in database dump", tournamentID != -1);
-    Queries.setCurrentTournament(connection, tournamentID);
-
-    // create the subjective datafile
-    subjectiveScores = File.createTempFile("testStartupState", ".fll");
-    subjectiveScores.deleteOnExit();
-    final FileOutputStream fileStream = new FileOutputStream(subjectiveScores);
-    DownloadSubjectiveData.writeSubjectiveScores(connection, document, fileStream);
-    fileStream.close();
-
-    final SubjectiveFrame frame = GuiActionRunner.execute(new GuiQuery<SubjectiveFrame>() {
-      protected SubjectiveFrame executeInEDT() throws IOException {
-        return new SubjectiveFrame(subjectiveScores);
-      }
-    });
-   window = new FrameFixture(frame);
   }
 
   @After
@@ -111,9 +128,10 @@ public class SubjectiveFrameTest {
     subjectiveScores.delete();
     TestUtils.deleteDatabase(database);
   }
-  
+
   @Test
-  public void testStartupState() throws SQLException, IOException {
+  public void testStartupState() throws IOException {
+    try {
     window.show(); // shows the frame to test
 
     final JTabbedPaneFixture tabbedPane = window.tabbedPane();
@@ -137,18 +155,25 @@ public class SubjectiveFrameTest {
         Assert.assertEquals("Category "
             + title, expected, table.rowCount());
       } else {
-        Assert.fail("Unknow category '" + title + "'");
+        Assert.fail("Unknow category '"
+            + title + "'");
       }
     }
+    } catch (final AssertionError e) {
+      TestUtils.saveScreenshot();
+      throw e;
+    } catch (final RuntimeException e) {
+      TestUtils.saveScreenshot();
+      throw e;
+    }
   }
-  
+
   // TODO create test for invalid values
-  
+
   // TODO make sure that the totals add up, take weights into account
-  
+
   // TODO make sure that clicking on cell does overwrite
-  
+
   // TODO make sure that backspace on cell clears
-  
 
 }
