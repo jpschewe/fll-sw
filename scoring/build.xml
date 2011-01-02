@@ -150,7 +150,7 @@
 		<path refid="compile.classpath" />
 
 		<fileset dir="${dir.lib}/test">
-			<include name="*.jar" />
+			<include name="**/*.jar" />
 		</fileset>
 
 		<pathelement location="${dir.classes.test}" />
@@ -768,17 +768,17 @@
 	<!-- integration tests -->
 	<target name="test.integration" depends="compile,compile.test.integration,coverage.instr" description="Run the integration tests">
 
-       	        <!-- setup cobertura flush application -->
-		<copy file="${dir.lib}/cobertura/coberturaFlush.war" todir="${dir.tomcat}/webapps"/>
-		
+		<!-- setup cobertura flush application -->
+		<copy file="${dir.lib}/cobertura/coberturaFlush.war" todir="${dir.tomcat}/webapps" />
+
 		<antcall target="tomcat.start.test" />
 		<antcall target="selenium.start" />
 
 		<run-tests working-dir="${dir.build}" dir.src="${dir.test.integration}" />
 
 		<!-- force cobertura information to be written -->
-                <get src="http://localhost:9080/coberturaFlush/flushCobertura" dest="${dir.build}" />
-		
+		<get src="http://localhost:9080/coberturaFlush/flushCobertura" dest="${dir.build}" />
+
 		<antcall target="selenium.stop" />
 		<antcall target="tomcat.stop" />
 	</target>

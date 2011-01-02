@@ -103,7 +103,6 @@ public final class SubjectiveFrame extends JFrame {
       try {
         if (null != file) {
           final SubjectiveFrame frame = new SubjectiveFrame(file);
-          frame.pack();
           frame.setVisible(true);
         } else {
           System.exit(0);
@@ -245,6 +244,8 @@ public final class SubjectiveFrame extends JFrame {
       }
     });
     setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+    
+    pack();
   }
 
   private void createSubjectiveTable(final JTabbedPane tabbedPane,
