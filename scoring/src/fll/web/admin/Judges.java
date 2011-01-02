@@ -190,7 +190,7 @@ public final class Judges {
   }
 
   private static boolean checkForEnteredSubjectiveScores(final Connection connection,
-                                                         List<Element> subjectiveCategories,
+                                                         final List<Element> subjectiveCategories,
                                                          final int tournament) throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -466,6 +466,9 @@ public final class Judges {
     response.sendRedirect(response.encodeRedirectURL("index.jsp"));
   }
 
+  /**
+   * Judge information for use in a collection.
+   */
   private static final class JudgeInformation {
     private final String id;
 

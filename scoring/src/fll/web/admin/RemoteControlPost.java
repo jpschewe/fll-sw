@@ -93,7 +93,6 @@ public class RemoteControlPost extends BaseFLLServlet {
               + "_displayURL");
           application.removeAttribute(displayName
               + "_playoffRoundNumber");
-          ;
           application.removeAttribute(displayName
               + "_playoffDivision");
         } else {
