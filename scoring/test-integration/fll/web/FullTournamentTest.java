@@ -317,6 +317,8 @@ public class FullTournamentTest extends SeleneseTestCase {
 
       }
 
+      checkDisplays();
+      
       enterSubjectiveScores(testDataConn, challengeDocument, testTournamentName);
 
       // compute final scores
@@ -785,6 +787,23 @@ public class FullTournamentTest extends SeleneseTestCase {
       SQLFunctions.close(prep);
     }
 
+  }
+  
+  /**
+   * Check display pages that aren't shown otherwise.
+   */
+  private void checkDisplays() {    
+    selenium.open(TestUtils.URL_ROOT + "scoreboard/main.jsp");
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    Assert.assertFalse("Error loading scoreboard", selenium.isTextPresent("An error has occurred"));
+    
+    selenium.open(TestUtils.URL_ROOT + "playoff/remoteMain.jsp");
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    Assert.assertFalse("Error loading playoffs", selenium.isTextPresent("An error has occurred"));
+
+    selenium.open(TestUtils.URL_ROOT + "welcome.jsp");
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    Assert.assertFalse("Error loading welcome", selenium.isTextPresent("An error has occurred"));
   }
 
   /**
