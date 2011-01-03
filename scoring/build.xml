@@ -644,7 +644,7 @@
 	</target>
 
 	<!-- ==================== Tests  ==================== -->
-	<target name="test.all" depends="test.integration,test.unit" description="Run all tests" />
+	<target name="test.all" depends="test.unit,test.integration" description="Run all tests" />
 
 	<target name="test.all.pass" depends="test.all" description="Run all tests and fail if any tests fail">
 		<fail message="Some tests failed. Use test.report to generate a nice report to check" if="test.failed" />
