@@ -16,7 +16,6 @@ import org.fest.swing.image.ScreenshotTaker;
 
 import fll.util.LogUtils;
 
-
 /**
  * Some utilities for writing tests.
  */
@@ -71,25 +70,29 @@ public final class TestUtils {
   }
 
   /**
-   * Delete all files that would be associated with the specified database. 
+   * Delete all files that would be associated with the specified database.
    */
   public static void deleteDatabase(final String database) {
-    for(final String extension : Utilities.HSQL_DB_EXTENSIONS) {
-      final String filename = database + extension;
+    for (final String extension : Utilities.HSQL_DB_EXTENSIONS) {
+      final String filename = database
+          + extension;
       final File file = new File(filename);
-      if(file.exists()) {
-        if(!file.delete()) {
+      if (file.exists()) {
+        if (!file.delete()) {
           file.deleteOnExit();
         }
       }
     }
   }
-  
+
   private static final ScreenshotTaker screenshotTaker = new ScreenshotTaker();
+
   public static void saveScreenshot() throws IOException {
-    final File screenshot = File.createTempFile("fll", "png", new File("screenshots"));
+    final File screenshot = File.createTempFile("fll", ".png", new File("screenshots"));
     LOG.error("Screenshot saved to "
         + screenshot.getAbsolutePath());
+    // file can't exist when calling save desktop as png
+    screenshot.delete();
     screenshotTaker.saveDesktopAsPng(screenshot.getAbsolutePath());
   }
 }
