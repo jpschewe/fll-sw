@@ -33,7 +33,10 @@ import org.fest.swing.fixture.FrameFixture;
 import org.fest.swing.fixture.JOptionPaneFixture;
 import org.fest.swing.fixture.JTabbedPaneFixture;
 import org.fest.swing.fixture.JTableFixture;
+import org.fest.swing.security.ExitCallHook;
+import org.fest.swing.security.NoExitSecurityManagerInstaller;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -54,9 +57,21 @@ import fll.web.admin.DownloadSubjectiveData;
  */
 public class SubjectiveFrameTest {
 
+  private static NoExitSecurityManagerInstaller noExitSecurityManagerInstaller;
+
+  @AfterClass
+  public static void tearDownOnce() {
+    noExitSecurityManagerInstaller.uninstall();
+  }
+  
   @BeforeClass
   public static void setUpOnce() {
     FailOnThreadViolationRepaintManager.install();
+    noExitSecurityManagerInstaller = NoExitSecurityManagerInstaller.installNoExitSecurityManager(new ExitCallHook() {
+      public void exitCalled(final int status) {
+        Assert.assertEquals("Bad exit status", 0, status);
+      }
+    });
   }
 
   private FrameFixture window;
