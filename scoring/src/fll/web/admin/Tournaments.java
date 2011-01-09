@@ -184,7 +184,7 @@ public final class Tournaments {
         || GenerateDB.DROP_TOURNAMENT_NAME.equals(name)) {
       out.print(" readonly");
     }
-    out.println(" maxlength='16' size='16'></td>");
+    out.println(" maxlength='128' size='16'></td>");
 
     out.print("  <td><input type='text' name='location"
         + row + "'");
