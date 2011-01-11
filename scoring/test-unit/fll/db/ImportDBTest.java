@@ -11,9 +11,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,6 +38,44 @@ public class ImportDBTest {
     LogUtils.initializeLogging();
   }
 
+  /**
+   * Make sure that no show scores in the subjective data import properly. 
+   * @throws IOException 
+   * @throws SQLException 
+   */
+  @Test
+  public void testImportSubjectiveNoShow() throws IOException, SQLException {
+    final InputStream dumpFileIS = ImportDBTest.class.getResourceAsStream("data/mays-20110108-database.flldb");
+    Assert.assertNotNull("Cannot find test data", dumpFileIS);
+   
+    final File tempFile = File.createTempFile("flltest", null);
+    final String database = tempFile.getAbsolutePath();
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), database);
+
+
+      final Connection connection = Utilities.createDataSource(database).getConnection();
+      
+      // check that team 8777 has a no show in research
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT NoShow FROM research WHERE TeamNumber = 8777");
+      Assert.assertTrue("Should have a row", rs.next());
+      Assert.assertTrue("Should have a no show", rs.getBoolean(1));      
+
+      connection.close();
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
+      
+      if (!tempFile.delete()) {
+        tempFile.deleteOnExit();
+      }
+    }
+    TestUtils.deleteDatabase(database);
+  }
+  
   /**
    * Test
    * {@link ImportDB#loadFromDumpIntoNewDB(java.util.zip.ZipInputStream, String)}
