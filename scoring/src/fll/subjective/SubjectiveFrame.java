@@ -317,7 +317,8 @@ public final class SubjectiveFrame extends JFrame {
         int row = table.getSelectedRow();
         int column = table.getSelectedColumn();
 
-        while (!table.isCellEditable(row, column)) {
+        // skip the no show when tabbing
+        while (!table.isCellEditable(row, column) || table.getColumnClass(column) == Boolean.class) {
           column += 1;
 
           if (column == columnCount) {
