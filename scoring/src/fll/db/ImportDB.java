@@ -772,9 +772,10 @@ public final class ImportDB {
         final StringBuffer columns = new StringBuffer();
         columns.append(" Tournament,");
         columns.append(" TeamNumber,");
+        columns.append(" NoShow,");
         final List<Element> goals = new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("goal"))
                                                                                                                       .asList();
-        final int numColumns = goals.size() + 3;
+        final int numColumns = goals.size() + 4;
         for (final Element element : goals) {
           columns.append(" "
               + element.getAttribute("name") + ",");
