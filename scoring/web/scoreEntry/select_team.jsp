@@ -59,7 +59,20 @@ function editFlagBoxClicked() {
 		text.style.color = "gray";
   }
 }
+function reloadRuns() {
 
+document.verify.TeamNumber.length = 0;
+var s = document.createElement('script');
+s.type='text/javascript';
+s.id = 'reloadruns';
+document.body.appendChild(s);
+s.src='unverifiedRunsObject.jsp?' + Math.random();
+//document.body.removeChild(document.getElementById('reloadruns'));
+}
+
+
+// Set to reload unverified runs every 5 seconds
+setInterval('reloadRuns()',5000);
 </script>
   </head>
   <body onload="editFlagBoxClicked()">
