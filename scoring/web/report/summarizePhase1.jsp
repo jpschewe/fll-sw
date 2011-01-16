@@ -44,11 +44,10 @@ ScoreStandardization.summarizeScores(connection, challengeDocument, currentTourn
       </tr>
       <x:forEach select="$challengeDocument/fll/subjectiveCategory">
         <sql:query var="result" dataSource="${datasource}">
-          SELECT Judge, COUNT(ComputedTotal) AS numTeams 
+          SELECT Judge, COUNT(*) AS numTeams 
           FROM <x:out select="./@name"/> 
           WHERE Tournament = <%=currentTournament%> 
-          AND NoShow = false 
-          AND ComputedTotal IS NOT NULL 
+          AND ( ComputedTotal IS NOT NULL OR NoShow = true ) 
           GROUP BY Judge
         </sql:query>
         <c:forEach items="${result.rows}" var="row">

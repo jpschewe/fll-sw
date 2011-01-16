@@ -33,6 +33,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ListSelectionEvent;
@@ -93,8 +94,10 @@ public class SchedulerUI extends JFrame {
     }
   }
 
+  private static final String BASE_TITLE = "FLL Scheduler";
+
   public SchedulerUI() {
-    super("FLL Scheduler");
+    super(BASE_TITLE);
     setJMenuBar(createMenubar());
 
     final Container cpane = getContentPane();
@@ -110,6 +113,7 @@ public class SchedulerUI extends JFrame {
     final JScrollPane dataScroller = new JScrollPane(scheduleTable);
 
     violationTable = new JTable();
+    violationTable.setDefaultRenderer(String.class, violationTableRenderer);
     final JScrollPane violationScroller = new JScrollPane(violationTable);
     violationTable.getSelectionModel().addListSelectionListener(violationSelectionListener);
 
@@ -350,6 +354,9 @@ public class SchedulerUI extends JFrame {
             currentFile = selectedFile;
             currentSheetName = sheetName;
             setScheduleData(schedule);
+
+            setTitle(BASE_TITLE
+                + " - " + currentFile.getName() + ":" + currentSheetName);
           } catch (final ParseException e) {
             final Formatter errorFormatter = new Formatter();
             errorFormatter.format("Error reading file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
@@ -486,10 +493,11 @@ public class SchedulerUI extends JFrame {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private TableCellRenderer schedTableRenderer = new DefaultTableCellRenderer() {
-    private final Color hardConstraintColor = Color.RED;
+  private static final Color HARD_CONSTRAINT_COLOR = Color.RED;
 
-    private final Color softConstraintColor = Color.YELLOW;
+  private static final Color SOFT_CONSTRAINT_COLOR = Color.YELLOW;
+
+  private TableCellRenderer schedTableRenderer = new DefaultTableCellRenderer() {
 
     @Override
     public Component getTableCellRendererComponent(final JTable table,
@@ -500,11 +508,14 @@ public class SchedulerUI extends JFrame {
                                                    final int column) {
       setHorizontalAlignment(CENTER);
 
-      final TeamScheduleInfo schedInfo = getScheduleModel().getSchedInfo(row);
+      final int tmRow = table.convertRowIndexToModel(row);
+      final int tmCol = table.convertColumnIndexToModel(column);
+      final TeamScheduleInfo schedInfo = getScheduleModel().getSchedInfo(tmRow);
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Checking for violations against team: "
             + schedInfo.getTeamNumber() //
-            + " column: " + column //
+            + " column: " + tmCol //
+            + " row: " + tmRow //
         );
       }
 
@@ -512,16 +523,16 @@ public class SchedulerUI extends JFrame {
       boolean isHard = false;
       for (final ConstraintViolation violation : getViolationsModel().getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
-          if ((SchedulerTableModel.TEAM_NUMBER_COLUMN == column || SchedulerTableModel.JUDGE_COLUMN == column)
+          if ((SchedulerTableModel.TEAM_NUMBER_COLUMN == tmCol || SchedulerTableModel.JUDGE_COLUMN == tmCol)
               && null == violation.getPresentation() && null == violation.getTechnical()
               && null == violation.getPerformance()) {
             error = true;
             isHard |= violation.isHard();
-          } else if (SchedulerTableModel.PRESENTATION_COLUMN == column
+          } else if (SchedulerTableModel.PRESENTATION_COLUMN == tmCol
               && null != violation.getPresentation()) {
             error = true;
             isHard |= violation.isHard();
-          } else if (SchedulerTableModel.TECHNICAL_COLUMN == column
+          } else if (SchedulerTableModel.TECHNICAL_COLUMN == tmCol
               && null != violation.getTechnical()) {
             error = true;
             isHard |= violation.isHard();
@@ -539,8 +550,8 @@ public class SchedulerUI extends JFrame {
                 + (round * SchedulerTableModel.NUM_COLUMNS_PER_ROUND);
             final int lastIdx = firstIdx
                 + SchedulerTableModel.NUM_COLUMNS_PER_ROUND - 1;
-            if (firstIdx <= column
-                && column <= lastIdx) {
+            if (firstIdx <= tmCol
+                && tmCol <= lastIdx) {
               error = true;
               isHard |= violation.isHard();
             }
@@ -551,7 +562,7 @@ public class SchedulerUI extends JFrame {
                   + " team: " + schedInfo.getTeamNumber() // 
                   + " firstIdx: " + firstIdx // 
                   + " lastIdx: " + lastIdx //
-                  + " column: " + column //
+                  + " column: " + tmCol //
                   + " error: " + error //
               );
             }
@@ -563,7 +574,7 @@ public class SchedulerUI extends JFrame {
       setForeground(null);
       setBackground(null);
       if (error) {
-        final Color violationColor = isHard ? hardConstraintColor : softConstraintColor;
+        final Color violationColor = isHard ? HARD_CONSTRAINT_COLOR : SOFT_CONSTRAINT_COLOR;
         if (isSelected) {
           setForeground(violationColor);
         } else {
@@ -571,14 +582,41 @@ public class SchedulerUI extends JFrame {
         }
       }
 
-      // TODO would be nice to set foreground color when selected
-
       if (value instanceof Date) {
         final String strValue = TournamentSchedule.OUTPUT_DATE_FORMAT.get().format((Date) value);
         return super.getTableCellRendererComponent(table, strValue, isSelected, hasFocus, row, column);
       } else {
         return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
       }
+    }
+  };
+
+  private TableCellRenderer violationTableRenderer = new DefaultTableCellRenderer() {
+    @Override
+    public Component getTableCellRendererComponent(final JTable table,
+                                                   final Object value,
+                                                   final boolean isSelected,
+                                                   final boolean hasFocus,
+                                                   final int row,
+                                                   final int column) {
+      setHorizontalAlignment(CENTER);
+
+      final int tmRow = table.convertRowIndexToModel(row);
+
+      final ConstraintViolation violation = getViolationsModel().getViolation(tmRow);
+
+      final Color violationColor = violation.isHard() ? HARD_CONSTRAINT_COLOR : SOFT_CONSTRAINT_COLOR;
+      setForeground(null);
+      setBackground(null);
+      if (isSelected) {
+        setForeground(violationColor);
+      } else {
+        setBackground(violationColor);
+      }
+
+      setHorizontalAlignment(SwingConstants.LEFT);
+
+      return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
     }
   };
 
@@ -593,5 +631,4 @@ public class SchedulerUI extends JFrame {
   protected String getCurrentSheetName() {
     return currentSheetName;
   }
-
 }

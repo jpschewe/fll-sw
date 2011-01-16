@@ -150,7 +150,7 @@
 		<path refid="compile.classpath" />
 
 		<fileset dir="${dir.lib}/test">
-			<include name="*.jar" />
+			<include name="**/*.jar" />
 		</fileset>
 
 		<pathelement location="${dir.classes.test}" />
@@ -160,15 +160,12 @@
 	<target name="coverage.instr" depends="compile" description="Instrument files for code coverage">
 		<mkdir dir="${dir.coverage}" />
 
-		<delete file="${dir.coverage}/cobertura.ser" />
-		<delete file="${dir.coverage}/tomcat-cobertura.ser" />
-		<delete file="${dir.coverage}/merge-cobertura.ser" />
-
 		<cobertura-instrument datafile="${dir.coverage}/cobertura.ser">
 			<fileset dir="${dir.classes}">
 				<include name="**/*.class" />
 			</fileset>
 		</cobertura-instrument>
+		<copy file="${dir.coverage}/cobertura.ser" tofile="${dir.coverage}/tomcat-cobertura.ser" />
 	</target>
 
 	<target name="coverage.report" description="Generate coverage report">
@@ -647,7 +644,7 @@
 	</target>
 
 	<!-- ==================== Tests  ==================== -->
-	<target name="test.all" depends="test.integration,test.unit" description="Run all tests" />
+	<target name="test.all" depends="test.unit,test.integration" description="Run all tests" />
 
 	<target name="test.all.pass" depends="test.all" description="Run all tests and fail if any tests fail">
 		<fail message="Some tests failed. Use test.report to generate a nice report to check" if="test.failed" />
@@ -770,10 +767,17 @@
 
 	<!-- integration tests -->
 	<target name="test.integration" depends="compile,compile.test.integration,coverage.instr" description="Run the integration tests">
+
+		<!-- setup cobertura flush application -->
+		<copy file="${dir.lib}/cobertura/coberturaFlush.war" todir="${dir.tomcat}/webapps" />
+
 		<antcall target="tomcat.start.test" />
 		<antcall target="selenium.start" />
 
 		<run-tests working-dir="${dir.build}" dir.src="${dir.test.integration}" />
+
+		<!-- force cobertura information to be written -->
+		<get src="http://localhost:9080/coberturaFlush/flushCobertura" dest="${dir.build}" />
 
 		<antcall target="selenium.stop" />
 		<antcall target="tomcat.stop" />

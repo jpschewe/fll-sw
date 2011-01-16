@@ -34,6 +34,8 @@ SQLFunctions.close(stmt);
     <h1><x:out select="$challengeDocument/fll/@title"/> (Reporting)</h1>
 
 ${message}
+<%-- clear out the message, so that we don't see it again --%>
+<c:remove var="message" />
 
     <ol>
       <li><a href="summarizePhase1.jsp">Compute summarized scores</a>.  This
