@@ -171,20 +171,6 @@ setInterval('reloadRuns()',5000);
             <font face='arial' size='4'>Unverified Runs:</font><br>
                   <p>Don't see the team and run you're looking for, try <a href="select_team.jsp">reloading this page</a>.</p>            
             <select size='20' name='TeamNumber' ondblclick='verify.submit()'>
-             <sql:query var="result" dataSource="${datasource}">
-   SELECT
-     Performance.TeamNumber
-    ,Performance.RunNumber
-    ,Teams.TeamName
-     FROM Performance, Teams
-     WHERE Verified <> TRUE 
-       AND Tournament = ${currentTournament}
-       AND Teams.TeamNumber = Performance.TeamNumber
-       ORDER BY Performance.RunNumber, Teams.TeamNumber
- </sql:query>
-              <c:forEach var="row" items="${result.rowsByIndex}">
-                <option value="${row[0]}-${row[1]}">Run ${row[1]}&nbsp;-&nbsp;${row[0]}&nbsp;&nbsp;&nbsp;[${row[2]}]</option>
-              </c:forEach>
             </select>
           </td>
         </tr>
