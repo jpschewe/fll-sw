@@ -71,11 +71,16 @@ s.src='unverifiedRunsObject.jsp?' + Math.random();
 }
 
 
+function init() {
+  editFlagBoxClicked();
+  reloadRuns(); 
+}
+
 // Set to reload unverified runs every 5 seconds
 setInterval('reloadRuns()',5000);
 </script>
   </head>
-  <body onload="editFlagBoxClicked()">
+  <body onload="init()">
 
       <!-- top info bar -->
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
