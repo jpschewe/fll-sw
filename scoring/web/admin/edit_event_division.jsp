@@ -47,6 +47,7 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
       scope="page" />
     </c:otherwise>
    </c:choose>
+   
    <!--  setting event division for <c:out value="${teamNumber}"/> 
          to <c:out value="${new_division}"/> 
          in tournament <c:out value="${currentTournament}"/> -->
@@ -56,6 +57,19 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
       WHERE TeamNumber = <c:out value="${teamNumber}" />
       AND Tournament = <c:out value="${currentTournament}" />
   </sql:update>
+  
+  <%-- clear out judges --%>
+  <sql:update dataSource='${datasource}'>
+  DELETE FROM Judges WHERE Tournament = ${currentTournament } 
+  </sql:update>
+  
+  <%-- clear out subjective scores --%>
+  <x:forEach select="$challengeDocument/fll/subjectiveCategory">
+    <sql:update dataSource='${datasource}'>
+    DELETE FROM <x:out select="./@name"/> WHERE Tournament = ${currentTournament } 
+    </sql:update>
+  </x:forEach>
+  
   </c:if>
  </c:forEach>
 </c:if>
@@ -70,6 +84,13 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
 <body>
 <h1><x:out select="$challengeDocument/fll/@title" /> (Edit Event
 Division)</h1>
+
+ <sql:query var="result" dataSource="${datasource}">
+  SELECT id FROM Judges WHERE Tournament = ${currentTournament } LIMIT 1
+</sql:query>
+ <c:forEach items="${result.rows}" var="row">
+<p class='error'>Judges have already been assigned for this tournament, changing the event divisions will cause the judges and any subjective scores to be deleted.</p>
+</c:forEach>
 
 <p>This page allows you to assign event divisions to each team.
 Normally teams are just in the divisions they are registered in. However

@@ -280,19 +280,6 @@ public class ScoresheetGenerator {
     sciC.setPaddingRight(36);
     sciC.setHorizontalAlignment(Element.ALIGN_RIGHT);
 
-    final Phrase cpr = new Phrase("All Challenge Pieces Returned _______", ARIAL_8PT_NORMAL);
-    final PdfPCell cprC = new PdfPCell(cpr);
-    cprC.setBorder(0);
-    cprC.setPaddingTop(9);
-    cprC.setPaddingRight(36);
-    cprC.setHorizontalAlignment(Element.ALIGN_RIGHT);
-    final Phrase blank1 = new Phrase("", ARIAL_8PT_NORMAL);
-    final PdfPCell blankC = new PdfPCell(blank1);
-    blankC.setBorder(0);
-    blankC.setPaddingTop(9);
-    blankC.setPaddingRight(36);
-    blankC.setHorizontalAlignment(Element.ALIGN_RIGHT);
-
     final PdfPTable[] team = new PdfPTable[m_numTeams];
     final PdfPCell[] cell = new PdfPCell[m_numTeams];
 
@@ -405,10 +392,6 @@ public class ScoresheetGenerator {
       team[i].addCell(desC);
       team[i].addCell(tciC);
       team[i].addCell(sciC);
-
-      // second check
-      team[i].addCell(cprC);
-      team[i].addCell(blankC);
 
       cell[i] = new PdfPCell(team[i]);
       cell[i].setBorder(0);

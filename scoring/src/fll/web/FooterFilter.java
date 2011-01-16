@@ -69,7 +69,7 @@ public class FooterFilter implements Filter {
 
           final CharArrayWriter caw = new CharArrayWriter();
           final int bodyIndex = origStr.indexOf("</body>");
-          if (-1 != bodyIndex && !url.endsWith("welcome.jsp")) {
+          if (-1 != bodyIndex && !noFooter(url)) {
             caw.write(origStr.substring(0, bodyIndex - 1));
             addFooter(caw, httpRequest);
             response.setContentLength(caw.toString().length());
@@ -107,6 +107,21 @@ public class FooterFilter implements Filter {
     }
   }
 
+  /**
+   *  
+   * @param url the url to check
+   * @return true for all urls that should have no footer
+   */
+  private static boolean noFooter(final String url) {
+    if(url.endsWith("welcome.jsp")) {
+      return true;
+    } else if(url.indexOf("scoreBoard") != -1 && !url.endsWith("index.jsp")) {
+      return true;
+    } else {
+    return false;
+    }
+  }
+  
   /**
    * Writer the footer to the char array writer.
    */

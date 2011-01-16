@@ -156,6 +156,7 @@ function editFlagBoxClicked() {
             <!-- pick team from a list -->
             <br>
             <font face='arial' size='4'>Unverified Runs:</font><br>
+                  <p>Don't see the team and run you're looking for, try <a href="select_team.jsp">reloading this page</a>.</p>            
             <select size='20' name='TeamNumber' ondblclick='verify.submit()'>
              <sql:query var="result" dataSource="${datasource}">
    SELECT

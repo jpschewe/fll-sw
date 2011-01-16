@@ -50,6 +50,7 @@
           
         </c:when> <%-- end not empty displayName --%>
         <c:otherwise>
+          <%-- if no display name, then just use the values for the default display --%>
           <c:set var='localDisplayPage' value='${displayPage}'/>
           <c:set var='localDisplayURL' value='${displayURL}'/>
         </c:otherwise>

@@ -39,7 +39,6 @@ import fll.xml.XMLUtils;
 
 /**
  * Java code used in judges.jsp
- * 
  */
 public final class Judges {
 
@@ -50,17 +49,29 @@ public final class Judges {
   }
 
   /**
+   * String used for all divisions when assigning judges.
+   */
+  public static final String ALL_DIVISIONS = "All";
+
+  /**
    * Generate the judges page
    */
-  public static void generatePage(final JspWriter out, final ServletContext application, final HttpServletRequest request, final HttpServletResponse response)
-      throws SQLException, IOException, ParseException {
+  public static void generatePage(final JspWriter out,
+                                  final ServletContext application,
+                                  final HttpServletRequest request,
+                                  final HttpServletResponse response) throws SQLException, IOException, ParseException {
     final HttpSession session = request.getSession();
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
     final DataSource datasource = SessionAttributes.getDataSource(session);
     final Connection connection = datasource.getConnection();
     final int tournament = Queries.getCurrentTournament(connection);
 
-    final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory")).asList();
+    final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
+                                                                                    challengeDocument
+                                                                                                     .getDocumentElement()
+                                                                                                     .getElementsByTagName(
+                                                                                                                           "subjectiveCategory"))
+                                                                                                                                                 .asList();
 
     // count the number of rows present
     int rowIndex = 0;
@@ -109,11 +120,15 @@ public final class Judges {
 
     // get list of divisions and add "All" as a possible value
     final List<String> divisions = Queries.getEventDivisions(connection);
-    divisions.add(0, "All");
+    divisions.add(0, ALL_DIVISIONS);
 
     out
        .println("<p>Judges ID's must be unique.  They can be just the name of the judge.  Keep in mind that this ID needs to be entered on the judging forms.  There must be at least 1 judge for each category.</p>");
 
+    if (checkForEnteredSubjectiveScores(connection, subjectiveCategories, tournament)) {
+      out
+         .println("<p class='error'>Subjective scores have already been entered for this tournament, changing the judges may cause some scores to be deleted</p>");
+    }
     out.println("<table border='1'><tr><th>ID</th><th>Category</th><th>Division</th></tr>");
 
     int row = 0; // keep track of which row we're generating
@@ -123,7 +138,7 @@ public final class Judges {
       // the judges out of the DB
       ResultSet rs = null;
       PreparedStatement stmt = null;
-      try {        
+      try {
         stmt = connection.prepareStatement("SELECT id, category, event_division FROM Judges WHERE Tournament = ?");
         stmt.setInt(1, tournament);
         rs = stmt.executeQuery();
@@ -174,6 +189,29 @@ public final class Judges {
     out.println("</form>");
   }
 
+  private static boolean checkForEnteredSubjectiveScores(final Connection connection,
+                                                         final List<Element> subjectiveCategories,
+                                                         final int tournament) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      for (final Element category : subjectiveCategories) {
+        final String categoryName = category.getAttribute("name");
+        prep = connection.prepareStatement(String.format("SELECT * FROM %s WHERE Tournament = ?", categoryName));
+        prep.setInt(1, tournament);
+        rs = prep.executeQuery();
+        if (rs.next()) {
+          return true;
+        }
+      }
+      return false;
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+
+  }
+
   /**
    * Generate a row in the judges table defaulting the form elemenets to the
    * given information.
@@ -207,13 +245,14 @@ public final class Judges {
         + row + "'>");
     for (final Element category : subjectiveCategories) {
       final String categoryName = category.getAttribute("name");
+      final String categoryTitle = category.getAttribute("title");
       out.print("  <option value='"
           + categoryName + "'");
       if (categoryName.equals(cat)) {
         out.print(" selected");
       }
       out.println(">"
-          + categoryName + "</option>");
+          + categoryTitle + "</option>");
     }
     out.println("  </select></td>");
 
@@ -240,9 +279,11 @@ public final class Judges {
    * 
    * @return null if everything is ok, otherwise the error message
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="XSS_REQUEST_PARAMETER_TO_JSP_WRITER", justification="Checking category name retrieved from request against valid category names")
-  private static String generateVerifyTable(final JspWriter out, final List<Element> subjectiveCategories, final HttpServletRequest request, final Document challengeDocument)
-      throws IOException, ParseException {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "XSS_REQUEST_PARAMETER_TO_JSP_WRITER", justification = "Checking category name retrieved from request against valid category names")
+  private static String generateVerifyTable(final JspWriter out,
+                                            final List<Element> subjectiveCategories,
+                                            final HttpServletRequest request,
+                                            final Document challengeDocument) throws IOException, ParseException {
     // keep track of any errors
     final StringBuffer error = new StringBuffer();
 
@@ -282,7 +323,7 @@ public final class Judges {
 
     // now walk the keys of the hash and make sure that all values have a list
     // of size > 0, otherwise append an error to error.
-    for(final Map.Entry<String, Set<String>> entry : hash.entrySet()) {
+    for (final Map.Entry<String, Set<String>> entry : hash.entrySet()) {
       final String categoryName = entry.getKey();
       final Set<String> set = entry.getValue();
       if (set.isEmpty()) {
@@ -294,7 +335,8 @@ public final class Judges {
     if (error.length() > 0) {
       return error.toString();
     } else {
-      out.println("<p>If everything looks ok, click Commit, otherwise click Cancel and you'll go back to the edit page.</p>");
+      out
+         .println("<p>If everything looks ok, click Commit, otherwise click Cancel and you'll go back to the edit page.</p>");
       // generate final table with submit button
       out.println("<table border='1'><tr><th>ID</th><th>Category</th><th>Division</th></tr>");
 
@@ -308,8 +350,7 @@ public final class Judges {
           + row);
       while (null != category) {
         if (null != id
-            && division != null
-            && XMLUtils.isValidCategoryName(challengeDocument, category)) {
+            && division != null && XMLUtils.isValidCategoryName(challengeDocument, category)) {
           id = id.trim();
           id = id.toUpperCase();
           if (id.length() > 0) {
@@ -348,10 +389,26 @@ public final class Judges {
    * 
    * @param tournament the current tournament
    */
-  private static void commitData(final HttpServletRequest request, final HttpServletResponse response, final HttpSession session, final Connection connection, final int tournament)
-      throws SQLException, IOException {
+  private static void commitData(final HttpServletRequest request,
+                                 final HttpServletResponse response,
+                                 final HttpSession session,
+                                 final Connection connection,
+                                 final int tournament) throws SQLException, IOException {
     PreparedStatement prep = null;
+    ResultSet rs = null;
     try {
+      // save old judge information
+      final Set<JudgeInformation> oldJudgeInfo = new HashSet<JudgeInformation>();
+      prep = connection.prepareStatement("SELECT id, category, event_division FROM Judges WHERE Tournament = ?");
+      prep.setInt(1, tournament);
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final String id = rs.getString(1);
+        final String category = rs.getString(2);
+        final String division = rs.getString(3);
+        oldJudgeInfo.add(new JudgeInformation(id, category, division));
+      }
+
       // delete old data in judges
       prep = connection.prepareStatement("DELETE FROM Judges where Tournament = ?");
       prep.setInt(1, tournament);
@@ -360,7 +417,8 @@ public final class Judges {
       prep = null;
 
       // walk request parameters and insert data into database
-      prep = connection.prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES(?, ?, ?, ?)");
+      prep = connection
+                       .prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES(?, ?, ?, ?)");
       prep.setInt(4, tournament);
       int row = 0;
       String id = request.getParameter("id"
@@ -369,11 +427,14 @@ public final class Judges {
           + row);
       String division = request.getParameter("div"
           + row);
+      final Set<JudgeInformation> newJudgeInfo = new HashSet<JudgeInformation>();
       while (null != category) {
         prep.setString(1, id);
         prep.setString(2, category);
         prep.setString(3, division);
         prep.executeUpdate();
+        final JudgeInformation info = new JudgeInformation(id, category, division);
+        newJudgeInfo.add(info);
 
         row++;
         id = request.getParameter("id"
@@ -384,8 +445,20 @@ public final class Judges {
             + row);
       }
 
+      // figure out which ones are no longer there and remove all of their old
+      // scores
+      oldJudgeInfo.removeAll(newJudgeInfo);
+      for (final JudgeInformation oldInfo : oldJudgeInfo) {
+        prep = connection.prepareStatement(String.format("DELETE FROM %s WHERE Judge = ? AND Tournament = ?",
+                                                         oldInfo.getCategory()));
+        prep.setString(1, oldInfo.getId());
+        prep.setInt(2, tournament);
+        prep.executeUpdate();
+      }
+
     } finally {
       SQLFunctions.close(prep);
+      SQLFunctions.close(rs);
     }
 
     // finally redirect to index.jsp
@@ -393,4 +466,54 @@ public final class Judges {
     response.sendRedirect(response.encodeRedirectURL("index.jsp"));
   }
 
+  /**
+   * Judge information for use in a collection.
+   */
+  private static final class JudgeInformation {
+    private final String id;
+
+    public String getId() {
+      return id;
+    }
+
+    private final String category;
+
+    public String getCategory() {
+      return category;
+    }
+
+    private final String division;
+
+    public String getDivision() {
+      return division;
+    }
+
+    public JudgeInformation(final String id,
+                            final String category,
+                            final String division) {
+      this.id = id;
+      this.category = category;
+      this.division = division;
+    }
+
+    @Override
+    public int hashCode() {
+      return id.hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (null == o) {
+        return false;
+      } else if (o == this) {
+        return true;
+      } else if (o.getClass().equals(JudgeInformation.class)) {
+        final JudgeInformation other = (JudgeInformation) o;
+        return getId().equals(other.getId())
+            && getCategory().equals(other.getCategory()) && getDivision().equals(other.getDivision());
+      } else {
+        return false;
+      }
+    }
+  }
 }

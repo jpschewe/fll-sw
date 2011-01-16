@@ -166,6 +166,9 @@ function init() {
   </c:if>
 
   refresh();
+  
+  /* Saves total score for smarter notification popups */
+  savedTotalScore = document.scoreEntry.totalScore.value;
 }
 
 <!-- reset to default values -->
@@ -241,7 +244,15 @@ function CancelClicked() {
 function verification() {
 if (Verified == 1)
 {
-m = "You are changing a score -- are you sure?";
+	// Smarter Score Popups
+	if (savedTotalScore!=document.scoreEntry.totalScore.value)
+	 {
+		 m = "You are changing and verifying a score -- are you sure?";
+	 }
+	 else
+	 {
+		 m = "You are verifying a score -- are you sure?";
+	 }
 return m;
 }
 else 
