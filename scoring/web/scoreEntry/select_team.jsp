@@ -67,7 +67,7 @@ s.type='text/javascript';
 s.id = 'reloadruns';
 document.body.appendChild(s);
 s.src='unverifiedRunsObject.jsp?' + Math.random();
-//document.body.removeChild(document.getElementById('reloadruns'));
+document.body.removeChild(document.getElementById('reloadruns'));
 }
 
 
