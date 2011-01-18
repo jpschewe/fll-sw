@@ -10,20 +10,14 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.util.Arrays;
 
 import junit.framework.Assert;
 
 import org.xml.sax.SAXException;
 
-import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebForm;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-
-import fll.TestUtils;
 
 /**
  * Utilities for web tests.
@@ -77,41 +71,5 @@ public final class WebTestUtils {
         + response.getURL() + " code: " + code + " message: " + responseMessage + " Contents of error page written to: " + output.getAbsolutePath());
     }
     
-  }
-
-  /**
-   * Set the current tournament by name.
-   * @param conversation the web conversation
-   * @param tournamentName the name of the tournament to make the current tournament
-   */
-  public static void setTournament(final WebConversation conversation,
-                                   final String tournamentName) throws MalformedURLException, IOException, SAXException {
-    WebRequest request;
-    WebResponse response;
-    request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "admin/index.jsp");
-    response = loadPage(conversation, request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-    final WebForm form = response.getFormWithID("currentTournament");
-    Assert.assertNotNull(form);
-    
-    final String[] options = form.getOptions("currentTournament");
-    final String[] optionValues = form.getOptionValues("currentTournament");
-    Assert.assertEquals(options.length, optionValues.length);
-    String tournamentID = null;
-    for(int i=0; i<options.length; ++i) {
-      if(options[i].endsWith("[ " + tournamentName + " ]")) {
-        tournamentID = optionValues[i];
-      }
-    }
-    Assert.assertNotNull("Unable to find '" + tournamentName + "' as an option in: " + Arrays.asList(options), tournamentID);
-    
-    form.setParameter("currentTournament", tournamentID);
-    request = form.getRequest();
-    response = loadPage(conversation, request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-    Assert.assertNotNull("Error loading teams: "
-        + response.getText(), response.getElementWithID("success"));
-    Assert.assertNotNull(response.getElementWithID("success"));
   }
 }
