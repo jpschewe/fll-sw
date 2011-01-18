@@ -55,7 +55,6 @@ public class WebTest extends SeleneseTestCase {
         // "scoreboard/main.jsp",
         // "scoreboard_800/main.jsp",
         "scoreEntry/select_team.jsp", "setup/index.jsp", "style/style.jsp", "troubleshooting/index.jsp", };
-    final WebConversation conversation = new WebConversation();
     for (final String page : pages) {
       LOG.info("Testing page #"
           + page + "#");
@@ -63,7 +62,7 @@ public class WebTest extends SeleneseTestCase {
 
       final String url = TestUtils.URL_ROOT
           + page;
-      WebTestUtils.loadPage(conversation, url);
+      IntegrationTestUtils.loadPage(selenium, url);
     }
   }
 

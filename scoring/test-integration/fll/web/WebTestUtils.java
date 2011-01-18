@@ -38,15 +38,6 @@ public final class WebTestUtils {
    * Load a page and return the response. If there is an HttpException, call
    * {@link Assert#fail(String)} with a reasonable message.
    */
-  public static WebResponse loadPage(final WebConversation conversation, final String url) throws IOException, SAXException {
-    final WebRequest request = new GetMethodWebRequest(url);
-    return loadPage(conversation, request);
-  }
-
-  /**
-   * Load a page and return the response. If there is an HttpException, call
-   * {@link Assert#fail(String)} with a reasonable message.
-   */
   public static WebResponse loadPage(final WebConversation conversation, final WebRequest request) throws IOException, SAXException {
     final boolean exceptionOnError = conversation.getExceptionsThrownOnErrorStatus();
     conversation.setExceptionsThrownOnErrorStatus(false);

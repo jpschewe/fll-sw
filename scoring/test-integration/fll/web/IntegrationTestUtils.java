@@ -34,6 +34,29 @@ public final class IntegrationTestUtils {
   }
   
   /**
+   * Load a page and check to make sure the page didn't crash.
+   * 
+   * @param selenium the test controller
+   * @param url the page to load
+   * @throws IOException
+   */
+  public static void loadPage(final Selenium selenium, final String url) throws IOException {
+    try {
+      selenium.open(TestUtils.URL_ROOT + "setup/");
+      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+      final boolean error = selenium.isTextPresent("Exception");
+      Assert.assertFalse("Error loading: " + url, error);
+    } catch(final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;      
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
+  }
+  
+  /**
    * Initialize the database using the given challenge descriptor.
    * 
    * @param selenium the test controller
