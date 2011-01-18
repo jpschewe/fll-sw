@@ -43,8 +43,7 @@ public final class IntegrationTestUtils {
   public static void loadPage(final Selenium selenium,
                               final String url) throws IOException {
     try {
-      selenium.open(TestUtils.URL_ROOT
-          + "setup/");
+      selenium.open(url);
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
       final boolean error = selenium.isTextPresent("Exception");
