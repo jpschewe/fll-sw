@@ -168,7 +168,7 @@ public class FullTournamentTest extends SeleneseTestCase {
       Assert.assertNotNull("Could not create test database connection", serverConnection);
 
       // set the tournament
-      WebTestUtils.setTournament(conversation, testTournamentName);
+      IntegrationTestUtils.setTournament(selenium, testTournamentName);
 
       // assign judges
       request = new GetMethodWebRequest(TestUtils.URL_ROOT
