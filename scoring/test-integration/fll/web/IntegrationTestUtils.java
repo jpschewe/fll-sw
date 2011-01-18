@@ -200,7 +200,7 @@ public final class IntegrationTestUtils {
       loadPage(selenium, TestUtils.URL_ROOT
           + "admin/index.jsp");
       
-      selenium.select("currentTournament", tournamentName);
+      selenium.select("currentTournamentSelect", tournamentName);
       
       selenium.click("change_tournament");
       
