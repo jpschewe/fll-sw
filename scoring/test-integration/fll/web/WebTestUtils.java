@@ -9,7 +9,6 @@ package fll.web;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.util.Arrays;
@@ -19,7 +18,6 @@ import junit.framework.Assert;
 import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.UploadFileSpec;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebForm;
 import com.meterware.httpunit.WebRequest;
@@ -34,37 +32,6 @@ public final class WebTestUtils {
 
   private WebTestUtils() {
     // no instances
-  }
-
-  /**
-   * Initialize a database from a zip file.
-   * 
-   * @param inputStream input stream that has database to load in it, this input
-   *          stream is closed by this method upon successful completion
-   * @throws SAXException
-   * @throws IOException
-   * @throws MalformedURLException
-   */
-  public static void initializeDatabaseFromDump(final InputStream inputStream) throws MalformedURLException, IOException, SAXException {
-    Assert.assertNotNull("Zip to load must not be null", inputStream);
-
-    final WebConversation conversation = new WebConversation();
-    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "setup/");
-    WebResponse response = conversation.getResponse(request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-
-    final WebForm form = response.getFormWithID("import");
-    Assert.assertNotNull(form);
-    final UploadFileSpec challengeUpload = new UploadFileSpec("database.zip", inputStream, "application/zip");
-    Assert.assertNotNull(challengeUpload);
-    form.setParameter("dbdump", new UploadFileSpec[] { challengeUpload });
-    request = form.getRequest("createdb");
-    response = conversation.getResponse(request);
-    Assert.assertTrue(response.isHTML());
-    Assert.assertNotNull("Error initializing database: "
-        + response.getText(), response.getElementWithID("success"));
-    inputStream.close();
   }
 
   /**
