@@ -199,7 +199,16 @@ public final class IntegrationTestUtils {
       loadPage(selenium, TestUtils.URL_ROOT
           + "admin/index.jsp");
       
-      selenium.select("currentTournamentSelect", tournamentName);
+      final String[] options = selenium.getSelectOptions("currentTournamentSelect");
+      String tournamentID = null;
+      for(int i=0; i<options.length; ++i) {
+        if(options[i].endsWith("[ " + tournamentName + " ]")) {
+          tournamentID = options[i];
+        }
+      }
+      Assert.assertNotNull("Could not find tournament with name: " + tournamentName, tournamentID);
+
+      selenium.select("currentTournamentSelect", tournamentID);
       
       selenium.click("change_tournament");
       
