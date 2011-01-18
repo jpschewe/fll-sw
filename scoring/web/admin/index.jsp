@@ -132,7 +132,7 @@ ${message}
 		  rs.close();
 		  stmt.close();
 		%>
-	</select> <input type='submit' value='Change tournament'></form>
+	</select> <input type='submit' name='change_tournament' value='Change tournament'></form>
 	</li>
  
     <li>Upload schedule for current tournament.
