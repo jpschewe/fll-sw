@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import com.meterware.httpunit.WebConversation;
 import com.thoughtworks.selenium.SeleneseTestCase;
 
 import fll.TestUtils;
@@ -68,15 +67,15 @@ public class WebTest extends SeleneseTestCase {
 
   /**
    * Test changing tournaments to DUMMY and then back to State.
+   * @throws IOException 
    */
   @Test
-  public void testChangeTournament() throws MalformedURLException, IOException, SAXException {
+  public void testChangeTournament() throws IOException {
     IntegrationTestUtils.initializeDatabaseFromDump(selenium, WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
 
-    final WebConversation conversation = new WebConversation();
-    WebTestUtils.setTournament(conversation, GenerateDB.DUMMY_TOURNAMENT_NAME);
+    IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
-    WebTestUtils.setTournament(conversation, "STATE");
+    IntegrationTestUtils.setTournament(selenium, "STATE");
   }
 
 }
