@@ -211,7 +211,8 @@ public final class IntegrationTestUtils {
       selenium.select("currentTournamentSelect", tournamentID);
       
       selenium.click("change_tournament");
-      
+      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
       Assert.assertTrue(selenium.isElementPresent("id=success"));
     } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
