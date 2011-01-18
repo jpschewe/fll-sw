@@ -73,9 +73,9 @@ public class WebTest extends SeleneseTestCase {
   public void testChangeTournament() throws IOException {
     IntegrationTestUtils.initializeDatabaseFromDump(selenium, WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
 
-    IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
+    IntegrationTestUtils.setTournament(selenium, "Default dummy tournament [ " + GenerateDB.DUMMY_TOURNAMENT_NAME + " ]");
 
-    IntegrationTestUtils.setTournament(selenium, "STATE");
+    IntegrationTestUtils.setTournament(selenium, "null [ STATE ]");
   }
 
 }
