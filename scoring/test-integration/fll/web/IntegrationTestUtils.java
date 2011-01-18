@@ -75,6 +75,44 @@ public final class IntegrationTestUtils {
       throw e;
     }
   }
+  
+  /**
+   * Initialize a database from a zip file.
+   * 
+   * @param selenium the test controller
+   * @param inputStream input stream that has database to load in it, this input
+   *          stream is closed by this method upon successful completion
+   * @throws IOException
+   */
+  public static void initializeDatabaseFromDump(final Selenium selenium, final InputStream inputStream) throws IOException {
+    try {
+      Assert.assertNotNull(inputStream);
+      final File dumpFile = IntegrationTestUtils.storeInputStreamToFile(inputStream);
+      try {
+        selenium.open(TestUtils.URL_ROOT + "setup/");
+        selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+        selenium.type("dbdump", dumpFile.getAbsolutePath());
+        selenium.click("createdb");
+        selenium.waitForPageToLoad(WAIT_FOR_PAGE_TIMEOUT);
+        final boolean success = selenium.isTextPresent("Successfully initialized database");
+        Assert.assertTrue("Database was not successfully initialized", success);
+      } finally {
+        if (!dumpFile.delete()) {
+          dumpFile.deleteOnExit();
+        }
+      }
+    } catch(final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;      
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
+  }
 
   public static void storeScreenshot(final Selenium selenium) throws IOException {
     final File baseFile = File.createTempFile("fll", null, new File("screenshots"));
