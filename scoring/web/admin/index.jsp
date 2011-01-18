@@ -112,7 +112,7 @@ ${message}
     
 	<li>
 	<form id='currentTournament' action='SetCurrentTournament'
-		method="post">Current Tournament: <select
+		method="post">Current Tournament: <select id='currentTournamentSelect'
 		name='currentTournament'>
 		<%
 		  final Statement stmt = connection.createStatement();
