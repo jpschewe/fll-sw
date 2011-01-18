@@ -77,9 +77,7 @@ function init() {
 }
 
 // Set to reload unverified runs every 5 seconds
-if(window.setInterval) {
-  setInterval('reloadRuns()',5000);
-}
+setInterval('reloadRuns()',5000);
 </script>
   </head>
   <body onload="init()">
