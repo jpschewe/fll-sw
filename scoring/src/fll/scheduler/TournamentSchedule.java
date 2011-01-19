@@ -1235,7 +1235,7 @@ public class TournamentSchedule implements Serializable {
     }
 
     if (ti.getPerf(1).getTime()
-        + getPerformanceDuration() + getPerformanceChangetime() > ti.getPerf(2).getTime()) {
+        + getPerformanceDuration() > ti.getPerf(2).getTime()) {
       final String message = String
                                    .format(
                                            "Team %d is still in performance %d when they are to start performance %d: %s - %s",

@@ -112,7 +112,7 @@ ${message}
     
 	<li>
 	<form id='currentTournament' action='SetCurrentTournament'
-		method="post">Current Tournament: <select
+		method="post">Current Tournament: <select id='currentTournamentSelect'
 		name='currentTournament'>
 		<%
 		  final Statement stmt = connection.createStatement();
@@ -132,7 +132,7 @@ ${message}
 		  rs.close();
 		  stmt.close();
 		%>
-	</select> <input type='submit' value='Change tournament'></form>
+	</select> <input type='submit' name='change_tournament' value='Change tournament'></form>
 	</li>
  
     <li>Upload schedule for current tournament.
