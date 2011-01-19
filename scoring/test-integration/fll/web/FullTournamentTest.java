@@ -324,37 +324,56 @@ public class FullTournamentTest extends SeleneseTestCase {
 
       enterSubjectiveScores(testDataConn, challengeDocument, testTournamentName);
 
-      // compute final scores
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "report/summarizePhase1.jsp");
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHTML());
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "report/summarizePhase2.jsp");
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHTML());
-      Assert.assertNotNull(response.getElementWithID("success"));
+      computeFinalScores();
 
-      // generate reports
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "report/CategorizedScores");
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHTML());
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "report/CategoryScoresByJudge");
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHTML());
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "report/CategoryScoresByScoreGroup");
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHTML());
+      checkReports();
 
-      // PDF reports
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "report/finalComputedScores.pdf");
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertEquals("application/pdf", response.getContentType());
+      checkRankAndScores(serverConnection, testTournamentName);
+      
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
+      SQLFunctions.close(prep);
+      SQLFunctions.close(testDataConn);
+      // Utilities.closeConnection(connection);
+    }
+  }
+  
+  private void computeFinalScores() throws IOException {
+    // compute final scores
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+        + "report/summarizePhase1.jsp");
+    
+    selenium.click("id=continue");
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    
+    Assert.assertTrue(selenium.isElementPresent("id=success"));    
+  }
+  
+  private void checkReports() throws IOException {
+    // generate reports
+    
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+        + "report/CategorizedScores");
+    
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+        + "report/CategoryScoresByJudge");
+    
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+        + "report/CategoryScoresByScoreGroup");
 
+    // TODO PDF reports
+//    request = new GetMethodWebRequest(TestUtils.URL_ROOT
+//        + "report/finalComputedScores.pdf");
+//    response = WebTestUtils.loadPage(conversation, request);
+//    Assert.assertEquals("application/pdf", response.getContentType());
+  }
+
+  private void checkRankAndScores(final Connection serverConnection,
+                                  final String testTournamentName) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
       // check ranking and scores
       final double scoreFP = 1E-1; // just check to one decimal place
 
@@ -402,17 +421,11 @@ public class FullTournamentTest extends SeleneseTestCase {
 
         ++rank;
       }
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-
-      // TODO check scores?
     } finally {
       SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
       SQLFunctions.close(prep);
-      SQLFunctions.close(testDataConn);
-      // Utilities.closeConnection(connection);
     }
+    // TODO check scores?
   }
 
   /**
