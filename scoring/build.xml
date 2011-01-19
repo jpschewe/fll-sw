@@ -661,7 +661,9 @@
 		<echo message="See ${dir.reports}/junit/index.html to see the unit test results" />
 	</target>
 
-	<target name="before-checkin" depends="test.unit,test.report" description="Run before a checkin" />
+	<target name="before-checkin" depends="test.unit,test.report" description="Run before a checkin">
+		<fail message="Some tests failed. See the test report for what failed and why." if="test.failed" />
+	</target>	
 
 	<target name="install.testdb" description="install the test database">
 		<delete>
