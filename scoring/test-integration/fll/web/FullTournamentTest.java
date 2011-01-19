@@ -100,153 +100,20 @@ public class FullTournamentTest extends SeleneseTestCase {
       final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml");
       IntegrationTestUtils.initializeDatabase(selenium, challengeDocIS, true);
 
-      // --- load teams ---
-      // find upload form on admin page
-      WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "admin/");
-      WebResponse response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-      WebForm form = response.getFormWithID("uploadTeams");
+      WebRequest request;
+      WebResponse response;
+      WebForm form;
+      loadTeams(conversation);
 
-      // set the parameters
-      final InputStream teamsIS = FullTournamentTest.class.getResourceAsStream("data/teams-ft.csv");
-      Assert.assertNotNull(teamsIS);
-      final UploadFileSpec teamsUpload = new UploadFileSpec("teams.csv", teamsIS, "text/plain");
-      form.setParameter("file", new UploadFileSpec[] { teamsUpload });
-      request = form.getRequest();
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHTML());
-      // Assert.assertNotNull("Error uploading data file: " +
-      // response.getText(), response.getElementWithID("success"));
-      teamsIS.close();
+      createTournamentsForRegions(conversation);
 
-      // skip past the filter page
-      form = response.getFormWithName("filterTeams");
-      request = form.getRequest("next");
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHTML());
+      final Connection serverConnection = initializeTournamentsByRegion(conversation);
 
-      // team column selection
-      form = response.getFormWithName("verifyTeams");
-      Assert.assertNotNull(form);
-      form.setParameter("TeamNumber", "tea_number");
-      form.setParameter("TeamName", "tea_name");
-      form.setParameter("Organization", "org_name");
-      form.setParameter("Region", "eve_name");
-      form.setParameter("Division", "div_name");
-      request = form.getRequest();
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHTML());
-      Assert.assertNotNull("Error loading teams: "
-          + response.getText(), response.getElementWithID("success"));
-
-      // create tournaments for all regions
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "admin/AddTournamentsForRegions");
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-      Assert.assertNotNull(response.getElementWithID("success"));
-
-      // initialize tournaments by region
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "admin/tournamentInitialization.jsp");
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-      form = response.getFormWithName("form");
-      Assert.assertNotNull(form);
-      request = form.getRequest();
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHTML());
-      form = response.getFormWithName("verify");
-      Assert.assertNotNull(form);
-      request = form.getRequest();
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHTML());
-      Assert.assertNotNull(response.getElementWithID("success"));
-
-      final Connection serverConnection = TestUtils.createTestDBConnection();
-      Assert.assertNotNull("Could not create test database connection", serverConnection);
-
-      // set the tournament
       IntegrationTestUtils.setTournament(selenium, testTournamentName);
 
-      // assign judges
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "admin/judges.jsp");
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-      form = response.getFormWithName("judges");
-      Assert.assertNotNull(form);
+      assignJudges(testDataConn, testTournamentName, conversation);
 
-      // need to add rows to form if test database has more judges than
-      // categories
-      prep = testDataConn.prepareStatement("SELECT COUNT(id) FROM Judges WHERE Tournament = ?");
-      prep.setString(1, testTournamentName);
-      rs = prep.executeQuery();
-      Assert.assertTrue("Could not find judges information in test data", rs.next());
-      final int numJudges = rs.getInt(1);
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-      while (!form.hasParameterNamed("id"
-          + String.valueOf(numJudges - 1))) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Adding a row to the judges entry form");
-        }
-        request = form.getRequest("submit", "Add Row");
-        response = WebTestUtils.loadPage(conversation, request);
-        Assert.assertTrue(response.isHTML());
-        form = response.getFormWithName("judges");
-        Assert.assertNotNull(form);
-      }
-
-      // assign judges from database
-      int judgeIndex = 0;
-      prep = testDataConn.prepareStatement("SELECT id, category, Division FROM Judges WHERE Tournament = ?");
-      prep.setString(1, testTournamentName);
-      rs = prep.executeQuery();
-      while (rs.next()) {
-        final String id = rs.getString(1);
-        final String category = rs.getString(2);
-        final String division = rs.getString(3);
-        form.setParameter("id"
-            + judgeIndex, id);
-        form.setParameter("cat"
-            + judgeIndex, category);
-        form.setParameter("div"
-            + judgeIndex, division);
-        ++judgeIndex;
-      }
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-
-      // submit those values
-      request = form.getRequest("finished", "Finished");
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHTML());
-      Assert.assertNull("Got error from judges assignment", response.getElementWithID("error"));
-
-      // commit judges information
-      form = response.getFormWithName("judges");
-      Assert.assertNotNull(form);
-      request = form.getRequest("commit", "Commit");
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHTML());
-      Assert.assertNotNull("Error assigning judges", response.getElementWithID("success"));
-
-      // assign table labels
-      request = new GetMethodWebRequest(TestUtils.URL_ROOT
-          + "admin/tables.jsp");
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-      form = response.getFormWithName("tables");
-      Assert.assertNotNull(form);
-      form.setParameter("SideA0", "red");
-      form.setParameter("SideB0", "blue");
-      request = form.getRequest("submit", "Finished");
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHTML());
-      Assert.assertNull("Got error from judges assignment", response.getElementWithID("error"));
-      Assert.assertNotNull(response.getElementWithID("success"));
+      assignTableLabels(conversation);
 
       /*
        * --- Enter 3 runs for each team --- Use data from test data base,
@@ -337,6 +204,172 @@ public class FullTournamentTest extends SeleneseTestCase {
       SQLFunctions.close(testDataConn);
       // Utilities.closeConnection(connection);
     }
+  }
+
+  private void assignTableLabels(final WebConversation conversation) throws IOException, SAXException {
+    WebRequest request;
+    WebResponse response;
+    WebForm form;
+    request = new GetMethodWebRequest(TestUtils.URL_ROOT
+        + "admin/tables.jsp");
+    response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
+    form = response.getFormWithName("tables");
+    Assert.assertNotNull(form);
+    form.setParameter("SideA0", "red");
+    form.setParameter("SideB0", "blue");
+    request = form.getRequest("submit", "Finished");
+    response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertTrue(response.isHTML());
+    Assert.assertNull("Got error from judges assignment", response.getElementWithID("error"));
+    Assert.assertNotNull(response.getElementWithID("success"));
+  }
+
+  private void assignJudges(Connection testDataConn,
+                            final String testTournamentName,
+                            final WebConversation conversation) throws IOException, SAXException, SQLException {
+    ResultSet rs;
+    PreparedStatement prep;
+    WebRequest request;
+    WebResponse response;
+    WebForm form;
+    request = new GetMethodWebRequest(TestUtils.URL_ROOT
+        + "admin/judges.jsp");
+    response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
+    form = response.getFormWithName("judges");
+    Assert.assertNotNull(form);
+
+    // need to add rows to form if test database has more judges than
+    // categories
+    prep = testDataConn.prepareStatement("SELECT COUNT(id) FROM Judges WHERE Tournament = ?");
+    prep.setString(1, testTournamentName);
+    rs = prep.executeQuery();
+    Assert.assertTrue("Could not find judges information in test data", rs.next());
+    final int numJudges = rs.getInt(1);
+    SQLFunctions.close(rs);
+    SQLFunctions.close(prep);
+    while (!form.hasParameterNamed("id"
+        + String.valueOf(numJudges - 1))) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Adding a row to the judges entry form");
+      }
+      request = form.getRequest("submit", "Add Row");
+      response = WebTestUtils.loadPage(conversation, request);
+      Assert.assertTrue(response.isHTML());
+      form = response.getFormWithName("judges");
+      Assert.assertNotNull(form);
+    }
+
+    // assign judges from database
+    int judgeIndex = 0;
+    prep = testDataConn.prepareStatement("SELECT id, category, Division FROM Judges WHERE Tournament = ?");
+    prep.setString(1, testTournamentName);
+    rs = prep.executeQuery();
+    while (rs.next()) {
+      final String id = rs.getString(1);
+      final String category = rs.getString(2);
+      final String division = rs.getString(3);
+      form.setParameter("id"
+          + judgeIndex, id);
+      form.setParameter("cat"
+          + judgeIndex, category);
+      form.setParameter("div"
+          + judgeIndex, division);
+      ++judgeIndex;
+    }
+    SQLFunctions.close(rs);
+    SQLFunctions.close(prep);
+
+    // submit those values
+    request = form.getRequest("finished", "Finished");
+    response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertTrue(response.isHTML());
+    Assert.assertNull("Got error from judges assignment", response.getElementWithID("error"));
+
+    // commit judges information
+    form = response.getFormWithName("judges");
+    Assert.assertNotNull(form);
+    request = form.getRequest("commit", "Commit");
+    response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertTrue(response.isHTML());
+    Assert.assertNotNull("Error assigning judges", response.getElementWithID("success"));
+  }
+
+  private Connection initializeTournamentsByRegion(final WebConversation conversation) throws IOException, SAXException {
+    WebRequest request;
+    WebResponse response;
+    WebForm form;
+    request = new GetMethodWebRequest(TestUtils.URL_ROOT
+        + "admin/tournamentInitialization.jsp");
+    response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
+    form = response.getFormWithName("form");
+    Assert.assertNotNull(form);
+    request = form.getRequest();
+    response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertTrue(response.isHTML());
+    form = response.getFormWithName("verify");
+    Assert.assertNotNull(form);
+    request = form.getRequest();
+    response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertTrue(response.isHTML());
+    Assert.assertNotNull(response.getElementWithID("success"));
+
+    final Connection serverConnection = TestUtils.createTestDBConnection();
+    Assert.assertNotNull("Could not create test database connection", serverConnection);
+    return serverConnection;
+  }
+
+  private void createTournamentsForRegions(final WebConversation conversation) throws IOException, SAXException {
+    WebRequest request;
+    WebResponse response;
+    request = new GetMethodWebRequest(TestUtils.URL_ROOT
+        + "admin/AddTournamentsForRegions");
+    response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
+    Assert.assertNotNull(response.getElementWithID("success"));
+  }
+
+  private void loadTeams(final WebConversation conversation) throws IOException, SAXException {
+    // find upload form on admin page
+    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
+        + "admin/");
+    WebResponse response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
+    WebForm form = response.getFormWithID("uploadTeams");
+
+    // set the parameters
+    final InputStream teamsIS = FullTournamentTest.class.getResourceAsStream("data/teams-ft.csv");
+    Assert.assertNotNull(teamsIS);
+    final UploadFileSpec teamsUpload = new UploadFileSpec("teams.csv", teamsIS, "text/plain");
+    form.setParameter("file", new UploadFileSpec[] { teamsUpload });
+    request = form.getRequest();
+    response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertTrue(response.isHTML());
+    // Assert.assertNotNull("Error uploading data file: " +
+    // response.getText(), response.getElementWithID("success"));
+    teamsIS.close();
+
+    // skip past the filter page
+    form = response.getFormWithName("filterTeams");
+    request = form.getRequest("next");
+    response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertTrue(response.isHTML());
+
+    // team column selection
+    form = response.getFormWithName("verifyTeams");
+    Assert.assertNotNull(form);
+    form.setParameter("TeamNumber", "tea_number");
+    form.setParameter("TeamName", "tea_name");
+    form.setParameter("Organization", "org_name");
+    form.setParameter("Region", "eve_name");
+    form.setParameter("Division", "div_name");
+    request = form.getRequest();
+    response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertTrue(response.isHTML());
+    Assert.assertNotNull("Error loading teams: "
+        + response.getText(), response.getElementWithID("success"));
   }
   
   private void computeFinalScores() throws IOException {
