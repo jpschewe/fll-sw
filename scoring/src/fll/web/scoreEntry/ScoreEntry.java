@@ -525,12 +525,16 @@ public final class ScoreEntry {
     // generate buttons with calls to increment<name>
     final String buttonName = (increment < 0 ? "" : "+")
         + String.valueOf(increment);
-    final String incdec = (increment < 0 ? "dec" : "inc");
+    final String buttonID = getIncDecButtonID(name, increment);
     writer.println("        <td>");
-    writer.println("          <input id='"
-        + incdec + "_" + name + "_" + String.valueOf(increment) + "' type='button' value='" + buttonName + "' onclick='" + getIncrementMethodName(name) + "("
+    writer.println("          <input id='" + buttonID + "' type='button' value='" + buttonName + "' onclick='" + getIncrementMethodName(name) + "("
         + increment + ")'>");
     writer.println("        </td>");
+  }
+  
+  public static String getIncDecButtonID(final String name, final int increment) {
+    final String incdec = (increment < 0 ? "dec" : "inc");
+    return incdec + "_" + name + "_" + String.valueOf(Math.abs(increment)); 
   }
 
   /**
