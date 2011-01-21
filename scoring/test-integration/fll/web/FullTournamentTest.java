@@ -103,6 +103,7 @@ public class FullTournamentTest extends SeleneseTestCase {
       WebRequest request;
       WebResponse response;
       WebForm form;
+
       loadTeams(conversation);
 
       createTournamentsForRegions(conversation);
@@ -113,7 +114,7 @@ public class FullTournamentTest extends SeleneseTestCase {
 
       assignJudges(testDataConn, testTournamentName, conversation);
 
-      assignTableLabels(conversation);
+      assignTableLabels();
 
       /*
        * --- Enter 3 runs for each team --- Use data from test data base,
@@ -196,7 +197,7 @@ public class FullTournamentTest extends SeleneseTestCase {
       checkReports();
 
       checkRankAndScores(serverConnection, testTournamentName);
-      
+
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(stmt);
@@ -206,23 +207,16 @@ public class FullTournamentTest extends SeleneseTestCase {
     }
   }
 
-  private void assignTableLabels(final WebConversation conversation) throws IOException, SAXException {
-    WebRequest request;
-    WebResponse response;
-    WebForm form;
-    request = new GetMethodWebRequest(TestUtils.URL_ROOT
+  private void assignTableLabels() throws IOException, SAXException {
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/tables.jsp");
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-    form = response.getFormWithName("tables");
-    Assert.assertNotNull(form);
-    form.setParameter("SideA0", "red");
-    form.setParameter("SideB0", "blue");
-    request = form.getRequest("submit", "Finished");
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue(response.isHTML());
-    Assert.assertNull("Got error from judges assignment", response.getElementWithID("error"));
-    Assert.assertNotNull(response.getElementWithID("success"));
+    selenium.type("SideA0", "red");
+    selenium.type("SideB0", "blue");
+    selenium.click("id=finished");
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+    Assert.assertFalse(selenium.isElementPresent("id=error"));
+    Assert.assertTrue(selenium.isElementPresent("id=success"));
   }
 
   private void assignJudges(Connection testDataConn,
@@ -371,35 +365,35 @@ public class FullTournamentTest extends SeleneseTestCase {
     Assert.assertNotNull("Error loading teams: "
         + response.getText(), response.getElementWithID("success"));
   }
-  
+
   private void computeFinalScores() throws IOException {
     // compute final scores
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "report/summarizePhase1.jsp");
-    
+
     selenium.click("id=continue");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-    
-    Assert.assertTrue(selenium.isElementPresent("id=success"));    
+
+    Assert.assertTrue(selenium.isElementPresent("id=success"));
   }
-  
+
   private void checkReports() throws IOException {
     // generate reports
-    
+
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "report/CategorizedScores");
-    
+
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "report/CategoryScoresByJudge");
-    
+
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "report/CategoryScoresByScoreGroup");
 
     // TODO PDF reports
-//    request = new GetMethodWebRequest(TestUtils.URL_ROOT
-//        + "report/finalComputedScores.pdf");
-//    response = WebTestUtils.loadPage(conversation, request);
-//    Assert.assertEquals("application/pdf", response.getContentType());
+    // request = new GetMethodWebRequest(TestUtils.URL_ROOT
+    // + "report/finalComputedScores.pdf");
+    // response = WebTestUtils.loadPage(conversation, request);
+    // Assert.assertEquals("application/pdf", response.getContentType());
   }
 
   private void checkRankAndScores(final Connection serverConnection,
