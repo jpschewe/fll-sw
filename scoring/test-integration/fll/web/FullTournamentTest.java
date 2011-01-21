@@ -112,7 +112,7 @@ public class FullTournamentTest extends SeleneseTestCase {
 
       IntegrationTestUtils.setTournament(selenium, testTournamentName);
 
-      assignJudges(testDataConn, testTournamentName, conversation);
+      assignJudges(testDataConn, testTournamentName);
 
       assignTableLabels();
 
@@ -220,19 +220,11 @@ public class FullTournamentTest extends SeleneseTestCase {
   }
 
   private void assignJudges(Connection testDataConn,
-                            final String testTournamentName,
-                            final WebConversation conversation) throws IOException, SAXException, SQLException {
+                            final String testTournamentName) throws IOException, SAXException, SQLException {
     ResultSet rs;
     PreparedStatement prep;
-    WebRequest request;
-    WebResponse response;
-    WebForm form;
-    request = new GetMethodWebRequest(TestUtils.URL_ROOT
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/judges.jsp");
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-    form = response.getFormWithName("judges");
-    Assert.assertNotNull(form);
 
     // need to add rows to form if test database has more judges than
     // categories
@@ -243,16 +235,13 @@ public class FullTournamentTest extends SeleneseTestCase {
     final int numJudges = rs.getInt(1);
     SQLFunctions.close(rs);
     SQLFunctions.close(prep);
-    while (!form.hasParameterNamed("id"
+    while (!selenium.isElementPresent("name=id"
         + String.valueOf(numJudges - 1))) {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Adding a row to the judges entry form");
       }
-      request = form.getRequest("submit", "Add Row");
-      response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertTrue(response.isHTML());
-      form = response.getFormWithName("judges");
-      Assert.assertNotNull(form);
+      selenium.click("name=add_rows");
+      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
     }
 
     // assign judges from database
@@ -264,11 +253,11 @@ public class FullTournamentTest extends SeleneseTestCase {
       final String id = rs.getString(1);
       final String category = rs.getString(2);
       final String division = rs.getString(3);
-      form.setParameter("id"
+      selenium.type("id"
           + judgeIndex, id);
-      form.setParameter("cat"
+      selenium.type("cat"
           + judgeIndex, category);
-      form.setParameter("div"
+      selenium.type("div"
           + judgeIndex, division);
       ++judgeIndex;
     }
@@ -276,18 +265,15 @@ public class FullTournamentTest extends SeleneseTestCase {
     SQLFunctions.close(prep);
 
     // submit those values
-    request = form.getRequest("finished", "Finished");
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue(response.isHTML());
-    Assert.assertNull("Got error from judges assignment", response.getElementWithID("error"));
+    selenium.click("finished");
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+    Assert.assertFalse("Got error from judges assignment", selenium.isElementPresent("error"));
 
     // commit judges information
-    form = response.getFormWithName("judges");
-    Assert.assertNotNull(form);
-    request = form.getRequest("commit", "Commit");
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue(response.isHTML());
-    Assert.assertNotNull("Error assigning judges", response.getElementWithID("success"));
+    selenium.click("commit");
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    Assert.assertTrue("Error assigning judges", selenium.isElementPresent("success"));
   }
 
   private Connection initializeTournamentsByRegion(final WebConversation conversation) throws IOException, SAXException {
