@@ -20,6 +20,7 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -207,7 +208,7 @@ public final class Utilities {
         prep.setNull(index, Types.TIME);
       } else {
         try {
-          final Date value = ImportDB.CSV_TIMESTAMP_FORMATTER.get().parse(data);
+          final Date value = ImportDB.CSV_TIME_FORMATTER.get().parse(data);
           final Time time = new Time(value.getTime());
           prep.setTime(index, time);
         } catch (final ParseException e) {

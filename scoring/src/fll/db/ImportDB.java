@@ -1232,4 +1232,13 @@ public final class ImportDB {
     }
   };
 
+  /**
+   * Time format found in the CSV dump files.
+   */
+  public static final ThreadLocal<DateFormat> CSV_TIME_FORMATTER = new ThreadLocal<DateFormat>() {
+    protected DateFormat initialValue() {
+      return new SimpleDateFormat("HH:mm:ss");
+    }
+  };
+
 }
