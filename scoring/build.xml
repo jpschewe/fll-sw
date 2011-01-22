@@ -8,7 +8,7 @@
 	<property file="override.properties" />
 
 	<property name="app.name" value="${ant.project.name}" />
-	<property name="app.version" value="5.14" />
+	<property name="app.version" value="5.15" />
 
 	<property name="dir.build" value="${basedir}/build" />
 	<property name="dir.tomcat" value="${dir.build}/tomcat" />
