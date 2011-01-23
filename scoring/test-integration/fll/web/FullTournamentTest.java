@@ -377,7 +377,7 @@ public class FullTournamentTest extends SeleneseTestCase {
     Assert.assertTrue(selenium.isElementPresent("id=success"));
   }
 
-  private void checkReports() throws IOException {
+  private void checkReports() throws IOException, SAXException {
     // generate reports
 
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
@@ -389,11 +389,12 @@ public class FullTournamentTest extends SeleneseTestCase {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "report/CategoryScoresByScoreGroup");
 
-    // TODO PDF reports
-    // request = new GetMethodWebRequest(TestUtils.URL_ROOT
-    // + "report/finalComputedScores.pdf");
-    // response = WebTestUtils.loadPage(conversation, request);
-    // Assert.assertEquals("application/pdf", response.getContentType());
+    // PDF reports need to be done with httpunit
+    final WebConversation conversation = new WebConversation();
+     WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
+     + "report/finalComputedScores.pdf");
+     WebResponse response = WebTestUtils.loadPage(conversation, request);
+     Assert.assertEquals("application/pdf", response.getContentType());
   }
 
   private void checkRankAndScores(final Connection serverConnection,

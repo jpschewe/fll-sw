@@ -88,9 +88,8 @@ public class InitFilter implements Filter {
                   + "/style") || path.startsWith(httpRequest.getContextPath()
                   + "/images") || path.startsWith(httpRequest.getContextPath()
                   + "/sponsor_logos") || path.startsWith(httpRequest.getContextPath()
-                  + "/wiki") || path.endsWith(".jpg") || path.endsWith(".gif") || path.endsWith(".png")
-              || path.endsWith(".pdf") || path.endsWith(".html"))) {
-        // don't do init on the setup pages
+                  + "/wiki") || path.endsWith(".jpg") || path.endsWith(".gif") || path.endsWith(".png") || path.endsWith(".html"))) {
+        // don't do init on some pages
         chain.doFilter(request, response);
       } else {
         try {
@@ -143,9 +142,7 @@ public class InitFilter implements Filter {
     final boolean dbok = Utilities.testHSQLDB(database);
     if (!dbok) {
       LOGGER.warn("Database files not ok, redirecting to setup");
-      session
-             .setAttribute(
-                           SessionAttributes.MESSAGE,
+      session.setAttribute(SessionAttributes.MESSAGE,
                            "<p class='error'>The database does not exist yet or there is a problem with the database files. Please create the database.<br/></p>");
       return request.getContextPath()
           + "/setup";
@@ -185,8 +182,7 @@ public class InitFilter implements Filter {
         final Document document = Queries.getChallengeDocument(connection);
         if (null == document) {
           LOGGER.warn("Could not find challenge descriptor");
-          session
-                 .setAttribute(SessionAttributes.MESSAGE,
+          session.setAttribute(SessionAttributes.MESSAGE,
                                "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
           return request.getContextPath()
               + "/setup";
