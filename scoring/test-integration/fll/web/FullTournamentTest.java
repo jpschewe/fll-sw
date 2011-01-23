@@ -77,30 +77,28 @@ public class FullTournamentTest extends SeleneseTestCase {
    * @throws InterruptedException
    */
   @Test
-  public void testFullTournament() throws MalformedURLException, IOException, SAXException, ClassNotFoundException,
+  public void testFullTournament() throws IOException, SAXException, ClassNotFoundException,
       InstantiationException, IllegalAccessException, ParseException, SQLException, InterruptedException {
     final int numSeedingRounds = 3;
 
-    // create connection to database with test data
-    Class.forName("org.hsqldb.jdbcDriver").newInstance();
     Connection testDataConn = null;
     Statement stmt = null;
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
+      Class.forName("org.hsqldb.jdbcDriver").newInstance();
+      
       testDataConn = DriverManager.getConnection("jdbc:hsqldb:res:/fll/web/data/flldb-ft");
       final String testTournamentName = "Field";
       Assert.assertNotNull("Error connecting to test data database", testDataConn);
 
       stmt = testDataConn.createStatement();
 
-      final WebConversation conversation = new WebConversation();
-
       // --- initialize database ---
       final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml");
       IntegrationTestUtils.initializeDatabase(selenium, challengeDocIS, true);
 
-      loadTeams(conversation);
+      loadTeams();
 
       createTournamentsForRegions();
 
@@ -186,7 +184,37 @@ public class FullTournamentTest extends SeleneseTestCase {
       checkReports();
 
       checkRankAndScores(serverConnection, testTournamentName);
-
+            
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final SAXException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final ClassNotFoundException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final InstantiationException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IllegalAccessException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final ParseException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final SQLException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final InterruptedException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(stmt);
@@ -316,45 +344,45 @@ public class FullTournamentTest extends SeleneseTestCase {
     Assert.assertNotNull(selenium.isElementPresent("id=success"));
   }
 
-  private void loadTeams(final WebConversation conversation) throws IOException, SAXException {
-    // find upload form on admin page
-    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
+  private void loadTeams() throws IOException, SAXException {
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/");
-    WebResponse response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-    WebForm form = response.getFormWithID("uploadTeams");
-
-    // set the parameters
+    
     final InputStream teamsIS = FullTournamentTest.class.getResourceAsStream("data/teams-ft.csv");
     Assert.assertNotNull(teamsIS);
-    final UploadFileSpec teamsUpload = new UploadFileSpec("teams.csv", teamsIS, "text/plain");
-    form.setParameter("file", new UploadFileSpec[] { teamsUpload });
-    request = form.getRequest();
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue(response.isHTML());
-    // Assert.assertNotNull("Error uploading data file: " +
-    // response.getText(), response.getElementWithID("success"));
+    final File teamsFile = IntegrationTestUtils.storeInputStreamToFile(teamsIS);
     teamsIS.close();
+    try {      
+      selenium.type("id=teams_file", teamsFile.getAbsolutePath());
+      
+      selenium.click("id=upload_teams");
+      
+      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      
+      Assert.assertFalse(selenium.isTextPresent("Exception"));      
+    } finally {
+      if (!teamsFile.delete()) {
+        teamsFile.deleteOnExit();
+      }
+    }   
 
     // skip past the filter page
-    form = response.getFormWithName("filterTeams");
-    request = form.getRequest("next");
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue(response.isHTML());
+    selenium.click("id=next");
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    Assert.assertFalse(selenium.isTextPresent("Exception"));
+
 
     // team column selection
-    form = response.getFormWithName("verifyTeams");
-    Assert.assertNotNull(form);
-    form.setParameter("TeamNumber", "tea_number");
-    form.setParameter("TeamName", "tea_name");
-    form.setParameter("Organization", "org_name");
-    form.setParameter("Region", "eve_name");
-    form.setParameter("Division", "div_name");
-    request = form.getRequest();
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue(response.isHTML());
-    Assert.assertNotNull("Error loading teams: "
-        + response.getText(), response.getElementWithID("success"));
+    selenium.select("TeamNumber", "tea_number");
+    selenium.select("TeamName", "tea_name");
+    selenium.select("Organization", "org_name");
+    selenium.select("Region", "eve_name");
+    selenium.select("Division", "div_name");
+    selenium.click("id=next");
+
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    Assert.assertFalse(selenium.isTextPresent("Exception"));
+    Assert.assertTrue(selenium.isElementPresent("id=success"));
   }
 
   private void computeFinalScores() throws IOException {
