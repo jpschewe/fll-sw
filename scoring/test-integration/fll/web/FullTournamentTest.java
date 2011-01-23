@@ -133,7 +133,7 @@ public class FullTournamentTest extends SeleneseTestCase {
       prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?");
       boolean initializedPlayoff = false;
       prep.setString(1, testTournamentName);
-      final String[] divisions = getDivisions(conversation);
+      final String[] divisions = getDivisions();
       for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
 
         if (runNumber > numSeedingRounds) {
@@ -208,19 +208,16 @@ public class FullTournamentTest extends SeleneseTestCase {
   }
 
   /**
-   * @param conversation
    * @return
    * @throws SAXException
    * @throws IOException
    */
-  private String[] getDivisions(final WebConversation conversation) throws IOException, SAXException {
-    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "playoff");
-    WebResponse response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue(response.isHTML());
-    WebForm form = response.getFormWithName("initialize");
-    Assert.assertNotNull(form);
-    final String[] divisions = form.getOptionValues("division");
+  private String[] getDivisions() throws IOException, SAXException {
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+        + "playoff");    
+    final String[] divisions = selenium.getSelectOptions("xpath=//form[@name='initialize']//select[@name='division']");
+    Assert.assertNotNull("Cannot find divisions options", divisions);
+    Assert.assertTrue("Should have some divisions", divisions.length > 0);
     return divisions;
   }
 
