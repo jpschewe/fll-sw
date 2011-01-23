@@ -68,9 +68,9 @@ ${message}
           for multiple pieces of data.
 	<a href='javascript:hide("UploadTeamsHelp")'>[hide]</a></div>
         
-	  <input type="file" size="32" name="file">
+	  <input type="file" size="32" id='teams_file' name="file">
 	  <input type='hidden' name='uploadRedirect' value="<c:url value='/admin/UploadTeams'/>" />
-	  <input type="submit" value="Upload">
+	  <input type="submit" id='upload_teams' value="Upload">
 	</form>
 	</li>
 
