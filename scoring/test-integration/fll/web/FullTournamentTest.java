@@ -102,9 +102,13 @@ public class FullTournamentTest extends SeleneseTestCase {
 
       loadTeams(conversation);
 
-      createTournamentsForRegions(conversation);
+      createTournamentsForRegions();
 
-      final Connection serverConnection = initializeTournamentsByRegion(conversation);
+      
+      initializeTournamentsByRegion();
+
+      final Connection serverConnection = TestUtils.createTestDBConnection();
+      Assert.assertNotNull("Could not create test database connection", serverConnection);      
 
       IntegrationTestUtils.setTournament(selenium, testTournamentName);
 
@@ -199,9 +203,10 @@ public class FullTournamentTest extends SeleneseTestCase {
    */
   private void initializePlayoffsForDivision(final String division) throws IOException, SAXException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "playoff");    
-    selenium.select("xpath=//form[@name='initialize']//select[@name='division']", "value=" + division);
-    selenium.click("id=initialize_brackets");   
+        + "playoff");
+    selenium.select("xpath=//form[@name='initialize']//select[@name='division']", "value="
+        + division);
+    selenium.click("id=initialize_brackets");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
     Assert.assertFalse(selenium.isTextPresent("Exception"));
@@ -214,7 +219,7 @@ public class FullTournamentTest extends SeleneseTestCase {
    */
   private String[] getDivisions() throws IOException, SAXException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "playoff");    
+        + "playoff");
     final String[] divisions = selenium.getSelectOptions("xpath=//form[@name='initialize']//select[@name='division']");
     Assert.assertNotNull("Cannot find divisions options", divisions);
     Assert.assertTrue("Should have some divisions", divisions.length > 0);
@@ -290,39 +295,25 @@ public class FullTournamentTest extends SeleneseTestCase {
     Assert.assertTrue("Error assigning judges", selenium.isElementPresent("success"));
   }
 
-  private Connection initializeTournamentsByRegion(final WebConversation conversation) throws IOException, SAXException {
-    WebRequest request;
-    WebResponse response;
-    WebForm form;
-    request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "admin/tournamentInitialization.jsp");
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-    form = response.getFormWithName("form");
-    Assert.assertNotNull(form);
-    request = form.getRequest();
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue(response.isHTML());
-    form = response.getFormWithName("verify");
-    Assert.assertNotNull(form);
-    request = form.getRequest();
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue(response.isHTML());
-    Assert.assertNotNull(response.getElementWithID("success"));
+  private void initializeTournamentsByRegion() throws IOException, SAXException {
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+        + "admin/tournamentInitialization.jsp");    
+    selenium.submit("name=form");
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    Assert.assertFalse(selenium.isTextPresent("Exception"));
 
-    final Connection serverConnection = TestUtils.createTestDBConnection();
-    Assert.assertNotNull("Could not create test database connection", serverConnection);
-    return serverConnection;
+
+    selenium.click("id=continue");
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    Assert.assertFalse(selenium.isTextPresent("Exception"));
+    Assert.assertTrue("Error assigning judges", selenium.isElementPresent("success"));
+    
   }
 
-  private void createTournamentsForRegions(final WebConversation conversation) throws IOException, SAXException {
-    WebRequest request;
-    WebResponse response;
-    request = new GetMethodWebRequest(TestUtils.URL_ROOT
+  private void createTournamentsForRegions() throws IOException {
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/AddTournamentsForRegions");
-    response = WebTestUtils.loadPage(conversation, request);
-    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-    Assert.assertNotNull(response.getElementWithID("success"));
+    Assert.assertNotNull(selenium.isElementPresent("id=success"));
   }
 
   private void loadTeams(final WebConversation conversation) throws IOException, SAXException {
@@ -391,10 +382,10 @@ public class FullTournamentTest extends SeleneseTestCase {
 
     // PDF reports need to be done with httpunit
     final WebConversation conversation = new WebConversation();
-     WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-     + "report/finalComputedScores.pdf");
-     WebResponse response = WebTestUtils.loadPage(conversation, request);
-     Assert.assertEquals("application/pdf", response.getContentType());
+    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
+        + "report/finalComputedScores.pdf");
+    WebResponse response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertEquals("application/pdf", response.getContentType());
   }
 
   private void checkRankAndScores(final Connection serverConnection,
