@@ -110,7 +110,7 @@ if(null == errorMessage || "".equals(errorMessage)) {
         </tr>
           
         <tr>
-          <td colspan='2'><input type='submit' value='Next'></td>
+          <td colspan='2'><input type='submit' id='next' value='Next'></td>
         </tr>
           
       </table> 

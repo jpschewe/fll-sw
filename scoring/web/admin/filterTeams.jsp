@@ -86,8 +86,8 @@ while(null != filterColumn) {
         </tr>
 
         <tr>
-          <td><input type='submit' name='apply' value='Apply Changes'></td>
-          <td><input type='submit' name='next' value='Next'>  Click here when all appropriate filters have been applied.</td>
+          <td><input type='submit' id='apply_changes' name='apply' value='Apply Changes'></td>
+          <td><input type='submit' id='next' name='next' value='Next'>  Click here when all appropriate filters have been applied.</td>
       </table>
     </form>
 

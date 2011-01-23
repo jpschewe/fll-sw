@@ -61,7 +61,7 @@ for(String div : divisions) {
 %>
           </select><br>
           <input type='checkbox' name='enableThird' value='yes'/>Check to enable 3rd/4th place brackets<br>
-          <input type='submit' value='Initialize Brackets'/>
+          <input type='submit' id='initialize_brackets' value='Initialize Brackets'/>
           </form>
 
         <li>
@@ -99,7 +99,7 @@ for(int numRounds = 2; numRounds <= numPlayoffRounds+1; numRounds++) {
   out.println(">" + numRounds + "</option>");
 }
 %>
-            <input type='submit' value='Display Brackets'>
+            <input type='submit' id='display_printable_brackets' value='Display Brackets'>
           </form>               
         </li>
 
@@ -139,7 +139,7 @@ for(int numRounds = 2; numRounds <= numPlayoffRounds+1; numRounds++) {
 }
 %>
             </select>
-            <input type='submit' value='Display Brackets'>
+            <input type='submit' id='display_scoregen_brackets' value='Display Brackets'>
           </form>
         </li>
 
