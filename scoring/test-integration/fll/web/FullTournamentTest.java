@@ -100,10 +100,6 @@ public class FullTournamentTest extends SeleneseTestCase {
       final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml");
       IntegrationTestUtils.initializeDatabase(selenium, challengeDocIS, true);
 
-      WebRequest request;
-      WebResponse response;
-      WebForm form;
-
       loadTeams(conversation);
 
       createTournamentsForRegions(conversation);
@@ -128,10 +124,8 @@ public class FullTournamentTest extends SeleneseTestCase {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
 
-      final Document challengeDocument = ChallengeParser
-                                                        .parse(new InputStreamReader(
-                                                                                     FullTournamentTest.class
-                                                                                                             .getResourceAsStream("data/challenge-ft.xml")));
+      final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(
+                                                                                     FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
       Assert.assertNotNull(challengeDocument);
       final Element rootElement = challengeDocument.getDocumentElement();
       final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
@@ -139,29 +133,20 @@ public class FullTournamentTest extends SeleneseTestCase {
       prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?");
       boolean initializedPlayoff = false;
       prep.setString(1, testTournamentName);
+      final String[] divisions = getDivisions(conversation);
       for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
-        request = new GetMethodWebRequest(TestUtils.URL_ROOT
-            + "playoff");
-        response = WebTestUtils.loadPage(conversation, request);
-        Assert.assertTrue(response.isHTML());
-        form = response.getFormWithName("initialize");
-        Assert.assertNotNull(form);
-        final String[] divisions = form.getOptionValues("division");
 
         if (runNumber > numSeedingRounds) {
           if (!initializedPlayoff) {
             // TODO make sure to check the result of checking the seeding rounds
 
             // initialize the playoff brackets with playoff/index.jsp form
-            for (int divIdx = 0; divIdx < divisions.length; ++divIdx) {
+            for (final String division : divisions) {
               if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Initializing playoff brackets for division "
-                    + divisions[divIdx]);
+                    + division);
               }
-              form.setParameter("division", divisions[divIdx]);
-              request = form.getRequest();
-              response = WebTestUtils.loadPage(conversation, request);
-              Assert.assertTrue(response.isHTML());
+              initializePlayoffsForDivision(division);
             }
             initializedPlayoff = true;
           }
@@ -179,10 +164,10 @@ public class FullTournamentTest extends SeleneseTestCase {
 
         if (runNumber > numSeedingRounds
             && runNumber != maxRuns) {
-          for (int divIdx = 0; divIdx < divisions.length; ++divIdx) {
-            printPlayoffScoresheets(divisions[divIdx]);
+          for (final String division : divisions) {
+            printPlayoffScoresheets(division);
             LOGGER.info("Succssfully printed scoresheets round: "
-                + runNumber + "division: " + divisions[divIdx]);
+                + runNumber + "division: " + division);
           }
         }
 
@@ -205,6 +190,38 @@ public class FullTournamentTest extends SeleneseTestCase {
       SQLFunctions.close(testDataConn);
       // Utilities.closeConnection(connection);
     }
+  }
+
+  /**
+   * @param string
+   * @throws SAXException
+   * @throws IOException
+   */
+  private void initializePlayoffsForDivision(final String division) throws IOException, SAXException {
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+        + "playoff");    
+    selenium.select("xpath=//form[@name='initialize']//select[@name='division']", "value=" + division);
+    selenium.click("id=initialize_brackets");   
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+    Assert.assertFalse(selenium.isTextPresent("Exception"));
+  }
+
+  /**
+   * @param conversation
+   * @return
+   * @throws SAXException
+   * @throws IOException
+   */
+  private String[] getDivisions(final WebConversation conversation) throws IOException, SAXException {
+    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
+        + "playoff");
+    WebResponse response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertTrue(response.isHTML());
+    WebForm form = response.getFormWithName("initialize");
+    Assert.assertNotNull(form);
+    final String[] divisions = form.getOptionValues("division");
+    return divisions;
   }
 
   private void assignTableLabels() throws IOException, SAXException {
@@ -519,10 +536,8 @@ public class FullTournamentTest extends SeleneseTestCase {
 
       // insert scores into zip
       for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
-                                                                                  challengeDocument
-                                                                                                   .getDocumentElement()
-                                                                                                   .getElementsByTagName(
-                                                                                                                         "subjectiveCategory"))) {
+                                                                                  challengeDocument.getDocumentElement()
+                                                                                                   .getElementsByTagName("subjectiveCategory"))) {
         final String category = subjectiveElement.getAttribute("name");
         final String title = subjectiveElement.getAttribute("title");
         // find appropriate table model
@@ -557,8 +572,7 @@ public class FullTournamentTest extends SeleneseTestCase {
             tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);
           } else {
             for (final Element goalElement : new NodelistElementCollectionAdapter(
-                                                                                  subjectiveElement
-                                                                                                   .getElementsByTagName("goal"))) {
+                                                                                  subjectiveElement.getElementsByTagName("goal"))) {
               final String goalName = goalElement.getAttribute("name");
               final String goalTitle = goalElement.getAttribute("title");
 
@@ -656,8 +670,7 @@ public class FullTournamentTest extends SeleneseTestCase {
             + teamNumber + " run: " + runNumber);
       }
 
-      prep = testDataConn
-                         .prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?");
+      prep = testDataConn.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?");
       prep.setString(1, testTournament);
       prep.setInt(2, runNumber);
       prep.setInt(3, teamNumber);
@@ -681,8 +694,7 @@ public class FullTournamentTest extends SeleneseTestCase {
           // walk over challenge descriptor to get all element names and then
           // use the values from rs
           for (final Element element : new NodelistElementCollectionAdapter(
-                                                                            performanceElement
-                                                                                              .getElementsByTagName("goal"))) {
+                                                                            performanceElement.getElementsByTagName("goal"))) {
             final String name = element.getAttribute("name");
             final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
             final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
@@ -779,8 +791,7 @@ public class FullTournamentTest extends SeleneseTestCase {
             + teamNumber + " run: " + runNumber);
       }
 
-      prep = testDataConn
-                         .prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?");
+      prep = testDataConn.prepareStatement("SELECT * FROM Performance WHERE Tournament = ? AND RunNumber = ? AND TeamNumber = ?");
       prep.setString(1, testTournament);
       prep.setInt(2, runNumber);
       prep.setInt(3, teamNumber);
@@ -810,8 +821,7 @@ public class FullTournamentTest extends SeleneseTestCase {
           // walk over challenge descriptor to get all element names and then
           // use the values from rs
           for (final Element element : new NodelistElementCollectionAdapter(
-                                                                            performanceElement
-                                                                                              .getElementsByTagName("goal"))) {
+                                                                            performanceElement.getElementsByTagName("goal"))) {
             final String name = element.getAttribute("name");
             final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
             final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
