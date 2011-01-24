@@ -61,13 +61,13 @@ function editFlagBoxClicked() {
 }
 function reloadRuns() {
 
+document.body.removeChild(document.getElementById('reloadruns'));
 document.verify.TeamNumber.length = 0;
 var s = document.createElement('script');
 s.type='text/javascript';
 s.id = 'reloadruns';
-document.body.appendChild(s);
 s.src='unverifiedRunsObject.jsp?' + Math.random();
-document.body.removeChild(document.getElementById('reloadruns'));
+document.body.appendChild(s);
 }
 
 
@@ -194,7 +194,7 @@ setInterval('reloadRuns()',5000);
 
 </table> <!-- outer table -->
 
-    
+        <script type="text/javascript" id="reloadruns" src="unverifiedRunsObject.jsp"></script>
     
   </body>
 </html>
