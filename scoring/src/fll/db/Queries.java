@@ -2426,6 +2426,56 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
   }
+
+  /**
+   * Query for whether the specified team has advanced to the specified (playoff) round.
+   * @param connection The database connection to use.
+   * @param roundNumber The round number to check. Must be greater than # of seeding rounds.
+   * @param division The division to check in the current tournament.
+   * @return true if team has entry in playoff table for the given round.
+   * @throws SQLException if database access fails.
+   * @throws RuntimeException
+   */
+  public static boolean didTeamReachPlayoffRound(final Connection connection,
+                                                 final int roundNumber,
+                                                 final int teamNumber,
+                                                 final String division) throws SQLException, RuntimeException {
+    return didTeamReachPlayoffRound(connection, getCurrentTournament(connection),
+                                    roundNumber, teamNumber, division);
+  }
+  
+  public static boolean didTeamReachPlayoffRound(final Connection connection,
+                                                 final int tournamentID,
+                                                 final int roundNumber,
+                                                 final int teamNumber,
+                                                 final String division) throws SQLException, RuntimeException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT Count(*) FROM PlayoffData"
+          + " WHERE Tournament = ?"
+          + " AND PlayoffRound = ?"
+          + " AND Team = ?"
+          + " AND event_division = ?");
+      prep.setInt(1, tournamentID);
+      prep.setInt(2, roundNumber-getNumSeedingRounds(connection, tournamentID));
+      prep.setInt(3, teamNumber);
+      prep.setString(4, division);
+      rs = prep.executeQuery();
+      if (!rs.next()) {
+        throw new RuntimeException("Query to check for team # "
+                                   + Integer.toString(teamNumber)
+                                   + "in round "
+                                   + Integer.toString(roundNumber)
+                                   + " failed.");
+      } else {
+        return rs.getInt(1) == 1;
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
   
   /**
    * Get the color for a division index. Below are the colors used.
