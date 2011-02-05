@@ -31,7 +31,7 @@ final String division = request.getParameter("division");
     <%} else {%>
       [Division: <%=division%>]
     <%} %></h2>
-      <p>Teams with fewer runs than seeding rounds. Teams with no runs are excluded from this check.
+      <p>Teams with fewer runs than seeding rounds. Teams with no runs are excluded from this check.</p>
         <ul>
 <%
 final List<Team> less = Queries.getTeamsNeedingSeedingRuns(connection, tournamentTeams, division, true);
@@ -46,9 +46,8 @@ if(lessIter.hasNext()) {
 }
 %>
         </ul>
-      </p>
 
-      <p>Teams with more runs than seeding rounds:
+      <p>Teams with more runs than seeding rounds:</p>
         <ul>
 <%
 final List<Team> more = Queries.getTeamsWithExtraRuns(connection, tournamentTeams, division, true);
@@ -63,7 +62,6 @@ if(moreIter.hasNext()) {
 }
 %>
         </ul>
-      </p>
       <p><a href="index.jsp">Back to Playoff menu</a></p>
 
 
