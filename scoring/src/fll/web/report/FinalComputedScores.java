@@ -181,10 +181,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
         final int numColumnsRightOfSubjective = 2;
         final float[] relativeWidths = new float[nonZeroWeights
             + numColumnsLeftOfSubjective + numColumnsRightOfSubjective];
-        relativeWidths[0] = 4f;
+        relativeWidths[0] = 3f;
         relativeWidths[1] = 1.0f;
         if(null != schedule) {
-          relativeWidths[2] = 1.0f;
+          relativeWidths[2] = 0.5f;
         }
         relativeWidths[relativeWidths.length
             - numColumnsRightOfSubjective] = 1.5f;
@@ -208,10 +208,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
         // /////////////////////////////////////////////////////////////////////
         // Write the table column headers
         // /////////////////////////////////////////////////////////////////////
-        final PdfPCell teamCell = new PdfPCell(new Phrase("Organization / Team # / Team Name", ARIAL_8PT_BOLD));
-        teamCell.setBorder(0);
-        teamCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
-        divTable.addCell(teamCell);
+        // team information
+        final PdfPCell organizationCell = new PdfPCell(new Phrase("Organization", ARIAL_8PT_BOLD));
+        organizationCell.setBorder(0);
+        organizationCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
+        divTable.addCell(organizationCell);
 
         // judging group
         if (null != schedule) {
@@ -260,9 +261,16 @@ public final class FinalComputedScores extends BaseFLLServlet {
         // Write a table row with the relative weights of the subjective scores
         // /////////////////////////////////////////////////////////////////////
 
+        final PdfPCell teamCell = new PdfPCell(new Phrase("Team # / Team Name", ARIAL_8PT_BOLD));
+        teamCell.setBorder(0);
+        teamCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
+        divTable.addCell(teamCell);
+        
         final Paragraph wPar = new Paragraph("Weight:", ARIAL_8PT_NORMAL);
         final PdfPCell wCell = new PdfPCell(wPar);
-        wCell.setColspan(numColumnsLeftOfSubjective);
+        if(null != schedule) {
+          wCell.setColspan(2);
+        }
         wCell.setBorder(0);
         wCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
         divTable.addCell(wCell);
