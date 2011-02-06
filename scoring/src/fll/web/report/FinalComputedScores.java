@@ -327,17 +327,16 @@ public final class FinalComputedScores extends BaseFLLServlet {
                 + catName);
           }
         }
-        // TODO make prepared statement
         query.append(" FROM Teams,FinalScores,current_tournament_teams");
         query.append(" WHERE FinalScores.TeamNumber = Teams.TeamNumber");
-        query.append(" AND FinalScores.Tournament = "
-            + tournament.getTournamentID());
+        query.append(" AND FinalScores.Tournament = ?");
         query.append(" AND current_tournament_teams.event_division = ?");
         query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
         query.append(" ORDER BY FinalScores.OverallScore "
             + ascDesc + ", Teams.TeamNumber");
         prep = connection.prepareStatement(query.toString());
-        prep.setString(1, division);
+        prep.setInt(1, tournament.getTournamentID());
+        prep.setString(2, division);
         teamsRS = prep.executeQuery();
         while (teamsRS.next()) {
           final int teamNumber = teamsRS.getInt(3);
@@ -393,38 +392,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           rawLabel.setBorder(0);
           curteam.addCell(rawLabel);
 
-          // Next, one column containing the raw score for each subjective
-          // category with weight > 0
-          for (int cat = 0; cat < subjectiveCategories.size(); cat++) {
-            final Element catElement = subjectiveCategories.get(cat);
-            final double catWeight = weights[cat];
-            if (catWeight > 0.0) {
-              final String catName = catElement.getAttribute("name");
-              rawScoreRS = stmt.executeQuery("SELECT ComputedTotal"
-                  // TODO make prepared statement
-                  + " FROM " + catName + " WHERE TeamNumber = " + teamNumber + " AND Tournament = "
-                  + tournament.getTournamentID() + " ORDER BY ComputedTotal " + ascDesc);
-              boolean scoreSeen = false;
-              final StringBuilder rawScoreText = new StringBuilder();
-              while (rawScoreRS.next()) {
-                final double v = rawScoreRS.getDouble(1);
-                if (!rawScoreRS.wasNull()) {
-                  if (scoreSeen) {
-                    rawScoreText.append(", ");
-                  } else {
-                    scoreSeen = true;
-                  }
-                  rawScoreText.append(Utilities.NUMBER_FORMAT_INSTANCE.format(v));
-                }
-              }
-              final PdfPCell subjCell = new PdfPCell((!scoreSeen ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)
-                  : new Phrase(rawScoreText.toString(), ARIAL_8PT_NORMAL)));
-              subjCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-              subjCell.setBorder(0);
-              curteam.addCell(subjCell);
-              rawScoreRS.close();
-            }
-          }
+          insertRawScoreColumns(connection, tournament, ascDesc, subjectiveCategories, weights, teamNumber, curteam);
 
           // Column for the highest performance score of the seeding rounds
           rawScoreRS = stmt.executeQuery("SELECT score FROM performance_seeding_max"
@@ -555,6 +523,56 @@ public final class FinalComputedScores extends BaseFLLServlet {
       SQLFunctions.close(stmt);
       SQLFunctions.close(teamsStmt);
       SQLFunctions.close(prep);
+    }
+  }
+
+  private void insertRawScoreColumns(final Connection connection,
+                                     final Tournament tournament,
+                                     final String ascDesc,
+                                     final List<Element> subjectiveCategories,
+                                     final double[] weights,
+                                     final int teamNumber,
+                                     final PdfPTable curteam) throws SQLException {
+    Statement stmt = null;
+    ResultSet rawScoreRS = null;
+    try {
+      stmt = connection.createStatement();
+
+      // Next, one column containing the raw score for each subjective
+      // category with weight > 0
+      for (int cat = 0; cat < subjectiveCategories.size(); cat++) {
+        final Element catElement = subjectiveCategories.get(cat);
+        final double catWeight = weights[cat];
+        if (catWeight > 0.0) {
+          final String catName = catElement.getAttribute("name");
+          rawScoreRS = stmt.executeQuery("SELECT ComputedTotal"
+              // TODO make prepared statement
+              + " FROM " + catName + " WHERE TeamNumber = " + teamNumber + " AND Tournament = "
+              + tournament.getTournamentID() + " ORDER BY ComputedTotal " + ascDesc);
+          boolean scoreSeen = false;
+          final StringBuilder rawScoreText = new StringBuilder();
+          while (rawScoreRS.next()) {
+            final double v = rawScoreRS.getDouble(1);
+            if (!rawScoreRS.wasNull()) {
+              if (scoreSeen) {
+                rawScoreText.append(", ");
+              } else {
+                scoreSeen = true;
+              }
+              rawScoreText.append(Utilities.NUMBER_FORMAT_INSTANCE.format(v));
+            }
+          }
+          final PdfPCell subjCell = new PdfPCell((!scoreSeen ? new Phrase("No Score", ARIAL_8PT_NORMAL_RED)
+              : new Phrase(rawScoreText.toString(), ARIAL_8PT_NORMAL)));
+          subjCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+          subjCell.setBorder(0);
+          curteam.addCell(subjCell);
+          rawScoreRS.close();
+        }
+      }
+    } finally {
+      SQLFunctions.close(rawScoreRS);
+      SQLFunctions.close(stmt);
     }
   }
 
