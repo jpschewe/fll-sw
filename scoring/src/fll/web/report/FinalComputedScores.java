@@ -13,7 +13,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -138,7 +137,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
     try {
       // This creates our new PDF document and declares it to be in landscape
       // orientation
-      // TODO should rotate after some number of columns?
       final Document pdfDoc = new Document(PageSize.LETTER);
       final PdfWriter writer = PdfWriter.getInstance(pdfDoc, out);
       writer.setPageEvent(pageHandler);
@@ -183,9 +181,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
         final float[] relativeWidths = new float[numColumnsLeftOfSubjective
             + nonZeroWeights + numColumnsRightOfSubjective];
         relativeWidths[0] = 3f;
-        relativeWidths[1] = 1.0f;
         if (null != schedule) {
-          relativeWidths[2] = 0.5f;
+          relativeWidths[1] = 1.0f;
+          relativeWidths[2] = 1.0f;
+        } else {
+          relativeWidths[1] = 1.0f;
         }
         relativeWidths[relativeWidths.length
             - numColumnsRightOfSubjective] = 1.5f;
@@ -388,7 +388,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
           }
 
           // Second column is "Raw:"
-          curteam.addCell(new Phrase("Raw:", ARIAL_8PT_NORMAL));
+          final PdfPCell rawLabel = new PdfPCell(new Phrase("Raw:", ARIAL_8PT_NORMAL));
+          rawLabel.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
+          rawLabel.setBorder(0);
+          curteam.addCell(rawLabel);
 
           // Next, one column containing the raw score for each subjective
           // category with weight > 0
