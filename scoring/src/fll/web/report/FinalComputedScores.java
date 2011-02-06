@@ -64,7 +64,7 @@ import fll.xml.XMLUtils;
 public final class FinalComputedScores extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-  
+
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -119,10 +119,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
     final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
 
     final TournamentSchedule schedule;
-    //FIXME ticket:78
+    // FIXME ticket:78
     if (TournamentSchedule.scheduleExistsInDatabase(connection, tournament.getTournamentID())) {
-      if(LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Found a schedule for tournament: " + tournament);
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Found a schedule for tournament: "
+            + tournament);
       }
       schedule = new TournamentSchedule(connection, tournament.getTournamentID());
     } else {
@@ -137,7 +138,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
     try {
       // This creates our new PDF document and declares it to be in landscape
       // orientation
-      final Document pdfDoc = new Document(PageSize.LETTER);
+      //FIXME try setting landscape
+      final Document pdfDoc = new Document(PageSize.LETTER.rotate());
       final PdfWriter writer = PdfWriter.getInstance(pdfDoc, out);
       writer.setPageEvent(pageHandler);
 
@@ -149,9 +151,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       final Element rootElement = challengeDocument.getDocumentElement();
 
       final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
-                                                                                      rootElement
-                                                                                                 .getElementsByTagName("subjectiveCategory"))
-                                                                                                                                             .asList();
+                                                                                      rootElement.getElementsByTagName("subjectiveCategory")).asList();
       stmt = connection.createStatement();
       teamsStmt = connection.createStatement();
 
@@ -180,11 +180,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
           numColumnsLeftOfSubjective = 3;
         }
         final int numColumnsRightOfSubjective = 2;
-        final float[] relativeWidths = new float[nonZeroWeights
-            + numColumnsLeftOfSubjective + numColumnsRightOfSubjective];
+        final float[] relativeWidths = new float[numColumnsLeftOfSubjective
+            + nonZeroWeights + numColumnsRightOfSubjective];
         relativeWidths[0] = 3f;
         relativeWidths[1] = 1.0f;
-        if(null != schedule) {
+        if (null != schedule) {
           relativeWidths[2] = 0.5f;
         }
         relativeWidths[relativeWidths.length
@@ -266,10 +266,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
         teamCell.setBorder(0);
         teamCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
         divTable.addCell(teamCell);
-        
+
         final Paragraph wPar = new Paragraph("Weight:", ARIAL_8PT_NORMAL);
         final PdfPCell wCell = new PdfPCell(wPar);
-        if(null != schedule) {
+        if (null != schedule) {
           wCell.setColspan(2);
         }
         wCell.setBorder(0);
@@ -310,8 +310,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         // the horizontal line.
 
         final StringBuilder query = new StringBuilder();
-        query
-             .append("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,FinalScores.OverallScore,FinalScores.performance");
+        query.append("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,FinalScores.OverallScore,FinalScores.performance");
         for (int cat = 0; cat < catElements.length; cat++) {
           if (weights[cat] > 0.0) {
             final String catName = catElements[cat].getAttribute("name");
@@ -362,13 +361,15 @@ public final class FinalComputedScores extends BaseFLLServlet {
             // insert judging station here
             final TeamScheduleInfo si = schedule.getSchedInfoForTeam(teamNumber);
             if (null == si) {
-              if(LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Got null sched info for team " + teamNumber);
+              if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("Got null sched info for team "
+                    + teamNumber);
               }
               curteam.addCell("");
             } else {
-              if(LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Found judging station " + si.getJudgingStation() + " for team " + teamNumber);
+              if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("Found judging station "
+                    + si.getJudgingStation() + " for team " + teamNumber);
               }
               final PdfPCell judgeStation = new PdfPCell(new Phrase(si.getJudgingStation(), ARIAL_8PT_NORMAL));
               judgeStation.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
@@ -446,12 +447,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
           teamNameCol.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_LEFT);
           curteam.addCell(teamNameCol);
 
-
           // Second column contains "Scaled:"
           final PdfPCell scaledCell = new PdfPCell(new Phrase("Scaled:", ARIAL_8PT_NORMAL));
           scaledCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
           scaledCell.setBorder(0);
-          if(null != schedule) {
+          if (null != schedule) {
             scaledCell.setColspan(2);
           }
           curteam.addCell(scaledCell);
