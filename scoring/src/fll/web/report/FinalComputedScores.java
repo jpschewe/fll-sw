@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -119,7 +120,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
     final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
 
     final TournamentSchedule schedule;
-    // FIXME ticket:78
     if (TournamentSchedule.scheduleExistsInDatabase(connection, tournament.getTournamentID())) {
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Found a schedule for tournament: "
@@ -138,8 +138,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
     try {
       // This creates our new PDF document and declares it to be in landscape
       // orientation
-      //FIXME try setting landscape
-      final Document pdfDoc = new Document(PageSize.LETTER.rotate());
+      // TODO should rotate after some number of columns?
+      final Document pdfDoc = new Document(PageSize.LETTER);
       final PdfWriter writer = PdfWriter.getInstance(pdfDoc, out);
       writer.setPageEvent(pageHandler);
 
@@ -191,7 +191,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
             - numColumnsRightOfSubjective] = 1.5f;
         relativeWidths[relativeWidths.length
             - numColumnsRightOfSubjective + 1] = 1.5f;
-        for (int i = numColumnsLeftOfSubjective; i < numColumnsRightOfSubjective
+        for (int i = numColumnsLeftOfSubjective; i < numColumnsLeftOfSubjective
             + nonZeroWeights; i++) {
           relativeWidths[i] = 1.5f;
         }
@@ -205,6 +205,15 @@ public final class FinalComputedScores extends BaseFLLServlet {
         final PdfPCell headerCell = new PdfPCell(header);
         headerCell.setColspan(relativeWidths.length);
         divTable.addCell(headerCell);
+
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("num relative widths: "
+              + relativeWidths.length);
+          for (int i = 0; i < relativeWidths.length; ++i) {
+            LOGGER.trace("\twidth["
+                + i + "] = " + relativeWidths[i]);
+          }
+        }
 
         // /////////////////////////////////////////////////////////////////////
         // Write the table column headers
