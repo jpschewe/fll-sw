@@ -135,16 +135,9 @@ public final class FinalComputedScores extends BaseFLLServlet {
     ResultSet teamsRS = null;
     PreparedStatement prep = null;
     try {
-      // This creates our new PDF document and declares it to be in landscape
+      // This creates our new PDF document and declares it to be in portrait
       // orientation
-      final Document pdfDoc = new Document(PageSize.LETTER);
-      final PdfWriter writer = PdfWriter.getInstance(pdfDoc, out);
-      writer.setPageEvent(pageHandler);
-
-      // Measurements are always in points (72 per inch) - This sets up 1/2 inch
-      // margins
-      pdfDoc.setMargins(0.5f * 72, 0.5f * 72, 0.5f * 72, 0.5f * 72);
-      pdfDoc.open();
+      final Document pdfDoc = createPdfDoc(out, pageHandler);
 
       final Element rootElement = challengeDocument.getDocumentElement();
 
@@ -215,104 +208,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           }
         }
 
-        // /////////////////////////////////////////////////////////////////////
-        // Write the table column headers
-        // /////////////////////////////////////////////////////////////////////
-        // team information
-        final PdfPCell organizationCell = new PdfPCell(new Phrase("Organization", ARIAL_8PT_BOLD));
-        organizationCell.setBorder(0);
-        organizationCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
-        divTable.addCell(organizationCell);
-
-        // judging group
-        if (null != schedule) {
-          final Paragraph judgingStation = new Paragraph("Judging", ARIAL_8PT_BOLD);
-          judgingStation.add(Chunk.NEWLINE);
-          judgingStation.add(new Chunk("Station"));
-          final PdfPCell osCell = new PdfPCell(judgingStation);
-          osCell.setBorder(0);
-          osCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-          osCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
-          divTable.addCell(osCell);
-        }
-
-        divTable.addCell(""); // weight/raw&scaled
-
-        for (int cat = 0; cat < catElements.length; cat++) {
-          if (weights[cat] > 0.0) {
-            final String catTitle = catElements[cat].getAttribute("title");
-
-            final Paragraph catPar = new Paragraph(catTitle, ARIAL_8PT_BOLD);
-            final PdfPCell catCell = new PdfPCell(catPar);
-            catCell.setBorder(0);
-            catCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-            catCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
-            divTable.addCell(catCell);
-          }
-        }
-
-        final Paragraph perfPar = new Paragraph("Performance", ARIAL_8PT_BOLD);
-        final PdfPCell perfCell = new PdfPCell(perfPar);
-        perfCell.setBorder(0);
-        perfCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-        perfCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
-        divTable.addCell(perfCell);
-
-        final Paragraph overallScore = new Paragraph("Overall", ARIAL_8PT_BOLD);
-        overallScore.add(Chunk.NEWLINE);
-        overallScore.add(new Chunk("Score"));
-        final PdfPCell osCell = new PdfPCell(overallScore);
-        osCell.setBorder(0);
-        osCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-        osCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
-        divTable.addCell(osCell);
-
-        // /////////////////////////////////////////////////////////////////////
-        // Write a table row with the relative weights of the subjective scores
-        // /////////////////////////////////////////////////////////////////////
-
-        final PdfPCell teamCell = new PdfPCell(new Phrase("Team # / Team Name", ARIAL_8PT_BOLD));
-        teamCell.setBorder(0);
-        teamCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
-        divTable.addCell(teamCell);
-
-        final Paragraph wPar = new Paragraph("Weight:", ARIAL_8PT_NORMAL);
-        final PdfPCell wCell = new PdfPCell(wPar);
-        if (null != schedule) {
-          wCell.setColspan(2);
-        }
-        wCell.setBorder(0);
-        wCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-        divTable.addCell(wCell);
-
-        final PdfPCell[] wCells = new PdfPCell[subjectiveCategories.size()];
-        final Paragraph[] wPars = new Paragraph[subjectiveCategories.size()];
-        for (int cat = 0; cat < catElements.length; cat++) {
-          if (weights[cat] > 0.0) {
-            wPars[cat] = new Paragraph(Double.toString(weights[cat]), ARIAL_8PT_NORMAL);
-            wCells[cat] = new PdfPCell(wPars[cat]);
-            wCells[cat].setBorder(0);
-            wCells[cat].setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-            divTable.addCell(wCells[cat]);
-          }
-        }
-
-        final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
-        final double perfWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(performanceElement.getAttribute("weight"))
-                                                                  .doubleValue();
-        final Paragraph perfWeightPar = new Paragraph(Double.toString(perfWeight), ARIAL_8PT_NORMAL);
-        final PdfPCell perfWeightCell = new PdfPCell(perfWeightPar);
-        perfWeightCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-        perfWeightCell.setBorder(0);
-        divTable.addCell(perfWeightCell);
-
-        divTable.addCell("");
-
-        PdfPCell blankCell = new PdfPCell();
-        blankCell.setBorder(0);
-        blankCell.setBorderWidthBottom(1.0f);
-        blankCell.setColspan(relativeWidths.length);
-        divTable.addCell(blankCell);
+        writeColumnHeaders(schedule, weights, catElements, relativeWidths, rootElement, subjectiveCategories, divTable);
 
         divTable.setHeaderRows(4); // Cause the first 4 rows to be repeated on
         // each page - 1 row for box header, 2 rows text headers and 1 for
@@ -484,7 +380,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
           // This is an empty row in the team table that is added to put a
           // horizontal rule under the team's score in the display
-          blankCell = new PdfPCell();
+          final PdfPCell blankCell = new PdfPCell();
           blankCell.setBorder(0);
           blankCell.setBorderWidthBottom(0.5f);
           blankCell.setBorderColorBottom(BaseColor.GRAY);
@@ -524,6 +420,130 @@ public final class FinalComputedScores extends BaseFLLServlet {
       SQLFunctions.close(teamsStmt);
       SQLFunctions.close(prep);
     }
+  }
+
+  /**
+   * @throws ParseException
+   */
+  private void writeColumnHeaders(final TournamentSchedule schedule,
+                                  final double[] weights,
+                                  final Element[] catElements,
+                                  final float[] relativeWidths,
+                                  final Element rootElement,
+                                  final List<Element> subjectiveCategories,
+                                  final PdfPTable divTable) throws ParseException {
+
+    // /////////////////////////////////////////////////////////////////////
+    // Write the table column headers
+    // /////////////////////////////////////////////////////////////////////
+    // team information
+    final PdfPCell organizationCell = new PdfPCell(new Phrase("Organization", ARIAL_8PT_BOLD));
+    organizationCell.setBorder(0);
+    organizationCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
+    divTable.addCell(organizationCell);
+
+    // judging group
+    if (null != schedule) {
+      final Paragraph judgingStation = new Paragraph("Judging", ARIAL_8PT_BOLD);
+      judgingStation.add(Chunk.NEWLINE);
+      judgingStation.add(new Chunk("Station"));
+      final PdfPCell osCell = new PdfPCell(judgingStation);
+      osCell.setBorder(0);
+      osCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+      osCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
+      divTable.addCell(osCell);
+    }
+
+    divTable.addCell(""); // weight/raw&scaled
+
+    for (int cat = 0; cat < catElements.length; cat++) {
+      if (weights[cat] > 0.0) {
+        final String catTitle = catElements[cat].getAttribute("title");
+
+        final Paragraph catPar = new Paragraph(catTitle, ARIAL_8PT_BOLD);
+        final PdfPCell catCell = new PdfPCell(catPar);
+        catCell.setBorder(0);
+        catCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+        catCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
+        divTable.addCell(catCell);
+      }
+    }
+
+    final Paragraph perfPar = new Paragraph("Performance", ARIAL_8PT_BOLD);
+    final PdfPCell perfCell = new PdfPCell(perfPar);
+    perfCell.setBorder(0);
+    perfCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+    perfCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
+    divTable.addCell(perfCell);
+
+    final Paragraph overallScore = new Paragraph("Overall", ARIAL_8PT_BOLD);
+    overallScore.add(Chunk.NEWLINE);
+    overallScore.add(new Chunk("Score"));
+    final PdfPCell osCell = new PdfPCell(overallScore);
+    osCell.setBorder(0);
+    osCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+    osCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
+    divTable.addCell(osCell);
+
+    // /////////////////////////////////////////////////////////////////////
+    // Write a table row with the relative weights of the subjective scores
+    // /////////////////////////////////////////////////////////////////////
+
+    final PdfPCell teamCell = new PdfPCell(new Phrase("Team # / Team Name", ARIAL_8PT_BOLD));
+    teamCell.setBorder(0);
+    teamCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
+    divTable.addCell(teamCell);
+
+    final Paragraph wPar = new Paragraph("Weight:", ARIAL_8PT_NORMAL);
+    final PdfPCell wCell = new PdfPCell(wPar);
+    if (null != schedule) {
+      wCell.setColspan(2);
+    }
+    wCell.setBorder(0);
+    wCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
+    divTable.addCell(wCell);
+
+    final PdfPCell[] wCells = new PdfPCell[subjectiveCategories.size()];
+    final Paragraph[] wPars = new Paragraph[subjectiveCategories.size()];
+    for (int cat = 0; cat < catElements.length; cat++) {
+      if (weights[cat] > 0.0) {
+        wPars[cat] = new Paragraph(Double.toString(weights[cat]), ARIAL_8PT_NORMAL);
+        wCells[cat] = new PdfPCell(wPars[cat]);
+        wCells[cat].setBorder(0);
+        wCells[cat].setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+        divTable.addCell(wCells[cat]);
+      }
+    }
+
+    final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
+    final double perfWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(performanceElement.getAttribute("weight"))
+                                                              .doubleValue();
+    final Paragraph perfWeightPar = new Paragraph(Double.toString(perfWeight), ARIAL_8PT_NORMAL);
+    final PdfPCell perfWeightCell = new PdfPCell(perfWeightPar);
+    perfWeightCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+    perfWeightCell.setBorder(0);
+    divTable.addCell(perfWeightCell);
+
+    divTable.addCell("");
+
+    PdfPCell blankCell = new PdfPCell();
+    blankCell.setBorder(0);
+    blankCell.setBorderWidthBottom(1.0f);
+    blankCell.setColspan(relativeWidths.length);
+    divTable.addCell(blankCell);
+  }
+
+  private Document createPdfDoc(final OutputStream out,
+                                final SimpleFooterHandler pageHandler) throws DocumentException {
+    final Document pdfDoc = new Document(PageSize.LETTER);
+    final PdfWriter writer = PdfWriter.getInstance(pdfDoc, out);
+    writer.setPageEvent(pageHandler);
+
+    // Measurements are always in points (72 per inch) - This sets up 1/2 inch
+    // margins
+    pdfDoc.setMargins(0.5f * 72, 0.5f * 72, 0.5f * 72, 0.5f * 72);
+    pdfDoc.open();
+    return pdfDoc;
   }
 
   private void insertRawScoreColumns(final Connection connection,
