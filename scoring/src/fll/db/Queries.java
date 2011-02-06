@@ -1064,8 +1064,11 @@ public final class Queries {
 
           }
         } else {
-          throw new RuntimeException("Team "
-              + teamNumber + " could not be found in the playoff table for playoff round " + playoffRun);
+            // Do nothing - team didn't get entered into the PlayoffData table.
+            // This should not happen, but we also cannot get here unless a score
+            // got entered for the team in the Performance table, in which case we
+            // want to allow the web interface to be able to delete that score to
+            // remove the score from the Performance table.
         }
       }
     } finally {
