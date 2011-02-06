@@ -67,11 +67,8 @@ public final class Judges {
     final int tournament = Queries.getCurrentTournament(connection);
 
     final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
-                                                                                    challengeDocument
-                                                                                                     .getDocumentElement()
-                                                                                                     .getElementsByTagName(
-                                                                                                                           "subjectiveCategory"))
-                                                                                                                                                 .asList();
+                                                                                    challengeDocument.getDocumentElement()
+                                                                                                     .getElementsByTagName("subjectiveCategory")).asList();
 
     // count the number of rows present
     int rowIndex = 0;
@@ -122,12 +119,10 @@ public final class Judges {
     final List<String> divisions = Queries.getEventDivisions(connection);
     divisions.add(0, ALL_DIVISIONS);
 
-    out
-       .println("<p>Judges ID's must be unique.  They can be just the name of the judge.  Keep in mind that this ID needs to be entered on the judging forms.  There must be at least 1 judge for each category.</p>");
+    out.println("<p>Judges ID's must be unique.  They can be just the name of the judge.  Keep in mind that this ID needs to be entered on the judging forms.  There must be at least 1 judge for each category.</p>");
 
     if (checkForEnteredSubjectiveScores(connection, subjectiveCategories, tournament)) {
-      out
-         .println("<p class='error'>Subjective scores have already been entered for this tournament, changing the judges may cause some scores to be deleted</p>");
+      out.println("<p class='error'>Subjective scores have already been entered for this tournament, changing the judges may cause some scores to be deleted</p>");
     }
     out.println("<table border='1'><tr><th>ID</th><th>Category</th><th>Division</th></tr>");
 
@@ -189,6 +184,7 @@ public final class Judges {
     out.println("</form>");
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
   private static boolean checkForEnteredSubjectiveScores(final Connection connection,
                                                          final List<Element> subjectiveCategories,
                                                          final int tournament) throws SQLException {
@@ -335,8 +331,7 @@ public final class Judges {
     if (error.length() > 0) {
       return error.toString();
     } else {
-      out
-         .println("<p>If everything looks ok, click Commit, otherwise click Cancel and you'll go back to the edit page.</p>");
+      out.println("<p>If everything looks ok, click Commit, otherwise click Cancel and you'll go back to the edit page.</p>");
       // generate final table with submit button
       out.println("<table border='1'><tr><th>ID</th><th>Category</th><th>Division</th></tr>");
 
@@ -417,8 +412,7 @@ public final class Judges {
       prep = null;
 
       // walk request parameters and insert data into database
-      prep = connection
-                       .prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES(?, ?, ?, ?)");
+      prep = connection.prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES(?, ?, ?, ?)");
       prep.setInt(4, tournament);
       int row = 0;
       String id = request.getParameter("id"

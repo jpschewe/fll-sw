@@ -156,14 +156,13 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
     Queries.updateSubjectiveScoreTotals(challengeDocument, connection);
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")
   private static void removeNullRows(final int currentTournament,
                                      final Connection connection,
                                      final String categoryName,
                                      final Element categoryElement) throws SQLException {
     final List<Element> goalDescriptions = new NodelistElementCollectionAdapter(
-                                                                                categoryElement
-                                                                                               .getElementsByTagName("goal"))
-                                                                                                                             .asList();
+                                                                                categoryElement.getElementsByTagName("goal")).asList();
     PreparedStatement prep = null;
     try {
       final StringBuffer sql = new StringBuffer();
@@ -185,15 +184,14 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
     }
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")
   private static void saveCategoryData(final int currentTournament,
                                        final Connection connection,
                                        final Element scoreCategoryElement,
                                        final String categoryName,
                                        final Element categoryElement) throws SQLException, ParseException {
     final List<Element> goalDescriptions = new NodelistElementCollectionAdapter(
-                                                                                categoryElement
-                                                                                               .getElementsByTagName("goal"))
-                                                                                                                             .asList();
+                                                                                categoryElement.getElementsByTagName("goal")).asList();
 
     PreparedStatement insertPrep = null;
     PreparedStatement updatePrep = null;
@@ -226,8 +224,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       updatePrep.setInt(numGoals + 3, currentTournament);
 
       for (final Element scoreElement : new NodelistElementCollectionAdapter(
-                                                                             scoreCategoryElement
-                                                                                                 .getElementsByTagName("score"))) {
+                                                                             scoreCategoryElement.getElementsByTagName("score"))) {
 
         if (scoreElement.hasAttribute("modified")
             && "true".equalsIgnoreCase(scoreElement.getAttribute("modified"))) {
