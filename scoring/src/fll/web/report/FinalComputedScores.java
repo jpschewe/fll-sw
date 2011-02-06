@@ -369,7 +369,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
               if(LOGGER.isTraceEnabled()) {
                 LOGGER.trace("Found judging station " + si.getJudgingStation() + " for team " + teamNumber);
               }
-              curteam.addCell(new Phrase(si.getJudgingStation(), ARIAL_8PT_NORMAL));
+              final PdfPCell judgeStation = new PdfPCell(new Phrase(si.getJudgingStation(), ARIAL_8PT_NORMAL));
+              judgeStation.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+              judgeStation.setBorder(0);
+              curteam.addCell(judgeStation);
             }
           }
 
@@ -448,8 +451,13 @@ public final class FinalComputedScores extends BaseFLLServlet {
           }
 
           // Second column contains "Scaled:"
-          curteam.getDefaultCell().setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-          curteam.addCell(new Phrase("Scaled:", ARIAL_8PT_NORMAL));
+          final PdfPCell scaledCell = new PdfPCell(new Phrase("Scaled:", ARIAL_8PT_NORMAL));
+          scaledCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
+          scaledCell.setBorder(0);
+//          if(null != schedule) {
+//            scaledCell.setColspan(2);
+//          }
+          curteam.addCell(scaledCell);
 
           // Next, one column containing the scaled score for each subjective
           // category with weight > 0
