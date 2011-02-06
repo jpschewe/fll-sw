@@ -1021,8 +1021,7 @@ public final class Queries {
           + " AND RunNumber > ?" //
           + " AND Tournament = ?");
       if (irunNumber > numSeedingRounds) {
-        final int playoffRun = irunNumber
-            - numSeedingRounds;
+        final int playoffRun = irunNumber - numSeedingRounds;
         final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun);
         final String division = getEventDivision(connection, teamNumber);
         if (ptLine > 0) {
@@ -1077,10 +1076,12 @@ public final class Queries {
     PreparedStatement deletePrep = null;
     try {
       deletePrep = connection.prepareStatement("DELETE FROM Performance " //
-          + " WHERE TeamNumber = ?" //
+          + " WHERE Tournament = ?"
+          + " AND TeamNumber = ?"
           + " AND RunNumber = ?");
-      deletePrep.setInt(1, teamNumber);
-      deletePrep.setInt(2, irunNumber);
+      deletePrep.setInt(1, currentTournament);
+      deletePrep.setInt(2, teamNumber);
+      deletePrep.setInt(3, irunNumber);
 
       deletePrep.executeUpdate();
     } finally {
