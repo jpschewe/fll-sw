@@ -265,7 +265,7 @@ public class FullTournamentTest extends SeleneseTestCase {
     Assert.assertTrue(selenium.isElementPresent("id=success"));
   }
 
-  private void assignJudges(Connection testDataConn,
+  private void assignJudges(final Connection testDataConn,
                             final String testTournamentName) throws IOException, SAXException, SQLException {
     ResultSet rs;
     PreparedStatement prep;
