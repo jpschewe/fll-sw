@@ -77,8 +77,8 @@ public class FullTournamentTest extends SeleneseTestCase {
    * @throws InterruptedException
    */
   @Test
-  public void testFullTournament() throws IOException, SAXException, ClassNotFoundException,
-      InstantiationException, IllegalAccessException, ParseException, SQLException, InterruptedException {
+  public void testFullTournament() throws IOException, SAXException, ClassNotFoundException, InstantiationException,
+      IllegalAccessException, ParseException, SQLException, InterruptedException {
     final int numSeedingRounds = 3;
 
     Connection testDataConn = null;
@@ -87,7 +87,7 @@ public class FullTournamentTest extends SeleneseTestCase {
     PreparedStatement prep = null;
     try {
       Class.forName("org.hsqldb.jdbcDriver").newInstance();
-      
+
       testDataConn = DriverManager.getConnection("jdbc:hsqldb:res:/fll/web/data/flldb-ft");
       final String testTournamentName = "Field";
       Assert.assertNotNull("Error connecting to test data database", testDataConn);
@@ -102,11 +102,10 @@ public class FullTournamentTest extends SeleneseTestCase {
 
       createTournamentsForRegions();
 
-      
       initializeTournamentsByRegion();
 
       final Connection serverConnection = TestUtils.createTestDBConnection();
-      Assert.assertNotNull("Could not create test database connection", serverConnection);      
+      Assert.assertNotNull("Could not create test database connection", serverConnection);
 
       IntegrationTestUtils.setTournament(selenium, testTournamentName);
 
@@ -184,7 +183,7 @@ public class FullTournamentTest extends SeleneseTestCase {
       checkReports();
 
       checkRankAndScores(serverConnection, testTournamentName);
-            
+
     } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
@@ -325,17 +324,16 @@ public class FullTournamentTest extends SeleneseTestCase {
 
   private void initializeTournamentsByRegion() throws IOException, SAXException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "admin/tournamentInitialization.jsp");    
+        + "admin/tournamentInitialization.jsp");
     selenium.submit("name=form");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
     Assert.assertFalse(selenium.isTextPresent("Exception"));
-
 
     selenium.click("id=continue");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
     Assert.assertFalse(selenium.isTextPresent("Exception"));
     Assert.assertTrue("Error assigning judges", selenium.isElementPresent("success"));
-    
+
   }
 
   private void createTournamentsForRegions() throws IOException {
@@ -347,30 +345,29 @@ public class FullTournamentTest extends SeleneseTestCase {
   private void loadTeams() throws IOException, SAXException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/");
-    
+
     final InputStream teamsIS = FullTournamentTest.class.getResourceAsStream("data/teams-ft.csv");
     Assert.assertNotNull(teamsIS);
     final File teamsFile = IntegrationTestUtils.storeInputStreamToFile(teamsIS);
     teamsIS.close();
-    try {      
+    try {
       selenium.type("id=teams_file", teamsFile.getAbsolutePath());
-      
+
       selenium.click("id=upload_teams");
-      
+
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-      
-      Assert.assertFalse(selenium.isTextPresent("Exception"));      
+
+      Assert.assertFalse(selenium.isTextPresent("Exception"));
     } finally {
       if (!teamsFile.delete()) {
         teamsFile.deleteOnExit();
       }
-    }   
+    }
 
     // skip past the filter page
     selenium.click("id=next");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
     Assert.assertFalse(selenium.isTextPresent("Exception"));
-
 
     // team column selection
     selenium.select("TeamNumber", "tea_number");
@@ -822,14 +819,15 @@ public class FullTournamentTest extends SeleneseTestCase {
           selenium.open(selectTeamPage);
           selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
+          final String selectorRegexp = "regexp:Run "
+              + runNumber + "\\s-\\s" + teamNumber;
           // verify that teamNumber is in the list
           Assert.assertTrue("Can't find team number: "
-              + teamNumber + " run number: " + runNumber + " in verify list", selenium.isTextPresent("Run "
-              + runNumber + " - " + teamNumber));
+              + teamNumber + " run number: " + runNumber + " in verify list", selenium.isTextPresent(selectorRegexp));
 
           // select this entry
-          selenium.select("xpath=//form[@name='verify']//select[@name='TeamNumber']", "label=regexp:Run "
-              + runNumber + "\\s-\\s" + teamNumber);
+          selenium.select("xpath=//form[@name='verify']//select[@name='TeamNumber']", "label="
+              + selectorRegexp);
 
           // submit the page
           selenium.click("id=verify_submit");
