@@ -119,6 +119,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
 
     final TournamentSchedule schedule;
+    //FIXME ticket:78
     if (TournamentSchedule.scheduleExistsInDatabase(connection, tournament.getTournamentID())) {
       if(LOGGER.isTraceEnabled()) {
         LOGGER.trace("Found a schedule for tournament: " + tournament);
@@ -445,18 +446,14 @@ public final class FinalComputedScores extends BaseFLLServlet {
           teamNameCol.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_LEFT);
           curteam.addCell(teamNameCol);
 
-          if (null != schedule) {
-            // nothing to show in second row for judging station
-            curteam.addCell("");
-          }
 
           // Second column contains "Scaled:"
           final PdfPCell scaledCell = new PdfPCell(new Phrase("Scaled:", ARIAL_8PT_NORMAL));
           scaledCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
           scaledCell.setBorder(0);
-//          if(null != schedule) {
-//            scaledCell.setColspan(2);
-//          }
+          if(null != schedule) {
+            scaledCell.setColspan(2);
+          }
           curteam.addCell(scaledCell);
 
           // Next, one column containing the scaled score for each subjective
