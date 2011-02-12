@@ -1021,8 +1021,7 @@ public final class Queries {
           + " AND RunNumber > ?" //
           + " AND Tournament = ?");
       if (irunNumber > numSeedingRounds) {
-        final int playoffRun = irunNumber
-            - numSeedingRounds;
+        final int playoffRun = irunNumber - numSeedingRounds;
         final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun);
         final String division = getEventDivision(connection, teamNumber);
         if (ptLine > 0) {
@@ -1065,8 +1064,11 @@ public final class Queries {
 
           }
         } else {
-          throw new RuntimeException("Team "
-              + teamNumber + " could not be found in the playoff table for playoff round " + playoffRun);
+            // Do nothing - team didn't get entered into the PlayoffData table.
+            // This should not happen, but we also cannot get here unless a score
+            // got entered for the team in the Performance table, in which case we
+            // want to allow the web interface to be able to delete that score to
+            // remove the score from the Performance table.
         }
       }
     } finally {
@@ -1077,10 +1079,12 @@ public final class Queries {
     PreparedStatement deletePrep = null;
     try {
       deletePrep = connection.prepareStatement("DELETE FROM Performance " //
-          + " WHERE TeamNumber = ?" //
+          + " WHERE Tournament = ?"
+          + " AND TeamNumber = ?"
           + " AND RunNumber = ?");
-      deletePrep.setInt(1, teamNumber);
-      deletePrep.setInt(2, irunNumber);
+      deletePrep.setInt(1, currentTournament);
+      deletePrep.setInt(2, teamNumber);
+      deletePrep.setInt(3, irunNumber);
 
       deletePrep.executeUpdate();
     } finally {
