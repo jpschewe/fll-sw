@@ -239,7 +239,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
   private void writeScores(final Connection connection,
                            final Element[] catElements,
                            final double[] weights,
-                           float[] relativeWidths,
+                           final float[] relativeWidths,
                            final String division,
                            final WinnerType winnerCriteria,
                            final Tournament tournament,

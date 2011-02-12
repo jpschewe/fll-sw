@@ -1069,6 +1069,9 @@ public final class Queries {
             // got entered for the team in the Performance table, in which case we
             // want to allow the web interface to be able to delete that score to
             // remove the score from the Performance table.
+          if(LOGGER.isDebugEnabled()) {
+            LOGGER.trace("Deleting a score that wasn't in the PlayoffData table");
+          }
         }
       }
     } finally {
