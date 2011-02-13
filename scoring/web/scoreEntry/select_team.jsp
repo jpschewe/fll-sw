@@ -14,8 +14,6 @@
 <%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
 
 <%
-final String lEditFlag = request.getParameter("EditFlag");
-
 final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
 final Statement stmt = connection.createStatement();
