@@ -11,7 +11,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.util.Iterator;
 import java.util.List;
@@ -102,8 +101,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
   /**
    * Generate the actual report.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
-                                                             "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Sort determined by winner criteria, category name determines table name")
   private void generateReport(final Connection connection,
                               final OutputStream out,
                               final org.w3c.dom.Document challengeDocument,
@@ -128,11 +125,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
       schedule = null;
     }
 
-    Statement stmt = null;
-    Statement teamsStmt = null;
-    ResultSet rawScoreRS = null;
-    ResultSet teamsRS = null;
-    PreparedStatement prep = null;
     try {
       // This creates our new PDF document and declares it to be in portrait
       // orientation
@@ -142,8 +134,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
       final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
                                                                                       rootElement.getElementsByTagName("subjectiveCategory")).asList();
-      stmt = connection.createStatement();
-      teamsStmt = connection.createStatement();
 
       final Iterator<String> divisionIter = Queries.getEventDivisions(connection).iterator();
       while (divisionIter.hasNext()) {
@@ -226,16 +216,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
       throw new RuntimeException("Error parsing category weight!", pe);
     } catch (final DocumentException de) {
       throw new RuntimeException("Error creating PDF document!", de);
-    } finally {
-      SQLFunctions.close(rawScoreRS);
-      SQLFunctions.close(teamsRS);
-
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(teamsStmt);
-      SQLFunctions.close(prep);
     }
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
   private void writeScores(final Connection connection,
                            final Element[] catElements,
                            final double[] weights,
@@ -579,6 +563,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     return pdfDoc;
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Winner type is used to determine sort order")
   private void insertRawScoreColumns(final Connection connection,
                                      final Tournament tournament,
                                      final String ascDesc,
