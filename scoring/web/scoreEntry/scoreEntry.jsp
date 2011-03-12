@@ -41,11 +41,13 @@ final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
 final int tournament = Queries.getCurrentTournament(connection);
 final int numSeedingRounds = Queries.getNumSeedingRounds(connection, tournament);
+pageContext.setAttribute("numSeedingRounds", numSeedingRounds);
 final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
 if(!tournamentTeams.containsKey(new Integer(teamNumber))) {
   throw new RuntimeException("Selected team number is not valid: " + teamNumber);
 }
 final Team team = tournamentTeams.get(new Integer(teamNumber));
+pageContext.setAttribute("team", team);
 
 //the next run the team will be competing in
 final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumber());
@@ -84,15 +86,19 @@ if("1".equals(request.getParameter("EditFlag"))) {
 	}
   lRunNumber = nextRunNumber;
 }
+pageContext.setAttribute("lRunNumber",lRunNumber);
+
 final String roundText;
 if(lRunNumber > numSeedingRounds) {
 	roundText = "Playoff&nbsp;Round&nbsp;" + (lRunNumber - numSeedingRounds);
 } else {
 	roundText = "Run&nbsp;Number&nbsp;" + lRunNumber;
 }
+pageContext.setAttribute("roundText", roundText);
 
 final String minimumAllowedScoreStr = ((Element)challengeDocument.getDocumentElement().getElementsByTagName("Performance").item(0)).getAttribute("minimumScore");
 final int minimumAllowedScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(minimumAllowedScoreStr).intValue();
+pageContext.setAttribute("minimumAllowedScore", minimumAllowedScore);
 
 //check if this is the last run a team has completed
 final int maxRunCompleted = Queries.getMaxRunNumber(connection, teamNumber);
@@ -110,20 +116,46 @@ if(lRunNumber > 1) {
   previousVerified = true;
 }
 pageContext.setAttribute("previousVerified", previousVerified);
+
+if(lRunNumber <= numSeedingRounds) {
+  if("1".equals(request.getParameter("EditFlag"))) {
+    pageContext.setAttribute("top_info_color", "yellow");  
+  } else {
+    pageContext.setAttribute("top_info_color", "#e0e0e0");
+  }
+} else {
+  pageContext.setAttribute("top_info_color", "#00ff00");
+}
+
+if("1".equals(request.getParameter("EditFlag"))) {
+  pageContext.setAttribute("body_background", "yellow");  
+} else {
+  pageContext.setAttribute("body_background", "transparent");
+}
+
 %>
 
 <html>
   <head>
-    <c:if test="${not empty param.EditFlag}" var="editFlag">
+  <c:choose>
+    <c:when test="${1 == param.EditFlag}">
       <title>Score Edit</title>
-    </c:if>
-    <c:if test="${not editFlag}">
+    </c:when>
+    <c:otherwise>
       <title>Score Entry</title>
       <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    </c:if>
+    </c:otherwise>
+    </c:choose>
 
     <style type='text/css'>
       TD {font-family: arial}
+      table#top_info {   
+      background-color: ${top_info_color};   
+      }
+      
+      body { 
+      background-color: ${body_background};
+      }
     </style>
 
 <script language="javascript">
@@ -156,7 +188,7 @@ function init() {
   document.onselectstart=new Function ("return false")
 
   <c:choose>
-  <c:when test="${editFlag}">
+  <c:when test="${1 == param.EditFlag}">
   <%
     ScoreEntry.generateInitForScoreEdit(out, session, challengeDocument, team.getTeamNumber(), lRunNumber);
   %>
@@ -183,8 +215,8 @@ function refresh() {
   <%ScoreEntry.generateRefreshBody(out, challengeDocument);%>
 
   //check for minimum total score
-  if(score < <%=minimumAllowedScore%>) {
-    score = <%=minimumAllowedScore%>;
+  if(score < ${minimumAllowedScore}) {
+    score = ${minimumAllowedScore};
   }
 
   document.scoreEntry.totalScore.value = score;
@@ -230,12 +262,14 @@ function replaceText(sId, sText) {
  * Called when the cancel button is clicked.
  */
 function CancelClicked() {
-  <c:if test="${editFlag}">
+  <c:choose>	
+  <c:when test="${1 == param.EditFlag}">
   if (confirm("Cancel and lose changes?") == true) {
-  </c:if>
-  <c:if test="${not editFlag}">
+  </c:when>
+  <c:otherwise>
   if (confirm("Cancel and lose data?") == true) {
-  </c:if>
+  </c:otherwise>
+  </c:choose>
     window.location.href= "select_team.jsp";
   }
 }
@@ -266,56 +300,38 @@ return m;
 
   </head>
 
-  <c:if test="${editFlag}">
-      <c:if test="${isBye}">
-        <body bgcolor="yellow">
-      </c:if>
-      <c:if test="${not isBye}">
-        <body bgcolor="yellow" onload="init()">
-      </c:if>
-  </c:if>
-  <c:if test="${not editFlag}">
-    <body onload="init()">
-  </c:if>
-
+<body onload="init()">
     <form action="submit.jsp" method="POST" name="scoreEntry">
 
-      <c:if test="${editFlag}">
+      <c:if test="${1 == param.EditFlag}">
         <input type='hidden' name='EditFlag' value='1' readonly>
       </c:if>
-      <input type='hidden' name='RunNumber' value='<%=lRunNumber%>' readonly>
-      <input type='hidden' name='TeamNumber' value='<%=team.getTeamNumber()%>' readonly>
+      <input type='hidden' name='RunNumber' value='${lRunNumber}' readonly>
+      <input type='hidden' name='TeamNumber' value='${team.teamNumber}' readonly>
 
       <table width='100%' border="0" cellpadding="0" cellspacing="0" align="center"> <!-- info bar -->
         <tr>
           <td align="center" valign="middle">
           <!-- top info bar (team name etc) -->
-<%if(lRunNumber <= numSeedingRounds) {%>
-            <c:if test="${editFlag}">
-              <table border="1" cellpadding="0" cellspacing="0" width="100%" bgcolor='yellow'>
-            </c:if>
-            <c:if test="${not editFlag}">
-              <table border="1" cellpadding="0" cellspacing="0" width="100%" bgcolor='#e0e0e0'>
-            </c:if>
-<%} else {%>
-            <table border="1" cellpadding="0" cellspacing="0" width="100%" bgcolor='#00FF00'>
-<%}%>
+            <table id='top_info' border="1" cellpadding="0" cellspacing="0" width="100%">
               <tr align="center" valign="middle"><td>
 
                   <table border="0" cellpadding="5" cellspacing="0" width="90%"> <!--  inner box on title -->
                     <tr>
                       <td valign="middle" align="center">
-                        <c:if test="${editFlag}">
+                        <c:choose>
+                        <c:when test="${1 == param.EditFlag}">
                           <font face="Arial" size="4"><x:out select="$challengeDocument/fll/@title"/> (Score Edit)</font>
-                        </c:if>
-                        <c:if test="${not editFlag}">
+                        </c:when>
+                        <c:otherwise>
                           <font face="Arial" size="4"><x:out select="$challengeDocument/fll/@title"/> (Score Entry)</font>
-                        </c:if>
+                        </c:otherwise>
+                        </c:choose>
                       </td>
                     </tr>
                     <tr align="center">
                       <td>
-                        <font face="Arial" size="4" color='#0000ff'>#<%=team.getTeamNumber()%>&nbsp;<%=team.getOrganization()%>&nbsp;<%=team.getTeamName()%>&nbsp;--&nbsp;<%=roundText%></font>
+                        <font face="Arial" size="4" color='#0000ff'>#${team.teamNumber}&nbsp;${team.organization}&nbsp;${team.teamName}&nbsp;--&nbsp;${roundText}</font>
                       </td>
                     </tr>
                   </table> <!--  end inner box on title -->
@@ -384,15 +400,17 @@ return m;
             <tr>
               <td colspan='3' align='right'>
                 <c:if test="${not isBye and not isNoShow}">
-                  <c:if test="${editFlag}">
+                  <c:choose>
+                  <c:when test="${1 == param.EditFlag}">
                     <input type='submit' id='submit' name='submit' value='Submit Score' onclick='return confirm(verification())'>
-                  </c:if>
-                  <c:if test="${not editFlag}">
+                  </c:when>
+                  <c:otherwise>
                     <input type='submit' id='submit' name='submit' value='Submit Score' onclick='return confirm("Submit Data -- Are you sure?")'>
-                  </c:if>
+                  </c:otherwise>
+                  </c:choose>
                 </c:if>
                 <input type='button' id='cancel' value='Cancel' onclick='CancelClicked()'>
-                <c:if test="${editFlag and isLastRun}">
+                <c:if test="${1 == param.EditFlag and isLastRun}">
                   <input type='submit' id='delete' name='delete' value='Delete Score' onclick='return confirm("Are you sure you want to delete this score?")'>
                 </c:if>
               </td>
