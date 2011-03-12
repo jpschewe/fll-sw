@@ -155,17 +155,16 @@ function init() {
   // disable text selection
   document.onselectstart=new Function ("return false")
 
-  <c:if test="${editFlag}">
+  <c:choose>
+  <c:when test="${editFlag}">
   <%
     ScoreEntry.generateInitForScoreEdit(out, session, challengeDocument, team.getTeamNumber(), lRunNumber);
   %>
-  </c:if>
-  gbl_NoShow = 0;
-  <c:if test="${not editFlag}">
-        // Always init the special double-check column
-    Verified = 0;
+  </c:when>
+  <c:otherwise>
     reset();
-  </c:if>
+  </c:otherwise>
+  </c:choose>
 
   refresh();
   
