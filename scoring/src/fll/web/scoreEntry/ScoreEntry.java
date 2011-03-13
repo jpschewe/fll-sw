@@ -354,14 +354,13 @@ public final class ScoreEntry {
   }
 
   /**
-   * Generate the reset method, initializes all variables to their default
+   * Generate init for new scores, initializes all variables to their default
    * values.
    */
-  public static void generateReset(final JspWriter writer,
+  public static void generateInitForNewScore(final JspWriter writer,
                                    final Document document) throws IOException, ParseException {
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
-    writer.println("function reset() {");
 
     for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
       final String name = element.getAttribute("name");
@@ -399,7 +398,6 @@ public final class ScoreEntry {
 
     writer.println("  gbl_NoShow = 0;");
 
-    writer.println("}");
   }
 
   /**

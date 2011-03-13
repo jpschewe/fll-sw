@@ -56,7 +56,9 @@ final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumbe
 int lRunNumber;
 if("1".equals(request.getParameter("EditFlag"))) {  
   if(null == runNumberStr) {
-    throw new RuntimeException("Please choose a run number when editing scores");
+    session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>Please choose a run number when editing scores</p>");
+    response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
+    return;
   }
   final int runNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumberStr).intValue();
   if(runNumber == 0) {
@@ -194,7 +196,10 @@ function init() {
   %>
   </c:when>
   <c:otherwise>
-    reset();
+  <%
+  ScoreEntry.generateInitForNewScore(out, challengeDocument);
+  %>
+
   </c:otherwise>
   </c:choose>
 
@@ -203,9 +208,6 @@ function init() {
   /* Saves total score for smarter notification popups */
   savedTotalScore = document.scoreEntry.totalScore.value;
 }
-
-<!-- reset to default values -->
-<%ScoreEntry.generateReset(out, challengeDocument);%>
 
 function refresh() {
   document.scoreEntry.NoShow.value = gbl_NoShow;
