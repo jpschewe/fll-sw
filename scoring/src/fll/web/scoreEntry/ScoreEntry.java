@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
@@ -30,10 +31,12 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FP;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeParser;
 import fll.xml.ScoreType;
@@ -59,7 +62,8 @@ public final class ScoreEntry {
    * of document.
    */
   public static void generateIsConsistent(final JspWriter writer,
-                                          final Document document) throws IOException {
+                                          final ServletContext application) throws IOException {
+    final Document document = ApplicationAttributes.getChallengeDocument(application);
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
 
@@ -98,7 +102,8 @@ public final class ScoreEntry {
    * @throws ParseException
    */
   public static void generateIncrementMethods(final Writer writer,
-                                              final Document document) throws IOException, ParseException {
+                                              final ServletContext application) throws IOException, ParseException {
+    final Document document = ApplicationAttributes.getChallengeDocument(application);
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
     final Formatter formatter = new Formatter(writer);
@@ -180,11 +185,12 @@ public final class ScoreEntry {
    * Generate the body of the refresh function
    */
   public static void generateRefreshBody(final Writer writer,
-                                         final Document document) throws ParseException, IOException {
+                                         final ServletContext application) throws ParseException, IOException {
     if (LOG.isTraceEnabled()) {
       LOG.trace("Entering generateRefreshBody");
     }
 
+    final Document document = ApplicationAttributes.getChallengeDocument(application);
     final Formatter formatter = new Formatter(writer);
 
     final Element rootElement = document.getDocumentElement();
@@ -290,7 +296,8 @@ public final class ScoreEntry {
    * @throws ParseException
    */
   public static void generateCheckRestrictionsBody(final Writer writer,
-                                                   final Document document) throws IOException, ParseException {
+                                                   final ServletContext application) throws IOException, ParseException {
+    final Document document = ApplicationAttributes.getChallengeDocument(application);
     final Formatter formatter = new Formatter(writer);
 
     final Element rootElement = document.getDocumentElement();
@@ -358,7 +365,8 @@ public final class ScoreEntry {
    * values.
    */
   public static void generateInitForNewScore(final JspWriter writer,
-                                   final Document document) throws IOException, ParseException {
+                                             final ServletContext application) throws IOException, ParseException {
+    final Document document = ApplicationAttributes.getChallengeDocument(application);
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
 
@@ -419,7 +427,8 @@ public final class ScoreEntry {
    * Generate the score entry form.
    */
   public static void generateScoreEntry(final JspWriter writer,
-                                        final Document document) throws IOException {
+                                        final ServletContext application) throws IOException {
+    final Document document = ApplicationAttributes.getChallengeDocument(application);
     final Formatter formatter = new Formatter(writer);
 
     final Element rootElement = document.getDocumentElement();
@@ -585,10 +594,12 @@ public final class ScoreEntry {
    * team's score.
    */
   public static void generateInitForScoreEdit(final JspWriter writer,
-                                              final HttpSession session,
-                                              final Document document,
-                                              final int teamNumber,
-                                              final int runNumber) throws SQLException, IOException {
+                                              final ServletContext application,
+                                              final HttpSession session) throws SQLException, IOException {
+    final Document document = ApplicationAttributes.getChallengeDocument(application);
+    final int teamNumber = SessionAttributes.getNonNullAttribute(session, "team", Team.class).getTeamNumber();
+    final int runNumber = SessionAttributes.getNonNullAttribute(session, "lRunNumber", Number.class).intValue();
+
     final DataSource datasource = SessionAttributes.getDataSource(session);
     final Connection connection = datasource.getConnection();
     final int tournament = Queries.getCurrentTournament(connection);
