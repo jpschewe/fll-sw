@@ -110,7 +110,7 @@ setInterval('reloadRuns()',5000);
       <table> <!-- outer table -->        
         <tr>
         <td>
-        <form action="scoreEntry.jsp" method="POST" name="selectTeam">
+        <form action="GatherScoreEntryData" method="POST" name="selectTeam">
         <table> <!-- left table -->
         
         <tr align='left' valign='top'>
@@ -163,7 +163,7 @@ setInterval('reloadRuns()',5000);
       </td> <!-- left table -->
       
       <td valign='top'> <!-- right table -->
-      <form action="scoreEntry.jsp" method="POST" name="verify">
+      <form action="GatherScoreEntryData" method="POST" name="verify">
       <input type="hidden" name='EditFlag' value="1" />
       
       <table>
