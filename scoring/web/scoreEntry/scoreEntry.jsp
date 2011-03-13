@@ -41,13 +41,13 @@ final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
 final int tournament = Queries.getCurrentTournament(connection);
 final int numSeedingRounds = Queries.getNumSeedingRounds(connection, tournament);
-pageContext.setAttribute("numSeedingRounds", numSeedingRounds);
+session.setAttribute("numSeedingRounds", numSeedingRounds);
 final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
 if(!tournamentTeams.containsKey(new Integer(teamNumber))) {
   throw new RuntimeException("Selected team number is not valid: " + teamNumber);
 }
 final Team team = tournamentTeams.get(new Integer(teamNumber));
-pageContext.setAttribute("team", team);
+session.setAttribute("team", team);
 
 //the next run the team will be competing in
 final int nextRunNumber = Queries.getNextRunNumber(connection, team.getTeamNumber());
@@ -95,7 +95,7 @@ if("1".equals(request.getParameter("EditFlag"))) {
 	}
   lRunNumber = nextRunNumber;
 }
-pageContext.setAttribute("lRunNumber",lRunNumber);
+session.setAttribute("lRunNumber",lRunNumber);
 
 final String roundText;
 if(lRunNumber > numSeedingRounds) {
@@ -103,19 +103,19 @@ if(lRunNumber > numSeedingRounds) {
 } else {
 	roundText = "Run&nbsp;Number&nbsp;" + lRunNumber;
 }
-pageContext.setAttribute("roundText", roundText);
+session.setAttribute("roundText", roundText);
 
 final String minimumAllowedScoreStr = ((Element)challengeDocument.getDocumentElement().getElementsByTagName("Performance").item(0)).getAttribute("minimumScore");
 final int minimumAllowedScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(minimumAllowedScoreStr).intValue();
-pageContext.setAttribute("minimumAllowedScore", minimumAllowedScore);
+session.setAttribute("minimumAllowedScore", minimumAllowedScore);
 
 //check if this is the last run a team has completed
 final int maxRunCompleted = Queries.getMaxRunNumber(connection, teamNumber);
-pageContext.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == maxRunCompleted));
+session.setAttribute("isLastRun", Boolean.valueOf(lRunNumber == maxRunCompleted));
 
 //check if the score being edited is a bye
-pageContext.setAttribute("isBye", Boolean.valueOf(Queries.isBye(connection, tournament, teamNumber, lRunNumber)));
-pageContext.setAttribute("isNoShow", Boolean.valueOf(Queries.isNoShow(connection, tournament, teamNumber, lRunNumber)));
+session.setAttribute("isBye", Boolean.valueOf(Queries.isBye(connection, tournament, teamNumber, lRunNumber)));
+session.setAttribute("isNoShow", Boolean.valueOf(Queries.isNoShow(connection, tournament, teamNumber, lRunNumber)));
 
 // check if previous run is verified
 final boolean previousVerified;
@@ -124,22 +124,22 @@ if(lRunNumber > 1) {
 } else {
   previousVerified = true;
 }
-pageContext.setAttribute("previousVerified", previousVerified);
+session.setAttribute("previousVerified", previousVerified);
 
 if(lRunNumber <= numSeedingRounds) {
   if("1".equals(request.getParameter("EditFlag"))) {
-    pageContext.setAttribute("top_info_color", "yellow");  
+    session.setAttribute("top_info_color", "yellow");  
   } else {
-    pageContext.setAttribute("top_info_color", "#e0e0e0");
+    session.setAttribute("top_info_color", "#e0e0e0");
   }
 } else {
-  pageContext.setAttribute("top_info_color", "#00ff00");
+  session.setAttribute("top_info_color", "#00ff00");
 }
 
 if("1".equals(request.getParameter("EditFlag"))) {
-  pageContext.setAttribute("body_background", "yellow");  
+  session.setAttribute("body_background", "yellow");  
 } else {
-  pageContext.setAttribute("body_background", "transparent");
+  session.setAttribute("body_background", "transparent");
 }
 
 %>

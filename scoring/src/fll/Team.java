@@ -5,6 +5,7 @@
  */
 package fll;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,7 +23,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  * someone changes the database, this object does not notice the changes. It's a
  * snapshot in time from when the object was created.
  */
-public final class Team {
+public final class Team implements Serializable {
 
   /**
    * Constant to represent the team number for a bye
