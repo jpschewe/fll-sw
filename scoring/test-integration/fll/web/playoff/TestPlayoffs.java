@@ -95,7 +95,8 @@ public class TestPlayoffs extends SeleneseTestCase {
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
     // check for error message
-    Assert.assertTrue("Should have errors", selenium.isElementPresent("name=error"));
+    //Assert.assertTrue("Should have errors", selenium.isElementPresent("name=error"));
+    Assert.assertTrue("Should have errors", selenium.isTextPresent("Selected team has not advanced to the next playoff round."));
     } catch (final IOException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
