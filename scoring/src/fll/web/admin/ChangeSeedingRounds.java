@@ -51,7 +51,7 @@ public class ChangeSeedingRounds extends BaseFLLServlet {
           message.append("<p class='error'>Cannot have negative number of seeding rounds</p>");
         } else {
           final int tournament = Queries.getCurrentTournament(connection);
-          Queries.setNumSeedingRounds(connection, newSeedingRounds, tournament);
+          Queries.setNumSeedingRounds(connection, tournament, newSeedingRounds);
           message.append(String.format("<p id='success'><i>Changed number of seeing rounds to %s</i></p>", newSeedingRounds));
         }
       } else {
