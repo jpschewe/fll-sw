@@ -113,6 +113,7 @@ public class ScoreEntryTest {
       return null;
     }
 
+    @Deprecated
     public Servlet getServlet(final String arg0) throws ServletException {
       return null;
     }
@@ -121,10 +122,12 @@ public class ScoreEntryTest {
       return null;
     }
 
+    @Deprecated
     public Enumeration<?> getServletNames() {
       return null;
     }
 
+    @Deprecated
     public Enumeration<?> getServlets() {
       return null;
     }
@@ -132,6 +135,7 @@ public class ScoreEntryTest {
     public void log(final String arg0) {
     }
 
+    @Deprecated
     public void log(final Exception arg0,
                     final String arg1) {
     }
