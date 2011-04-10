@@ -218,7 +218,7 @@ public final class IntegrationTestUtils {
           + tournament, tournamentID);
       selenium.select("currentTournamentSelect", tournamentID);
       
-      selenium.click("Commit");
+      selenium.click("name=commit");
       
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
       Assert.assertTrue(selenium.isElementPresent("id=success"));
