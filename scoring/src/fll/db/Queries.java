@@ -1518,7 +1518,11 @@ public final class Queries {
       prep = getTournamentParameterStmt(connection, tournament, paramName);
       rs = prep.executeQuery();
       if (rs.next()) {
-        return rs.getInt(1);
+        int value = rs.getInt(1);
+        if(LOGGER.isTraceEnabled()) {
+          LOGGER.trace("getIntTournamentParameter tournament: " + tournament + " param: " + paramName + " value: " + value);
+        }        
+        return value;
       } else {
         throw new FLLInternalException("There is no default value for tournament parameter: "
             + paramName);
