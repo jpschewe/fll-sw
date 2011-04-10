@@ -129,7 +129,7 @@ public class ScoreEntryTest {
       return null;
     }
 
-    public void log(String arg0) {
+    public void log(final String arg0) {
     }
 
     public void log(final Exception arg0,
