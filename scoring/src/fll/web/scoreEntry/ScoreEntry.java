@@ -291,7 +291,6 @@ public final class ScoreEntry {
    * Output the body for the check_restrictions method.
    * 
    * @param writer where to write
-   * @param document the challenge document
    * @throws IOException
    * @throws ParseException
    */
