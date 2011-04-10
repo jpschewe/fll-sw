@@ -75,16 +75,16 @@ public class TestPlayoffs extends SeleneseTestCase {
     Assert.assertFalse(selenium.isTextPresent("Exception"));
 
     // enter score for teams 3 and 0 with 3 winning
-    enterTeamScore(4);
+    enterTeamScore(3);
     Assert.assertFalse("Errors: ", selenium.isElementPresent("name=error"));
-    enterTeamScore(1);
+    enterTeamScore(0);
     Assert.assertFalse("Errors: ", selenium.isElementPresent("name=error"));
 
 
     // enter score for teams 2 and 1 with 1 winning
-    enterTeamScore(3);
-    Assert.assertFalse("Errors: ", selenium.isElementPresent("name=error"));
     enterTeamScore(2);
+    Assert.assertFalse("Errors: ", selenium.isElementPresent("name=error"));
+    enterTeamScore(1);
     Assert.assertFalse("Errors: ", selenium.isElementPresent("name=error"));
 
 
