@@ -55,8 +55,8 @@ public class TestPlayoffs extends SeleneseTestCase {
     // set seeding rounds to 1
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/index.jsp");
-    selenium.select("id=changeSeedingRounds", "1");
-    selenium.click("changeSeedingRounds");
+    selenium.select("name=seedingRounds", "1");
+    selenium.click("name=changeSeedingRounds");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
     // enter 1 score for all teams equal to their team number
