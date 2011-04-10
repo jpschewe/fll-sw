@@ -80,17 +80,19 @@ public class TestPlayoffs extends SeleneseTestCase {
     enterTeamScore(0);
     Assert.assertFalse("Errors: ", selenium.isElementPresent("name=error"));
 
-
     // enter score for teams 2 and 1 with 1 winning
     enterTeamScore(2);
     Assert.assertFalse("Errors: ", selenium.isElementPresent("name=error"));
     enterTeamScore(1);
     Assert.assertFalse("Errors: ", selenium.isElementPresent("name=error"));
 
+    // attempt to enter score for 0
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+        + "scoreEntry/select_team.jsp");
+    selenium.select("xpath=//form[@name='selectTeam']//select[@name='TeamNumber']", "value=0");
+    selenium.click("id=enter_submit");
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
-    // attempt to enter score for 1
-    enterTeamScore(1);
-    
     // check for error message
     Assert.assertTrue("Should have errors", selenium.isElementPresent("name=error"));
   }
