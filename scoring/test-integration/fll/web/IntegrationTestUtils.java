@@ -82,11 +82,8 @@ public final class IntegrationTestUtils {
           selenium.click("force_rebuild");
         }
         selenium.click("reinitializeDatabase");
-        Assert
-              .assertTrue(selenium
-                                  .getConfirmation()
-                                  .matches(
-                                           "^This will erase ALL scores in the database fll \\(if it already exists\\), are you sure[\\s\\S]$"));
+        Assert.assertTrue(selenium.getConfirmation()
+                                  .matches("^This will erase ALL scores in the database fll \\(if it already exists\\), are you sure[\\s\\S]$"));
         selenium.waitForPageToLoad(WAIT_FOR_PAGE_TIMEOUT);
         final boolean success = selenium.isTextPresent("Successfully initialized database");
         Assert.assertTrue("Database was not successfully initialized", success);
@@ -187,29 +184,84 @@ public final class IntegrationTestUtils {
   }
 
   /**
+   * Add a team to a tournament.
+   */
+  public static void addTeam(final Selenium selenium,
+                             final int teamNumber,
+                             final String teamName,
+                             final String organization,
+                             final String region,
+                             final String division,
+                             final String tournament) throws IOException {
+    try {
+      loadPage(selenium, TestUtils.URL_ROOT
+          + "admin/index.jsp");
+
+      selenium.click("link=Add a team");
+      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+      selenium.type("teamNumber", String.valueOf(teamNumber));
+      selenium.type("teamName", teamName);
+      selenium.type("organization", organization);
+      selenium.type("region", region);
+      selenium.click("id=division_text_choice");
+      selenium.type("division_text", division);
+      
+      final String[] options = selenium.getSelectOptions("currentTournamentSelect");
+      String tournamentID = null;
+      for (int i = 0; i < options.length; ++i) {
+        if (options[i].equals(tournament)) {
+          tournamentID = options[i];
+        }
+      }
+      Assert.assertNotNull("Could not find tournament with name: "
+          + tournament, tournamentID);
+      selenium.select("currentTournamentSelect", tournamentID);
+      
+      selenium.click("name=commit");
+      
+      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      Assert.assertTrue(selenium.isElementPresent("id=success"));
+
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
+
+  }
+
+  /**
    * Set the current tournament by name.
    * 
    * @param tournamentName the name of the tournament to make the current
    *          tournament
-   * @throws IOException 
+   * @throws IOException
    */
   public static void setTournament(final Selenium selenium,
                                    final String tournamentName) throws IOException {
     try {
       loadPage(selenium, TestUtils.URL_ROOT
           + "admin/index.jsp");
-      
+
       final String[] options = selenium.getSelectOptions("currentTournamentSelect");
       String tournamentID = null;
-      for(int i=0; i<options.length; ++i) {
-        if(options[i].endsWith("[ " + tournamentName + " ]")) {
+      for (int i = 0; i < options.length; ++i) {
+        if (options[i].endsWith("[ "
+            + tournamentName + " ]")) {
           tournamentID = options[i];
         }
       }
-      Assert.assertNotNull("Could not find tournament with name: " + tournamentName, tournamentID);
+      Assert.assertNotNull("Could not find tournament with name: "
+          + tournamentName, tournamentID);
 
       selenium.select("currentTournamentSelect", tournamentID);
-      
+
       selenium.click("change_tournament");
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
