@@ -39,6 +39,7 @@ public class TestPlayoffs extends SeleneseTestCase {
    */
   @Test
   public void testNotAdvanced() throws IOException {
+    try {
     // initialize database using simple challenge descriptor that just has 1
     // goal from 1 - 100
     final InputStream challengeStream = TestPlayoffs.class.getResourceAsStream("data/simple.xml");
@@ -95,6 +96,16 @@ public class TestPlayoffs extends SeleneseTestCase {
 
     // check for error message
     Assert.assertTrue("Should have errors", selenium.isElementPresent("name=error"));
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
   }
 
   private void enterTeamScore(final int teamNumber) throws IOException {
