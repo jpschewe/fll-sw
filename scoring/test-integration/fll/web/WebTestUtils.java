@@ -15,9 +15,13 @@ import junit.framework.Assert;
 
 import org.xml.sax.SAXException;
 
+import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
+import com.meterware.httpunit.WebForm;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+
+import fll.TestUtils;
 
 /**
  * Utilities for web tests.
@@ -73,6 +77,35 @@ public final class WebTestUtils {
           + " Contents of error page written to: " + output.getAbsolutePath());
     }
 
+  }
+  
+  /**
+   * @return
+   * @throws SAXException
+   * @throws IOException
+   */
+  public static WebConversation getConversation() throws IOException, SAXException {
+    final WebConversation conversation = new WebConversation();
+
+    // check for login and login if needed
+    WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
+        + "setup/existingdb.jsp");
+    WebResponse response = conversation.getResponse(request);
+    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
+
+    WebForm form = response.getFormWithName("login");
+    if (null != form) {
+      request = form.getRequest();
+      request.setParameter("j_username", "fll");
+      request.setParameter("j_password", "LegoLeague");
+      response = conversation.getResponse(request);
+      Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
+    }
+
+    // setup auth
+    // conversation.setAuthentication("FLL", "fll", "LegoLeague");
+
+    return conversation;
   }
 
 }
