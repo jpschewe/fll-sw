@@ -14,8 +14,6 @@
 <%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
 
 <%
-final String lEditFlag = request.getParameter("EditFlag");
-
 final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
 final Statement stmt = connection.createStatement();
@@ -59,10 +57,28 @@ function editFlagBoxClicked() {
 		text.style.color = "gray";
   }
 }
+function reloadRuns() {
 
+document.body.removeChild(document.getElementById('reloadruns'));
+document.verify.TeamNumber.length = 0;
+var s = document.createElement('script');
+s.type='text/javascript';
+s.id = 'reloadruns';
+s.src='unverifiedRunsObject.jsp?' + Math.random();
+document.body.appendChild(s);
+}
+
+
+function init() {
+  editFlagBoxClicked();
+  reloadRuns(); 
+}
+
+// Set to reload unverified runs every 5 seconds
+setInterval('reloadRuns()',5000);
 </script>
   </head>
-  <body onload="editFlagBoxClicked()">
+  <body onload="init()">
 
       <!-- top info bar -->
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
@@ -94,7 +110,7 @@ function editFlagBoxClicked() {
       <table> <!-- outer table -->        
         <tr>
         <td>
-        <form action="scoreEntry.jsp" method="POST" name="selectTeam">
+        <form action="GatherScoreEntryData" method="POST" name="selectTeam">
         <table> <!-- left table -->
         
         <tr align='left' valign='top'>
@@ -138,7 +154,7 @@ function editFlagBoxClicked() {
           <!-- submit button -->
           <td align='left'>
             <!--<font face='arial' size='4'><b>Submit</b></font>-->
-            <input class='dark_bg' type="submit" value="Submit">
+            <input class='dark_bg' type="submit" value="Submit" id='enter_submit'>
           </td>
         </tr>
       
@@ -147,7 +163,7 @@ function editFlagBoxClicked() {
       </td> <!-- left table -->
       
       <td valign='top'> <!-- right table -->
-      <form action="scoreEntry.jsp" method="POST" name="verify">
+      <form action="GatherScoreEntryData" method="POST" name="verify">
       <input type="hidden" name='EditFlag' value="1" />
       
       <table>
@@ -156,22 +172,8 @@ function editFlagBoxClicked() {
             <!-- pick team from a list -->
             <br>
             <font face='arial' size='4'>Unverified Runs:</font><br>
-                  <p>Don't see the team and run you're looking for, try <a href="select_team.jsp">reloading this page</a>.</p>            
+                  <p><a href="#" onclick="reloadRuns();">Reload Unverified Runs</a></p>            
             <select size='20' name='TeamNumber' ondblclick='verify.submit()'>
-             <sql:query var="result" dataSource="${datasource}">
-   SELECT
-     Performance.TeamNumber
-    ,Performance.RunNumber
-    ,Teams.TeamName
-     FROM Performance, Teams
-     WHERE Verified <> TRUE 
-       AND Tournament = ${currentTournament}
-       AND Teams.TeamNumber = Performance.TeamNumber
-       ORDER BY Performance.RunNumber, Teams.TeamNumber
- </sql:query>
-              <c:forEach var="row" items="${result.rowsByIndex}">
-                <option value="${row[0]}-${row[1]}">Run ${row[1]}&nbsp;-&nbsp;${row[0]}&nbsp;&nbsp;&nbsp;[${row[2]}]</option>
-              </c:forEach>
             </select>
           </td>
         </tr>
@@ -190,7 +192,7 @@ function editFlagBoxClicked() {
 
 </table> <!-- outer table -->
 
-    
+        <script type="text/javascript" id="reloadruns" src="unverifiedRunsObject.jsp"></script>
     
   </body>
 </html>

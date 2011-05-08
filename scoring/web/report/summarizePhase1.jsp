@@ -69,7 +69,7 @@ ScoreStandardization.summarizeScores(connection, challengeDocument, currentTourn
       </x:forEach>
     </table>
         
-    <p>If these look correct, <a href="summarizePhase2.jsp">continue</a> on to
+    <p>If these look correct, <a href="summarizePhase2.jsp" id='continue'>continue</a> on to
     the second phase of computing the scores.  This page will return you to
     the reporting menu if everything is ok.</p>
         

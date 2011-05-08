@@ -68,9 +68,9 @@ ${message}
           for multiple pieces of data.
 	<a href='javascript:hide("UploadTeamsHelp")'>[hide]</a></div>
         
-	  <input type="file" size="32" name="file">
+	  <input type="file" size="32" id='teams_file' name="file">
 	  <input type='hidden' name='uploadRedirect' value="<c:url value='/admin/UploadTeams'/>" />
-	  <input type="submit" value="Upload">
+	  <input type="submit" id='upload_teams' value="Upload">
 	</form>
 	</li>
 
@@ -112,7 +112,7 @@ ${message}
     
 	<li>
 	<form id='currentTournament' action='SetCurrentTournament'
-		method="post">Current Tournament: <select
+		method="post">Current Tournament: <select id='currentTournamentSelect'
 		name='currentTournament'>
 		<%
 		  final Statement stmt = connection.createStatement();
@@ -132,7 +132,7 @@ ${message}
 		  rs.close();
 		  stmt.close();
 		%>
-	</select> <input type='submit' value='Change tournament'></form>
+	</select> <input type='submit' name='change_tournament' value='Change tournament'></form>
 	</li>
  
     <li>Upload schedule for current tournament.

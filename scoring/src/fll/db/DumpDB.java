@@ -171,7 +171,7 @@ public final class DumpDB extends BaseFLLServlet {
         dumpedTypes = dumpTableTypes(tableName.toUpperCase(), metadata, outputWriter);
       }
       if(!dumpedTypes) {
-        dumpedTypes = dumpTableTypes(tableName.toLowerCase(), metadata, outputWriter);
+        dumpTableTypes(tableName.toLowerCase(), metadata, outputWriter);
       }
       output.closeEntry();
       SQLFunctions.close(rs);

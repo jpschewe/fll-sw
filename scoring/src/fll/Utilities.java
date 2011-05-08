@@ -207,7 +207,7 @@ public final class Utilities {
         prep.setNull(index, Types.TIME);
       } else {
         try {
-          final Date value = ImportDB.CSV_TIMESTAMP_FORMATTER.get().parse(data);
+          final Date value = ImportDB.CSV_TIME_FORMATTER.get().parse(data);
           final Time time = new Time(value.getTime());
           prep.setTime(index, time);
         } catch (final ParseException e) {

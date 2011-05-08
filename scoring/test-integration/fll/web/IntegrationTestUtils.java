@@ -34,6 +34,31 @@ public final class IntegrationTestUtils {
   }
 
   /**
+   * Load a page and check to make sure the page didn't crash.
+   * 
+   * @param selenium the test controller
+   * @param url the page to load
+   * @throws IOException
+   */
+  public static void loadPage(final Selenium selenium,
+                              final String url) throws IOException {
+    try {
+      selenium.open(url);
+      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+      final boolean error = selenium.isTextPresent("Exception");
+      Assert.assertFalse("Error loading: "
+          + url, error);
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
+  }
+
+  /**
    * Initialize the database using the given challenge descriptor.
    * 
    * @param selenium the test controller
@@ -68,6 +93,46 @@ public final class IntegrationTestUtils {
       } finally {
         if (!challengeFile.delete()) {
           challengeFile.deleteOnExit();
+        }
+      }
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
+  }
+
+  /**
+   * Initialize a database from a zip file.
+   * 
+   * @param selenium the test controller
+   * @param inputStream input stream that has database to load in it, this input
+   *          stream is closed by this method upon successful completion
+   * @throws IOException
+   */
+  public static void initializeDatabaseFromDump(final Selenium selenium,
+                                                final InputStream inputStream) throws IOException {
+    try {
+      Assert.assertNotNull(inputStream);
+      final File dumpFile = IntegrationTestUtils.storeInputStreamToFile(inputStream);
+      try {
+        selenium.open(TestUtils.URL_ROOT
+            + "setup/");
+        selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+        selenium.type("dbdump", dumpFile.getAbsolutePath());
+        selenium.click("createdb");
+        selenium.waitForPageToLoad(WAIT_FOR_PAGE_TIMEOUT);
+        final boolean success = selenium.isTextPresent("Successfully initialized database");
+        Assert.assertTrue("Database was not successfully initialized", success);
+      } finally {
+        if (!dumpFile.delete()) {
+          dumpFile.deleteOnExit();
         }
       }
     } catch (final AssertionError e) {
@@ -138,4 +203,101 @@ public final class IntegrationTestUtils {
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
     }
   }
+
+  /**
+   * Add a team to a tournament.
+   */
+  public static void addTeam(final Selenium selenium,
+                             final int teamNumber,
+                             final String teamName,
+                             final String organization,
+                             final String region,
+                             final String division,
+                             final String tournament) throws IOException {
+    try {
+      loadPage(selenium, TestUtils.URL_ROOT
+          + "admin/index.jsp");
+
+      selenium.click("link=Add a team");
+      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+      selenium.type("teamNumber", String.valueOf(teamNumber));
+      selenium.type("teamName", teamName);
+      selenium.type("organization", organization);
+      selenium.type("region", region);
+      selenium.click("id=division_text_choice");
+      selenium.type("division_text", division);
+      
+      final String[] options = selenium.getSelectOptions("currentTournamentSelect");
+      String tournamentID = null;
+      for (int i = 0; i < options.length; ++i) {
+        if (options[i].equals(tournament)) {
+          tournamentID = options[i];
+        }
+      }
+      Assert.assertNotNull("Could not find tournament with name: "
+          + tournament, tournamentID);
+      selenium.select("currentTournamentSelect", tournamentID);
+      
+      selenium.click("name=commit");
+      
+      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      Assert.assertTrue(selenium.isElementPresent("id=success"));
+
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
+
+  }
+
+  /**
+   * Set the current tournament by name.
+   * 
+   * @param tournamentName the name of the tournament to make the current
+   *          tournament
+   * @throws IOException
+   */
+  public static void setTournament(final Selenium selenium,
+                                   final String tournamentName) throws IOException {
+    try {
+      loadPage(selenium, TestUtils.URL_ROOT
+          + "admin/index.jsp");
+
+      final String[] options = selenium.getSelectOptions("currentTournamentSelect");
+      String tournamentID = null;
+      for (int i = 0; i < options.length; ++i) {
+        if (options[i].endsWith("[ "
+            + tournamentName + " ]")) {
+          tournamentID = options[i];
+        }
+      }
+      Assert.assertNotNull("Could not find tournament with name: "
+          + tournamentName, tournamentID);
+
+      selenium.select("currentTournamentSelect", tournamentID);
+
+      selenium.click("change_tournament");
+      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+      Assert.assertTrue(selenium.isElementPresent("id=success"));
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
+
+  }
+  
 }

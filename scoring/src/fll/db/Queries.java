@@ -1021,8 +1021,7 @@ public final class Queries {
           + " AND RunNumber > ?" //
           + " AND Tournament = ?");
       if (irunNumber > numSeedingRounds) {
-        final int playoffRun = irunNumber
-            - numSeedingRounds;
+        final int playoffRun = irunNumber - numSeedingRounds;
         final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun);
         final String division = getEventDivision(connection, teamNumber);
         if (ptLine > 0) {
@@ -1065,8 +1064,14 @@ public final class Queries {
 
           }
         } else {
-          throw new RuntimeException("Team "
-              + teamNumber + " could not be found in the playoff table for playoff round " + playoffRun);
+            // Do nothing - team didn't get entered into the PlayoffData table.
+            // This should not happen, but we also cannot get here unless a score
+            // got entered for the team in the Performance table, in which case we
+            // want to allow the web interface to be able to delete that score to
+            // remove the score from the Performance table.
+          if(LOGGER.isDebugEnabled()) {
+            LOGGER.trace("Deleting a score that wasn't in the PlayoffData table");
+          }
         }
       }
     } finally {
@@ -1077,10 +1082,12 @@ public final class Queries {
     PreparedStatement deletePrep = null;
     try {
       deletePrep = connection.prepareStatement("DELETE FROM Performance " //
-          + " WHERE TeamNumber = ?" //
+          + " WHERE Tournament = ?"
+          + " AND TeamNumber = ?"
           + " AND RunNumber = ?");
-      deletePrep.setInt(1, teamNumber);
-      deletePrep.setInt(2, irunNumber);
+      deletePrep.setInt(1, currentTournament);
+      deletePrep.setInt(2, teamNumber);
+      deletePrep.setInt(3, irunNumber);
 
       deletePrep.executeUpdate();
     } finally {
@@ -1511,7 +1518,11 @@ public final class Queries {
       prep = getTournamentParameterStmt(connection, tournament, paramName);
       rs = prep.executeQuery();
       if (rs.next()) {
-        return rs.getInt(1);
+        int value = rs.getInt(1);
+        if(LOGGER.isTraceEnabled()) {
+          LOGGER.trace("getIntTournamentParameter tournament: " + tournament + " param: " + paramName + " value: " + value);
+        }        
+        return value;
       } else {
         throw new FLLInternalException("There is no default value for tournament parameter: "
             + paramName);
@@ -2420,6 +2431,56 @@ public final class Queries {
         throw new RuntimeException("Query to obtain count of PlayoffData entries returned no data");
       } else {
         return rs.getInt(1) > 0;
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Query for whether the specified team has advanced to the specified (playoff) round.
+   * @param connection The database connection to use.
+   * @param roundNumber The round number to check. Must be greater than # of seeding rounds.
+   * @param division The division to check in the current tournament.
+   * @return true if team has entry in playoff table for the given round.
+   * @throws SQLException if database access fails.
+   * @throws RuntimeException
+   */
+  public static boolean didTeamReachPlayoffRound(final Connection connection,
+                                                 final int roundNumber,
+                                                 final int teamNumber,
+                                                 final String division) throws SQLException, RuntimeException {
+    return didTeamReachPlayoffRound(connection, getCurrentTournament(connection),
+                                    roundNumber, teamNumber, division);
+  }
+  
+  public static boolean didTeamReachPlayoffRound(final Connection connection,
+                                                 final int tournamentID,
+                                                 final int roundNumber,
+                                                 final int teamNumber,
+                                                 final String division) throws SQLException, RuntimeException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT Count(*) FROM PlayoffData"
+          + " WHERE Tournament = ?"
+          + " AND PlayoffRound = ?"
+          + " AND Team = ?"
+          + " AND event_division = ?");
+      prep.setInt(1, tournamentID);
+      prep.setInt(2, roundNumber-getNumSeedingRounds(connection, tournamentID));
+      prep.setInt(3, teamNumber);
+      prep.setString(4, division);
+      rs = prep.executeQuery();
+      if (!rs.next()) {
+        throw new RuntimeException("Query to check for team # "
+                                   + Integer.toString(teamNumber)
+                                   + "in round "
+                                   + Integer.toString(roundNumber)
+                                   + " failed.");
+      } else {
+        return rs.getInt(1) == 1;
       }
     } finally {
       SQLFunctions.close(rs);
