@@ -15,7 +15,7 @@
 <c:remove var="message" />
 
 <c:set var="redirect_url" scope="session">
- <c:url value="/setup/index.jsp" />
+ <c:url value="/" />
 </c:set>
 
 <p>

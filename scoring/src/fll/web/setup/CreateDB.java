@@ -89,6 +89,7 @@ public class CreateDB extends BaseFLLServlet {
         message.append("<p class='error'>Unknown form state, expected form fields not seen: "
             + request + "</p>");
       }
+
     } catch (final FileUploadException fue) {
       message.append("<p class='error'>Error handling the file upload: "
           + fue.getMessage() + "</p>");
@@ -105,7 +106,9 @@ public class CreateDB extends BaseFLLServlet {
     }
 
     session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
+    response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+        + "/admin/createUsername.jsp"));
+
   }
 
 }
