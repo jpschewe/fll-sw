@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<clay-model clay-version="2.0.0">
+<clay-model clay-version="2.0.1">
 <database-model author="" begin-script="" end-script="" id="1f769f17:1248908e683:-8000" name="dbModel" sql-dialect-id="jp.azzurri.clay.dialect.HSQLDB_1_8_0_Dialect" version="1.0">
 <schema-list>
 <schema id="1f769f17:1248908e683:-7ffd" name="DEFAULT_SCHEMA">
@@ -381,6 +381,29 @@
 </foreign-key>
 </foreign-key-list>
 </table>
+<table id="1b527d23:12fd1ad49f2:-7fd1" name="authentication">
+<column-list>
+<column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1b527d23:12fd1ad49f2:-7fcd" mandatory="true" name="user">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+<column auto-increment="false" column-size="32" decimal-digits="0" default-value="" id="1b527d23:12fd1ad49f2:-7fcc" mandatory="false" name="pass">
+<data-type name="CHAR" selected-variant-pattern="CHAR(%n)"/>
+</column>
+</column-list>
+<primary-key id="1b527d23:12fd1ad49f2:-7fd0" name="PK_AUTHENTICATION">
+<primary-key-column name="user"/>
+</primary-key>
+</table>
+<table id="1b527d23:12fd1ad49f2:-7fc7" name="valid_login">
+<column-list>
+<column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1b527d23:12fd1ad49f2:-7fc3" mandatory="true" name="magic_key">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
+</column-list>
+<primary-key id="1b527d23:12fd1ad49f2:-7fc6" name="PK_VALID_LOGIN">
+<primary-key-column name="magic_key"/>
+</primary-key>
+</table>
 </table-list>
 </schema>
 </schema-list>
@@ -399,5 +422,7 @@
 <table-figure refid="7ad99991:125ecd3d8cf:-7f78" x="342" y="861"/>
 <table-figure refid="73daf36c:1292a0d6a87:-7fdb" x="428" y="14"/>
 <table-figure refid="73daf36c:1292a0d6a87:-7fc9" x="5" y="12"/>
+<table-figure refid="1b527d23:12fd1ad49f2:-7fd1" x="137" y="221"/>
+<table-figure refid="1b527d23:12fd1ad49f2:-7fc7" x="123" y="318"/>
 </diagram>
 </clay-model>
