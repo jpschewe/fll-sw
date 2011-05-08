@@ -27,7 +27,9 @@ public class TestPlayoffs extends SeleneseTestCase {
   @Override
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    super.setUp("http://localhost:9080/setup");
+    super.setUp(TestUtils.URL_ROOT
+                + "setup");
+    IntegrationTestUtils.login(selenium);
   }
 
   /**
