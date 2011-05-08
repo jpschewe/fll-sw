@@ -41,7 +41,10 @@ public class CreateDB extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();
 
-  protected void processRequest(final HttpServletRequest request, final HttpServletResponse response, final ServletContext application, final HttpSession session)throws IOException, ServletException {
+  protected void processRequest(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final ServletContext application,
+                                final HttpSession session) throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
 
     try {
