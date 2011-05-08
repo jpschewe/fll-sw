@@ -26,7 +26,12 @@ pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
 
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/></h1>
-    <ul>
+
+ ${message}
+ <%-- clear out the message, so that we don't see it again --%>
+ <c:remove var="message" />
+
+ <ul>
 
       <li>Current Tournament -&gt; <%=Queries.getCurrentTournamentName(connection)%></li>
 
