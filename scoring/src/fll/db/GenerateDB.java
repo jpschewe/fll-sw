@@ -114,6 +114,10 @@ public final class GenerateDB {
 
       createGlobalParameters(document, connection, forceRebuild, tables);
 
+      // authentication tables
+      createAuthentication(connection);
+      createValidLogins(connection);
+
       // Table structure for table 'Tournaments'
       tournaments(connection, forceRebuild, tables);
 
@@ -235,8 +239,7 @@ public final class GenerateDB {
         createStatement.append(" Bye boolean DEFAULT FALSE NOT NULL,");
         createStatement.append(" Verified boolean DEFAULT FALSE NOT NULL,");
         for (final Element element : new NodelistElementCollectionAdapter(
-                                                                          performanceElement
-                                                                                            .getElementsByTagName("goal"))) {
+                                                                          performanceElement.getElementsByTagName("goal"))) {
           final String columnDefinition = generateGoalColumnDefinition(element);
           createStatement.append(" "
               + columnDefinition + ",");
@@ -264,8 +267,7 @@ public final class GenerateDB {
       finalScores.append("TeamNumber integer NOT NULL,");
       finalScores.append("Tournament INTEGER NOT NULL,");
       for (final Element categoryElement : new NodelistElementCollectionAdapter(
-                                                                                rootElement
-                                                                                           .getElementsByTagName("subjectiveCategory"))) {
+                                                                                rootElement.getElementsByTagName("subjectiveCategory"))) {
         createStatement.setLength(0);
 
         final String tableName = categoryElement.getAttribute("name");
@@ -324,7 +326,7 @@ public final class GenerateDB {
           + "   SELECT param_value FROM tournament_parameters" //
           + "     WHERE param = 'SeedingRounds' AND tournament = ("
           + "       SELECT MAX(tournament) FROM tournament_parameters"//
-          + "         WHERE param = 'SeedingRounds'"// 
+          + "         WHERE param = 'SeedingRounds'"//
           + "           AND ( tournament = -1 OR tournament = ("//
           // current tournament
           + "             SELECT param_value FROM global_parameters"//
@@ -354,6 +356,45 @@ public final class GenerateDB {
       SQLFunctions.close(prep);
     }
 
+  }
+
+  /**
+   * Create the 'authentication' table. Drops the table if it exists.
+   * 
+   */
+  public static void createAuthentication(final Connection connection) throws SQLException {
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+      
+      stmt.executeUpdate("DROP TABLE IF EXISTS authentication CASCADE");
+      stmt.executeUpdate("CREATE TABLE authentication ("
+          + "  user varchar(64) NOT NULL" //
+          + " ,pass char(32)"//
+          + " ,CONSTRAINT authentication_pk PRIMARY KEY (user)" //
+          + ")");
+    } finally {
+      SQLFunctions.close(stmt);
+    }
+  }
+
+  /**
+   * Create the 'valid_logins' table. Drops the table if it exists.
+   * 
+   */
+  public static void createValidLogins(final Connection connection) throws SQLException {
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+      
+      stmt.executeUpdate("DROP TABLE IF EXISTS valid_logins CASCADE");
+      stmt.executeUpdate("CREATE TABLE valid_logins ("
+          + "  magic_key varchar(64) NOT NULL" //
+          + " ,CONSTRAINT valid_logins_pk PRIMARY KEY (magic_key)" //
+          + ")");
+    } finally {
+      SQLFunctions.close(stmt);
+    }
   }
 
   /** Table structure for table 'tournament_parameters' */
@@ -688,8 +729,7 @@ public final class GenerateDB {
         sql.append(" ,table_side INTEGER NOT NULL");
         sql.append(" ,CONSTRAINT sched_perf_rounds_pk PRIMARY KEY (tournament, team_number, round)");
         if (createConstraints) {
-          sql
-             .append(" ,CONSTRAINT sched_perf_rounds_fk1 FOREIGN KEY(tournament, team_number) REFERENCES schedule(tournament, team_number)");
+          sql.append(" ,CONSTRAINT sched_perf_rounds_fk1 FOREIGN KEY(tournament, team_number) REFERENCES schedule(tournament, team_number)");
         }
         sql.append(")");
 
