@@ -59,5 +59,10 @@
 	<classpathentry kind="lib" path="scoring/lib/test/fest/fest-util-1.1.2.jar" sourcepath="scoring/lib/test/fest/fest-util-1.1.2-sources.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/fest/jcip-annotations-1.0.jar" sourcepath="scoring/lib/test/fest/jcip-annotations-1.0-sources.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/junit-4.8.2.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/commons-codec-1.5.jar" sourcepath="scoring/lib/source/commons-codec-1.5-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/scoring/lib/source/commons-codec-1.5-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
