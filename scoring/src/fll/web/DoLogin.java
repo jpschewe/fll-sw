@@ -9,7 +9,6 @@ package fll.web;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -18,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.util.sql.SQLFunctions;
+import fll.db.Queries;
 
 /**
  * Handle login credentials and if incorrect redirect back to login page.
@@ -39,8 +38,7 @@ public class DoLogin extends BaseFLLServlet {
       final Connection connection = datasource.getConnection();
 
       // check for authentication table
-      final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
-      if (!tables.contains("authentication")) {
+      if (Queries.isAuthenticationEmpty(connection)) {
         session.setAttribute(SessionAttributes.MESSAGE,
                              "<p class='error'>No authentication information in the database - see administrator</p>");
         response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
