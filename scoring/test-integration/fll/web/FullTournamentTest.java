@@ -493,7 +493,8 @@ public class FullTournamentTest extends SeleneseTestCase {
 
     // find form named 'printable'
     WebForm form = response.getFormWithName("printable");
-
+    Assert.assertNotNull("printable form not found", form);
+    
     request = form.getRequest();
 
     // set division
@@ -505,7 +506,8 @@ public class FullTournamentTest extends SeleneseTestCase {
 
     // find form named 'printScoreSheets'
     form = response.getFormWithName("printScoreSheets");
-
+    Assert.assertNotNull("printScoreSheets form not found", form);
+    
     // click 'Print scoresheets'
     request = form.getRequest();
     response = WebTestUtils.loadPage(conversation, request);
