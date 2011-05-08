@@ -71,6 +71,9 @@
  <li><a href="http://one-jar.sourceforge.net/index.php">One-Jar</a>
  (Used to create single jar file for applications) - <a
   href="one-jar-license.txt">License</a></li>
+
+<li><a href="http://commons.apache.org/codec/">Commons Codec
+ </a> - <a href="commons-codec-LICENSE.txt">License</a></li>
   
 </ul>
 

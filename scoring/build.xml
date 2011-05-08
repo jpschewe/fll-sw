@@ -115,6 +115,9 @@
 		<pathelement location="${dir.lib.findbugs}/annotations.jar" />
 		<pathelement location="${dir.lib.findbugs}/jsr305.jar" />
 
+		<!-- used for password hashes -->
+		<pathelement location="${dir.lib}/commons-codec-1.5.jar" />
+		
 		<path refid="cobertura.classpath" />
 
 	</path>
