@@ -408,7 +408,7 @@ public class FullTournamentTest extends SeleneseTestCase {
         + "report/CategoryScoresByScoreGroup");
 
     // PDF reports need to be done with httpunit
-    final WebConversation conversation = new WebConversation();
+    final WebConversation conversation = WebTestUtils.getConversation();
     WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
         + "report/finalComputedScores.pdf");
     WebResponse response = WebTestUtils.loadPage(conversation, request);
@@ -485,7 +485,7 @@ public class FullTournamentTest extends SeleneseTestCase {
    */
   private static void printPlayoffScoresheets(final String division) throws MalformedURLException, IOException,
       SAXException, InterruptedException {
-    final WebConversation conversation = new WebConversation();
+    final WebConversation conversation = WebTestUtils.getConversation();
     WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
         + "playoff/index.jsp");
     WebResponse response = WebTestUtils.loadPage(conversation, request);
@@ -534,7 +534,7 @@ public class FullTournamentTest extends SeleneseTestCase {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      final WebConversation conversation = new WebConversation();
+      final WebConversation conversation = WebTestUtils.getConversation();
 
       // download subjective zip
       WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
