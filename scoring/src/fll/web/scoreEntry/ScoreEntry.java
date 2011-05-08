@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
@@ -30,10 +31,12 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FP;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeParser;
 import fll.xml.ScoreType;
@@ -58,7 +61,9 @@ public final class ScoreEntry {
    * Generate the isConsistent method for the goals in the performance element
    * of document.
    */
-  public static void generateIsConsistent(final JspWriter writer, final Document document) throws IOException {
+  public static void generateIsConsistent(final JspWriter writer,
+                                          final ServletContext application) throws IOException {
+    final Document document = ApplicationAttributes.getChallengeDocument(application);
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
 
@@ -96,7 +101,9 @@ public final class ScoreEntry {
    * 
    * @throws ParseException
    */
-  public static void generateIncrementMethods(final Writer writer, final Document document) throws IOException, ParseException {
+  public static void generateIncrementMethods(final Writer writer,
+                                              final ServletContext application) throws IOException, ParseException {
+    final Document document = ApplicationAttributes.getChallengeDocument(application);
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
     final Formatter formatter = new Formatter(writer);
@@ -165,7 +172,8 @@ public final class ScoreEntry {
     formatter.format("}%n%n%n");
 
     // generate the methods to update the computed goal variables
-    for (final Element ele : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("computedGoal"))) {
+    for (final Element ele : new NodelistElementCollectionAdapter(
+                                                                  performanceElement.getElementsByTagName("computedGoal"))) {
       final String goalName = ele.getAttribute("name");
       formatter.format("<!-- %s -->%n", goalName);
       formatter.format("var %s;%n", getVarNameForComputedScore(goalName));
@@ -176,11 +184,13 @@ public final class ScoreEntry {
   /**
    * Generate the body of the refresh function
    */
-  public static void generateRefreshBody(final Writer writer, final Document document) throws ParseException, IOException {
+  public static void generateRefreshBody(final Writer writer,
+                                         final ServletContext application) throws ParseException, IOException {
     if (LOG.isTraceEnabled()) {
       LOG.trace("Entering generateRefreshBody");
     }
 
+    final Document document = ApplicationAttributes.getChallengeDocument(application);
     final Formatter formatter = new Formatter(writer);
 
     final Element rootElement = document.getDocumentElement();
@@ -215,7 +225,8 @@ public final class ScoreEntry {
           final Element valueEle = (Element) posValues.get(valueIdx);
 
           final String value = valueEle.getAttribute("value");
-          final double valueScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(valueEle.getAttribute("score")).doubleValue();
+          final double valueScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(valueEle.getAttribute("score"))
+                                                                    .doubleValue();
           if (valueIdx > 0) {
             formatter.format("} else ");
           }
@@ -258,7 +269,8 @@ public final class ScoreEntry {
     formatter.format("}%n");
 
     // output calls to the computed goal methods
-    for (final Element ele : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("computedGoal"))) {
+    for (final Element ele : new NodelistElementCollectionAdapter(
+                                                                  performanceElement.getElementsByTagName("computedGoal"))) {
       final String goalName = ele.getAttribute("name");
       final String computedVarName = getVarNameForComputedScore(goalName);
       formatter.format("%s();%n", getComputedMethodName(goalName));
@@ -279,18 +291,20 @@ public final class ScoreEntry {
    * Output the body for the check_restrictions method.
    * 
    * @param writer where to write
-   * @param document the challenge document
    * @throws IOException
    * @throws ParseException
    */
-  public static void generateCheckRestrictionsBody(final Writer writer, final Document document) throws IOException, ParseException {
+  public static void generateCheckRestrictionsBody(final Writer writer,
+                                                   final ServletContext application) throws IOException, ParseException {
+    final Document document = ApplicationAttributes.getChallengeDocument(application);
     final Formatter formatter = new Formatter(writer);
 
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
 
     final Collection<String> goalsWithRestrictions = new LinkedList<String>();
-    final List<Element> restrictions = new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("restriction")).asList();
+    final List<Element> restrictions = new NodelistElementCollectionAdapter(
+                                                                            performanceElement.getElementsByTagName("restriction")).asList();
 
     // find out which goals are involved in restrictions
     for (final Element restrictEle : restrictions) {
@@ -305,8 +319,10 @@ public final class ScoreEntry {
     // output actual check of restriction
     for (int restrictIdx = 0; restrictIdx < restrictions.size(); ++restrictIdx) {
       final Element restrictEle = (Element) restrictions.get(restrictIdx);
-      final double lowerBound = Utilities.NUMBER_FORMAT_INSTANCE.parse(restrictEle.getAttribute("lowerBound")).doubleValue();
-      final double upperBound = Utilities.NUMBER_FORMAT_INSTANCE.parse(restrictEle.getAttribute("upperBound")).doubleValue();
+      final double lowerBound = Utilities.NUMBER_FORMAT_INSTANCE.parse(restrictEle.getAttribute("lowerBound"))
+                                                                .doubleValue();
+      final double upperBound = Utilities.NUMBER_FORMAT_INSTANCE.parse(restrictEle.getAttribute("upperBound"))
+                                                                .doubleValue();
       final String message = restrictEle.getAttribute("message");
 
       final String polyString = polyToString(restrictEle);
@@ -344,24 +360,27 @@ public final class ScoreEntry {
   }
 
   /**
-   * Generate the reset method, initializes all variables to their default
+   * Generate init for new scores, initializes all variables to their default
    * values.
    */
-  public static void generateReset(final JspWriter writer, final Document document) throws IOException, ParseException {
+  public static void generateInitForNewScore(final JspWriter writer,
+                                             final ServletContext application) throws IOException, ParseException {
+    final Document document = ApplicationAttributes.getChallengeDocument(application);
     final Element rootElement = document.getDocumentElement();
     final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
-    writer.println("function reset() {");
 
     for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
       final String name = element.getAttribute("name");
-      final double initialValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("initialValue")).doubleValue();
+      final double initialValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("initialValue"))
+                                                                  .doubleValue();
       if (XMLUtils.isEnumeratedGoal(element)) {
         // find score that matches initialValue or is min
         final List<Element> values = new NodelistElementCollectionAdapter(element.getElementsByTagName("value")).asList();
         boolean found = false;
         for (final Element valueEle : values) {
           final String value = valueEle.getAttribute("value");
-          final double valueScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(valueEle.getAttribute("score")).doubleValue();
+          final double valueScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(valueEle.getAttribute("score"))
+                                                                    .doubleValue();
           if (FP.equals(valueScore, initialValue, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
             writer.println("  "
                 + getVarNameForRawScore(name) + " = \"" + value + "\";");
@@ -370,7 +389,8 @@ public final class ScoreEntry {
         }
         if (!found) {
           // fall back to just using the first enum value
-          LOG.warn(new Formatter().format("Initial value for enum goal '%s' does not match the score of any enum value", name));
+          LOG.warn(new Formatter().format("Initial value for enum goal '%s' does not match the score of any enum value",
+                                          name));
           writer.println("  "
               + getVarNameForRawScore(name) + " = \"" + values.get(0).getAttribute("value") + "\";");
         }
@@ -381,7 +401,10 @@ public final class ScoreEntry {
       }
     }
 
-    writer.println("}");
+    writer.println("  Verified = 0;");
+
+    writer.println("  gbl_NoShow = 0;");
+
   }
 
   /**
@@ -402,7 +425,9 @@ public final class ScoreEntry {
   /**
    * Generate the score entry form.
    */
-  public static void generateScoreEntry(final JspWriter writer, final Document document) throws IOException {
+  public static void generateScoreEntry(final JspWriter writer,
+                                        final ServletContext application) throws IOException {
+    final Document document = ApplicationAttributes.getChallengeDocument(application);
     final Formatter formatter = new Formatter(writer);
 
     final Element rootElement = document.getDocumentElement();
@@ -467,7 +492,9 @@ public final class ScoreEntry {
    * @throws IOException
    * @throws ParseException
    */
-  private static void generateSimpleGoalButtons(final Element goalEle, final String name, final JspWriter writer) throws IOException, ParseException {
+  private static void generateSimpleGoalButtons(final Element goalEle,
+                                                final String name,
+                                                final JspWriter writer) throws IOException, ParseException {
     // start inc/dec buttons
     writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='150'>");
     writer.println("      <tr align='center'>");
@@ -521,31 +548,43 @@ public final class ScoreEntry {
    * Generate an increment or decrement button for goal name with
    * increment/decrement increment.
    */
-  private static void generateIncDecButton(final String name, final int increment, final JspWriter writer) throws IOException {
+  private static void generateIncDecButton(final String name,
+                                           final int increment,
+                                           final JspWriter writer) throws IOException {
     // generate buttons with calls to increment<name>
     final String buttonName = (increment < 0 ? "" : "+")
         + String.valueOf(increment);
-    final String incdec = (increment < 0 ? "dec" : "inc");
+    final String buttonID = getIncDecButtonID(name, increment);
     writer.println("        <td>");
     writer.println("          <input id='"
-        + incdec + "_" + name + "_" + String.valueOf(increment) + "' type='button' value='" + buttonName + "' onclick='" + getIncrementMethodName(name) + "("
+        + buttonID + "' type='button' value='" + buttonName + "' onclick='" + getIncrementMethodName(name) + "("
         + increment + ")'>");
     writer.println("        </td>");
+  }
+
+  public static String getIncDecButtonID(final String name,
+                                         final int increment) {
+    final String incdec = (increment < 0 ? "dec" : "inc");
+    return incdec
+        + "_" + name + "_" + String.valueOf(Math.abs(increment));
   }
 
   /**
    * Generate yes and no buttons for goal name.
    */
-  private static void generateYesNoButtons(final String name, final JspWriter writer) throws IOException {
+  private static void generateYesNoButtons(final String name,
+                                           final JspWriter writer) throws IOException {
     // generate radio buttons with calls to set<name>
     writer.println("        <td>");
     writer.println("          <input type='radio' id='"
         + name + "_yes' name='" + name + "' value='1' onclick='" + getSetMethodName(name) + "(1)'>");
-    writer.println("          <label for='" + name + "_yes'>Yes</label>");
+    writer.println("          <label for='"
+        + name + "_yes'>Yes</label>");
     writer.println("          &nbsp;&nbsp;");
     writer.println("          <input type='radio' id='"
         + name + "_no' name='" + name + "' value='0' onclick='" + getSetMethodName(name) + "(0)'>");
-    writer.println("          <label for='" + name + "_no'>No</label>");
+    writer.println("          <label for='"
+        + name + "_no'>No</label>");
     writer.println("        </td>");
   }
 
@@ -554,32 +593,33 @@ public final class ScoreEntry {
    * team's score.
    */
   public static void generateInitForScoreEdit(final JspWriter writer,
-                                              final HttpSession session,
-                                              final Document document,
-                                              final int teamNumber,
-                                              final int runNumber) throws SQLException, IOException {
+                                              final ServletContext application,
+                                              final HttpSession session) throws SQLException, IOException {
+    final Document document = ApplicationAttributes.getChallengeDocument(application);
+    final int teamNumber = SessionAttributes.getNonNullAttribute(session, "team", Team.class).getTeamNumber();
+    final int runNumber = SessionAttributes.getNonNullAttribute(session, "lRunNumber", Number.class).intValue();
+
     final DataSource datasource = SessionAttributes.getDataSource(session);
     final Connection connection = datasource.getConnection();
     final int tournament = Queries.getCurrentTournament(connection);
-    
+
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
       prep = connection.prepareStatement("SELECT * from Performance"
-                                         + " WHERE TeamNumber = ?" //
-                                         + " AND RunNumber = ?"//
-                                         + " AND Tournament = ?");
+          + " WHERE TeamNumber = ?" //
+          + " AND RunNumber = ?"//
+          + " AND Tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setInt(2, runNumber);
       prep.setInt(3, tournament);
-      
+
       rs = prep.executeQuery();
       if (rs.next()) {
-        // writer.println("  gbl_NoShow = " + rs.getString("NoShow") + ";");
-
         final Element rootElement = document.getDocumentElement();
         final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
-        for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
+        for (final Element element : new NodelistElementCollectionAdapter(
+                                                                          performanceElement.getElementsByTagName("goal"))) {
           final String name = element.getAttribute("name");
           final List<Element> values = new NodelistElementCollectionAdapter(element.getElementsByTagName("value")).asList();
           final String rawVarName = getVarNameForRawScore(name);
@@ -597,8 +637,9 @@ public final class ScoreEntry {
               }
             }
             if (!found) {
-              throw new RuntimeException("Found enumerated value in the database that's not in the XML document, goal: "
-                  + name + " value: " + storedValue);
+              throw new RuntimeException(
+                                         "Found enumerated value in the database that's not in the XML document, goal: "
+                                             + name + " value: " + storedValue);
             }
           } else {
             // just use the value that is stored in the database
@@ -609,6 +650,9 @@ public final class ScoreEntry {
         // Always init the special double-check column
         writer.println("  Verified = "
             + rs.getBoolean("Verified") + ";");
+
+        writer.println("  gbl_NoShow = "
+            + rs.getBoolean("NoShow") + ";");
       } else {
         throw new RuntimeException("Cannot find TeamNumber and RunNumber in Performance table"
             + " TeamNumber: " + teamNumber + " RunNumber: " + runNumber);
@@ -619,7 +663,9 @@ public final class ScoreEntry {
     }
   }
 
-  private static void generateEnumeratedGoalButtons(final Element goal, final String goalName, final JspWriter writer) throws IOException, ParseException {
+  private static void generateEnumeratedGoalButtons(final Element goal,
+                                                    final String goalName,
+                                                    final JspWriter writer) throws IOException, ParseException {
     writer.println("    <table border='0' cellpadding='0' cellspacing='0' width='100%'>");
 
     for (final Element valueEle : new NodelistElementCollectionAdapter(goal.getElementsByTagName("value"))) {
@@ -628,7 +674,8 @@ public final class ScoreEntry {
       writer.println("      <tr>");
       writer.println("        <td>");
       writer.println("          <input type='radio' name='"
-          + goalName + "' value='" + value + "' id='" + getIDForEnumRadio(goalName, value) + "' ' onclick='" + getSetMethodName(goalName) + "(\"" + value + "\")'>");
+          + goalName + "' value='" + value + "' id='" + getIDForEnumRadio(goalName, value) + "' ' onclick='"
+          + getSetMethodName(goalName) + "(\"" + value + "\")'>");
       writer.println("        </td>");
       writer.println("        <td>");
       writer.println("          "
@@ -641,12 +688,14 @@ public final class ScoreEntry {
   }
 
   /**
-   * The ID assigned to the radio button for a particular value of an enumerated goal.
+   * The ID assigned to the radio button for a particular value of an enumerated
+   * goal.
    */
-  public static String getIDForEnumRadio(final String goalName, final String value) {
-    return goalName + "_" + value;
+  public static String getIDForEnumRadio(final String goalName,
+                                         final String value) {
+    return goalName
+        + "_" + value;
   }
-  
 
   /**
    * The name of the javascript variable that represents the raw score for a
@@ -711,7 +760,8 @@ public final class ScoreEntry {
         + goalName;
   }
 
-  private static void generateComputedGoalFunction(final Formatter formatter, final Element ele) throws ParseException {
+  private static void generateComputedGoalFunction(final Formatter formatter,
+                                                   final Element ele) throws ParseException {
     final String goalName = ele.getAttribute("name");
 
     formatter.format("function %s() {%n", getComputedMethodName(goalName));
@@ -728,7 +778,8 @@ public final class ScoreEntry {
       }
     }
 
-    formatter.format("%sdocument.scoreEntry.score_%s.value = %s;%n", generateIndentSpace(INDENT_LEVEL), goalName, getVarNameForComputedScore(goalName));
+    formatter.format("%sdocument.scoreEntry.score_%s.value = %s;%n", generateIndentSpace(INDENT_LEVEL), goalName,
+                     getVarNameForComputedScore(goalName));
     formatter.format("}%n");
   }
 
@@ -740,11 +791,14 @@ public final class ScoreEntry {
     return varName;
   }
 
-  private static void generateSwitch(final Formatter formatter, final Element ele, final String goalName, final int indent) throws ParseException {
+  private static void generateSwitch(final Formatter formatter,
+                                     final Element ele,
+                                     final String goalName,
+                                     final int indent) throws ParseException {
     // keep track if there are any case statements
     boolean first = true;
     boolean hasCase = false;
-    for(final Element childEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
+    for (final Element childEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
       final String childName = childEle.getNodeName();
       if ("case".equals(childName)) {
         hasCase = true;
@@ -813,7 +867,7 @@ public final class ScoreEntry {
   private static String polyToString(final Element ele) throws ParseException {
     final Formatter formatter = new Formatter();
     boolean first = true;
-    for(final Element childEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
+    for (final Element childEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
       if (!first) {
         formatter.format(" + ");
       } else {
@@ -822,7 +876,8 @@ public final class ScoreEntry {
 
       if ("term".equals(childEle.getNodeName())) {
         final String goal = childEle.getAttribute("goal");
-        final double coefficient = Utilities.NUMBER_FORMAT_INSTANCE.parse(childEle.getAttribute("coefficient")).doubleValue();
+        final double coefficient = Utilities.NUMBER_FORMAT_INSTANCE.parse(childEle.getAttribute("coefficient"))
+                                                                   .doubleValue();
         final String scoreType = childEle.getAttribute("scoreType");
         final String varName;
         if ("raw".equals(scoreType)) {
@@ -837,7 +892,8 @@ public final class ScoreEntry {
         final String floatingPoint = childEle.getAttribute("floatingPoint");
         formatter.format("%s", applyFloatingPoint(value, floatingPoint));
       } else if ("variableRef".equals(childEle.getNodeName())) {
-        final double coefficient = Utilities.NUMBER_FORMAT_INSTANCE.parse(childEle.getAttribute("coefficient")).doubleValue();
+        final double coefficient = Utilities.NUMBER_FORMAT_INSTANCE.parse(childEle.getAttribute("coefficient"))
+                                                                   .doubleValue();
         final String variable = getComputedGoalLocalVarName(childEle.getAttribute("variable"));
         final String floatingPoint = childEle.getAttribute("floatingPoint");
         final String value = new Formatter().format("%f * %s", coefficient, variable).toString();
@@ -861,7 +917,8 @@ public final class ScoreEntry {
    * @param floatingPoint the floating point handling
    * @return value with the floating point handling applied
    */
-  private static String applyFloatingPoint(final String value, final String floatingPoint) {
+  private static String applyFloatingPoint(final String value,
+                                           final String floatingPoint) {
     if ("decimal".equals(floatingPoint)) {
       return value;
     } else if ("round".equals(floatingPoint)) {
@@ -902,7 +959,9 @@ public final class ScoreEntry {
    * @param ele
    * @throws ParseException
    */
-  private static void generateCondition(final Formatter formatter, final String ifPrefix, final Element ele) throws ParseException {
+  private static void generateCondition(final Formatter formatter,
+                                        final String ifPrefix,
+                                        final Element ele) throws ParseException {
     formatter.format("%sif(", ifPrefix);
 
     final List<Element> elementChildren = new NodelistElementCollectionAdapter(ele.getChildNodes()).asList();

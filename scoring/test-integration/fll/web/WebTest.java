@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import com.meterware.httpunit.WebConversation;
+import com.thoughtworks.selenium.SeleneseTestCase;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
@@ -22,19 +22,15 @@ import fll.util.LogUtils;
 /**
  * Basic tests of loading pages.
  */
-public class WebTest /* extends SeleneseTestCase */{
+public class WebTest extends SeleneseTestCase {
 
   private static final Logger LOG = LogUtils.getLogger();
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     LogUtils.initializeLogging();
+    super.setUp("http://localhost:9080/setup");
   }
-
-  // @Override
-  // public void setUp() throws Exception {
-  // super.setUp("http://localhost:9080/setup");
-  // }
 
   /**
    * Basic load of the pages.
@@ -45,8 +41,8 @@ public class WebTest /* extends SeleneseTestCase */{
         "", //
         "display.jsp", //
         "index.jsp", //
-        "welcome.jsp", "admin", "admin/index.jsp", "admin/edit_event_division.jsp", "admin/tournaments.jsp", "admin/judges.jsp", "admin/tables.jsp",
-        "admin/select_team.jsp", "admin/remoteControl.jsp", //
+        "welcome.jsp", "admin", "admin/index.jsp", "admin/edit_event_division.jsp", "admin/tournaments.jsp",
+        "admin/judges.jsp", "admin/tables.jsp", "admin/select_team.jsp", "admin/remoteControl.jsp", //
         "credits/credits.jsp", //
         "developer/index.jsp", "developer/query.jsp", //
         "playoff/index.jsp", "playoff/check.jsp?division=__all__",
@@ -58,29 +54,28 @@ public class WebTest /* extends SeleneseTestCase */{
         // "scoreboard/main.jsp",
         // "scoreboard_800/main.jsp",
         "scoreEntry/select_team.jsp", "setup/index.jsp", "style/style.jsp", "troubleshooting/index.jsp", };
-    final WebConversation conversation = WebTestUtils.getConversation();
     for (final String page : pages) {
       LOG.info("Testing page #"
           + page + "#");
-      WebTestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
+      IntegrationTestUtils.initializeDatabaseFromDump(selenium, WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
 
       final String url = TestUtils.URL_ROOT
           + page;
-      WebTestUtils.loadPage(conversation, url);
+      IntegrationTestUtils.loadPage(selenium, url);
     }
   }
 
   /**
    * Test changing tournaments to DUMMY and then back to State.
+   * @throws IOException 
    */
   @Test
-  public void testChangeTournament() throws MalformedURLException, IOException, SAXException {
-    WebTestUtils.initializeDatabaseFromDump(WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
+  public void testChangeTournament() throws IOException {
+    IntegrationTestUtils.initializeDatabaseFromDump(selenium, WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
 
-    final WebConversation conversation = WebTestUtils.getConversation();
-    WebTestUtils.setTournament(conversation, GenerateDB.DUMMY_TOURNAMENT_NAME);
+    IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
-    WebTestUtils.setTournament(conversation, "STATE");
+    IntegrationTestUtils.setTournament(selenium, "STATE");
   }
 
 }

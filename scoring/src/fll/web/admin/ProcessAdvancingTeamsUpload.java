@@ -159,8 +159,12 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
     String[] data = reader.readNext();
     while (null != data) {
       if (teamNumColumnIdx < data.length) {
-        final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(data[teamNumColumnIdx]).intValue();
-        teams.add(teamNumber);
+        final String teamNumStr = data[teamNumColumnIdx];
+        if (null != teamNumStr
+            && !"".equals(teamNumStr.trim())) {
+          final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumStr).intValue();
+          teams.add(teamNumber);
+        }
       }
 
       data = reader.readNext();

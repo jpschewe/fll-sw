@@ -83,7 +83,7 @@ function confirmChangeTournament() {
     </c:choose>
     ${possibleDivision}
    </c:forEach> 
-   <input type='radio' name='division' value='text' /> 
+   <input type='radio' id='division_text_choice' name='division' value='text' /> 
    <input type='text' name='division_text' />
         </td>
       </tr>
@@ -98,7 +98,7 @@ function confirmChangeTournament() {
             <p>Playoffs are initialized for the team's current tournament, the current tournament may not be modified now.</p>
           </c:when>
           <c:otherwise>
-            <select name='currentTournament'>
+            <select id='currentTournamentSelect' name='currentTournament'>
             <c:forEach items='${tournaments}' var='tournament'>
               <c:choose>
               <c:when test="${tournament.tournamentID == teamCurrentTournament.tournamentID }">

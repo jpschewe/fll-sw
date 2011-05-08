@@ -43,7 +43,7 @@
       </table>
             
       <input type='hidden' name='verified' value='true' />
-      <input type='submit' name='submit' value='Continue' />
+      <input type='submit' id='continue' name='submit' value='Continue' />
     </form>
 
 

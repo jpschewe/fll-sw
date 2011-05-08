@@ -60,6 +60,7 @@ public class CommitTeam extends BaseFLLServlet {
               + teamNumber);
         }
         Queries.deleteTeam(teamNumber, challengeDocument, connection);
+        message.append("<p id='success'>Successfully deleted a team</p>");
       } else if (null != request.getParameter("advance")) {
         if (LOGGER.isInfoEnabled()) {
           LOGGER.info("Advancing "
@@ -70,6 +71,8 @@ public class CommitTeam extends BaseFLLServlet {
           message.append("<p class='error'>Error advancing team</p>");
           LOGGER.error("Error advancing team: "
               + teamNumber);
+        }else {
+          message.append("<p id='success'>Successfully advanced a team</p>");
         }
       } else if (null != request.getParameter("demote")) {
         if (LOGGER.isInfoEnabled()) {
@@ -83,21 +86,25 @@ public class CommitTeam extends BaseFLLServlet {
             LOGGER.info("Adding "
                 + teamNumber);
           }
-          final String otherTeam = Queries.addTeam(connection, teamNumber, request.getParameter("teamName"), request.getParameter("organization"),
+          final String otherTeam = Queries.addTeam(connection, teamNumber, request.getParameter("teamName"),
+                                                   request.getParameter("organization"),
                                                    request.getParameter("region"), division);
           if (null != otherTeam) {
             message.append("<p class='error'>Error, team number "
                 + teamNumber + " is already assigned.</p>");
             LOGGER.error("TeamNumber "
                 + teamNumber + " is already assigned");
+          } else {
+            message.append("<p id='success'>Successfully added a team</p>");
           }
         } else {
           if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Updating "
                 + teamNumber + " team info");
           }
-          Queries.updateTeam(connection, teamNumber, request.getParameter("teamName"), request.getParameter("organization"), request.getParameter("region"),
-                             division);
+          Queries.updateTeam(connection, teamNumber, request.getParameter("teamName"),
+                             request.getParameter("organization"), request.getParameter("region"), division);
+          message.append("<p id='success'>Successfully updated a team's info</p>");
         }
 
         // this will be null if the tournament can't be changed

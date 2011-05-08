@@ -133,7 +133,8 @@ public class SchedulerUI extends JFrame {
       final ConstraintViolation selected = getViolationsModel().getViolation(selectedRow);
       if (ConstraintViolation.NO_TEAM != selected.getTeam()) {
         final int teamIndex = getScheduleModel().getIndexOfTeam(selected.getTeam());
-        getScheduleTable().changeSelection(teamIndex, 1, false, false);
+        final int displayIndex = getScheduleTable().convertRowIndexToView(teamIndex);
+        getScheduleTable().changeSelection(displayIndex, 1, false, false);
       }
     }
   };

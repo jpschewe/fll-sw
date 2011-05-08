@@ -85,7 +85,7 @@ public final class TestUtils {
     }
   }
 
-  private static final ScreenshotTaker screenshotTaker = new ScreenshotTaker();
+  private static final ScreenshotTaker SCREENSHOT_TAKER = new ScreenshotTaker();
 
   public static void saveScreenshot() throws IOException {
     final File screenshot = File.createTempFile("fll", ".png", new File("screenshots"));
@@ -93,6 +93,6 @@ public final class TestUtils {
         + screenshot.getAbsolutePath());
     // file can't exist when calling save desktop as png
     screenshot.delete();
-    screenshotTaker.saveDesktopAsPng(screenshot.getAbsolutePath());
+    SCREENSHOT_TAKER.saveDesktopAsPng(screenshot.getAbsolutePath());
   }
 }
