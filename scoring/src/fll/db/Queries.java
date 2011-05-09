@@ -29,6 +29,7 @@ import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 
+import net.mtu.eggplant.util.Functions;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
@@ -3118,7 +3119,7 @@ public final class Queries {
    */
   public static Map<String, String> getAuthInfo(final Connection connection) throws SQLException {
     final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
-    if (!tables.contains("valid_login")) {      
+    if (!tables.contains("valid_login")) {
       GenerateDB.createValidLogin(connection);
     }
 
@@ -3154,6 +3155,61 @@ public final class Queries {
       prep.executeUpdate();
     } finally {
       SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Check if the specified login key matches one that was stored.
+   * 
+   * @param magicKey the key to check
+   * @return true if it matches on in the database, false otherwise
+   */
+  public static boolean checkValidLogin(final Connection connection,
+                                        final String magicKey) throws SQLException {
+    // not doing the comparison with SQL to avoid SQL injection attack
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT magic_key FROM valid_login");
+      while (rs.next()) {
+        final String compare = rs.getString(1);
+        if (Functions.safeEquals(magicKey, compare)) {
+          return true;
+        }
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
+    }
+    return false;
+  }
+
+  /**
+   * Remove a valid login.
+   */
+  public static void removeValidLogin(final Connection connection,
+                                      final String magicKey) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("DELETE FROM valid_login WHERE magic_key = ?");
+      prep.setString(1, magicKey);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Log everyone out.
+   */
+  public static void logoutAll(final Connection connection) throws SQLException {
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+      stmt.executeUpdate("DELETE FROM valid_login");
+    } finally {
+      SQLFunctions.close(stmt);
     }
   }
 }
