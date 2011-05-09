@@ -3087,13 +3087,13 @@ public final class Queries {
    * 
    * @return true if the authentication table is missing or empty
    */
-  public static boolean isAuthenticationEmpty(final Connection connection) throws SQLException {    
+  public static boolean isAuthenticationEmpty(final Connection connection) throws SQLException {
     final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
     if (!tables.contains("authentication")) {
-      GenerateDB.createAuthentication(connection);      
+      GenerateDB.createAuthentication(connection);
       return true;
     }
-    
+
     Statement stmt = null;
     ResultSet rs = null;
     try {
@@ -3107,6 +3107,53 @@ public final class Queries {
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(stmt);
+    }
+  }
+
+  /**
+   * Get the authentication information.
+   * 
+   * @param connection
+   * @return key is user, value is hashed pass
+   */
+  public static Map<String, String> getAuthInfo(final Connection connection) throws SQLException {
+    final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
+    if (!tables.contains("valid_login")) {      
+      GenerateDB.createValidLogin(connection);
+    }
+
+    Statement stmt = null;
+    ResultSet rs = null;
+    Map<String, String> retval = new HashMap<String, String>();
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT user, pass FROM authentication");
+      while (rs.next()) {
+        final String user = rs.getString(1);
+        final String pass = rs.getString(2);
+        retval.put(user, pass);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
+    }
+    return retval;
+  }
+
+  /**
+   * Add a valid login to the database.
+   * 
+   * @param magicKey
+   */
+  public static void addValidLogin(final Connection connection,
+                                   final String magicKey) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("INSERT INTO valid_login (magic_key) VALUES(?)");
+      prep.setString(1, magicKey);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
     }
   }
 }

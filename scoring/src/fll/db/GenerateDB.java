@@ -116,7 +116,7 @@ public final class GenerateDB {
 
       // authentication tables
       createAuthentication(connection);
-      createValidLogins(connection);
+      createValidLogin(connection);
 
       // Table structure for table 'Tournaments'
       tournaments(connection, forceRebuild, tables);
@@ -379,18 +379,18 @@ public final class GenerateDB {
   }
 
   /**
-   * Create the 'valid_logins' table. Drops the table if it exists.
+   * Create the 'valid_login' table. Drops the table if it exists.
    * 
    */
-  public static void createValidLogins(final Connection connection) throws SQLException {
+  public static void createValidLogin(final Connection connection) throws SQLException {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
       
-      stmt.executeUpdate("DROP TABLE IF EXISTS valid_logins CASCADE");
-      stmt.executeUpdate("CREATE TABLE valid_logins ("
+      stmt.executeUpdate("DROP TABLE IF EXISTS valid_login CASCADE");
+      stmt.executeUpdate("CREATE TABLE valid_login ("
           + "  magic_key varchar(64) NOT NULL" //
-          + " ,CONSTRAINT valid_logins_pk PRIMARY KEY (magic_key)" //
+          + " ,CONSTRAINT valid_login_pk PRIMARY KEY (magic_key)" //
           + ")");
     } finally {
       SQLFunctions.close(stmt);
