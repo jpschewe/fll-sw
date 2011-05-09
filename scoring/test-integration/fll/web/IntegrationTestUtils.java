@@ -191,7 +191,7 @@ public final class IntegrationTestUtils {
    */
   public static void login(final Selenium selenium) {
     selenium.open(TestUtils.URL_ROOT
-        + "setup/existingdb.jsp");
+        + "setup/index.jsp");
 
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
     if (selenium.isTextPresent("Login to FLL")) {

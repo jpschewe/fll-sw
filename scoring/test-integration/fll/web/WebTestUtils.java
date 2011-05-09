@@ -89,7 +89,7 @@ public final class WebTestUtils {
 
     // check for login and login if needed
     WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "setup/existingdb.jsp");
+        + "setup/index.jsp");
     WebResponse response = conversation.getResponse(request);
     Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
 
