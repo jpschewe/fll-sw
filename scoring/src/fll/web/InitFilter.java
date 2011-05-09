@@ -79,32 +79,132 @@ public class InitFilter implements Filter {
         && request instanceof HttpServletRequest) {
       final HttpServletResponse httpResponse = (HttpServletResponse) response;
       final HttpServletRequest httpRequest = (HttpServletRequest) request;
-
       final String path = httpRequest.getRequestURI();
-      if (null != path
-          && (path.startsWith(httpRequest.getContextPath()
-              + "/setup")
-              || path.startsWith(httpRequest.getContextPath()
-                  + "/style") || path.startsWith(httpRequest.getContextPath()
-                  + "/images") || path.startsWith(httpRequest.getContextPath()
-                  + "/sponsor_logos") || path.startsWith(httpRequest.getContextPath()
-                  + "/wiki") || path.endsWith(".jpg") || path.endsWith(".gif") || path.endsWith(".png") || path.endsWith(".html"))) {
-        // don't do init on some pages
-        chain.doFilter(request, response);
-      } else {
-        try {
-          final String redirect = initialize(httpRequest, httpResponse);
-          if (null != redirect) {
-            httpResponse.sendRedirect(httpResponse.encodeRedirectURL(redirect));
-          } else {
-            chain.doFilter(request, response);
-          }
-        } catch (final SQLException e) {
-          throw new RuntimeException(e);
+      final HttpSession session = httpRequest.getSession();
+
+      // call init before check security, if a page doesn't need init,
+      // then it doesn't require security either
+      final boolean needsInit = needsInit(httpRequest.getContextPath(), path);
+      final boolean needsSecurity = needsSecurity(httpRequest.getContextPath(), path);
+
+      if (needsInit) {
+        if (!initialize(httpRequest, httpResponse, session)) {
+          return;
         }
       }
+
+      if (needsSecurity) {
+        if (!checkSecurity(httpRequest, httpResponse, session)) {
+          return;
+        }
+      }
+    }
+
+    chain.doFilter(request, response);
+  }
+
+  /**
+   * Check if the path needs security.
+   * 
+   * @param contextPath the contet of the web app
+   * @param path the path to the requested resource
+   * @return true if a valid login is required for this resource
+   */
+  private boolean needsSecurity(final String contextPath,
+                                final String path) {
+    if (null != path
+        && (path.startsWith(contextPath
+            + "/admin/") //
+            || path.startsWith(contextPath
+                + "/developer/") //
+            || path.startsWith(contextPath
+                + "/scoreEntry/") //
+            || path.startsWith(contextPath
+                + "/report/") //
+            || path.startsWith(contextPath
+                + "/schedule/") //
+            || path.startsWith(contextPath
+                + "/playoff/initializebrackets.jsp") //
+        || path.startsWith(contextPath
+            + "/playoff/scoregenbrackets.jsp") //
+        )) {
+      return true;
     } else {
-      chain.doFilter(request, response);
+      return false;
+    }
+  }
+
+  /**
+   * Check if the path needs init to be called.
+   * 
+   * @param contextPath the contet of the web app
+   * @param path the path to the requested resource
+   * @return true if initalize needs to be called
+   */
+  private boolean needsInit(final String contextPath,
+                            final String path) {
+    if (null != path
+        && (path.startsWith(contextPath
+            + "/setup") //
+            || path.startsWith(contextPath
+                + "/style") //
+            || path.startsWith(contextPath
+                + "/images") //
+            || path.startsWith(contextPath
+                + "/sponsor_logos") //
+            || path.startsWith(contextPath
+                + "/wiki") //
+            || path.endsWith(".jpg") //
+            || path.endsWith(".gif") //
+            || path.endsWith(".png") //
+        || path.endsWith(".html"))) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  /**
+   * Check if the current connection is authenticated or the page doesn't
+   * require authentication.
+   * 
+   * @param request request
+   * @param response response
+   * @param session session for the request
+   * @return true if everything is OK, false if a redirect to the login page was
+   *         issued
+   */
+  private boolean checkSecurity(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final HttpSession session) throws IOException {
+
+    final DataSource datasource = SessionAttributes.getDataSource(session);
+
+    try {
+      final Connection connection = datasource.getConnection();
+
+      if (Queries.isAuthenticationEmpty(connection)) {
+        return true;
+      }
+
+      final String magicKey = CookieUtils.findLoginKey(request);
+      if (null == magicKey) {
+        session.setAttribute(SessionAttributes.REDIRECT_URL, request.getRequestURI());
+        response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+            + "/login.jsp"));
+        return false;
+      }
+
+      if (Queries.checkValidLogin(connection, magicKey)) {
+        return true;
+      } else {
+        session.setAttribute(SessionAttributes.REDIRECT_URL, request.getRequestURI());
+        response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+            + "/login.jsp"));
+        return false;
+      }
+    } catch (final SQLException e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -118,93 +218,96 @@ public class InitFilter implements Filter {
   /**
    * @param request
    * @param response
-   * @return the URL to redirect to if there was trouble. This should be passed
-   *         to encodeRedirectURL. If this is null, then everything initialized
-   *         OK
-   * @throws IOException
-   * @throws RuntimeException
-   * @throws SQLException
+   * @return true if everything is OK, false if a redirect happened
    */
-  public static String initialize(final HttpServletRequest request,
-                                  final HttpServletResponse response) throws IOException, SQLException, RuntimeException {
-    final HttpSession session = request.getSession();
-    final ServletContext application = session.getServletContext();
+  public static boolean initialize(final HttpServletRequest request,
+                                   final HttpServletResponse response,
+                                   final HttpSession session) throws IOException, RuntimeException {
+    try {
+      final ServletContext application = session.getServletContext();
 
-    application.setAttribute(ApplicationAttributes.DATABASE, application.getRealPath("/WEB-INF/flldb"));
+      application.setAttribute(ApplicationAttributes.DATABASE, application.getRealPath("/WEB-INF/flldb"));
 
-    // set some default text
-    if (null == application.getAttribute(ApplicationAttributes.SCORE_PAGE_TEXT)) {
-      application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "FLL");
-    }
-
-    final String database = ApplicationAttributes.getDatabase(application);
-
-    final boolean dbok = Utilities.testHSQLDB(database);
-    if (!dbok) {
-      LOGGER.warn("Database files not ok, redirecting to setup");
-      session.setAttribute(SessionAttributes.MESSAGE,
-                           "<p class='error'>The database does not exist yet or there is a problem with the database files. Please create the database.<br/></p>");
-      return request.getContextPath()
-          + "/setup";
-    }
-
-    // initialize the datasource
-    final DataSource datasource;
-    if (null == SessionAttributes.getDataSource(session)) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Datasource not available, creating");
+      // set some default text
+      if (null == application.getAttribute(ApplicationAttributes.SCORE_PAGE_TEXT)) {
+        application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "FLL");
       }
-      datasource = Utilities.createDataSource(database);
-      session.setAttribute(SessionAttributes.DATASOURCE, datasource);
-    } else {
-      datasource = SessionAttributes.getDataSource(session);
-    }
 
-    // Initialize the connection
-    final Connection connection = datasource.getConnection();
+      final String database = ApplicationAttributes.getDatabase(application);
 
-    // check if the database is initialized
-    final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
-    if (!dbinitialized) {
-      LOGGER.warn("Database not initialized, redirecting to setup");
-      session.setAttribute(SessionAttributes.MESSAGE,
-                           "<p class='error'>The database is not yet initialized. Please create the database.</p>");
-      return request.getContextPath()
-          + "/setup";
-    }
-
-    // load the challenge descriptor
-    if (null == ApplicationAttributes.getChallengeDocument(application)) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Loading challenge descriptor");
+      final boolean dbok = Utilities.testHSQLDB(database);
+      if (!dbok) {
+        LOGGER.warn("Database files not ok, redirecting to setup");
+        session.setAttribute(SessionAttributes.MESSAGE,
+                             "<p class='error'>The database does not exist yet or there is a problem with the database files. Please create the database.<br/></p>");
+        response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+            + "/setup"));
+        return false;
       }
-      try {
-        final Document document = Queries.getChallengeDocument(connection);
-        if (null == document) {
-          LOGGER.warn("Could not find challenge descriptor");
-          session.setAttribute(SessionAttributes.MESSAGE,
-                               "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
-          return request.getContextPath()
-              + "/setup";
+
+      // initialize the datasource
+      final DataSource datasource;
+      if (null == SessionAttributes.getDataSource(session)) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Datasource not available, creating");
         }
-        application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, document);
-      } catch (final FLLRuntimeException e) {
-        LOGGER.error("Error getting challenge document", e);
-        session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>"
-            + e.getMessage() + " Please create the database.</p>");
-        return request.getContextPath()
-            + "/setup";
+        datasource = Utilities.createDataSource(database);
+        session.setAttribute(SessionAttributes.DATASOURCE, datasource);
+      } else {
+        datasource = SessionAttributes.getDataSource(session);
       }
+
+      // Initialize the connection
+      final Connection connection = datasource.getConnection();
+
+      // check if the database is initialized
+      final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
+      if (!dbinitialized) {
+        LOGGER.warn("Database not initialized, redirecting to setup");
+        session.setAttribute(SessionAttributes.MESSAGE,
+                             "<p class='error'>The database is not yet initialized. Please create the database.</p>");
+        response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+            + "/setup"));
+        return false;
+      }
+
+      // load the challenge descriptor
+      if (null == ApplicationAttributes.getChallengeDocument(application)) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Loading challenge descriptor");
+        }
+        try {
+          final Document document = Queries.getChallengeDocument(connection);
+          if (null == document) {
+            LOGGER.warn("Could not find challenge descriptor");
+            session.setAttribute(SessionAttributes.MESSAGE,
+                                 "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
+            response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+                + "/setup"));
+            return false;
+          }
+          application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, document);
+        } catch (final FLLRuntimeException e) {
+          LOGGER.error("Error getting challenge document", e);
+          session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>"
+              + e.getMessage() + " Please create the database.</p>");
+          response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+              + "/setup"));
+          return false;
+        }
+      }
+
+      // TODO put this in a separate filter to turn off caching
+
+      // keep browser from caching any content
+      response.setHeader("Cache-Control", "no-store"); // HTTP 1.1
+      response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+      response.setDateHeader("Expires", 0); // prevents caching at the proxy
+      // server
+
+      return true;
+    } catch (final SQLException e) {
+      throw new RuntimeException(e);
     }
-
-    // TODO put this in a separate filter to turn off caching
-
-    // keep browser from caching any content
-    response.setHeader("Cache-Control", "no-store"); // HTTP 1.1
-    response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-    response.setDateHeader("Expires", 0); // prevents caching at the proxy
-    // server
-
-    return null;
   }
 }

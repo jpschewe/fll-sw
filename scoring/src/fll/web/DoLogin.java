@@ -13,7 +13,6 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -68,9 +67,7 @@ public class DoLogin extends BaseFLLServlet {
             && hashedPass.equals(entry.getValue())) {
           final String magicKey = String.valueOf(System.currentTimeMillis());
           Queries.addValidLogin(connection, magicKey);
-          final Cookie cookie = new Cookie("fll-login", magicKey);
-          cookie.setMaxAge(7 * 24 * 60 * 60); // week year
-          response.addCookie(cookie);
+          CookieUtils.setLoginCookie(response, magicKey);
 
           response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
           return;

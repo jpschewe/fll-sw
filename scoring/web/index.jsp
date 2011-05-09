@@ -80,6 +80,8 @@ pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
           </c:forEach>
         </ul>
       </li>
+      
+      <li><a href="DoLogout">Log out</a></li>
     </ul>
 
   </body>
