@@ -9,13 +9,17 @@ package fll.web;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 import fll.db.Queries;
 
@@ -41,18 +45,41 @@ public class DoLogin extends BaseFLLServlet {
       if (Queries.isAuthenticationEmpty(connection)) {
         session.setAttribute(SessionAttributes.MESSAGE,
                              "<p class='error'>No authentication information in the database - see administrator</p>");
-        response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-            + "/login.jsp"));
+        response.sendRedirect(response.encodeRedirectURL("login.jsp"));
         return;
       }
 
       // compute hash
+      final String user = request.getParameter("user");
+      final String pass = request.getParameter("pass");
+      if (null == user
+          || user.isEmpty() || null == pass || pass.isEmpty()) {
+        session.setAttribute(SessionAttributes.MESSAGE,
+                             "<p class='error'>You must fill out all fields in the form.</p>");
+        response.sendRedirect(response.encodeRedirectURL("login.jsp"));
+        return;
+      }
+      final String hashedPass = DigestUtils.md5Hex(pass);
 
       // compare login information
+      final Map<String, String> authInfo = Queries.getAuthInfo(connection);
+      for (final Map.Entry<String, String> entry : authInfo.entrySet()) {
+        if (user.equals(entry.getKey())
+            && hashedPass.equals(entry.getValue())) {
+          final String magicKey = String.valueOf(System.currentTimeMillis());
+          Queries.addValidLogin(connection, magicKey);
+          final Cookie cookie = new Cookie("fll-login", magicKey);
+          cookie.setMaxAge(7 * 24 * 60 * 60); // week year
+          response.addCookie(cookie);
+
+          response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
+          return;
+        }
+      }
 
       session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>Incorrect login information provided</p>");
-      response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-          + "/login.jsp"));
+      response.sendRedirect(response.encodeRedirectURL("login.jsp"));
+      return;
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     }
