@@ -29,6 +29,10 @@ public final class IntegrationTestUtils {
 
   public static final String WAIT_FOR_PAGE_TIMEOUT = "60000";
 
+  public static final String TEST_USERNAME = "fll";
+
+  public static final String TEST_PASSWORD = "Lego";
+
   private IntegrationTestUtils() {
     // no instances
   }
@@ -82,14 +86,22 @@ public final class IntegrationTestUtils {
           selenium.click("force_rebuild");
         }
         selenium.click("reinitializeDatabase");
-        Assert
-              .assertTrue(selenium
-                                  .getConfirmation()
-                                  .matches(
-                                           "^This will erase ALL scores in the database fll \\(if it already exists\\), are you sure[\\s\\S]$"));
+        Assert.assertTrue(selenium.getConfirmation()
+                                  .matches("^This will erase ALL scores in the database fll \\(if it already exists\\), are you sure[\\s\\S]$"));
         selenium.waitForPageToLoad(WAIT_FOR_PAGE_TIMEOUT);
+
         final boolean success = selenium.isTextPresent("Successfully initialized database");
         Assert.assertTrue("Database was not successfully initialized", success);
+
+        // setup user
+        selenium.type("user", TEST_USERNAME);
+        selenium.type("pass", TEST_PASSWORD);
+        selenium.type("pass_check", TEST_PASSWORD);
+        selenium.click("submit_create_user");
+        selenium.waitForPageToLoad(WAIT_FOR_PAGE_TIMEOUT);
+        final boolean userSuccess = selenium.isTextPresent("Successfully created user");
+        Assert.assertTrue("Problem creating user", userSuccess);
+
       } finally {
         if (!challengeFile.delete()) {
           challengeFile.deleteOnExit();
@@ -191,17 +203,11 @@ public final class IntegrationTestUtils {
    */
   public static void login(final Selenium selenium) {
     selenium.open(TestUtils.URL_ROOT
-        + "setup/index.jsp");
-
+        + "login.jsp");
+    selenium.type("user", TEST_USERNAME);
+    selenium.type("pass", TEST_PASSWORD);
+    selenium.click("submit_login");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-    if (selenium.isTextPresent("Login to FLL")) {
-
-      // login
-      selenium.type("j_username", "fll");
-      selenium.type("j_password", "LegoLeague");
-      selenium.click("submit_login");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-    }
   }
 
   /**
@@ -227,7 +233,7 @@ public final class IntegrationTestUtils {
       selenium.type("region", region);
       selenium.click("id=division_text_choice");
       selenium.type("division_text", division);
-      
+
       final String[] options = selenium.getSelectOptions("currentTournamentSelect");
       String tournamentID = null;
       for (int i = 0; i < options.length; ++i) {
@@ -238,9 +244,9 @@ public final class IntegrationTestUtils {
       Assert.assertNotNull("Could not find tournament with name: "
           + tournament, tournamentID);
       selenium.select("currentTournamentSelect", tournamentID);
-      
+
       selenium.click("name=commit");
-      
+
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
       Assert.assertTrue(selenium.isElementPresent("id=success"));
 
@@ -299,5 +305,5 @@ public final class IntegrationTestUtils {
     }
 
   }
-  
+
 }

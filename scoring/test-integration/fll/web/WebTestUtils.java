@@ -78,32 +78,30 @@ public final class WebTestUtils {
     }
 
   }
-  
+
   /**
-   * @return
+   * Create a new web conversation that is logged in.
+   * 
+   * @return a web conversation to use
    * @throws SAXException
    * @throws IOException
    */
   public static WebConversation getConversation() throws IOException, SAXException {
     final WebConversation conversation = new WebConversation();
 
-    // check for login and login if needed
+    // always login first
     WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
-        + "setup/index.jsp");
+        + "login.jsp");
     WebResponse response = conversation.getResponse(request);
     Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
 
     WebForm form = response.getFormWithName("login");
-    if (null != form) {
-      request = form.getRequest();
-      request.setParameter("j_username", "fll");
-      request.setParameter("j_password", "LegoLeague");
-      response = conversation.getResponse(request);
-      Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
-    }
-
-    // setup auth
-    // conversation.setAuthentication("FLL", "fll", "LegoLeague");
+    Assert.assertNotNull("Cannot find login form", form);
+    request = form.getRequest();
+    request.setParameter("user", IntegrationTestUtils.TEST_USERNAME);
+    request.setParameter("pass", IntegrationTestUtils.TEST_PASSWORD);
+    response = conversation.getResponse(request);
+    Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
 
     return conversation;
   }
