@@ -125,8 +125,10 @@ public class InitFilter implements Filter {
                 + "/schedule/") //
             || path.startsWith(contextPath
                 + "/playoff/initializebrackets.jsp") //
+            || path.startsWith(contextPath
+                + "/playoff/scoregenbrackets.jsp") //
         || path.startsWith(contextPath
-            + "/playoff/scoregenbrackets.jsp") //
+            + "/setup") //
         )) {
       return true;
     } else {
