@@ -24,6 +24,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import fll.db.Queries;
 import fll.web.BaseFLLServlet;
+import fll.web.DoLogin;
 import fll.web.SessionAttributes;
 
 /**
@@ -78,7 +79,9 @@ public class CreateUser extends BaseFLLServlet {
       prep.executeUpdate();
 
       session.setAttribute(SessionAttributes.MESSAGE, "<p id='success-create-user'>Successfully created user</p>");
-      response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
+
+      // do a login
+      DoLogin.doLogin(request, response, session);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     } finally {
