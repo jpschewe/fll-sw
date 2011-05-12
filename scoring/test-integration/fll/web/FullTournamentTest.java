@@ -26,6 +26,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -57,6 +58,7 @@ public class FullTournamentTest extends SeleneseTestCase {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
+  @Before
   @Override
   public void setUp() throws Exception {
     LogUtils.initializeLogging();

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.thoughtworks.selenium.SeleneseTestCase;
@@ -24,6 +25,7 @@ import fll.web.IntegrationTestUtils;
  */
 public class TestPlayoffs extends SeleneseTestCase {
 
+  @Before
   @Override
   public void setUp() throws Exception {
     LogUtils.initializeLogging();

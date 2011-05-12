@@ -3,6 +3,7 @@ package fll.web;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.thoughtworks.selenium.SeleneseTestCase;
@@ -15,11 +16,11 @@ import fll.util.LogUtils;
  */
 public class InitializeDatabaseTest extends SeleneseTestCase {
 
+  @Before
   @Override
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
     super.setUp(TestUtils.URL_ROOT + "setup");
-    IntegrationTestUtils.login(selenium);    
   }
 
   @Test
