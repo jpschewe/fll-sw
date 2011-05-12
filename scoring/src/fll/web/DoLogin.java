@@ -36,6 +36,16 @@ public class DoLogin extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
 
+    doLogin(request, response, session);
+  }
+
+  /**
+   * Does the work of login. Exists as a separate method so that it can be
+   * called from {@link fll.web.admin.CreateUser}
+   */
+  public static void doLogin(final HttpServletRequest request,
+                             final HttpServletResponse response,
+                             final HttpSession session) throws IOException, ServletException {
     final DataSource datasource = SessionAttributes.getDataSource(session);
     try {
       final Connection connection = datasource.getConnection();
