@@ -80,6 +80,14 @@ public final class IntegrationTestUtils {
         selenium.open(TestUtils.URL_ROOT
             + "setup/");
         selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+        
+        if(selenium.isTextPresent("Login to FLL")) {
+          login(selenium);
+
+          selenium.open(TestUtils.URL_ROOT
+                        + "setup/");
+                    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+        }
 
         selenium.type("xmldocument", challengeFile.getAbsolutePath());
         if (forceRebuild) {
@@ -136,6 +144,14 @@ public final class IntegrationTestUtils {
         selenium.open(TestUtils.URL_ROOT
             + "setup/");
         selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+        if(selenium.isTextPresent("Login to FLL")) {
+          login(selenium);
+
+          selenium.open(TestUtils.URL_ROOT
+                        + "setup/");
+                    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+        }
 
         selenium.type("dbdump", dumpFile.getAbsolutePath());
         selenium.click("createdb");
