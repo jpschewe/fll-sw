@@ -3159,9 +3159,9 @@ public final class Queries {
   }
 
   /**
-   * Check if the specified login key matches one that was stored.
+   * Check if any of the specified login keys matches one that was stored.
    * 
-   * @param magicKey the key to check
+   * @param keys teh keys to check
    * @return true if it matches on in the database, false otherwise
    */
   public static boolean checkValidLogin(final Connection connection,
