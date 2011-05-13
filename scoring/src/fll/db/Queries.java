@@ -3165,7 +3165,7 @@ public final class Queries {
    * @return true if it matches on in the database, false otherwise
    */
   public static boolean checkValidLogin(final Connection connection,
-                                        final String magicKey) throws SQLException {
+                                        final Collection<String> keys) throws SQLException {
     // not doing the comparison with SQL to avoid SQL injection attack
     Statement stmt = null;
     ResultSet rs = null;
@@ -3174,8 +3174,10 @@ public final class Queries {
       rs = stmt.executeQuery("SELECT magic_key FROM valid_login");
       while (rs.next()) {
         final String compare = rs.getString(1);
-        if (Functions.safeEquals(magicKey, compare)) {
-          return true;
+        for (final String magicKey : keys) {
+          if (Functions.safeEquals(magicKey, compare)) {
+            return true;
+          }
         }
       }
     } finally {

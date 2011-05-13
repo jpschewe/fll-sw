@@ -30,6 +30,7 @@ package fll.web;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -86,15 +87,18 @@ public class InitFilter implements Filter {
       // then it doesn't require security either
       final boolean needsInit = needsInit(httpRequest.getContextPath(), path);
       final boolean needsSecurity = needsSecurity(httpRequest.getContextPath(), path);
-
+      LOGGER.debug("needsInit: " + needsInit + " needsSecurity: " + needsSecurity);
+      
       if (needsInit) {
         if (!initialize(httpRequest, httpResponse, session)) {
+          LOGGER.debug("Returning after initialize did redirect");
           return;
         }
       }
 
       if (needsSecurity) {
         if (!checkSecurity(httpRequest, httpResponse, session)) {
+          LOGGER.debug("Returning after checkSecurity did redirect");
           return;
         }
       }
@@ -112,6 +116,7 @@ public class InitFilter implements Filter {
    */
   private boolean needsSecurity(final String contextPath,
                                 final String path) {
+    LOGGER.debug("Checking contextPath: " + contextPath + " path: " + path);
     if (null != path
         && (path.startsWith(contextPath
             + "/admin/") //
@@ -130,6 +135,7 @@ public class InitFilter implements Filter {
         || path.startsWith(contextPath
             + "/setup") //
         )) {
+      LOGGER.debug("Returning true from needsSecurity");
       return true;
     } else {
       return false;
@@ -186,23 +192,19 @@ public class InitFilter implements Filter {
       final Connection connection = datasource.getConnection();
 
       if (Queries.isAuthenticationEmpty(connection)) {
+        LOGGER.debug("Returning true from checkSecurity for empty auth");
         return true;
       }
 
-      final String magicKey = CookieUtils.findLoginKey(request);
-      if (null == magicKey) {
-        session.setAttribute(SessionAttributes.REDIRECT_URL, request.getRequestURI());
-        response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-            + "/login.jsp"));
-        return false;
-      }
-
-      if (Queries.checkValidLogin(connection, magicKey)) {
+      final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
+      if (Queries.checkValidLogin(connection, loginKeys)) {
+        LOGGER.debug("Returning true from checkSecurity for valid login: " + loginKeys);
         return true;
       } else {
         session.setAttribute(SessionAttributes.REDIRECT_URL, request.getRequestURI());
         response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
             + "/login.jsp"));
+        LOGGER.debug("Returning false from checkSecurity");
         return false;
       }
     } catch (final SQLException e) {
