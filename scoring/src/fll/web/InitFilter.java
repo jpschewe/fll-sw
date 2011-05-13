@@ -83,14 +83,17 @@ public class InitFilter implements Filter {
       final String path = httpRequest.getRequestURI();
       final HttpSession session = httpRequest.getSession();
 
+      final ServletContext application = session.getServletContext();
+
       // call init before check security, if a page doesn't need init,
       // then it doesn't require security either
-      final boolean needsInit = needsInit(httpRequest.getContextPath(), path);
+      final boolean needsInit = needsInit(httpRequest.getContextPath(), path, application);
       final boolean needsSecurity = needsSecurity(httpRequest.getContextPath(), path);
-      LOGGER.debug("needsInit: " + needsInit + " needsSecurity: " + needsSecurity);
-      
+      LOGGER.debug("needsInit: "
+          + needsInit + " needsSecurity: " + needsSecurity);
+
       if (needsInit) {
-        if (!initialize(httpRequest, httpResponse, session)) {
+        if (!initialize(httpRequest, httpResponse, session, application)) {
           LOGGER.debug("Returning after initialize did redirect");
           return;
         }
@@ -116,7 +119,8 @@ public class InitFilter implements Filter {
    */
   private boolean needsSecurity(final String contextPath,
                                 final String path) {
-    LOGGER.debug("Checking contextPath: " + contextPath + " path: " + path);
+    LOGGER.debug("Checking contextPath: "
+        + contextPath + " path: " + path);
     if (null != path
         && (path.startsWith(contextPath
             + "/admin/") //
@@ -150,26 +154,34 @@ public class InitFilter implements Filter {
    * @return true if initalize needs to be called
    */
   private boolean needsInit(final String contextPath,
-                            final String path) {
-    if (null != path
-        && (path.startsWith(contextPath
-            + "/setup") //
-            || path.startsWith(contextPath
-                + "/style") //
-            || path.startsWith(contextPath
-                + "/images") //
-            || path.startsWith(contextPath
-                + "/sponsor_logos") //
-            || path.startsWith(contextPath
-                + "/wiki") //
-            || path.endsWith(".jpg") //
-            || path.endsWith(".gif") //
-            || path.endsWith(".png") //
-        || path.endsWith(".html"))) {
-      return false;
-    } else {
-      return true;
+                            final String path,
+                            final ServletContext application) {
+    if (null != path) {
+      final String database = application.getRealPath("/WEB-INF/flldb");
+      final boolean dbExists = Utilities.testHSQLDB(database);
+
+      if (path.startsWith(contextPath
+          + "/style") //
+          || path.startsWith(contextPath
+              + "/images") //
+          || path.startsWith(contextPath
+              + "/sponsor_logos") //
+          || path.startsWith(contextPath
+              + "/wiki") //
+          || path.endsWith(".jpg") //
+          || path.endsWith(".gif") //
+          || path.endsWith(".png") //
+          || path.endsWith(".html")) {
+        return false;
+      } else if (!dbExists
+          && path.startsWith(contextPath
+              + "/setup")) {
+        // setup needs init if the database is there, otherwise the security
+        // check fails
+        return false;
+      }
     }
+    return true;
   }
 
   /**
@@ -198,7 +210,8 @@ public class InitFilter implements Filter {
 
       final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
       if (Queries.checkValidLogin(connection, loginKeys)) {
-        LOGGER.debug("Returning true from checkSecurity for valid login: " + loginKeys);
+        LOGGER.debug("Returning true from checkSecurity for valid login: "
+            + loginKeys);
         return true;
       } else {
         session.setAttribute(SessionAttributes.REDIRECT_URL, request.getRequestURI());
@@ -224,23 +237,21 @@ public class InitFilter implements Filter {
    * @param response
    * @return true if everything is OK, false if a redirect happened
    */
-  public static boolean initialize(final HttpServletRequest request,
-                                   final HttpServletResponse response,
-                                   final HttpSession session) throws IOException, RuntimeException {
+  private static boolean initialize(final HttpServletRequest request,
+                                    final HttpServletResponse response,
+                                    final HttpSession session,
+                                    final ServletContext application) throws IOException, RuntimeException {
     try {
-      final ServletContext application = session.getServletContext();
-
-      application.setAttribute(ApplicationAttributes.DATABASE, application.getRealPath("/WEB-INF/flldb"));
-
       // set some default text
       if (null == application.getAttribute(ApplicationAttributes.SCORE_PAGE_TEXT)) {
         application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "FLL");
       }
 
+      application.setAttribute(ApplicationAttributes.DATABASE, application.getRealPath("/WEB-INF/flldb"));
       final String database = ApplicationAttributes.getDatabase(application);
 
-      final boolean dbok = Utilities.testHSQLDB(database);
-      if (!dbok) {
+      final boolean dbExists = Utilities.testHSQLDB(database);
+      if (!dbExists) {
         LOGGER.warn("Database files not ok, redirecting to setup");
         session.setAttribute(SessionAttributes.MESSAGE,
                              "<p class='error'>The database does not exist yet or there is a problem with the database files. Please create the database.<br/></p>");
