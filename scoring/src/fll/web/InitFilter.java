@@ -312,7 +312,7 @@ public class InitFilter implements Filter {
         }
       }
 
-      // TODO put this in a separate filter to turn off caching
+      // TODO ticket:87 allow static data to be cached
 
       // keep browser from caching any content
       response.setHeader("Cache-Control", "no-store"); // HTTP 1.1

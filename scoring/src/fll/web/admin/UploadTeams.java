@@ -488,7 +488,7 @@ public final class UploadTeams extends BaseFLLServlet {
         }
         try {
           final Number num = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumStr);
-          // TODO perhaps should check for double vs. int, but this works for
+          // TODO ticket:86 perhaps should check for double vs. int, but this works for
           // now
           final int teamNum = num.intValue();
           prep.setInt(1, teamNum);
