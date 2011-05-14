@@ -26,6 +26,8 @@ public final class CookieUtils {
 
   public static final String LOGIN_KEY = "fll-login";
 
+  private CookieUtils() {}
+  
   /**
    * Set the login cookie.
    * 
