@@ -449,9 +449,6 @@ public final class GenerateDB {
         Tournament.createTournament(connection, DUMMY_TOURNAMENT_NAME, "Default dummy tournament");
         Tournament.createTournament(connection, DROP_TOURNAMENT_NAME, "Dummy tournament for teams that drop out");
 
-        // TODO can we add a constraint that NextTournament must refer to Name
-        // and still handle null?
-
         // add internal tournament for default values and such
         createInternalTournament(connection);
       }

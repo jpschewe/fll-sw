@@ -1097,7 +1097,7 @@ public final class ImportDB {
       }
     }
 
-    // TODO check documents bug: 2126186
+    // TODO ticket:81 check documents
 
     return differencesFound;
   }

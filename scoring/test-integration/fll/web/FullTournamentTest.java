@@ -143,7 +143,7 @@ public class FullTournamentTest extends SeleneseTestCase {
 
         if (runNumber > numSeedingRounds) {
           if (!initializedPlayoff) {
-            // TODO make sure to check the result of checking the seeding rounds
+            // TODO ticket:83 make sure to check the result of checking the seeding rounds
 
             // initialize the playoff brackets with playoff/index.jsp form
             for (final String division : divisions) {
@@ -473,7 +473,7 @@ public class FullTournamentTest extends SeleneseTestCase {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
     }
-    // TODO check scores?
+    // TODO ticket:82 check scores?
   }
 
   /**

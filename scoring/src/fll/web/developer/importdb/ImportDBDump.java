@@ -63,7 +63,7 @@ public class ImportDBDump extends BaseFLLServlet {
             + String.valueOf(_importdbCount++);
         final String url = "jdbc:hsqldb:mem:"
             + databaseName;
-        // TODO should figure out how to clean up this database
+        // TODO ticket:88 should figure out how to clean up this database
         final DataSource importDataSource = Utilities.createDataSource(databaseName, url);
 
         // let other pages know where the connection is
