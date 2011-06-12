@@ -404,6 +404,33 @@
 <primary-key-column name="magic_key"/>
 </primary-key>
 </table>
+<table id="7637d490:13084efdedd:-7f9e" name="sched_subjective">
+<column-list>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="7637d490:13084efdedd:-7f9a" mandatory="true" name="tournament">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="7637d490:13084efdedd:-7f99" mandatory="true" name="team_number">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="7637d490:13084efdedd:-7f98" mandatory="true" name="name">
+<data-type name="LONGVARCHAR" selected-variant-pattern="LONGVARCHAR"/>
+</column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="7637d490:13084efdedd:-7f97" mandatory="false" name="subj_time">
+<data-type name="TIME" selected-variant-pattern="TIME"/>
+</column>
+</column-list>
+<primary-key id="7637d490:13084efdedd:-7f9d" name="PK_SCHED_SUBJECTIVE">
+<primary-key-column name="tournament"/>
+<primary-key-column name="team_number"/>
+<primary-key-column name="name"/>
+</primary-key>
+<foreign-key-list>
+<foreign-key id="7637d490:13084efdedd:-7f80" name="FK_sched_subjective_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_SCHEDULE" referenced-table="schedule" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
+<foreign-key-column column-name="tournament" referenced-key-column-name="tournament"/>
+<foreign-key-column column-name="team_number" referenced-key-column-name="team_number"/>
+</foreign-key>
+</foreign-key-list>
+</table>
 </table-list>
 </schema>
 </schema-list>
@@ -422,7 +449,8 @@
 <table-figure refid="7ad99991:125ecd3d8cf:-7f78" x="342" y="861"/>
 <table-figure refid="73daf36c:1292a0d6a87:-7fdb" x="428" y="14"/>
 <table-figure refid="73daf36c:1292a0d6a87:-7fc9" x="5" y="12"/>
-<table-figure refid="1b527d23:12fd1ad49f2:-7fd1" x="137" y="221"/>
-<table-figure refid="1b527d23:12fd1ad49f2:-7fc7" x="123" y="318"/>
+<table-figure refid="1b527d23:12fd1ad49f2:-7fd1" x="328" y="303"/>
+<table-figure refid="1b527d23:12fd1ad49f2:-7fc7" x="308" y="382"/>
+<table-figure refid="7637d490:13084efdedd:-7f9e" x="16" y="149"/>
 </diagram>
 </clay-model>

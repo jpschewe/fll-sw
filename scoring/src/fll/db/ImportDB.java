@@ -15,6 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -41,6 +42,7 @@ import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.TeamPropertyDifference.TeamProperty;
+import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
 import fll.web.developer.importdb.TournamentDifference;
 import fll.xml.ChallengeParser;
@@ -482,6 +484,9 @@ public final class ImportDB {
     if (dbVersion < 2) {
       upgrade1To2(connection);
     }
+    if (dbVersion < 6) {
+      upgrade2To6(connection);
+    }
     final int newVersion = Queries.getDatabaseVersion(connection);
     if (newVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
@@ -496,6 +501,56 @@ public final class ImportDB {
     // global_parameters, but we need to force it to 2 for later upgrade
     // functions to not be confused
     setDBVersion(connection, 2);
+  }
+
+  private static void upgrade2To6(final Connection connection) throws SQLException {
+    Statement stmt = null;
+    ResultSet rs = null;
+    PreparedStatement prep = null;
+    try {
+      stmt = connection.createStatement();
+      stmt.executeUpdate("DROP TABLE IF EXISTS sched_subjective CASCADE");
+
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE sched_subjective (");
+      sql.append("  tournament INTEGER NOT NULL");
+      sql.append(" ,team_number INTEGER NOT NULL");
+      sql.append(" ,name LONGVARCHAR NOT NULL");
+      sql.append(" ,subj_time TIME NOT NULL");
+      sql.append(" ,CONSTRAINT sched_subjective_pk PRIMARY KEY (tournament, team_number, name)");
+      sql.append(")");
+      stmt.executeUpdate(sql.toString());
+
+      // migrate subjective times over
+      prep = connection.prepareStatement("INSERT INTO sched_subjective" //
+          + " (tournament, team_number, name, subj_time)" //
+          + " VALUES(?, ?, ?, ?)");
+      rs = stmt.executeQuery("SELECT tournament, team_number, presentation, technical FROM schedule");
+      while (rs.next()) {
+        final int tournament = rs.getInt(1);
+        final int team = rs.getInt(2);
+        final Time presentation = rs.getTime(3);
+        final Time technical = rs.getTime(4);
+        prep.setInt(1, tournament);
+        prep.setInt(2, team);
+        prep.setString(3, TournamentSchedule.TECHNICAL_HEADER);
+        prep.setTime(4, technical);
+        prep.executeUpdate();
+
+        prep.setString(3, TournamentSchedule.RESEARCH_HEADER);
+        prep.setTime(4, presentation);
+        prep.executeUpdate();
+      }
+
+      setDBVersion(connection, 6);
+    } finally {
+      SQLFunctions.close(rs);
+      rs = null;
+      SQLFunctions.close(stmt);
+      stmt = null;
+      SQLFunctions.close(prep);
+      prep = null;
+    }
   }
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon tables in the database")
@@ -675,10 +730,16 @@ public final class ImportDB {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
       SQLFunctions.close(destPrep);
+      destPrep = null;
+      destPrep = destinationConnection.prepareStatement("DELETE FROM sched_subjective WHERE Tournament = ?");
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+      SQLFunctions.close(destPrep);
       destPrep = destinationConnection.prepareStatement("DELETE FROM schedule WHERE Tournament = ?");
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
       SQLFunctions.close(destPrep);
+      destPrep = null;
 
       sourcePrep = sourceConnection.prepareStatement("SELECT team_number, judging_station, presentation, technical" //
           + " FROM schedule WHERE tournament=?");
@@ -693,14 +754,17 @@ public final class ImportDB {
           Object sourceObj = sourceRS.getObject(i);
           if ("".equals(sourceObj)) {
             sourceObj = null;
-          }          
+          }
           destPrep.setObject(i + 1, sourceObj);
         }
         destPrep.executeUpdate();
       }
       SQLFunctions.close(sourceRS);
+      sourceRS = null;
       SQLFunctions.close(sourcePrep);
+      sourcePrep = null;
       SQLFunctions.close(destPrep);
+      destPrep = null;
 
       sourcePrep = sourceConnection.prepareStatement("SELECT team_number, round, perf_time, table_color, table_side" //
           + " FROM sched_perf_rounds WHERE tournament=?");
@@ -721,13 +785,44 @@ public final class ImportDB {
         destPrep.executeUpdate();
       }
       SQLFunctions.close(sourceRS);
+      sourceRS = null;
       SQLFunctions.close(sourcePrep);
+      sourcePrep = null;
       SQLFunctions.close(destPrep);
+      destPrep = null;
+
+      sourcePrep = sourceConnection.prepareStatement("SELECT team_number, name, subj_time" //
+          + " FROM sched_subjective WHERE tournament=?");
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep = destinationConnection.prepareStatement("INSERT INTO sched_subjective" //
+          + " (tournament, team_number, name, subj_time)" //
+          + " VALUES (?, ?, ?, ?)");
+      destPrep.setInt(1, destTournamentID);
+      sourceRS = sourcePrep.executeQuery();
+      while (sourceRS.next()) {
+        for (int i = 1; i <= 3; i++) {
+          Object sourceObj = sourceRS.getObject(i);
+          if ("".equals(sourceObj)) {
+            sourceObj = null;
+          }
+          destPrep.setObject(i + 1, sourceObj);
+        }
+        destPrep.executeUpdate();
+      }
+      SQLFunctions.close(sourceRS);
+      sourceRS = null;
+      SQLFunctions.close(sourcePrep);
+      sourcePrep = null;
+      SQLFunctions.close(destPrep);
+      destPrep = null;
 
     } finally {
       SQLFunctions.close(sourceRS);
+      sourceRS = null;
       SQLFunctions.close(sourcePrep);
+      sourcePrep = null;
       SQLFunctions.close(destPrep);
+      destPrep = null;
     }
   }
 
