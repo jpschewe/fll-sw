@@ -70,6 +70,7 @@ public final class ConstraintViolation {
                              final Date technical,
                              final Date performance,
                              final String message) {
+    //FIXME how to handle arbitrary subjective categories
     this.isHard = isHard;
     this.team = team;
     this.presentation = DateUtils.copyDate(presentation);

@@ -73,9 +73,11 @@ import javax.swing.table.AbstractTableModel;
     case JUDGE_COLUMN:
       return schedInfo.getJudgingStation();
     case PRESENTATION_COLUMN:
-      return schedInfo.getPresentation();
+      //FIXME need to make generic
+      return schedInfo.getSubjectiveTimeByName(TournamentSchedule.RESEARCH_HEADER).getTime();
     case TECHNICAL_COLUMN:
-      return schedInfo.getTechnical();
+      //FIXME need to make generic
+      return schedInfo.getSubjectiveTimeByName(TournamentSchedule.TECHNICAL_HEADER).getTime();
     default:
       final int perfColIdx = columnIndex - FIRST_PERFORMANCE_COLUMN;
       final int round = perfColIdx / NUM_COLUMNS_PER_ROUND;
