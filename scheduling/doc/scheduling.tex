@@ -37,7 +37,7 @@ rounds for teams with opponents in a different round
 \section{Subjective}
 %TODO figure out how to put in a lunch break
 
-Everything defined here is true for all subjective judging categories, currently only Presentation and Technical.
+Everything defined here is true for all subjective judging categories.
 
 \begin{algorithmic}
 \STATE $JN_{cat,div}$ - number of judges for category $cat$ in division $div$
@@ -63,13 +63,19 @@ Everything defined here is true for all subjective judging categories, currently
 These constraints are applied to each team.
 
 \begin{algorithm}
-\caption{Relationship between presentation and technical}
+\caption{Relationship between each subjective category}
 \begin{algorithmic}
-\IF{$pres_{end} <= tech_{start}$}
-  \STATE $pres_{end} + changetime <= tech_{start}$
-\ELSE
-  \STATE $tech_{end} + changetime <= pres_{start}$
-\ENDIF
+\FOR{$category1 \in SubjectiveCategories$}
+  \FOR{$category2 \in SubjectiveCategories$}
+    \IF{$category1 != category2$}
+      \IF{$category1_{end} <= category2_{start}$}
+        \STATE $category1_{end} + changetime <= category2_{start}$
+      \ELSE
+        \STATE $category2_{end} + changetime <= category1_{start}$
+      \ENDIF
+    \ENDIF
+  \ENDFOR
+\ENDFOR
 \end{algorithmic}
 \end{algorithm}
 
@@ -83,8 +89,7 @@ These constraints are applied to each team.
   \STATE $P_{{N-1}_{end}} + 15 <= P_{N_{start}}$
 \ENDFOR
 
-\STATE $pres_{end} = pres_{start} + 20$
-\STATE $tech_{end} = tech_{start} + 20$
+\STATE $subjectiveCategory_{end} = subjectiveCategory_{start} + 20$
 \end{algorithmic}
 \end{algorithm}
 
@@ -98,27 +103,16 @@ These constraints are applied to each team.
 \end{algorithm}
 
 \begin{algorithm}
-\caption{Relationships between Presentation judging and performance}
+\caption{Relationships between subjective categories judging and performance}
 \begin{algorithmic}
-\FOR{$i \in 1 \dots 3$}
-  \IF{$pres_{end} <= P_{i_{start}}$}
-    \STATE $pres_{end} + changetime <= P_{i_{start}}$
-  \ELSE
-    \STATE $P_{i_{end}} + changetime <= pres_{start}$
-  \ENDIF
-\ENDFOR
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}
-\caption{Relationships between Technical judging and performance}
-\begin{algorithmic}
-\FOR{$i \in 1 \dots NRounds$}
-  \IF{$tech_{end} <= P_{i_{start}}$}
-    \STATE $tech_{end} + changetime <= P_{i_{start}}$
-  \ELSE
-    \STATE $P_{i_{end}} + changetime <= tech_{start}$
-  \ENDIF
+\FOR{$category \in SubjectiveCategories$}
+  \FOR{$i \in 1 \dots 3$}
+    \IF{$category_{end} <= P_{i_{start}}$}
+      \STATE $category_{end} + changetime <= P_{i_{start}}$
+    \ELSE
+      \STATE $P_{i_{end}} + changetime <= category_{start}$
+    \ENDIF
+  \ENDFOR
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
@@ -163,7 +157,7 @@ at the same time}
 \caption{There can only be $JN_{cat,div}$ teams being judged at the same
 time in division $div$ for category $cat$}
 \begin{algorithmic}
-\FORALL{$cat \in tech, pres$}
+\FORALL{$cat \in SubjectiveCategories$}
   \FORALL{$div \in divisions$}
     \STATE $teamsAtTime_{cat,div} = []$
   \ENDFOR
