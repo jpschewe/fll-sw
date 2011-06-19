@@ -168,6 +168,13 @@ public class TournamentSchedule implements Serializable {
   private final Set<String> subjectiveStations = new HashSet<String>();
 
   /**
+   * The list of subjective stations for this schedule.
+   */
+  public Set<String> getSubjectiveStations() {
+    return Collections.unmodifiableSet(subjectiveStations);
+  }
+
+  /**
    * @return An unmodifiable copy of the schedule.
    */
   public List<TeamScheduleInfo> getSchedule() {
