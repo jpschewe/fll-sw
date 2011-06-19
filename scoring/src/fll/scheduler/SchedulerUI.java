@@ -544,7 +544,7 @@ public class SchedulerUI extends JFrame {
                 && round < schedInfo.getNumberOfRounds()) {
               ++round;
               if (round >= schedInfo.getNumberOfRounds()) {
-                throw new RuntimeException("Internal error, walkd off the end of the round list");
+                throw new RuntimeException("Internal error, walked off the end of the round list");
               }
             }
             final int firstIdx = SchedulerTableModel.FIRST_PERFORMANCE_COLUMN
