@@ -1614,7 +1614,7 @@ public class TournamentSchedule implements Serializable {
       // insert new tournament schedule
       insertSchedule = connection.prepareStatement("INSERT INTO schedule"//
           + " (tournament, team_number, judging_station)"//
-          + " VALUES(?, ?, ?, ?, ?)");
+          + " VALUES(?, ?, ?)");
       insertSchedule.setInt(1, tournamentID);
 
       insertPerfRounds = connection.prepareStatement("INSERT INTO sched_perf_rounds"//
