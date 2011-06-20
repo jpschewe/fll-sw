@@ -17,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.List;
@@ -51,6 +52,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import com.itextpdf.text.DocumentException;
 
+import fll.scheduler.TeamScheduleInfo.SubjectiveTime;
 import fll.util.ExcelCellReader;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -206,8 +208,7 @@ public class SchedulerUI extends JFrame {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error parsing file: %s", e.getMessage());
         LOGGER.error(errorFormatter, e);
-        JOptionPane
-                   .showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
       } finally {
         try {
           if (null != fis) {
@@ -406,9 +407,10 @@ public class SchedulerUI extends JFrame {
           }
 
         } else {
-          JOptionPane.showMessageDialog(SchedulerUI.this, new Formatter().format("%s is not a file or is not readable",
-                                                                                 selectedFile.getAbsolutePath()),
-                                        "Error reading file", JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(SchedulerUI.this,
+                                        new Formatter().format("%s is not a file or is not readable",
+                                                               selectedFile.getAbsolutePath()), "Error reading file",
+                                        JOptionPane.ERROR_MESSAGE);
         }
       }
     }
@@ -464,7 +466,7 @@ public class SchedulerUI extends JFrame {
     scheduleTable.clearSelection();
 
     scheduleData = sd;
-    scheduleModel = new SchedulerTableModel(scheduleData.getSchedule(), scheduleData.getNumberOfRounds());
+    scheduleModel = new SchedulerTableModel(scheduleData);
     scheduleTable.setModel(scheduleModel);
 
     checkSchedule();
@@ -524,17 +526,9 @@ public class SchedulerUI extends JFrame {
       boolean isHard = false;
       for (final ConstraintViolation violation : getViolationsModel().getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
+          Collection<SubjectiveTime> subjectiveTimes = violation.getSubjectiveTimes();
           if ((SchedulerTableModel.TEAM_NUMBER_COLUMN == tmCol || SchedulerTableModel.JUDGE_COLUMN == tmCol)
-              && null == violation.getPresentation() && null == violation.getTechnical()
-              && null == violation.getPerformance()) {
-            error = true;
-            isHard |= violation.isHard();
-          } else if (SchedulerTableModel.PRESENTATION_COLUMN == tmCol
-              && null != violation.getPresentation()) {
-            error = true;
-            isHard |= violation.isHard();
-          } else if (SchedulerTableModel.TECHNICAL_COLUMN == tmCol
-              && null != violation.getTechnical()) {
+              && subjectiveTimes.isEmpty() && null == violation.getPerformance()) {
             error = true;
             isHard |= violation.isHard();
           } else if (null != violation.getPerformance()) {
@@ -547,7 +541,7 @@ public class SchedulerUI extends JFrame {
                 throw new RuntimeException("Internal error, walked off the end of the round list");
               }
             }
-            final int firstIdx = SchedulerTableModel.FIRST_PERFORMANCE_COLUMN
+            final int firstIdx = getScheduleModel().getFirstPerformanceColumn()
                 + (round * SchedulerTableModel.NUM_COLUMNS_PER_ROUND);
             final int lastIdx = firstIdx
                 + SchedulerTableModel.NUM_COLUMNS_PER_ROUND - 1;
@@ -560,12 +554,19 @@ public class SchedulerUI extends JFrame {
             if (LOGGER.isTraceEnabled()) {
               LOGGER.trace("Violation is in performance round: "
                   + round //
-                  + " team: " + schedInfo.getTeamNumber() // 
-                  + " firstIdx: " + firstIdx // 
+                  + " team: " + schedInfo.getTeamNumber() //
+                  + " firstIdx: " + firstIdx //
                   + " lastIdx: " + lastIdx //
                   + " column: " + tmCol //
                   + " error: " + error //
               );
+            }
+          } else {
+            for (final SubjectiveTime subj : subjectiveTimes) {
+              if (tmCol == getScheduleModel().getColumnForSubjective(subj.getName())) {
+                error = true;
+                isHard |= violation.isHard();
+              }
             }
           }
         }
