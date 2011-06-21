@@ -62,6 +62,7 @@ public class CheckViolations extends BaseFLLServlet {
       final Collection<String> subjectiveHeaders = new LinkedList<String>();
       subjectiveHeaders.add(TournamentSchedule.TECHNICAL_HEADER);
       subjectiveHeaders.add(TournamentSchedule.RESEARCH_HEADER);
+      subjectiveHeaders.add("Presentation");
       final TournamentSchedule schedule = new TournamentSchedule(stream, sheetName, subjectiveHeaders);
       session.setAttribute("uploadSchedule_schedule", schedule);
       
