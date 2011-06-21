@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.LinkedList;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -57,7 +58,11 @@ public class CheckViolations extends BaseFLLServlet {
     final String sheetName = SessionAttributes.getNonNullAttribute(session, "uploadSchedule_sheet", String.class);
     try {
       final InputStream stream = new FileInputStream(scheduleFile);
-      final TournamentSchedule schedule = new TournamentSchedule(stream, sheetName);
+      // FIXME need to propmpt for headers
+      final Collection<String> subjectiveHeaders = new LinkedList<String>();
+      subjectiveHeaders.add(TournamentSchedule.TECHNICAL_HEADER);
+      subjectiveHeaders.add(TournamentSchedule.RESEARCH_HEADER);
+      final TournamentSchedule schedule = new TournamentSchedule(stream, sheetName, subjectiveHeaders);
       session.setAttribute("uploadSchedule_schedule", schedule);
       
       final DataSource datasource = SessionAttributes.getDataSource(session);

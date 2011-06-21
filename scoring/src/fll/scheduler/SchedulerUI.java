@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.prefs.Preferences;
 
@@ -184,7 +185,11 @@ public class SchedulerUI extends JFrame {
       FileInputStream fis = null;
       try {
         fis = new FileInputStream(getCurrentFile());
-        final TournamentSchedule newData = new TournamentSchedule(fis, getCurrentSheetName());
+        // FIXME need to propmpt for headers
+        final Collection<String> subjectiveHeaders = new LinkedList<String>();
+        subjectiveHeaders.add(TournamentSchedule.TECHNICAL_HEADER);
+        subjectiveHeaders.add(TournamentSchedule.RESEARCH_HEADER);
+        final TournamentSchedule newData = new TournamentSchedule(fis, getCurrentSheetName(), subjectiveHeaders);
         setScheduleData(newData);
       } catch (final IOException e) {
         final Formatter errorFormatter = new Formatter();
@@ -352,7 +357,11 @@ public class SchedulerUI extends JFrame {
               return;
             }
             fis = new FileInputStream(selectedFile);
-            final TournamentSchedule schedule = new TournamentSchedule(fis, sheetName);
+            // FIXME need to propmpt for headers
+            final Collection<String> subjectiveHeaders = new LinkedList<String>();
+            subjectiveHeaders.add(TournamentSchedule.TECHNICAL_HEADER);
+            subjectiveHeaders.add(TournamentSchedule.RESEARCH_HEADER);
+            final TournamentSchedule schedule = new TournamentSchedule(fis, sheetName, subjectiveHeaders);
             currentFile = selectedFile;
             currentSheetName = sheetName;
             setScheduleData(schedule);

@@ -196,22 +196,24 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * @param stream where to read the schedule from, must be an excel
-   *          spreadsheet, will be closed by this method if no exception occurs
-   * @param sheetName the name of the sheet to look at
+   * @param columnInfo information about what headers are where, the method
+   *          {@link #findColumns(SubjectiveHeaderChooser, CellFileReader)} can
+   *          be used for this
+   * @param stream how to access the spreadsheet
+   * @param sheetName the name of the worksheet the data is on
+   * @param subjectiveHeaders the headers for the subjective columns
    * @throws ScheduleParseException if there is an error parsing the schedule
    */
   public TournamentSchedule(final InputStream stream,
-                            final String sheetName) throws IOException, ParseException, InvalidFormatException,
-      ScheduleParseException {
-    // FIXME populate the list of subjective judging stations, should be passed
-    // in
-
+                            final String sheetName,
+                            final Collection<String> subjectiveHeaders) throws IOException, ParseException,
+      InvalidFormatException, ScheduleParseException {
     final CellFileReader reader = new ExcelCellReader(stream, sheetName);
-
-    final ColumnInformation ci = findColumns(reader);
-    numRounds = ci.getNumPerfs();
-    parseData(reader, ci);
+    final ColumnInformation columnInfo = findColumns(reader, subjectiveHeaders);
+    // FIXME figure out how to get the reader to the right place and have
+    // subjective column
+    numRounds = columnInfo.getNumPerfs();
+    parseData(reader, columnInfo);
     reader.close();
   }
 
@@ -369,7 +371,8 @@ public class TournamentSchedule implements Serializable {
    * @throws IOException
    * @throws RuntimeException if a header row cannot be found
    */
-  private static ColumnInformation findColumns(final CellFileReader reader) throws IOException {
+  public static ColumnInformation findColumns(final CellFileReader reader,
+                                              final Collection<String> subjectiveHeaders) throws IOException {
     while (true) {
       final String[] line = reader.readNext();
       if (null == line) {
@@ -377,7 +380,7 @@ public class TournamentSchedule implements Serializable {
       }
 
       if (isHeaderLine(line)) {
-        return parseHeader(line);
+        return parseHeader(subjectiveHeaders, line);
       }
     }
   }
@@ -470,32 +473,42 @@ public class TournamentSchedule implements Serializable {
     }
   }
 
-  private static ColumnInformation parseHeader(final String[] line) {
+  private static ColumnInformation parseHeader(final Collection<String> subjectiveHeaders,
+                                               final String[] line) {
+    final Collection<String> remainingHeaders = new LinkedList<String>(Arrays.asList(line));
     final int numPerfRounds = countNumRounds(line);
 
     final int[] perfColumn = new int[numPerfRounds];
     final int[] perfTableColumn = new int[numPerfRounds];
 
     final int teamNumColumn = getColumnForHeader(line, TEAM_NUMBER_HEADER);
+    remainingHeaders.remove(TEAM_NUMBER_HEADER);
     final int organizationColumn = getColumnForHeader(line, ORGANIZATION_HEADER);
+    remainingHeaders.remove(ORGANIZATION_HEADER);
     final int teamNameColumn = getColumnForHeader(line, TEAM_NAME_HEADER);
+    remainingHeaders.remove(TEAM_NAME_HEADER);
     final int divisionColumn = getColumnForHeader(line, DIVISION_HEADER);
-    int presentationColumn;
-    try {
-      presentationColumn = getColumnForHeader(line, RESEARCH_HEADER);
-    } catch (final FLLRuntimeException e) {
-      // support old schedules
-      presentationColumn = getColumnForHeader(line, "Presentation");
-    }
-    final int technicalColumn = getColumnForHeader(line, TECHNICAL_HEADER);
+    remainingHeaders.remove(DIVISION_HEADER);
+
     final int judgeGroupColumn = getColumnForHeader(line, JUDGE_GROUP_HEADER);
+    remainingHeaders.remove(JUDGE_GROUP_HEADER);
     for (int round = 0; round < numPerfRounds; ++round) {
-      perfColumn[round] = getColumnForHeader(line, String.format(PERF_HEADER_FORMAT, (round + 1)));
-      perfTableColumn[round] = getColumnForHeader(line, String.format(TABLE_HEADER_FORMAT, (round + 1)));
+      final String perfHeader = String.format(PERF_HEADER_FORMAT, (round + 1));
+      final String perfTableHeader = String.format(TABLE_HEADER_FORMAT, (round + 1));
+      perfColumn[round] = getColumnForHeader(line, perfHeader);
+      remainingHeaders.remove(perfHeader);
+      perfTableColumn[round] = getColumnForHeader(line, perfTableHeader);
+      remainingHeaders.remove(perfTableHeader);
     }
 
-    return new ColumnInformation(teamNumColumn, organizationColumn, teamNameColumn, divisionColumn, presentationColumn,
-                                 technicalColumn, judgeGroupColumn, perfColumn, perfTableColumn);
+    final Map<Integer, String> subjectiveColumns = new HashMap<Integer, String>();
+    for (final String header : subjectiveHeaders) {
+      final int column = getColumnForHeader(line, header);
+      subjectiveColumns.put(column, header);
+    }
+
+    return new ColumnInformation(teamNumColumn, organizationColumn, teamNameColumn, divisionColumn, subjectiveColumns,
+                                 judgeGroupColumn, perfColumn, perfTableColumn);
   }
 
   /**
@@ -1397,19 +1410,18 @@ public class TournamentSchedule implements Serializable {
       ti.setTeamName(line[ci.getTeamNameColumn()]);
       ti.setOrganization(line[ci.getOrganizationColumn()]);
       ti.setDivision(line[ci.getDivisionColumn()]);
-      final String presentationStr = line[ci.getPresentationColumn()];
-      if ("".equals(presentationStr)) {
-        // If we got an empty string, then we must have hit the end
-        return null;
-      }
-      ti.addSubjectiveTime(new TeamScheduleInfo.SubjectiveTime(RESEARCH_HEADER, parseDate(presentationStr)));
 
-      final String technicalStr = line[ci.getTechnicalColumn()];
-      if ("".equals(technicalStr)) {
-        // If we got an empty string, then we must have hit the end
-        return null;
+      for (final Map.Entry<Integer, String> entry : ci.getSubjectiveColumnInfo().entrySet()) {
+        final String station = entry.getValue();
+        final int column = entry.getKey();
+        final String str = line[column];
+        if ("".equals(str)) {
+          // If we got an empty string, then we must have hit the end
+          return null;
+        }
+        final Date date = parseDate(str);
+        ti.addSubjectiveTime(new SubjectiveTime(station, date));
       }
-      ti.addSubjectiveTime(new TeamScheduleInfo.SubjectiveTime(TECHNICAL_HEADER, parseDate(technicalStr)));
 
       ti.setJudgingStation(line[ci.getJudgeGroupColumn()]);
 
@@ -1719,7 +1731,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Keep track of column information from a spreadsheet.
    */
-  private static final class ColumnInformation {
+  public static final class ColumnInformation {
     private final int teamNumColumn;
 
     public int getTeamNumColumn() {
@@ -1744,16 +1756,10 @@ public class TournamentSchedule implements Serializable {
       return divisionColumn;
     }
 
-    private final int presentationColumn;
+    private final Map<Integer, String> subjectiveColumns;
 
-    public int getPresentationColumn() {
-      return presentationColumn;
-    }
-
-    private final int technicalColumn;
-
-    public int getTechnicalColumn() {
-      return technicalColumn;
+    public Map<Integer, String> getSubjectiveColumnInfo() {
+      return subjectiveColumns;
     }
 
     private final int judgeGroupColumn;
@@ -1782,8 +1788,7 @@ public class TournamentSchedule implements Serializable {
                              final int organizationColumn,
                              final int teamNameColumn,
                              final int divisionColumn,
-                             final int presentationColumn,
-                             final int technicalColumn,
+                             final Map<Integer, String> subjectiveColumns,
                              final int judgeGroupColumn,
                              final int[] perfColumn,
                              final int[] perfTableColumn) {
@@ -1791,12 +1796,10 @@ public class TournamentSchedule implements Serializable {
       this.organizationColumn = organizationColumn;
       this.teamNameColumn = teamNameColumn;
       this.divisionColumn = divisionColumn;
-      this.presentationColumn = presentationColumn;
-      this.technicalColumn = technicalColumn;
+      this.subjectiveColumns = subjectiveColumns;
       this.judgeGroupColumn = judgeGroupColumn;
       this.perfColumn = perfColumn;
       this.perfTableColumn = perfTableColumn;
     }
   }
-
 }

@@ -60,7 +60,6 @@ public final class ConstraintViolation {
                              final SubjectiveTime subjective2,
                              final Date performance,
                              final String message) {
-    // FIXME how to handle arbitrary subjective categories
     this.isHard = isHard;
     this.team = team;
     if (null != subjective1) {

@@ -42,7 +42,6 @@ import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.TeamPropertyDifference.TeamProperty;
-import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
 import fll.web.developer.importdb.TournamentDifference;
 import fll.xml.ChallengeParser;
@@ -533,11 +532,11 @@ public final class ImportDB {
         final Time technical = rs.getTime(4);
         prep.setInt(1, tournament);
         prep.setInt(2, team);
-        prep.setString(3, TournamentSchedule.TECHNICAL_HEADER);
+        prep.setString(3, "Technical");
         prep.setTime(4, technical);
         prep.executeUpdate();
 
-        prep.setString(3, TournamentSchedule.RESEARCH_HEADER);
+        prep.setString(3, "Research");
         prep.setTime(4, presentation);
         prep.executeUpdate();
       }

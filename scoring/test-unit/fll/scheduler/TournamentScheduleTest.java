@@ -15,6 +15,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -116,12 +118,17 @@ public class TournamentScheduleTest {
       Assert.assertEquals("Expecting exactly 1 sheet in schedule spreadsheet", 1, sheetNames.size());
 
       scheduleStream = scheduleResource.openStream();
-      final TournamentSchedule schedule = new TournamentSchedule(scheduleStream, sheetNames.get(0));
+      // FIXME need to propmpt for headers
+      final Collection<String> subjectiveHeaders = new LinkedList<String>();
+      subjectiveHeaders.add(TournamentSchedule.TECHNICAL_HEADER);
+      subjectiveHeaders.add(TournamentSchedule.RESEARCH_HEADER);
+      final TournamentSchedule schedule = new TournamentSchedule(scheduleStream, sheetNames.get(0), subjectiveHeaders);
       scheduleStream.close();
 
       schedule.storeSchedule(memConnection, tournament.getTournamentID());
 
-      final boolean existsAfter = TournamentSchedule.scheduleExistsInDatabase(memConnection, tournament.getTournamentID());
+      final boolean existsAfter = TournamentSchedule.scheduleExistsInDatabase(memConnection,
+                                                                              tournament.getTournamentID());
       Assert.assertTrue("Schedule should exist now that it's been stored", existsAfter);
 
     } finally {
