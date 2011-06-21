@@ -189,6 +189,7 @@ public class SchedulerUI extends JFrame {
         final Collection<String> subjectiveHeaders = new LinkedList<String>();
         subjectiveHeaders.add(TournamentSchedule.TECHNICAL_HEADER);
         subjectiveHeaders.add(TournamentSchedule.RESEARCH_HEADER);
+        subjectiveHeaders.add("Presentation");
         final TournamentSchedule newData = new TournamentSchedule(fis, getCurrentSheetName(), subjectiveHeaders);
         setScheduleData(newData);
       } catch (final IOException e) {
@@ -361,6 +362,7 @@ public class SchedulerUI extends JFrame {
             final Collection<String> subjectiveHeaders = new LinkedList<String>();
             subjectiveHeaders.add(TournamentSchedule.TECHNICAL_HEADER);
             subjectiveHeaders.add(TournamentSchedule.RESEARCH_HEADER);
+            subjectiveHeaders.add("Presentation");
             final TournamentSchedule schedule = new TournamentSchedule(fis, sheetName, subjectiveHeaders);
             currentFile = selectedFile;
             currentSheetName = sheetName;

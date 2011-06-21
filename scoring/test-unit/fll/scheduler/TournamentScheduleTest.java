@@ -122,6 +122,7 @@ public class TournamentScheduleTest {
       final Collection<String> subjectiveHeaders = new LinkedList<String>();
       subjectiveHeaders.add(TournamentSchedule.TECHNICAL_HEADER);
       subjectiveHeaders.add(TournamentSchedule.RESEARCH_HEADER);
+      subjectiveHeaders.add("Presentation");
       final TournamentSchedule schedule = new TournamentSchedule(scheduleStream, sheetNames.get(0), subjectiveHeaders);
       scheduleStream.close();
 
