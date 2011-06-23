@@ -507,8 +507,8 @@ public class TournamentSchedule implements Serializable {
       subjectiveColumns.put(column, header);
     }
 
-    return new ColumnInformation(teamNumColumn, organizationColumn, teamNameColumn, divisionColumn, subjectiveColumns,
-                                 judgeGroupColumn, perfColumn, perfTableColumn);
+    return new ColumnInformation(line, teamNumColumn, organizationColumn, teamNameColumn, divisionColumn,
+                                 subjectiveColumns, judgeGroupColumn, perfColumn, perfTableColumn);
   }
 
   /**
@@ -1732,6 +1732,17 @@ public class TournamentSchedule implements Serializable {
    * Keep track of column information from a spreadsheet.
    */
   public static final class ColumnInformation {
+
+    private final List<String> headerLine;
+
+    /**
+     * The columns that were parsed into the headers in the same order that they
+     * appear in the schedule.
+     */
+    public List<String> getHeaderLine() {
+      return headerLine;
+    }
+
     private final int teamNumColumn;
 
     public int getTeamNumColumn() {
@@ -1784,7 +1795,8 @@ public class TournamentSchedule implements Serializable {
       return perfTableColumn[round];
     }
 
-    public ColumnInformation(final int teamNumColumn,
+    public ColumnInformation(final String[] headerLine,
+                             final int teamNumColumn,
                              final int organizationColumn,
                              final int teamNameColumn,
                              final int divisionColumn,
@@ -1792,6 +1804,7 @@ public class TournamentSchedule implements Serializable {
                              final int judgeGroupColumn,
                              final int[] perfColumn,
                              final int[] perfTableColumn) {
+      this.headerLine = Collections.unmodifiableList(Arrays.asList(headerLine));
       this.teamNumColumn = teamNumColumn;
       this.organizationColumn = organizationColumn;
       this.teamNameColumn = teamNameColumn;
@@ -1800,6 +1813,48 @@ public class TournamentSchedule implements Serializable {
       this.judgeGroupColumn = judgeGroupColumn;
       this.perfColumn = perfColumn;
       this.perfTableColumn = perfTableColumn;
+
+      // determine which columns aren't used
+      final List<String> unused = new LinkedList<String>();
+      for (int column = 0; column < this.headerLine.size(); ++column) {
+        boolean match = false;
+        if (column == this.teamNumColumn //
+            || column == this.organizationColumn //
+            || column == this.teamNameColumn //
+            || column == this.divisionColumn //
+            || column == this.judgeGroupColumn //
+        ) {
+          match = true;
+        }
+        for (final int pc : this.perfColumn) {
+          if (pc == column) {
+            match = true;
+          }
+        }
+        for (final int ptc : this.perfTableColumn) {
+          if (ptc == column) {
+            match = true;
+          }
+        }
+        for (final int sc : this.subjectiveColumns.keySet()) {
+          if (sc == column) {
+            match = true;
+          }
+        }
+        if (!match) {
+          unused.add(this.headerLine.get(column));
+        }
+      }
+      this.unusedColumns = Collections.unmodifiableList(unused);
+    }
+
+    private final List<String> unusedColumns;
+
+    /**
+     * @return the column names that were in the header line, but not used.
+     */
+    public List<String> getUnusedColumns() {
+      return unusedColumns;
     }
   }
 }

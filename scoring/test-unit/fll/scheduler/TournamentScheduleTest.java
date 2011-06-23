@@ -31,6 +31,8 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
+import fll.scheduler.TournamentSchedule.ColumnInformation;
+import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.LogUtils;
 import fll.xml.ChallengeParser;
@@ -117,13 +119,27 @@ public class TournamentScheduleTest {
       scheduleStream.close();
       Assert.assertEquals("Expecting exactly 1 sheet in schedule spreadsheet", 1, sheetNames.size());
 
-      scheduleStream = scheduleResource.openStream();
       // FIXME need to propmpt for headers
+      final String sheetName = sheetNames.get(0);
+      scheduleStream = scheduleResource.openStream();
+      final CellFileReader reader = new ExcelCellReader(scheduleStream, sheetName);
+      final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
+      // determine the subjective columns
+      final Collection<String> possibleSubjectiveHeaders = new LinkedList<String>();
+      possibleSubjectiveHeaders.add(TournamentSchedule.TECHNICAL_HEADER);
+      possibleSubjectiveHeaders.add(TournamentSchedule.RESEARCH_HEADER);
+      possibleSubjectiveHeaders.add("Presentation");
+
       final Collection<String> subjectiveHeaders = new LinkedList<String>();
-      subjectiveHeaders.add(TournamentSchedule.TECHNICAL_HEADER);
-      subjectiveHeaders.add(TournamentSchedule.RESEARCH_HEADER);
-      subjectiveHeaders.add("Presentation");
-      final TournamentSchedule schedule = new TournamentSchedule(scheduleStream, sheetNames.get(0), subjectiveHeaders);
+      final List<String> unusedColumns = columnInfo.getUnusedColumns();
+      for (final String unused : unusedColumns) {
+        if (possibleSubjectiveHeaders.contains(unused)) {
+          subjectiveHeaders.add(unused);
+        }
+      }
+
+      scheduleStream = scheduleResource.openStream();
+      final TournamentSchedule schedule = new TournamentSchedule(scheduleStream, sheetName, subjectiveHeaders);
       scheduleStream.close();
 
       schedule.storeSchedule(memConnection, tournament.getTournamentID());
