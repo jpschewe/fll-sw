@@ -210,8 +210,6 @@ public class TournamentSchedule implements Serializable {
       InvalidFormatException, ScheduleParseException {
     final CellFileReader reader = new ExcelCellReader(stream, sheetName);
     final ColumnInformation columnInfo = findColumns(reader, subjectiveHeaders);
-    // FIXME figure out how to get the reader to the right place and have
-    // subjective column
     numRounds = columnInfo.getNumPerfs();
     parseData(reader, columnInfo);
     reader.close();

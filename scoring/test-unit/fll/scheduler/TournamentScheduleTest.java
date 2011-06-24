@@ -119,20 +119,21 @@ public class TournamentScheduleTest {
       scheduleStream.close();
       Assert.assertEquals("Expecting exactly 1 sheet in schedule spreadsheet", 1, sheetNames.size());
 
-      // FIXME need to propmpt for headers
       final String sheetName = sheetNames.get(0);
+      
+      // determine the subjective columns
       scheduleStream = scheduleResource.openStream();
       final CellFileReader reader = new ExcelCellReader(scheduleStream, sheetName);
       final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
-      // determine the subjective columns
+
       final Collection<String> possibleSubjectiveHeaders = new LinkedList<String>();
       possibleSubjectiveHeaders.add(TournamentSchedule.TECHNICAL_HEADER);
       possibleSubjectiveHeaders.add(TournamentSchedule.RESEARCH_HEADER);
       possibleSubjectiveHeaders.add("Presentation");
 
+      // prompt for which headers are subjective
       final Collection<String> subjectiveHeaders = new LinkedList<String>();
-      final List<String> unusedColumns = columnInfo.getUnusedColumns();
-      for (final String unused : unusedColumns) {
+      for (final String unused : columnInfo.getUnusedColumns()) {
         if (possibleSubjectiveHeaders.contains(unused)) {
           subjectiveHeaders.add(unused);
         }
