@@ -18,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.LinkedList;
@@ -26,6 +27,9 @@ import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -54,6 +58,8 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import com.itextpdf.text.DocumentException;
 
 import fll.scheduler.TeamScheduleInfo.SubjectiveTime;
+import fll.scheduler.TournamentSchedule.ColumnInformation;
+import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -185,12 +191,8 @@ public class SchedulerUI extends JFrame {
       FileInputStream fis = null;
       try {
         fis = new FileInputStream(getCurrentFile());
-        // FIXME need to propmpt for headers
-        final Collection<String> subjectiveHeaders = new LinkedList<String>();
-        subjectiveHeaders.add(TournamentSchedule.TECHNICAL_HEADER);
-        subjectiveHeaders.add(TournamentSchedule.RESEARCH_HEADER);
-        subjectiveHeaders.add("Presentation");
-        final TournamentSchedule newData = new TournamentSchedule(fis, getCurrentSheetName(), subjectiveHeaders);
+        final TournamentSchedule newData = new TournamentSchedule(fis, getCurrentSheetName(),
+                                                                  scheduleData.getSubjectiveStations());
         setScheduleData(newData);
       } catch (final IOException e) {
         final Formatter errorFormatter = new Formatter();
@@ -358,11 +360,41 @@ public class SchedulerUI extends JFrame {
               return;
             }
             fis = new FileInputStream(selectedFile);
-            // FIXME need to propmpt for headers
-            final Collection<String> subjectiveHeaders = new LinkedList<String>();
-            subjectiveHeaders.add(TournamentSchedule.TECHNICAL_HEADER);
-            subjectiveHeaders.add(TournamentSchedule.RESEARCH_HEADER);
-            subjectiveHeaders.add("Presentation");
+            final CellFileReader reader = new ExcelCellReader(fis, sheetName);
+            final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
+            fis.close();
+            fis = null;
+            final List<String> subjectiveHeaders;
+            final List<String> unusedColumns = columnInfo.getUnusedColumns();
+            final List<JCheckBox> checkboxes = new LinkedList<JCheckBox>();
+            final Box optionPanel = new Box(BoxLayout.PAGE_AXIS);
+            for (final String header : unusedColumns) {
+              if (null != header
+                  && header.length() > 0) {
+                final JCheckBox checkbox = new JCheckBox(header);
+                checkboxes.add(checkbox);
+                optionPanel.add(checkbox);
+              }
+            }
+            if (!checkboxes.isEmpty()) {
+              JOptionPane.showMessageDialog(SchedulerUI.this, optionPanel, "Choose Sujbective Columns",
+                                            JOptionPane.QUESTION_MESSAGE);
+              subjectiveHeaders = new LinkedList<String>();
+              for (final JCheckBox box : checkboxes) {
+                if (box.isSelected()) {
+                  subjectiveHeaders.add(box.getText());
+                }
+              }
+            } else {
+              subjectiveHeaders = Collections.emptyList();
+            }
+
+            if (LOGGER.isTraceEnabled()) {
+              LOGGER.trace("Subjective headers selected: "
+                  + subjectiveHeaders);
+            }
+
+            fis = new FileInputStream(selectedFile);
             final TournamentSchedule schedule = new TournamentSchedule(fis, sheetName, subjectiveHeaders);
             currentFile = selectedFile;
             currentSheetName = sheetName;
