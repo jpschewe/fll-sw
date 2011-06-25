@@ -14,6 +14,8 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
+import fll.scheduler.TeamScheduleInfo.SubjectiveTime;
+
 /**
  * Table model for scheduler information used in {@link SchedulerUI}.
  */
@@ -90,7 +92,12 @@ import javax.swing.table.AbstractTableModel;
       return schedInfo.getJudgingStation();
     } else if (columnIndex < getFirstPerformanceColumn()) {
       // columns are named by the subjective categories
-      return schedInfo.getSubjectiveTimeByName(getColumnName(columnIndex));
+      final SubjectiveTime subj = schedInfo.getSubjectiveTimeByName(getColumnName(columnIndex));
+      if (null == subj) {
+        return null;
+      } else {
+        return subj.getTime();
+      }
     } else {
       final int perfColIdx = columnIndex
           - getFirstPerformanceColumn();
@@ -144,7 +151,7 @@ import javax.swing.table.AbstractTableModel;
       return "Judge";
     } else if (columnIndex < getFirstPerformanceColumn()) {
       return subjectiveColumns.get(columnIndex
-          - JUDGE_COLUMN + 1);
+          - JUDGE_COLUMN - 1);
     } else {
       final int perfColIdx = columnIndex
           - getFirstPerformanceColumn();
