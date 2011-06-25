@@ -210,6 +210,8 @@ public class TournamentSchedule implements Serializable {
     numRounds = columnInfo.getNumPerfs();
     parseData(reader, columnInfo);
     reader.close();
+    this.subjectiveStations.clear();
+    this.subjectiveStations.addAll(subjectiveHeaders);
   }
 
   /**
