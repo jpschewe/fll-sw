@@ -21,7 +21,7 @@
   action='ProcessSubjectiveHeaders'>
   <p>Choose the columns that represent subjective judging stations
    in your schedule. You can choose none, meaning you have no subjective
-   judging stations</p>
+   judging stations.</p>
   <table>
    <c:forEach items="${uploadSchedule_unusedHeaders }" var="subjHeader"
     varStatus="loopStatus">
