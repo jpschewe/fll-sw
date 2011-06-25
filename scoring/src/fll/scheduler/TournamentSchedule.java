@@ -196,9 +196,6 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * @param columnInfo information about what headers are where, the method
-   *          {@link #findColumns(SubjectiveHeaderChooser, CellFileReader)} can
-   *          be used for this
    * @param stream how to access the spreadsheet
    * @param sheetName the name of the worksheet the data is on
    * @param subjectiveHeaders the headers for the subjective columns
