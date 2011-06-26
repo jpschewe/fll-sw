@@ -15,6 +15,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -29,6 +31,8 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
+import fll.scheduler.TournamentSchedule.ColumnInformation;
+import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.LogUtils;
 import fll.xml.ChallengeParser;
@@ -115,13 +119,34 @@ public class TournamentScheduleTest {
       scheduleStream.close();
       Assert.assertEquals("Expecting exactly 1 sheet in schedule spreadsheet", 1, sheetNames.size());
 
+      final String sheetName = sheetNames.get(0);
+      
+      // determine the subjective columns
       scheduleStream = scheduleResource.openStream();
-      final TournamentSchedule schedule = new TournamentSchedule(scheduleStream, sheetNames.get(0));
+      final CellFileReader reader = new ExcelCellReader(scheduleStream, sheetName);
+      final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
+
+      final Collection<String> possibleSubjectiveHeaders = new LinkedList<String>();
+      possibleSubjectiveHeaders.add(TournamentSchedule.TECHNICAL_HEADER);
+      possibleSubjectiveHeaders.add(TournamentSchedule.RESEARCH_HEADER);
+      possibleSubjectiveHeaders.add("Presentation");
+
+      // prompt for which headers are subjective
+      final Collection<String> subjectiveHeaders = new LinkedList<String>();
+      for (final String unused : columnInfo.getUnusedColumns()) {
+        if (possibleSubjectiveHeaders.contains(unused)) {
+          subjectiveHeaders.add(unused);
+        }
+      }
+
+      scheduleStream = scheduleResource.openStream();
+      final TournamentSchedule schedule = new TournamentSchedule(scheduleStream, sheetName, subjectiveHeaders);
       scheduleStream.close();
 
       schedule.storeSchedule(memConnection, tournament.getTournamentID());
 
-      final boolean existsAfter = TournamentSchedule.scheduleExistsInDatabase(memConnection, tournament.getTournamentID());
+      final boolean existsAfter = TournamentSchedule.scheduleExistsInDatabase(memConnection,
+                                                                              tournament.getTournamentID());
       Assert.assertTrue("Schedule should exist now that it's been stored", existsAfter);
 
     } finally {

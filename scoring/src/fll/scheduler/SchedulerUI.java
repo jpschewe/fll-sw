@@ -17,13 +17,19 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -51,6 +57,9 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import com.itextpdf.text.DocumentException;
 
+import fll.scheduler.TeamScheduleInfo.SubjectiveTime;
+import fll.scheduler.TournamentSchedule.ColumnInformation;
+import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -182,7 +191,8 @@ public class SchedulerUI extends JFrame {
       FileInputStream fis = null;
       try {
         fis = new FileInputStream(getCurrentFile());
-        final TournamentSchedule newData = new TournamentSchedule(fis, getCurrentSheetName());
+        final TournamentSchedule newData = new TournamentSchedule(fis, getCurrentSheetName(),
+                                                                  scheduleData.getSubjectiveStations());
         setScheduleData(newData);
       } catch (final IOException e) {
         final Formatter errorFormatter = new Formatter();
@@ -206,8 +216,7 @@ public class SchedulerUI extends JFrame {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error parsing file: %s", e.getMessage());
         LOGGER.error(errorFormatter, e);
-        JOptionPane
-                   .showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
       } finally {
         try {
           if (null != fis) {
@@ -351,7 +360,42 @@ public class SchedulerUI extends JFrame {
               return;
             }
             fis = new FileInputStream(selectedFile);
-            final TournamentSchedule schedule = new TournamentSchedule(fis, sheetName);
+            final CellFileReader reader = new ExcelCellReader(fis, sheetName);
+            final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
+            fis.close();
+            fis = null;
+            final List<String> subjectiveHeaders;
+            final List<String> unusedColumns = columnInfo.getUnusedColumns();
+            final List<JCheckBox> checkboxes = new LinkedList<JCheckBox>();
+            final Box optionPanel = new Box(BoxLayout.PAGE_AXIS);
+            for (final String header : unusedColumns) {
+              if (null != header
+                  && header.length() > 0) {
+                final JCheckBox checkbox = new JCheckBox(header);
+                checkboxes.add(checkbox);
+                optionPanel.add(checkbox);
+              }
+            }
+            if (!checkboxes.isEmpty()) {
+              JOptionPane.showMessageDialog(SchedulerUI.this, optionPanel, "Choose Sujbective Columns",
+                                            JOptionPane.QUESTION_MESSAGE);
+              subjectiveHeaders = new LinkedList<String>();
+              for (final JCheckBox box : checkboxes) {
+                if (box.isSelected()) {
+                  subjectiveHeaders.add(box.getText());
+                }
+              }
+            } else {
+              subjectiveHeaders = Collections.emptyList();
+            }
+
+            if (LOGGER.isTraceEnabled()) {
+              LOGGER.trace("Subjective headers selected: "
+                  + subjectiveHeaders);
+            }
+
+            fis = new FileInputStream(selectedFile);
+            final TournamentSchedule schedule = new TournamentSchedule(fis, sheetName, subjectiveHeaders);
             currentFile = selectedFile;
             currentSheetName = sheetName;
             setScheduleData(schedule);
@@ -406,9 +450,10 @@ public class SchedulerUI extends JFrame {
           }
 
         } else {
-          JOptionPane.showMessageDialog(SchedulerUI.this, new Formatter().format("%s is not a file or is not readable",
-                                                                                 selectedFile.getAbsolutePath()),
-                                        "Error reading file", JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(SchedulerUI.this,
+                                        new Formatter().format("%s is not a file or is not readable",
+                                                               selectedFile.getAbsolutePath()), "Error reading file",
+                                        JOptionPane.ERROR_MESSAGE);
         }
       }
     }
@@ -464,7 +509,7 @@ public class SchedulerUI extends JFrame {
     scheduleTable.clearSelection();
 
     scheduleData = sd;
-    scheduleModel = new SchedulerTableModel(scheduleData.getSchedule(), scheduleData.getNumberOfRounds());
+    scheduleModel = new SchedulerTableModel(scheduleData);
     scheduleTable.setModel(scheduleModel);
 
     checkSchedule();
@@ -524,17 +569,9 @@ public class SchedulerUI extends JFrame {
       boolean isHard = false;
       for (final ConstraintViolation violation : getViolationsModel().getViolations()) {
         if (violation.getTeam() == schedInfo.getTeamNumber()) {
+          Collection<SubjectiveTime> subjectiveTimes = violation.getSubjectiveTimes();
           if ((SchedulerTableModel.TEAM_NUMBER_COLUMN == tmCol || SchedulerTableModel.JUDGE_COLUMN == tmCol)
-              && null == violation.getPresentation() && null == violation.getTechnical()
-              && null == violation.getPerformance()) {
-            error = true;
-            isHard |= violation.isHard();
-          } else if (SchedulerTableModel.PRESENTATION_COLUMN == tmCol
-              && null != violation.getPresentation()) {
-            error = true;
-            isHard |= violation.isHard();
-          } else if (SchedulerTableModel.TECHNICAL_COLUMN == tmCol
-              && null != violation.getTechnical()) {
+              && subjectiveTimes.isEmpty() && null == violation.getPerformance()) {
             error = true;
             isHard |= violation.isHard();
           } else if (null != violation.getPerformance()) {
@@ -544,10 +581,10 @@ public class SchedulerUI extends JFrame {
                 && round < schedInfo.getNumberOfRounds()) {
               ++round;
               if (round >= schedInfo.getNumberOfRounds()) {
-                throw new RuntimeException("Internal error, walkd off the end of the round list");
+                throw new RuntimeException("Internal error, walked off the end of the round list");
               }
             }
-            final int firstIdx = SchedulerTableModel.FIRST_PERFORMANCE_COLUMN
+            final int firstIdx = getScheduleModel().getFirstPerformanceColumn()
                 + (round * SchedulerTableModel.NUM_COLUMNS_PER_ROUND);
             final int lastIdx = firstIdx
                 + SchedulerTableModel.NUM_COLUMNS_PER_ROUND - 1;
@@ -560,12 +597,19 @@ public class SchedulerUI extends JFrame {
             if (LOGGER.isTraceEnabled()) {
               LOGGER.trace("Violation is in performance round: "
                   + round //
-                  + " team: " + schedInfo.getTeamNumber() // 
-                  + " firstIdx: " + firstIdx // 
+                  + " team: " + schedInfo.getTeamNumber() //
+                  + " firstIdx: " + firstIdx //
                   + " lastIdx: " + lastIdx //
                   + " column: " + tmCol //
                   + " error: " + error //
               );
+            }
+          } else {
+            for (final SubjectiveTime subj : subjectiveTimes) {
+              if (tmCol == getScheduleModel().getColumnForSubjective(subj.getName())) {
+                error = true;
+                isHard |= violation.isHard();
+              }
             }
           }
         }
