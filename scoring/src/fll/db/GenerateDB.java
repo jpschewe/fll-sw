@@ -38,7 +38,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 2;
+  public static final int DATABASE_VERSION = 6;
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -706,14 +706,12 @@ public final class GenerateDB {
           sql.append(" ,CONSTRAINT schedule_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
         }
         sql.append(")");
-
         stmt.executeUpdate(sql.toString());
       }
 
       if (forceRebuild) {
         stmt.executeUpdate("DROP TABLE IF EXISTS sched_perf_rounds CASCADE");
       }
-
       if (forceRebuild
           || !tables.contains("sched_perf_rounds".toLowerCase())) {
         final StringBuilder sql = new StringBuilder();
@@ -729,9 +727,28 @@ public final class GenerateDB {
           sql.append(" ,CONSTRAINT sched_perf_rounds_fk1 FOREIGN KEY(tournament, team_number) REFERENCES schedule(tournament, team_number)");
         }
         sql.append(")");
-
-        stmt.executeUpdate(sql.toString());
+        stmt.executeUpdate(sql.toString());        
       }
+      
+      if (forceRebuild) {
+        stmt.executeUpdate("DROP TABLE IF EXISTS sched_subjective CASCADE");
+      }
+      if (forceRebuild
+          || !tables.contains("sched_subjective".toLowerCase())) {
+        final StringBuilder sql = new StringBuilder();
+        sql.append("CREATE TABLE sched_subjective (");
+        sql.append("  tournament INTEGER NOT NULL");
+        sql.append(" ,team_number INTEGER NOT NULL");
+        sql.append(" ,name LONGVARCHAR NOT NULL");
+        sql.append(" ,subj_time TIME NOT NULL");
+        sql.append(" ,CONSTRAINT sched_subjective_pk PRIMARY KEY (tournament, team_number, name)");
+        if (createConstraints) {
+          sql.append(" ,CONSTRAINT sched_subjective_fk1 FOREIGN KEY(tournament, team_number) REFERENCES schedule(tournament, team_number)");
+        }
+        sql.append(")");
+        stmt.executeUpdate(sql.toString());        
+      }
+      
     } finally {
       SQLFunctions.close(stmt);
       stmt = null;

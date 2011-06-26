@@ -1,7 +1,12 @@
 package fll.scheduler;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Holds data about the schedule for a team.
@@ -16,16 +21,12 @@ public final class TeamScheduleInfo implements Serializable {
 
   private String division;
 
-  private Date presentation = null;
-
-  private Date technical = null;
-
   private String judgingStation;
 
   private final Date[] perf;
 
   public void setPerf(final int idx,
-               final Date d) {
+                      final Date d) {
     perf[idx] = d;
   }
 
@@ -42,7 +43,7 @@ public final class TeamScheduleInfo implements Serializable {
    * @param idx zero based
    */
   public void setPerfTableColor(final int idx,
-                         final String v) {
+                                final String v) {
     perfTableColor[idx] = v;
   }
 
@@ -59,7 +60,7 @@ public final class TeamScheduleInfo implements Serializable {
    * @param idx zero based
    */
   public void setPerfTableSide(final int idx,
-                        final int v) {
+                               final int v) {
     perfTableSide[idx] = v;
   }
 
@@ -166,34 +167,6 @@ public final class TeamScheduleInfo implements Serializable {
   }
 
   /**
-   * @param presentation the presentation to set
-   */
-  public void setPresentation(final Date presentation) {
-    this.presentation = new Date(presentation.getTime());
-  }
-
-  /**
-   * @return the presentation
-   */
-  public Date getPresentation() {
-    return new Date(presentation.getTime());
-  }
-
-  /**
-   * @param technical the technical to set
-   */
-  public void setTechnical(final Date technical) {
-    this.technical = new Date(technical.getTime());
-  }
-
-  /**
-   * @return the technical
-   */
-  public Date getTechnical() {
-    return new Date(technical.getTime());
-  }
-
-  /**
    * @param judge the judging station
    */
   public void setJudgingStation(final String judge) {
@@ -212,4 +185,61 @@ public final class TeamScheduleInfo implements Serializable {
   }
 
   private final int numberOfRounds;
+
+  private Map<String, SubjectiveTime> subjectiveTimes = new HashMap<String, SubjectiveTime>();
+
+  public Collection<SubjectiveTime> getSubjectiveTimes() {
+    return Collections.unmodifiableCollection(subjectiveTimes.values());
+  }
+
+  public void addSubjectiveTime(final SubjectiveTime s) {
+    subjectiveTimes.put(s.getName(), s);
+  }
+
+  public void removeSubjectiveTime(final SubjectiveTime s) {
+    subjectiveTimes.remove(s.getName());
+  }
+
+  /**
+   * Get the subjective time by name.
+   * 
+   * @return null if no time with that name found
+   */
+  public SubjectiveTime getSubjectiveTimeByName(final String name) {
+    return subjectiveTimes.get(name);
+  }
+
+  public Set<String> getKnownSubjectiveStations() {
+    return Collections.unmodifiableSet(subjectiveTimes.keySet());
+  }
+
+  /**
+   * Represents a subjective judging time.
+   */
+  public static final class SubjectiveTime {
+    public SubjectiveTime(final String name,
+                          final Date time) {
+      this.name = name;
+      this.time = time == null ? null : new Date(time.getTime());
+    }
+
+    private final String name;
+
+    /**
+     * Name of what is being judged.
+     */
+    public String getName() {
+      return name;
+    }
+
+    private final Date time;
+
+    /**
+     * Time of the judging session.
+     */
+    public Date getTime() {
+      return null == time ? null : new Date(time.getTime());
+    }
+
+  }
 }
