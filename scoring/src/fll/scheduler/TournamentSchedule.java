@@ -64,6 +64,10 @@ import fll.util.LogUtils;
 
 /**
  * Tournament schedule. Can parse the schedule from a spreadsheet.
+ * <p>
+ * Note to developers: The comments prefixed with "constraint:" refer back to
+ * the scheduling document.
+ * </p>
  */
 public class TournamentSchedule implements Serializable {
   private static final Logger LOGGER = LogUtils.getLogger();
@@ -1040,7 +1044,8 @@ public class TournamentSchedule implements Serializable {
    * performing at the same time.
    */
   private void verifyPerformanceAtTime(final Collection<ConstraintViolation> violations) {
-    // constraint set 6
+    // constraint: Limit the number of teams competing on the performance tables
+    // at the same time
     final Map<Date, Set<TeamScheduleInfo>> teamsAtTime = new HashMap<Date, Set<TeamScheduleInfo>>();
     for (final TeamScheduleInfo si : _schedule) {
       for (int round = 0; round < getNumberOfRounds(); ++round) {
@@ -1068,7 +1073,7 @@ public class TournamentSchedule implements Serializable {
    * Ensure that no more than 1 team is in a subjective judging station at once.
    */
   private void verifySubjectiveAtTime(final Collection<ConstraintViolation> violations) {
-    // constraint set 7
+    // constraint: Limit the number of teams at a subjective judging station
     // category -> time -> teams
     final Map<String, Map<Date, Set<TeamScheduleInfo>>> allSubjective = new HashMap<String, Map<Date, Set<TeamScheduleInfo>>>();
     for (final TeamScheduleInfo si : _schedule) {
@@ -1162,7 +1167,7 @@ public class TournamentSchedule implements Serializable {
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "IM_BAD_CHECK_FOR_ODD", justification = "The size of a container cannot be negative")
   private void verifyTeam(final Collection<ConstraintViolation> violations,
                           final TeamScheduleInfo ti) {
-    // constraint set 1
+    // Relationship between each subjective category
     for (final SubjectiveTime category1 : ti.getSubjectiveTimes()) {
       for (final SubjectiveTime category2 : ti.getSubjectiveTimes()) {
         if (!category1.getName().equals(category2.getName())) {
@@ -1204,7 +1209,7 @@ public class TournamentSchedule implements Serializable {
       }
     }
 
-    // constraint set 3
+    // constraint: Relationships between performance rounds
     final long changetime;
     final int round1OpponentRound = findOpponentRound(ti, 0);
     final int round2OpponentRound = findOpponentRound(ti, 1);
@@ -1246,13 +1251,14 @@ public class TournamentSchedule implements Serializable {
       violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(2), message));
     }
 
-    // constraint set 4
+    // constraint: Relationships between subjective categories judging and
+    // performance
     for (int round = 0; round < getNumberOfRounds(); ++round) {
       final String performanceName = String.valueOf(round + 1);
       verifyPerformanceVsSubjective(violations, ti, performanceName, ti.getPerf(round));
     }
 
-    // constraint set 5
+    // constraint: Each team should always compete against other teams
     // make sure that all opponents are different & sides are different
     for (int round = 0; round < getNumberOfRounds(); ++round) {
       final TeamScheduleInfo opponent = findOpponent(ti, round);
