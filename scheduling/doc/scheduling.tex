@@ -3,6 +3,9 @@
 \usepackage{float}
 \usepackage{alltt}
 
+% FloatBarrier
+\usepackage{placeins}
+
 % html links
 \usepackage{hyperref}
 
@@ -17,6 +20,8 @@
 \begin{document}
 \maketitle
 
+% Note: the captions on the algorithms are used in the comments for the
+% constraints in the Java scheduler and verifier.
 \chapter{FLL Scheduling Constraints}
 
 \section{Definitions}
@@ -32,7 +37,6 @@
 \STATE $specialPerformanceChangetime = 30$ - time between performance
 rounds for teams with opponents in a different round
 \end{algorithmic}
-
 
 \section{Subjective}
 %TODO figure out how to put in a lunch break
@@ -134,8 +138,8 @@ These constraints are applied to each team.
 These constraints pertain to the tournament as a whole.
 
 \begin{algorithm}
-\caption{There can only be $PN$ teams competing on the performance tables
-at the same time}
+\caption{Limit the number of teams competing on the performance tables at
+  the same time}
 \begin{algorithmic}
 
 \STATE $teamsAtTime = []$
@@ -154,8 +158,7 @@ at the same time}
 \end{algorithm}
 
 \begin{algorithm}
-\caption{There can only be $JN_{cat,div}$ teams being judged at the same
-time in division $div$ for category $cat$}
+\caption{Limit the number of teams at a subjective judging station}
 \begin{algorithmic}
 \FORALL{$cat \in SubjectiveCategories$}
   \FORALL{$div \in divisions$}
@@ -175,6 +178,7 @@ time in division $div$ for category $cat$}
 \end{algorithmic}
 \end{algorithm}
 
+\FloatBarrier
 \section{Implementation ideas}
 Possible solvers include:
 \begin{itemize}
