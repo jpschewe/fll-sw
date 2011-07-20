@@ -1044,8 +1044,7 @@ public class TournamentSchedule implements Serializable {
    * performing at the same time.
    */
   private void verifyPerformanceAtTime(final Collection<ConstraintViolation> violations) {
-    // constraint: Limit the number of teams competing on the performance tables
-    // at the same time
+    // constraint: tournament:1
     final Map<Date, Set<TeamScheduleInfo>> teamsAtTime = new HashMap<Date, Set<TeamScheduleInfo>>();
     for (final TeamScheduleInfo si : _schedule) {
       for (int round = 0; round < getNumberOfRounds(); ++round) {
@@ -1073,7 +1072,7 @@ public class TournamentSchedule implements Serializable {
    * Ensure that no more than 1 team is in a subjective judging station at once.
    */
   private void verifySubjectiveAtTime(final Collection<ConstraintViolation> violations) {
-    // constraint: Limit the number of teams at a subjective judging station
+    // constraint: tournament:1
     // category -> time -> teams
     final Map<String, Map<Date, Set<TeamScheduleInfo>>> allSubjective = new HashMap<String, Map<Date, Set<TeamScheduleInfo>>>();
     for (final TeamScheduleInfo si : _schedule) {
@@ -1209,7 +1208,7 @@ public class TournamentSchedule implements Serializable {
       }
     }
 
-    // constraint: Relationships between performance rounds
+    // constraint: team:3
     final long changetime;
     final int round1OpponentRound = findOpponentRound(ti, 0);
     final int round2OpponentRound = findOpponentRound(ti, 1);
@@ -1251,15 +1250,13 @@ public class TournamentSchedule implements Serializable {
       violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(2), message));
     }
 
-    // constraint: Relationships between subjective categories judging and
-    // performance
+    // constraint: team:4
     for (int round = 0; round < getNumberOfRounds(); ++round) {
       final String performanceName = String.valueOf(round + 1);
       verifyPerformanceVsSubjective(violations, ti, performanceName, ti.getPerf(round));
     }
 
-    // constraint: Each team should always compete against other teams
-    // make sure that all opponents are different & sides are different
+    // constraint: team:5
     for (int round = 0; round < getNumberOfRounds(); ++round) {
       final TeamScheduleInfo opponent = findOpponent(ti, round);
       if (null != opponent) {
