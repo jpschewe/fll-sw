@@ -12,7 +12,7 @@
 % algorithm environment for pseudocode 
 \usepackage{algorithm}
 \usepackage{algorithmic}
-\floatname{algorithm}{Constraint Set}
+%\floatname{algorithm}{}
 
 \title{FLL Tournament Scheduling}
 \author{Jon Schewe}
@@ -27,17 +27,24 @@
 
 \section{Definitions}
 
+\begin{algorithm}
+\caption{param:0 - Basic definitions and parmaeters}
 \begin{algorithmic}
 \STATE $SOS$ - the start of the tournament (time 0)
 \STATE $TN$ - number of teams at the tournament
 \STATE $TN_{N}$ - number of division $N$ teams
 \STATE $T_{0}, T_{1}, \dots, T_{n}$ - teams
-\STATE $div(T_{0})$ - division of team $T_{0}$
+\STATE $div(T_{0})$ - division of team 0
+\STATE $P(T_{0}, 1)$ - performance time for team 0 round 1
+\STATE $S(T_{0}, cat)$ - subjective time for team 0 subjective category $cat$
 \STATE $changetime = 15$ - time between events
-\STATE $performanceChangetime = 45$ - time between performance rounds
-\STATE $specialPerformanceChangetime = 30$ - time between performance
-rounds for teams with opponents in a different round
+\STATE $performanceDuration = 5$ - amount of time for a performance run for
+\STATE $subjectiveDuration = 20$ - amount of time to judge a subjective
+category for a team
+\COMMENT FIXME: need to figure out how to do constraints for state where we
+alternate tables
 \end{algorithmic}
+\end{algorithm}
 
 \FloatBarrier
 \section{Subjective}
@@ -45,31 +52,38 @@ rounds for teams with opponents in a different round
 
 Everything defined here is true for all subjective judging categories.
 
+\begin{algorithm}
+\caption{param:1 - Parameters for subjective judging}
 \begin{algorithmic}
-\STATE $JN_{cat,div}$ - number of judges for category $cat$ in division $div$
-\STATE $subjective_{start} = SOS$
+\STATE $JN_{cat,div}$ - number of judges for category $cat$ in division
+$div$ (typically 1 for regional, more for state)
+\STATE $subjectiveStart = SOS$
+\STATE $NSubj = 3$ - number of subjective categories
 \end{algorithmic}
+\end{algorithm}
 
 \FloatBarrier
 \section{Performance}
+\begin{algorithm}
+\caption{param:2 - Performance parameters}
 \begin{algorithmic}
 \STATE $TableN$ - number of tables
-\STATE $coaches meeting = SOS + 30$
-\STATE $performance_{start} = SOS + 60$ - give time for teams to get settled
-\STATE $PN = ceil(TN / 2) / TableN$ - number of time slots for each performance round
+\STATE $performanceStart = SOS + 60$ - give time for teams to get settled
+\STATE $PN = ceil(TN / 2) / TableN$ - number of time slots for each
+performance round
+\STATE $NRounds$ - the number of performance rounds (typically 3)
+\STATE $performanceChangetime = 45$ - time between performance rounds
+%\STATE $specialPerformanceChangetime = 30$ - time between performance
+%rounds for teams with opponents in a different round
+\STATE $NDivs = 2$ - number of divisions
 \end{algorithmic}
-
-\begin{algorithmic}
-\STATE $P_{1} = performance_{start}$
-\FOR{$round \in 2 \dots NRounds$}
-  \STATE $P_{round} = P_{round-1} + 5$
-\ENDFOR
-\end{algorithmic}
+\end{algorithm}
 
 \FloatBarrier
 \section{Team Constraints}
-These constraints are applied to each team.
+These constraints are applied to each team $T$.
 
+FIXME: Need to figure out how to handle the conditional constraints here
 \begin{algorithm}
 \caption{team:1 - Relationship between each subjective category}
 \begin{algorithmic}
@@ -77,9 +91,9 @@ These constraints are applied to each team.
   \FOR{$category2 \in SubjectiveCategories$}
     \IF{$category1 != category2$}
       \IF{$category1_{end} <= category2_{start}$}
-        \STATE $category1_{end} + changetime <= category2_{start}$
+        \STATE $S(T, category1)_{end} + changetime <= S(T, category2)_{start}$
       \ELSE
-        \STATE $category2_{end} + changetime <= category1_{start}$
+        \STATE $S(T, category2)_{end} + changetime <= S(T, category1)_{start}$
       \ENDIF
     \ENDIF
   \ENDFOR
@@ -88,16 +102,23 @@ These constraints are applied to each team.
 \end{algorithm}
 
 \begin{algorithm}
-\caption{team:2 - Basic constraints}
+\caption{team:2 - Basic performance constraints}
 \begin{algorithmic}
 \FOR{$round \in 1 \dots NRounds$}
-  \STATE $P_{N_{end}} = P_{N_{start}} + 5$
+  \STATE $P(T, N)_{end} = P(T, N)_{start} + performanceDuration$
 \ENDFOR
 \FOR{$round \in 2 \dots NRounds$}
-  \STATE $P_{{N-1}_{end}} + 15 <= P_{N_{start}}$
+  \STATE $P(T, N-1)_{end} + performanceChangetime <= P(T, N)_{start}$
 \ENDFOR
+\end{algorithmic}
+\end{algorithm}
 
-\STATE $subjectiveCategory_{end} = subjectiveCategory_{start} + 20$
+\begin{algorithm}
+\caption{team:6 - Basic subjective constraints}
+\begin{algorithmic}
+\FOR{$cat \in 1 \dots NSubj$}
+  \STATE $S(T, cat)_{end} = S(T, cat)_{start} + subjectiveDuration$
+\ENDFOR
 \end{algorithmic}
 \end{algorithm}
 
@@ -105,20 +126,23 @@ These constraints are applied to each team.
 \caption{team:3 - Relationships between performance rounds}
 \begin{algorithmic}
 \FOR{$round \in 2 \dots NRounds$}
-  \STATE $P_{{N-1}_{end}} + performanceChangetime <= P_{N_{start}}$ \COMMENT FIX: Note that if the opponent is in a different round $performanceChangeTime$ needs to be $specialPerformanceChangetime$
+  \STATE $P_{{N-1}_{end}} + performanceChangetime <= P_{N_{start}}$ \COMMENT FIXME: Note that if the opponent is in a different round $performanceChangeTime$ needs to be $specialPerformanceChangetime$
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
 
+
+\FloatBarrier
+FIXME: Need to figure out how to handle conditional here.
 \begin{algorithm}
 \caption{team:4 - Relationships between subjective categories judging and performance}
 \begin{algorithmic}
 \FOR{$category \in SubjectiveCategories$}
-  \FOR{$i \in 1 \dots 3$}
-    \IF{$category_{end} <= P_{i_{start}}$}
-      \STATE $category_{end} + changetime <= P_{i_{start}}$
+  \FOR{$round \in 1 \dots nRounds$}
+    \IF{$category_{end} <= P_{round_{start}}$}
+      \STATE $S(T, category)_{end} + changetime <= P(T, round)_{start}$
     \ELSE
-      \STATE $P_{i_{end}} + changetime <= category_{start}$
+      \STATE $P(T, round)_{end} + changetime <= S(T, category)_{start}$
     \ENDIF
   \ENDFOR
 \ENDFOR
@@ -179,6 +203,27 @@ These constraints pertain to the tournament as a whole.
       \ENDIF
     \ENDFOR
   \ENDFOR
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{tournament:3 - make sure subjective judging start after $subjectiveStart$}
+\begin{algorithmic}
+\FORALL{$T \in teams$}
+  \FORALL{$cat \in SubjectiveCategories$}
+    \STATE $S(T, cat) >= subjectiveStart$
+  \ENDFOR
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{tournament:4 - make sure performance starts after
+$performanceStart$.}
+\begin{algorithmic}
+\FORALL{$T \in teams$}
+  \STATE $P(T, 1) >= performanceStart$
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
