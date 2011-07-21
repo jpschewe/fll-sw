@@ -3,6 +3,8 @@
 \usepackage{float}
 \usepackage{alltt}
 
+\usepackage[table,usenames,dvipsnames]{xcolor}
+
 % FloatBarrier
 \usepackage{placeins}
 
@@ -13,6 +15,25 @@
 \usepackage{algorithm}
 \usepackage{algorithmic}
 %\floatname{algorithm}{}
+
+% draft - include comments as footnotes and marginpars
+\newif\ifdraft
+\drafttrue
+\ifdraft
+\typeout{DRAFT - WITH COMMENTS}
+\newcommand{\doccomment}[3]%
+{\marginpar{\textcolor{#2}{\bf #1}}%
+%\footnote{\textcolor{#2}{#3}}%
+\footnote{{\color{#2}#3}}%
+}
+\else
+\typeout{NOT DRAFT - NO COMMENTS}
+\newcommand{\doccomment}[3]{}
+\fi
+
+% comments for individuals
+\newcommand{\jpscomment}[1]%
+{\doccomment{SCHEWE}{Bittersweet}{#1}}
 
 \title{FLL Tournament Scheduling}
 \author{Jon Schewe}
@@ -41,10 +62,10 @@
 \STATE $performanceDuration = 5$ - amount of time for a performance run for
 \STATE $subjectiveDuration = 20$ - amount of time to judge a subjective
 category for a team
-\COMMENT FIXME: need to figure out how to do constraints for state where we
-alternate tables
 \end{algorithmic}
 \end{algorithm}
+\jpscomment{FIXME: need to figure out how to do constraints for state where we
+alternate tables}
 
 \FloatBarrier
 \section{Subjective}
@@ -83,7 +104,7 @@ performance round
 \section{Team Constraints}
 These constraints are applied to each team $T$.
 
-FIXME: Need to figure out how to handle the conditional constraints here
+\jpscomment{FIXME: Need to figure out how to handle the conditional constraints here}
 \begin{algorithm}
 \caption{team:1 - Relationship between each subjective category}
 \begin{algorithmic}
@@ -126,14 +147,18 @@ FIXME: Need to figure out how to handle the conditional constraints here
 \caption{team:3 - Relationships between performance rounds}
 \begin{algorithmic}
 \FOR{$round \in 2 \dots NRounds$}
-  \STATE $P_{{N-1}_{end}} + performanceChangetime <= P_{N_{start}}$ \COMMENT FIXME: Note that if the opponent is in a different round $performanceChangeTime$ needs to be $specialPerformanceChangetime$
+  \STATE $P_{{N-1}_{end}} + performanceChangetime <= P_{N_{start}}$
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
+\jpscomment{FIXME: Note that if the opponent is in a different round
+  $performanceChangeTime$ needs to be
+  $specialPerformanceChangetime$. This can be ignored if we make sure
+  there's always an even number of teams (using a dummy).}
 
 
 \FloatBarrier
-FIXME: Need to figure out how to handle conditional here.
+\jpscomment{FIXME: Need to figure out how to handle conditional here.}
 \begin{algorithm}
 \caption{team:4 - Relationships between subjective categories judging and performance}
 \begin{algorithmic}
@@ -237,5 +262,16 @@ Possible solvers include:
 \item \url{http://choco.emn.fr/}{Choco}
 \item \url{http://jacop.osolpro.com/}{JaCoP} - implements Minizinc
 \end{itemize}
+
+\FloatBarrier
+\section{Issues}
+There are some issues to work out with these constraints.
+\begin{itemize}
+\item How to handle odd number of teams? Currently I'm thinking I'll just
+  add a dummy to make it even.
+\item How to handle alternating sets of tables for performance
+\item Conditionally adding constraints
+\end{itemize}
+
 
 \end{document}
