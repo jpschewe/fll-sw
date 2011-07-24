@@ -53,19 +53,16 @@
 \begin{algorithmic}
 \STATE $SOS$ - the start of the tournament (time 0)
 \STATE $TN$ - number of teams at the tournament
-\STATE $TN_{N}$ - number of division $N$ teams
 \STATE $T_{0}, T_{1}, \dots, T_{n}$ - teams
 \STATE $div(T_{0})$ - division of team 0
 \STATE $P(T_{0}, 1)$ - performance time for team 0 round 1
 \STATE $S(T_{0}, cat)$ - subjective time for team 0 subjective category $cat$
 \STATE $changetime = 15$ - time between events
-\STATE $performanceDuration = 5$ - amount of time for a performance run for
+\STATE $performanceDuration = 5$ - amount of time for a performance run
 \STATE $subjectiveDuration = 20$ - amount of time to judge a subjective
 category for a team
 \end{algorithmic}
 \end{algorithm}
-\jpscomment{FIXME: need to figure out how to do constraints for state where we
-alternate tables}
 
 \FloatBarrier
 \section{Subjective}
@@ -90,13 +87,10 @@ $div$ (typically 1 for regional, more for state)
 \begin{algorithmic}
 \STATE $TableN$ - number of tables
 \STATE $performanceStart = SOS + 60$ - give time for teams to get settled
-\STATE $PN = ceil(TN / 2) / TableN$ - number of time slots for each
-performance round
 \STATE $NRounds$ - the number of performance rounds (typically 3)
 \STATE $performanceChangetime = 45$ - time between performance rounds
 %\STATE $specialPerformanceChangetime = 30$ - time between performance
 %rounds for teams with opponents in a different round
-\STATE $NDivs = 2$ - number of divisions
 \end{algorithmic}
 \end{algorithm}
 
@@ -104,7 +98,6 @@ performance round
 \section{Team Constraints}
 These constraints are applied to each team $T$.
 
-\jpscomment{FIXME: Need to figure out how to handle the conditional constraints here}
 \begin{algorithm}
 \caption{team:1 - Relationship between each subjective category}
 \begin{algorithmic}
@@ -126,10 +119,10 @@ These constraints are applied to each team $T$.
 \caption{team:2 - Basic performance constraints}
 \begin{algorithmic}
 \FOR{$round \in 1 \dots NRounds$}
-  \STATE $P(T, N)_{end} = P(T, N)_{start} + performanceDuration$
+  \STATE $P(T, round)_{end} = P(T, round)_{start} + performanceDuration$
 \ENDFOR
 \FOR{$round \in 2 \dots NRounds$}
-  \STATE $P(T, N-1)_{end} + performanceChangetime <= P(T, N)_{start}$
+  \STATE $P(T, round-1)_{end} + performanceChangetime <= P(T, round)_{start}$
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
@@ -147,24 +140,19 @@ These constraints are applied to each team $T$.
 \caption{team:3 - Relationships between performance rounds}
 \begin{algorithmic}
 \FOR{$round \in 2 \dots NRounds$}
-  \STATE $P_{{N-1}_{end}} + performanceChangetime <= P_{N_{start}}$
+  \STATE $P(T, round-1)_{end} + performanceChangetime <= P(T, round)_{start}$
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
-\jpscomment{FIXME: Note that if the opponent is in a different round
-  $performanceChangeTime$ needs to be
-  $specialPerformanceChangetime$. This can be ignored if we make sure
-  there's always an even number of teams (using a dummy).}
 
 
 \FloatBarrier
-\jpscomment{FIXME: Need to figure out how to handle conditional here.}
 \begin{algorithm}
 \caption{team:4 - Relationships between subjective categories judging and performance}
 \begin{algorithmic}
 \FOR{$category \in SubjectiveCategories$}
-  \FOR{$round \in 1 \dots nRounds$}
-    \IF{$category_{end} <= P_{round_{start}}$}
+  \FOR{$round \in 1 \dots NRounds$}
+    \IF{$category_{end} <= P(T, round)_{start}$}
       \STATE $S(T, category)_{end} + changetime <= P(T, round)_{start}$
     \ELSE
       \STATE $P(T, round)_{end} + changetime <= S(T, category)_{start}$
@@ -178,9 +166,9 @@ These constraints are applied to each team $T$.
 \caption{team:5 - Each team should always compete against other teams}
 \begin{algorithmic}
 \FOR{$round \in 1 \dots NRounds$}
-  \STATE $opp = opponent(P_round)$
+  \STATE $opp = opponent(T, round)$
   \FOR{$r \in round+1 \dots NRounds$}
-    \STATE $opp != opponent(P_r)$
+    \STATE $opp != opponent(P, r)$
   \ENDFOR
 \ENDFOR
 \end{algorithmic}
@@ -197,11 +185,11 @@ These constraints pertain to the tournament as a whole.
 \begin{algorithmic}
 
 \STATE $teamsAtTime = []$
-\FORALL{$T \in teams$}
-  \FORALL{$i \in 1 \dots NRounds$}
+\FOR{$T \in teams$}
+  \FOR{$i \in 1 \dots NRounds$}
     \STATE $teamsAtTime[T_{P_{i_{start}}}].append(T)$
   \ENDFOR
-  \FORALL{$key \in teamsAtTime.keys()$}
+  \FOR{$key \in teamsAtTime.keys()$}
     \IF{$teamsAtTime[key].size() > PN$}
       \STATE BACKTRACK - perhaps can make this a constraint?
     \ENDIF
@@ -214,15 +202,15 @@ These constraints pertain to the tournament as a whole.
 \begin{algorithm}
 \caption{tournament:2 - Limit the number of teams at a subjective judging station}
 \begin{algorithmic}
-\FORALL{$cat \in SubjectiveCategories$}
-  \FORALL{$div \in divisions$}
+\FOR{$cat \in SubjectiveCategories$}
+  \FOR{$div \in divisions$}
     \STATE $teamsAtTime_{cat,div} = []$
   \ENDFOR
-  \FORALL{$T \in teams$}
+  \FOR{$T \in teams$}
     \STATE $teamsAtTime_{cat,div(T)}[T_{cat_{start}}].append(T)$
   \ENDFOR
-  \FORALL{$div \in divisions$}
-    \FORALL{$key \in teamsAtTime_{cat,div}.keys()$}
+  \FOR{$div \in divisions$}
+    \FOR{$key \in teamsAtTime_{cat,div}.keys()$}
       \IF{$teamsAtTime_{cat,div}[key].size() > JN_{cat,div}$}
         \STATE BACKTRACK - perhaps can make this a constraint?
       \ENDIF
@@ -235,8 +223,8 @@ These constraints pertain to the tournament as a whole.
 \begin{algorithm}
 \caption{tournament:3 - make sure subjective judging start after $subjectiveStart$}
 \begin{algorithmic}
-\FORALL{$T \in teams$}
-  \FORALL{$cat \in SubjectiveCategories$}
+\FOR{$T \in teams$}
+  \FOR{$cat \in SubjectiveCategories$}
     \STATE $S(T, cat) >= subjectiveStart$
   \ENDFOR
 \ENDFOR
@@ -247,7 +235,7 @@ These constraints pertain to the tournament as a whole.
 \caption{tournament:4 - make sure performance starts after
 $performanceStart$.}
 \begin{algorithmic}
-\FORALL{$T \in teams$}
+\FOR{$T \in teams$}
   \STATE $P(T, 1) >= performanceStart$
 \ENDFOR
 \end{algorithmic}
@@ -271,6 +259,11 @@ There are some issues to work out with these constraints.
   add a dummy to make it even.
 \item How to handle alternating sets of tables for performance
 \item Conditionally adding constraints
+\item Can the number of teams in a subjective judging category at the same
+  time be handled as a constraint? Probably an all different constraint,
+  although how to handle multiple judges for the same group of teams?
+  Perhaps put in judging group up front?
+\item Can the number of teams at a performance table be handled directly?
 \end{itemize}
 
 
