@@ -13,7 +13,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.thoughtworks.selenium.SeleneseTestCase;
+import com.thoughtworks.selenium.SeleneseTestBase;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
@@ -23,7 +23,7 @@ import fll.web.IntegrationTestUtils;
 /**
  * Test things about the playoffs.
  */
-public class TestPlayoffs extends SeleneseTestCase {
+public class TestPlayoffs extends SeleneseTestBase {
 
   @Before
   @Override
