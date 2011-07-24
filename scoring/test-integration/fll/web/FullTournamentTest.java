@@ -64,7 +64,6 @@ public class FullTournamentTest extends SeleneseTestCase {
     LogUtils.initializeLogging();
     super.setUp(TestUtils.URL_ROOT
         + "setup");
-    IntegrationTestUtils.login(selenium);
   }
 
   /**

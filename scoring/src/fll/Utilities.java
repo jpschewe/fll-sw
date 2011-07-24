@@ -302,7 +302,7 @@ public final class Utilities {
 
   /**
    * Test that the database behind the connection is initialized. Checks for the
-   * existance of the TournamentParameters tables.
+   * existence of the TournamentParameters tables.
    * 
    * @param connection the connection to check
    * @return true if the database is initialized

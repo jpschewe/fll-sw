@@ -110,6 +110,7 @@ public final class IntegrationTestUtils {
         final boolean userSuccess = selenium.isTextPresent("Successfully created user");
         Assert.assertTrue("Problem creating user", userSuccess);
 
+        login(selenium);
       } finally {
         if (!challengeFile.delete()) {
           challengeFile.deleteOnExit();
@@ -163,6 +164,7 @@ public final class IntegrationTestUtils {
           dumpFile.deleteOnExit();
         }
       }
+      login(selenium);
     } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;

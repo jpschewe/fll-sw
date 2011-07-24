@@ -31,7 +31,6 @@ public class SlideshowTest extends SeleneseTestCase {
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
     super.setUp(TestUtils.URL_ROOT + "/setup");
-    IntegrationTestUtils.login(selenium);
   }
 
   /**
