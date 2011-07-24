@@ -163,6 +163,8 @@ public class FullTournamentTest extends SeleneseTestCase {
         while (rs.next()) {
           final int teamNumber = rs.getInt(1);
           enterPerformanceScore(testDataConn, performanceElement, testTournamentName, runNumber, teamNumber);
+          // give the web server a chance to catch up
+          Thread.sleep(100);
           verifyPerformanceScore(testDataConn, performanceElement, testTournamentName, runNumber, teamNumber);
         }
 
