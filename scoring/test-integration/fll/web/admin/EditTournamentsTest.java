@@ -14,7 +14,7 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.thoughtworks.selenium.SeleneseTestCase;
+import com.thoughtworks.selenium.SeleneseTestBase;
 
 import fll.TestUtils;
 import fll.util.LogUtils;
@@ -24,7 +24,7 @@ import fll.web.IntegrationTestUtils;
 /**
  * Test editing the tournaments list
  */
-public class EditTournamentsTest extends SeleneseTestCase {
+public class EditTournamentsTest extends SeleneseTestBase {
 
   @Before
   @Override
