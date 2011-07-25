@@ -6,7 +6,7 @@ import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.thoughtworks.selenium.SeleneseTestCase;
+import com.thoughtworks.selenium.SeleneseTestBase;
 
 import fll.TestUtils;
 import fll.util.LogUtils;
@@ -14,7 +14,7 @@ import fll.util.LogUtils;
 /**
  * Test initializing the database via the web.
  */
-public class InitializeDatabaseTest extends SeleneseTestCase {
+public class InitializeDatabaseTest extends SeleneseTestBase {
 
   @Before
   @Override

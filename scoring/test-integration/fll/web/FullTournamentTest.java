@@ -39,7 +39,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebForm;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.thoughtworks.selenium.SeleneseTestCase;
+import com.thoughtworks.selenium.SeleneseTestBase;
 
 import fll.TestUtils;
 import fll.Tournament;
@@ -54,7 +54,7 @@ import fll.xml.XMLUtils;
 /**
  * Test a full tournament.
  */
-public class FullTournamentTest extends SeleneseTestCase {
+public class FullTournamentTest extends SeleneseTestBase {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -64,7 +64,6 @@ public class FullTournamentTest extends SeleneseTestCase {
     LogUtils.initializeLogging();
     super.setUp(TestUtils.URL_ROOT
         + "setup");
-    IntegrationTestUtils.login(selenium);
   }
 
   /**
@@ -164,6 +163,8 @@ public class FullTournamentTest extends SeleneseTestCase {
         while (rs.next()) {
           final int teamNumber = rs.getInt(1);
           enterPerformanceScore(testDataConn, performanceElement, testTournamentName, runNumber, teamNumber);
+          // give the web server a chance to catch up
+          Thread.sleep(100);
           verifyPerformanceScore(testDataConn, performanceElement, testTournamentName, runNumber, teamNumber);
         }
 

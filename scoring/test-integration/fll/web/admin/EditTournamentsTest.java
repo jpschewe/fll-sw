@@ -14,7 +14,7 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.thoughtworks.selenium.SeleneseTestCase;
+import com.thoughtworks.selenium.SeleneseTestBase;
 
 import fll.TestUtils;
 import fll.util.LogUtils;
@@ -24,14 +24,13 @@ import fll.web.IntegrationTestUtils;
 /**
  * Test editing the tournaments list
  */
-public class EditTournamentsTest extends SeleneseTestCase {
+public class EditTournamentsTest extends SeleneseTestBase {
 
   @Before
   @Override
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
     super.setUp(TestUtils.URL_ROOT + "setup");
-    IntegrationTestUtils.login(selenium);    
   }
 
   @Test
