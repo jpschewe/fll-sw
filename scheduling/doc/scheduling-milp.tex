@@ -1,0 +1,140 @@
+\documentclass[letterpaper,11pt]{report}
+\usepackage{fullpage}
+\usepackage{float}
+\usepackage{alltt}
+
+\usepackage[table,usenames,dvipsnames]{xcolor}
+
+% FloatBarrier
+\usepackage{placeins}
+
+% html links
+\usepackage{hyperref}
+
+% algorithm environment for pseudocode 
+\usepackage{algorithm}
+\usepackage{algorithmic}
+%\floatname{algorithm}{}
+
+% draft - include comments as footnotes and marginpars
+\newif\ifdraft
+\drafttrue
+\ifdraft
+\typeout{DRAFT - WITH COMMENTS}
+\newcommand{\doccomment}[3]%
+{\marginpar{\textcolor{#2}{\bf #1}}%
+%\footnote{\textcolor{#2}{#3}}%
+\footnote{{\color{#2}#3}}%
+}
+\else
+\typeout{NOT DRAFT - NO COMMENTS}
+\newcommand{\doccomment}[3]{}
+\fi
+
+% comments for individuals
+\newcommand{\jpscomment}[1]%
+{\doccomment{SCHEWE}{Bittersweet}{#1}}
+
+\title{FLL Tournament Scheduling (MILP formulation)}
+\author{Jon Schewe}
+
+\begin{document}
+\maketitle
+
+% Note: the captions on the algorithms are used in the comments for the
+% constraints in the Java scheduler and verifier. The portion
+% before the ":" is in the Java.
+\chapter{FLL Scheduling Constraints}
+
+\section{Definitions}
+\begin{itemize}
+
+\item[$T$] Time, in increments of 1 minute
+\item[$TMax$] Maximum timeslot, $t \in 1 \dots TMax$  
+\item[$NSubjective$] The number of subjective judging stations
+\item[$NRounds$] The number of performance rounds
+\item[$NTables$] The number of performance tables
+\item[$subjective_{i}$] Subjective judging station $i$ ($1 \dots NSubjective$)
+\item[$p_{r,b,s}$] Table side $s$ (1 or 2) of table $b$ ($1 \dots NTables$) for
+  round $r$ ($1 \dots NRounds$)
+
+\item[$M$] The set of places that each team is judged, includes all of
+  \begin{itemize}
+  \item[S] $subjective_{i}$ All subjective judging stations
+  \item[P] $p_{r,b,s}$ All performance judging stations 
+  \end{itemize}
+
+\item[$N$] All teams \jpscomment{Need to have a subscript for each judging
+    group}
+
+\item[$y_{t}^{i,m}$] The status of judging station $m$ at time $t$ for team
+  $i$, 1 if the team is using the station at the specified time, 0 otherwise.
+
+\item[$z_{t}^{i,m}$] 1 if team $i$ is starting judging at station $m$ at
+  time $t$, 0 otherwise.
+ 
+\item[$\alpha^{m}$] Number of time units that judging at station $m$
+  takes. All subjective judging takes 20 minutes, performance judging is 5
+  minutes. \jpscomment{Note that this changes when we alternate tables at state}
+
+\item[$ct$] Time to change between judging stations. Typically set to 15
+  minutes.
+\item[$pct$] Time between performance runs. Typically set to 45
+  minutes. \jpscomment{For odd numbered tournaments may be reduced to 30
+    minutes}
+
+
+\end{itemize}
+
+\section{Constraints}
+
+\subsection{Keep judging station $m$ busy while team $i$ is using it.}
+$\sum\limits_{u=1}^{\alpha^{m}} z_{t-u+1}^{i,m} \le y_{t}^{i,m}$
+\hfill $\forall m \in M, i \in N, t \in T$
+
+\subsection{Note the start of judging at a station upon team transition.}
+$z_{t}^{i,m} \ge y_{t}^{i,m} - y{t-1}^{i,m}$
+\hfill $\forall m \in M, t \in T, i \in N$
+
+\subsection{Ensure that only 1 team ($i$) is at judging station $m$ at a given time
+($t$).}
+$\sum\limits_{i \in N_{m}} y_{t}^{i,m} = 1$          
+\hfill $\forall m \in M, t \in T$
+
+\subsection{Each team must appear at each station at most once.}
+$\sum\limits_{t} z_{t}^{i,m} \le 1$
+\hfill $\forall m \in M, t \in T, i \in N$
+
+\subsection{Enforce change time.}
+$y_{t+u}^{i,n} \le 1 - y{t}^{i,m}$
+\hfill $\forall m \in M, 0 \le u \le \alpha^{m} + ct, n \in M \wedge n \neq m$
+
+\subsection{Enforce performance change time.}
+$y_{t+u}^{i,n} \le 1 - y{t}^{i,m}$
+\hfill $\forall m \in P, 0 \le u \le \alpha^{m} + pct, n \in P \wedge n \neq m$
+
+\subsection{Each team must be judged in each performance once.}
+$\sum\limits_{m \in P} \sum\limits_{t} z_{t}^{i,m}$
+\hfill $\forall t \in T, i \in N$
+
+
+\subsection{Each team must be judged in at all stations.}
+$\sum\limits_{m \in M} \sum\limits_{t \in T} z_{t}^{i,m} = NSubjective +
+NRounds$
+\hfill $\forall i \in N$
+
+\section{Breaks}
+\subsection{Start the performance rounds 60 minutes into the day.}
+$\sum\limits_{m \in P} \sum\limits_{t = 1}^{60} y_{t}^{i,m} = 0$
+
+\subsection{Other Breaks}
+Need to add in lunch breaks for subjective and a break after the first few
+performance runs. \jpscomment{Not sure how I want to do this yet.}
+
+\section{Objective function}
+Make everything as early as possible.
+$Min \sum\limits_{m \in M} \sum\limits_{i \in N} \sum\limits_{t \in T}
+y_{t}^{i,m} t$
+
+
+\end{document}
