@@ -98,7 +98,7 @@ $\sum\limits_{u=1}^{\alpha^{m}} z_{t-u+1}^{i,m} \le y_{t}^{i,m}$
 \hfill $\forall m \in M, i \in N, t \in T$
 
 \subsection{Note the start of judging at a station upon team transition.}
-$z_{t}^{i,m} \ge y_{t}^{i,m} - y{t-1}^{i,m}$
+$z_{t}^{i,m} \ge y_{t}^{i,m} - y_{t-1}^{i,m}$
 \hfill $\forall m \in M, t \in T, i \in N$
 
 \subsection{Ensure that only 1 team ($i$) is at judging station $m$ at a given time
@@ -111,19 +111,19 @@ $\sum\limits_{t} z_{t}^{i,m} \le 1$
 \hfill $\forall m \in M, t \in T, i \in N$
 
 \subsection{Enforce change time.}
-$y_{t+u}^{i,n} \le 1 - y{t}^{i,m}$
+$y_{t+u}^{i,n} \le 1 - y_{t}^{i,m}$
 \hfill $\forall m \in M, 0 \le u \le \alpha^{m} + ct, n \in M \wedge n \neq m$
 
 \subsection{Enforce performance change time.}
-$y_{t+u}^{i,n} \le 1 - y{t}^{i,m}$
+$y_{t+u}^{i,n} \le 1 - y_{t}^{i,m}$
 \hfill $\forall m \in P, 0 \le u \le \alpha^{m} + pct, n \in P \wedge n \neq m$
 
 \subsection{Each team must be judged in each performance once.}
-$\sum\limits_{m \in P} \sum\limits_{t} z_{t}^{i,m}$
+$\sum\limits_{m \in P} \sum\limits_{t \in T} z_{t}^{i,m} = 1$
 \hfill $\forall t \in T, i \in N$
 
 
-\subsection{Each team must be judged in at all stations.}
+\subsection{Each team must be judged in all categories.}
 $\sum\limits_{m \in M} \sum\limits_{t \in T} z_{t}^{i,m} = NSubjective +
 NRounds$
 \hfill $\forall i \in N$
