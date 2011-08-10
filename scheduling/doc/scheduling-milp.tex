@@ -54,18 +54,23 @@
 \item[$NSubjective$] The number of subjective judging stations
 \item[$NRounds$] The number of performance rounds
 \item[$NTables$] The number of performance tables
-\item[$subjective_{i}$] Subjective judging station $i$ ($1 \dots NSubjective$)
+\item[$NGroups$] The number of judging groups, typically 2
+\item[$subjective_{i,n}$] Subjective judging station $i$ ($1 \dots
+  NSubjective$) for judging group $n$ ($1 \dots NGroups$)
 \item[$p_{r,b,s}$] Table side $s$ (1 or 2) of table $b$ ($1 \dots NTables$) for
   round $r$ ($1 \dots NRounds$)
 
+\item[$G_{g}$] The teams in judging group $g$
+\item[$N$] All teams = ($G_{1}, G_{2}, \dots, G_{NGroups}$)
+
 \item[$M$] The set of places that each team is judged, includes all of
   \begin{itemize}
-  \item[S] $subjective_{i}$ All subjective judging stations
-  \item[P] $p_{r,b,s}$ All performance judging stations 
+  \item[$S_{g}$] All subjective judging stations for
+    judging group g = ($subjective_{i, g} \forall i \in G_{g}$)
+  \item[$P$] All performance judging stations = ($p_{r,b,s} \forall r,
+    \forall b, \forall s$)
   \end{itemize}
 
-\item[$N$] All teams \jpscomment{Need to have a subscript for each judging
-    group}
 
 \item[$y_{t}^{i,m}$] The status of judging station $m$ at time $t$ for team
   $i$, 1 if the team is using the station at the specified time, 0 otherwise.
@@ -98,7 +103,7 @@ $z_{t}^{i,m} \ge y_{t}^{i,m} - y{t-1}^{i,m}$
 
 \subsection{Ensure that only 1 team ($i$) is at judging station $m$ at a given time
 ($t$).}
-$\sum\limits_{i \in N_{m}} y_{t}^{i,m} = 1$          
+$\sum\limits_{i \in N} y_{t}^{i,m} = 1$          
 \hfill $\forall m \in M, t \in T$
 
 \subsection{Each team must appear at each station at most once.}
@@ -122,6 +127,13 @@ $\sum\limits_{m \in P} \sum\limits_{t} z_{t}^{i,m}$
 $\sum\limits_{m \in M} \sum\limits_{t \in T} z_{t}^{i,m} = NSubjective +
 NRounds$
 \hfill $\forall i \in N$
+
+\subsection{Judging groups}
+Each team is only judged at the subjective stations for their judging
+group.
+
+$z_{t}^{i,m} = 0, y_{t}^{i,m} = 0$
+\hfill $\forall m \in S_{n}, \forall i \in G_{g} \wedge g \neq n$
 
 \section{Breaks}
 \subsection{Start the performance rounds 60 minutes into the day.}
