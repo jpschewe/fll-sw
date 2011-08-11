@@ -49,43 +49,40 @@
 \section{Definitions}
 \begin{itemize}
 
-\item[$T$] Time, in increments of 1 minute
-\item[$TMax$] Maximum timeslot, $t \in 1 \dots TMax$  
+\item[$TMax$] Maximum timeslot
+\item[$TInc$] Number of minutes to a slot, typically 5
+\item[$T$] Time, in increments of $TInc$ minutes, $t \in 1 \dots TMax$
 \item[$NSubjective$] The number of subjective judging stations
 \item[$NRounds$] The number of performance rounds
 \item[$NTables$] The number of performance tables
 \item[$NGroups$] The number of judging groups, typically 2
-\item[$subjective_{i,n}$] Subjective judging station $i$ ($1 \dots
-  NSubjective$) for judging group $n$ ($1 \dots NGroups$)
-\item[$p_{r,b,s}$] Table side $s$ (1 or 2) of table $b$ ($1 \dots NTables$) for
-  round $r$ ($1 \dots NRounds$)
 
 \item[$G_{g}$] The teams in judging group $g$
 \item[$N$] All teams = ($G_{1}, G_{2}, \dots, G_{NGroups}$)
 
-\item[$M$] The set of places that each team is judged, includes all of
-  \begin{itemize}
-  \item[$S_{g}$] All subjective judging stations for
-    judging group g = ($subjective_{i, g} \forall i \in G_{g}$)
-  \item[$P$] All performance judging stations = ($p_{r,b,s} \forall r,
-    \forall b, \forall s$)
-  \end{itemize}
+\item[$py_{t}^{i,b,s}$] The status of performance table $b$ side $s$ for
+at  time $t$ for team $i$. 1 if the table is in use.  
 
+\item[$pz_{t}^{i,b,s}$] 1 if team $i$ is starting performance on table $b$,
+  side $s$ at time $t$.
 
-\item[$y_{t}^{i,m}$] The status of judging station $m$ at time $t$ for team
-  $i$, 1 if the team is using the station at the specified time, 0 otherwise.
+\item[$sy_{t}^{i,n}$] The status of subjective judging station $n$ at time $t$ for team
+  $i$, 1 if the station is in use.
 
-\item[$z_{t}^{i,m}$] 1 if team $i$ is starting judging at station $m$ at
-  time $t$, 0 otherwise.
- 
-\item[$\alpha^{m}$] Number of time units that judging at station $m$
-  takes. All subjective judging takes 20 minutes, performance judging is 5
-  minutes. \jpscomment{Note that this changes when we alternate tables at state}
+\item[$sz_{t}^{i,n}$] 1 if team $i$ is starting judging at subjective
+judging station $n$ at time $t$.
 
-\item[$ct$] Time to change between judging stations. Typically set to 15
-  minutes.
-\item[$pct$] Time between performance runs. Typically set to 45
-  minutes. \jpscomment{For odd numbered tournaments may be reduced to 30
+\item[$\alpha^{subjective}$] Number of time units that subjective judging
+  takes. $\alpha^{subjective} = 20 / TInc$
+
+\item[$\alpha^{performance}$] Number of time units that performance judging
+  takes. $\alpha^{subjective} = 5 / TInc$ \jpscomment{Note that this
+changes when we alternate tables at state}
+
+\item[$ct$] Time to change between judging stations, in time increments. Typically set to 15
+  minutes. $ct = 15/TInc$
+\item[$pct$] Time between performance runs, in time increments. Typically set to 45
+  minutes. $ct = 45/TInc$ \jpscomment{For odd numbered tournaments may be reduced to 30
     minutes}
 
 
@@ -93,51 +90,109 @@
 
 \section{Constraints}
 
-\subsection{Keep judging station $m$ busy while team $i$ is using it.}
-$\sum\limits_{u=1}^{\alpha^{m}} z_{t-u+1}^{i,m} \le y_{t}^{i,m}$
-\hfill $\forall m \in M, i \in N, t \in T$
+\subsection{Keep each judging station busy while team $i$ is using it.}
+
+$\sum\limits_{u=1}^{\alpha^{subjective}} sz_{t-u+1}^{i,n} \le sy_{t}^{i,n}$
+\hfill $\forall t \in T,  \forall i \in N,
+\forall n \in 1 \dots NSubjective$
+
+$\sum\limits_{u=1}^{\alpha^{performance}} pz_{t-u+1}^{i,b,s} \le py_{t}^{i,b,s}$
+\hfill $\forall t \in T, \forall i \in N, \forall b \in 1 \dots NTables,
+\forall s \in 1 \dots 2$
+
 
 \subsection{Note the start of judging at a station upon team transition.}
-$z_{t}^{i,m} \ge y_{t}^{i,m} - y_{t-1}^{i,m}$
-\hfill $\forall m \in M, t \in T, i \in N$
+$sz_{t}^{i,n} \ge sy_{t}^{i,n} - sy_{t-1}^{i,n}$
+\hfill $\forall t \in T, \forall i \in N,
+\forall n \in 1 \dots NSubjective$
 
-\subsection{Ensure that only 1 team ($i$) is at judging station $m$ at a given time
-($t$).}
-$\sum\limits_{i \in N} y_{t}^{i,m} \le 1$          
-\hfill $\forall m \in M, t \in T$
+$pz_{t}^{i,b,sn} \ge py_{t}^{i,b,s} - py_{t-1}^{i,b,s}$
+\hfill $\forall t \in T, \forall i \in N, \forall b \in 1 \dots NTables,
+\forall s \in 1 \dots 2$
 
-\subsection{Each team must appear at each station at most once.}
-$\sum\limits_{t} z_{t}^{i,m} \le 1$
-\hfill $\forall m \in M, t \in T, i \in N$
+
+\subsection{Ensure that only 1 team ($i$) is at each judging station at a
+given time ($t$).}
+
+$\sum\limits_{i \in G_{g}} sy_{t}^{i,n} \le 1$          
+\hfill $\forall t \in T, \forall g \in 1 \dots NGroups,
+\forall n \in 1 \dots NSubjective$
+
+$\sum\limits_{i \in N} py_{t}^{i,b,s} \le 1$          
+\hfill $\forall t \in T, \forall b \in 1 \dots NTables,
+\forall s \in 1 \dots 2$
+
+
+\subsection{Each team must appear at each subjective station once.}
+$\sum\limits_{t \in T} sz_{t}^{i,n} = 1$
+\hfill $\forall n \in 1 \dots NSubjective, i \in N$
+
+\subsection{Each team must appear in performance $NRounds$ times.}
+$\sum\limits_{t \in T} pz_{t}^{i,b,1} + pz_{t}^{i,b,2} = NRounds$
+\hfill $\forall i \in N, \forall b \in 1 \dots NTables$
+
 
 \subsection{Enforce change time.}
-$y_{t+u}^{i,n} \le 1 - y_{t}^{i,m}$
-\hfill $\forall m \in M, 0 \le u \le \alpha^{m} + ct, n \in M \wedge n \neq m$
+$sy_{t+u}^{i,d} \le 1 - sy_{t}^{i,n}$
+\hfill $\forall i \in N,
+\forall n \in 1 \dots NSubjective, 
+d \in 1 \dots NSubjective \wedge d \neq n,
+0 \le u \le \alpha^{subjective} + ct$
+
+$py_{t+u}^{i,b,s} \le 1 - sy_{t}^{i,n}$
+\hfill $\forall i \in N,
+\forall n \in 1 \dots NSubjective, 
+\forall b \in 1 \dots NTables,
+\forall s \in 1 \dots 2,
+0 \le u \le \alpha^{subjective}+ ct,$
+
+$py_{t+u}^{i,d,e} \le 1 - py_{t}^{i,b,s}$
+\hfill $\forall i \in N,
+\forall b \in 1 \dots NTables,
+\forall s \in 1 \dots 2,
+\forall d \in 1 \dots NTables \wedge d \neq b,
+\forall e \in 1 \dots 2 \wedge e \neq s,
+0 \le u \le \alpha^{performance}+ ct$
+
+$sy_{t+u}^{i,n} \le 1 - py_{t}^{i,b,s}$
+\hfill $\forall i \in N,
+\forall b \in 1 \dots NTables,
+\forall s \in 1 \dots 2,
+\forall n \in 1 \dots NSubjective
+0 \le u \le \alpha^{performance}+ ct$
+
 
 \subsection{Enforce performance change time.}
-$y_{t+u}^{i,n} \le 1 - y_{t}^{i,m}$
-\hfill $\forall m \in P, 0 \le u \le \alpha^{m} + pct, n \in P \wedge n \neq m$
+$\sum\limits_{b=1}^{NTables} (py_{t+u}^{i,b,1} + py_{t+u}^{i,b,2}) \le 1 - \sum\limits_{b=1}^{NTables} (py_{t}^{i,b,1} + py_{t}^{i,b,2})$
+\hfill $\forall i \in N, 
+0 \le u \le \alpha^{m} + pct$
 
-\subsection{Each team must be judged in each performance once.}
-$\sum\limits_{m \in P} \sum\limits_{t \in T} z_{t}^{i,m} = 1$
-\hfill $\forall t \in T, i \in N$
+
+\subsection{Make sure both sides of a table are always used if one side is
+  used.}
+$py_{t}^{i,b,1} - py_{t}^{i,b,2} \le 0$
+\hfill $\forall i \in N,
+\forall b \in 1 \dots NTables$
 
 
 \subsection{Each team must be judged in all categories.}
-$\sum\limits_{m \in M} \sum\limits_{t \in T} z_{t}^{i,m} = NSubjective +
-NRounds$
+$\sum\limits_{t \in T} ( 
+    \sum\limits_{n=1}^{NSubjective} sz_{t}^{i,n}  
+ + \sum\limits_{b=1}^{NTables} (pz{t}^{i,b,1} + pz{t}^{i,b,2})
+)
+= NSubjective + NRounds$
 \hfill $\forall i \in N$
+
 
 \subsection{Judging groups}
 Each team is only judged at the subjective stations for their judging
-group.
+group. This is handled by only constraining teams in the appropriate
+judging group to the appropriate judging station.
 
-$z_{t}^{i,m} = 0, y_{t}^{i,m} = 0$
-\hfill $\forall m \in S_{n}, \forall i \in G_{g} \wedge g \neq n$
 
 \section{Breaks}
 \subsection{Start the performance rounds 60 minutes into the day.}
-$\sum\limits_{m \in P} \sum\limits_{t = 1}^{60} y_{t}^{i,m} = 0$
+$\sum\limits_{i \in N} \sum\limits_{b=1}^{NTables} \sum\limits_{s=1}^{2} \sum\limits_{t = 1}^{60/TInc} py_{t}^{i,b,s} = 0$
 
 \subsection{Other Breaks}
 Need to add in lunch breaks for subjective and a break after the first few
@@ -145,8 +200,15 @@ performance runs. \jpscomment{Not sure how I want to do this yet.}
 
 \section{Objective function}
 Make everything as early as possible.
-$Min \sum\limits_{m \in M} \sum\limits_{i \in N} \sum\limits_{t \in T}
-y_{t}^{i,m} t$
 
+$Min ( 
+\sum\limits_{t \in T}
+  \sum\limits_{i \in N} (
+    \sum\limits_{n=1}^{NSubjective}
+      ( sy_{t}^{i,n} \times t )
+  + \sum\limits_{b=1}^{NTables} ( ( py_{t}^{i,b,1} + py_{t}^{i,b,2} )
+  \times t)
+  )
+) $
 
 \end{document}
