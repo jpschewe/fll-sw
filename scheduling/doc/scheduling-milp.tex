@@ -102,18 +102,18 @@ $\sum\limits_{u=1}^{\alpha^{performance}} pz_{t-u+1}^{i,b,s} \le py_{t}^{i,b,s}$
 
 
 \subsection{Note the start of judging at a station upon team transition.}
-$sz_{t}^{i,n} \ge sy_{t}^{i,n} - sy_{t-1}^{i,n}$
+$sy_{t}^{i,n} - sy_{t-1}^{i,n} \le sz_{t}^{i,n}$
 \hfill $\forall t \in T, \forall i \in N,
 \forall n \in 1 \dots NSubjective$
 
-$pz_{t}^{i,b,sn} \ge py_{t}^{i,b,s} - py_{t-1}^{i,b,s}$
+$py_{t}^{i,b,s} - py_{t-1}^{i,b,s} \le pz_{t}^{i,b,s}$
 \hfill $\forall t \in T, \forall i \in N, \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2$
 
 
 \subsection{Ensure that only 1 team ($i$) is at each judging station at a
 given time ($t$).}
-
+\label{judging_group_constraint}
 $\sum\limits_{i \in G_{g}} sy_{t}^{i,n} \le 1$          
 \hfill $\forall t \in T, \forall g \in 1 \dots NGroups,
 \forall n \in 1 \dots NSubjective$
@@ -128,25 +128,29 @@ $\sum\limits_{t \in T} sz_{t}^{i,n} = 1$
 \hfill $\forall n \in 1 \dots NSubjective, i \in N$
 
 \subsection{Each team must appear in performance $NRounds$ times.}
-$\sum\limits_{t \in T} pz_{t}^{i,b,1} + pz_{t}^{i,b,2} = NRounds$
+$\sum\limits_{t \in T} ( pz_{t}^{i,b,1} + pz_{t}^{i,b,2} ) = NRounds$
 \hfill $\forall i \in N, \forall b \in 1 \dots NTables$
 
 
 \subsection{Enforce change time.}
-$sy_{t+u}^{i,d} \le 1 - sy_{t}^{i,n}$
+
+\subsubsection{Subjective category $n$ to all other subjective categories}
+$sy_{t}^{i,n} + sy_{t+u}^{i,d} \le 1$
 \hfill $\forall i \in N,
 \forall n \in 1 \dots NSubjective, 
 d \in 1 \dots NSubjective \wedge d \neq n,
 0 \le u \le \alpha^{subjective} + ct$
 
-$py_{t+u}^{i,b,s} \le 1 - sy_{t}^{i,n}$
+\subsubsection{Subjective category $n$ to all performance stations}
+$sy_{t}^{i,n} + py_{t+u}^{i,b,s} \le 1$
 \hfill $\forall i \in N,
 \forall n \in 1 \dots NSubjective, 
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
 0 \le u \le \alpha^{subjective}+ ct,$
 
-$py_{t+u}^{i,d,e} \le 1 - py_{t}^{i,b,s}$
+\subsubsection{Performance on table $b$ side $s$ to all other performance stations}
+$py_{t}^{i,b,s} + py_{t+u}^{i,d,e} \le 1$
 \hfill $\forall i \in N,
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
@@ -154,7 +158,8 @@ $py_{t+u}^{i,d,e} \le 1 - py_{t}^{i,b,s}$
 \forall e \in 1 \dots 2 \wedge e \neq s,
 0 \le u \le \alpha^{performance}+ ct$
 
-$sy_{t+u}^{i,n} \le 1 - py_{t}^{i,b,s}$
+\subsubsection{Performance on table $b$ side $s$ to all subjective stations}
+$py_{t}^{i,b,s} + sy_{t+u}^{i,n} \le 1$
 \hfill $\forall i \in N,
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
@@ -163,7 +168,11 @@ $sy_{t+u}^{i,n} \le 1 - py_{t}^{i,b,s}$
 
 
 \subsection{Enforce performance change time.}
-$\sum\limits_{b=1}^{NTables} (py_{t+u}^{i,b,1} + py_{t+u}^{i,b,2}) \le 1 - \sum\limits_{b=1}^{NTables} (py_{t}^{i,b,1} + py_{t}^{i,b,2})$
+$
+\sum\limits_{b=1}^{NTables} (py_{t}^{i,b,1} + py_{t}^{i,b,2})
++
+\sum\limits_{b=1}^{NTables} (py_{t+u}^{i,b,1} + py_{t+u}^{i,b,2}) 
+\le 1$
 \hfill $\forall i \in N, 
 0 \le u \le \alpha^{m} + pct$
 
@@ -187,12 +196,14 @@ $\sum\limits_{t \in T} (
 \subsection{Judging groups}
 Each team is only judged at the subjective stations for their judging
 group. This is handled by only constraining teams in the appropriate
-judging group to the appropriate judging station.
+judging group to the appropriate judging station. See \autoref{judging_group_constraint}
 
 
 \section{Breaks}
 \subsection{Start the performance rounds 60 minutes into the day.}
-$\sum\limits_{i \in N} \sum\limits_{b=1}^{NTables} \sum\limits_{s=1}^{2} \sum\limits_{t = 1}^{60/TInc} py_{t}^{i,b,s} = 0$
+$\sum\limits_{i \in N} \sum\limits_{b=1}^{NTables} 
+    \sum\limits_{t = 1}^{60/TInc} 
+      ( py_{t}^{i,b,1} + py_{t}^{i,b,2} ) = 0$
 
 \subsection{Other Breaks}
 Need to add in lunch breaks for subjective and a break after the first few
