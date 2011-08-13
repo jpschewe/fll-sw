@@ -46,16 +46,35 @@
 % before the ":" is in the Java.
 \chapter{FLL Scheduling Constraints}
 
-\section{Definitions}
+\section{Parameters}
 \begin{itemize}
 
-\item[$TMax$] Maximum timeslot
 \item[$TInc$] Number of minutes to a slot, typically 5
-\item[$T$] Time, in increments of $TInc$ minutes, $t \in 1 \dots TMax$
+\item[$TMax$] Maximum timeslot, typically 8 hours. $(12 * 60)/TInc$
 \item[$NSubjective$] The number of subjective judging stations
 \item[$NRounds$] The number of performance rounds
 \item[$NTables$] The number of performance tables
 \item[$NGroups$] The number of judging groups, typically 2
+
+\item[$\alpha^{subjective}$] Number of time units that subjective judging
+  takes. $\alpha^{subjective} = 20 / TInc$
+
+\item[$\alpha^{performance}$] Number of time units that performance judging
+  takes. $\alpha^{subjective} = 5 / TInc$ \jpscomment{Note that this
+changes when we alternate tables at state}
+
+\item[$ct$] Time to change between judging stations, in time increments. Typically set to 15
+  minutes. $ct = 15/TInc$
+\item[$pct$] Time between performance runs, in time increments. Typically set to 45
+  minutes. $ct = 45/TInc$ \jpscomment{For odd numbered tournaments may be reduced to 30
+    minutes}
+
+\end{itemize}
+
+\section{Definitions}
+\begin{itemize}
+
+\item[$T$] Time, in increments of $TInc$ minutes, $t \in 1 \dots TMax$
 
 \item[$G_{g}$] The teams in judging group $g$
 \item[$N$] All teams = ($G_{1}, G_{2}, \dots, G_{NGroups}$)
@@ -72,21 +91,9 @@ at  time $t$ for team $i$. 1 if the table is in use.
 \item[$sz_{t}^{i,n}$] 1 if team $i$ is starting judging at subjective
 judging station $n$ at time $t$.
 
-\item[$\alpha^{subjective}$] Number of time units that subjective judging
-  takes. $\alpha^{subjective} = 20 / TInc$
-
-\item[$\alpha^{performance}$] Number of time units that performance judging
-  takes. $\alpha^{subjective} = 5 / TInc$ \jpscomment{Note that this
-changes when we alternate tables at state}
-
-\item[$ct$] Time to change between judging stations, in time increments. Typically set to 15
-  minutes. $ct = 15/TInc$
-\item[$pct$] Time between performance runs, in time increments. Typically set to 45
-  minutes. $ct = 45/TInc$ \jpscomment{For odd numbered tournaments may be reduced to 30
-    minutes}
-
 
 \end{itemize}
+
 
 \section{Constraints}
 
