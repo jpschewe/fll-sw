@@ -142,6 +142,8 @@
 		<pathelement location="${dir.lib}/serializer.jar" />
 		<pathelement location="${dir.lib}/xalan.jar" />
 
+		<!-- Constraint library for scheduling -->
+		<pathelement location="${dir.lib}/JaCoP-3.1.1.jar" />
 
 		<!-- tomcat libraries -->
 		<pathelement location="${dir.tomcat.src}/lib/servlet-api.jar" />
