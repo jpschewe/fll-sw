@@ -140,24 +140,15 @@ public class TournamentSchedule implements Serializable {
     }
   };
 
-  public static final long SECONDS_PER_MINUTE = 60;
+  private long performanceDuration = Utilities.convertMinutesToMilliseconds(SchedParams.DEFAULT_PERFORMANCE_MINUTES);
 
-  public static final long MILLISECONDS_PER_SECOND = 1000;
+  private long subjectiveDuration = Utilities.convertMinutesToMilliseconds(SchedParams.DEFAULT_SUBJECTIVE_MINUTES);
 
-  private long performanceDuration = 5
-      * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
+  private long changetime = Utilities.convertMinutesToMilliseconds(SchedParams.DEFAULT_CHANGETIME_MINUTES);
 
-  private long subjectiveDuration = 20
-      * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
+  private long performanceChangetime = Utilities.convertMinutesToMilliseconds(SchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
 
-  private long changetime = 15
-      * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
-
-  private long performanceChangetime = 45
-      * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
-
-  private long specialPerformanceChangetime = 30
-      * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
+  private long specialPerformanceChangetime = Utilities.convertMinutesToMilliseconds(30);
 
   private final HashMap<Date, Map<String, List<TeamScheduleInfo>>> _matches = new HashMap<Date, Map<String, List<TeamScheduleInfo>>>();
 
@@ -1228,7 +1219,7 @@ public class TournamentSchedule implements Serializable {
         + getPerformanceDuration() + changetime > ti.getPerf(1).getTime()) {
       final String message = String.format("Team %d doesn't have enough time (%d minutes) between performance 1 and performance 2: %s - %s",
                                            ti.getTeamNumber(), changetime
-                                               / 1000 / SECONDS_PER_MINUTE,
+                                               / 1000 / Utilities.SECONDS_PER_MINUTE,
                                            OUTPUT_DATE_FORMAT.get().format(ti.getPerf(0)),
                                            OUTPUT_DATE_FORMAT.get().format(ti.getPerf(1)));
       violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(1), message));
@@ -1244,7 +1235,7 @@ public class TournamentSchedule implements Serializable {
         + getPerformanceDuration() + getPerformanceChangetime() > ti.getPerf(2).getTime()) {
       final String message = String.format("Team %d doesn't have enough time (%d minutes) between performance 2 and performance 3: %s - %s",
                                            ti.getTeamNumber(), changetime
-                                               / 1000 / SECONDS_PER_MINUTE,
+                                               / 1000 / Utilities.SECONDS_PER_MINUTE,
                                            OUTPUT_DATE_FORMAT.get().format(ti.getPerf(1)),
                                            OUTPUT_DATE_FORMAT.get().format(ti.getPerf(2)));
       violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(2), message));
@@ -1337,7 +1328,7 @@ public class TournamentSchedule implements Serializable {
               + getPerformanceDuration() + getPerformanceChangetime() > ti.getPerf(round + 1).getTime()) {
             final String message = String.format("Team %d doesn't have enough time (%d minutes) between performance %d and performance extra: %s - %s",
                                                  ti.getTeamNumber(), changetime
-                                                     / 1000 / SECONDS_PER_MINUTE, round,
+                                                     / 1000 / Utilities.SECONDS_PER_MINUTE, round,
                                                  OUTPUT_DATE_FORMAT.get().format(next.getPerf(round)),
                                                  OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round + 1)));
             violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(round + 1), message));
@@ -1508,7 +1499,7 @@ public class TournamentSchedule implements Serializable {
 
   public long getChangetimeAsMinutes() {
     return getChangetime()
-        / SECONDS_PER_MINUTE / MILLISECONDS_PER_SECOND;
+        / Utilities.SECONDS_PER_MINUTE / Utilities.MILLISECONDS_PER_SECOND;
   }
 
   /**
