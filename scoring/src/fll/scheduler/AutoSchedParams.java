@@ -14,7 +14,7 @@ import fll.Utilities;
 /**
  * Parameters for the scheduler.
  */
-public class SchedParams {
+public class AutoSchedParams {
 
   public static final int DEFAULT_TINC = 5;
   public static final int DEFAULT_MAX_HOURS = 8;
@@ -44,7 +44,7 @@ public class SchedParams {
    * @throws InconsistentSchedParams if one of the specified times isn't a
    *           multiple of tinc
    */
-  public SchedParams(final int tinc,
+  public AutoSchedParams(final int tinc,
                      final int maxHours,
                      final int nsubjective,
                      final int nrounds,
