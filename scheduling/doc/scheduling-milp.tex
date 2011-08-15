@@ -56,8 +56,8 @@
 \item[$NTables$] The number of performance tables
 \item[$NGroups$] The number of judging groups, typically 2
 
-\item[$\alpha^{subjective}$] Number of time units that subjective judging
-  takes. $\alpha^{subjective} = 20 / TInc$
+\item[$\alpha^{subjective_{n}}$] Number of time units that a subjective judging
+  category takes.
 
 \item[$\alpha^{performance}$] Number of time units that performance judging
   takes. $\alpha^{subjective} = 5 / TInc$ \jpscomment{Note that this
@@ -99,7 +99,7 @@ judging station $n$ at time $t$.
 
 \subsection{Keep each judging station busy while team $i$ is using it.}
 
-$\sum\limits_{u=1}^{\alpha^{subjective}} sz_{t-u+1}^{i,n} \le sy_{t}^{i,n}$
+$\sum\limits_{u=1}^{\alpha^{subjective_{n}}} sz_{t-u+1}^{i,n} \le sy_{t}^{i,n}$
 \hfill $\forall t \in T,  \forall i \in N,
 \forall n \in 1 \dots NSubjective$
 
@@ -146,7 +146,7 @@ $sy_{t}^{i,n} + sy_{t+u}^{i,d} \le 1$
 \hfill $\forall i \in N,
 \forall n \in 1 \dots NSubjective, 
 d \in 1 \dots NSubjective \wedge d \neq n,
-0 \le u \le \alpha^{subjective} + ct$
+0 \le u \le \alpha^{subjective_{n}} + ct$
 
 \subsubsection{Subjective category $n$ to all performance stations}
 $sy_{t}^{i,n} + py_{t+u}^{i,b,s} \le 1$
@@ -154,7 +154,7 @@ $sy_{t}^{i,n} + py_{t+u}^{i,b,s} \le 1$
 \forall n \in 1 \dots NSubjective, 
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
-0 \le u \le \alpha^{subjective}+ ct,$
+0 \le u \le \alpha^{subjective_{n}}+ ct,$
 
 \subsubsection{Performance on table $b$ side $s$ to all other performance stations}
 $py_{t}^{i,b,s} + py_{t+u}^{i,d,e} \le 1$
@@ -181,7 +181,7 @@ $
 \sum\limits_{b=1}^{NTables} (py_{t+u}^{i,b,1} + py_{t+u}^{i,b,2}) 
 \le 1$
 \hfill $\forall i \in N, 
-0 \le u \le \alpha^{m} + pct$
+0 \le u \le \alpha^{performance} + pct$
 
 
 \subsection{Make sure both sides of a table are always used if one side is
