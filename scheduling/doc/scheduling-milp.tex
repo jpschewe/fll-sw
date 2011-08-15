@@ -5,6 +5,9 @@
 
 \usepackage[table,usenames,dvipsnames]{xcolor}
 
+% allow more floats on a page
+\setcounter{totalnumber}{10}
+
 % FloatBarrier
 \usepackage{placeins}
 
@@ -14,7 +17,7 @@
 % algorithm environment for pseudocode 
 \usepackage{algorithm}
 \usepackage{algorithmic}
-%\floatname{algorithm}{}
+\floatname{algorithm}{Constraint}
 
 % draft - include comments as footnotes and marginpars
 \newif\ifdraft
@@ -99,64 +102,106 @@ judging station $n$ at time $t$.
 
 \subsection{Keep each judging station busy while team $i$ is using it.}
 
+\begin{algorithm}
+\caption{stationBusySubjective}
 $\sum\limits_{u=1}^{\alpha^{n}} sz_{t-u+1}^{i,n} \le sy_{t}^{i,n}$
 \hfill $\forall t \in T,  \forall i \in N,
 \forall n \in 1 \dots NSubjective$
+\end{algorithm}
 
+\begin{algorithm}
+\caption{stationBusyPerformance}
 $\sum\limits_{u=1}^{\alpha^{perf}} pz_{t-u+1}^{i,b,s} \le py_{t}^{i,b,s}$
 \hfill $\forall t \in T, \forall i \in N, \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2$
+\end{algorithm}
 
 
+\FloatBarrier
 \subsection{Note the start of judging at a station upon team transition.}
+\begin{algorithm}
+\caption{stationStartSubjective}
 $sy_{t}^{i,n} - sy_{t-1}^{i,n} \le sz_{t}^{i,n}$
 \hfill $\forall t \in T, \forall i \in N,
 \forall n \in 1 \dots NSubjective$
+\end{algorithm}
 
+\begin{algorithm}
+\caption{stationStartPerformance}
 $py_{t}^{i,b,s} - py_{t-1}^{i,b,s} \le pz_{t}^{i,b,s}$
 \hfill $\forall t \in T, \forall i \in N, \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2$
+\end{algorithm}
 
 
+\FloatBarrier
 \subsection{Ensure that only 1 team ($i$) is at each judging station at a
 given time ($t$).}
 \label{judging_group_constraint}
+
+\begin{algorithm}
+\caption{noOverlapSubjective}
 $\sum\limits_{i \in G_{g}} sy_{t}^{i,n} \le 1$          
 \hfill $\forall t \in T, \forall g \in 1 \dots NGroups,
 \forall n \in 1 \dots NSubjective$
+\end{algorithm}
 
+\begin{algorithm}
+\caption{noOverlapPerformance}
 $\sum\limits_{i \in N} py_{t}^{i,b,s} \le 1$          
 \hfill $\forall t \in T, \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2$
+\end{algorithm}
 
 
+\FloatBarrier
 \subsection{Each team must appear at each subjective station once.}
+
+\begin{algorithm}
+\caption{teamSubjective}
 $\sum\limits_{t \in T} sz_{t}^{i,n} = 1$
 \hfill $\forall n \in 1 \dots NSubjective, i \in N$
+\end{algorithm}
 
+
+\FloatBarrier
 \subsection{Each team must appear in performance $NRounds$ times.}
+
+\begin{algorithm}
+\caption{teamPerformance}
 $\sum\limits_{t \in T} ( pz_{t}^{i,b,1} + pz_{t}^{i,b,2} ) = NRounds$
 \hfill $\forall i \in N, \forall b \in 1 \dots NTables$
+\end{algorithm}
 
 
+\FloatBarrier
 \subsection{Enforce change time.}
 
 \subsubsection{Subjective category $n$ to all other subjective categories}
+\begin{algorithm}
+\caption{subjSubjChangetime}
 $sy_{t}^{i,n} + sy_{t+u}^{i,d} \le 1$
 \hfill $\forall i \in N,
 \forall n \in 1 \dots NSubjective, 
 d \in 1 \dots NSubjective \wedge d \neq n,
 0 \le u \le \alpha^{n} + ct$
+\end{algorithm}
 
 \subsubsection{Subjective category $n$ to all performance stations}
+\begin{algorithm}
+\caption{subjPerfChangetime}
 $sy_{t}^{i,n} + py_{t+u}^{i,b,s} \le 1$
 \hfill $\forall i \in N,
 \forall n \in 1 \dots NSubjective, 
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
 0 \le u \le \alpha^{n}+ ct,$
+\end{algorithm}
 
-\subsubsection{Performance on table $b$ side $s$ to all other performance stations}
+\subsubsection{Performance on table $b$ side $s$ to all other performance
+  stations}
+\begin{algorithm}
+\caption{perfPerfChangetime}
 $py_{t}^{i,b,s} + py_{t+u}^{i,d,e} \le 1$
 \hfill $\forall i \in N,
 \forall b \in 1 \dots NTables,
@@ -164,17 +209,24 @@ $py_{t}^{i,b,s} + py_{t+u}^{i,d,e} \le 1$
 \forall d \in 1 \dots NTables \wedge d \neq b,
 \forall e \in 1 \dots 2 \wedge e \neq s,
 0 \le u \le \alpha^{perf}+ ct$
+\end{algorithm}
 
-\subsubsection{Performance on table $b$ side $s$ to all subjective stations}
+\subsubsection{Performance on table $b$ side $s$ to all subjective
+  stations}
+\begin{algorithm}
+\caption{perfSubjChangetime}
 $py_{t}^{i,b,s} + sy_{t+u}^{i,n} \le 1$
 \hfill $\forall i \in N,
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
 \forall n \in 1 \dots NSubjective
 0 \le u \le \alpha^{perf}+ ct$
+\end{algorithm}
 
-
+\FloatBarrier
 \subsection{Enforce performance change time.}
+\begin{algorithm}
+\caption{performanceChangetime}
 $
 \sum\limits_{b=1}^{NTables} (py_{t}^{i,b,1} + py_{t}^{i,b,2})
 +
@@ -182,36 +234,48 @@ $
 \le 1$
 \hfill $\forall i \in N, 
 0 \le u \le \alpha^{perf} + pct$
+\end{algorithm}
 
-
+\FloatBarrier
 \subsection{Make sure both sides of a table are always used if one side is
   used.}
+\begin{algorithm}
+\caption{perfUseBothSides}
 $py_{t}^{i,b,1} - py_{t}^{i,b,2} \le 0$
 \hfill $\forall i \in N,
 \forall b \in 1 \dots NTables$
+\end{algorithm}
 
 
+\FloatBarrier
 \subsection{Each team must be judged in all categories.}
+\begin{algorithm}
+\caption{teamJudging}
 $\sum\limits_{t \in T} ( 
     \sum\limits_{n=1}^{NSubjective} sz_{t}^{i,n}  
  + \sum\limits_{b=1}^{NTables} (pz{t}^{i,b,1} + pz{t}^{i,b,2})
 )
 = NSubjective + NRounds$
 \hfill $\forall i \in N$
+\end{algorithm}
 
-
+\FloatBarrier
 \subsection{Judging groups}
 Each team is only judged at the subjective stations for their judging
 group. This is handled by only constraining teams in the appropriate
 judging group to the appropriate judging station. See \autoref{judging_group_constraint}
 
 
+\FloatBarrier
 \section{Breaks}
 \subsection{Start the performance rounds 60 minutes into the day.}
+\begin{algorithm}
+\caption{performanceStart}
 $\sum\limits_{i \in N} \sum\limits_{b=1}^{NTables} 
     \sum\limits_{t = 1}^{60/TInc} 
       ( py_{t}^{i,b,1} + py_{t}^{i,b,2} ) = 0$
-
+\end{algorithm}
+    
 \subsection{Other Breaks}
 Need to add in lunch breaks for subjective and a break after the first few
 performance runs. \jpscomment{Not sure how I want to do this yet.}
