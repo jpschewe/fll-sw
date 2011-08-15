@@ -290,9 +290,7 @@ public final class Utilities {
    * Extensions used by HSQL for it's database files. These extensions include
    * the dot.
    */
-  public static final Collection<String> HSQL_DB_EXTENSIONS = Collections
-                                                                         .unmodifiableCollection(Arrays
-                                                                                                       .asList(new String[] {
+  public static final Collection<String> HSQL_DB_EXTENSIONS = Collections.unmodifiableCollection(Arrays.asList(new String[] {
                                                                                                                              ".properties",
                                                                                                                              ".script",
                                                                                                                              ".log",
@@ -528,4 +526,24 @@ public final class Utilities {
     return extension;
   }
 
+  public static final int MINUTES_PER_HOUR = 60;
+
+  /**
+   * Convert hours to minutes.
+   */
+  public static int convertHoursToMinutes(final int hours) {
+    return hours * MINUTES_PER_HOUR;
+  }
+
+  public static final long SECONDS_PER_MINUTE = 60;
+
+  public static final long MILLISECONDS_PER_SECOND = 1000;
+
+  public static long convertMinutesToSeconds(final long minutes) {
+    return minutes * SECONDS_PER_MINUTE;
+  }
+  
+  public static long convertMinutesToMilliseconds(final long minutes) {
+    return convertMinutesToSeconds(minutes) * MILLISECONDS_PER_SECOND;
+  }
 }
