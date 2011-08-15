@@ -56,11 +56,11 @@
 \item[$NTables$] The number of performance tables
 \item[$NGroups$] The number of judging groups, typically 2
 
-\item[$\alpha^{subjective_{n}}$] Number of time units that a subjective judging
-  category takes.
+\item[$\alpha^{n}$] Number of time units that subjective judging
+  category $n$ takes.
 
-\item[$\alpha^{performance}$] Number of time units that performance judging
-  takes. $\alpha^{subjective} = 5 / TInc$ \jpscomment{Note that this
+\item[$\alpha^{perf}$] Number of time units that performance judging
+  takes. $\alpha^{perf} = 5 / TInc$ \jpscomment{Note that this
 changes when we alternate tables at state}
 
 \item[$ct$] Time to change between judging stations, in time increments. Typically set to 15
@@ -99,11 +99,11 @@ judging station $n$ at time $t$.
 
 \subsection{Keep each judging station busy while team $i$ is using it.}
 
-$\sum\limits_{u=1}^{\alpha^{subjective_{n}}} sz_{t-u+1}^{i,n} \le sy_{t}^{i,n}$
+$\sum\limits_{u=1}^{\alpha^{n}} sz_{t-u+1}^{i,n} \le sy_{t}^{i,n}$
 \hfill $\forall t \in T,  \forall i \in N,
 \forall n \in 1 \dots NSubjective$
 
-$\sum\limits_{u=1}^{\alpha^{performance}} pz_{t-u+1}^{i,b,s} \le py_{t}^{i,b,s}$
+$\sum\limits_{u=1}^{\alpha^{perf}} pz_{t-u+1}^{i,b,s} \le py_{t}^{i,b,s}$
 \hfill $\forall t \in T, \forall i \in N, \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2$
 
@@ -146,7 +146,7 @@ $sy_{t}^{i,n} + sy_{t+u}^{i,d} \le 1$
 \hfill $\forall i \in N,
 \forall n \in 1 \dots NSubjective, 
 d \in 1 \dots NSubjective \wedge d \neq n,
-0 \le u \le \alpha^{subjective_{n}} + ct$
+0 \le u \le \alpha^{n} + ct$
 
 \subsubsection{Subjective category $n$ to all performance stations}
 $sy_{t}^{i,n} + py_{t+u}^{i,b,s} \le 1$
@@ -154,7 +154,7 @@ $sy_{t}^{i,n} + py_{t+u}^{i,b,s} \le 1$
 \forall n \in 1 \dots NSubjective, 
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
-0 \le u \le \alpha^{subjective_{n}}+ ct,$
+0 \le u \le \alpha^{n}+ ct,$
 
 \subsubsection{Performance on table $b$ side $s$ to all other performance stations}
 $py_{t}^{i,b,s} + py_{t+u}^{i,d,e} \le 1$
@@ -163,7 +163,7 @@ $py_{t}^{i,b,s} + py_{t+u}^{i,d,e} \le 1$
 \forall s \in 1 \dots 2,
 \forall d \in 1 \dots NTables \wedge d \neq b,
 \forall e \in 1 \dots 2 \wedge e \neq s,
-0 \le u \le \alpha^{performance}+ ct$
+0 \le u \le \alpha^{perf}+ ct$
 
 \subsubsection{Performance on table $b$ side $s$ to all subjective stations}
 $py_{t}^{i,b,s} + sy_{t+u}^{i,n} \le 1$
@@ -171,7 +171,7 @@ $py_{t}^{i,b,s} + sy_{t+u}^{i,n} \le 1$
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
 \forall n \in 1 \dots NSubjective
-0 \le u \le \alpha^{performance}+ ct$
+0 \le u \le \alpha^{perf}+ ct$
 
 
 \subsection{Enforce performance change time.}
@@ -181,7 +181,7 @@ $
 \sum\limits_{b=1}^{NTables} (py_{t+u}^{i,b,1} + py_{t+u}^{i,b,2}) 
 \le 1$
 \hfill $\forall i \in N, 
-0 \le u \le \alpha^{performance} + pct$
+0 \le u \le \alpha^{perf} + pct$
 
 
 \subsection{Make sure both sides of a table are always used if one side is
