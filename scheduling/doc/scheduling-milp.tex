@@ -239,7 +239,8 @@ $
 \sum\limits_{b=1}^{NTables} (py_{t+u}^{i,b,1} + py_{t+u}^{i,b,2}) 
 \le 1$
 \hfill $\forall i \in N, 
-0 \le u \le \alpha^{perf} + pct$
+\forall t \in T,
+\forall u \in 0 \dots \alpha^{perf} + pct$
 \end{algorithm}
 
 \FloatBarrier
@@ -247,9 +248,10 @@ $
   used.}
 \begin{algorithm}
 \caption{perfUseBothSides}
-$py_{t}^{i,b,1} - py_{t}^{i,b,2} \le 0$
+$py_{t}^{i,b,1} = py_{t}^{i,b,2}$
 \hfill $\forall i \in N,
-\forall b \in 1 \dots NTables$
+\forall b \in 1 \dots NTables,
+\forall t \in T$
 \end{algorithm}
 
 
