@@ -122,7 +122,7 @@ $\sum\limits_{u=1}^{\alpha^{perf}} pz_{t-u+1}^{i,b,s} \le py_{t}^{i,b,s}$
 \begin{algorithm}
 \caption{stationStartSubjective}
 $sy_{t}^{i,n} - sy_{t-1}^{i,n} \le sz_{t}^{i,n}$
-\hfill $\forall t \in T, \forall i \in N,
+\hfill $\forall t \in {2 \dots TMax}, \forall i \in N,
 \forall n \in 1 \dots NSubjective$
 \end{algorithm}
 
@@ -169,13 +169,13 @@ $\sum\limits_{t \in T} sz_{t}^{i,n} = 1$
 
 \begin{algorithm}
 \caption{teamPerformance}
-$\sum\limits_{t \in T} ( pz_{t}^{i,b,1} + pz_{t}^{i,b,2} ) = NRounds$
-\hfill $\forall i \in N, \forall b \in 1 \dots NTables$
+$\sum\limits_{b=1}^{NTables} \sum\limits_{t \in T} ( pz_{t}^{i,b,1} + pz_{t}^{i,b,2} ) = NRounds$
+\hfill $\forall i \in N$
 \end{algorithm}
 
 
 \FloatBarrier
-\subsection{Enforce change time.}
+\subsection{Enforce change time for each team $i$.}
 
 \subsubsection{Subjective category $n$ to all other subjective categories}
 \begin{algorithm}
@@ -183,8 +183,9 @@ $\sum\limits_{t \in T} ( pz_{t}^{i,b,1} + pz_{t}^{i,b,2} ) = NRounds$
 $sy_{t}^{i,n} + sy_{t+u}^{i,d} \le 1$
 \hfill $\forall i \in N,
 \forall n \in 1 \dots NSubjective, 
-d \in 1 \dots NSubjective \wedge d \neq n,
-0 \le u \le \alpha^{n} + ct$
+\forall t \in T,
+\forall d \in 1 \dots NSubjective \wedge d \neq n,
+\forall u \in 0 \dots \alpha^{n} + ct$
 \end{algorithm}
 
 \subsubsection{Subjective category $n$ to all performance stations}
@@ -193,9 +194,11 @@ d \in 1 \dots NSubjective \wedge d \neq n,
 $sy_{t}^{i,n} + py_{t+u}^{i,b,s} \le 1$
 \hfill $\forall i \in N,
 \forall n \in 1 \dots NSubjective, 
+\forall t \in T,
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
-0 \le u \le \alpha^{n}+ ct,$
+\forall u \in 0 \dots \alpha^{n}+ ct
+$
 \end{algorithm}
 
 \subsubsection{Performance on table $b$ side $s$ to all other performance
@@ -206,9 +209,11 @@ $py_{t}^{i,b,s} + py_{t+u}^{i,d,e} \le 1$
 \hfill $\forall i \in N,
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
-\forall d \in 1 \dots NTables \wedge d \neq b,
-\forall e \in 1 \dots 2 \wedge e \neq s,
-0 \le u \le \alpha^{perf}+ ct$
+\forall t \in T,
+\forall d \in 1 \dots NTables ,
+\forall e \in 1 \dots 2,
+d \neq b  \wedge e \neq s,
+\forall u \in 0 \dots \alpha^{perf}+ ct$
 \end{algorithm}
 
 \subsubsection{Performance on table $b$ side $s$ to all subjective
@@ -219,8 +224,9 @@ $py_{t}^{i,b,s} + sy_{t+u}^{i,n} \le 1$
 \hfill $\forall i \in N,
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
+\forall t \in T,
 \forall n \in 1 \dots NSubjective
-0 \le u \le \alpha^{perf}+ ct$
+\forall u \in 0 \dots \alpha^{perf}+ ct$
 \end{algorithm}
 
 \FloatBarrier
