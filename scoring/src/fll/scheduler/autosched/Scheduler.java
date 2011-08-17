@@ -26,6 +26,7 @@ import JaCoP.core.IntVar;
 import JaCoP.core.Store;
 import JaCoP.search.DepthFirstSearch;
 import JaCoP.search.IndomainMin;
+import JaCoP.search.MostConstrainedStatic;
 import JaCoP.search.Search;
 import JaCoP.search.SelectChoicePoint;
 import JaCoP.search.SimpleSelect;
@@ -72,7 +73,7 @@ public class Scheduler {
       mTeams.put(group, teams);
     }
 
-    mObjective = new IntVar(mStore, "Objective");
+    mObjective = new IntVar(mStore, "Objective", 0, 10000);
     mOne = new IntVar(mStore, "one", 1, 1);
     buildModel();
   }
@@ -516,7 +517,8 @@ public class Scheduler {
       }
     }
 
-    final SelectChoicePoint<IntVar> select = new SimpleSelect<IntVar>(choiceVariables.toArray(new IntVar[0]), null,
+    final SelectChoicePoint<IntVar> select = new SimpleSelect<IntVar>(choiceVariables.toArray(new IntVar[0]),
+                                                                      new MostConstrainedStatic<IntVar>(),
                                                                       new IndomainMin<IntVar>());
 
     final Search<IntVar> search = new DepthFirstSearch<IntVar>();

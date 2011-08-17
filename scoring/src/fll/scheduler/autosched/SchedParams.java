@@ -51,14 +51,14 @@ public class SchedParams {
    *           multiple of tinc
    */
   public SchedParams(final int tinc,
-                         final int maxHours,
-                         final List<SubjectiveParams> subjectiveParams,
-                         final int nrounds,
-                         final int ntables,
-                         final int performanceMinutes,
-                         final int changetimeMinutes,
-                         final int performanceChangetimeMinutes,
-                         final List<Integer> teams) throws InconsistentSchedParams {
+                     final int maxHours,
+                     final List<SubjectiveParams> subjectiveParams,
+                     final int nrounds,
+                     final int ntables,
+                     final int performanceMinutes,
+                     final int changetimeMinutes,
+                     final int performanceChangetimeMinutes,
+                     final List<Integer> teams) throws InconsistentSchedParams {
     mTInc = tinc;
     mMaxHours = maxHours;
     mSubjectiveParams = new ArrayList<SubjectiveParams>(subjectiveParams);
@@ -130,7 +130,7 @@ public class SchedParams {
   }
 
   public int getMaxTimeSlots() {
-    return getMaxHours()
+    return Utilities.convertHoursToMinutes(getMaxHours())
         / getTInc();
   }
 
