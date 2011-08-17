@@ -38,7 +38,7 @@ public class SchedulerTest {
     subjectiveParams.add(new SubjectiveParams("Research", SchedParams.DEFAULT_SUBJECTIVE_MINUTES));
     final List<Integer> teams = new LinkedList<Integer>();
     teams.add(2);
-    final SchedParams params = new SchedParams(SchedParams.DEFAULT_TINC, SchedParams.DEFAULT_MAX_HOURS,
+    final SchedParams params = new SchedParams(SchedParams.DEFAULT_TINC, 4,
                                                subjectiveParams, 1, 1, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
                                                SchedParams.DEFAULT_CHANGETIME_MINUTES,
                                                SchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES, teams);
