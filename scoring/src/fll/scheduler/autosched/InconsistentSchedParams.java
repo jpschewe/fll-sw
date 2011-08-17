@@ -4,7 +4,7 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-package fll.scheduler;
+package fll.scheduler.autosched;
 
 import fll.util.FLLRuntimeException;
 
