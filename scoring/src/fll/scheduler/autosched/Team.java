@@ -105,7 +105,69 @@ import JaCoP.core.Store;
     return pz[table][side][timeslot];
   }
 
-  // FIXME int getSubjectiveTimeslot(final int category)
-  // FIXME {table, side, time} getPerformanceTimeslot(final int round)
+  /**
+   * The timeslot that this team has for the specified category. This function
+   * should not be called until the schedule has been solved.
+   * 
+   * @return the timeslot, -1 if no timeslot is found
+   */
+  int getSubjectiveTimeslot(final int category) {
+    for (int t = 0; t < sz[category].length; ++t) {
+      if (sz[category][t].value() > 0) {
+        return t;
+      }
+    }
+    return -1;
+  }
 
+  /**
+   * Get the performance timeslot for the specified round.
+   * 
+   * @param round to look for, 0 based
+   * @return null if no slot is found
+   */
+  PerformanceSlot getPerformanceTimeslot(final int round) {
+    int numFound = 0;
+    for (int table = 0; table < pz.length; ++table) {
+      for (int side = 0; side < pz[table].length; ++side) {
+        for (int t = 0; t < pz[table][side].length; ++t) {
+          if (pz[table][side][t].value() > 0) {
+            ++numFound;
+          }
+          if (round + 1 == numFound) {
+            return new PerformanceSlot(table, side, t);
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  public static final class PerformanceSlot {
+    public PerformanceSlot(final int table,
+                           final int side,
+                           final int timeslot) {
+      mTable = table;
+      mSide = side;
+      mTimeslot = timeslot;
+    }
+
+    private final int mTable;
+
+    public int getTable() {
+      return mTable;
+    }
+
+    private final int mSide;
+
+    public int getSide() {
+      return mSide;
+    }
+
+    private final int mTimeslot;
+
+    public int getTimeslot() {
+      return mTimeslot;
+    }
+  }
 }

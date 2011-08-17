@@ -96,13 +96,13 @@ public class TournamentSchedule implements Serializable {
    * Used with {@link String#format(String, Object...)} to create a performance
    * round header.
    */
-  private static final String PERF_HEADER_FORMAT = "Perf #%d";
+  public static final String PERF_HEADER_FORMAT = "Perf #%d";
 
   /**
    * Used with {@link String#format(String, Object...)} to create a performance
    * table header.
    */
-  private static final String TABLE_HEADER_FORMAT = "Perf %d Table";
+  public static final String TABLE_HEADER_FORMAT = "Perf %d Table";
 
   private final int numRounds;
 
