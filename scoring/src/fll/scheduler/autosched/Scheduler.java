@@ -39,6 +39,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 import fll.Utilities;
 import fll.scheduler.TournamentSchedule;
 import fll.scheduler.autosched.Team.PerformanceSlot;
+import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 
 /**
@@ -66,7 +67,10 @@ public class Scheduler {
    */
   private final IntVar mOne;
 
-  public Scheduler(final SchedParams params) {
+  /**
+   * @throws FLLRuntimeException if the number of teams is not even
+   */
+  public Scheduler(final SchedParams params) throws FLLRuntimeException {
     mParams = params;
 
     final List<Integer> teamInformation = mParams.getTeams();
@@ -81,6 +85,10 @@ public class Scheduler {
         teams.add(team);
       }
       mTeams.put(group, teams);
+    }
+    if (teamNumber % 2 == 0) {
+      throw new FLLRuntimeException("Must have an even number of teams: "
+          + (teamNumber - 1));
     }
 
     mDefaultDomain = new IntervalDomain(0, 10000);
