@@ -56,6 +56,7 @@ import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.scheduler.TeamScheduleInfo.SubjectiveTime;
+import fll.scheduler.autosched.SchedParams;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
@@ -140,13 +141,13 @@ public class TournamentSchedule implements Serializable {
     }
   };
 
-  private long performanceDuration = Utilities.convertMinutesToMilliseconds(AutoSchedParams.DEFAULT_PERFORMANCE_MINUTES);
+  private long performanceDuration = Utilities.convertMinutesToMilliseconds(SchedParams.DEFAULT_PERFORMANCE_MINUTES);
 
-  private long subjectiveDuration = Utilities.convertMinutesToMilliseconds(AutoSchedParams.DEFAULT_SUBJECTIVE_MINUTES);
+  private long subjectiveDuration = Utilities.convertMinutesToMilliseconds(SchedParams.DEFAULT_SUBJECTIVE_MINUTES);
 
-  private long changetime = Utilities.convertMinutesToMilliseconds(AutoSchedParams.DEFAULT_CHANGETIME_MINUTES);
+  private long changetime = Utilities.convertMinutesToMilliseconds(SchedParams.DEFAULT_CHANGETIME_MINUTES);
 
-  private long performanceChangetime = Utilities.convertMinutesToMilliseconds(AutoSchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
+  private long performanceChangetime = Utilities.convertMinutesToMilliseconds(SchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
 
   private long specialPerformanceChangetime = Utilities.convertMinutesToMilliseconds(30);
 

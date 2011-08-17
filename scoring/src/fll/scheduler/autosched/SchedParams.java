@@ -3,7 +3,7 @@
  * HighTechKids is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
-package fll.scheduler;
+package fll.scheduler.autosched;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,7 +14,7 @@ import fll.Utilities;
 /**
  * Parameters for the scheduler.
  */
-public class AutoSchedParams {
+public class SchedParams {
 
   public static final int DEFAULT_TINC = 5;
 
@@ -50,7 +50,7 @@ public class AutoSchedParams {
    * @throws InconsistentSchedParams if one of the specified times isn't a
    *           multiple of tinc
    */
-  public AutoSchedParams(final int tinc,
+  public SchedParams(final int tinc,
                          final int maxHours,
                          final List<SubjectiveParams> subjectiveParams,
                          final int nrounds,
