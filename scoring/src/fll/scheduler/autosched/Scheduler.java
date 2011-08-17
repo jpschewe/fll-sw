@@ -6,7 +6,10 @@
 
 package fll.scheduler.autosched;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +25,9 @@ import JaCoP.constraints.XlteqY;
 import JaCoP.constraints.XmulCeqZ;
 import JaCoP.constraints.XplusYeqZ;
 import JaCoP.constraints.XplusYlteqZ;
+import JaCoP.core.IntDomain;
 import JaCoP.core.IntVar;
+import JaCoP.core.IntervalDomain;
 import JaCoP.core.Store;
 import JaCoP.search.DepthFirstSearch;
 import JaCoP.search.IndomainMin;
@@ -30,6 +35,10 @@ import JaCoP.search.MostConstrainedStatic;
 import JaCoP.search.Search;
 import JaCoP.search.SelectChoicePoint;
 import JaCoP.search.SimpleSelect;
+import au.com.bytecode.opencsv.CSVWriter;
+import fll.Utilities;
+import fll.scheduler.TournamentSchedule;
+import fll.scheduler.autosched.Team.PerformanceSlot;
 import fll.util.LogUtils;
 
 /**
@@ -50,6 +59,7 @@ public class Scheduler {
   private final SchedParams mParams;
 
   private final IntVar mObjective;
+  private final IntDomain mDefaultDomain;
 
   /**
    * Variable equal to 1. Used for certain constraints that require a variable.
@@ -73,9 +83,77 @@ public class Scheduler {
       mTeams.put(group, teams);
     }
 
-    mObjective = new IntVar(mStore, "Objective", 0, 10000);
+    mDefaultDomain = new IntervalDomain(0, 10000);
+    mObjective = new IntVar(mStore, "Objective", mDefaultDomain);
     mOne = new IntVar(mStore, "one", 1, 1);
     buildModel();
+  }
+
+  /**
+   * Output the schedule. The writer is not closed by this method.
+   * 
+   * @param startTime the time to start the tournament at
+   * @param writer where to write the data
+   * @throws IOException
+   */
+  public void outputSchedule(final Date startTime,
+                             final Writer writer) throws IOException {
+    final CSVWriter csvwriter = new CSVWriter(writer);
+    final List<String> headers = new LinkedList<String>();
+    headers.add(TournamentSchedule.TEAM_NUMBER_HEADER);
+    for (int n = 0; n < mParams.getNSubjective(); ++n) {
+      headers.add(mParams.getSubjectiveName(n));
+    }
+    headers.add(TournamentSchedule.JUDGE_GROUP_HEADER);
+    for (int round = 0; round < mParams.getNRounds(); ++round) {
+      headers.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round + 1));
+      headers.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round + 1));
+    }
+    csvwriter.writeNext(headers.toArray(new String[headers.size()]));
+
+    for (final Map.Entry<Integer, List<Team>> entry : mTeams.entrySet()) {
+      for (final Team i : entry.getValue()) {
+        final List<String> line = new LinkedList<String>();
+        line.add(i.getName());
+        for (int n = 0; n < mParams.getNSubjective(); ++n) {
+          final int slot = i.getSubjectiveTimeslot(n);
+          // FIXME this should be an exception
+          if (-1 == slot) {
+            line.add("");
+          } else {
+            final Date time = convertSlotToTime(startTime, slot);
+            line.add(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(time));
+          }
+        }
+
+        line.add(String.valueOf(i.getJudgingGroup() + 1));
+
+        for (int round = 0; round < mParams.getNRounds(); ++round) {
+          final PerformanceSlot slot = i.getPerformanceTimeslot(round);
+          // FIXME this should be an exception
+          if (null == slot) {
+            line.add("");
+            line.add("");
+          } else {
+            final Date time = convertSlotToTime(startTime, slot.getTimeslot());
+            line.add(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(time));
+            line.add(String.format("Table%d %d", slot.getTable() + 1, slot.getSide() + 1));
+          }
+        }
+        csvwriter.writeNext(line.toArray(new String[line.size()]));
+      }
+    }
+
+    csvwriter.flush();
+  }
+
+  private Date convertSlotToTime(final Date startTime,
+                                 final int slot) {
+    final int minutes = slot
+        * mParams.getTInc();
+    final long milliseconds = Utilities.convertMinutesToMilliseconds(minutes);
+    return new Date(startTime.getTime()
+        + milliseconds);
   }
 
   /**
@@ -107,16 +185,16 @@ public class Scheduler {
       for (final Team i : entry.getValue()) {
         for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
           for (int n = 0; n < mParams.getNSubjective(); ++n) {
-            final IntVar temp = new IntVar(mStore, String.format("objective.syTemp[%s][%d][%d]", i.getName(), n, t));
-            new XmulCeqZ(i.getSY(n, t), t, temp);
+            final IntVar temp = new IntVar(mStore, String.format("objective.syTemp[%s][%d][%d]", i.getName(), n, t), mDefaultDomain);
+            mStore.impose(new XmulCeqZ(i.getSY(n, t), t, temp));
             sumVars.add(temp);
           }
 
           for (int b = 0; b < mParams.getNTables(); ++b) {
             for (int s = 0; s < 2; ++s) {
               final IntVar temp = new IntVar(mStore, String.format("objective.pyTemp[%s][%d][%d][%d]", i.getName(), b,
-                                                                   s, t));
-              new XmulCeqZ(i.getPY(b, s, t), t, temp);
+                                                                   s, t), mDefaultDomain);
+              mStore.impose(new XmulCeqZ(i.getPY(b, s, t), t, temp));
               sumVars.add(temp);
             }
           }
@@ -124,9 +202,9 @@ public class Scheduler {
         }
       }
     }
-    final IntVar sum = new IntVar(mStore, "objective.sum");
-    new Sum(sumVars, sum);
-    new XeqY(sum, mObjective);
+    final IntVar sum = new IntVar(mStore, "objective.sum", mDefaultDomain);
+    mStore.impose(new Sum(sumVars, sum));
+    mStore.impose(new XeqY(sum, mObjective));
   }
 
   private void performanceStart() {
@@ -143,9 +221,9 @@ public class Scheduler {
         }
       }
     }
-    final IntVar sum = new IntVar(mStore, "performanceStart.sum");
-    new Sum(sumVars, sum);
-    new XeqC(sum, 0);
+    final IntVar sum = new IntVar(mStore, "performanceStart.sum", mDefaultDomain);
+    mStore.impose(new Sum(sumVars, sum));
+    mStore.impose(new XeqC(sum, 0));
   }
 
   private void teamJudging() {
@@ -164,10 +242,10 @@ public class Scheduler {
           }
         }
 
-        final IntVar sum = new IntVar(mStore, String.format("teamJudging.sum[%s]", i.getName()));
-        new Sum(sumVars, sum);
-        new XeqC(sum, mParams.getNSubjective()
-            + mParams.getNRounds());
+        final IntVar sum = new IntVar(mStore, String.format("teamJudging.sum[%s]", i.getName()), mDefaultDomain);
+        mStore.impose(new Sum(sumVars, sum));
+        mStore.impose(new XeqC(sum, mParams.getNSubjective()
+            + mParams.getNRounds()));
       }
     }
   }
@@ -177,7 +255,7 @@ public class Scheduler {
       for (final Team i : entry.getValue()) {
         for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
           for (int b = 0; b < mParams.getNTables(); ++b) {
-            new XeqY(i.getPY(b, 0, t), i.getPY(b, 1, t));
+            mStore.impose(new XeqY(i.getPY(b, 0, t), i.getPY(b, 1, t)));
           }
         }
       }
@@ -205,13 +283,13 @@ public class Scheduler {
               }
 
               final IntVar sumT = new IntVar(mStore,
-                                             String.format("performanceChangetime.sumT[%s][%d]", i.getName(), t));
-              new Sum(sumVarsT, sumT);
+                                             String.format("performanceChangetime.sumT[%s][%d]", i.getName(), t), mDefaultDomain);
+              mStore.impose(new Sum(sumVarsT, sumT));
               final IntVar sumU = new IntVar(mStore,
-                                             String.format("performanceChangetime.sumU[%s][%d]", i.getName(), u));
-              new Sum(sumVarsU, sumU);
+                                             String.format("performanceChangetime.sumU[%s][%d]", i.getName(), u), mDefaultDomain);
+              mStore.impose(new Sum(sumVarsU, sumU));
 
-              new XplusYlteqZ(sumT, sumU, mOne);
+              mStore.impose(new XplusYlteqZ(sumT, sumU, mOne));
             }
           }
         }
@@ -236,7 +314,7 @@ public class Scheduler {
                       final IntVar pyu = i.getPY(d, e, t
                           + u);
                       if (null != pyu) {
-                        new XplusYlteqZ(pyt, pyu, mOne);
+                        mStore.impose(new XplusYlteqZ(pyt, pyu, mOne));
                       }
                     }
                   }
@@ -262,7 +340,7 @@ public class Scheduler {
                   final IntVar syu = i.getSY(n, t
                       + u);
                   if (null != syu) {
-                    new XplusYlteqZ(pyt, syu, mOne);
+                    mStore.impose(new XplusYlteqZ(pyt, syu, mOne));
                   }
                 }
               }
@@ -289,7 +367,7 @@ public class Scheduler {
                   final IntVar pyu = i.getPY(b, s, t
                       + u);
                   if (null != pyu) {
-                    new XplusYlteqZ(syt, pyu, mOne);
+                    mStore.impose(new XplusYlteqZ(syt, pyu, mOne));
                   }
                 }
               }
@@ -316,7 +394,7 @@ public class Scheduler {
                   final IntVar syu = i.getSY(d, t
                       + u);
                   if (null != syu) {
-                    new XplusYlteqZ(syt, syu, mOne);
+                    mStore.impose(new XplusYlteqZ(syt, syu, mOne));
                   }
                 }
 
@@ -341,9 +419,9 @@ public class Scheduler {
             sumVars.add(i.getPZ(b, 1, t));
           }
         }
-        final IntVar sum = new IntVar(mStore, String.format("teamPerformance.sum[%s]", i.getName()));
-        new Sum(sumVars, sum);
-        new XeqC(sum, mParams.getNRounds());
+        final IntVar sum = new IntVar(mStore, String.format("teamPerformance.sum[%s]", i.getName()), mDefaultDomain);
+        mStore.impose(new Sum(sumVars, sum));
+        mStore.impose(new XeqC(sum, mParams.getNRounds()));
       }
     }
   }
@@ -357,9 +435,9 @@ public class Scheduler {
           for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
             sumVars.add(i.getSZ(n, t));
           }
-          final IntVar sum = new IntVar(mStore, String.format("teamSubjective.sum[%s][%d]", i.getName(), n));
-          new Sum(sumVars, sum);
-          new XeqC(sum, 1);
+          final IntVar sum = new IntVar(mStore, String.format("teamSubjective.sum[%s][%d]", i.getName(), n), mDefaultDomain);
+          mStore.impose(new Sum(sumVars, sum));
+          mStore.impose(new XeqC(sum, 1));
         }
       }
     }
@@ -375,9 +453,9 @@ public class Scheduler {
           for (final Team i : entry.getValue()) {
             sumVars.add(i.getSY(n, t));
           }
-          final IntVar sum = new IntVar(mStore, String.format("noOverlapSubjective.sum[%d][%d][%d]", g, n, t));
-          new Sum(sumVars, sum);
-          new XlteqC(sum, 1);
+          final IntVar sum = new IntVar(mStore, String.format("noOverlapSubjective.sum[%d][%d][%d]", g, n, t), mDefaultDomain);
+          mStore.impose(new Sum(sumVars, sum));
+          mStore.impose(new XlteqC(sum, 1));
         }
       }
     }
@@ -395,10 +473,9 @@ public class Scheduler {
             }
           }
 
-          final IntVar sum = new IntVar(mStore, String.format("noOverlapPerformance.sum[%d][%d][%d]", b, s, t));
-          new Sum(sumVars, sum);
-          new XlteqC(sum, 1);
-
+          final IntVar sum = new IntVar(mStore, String.format("noOverlapPerformance.sum[%d][%d][%d]", b, s, t), mDefaultDomain);
+          mStore.impose(new Sum(sumVars, sum));
+          mStore.impose(new XlteqC(sum, 1));
         }
       }
     }
@@ -418,9 +495,9 @@ public class Scheduler {
               }
             }
             final IntVar sum = new IntVar(mStore, String.format("stationBusySubjective.sum[%s][%d][%d]", i.getName(),
-                                                                n, t));
-            new Sum(sumVars, sum);
-            new XlteqY(sum, i.getSY(n, t));
+                                                                n, t), mDefaultDomain);
+            mStore.impose(new Sum(sumVars, sum));
+            mStore.impose(new XlteqY(sum, i.getSY(n, t)));
 
           }
         }
@@ -443,9 +520,9 @@ public class Scheduler {
                 }
               }
               final IntVar sum = new IntVar(mStore, String.format("stationBusyPerformance.sum[%s][%d][%d][%d]",
-                                                                  i.getName(), b, s, t));
-              new Sum(sumVars, sum);
-              new XlteqY(sum, i.getPY(b, s, t));
+                                                                  i.getName(), b, s, t), mDefaultDomain);
+              mStore.impose(new Sum(sumVars, sum));
+              mStore.impose(new XlteqY(sum, i.getPY(b, s, t)));
             }
           }
         }
@@ -461,9 +538,9 @@ public class Scheduler {
             final IntVar sztMinus1 = i.getSY(n, t - 1);
             if (null != sztMinus1) {
               final IntVar temp = new IntVar(mStore, String.format("stationStartSubjective.temp[%s][%d][%d]",
-                                                                   i.getName(), n, t));
-              new XplusYeqZ(i.getSZ(n, t), sztMinus1, temp);
-              new XlteqY(i.getSY(n, t), temp);
+                                                                   i.getName(), n, t), mDefaultDomain);
+              mStore.impose(new XplusYeqZ(i.getSZ(n, t), sztMinus1, temp));
+              mStore.impose(new XlteqY(i.getSY(n, t), temp));
             }
           }
         }
@@ -480,9 +557,9 @@ public class Scheduler {
               final IntVar sztMinus1 = i.getSY(b, t - 1);
               if (null != sztMinus1) {
                 final IntVar temp = new IntVar(mStore, String.format("stationStartPerformance.temp[%s][%d][%d][%d]",
-                                                                     i.getName(), b, s, t));
-                new XplusYeqZ(i.getPZ(b, s, t), sztMinus1, temp);
-                new XlteqY(i.getPY(b, s, t), temp);
+                                                                     i.getName(), b, s, t), mDefaultDomain);
+                mStore.impose(new XplusYeqZ(i.getPZ(b, s, t), sztMinus1, temp));
+                mStore.impose(new XlteqY(i.getPY(b, s, t), temp));
               }
             }
           }
@@ -517,22 +594,23 @@ public class Scheduler {
       }
     }
 
-    final SelectChoicePoint<IntVar> select = new SimpleSelect<IntVar>(choiceVariables.toArray(new IntVar[0]),
+    final SelectChoicePoint<IntVar> select = new SimpleSelect<IntVar>(
+                                                                      choiceVariables.toArray(new IntVar[choiceVariables.size()]),
                                                                       new MostConstrainedStatic<IntVar>(),
                                                                       new IndomainMin<IntVar>());
 
     final Search<IntVar> search = new DepthFirstSearch<IntVar>();
 
     final boolean result = search.labeling(mStore, select, mObjective);
-
     if (result) {
-      mStore.print();
+      LOGGER.debug("*** Objective: "
+          + search.getCostVariable() + " = " +search.getCostValue());
     }
-
+    
     final long T2 = System.currentTimeMillis();
 
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("\n\t*** Execution time = "
+      LOGGER.debug("*** Execution time = "
           + (T2 - T1) + " ms");
     }
 
