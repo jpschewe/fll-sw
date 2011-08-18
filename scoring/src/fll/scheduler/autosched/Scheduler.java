@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import JaCoP.constraints.Constraint;
 import JaCoP.constraints.Sum;
 import JaCoP.constraints.XeqY;
 import JaCoP.constraints.XlteqY;
@@ -197,6 +198,12 @@ public class Scheduler {
 //    objective();
   }
 
+  private void addConstraint(final Constraint c,
+                             final String name) {
+    c.id = name;
+    mStore.impose(c);
+  }
+
   private void subjectiveEOS() {
     final ArrayList<IntVar> sumVars = new ArrayList<IntVar>();
     for (final Map.Entry<Integer, List<Team>> entry : mTeams.entrySet()) {
@@ -210,8 +217,8 @@ public class Scheduler {
       }
     }
     final IntVar sum = new IntVar(mStore, "subjectiveEOS.sum", mDefaultDomain);
-    mStore.impose(new Sum(sumVars, sum));
-    mStore.impose(new XeqY(sum, mZero));
+    addConstraint(new Sum(sumVars, sum), "subjectiveEOS.sum");
+    addConstraint(new XeqY(sum, mZero), "subjectiveEOS");
   }
 
   private void performanceEOS() {
@@ -227,9 +234,9 @@ public class Scheduler {
         }
       }
     }
-    final IntVar sum = new IntVar(mStore, "subjectiveEOS.sum", mDefaultDomain);
-    mStore.impose(new Sum(sumVars, sum));
-    mStore.impose(new XeqY(sum, mZero));
+    final IntVar sum = new IntVar(mStore, "performanceEOS.sum", mDefaultDomain);
+    addConstraint(new Sum(sumVars, sum), "performanceEOS.sum");
+    addConstraint(new XeqY(sum, mZero), "performanceEOS");
   }
 
   private void objective() {
@@ -257,8 +264,8 @@ public class Scheduler {
       }
     }
     final IntVar sum = new IntVar(mStore, "objective.sum", mDefaultDomain);
-    mStore.impose(new Sum(sumVars, sum));
-    mStore.impose(new XeqY(sum, mObjective));
+    addConstraint(new Sum(sumVars, sum), "objective.sum");
+    addConstraint(new XeqY(sum, mObjective), "objective");
   }
 
   private void performanceStart() {
@@ -276,9 +283,8 @@ public class Scheduler {
       }
     }
     final IntVar sum = new IntVar(mStore, "performanceStart.sum", mDefaultDomain);
-    mStore.impose(new Sum(sumVars, sum));
-
-    mStore.impose(new XeqY(sum, mZero));
+    addConstraint(new Sum(sumVars, sum), "performanceStart.sum");
+    addConstraint(new XeqY(sum, mZero), "performanceStart");
   }
 
   private void teamJudging() {
@@ -495,10 +501,11 @@ public class Scheduler {
           for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
             sumVars.add(i.getSZ(n, t));
           }
-          final IntVar sum = new IntVar(mStore, String.format("teamSubjective.sum[%s][%d]", i.getName(), n),
-                                        mDefaultDomain);
-          mStore.impose(new Sum(sumVars, sum));
-          mStore.impose(new XeqY(sum, mOne));
+          final String sumName = String.format("teamSubjective.sum[%s][%d]", i.getName(), n);
+          final String name = String.format("teamSubjective[%s][%d]", i.getName(), n);
+          final IntVar sum = new IntVar(mStore, sumName, mDefaultDomain);
+          addConstraint(new Sum(sumVars, sum), sumName);
+          addConstraint(new XeqY(sum, mOne), name);
         }
       }
     }
@@ -514,10 +521,11 @@ public class Scheduler {
           for (final Team i : entry.getValue()) {
             sumVars.add(i.getSY(n, t));
           }
-          final IntVar sum = new IntVar(mStore, String.format("noOverlapSubjective.sum[%d][%d][%d]", g, n, t),
-                                        mDefaultDomain);
-          mStore.impose(new Sum(sumVars, sum));
-          mStore.impose(new XlteqY(sum, mOne));
+          final String sumName = String.format("noOverlapSubjective.sum[%d][%d][%d]", g, n, t);
+          final String name = String.format("noOverlapSubjective[%d][%d][%d]", g, n, t);
+          final IntVar sum = new IntVar(mStore, sumName, mDefaultDomain);
+          addConstraint(new Sum(sumVars, sum), sumName);
+          addConstraint(new XlteqY(sum, mOne), name);
         }
       }
     }
@@ -557,11 +565,11 @@ public class Scheduler {
                 sumVars.add(sz);
               }
             }
-            final IntVar sum = new IntVar(mStore, String.format("stationBusySubjective.sum[%s][%d][%d]", i.getName(),
-                                                                n, t), mDefaultDomain);
-            mStore.impose(new Sum(sumVars, sum));
-            mStore.impose(new XlteqY(sum, i.getSY(n, t)));
-
+            final String sumName = String.format("stationBusySubjective.sum[%s][%d][%d]", i.getName(), n, t);
+            final String name = String.format("stationBusySubjective[%s][%d][%d]", i.getName(), n, t);
+            final IntVar sum = new IntVar(mStore, sumName, mDefaultDomain);
+            addConstraint(new Sum(sumVars, sum), sumName);
+            addConstraint(new XlteqY(sum, i.getSY(n, t)), name);
           }
         }
       }
@@ -600,10 +608,11 @@ public class Scheduler {
           for (int t = 1; t < mParams.getMaxTimeSlots(); ++t) {
             final IntVar sztMinus1 = i.getSY(n, t - 1);
             if (null != sztMinus1) {
-              final IntVar temp = new IntVar(mStore, String.format("stationStartSubjective.temp[%s][%d][%d]",
-                                                                   i.getName(), n, t), mDefaultDomain);
-              mStore.impose(new XplusYeqZ(i.getSZ(n, t), sztMinus1, temp));
-              mStore.impose(new XlteqY(i.getSY(n, t), temp));
+              final String tempName = String.format("stationStartSubjective.temp[%s][%d][%d]", i.getName(), n, t);
+              final String name = String.format("stationStartSubjective[%s][%d][%d]", i.getName(), n, t);
+              final IntVar temp = new IntVar(mStore, tempName, mDefaultDomain);
+              addConstraint(new XplusYeqZ(i.getSZ(n, t), sztMinus1, temp), tempName);
+              addConstraint(new XlteqY(i.getSY(n, t), temp), name);
             }
           }
         }
