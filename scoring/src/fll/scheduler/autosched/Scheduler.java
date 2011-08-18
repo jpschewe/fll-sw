@@ -273,10 +273,8 @@ public class Scheduler {
       for (final Team i : entry.getValue()) {
         for (int b = 0; b < mParams.getNTables(); ++b) {
           for (int t = 0; t < 60 / mParams.getTInc(); ++t) {
-            if (null != i.getPY(b, 0, t)) {
-              sumVars.add(i.getPY(b, 0, t));
-              sumVars.add(i.getPY(b, 1, t));
-            }
+            sumVars.add(i.getPY(b, 0, t));
+            sumVars.add(i.getPY(b, 1, t));
           }
         }
       }
@@ -330,19 +328,16 @@ public class Scheduler {
         for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
           for (int u = 0; u < mParams.getPerformanceTimeSlots()
               + mParams.getPerformanceChangetimeSlots(); ++u) {
-            if (null != i.getPY(0, 0, t
-                + u)) {
-              final ArrayList<IntVar> sumVarsT = new ArrayList<IntVar>();
-              final ArrayList<IntVar> sumVarsU = new ArrayList<IntVar>();
-              for (int b = 0; b < mParams.getNTables(); ++b) {
-                sumVarsT.add(i.getPY(b, 0, t));
-                sumVarsT.add(i.getPY(b, 1, t));
+            final ArrayList<IntVar> sumVarsT = new ArrayList<IntVar>();
+            final ArrayList<IntVar> sumVarsU = new ArrayList<IntVar>();
+            for (int b = 0; b < mParams.getNTables(); ++b) {
+              sumVarsT.add(i.getPY(b, 0, t));
+              sumVarsT.add(i.getPY(b, 1, t));
 
-                sumVarsU.add(i.getPY(b, 0, t
-                    + u));
-                sumVarsU.add(i.getPY(b, 1, t
-                    + u));
-              }
+              sumVarsU.add(i.getPY(b, 0, t
+                  + u));
+              sumVarsU.add(i.getPY(b, 1, t
+                  + u));
 
               final IntVar sumT = new IntVar(mStore,
                                              String.format("performanceChangetime.sumT[%s][%d]", i.getName(), t),
@@ -377,9 +372,7 @@ public class Scheduler {
                         + mParams.getChangetimeSlots(); ++u) {
                       final IntVar pyu = i.getPY(d, e, t
                           + u);
-                      if (null != pyu) {
-                        mStore.impose(new XplusYlteqZ(pyt, pyu, mOne));
-                      }
+                      mStore.impose(new XplusYlteqZ(pyt, pyu, mOne));
                     }
                   }
                 }
@@ -403,9 +396,7 @@ public class Scheduler {
                 for (int u = 0; u < mParams.getPerformanceChangetimeSlots(); ++u) {
                   final IntVar syu = i.getSY(n, t
                       + u);
-                  if (null != syu) {
-                    mStore.impose(new XplusYlteqZ(pyt, syu, mOne));
-                  }
+                  mStore.impose(new XplusYlteqZ(pyt, syu, mOne));
                 }
               }
 
@@ -430,9 +421,7 @@ public class Scheduler {
                     + mParams.getChangetimeSlots(); ++u) {
                   final IntVar pyu = i.getPY(b, s, t
                       + u);
-                  if (null != pyu) {
-                    mStore.impose(new XplusYlteqZ(syt, pyu, mOne));
-                  }
+                  mStore.impose(new XplusYlteqZ(syt, pyu, mOne));
                 }
               }
             }
@@ -457,9 +446,7 @@ public class Scheduler {
                     + mParams.getChangetimeSlots(); ++u) {
                   final IntVar syu = i.getSY(d, t
                       + u);
-                  if (null != syu) {
-                    mStore.impose(new XplusYlteqZ(syt, syu, mOne));
-                  }
+                  mStore.impose(new XplusYlteqZ(syt, syu, mOne));
                 }
 
               }
@@ -560,9 +547,7 @@ public class Scheduler {
             for (int u = 0; u < mParams.getSubjectiveTimeSlots(n); ++u) {
               final IntVar sz = i.getSZ(n, t
                   - u);
-              if (null != sz) {
-                sumVars.add(sz);
-              }
+              sumVars.add(sz);
             }
             final String sumName = String.format("stationBusySubjective.sum[%s][%d][%d]", i.getName(), n, t);
             final String name = String.format("stationBusySubjective[%s][%d][%d]", i.getName(), n, t);
@@ -585,9 +570,7 @@ public class Scheduler {
               for (int u = 0; u < mParams.getPerformanceTimeSlots(); ++u) {
                 final IntVar pz = i.getPZ(b, s, t
                     - u);
-                if (null != pz) {
-                  sumVars.add(pz);
-                }
+                sumVars.add(pz);
               }
               final IntVar sum = new IntVar(mStore, String.format("stationBusyPerformance.sum[%s][%d][%d][%d]",
                                                                   i.getName(), b, s, t), mDefaultDomain);
@@ -606,13 +589,11 @@ public class Scheduler {
         for (int n = 0; n < mParams.getNSubjective(); ++n) {
           for (int t = 1; t < mParams.getMaxTimeSlots(); ++t) {
             final IntVar sztMinus1 = i.getSY(n, t - 1);
-            if (null != sztMinus1) {
-              final String tempName = String.format("stationStartSubjective.temp[%s][%d][%d]", i.getName(), n, t);
-              final String name = String.format("stationStartSubjective[%s][%d][%d]", i.getName(), n, t);
-              final IntVar temp = new IntVar(mStore, tempName, mDefaultDomain);
-              addConstraint(new XplusYeqZ(i.getSZ(n, t), sztMinus1, temp), tempName);
-              addConstraint(new XlteqY(i.getSY(n, t), temp), name);
-            }
+            final String tempName = String.format("stationStartSubjective.temp[%s][%d][%d]", i.getName(), n, t);
+            final String name = String.format("stationStartSubjective[%s][%d][%d]", i.getName(), n, t);
+            final IntVar temp = new IntVar(mStore, tempName, mDefaultDomain);
+            addConstraint(new XplusYeqZ(i.getSZ(n, t), sztMinus1, temp), tempName);
+            addConstraint(new XlteqY(i.getSY(n, t), temp), name);
           }
         }
       }
@@ -626,12 +607,10 @@ public class Scheduler {
           for (int s = 0; s < 2; ++s) {
             for (int t = 1; t < mParams.getMaxTimeSlots(); ++t) {
               final IntVar sztMinus1 = i.getSY(b, t - 1);
-              if (null != sztMinus1) {
-                final IntVar temp = new IntVar(mStore, String.format("stationStartPerformance.temp[%s][%d][%d][%d]",
-                                                                     i.getName(), b, s, t), mDefaultDomain);
-                mStore.impose(new XplusYeqZ(i.getPZ(b, s, t), sztMinus1, temp));
-                mStore.impose(new XlteqY(i.getPY(b, s, t), temp));
-              }
+              final IntVar temp = new IntVar(mStore, String.format("stationStartPerformance.temp[%s][%d][%d][%d]",
+                                                                   i.getName(), b, s, t), mDefaultDomain);
+              mStore.impose(new XplusYeqZ(i.getPZ(b, s, t), sztMinus1, temp));
+              mStore.impose(new XlteqY(i.getPY(b, s, t), temp));
             }
           }
         }

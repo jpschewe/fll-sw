@@ -66,41 +66,23 @@ import JaCoP.core.Store;
 
   public IntVar getSY(final int category,
                       final int timeslot) {
-    if (category < 0
-        || category >= sy.length || timeslot < 0 || timeslot >= sy[category].length) {
-      return null;
-    }
     return sy[category][timeslot];
   }
 
   public IntVar getSZ(final int category,
                       final int timeslot) {
-    if (category < 0
-        || category >= sz.length || timeslot < 0 || timeslot >= sz[category].length) {
-      return null;
-    }
     return sz[category][timeslot];
   }
 
   public IntVar getPY(final int table,
                       final int side,
                       final int timeslot) {
-    if (table < 0
-        || table >= py.length || side < 0 || side >= py[table].length || timeslot < 0
-        || timeslot >= py[table][side].length) {
-      return null;
-    }
     return py[table][side][timeslot];
   }
 
   public IntVar getPZ(final int table,
                       final int side,
                       final int timeslot) {
-    if (table < 0
-        || table >= pz.length || side < 0 || side >= pz[table].length || timeslot < 0
-        || timeslot >= pz[table][side].length) {
-      return null;
-    }
     return pz[table][side][timeslot];
   }
 
