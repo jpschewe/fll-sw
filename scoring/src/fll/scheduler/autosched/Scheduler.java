@@ -20,7 +20,6 @@ import org.apache.log4j.Logger;
 import JaCoP.constraints.Sum;
 import JaCoP.constraints.XeqC;
 import JaCoP.constraints.XeqY;
-import JaCoP.constraints.XlteqC;
 import JaCoP.constraints.XlteqY;
 import JaCoP.constraints.XmulCeqZ;
 import JaCoP.constraints.XplusYeqZ;
@@ -450,7 +449,7 @@ public class Scheduler {
           final IntVar sum = new IntVar(mStore, String.format("teamSubjective.sum[%s][%d]", i.getName(), n),
                                         mDefaultDomain);
           mStore.impose(new Sum(sumVars, sum));
-          mStore.impose(new XeqC(sum, 1));
+          mStore.impose(new XeqY(sum, mOne));
         }
       }
     }
@@ -469,7 +468,7 @@ public class Scheduler {
           final IntVar sum = new IntVar(mStore, String.format("noOverlapSubjective.sum[%d][%d][%d]", g, n, t),
                                         mDefaultDomain);
           mStore.impose(new Sum(sumVars, sum));
-          mStore.impose(new XlteqC(sum, 1));
+          mStore.impose(new XlteqY(sum, mOne));
         }
       }
     }
@@ -490,7 +489,7 @@ public class Scheduler {
           final IntVar sum = new IntVar(mStore, String.format("noOverlapPerformance.sum[%d][%d][%d]", b, s, t),
                                         mDefaultDomain);
           mStore.impose(new Sum(sumVars, sum));
-          mStore.impose(new XlteqC(sum, 1));
+          mStore.impose(new XlteqY(sum, mOne));
         }
       }
     }
