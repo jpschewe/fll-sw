@@ -30,7 +30,6 @@ import JaCoP.core.IntervalDomain;
 import JaCoP.core.Store;
 import JaCoP.search.DepthFirstSearch;
 import JaCoP.search.IndomainMin;
-import JaCoP.search.MostConstrainedStatic;
 import JaCoP.search.SelectChoicePoint;
 import JaCoP.search.SimpleSelect;
 import au.com.bytecode.opencsv.CSVWriter;
@@ -667,8 +666,7 @@ public class Scheduler {
     }
 
     final IntVar[] vars = choiceVariables.toArray(new IntVar[choiceVariables.size()]);
-    final SelectChoicePoint<IntVar> select = new SimpleSelect<IntVar>(vars, new MostConstrainedStatic<IntVar>(),
-                                                                      new IndomainMin<IntVar>());
+    final SelectChoicePoint<IntVar> select = new SimpleSelect<IntVar>(vars, null, new IndomainMin<IntVar>());
 
     final DepthFirstSearch<IntVar> search = new DepthFirstSearch<IntVar>();
 
