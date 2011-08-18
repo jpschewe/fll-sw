@@ -500,7 +500,7 @@ public class Scheduler {
         for (int n = 0; n < mParams.getNSubjective(); ++n) {
           for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
             final ArrayList<IntVar> sumVars = new ArrayList<IntVar>();
-            for (int u = 1; u < mParams.getSubjectiveTimeSlots(n); ++u) {
+            for (int u = 1; u <= mParams.getSubjectiveTimeSlots(n); ++u) {
               final IntVar sz = i.getSZ(n, t
                   - u + 1);
               if (null != sz) {
@@ -525,7 +525,7 @@ public class Scheduler {
           for (int s = 0; s < 2; ++s) {
             for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
               final ArrayList<IntVar> sumVars = new ArrayList<IntVar>();
-              for (int u = 1; u < mParams.getPerformanceTimeSlots(); ++u) {
+              for (int u = 1; u <= mParams.getPerformanceTimeSlots(); ++u) {
                 final IntVar pz = i.getPZ(b, s, t
                     - u + 1);
                 if (null != pz) {
