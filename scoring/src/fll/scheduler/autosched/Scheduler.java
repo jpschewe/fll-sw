@@ -548,11 +548,11 @@ public class Scheduler {
     for (final Map.Entry<Integer, List<Team>> entry : mTeams.entrySet()) {
       for (final Team i : entry.getValue()) {
         for (int n = 0; n < mParams.getNSubjective(); ++n) {
-          for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
+          for (int t = mParams.getSubjectiveTimeSlots(n) - 1; t < mParams.getMaxTimeSlots(); ++t) {
             final ArrayList<IntVar> sumVars = new ArrayList<IntVar>();
-            for (int u = 1; u <= mParams.getSubjectiveTimeSlots(n); ++u) {
+            for (int u = 0; u < mParams.getSubjectiveTimeSlots(n); ++u) {
               final IntVar sz = i.getSZ(n, t
-                  - u + 1);
+                  - u);
               if (null != sz) {
                 sumVars.add(sz);
               }
@@ -573,11 +573,11 @@ public class Scheduler {
       for (final Team i : entry.getValue()) {
         for (int b = 0; b < mParams.getNTables(); ++b) {
           for (int s = 0; s < 2; ++s) {
-            for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
+            for (int t = mParams.getPerformanceChangetimeSlots() - 1; t < mParams.getMaxTimeSlots(); ++t) {
               final ArrayList<IntVar> sumVars = new ArrayList<IntVar>();
-              for (int u = 1; u <= mParams.getPerformanceTimeSlots(); ++u) {
+              for (int u = 0; u < mParams.getPerformanceTimeSlots(); ++u) {
                 final IntVar pz = i.getPZ(b, s, t
-                    - u + 1);
+                    - u);
                 if (null != pz) {
                   sumVars.add(pz);
                 }
@@ -597,7 +597,7 @@ public class Scheduler {
     for (final Map.Entry<Integer, List<Team>> entry : mTeams.entrySet()) {
       for (final Team i : entry.getValue()) {
         for (int n = 0; n < mParams.getNSubjective(); ++n) {
-          for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
+          for (int t = 1; t < mParams.getMaxTimeSlots(); ++t) {
             final IntVar sztMinus1 = i.getSY(n, t - 1);
             if (null != sztMinus1) {
               final IntVar temp = new IntVar(mStore, String.format("stationStartSubjective.temp[%s][%d][%d]",
@@ -616,7 +616,7 @@ public class Scheduler {
       for (final Team i : entry.getValue()) {
         for (int b = 0; b < mParams.getNTables(); ++b) {
           for (int s = 0; s < 2; ++s) {
-            for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
+            for (int t = 1; t < mParams.getMaxTimeSlots(); ++t) {
               final IntVar sztMinus1 = i.getSY(b, t - 1);
               if (null != sztMinus1) {
                 final IntVar temp = new IntVar(mStore, String.format("stationStartPerformance.temp[%s][%d][%d][%d]",
