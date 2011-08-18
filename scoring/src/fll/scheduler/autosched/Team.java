@@ -6,7 +6,6 @@
 
 package fll.scheduler.autosched;
 
-import JaCoP.core.BooleanVar;
 import JaCoP.core.IntVar;
 import JaCoP.core.Store;
 
@@ -29,17 +28,17 @@ import JaCoP.core.Store;
     this.pz = new IntVar[numTables][2][numTimeslots];
     for (int n = 0; n < numSubjective; ++n) {
       for (int t = 0; t < numTimeslots; ++t) {
-        sy[n][t] = new BooleanVar(store, String.format("%s.sy[%d][%d]", name, n, t));
-        sz[n][t] = new BooleanVar(store, String.format("%s.sz[%d][%d]", name, n, t));
+        sy[n][t] = new IntVar(store, String.format("%s.sy[%d][%d]", name, n, t), 0, 1);
+        sz[n][t] = new IntVar(store, String.format("%s.sz[%d][%d]", name, n, t), 0, 1);
       }
     }
 
     for (int b = 0; b < numTables; ++b) {
       for (int t = 0; t < numTimeslots; ++t) {
-        py[b][0][t] = new BooleanVar(store, String.format("%s.py[%d][%d][%d]", name, b, 0, t));
-        py[b][1][t] = new BooleanVar(store, String.format("%s.py[%d][%d][%d]", name, b, 1, t));
-        pz[b][0][t] = new BooleanVar(store, String.format("%s.pz[%d][%d][%d]", name, b, 0, t));
-        pz[b][1][t] = new BooleanVar(store, String.format("%s.pz[%d][%d][%d]", name, b, 1, t));
+        py[b][0][t] = new IntVar(store, String.format("%s.py[%d][%d][%d]", name, b, 0, t), 0, 1);
+        py[b][1][t] = new IntVar(store, String.format("%s.py[%d][%d][%d]", name, b, 1, t), 0, 1);
+        pz[b][0][t] = new IntVar(store, String.format("%s.pz[%d][%d][%d]", name, b, 0, t), 0, 1);
+        pz[b][1][t] = new IntVar(store, String.format("%s.pz[%d][%d][%d]", name, b, 1, t), 0, 1);
       }
     }
 
