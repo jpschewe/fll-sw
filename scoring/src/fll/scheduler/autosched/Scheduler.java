@@ -86,10 +86,12 @@ public class Scheduler {
       }
       mTeams.put(group, teams);
     }
-    if (teamNumber % 2 == 0) {
-      throw new FLLRuntimeException("Must have an even number of teams: "
-          + (teamNumber - 1));
-    }
+
+    // FIXME debug
+    // if (teamNumber % 2 == 0) {
+    // throw new FLLRuntimeException("Must have an even number of teams: "
+    // + (teamNumber - 1));
+    // }
 
     mDefaultDomain = new IntervalDomain(-10000, 10000);
     mObjective = new IntVar(mStore, "Objective", mDefaultDomain);
@@ -173,26 +175,26 @@ public class Scheduler {
     stationBusySubjective();
     stationStartSubjective();
     noOverlapSubjective();
-    subjectiveEOS();
+//    subjectiveEOS();
     teamSubjective();
 
-    stationBusyPerformance();
-    stationStartPerformance();
-    performanceEOS();
-    noOverlapPerformance();
-    teamPerformance();
-    perfUseBothSides();
-    performanceStart();
+//    stationBusyPerformance();
+//    stationStartPerformance();
+//    performanceEOS();
+//    noOverlapPerformance();
+//    teamPerformance();
+//    perfUseBothSides();
+//    performanceStart();
 
-    subjSubjChangetime();
-    subjPerfChangetime();
-    perfPerfChangetime();
-    perfSubjChangetime();
-    performanceChangetime();
+//    subjSubjChangetime();
+//    subjPerfChangetime();
+//    perfPerfChangetime();
+//    perfSubjChangetime();
+//    performanceChangetime();
 
-    teamJudging();
+//    teamJudging();
 
-    objective();
+//    objective();
   }
 
   private void subjectiveEOS() {
@@ -661,13 +663,37 @@ public class Scheduler {
 
     final DepthFirstSearch<IntVar> search = new DepthFirstSearch<IntVar>();
 
-//    final TraceGenerator<IntVar> trace = new TraceGenerator<IntVar>(search, select, vars);
-    LOGGER.debug("store: " + mStore.toString());
+    // final TraceGenerator<IntVar> trace = new TraceGenerator<IntVar>(search,
+    // select, vars);
+    LOGGER.debug("--All variables before search");
+    for (final Map.Entry<Integer, List<Team>> entry : mTeams.entrySet()) {
+      for (final Team i : entry.getValue()) {
+        for (int n = 0; n < mParams.getNSubjective(); ++n) {
+          for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
+            LOGGER.debug(i.getSY(n, t));
+            LOGGER.debug(i.getSZ(n, t));
+          }
+        }
+      }
+    }
+    LOGGER.debug("--end all variables before search");
     final boolean result = search.labeling(mStore, select, mObjective);
     if (result) {
       LOGGER.debug("*** Objective: "
           + search.getCostVariable() + " = " + search.getCostValue());
     }
+    LOGGER.debug("--All variables afer search");
+    for (final Map.Entry<Integer, List<Team>> entry : mTeams.entrySet()) {
+      for (final Team i : entry.getValue()) {
+        for (int n = 0; n < mParams.getNSubjective(); ++n) {
+          for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
+            LOGGER.debug(i.getSY(n, t));
+            LOGGER.debug(i.getSZ(n, t));
+          }
+        }
+      }
+    }
+    LOGGER.debug("--end all variables after search");
 
     LOGGER.debug("Timeout? "
         + search.timeOutOccured);
