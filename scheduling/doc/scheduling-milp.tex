@@ -200,9 +200,9 @@ $\sum\limits_{i \in
 $sy_{t}^{i,n} + sy_{t+u}^{i,d} \le 1$
 \hfill $\forall i \in N,
 \forall n \in 1 \dots NSubjective, 
-\forall t \in T,
+\forall t \in 1..{TMax-\alpha^{n} + ct-1},
 \forall d \in 1 \dots NSubjective \wedge d \neq n,
-\forall u \in 0 \dots \alpha^{n} + ct$
+\forall u \in 0 \dots \alpha^{n} + ct-1$
 \end{algorithm}
 
 \subsubsection{Subjective category $n$ to all performance stations}
@@ -211,10 +211,10 @@ $sy_{t}^{i,n} + sy_{t+u}^{i,d} \le 1$
 $sy_{t}^{i,n} + py_{t+u}^{i,b,s} \le 1$
 \hfill $\forall i \in N,
 \forall n \in 1 \dots NSubjective, 
-\forall t \in T,
+\forall t \in 1..{TMax-\alpha^{n} + ct-1},
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
-\forall u \in 0 \dots \alpha^{n}+ ct
+\forall u \in 0 \dots \alpha^{n}+ ct-1
 $
 \end{algorithm}
 
@@ -226,11 +226,11 @@ $py_{t}^{i,b,s} + py_{t+u}^{i,d,e} \le 1$
 \hfill $\forall i \in N,
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
-\forall t \in T,
+\forall t \in 1..{TMax-\alpha^{perf} + ct-1},
 \forall d \in 1 \dots NTables ,
 \forall e \in 1 \dots 2,
 d \neq b  \wedge e \neq s,
-\forall u \in 0 \dots \alpha^{perf}+ ct$
+\forall u \in 0 \dots \alpha^{perf}+ ct-1$
 \end{algorithm}
 
 \subsubsection{Performance on table $b$ side $s$ to all subjective
@@ -241,9 +241,9 @@ $py_{t}^{i,b,s} + sy_{t+u}^{i,n} \le 1$
 \hfill $\forall i \in N,
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
-\forall t \in T,
+\forall t \in 1..{TMax-\alpha^{perf} + ct-1},
 \forall n \in 1 \dots NSubjective
-\forall u \in 0 \dots \alpha^{perf}+ ct$
+\forall u \in 0 \dots \alpha^{perf}+ ct-1$
 \end{algorithm}
 
 \FloatBarrier
@@ -256,8 +256,8 @@ $
 \sum\limits_{b=1}^{NTables} (py_{t+u}^{i,b,1} + py_{t+u}^{i,b,2}) 
 \le 1$
 \hfill $\forall i \in N, 
-\forall t \in T,
-\forall u \in 0 \dots \alpha^{perf} + pct$
+\forall t \in 1 \dots TMax-\alpha^{perf} + pct-1,
+\forall u \in 0 \dots \alpha^{perf} + pct-1$
 \end{algorithm}
 
 \FloatBarrier

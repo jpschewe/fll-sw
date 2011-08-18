@@ -323,11 +323,13 @@ public class Scheduler {
   }
 
   private void performanceChangetime() {
+    final int uUpper = mParams.getPerformanceTimeSlots()
+        + mParams.getPerformanceChangetimeSlots() - 1;
     for (final Map.Entry<Integer, List<Team>> entry : mTeams.entrySet()) {
       for (final Team i : entry.getValue()) {
-        for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
-          for (int u = 0; u < mParams.getPerformanceTimeSlots()
-              + mParams.getPerformanceChangetimeSlots(); ++u) {
+        for (int t = 0; t < mParams.getMaxTimeSlots()
+            - uUpper; ++t) {
+          for (int u = 0; u < uUpper; ++u) {
             final ArrayList<IntVar> sumVarsT = new ArrayList<IntVar>();
             final ArrayList<IntVar> sumVarsU = new ArrayList<IntVar>();
             for (int b = 0; b < mParams.getNTables(); ++b) {
@@ -357,19 +359,21 @@ public class Scheduler {
   }
 
   private void perfPerfChangetime() {
+    final int uUpper = mParams.getPerformanceTimeSlots()
+        + mParams.getChangetimeSlots() - 1;
     for (final Map.Entry<Integer, List<Team>> entry : mTeams.entrySet()) {
       for (final Team i : entry.getValue()) {
         for (int b = 0; b < mParams.getNTables(); ++b) {
           for (int s = 0; s < 2; ++s) {
-            for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
+            for (int t = 0; t < mParams.getMaxTimeSlots()
+                - uUpper; ++t) {
               final IntVar pyt = i.getPY(b, s, t);
 
               for (int d = 0; d < mParams.getNTables(); ++d) {
                 for (int e = 0; e < 2; ++e) {
                   if (d != b
                       && e != s) {
-                    for (int u = 0; u < mParams.getPerformanceTimeSlots()
-                        + mParams.getChangetimeSlots(); ++u) {
+                    for (int u = 0; u < uUpper; ++u) {
                       final IntVar pyu = i.getPY(d, e, t
                           + u);
                       mStore.impose(new XplusYlteqZ(pyt, pyu, mOne));
@@ -385,15 +389,18 @@ public class Scheduler {
   }
 
   private void perfSubjChangetime() {
+    final int uUpper = mParams.getPerformanceChangetimeSlots()
+        + mParams.getChangetimeSlots() - 1;
     for (final Map.Entry<Integer, List<Team>> entry : mTeams.entrySet()) {
       for (final Team i : entry.getValue()) {
         for (int b = 0; b < mParams.getNTables(); ++b) {
           for (int s = 0; s < 2; ++s) {
-            for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
+            for (int t = 0; t < mParams.getMaxTimeSlots()
+                - uUpper; ++t) {
               final IntVar pyt = i.getPY(b, s, t);
 
               for (int n = 0; n < mParams.getNSubjective(); ++n) {
-                for (int u = 0; u < mParams.getPerformanceChangetimeSlots(); ++u) {
+                for (int u = 0; u < uUpper; ++u) {
                   final IntVar syu = i.getSY(n, t
                       + u);
                   mStore.impose(new XplusYlteqZ(pyt, syu, mOne));
@@ -412,13 +419,15 @@ public class Scheduler {
       for (final Team i : entry.getValue()) {
 
         for (int n = 0; n < mParams.getNSubjective(); ++n) {
-          for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
+          final int uUpper = mParams.getSubjectiveTimeSlots(n)
+              + mParams.getChangetimeSlots() - 1;
+          for (int t = 0; t < mParams.getMaxTimeSlots()
+              - uUpper; ++t) {
             final IntVar syt = i.getSY(n, t);
 
             for (int b = 0; b < mParams.getNTables(); ++b) {
               for (int s = 0; s < 2; ++s) {
-                for (int u = 0; u < mParams.getSubjectiveTimeSlots(n)
-                    + mParams.getChangetimeSlots(); ++u) {
+                for (int u = 0; u < uUpper; ++u) {
                   final IntVar pyu = i.getPY(b, s, t
                       + u);
                   mStore.impose(new XplusYlteqZ(syt, pyu, mOne));
@@ -436,14 +445,16 @@ public class Scheduler {
       for (final Team i : entry.getValue()) {
 
         for (int n = 0; n < mParams.getNSubjective(); ++n) {
-          for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
+          final int uUpper = mParams.getSubjectiveTimeSlots(n)
+              + mParams.getChangetimeSlots() - 1;
+          for (int t = 0; t < mParams.getMaxTimeSlots()
+              - uUpper; ++t) {
 
             final IntVar syt = i.getSY(n, t);
             for (int d = 0; d < mParams.getNSubjective(); ++d) {
               if (d != n) {
 
-                for (int u = 0; u < mParams.getSubjectiveTimeSlots(n)
-                    + mParams.getChangetimeSlots(); ++u) {
+                for (int u = 0; u < uUpper; ++u) {
                   final IntVar syu = i.getSY(d, t
                       + u);
                   mStore.impose(new XplusYlteqZ(syt, syu, mOne));
