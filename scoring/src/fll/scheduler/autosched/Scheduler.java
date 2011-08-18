@@ -677,8 +677,8 @@ public class Scheduler {
       for (final Team i : entry.getValue()) {
         for (int n = 0; n < mParams.getNSubjective(); ++n) {
           for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
-            LOGGER.debug(i.getSY(n, t));
             LOGGER.debug(i.getSZ(n, t));
+            LOGGER.debug(i.getSY(n, t));
           }
         }
       }
@@ -689,13 +689,13 @@ public class Scheduler {
       LOGGER.debug("*** Objective: "
           + search.getCostVariable() + " = " + search.getCostValue());
     }
-    LOGGER.debug("--All variables afer search");
+    LOGGER.debug("--All variables after search");
     for (final Map.Entry<Integer, List<Team>> entry : mTeams.entrySet()) {
       for (final Team i : entry.getValue()) {
         for (int n = 0; n < mParams.getNSubjective(); ++n) {
           for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
-            LOGGER.debug(i.getSY(n, t));
             LOGGER.debug(i.getSZ(n, t));
+            LOGGER.debug(i.getSY(n, t));
           }
         }
       }
