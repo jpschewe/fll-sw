@@ -64,6 +64,7 @@ public class Scheduler {
    * Variable equal to 1. Used for certain constraints that require a variable.
    */
   private final IntVar mOne;
+
   private final IntVar mZero;
 
   /**
@@ -170,22 +171,63 @@ public class Scheduler {
    */
   private void buildModel() {
     stationBusySubjective();
-    stationBusyPerformance();
     stationStartSubjective();
-    stationStartPerformance();
     noOverlapSubjective();
-    noOverlapPerformance();
+    subjectiveEOS();
     teamSubjective();
+
+    stationBusyPerformance();
+    stationStartPerformance();
+    performanceEOS();
+    noOverlapPerformance();
     teamPerformance();
+    perfUseBothSides();
+    performanceStart();
+
     subjSubjChangetime();
     subjPerfChangetime();
     perfPerfChangetime();
     perfSubjChangetime();
     performanceChangetime();
-    perfUseBothSides();
+
     teamJudging();
-    performanceStart();
+
     objective();
+  }
+
+  private void subjectiveEOS() {
+    final ArrayList<IntVar> sumVars = new ArrayList<IntVar>();
+    for (final Map.Entry<Integer, List<Team>> entry : mTeams.entrySet()) {
+      for (final Team i : entry.getValue()) {
+        for (int n = 0; n < mParams.getNSubjective(); ++n) {
+          for (int t = mParams.getMaxTimeSlots()
+              - mParams.getSubjectiveTimeSlots(n); t < mParams.getMaxTimeSlots(); ++t) {
+            sumVars.add(i.getSZ(n, t));
+          }
+        }
+      }
+    }
+    final IntVar sum = new IntVar(mStore, "subjectiveEOS.sum", mDefaultDomain);
+    mStore.impose(new Sum(sumVars, sum));
+    mStore.impose(new XeqY(sum, mZero));
+  }
+
+  private void performanceEOS() {
+    final ArrayList<IntVar> sumVars = new ArrayList<IntVar>();
+    for (final Map.Entry<Integer, List<Team>> entry : mTeams.entrySet()) {
+      for (final Team i : entry.getValue()) {
+        for (int b = 0; b < mParams.getNTables(); ++b) {
+          for (int t = mParams.getMaxTimeSlots()
+              - mParams.getPerformanceTimeSlots(); t < mParams.getMaxTimeSlots(); ++t) {
+            sumVars.add(i.getPZ(b, 0, t));
+            sumVars.add(i.getPZ(b, 1, t));
+          }
+        }
+      }
+    }
+    final IntVar sum = new IntVar(mStore, "subjectiveEOS.sum", mDefaultDomain);
+    mStore.impose(new Sum(sumVars, sum));
+    mStore.impose(new XeqY(sum, mZero));
   }
 
   private void objective() {
@@ -238,7 +280,8 @@ public class Scheduler {
   }
 
   private void teamJudging() {
-    final int numStations = mParams.getNSubjective() + mParams.getNRounds();
+    final int numStations = mParams.getNSubjective()
+        + mParams.getNRounds();
     final IntVar numStationsVar = new IntVar(mStore, "numJudgingStations", numStations, numStations);
     for (final Map.Entry<Integer, List<Team>> entry : mTeams.entrySet()) {
       for (final Team i : entry.getValue()) {

@@ -173,6 +173,21 @@ $\sum\limits_{b=1}^{NTables} \sum\limits_{t \in T} ( pz_{t}^{i,b,1} + pz_{t}^{i,
 \hfill $\forall i \in N$
 \end{algorithm}
 
+\FloatBarrier
+\subsection{Ensure that teams don't start too close to the end of the
+  tournament.}
+\begin{algorithm}
+\caption{subjectiveEOS}
+$\sum\limits_{i \in N}\sum\limits_{n=1}^{NSubjective}\sum\limits_{t=TMax-\alpha^{n}+1}^{TMax} sz_{t}^{i,n} = 0$
+\end{algorithm}
+
+\begin{algorithm}
+\caption{performanceEOS}
+$\sum\limits_{i \in
+  N}\sum\limits_{b=1}^{NTables}\sum\limits_{t=TMax-\alpha^{perf}+1}^{TMax}
+  ( pz_{t}^{i,b,1} + pz_{t}^{i,b,2} ) = 0$
+\end{algorithm}
+
 
 \FloatBarrier
 \subsection{Enforce change time for each team $i$.}
