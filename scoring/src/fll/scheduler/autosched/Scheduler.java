@@ -18,7 +18,6 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import JaCoP.constraints.Sum;
-import JaCoP.constraints.XeqC;
 import JaCoP.constraints.XeqY;
 import JaCoP.constraints.XlteqY;
 import JaCoP.constraints.XmulCeqZ;
@@ -65,6 +64,7 @@ public class Scheduler {
    * Variable equal to 1. Used for certain constraints that require a variable.
    */
   private final IntVar mOne;
+  private final IntVar mZero;
 
   /**
    * @throws FLLRuntimeException if the number of teams is not even
@@ -93,6 +93,8 @@ public class Scheduler {
     mDefaultDomain = new IntervalDomain(-10000, 10000);
     mObjective = new IntVar(mStore, "Objective", mDefaultDomain);
     mOne = new IntVar(mStore, "one", 1, 1);
+    mZero = new IntVar(mStore, "zero", 0, 0);
+
     buildModel();
   }
 
@@ -231,10 +233,13 @@ public class Scheduler {
     }
     final IntVar sum = new IntVar(mStore, "performanceStart.sum", mDefaultDomain);
     mStore.impose(new Sum(sumVars, sum));
-    mStore.impose(new XeqC(sum, 0));
+
+    mStore.impose(new XeqY(sum, mZero));
   }
 
   private void teamJudging() {
+    final int numStations = mParams.getNSubjective() + mParams.getNRounds();
+    final IntVar numStationsVar = new IntVar(mStore, "numJudgingStations", numStations, numStations);
     for (final Map.Entry<Integer, List<Team>> entry : mTeams.entrySet()) {
       for (final Team i : entry.getValue()) {
         final ArrayList<IntVar> sumVars = new ArrayList<IntVar>();
@@ -252,8 +257,7 @@ public class Scheduler {
 
         final IntVar sum = new IntVar(mStore, String.format("teamJudging.sum[%s]", i.getName()), mDefaultDomain);
         mStore.impose(new Sum(sumVars, sum));
-        mStore.impose(new XeqC(sum, mParams.getNSubjective()
-            + mParams.getNRounds()));
+        mStore.impose(new XeqY(sum, numStationsVar));
       }
     }
   }
@@ -419,6 +423,7 @@ public class Scheduler {
   }
 
   private void teamPerformance() {
+    final IntVar nRounds = new IntVar(mStore, "NRounds", mParams.getNRounds(), mParams.getNRounds());
     for (final Map.Entry<Integer, List<Team>> entry : mTeams.entrySet()) {
       for (final Team i : entry.getValue()) {
 
@@ -431,7 +436,7 @@ public class Scheduler {
         }
         final IntVar sum = new IntVar(mStore, String.format("teamPerformance.sum[%s]", i.getName()), mDefaultDomain);
         mStore.impose(new Sum(sumVars, sum));
-        mStore.impose(new XeqC(sum, mParams.getNRounds()));
+        mStore.impose(new XeqY(sum, nRounds));
       }
     }
   }
