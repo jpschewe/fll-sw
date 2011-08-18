@@ -33,7 +33,6 @@ import JaCoP.search.IndomainMin;
 import JaCoP.search.MostConstrainedStatic;
 import JaCoP.search.SelectChoicePoint;
 import JaCoP.search.SimpleSelect;
-import JaCoP.search.TraceGenerator;
 import au.com.bytecode.opencsv.CSVWriter;
 import fll.Utilities;
 import fll.scheduler.TournamentSchedule;
