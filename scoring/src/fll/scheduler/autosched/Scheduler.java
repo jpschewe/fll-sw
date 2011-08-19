@@ -312,11 +312,20 @@ public class Scheduler {
 
   private void perfUseBothSides() {
     for (final Map.Entry<Integer, List<Team>> entry : mTeams.entrySet()) {
-      for (final Team i : entry.getValue()) {
-        for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
-          for (int b = 0; b < mParams.getNTables(); ++b) {
-            mStore.impose(new XeqY(i.getPY(b, 0, t), i.getPY(b, 1, t)));
+      for (int t = 0; t < mParams.getMaxTimeSlots(); ++t) {
+        for (int b = 0; b < mParams.getNTables(); ++b) {
+          final ArrayList<IntVar> side1Vars = new ArrayList<IntVar>();
+          final ArrayList<IntVar> side2Vars = new ArrayList<IntVar>();
+          for (final Team i : entry.getValue()) {
+            side1Vars.add(i.getPY(b, 0, t));
+            side2Vars.add(i.getPY(b, 1, t));
           }
+          
+          final IntVar side1Sum = new IntVar(mStore, String.format("perfUseBothSides.sumSide1[%d][%d]", b, t), mDefaultDomain);
+          mStore.impose(new Sum(side1Vars, side1Sum));
+          final IntVar side2Sum = new IntVar(mStore, String.format("perfUseBothSides.sumSide2[%d][%d]", b, t), mDefaultDomain);
+          mStore.impose(new Sum(side2Vars, side2Sum));
+          mStore.impose(new XeqY(side1Sum, side2Sum));
         }
       }
     }
@@ -340,9 +349,8 @@ public class Scheduler {
               sumVars.add(i.getPY(b, 1, t
                   + u));
 
-              final IntVar sum = new IntVar(mStore,
-                                             String.format("performanceChangetime.sum[%s][%d]", i.getName(), t),
-                                             mDefaultDomain);
+              final IntVar sum = new IntVar(mStore, String.format("performanceChangetime.sum[%s][%d]", i.getName(), t),
+                                            mDefaultDomain);
               mStore.impose(new Sum(sumVars, sum));
               mStore.impose(new XlteqY(sum, mOne));
             }
