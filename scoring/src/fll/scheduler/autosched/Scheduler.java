@@ -330,27 +330,21 @@ public class Scheduler {
         for (int t = 0; t < mParams.getMaxTimeSlots()
             - uUpper; ++t) {
           for (int u = 0; u < uUpper; ++u) {
-            final ArrayList<IntVar> sumVarsT = new ArrayList<IntVar>();
-            final ArrayList<IntVar> sumVarsU = new ArrayList<IntVar>();
+            final ArrayList<IntVar> sumVars = new ArrayList<IntVar>();
             for (int b = 0; b < mParams.getNTables(); ++b) {
-              sumVarsT.add(i.getPY(b, 0, t));
-              sumVarsT.add(i.getPY(b, 1, t));
+              sumVars.add(i.getPY(b, 0, t));
+              sumVars.add(i.getPY(b, 1, t));
 
-              sumVarsU.add(i.getPY(b, 0, t
+              sumVars.add(i.getPY(b, 0, t
                   + u));
-              sumVarsU.add(i.getPY(b, 1, t
+              sumVars.add(i.getPY(b, 1, t
                   + u));
 
-              final IntVar sumT = new IntVar(mStore,
-                                             String.format("performanceChangetime.sumT[%s][%d]", i.getName(), t),
+              final IntVar sum = new IntVar(mStore,
+                                             String.format("performanceChangetime.sum[%s][%d]", i.getName(), t),
                                              mDefaultDomain);
-              mStore.impose(new Sum(sumVarsT, sumT));
-              final IntVar sumU = new IntVar(mStore,
-                                             String.format("performanceChangetime.sumU[%s][%d]", i.getName(), u),
-                                             mDefaultDomain);
-              mStore.impose(new Sum(sumVarsU, sumU));
-
-              mStore.impose(new XplusYlteqZ(sumT, sumU, mOne));
+              mStore.impose(new Sum(sumVars, sum));
+              mStore.impose(new XlteqY(sum, mOne));
             }
           }
         }
