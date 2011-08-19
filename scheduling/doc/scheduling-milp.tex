@@ -251,9 +251,10 @@ $py_{t}^{i,b,s} + sy_{t+u}^{i,n} \le 1$
 \begin{algorithm}
 \caption{performanceChangetime}
 $
-\sum\limits_{b=1}^{NTables} (py_{t}^{i,b,1} + py_{t}^{i,b,2})
+\sum\limits_{b=1}^{NTables} (
+py_{t}^{i,b,1} + py_{t}^{i,b,2}
 +
-\sum\limits_{b=1}^{NTables} (py_{t+u}^{i,b,1} + py_{t+u}^{i,b,2}) 
+py_{t+u}^{i,b,1} + py_{t+u}^{i,b,2})
 \le 1$
 \hfill $\forall i \in N, 
 \forall t \in 1 \dots TMax-\alpha^{perf} + pct-1,
