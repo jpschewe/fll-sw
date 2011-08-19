@@ -77,6 +77,8 @@ changes when we alternate tables at state}
 \section{Definitions}
 \begin{itemize}
 
+\item[$M$] A big number that will invalidate any constraint, 10,000 works well.
+
 \item[$T$] Time, in increments of $TInc$ minutes, $t \in 1 \dots TMax$
 
 \item[$G_{g}$] The teams in judging group $g$
@@ -190,6 +192,20 @@ $\sum\limits_{i \in
   ( pz_{t}^{i,b,1} + pz_{t}^{i,b,2} ) = 0$
 \end{algorithm}
 
+\FloatBarrier
+\subsection{Order the teams for the first subjective category.}
+If we order things such that team 1 must be judged in subjective category 1
+before team 2 and so on we cut out a bunch of search space without removing
+any solutions that we care about. We can't do this for all subjective
+categories because there the order may matter once the first category is
+set.
+\begin{algorithm}
+\caption{subjOrder}
+$\sum\limits_{j \in N}^{j \ne i} \sum\limits_{p=1}^{t} sz_{p}^{j,1} <= 
+( 0 + ( 1 - sz_{t}^{i,1} ) * M )$
+\hfill $\forall i \in N, 
+\forall t \in t$
+\end{algorithm}
 
 \FloatBarrier
 \subsection{Enforce change time for each team $i$.}
