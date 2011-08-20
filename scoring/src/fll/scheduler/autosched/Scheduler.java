@@ -174,27 +174,27 @@ public class Scheduler {
   private void buildModel() {
     stationBusySubjective();
     stationStartSubjective();
-    noOverlapSubjective();
-//    subjectiveEOS();
+    // noOverlapSubjective();
+    subjectiveEOS();
     teamSubjective();
 
-//    stationBusyPerformance();
-//    stationStartPerformance();
-//    performanceEOS();
-//    noOverlapPerformance();
-//    teamPerformance();
-//    perfUseBothSides();
-//    performanceStart();
+    // stationBusyPerformance();
+    // stationStartPerformance();
+    // performanceEOS();
+    // noOverlapPerformance();
+    // teamPerformance();
+    // perfUseBothSides();
+    // performanceStart();
 
-//    subjSubjChangetime();
-//    subjPerfChangetime();
-//    perfPerfChangetime();
-//    perfSubjChangetime();
-//    performanceChangetime();
+    // subjSubjChangetime();
+    // subjPerfChangetime();
+    // perfPerfChangetime();
+    // perfSubjChangetime();
+    // performanceChangetime();
 
-//    teamJudging();
+    // teamJudging();
 
-//    objective();
+    // objective();
   }
 
   private void addConstraint(final Constraint c,
