@@ -35,6 +35,8 @@ int: pct_minutes = 45;
 int: M = 10000;
 
 % computed parameters
+constraint assert(nTeams mod 2 == 0, "Number of teams must be even");
+
 int: TMax = TMax_hours * 60 div TInc;
 int: alpha_subj = alpha_subj_minutes div TInc;
 int: alpha_perf = alpha_perf_minutes div TInc;
