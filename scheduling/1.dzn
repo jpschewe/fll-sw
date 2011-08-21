@@ -1,0 +1,19 @@
+TInc = 5;
+TMax_hours = 8;
+
+% subjective setup
+NSubjective = 1;
+subj_minutes = [20];
+
+% performance setup
+NRounds = 1;
+NTables = 1;
+
+% judging groups
+NGroups = 1;
+group_counts = [2];
+
+alpha_perf_minutes = 5;
+
+ct_minutes = 15;
+pct_minutes = 45;
