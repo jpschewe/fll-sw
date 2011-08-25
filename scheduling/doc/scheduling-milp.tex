@@ -106,16 +106,16 @@ judging station $n$ at time $t$.
 
 \begin{algorithm}
 \caption{stationBusySubjective}
-$\sum\limits_{u=1}^{\alpha^{n}} sz_{t-u+1}^{i,n} \le sy_{t}^{i,n}$
-\hfill $\forall t \in \alpha^{n} \dots TMax,
+$\sum\limits_{u=1}^{min(t, \alpha^{n})} sz_{t-u+1}^{i,n} \le sy_{t}^{i,n}$
+\hfill $\forall t \in 1 \dots TMax,
 \forall i \in N,
 \forall n \in 1 \dots NSubjective$
 \end{algorithm}
 
 \begin{algorithm}
 \caption{stationBusyPerformance}
-$\sum\limits_{u=1}^{\alpha^{perf}} pz_{t-u+1}^{i,b,s} \le py_{t}^{i,b,s}$
-\hfill $\forall t \in \alpha^{perf} \dots TMax, 
+$\sum\limits_{u=1}^{min(t, \alpha^{perf})} pz_{t-u+1}^{i,b,s} \le py_{t}^{i,b,s}$
+\hfill $\forall t \in 1 \dots TMax, 
 \forall i \in N, \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2$
 \end{algorithm}
