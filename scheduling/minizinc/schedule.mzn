@@ -62,8 +62,14 @@ constraint
   forall(g in 1..NGroups) (
   forall (i in 1..group_counts[g]) (
     forall (n in 1..NSubjective) (
-      forall (t in alpha_subj[n]..TMax) (
-        sum (u in 1..alpha_subj[n]) (sz[g,i,n,t-u+1]) <= sy[g,i,n,t]
+      forall (t in 1..TMax) (
+        sum (u in 1..alpha_subj[n]) (
+          if(t-u+1 >= 1) then
+            sz[g,i,n,t-u+1]
+          else
+            0
+          endif
+        ) <= sy[g,i,n,t]
 ))));
 
 % stationBusyPerformance
@@ -73,7 +79,13 @@ constraint
     forall(b in 1..NTables) (
       forall(s in 1..2) (
         forall(t in alpha_perf..TMax) (
-	  sum(u in 1..alpha_perf) (pz[g,i,b,s,t-u+1]) <= py[g,i,b,s,t]
+	  sum(u in 1..alpha_perf) (
+            if(t-u+1 >= 1) then
+              pz[g,i,b,s,t-u+1]
+            else
+              0
+            endif
+           ) <= py[g,i,b,s,t]
 )))));
 
 % stationStartSubjective
