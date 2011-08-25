@@ -1,3 +1,7 @@
+% Copyright (c) 2011 HighTechKids.  All rights reserved
+% HighTechKids is on the web at: http://www.hightechkids.org
+% This code is released under GPL; see LICENSE.txt for details.
+
 include "globals.mzn";
 
 % run with 'minizinc -G linear -b mip' - doesn't work because of 5d arrays
