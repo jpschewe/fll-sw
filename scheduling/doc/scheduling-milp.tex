@@ -86,18 +86,17 @@ changes when we alternate tables at state}
 \item[$T$] Time, in increments of $TInc$ minutes, $t \in 1 \dots TMax$
 
 \item[$G_{g}$] The teams in judging group $g$
-\item[$N$] All teams = ($G_{1}, G_{2}, \dots, G_{NGroups}$)
 
-\item[$py_{t}^{i,b,s}$] The status of performance table $b$ side $s$ for
-at  time $t$ for team $i$. 1 if the table is in use.  
+\item[$py_{t}^{g,i,b,s}$] The status of performance table $b$ side $s$ for
+at time $t$ for team $i$ in group $g$. 1 if the table is in use.  
 
-\item[$pz_{t}^{i,b,s}$] 1 if team $i$ is starting performance on table $b$,
+\item[$pz_{t}^{g,i,b,s}$] 1 if team $i$ in group $g$ is starting performance on table $b$,
   side $s$ at time $t$.
 
-\item[$sy_{t}^{i,n}$] The status of subjective judging station $n$ at time $t$ for team
-  $i$, 1 if the station is in use.
+\item[$sy_{t}^{g,i,n}$] The status of subjective judging station $n$ at time $t$ for team
+  $i$ in group $g$, 1 if the station is in use.
 
-\item[$sz_{t}^{i,n}$] 1 if team $i$ is starting judging at subjective
+\item[$sz_{t}^{g,i,n}$] 1 if team $i$ in group $g$ is starting judging at subjective
 judging station $n$ at time $t$.
 
 
@@ -110,18 +109,25 @@ judging station $n$ at time $t$.
 
 \begin{algorithm}
 \caption{stationBusySubjective}
-$\sum\limits_{u=1}^{min(t, \alpha^{n})} sz_{t-u+1}^{i,n} \le sy_{t}^{i,n}$
-\hfill $\forall t \in 1 \dots TMax,
-\forall i \in N,
-\forall n \in 1 \dots NSubjective$
+$\sum\limits_{u=1}^{min(t, \alpha^{n})} sz_{t-u+1}^{g,i,n} \le sy_{t}^{g,i,n}$
+\hfill $
+\forall g \in 1 \dots NGroups,
+\forall i \in G_{g},
+\forall n \in 1 \dots NSubjective,
+\forall t \in 1 \dots TMax
+$
 \end{algorithm}
 
 \begin{algorithm}
 \caption{stationBusyPerformance}
-$\sum\limits_{u=1}^{min(t, \alpha^{perf})} pz_{t-u+1}^{i,b,s} \le py_{t}^{i,b,s}$
-\hfill $\forall t \in 1 \dots TMax, 
-\forall i \in N, \forall b \in 1 \dots NTables,
-\forall s \in 1 \dots 2$
+$\sum\limits_{u=1}^{min(t, \alpha^{perf})} pz_{t-u+1}^{g,i,b,s} \le py_{t}^{g,i,b,s}$
+\hfill $
+\forall g \in 1 \dots NGroups,
+\forall i \in G_{g}, 
+\forall b \in 1 \dots NTables,
+\forall s \in 1 \dots 2,
+\forall t \in 1 \dots TMax
+$
 \end{algorithm}
 
 
@@ -129,16 +135,25 @@ $\sum\limits_{u=1}^{min(t, \alpha^{perf})} pz_{t-u+1}^{i,b,s} \le py_{t}^{i,b,s}
 \subsection{Note the start of judging at a station upon team transition.}
 \begin{algorithm}
 \caption{stationStartSubjective}
-$sy_{t}^{i,n} - sy_{t-1}^{i,n} \le sz_{t}^{i,n}$
-\hfill $\forall t \in {2 \dots TMax}, \forall i \in N,
-\forall n \in 1 \dots NSubjective$
+$sy_{t}^{g,i,n} - sy_{t-1}^{g,i,n} \le sz_{t}^{g,i,n}$
+\hfill $
+\forall g \in 1 \dots NGroups,
+\forall i \in G_{g},
+\forall n \in 1 \dots NSubjective,
+\forall t \in {2 \dots TMax}
+$
 \end{algorithm}
 
 \begin{algorithm}
 \caption{stationStartPerformance}
-$py_{t}^{i,b,s} - py_{t-1}^{i,b,s} \le pz_{t}^{i,b,s}$
-\hfill $\forall t \in {2 \dots TMax}, \forall i \in N, \forall b \in {1 \dots NTables},
-\forall s \in 1 \dots 2$
+$py_{t}^{g,i,b,s} - py_{t-1}^{g,i,b,s} \le pz_{t}^{g,i,b,s}$
+\hfill $
+\forall g \in 1 \dots NGroups,
+\forall i \in G_{g},
+\forall b \in {1 \dots NTables},
+\forall s \in 1 \dots 2,
+\forall t \in {2 \dots TMax}
+$
 \end{algorithm}
 
 
@@ -149,16 +164,22 @@ given time ($t$).}
 
 \begin{algorithm}
 \caption{noOverlapSubjective}
-$\sum\limits_{i \in G_{g}} sy_{t}^{i,n} \le 1$          
-\hfill $\forall t \in T, \forall g \in 1 \dots NGroups,
-\forall n \in 1 \dots NSubjective$
+$\sum\limits_{i \in G_{g}} sy_{t}^{g,i,n} \le 1$          
+\hfill $
+\forall g \in 1 \dots NGroups,
+\forall n \in 1 \dots NSubjective,
+\forall t \in T
+$
 \end{algorithm}
 
 \begin{algorithm}
 \caption{noOverlapPerformance}
-$\sum\limits_{i \in N} py_{t}^{i,b,s} \le 1$          
-\hfill $\forall t \in T, \forall b \in 1 \dots NTables,
-\forall s \in 1 \dots 2$
+$\sum\limits_{g=1}^{NGroups} \sum\limits_{i \in G_{g}} py_{t}^{g,i,b,s} \le 1$
+\hfill $
+\forall b \in 1 \dots NTables,
+\forall s \in 1 \dots 2,
+\forall t \in T
+$
 \end{algorithm}
 
 
@@ -167,8 +188,12 @@ $\sum\limits_{i \in N} py_{t}^{i,b,s} \le 1$
 
 \begin{algorithm}
 \caption{teamSubjective}
-$\sum\limits_{t \in T} sz_{t}^{i,n} = 1$
-\hfill $\forall n \in 1 \dots NSubjective, i \in N$
+$\sum\limits_{t \in T} sz_{t}^{g,i,n} = 1$
+\hfill $
+\forall g \in 1 \dots NGroups,
+\forall i \in G_{g},
+\forall n \in 1 \dots NSubjective,
+$
 \end{algorithm}
 
 
@@ -177,8 +202,11 @@ $\sum\limits_{t \in T} sz_{t}^{i,n} = 1$
 
 \begin{algorithm}
 \caption{teamPerformance}
-$\sum\limits_{b=1}^{NTables} \sum\limits_{t \in T} ( pz_{t}^{i,b,1} + pz_{t}^{i,b,2} ) = NRounds$
-\hfill $\forall i \in N$
+$\sum\limits_{b=1}^{NTables} \sum\limits_{t \in T} ( pz_{t}^{g,i,b,1} + pz_{t}^{g,i,b,2} ) = NRounds$
+\hfill $
+\forall g \in 1 \dots NGroups,
+\forall i \in G_{g}
+$
 \end{algorithm}
 
 \FloatBarrier
@@ -186,14 +214,21 @@ $\sum\limits_{b=1}^{NTables} \sum\limits_{t \in T} ( pz_{t}^{i,b,1} + pz_{t}^{i,
   tournament.}
 \begin{algorithm}
 \caption{subjectiveEOS}
-$\sum\limits_{i \in N}\sum\limits_{n=1}^{NSubjective}\sum\limits_{t=TMax-\alpha^{n}+1}^{TMax} sz_{t}^{i,n} = 0$
+$
+\sum\limits_{g=1}^{NGroups}
+\sum\limits_{i \in G_{g}}
+  \sum\limits_{n=1}^{NSubjective}
+    \sum\limits_{t=TMax-\alpha^{n}+1}^{TMax} sz_{t}^{g,i,n} = 0$
 \end{algorithm}
 
 \begin{algorithm}
 \caption{performanceEOS}
-$\sum\limits_{i \in
-  N}\sum\limits_{b=1}^{NTables}\sum\limits_{t=TMax-\alpha^{perf}+1}^{TMax}
-  ( pz_{t}^{i,b,1} + pz_{t}^{i,b,2} ) = 0$
+$
+\sum\limits_{g=1}^{NGroups}
+\sum\limits_{i \in G_{g}}
+  \sum\limits_{b=1}^{NTables}
+    \sum\limits_{t=TMax-\alpha^{perf}+1}^{TMax}
+  ( pz_{t}^{g,i,b,1} + pz_{t}^{g,i,b,2} ) = 0$
 \end{algorithm}
 
 \FloatBarrier
@@ -205,31 +240,42 @@ categories because there the order may matter once the first category is
 set.
 \begin{algorithm}
 \caption{subjOrder}
-$\sum\limits_{j \in N}^{j \ne i} \sum\limits_{p=1}^{t} sz_{p}^{j,1} <= 
-( 0 + ( 1 - sz_{t}^{i,1} ) * M )$
-\hfill $\forall i \in N, 
-\forall t \in t$
+$
+\sum\limits_{j \in N}^{j \ne i}
+  \sum\limits_{p=1}^{t} sz_{p}^{g,j,1} <= 
+( 0 + ( 1 - sz_{t}^{g,i,1} ) * M )$
+\hfill $
+\forall g \in 1 \dots NGroups,
+\forall i \in G_{g}, 
+\forall t \in t
+$
 \end{algorithm}
 
 \FloatBarrier
 \subsection{Enforce change time for each team $i$.}
 
+\FloatBarrier
 \subsubsection{Subjective category $n$ to all other subjective categories}
 \begin{algorithm}
 \caption{subjSubjChangetime}
-$sy_{t}^{i,n} + sy_{t+u}^{i,d} \le 1$
-\hfill $\forall i \in N,
+$sy_{t}^{g,i,n} + sy_{t+u}^{g,i,d} \le 1$
+\hfill $
+\forall g \in 1 \dots NGroups,
+\forall i \in G_{g},
 \forall n \in 1 \dots NSubjective, 
 \forall t \in 1..{TMax- ct-1},
 \forall d \in 1 \dots NSubjective \wedge d \neq n,
 \forall u \in 0 \dots ct-1$
 \end{algorithm}
 
+\FloatBarrier
 \subsubsection{Subjective category $n$ to all performance stations}
 \begin{algorithm}
 \caption{subjPerfChangetime}
-$sy_{t}^{i,n} + py_{t+u}^{i,b,s} \le 1$
-\hfill $\forall i \in N,
+$sy_{t}^{g,i,n} + py_{t+u}^{g,i,b,s} \le 1$
+\hfill $
+\forall g \in 1 \dots NGroups,
+\forall i \in G_{g},
 \forall n \in 1 \dots NSubjective, 
 \forall t \in 1..{TMax- ct-1},
 \forall b \in 1 \dots NTables,
@@ -238,12 +284,15 @@ $sy_{t}^{i,n} + py_{t+u}^{i,b,s} \le 1$
 $
 \end{algorithm}
 
+\FloatBarrier
 \subsubsection{Performance on table $b$ side $s$ to all other performance
   stations}
 \begin{algorithm}
 \caption{perfPerfChangetime}
-$py_{t}^{i,b,s} + py_{t+u}^{i,d,e} \le 1$
-\hfill $\forall i \in N,
+$py_{t}^{g,i,b,s} + py_{t+u}^{g,i,d,e} \le 1$
+\hfill $
+\forall g \in 1 \dots NGroups,
+\forall i \in G_{g},
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
 \forall t \in 1..{TMax- ct-1},
@@ -253,12 +302,15 @@ d \neq b  \wedge e \neq s,
 \forall u \in 0 \dots ct-1$
 \end{algorithm}
 
+\FloatBarrier
 \subsubsection{Performance on table $b$ side $s$ to all subjective
   stations}
 \begin{algorithm}
 \caption{perfSubjChangetime}
-$py_{t}^{i,b,s} + sy_{t+u}^{i,n} \le 1$
-\hfill $\forall i \in N,
+$py_{t}^{g,i,b,s} + sy_{t+u}^{g,i,n} \le 1$
+\hfill $
+\forall g \in 1 \dots NGroups,
+\forall i \in G_{g},
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
 \forall t \in 1..{TMax-ct-1},
@@ -272,11 +324,13 @@ $py_{t}^{i,b,s} + sy_{t+u}^{i,n} \le 1$
 \caption{performanceChangetime}
 $
 \sum\limits_{b=1}^{NTables} (
-py_{t}^{i,b,1} + py_{t}^{i,b,2}
+py_{t}^{g,i,b,1} + py_{t}^{g,i,b,2}
 +
-py_{t+u}^{i,b,1} + py_{t+u}^{i,b,2})
+py_{t+u}^{g,i,b,1} + py_{t+u}^{g,i,b,2})
 \le 1$
-\hfill $\forall i \in N, 
+\hfill $
+\forall g \in 1 \dots NGroups,
+\forall i \in G_{g}, 
 \forall t \in 1 \dots TMax- pct-1,
 \forall u \in 1 \dots pct-1$
 \end{algorithm}
@@ -286,7 +340,9 @@ py_{t+u}^{i,b,1} + py_{t+u}^{i,b,2})
   used.}
 \begin{algorithm}
 \caption{perfUseBothSides}
-$\sum\limits_{i \in N} py_{t}^{i,b,1} = \sum\limits_{i \in N}py_{t}^{i,b,2}$
+$\sum\limits_{g=1}^{NGroups}\sum\limits_{i \in N} py_{t}^{g,i,b,1} 
+= 
+\sum\limits_{g=1}^{NGroups}\sum\limits_{i \in N}py_{t}^{g,i,b,2}$
 \hfill $
 \forall b \in 1 \dots NTables,
 \forall t \in T$
@@ -298,11 +354,13 @@ $\sum\limits_{i \in N} py_{t}^{i,b,1} = \sum\limits_{i \in N}py_{t}^{i,b,2}$
 \begin{algorithm}
 \caption{teamJudging}
 $\sum\limits_{t \in T} ( 
-    \sum\limits_{n=1}^{NSubjective} sz_{t}^{i,n}  
- + \sum\limits_{b=1}^{NTables} (pz_{t}^{i,b,1} + pz_{t}^{i,b,2})
+    \sum\limits_{n=1}^{NSubjective} sz_{t}^{g,i,n}
+ + \sum\limits_{b=1}^{NTables} (pz_{t}^{g,i,b,1} + pz_{t}^{g,i,b,2})
 )
 = NSubjective + NRounds$
-\hfill $\forall i \in N$
+\hfill $
+\forall g \in 1 \dots NGroups,
+\forall i \in G_{g}$
 \end{algorithm}
 
 \FloatBarrier
@@ -317,9 +375,12 @@ judging group to the appropriate judging station. See \autoref{judging_group_con
 \subsection{Start the performance rounds 60 minutes into the day.}
 \begin{algorithm}
 \caption{performanceStart}
-$\sum\limits_{i \in N} \sum\limits_{b=1}^{NTables} 
+$
+\sum\limits_{g=1}^{NGroups}
+\sum\limits_{i \in G_{g}} 
+  \sum\limits_{b=1}^{NTables} 
     \sum\limits_{t = 1}^{60/TInc} 
-      ( pz_{t}^{i,b,1} + pz_{t}^{i,b,2} ) = 0$
+      ( pz_{t}^{g,i,b,1} + pz_{t}^{g,i,b,2} ) = 0$
 \end{algorithm}
     
 \subsection{Other Breaks}
@@ -331,10 +392,11 @@ Make everything as early as possible.
 
 $Min ( 
 \sum\limits_{t \in T}
-  \sum\limits_{i \in N} (
+ \sum\limits_{g=1}^{NGroups}
+  \sum\limits_{i \in G_{g}} (
     \sum\limits_{n=1}^{NSubjective}
-      ( sy_{t}^{i,n} \times t )
-  + \sum\limits_{b=1}^{NTables} ( ( py_{t}^{i,b,1} + py_{t}^{i,b,2} )
+      ( sy_{t}^{g,i,n} \times t )
+  + \sum\limits_{b=1}^{NTables} ( ( py_{t}^{g,i,b,1} + py_{t}^{g,i,b,2} )
   \times t)
   )
 ) $
