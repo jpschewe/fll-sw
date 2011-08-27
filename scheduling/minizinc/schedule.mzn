@@ -27,8 +27,6 @@ int: ct_minutes;
 int: pct_minutes;
 
 
-
-%%%% Don't edit below here %%%%
 int: M = 10000;
 
 % computed parameters
@@ -60,6 +58,22 @@ array [1..NGroups, 1..MaxTeamsInGroup, 1..NTables, 1..2, 1..TMax ] of var
 array [1..NGroups, 1..MaxTeamsInGroup, 1..NTables, 1..2, 1..TMax ] of var
 0..1 : py ::is_output;
 var int: objective;
+
+% zero out extra variables
+constraint
+sum(t in 1..TMax) (
+  sum(g in 1..NGroups) (
+    sum(i in 1..MaxTeamsInGroup) (
+      if(i > group_counts[g]) then
+        sum(n in 1..NSubjective) ( sz[g,i,n,t] + sy[g,i,n,t] )
+        + sum(b in 1..NTables) (
+          pz[g,i,b,1,t] + pz[g,i,b,2,t]
+          + py[g,i,b,1,t] + py[g,i,b,2,t]
+        )
+      else
+        0
+      endif
+))) = 0;
 
 % stationBusySubjective
 constraint
