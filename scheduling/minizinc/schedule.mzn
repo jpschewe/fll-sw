@@ -269,8 +269,8 @@ forall(g in 1..NGroups) (
 constraint
   forall(b in 1..NTables) (
     forall(t in 1..TMax) (
-      sum(g in 1..NGroups) (sum(i in 1..group_counts[g]) (py[g,i,b,1,t]))
-      = sum(g in 1..NGroups) (sum(i in 1..group_counts[g]) (py[g,i,b,2,t]))
+      sum(g in 1..NGroups) (sum(i in 1..group_counts[g]) (pz[g,i,b,1,t]))
+      = sum(g in 1..NGroups) (sum(i in 1..group_counts[g]) (pz[g,i,b,2,t]))
 ));
 
 % performanceStart

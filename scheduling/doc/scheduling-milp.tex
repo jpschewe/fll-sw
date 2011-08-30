@@ -239,7 +239,7 @@ set.
 \begin{algorithm}
 \caption{subjOrder}
 $
-\sum\limits_{j = i+1 \wedge j \in G_{g}}
+\sum\limits_{j \in G_{g} \colon j > i}
   \sum\limits_{p=1}^{t} sz_{p}^{g,j,1} <= 
 ( 0 + ( 1 - sz_{t}^{g,i,1} ) * M )$
 \hfill $
@@ -338,9 +338,9 @@ py_{t+u}^{g,i,b,1} + py_{t+u}^{g,i,b,2})
   used.}
 \begin{algorithm}
 \caption{perfUseBothSides}
-$\sum\limits_{g=1}^{NGroups}\sum\limits_{i \in N} py_{t}^{g,i,b,1} 
+$\sum\limits_{g=1}^{NGroups}\sum\limits_{i \in G_{g}} pz_{t}^{g,i,b,1} 
 = 
-\sum\limits_{g=1}^{NGroups}\sum\limits_{i \in N}py_{t}^{g,i,b,2}$
+\sum\limits_{g=1}^{NGroups}\sum\limits_{i \in G_{g}}pz_{t}^{g,i,b,2}$
 \hfill $
 \forall b \in 1 \dots NTables,
 \forall t \in T$
