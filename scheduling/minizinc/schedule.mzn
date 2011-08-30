@@ -175,20 +175,19 @@ sum(g in 1..NGroups) (
 ))) = 0;
 
 % subjOrder
-%FIXME doesn't work and needs subjective groups as well
-%DEBUG constraint
-%DEBUG   forall(i in 1..nTeams) (
-%DEBUG     forall(t in 1..TMax) (
-%DEBUG       sum(j in 1..nTeams) (
-%DEBUG         sum(p in 1..t) (
-%DEBUG 	if j != i then
-%DEBUG 	  sz[j,1,p]
-%DEBUG 	else
-%DEBUG 	  0
-%DEBUG 	endif
-%DEBUG 	)
-%DEBUG       ) <= ( 0 + ( ( 1  - sz[i,1,t] ) * M ) )
-%DEBUG ));
+constraint
+forall(g in 1..NGroups) (  
+  forall(i in 1..group_counts[g]) (
+    forall(t in 1..TMax) (
+      sum(j in i..group_counts[g]) (
+        if(j > i) then
+          sum(p in 1..t) ( sz[g,j,1,p] )
+        else
+          0
+        endif
+	)
+    <= ( 0 + ( ( 1  - sz[g,i,1,t] ) * M ) )
+)));
 
 int: subj_ulimit = ct-1;
 int: subj_tlimit = TMax-subj_ulimit;
