@@ -163,18 +163,16 @@ constraint
 sum(g in 1..NGroups) (
   sum (i in 1..group_counts[g]) (
     sum (n in 1..NSubjective) (
-      sum (t in TMax-alpha_subj[n]+1..TMax) (
-        sz[g,i,n,t]
-)))) = 0;
+      sz[g,i,n,TMax]
+))) = 0;
 
 % performanceEOS
 constraint
 sum(g in 1..NGroups) (
   sum (i in 1..group_counts[g]) (
     sum (b in 1..NTables) (
-      sum (t in TMax-alpha_perf+1..TMax) (
-       pz[g,i,b,1,t] + pz[g,i,b,2,t]
-)))) = 0;
+      pz[g,i,b,1,TMax] + pz[g,i,b,2,TMax]
+))) = 0;
 
 % subjOrder
 %FIXME doesn't work and needs subjective groups as well

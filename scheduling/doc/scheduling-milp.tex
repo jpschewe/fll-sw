@@ -57,7 +57,7 @@
 \begin{itemize}
 
 \item[$TInc$] Number of minutes to a slot, typically 5
-\item[$TMax$] Maximum timeslot, typically 8 hours. $(12 * 60)/TInc$
+\item[$TMax$] Maximum timeslot plus 1 to keep teams from starting too late, typically 8 hours. $((12 * 60)/TInc) + 1$
 \item[$NSubjective$] The number of subjective judging stations
 \item[$NRounds$] The number of performance rounds
 \item[$NTables$] The number of performance tables
@@ -217,8 +217,7 @@ $
 $
 \sum\limits_{g=1}^{NGroups}
 \sum\limits_{i \in G_{g}}
-  \sum\limits_{n=1}^{NSubjective}
-    \sum\limits_{t=TMax-\alpha^{n}+1}^{TMax} sz_{t}^{g,i,n} = 0$
+  \sum\limits_{n=1}^{NSubjective} sz_{TMax}^{g,i,n} = 0$
 \end{algorithm}
 
 \begin{algorithm}
@@ -227,8 +226,7 @@ $
 \sum\limits_{g=1}^{NGroups}
 \sum\limits_{i \in G_{g}}
   \sum\limits_{b=1}^{NTables}
-    \sum\limits_{t=TMax-\alpha^{perf}+1}^{TMax}
-  ( pz_{t}^{g,i,b,1} + pz_{t}^{g,i,b,2} ) = 0$
+  ( pz_{TMax}^{g,i,b,1} + pz_{TMax}^{g,i,b,2} ) = 0$
 \end{algorithm}
 
 \FloatBarrier
