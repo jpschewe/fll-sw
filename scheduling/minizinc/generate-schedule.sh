@@ -13,7 +13,7 @@ if [ $# -ne 1 ]; then
 fi
 
 param_file=$1
-mzn2fzn --no-output-ozn --globals-dir linear "${mydir}/schedule.mzn" "${param_file}" -o schedule.fzn || fatal "Error executing mzn2fzn"
-flatzinc -b mip -o schedule.result schedule.fzn || fatal "Error executing flatzinc"
-rm -f schedule.fzn
-log "Result is in schedule.result"
+mzn2fzn --no-output-ozn --globals-dir linear "${mydir}/schedule.mzn" "${param_file}" -o "${param_file}.fzn" || fatal "Error executing mzn2fzn"
+flatzinc -b mip -o "${param_file}.result" "${param_file}.fzn" || fatal "Error executing flatzinc"
+rm -f "${param_file}.fzn"
+log "Result is in ${param_file}.result"
