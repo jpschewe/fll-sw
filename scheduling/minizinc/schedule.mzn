@@ -273,19 +273,6 @@ constraint
       = sum(g in 1..NGroups) (sum(i in 1..group_counts[g]) (py[g,i,b,2,t]))
 ));
 
-% teamJudging
-constraint
-forall(g in 1..NGroups) (
-  forall(i in 1..group_counts[g]) (
-    sum(t in 1..TMax) (
-      sum(n in 1..NSubjective) (
-        sz[g,i,n,t] +
-	sum(b in 1..NTables) (
-	  pz[g,i,b,1,t] + pz[g,i,b,2,t]
-	))) = NSubjective + NRounds
-));
-
-
 % performanceStart
 int: perfStartWait = 60 div TInc;
 constraint
