@@ -163,7 +163,7 @@ constraint
 sum(g in 1..NGroups) (
   sum (i in 1..group_counts[g]) (
     sum (n in 1..NSubjective) (
-      sz[g,i,n,TMax]
+      sy[g,i,n,TMax]
 ))) = 0;
 
 % performanceEOS
@@ -171,7 +171,7 @@ constraint
 sum(g in 1..NGroups) (
   sum (i in 1..group_counts[g]) (
     sum (b in 1..NTables) (
-      pz[g,i,b,1,TMax] + pz[g,i,b,2,TMax]
+      py[g,i,b,1,TMax] + py[g,i,b,2,TMax]
 ))) = 0;
 
 % subjOrder
