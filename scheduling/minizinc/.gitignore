@@ -1,3 +1,2 @@
-schedule.fzn
-schedule.ozn
-schedule.result
+*.fzn
+*.result
