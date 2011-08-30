@@ -261,7 +261,7 @@ $sy_{t}^{g,i,n} + sy_{t+u}^{g,i,d} \le 1$
 \forall g \in 1 \dots NGroups,
 \forall i \in G_{g},
 \forall n \in 1 \dots NSubjective, 
-\forall t \in 1..{TMax- ct-1},
+\forall t \in 1..{TMax- (ct-1)},
 \forall d \in 1 \dots NSubjective \wedge d \neq n,
 \forall u \in 0 \dots ct-1$
 \end{algorithm}
@@ -275,7 +275,7 @@ $sy_{t}^{g,i,n} + py_{t+u}^{g,i,b,s} \le 1$
 \forall g \in 1 \dots NGroups,
 \forall i \in G_{g},
 \forall n \in 1 \dots NSubjective, 
-\forall t \in 1..{TMax- ct-1},
+\forall t \in 1..{TMax- (ct-1)},
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
 \forall u \in 0 \dots ct-1
@@ -293,7 +293,7 @@ $py_{t}^{g,i,b,s} + py_{t+u}^{g,i,d,e} \le 1$
 \forall i \in G_{g},
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
-\forall t \in 1..{TMax- ct-1},
+\forall t \in 1..{TMax- (ct-1)},
 \forall d \in 1 \dots NTables ,
 \forall e \in 1 \dots 2,
 d \neq b  \wedge e \neq s,
@@ -311,7 +311,7 @@ $py_{t}^{g,i,b,s} + sy_{t+u}^{g,i,n} \le 1$
 \forall i \in G_{g},
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
-\forall t \in 1..{TMax-ct-1},
+\forall t \in 1..{TMax-(ct-1)},
 \forall n \in 1 \dots NSubjective
 \forall u \in 0 \dots ct-1$
 \end{algorithm}
@@ -329,7 +329,7 @@ py_{t+u}^{g,i,b,1} + py_{t+u}^{g,i,b,2})
 \hfill $
 \forall g \in 1 \dots NGroups,
 \forall i \in G_{g}, 
-\forall t \in 1 \dots TMax- pct-1,
+\forall t \in 1 \dots TMax - (pct - 1),
 \forall u \in 1 \dots pct-1$
 \end{algorithm}
 
