@@ -348,20 +348,6 @@ $\sum\limits_{g=1}^{NGroups}\sum\limits_{i \in N} py_{t}^{g,i,b,1}
 
 
 \FloatBarrier
-\subsection{Each team must be judged in all categories.}
-\begin{algorithm}
-\caption{teamJudging}
-$\sum\limits_{t \in T} ( 
-    \sum\limits_{n=1}^{NSubjective} sz_{t}^{g,i,n}
- + \sum\limits_{b=1}^{NTables} (pz_{t}^{g,i,b,1} + pz_{t}^{g,i,b,2})
-)
-= NSubjective + NRounds$
-\hfill $
-\forall g \in 1 \dots NGroups,
-\forall i \in G_{g}$
-\end{algorithm}
-
-\FloatBarrier
 \subsection{Judging groups}
 Each team is only judged at the subjective stations for their judging
 group. This is handled by only constraining teams in the appropriate
