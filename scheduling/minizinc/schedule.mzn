@@ -181,7 +181,13 @@ forall(g in 1..NGroups) (
     forall(t in 1..TMax) (
       sum(j in i..group_counts[g]) (
         if(j > i) then
-          sum(p in 1..t) ( sz[g,j,1,p] )
+          sum(p in 1..TMax) (
+            if(p <= t + alpha_subj[1] - 1) then
+              sz[g,j,1,p]
+            else
+              0
+            endif
+          )
         else
           0
         endif
