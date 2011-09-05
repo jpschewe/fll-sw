@@ -1,2 +1,4 @@
 *.fzn
 *.result
+*.output
+*.ozn
