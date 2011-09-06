@@ -155,7 +155,7 @@ forall(g in 1..NGroups) (
   forall (i in 1..group_counts[g]) (
     sum (b in 1..NTables) (
       sum (t in 1..TMax) (pz[g,i,b,1,t] + pz[g,i,b,2,t])
-    ) = 1
+    ) = NRounds
 ));
 
 % subjectiveEOS
