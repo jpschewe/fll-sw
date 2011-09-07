@@ -17,6 +17,3 @@ alpha_perf_minutes = 5;
 
 ct_minutes = 15;
 pct_minutes = 45;
-
-% 9/3/2011 parse 3 seconds - 2m45.731s
-
