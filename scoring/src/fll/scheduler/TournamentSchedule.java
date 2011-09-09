@@ -96,7 +96,7 @@ public class TournamentSchedule implements Serializable {
    * Used with {@link String#format(String, Object...)} to create a performance
    * round header.
    */
-  public static final String PERF_HEADER_FORMAT = "Perf #%d";
+  public static final String PERF_HEADER_FORMAT = BASE_PERF_HEADER + "%d";
 
   /**
    * Used with {@link String#format(String, Object...)} to create a performance
@@ -741,8 +741,8 @@ public class TournamentSchedule implements Serializable {
       table.addCell(createHeaderCell(DIVISION_HEADER));
       table.addCell(createHeaderCell("School or Organization"));
       table.addCell(createHeaderCell("Team Name"));
-      table.addCell(createHeaderCell(new Formatter().format("Perf #%d", (round + 1)).toString()));
-      table.addCell(createHeaderCell(new Formatter().format("Perf %d Table", (round + 1)).toString()));
+      table.addCell(createHeaderCell(new Formatter().format(PERF_HEADER_FORMAT, (round + 1)).toString()));
+      table.addCell(createHeaderCell(new Formatter().format(TABLE_HEADER_FORMAT, (round + 1)).toString()));
       table.setHeaderRows(1);
 
       for (final TeamScheduleInfo si : _schedule) {
