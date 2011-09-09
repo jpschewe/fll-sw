@@ -5,6 +5,7 @@
  */
 package fll.scheduler;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -57,6 +58,7 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.scheduler.TeamScheduleInfo.SubjectiveTime;
 import fll.scheduler.autosched.SchedParams;
+import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
@@ -96,7 +98,8 @@ public class TournamentSchedule implements Serializable {
    * Used with {@link String#format(String, Object...)} to create a performance
    * round header.
    */
-  public static final String PERF_HEADER_FORMAT = BASE_PERF_HEADER + "%d";
+  public static final String PERF_HEADER_FORMAT = BASE_PERF_HEADER
+      + "%d";
 
   /**
    * Used with {@link String#format(String, Object...)} to create a performance
@@ -201,7 +204,33 @@ public class TournamentSchedule implements Serializable {
                             final String sheetName,
                             final Collection<String> subjectiveHeaders) throws IOException, ParseException,
       InvalidFormatException, ScheduleParseException {
-    final CellFileReader reader = new ExcelCellReader(stream, sheetName);
+    this(new ExcelCellReader(stream, sheetName), subjectiveHeaders);
+  }
+
+  /**
+   * Read the tournament schedule from a CSV file.
+   * 
+   * @param csvFile where to read the schedule from
+   * @param subjectiveHeaders the headers for the subjective columns
+   * @throws ScheduleParseException
+   * @throws ParseException
+   */
+  public TournamentSchedule(final File csvFile,
+                            final Collection<String> subjectiveHeaders) throws IOException, ParseException,
+      ScheduleParseException {
+    this(new CSVCellReader(csvFile), subjectiveHeaders);
+  }
+
+  /**
+   * Common construction.
+   * 
+   * @throws IOException
+   * @throws ScheduleParseException
+   * @throws ParseException
+   */
+  private TournamentSchedule(final CellFileReader reader,
+                             final Collection<String> subjectiveHeaders) throws IOException, ParseException,
+      ScheduleParseException {
     final ColumnInformation columnInfo = findColumns(reader, subjectiveHeaders);
     numRounds = columnInfo.getNumPerfs();
     parseData(reader, columnInfo);
