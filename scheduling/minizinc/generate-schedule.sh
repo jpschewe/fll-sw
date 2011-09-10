@@ -13,9 +13,8 @@ if [ $# -ne 1 ]; then
 fi
 
 param_file=$1
-date
-log "Converting to flatzinc"
-mzn2fzn --no-output-ozn --globals-dir linear "${mydir}/schedule.mzn" "${param_file}" -o "${param_file}.fzn" || fatal "Error executing mzn2fzn"
+
+"${mydir}/convert-schedule.sh" "${param_file}"
 
 date
 log "Solving"
