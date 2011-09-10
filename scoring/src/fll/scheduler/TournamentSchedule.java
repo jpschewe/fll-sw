@@ -1384,7 +1384,7 @@ public class TournamentSchedule implements Serializable {
         } else if (time.getTime()
             + getSubjectiveDuration() + getChangetime() > performanceTime.getTime()) {
           final String message = String.format("Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
-                                               ti.getTeamNumber(), subj.getTime(), performanceName,
+                                               ti.getTeamNumber(), OUTPUT_DATE_FORMAT.get().format(subj.getTime()), performanceName,
                                                getChangetimeAsMinutes());
           violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, subj, performanceTime, message));
         }
