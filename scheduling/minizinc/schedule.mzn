@@ -141,6 +141,16 @@ constraint
         sum(g in 1..NGroups) (sum(i in 1..group_counts[g]) (py[g,i,b,s,t])) <= 1
 )));
 
+% noOverlapTeam
+constraint
+forall(g in 1..NGroups) (
+  forall(i in 1..group_counts[g]) (
+    forall(t in 1..TMax) (
+      sum(n in 1..NSubjective) ( sz[g,i,n,t] )
+      + sum(b in 1..NTables) ( pz[g,i,b,1,t] + pz[g,i,b,2,t] )
+      <= 1
+)));
+
 % teamSubjective
 constraint
 forall(g in 1..NGroups) (
@@ -195,19 +205,16 @@ forall(g in 1..NGroups) (
     <= ( 0 + ( ( 1  - sz[g,i,1,t] ) * M ) )
 )));
 
-int: subj_ulimit = ct-1;
-int: subj_tlimit = TMax-subj_ulimit;
-
 % subjSubjChangetime
 constraint
 forall(g in 1..NGroups) (
   forall(i in 1..group_counts[g]) (
     forall(n in 1..NSubjective) (
-      forall(t in 1..subj_tlimit) (
+      forall(t in 1..TMax) (
         forall(d in 1..NSubjective) (
-	  forall(u in 0..subj_ulimit) (
-	    if(d != n) then
-	      sy[g,i,n,t] + sy[g,i,d,t+u] <= 1
+	  forall(u in 1..TMax) (
+	    if(u <= alpha_subj[n] + ct - 1 /\ t + u <= TMax) then
+	      sz[g,i,n,t] + sz[g,i,d,t+u] <= 1
 	    else
 	      true
 	    endif
@@ -218,15 +225,16 @@ constraint
 forall(g in 1..NGroups) (
   forall(i in 1..group_counts[g]) (
     forall(n in 1..NSubjective) (
-      forall(t in 1..subj_tlimit) (
-        forall(u in 0..subj_ulimit) (
+      forall(t in 1..TMax) (
+        forall(u in 1..TMax) (
           forall(b in 1..NTables) (
 	    forall(s in 1..2) (
-	      sy[g,i,n,t] + py[g,i,b,s,t+u] <= 1
+	      if(u <= alpha_subj[n] + ct - 1 /\ t + u <= TMax) then
+ 	        sz[g,i,n,t] + pz[g,i,b,s,t+u] <= 1
+              else
+                true
+              endif
 )))))));
-
-int: perf_ulimit = ct-1;
-int: perf_tlimit = TMax-perf_ulimit;
 
 % perfPerfChangetime
 constraint
@@ -234,12 +242,12 @@ forall(g in 1..NGroups) (
   forall(i in 1..group_counts[g]) (
     forall(b in 1..NTables) (
       forall(s in 1..2) (
-        forall(t in 1..perf_tlimit) (
-          forall(u in 0..perf_ulimit) (
+        forall(t in 1..TMax) (
+          forall(u in 1..TMax) (
   	    forall(d in 1..NTables) (
   	      forall(e in 1..2) (
-	        if(b != d /\ s != e) then
-		  py[g,i,b,s,t] + py[g,i,d,e,t+u] <= 1
+	        if(u <= alpha_perf + ct - 1 /\ t + u <= TMax) then
+		  pz[g,i,b,s,t] + pz[g,i,d,e,t+u] <= 1
 		else
 		  true
 		endif
@@ -251,24 +259,29 @@ forall(g in 1..NGroups) (
   forall(i in 1..group_counts[g]) (
     forall(b in 1..NTables) (
       forall(s in 1..2) (
-        forall(t in 1..perf_tlimit) (
-	  forall(u in 0..perf_ulimit) (
+        forall(t in 1..TMax) (
+	  forall(u in 1..TMax) (
 	    forall(n in 1..NSubjective) (
-	      py[g,i,b,s,t] + sy[g,i, n, t+u] <= 1
+	      if(u <= alpha_perf + ct - 1 /\ t + u <= TMax) then
+	        pz[g,i,b,s,t] + sz[g,i, n, t+u] <= 1
+              else
+                true
+              endif
 )))))));
-
-int: perf_pct_ulimit = pct-1;
-int: perf_pct_tlimit = TMax-perf_pct_ulimit;
 
 % performanceChangetime
 constraint
 forall(g in 1..NGroups) (
   forall(i in 1..group_counts[g]) (
-    forall(t in 1..perf_pct_tlimit) (
-      forall(u in 1..perf_pct_ulimit) (
-        sum(b in 1..NTables) (
-	  py[g,i,b,1,t] + py[g,i,b,2,t] + py[g,i,b,1,t+u] + py[g,i,b,2,t+u]
-	) <= 1
+    forall(t in 1..TMax) (
+      forall(u in 1..TMax) (
+        if(u <= alpha_perf + pct - 1 /\ t + u <= TMax) then
+          sum(b in 1..NTables) (
+	    py[g,i,b,1,t] + py[g,i,b,2,t] + py[g,i,b,1,t+u] + py[g,i,b,2,t+u]
+	  ) <= 1
+        else
+          true
+        endif
 ))));
 
 % perfUseBothSides
@@ -304,7 +317,8 @@ sum(t in 1..TMax) (
 
 
 solve minimize objective;
-    
+%solve satisfy;
+
 % output
 % [ if fix(sz[g,i,n,t]) == 1 then
 %     "sz[" ++ show(g) ++ "][" ++ show(i) ++ "][" ++ show(n) ++ "][" ++ show(t) ++ "] = " ++

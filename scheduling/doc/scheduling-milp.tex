@@ -104,7 +104,7 @@ judging station $n$ at time $t$.
 
 
 \section{Constraints}
-
+ 
 \subsection{Keep each judging station busy while team $i$ is using it.}
 
 \begin{algorithm}
@@ -182,6 +182,21 @@ $\sum\limits_{g=1}^{NGroups} \sum\limits_{i \in G_{g}} py_{t}^{g,i,b,s} \le 1$
 $
 \end{algorithm}
 
+\FloatBarrier
+\subsection{A team can't be in 2 places at once}
+\begin{algorithm}
+\caption{noOverlapTeam}
+$\sum\limits_{n=1}^{NSubjective} sz_{t}^{g,i,n}
++ \sum\limits_{b=1}^{NTables} ( sz_{t}^{g,i,b,1} + sz_{t}^{g,i,b,2} )
+\le 1
+$
+\hfill $
+\forall g \in 1 \dots NGroups,
+\forall i \in G_{g},
+\forall t \in 1 \dots TMax
+$
+\end{algorithm}
+
 
 \FloatBarrier
 \subsection{Each team must appear at each subjective station once.}
@@ -253,51 +268,50 @@ $
 \subsection{Enforce change time for each team $i$.}
 
 \FloatBarrier
-\subsubsection{Subjective category $n$ to all other subjective categories}
+\subsubsection{Subjective category $n$ to all subjective categories}
 \begin{algorithm}
 \caption{subjSubjChangetime}
-$sy_{t}^{g,i,n} + sy_{t+u}^{g,i,d} \le 1$
+$sz_{t}^{g,i,n} + sz_{t+u}^{g,i,d} \le 1$
 \hfill $
 \forall g \in 1 \dots NGroups,
 \forall i \in G_{g},
 \forall n \in 1 \dots NSubjective, 
-\forall t \in 1..{TMax- (ct-1)},
-\forall d \in 1 \dots NSubjective \wedge d \neq n,
-\forall u \in 0 \dots ct-1$
+\forall t \in 1..{TMax - (\alpha^{n} + ct - 1)},
+\forall d \in 1 \dots NSubjective,
+\forall u \in 1 \dots \alpha^{n} + ct - 1$
 \end{algorithm}
 
 \FloatBarrier
 \subsubsection{Subjective category $n$ to all performance stations}
 \begin{algorithm}
 \caption{subjPerfChangetime}
-$sy_{t}^{g,i,n} + py_{t+u}^{g,i,b,s} \le 1$
+$sz_{t}^{g,i,n} + pz_{t+u}^{g,i,b,s} \le 1$
 \hfill $
 \forall g \in 1 \dots NGroups,
 \forall i \in G_{g},
 \forall n \in 1 \dots NSubjective, 
-\forall t \in 1..{TMax- (ct-1)},
+\forall t \in 1..{TMax - (\alpha^{n} + ct - 1)},
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
-\forall u \in 0 \dots ct-1
+\forall u \in 1 \dots \alpha^{n} + ct - 1
 $
 \end{algorithm}
 
 \FloatBarrier
-\subsubsection{Performance on table $b$ side $s$ to all other performance
+\subsubsection{Performance on table $b$ side $s$ to all performance
   stations}
 \begin{algorithm}
 \caption{perfPerfChangetime}
-$py_{t}^{g,i,b,s} + py_{t+u}^{g,i,d,e} \le 1$
+$pz_{t}^{g,i,b,s} + pz_{t+u}^{g,i,d,e} \le 1$
 \hfill $
 \forall g \in 1 \dots NGroups,
 \forall i \in G_{g},
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
-\forall t \in 1..{TMax- (ct-1)},
-\forall d \in 1 \dots NTables ,
+\forall t \in 1..{TMax - (\alpha^{perf} + ct - 1)},
+\forall d \in 1 \dots NTables,
 \forall e \in 1 \dots 2,
-d \neq b  \wedge e \neq s,
-\forall u \in 0 \dots ct-1$
+\forall u \in 1 \dots \alpha^{perf} + ct - 1$
 \end{algorithm}
 
 \FloatBarrier
@@ -305,15 +319,15 @@ d \neq b  \wedge e \neq s,
   stations}
 \begin{algorithm}
 \caption{perfSubjChangetime}
-$py_{t}^{g,i,b,s} + sy_{t+u}^{g,i,n} \le 1$
+$pz_{t}^{g,i,b,s} + sz_{t+u}^{g,i,n} \le 1$
 \hfill $
 \forall g \in 1 \dots NGroups,
 \forall i \in G_{g},
 \forall b \in 1 \dots NTables,
 \forall s \in 1 \dots 2,
-\forall t \in 1..{TMax-(ct-1)},
+\forall t \in 1..{TMax - (\alpha^{perf} + ct - 1)},
 \forall n \in 1 \dots NSubjective
-\forall u \in 0 \dots ct-1$
+\forall u \in 1 \dots \alpha^{perf} + ct - 1$
 \end{algorithm}
 
 \FloatBarrier
@@ -322,15 +336,15 @@ $py_{t}^{g,i,b,s} + sy_{t+u}^{g,i,n} \le 1$
 \caption{performanceChangetime}
 $
 \sum\limits_{b=1}^{NTables} (
-py_{t}^{g,i,b,1} + py_{t}^{g,i,b,2}
+pz_{t}^{g,i,b,1} + pz_{t}^{g,i,b,2}
 +
-py_{t+u}^{g,i,b,1} + py_{t+u}^{g,i,b,2})
+pz_{t+u}^{g,i,b,1} + pz_{t+u}^{g,i,b,2})
 \le 1$
 \hfill $
 \forall g \in 1 \dots NGroups,
 \forall i \in G_{g}, 
-\forall t \in 1 \dots TMax - (pct - 1),
-\forall u \in 1 \dots pct-1$
+\forall t \in 1 \dots TMax - (\alpha^{perf} + pct - 1),
+\forall u \in 1 \dots \alpha^{perf} + pct - 1$
 \end{algorithm}
 
 \FloatBarrier
@@ -373,6 +387,8 @@ performance runs. \jpscomment{Not sure how I want to do this yet.}
 
 \section{Objective function}
 Make everything as early as possible.
+\jpscomment{Find a way to make it more desirable to compete against
+  different teams in performance rounds}
 
 $Min ( 
 \sum\limits_{t \in T}
