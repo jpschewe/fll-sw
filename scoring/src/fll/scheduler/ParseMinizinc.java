@@ -370,6 +370,29 @@ public class ParseMinizinc {
         + ntables);
     LOGGER.info("ngroups: "
         + ngroups);
+    for (int group = 0; group < sz.length; ++group) {
+      for (int team = 0; team < sz[group].length; ++team) {
+        for (int subj = 0; subj < sz[group][team].length; ++subj) {
+          for (int t = 0; t < sz[group][team][subj].length; ++t) {
+            if (sz[group][team][subj][t] > 0) {
+              LOGGER.trace(String.format("sz[%d][%d][%d][%d] = %d", group, team, subj, t, sz[group][team][subj][t]));
+            }
+          }
+        }
+      }
+    }
+    for (int group = 0; group < sy.length; ++group) {
+      for (int team = 0; team < sy[group].length; ++team) {
+        for (int subj = 0; subj < sy[group][team].length; ++subj) {
+          for (int t = 0; t < sy[group][team][subj].length; ++t) {
+            if (sy[group][team][subj][t] > 0) {
+              LOGGER.trace(String.format("sy[%d][%d][%d][%d] = %d", group, team, subj, t, sy[group][team][subj][t]));
+            }
+          }
+        }
+      }
+    }
+
     outputSchedule();
   }
 
@@ -381,9 +404,14 @@ public class ParseMinizinc {
         + schedule.getAbsolutePath());
 
     final BufferedWriter writer = new BufferedWriter(new FileWriter(schedule));
-    writer.write(TournamentSchedule.TEAM_NUMBER_HEADER + ",");
-    writer.write(TournamentSchedule.ORGANIZATION_HEADER + ",");
-    writer.write(TournamentSchedule.DIVISION_HEADER + ",");
+    writer.write(TournamentSchedule.TEAM_NUMBER_HEADER
+        + ",");
+    writer.write(TournamentSchedule.TEAM_NAME_HEADER
+        + ",");
+    writer.write(TournamentSchedule.ORGANIZATION_HEADER
+        + ",");
+    writer.write(TournamentSchedule.DIVISION_HEADER
+        + ",");
     writer.write(TournamentSchedule.JUDGE_GROUP_HEADER);
     for (int subj = 0; subj < nsubjective; ++subj) {
       writer.write(",Subj"
@@ -408,8 +436,9 @@ public class ParseMinizinc {
             + (group + 1) + " team " + (team + 1));
         final int teamNum = (group + 1)
             * 100 + team;
-        final int judgingGroup = group+1;
-        writer.write(String.format("Team %d, Org %d, D%d, G%d", teamNum, teamNum, judgingGroup, judgingGroup));
+        final int judgingGroup = group + 1;
+        writer.write(String.format("%d,Team %d, Org %d, D%d, G%d", teamNum, teamNum, teamNum, judgingGroup,
+                                   judgingGroup));
         for (int subj = 0; subj < nsubjective; ++subj) {
           final Date time = getTime(sz[group][team][subj], 1);
           if (null == time) {
