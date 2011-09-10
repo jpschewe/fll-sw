@@ -59,6 +59,7 @@ import com.itextpdf.text.DocumentException;
 
 import fll.scheduler.TeamScheduleInfo.SubjectiveTime;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
+import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLRuntimeException;
@@ -190,9 +191,16 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       FileInputStream fis = null;
       try {
-        fis = new FileInputStream(getCurrentFile());
-        final TournamentSchedule newData = new TournamentSchedule(fis, getCurrentSheetName(),
-                                                                  scheduleData.getSubjectiveStations());
+        final String sheetName = getCurrentSheetName();
+        final TournamentSchedule newData;
+        if (null == sheetName) {
+          // if no sheet name, assume CSV file
+          newData = new TournamentSchedule(getCurrentFile(), scheduleData.getSubjectiveStations());
+        } else {
+          fis = new FileInputStream(getCurrentFile());
+          newData = new TournamentSchedule(fis, sheetName, scheduleData.getSubjectiveStations());
+        }
+
         setScheduleData(newData);
       } catch (final IOException e) {
         final Formatter errorFormatter = new Formatter();
@@ -339,7 +347,8 @@ public class SchedulerUI extends JFrame {
       final String startingDirectory = PREFS.get(STARTING_DIRECTORY_PREF, null);
 
       final JFileChooser fileChooser = new JFileChooser();
-      final FileFilter filter = new BasicFileFilter("Excel Spreadsheet", new String[] { "xls", "xslx" });
+      final FileFilter filter = new BasicFileFilter("FLL Schedule (xls, xlsx, csv)", new String[] { "xls", "xslx",
+                                                                                                   "csv" });
       fileChooser.setFileFilter(filter);
       if (null != startingDirectory) {
         fileChooser.setCurrentDirectory(new File(startingDirectory));
@@ -351,19 +360,30 @@ public class SchedulerUI extends JFrame {
         PREFS.put(STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
 
         final File selectedFile = fileChooser.getSelectedFile();
-        if (selectedFile.isFile()
-            && selectedFile.canRead()) {
+        if (null != selectedFile
+            && selectedFile.isFile() && selectedFile.canRead()) {
           FileInputStream fis = null;
           try {
-            final String sheetName = promptForSheetName(selectedFile);
-            if (null == sheetName) {
-              return;
+            final boolean csv = selectedFile.getName().endsWith("csv");
+            final CellFileReader reader;
+            final String sheetName;
+            if (csv) {
+              reader = new CSVCellReader(selectedFile);
+              sheetName = null;
+            } else {
+              sheetName = promptForSheetName(selectedFile);
+              if (null == sheetName) {
+                return;
+              }
+              fis = new FileInputStream(selectedFile);
+              reader = new ExcelCellReader(fis, sheetName);
             }
-            fis = new FileInputStream(selectedFile);
-            final CellFileReader reader = new ExcelCellReader(fis, sheetName);
             final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
-            fis.close();
-            fis = null;
+            if (null != fis) {
+              fis.close();
+              fis = null;
+            }
+
             final List<String> subjectiveHeaders;
             final List<String> unusedColumns = columnInfo.getUnusedColumns();
             final List<JCheckBox> checkboxes = new LinkedList<JCheckBox>();
@@ -394,8 +414,13 @@ public class SchedulerUI extends JFrame {
                   + subjectiveHeaders);
             }
 
-            fis = new FileInputStream(selectedFile);
-            final TournamentSchedule schedule = new TournamentSchedule(fis, sheetName, subjectiveHeaders);
+            final TournamentSchedule schedule;
+            if (csv) {
+              schedule = new TournamentSchedule(selectedFile, subjectiveHeaders);
+            } else {
+              fis = new FileInputStream(selectedFile);
+              schedule = new TournamentSchedule(fis, sheetName, subjectiveHeaders);
+            }
             currentFile = selectedFile;
             currentSheetName = sheetName;
             setScheduleData(schedule);
