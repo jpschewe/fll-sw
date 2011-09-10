@@ -1414,6 +1414,9 @@ public class TournamentSchedule implements Serializable {
                                      final ColumnInformation ci) throws IOException, ParseException,
       ScheduleParseException {
     final String[] line = reader.readNext();
+    if(null == line) {
+      return null;
+    }
 
     try {
 
