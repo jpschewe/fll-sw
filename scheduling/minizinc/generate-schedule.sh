@@ -13,11 +13,21 @@ if [ $# -ne 1 ]; then
 fi
 
 param_file=$1
+flatzinc_file="${param_file}.fzn"
 
 "${mydir}/convert-schedule.sh" "${param_file}"
 
 date
 log "Solving"
-flatzinc -b mip -o "${param_file}.result" "${param_file}.fzn" || fatal "Error executing flatzinc"
-rm -f "${param_file}.fzn"
-log "Result is in ${param_file}.result"
+#flatzinc -b mip -o "${param_file}.result" "${flatzinc_file}" || fatal "Error executing flatzinc"
+#log "Result is in ${param_file}.result"
+
+# use scip
+/home/jpschewe/projects/fll-sw/scip-2.0.2.linux.x86_64.gnu.opt.spx \
+  -l "${flatzinc_file}.scip.log" \
+  -c "read ${flatzinc_file}" \
+  -c "optimize" \
+  -c "write solution ${flatzinc_file}.scip.sol" \
+  -c "quit"
+date
+log "Finished with ${param_file}"
