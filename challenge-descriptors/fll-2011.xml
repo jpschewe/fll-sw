@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="MN FIRST LEGO League Tournament" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 5">
+
+  <Performance minimumScore="0" weight="1.0">
+
+    <goal name="pollution_reversal" title="Pollution Reversal"
+      multiplier="4" max="2"
+      />
+
+    <goal name="corn_harvest" title="Corn Harvest"
+      initialValue="0">
+      <value score="9" title="In Base" value="in_base"/>
+      <value score="5" title="On Mat" value="on_mat"/>
+      <value score="0" title="None" value="none"/>
+    </goal>
+
+    <goal name="fishing" title="Fishing"
+      multiplier="3" max="3"/>
+
+    <goal name="pizza_ice_cream" title="Pizza and Ice Cream"
+      multiplier="7" max="2"/>
+
+    <goal name="farm_fresh_produce" title="Farm Fresh Produce"
+      multiplier="9"/>
+
+    <goal name="distant_travel" title="Distant Travel"
+      multiplier="9"/>
+
+    <goal name="cooking_time" title="Cooking Time"
+      multiplier="14"
+      />
+
+    <goal name="storage_temperature" title="Storage Temperature"
+      multiplier="20"/>
+
+    <goal name="pest_removal" title="Pest Removal"
+      multiplier="15" max="2"/>
+
+    <goal name="refrig_ground_transport" title="Refrigerated Ground Transport"
+      initialValue="0">
+      <value score="20" title="Dock" value="dock"/>
+      <value score="12" title="Base" value="base"/>
+      <value score="0" title="None" value="none"/>
+    </goal>
+    <goal name="fish_inside_trailer" title="Fish Inside Trailer"
+      multiplier="0" max="3" />
+    <!-- need to have the trailer on the dock to get the fish bonus -->
+    <computedGoal name="fish_trailer_bonus" title="Fish Trailer Bonus">
+      <switch>
+        <case>
+          <enumCondition>
+            <left>
+              <goalRef goal="refrig_ground_transport"/>
+            </left>
+            <equal-to/>
+            <right>
+              <stringConstant value="dock"/>
+            </right>
+          </enumCondition>
+          <result>
+            <term scoreType="raw" coefficient="6" goal="fish_inside_trailer"/>
+          </result>
+        </case>
+        <default>
+          <constant value="0"/>
+        </default>
+      </switch>
+    </computedGoal>
+
+    <goal name="groceries" title="Groceries"
+      multiplier="2" max="12"/>
+
+    <!-- multiplier is 7 or 12 depending on if bacteria is outside base -->
+    <goal name="disinfect" title="Disinfect"
+      multiplier="0" max="4"/>
+    <goal name="bacteria_outside_base" title="Bacteria Touching Mat Outside Base"
+      multiplier="0"/>
+    <computedGoal name="disinfect_score" title="Disinfect Score">
+      <switch>
+        <case>
+          <condition>
+            <left>
+              <term scoreType="raw" goal="bacteria_outside_base"/>
+            </left>
+            <greater-than/>
+            <right>
+              <constant value="0"/>
+            </right>
+          </condition>
+          <result>
+            <term scoreType="raw" coefficient="12" goal="disinfect"/>
+          </result>
+        </case>
+        <default>
+          <term scoreType="raw" coefficient="7" goal="disinfect"/>
+        </default>
+      </switch>
+    </computedGoal>
+
+    <goal name="hand_wash_bacterial" title="Hand Wash/Bacterial"
+      multiplier="3" max="48"/>
+
+    <goal name="hand_wash_viral" title="Num Germs in Sink"
+      multiplier="0" max="60"/>
+    <computedGoal name="hand_wash_viral_score" title="Hand Wash/Viral">
+      <switch>
+        <case>
+          <condition>
+            <left>
+              <term goal="hand_wash_viral" scoreType="raw"/>
+            </left>
+            <greater-than-or-equal/>
+            <right>
+              <constant value="9"/>
+            </right>
+          </condition>
+          <result>
+            <constant value="13"/>
+          </result>
+        </case>
+        <case>
+          <condition>
+            <left>
+              <term goal="hand_wash_viral" scoreType="raw"/>
+            </left>
+            <greater-than-or-equal/>
+            <right>
+              <constant value="1"/>
+            </right>
+          </condition>
+          <result>
+            <constant value="6"/>
+          </result>
+        </case>
+        <default>
+          <constant value="0"/>
+        </default>
+      </switch>
+    </computedGoal>
+
+    <goal name="good_bacteria" title="Yellow Bacteria in Base"
+      multiplier="6" max="12" />
+
+
+    <restriction lowerBound="0" upperBound="3"
+      message="There are only 3 big fish on the table">
+      <term goal="fishing" scoreType="raw"/>
+      <term goal="fish_inside_trailer" scoreType="raw"/>
+    </restriction>
+    
+    <tiebreaker>
+      <test winner='HIGH'>
+        <term goal='pollution_reversal' scoreType='computed' />
+      </test>
+      
+    </tiebreaker>
+
+  </Performance>
+
+  <subjectiveCategory name="teamwork" title="Teamwork"
+    weight="1.0">
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="roles"
+      title="Roles and Responsibilities">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="professionalism" title="Gracious Professionalism">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="dynamics"
+      title="Problem Solving &amp; Team Dynamics &amp; Communications">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="confidence"
+      title="Confidence &amp; Enthusiasm">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="fll_values"
+      title="FLL Values">
+    </goal>
+  </subjectiveCategory>
+
+
+  <subjectiveCategory name="robustdesign" title="Design"
+    weight="0.5">
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="strategy"
+      title="Strategy, Process, Problem Solving">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="locomotion"
+      title="Locomotion and Navigation">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="design_kids"
+      title="Kids Did the Work">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="structural"
+      title="Structural">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="overall_design" title="Overall Design">
+    </goal>
+  </subjectiveCategory>
+
+
+  <subjectiveCategory name="programming" title="Programming"
+    weight="0.5">
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="programming_strategy" title="Strategy, Process, Problem Solving" />
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="useoflanguage" title="Language Use, Modularity/Abstraction">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="programming_kids" title="Kids Did the Work">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="sensorcontrol" title="Sensor Control">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="design"
+      title="Overall Design">
+    </goal>
+  </subjectiveCategory>
+
+  <subjectiveCategory name="research"
+    title="Research Project Assessment" weight="1.0">
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="research"
+      title="Research">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="innovative_solution" title="Innovative Solution">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="background"
+      title="Background, Data and Graphics">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="creative"
+      title="Quality of Presentation/Creative Presentation">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="sharing"
+      title="Sharing">
+    </goal>
+  </subjectiveCategory>
+
+
+</fll>

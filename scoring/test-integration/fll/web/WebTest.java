@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import com.thoughtworks.selenium.SeleneseTestCase;
+import com.thoughtworks.selenium.SeleneseTestBase;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
@@ -22,7 +22,7 @@ import fll.util.LogUtils;
 /**
  * Basic tests of loading pages.
  */
-public class WebTest extends SeleneseTestCase {
+public class WebTest extends SeleneseTestBase {
 
   private static final Logger LOG = LogUtils.getLogger();
 
@@ -31,7 +31,6 @@ public class WebTest extends SeleneseTestCase {
     LogUtils.initializeLogging();
     super.setUp(TestUtils.URL_ROOT
                 + "setup");
-    IntegrationTestUtils.login(selenium);
   }
 
   /**
