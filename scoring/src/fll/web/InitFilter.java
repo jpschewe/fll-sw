@@ -87,7 +87,7 @@ public class InitFilter implements Filter {
 
       // call init before check security, if a page doesn't need init,
       // then it doesn't require security either
-      final boolean needsInit = needsInit(httpRequest.getContextPath(), path, application);
+      final boolean needsInit = needsInit(httpRequest.getContextPath(), path);
       final boolean needsSecurity = needsSecurity(httpRequest.getContextPath(), path);
       LOGGER.debug("needsInit: "
           + needsInit + " needsSecurity: " + needsSecurity);
@@ -154,12 +154,8 @@ public class InitFilter implements Filter {
    * @return true if initalize needs to be called
    */
   private boolean needsInit(final String contextPath,
-                            final String path,
-                            final ServletContext application) {
+                            final String path) {
     if (null != path) {
-      final String database = application.getRealPath("/WEB-INF/flldb");
-      final boolean dbExists = Utilities.testHSQLDB(database);
-
       if (path.startsWith(contextPath
           + "/style") //
           || path.startsWith(contextPath
@@ -173,11 +169,13 @@ public class InitFilter implements Filter {
           || path.endsWith(".png") //
           || path.endsWith(".html")) {
         return false;
-      } else if (!dbExists
-          && path.startsWith(contextPath
-              + "/setup")) {
-        // setup needs init if the database is there, otherwise the security
-        // check fails
+      } else if (path.equals(contextPath
+          + "/setup/index.jsp")) {
+        return false;
+      } else if (path.equals(contextPath
+          + "/setup/CreateDB")) {
+        // FIXME need to know the difference between creating new database and
+        // importing into an existing one
         return false;
       }
     }
@@ -256,7 +254,7 @@ public class InitFilter implements Filter {
         session.setAttribute(SessionAttributes.MESSAGE,
                              "<p class='error'>The database does not exist yet or there is a problem with the database files. Please create the database.<br/></p>");
         response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-            + "/setup"));
+            + "/setup/index.jsp"));
         return false;
       }
 
@@ -282,7 +280,7 @@ public class InitFilter implements Filter {
         session.setAttribute(SessionAttributes.MESSAGE,
                              "<p class='error'>The database is not yet initialized. Please create the database.</p>");
         response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-            + "/setup"));
+            + "/setup/index.jsp"));
         return false;
       }
 
@@ -298,7 +296,7 @@ public class InitFilter implements Filter {
             session.setAttribute(SessionAttributes.MESSAGE,
                                  "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
             response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-                + "/setup"));
+                + "/setup/index.jsp"));
             return false;
           }
           application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, document);
@@ -307,7 +305,7 @@ public class InitFilter implements Filter {
           session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>"
               + e.getMessage() + " Please create the database.</p>");
           response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-              + "/setup"));
+              + "/setup/index.jsp"));
           return false;
         }
       }
