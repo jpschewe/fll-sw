@@ -6,19 +6,23 @@
 
 package fll.scheduler;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.log4j.Logger;
 
 import fll.scheduler.TeamScheduleInfo.PerformanceTime;
@@ -32,17 +36,17 @@ public class ParseMinizinc {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private int nsubjective = -1;
+  private final int nsubjective;
 
-  private int nrounds = -1;
+  private final int nrounds;
 
-  private int ntables = -1;
+  private final int ntables;
 
-  private int ngroups = -1;
+  private final int ngroups;
 
-  private int tmax = -1;
+  private final int tmax;
 
-  private int maxTeamsPerGroup = -1;
+  private final int maxTeamsPerGroup;
 
   private static final String arrayPrefix = "1..";
 
@@ -69,12 +73,42 @@ public class ParseMinizinc {
   private int[][][][][] pz;
 
   public ParseMinizinc(final Date startTime,
-                       final int tinc,
-                       final int nrounds,
-                       final File resultFile) throws FileNotFoundException {
+                       final File datafile,
+                       final File resultFile) throws IOException {
     this.startTime = startTime;
-    this.tinc = tinc;
-    this.nrounds = nrounds;
+
+    final Properties properties = parseMinizincData(datafile);
+    LOGGER.debug(properties.toString());
+
+    tinc = readIntProperty(properties, "TInc");
+    ngroups = readIntProperty(properties, "NGroups");
+    nrounds = readIntProperty(properties, "NRounds");
+    ntables = readIntProperty(properties, "NTables");
+    final int tmaxHours = readIntProperty(properties, "TMax_hours");
+    tmax = tmaxHours
+        * 60 / tinc;
+    nsubjective = readIntProperty(properties, "NSubjective");
+    final String groupCountsStr = properties.getProperty("group_counts");
+    final int lbracket = groupCountsStr.indexOf('[');
+    if (-1 == lbracket) {
+      throw new FLLRuntimeException("No '[' found in group_counts: '"
+          + groupCountsStr + "'");
+    }
+    final int rbracket = groupCountsStr.indexOf(']', lbracket);
+    if (-1 == rbracket) {
+      throw new FLLRuntimeException("No ']' found in group_counts: '"
+          + groupCountsStr + "'");
+    }
+    final String groups = groupCountsStr.substring(lbracket + 1, rbracket);
+    int lmaxTeamsPerGroup = 0;
+    for (final String groupCount : groups.split(",")) {
+      final int count = Integer.valueOf(groupCount);
+      lmaxTeamsPerGroup = Math.max(lmaxTeamsPerGroup, count);
+    }
+    maxTeamsPerGroup = lmaxTeamsPerGroup;
+    LOGGER.debug("Max teams in group: "
+        + maxTeamsPerGroup);
+
     this.reader = new LineNumberReader(new FileReader(resultFile));
     this.resultFile = resultFile;
   }
@@ -234,9 +268,7 @@ public class ParseMinizinc {
     final int pyNGroups = parseArrayBound("first");
     LOGGER.debug(varname
         + " ngroups: " + pyNGroups);
-    if (-1 == ngroups) {
-      ngroups = pyNGroups;
-    } else if (ngroups != pyNGroups) {
+    if (ngroups != pyNGroups) {
       throw new ParseException("Inconsistent number of groups "
           + varname + " says: " + pyNGroups + " previous line says: " + ngroups, reader.getLineNumber());
     }
@@ -244,9 +276,7 @@ public class ParseMinizinc {
     final int pyMaxTeamsPerGroup = parseArrayBound("second");
     LOGGER.debug(varname
         + " maxTeamsPerGroup: " + pyMaxTeamsPerGroup);
-    if (-1 == maxTeamsPerGroup) {
-      maxTeamsPerGroup = pyMaxTeamsPerGroup;
-    } else if (maxTeamsPerGroup != pyMaxTeamsPerGroup) {
+    if (maxTeamsPerGroup != pyMaxTeamsPerGroup) {
       throw new ParseException("Inconsistent max number of teams per group "
           + varname + " says: " + pyMaxTeamsPerGroup + " previous line says: " + maxTeamsPerGroup,
                                reader.getLineNumber());
@@ -255,9 +285,7 @@ public class ParseMinizinc {
     final int pyNtables = parseArrayBound("third");
     LOGGER.debug(varname
         + " NTables: " + pyNtables);
-    if (-1 == ntables) {
-      ntables = pyNtables;
-    } else if (ntables != pyNtables) {
+    if (ntables != pyNtables) {
       throw new ParseException("Inconsistent ntables "
           + varname + " says: " + pyNtables + " previous line says: " + ntables, reader.getLineNumber());
     }
@@ -273,9 +301,7 @@ public class ParseMinizinc {
     final int pyTMax = parseArrayBound("fifth");
     LOGGER.debug(varname
         + " TMax: " + pyTMax);
-    if (-1 == tmax) {
-      tmax = pyTMax;
-    } else if (tmax != pyTMax) {
+    if (tmax != pyTMax) {
       throw new ParseException("Inconsistent tmax "
           + varname + " says: " + pyTMax + " previous line says: " + tmax, reader.getLineNumber());
     }
@@ -294,9 +320,7 @@ public class ParseMinizinc {
     final int pyNGroups = parseArrayBound("first");
     LOGGER.debug(varname
         + " ngroups: " + pyNGroups);
-    if (-1 == ngroups) {
-      ngroups = pyNGroups;
-    } else if (ngroups != pyNGroups) {
+    if (ngroups != pyNGroups) {
       throw new ParseException("Inconsistent number of groups "
           + varname + " says: " + pyNGroups + " previous line says: " + ngroups, reader.getLineNumber());
     }
@@ -304,9 +328,7 @@ public class ParseMinizinc {
     final int pyMaxTeamsPerGroup = parseArrayBound("second");
     LOGGER.debug(varname
         + " maxTeamsPerGroup: " + pyMaxTeamsPerGroup);
-    if (-1 == maxTeamsPerGroup) {
-      maxTeamsPerGroup = pyMaxTeamsPerGroup;
-    } else if (maxTeamsPerGroup != pyMaxTeamsPerGroup) {
+    if (maxTeamsPerGroup != pyMaxTeamsPerGroup) {
       throw new ParseException("Inconsistent max number of teams per group "
           + varname + " says: " + pyMaxTeamsPerGroup + " previous line says: " + maxTeamsPerGroup,
                                reader.getLineNumber());
@@ -315,9 +337,7 @@ public class ParseMinizinc {
     final int pyNSubj = parseArrayBound("third");
     LOGGER.debug(varname
         + " NSubj: " + pyNSubj);
-    if (-1 == nsubjective) {
-      nsubjective = pyNSubj;
-    } else if (nsubjective != pyNSubj) {
+    if (nsubjective != pyNSubj) {
       throw new ParseException("Inconsistent NSujb "
           + varname + " says: " + pyNSubj + " previous line says: " + nsubjective, reader.getLineNumber());
     }
@@ -325,9 +345,7 @@ public class ParseMinizinc {
     final int pyTMax = parseArrayBound("fourth");
     LOGGER.debug(varname
         + " TMax: " + pyTMax);
-    if (-1 == tmax) {
-      tmax = pyTMax;
-    } else if (tmax != pyTMax) {
+    if (tmax != pyTMax) {
       throw new ParseException("Inconsistent tmax "
           + varname + " says: " + pyTMax + " previous line says: " + tmax, reader.getLineNumber());
     }
@@ -520,21 +538,56 @@ public class ParseMinizinc {
     return false;
   }
 
+  public static Properties parseMinizincData(final File datafile) throws IOException {
+    final BufferedReader reader = new BufferedReader(new FileReader(datafile));
+    final StringWriter strWriter = new StringWriter();
+    final BufferedWriter writer = new BufferedWriter(strWriter);
+
+    String line;
+    while (null != (line = reader.readLine())) {
+      writer.write(line.replace('%', '#').replace(';', ' '));
+      writer.newLine();
+    }
+    reader.close();
+    writer.close();
+
+    // load into properties
+    final StringReader strReader = new StringReader(strWriter.toString());
+    final Properties properties = new Properties();
+    properties.load(new ReaderInputStream(strReader));
+
+    return properties;
+  }
+
+  public static int readIntProperty(final Properties properties,
+                                    final String property) {
+    final String value = properties.getProperty(property);
+    if (null == property) {
+      throw new NullPointerException("Property '"
+          + property + "' doesn't have a value");
+    }
+    return Integer.valueOf(value.trim());
+  }
+
   public static void main(final String[] args) {
     LogUtils.initializeLogging();
 
-    if (args.length != 4) {
-      LOGGER.fatal("You must specify the start time (HH:MM), TInc, NRounds, and schedule result file");
+    if (args.length != 3) {
+      LOGGER.fatal("You must specify the start time (HH:MM), data file, and schedule result file");
       System.exit(1);
     }
 
     try {
       final Date startTime = TournamentSchedule.OUTPUT_DATE_FORMAT.get().parse(args[0]);
 
-      final int tinc = Integer.valueOf(args[1]);
-      final int nrounds = Integer.valueOf(args[2]);
+      final File datafile = new File(args[1]);
+      if (!datafile.canRead()) {
+        LOGGER.fatal(datafile.getAbsolutePath()
+            + " is not readable");
+        System.exit(4);
+      }
 
-      final File resultFile = new File(args[3]);
+      final File resultFile = new File(args[2]);
       if (!resultFile.canRead()) {
         LOGGER.fatal(resultFile.getAbsolutePath()
             + " is not readable");
@@ -543,7 +596,7 @@ public class ParseMinizinc {
 
       LOGGER.info("Reading result file: "
           + resultFile.getAbsolutePath());
-      final ParseMinizinc parser = new ParseMinizinc(startTime, tinc, nrounds, resultFile);
+      final ParseMinizinc parser = new ParseMinizinc(startTime, datafile, resultFile);
       parser.parse();
     } catch (final NumberFormatException e) {
       LOGGER.fatal("tinc cannot be parsed as a number: "
