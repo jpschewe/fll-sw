@@ -102,7 +102,7 @@ public class ParseMinizinc {
     final String groups = groupCountsStr.substring(lbracket + 1, rbracket);
     int lmaxTeamsPerGroup = 0;
     for (final String groupCount : groups.split(",")) {
-      final int count = Integer.valueOf(groupCount);
+      final int count = Integer.valueOf(groupCount.trim());
       lmaxTeamsPerGroup = Math.max(lmaxTeamsPerGroup, count);
     }
     maxTeamsPerGroup = lmaxTeamsPerGroup;
@@ -353,14 +353,10 @@ public class ParseMinizinc {
     return sx;
   }
 
-  /**
-   * Entry point.
-   * 
-   * @throws IOException if there is an error reading the file
-   * @throws ParseException if there is an error parsing
-   */
-  private void parse() throws IOException, ParseException {
-    while (null != (line = reader.readLine())) {
+  private static final String SCIP_FIRST_LINE = "solution status: optimal solution found";
+
+  private void parseMinizinc() throws IOException, ParseException {
+    while (null != line) {
       if (line.length() == 0) {
         // empty
         return;
@@ -379,6 +375,24 @@ public class ParseMinizinc {
         throw new ParseException("Unrecognized line: '"
             + line + "'", 0);
       }
+    }
+
+    line = reader.readLine();
+  }
+
+  /**
+   * Entry point.
+   * 
+   * @throws IOException if there is an error reading the file
+   * @throws ParseException if there is an error parsing
+   */
+  private void parse() throws IOException, ParseException {
+    line = reader.readLine();
+    if (null != line
+        && SCIP_FIRST_LINE.equals(line)) {
+      parseSCIP();
+    } else {
+      parseMinizinc();
     }
 
     LOGGER.info("Finished parsing");
@@ -412,6 +426,67 @@ public class ParseMinizinc {
     }
 
     outputSchedule();
+  }
+
+  private int parseSCIPArrayIndex() throws ParseException {
+    if (null == line) {
+      throw new NullPointerException("line cannot be null");
+    }
+    final int lbracket = line.indexOf('[');
+    if (-1 == lbracket) {
+      throw new ParseException("Unable to find '[' in '"
+          + line + "'", 0);
+    }
+    final int rbracket = line.indexOf(']', lbracket);
+    if (-1 == rbracket) {
+      throw new ParseException("Unable to find ']' in '"
+          + line + "'", 0);
+    }
+    final String str = line.substring(lbracket + 1, rbracket);
+    try {
+      return Integer.valueOf(str.trim());
+    } catch (final NumberFormatException e) {
+      throw new FLLRuntimeException("Cannot parse array index as integer '"
+          + str.trim() + "'");
+    }
+  }
+
+  private void parseSCIP() throws ParseException {
+    sz = new int[ngroups][maxTeamsPerGroup][nsubjective][tmax];
+    sy = new int[ngroups][maxTeamsPerGroup][nsubjective][tmax];
+    pz = new int[ngroups][maxTeamsPerGroup][ntables][2][tmax];
+    py = new int[ngroups][maxTeamsPerGroup][ntables][2][tmax];
+    while (null != line) {
+      if (SCIP_FIRST_LINE.equals(line)) {
+        // ignore
+      } else if (line.startsWith("objective value")) {
+        // ignore
+      } else if (line.startsWith("true")) {
+        // ignore
+      } else if (line.startsWith("objective")) {
+        // ignore
+      } else if (line.startsWith("sz")) {
+        // FIXME store value
+        final int value = parseSCIPArrayIndex();
+        
+      } else if (line.startsWith("sy")) {
+        // FIXME store value
+        final int value = parseSCIPArrayIndex();
+        
+      } else if (line.startsWith("pz")) {
+        // FIXME store value
+        final int value = parseSCIPArrayIndex();
+        
+      } else if (line.startsWith("py")) {
+        // FIXME store value
+        final int value = parseSCIPArrayIndex();
+        
+      } else {
+        throw new ParseException("Unrecognized line: '"
+            + line + "'", 0);
+      }
+
+    }
   }
 
   private void outputSchedule() throws IOException {
@@ -566,7 +641,12 @@ public class ParseMinizinc {
       throw new NullPointerException("Property '"
           + property + "' doesn't have a value");
     }
-    return Integer.valueOf(value.trim());
+    try {
+      return Integer.valueOf(value.trim());
+    } catch (final NumberFormatException e) {
+      throw new FLLRuntimeException("'"
+          + property + "' doesn't parse as a number '" + value.trim() + "'", e);
+    }
   }
 
   public static void main(final String[] args) {
@@ -598,10 +678,9 @@ public class ParseMinizinc {
           + resultFile.getAbsolutePath());
       final ParseMinizinc parser = new ParseMinizinc(startTime, datafile, resultFile);
       parser.parse();
-    } catch (final NumberFormatException e) {
-      LOGGER.fatal("tinc cannot be parsed as a number: "
-          + e.getMessage());
-      System.exit(5);
+      // } catch (final NumberFormatException e) {
+      // LOGGER.fatal(e);
+      // System.exit(5);
     } catch (final IOException e) {
       LOGGER.fatal("Error reading file", e);
       System.exit(4);
