@@ -22,7 +22,6 @@ import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.log4j.Logger;
 
 import fll.scheduler.TeamScheduleInfo.PerformanceTime;
@@ -629,7 +628,7 @@ public class ParseMinizinc {
     // load into properties
     final StringReader strReader = new StringReader(strWriter.toString());
     final Properties properties = new Properties();
-    properties.load(new ReaderInputStream(strReader));
+    properties.load(strReader);
 
     return properties;
   }
