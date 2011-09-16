@@ -374,9 +374,8 @@ public class ParseMinizinc {
         throw new ParseException("Unrecognized line: '"
             + line + "'", 0);
       }
-    }
-
-    line = reader.readLine();
+      line = reader.readLine();
+    }    
   }
 
   /**
@@ -450,7 +449,7 @@ public class ParseMinizinc {
     }
   }
 
-  private void parseSCIP() throws ParseException {
+  private void parseSCIP() throws ParseException, IOException {
     sz = new int[ngroups][maxTeamsPerGroup][nsubjective][tmax];
     sy = new int[ngroups][maxTeamsPerGroup][nsubjective][tmax];
     pz = new int[ngroups][maxTeamsPerGroup][ntables][2][tmax];
@@ -464,32 +463,73 @@ public class ParseMinizinc {
         // ignore
       } else if (line.startsWith("objective")) {
         // ignore
-      } else if (line.startsWith("sz")) {
-        // FIXME store value
+      } else if (line.startsWith("sz[")
+          || line.startsWith("sy[")) {
         final int value = parseSCIPArrayIndex();
-        
-      } else if (line.startsWith("sy")) {
-        // FIXME store value
+        final int dim1Size = maxTeamsPerGroup
+            * nsubjective * tmax;
+        final int group = value
+            / dim1Size;
+        final int dim1Remainder = value
+            - (group * dim1Size);
+        final int dim2Size = nsubjective
+            * tmax;
+        final int team = dim1Remainder
+            / dim2Size;
+        final int dim2Remainder = dim1Remainder
+            - (team * dim2Size);
+        final int dim3Size = tmax;
+        final int cat = dim2Remainder
+            / dim3Size;
+        final int dim3Remainder = dim2Remainder
+            - (cat * dim3Size);
+        final int t = dim3Remainder;
+        if (line.startsWith("sz")) {
+          sz[group][team][cat][t] = 1;
+        } else {
+          sy[group][team][cat][t] = 1;
+        }
+      } else if (line.startsWith("pz[")
+          || line.startsWith("py[")) {
         final int value = parseSCIPArrayIndex();
-        
-      } else if (line.startsWith("pz")) {
-        // FIXME store value
-        final int value = parseSCIPArrayIndex();
-        
-      } else if (line.startsWith("py")) {
-        // FIXME store value
-        final int value = parseSCIPArrayIndex();
-        
+        final int dim1Size = maxTeamsPerGroup
+            * ntables * 2 * tmax;
+        final int group = value
+            / dim1Size;
+        final int dim1Remainder = value
+            - (group * dim1Size);
+        final int dim2Size = ntables
+            * 2 * tmax;
+        final int team = dim1Remainder
+            / dim2Size;
+        final int dim2Remainder = dim1Remainder
+            - (team * dim2Size);
+        final int dim3Size = 2 * tmax;
+        final int table = dim2Remainder
+            / dim3Size;
+        final int dim3Remainder = dim2Remainder
+            - (table * dim3Size);
+        final int dim4Size = tmax;
+        final int side = dim3Remainder
+            / dim4Size;
+        final int dim4Remainder = dim3Remainder
+            - (side * dim4Size);
+        final int t = dim4Remainder;
+        if (line.startsWith("pz")) {
+          pz[group][team][table][side][t] = 1;
+        } else {
+          py[group][team][table][side][t] = 1;
+        }
       } else {
         throw new ParseException("Unrecognized line: '"
             + line + "'", 0);
       }
 
+      line = reader.readLine();
     }
   }
 
   private void outputSchedule() throws IOException {
-    // FIXME do sanity check on n*
     final File schedule = new File(resultFile.getAbsolutePath()
         + ".csv");
     LOGGER.info("Schedule output to "
