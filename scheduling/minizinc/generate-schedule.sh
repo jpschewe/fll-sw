@@ -23,6 +23,7 @@ log "Solving"
 #log "Result is in ${param_file}.result"
 
 # use scip
+#FIXME figure out how to set limits/gap to reduce search time?
 /home/jpschewe/projects/fll-sw/scip-2.0.2.linux.x86_64.gnu.opt.spx \
   -l "${flatzinc_file}.scip.log" \
   -c "read ${flatzinc_file}" \
