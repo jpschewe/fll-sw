@@ -6,3 +6,4 @@
 *.scip.log
 *.scip.sol
 *.scip.sol.csv
+fllparse-minizinc.log
