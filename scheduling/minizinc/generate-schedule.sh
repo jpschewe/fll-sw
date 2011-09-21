@@ -8,14 +8,20 @@ warn() { log "WARNING: $*" >&2; }
 error() { log "ERROR: $*" >&2; }
 fatal() { error "$*"; exit 1; }
 
-if [ $# -ne 1 ]; then
+if [ $# -lt 1 ]; then
     fatal "Usage: $0 <params.dzn>"
 fi
 
 param_file=$1
-flatzinc_file="${param_file}.fzn"
+feasible=${2-0}
 
-"${mydir}/convert-schedule.sh" "${param_file}"
+if [ ${feasible} -ne 0 ]; then
+    flatzinc_file="${param_file}.feasible.fzn"
+else
+    flatzinc_file="${param_file}.fzn"
+fi
+
+"${mydir}/convert-schedule.sh" "${param_file}" ${feasible}
 
 date
 log "Solving"

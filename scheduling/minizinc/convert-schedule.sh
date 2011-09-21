@@ -8,13 +8,18 @@ warn() { log "WARNING: $*" >&2; }
 error() { log "ERROR: $*" >&2; }
 fatal() { error "$*"; exit 1; }
 
-if [ $# -ne 1 ]; then
+if [ $# -lt 1 ]; then
         fatal "Usage: $0 <params.dzn>"
 fi
 
 param_file=$1
-flatzinc_file="${param_file}.fzn"
+feasible=${2-0}
 
+if [ ${feasible} -ne 0 ]; then
+    flatzinc_file="${param_file}.feasible.fzn"
+else
+    flatzinc_file="${param_file}.fzn"
+fi
 
 needs_update=0
 if [ ! -e "${flatzinc_file}" ]; then
@@ -35,14 +40,21 @@ else
 fi
 
 if [ ${needs_update} -ne 0 ]; then
+    if [ ${feasible} -ne 0 ]; then
+        cat "${mydir}/schedule.mzn" "${mydir}/schedule-feasible.mzn" > "${mydir}/schedule-$$.mzn"
+    else
+        cat "${mydir}/schedule.mzn" "${mydir}/schedule-objective.mzn" > "${mydir}/schedule-$$.mzn"
+    fi
+
     log "Converting to flatzinc"
     date
     mzn2fzn --no-output-ozn --globals-dir linear \
-        "${mydir}/schedule.mzn" "${param_file}" \
+        "${mydir}/schedule-$$.mzn" "${param_file}" \
         -o "${flatzinc_file}" \
         || fatal "Error executing mzn2fzn"
     date
     log "flatzinc file is ${flatzinc_file}"
+    rm -f "${mydir}/schedule-$$.mzn"
 else
     log "${flatzinc_file} is already up to date"
 fi
