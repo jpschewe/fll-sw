@@ -17,8 +17,10 @@ feasible=${2-0}
 
 if [ ${feasible} -ne 0 ]; then
     flatzinc_file="${param_file}.feasible.fzn"
+    schedule_solve_file="${mydir}/schedule-feasible.mzn"
 else
     flatzinc_file="${param_file}.fzn"
+    schedule_solve_file="${mydir}/schedule-objective.mzn"
 fi
 
 needs_update=0
@@ -31,20 +33,20 @@ else
         || fatal "Error executing stat on schedule.mzn"
     flatzinc_file_time=$(stat --format "%Y" "${flatzinc_file}") \
         || fatal "Error executing stat on ${flatzinc_file}"
+    schedule_solve_file_time=$(stat --format "%Y" "${schedule_solve_file}") \
+        || fatal "Error executing stat on ${schedule_solve_file}"
 
     if [ ${param_file_time} -gt ${flatzinc_file_time} ]; then
         needs_update=1
     elif [ ${schedule_file_time} -gt ${flatzinc_file_time} ]; then
         needs_update=1
+    elif [ ${schedule_solve_file_time} -gt ${flatzinc_file_time} ]; then
+        needs_update=1
     fi
 fi
 
 if [ ${needs_update} -ne 0 ]; then
-    if [ ${feasible} -ne 0 ]; then
-        cat "${mydir}/schedule.mzn" "${mydir}/schedule-feasible.mzn" > "${mydir}/schedule-$$.mzn"
-    else
-        cat "${mydir}/schedule.mzn" "${mydir}/schedule-objective.mzn" > "${mydir}/schedule-$$.mzn"
-    fi
+    cat "${mydir}/schedule.mzn" "${schedule_solve_file}" > "${mydir}/schedule-$$.mzn"
 
     log "Converting to flatzinc"
     date
