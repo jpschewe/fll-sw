@@ -390,15 +390,31 @@ Make everything as early as possible.
 \jpscomment{Find a way to make it more desirable to compete against
   different teams in performance rounds}
 
-$Min ( 
-\sum\limits_{t \in T}
- \sum\limits_{g=1}^{NGroups}
-  \sum\limits_{i \in G_{g}} (
-    \sum\limits_{n=1}^{NSubjective}
-      ( sy_{t}^{g,i,n} \times t )
-  + \sum\limits_{b=1}^{NTables} ( ( py_{t}^{g,i,b,1} + py_{t}^{g,i,b,2} )
-  \times t)
-  )
-) $
+% $Min ( 
+% \sum\limits_{t \in T}
+%  \sum\limits_{g=1}^{NGroups}
+%   \sum\limits_{i \in G_{g}} (
+%     \sum\limits_{n=1}^{NSubjective}
+%       ( sy_{t}^{g,i,n} \times t )
+%   + \sum\limits_{b=1}^{NTables} ( ( py_{t}^{g,i,b,1} + py_{t}^{g,i,b,2} )
+%   \times t)
+%   )
+% ) $
+
+\begin{algorithm}
+\caption{objectiveYMax1}
+$yMax_{t} \ge 1 - (
+  \sum\limits_{g=1}^{NGroups}
+    \sum\limits_{i \in G_{g}} (
+      \sum\limits_{n=1}^{NSubjective} sy_{t}^{g,i,n} +
+      \sum\limits_{b=1}^{NTables} ( py_{t}^{g,i,b,1} + py_{t}^{g,i,b,1} )
+    )) * M
+$
+\hfill$
+\forall t \in 1 \dots TMax
+$
+
+\end{algorithm}
+
 
 \end{document}
