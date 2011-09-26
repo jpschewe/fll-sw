@@ -53,6 +53,7 @@ import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.scheduler.TeamScheduleInfo.SubjectiveTime;
@@ -170,6 +171,11 @@ public class TournamentSchedule implements Serializable {
   private final LinkedList<TeamScheduleInfo> _schedule = new LinkedList<TeamScheduleInfo>();
 
   private final Set<String> subjectiveStations = new HashSet<String>();
+  
+  /**
+   * Name of this tournament.
+   */
+  private final String name;
 
   /**
    * The list of subjective stations for this schedule.
@@ -200,15 +206,18 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
+   * @param name the name of the tournament
    * @param stream how to access the spreadsheet
    * @param sheetName the name of the worksheet the data is on
    * @param subjectiveHeaders the headers for the subjective columns
    * @throws ScheduleParseException if there is an error parsing the schedule
    */
-  public TournamentSchedule(final InputStream stream,
+  public TournamentSchedule(final String name, 
+                            final InputStream stream,
                             final String sheetName,
                             final Collection<String> subjectiveHeaders) throws IOException, ParseException,
       InvalidFormatException, ScheduleParseException {
+    this.name = name;
     final CellFileReader reader = new ExcelCellReader(stream, sheetName);
     final ColumnInformation columnInfo = findColumns(reader, subjectiveHeaders);
     numRounds = columnInfo.getNumPerfs();
@@ -227,6 +236,9 @@ public class TournamentSchedule implements Serializable {
    */
   public TournamentSchedule(final Connection connection,
                             final int tournamentID) throws SQLException {
+    final Tournament currentTournament = Tournament.findTournamentByID(connection, tournamentID);
+    name = currentTournament.getName();
+    
     PreparedStatement getSched = null;
     ResultSet sched = null;
     PreparedStatement getPerfRounds = null;
@@ -745,13 +757,17 @@ public class TournamentSchedule implements Serializable {
       final PdfPTable table = createTable(6);
       table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
 
+      final PdfPCell tournamentCell = createHeaderCell("Tournament: " + name + " Performance Round: " + String.valueOf(round+1));
+      tournamentCell.setColspan(6);
+      table.addCell(tournamentCell);
+
       table.addCell(createHeaderCell(TEAM_NUMBER_HEADER));
       table.addCell(createHeaderCell(DIVISION_HEADER));
       table.addCell(createHeaderCell("School or Organization"));
       table.addCell(createHeaderCell("Team Name"));
       table.addCell(createHeaderCell(new Formatter().format("Perf #%d", (round + 1)).toString()));
       table.addCell(createHeaderCell(new Formatter().format("Perf %d Table", (round + 1)).toString()));
-      table.setHeaderRows(1);
+      table.setHeaderRows(2);
 
       for (final TeamScheduleInfo si : _schedule) {
         // check if team needs to stay and color the cell magenta if they do
@@ -831,15 +847,19 @@ public class TournamentSchedule implements Serializable {
     final PdfPTable table = createTable(6);
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
 
-    Collections.sort(_schedule, getComparatorForSubjective(subjectiveStation));
+    final PdfPCell tournamentCell = createHeaderCell("Tournament: " + name + " - " + subjectiveStation);
+    tournamentCell.setColspan(6);
+    table.addCell(tournamentCell);
+    
     table.addCell(createHeaderCell(TEAM_NUMBER_HEADER));
     table.addCell(createHeaderCell(DIVISION_HEADER));
     table.addCell(createHeaderCell("School or Organization"));
     table.addCell(createHeaderCell("Team Name"));
-    table.addCell(createHeaderCell(RESEARCH_HEADER));
+    table.addCell(createHeaderCell(subjectiveStation));
     table.addCell(createHeaderCell(JUDGE_GROUP_HEADER));
-    table.setHeaderRows(1);
+    table.setHeaderRows(2);
 
+    Collections.sort(_schedule, getComparatorForSubjective(subjectiveStation));
     for (final TeamScheduleInfo si : _schedule) {
       table.addCell(createCell(String.valueOf(si.getTeamNumber())));
       table.addCell(createCell(si.getDivision()));
