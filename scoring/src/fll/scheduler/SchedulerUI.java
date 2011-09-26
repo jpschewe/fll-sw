@@ -190,8 +190,17 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       FileInputStream fis = null;
       try {
-        fis = new FileInputStream(getCurrentFile());
-        final TournamentSchedule newData = new TournamentSchedule(fis, getCurrentSheetName(),
+        final File selectedFile = getCurrentFile();
+        fis = new FileInputStream(selectedFile);
+        final String fullname = selectedFile.getName();
+        final int dotIndex = fullname.lastIndexOf('.');
+        final String name;
+        if(-1 != dotIndex) {
+          name = fullname.substring(0, dotIndex);
+        } else {
+          name = fullname;
+        }
+        final TournamentSchedule newData = new TournamentSchedule(name, fis, getCurrentSheetName(),
                                                                   scheduleData.getSubjectiveStations());
         setScheduleData(newData);
       } catch (final IOException e) {
@@ -395,7 +404,15 @@ public class SchedulerUI extends JFrame {
             }
 
             fis = new FileInputStream(selectedFile);
-            final TournamentSchedule schedule = new TournamentSchedule(fis, sheetName, subjectiveHeaders);
+            final String fullname = selectedFile.getName();
+            final int dotIndex = fullname.lastIndexOf('.');
+            final String name;
+            if(-1 != dotIndex) {
+              name = fullname.substring(0, dotIndex);
+            } else {
+              name = fullname;
+            }
+            final TournamentSchedule schedule = new TournamentSchedule(name, fis, sheetName, subjectiveHeaders);
             currentFile = selectedFile;
             currentSheetName = sheetName;
             setScheduleData(schedule);
