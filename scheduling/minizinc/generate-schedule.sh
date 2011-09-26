@@ -21,7 +21,7 @@ else
     flatzinc_file="${param_file}.fzn"
 fi
 
-"${mydir}/convert-schedule.sh" "${param_file}" ${feasible}
+"${mydir}/convert-schedule.sh" "${param_file}" ${feasible} || fatal "Error executing convert-schedule.sh"
 
 date
 log "Solving"

@@ -10,6 +10,7 @@ include "globals.mzn";
 % parameters
 int: TInc;
 int: TMax_hours;
+int: TMax_minutes;
 
 % subjective setup
 int: NSubjective;
@@ -39,7 +40,9 @@ array [1..NSubjective] of int : alpha_subj = [ x div TInc | x in subj_minutes ];
 int: NTeams = sum(group_counts);
 constraint assert(NTeams mod 2 == 0, "Number of teams must be even");
 
-int: TMax = TMax_hours * 60 div TInc;
+constraint assert( ((TMax_hours * 60) + TMax_minutes) mod TInc == 0, "TMax must be evenly divisible by TInc");
+
+int: TMax = ( (TMax_hours * 60) + TMax_minutes) div TInc;
 int: alpha_perf = alpha_perf_minutes div TInc;
 int: ct = ct_minutes div TInc;
 int: pct = pct_minutes div TInc;
