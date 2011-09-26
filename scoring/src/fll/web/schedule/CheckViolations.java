@@ -85,7 +85,15 @@ public class CheckViolations extends BaseFLLServlet {
       }
       
       final InputStream stream = new FileInputStream(scheduleFile);
-      final TournamentSchedule schedule = new TournamentSchedule(stream, sheetName, subjectiveHeaders);
+      final String fullname = scheduleFile.getName();
+      final int dotIndex = fullname.lastIndexOf('.');
+      final String name;
+      if(-1 != dotIndex) {
+        name = fullname.substring(0, dotIndex);
+      } else {
+        name = fullname;
+      }
+      final TournamentSchedule schedule = new TournamentSchedule(name, stream, sheetName, subjectiveHeaders);
       session.setAttribute("uploadSchedule_schedule", schedule);
 
       final DataSource datasource = SessionAttributes.getDataSource(session);
