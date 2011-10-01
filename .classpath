@@ -63,7 +63,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/scoring/lib/source/commons-codec-1.5-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="scoring/lib/JaCoP-3.1.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/selenium-server-standalone-2.1.0.jar" sourcepath="scoring/lib/test/selenium-server-2.1.0-srcs.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
