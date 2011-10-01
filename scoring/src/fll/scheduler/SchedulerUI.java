@@ -286,7 +286,7 @@ public class SchedulerUI extends JFrame {
     {
       putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Export16.gif"));
       putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Export24.gif"));
-      putValue(SHORT_DESCRIPTION, "Write out the detailed schedules as PDFs");
+      putValue(SHORT_DESCRIPTION, "Write out the detailed schedules as a PDF");
       // putValue(MNEMONIC_KEY, KeyEvent.VK_X);
     }
 
