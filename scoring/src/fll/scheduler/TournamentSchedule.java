@@ -96,7 +96,7 @@ public class TournamentSchedule implements Serializable {
    * Used with {@link String#format(String, Object...)} to create a performance
    * round header.
    */
-  private static final String PERF_HEADER_FORMAT = "Perf #%d";
+  private static final String PERF_HEADER_FORMAT = BASE_PERF_HEADER + "%d";
 
   /**
    * Used with {@link String#format(String, Object...)} to create a performance
