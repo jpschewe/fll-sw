@@ -4,37 +4,37 @@
 
   <Performance minimumScore="0" weight="1.0">
 
-    <goal name="pollution_reversal" title="Pollution Reversal"
+    <goal name="pollution_reversal" title="Pollution Balls touching Mat"
       multiplier="4" max="2"
       />
 
-    <goal name="corn_harvest" title="Corn Harvest"
+    <goal name="corn_harvest" title="Corn Harvest (one piece)"
       initialValue="0">
       <value score="9" title="In Base" value="in_base"/>
       <value score="5" title="On Mat" value="on_mat"/>
       <value score="0" title="None" value="none"/>
     </goal>
 
-    <goal name="fishing" title="Fishing"
+    <goal name="fishing" title="Big Fish in Base"
       multiplier="3" max="3"/>
 
-    <goal name="pizza_ice_cream" title="Pizza and Ice Cream"
+    <goal name="pizza_ice_cream" title="Pizza and Ice Cream in Base"
       multiplier="7" max="2"/>
 
-    <goal name="farm_fresh_produce" title="Farm Fresh Produce"
+    <goal name="farm_fresh_produce" title="Yellow Truck in Base"
       multiplier="9"/>
 
     <goal name="distant_travel" title="Distant Travel"
       multiplier="9"/>
 
-    <goal name="cooking_time" title="Cooking Time"
+    <goal name="cooking_time" title="Cooking Timer pointing Red"
       multiplier="14"
       />
 
     <goal name="storage_temperature" title="Storage Temperature"
       multiplier="20"/>
 
-    <goal name="pest_removal" title="Pest Removal"
+    <goal name="pest_removal" title="Pest Removal (Rats in Base)"
       multiplier="15" max="2"/>
 
     <goal name="refrig_ground_transport" title="Refrigerated Ground Transport"
@@ -43,7 +43,7 @@
       <value score="12" title="Base" value="base"/>
       <value score="0" title="None" value="none"/>
     </goal>
-    <goal name="fish_inside_trailer" title="Fish Inside Trailer"
+    <goal name="fish_inside_trailer" title="Fish Inside Trailer (Only at Dock)"
       multiplier="0" max="3" />
     <!-- need to have the trailer on the dock to get the fish bonus -->
     <computedGoal name="fish_trailer_bonus" title="Fish Trailer Bonus">
@@ -68,11 +68,11 @@
       </switch>
     </computedGoal>
 
-    <goal name="groceries" title="Groceries"
+    <goal name="groceries" title="Groceries on Table"
       multiplier="2" max="12"/>
 
     <!-- multiplier is 7 or 12 depending on if bacteria is outside base -->
-    <goal name="disinfect" title="Disinfect"
+    <goal name="disinfect" title="Disinfect Dispensers Empty"
       multiplier="0" max="4"/>
     <goal name="bacteria_outside_base" title="Bacteria Touching Mat Outside Base"
       multiplier="0"/>
@@ -89,20 +89,20 @@
             </right>
           </condition>
           <result>
-            <term scoreType="raw" coefficient="12" goal="disinfect"/>
+            <term scoreType="raw" coefficient="7" goal="disinfect"/>
           </result>
         </case>
         <default>
-          <term scoreType="raw" coefficient="7" goal="disinfect"/>
+          <term scoreType="raw" coefficient="12" goal="disinfect"/>
         </default>
       </switch>
     </computedGoal>
 
-    <goal name="hand_wash_bacterial" title="Hand Wash/Bacterial"
-      multiplier="3" max="48"/>
+    <goal name="hand_wash_bacterial" title="Hand Wash/Bacterial in Sink"
+      multiplier="3" max="60"/>
 
-    <goal name="hand_wash_viral" title="Num Germs in Sink"
-      multiplier="0" max="60"/>
+    <goal name="hand_wash_viral" title="Number Virus in Sink"
+      multiplier="0" max="16"/>
     <computedGoal name="hand_wash_viral_score" title="Hand Wash/Viral">
       <switch>
         <case>
@@ -151,7 +151,15 @@
     
     <tiebreaker>
       <test winner='HIGH'>
-        <term goal='pollution_reversal' scoreType='computed' />
+        <term goal='groceries' scoreType='computed' />
+      </test>
+
+      <test winner='HIGH'>
+        <term goal='disinfect_score' scoreType='computed' />
+      </test>
+
+      <test winner='HIGH'>
+        <term goal='hand_wash_bacterial' scoreType='computed' />
       </test>
       
     </tiebreaker>
