@@ -57,7 +57,6 @@ import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.scheduler.TeamScheduleInfo.SubjectiveTime;
-import fll.scheduler.autosched.SchedParams;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
