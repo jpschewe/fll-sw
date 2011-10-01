@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import net.mtu.eggplant.util.Functions;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
@@ -96,7 +97,8 @@ public class TournamentSchedule implements Serializable {
    * Used with {@link String#format(String, Object...)} to create a performance
    * round header.
    */
-  private static final String PERF_HEADER_FORMAT = BASE_PERF_HEADER + "%d";
+  private static final String PERF_HEADER_FORMAT = BASE_PERF_HEADER
+      + "%d";
 
   /**
    * Used with {@link String#format(String, Object...)} to create a performance
@@ -171,7 +173,7 @@ public class TournamentSchedule implements Serializable {
   private final LinkedList<TeamScheduleInfo> _schedule = new LinkedList<TeamScheduleInfo>();
 
   private final Set<String> subjectiveStations = new HashSet<String>();
-  
+
   /**
    * Name of this tournament.
    */
@@ -212,7 +214,7 @@ public class TournamentSchedule implements Serializable {
    * @param subjectiveHeaders the headers for the subjective columns
    * @throws ScheduleParseException if there is an error parsing the schedule
    */
-  public TournamentSchedule(final String name, 
+  public TournamentSchedule(final String name,
                             final InputStream stream,
                             final String sheetName,
                             final Collection<String> subjectiveHeaders) throws IOException, ParseException,
@@ -238,7 +240,7 @@ public class TournamentSchedule implements Serializable {
                             final int tournamentID) throws SQLException {
     final Tournament currentTournament = Tournament.findTournamentByID(connection, tournamentID);
     name = currentTournament.getName();
-    
+
     PreparedStatement getSched = null;
     ResultSet sched = null;
     PreparedStatement getPerfRounds = null;
@@ -757,7 +759,8 @@ public class TournamentSchedule implements Serializable {
       final PdfPTable table = createTable(6);
       table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
 
-      final PdfPCell tournamentCell = createHeaderCell("Tournament: " + name + " Performance Round: " + String.valueOf(round+1));
+      final PdfPCell tournamentCell = createHeaderCell("Tournament: "
+          + name + " Performance Round: " + String.valueOf(round + 1));
       tournamentCell.setColspan(6);
       table.addCell(tournamentCell);
 
@@ -847,10 +850,11 @@ public class TournamentSchedule implements Serializable {
     final PdfPTable table = createTable(6);
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
 
-    final PdfPCell tournamentCell = createHeaderCell("Tournament: " + name + " - " + subjectiveStation);
+    final PdfPCell tournamentCell = createHeaderCell("Tournament: "
+        + name + " - " + subjectiveStation);
     tournamentCell.setColspan(6);
     table.addCell(tournamentCell);
-    
+
     table.addCell(createHeaderCell(TEAM_NUMBER_HEADER));
     table.addCell(createHeaderCell(DIVISION_HEADER));
     table.addCell(createHeaderCell("School or Organization"));
@@ -1280,6 +1284,13 @@ public class TournamentSchedule implements Serializable {
     for (int round = 0; round < getNumberOfRounds(); ++round) {
       final TeamScheduleInfo opponent = findOpponent(ti, round);
       if (null != opponent) {
+        if (!Functions.safeEquals(ti.getDivision(), opponent.getDivision())) {
+          final String divMessage = String.format("Team %d in division %s is competing against team %d from division %s round %d",
+                                                  ti.getTeamNumber(), ti.getDivision(), opponent.getTeamNumber(),
+                                                  opponent.getDivision(), (round+1));
+          violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, ti.getPerf(round), divMessage));
+        }
+
         int opponentSide = -1;
         // figure out which round matches up
         for (int oround = 0; oround < getNumberOfRounds(); ++oround) {
@@ -1309,7 +1320,6 @@ public class TournamentSchedule implements Serializable {
             final String message = String.format("Team %d competes against %d more than once rounds: %d, %d",
                                                  ti.getTeamNumber(), opponent.getTeamNumber(), (round + 1), (r + 1));
             violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, null, message));
-            violations.add(new ConstraintViolation(false, opponent.getTeamNumber(), null, null, null, message));
           }
         }
       } else {
