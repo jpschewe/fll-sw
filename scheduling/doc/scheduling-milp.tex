@@ -381,40 +381,72 @@ $
       ( pz_{t}^{g,i,b,1} + pz_{t}^{g,i,b,2} ) = 0$
 \end{algorithm}
     
+\FloatBarrier
 \subsection{Other Breaks}
 Need to add in lunch breaks for subjective and a break after the first few
 performance runs. \jpscomment{Not sure how I want to do this yet.}
 
+\FloatBarrier
 \section{Objective function}
-Make everything as early as possible.
-\jpscomment{Find a way to make it more desirable to compete against
-  different teams in performance rounds}
+I currently have 2 possible objective functions. The YMax objective
+function should produce better results, but is many times slower.
+Both objective functions try and make everything as early as possible.
 
-% $Min ( 
-% \sum\limits_{t \in T}
-%  \sum\limits_{g=1}^{NGroups}
-%   \sum\limits_{i \in G_{g}} (
-%     \sum\limits_{n=1}^{NSubjective}
-%       ( sy_{t}^{g,i,n} \times t )
-%   + \sum\limits_{b=1}^{NTables} ( ( py_{t}^{g,i,b,1} + py_{t}^{g,i,b,2} )
-%   \times t)
-%   )
-% ) $
+\FloatBarrier
+\subsection{Original}
+$Min ( 
+\sum\limits_{t \in T}
+ \sum\limits_{g=1}^{NGroups}
+  \sum\limits_{i \in G_{g}} (
+    \sum\limits_{n=1}^{NSubjective}
+      ( sy_{t}^{g,i,n} \times t )
+  + \sum\limits_{b=1}^{NTables} ( ( py_{t}^{g,i,b,1} + py_{t}^{g,i,b,2} )
+  \times t)
+  )
+) $
+
+\FloatBarrier
+\subsection{YMax}
+$yMax_{t}$ is an integer variable that is 1 if any judging station is busy at
+time $t$ and 0 otherwise.
 
 \begin{algorithm}
-\caption{objectiveYMax1}
-$yMax_{t} \ge 1 - (
-  \sum\limits_{g=1}^{NGroups}
-    \sum\limits_{i \in G_{g}} (
-      \sum\limits_{n=1}^{NSubjective} sy_{t}^{g,i,n} +
-      \sum\limits_{b=1}^{NTables} ( py_{t}^{g,i,b,1} + py_{t}^{g,i,b,1} )
-    )) * M
-$
+\caption{objectiveYMaxSubjective}
+$yMax_{t} \ge sy_{t}^{g,i,n}$
 \hfill$
-\forall t \in 1 \dots TMax
+\forall g \in 1 \dots NGroups,
+\forall i \in G_{g}, 
+\forall t \in 1 \dots TMax,
+\forall n \in 1 \dots NSubjective
 $
-
 \end{algorithm}
 
+\begin{algorithm}
+\caption{objectiveYMaxPerf}
+$yMax_{t} \ge py_{t}^{g,i,b,s}$
+\hfill$
+\forall g \in 1 \dots NGroups,
+\forall i \in G_{g}, 
+\forall t \in 1 \dots TMax,
+\forall b \in 1 \dots NTables,
+\forall s \in 1 \dots 2
+$
+\end{algorithm}
+
+\FloatBarrier
+$objective$ is equal to the largest $t$ that has any judging happening.
+\begin{algorithm}
+\caption{objectiveYMax}
+$objective \ge yMax_{t} * t$
+\hfill
+$\forall t \in 1 \dots TMax$
+\end{algorithm}
+
+\FloatBarrier
+Make everything as early as possible.
+\begin{algorithm}
+\caption{objective}
+$Min(objective)$
+\end{algorithm}
 
 \end{document}
