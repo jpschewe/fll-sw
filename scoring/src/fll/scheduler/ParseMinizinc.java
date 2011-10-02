@@ -371,8 +371,8 @@ public class ParseMinizinc {
       } else if (line.startsWith("sz = array4d")) {
         sz = parseS("sz");
       } else {
-        throw new ParseException("Unrecognized line: '"
-            + line + "'", 0);
+        LOGGER.warn("Unrecognized line: '"
+            + line + "', skipping");
       }
       line = reader.readLine();
     }    
@@ -521,8 +521,8 @@ public class ParseMinizinc {
           py[group][team][table][side][t] = 1;
         }
       } else {
-        throw new ParseException("Unrecognized line: '"
-            + line + "'", 0);
+        LOGGER.warn("Unrecognized line: '"
+            + line + "', skippin");
       }
 
       line = reader.readLine();
