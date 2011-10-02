@@ -1,4 +1,6 @@
 % objective
+var int: objective;
+
 constraint
 sum(t in 1..TMax) (
   sum(g in 1..NGroups) (

@@ -60,7 +60,6 @@ array [1..NGroups, 1..MaxTeamsInGroup, 1..NTables, 1..2, 1..TMax ] of var
 0..1 : pz ::is_output;
 array [1..NGroups, 1..MaxTeamsInGroup, 1..NTables, 1..2, 1..TMax ] of var
 0..1 : py ::is_output;
-var int: objective;
 
 % zero out extra variables
 constraint
