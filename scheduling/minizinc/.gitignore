@@ -3,7 +3,7 @@
 *.result.csv
 *.output
 *.ozn
-*.scip.log
+*.log
 *.scip.sol
 *.scip.sol.csv
 fllparse-minizinc.log
