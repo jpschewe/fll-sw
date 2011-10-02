@@ -1,6 +1,6 @@
 *.fzn
 *.result
-*.result.csv
+*.csv
 *.output
 *.ozn
 *.log
