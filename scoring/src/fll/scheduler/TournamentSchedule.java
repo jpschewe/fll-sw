@@ -19,6 +19,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -33,6 +34,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import net.mtu.eggplant.util.Functions;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
@@ -45,15 +47,16 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.scheduler.TeamScheduleInfo.SubjectiveTime;
@@ -97,7 +100,7 @@ public class TournamentSchedule implements Serializable {
    * Used with {@link String#format(String, Object...)} to create a performance
    * round header.
    */
-  public static final String PERF_HEADER_FORMAT = BASE_PERF_HEADER
+  private static final String PERF_HEADER_FORMAT = BASE_PERF_HEADER
       + "%d";
 
   /**
@@ -143,13 +146,17 @@ public class TournamentSchedule implements Serializable {
     }
   };
 
-  private long performanceDuration = Utilities.convertMinutesToMilliseconds(SchedParams.DEFAULT_PERFORMANCE_MINUTES);
-
-  private long subjectiveDuration = Utilities.convertMinutesToMilliseconds(SchedParams.DEFAULT_SUBJECTIVE_MINUTES);
-
   private long changetime = Utilities.convertMinutesToMilliseconds(SchedParams.DEFAULT_CHANGETIME_MINUTES);
 
   private long performanceChangetime = Utilities.convertMinutesToMilliseconds(SchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
+
+  private int performanceDurationMinutes = SchedParams.DEFAULT_PERFORMANCE_MINUTES;
+
+  private long performanceDuration = Utilities.convertMinutesToMilliseconds(performanceDurationMinutes);
+
+  private int subjectiveDurationMinutes = SchedParams.DEFAULT_SUBJECTIVE_MINUTES;
+
+  private long subjectiveDuration = Utilities.convertMinutesToMilliseconds(subjectiveDurationMinutes);
 
   private long specialPerformanceChangetime = Utilities.convertMinutesToMilliseconds(30);
 
@@ -164,6 +171,11 @@ public class TournamentSchedule implements Serializable {
   private final LinkedList<TeamScheduleInfo> _schedule = new LinkedList<TeamScheduleInfo>();
 
   private final Set<String> subjectiveStations = new HashSet<String>();
+
+  /**
+   * Name of this tournament.
+   */
+  private final String name;
 
   /**
    * The list of subjective stations for this schedule.
@@ -194,16 +206,18 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
+   * @param name the name of the tournament
    * @param stream how to access the spreadsheet
    * @param sheetName the name of the worksheet the data is on
    * @param subjectiveHeaders the headers for the subjective columns
    * @throws ScheduleParseException if there is an error parsing the schedule
    */
-  public TournamentSchedule(final InputStream stream,
+  public TournamentSchedule(final String name,
+                            final InputStream stream,
                             final String sheetName,
                             final Collection<String> subjectiveHeaders) throws IOException, ParseException,
       InvalidFormatException, ScheduleParseException {
-    this(new ExcelCellReader(stream, sheetName), subjectiveHeaders);
+    this(name, new ExcelCellReader(stream, sheetName), subjectiveHeaders);
   }
 
   /**
@@ -214,10 +228,11 @@ public class TournamentSchedule implements Serializable {
    * @throws ScheduleParseException
    * @throws ParseException
    */
-  public TournamentSchedule(final File csvFile,
+  public TournamentSchedule(final String name,
+                            final File csvFile,
                             final Collection<String> subjectiveHeaders) throws IOException, ParseException,
       ScheduleParseException {
-    this(new CSVCellReader(csvFile), subjectiveHeaders);
+    this(name, new CSVCellReader(csvFile), subjectiveHeaders);
   }
 
   /**
@@ -227,9 +242,11 @@ public class TournamentSchedule implements Serializable {
    * @throws ScheduleParseException
    * @throws ParseException
    */
-  private TournamentSchedule(final CellFileReader reader,
+  private TournamentSchedule(final String name,
+                             final CellFileReader reader,
                              final Collection<String> subjectiveHeaders) throws IOException, ParseException,
       ScheduleParseException {
+    this.name = name;
     final ColumnInformation columnInfo = findColumns(reader, subjectiveHeaders);
     numRounds = columnInfo.getNumPerfs();
     parseData(reader, columnInfo);
@@ -247,6 +264,9 @@ public class TournamentSchedule implements Serializable {
    */
   public TournamentSchedule(final Connection connection,
                             final int tournamentID) throws SQLException {
+    final Tournament currentTournament = Tournament.findTournamentByID(connection, tournamentID);
+    name = currentTournament.getName();
+
     PreparedStatement getSched = null;
     ResultSet sched = null;
     PreparedStatement getPerfRounds = null;
@@ -739,8 +759,7 @@ public class TournamentSchedule implements Serializable {
     detailedSchedules.setMargins(0.25f * 72, 0.25f * 72, 0.35f * 72, 0.35f * 72);
 
     // output to a PDF
-    final PdfWriter writer = PdfWriter.getInstance(detailedSchedules, output);
-    writer.setPageEvent(new PageFooter());
+    PdfWriter.getInstance(detailedSchedules, output);
 
     detailedSchedules.open();
 
@@ -751,7 +770,69 @@ public class TournamentSchedule implements Serializable {
 
     outputPerformanceSchedule(detailedSchedules);
 
+    for (final TeamScheduleInfo si : _schedule) {
+      outputTeamSchedule(detailedSchedules, si);
+      detailedSchedules.add(Chunk.NEXTPAGE);
+    }
+
     detailedSchedules.close();
+  }
+
+  private static final Font TEAM_TITLE_FONT = FontFactory.getFont(FontFactory.TIMES, 12, Font.BOLD);
+
+  private static final Font TEAM_HEADER_FONT = FontFactory.getFont(FontFactory.HELVETICA, 10, Font.BOLD);
+
+  private static final Font TEAM_VALUE_FONT = FontFactory.getFont(FontFactory.HELVETICA, 10, Font.NORMAL);
+
+  /**
+   * Output the detailed schedule for a team for the day.
+   * 
+   * @throws DocumentException
+   */
+  private void outputTeamSchedule(final Document detailedSchedules,
+                                  final TeamScheduleInfo si) throws DocumentException {
+    // used for various time computations
+    final Calendar cal = Calendar.getInstance();
+
+    final Paragraph para = new Paragraph();
+    para.add(new Chunk(String.format("Detailed schedule for Team #%d - %s", si.getTeamNumber(), si.getTeamName()),
+                       TEAM_TITLE_FONT));
+    para.add(Chunk.NEWLINE);
+
+    para.add(new Chunk("Division: ", TEAM_HEADER_FONT));
+    para.add(new Chunk(si.getDivision(), TEAM_VALUE_FONT));
+    para.add(Chunk.NEWLINE);
+
+    for (final String subjectiveStation : subjectiveStations) {
+      para.add(new Chunk(subjectiveStation
+          + ": ", TEAM_HEADER_FONT));
+      final Date start = si.getSubjectiveTimeByName(subjectiveStation).getTime();
+      cal.setTime(start);
+      cal.add(Calendar.MINUTE, subjectiveDurationMinutes);
+      final Date end = cal.getTime();
+      para.add(new Chunk(String.format("%s - %s", OUTPUT_DATE_FORMAT.get().format(start),
+                                       OUTPUT_DATE_FORMAT.get().format(end)), TEAM_VALUE_FONT));
+      para.add(Chunk.NEWLINE);
+    }
+
+    for (int round = 0; round < getNumberOfRounds(); ++round) {
+      para.add(new Chunk(String.format(PERF_HEADER_FORMAT, round + 1)
+          + ": ", TEAM_HEADER_FONT));
+      final Date start = si.getPerf(round);
+      cal.setTime(start);
+      cal.add(Calendar.MINUTE, performanceDurationMinutes);
+      final Date end = cal.getTime();
+      para.add(new Chunk(String.format("%s - %s %s %d", OUTPUT_DATE_FORMAT.get().format(start),
+                                       OUTPUT_DATE_FORMAT.get().format(end), si.getPerfTableColor(round),
+                                       si.getPerfTableSide(round)), TEAM_VALUE_FONT));
+      para.add(Chunk.NEWLINE);
+    }
+
+    para.add(Chunk.NEWLINE);
+    para.add(new Chunk(
+                       "Note that there may be more judging and a head to head round after this judging, please see the main tournament schedule for these details.",
+                       TEAM_HEADER_FONT));
+    detailedSchedules.add(para);
   }
 
   private void outputPerformanceSchedule(final Document detailedSchedules) throws DocumentException {
@@ -764,6 +845,11 @@ public class TournamentSchedule implements Serializable {
 
       final PdfPTable table = createTable(6);
       table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
+
+      final PdfPCell tournamentCell = createHeaderCell("Tournament: "
+          + name + " Performance Round: " + String.valueOf(round + 1));
+      tournamentCell.setColspan(6);
+      table.addCell(tournamentCell);
 
       table.addCell(createHeaderCell(TEAM_NUMBER_HEADER));
       table.addCell(createHeaderCell(DIVISION_HEADER));
@@ -851,15 +937,20 @@ public class TournamentSchedule implements Serializable {
     final PdfPTable table = createTable(6);
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
 
-    Collections.sort(_schedule, getComparatorForSubjective(subjectiveStation));
+    final PdfPCell tournamentCell = createHeaderCell("Tournament: "
+        + name + " - " + subjectiveStation);
+    tournamentCell.setColspan(6);
+    table.addCell(tournamentCell);
+
     table.addCell(createHeaderCell(TEAM_NUMBER_HEADER));
     table.addCell(createHeaderCell(DIVISION_HEADER));
     table.addCell(createHeaderCell("School or Organization"));
     table.addCell(createHeaderCell("Team Name"));
-    table.addCell(createHeaderCell(RESEARCH_HEADER));
+    table.addCell(createHeaderCell(subjectiveStation));
     table.addCell(createHeaderCell(JUDGE_GROUP_HEADER));
-    table.setHeaderRows(1);
+    table.setHeaderRows(2);
 
+    Collections.sort(_schedule, getComparatorForSubjective(subjectiveStation));
     for (final TeamScheduleInfo si : _schedule) {
       table.addCell(createCell(String.valueOf(si.getTeamNumber())));
       table.addCell(createCell(si.getDivision()));
@@ -1280,6 +1371,13 @@ public class TournamentSchedule implements Serializable {
     for (int round = 0; round < getNumberOfRounds(); ++round) {
       final TeamScheduleInfo opponent = findOpponent(ti, round);
       if (null != opponent) {
+        if (!Functions.safeEquals(ti.getDivision(), opponent.getDivision())) {
+          final String divMessage = String.format("Team %d in division %s is competing against team %d from division %s round %d",
+                                                  ti.getTeamNumber(), ti.getDivision(), opponent.getTeamNumber(),
+                                                  opponent.getDivision(), (round + 1));
+          violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, ti.getPerf(round), divMessage));
+        }
+
         int opponentSide = -1;
         // figure out which round matches up
         for (int oround = 0; oround < getNumberOfRounds(); ++oround) {
@@ -1309,7 +1407,6 @@ public class TournamentSchedule implements Serializable {
             final String message = String.format("Team %d competes against %d more than once rounds: %d, %d",
                                                  ti.getTeamNumber(), opponent.getTeamNumber(), (round + 1), (r + 1));
             violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, null, message));
-            violations.add(new ConstraintViolation(false, opponent.getTeamNumber(), null, null, null, message));
           }
         }
       } else {
@@ -1383,8 +1480,8 @@ public class TournamentSchedule implements Serializable {
         } else if (time.getTime()
             + getSubjectiveDuration() + getChangetime() > performanceTime.getTime()) {
           final String message = String.format("Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
-                                               ti.getTeamNumber(), OUTPUT_DATE_FORMAT.get().format(subj.getTime()), performanceName,
-                                               getChangetimeAsMinutes());
+                                               ti.getTeamNumber(), OUTPUT_DATE_FORMAT.get().format(subj.getTime()),
+                                               performanceName, getChangetimeAsMinutes());
           violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, subj, performanceTime, message));
         }
       } else {
@@ -1413,7 +1510,7 @@ public class TournamentSchedule implements Serializable {
                                      final ColumnInformation ci) throws IOException, ParseException,
       ScheduleParseException {
     final String[] line = reader.readNext();
-    if(null == line) {
+    if (null == line) {
       return null;
     }
 
@@ -1729,26 +1826,6 @@ public class TournamentSchedule implements Serializable {
     }
 
     return violations;
-  }
-
-  /**
-   * Page footer for schedule.
-   */
-  private static final class PageFooter extends PdfPageEventHelper {
-    @Override
-    public void onEndPage(final PdfWriter writer,
-                          final Document document) {
-      final Rectangle page = document.getPageSize();
-      final PdfPTable foot = new PdfPTable(1);
-      final PdfPCell cell = new PdfPCell(new Phrase("- "
-          + writer.getPageNumber() + " -"));
-      cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-      cell.setUseDescender(true);
-      foot.addCell(cell);
-      foot.setTotalWidth(page.getWidth()
-          - document.leftMargin() - document.rightMargin());
-      foot.writeSelectedRows(0, -1, document.leftMargin(), document.bottomMargin(), writer.getDirectContent());
-    }
   }
 
   /**

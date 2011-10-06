@@ -140,7 +140,7 @@ public class TournamentScheduleTest {
       }
 
       scheduleStream = scheduleResource.openStream();
-      final TournamentSchedule schedule = new TournamentSchedule(scheduleStream, sheetName, subjectiveHeaders);
+      final TournamentSchedule schedule = new TournamentSchedule("Test Tournament", scheduleStream, sheetName, subjectiveHeaders);
       scheduleStream.close();
 
       schedule.storeSchedule(memConnection, tournament.getTournamentID());
