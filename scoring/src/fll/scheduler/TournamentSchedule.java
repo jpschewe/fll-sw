@@ -1058,7 +1058,7 @@ public class TournamentSchedule implements Serializable {
         }
         final Date currentMax = maxSubjectiveTimes.get(stime.getName());
         if (null == currentMax) {
-          minSubjectiveTimes.put(stime.getName(), stime.getTime());
+          maxSubjectiveTimes.put(stime.getName(), stime.getTime());
         } else {
           if (stime.getTime().after(currentMax)) {
             maxSubjectiveTimes.put(stime.getName(), stime.getTime());
