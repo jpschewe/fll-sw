@@ -1,5 +1,7 @@
-/**
- * 
+/*
+ * Copyright (c) 2000-2002 INSciTE.  All rights reserved
+ * INSciTE is on the web at: http://www.hightechkids.org
+ * This code is released under GPL; see LICENSE.txt for details.
  */
 package fll.web.playoff;
 
@@ -253,26 +255,13 @@ public class ScoresheetGenerator {
     head.setVerticalAlignment(Element.ALIGN_TOP);
     head.addElement(titleParagraph);
 
-    // Cells for judge initials, team initials, score field, and 2nd
-    // check initials
-    final Phrase ji = new Phrase("Judge's Initials _______", ARIAL_8PT_NORMAL);
-    final PdfPCell jiC = new PdfPCell(ji);
-    jiC.setBorder(0);
-    jiC.setPaddingTop(9);
-    jiC.setPaddingRight(36);
-    jiC.setHorizontalAlignment(Element.ALIGN_RIGHT);
+    // Cells for score field, and 2nd check initials
     final Phrase des = new Phrase("Data Entry Score _______", ARIAL_8PT_NORMAL);
     final PdfPCell desC = new PdfPCell(des);
     desC.setBorder(0);
     desC.setPaddingTop(9);
     desC.setPaddingRight(36);
     desC.setHorizontalAlignment(Element.ALIGN_RIGHT);
-    final Phrase tci = new Phrase("Team Check Inititals _______", ARIAL_8PT_NORMAL);
-    final PdfPCell tciC = new PdfPCell(tci);
-    tciC.setBorder(0);
-    tciC.setPaddingTop(9);
-    tciC.setPaddingRight(36);
-    tciC.setHorizontalAlignment(Element.ALIGN_RIGHT);
     final Phrase sci = new Phrase("2nd Check Initials _______", ARIAL_8PT_NORMAL);
     final PdfPCell sciC = new PdfPCell(sci);
     sciC.setBorder(0);
@@ -305,7 +294,7 @@ public class ScoresheetGenerator {
       final Paragraph tblP = new Paragraph("Table:", ARIAL_10PT_NORMAL);
       tblP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell tblLc = new PdfPCell(team[i].getDefaultCell());
-      tblLc.setPaddingRight(9);
+      tblLc.setPaddingRight(2);
       tblLc.addElement(tblP);
       teamInfo.addCell(tblLc);
       // Table value cell
@@ -318,21 +307,27 @@ public class ScoresheetGenerator {
       final Paragraph rndP = new Paragraph("Round:", ARIAL_10PT_NORMAL);
       rndP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell rndlc = new PdfPCell(team[i].getDefaultCell());
-      rndlc.setPaddingRight(9);
+      rndlc.setPaddingRight(2);
       rndlc.addElement(rndP);
       teamInfo.addCell(rndlc);
       // Round number value cell
       final Paragraph rndV = new Paragraph(m_round[i], COURIER_10PT_NORMAL);
       final PdfPCell rndVc = new PdfPCell(team[i].getDefaultCell());
-      rndVc.setColspan(2);
+      //rndVc.setColspan(2);
       rndVc.addElement(rndV);
       teamInfo.addCell(rndVc);
+
+      final PdfPCell temp1 = new PdfPCell(team[i].getDefaultCell());
+      //temp1.setColspan(2);
+      temp1.addElement(new Paragraph("Judge ____", ARIAL_8PT_NORMAL));
+      teamInfo.addCell(temp1);
+
 
       // Team number label cell
       final Paragraph nbrP = new Paragraph("Team #:", ARIAL_10PT_NORMAL);
       nbrP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell nbrlc = new PdfPCell(team[i].getDefaultCell());
-      nbrlc.setPaddingRight(9);
+      nbrlc.setPaddingRight(2);
       nbrlc.addElement(nbrP);
       teamInfo.addCell(nbrlc);
       // Team number value cell
@@ -346,7 +341,7 @@ public class ScoresheetGenerator {
       final Paragraph divP = new Paragraph("Division:", ARIAL_10PT_NORMAL);
       divP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell divlc = new PdfPCell(team[i].getDefaultCell());
-      divlc.setPaddingRight(9);
+      divlc.setPaddingRight(2);
       divlc.addElement(divP);
       teamInfo.addCell(divlc);
       // Team division value cell
@@ -358,10 +353,15 @@ public class ScoresheetGenerator {
       }
       final Paragraph divV = new Paragraph(divStr, COURIER_10PT_NORMAL);
       final PdfPCell divVc = new PdfPCell(team[i].getDefaultCell());
-      divVc.setColspan(2);
+      //divVc.setColspan(2);
       divVc.addElement(divV);
       teamInfo.addCell(divVc);
 
+      final PdfPCell temp2 = new PdfPCell(team[i].getDefaultCell());
+      //temp2.setColspan(2);
+      temp2.addElement(new Paragraph("Team ____", ARIAL_8PT_NORMAL));
+      teamInfo.addCell(temp2);
+      
       // Team name label cell
       final Paragraph nameP = new Paragraph("Team Name:", ARIAL_10PT_NORMAL);
       nameP.setAlignment(Element.ALIGN_RIGHT);
@@ -388,9 +388,7 @@ public class ScoresheetGenerator {
         team[i].addCell(m_goalValue[j]);
       }
 
-      team[i].addCell(jiC);
       team[i].addCell(desC);
-      team[i].addCell(tciC);
       team[i].addCell(sciC);
 
       cell[i] = new PdfPCell(team[i]);
