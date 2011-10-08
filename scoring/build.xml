@@ -846,6 +846,7 @@
 			<sourcePath path="${dir.src}" />
 			<class location="${dir.classes}" />
 		</findbugs>
+		<echo message="See ${dir.build}/findbugs/report.html for the findbugs report" />
 	</target>
 
 	<!-- XDoclet -->

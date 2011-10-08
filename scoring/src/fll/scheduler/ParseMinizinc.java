@@ -666,21 +666,27 @@ public class ParseMinizinc {
   }
 
   public static Properties parseMinizincData(final File datafile) throws IOException {
-    final BufferedReader reader = new BufferedReader(new FileReader(datafile));
+    BufferedReader reader = null;
     final StringWriter strWriter = new StringWriter();
     BufferedWriter writer = null;
     try {
       writer = new BufferedWriter(strWriter);
+      reader = new BufferedReader(new FileReader(datafile));
 
       String line;
       while (null != (line = reader.readLine())) {
         writer.write(line.replace('%', '#').replace(';', ' '));
         writer.newLine();
       }
-      reader.close();
     } finally {
-      if (null != writer) {
-        writer.close();
+      try {
+        if (null != writer) {
+          writer.close();
+        }
+      } finally {
+        if (null != reader) {
+          reader.close();
+        }
       }
     }
 
