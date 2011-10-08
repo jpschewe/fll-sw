@@ -165,6 +165,7 @@ public final class Queries {
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(stmt);
+      SQLFunctions.close(prep);
     }
     return tournamentTeams;
   }
@@ -1098,7 +1099,8 @@ public final class Queries {
                                          final int lineNumber) throws SQLException {
     PreparedStatement prep = null;
     try {
-      // TODO ticket:5 cache this for later, should make Queries be an instantiated
+      // TODO ticket:5 cache this for later, should make Queries be an
+      // instantiated
       // class...
 
       prep = connection.prepareStatement("UPDATE PlayoffData SET Team = ?, Printed = ? WHERE event_division = ? AND Tournament = ? AND PlayoffRound = ? AND LineNumber = ?");
@@ -1483,11 +1485,17 @@ public final class Queries {
                                                               final int tournament,
                                                               final String paramName) throws SQLException {
     // TODO this should really be cached
-    PreparedStatement prep = connection.prepareStatement("SELECT param_value FROM tournament_parameters WHERE param = ? AND (tournament = ? OR tournament = ?) ORDER BY tournament DESC");
-    prep.setString(1, paramName);
-    prep.setInt(2, tournament);
-    prep.setInt(3, GenerateDB.INTERNAL_TOURNAMENT_ID);
-    return prep;
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("SELECT param_value FROM tournament_parameters WHERE param = ? AND (tournament = ? OR tournament = ?) ORDER BY tournament DESC");
+      prep.setString(1, paramName);
+      prep.setInt(2, tournament);
+      prep.setInt(3, GenerateDB.INTERNAL_TOURNAMENT_ID);
+      return prep;
+    } catch (final SQLException e) {
+      SQLFunctions.close(prep);
+      throw e;
+    }
   }
 
   /**
@@ -2842,9 +2850,15 @@ public final class Queries {
   private static PreparedStatement getGlobalParameterStmt(final Connection connection,
                                                           final String paramName) throws SQLException {
     // TODO this should really be cached
-    PreparedStatement prep = connection.prepareStatement("SELECT param_value FROM global_parameters WHERE param = ?");
-    prep.setString(1, paramName);
-    return prep;
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("SELECT param_value FROM global_parameters WHERE param = ?");
+      prep.setString(1, paramName);
+      return prep;
+    } catch (final SQLException e) {
+      SQLFunctions.close(prep);
+      throw e;
+    }
   }
 
   /**
