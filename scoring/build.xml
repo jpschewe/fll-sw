@@ -792,7 +792,7 @@
 	<!-- ===================== Checkstyle =================== -->
 	<taskdef resource="checkstyletask.properties">
 		<classpath>
-			<pathelement location="${dir.lib}/ant/checkstyle-all-5.0.jar" />
+			<pathelement location="${dir.lib}/ant/checkstyle-all-5.4.jar" />
 		</classpath>
 	</taskdef>
 
