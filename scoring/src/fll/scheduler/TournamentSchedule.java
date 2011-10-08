@@ -969,33 +969,44 @@ public class TournamentSchedule implements Serializable {
    * station. Sort by division, then judge, then by time.
    */
   private Comparator<TeamScheduleInfo> getComparatorForSubjective(final String name) {
-    return new Comparator<TeamScheduleInfo>() {
-      public int compare(final TeamScheduleInfo one,
-                         final TeamScheduleInfo two) {
+    return new SubjectiveComparator(name);
+  }
 
-        if (!one.getDivision().equals(two.getDivision())) {
-          return one.getDivision().compareTo(two.getDivision());
-        } else if (!one.getJudgingStation().equals(two.getJudgingStation())) {
-          return one.getJudgingStation().compareTo(two.getJudgingStation());
+  /**
+   * Comparator for for sorting by the specified subjective station.
+   */
+  private static class SubjectiveComparator implements Comparator<TeamScheduleInfo> {
+    private final String name;
+
+    public SubjectiveComparator(final String name) {
+      this.name = name;
+    }
+
+    public int compare(final TeamScheduleInfo one,
+                       final TeamScheduleInfo two) {
+
+      if (!one.getDivision().equals(two.getDivision())) {
+        return one.getDivision().compareTo(two.getDivision());
+      } else if (!one.getJudgingStation().equals(two.getJudgingStation())) {
+        return one.getJudgingStation().compareTo(two.getJudgingStation());
+      } else {
+        final TeamScheduleInfo.SubjectiveTime oneTime = one.getSubjectiveTimeByName(name);
+        final TeamScheduleInfo.SubjectiveTime twoTime = two.getSubjectiveTimeByName(name);
+
+        if (oneTime == null
+            && twoTime == null) {
+          return 0;
+        } else if (oneTime == null
+            && twoTime != null) {
+          return -1;
+        } else if (oneTime != null
+            && twoTime == null) {
+          return 1;
         } else {
-          final TeamScheduleInfo.SubjectiveTime oneTime = one.getSubjectiveTimeByName(name);
-          final TeamScheduleInfo.SubjectiveTime twoTime = two.getSubjectiveTimeByName(name);
-
-          if (oneTime == null
-              && twoTime == null) {
-            return 0;
-          } else if (oneTime == null
-              && twoTime != null) {
-            return -1;
-          } else if (oneTime != null
-              && twoTime == null) {
-            return 1;
-          } else {
-            return oneTime.getTime().compareTo(twoTime.getTime());
-          }
+          return oneTime.getTime().compareTo(twoTime.getTime());
         }
       }
-    };
+    }
   }
 
   /**
@@ -1911,8 +1922,10 @@ public class TournamentSchedule implements Serializable {
       this.divisionColumn = divisionColumn;
       this.subjectiveColumns = subjectiveColumns;
       this.judgeGroupColumn = judgeGroupColumn;
-      this.perfColumn = perfColumn;
-      this.perfTableColumn = perfTableColumn;
+      this.perfColumn = new int[perfColumn.length];
+      System.arraycopy(perfColumn, 0, this.perfColumn, 0, perfColumn.length);
+      this.perfTableColumn = new int[perfTableColumn.length];
+      System.arraycopy(perfTableColumn, 0, this.perfTableColumn, 0, perfTableColumn.length);
 
       // determine which columns aren't used
       final List<String> unused = new LinkedList<String>();
