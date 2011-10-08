@@ -170,7 +170,7 @@ public class TournamentSchedule implements Serializable {
 
   private final LinkedList<TeamScheduleInfo> _schedule = new LinkedList<TeamScheduleInfo>();
 
-  private final Set<String> subjectiveStations = new HashSet<String>();
+  private final HashSet<String> subjectiveStations = new HashSet<String>();
 
   /**
    * Name of this tournament.
@@ -975,7 +975,7 @@ public class TournamentSchedule implements Serializable {
   /**
    * Comparator for for sorting by the specified subjective station.
    */
-  private static class SubjectiveComparator implements Comparator<TeamScheduleInfo> {
+  private static class SubjectiveComparator implements Comparator<TeamScheduleInfo>, Serializable {
     private final String name;
 
     public SubjectiveComparator(final String name) {
@@ -993,17 +993,18 @@ public class TournamentSchedule implements Serializable {
         final TeamScheduleInfo.SubjectiveTime oneTime = one.getSubjectiveTimeByName(name);
         final TeamScheduleInfo.SubjectiveTime twoTime = two.getSubjectiveTimeByName(name);
 
-        if (oneTime == null
-            && twoTime == null) {
-          return 0;
-        } else if (oneTime == null
-            && twoTime != null) {
-          return -1;
-        } else if (oneTime != null
-            && twoTime == null) {
-          return 1;
+        if (oneTime == null) {
+          if (twoTime == null) {
+            return 0;
+          } else {
+            return -1;
+          }
         } else {
-          return oneTime.getTime().compareTo(twoTime.getTime());
+          if (null == twoTime) {
+            return 1;
+          } else {
+            return oneTime.getTime().compareTo(twoTime.getTime());
+          }
         }
       }
     }

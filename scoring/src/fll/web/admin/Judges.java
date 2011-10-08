@@ -384,6 +384,7 @@ public final class Judges {
    * 
    * @param tournament the current tournament
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
   private static void commitData(final HttpServletRequest request,
                                  final HttpServletResponse response,
                                  final HttpSession session,

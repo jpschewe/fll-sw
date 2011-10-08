@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -186,7 +185,7 @@ public final class TeamScheduleInfo implements Serializable {
 
   private final int numberOfRounds;
 
-  private Map<String, SubjectiveTime> subjectiveTimes = new HashMap<String, SubjectiveTime>();
+  private HashMap<String, SubjectiveTime> subjectiveTimes = new HashMap<String, SubjectiveTime>();
 
   public Collection<SubjectiveTime> getSubjectiveTimes() {
     return Collections.unmodifiableCollection(subjectiveTimes.values());
