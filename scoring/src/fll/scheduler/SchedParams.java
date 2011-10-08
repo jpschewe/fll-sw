@@ -34,12 +34,10 @@ public class SchedParams {
 
   /**
    * @param tinc the number of minutes per time slot
-   * @param tmax the number of hours that the tournament should go
-   * @param nsubjective the number of subjective rounds
+   * @param maxHours the number of hours that the tournament should go
+   * @param subjectiveParams the parameters for the subjective categories, one entry for each subjective category
    * @param nrounds the number of performance rounds
    * @param ntables the number of performance tables
-   * @param subjectiveMinutes the number of minutes that the subjective judging
-   *          takes
    * @param performanceMinutes the number of minutes that the performance
    *          judging takes
    * @param changetimeMinutes the number of minutes between judging stations for

@@ -117,7 +117,7 @@
 
 		<!-- used for password hashes -->
 		<pathelement location="${dir.lib}/commons-codec-1.5.jar" />
-		
+
 		<path refid="cobertura.classpath" />
 
 	</path>
@@ -269,7 +269,7 @@
 		<buildscript-one-jar scripts.dir="${dir.build}/bin" src.dir="${dir.web}/WEB-INF/classes" scripts.path="base.classpath" script.name="SchedulerUI" class.main="fll.scheduler.SchedulerUI" java.args="-Dapp.name=scheduler-ui -Dlogroot=./" />
 
 		<buildscript-one-jar scripts.dir="${dir.build}/bin" src.dir="${dir.web}/WEB-INF/classes" scripts.path="base.classpath" script.name="ParseMinizinc" class.main="fll.scheduler.ParseMinizinc" java.args="-Dapp.name=parse-minizinc -Dlogroot=./" />
-    
+
 		<!-- copy libraries over -->
 		<copy todir="${dir.build}/lib">
 			<fileset dir="${dir.lib}" />
@@ -667,7 +667,7 @@
 
 	<target name="before-checkin" depends="compile.test.all,test.unit,test.report" description="Run before a checkin">
 		<fail message="Some tests failed. See the test report for what failed and why." if="test.failed" />
-	</target>	
+	</target>
 
 	<target name="install.testdb" description="install the test database">
 		<delete>
