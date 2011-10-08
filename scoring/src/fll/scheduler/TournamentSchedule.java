@@ -1380,9 +1380,15 @@ public class TournamentSchedule implements Serializable {
     }
 
     // constraint: team:5
+    final Set<String> tableSides = new HashSet<String>();
     for (int round = 0; round < getNumberOfRounds(); ++round) {
       final TeamScheduleInfo opponent = findOpponent(ti, round);
       if (null != opponent) {
+        if(!tableSides.add(ti.getPerfTableColor(round) + " " + ti.getPerfTableSide(round))) {
+          final String tableMessage = String.format("Team %d is competing on %s %d more than once", ti.getTeamNumber(), ti.getPerfTableColor(round), ti.getPerfTableSide(round));
+          violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, null, tableMessage));
+        }
+
         if (!Functions.safeEquals(ti.getDivision(), opponent.getDivision())) {
           final String divMessage = String.format("Team %d in division %s is competing against team %d from division %s round %d",
                                                   ti.getTeamNumber(), ti.getDivision(), opponent.getTeamNumber(),
