@@ -47,7 +47,7 @@ public class ParseMinizinc {
 
   private final int maxTeamsPerGroup;
 
-  private static final String arrayPrefix = "1..";
+  private static final String ARRAY_PREFIX = "1..";
 
   private int startIdx;
 
@@ -119,7 +119,7 @@ public class ParseMinizinc {
    * @throws ParseException
    */
   private int parseArrayBound(final String num) throws ParseException {
-    startIdx = line.indexOf(arrayPrefix, commaIdx);
+    startIdx = line.indexOf(ARRAY_PREFIX, commaIdx);
     if (-1 == startIdx) {
       throw new ParseException("Can't find "
           + num + " '1..' in py line '" + line + "'", reader.getLineNumber());
@@ -130,7 +130,7 @@ public class ParseMinizinc {
           + num + " comma in py line '" + line + "'", reader.getLineNumber());
     }
     final String end = line.substring(startIdx
-        + arrayPrefix.length(), commaIdx);
+        + ARRAY_PREFIX.length(), commaIdx);
     return Integer.valueOf(end);
   }
 
@@ -456,13 +456,21 @@ public class ParseMinizinc {
     py = new int[ngroups][maxTeamsPerGroup][ntables][2][tmax];
     while (null != line) {
       if (SCIP_FIRST_LINE.equals(line)) {
-        // ignore
+        if(LOGGER.isTraceEnabled()) {
+          LOGGER.trace("ignoring - First line of SCIP");
+        }
       } else if (line.startsWith("objective value")) {
-        // ignore
+        if(LOGGER.isTraceEnabled()) {
+          LOGGER.trace("ignoring - 'objective value'");
+        }
       } else if (line.startsWith("true")) {
-        // ignore
+        if(LOGGER.isTraceEnabled()) {
+          LOGGER.trace("ignoring - 'true'");
+        }
       } else if (line.startsWith("objective")) {
-        // ignore
+        if(LOGGER.isTraceEnabled()) {
+          LOGGER.trace("ignoring - 'objective'");
+        }
       } else if (line.startsWith("sz[")
           || line.startsWith("sy[")) {
         final int value = parseSCIPArrayIndex();
