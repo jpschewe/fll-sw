@@ -825,7 +825,6 @@
 	<target name="continuous" description="Runs the continuous integration build">
 		<antcall target="clean" />
 		<antcall target="javadoc" />
-		<antcall target="checkstyle" />
 		<antcall target="findbugs" />
 		<antcall target="test.all" />
 		<antcall target="coverage.report" />
