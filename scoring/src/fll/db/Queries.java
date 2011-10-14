@@ -609,61 +609,12 @@ public final class Queries {
 
     final TeamScore teamScore = new HttpTeamScore(performanceElement, teamNumber, runNumber, request);
 
-    // FIXME pull out into separate function, perhaps updatePlayoffScore?
     // Perform updates to the playoff data table if in playoff rounds.
     if ((runNumber > numSeedingRounds)
         && "1".equals(request.getParameter("Verified"))) {
-      final int playoffRun = runNumber
-          - numSeedingRounds;
-      final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun);
-      final String division = getEventDivision(connection, teamNumber);
-      if (ptLine > 0) {
-        final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division,
-                                                           (ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1), playoffRun);
-
-        // If sibling team is the NULL team, then no playoff meta data needs
-        // updating, since we are still waiting for an earlier round to be
-        // entered. Also, if the sibling team isn't verified, we shouldn't
-        // be updating the playoffdata table.
-        if (Team.NULL_TEAM_NUMBER != siblingTeam
-            && Queries.performanceScoreExists(connection, siblingTeam, runNumber)
-            && Queries.isVerified(connection, currentTournament, Team.getTeamFromDatabase(connection, siblingTeam),
-                                  runNumber)) {
-          final Team teamA = Team.getTeamFromDatabase(connection, teamNumber);
-          final Team teamB = Team.getTeamFromDatabase(connection, siblingTeam);
-          if (teamA == null
-              || teamB == null) {
-            throw new FLLRuntimeException("Unable to find one of these team numbers in the database: "
-                + teamNumber + " and " + siblingTeam);
-          }
-
-          final Team newWinner = Playoff.pickWinner(connection, currentTournament, performanceElement, tiebreakerElement,
-                                                 winnerCriteria, teamB, teamA, teamScore, runNumber);
-
-          if (newWinner != null) {
-            // update the playoff data table with the winning team...
-            updatePlayoffTable(connection, newWinner.getTeamNumber(), division, currentTournament, (playoffRun + 1),
-                               ((ptLine + 1) / 2));
-
-            final int semiFinalRound = getNumPlayoffRounds(connection, division) - 1;
-            if (playoffRun == semiFinalRound
-                && isThirdPlaceEnabled(connection, division)) {
-              final Team newLoser;
-              if (newWinner.equals(teamA)) {
-                newLoser = teamB;
-              } else {
-                newLoser = teamA;
-              }
-              updatePlayoffTable(connection, newLoser.getTeamNumber(), division, currentTournament, (playoffRun + 1),
-                                 ((ptLine + 5) / 2));
-            }
-          }
-        }
-      } else {
-        throw new FLLRuntimeException("Unable to find team "
-            + teamNumber + " in the playoff brackets for playoff round " + playoffRun
-            + ". Maybe someone deleted their score from the previous run?");
-      }
+      updatePlayoffScore(connection, request, currentTournament,
+                         winnerCriteria, performanceElement, tiebreakerElement,
+                         teamNumber, runNumber, numSeedingRounds, teamScore);
     }
 
     final StringBuffer columns = new StringBuffer();
