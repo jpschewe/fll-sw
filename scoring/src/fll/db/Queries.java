@@ -2616,7 +2616,7 @@ public final class Queries {
   private static PreparedStatement getScoreStatsPrep(final Connection connection) throws SQLException {
     PreparedStatement prep = null;
     try {
-      prep = connection.prepareStatement("SELECT Bye, NoShow, Verified FROM Performance WHERE TeamNumber = ? AND Tournament = ? AND RunNumber = ?");
+      prep = connection.prepareStatement("SELECT Bye, NoShow, Verified FROM Performance WHERE Tournament = ? AND TeamNumber = ? AND RunNumber = ?");
     } catch (final SQLException e) {
       SQLFunctions.close(prep);
       throw e;
