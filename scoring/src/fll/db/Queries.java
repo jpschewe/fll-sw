@@ -862,7 +862,7 @@ public final class Queries {
             if (getPlayoffTableLineNumber(connection, currentTournament, teamNumber, playoffRun + 1) > 0) {
               try {
                 stmt = connection.createStatement();
-                // TODO make prepared statement
+                // TODO ticket:85 make prepared statement
                 rs = stmt.executeQuery("SELECT TeamNumber FROM Performance"
                     + " WHERE TeamNumber = " + teamNumber + " AND RunNumber > " + irunNumber + " AND Tournament = "
                     + currentTournament);
@@ -880,7 +880,7 @@ public final class Queries {
             if (getPlayoffTableLineNumber(connection, currentTournament, siblingTeam, playoffRun + 1) > 0) {
               try {
                 stmt = connection.createStatement();
-                // TODO make prepared statement
+                // TODO ticket:85 make prepared statement
                 rs = stmt.executeQuery("SELECT TeamNumber FROM Performance"
                     + " WHERE TeamNumber = " + siblingTeam + " AND RunNumber > " + irunNumber + " AND Tournament = "
                     + currentTournament);
@@ -967,7 +967,7 @@ public final class Queries {
     sql.append(" AND Tournament = "
         + currentTournament);
 
-    // TODO make prepared statement
+    // TODO ticket:85 make prepared statement
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
@@ -1483,7 +1483,7 @@ public final class Queries {
   private static PreparedStatement getTournamentParameterStmt(final Connection connection,
                                                               final int tournament,
                                                               final String paramName) throws SQLException {
-    // TODO this should really be cached
+    // TODO ticket:5 this should really be cached
     PreparedStatement prep = connection.prepareStatement("SELECT param_value FROM tournament_parameters WHERE param = ? AND (tournament = ? OR tournament = ?) ORDER BY tournament DESC");
     prep.setString(1, paramName);
     prep.setInt(2, tournament);
@@ -2022,7 +2022,7 @@ public final class Queries {
                                               final Document document,
                                               final int teamNumber,
                                               final int currentTournament) throws SQLException {
-    // TODO this could be cached
+    // TODO ticket:5 this could be cached
     PreparedStatement prep = null;
     try {
       // delete from subjective categories
@@ -2867,7 +2867,7 @@ public final class Queries {
    */
   private static PreparedStatement getGlobalParameterStmt(final Connection connection,
                                                           final String paramName) throws SQLException {
-    // TODO this should really be cached
+    // TODO ticket:5 this should really be cached
     PreparedStatement prep = connection.prepareStatement("SELECT param_value FROM global_parameters WHERE param = ?");
     prep.setString(1, paramName);
     return prep;
