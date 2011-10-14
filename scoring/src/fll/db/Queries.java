@@ -868,7 +868,6 @@ public final class Queries {
     sql.append(" AND Tournament = "
         + currentTournament);
 
-    // TODO ticket:85 make prepared statement
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
