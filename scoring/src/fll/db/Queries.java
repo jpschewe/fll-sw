@@ -802,21 +802,21 @@ public final class Queries {
 
     final String teamNumberStr = request.getParameter("TeamNumber");
     if (null == teamNumberStr) {
-      throw new RuntimeException("Missing parameter: TeamNumber");
+      throw new FLLRuntimeException("Missing parameter: TeamNumber");
     }
     final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberStr).intValue();
 
-    final String runNumber = request.getParameter("RunNumber");
-    if (null == runNumber) {
-      throw new RuntimeException("Missing parameter: RunNumber");
+    final String runNumberStr = request.getParameter("RunNumber");
+    if (null == runNumberStr) {
+      throw new FLLRuntimeException("Missing parameter: RunNumber");
     }
 
     final String noShow = request.getParameter("NoShow");
     if (null == noShow) {
-      throw new RuntimeException("Missing parameter: NoShow");
+      throw new FLLRuntimeException("Missing parameter: NoShow");
     }
 
-    final int irunNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumber).intValue();
+    final int irunNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(runNumberStr).intValue();
     final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
 
     final Team team = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("TeamNumber")));
@@ -963,7 +963,7 @@ public final class Queries {
         + teamNumber);
 
     sql.append(" AND RunNumber = "
-        + runNumber);
+        + runNumberStr);
     sql.append(" AND Tournament = "
         + currentTournament);
 
