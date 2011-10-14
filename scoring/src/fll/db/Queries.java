@@ -1098,7 +1098,8 @@ public final class Queries {
                                          final int lineNumber) throws SQLException {
     PreparedStatement prep = null;
     try {
-      // TODO ticket:5 cache this for later, should make Queries be an instantiated
+      // TODO ticket:5 cache this for later, should make Queries be an
+      // instantiated
       // class...
 
       prep = connection.prepareStatement("UPDATE PlayoffData SET Team = ?, Printed = ? WHERE event_division = ? AND Tournament = ? AND PlayoffRound = ? AND LineNumber = ?");
@@ -2495,21 +2496,22 @@ public final class Queries {
                               final int tournament,
                               final int teamNumber,
                               final int runNumber) throws SQLException, IllegalArgumentException {
-    Statement stmt = null;
+    PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      stmt = connection.createStatement();
-      // TODO make prepared statement
-      rs = stmt.executeQuery("SELECT Bye FROM Performance"
-          + " WHERE TeamNumber = " + teamNumber + " AND Tournament = " + tournament + " AND RunNumber = " + runNumber);
+      prep = getScoreStatsPrep(connection);
+      prep.setInt(1, tournament);
+      prep.setInt(2, teamNumber);
+      prep.setInt(3, runNumber);
+      rs = prep.executeQuery();
       if (rs.next()) {
-        return rs.getBoolean(1);
+        return rs.getBoolean("Bye");
       } else {
         return false;
       }
     } finally {
       SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2525,21 +2527,22 @@ public final class Queries {
                                  final int tournament,
                                  final int teamNumber,
                                  final int runNumber) throws SQLException, IllegalArgumentException {
-    Statement stmt = null;
+    PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      stmt = connection.createStatement();
-      // TODO make prepared statement
-      rs = stmt.executeQuery("SELECT NoShow FROM Performance"
-          + " WHERE TeamNumber = " + teamNumber + " AND Tournament = " + tournament + " AND RunNumber = " + runNumber);
+      prep = getScoreStatsPrep(connection);
+      prep.setInt(1, tournament);
+      prep.setInt(2, teamNumber);
+      prep.setInt(3, runNumber);
+      rs = prep.executeQuery();
       if (rs.next()) {
-        return rs.getBoolean(1);
+        return rs.getBoolean("NoShow");
       } else {
         return false;
       }
     } finally {
       SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
+      SQLFunctions.close(prep);
     }
   }
 
@@ -2550,22 +2553,42 @@ public final class Queries {
                                    final int tournament,
                                    final int teamNumber,
                                    final int runNumber) throws SQLException {
-    Statement stmt = null;
+    PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT Verified FROM Performance WHERE TeamNumber = "
-          + teamNumber + " AND Tournament = " + tournament + " AND RunNumber = " + runNumber);
+      prep = getScoreStatsPrep(connection);
+      prep.setInt(1, tournament);
+      prep.setInt(2, teamNumber);
+      prep.setInt(3, runNumber);
+      rs = prep.executeQuery();
       if (rs.next()) {
-        return rs.getBoolean(1);
+        return rs.getBoolean("Verified");
       } else {
         throw new RuntimeException("No score exists for tournament: "
             + tournament + " teamNumber: " + teamNumber + " runNumber: " + runNumber);
       }
     } finally {
       SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
+      SQLFunctions.close(prep);
     }
+  }
+
+  /**
+   * Get prepared statement that gets Verified, NoShow, Bye columns for a score.
+   * 
+   * @param connection
+   * @return 1 is tournament, 2 is teamNumber, 3 is runNumber
+   * @throws SQLException
+   */
+  private static PreparedStatement getScoreStatsPrep(final Connection connection) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("SELECT Bye, NoShow, Verified FROM Performance WHERE TeamNumber = ? AND Tournament = ? AND RunNumber = ?");
+    } catch (final SQLException e) {
+      SQLFunctions.close(prep);
+      throw e;
+    }
+    return prep;
   }
 
   /**
@@ -2585,14 +2608,17 @@ public final class Queries {
                                               final int tournament,
                                               final int teamNumber,
                                               final int playoffRunNumber) throws SQLException {
-    Statement stmt = null;
+    PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      stmt = connection.createStatement();
-      // TODO make prepared statement
-      rs = stmt.executeQuery("SELECT LineNumber FROM PlayoffData"
-          + " WHERE Team = " + teamNumber + " AND Tournament = " + tournament + " AND PlayoffRound = "
-          + playoffRunNumber);
+      prep = connection.prepareStatement("SELECT LineNumber FROM PlayoffData"
+          + " WHERE Team = ?"//
+          + " AND Tournament = ?" //
+          + " AND PlayoffRound = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, tournament);
+      prep.setInt(3, playoffRunNumber);
+      rs = prep.executeQuery();
       if (rs.next()) {
         return rs.getInt(1);
       } else {
@@ -2600,7 +2626,7 @@ public final class Queries {
       }
     } finally {
       SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
+      SQLFunctions.close(prep);
     }
   }
 
