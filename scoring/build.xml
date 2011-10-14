@@ -49,6 +49,14 @@
 		</classpath>
 	</taskdef>
 
+	<taskdef name="cpd" classname="net.sourceforge.pmd.cpd.CPDTask">
+		<classpath>
+			<fileset dir="${dir.lib}/ant/pmd">
+				<include name="*.jar" />
+			</fileset>
+		</classpath>
+	</taskdef>
+
 	<!--
   ==================== Compilation Control Options ====================
   -->
@@ -117,7 +125,7 @@
 
 		<!-- used for password hashes -->
 		<pathelement location="${dir.lib}/commons-codec-1.5.jar" />
-		
+
 		<path refid="cobertura.classpath" />
 
 	</path>
@@ -269,7 +277,7 @@
 		<buildscript-one-jar scripts.dir="${dir.build}/bin" src.dir="${dir.web}/WEB-INF/classes" scripts.path="base.classpath" script.name="SchedulerUI" class.main="fll.scheduler.SchedulerUI" java.args="-Dapp.name=scheduler-ui -Dlogroot=./" />
 
 		<buildscript-one-jar scripts.dir="${dir.build}/bin" src.dir="${dir.web}/WEB-INF/classes" scripts.path="base.classpath" script.name="ParseMinizinc" class.main="fll.scheduler.ParseMinizinc" java.args="-Dapp.name=parse-minizinc -Dlogroot=./" />
-    
+
 		<!-- copy libraries over -->
 		<copy todir="${dir.build}/lib">
 			<fileset dir="${dir.lib}" />
@@ -667,7 +675,7 @@
 
 	<target name="before-checkin" depends="compile.test.all,test.unit,test.report" description="Run before a checkin">
 		<fail message="Some tests failed. See the test report for what failed and why." if="test.failed" />
-	</target>	
+	</target>
 
 	<target name="install.testdb" description="install the test database">
 		<delete>
@@ -829,6 +837,7 @@
 		<antcall target="findbugs" />
 		<antcall target="test.all" />
 		<antcall target="coverage.report" />
+		<antcall target="cpd.xml" />
 	</target>
 
 	<target name="findbugs" depends="compile" description="Executes findbugs to look for problems in the source.">
@@ -847,6 +856,23 @@
 			<sourcePath path="${dir.src}" />
 			<class location="${dir.classes}" />
 		</findbugs>
+	</target>
+
+	<target name="cpd.text" description="Run Copy Paste Detector on the source and produce a text output">
+		<cpd minimumTokenCount="100" outputFile="${dir.build}/cpd.txt" format="text">
+			<fileset dir="${dir.src}">
+				<include name="**/*.java" />
+			</fileset>
+		</cpd>
+		<echo message="See ${dir.build}/cpd.txt for the copy paste report" />
+	</target>
+
+	<target name="cpd.xml" description="Run Copy Paste Detector on the source and produce an XML output">
+		<cpd minimumTokenCount="100" outputFile="${dir.build}/cpd.xml" format="xml">
+			<fileset dir="${dir.src}">
+				<include name="**/*.java" />
+			</fileset>
+		</cpd>
 	</target>
 
 	<!-- XDoclet -->
