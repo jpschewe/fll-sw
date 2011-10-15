@@ -68,7 +68,12 @@ import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 
 /**
- * Tournament schedule. Can parse the schedule from a spreadsheet.
+ * Tournament schedule. Can parse the schedule from a spreadsheet or CSV file.
+ * When using the schedule from inside the web application, note that the 
+ * team information isn't updated when the main database is modified, so 
+ * you can end up with teams in the schedule that are no longer in the tournament
+ * and you can end up with teams that are in the tournament, but not in the schedule.
+ *  
  * <p>
  * Note to developers: The comments prefixed with "constraint:" refer back to
  * the scheduling document.
