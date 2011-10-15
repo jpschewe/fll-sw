@@ -1405,50 +1405,39 @@ public class TournamentSchedule implements Serializable {
    */
   private void checkConstraintTeam3(final Collection<ConstraintViolation> violations,
                                     final TeamScheduleInfo ti) {
-    if (getNumberOfRounds() != 3) {
-      // FIXME ticket:4 needs to handle more rounds
-      throw new FLLRuntimeException("Schedules with other than 3 performance rounds cannot be properly checked");
+    if (getNumberOfRounds() < 2) {
+      // nothing to check
+      return;
     }
 
-    final long changetime;
-    final int round1OpponentRound = findOpponentRound(ti, 0);
-    final int round2OpponentRound = findOpponentRound(ti, 1);
-    if (round1OpponentRound != 0
-        || round2OpponentRound != 1) {
-      changetime = getSpecialPerformanceChangetime();
-    } else {
-      changetime = getPerformanceChangetime();
-    }
-    if (ti.getPerf(0).getTime()
-        + getPerformanceDuration() > ti.getPerf(1).getTime()) {
-      final String message = String.format("Team %d is still in performance %d when they are to start performance %d: %s - %s",
-                                           ti.getTeamNumber(), 1, 2, OUTPUT_DATE_FORMAT.get().format(ti.getPerf(0)),
-                                           OUTPUT_DATE_FORMAT.get().format(ti.getPerf(1)));
-      violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(1), message));
-    } else if (ti.getPerf(0).getTime()
-        + getPerformanceDuration() + changetime > ti.getPerf(1).getTime()) {
-      final String message = String.format("Team %d doesn't have enough time (%d minutes) between performance 1 and performance 2: %s - %s",
-                                           ti.getTeamNumber(), changetime
-                                               / 1000 / Utilities.SECONDS_PER_MINUTE,
-                                           OUTPUT_DATE_FORMAT.get().format(ti.getPerf(0)),
-                                           OUTPUT_DATE_FORMAT.get().format(ti.getPerf(1)));
-      violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(1), message));
-    }
-
-    if (ti.getPerf(1).getTime()
-        + getPerformanceDuration() > ti.getPerf(2).getTime()) {
-      final String message = String.format("Team %d is still in performance %d when they are to start performance %d: %s - %s",
-                                           ti.getTeamNumber(), 2, 3, OUTPUT_DATE_FORMAT.get().format(ti.getPerf(0)),
-                                           OUTPUT_DATE_FORMAT.get().format(ti.getPerf(1)));
-      violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(2), message));
-    } else if (ti.getPerf(1).getTime()
-        + getPerformanceDuration() + getPerformanceChangetime() > ti.getPerf(2).getTime()) {
-      final String message = String.format("Team %d doesn't have enough time (%d minutes) between performance 2 and performance 3: %s - %s",
-                                           ti.getTeamNumber(), changetime
-                                               / 1000 / Utilities.SECONDS_PER_MINUTE,
-                                           OUTPUT_DATE_FORMAT.get().format(ti.getPerf(1)),
-                                           OUTPUT_DATE_FORMAT.get().format(ti.getPerf(2)));
-      violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(2), message));
+    for (int round = 1; round < getNumberOfRounds(); ++round) {
+      final int prevRound = round - 1;
+      final long perfChangetime;
+      final int prevRoundOpponentRound = findOpponentRound(ti, prevRound);
+      final int curRoundOpponentRound = findOpponentRound(ti, round);
+      if (prevRoundOpponentRound != prevRound
+          || curRoundOpponentRound != round) {
+        perfChangetime = getSpecialPerformanceChangetime();
+      } else {
+        perfChangetime = getPerformanceChangetime();
+      }
+      if (ti.getPerf(prevRound).getTime()
+          + getPerformanceDuration() > ti.getPerf(round).getTime()) {
+        final String message = String.format("Team %d is still in performance %d when they are to start performance %d: %s - %s",
+                                             ti.getTeamNumber(), prevRound + 1, round + 1,
+                                             OUTPUT_DATE_FORMAT.get().format(ti.getPerf(prevRound)),
+                                             OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round)));
+        violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(round), message));
+      } else if (ti.getPerf(prevRound).getTime()
+          + getPerformanceDuration() + perfChangetime > ti.getPerf(round).getTime()) {
+        final String message = String.format("Team %d doesn't have enough time (%d minutes) between performance %d and performance %d: %s - %s",
+                                             ti.getTeamNumber(), perfChangetime
+                                                 / Utilities.MILLISECONDS_PER_SECOND / Utilities.SECONDS_PER_MINUTE,
+                                             prevRound + 1, round + 1,
+                                             OUTPUT_DATE_FORMAT.get().format(ti.getPerf(prevRound)),
+                                             OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round)));
+        violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(round), message));
+      }
     }
 
     checkForExtraPerformance(violations, ti, changetime);
