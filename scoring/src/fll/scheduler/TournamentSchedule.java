@@ -595,6 +595,7 @@ public class TournamentSchedule implements Serializable {
    */
   public List<ConstraintViolation> verifySchedule() {
     if (getNumberOfRounds() != 3) {
+      //FIXME ticket:4
       throw new FLLRuntimeException("Schedules with other than 3 performance rounds cannot be properly checked");
     }
 
