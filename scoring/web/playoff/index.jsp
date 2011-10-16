@@ -37,7 +37,7 @@ final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
             <option value='${division}'>${division}</option>
             </c:forEach>
           </select>
-          <input type='submit' value='Check Seeding Rounds'/>
+          <input type='submit' id='check_seeding_rounds' value='Check Seeding Rounds'/>
           </form>
 
         <li>
