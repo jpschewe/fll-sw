@@ -5,10 +5,7 @@
  */
 package fll.web.admin;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -43,9 +40,7 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
-import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
-import fll.util.ExcelCellReader;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
@@ -124,37 +119,7 @@ public final class UploadTeams extends BaseFLLServlet {
                                final String sheetName,
                                final Connection connection,
                                final HttpSession session) throws SQLException, IOException, InvalidFormatException {
-    final CellFileReader reader;
-    if (ExcelCellReader.isExcelFile(file)) {
-      FileInputStream fis = null;
-      try {
-        fis = new FileInputStream(file);
-        reader = new ExcelCellReader(fis, sheetName);
-      } finally {
-        if (null != fis) {
-          fis.close();
-        }
-      }
-    } else {
-      // determine if the file is tab separated or comma separated, check the
-      // first line for tabs and if they aren't found, assume it's comma
-      // separated
-      final BufferedReader breader = new BufferedReader(new FileReader(file));
-      try {
-        final String firstLine = breader.readLine();
-        if (null == firstLine) {
-          LOGGER.error("Empty file");
-          return;
-        }
-        if (firstLine.indexOf("\t") != -1) {
-          reader = new CSVCellReader(file, '\t');
-        } else {
-          reader = new CSVCellReader(file);
-        }
-      } finally {
-        breader.close();
-      }
-    }
+    final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
 
     // stores <option value='columnName'>columnName</option> for each column
     final StringBuffer selectOptions = new StringBuffer();
