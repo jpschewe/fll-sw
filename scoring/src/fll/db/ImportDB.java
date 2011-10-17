@@ -906,15 +906,13 @@ public final class ImportDB {
     }
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon categories and goal")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon categories")
   private static void importSubjective(final Connection sourceConnection,
                                        final Connection destinationConnection,
                                        final int sourceTournamentID,
                                        final int destTournamentID,
                                        final Element rootElement) throws SQLException {
     PreparedStatement destPrep = null;
-    PreparedStatement sourcePrep = null;
-    ResultSet sourceRS = null;
     try {
       // loop over each subjective category
       for (final Element categoryElement : new NodelistElementCollectionAdapter(
@@ -931,7 +929,7 @@ public final class ImportDB {
         destPrep.executeUpdate();
         SQLFunctions.close(destPrep);
 
-        final StringBuffer columns = new StringBuffer();
+        final StringBuilder columns = new StringBuilder();
         columns.append(" Tournament,");
         columns.append(" TeamNumber,");
         columns.append(" NoShow,");
@@ -943,87 +941,40 @@ public final class ImportDB {
         }
         columns.append(" Judge");
 
-        final StringBuffer sql = new StringBuffer();
-        sql.append("INSERT INTO ");
-        sql.append(tableName);
-        sql.append(" (");
-        sql.append(columns.toString());
-        sql.append(") VALUES (");
-        for (int i = 0; i < numColumns; i++) {
-          if (i > 0) {
-            sql.append(", ");
-          }
-          sql.append("?");
-        }
-        sql.append(")");
-        destPrep = destinationConnection.prepareStatement(sql.toString());
-        destPrep.setInt(1, destTournamentID);
-
-        sourcePrep = sourceConnection.prepareStatement("SELECT "
-            + columns.toString() + " FROM " + tableName + " WHERE Tournament = ?");
-        sourcePrep.setInt(1, sourceTournamentID);
-        sourceRS = sourcePrep.executeQuery();
-        while (sourceRS.next()) {
-          // skip tournament column
-          for (int i = 1; i < numColumns; i++) {
-            Object sourceObj = sourceRS.getObject(i + 1);
-            if ("".equals(sourceObj)) {
-              sourceObj = null;
-            }
-            destPrep.setObject(i + 1, sourceObj);
-          }
-          destPrep.executeUpdate();
-        }
-        SQLFunctions.close(sourceRS);
-        SQLFunctions.close(sourcePrep);
-        SQLFunctions.close(destPrep);
+        importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,
+                     sourceTournamentID);
       }
     } finally {
-      SQLFunctions.close(sourceRS);
-      SQLFunctions.close(sourcePrep);
       SQLFunctions.close(destPrep);
     }
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon goals")
-  private static void importPerformance(final Connection sourceConnection,
-                                        final Connection destinationConnection,
-                                        final int sourceTournamentID,
-                                        final int destTournamentID,
-                                        final Element rootElement) throws SQLException {
+  /**
+   * Common import code for importSubjective and importPerformance.
+   * 
+   * @param columns the columns in the table, this should include Tournament,
+   *          TeamNumber, NoShow, Judge or Verified, then all elements for
+   *          category
+   * @param tableName the name of the table to update
+   * @param numColumns the number of columns
+   * @param destinationConnection
+   * @param destTournamentID
+   * @param sourceConnection
+   * @param sourceTournamentID
+   * @throws SQLException
+   */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon goals and category")
+  private static void importCommon(final StringBuilder columns,
+                                   final String tableName,
+                                   final int numColumns,
+                                   final Connection destinationConnection,
+                                   final int destTournamentID,
+                                   final Connection sourceConnection,
+                                   final int sourceTournamentID) throws SQLException {
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
     try {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Importing performance scores");
-      }
-      final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
-      final String tableName = "Performance";
-      destPrep = destinationConnection.prepareStatement("DELETE FROM "
-          + tableName + " WHERE Tournament = ?");
-      destPrep.setInt(1, destTournamentID);
-      destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
-      destPrep = null;
-
-      final StringBuffer columns = new StringBuffer();
-      columns.append(" Tournament,");
-      columns.append(" TeamNumber,");
-      columns.append(" RunNumber,");
-      // Note: If TimeStamp is no longer the 3rd element, then the hack below
-      // needs to be modified
-      columns.append(" TimeStamp,");
-      final List<Element> goals = new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal")).asList();
-      final int numColumns = goals.size() + 7;
-      for (final Element element : goals) {
-        columns.append(" "
-            + element.getAttribute("name") + ",");
-      }
-      columns.append(" NoShow,");
-      columns.append(" Bye,");
-      columns.append(" Verified");
-
       final StringBuffer sql = new StringBuffer();
       sql.append("INSERT INTO ");
       sql.append(tableName);
@@ -1047,18 +998,62 @@ public final class ImportDB {
       while (sourceRS.next()) {
         // skip tournament column
         for (int i = 1; i < numColumns; i++) {
-          final Object sourceObj = sourceRS.getObject(i + 1);
-          try {
-            destPrep.setObject(i + 1, sourceObj);
-          } catch (final SQLException e) {
-            throw e;
+          Object sourceObj = sourceRS.getObject(i + 1);
+          if ("".equals(sourceObj)) {
+            sourceObj = null;
           }
+          destPrep.setObject(i + 1, sourceObj);
         }
         destPrep.executeUpdate();
       }
     } finally {
       SQLFunctions.close(sourceRS);
       SQLFunctions.close(sourcePrep);
+      SQLFunctions.close(destPrep);
+    }
+
+  }
+
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon category")
+  private static void importPerformance(final Connection sourceConnection,
+                                        final Connection destinationConnection,
+                                        final int sourceTournamentID,
+                                        final int destTournamentID,
+                                        final Element rootElement) throws SQLException {
+    PreparedStatement destPrep = null;
+    try {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Importing performance scores");
+      }
+      final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
+      final String tableName = "Performance";
+      destPrep = destinationConnection.prepareStatement("DELETE FROM Performance"
+          + tableName + " WHERE Tournament = ?");
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+      SQLFunctions.close(destPrep);
+      destPrep = null;
+
+      final StringBuilder columns = new StringBuilder();
+      columns.append(" Tournament,");
+      columns.append(" TeamNumber,");
+      columns.append(" RunNumber,");
+      // Note: If TimeStamp is no longer the 3rd element, then the hack below
+      // needs to be modified
+      columns.append(" TimeStamp,");
+      final List<Element> goals = new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal")).asList();
+      final int numColumns = goals.size() + 7;
+      for (final Element element : goals) {
+        columns.append(" "
+            + element.getAttribute("name") + ",");
+      }
+      columns.append(" NoShow,");
+      columns.append(" Bye,");
+      columns.append(" Verified");
+
+      importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,
+                   sourceTournamentID);
+    } finally {
       SQLFunctions.close(destPrep);
     }
   }
