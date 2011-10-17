@@ -1027,7 +1027,7 @@ public final class ImportDB {
       }
       final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
       final String tableName = "Performance";
-      destPrep = destinationConnection.prepareStatement("DELETE FROM Performance"
+      destPrep = destinationConnection.prepareStatement("DELETE FROM "
           + tableName + " WHERE Tournament = ?");
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
