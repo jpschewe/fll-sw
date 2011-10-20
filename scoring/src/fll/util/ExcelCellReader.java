@@ -34,7 +34,7 @@ import fll.scheduler.TournamentSchedule;
 /**
  * Read Excel files.
  */
-public class ExcelCellReader implements CellFileReader {
+public class ExcelCellReader extends CellFileReader {
 
   private final DataFormatter formatter;
 
