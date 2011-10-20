@@ -16,7 +16,7 @@ import au.com.bytecode.opencsv.CSVReader;
 /**
  * Read csv files.
  */
-public class CSVCellReader implements CellFileReader {
+public class CSVCellReader extends CellFileReader {
 
   private final CSVReader delegate;
 
