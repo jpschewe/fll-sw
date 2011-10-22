@@ -380,11 +380,55 @@ $
     \sum\limits_{t = 1}^{60/TInc} 
       ( pz_{t}^{g,i,b,1} + pz_{t}^{g,i,b,2} ) = 0$
 \end{algorithm}
-    
+
 \FloatBarrier
-\subsection{Other Breaks}
-Need to add in lunch breaks for subjective and a break after the first few
-performance runs. \jpscomment{Not sure how I want to do this yet.}
+\subsection{Break in performance in case things start off schedule}
+\begin{algorithm}
+\caption{performanceBreak1}
+$
+\sum\limits_{g=1}^{NGroups}
+\sum\limits_{i \in G_{g}} 
+  \sum\limits_{b=1}^{NTables} 
+    \sum\limits_{t = 20/TInc}^{20/TInc + 5/TInc} 
+      ( pz_{t}^{g,i,b,1} + pz_{t}^{g,i,b,2} ) = 0$
+\end{algorithm}
+
+\FloatBarrier
+\subsection{Performance lunch break}
+\begin{algorithm}
+\caption{performanceLunchBreak}
+$
+\sum\limits_{g=1}^{NGroups}
+\sum\limits_{i \in G_{g}} 
+  \sum\limits_{b=1}^{NTables} 
+    \sum\limits_{t = 210/TInc}^{210/TInc + 30/TInc} 
+      ( pz_{t}^{g,i,b,1} + pz_{t}^{g,i,b,2} ) = 0$
+\end{algorithm}
+
+\FloatBarrier
+\subsection{Break in subjective in case things start off schedule}
+\begin{algorithm}
+\caption{subjectiveBreak1}
+$
+\sum\limits_{g=1}^{NGroups}
+\sum\limits_{i \in G_{g}} 
+  \sum\limits_{n=1}^{NSubjective} 
+    \sum\limits_{t = 60/TInc}^{60/TInc + 10/TInc} 
+      sz_{t}^{g,i,n} = 0$
+\end{algorithm}
+
+\FloatBarrier
+\subsection{Subjective lunch break}
+\begin{algorithm}
+\caption{subjectiveLunchBreak}
+$
+\sum\limits_{g=1}^{NGroups}
+\sum\limits_{i \in G_{g}} 
+  \sum\limits_{n=1}^{NSubjective} 
+    \sum\limits_{t = 190/TInc}^{190/TInc + 30/TInc} 
+      sz_{t}^{g,i,n} = 0$
+\end{algorithm}
+
 
 \FloatBarrier
 \section{Objective function}
