@@ -304,3 +304,46 @@ sum(g in 1..NGroups) (
         pz[g,i,b,1,t] + pz[g,i,b,2,t]
 )))) = 0;
 
+% performanceBreak1
+int: perfBreak1Start = 20 div TInc;
+int: perfBreak1End = perfBreak1Start + 5 div TInc;
+constraint
+sum(g in 1..NGroups) (
+  sum(i in 1..group_counts[g]) (
+    sum(b in 1..NTables) (
+      sum(t in perfBreak1Start..perfBreak1End) (
+        pz[g,i,b,1,t] + pz[g,i,b,2,t]
+)))) = 0;
+
+% performanceLunchBreak
+int: perfLunchBreakStart = 210 div TInc;
+int: perfLunchBreakEnd = perfBreak1Start + 30 div TInc;
+constraint
+sum(g in 1..NGroups) (
+  sum(i in 1..group_counts[g]) (
+    sum(b in 1..NTables) (
+      sum(t in perfLunchBreakStart..perfLunchBreakEnd) (
+        pz[g,i,b,1,t] + pz[g,i,b,2,t]
+)))) = 0;
+
+% subjectiveBreak1
+int: subjectiveBreak1Start = 60 div TInc;
+int: subjectiveBreak1End = subjectiveBreak1Start + 10 div TInc;
+constraint
+sum(g in 1..NGroups) (
+  sum(i in 1..group_counts[g]) (
+    sum(n in 1..NSubjective) (
+      sum(t in subjectiveBreak1Start..subjectiveBreak1End) (
+        sz[g,i,n,t]
+)))) = 0;
+
+% subjectiveLunchBreak
+int: subjectiveLunchBreakStart = 190 div TInc;
+int: subjectiveLunchBreakEnd = subjectiveLunchBreakStart + 30 div TInc;
+constraint
+sum(g in 1..NGroups) (
+  sum(i in 1..group_counts[g]) (
+    sum(n in 1..NSubjective) (
+      sum(t in subjectiveLunchBreakStart..subjectiveLunchBreakEnd) (
+        sz[g,i,n,t]
+)))) = 0;
