@@ -18,7 +18,7 @@ feasible=${2-0}
 if [ ${feasible} -ne 0 ]; then
     flatzinc_file="${param_file}.feasible.fzn"
 else
-    flatzinc_file="${param_file}.fzn"
+    flatzinc_file="${param_file}.optimal.fzn"
 fi
 
 "${mydir}/convert-schedule.sh" "${param_file}" ${feasible} || fatal "Error executing convert-schedule.sh"
