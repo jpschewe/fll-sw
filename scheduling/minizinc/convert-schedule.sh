@@ -19,7 +19,7 @@ if [ ${feasible} -ne 0 ]; then
     flatzinc_file="${param_file}.feasible.fzn"
     schedule_solve_file="${mydir}/schedule-feasible.mzn"
 else
-    flatzinc_file="${param_file}.fzn"
+    flatzinc_file="${param_file}.optimal.fzn"
     schedule_solve_file="${mydir}/schedule-objective.mzn"
 fi
 
