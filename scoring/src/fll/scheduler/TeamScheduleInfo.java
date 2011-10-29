@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -186,7 +185,7 @@ public final class TeamScheduleInfo implements Serializable {
 
   private final int numberOfRounds;
 
-  private Map<String, SubjectiveTime> subjectiveTimes = new HashMap<String, SubjectiveTime>();
+  private HashMap<String, SubjectiveTime> subjectiveTimes = new HashMap<String, SubjectiveTime>();
 
   public Collection<SubjectiveTime> getSubjectiveTimes() {
     return Collections.unmodifiableCollection(subjectiveTimes.values());
@@ -216,7 +215,7 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * Represents a subjective judging time.
    */
-  public static final class SubjectiveTime {
+  public static final class SubjectiveTime implements Serializable {
     public SubjectiveTime(final String name,
                           final Date time) {
       this.name = name;
@@ -279,7 +278,9 @@ public final class TeamScheduleInfo implements Serializable {
 
     @Override
     public boolean equals(final Object o) {
-      if (this == o) {
+      if (o == null) {
+        return false;
+      } else if (this == o) {
         return true;
       } else if (o.getClass() == PerformanceTime.class) {
         return 0 == compareTo((PerformanceTime) o);
@@ -296,8 +297,7 @@ public final class TeamScheduleInfo implements Serializable {
         } else {
           return timeCompare;
         }
-      } else if (null == this.time
-          && null == other.time) {
+      } else if (null == other.time) {
         return this.table.compareTo(other.table);
       } else {
         return -1

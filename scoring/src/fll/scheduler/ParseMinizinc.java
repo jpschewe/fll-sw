@@ -47,7 +47,7 @@ public class ParseMinizinc {
 
   private final int maxTeamsPerGroup;
 
-  private static final String arrayPrefix = "1..";
+  private static final String ARRAY_PREFIX = "1..";
 
   private int startIdx;
 
@@ -74,7 +74,7 @@ public class ParseMinizinc {
   public ParseMinizinc(final Date startTime,
                        final File datafile,
                        final File resultFile) throws IOException {
-    this.startTime = startTime;
+    this.startTime = null == startTime ? null : new Date(startTime.getTime());
 
     final Properties properties = parseMinizincData(datafile);
     LOGGER.debug(properties.toString());
@@ -120,7 +120,7 @@ public class ParseMinizinc {
    * @throws ParseException
    */
   private int parseArrayBound(final String num) throws ParseException {
-    startIdx = line.indexOf(arrayPrefix, commaIdx);
+    startIdx = line.indexOf(ARRAY_PREFIX, commaIdx);
     if (-1 == startIdx) {
       throw new ParseException("Can't find "
           + num + " '1..' in py line '" + line + "'", reader.getLineNumber());
@@ -131,7 +131,7 @@ public class ParseMinizinc {
           + num + " comma in py line '" + line + "'", reader.getLineNumber());
     }
     final String end = line.substring(startIdx
-        + arrayPrefix.length(), commaIdx);
+        + ARRAY_PREFIX.length(), commaIdx);
     return Integer.valueOf(end);
   }
 
@@ -376,7 +376,7 @@ public class ParseMinizinc {
             + line + "', skipping");
       }
       line = reader.readLine();
-    }    
+    }
   }
 
   /**
@@ -457,13 +457,21 @@ public class ParseMinizinc {
     py = new int[ngroups][maxTeamsPerGroup][ntables][2][tmax];
     while (null != line) {
       if (SCIP_FIRST_LINE.equals(line)) {
-        // ignore
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("ignoring - First line of SCIP");
+        }
       } else if (line.startsWith("objective value")) {
-        // ignore
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("ignoring - 'objective value'");
+        }
       } else if (line.startsWith("true")) {
-        // ignore
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("ignoring - 'true'");
+        }
       } else if (line.startsWith("objective")) {
-        // ignore
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("ignoring - 'objective'");
+        }
       } else if (line.startsWith("sz[")
           || line.startsWith("sy[")) {
         final int value = parseSCIPArrayIndex();
@@ -536,83 +544,88 @@ public class ParseMinizinc {
     LOGGER.info("Schedule output to "
         + schedule.getAbsolutePath());
 
-    final BufferedWriter writer = new BufferedWriter(new FileWriter(schedule));
-    writer.write(TournamentSchedule.TEAM_NUMBER_HEADER
-        + ",");
-    writer.write(TournamentSchedule.TEAM_NAME_HEADER
-        + ",");
-    writer.write(TournamentSchedule.ORGANIZATION_HEADER
-        + ",");
-    writer.write(TournamentSchedule.DIVISION_HEADER
-        + ",");
-    writer.write(TournamentSchedule.JUDGE_GROUP_HEADER);
-    for (int subj = 0; subj < nsubjective; ++subj) {
-      writer.write(",Subj"
-          + (subj + 1));
-    }
-    for (int round = 0; round < nrounds; ++round) {
-      writer.write(","
-          + String.format(TournamentSchedule.PERF_HEADER_FORMAT, round + 1));
-      writer.write(","
-          + String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round + 1));
-    }
-    writer.newLine();
+    BufferedWriter writer = null;
+    try {
+      writer = new BufferedWriter(new FileWriter(schedule));
+      writer.write(TournamentSchedule.TEAM_NUMBER_HEADER
+          + ",");
+      writer.write(TournamentSchedule.TEAM_NAME_HEADER
+          + ",");
+      writer.write(TournamentSchedule.ORGANIZATION_HEADER
+          + ",");
+      writer.write(TournamentSchedule.DIVISION_HEADER
+          + ",");
+      writer.write(TournamentSchedule.JUDGE_GROUP_HEADER);
+      for (int subj = 0; subj < nsubjective; ++subj) {
+        writer.write(",Subj"
+            + (subj + 1));
+      }
+      for (int round = 0; round < nrounds; ++round) {
+        writer.write(","
+            + String.format(TournamentSchedule.PERF_HEADER_FORMAT, round + 1));
+        writer.write(","
+            + String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round + 1));
+      }
+      writer.newLine();
 
-    for (int group = 0; group < ngroups; ++group) {
-      for (int team = 0; team < maxTeamsPerGroup; ++team) {
-        if (!teamExists(group, team)) {
-          LOGGER.debug("doesn't exist group "
-              + (group + 1) + " team " + (team + 1));
-          continue;
-        }
-        LOGGER.debug("group "
-            + (group + 1) + " team " + (team + 1));
-        final int teamNum = (group + 1)
-            * 100 + team;
-        final int judgingGroup = group + 1;
-        writer.write(String.format("%d,Team %d, Org %d, D%d, G%d", teamNum, teamNum, teamNum, judgingGroup,
-                                   judgingGroup));
-        for (int subj = 0; subj < nsubjective; ++subj) {
-          final Date time = getTime(sz[group][team][subj], 1);
-          if (null == time) {
-            throw new RuntimeException("Could not find a subjective start for group: "
-                + (group + 1) + " team: " + (team + 1) + " subj: " + (subj + 1));
+      for (int group = 0; group < ngroups; ++group) {
+        for (int team = 0; team < maxTeamsPerGroup; ++team) {
+          if (!teamExists(group, team)) {
+            LOGGER.debug("doesn't exist group "
+                + (group + 1) + " team " + (team + 1));
+            continue;
           }
-          writer.write(",");
-          writer.write(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(time));
-        }
+          LOGGER.debug("group "
+              + (group + 1) + " team " + (team + 1));
+          final int teamNum = (group + 1)
+              * 100 + team;
+          final int judgingGroup = group + 1;
+          writer.write(String.format("%d,Team %d, Org %d, D%d, G%d", teamNum, teamNum, teamNum, judgingGroup,
+                                     judgingGroup));
+          for (int subj = 0; subj < nsubjective; ++subj) {
+            final Date time = getTime(sz[group][team][subj], 1);
+            if (null == time) {
+              throw new RuntimeException("Could not find a subjective start for group: "
+                  + (group + 1) + " team: " + (team + 1) + " subj: " + (subj + 1));
+            }
+            writer.write(",");
+            writer.write(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(time));
+          }
 
-        // find all performances for a team and then sort by time
-        final SortedSet<PerformanceTime> perfTimes = new TreeSet<PerformanceTime>();
-        for (int round = 0; round < nrounds; ++round) {
-          for (int table = 0; table < ntables; ++table) {
-            for (int side = 0; side < 2; ++side) {
-              final Date time = getTime(pz[group][team][table][side], round + 1);
-              if (null != time) {
-                perfTimes.add(new PerformanceTime(time, "Table"
-                    + (table + 1), (side + 1)));
+          // find all performances for a team and then sort by time
+          final SortedSet<PerformanceTime> perfTimes = new TreeSet<PerformanceTime>();
+          for (int round = 0; round < nrounds; ++round) {
+            for (int table = 0; table < ntables; ++table) {
+              for (int side = 0; side < 2; ++side) {
+                final Date time = getTime(pz[group][team][table][side], round + 1);
+                if (null != time) {
+                  perfTimes.add(new PerformanceTime(time, "Table"
+                      + (table + 1), (side + 1)));
+                }
               }
             }
           }
-        }
-        if (perfTimes.size() != nrounds) {
-          throw new FLLRuntimeException("Expecting "
-              + nrounds + " performance times, but only found " + perfTimes.size() + " group: " + (group + 1)
-              + " team: " + (team + 1));
-        }
-        for (final PerformanceTime perfTime : perfTimes) {
-          writer.write(",");
-          writer.write(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(perfTime.getTime()));
-          writer.write(",");
-          writer.write(perfTime.getTable()
-              + " " + perfTime.getSide());
-        }
+          if (perfTimes.size() != nrounds) {
+            throw new FLLRuntimeException("Expecting "
+                + nrounds + " performance times, but only found " + perfTimes.size() + " group: " + (group + 1)
+                + " team: " + (team + 1));
+          }
+          for (final PerformanceTime perfTime : perfTimes) {
+            writer.write(",");
+            writer.write(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(perfTime.getTime()));
+            writer.write(",");
+            writer.write(perfTime.getTable()
+                + " " + perfTime.getSide());
+          }
 
-        writer.newLine();
+          writer.newLine();
+        }
+      }
+    } finally {
+      if (null != writer) {
+        writer.close();
       }
     }
-
-    writer.close();
   }
 
   /**
@@ -654,17 +667,29 @@ public class ParseMinizinc {
   }
 
   public static Properties parseMinizincData(final File datafile) throws IOException {
-    final BufferedReader reader = new BufferedReader(new FileReader(datafile));
+    BufferedReader reader = null;
     final StringWriter strWriter = new StringWriter();
-    final BufferedWriter writer = new BufferedWriter(strWriter);
+    BufferedWriter writer = null;
+    try {
+      writer = new BufferedWriter(strWriter);
+      reader = new BufferedReader(new FileReader(datafile));
 
-    String line;
-    while (null != (line = reader.readLine())) {
-      writer.write(line.replace('%', '#').replace(';', ' '));
-      writer.newLine();
+      String line;
+      while (null != (line = reader.readLine())) {
+        writer.write(line.replace('%', '#').replace(';', ' '));
+        writer.newLine();
+      }
+    } finally {
+      try {
+        if (null != writer) {
+          writer.close();
+        }
+      } finally {
+        if (null != reader) {
+          reader.close();
+        }
+      }
     }
-    reader.close();
-    writer.close();
 
     // load into properties
     final StringReader strReader = new StringReader(strWriter.toString());
@@ -677,7 +702,7 @@ public class ParseMinizinc {
   public static int readIntProperty(final Properties properties,
                                     final String property) {
     final String value = properties.getProperty(property);
-    if (null == property) {
+    if (null == value) {
       throw new NullPointerException("Property '"
           + property + "' doesn't have a value");
     }

@@ -5,10 +5,7 @@
  */
 package fll.web.admin;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -21,9 +18,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
-import fll.util.ExcelCellReader;
 import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -83,38 +78,7 @@ public final class UploadAdvancingTeams extends BaseFLLServlet {
                                          final String sheetName,
                                          final HttpSession session) throws SQLException, IOException,
       InvalidFormatException {
-    final CellFileReader reader;
-    if (file.getName().endsWith(".xls")
-        || file.getName().endsWith(".xslx")) {
-      FileInputStream fis = null;
-      try {
-        fis = new FileInputStream(file);
-        reader = new ExcelCellReader(fis, sheetName);
-      } finally {
-        if (null != fis) {
-          fis.close();
-        }
-      }
-    } else {
-      // determine if the file is tab separated or comma separated, check the
-      // first line for tabs and if they aren't found, assume it's comma
-      // separated
-      final BufferedReader breader = new BufferedReader(new FileReader(file));
-      try {
-        final String firstLine = breader.readLine();
-        if (null == firstLine) {
-          LOGGER.error("Empty file");
-          return;
-        }
-        if (firstLine.indexOf("\t") != -1) {
-          reader = new CSVCellReader(file, '\t');
-        } else {
-          reader = new CSVCellReader(file);
-        }
-      } finally {
-        breader.close();
-      }
-    }
+    final CellFileReader reader = CellFileReader.createCellReader(file, sheetName);
 
     // parse out the first non-blank line as the names of the columns
     String[] columnNames = reader.readNext();
