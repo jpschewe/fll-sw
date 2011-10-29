@@ -11,8 +11,8 @@ NRounds = 3;
 NTables = 2;
 
 % judging groups
-NGroups = 2;
-group_counts = [16, 16];
+NGroups = 1;
+group_counts = [16];
 
 alpha_perf_minutes = 5;
 
