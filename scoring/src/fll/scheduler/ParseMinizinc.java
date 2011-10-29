@@ -84,8 +84,9 @@ public class ParseMinizinc {
     nrounds = readIntProperty(properties, "NRounds");
     ntables = readIntProperty(properties, "NTables");
     final int tmaxHours = readIntProperty(properties, "TMax_hours");
-    tmax = tmaxHours
-        * 60 / tinc;
+    final int tmaxMinutes = readIntProperty(properties, "TMax_minutes");
+    tmax = (tmaxHours
+        * 60 + tmaxMinutes) / tinc;
     nsubjective = readIntProperty(properties, "NSubjective");
     final String groupCountsStr = properties.getProperty("group_counts");
     final int lbracket = groupCountsStr.indexOf('[');
