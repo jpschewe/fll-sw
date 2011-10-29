@@ -191,16 +191,25 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       FileInputStream fis = null;
       try {
+        final File selectedFile = getCurrentFile();
         final String sheetName = getCurrentSheetName();
+        final String fullname = selectedFile.getName();
+        final int dotIndex = fullname.lastIndexOf('.');
+        final String name;
+        if (-1 != dotIndex) {
+          name = fullname.substring(0, dotIndex);
+        } else {
+          name = fullname;
+        }
+
         final TournamentSchedule newData;
         if (null == sheetName) {
           // if no sheet name, assume CSV file
-          newData = new TournamentSchedule(getCurrentFile(), scheduleData.getSubjectiveStations());
+          newData = new TournamentSchedule(name, selectedFile, scheduleData.getSubjectiveStations());
         } else {
-          fis = new FileInputStream(getCurrentFile());
-          newData = new TournamentSchedule(fis, sheetName, scheduleData.getSubjectiveStations());
+          fis = new FileInputStream(selectedFile);
+          newData = new TournamentSchedule(name, fis, sheetName, scheduleData.getSubjectiveStations());
         }
-
         setScheduleData(newData);
       } catch (final IOException e) {
         final Formatter errorFormatter = new Formatter();
@@ -285,7 +294,7 @@ public class SchedulerUI extends JFrame {
     {
       putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Export16.gif"));
       putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Export24.gif"));
-      putValue(SHORT_DESCRIPTION, "Write out the detailed schedules as PDFs");
+      putValue(SHORT_DESCRIPTION, "Write out the detailed schedules as a PDF");
       // putValue(MNEMONIC_KEY, KeyEvent.VK_X);
     }
 
@@ -414,12 +423,21 @@ public class SchedulerUI extends JFrame {
                   + subjectiveHeaders);
             }
 
+            final String fullname = selectedFile.getName();
+            final int dotIndex = fullname.lastIndexOf('.');
+            final String name;
+            if (-1 != dotIndex) {
+              name = fullname.substring(0, dotIndex);
+            } else {
+              name = fullname;
+            }
+
             final TournamentSchedule schedule;
             if (csv) {
-              schedule = new TournamentSchedule(selectedFile, subjectiveHeaders);
+              schedule = new TournamentSchedule(name, selectedFile, subjectiveHeaders);
             } else {
               fis = new FileInputStream(selectedFile);
-              schedule = new TournamentSchedule(fis, sheetName, subjectiveHeaders);
+              schedule = new TournamentSchedule(name, fis, sheetName, subjectiveHeaders);
             }
             currentFile = selectedFile;
             currentSheetName = sheetName;
