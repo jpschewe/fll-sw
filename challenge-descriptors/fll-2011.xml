@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fll title="MN FIRST LEGO League Tournament" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 5">
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 1">
 
   <Performance minimumScore="0" weight="1.0">
 
