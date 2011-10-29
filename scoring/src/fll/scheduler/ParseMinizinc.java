@@ -522,7 +522,7 @@ public class ParseMinizinc {
         }
       } else {
         LOGGER.warn("Unrecognized line: '"
-            + line + "', skippin");
+            + line + "', skipping");
       }
 
       line = reader.readLine();
