@@ -142,7 +142,8 @@ public class FullTournamentTest extends SeleneseTestBase {
 
         if (runNumber > numSeedingRounds) {
           if (!initializedPlayoff) {
-            // TODO ticket:83 make sure to check the result of checking the seeding rounds
+            // TODO ticket:83 make sure to check the result of checking the
+            // seeding rounds
 
             // initialize the playoff brackets with playoff/index.jsp form
             for (final String division : divisions) {
@@ -150,6 +151,7 @@ public class FullTournamentTest extends SeleneseTestBase {
                 LOGGER.debug("Initializing playoff brackets for division "
                     + division);
               }
+              checkSeedingRoundsForDivision(division);
               initializePlayoffsForDivision(division);
             }
             initializedPlayoff = true;
@@ -229,10 +231,22 @@ public class FullTournamentTest extends SeleneseTestBase {
   }
 
   /**
-   * @param string
-   * @throws SAXException
-   * @throws IOException
+   * Make sure there are no teams with more or less than seeding rounds for the
+   * specified division.
    */
+  private void checkSeedingRoundsForDivision(final String division) throws IOException, SAXException {
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+        + "playoff");
+    selenium.select("xpath=//form[@name='check']//select[@name='division']", "value="
+        + division);
+    selenium.click("id=check_seeding_rounds");
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    Assert.assertTrue("Found teams with less than seeding rounds division: '"
+        + division + "'", selenium.isElementPresent("id=no_teams_fewer"));
+    Assert.assertTrue("Found teams with more than seeding rounds division: '"
+        + division + "'", selenium.isElementPresent("id=no_teams_more"));
+  }
+
   private void initializePlayoffsForDivision(final String division) throws IOException, SAXException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "playoff");
@@ -497,7 +511,7 @@ public class FullTournamentTest extends SeleneseTestBase {
     // find form named 'printable'
     WebForm form = response.getFormWithName("printable");
     Assert.assertNotNull("printable form not found", form);
-    
+
     request = form.getRequest();
 
     // set division
@@ -510,7 +524,7 @@ public class FullTournamentTest extends SeleneseTestBase {
     // find form named 'printScoreSheets'
     form = response.getFormWithName("printScoreSheets");
     Assert.assertNotNull("printScoreSheets form not found", form);
-    
+
     // click 'Print scoresheets'
     request = form.getRequest();
     response = WebTestUtils.loadPage(conversation, request);

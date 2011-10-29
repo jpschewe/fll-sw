@@ -43,8 +43,6 @@ import fll.util.LogUtils;
 
 /**
  * Parse challenge description and generate script/text for scoreEntry page.
- * 
- * @version $Revision$
  */
 public final class ChallengeParser {
 
@@ -149,7 +147,7 @@ public final class ChallengeParser {
         }
 
         public void warning(final SAXParseException spe) throws SAXParseException {
-          System.err.println(spe.getMessage());
+          LOG.error(spe.getMessage(), spe);
         }
       });
 

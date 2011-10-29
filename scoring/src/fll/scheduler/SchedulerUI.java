@@ -492,7 +492,7 @@ public class SchedulerUI extends JFrame {
             }
           }
 
-        } else {
+        } else if (null != selectedFile) {
           JOptionPane.showMessageDialog(SchedulerUI.this,
                                         new Formatter().format("%s is not a file or is not readable",
                                                                selectedFile.getAbsolutePath()), "Error reading file",

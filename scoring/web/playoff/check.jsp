@@ -42,7 +42,7 @@ if(lessIter.hasNext()) {
     out.println("<li>" + team.getTeamName() + "(" + team.getTeamNumber() + ")</li>");
   }
 } else {
-  out.println("<i>No teams have fewer runs than seeding rounds.</i>");
+  out.println("<i id='no_teams_fewer'>No teams have fewer runs than seeding rounds.</i>");
 }
 %>
         </ul>
@@ -58,7 +58,7 @@ if(moreIter.hasNext()) {
     out.println("<li>" + team.getTeamName() + "(" + team.getTeamNumber() + ")</li>");
   }
 } else {
-  out.println("<i>No teams have more runs than seeding rounds.</i>");
+  out.println("<i id='no_teams_more'>No teams have more runs than seeding rounds.</i>");
 }
 %>
         </ul>
