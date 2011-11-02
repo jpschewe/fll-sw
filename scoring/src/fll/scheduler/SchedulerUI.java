@@ -193,14 +193,7 @@ public class SchedulerUI extends JFrame {
       try {
         final File selectedFile = getCurrentFile();
         final String sheetName = getCurrentSheetName();
-        final String fullname = selectedFile.getName();
-        final int dotIndex = fullname.lastIndexOf('.');
-        final String name;
-        if (-1 != dotIndex) {
-          name = fullname.substring(0, dotIndex);
-        } else {
-          name = fullname;
-        }
+        final String name = extractBasename(selectedFile);
 
         final TournamentSchedule newData;
         if (null == sheetName) {
@@ -301,14 +294,7 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       FileOutputStream fos = null;
       try {
-        final String filename = getCurrentFile().getPath();
-        final int dotIdx = filename.lastIndexOf('.');
-        final String baseFilename;
-        if (-1 == dotIdx) {
-          baseFilename = filename;
-        } else {
-          baseFilename = filename.substring(0, dotIdx);
-        }
+        final String baseFilename = extractBasename(getCurrentFile());
         final File pdfFile = new File(baseFilename
             + "-detailed.pdf");
         LOGGER.info("Writing detailed schedules to "
@@ -393,44 +379,9 @@ public class SchedulerUI extends JFrame {
               fis = null;
             }
 
-            final List<String> subjectiveHeaders;
-            final List<String> unusedColumns = columnInfo.getUnusedColumns();
-            final List<JCheckBox> checkboxes = new LinkedList<JCheckBox>();
-            final Box optionPanel = new Box(BoxLayout.PAGE_AXIS);
-            for (final String header : unusedColumns) {
-              if (null != header
-                  && header.length() > 0) {
-                final JCheckBox checkbox = new JCheckBox(header);
-                checkboxes.add(checkbox);
-                optionPanel.add(checkbox);
-              }
-            }
-            if (!checkboxes.isEmpty()) {
-              JOptionPane.showMessageDialog(SchedulerUI.this, optionPanel, "Choose Sujbective Columns",
-                                            JOptionPane.QUESTION_MESSAGE);
-              subjectiveHeaders = new LinkedList<String>();
-              for (final JCheckBox box : checkboxes) {
-                if (box.isSelected()) {
-                  subjectiveHeaders.add(box.getText());
-                }
-              }
-            } else {
-              subjectiveHeaders = Collections.emptyList();
-            }
+            final List<String> subjectiveHeaders = selectSubjectiveCategories(columnInfo);
 
-            if (LOGGER.isTraceEnabled()) {
-              LOGGER.trace("Subjective headers selected: "
-                  + subjectiveHeaders);
-            }
-
-            final String fullname = selectedFile.getName();
-            final int dotIndex = fullname.lastIndexOf('.');
-            final String name;
-            if (-1 != dotIndex) {
-              name = fullname.substring(0, dotIndex);
-            } else {
-              name = fullname;
-            }
+            final String name = extractBasename(selectedFile);
 
             final TournamentSchedule schedule;
             if (csv) {
@@ -718,5 +669,56 @@ public class SchedulerUI extends JFrame {
 
   protected String getCurrentSheetName() {
     return currentSheetName;
+  }
+
+  /**
+   * Prompt the user for which columns represent subjective categories.
+   */
+  private List<String> selectSubjectiveCategories(final ColumnInformation columnInfo) {
+    final List<String> subjectiveHeaders;
+    final List<String> unusedColumns = columnInfo.getUnusedColumns();
+    final List<JCheckBox> checkboxes = new LinkedList<JCheckBox>();
+    final Box optionPanel = new Box(BoxLayout.PAGE_AXIS);
+    for (final String header : unusedColumns) {
+      if (null != header
+          && header.length() > 0) {
+        final JCheckBox checkbox = new JCheckBox(header);
+        checkboxes.add(checkbox);
+        optionPanel.add(checkbox);
+      }
+    }
+    if (!checkboxes.isEmpty()) {
+      JOptionPane.showMessageDialog(SchedulerUI.this, optionPanel, "Choose Subjective Columns",
+                                    JOptionPane.QUESTION_MESSAGE);
+      subjectiveHeaders = new LinkedList<String>();
+      for (final JCheckBox box : checkboxes) {
+        if (box.isSelected()) {
+          subjectiveHeaders.add(box.getText());
+        }
+      }
+    } else {
+      subjectiveHeaders = Collections.emptyList();
+    }
+
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Subjective headers selected: "
+          + subjectiveHeaders);
+    }
+    return subjectiveHeaders;
+  }
+
+  /**
+   * Get the name of the file without the extension.
+   */
+  private static String extractBasename(final File selectedFile) {
+    final String name;
+    final String fullname = selectedFile.getName();
+    final int dotIndex = fullname.lastIndexOf('.');
+    if (-1 != dotIndex) {
+      name = fullname.substring(0, dotIndex);
+    } else {
+      name = fullname;
+    }
+    return name;
   }
 }
