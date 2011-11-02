@@ -59,7 +59,6 @@ import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
-import fll.scheduler.TeamScheduleInfo.SubjectiveTime;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
@@ -333,7 +332,7 @@ public class TournamentSchedule implements Serializable {
         while (subjective.next()) {
           final String name = subjective.getString(1);
           final Time subjTime = subjective.getTime(2);
-          ti.addSubjectiveTime(new TeamScheduleInfo.SubjectiveTime(name, subjTime));
+          ti.addSubjectiveTime(new SubjectiveTime(name, subjTime));
         }
 
         getPerfRounds.setInt(2, teamNumber);
@@ -990,8 +989,8 @@ public class TournamentSchedule implements Serializable {
       } else if (!one.getJudgingStation().equals(two.getJudgingStation())) {
         return one.getJudgingStation().compareTo(two.getJudgingStation());
       } else {
-        final TeamScheduleInfo.SubjectiveTime oneTime = one.getSubjectiveTimeByName(name);
-        final TeamScheduleInfo.SubjectiveTime twoTime = two.getSubjectiveTimeByName(name);
+        final SubjectiveTime oneTime = one.getSubjectiveTimeByName(name);
+        final SubjectiveTime twoTime = two.getSubjectiveTimeByName(name);
 
         if (oneTime == null) {
           if (twoTime == null) {
@@ -1059,7 +1058,7 @@ public class TournamentSchedule implements Serializable {
     final Map<String, Date> maxSubjectiveTimes = new HashMap<String, Date>();
 
     for (final TeamScheduleInfo si : _schedule) {
-      for (final TeamScheduleInfo.SubjectiveTime stime : si.getSubjectiveTimes()) {
+      for (final SubjectiveTime stime : si.getSubjectiveTimes()) {
         final Date currentMin = minSubjectiveTimes.get(stime.getName());
         if (null == currentMin) {
           minSubjectiveTimes.put(stime.getName(), stime.getTime());
@@ -1804,7 +1803,7 @@ public class TournamentSchedule implements Serializable {
           insertPerfRounds.executeUpdate();
         }
 
-        for (final TeamScheduleInfo.SubjectiveTime subjectiveTime : si.getSubjectiveTimes()) {
+        for (final SubjectiveTime subjectiveTime : si.getSubjectiveTimes()) {
           insertSubjective.setInt(2, si.getTeamNumber());
           insertSubjective.setString(3, subjectiveTime.getName());
           insertSubjective.setTime(4, Queries.dateToTime(subjectiveTime.getTime()));
