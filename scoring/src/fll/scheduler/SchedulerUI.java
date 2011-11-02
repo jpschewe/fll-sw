@@ -10,6 +10,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -27,14 +28,15 @@ import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
@@ -57,7 +59,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import com.itextpdf.text.DocumentException;
 
-import fll.scheduler.TeamScheduleInfo.SubjectiveTime;
+import fll.Utilities;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
@@ -379,8 +381,13 @@ public class SchedulerUI extends JFrame {
               fis = null;
             }
 
-            final List<String> subjectiveHeaders = selectSubjectiveCategories(columnInfo);
-
+            final List<SubjectiveStation> subjectiveStations = gatherSubjectiveStationInformation(columnInfo);
+            //FIXME here's where we connect the schedule with the constraint checker
+            final List<String> subjectiveHeaders = new LinkedList<String>();
+            for(final SubjectiveStation station : subjectiveStations) {
+              subjectiveHeaders.add(station.getName());
+            }
+            
             final String name = extractBasename(selectedFile);
 
             final TournamentSchedule schedule;
@@ -674,26 +681,40 @@ public class SchedulerUI extends JFrame {
   /**
    * Prompt the user for which columns represent subjective categories.
    */
-  private List<String> selectSubjectiveCategories(final ColumnInformation columnInfo) {
-    final List<String> subjectiveHeaders;
+  private List<SubjectiveStation> gatherSubjectiveStationInformation(final ColumnInformation columnInfo) {
     final List<String> unusedColumns = columnInfo.getUnusedColumns();
     final List<JCheckBox> checkboxes = new LinkedList<JCheckBox>();
-    final Box optionPanel = new Box(BoxLayout.PAGE_AXIS);
-    for (final String header : unusedColumns) {
-      if (null != header
-          && header.length() > 0) {
-        final JCheckBox checkbox = new JCheckBox(header);
+    final List<JFormattedTextField> subjectiveDurations = new LinkedList<JFormattedTextField>();
+    final JPanel optionPanel = new JPanel(new GridLayout(0, 2));
+    
+    optionPanel.add(new JLabel("Column"));
+    optionPanel.add(new JLabel("Duration (minutes)"));
+    
+    for (final String column : unusedColumns) {
+      if (null != column
+          && column.length() > 0) {
+        final JCheckBox checkbox = new JCheckBox(column);
         checkboxes.add(checkbox);
+        final JFormattedTextField duration = new JFormattedTextField(
+                                                                     Integer.valueOf(SchedParams.DEFAULT_SUBJECTIVE_MINUTES));
+        duration.setColumns(4);
+        subjectiveDurations.add(duration);
         optionPanel.add(checkbox);
+        optionPanel.add(duration);
       }
     }
+    final List<SubjectiveStation> subjectiveHeaders;
     if (!checkboxes.isEmpty()) {
       JOptionPane.showMessageDialog(SchedulerUI.this, optionPanel, "Choose Subjective Columns",
                                     JOptionPane.QUESTION_MESSAGE);
-      subjectiveHeaders = new LinkedList<String>();
-      for (final JCheckBox box : checkboxes) {
+      subjectiveHeaders = new LinkedList<SubjectiveStation>();
+      for (int i = 0; i < checkboxes.size(); ++i) {
+        final JCheckBox box = checkboxes.get(i);
+        final JFormattedTextField duration = subjectiveDurations.get(i);
         if (box.isSelected()) {
-          subjectiveHeaders.add(box.getText());
+          subjectiveHeaders.add(new SubjectiveStation(
+                                                      box.getText(),
+                                                      Utilities.convertMinutesToMilliseconds(((Number) duration.getValue()).longValue())));
         }
       }
     } else {
