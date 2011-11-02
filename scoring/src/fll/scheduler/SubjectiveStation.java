@@ -9,11 +9,11 @@ package fll.scheduler;
 import java.io.Serializable;
 
 /**
- * Represents a subjective station. 
+ * Represents a subjective station.
  */
 public final class SubjectiveStation implements Serializable {
   public SubjectiveStation(final String name,
-                        final long durationInMillis) {
+                           final long durationInMillis) {
     this.name = name;
     this.duration = durationInMillis;
   }
@@ -34,5 +34,24 @@ public final class SubjectiveStation implements Serializable {
    */
   public long getDuration() {
     return duration;
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (o == this) {
+      return true;
+    } else if (o == null) {
+      return false;
+    } else if (o instanceof SubjectiveStation) {
+      final SubjectiveStation other = (SubjectiveStation) o;
+      return other.getName().equals(getName());
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public int hashCode() {
+    return getName().hashCode();
   }
 }
