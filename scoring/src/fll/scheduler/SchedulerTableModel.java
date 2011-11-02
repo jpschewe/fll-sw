@@ -14,7 +14,6 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
-import fll.scheduler.TeamScheduleInfo.SubjectiveTime;
 
 /**
  * Table model for scheduler information used in {@link SchedulerUI}.
