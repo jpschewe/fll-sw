@@ -30,7 +30,10 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import fll.db.Queries;
 import fll.scheduler.ConstraintViolation;
+import fll.scheduler.SchedParams;
+import fll.scheduler.ScheduleChecker;
 import fll.scheduler.ScheduleParseException;
+import fll.scheduler.SubjectiveStation;
 import fll.scheduler.TournamentSchedule;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CellFileReader;
@@ -54,7 +57,9 @@ public class CheckViolations extends BaseFLLServlet {
   private static final Logger LOGGER = LogUtils.getLogger();
 
   public static final String SUBJECTIVE_HEADERS = "uploadSchedule_subjectiveHeaders";
+
   public static final String UNUSED_HEADERS = "uploadSchedule_unusedHeaders";
+
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -75,7 +80,7 @@ public class CheckViolations extends BaseFLLServlet {
         final CellFileReader reader = new ExcelCellReader(stream, sheetName);
         final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
         stream.close();
-        if(!columnInfo.getUnusedColumns().isEmpty()) {
+        if (!columnInfo.getUnusedColumns().isEmpty()) {
           session.setAttribute(UNUSED_HEADERS, columnInfo.getUnusedColumns());
           WebUtils.sendRedirect(application, response, "/schedule/chooseSubjectiveHeaders.jsp");
           return;
@@ -83,12 +88,12 @@ public class CheckViolations extends BaseFLLServlet {
           subjectiveHeaders = Collections.emptyList();
         }
       }
-      
+
       final InputStream stream = new FileInputStream(scheduleFile);
       final String fullname = scheduleFile.getName();
       final int dotIndex = fullname.lastIndexOf('.');
       final String name;
-      if(-1 != dotIndex) {
+      if (-1 != dotIndex) {
         name = fullname.substring(0, dotIndex);
       } else {
         name = fullname;
@@ -100,7 +105,17 @@ public class CheckViolations extends BaseFLLServlet {
       final Connection connection = datasource.getConnection();
       final int tournamentID = Queries.getCurrentTournament(connection);
       final Collection<ConstraintViolation> violations = schedule.compareWithDatabase(connection, tournamentID);
-      violations.addAll(schedule.verifySchedule());
+      // FIXME need to prompt the user for times
+      final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
+      for (final String category : schedule.getSubjectiveStations()) {
+        final SubjectiveStation station = new SubjectiveStation(category, SchedParams.DEFAULT_SUBJECTIVE_MINUTES);
+        subjectiveStations.add(station);
+      }
+      final SchedParams schedParams = new SchedParams(subjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
+                                                      SchedParams.DEFAULT_CHANGETIME_MINUTES,
+                                                      SchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
+      final ScheduleChecker checker = new ScheduleChecker(schedParams, schedule);
+      violations.addAll(checker.verifySchedule());
       if (violations.isEmpty()) {
         WebUtils.sendRedirect(application, response, "/schedule/CommitSchedule");
         return;

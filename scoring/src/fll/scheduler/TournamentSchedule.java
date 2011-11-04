@@ -34,7 +34,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import net.mtu.eggplant.util.Functions;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
@@ -149,27 +148,30 @@ public class TournamentSchedule implements Serializable {
     }
   };
 
-  private long changetime = Utilities.convertMinutesToMilliseconds(SchedParams.DEFAULT_CHANGETIME_MINUTES);
-
-  private long performanceChangetime = Utilities.convertMinutesToMilliseconds(SchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
-
-  private int performanceDurationMinutes = SchedParams.DEFAULT_PERFORMANCE_MINUTES;
-
-  private long performanceDuration = Utilities.convertMinutesToMilliseconds(performanceDurationMinutes);
-
-  private int subjectiveDurationMinutes = SchedParams.DEFAULT_SUBJECTIVE_MINUTES;
-
-  private long subjectiveDuration = Utilities.convertMinutesToMilliseconds(subjectiveDurationMinutes);
-
-  private long specialPerformanceChangetime = Utilities.convertMinutesToMilliseconds(30);
-
   private final HashMap<Date, Map<String, List<TeamScheduleInfo>>> _matches = new HashMap<Date, Map<String, List<TeamScheduleInfo>>>();
+
+  public Map<Date, Map<String, List<TeamScheduleInfo>>> getMatches() {
+    // TODO should make read-only somehow
+    return _matches;
+  }
 
   private final HashSet<String> _tableColors = new HashSet<String>();
 
+  public Set<String> getTableColors() {
+    return Collections.unmodifiableSet(_tableColors);
+  }
+
   private final HashSet<String> _divisions = new HashSet<String>();
 
+  public Set<String> getDivisions() {
+    return Collections.unmodifiableSet(_divisions);
+  }
+
   private final HashSet<String> _judges = new HashSet<String>();
+
+  public Set<String> getJudges() {
+    return Collections.unmodifiableSet(_judges);
+  }
 
   private final LinkedList<TeamScheduleInfo> _schedule = new LinkedList<TeamScheduleInfo>();
 
@@ -586,108 +588,6 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * Verify the schedule.
-   * 
-   * @return the constraint violations found, empty if no violations
-   * @throws IOException
-   */
-  public List<ConstraintViolation> verifySchedule() {
-    final List<ConstraintViolation> constraintViolations = new LinkedList<ConstraintViolation>();
-
-    for (final TeamScheduleInfo verify : getSchedule()) {
-      verifyTeam(constraintViolations, verify);
-    }
-
-    verifyPerformanceAtTime(constraintViolations);
-    verifyNumTeamsAtTable(constraintViolations);
-    verifySubjectiveAtTime(constraintViolations);
-    verifyNoOverlap(constraintViolations);
-
-    return constraintViolations;
-  }
-
-  /**
-   * Make sure that there are no overlaps in times at each scheduling location.
-   * 
-   * @param constraintViolations
-   */
-  private void verifyNoOverlap(final List<ConstraintViolation> violations) {
-    final Map<String, SortedSet<Date>> tableToTime = new HashMap<String, SortedSet<Date>>();
-    // category -> judge -> times
-    final Map<String, Map<String, SortedSet<Date>>> subjectiveToTime = new HashMap<String, Map<String, SortedSet<Date>>>();
-    for (final TeamScheduleInfo si : _schedule) {
-      final String judge = si.getJudgingStation();
-      for (final SubjectiveTime subj : si.getSubjectiveTimes()) {
-        Map<String, SortedSet<Date>> map = subjectiveToTime.get(subj.getName());
-        if (null == map) {
-          map = new HashMap<String, SortedSet<Date>>();
-          subjectiveToTime.put(subj.getName(), map);
-        }
-        SortedSet<Date> times = map.get(judge);
-        if (null == times) {
-          times = new TreeSet<Date>();
-          map.put(judge, times);
-        }
-        times.add(subj.getTime());
-      }
-
-      for (int round = 0; round < getNumberOfRounds(); ++round) {
-        final String table = si.getPerfTableColor(round);
-        final int side = si.getPerfTableSide(round);
-        final String tableKey = table
-            + " " + side;
-        SortedSet<Date> performance = tableToTime.get(tableKey);
-        if (null == performance) {
-          performance = new TreeSet<Date>();
-          tableToTime.put(tableKey, performance);
-        }
-        performance.add(si.getPerf(round));
-      }
-    }
-
-    // find violations
-    for (final Map.Entry<String, Map<String, SortedSet<Date>>> topEntry : subjectiveToTime.entrySet()) {
-      final String category = topEntry.getKey();
-      for (final Map.Entry<String, SortedSet<Date>> entry : topEntry.getValue().entrySet()) {
-        Date prev = null;
-        for (final Date current : entry.getValue()) {
-          if (null != prev) {
-            if (prev.getTime()
-                + getSubjectiveDuration() > current.getTime()) {
-              final String message = String.format("Overlap in %s for judge %s between %s and %s", category,
-                                                   entry.getKey(), OUTPUT_DATE_FORMAT.get().format(prev),
-                                                   OUTPUT_DATE_FORMAT.get().format(current));
-              violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, new SubjectiveTime(category,
-                                                                                                           prev), null,
-                                                     null, message));
-            }
-          }
-
-          prev = current;
-        }
-      }
-    }
-
-    for (final Map.Entry<String, SortedSet<Date>> entry : tableToTime.entrySet()) {
-      Date prev = null;
-      for (final Date current : entry.getValue()) {
-        if (null != prev) {
-          if (prev.getTime()
-              + getPerformanceDuration() > current.getTime()) {
-            final String message = String.format("Overlap in performance for table %s between %s and %s",
-                                                 entry.getKey(), OUTPUT_DATE_FORMAT.get().format(prev),
-                                                 OUTPUT_DATE_FORMAT.get().format(current));
-            violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, prev, message));
-          }
-        }
-
-        prev = current;
-      }
-    }
-
-  }
-
-  /**
    * Find the team that is competing earliest after the specified time on the
    * specified table and side in the specified round.
    * 
@@ -725,8 +625,8 @@ public class TournamentSchedule implements Serializable {
    * @return the team one needs to compete against in an extra round or null if
    *         the team does not need to stay
    */
-  private TeamScheduleInfo checkIfTeamNeedsToStay(final TeamScheduleInfo si,
-                                                  final int round) {
+  public TeamScheduleInfo checkIfTeamNeedsToStay(final TeamScheduleInfo si,
+                                                 final int round) {
     final int otherSide = 2 == si.getPerfTableSide(round) ? 1 : 2;
     final TeamScheduleInfo next = findNextTeam(si.getPerf(round), si.getPerfTableColor(round), otherSide, round);
 
@@ -749,7 +649,8 @@ public class TournamentSchedule implements Serializable {
    * @throws DocumentException
    * @throws IOException
    */
-  public void outputDetailedSchedules(final OutputStream output) throws DocumentException, IOException {
+  public void outputDetailedSchedules(final SchedParams params,
+                                      final OutputStream output) throws DocumentException, IOException {
     // print out detailed schedules
     final Document detailedSchedules = new Document(PageSize.LETTER); // portrait
 
@@ -770,7 +671,7 @@ public class TournamentSchedule implements Serializable {
     outputPerformanceSchedule(detailedSchedules);
 
     for (final TeamScheduleInfo si : _schedule) {
-      outputTeamSchedule(detailedSchedules, si);
+      outputTeamSchedule(params, detailedSchedules, si);
       detailedSchedules.add(Chunk.NEXTPAGE);
     }
 
@@ -788,7 +689,8 @@ public class TournamentSchedule implements Serializable {
    * 
    * @throws DocumentException
    */
-  private void outputTeamSchedule(final Document detailedSchedules,
+  private void outputTeamSchedule(final SchedParams params,
+                                  final Document detailedSchedules,
                                   final TeamScheduleInfo si) throws DocumentException {
     // used for various time computations
     final Calendar cal = Calendar.getInstance();
@@ -807,7 +709,7 @@ public class TournamentSchedule implements Serializable {
           + ": ", TEAM_HEADER_FONT));
       final Date start = si.getSubjectiveTimeByName(subjectiveStation).getTime();
       cal.setTime(start);
-      cal.add(Calendar.MINUTE, subjectiveDurationMinutes);
+      cal.add(Calendar.MINUTE, params.getStationByName(subjectiveStation).getDurationMinutes());
       final Date end = cal.getTime();
       para.add(new Chunk(String.format("%s - %s", OUTPUT_DATE_FORMAT.get().format(start),
                                        OUTPUT_DATE_FORMAT.get().format(end)), TEAM_VALUE_FONT));
@@ -819,7 +721,7 @@ public class TournamentSchedule implements Serializable {
           + ": ", TEAM_HEADER_FONT));
       final Date start = si.getPerf(round);
       cal.setTime(start);
-      cal.add(Calendar.MINUTE, performanceDurationMinutes);
+      cal.add(Calendar.MINUTE, params.getPerformanceMinutes());
       final Date end = cal.getTime();
       para.add(new Chunk(String.format("%s - %s %s %d", OUTPUT_DATE_FORMAT.get().format(start),
                                        OUTPUT_DATE_FORMAT.get().format(end), si.getPerfTableColor(round),
@@ -1143,104 +1045,6 @@ public class TournamentSchedule implements Serializable {
 
   }
 
-  private void verifyNumTeamsAtTable(final Collection<ConstraintViolation> violations) {
-    for (final Map.Entry<Date, Map<String, List<TeamScheduleInfo>>> dateEntry : _matches.entrySet()) {
-      for (final Map.Entry<String, List<TeamScheduleInfo>> timeEntry : dateEntry.getValue().entrySet()) {
-        final List<TeamScheduleInfo> tableMatches = timeEntry.getValue();
-        if (tableMatches.size() > 2) {
-          final List<Integer> teams = new LinkedList<Integer>();
-          for (final TeamScheduleInfo team : tableMatches) {
-            teams.add(team.getTeamNumber());
-          }
-          final String message = String.format("Too many teams competing on table: %s at time: %s. Teams: %s",
-                                               timeEntry.getKey(), OUTPUT_DATE_FORMAT.get().format(dateEntry.getKey()),
-                                               teams);
-          violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
-        }
-      }
-    }
-  }
-
-  /**
-   * Verify that there are no more than <code>numberOfTables</code> teams
-   * performing at the same time.
-   */
-  private void verifyPerformanceAtTime(final Collection<ConstraintViolation> violations) {
-    // constraint: tournament:1
-    final Map<Date, Set<TeamScheduleInfo>> teamsAtTime = new HashMap<Date, Set<TeamScheduleInfo>>();
-    for (final TeamScheduleInfo si : _schedule) {
-      for (int round = 0; round < getNumberOfRounds(); ++round) {
-        final Set<TeamScheduleInfo> teams;
-        if (teamsAtTime.containsKey(si.getPerf(round))) {
-          teams = teamsAtTime.get(si.getPerf(round));
-        } else {
-          teams = new HashSet<TeamScheduleInfo>();
-          teamsAtTime.put(si.getPerf(round), teams);
-        }
-        teams.add(si);
-      }
-    }
-
-    for (final Map.Entry<Date, Set<TeamScheduleInfo>> entry : teamsAtTime.entrySet()) {
-      if (entry.getValue().size() > _tableColors.size() * 2) {
-        final String message = String.format("There are too many teams in performance at %s",
-                                             OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
-        violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null, null, null, message));
-      }
-    }
-  }
-
-  /**
-   * Ensure that no more than 1 team is in a subjective judging station at once.
-   */
-  private void verifySubjectiveAtTime(final Collection<ConstraintViolation> violations) {
-    // constraint: tournament:1
-    // category -> time -> teams
-    final Map<String, Map<Date, Set<TeamScheduleInfo>>> allSubjective = new HashMap<String, Map<Date, Set<TeamScheduleInfo>>>();
-    for (final TeamScheduleInfo si : _schedule) {
-      for (final SubjectiveTime subj : si.getSubjectiveTimes()) {
-        final Map<Date, Set<TeamScheduleInfo>> teamsAtTime;
-        if (allSubjective.containsKey(subj.getName())) {
-          teamsAtTime = allSubjective.get(subj.getName());
-        } else {
-          teamsAtTime = new HashMap<Date, Set<TeamScheduleInfo>>();
-          allSubjective.put(subj.getName(), teamsAtTime);
-        }
-        final Set<TeamScheduleInfo> teams;
-        if (teamsAtTime.containsKey(subj.getTime())) {
-          teams = teamsAtTime.get(subj.getTime());
-        } else {
-          teams = new HashSet<TeamScheduleInfo>();
-          teamsAtTime.put(subj.getTime(), teams);
-        }
-        teams.add(si);
-      }
-    }
-
-    for (final Map.Entry<String, Map<Date, Set<TeamScheduleInfo>>> topEntry : allSubjective.entrySet()) {
-
-      for (final Map.Entry<Date, Set<TeamScheduleInfo>> entry : topEntry.getValue().entrySet()) {
-        if (entry.getValue().size() > _judges.size()) {
-          final String message = String.format("There are too many teams in %s at %s", topEntry.getKey(),
-                                               OUTPUT_DATE_FORMAT.get().format(entry.getKey()));
-          violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null,
-                                                 new SubjectiveTime(topEntry.getKey(), entry.getKey()), null, message));
-        }
-
-        final Set<String> judges = new HashSet<String>();
-        for (final TeamScheduleInfo ti : entry.getValue()) {
-          if (!judges.add(ti.getJudgingStation())) {
-            final String message = String.format("%s judge %s cannot see more than one team at %s", topEntry.getKey(),
-                                                 ti.getJudgingStation(), OUTPUT_DATE_FORMAT.get()
-                                                                                           .format(entry.getKey()));
-            violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, null,
-                                                   new SubjectiveTime(topEntry.getKey(), entry.getKey()), null, message));
-          }
-        }
-      }
-    }
-  }
-
   /**
    * Find the round of the opponent for a given team in a given round.
    * 
@@ -1249,8 +1053,8 @@ public class TournamentSchedule implements Serializable {
    * @param round
    * @return the round number or -1 if no opponent
    */
-  private int findOpponentRound(final TeamScheduleInfo ti,
-                                final int round) {
+  public int findOpponentRound(final TeamScheduleInfo ti,
+                               final int round) {
     final List<TeamScheduleInfo> tableMatches = _matches.get(ti.getPerf(round)).get(ti.getPerfTableColor(round));
     if (tableMatches.size() > 1) {
       if (tableMatches.get(0).equals(ti)) {
@@ -1271,8 +1075,8 @@ public class TournamentSchedule implements Serializable {
    * @param round
    * @return the team number or null if no opponent
    */
-  private TeamScheduleInfo findOpponent(final TeamScheduleInfo ti,
-                                        final int round) {
+  public TeamScheduleInfo findOpponent(final TeamScheduleInfo ti,
+                                       final int round) {
     final List<TeamScheduleInfo> tableMatches = _matches.get(ti.getPerf(round)).get(ti.getPerfTableColor(round));
     if (tableMatches.size() > 1) {
       if (tableMatches.get(0).equals(ti)) {
@@ -1282,252 +1086,6 @@ public class TournamentSchedule implements Serializable {
       }
     } else {
       return null;
-    }
-  }
-
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "IM_BAD_CHECK_FOR_ODD", justification = "The size of a container cannot be negative")
-  private void verifyTeam(final Collection<ConstraintViolation> violations,
-                          final TeamScheduleInfo ti) {
-    // Relationship between each subjective category
-    for (final SubjectiveTime category1 : ti.getSubjectiveTimes()) {
-      for (final SubjectiveTime category2 : ti.getSubjectiveTimes()) {
-        if (!category1.getName().equals(category2.getName())) {
-          final Date cat1Time = category1.getTime();
-          final Date cat2Time = category2.getTime();
-
-          if (cat1Time.before(cat2Time)) {
-            if (cat1Time.getTime()
-                + getSubjectiveDuration() > cat2Time.getTime()) {
-              final String message = String.format("Team %d is still in %s when they need to start %s",
-                                                   ti.getTeamNumber(), category1.getName(), category2.getName());
-              violations.add(new ConstraintViolation(true, ti.getTeamNumber(), category1, category2, null, message));
-              return;
-            } else if (cat1Time.getTime()
-                + getSubjectiveDuration() + getChangetime() > cat2Time.getTime()) {
-              final String message = String.format("Team %d has doesn't have enough time between %s and %s (need %d minutes)",
-                                                   ti.getTeamNumber(), category1.getName(), category2.getName(),
-                                                   getChangetimeAsMinutes());
-              violations.add(new ConstraintViolation(true, ti.getTeamNumber(), category1, category2, null, message));
-              return;
-            }
-          } else {
-            if (cat2Time.getTime()
-                + getSubjectiveDuration() > cat1Time.getTime()) {
-              final String message = String.format("Team %d is still in %s when they need start %s",
-                                                   ti.getTeamNumber(), category2.getName(), category1.getName());
-              violations.add(new ConstraintViolation(true, ti.getTeamNumber(), category1, category2, null, message));
-              return;
-            } else if (cat2Time.getTime()
-                + getSubjectiveDuration() + getChangetime() > cat1Time.getTime()) {
-              final String message = String.format("Team %d has doesn't have enough time between %s and %s (need %d minutes)",
-                                                   ti.getTeamNumber(), category1.getName(), category2.getName(),
-                                                   getChangetimeAsMinutes());
-              violations.add(new ConstraintViolation(true, ti.getTeamNumber(), category1, category2, null, message));
-              return;
-            }
-          }
-        }
-      }
-    }
-
-    checkConstraintTeam3(violations, ti);
-
-    // constraint: team:4
-    for (int round = 0; round < getNumberOfRounds(); ++round) {
-      final String performanceName = String.valueOf(round + 1);
-      verifyPerformanceVsSubjective(violations, ti, performanceName, ti.getPerf(round));
-    }
-
-    // constraint: team:5
-    final Set<String> tableSides = new HashSet<String>();
-    for (int round = 0; round < getNumberOfRounds(); ++round) {
-      final TeamScheduleInfo opponent = findOpponent(ti, round);
-      if (null != opponent) {
-        if (!tableSides.add(ti.getPerfTableColor(round)
-            + " " + ti.getPerfTableSide(round))) {
-          final String tableMessage = String.format("Team %d is competing on %s %d more than once", ti.getTeamNumber(),
-                                                    ti.getPerfTableColor(round), ti.getPerfTableSide(round));
-          violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, null, tableMessage));
-        }
-
-        if (!Functions.safeEquals(ti.getDivision(), opponent.getDivision())) {
-          final String divMessage = String.format("Team %d in division %s is competing against team %d from division %s round %d",
-                                                  ti.getTeamNumber(), ti.getDivision(), opponent.getTeamNumber(),
-                                                  opponent.getDivision(), (round + 1));
-          violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, ti.getPerf(round), divMessage));
-        }
-
-        int opponentSide = -1;
-        // figure out which round matches up
-        for (int oround = 0; oround < getNumberOfRounds(); ++oround) {
-          if (opponent.getPerf(oround).equals(ti.getPerf(round))) {
-            opponentSide = opponent.getPerfTableSide(oround);
-            break;
-          }
-        }
-        if (-1 == opponentSide) {
-          final String message = String.format("Unable to find time match for rounds between team %d and team %d at time %s",
-                                               ti.getTeamNumber(), opponent.getTeamNumber(),
-                                               OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round)));
-          violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(round), message));
-        } else {
-          if (opponentSide == ti.getPerfTableSide(round)) {
-            final String message = String.format("Team %d and team %d are both on table %s side %d at the same time for round %d",
-                                                 ti.getTeamNumber(), opponent.getTeamNumber(),
-                                                 ti.getPerfTableColor(round), ti.getPerfTableSide(round), (round + 1));
-            violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(round), message));
-          }
-        }
-
-        for (int r = round + 1; r < getNumberOfRounds(); ++r) {
-          final TeamScheduleInfo otherOpponent = findOpponent(ti, r);
-          if (otherOpponent != null
-              && opponent.equals(otherOpponent)) {
-            final String message = String.format("Team %d competes against %d more than once rounds: %d, %d",
-                                                 ti.getTeamNumber(), opponent.getTeamNumber(), (round + 1), (r + 1));
-            violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, null, message));
-          }
-        }
-      } else {
-        // only a problem if this is not the last round and we don't have an odd
-        // number of teams
-        if (!(round == getNumberOfRounds() - 1 && (_schedule.size() % 2) == 1)) {
-          final String message = String.format("Team %d has no opponent for round %d", ti.getTeamNumber(), (round + 1));
-          violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, ti.getPerf(round), message));
-        }
-      }
-    }
-  }
-
-  /**
-   * Check constraint team:3.
-   */
-  private void checkConstraintTeam3(final Collection<ConstraintViolation> violations,
-                                    final TeamScheduleInfo ti) {
-    if (getNumberOfRounds() < 2) {
-      // nothing to check
-      return;
-    }
-
-    for (int round = 1; round < getNumberOfRounds(); ++round) {
-      final int prevRound = round - 1;
-      final long perfChangetime;
-      final int prevRoundOpponentRound = findOpponentRound(ti, prevRound);
-      final int curRoundOpponentRound = findOpponentRound(ti, round);
-      if (prevRoundOpponentRound != prevRound
-          || curRoundOpponentRound != round) {
-        perfChangetime = getSpecialPerformanceChangetime();
-      } else {
-        perfChangetime = getPerformanceChangetime();
-      }
-      if (ti.getPerf(prevRound).getTime()
-          + getPerformanceDuration() > ti.getPerf(round).getTime()) {
-        final String message = String.format("Team %d is still in performance %d when they are to start performance %d: %s - %s",
-                                             ti.getTeamNumber(), prevRound + 1, round + 1,
-                                             OUTPUT_DATE_FORMAT.get().format(ti.getPerf(prevRound)),
-                                             OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round)));
-        violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(round), message));
-      } else if (ti.getPerf(prevRound).getTime()
-          + getPerformanceDuration() + perfChangetime > ti.getPerf(round).getTime()) {
-        final String message = String.format("Team %d doesn't have enough time (%d minutes) between performance %d and performance %d: %s - %s",
-                                             ti.getTeamNumber(), perfChangetime
-                                                 / Utilities.MILLISECONDS_PER_SECOND / Utilities.SECONDS_PER_MINUTE,
-                                             prevRound + 1, round + 1,
-                                             OUTPUT_DATE_FORMAT.get().format(ti.getPerf(prevRound)),
-                                             OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round)));
-        violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(round), message));
-      }
-    }
-
-    checkForExtraPerformance(violations, ti, changetime);
-  }
-
-  /**
-   * Check the performance constraints if this team is scheduled to stay for an
-   * extra non-scored round.
-   */
-  private void checkForExtraPerformance(final Collection<ConstraintViolation> violations,
-                                        final TeamScheduleInfo ti,
-                                        final long changetime) {
-    // check if the team needs to stay for any extra founds
-    final String performanceName = "extra";
-    for (int round = 0; round < getNumberOfRounds(); ++round) {
-      final TeamScheduleInfo next = checkIfTeamNeedsToStay(ti, round);
-      if (null != next) {
-
-        // check for competing against a team twice with this extra run
-        for (int r = 0; r < getNumberOfRounds(); ++r) {
-          final TeamScheduleInfo otherOpponent = findOpponent(ti, r);
-          if (otherOpponent != null
-              && next.equals(otherOpponent)) {
-            final String message = String.format("Team %d competes against %d more than once rounds: %d, extra",
-                                                 ti.getTeamNumber(), next.getTeamNumber(), (r + 1));
-            violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, null, message));
-            violations.add(new ConstraintViolation(false, next.getTeamNumber(), null, null, null, message));
-          }
-        }
-
-        // everything else checked out, only only need to check the end time
-        // against subjective and the next round
-        final Date performanceTime = next.getPerf(round);
-        verifyPerformanceVsSubjective(violations, ti, performanceName, performanceTime);
-
-        if (round + 1 < getNumberOfRounds()) {
-          if (next.getPerf(round).getTime()
-              + getPerformanceDuration() > ti.getPerf(round + 1).getTime()) {
-            final String message = String.format("Team %d will be in performance round %d when it is starting the extra performance round: %s - %s",
-                                                 ti.getTeamNumber(), round,
-                                                 OUTPUT_DATE_FORMAT.get().format(next.getPerf(round)),
-                                                 OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round + 1)));
-            violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(round + 1), message));
-          } else if (next.getPerf(round).getTime()
-              + getPerformanceDuration() + getPerformanceChangetime() > ti.getPerf(round + 1).getTime()) {
-            final String message = String.format("Team %d doesn't have enough time (%d minutes) between performance %d and performance extra: %s - %s",
-                                                 ti.getTeamNumber(), changetime
-                                                     / 1000 / Utilities.SECONDS_PER_MINUTE, round,
-                                                 OUTPUT_DATE_FORMAT.get().format(next.getPerf(round)),
-                                                 OUTPUT_DATE_FORMAT.get().format(ti.getPerf(round + 1)));
-            violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerf(round + 1), message));
-          }
-        }
-
-      }
-    }
-  }
-
-  private void verifyPerformanceVsSubjective(final Collection<ConstraintViolation> violations,
-                                             final TeamScheduleInfo ti,
-                                             final String performanceName,
-                                             final Date performanceTime) {
-    for (final SubjectiveTime subj : ti.getSubjectiveTimes()) {
-      final Date time = subj.getTime();
-      if (time.before(performanceTime)) {
-        if (time.getTime()
-            + getSubjectiveDuration() > performanceTime.getTime()) {
-          final String message = String.format("Team %d will be in %s when performance round %s starts",
-                                               ti.getTeamNumber(), subj.getName(), performanceName);
-          violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, subj, performanceTime, message));
-        } else if (time.getTime()
-            + getSubjectiveDuration() + getChangetime() > performanceTime.getTime()) {
-          final String message = String.format("Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
-                                               ti.getTeamNumber(), OUTPUT_DATE_FORMAT.get().format(subj.getTime()),
-                                               performanceName, getChangetimeAsMinutes());
-          violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, subj, performanceTime, message));
-        }
-      } else {
-        if (performanceTime.getTime()
-            + getPerformanceDuration() > time.getTime()) {
-          final String message = String.format("Team %d wil be in %s when performance round %s starts",
-                                               ti.getTeamNumber(), subj.getName(), performanceName);
-          violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, subj, performanceTime, message));
-        } else if (performanceTime.getTime()
-            + getPerformanceDuration() + getChangetime() > time.getTime()) {
-          final String message = String.format("Team %d has doesn't have enough time between %s and performance round %s (need %d minutes)",
-                                               ti.getTeamNumber(), subj.getName(), performanceName,
-                                               getChangetimeAsMinutes());
-          violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, subj, performanceTime, message));
-        }
-      }
     }
   }
 
@@ -1627,93 +1185,6 @@ public class TournamentSchedule implements Serializable {
         return OUTPUT_DATE_FORMAT.get().parse(s);
       }
     }
-  }
-
-  /**
-   * Time to allocate for a performance run.
-   * 
-   * @return the performanceDuration (milliseconds)
-   */
-  public long getPerformanceDuration() {
-    return performanceDuration;
-  }
-
-  /**
-   * Time to allocate for either subjective judging.
-   * 
-   * @return the subjectiveDuration (milliseconds)
-   */
-  public long getSubjectiveDuration() {
-    return subjectiveDuration;
-  }
-
-  /**
-   * This is the time required between events.
-   * 
-   * @return the changetime (milliseconds)
-   */
-  public long getChangetime() {
-    return changetime;
-  }
-
-  public long getChangetimeAsMinutes() {
-    return getChangetime()
-        / Utilities.SECONDS_PER_MINUTE / Utilities.MILLISECONDS_PER_SECOND;
-  }
-
-  /**
-   * This is the time required between performance runs for each team.
-   * 
-   * @return the performanceChangetime (milliseconds)
-   */
-  public long getPerformanceChangetime() {
-    return performanceChangetime;
-  }
-
-  /**
-   * This is the time required between performance runs for the two teams in
-   * involved in the performance run that crosses round 1 and round 2 when there
-   * is an odd number of teams.
-   * 
-   * @return the specialPerformanceChangetime (milliseconds)
-   */
-  public long getSpecialPerformanceChangetime() {
-    return specialPerformanceChangetime;
-  }
-
-  /**
-   * @param specialPerformanceChangetime the specialPerformanceChangetime to set
-   */
-  public void setSpecialPerformanceChangetime(final long specialPerformanceChangetime) {
-    this.specialPerformanceChangetime = specialPerformanceChangetime;
-  }
-
-  /**
-   * @param performanceChangetime the performanceChangetime to set
-   */
-  public void setPerformanceChangetime(final long performanceChangetime) {
-    this.performanceChangetime = performanceChangetime;
-  }
-
-  /**
-   * @param changetime the changetime to set
-   */
-  public void setChangetime(final long changetime) {
-    this.changetime = changetime;
-  }
-
-  /**
-   * @param subjectiveDuration the subjectiveDuration to set
-   */
-  public void setSubjectiveDuration(final long subjectiveDuration) {
-    this.subjectiveDuration = subjectiveDuration;
-  }
-
-  /**
-   * @param performanceDuration the performanceDuration to set
-   */
-  public void setPerformanceDuration(final long performanceDuration) {
-    this.performanceDuration = performanceDuration;
   }
 
   /**

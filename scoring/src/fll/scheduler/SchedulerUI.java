@@ -302,7 +302,7 @@ public class SchedulerUI extends JFrame {
             + pdfFile.getAbsolutePath());
 
         fos = new FileOutputStream(pdfFile);
-        getScheduleData().outputDetailedSchedules(fos);
+        getScheduleData().outputDetailedSchedules(getSchedParams(), fos);
         JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedules written to same directory as the schedule",
                                       "Information", JOptionPane.INFORMATION_MESSAGE);
       } catch (final DocumentException e) {
@@ -381,8 +381,9 @@ public class SchedulerUI extends JFrame {
             }
 
             final List<SubjectiveStation> subjectiveStations = gatherSubjectiveStationInformation(columnInfo);
-            // FIXME here's where we connect the schedule with the constraint
-            // checker
+            schedParams = new SchedParams(subjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
+                                          SchedParams.DEFAULT_CHANGETIME_MINUTES,
+                                          SchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
             final List<String> subjectiveHeaders = new LinkedList<String>();
             for (final SubjectiveStation station : subjectiveStations) {
               subjectiveHeaders.add(station.getName());
@@ -494,6 +495,12 @@ public class SchedulerUI extends JFrame {
     return scheduleData;
   }
 
+  private SchedParams schedParams;
+
+  public SchedParams getSchedParams() {
+    return schedParams;
+  }
+
   private SchedulerTableModel scheduleModel;
 
   SchedulerTableModel getScheduleModel() {
@@ -522,7 +529,8 @@ public class SchedulerUI extends JFrame {
   private void checkSchedule() {
     violationTable.clearSelection();
 
-    violationsModel = new ViolationTableModel(scheduleData.verifySchedule());
+    final ScheduleChecker checker = new ScheduleChecker(getSchedParams(), getScheduleData());
+    violationsModel = new ViolationTableModel(checker.verifySchedule());
     violationTable.setModel(violationsModel);
   }
 
@@ -712,7 +720,7 @@ public class SchedulerUI extends JFrame {
         final JCheckBox box = checkboxes.get(i);
         final JFormattedTextField duration = subjectiveDurations.get(i);
         if (box.isSelected()) {
-          subjectiveHeaders.add(new SubjectiveStation(box.getText(), ((Number) duration.getValue()).longValue()));
+          subjectiveHeaders.add(new SubjectiveStation(box.getText(), ((Number) duration.getValue()).intValue()));
         }
       }
     } else {
