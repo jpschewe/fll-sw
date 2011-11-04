@@ -594,7 +594,7 @@ public class TournamentSchedule implements Serializable {
   public List<ConstraintViolation> verifySchedule() {
     final List<ConstraintViolation> constraintViolations = new LinkedList<ConstraintViolation>();
 
-    for (final TeamScheduleInfo verify : _schedule) {
+    for (final TeamScheduleInfo verify : getSchedule()) {
       verifyTeam(constraintViolations, verify);
     }
 
