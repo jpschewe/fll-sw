@@ -35,7 +35,8 @@ public class SchedParams {
   /**
    * @param tinc the number of minutes per time slot
    * @param maxHours the number of hours that the tournament should go
-   * @param subjectiveParams the parameters for the subjective categories, one entry for each subjective category
+   * @param subjectiveParams the parameters for the subjective categories, one
+   *          entry for each subjective category
    * @param nrounds the number of performance rounds
    * @param ntables the number of performance tables
    * @param performanceMinutes the number of minutes that the performance
@@ -50,7 +51,7 @@ public class SchedParams {
    */
   public SchedParams(final int tinc,
                      final int maxHours,
-                     final List<SubjectiveParams> subjectiveParams,
+                     final List<SubjectiveStation> subjectiveParams,
                      final int nrounds,
                      final int ntables,
                      final int performanceMinutes,
@@ -59,7 +60,7 @@ public class SchedParams {
                      final List<Integer> teams) throws InconsistentSchedParams {
     mTInc = tinc;
     mMaxHours = maxHours;
-    mSubjectiveParams = new ArrayList<SubjectiveParams>(subjectiveParams);
+    mSubjectiveParams = new ArrayList<SubjectiveStation>(subjectiveParams);
     mNRounds = nrounds;
     mNTables = ntables;
     mPerformanceMinutes = performanceMinutes;
@@ -203,7 +204,7 @@ public class SchedParams {
     return Collections.unmodifiableList(mTeams);
   }
 
-  private final List<SubjectiveParams> mSubjectiveParams;
+  private final List<SubjectiveStation> mSubjectiveParams;
 
   /**
    * Number of subjective judging stations.
@@ -219,36 +220,13 @@ public class SchedParams {
   /**
    * Number of minutes for a subjective judging.
    */
-  public int getSubjectiveMinutes(final int station) {
+  public long getSubjectiveMinutes(final int station) {
     return mSubjectiveParams.get(station).getDurationMinutes();
   }
 
-  public int getSubjectiveTimeSlots(final int station) {
+  public long getSubjectiveTimeSlots(final int station) {
     return getSubjectiveMinutes(station)
         / getTInc();
-  }
-
-  /**
-   * Parameters for a subjective judging station.
-   */
-  public static final class SubjectiveParams {
-    public SubjectiveParams(final String name,
-                            final int durationMinutes) {
-      mName = name;
-      mDurationMinutes = durationMinutes;
-    }
-
-    public String getName() {
-      return mName;
-    }
-
-    private final String mName;
-
-    public int getDurationMinutes() {
-      return mDurationMinutes;
-    }
-
-    private final int mDurationMinutes;
   }
 
 }

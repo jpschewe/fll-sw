@@ -59,7 +59,6 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import com.itextpdf.text.DocumentException;
 
-import fll.Utilities;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
@@ -382,12 +381,13 @@ public class SchedulerUI extends JFrame {
             }
 
             final List<SubjectiveStation> subjectiveStations = gatherSubjectiveStationInformation(columnInfo);
-            //FIXME here's where we connect the schedule with the constraint checker
+            // FIXME here's where we connect the schedule with the constraint
+            // checker
             final List<String> subjectiveHeaders = new LinkedList<String>();
-            for(final SubjectiveStation station : subjectiveStations) {
+            for (final SubjectiveStation station : subjectiveStations) {
               subjectiveHeaders.add(station.getName());
             }
-            
+
             final String name = extractBasename(selectedFile);
 
             final TournamentSchedule schedule;
@@ -686,10 +686,10 @@ public class SchedulerUI extends JFrame {
     final List<JCheckBox> checkboxes = new LinkedList<JCheckBox>();
     final List<JFormattedTextField> subjectiveDurations = new LinkedList<JFormattedTextField>();
     final JPanel optionPanel = new JPanel(new GridLayout(0, 2));
-    
+
     optionPanel.add(new JLabel("Column"));
     optionPanel.add(new JLabel("Duration (minutes)"));
-    
+
     for (final String column : unusedColumns) {
       if (null != column
           && column.length() > 0) {
@@ -712,9 +712,7 @@ public class SchedulerUI extends JFrame {
         final JCheckBox box = checkboxes.get(i);
         final JFormattedTextField duration = subjectiveDurations.get(i);
         if (box.isSelected()) {
-          subjectiveHeaders.add(new SubjectiveStation(
-                                                      box.getText(),
-                                                      Utilities.convertMinutesToMilliseconds(((Number) duration.getValue()).longValue())));
+          subjectiveHeaders.add(new SubjectiveStation(box.getText(), ((Number) duration.getValue()).longValue()));
         }
       }
     } else {

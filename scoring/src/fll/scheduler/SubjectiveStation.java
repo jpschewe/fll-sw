@@ -8,14 +8,16 @@ package fll.scheduler;
 
 import java.io.Serializable;
 
+import fll.Utilities;
+
 /**
  * Represents a subjective station.
  */
 public final class SubjectiveStation implements Serializable {
   public SubjectiveStation(final String name,
-                           final long durationInMillis) {
+                           final long durationInMinutes) {
     this.name = name;
-    this.duration = durationInMillis;
+    this.durationMinutes = durationInMinutes;
   }
 
   private final String name;
@@ -27,13 +29,20 @@ public final class SubjectiveStation implements Serializable {
     return name;
   }
 
-  private final long duration;
+  private final long durationMinutes;
 
   /**
    * Duration of the judging session.
    */
-  public long getDuration() {
-    return duration;
+  public long getDurationInMillis() {
+    return Utilities.convertMinutesToMilliseconds(durationMinutes);
+  }
+
+  /**
+   * Duration of the judging session.
+   */
+  public long getDurationMinutes() {
+    return durationMinutes;
   }
 
   @Override
