@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import fll.scheduler.SubjectiveStation;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
@@ -42,15 +43,17 @@ public class ProcessSubjectiveHeaders extends BaseFLLServlet {
                                                                                             List.class);
 
     // get params for subjectiveHeader
-    final List<String> subjectiveHeaders = new LinkedList<String>();
+    final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
     for (final String str : request.getParameterValues("subjectiveHeader")) {
       final int index = Integer.valueOf(str);
       final String header = unusedHeaders.get(index);
-      subjectiveHeaders.add(header);
+      final String durationStr = request.getParameter("duration_"
+          + index);
+      subjectiveStations.add(new SubjectiveStation(header, Integer.valueOf(durationStr)));
     }
 
-    session.setAttribute(CheckViolations.SUBJECTIVE_HEADERS, subjectiveHeaders);
-    
+    session.setAttribute(CheckViolations.SUBJECTIVE_STATIONS, subjectiveStations);
+
     WebUtils.sendRedirect(application, response, "/schedule/CheckViolations");
   }
 }
