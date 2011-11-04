@@ -15,7 +15,7 @@ import fll.Utilities;
  */
 public final class SubjectiveStation implements Serializable {
   public SubjectiveStation(final String name,
-                           final long durationInMinutes) {
+                           final int durationInMinutes) {
     this.name = name;
     this.durationMinutes = durationInMinutes;
   }
@@ -29,7 +29,7 @@ public final class SubjectiveStation implements Serializable {
     return name;
   }
 
-  private final long durationMinutes;
+  private final int durationMinutes;
 
   /**
    * Duration of the judging session.
@@ -41,7 +41,7 @@ public final class SubjectiveStation implements Serializable {
   /**
    * Duration of the judging session.
    */
-  public long getDurationMinutes() {
+  public int getDurationMinutes() {
     return durationMinutes;
   }
 
