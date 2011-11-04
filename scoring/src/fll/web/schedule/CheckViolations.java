@@ -56,7 +56,7 @@ public class CheckViolations extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  public static final String SUBJECTIVE_HEADERS = "uploadSchedule_subjectiveHeaders";
+  public static final String SUBJECTIVE_STATIONS = "uploadSchedule_subjectiveStations";
 
   public static final String UNUSED_HEADERS = "uploadSchedule_unusedHeaders";
 
@@ -73,8 +73,8 @@ public class CheckViolations extends BaseFLLServlet {
       // of subjective headers
       // J2EE doesn't have things typed yet
       @SuppressWarnings("unchecked")
-      List<String> subjectiveHeaders = (List<String>) session.getAttribute(SUBJECTIVE_HEADERS);
-      if (null == subjectiveHeaders) {
+      List<SubjectiveStation> subjectiveStations = (List<SubjectiveStation>) session.getAttribute(SUBJECTIVE_STATIONS);
+      if (null == subjectiveStations) {
         // get unused headers
         final InputStream stream = new FileInputStream(scheduleFile);
         final CellFileReader reader = new ExcelCellReader(stream, sheetName);
@@ -82,10 +82,11 @@ public class CheckViolations extends BaseFLLServlet {
         stream.close();
         if (!columnInfo.getUnusedColumns().isEmpty()) {
           session.setAttribute(UNUSED_HEADERS, columnInfo.getUnusedColumns());
+          session.setAttribute("default_duration", SchedParams.DEFAULT_SUBJECTIVE_MINUTES);
           WebUtils.sendRedirect(application, response, "/schedule/chooseSubjectiveHeaders.jsp");
           return;
         } else {
-          subjectiveHeaders = Collections.emptyList();
+          subjectiveStations = Collections.emptyList();
         }
       }
 
@@ -98,6 +99,10 @@ public class CheckViolations extends BaseFLLServlet {
       } else {
         name = fullname;
       }
+      final List<String> subjectiveHeaders = new LinkedList<String>();
+      for (final SubjectiveStation station : subjectiveStations) {
+        subjectiveHeaders.add(station.getName());
+      }
       final TournamentSchedule schedule = new TournamentSchedule(name, stream, sheetName, subjectiveHeaders);
       session.setAttribute("uploadSchedule_schedule", schedule);
 
@@ -105,12 +110,6 @@ public class CheckViolations extends BaseFLLServlet {
       final Connection connection = datasource.getConnection();
       final int tournamentID = Queries.getCurrentTournament(connection);
       final Collection<ConstraintViolation> violations = schedule.compareWithDatabase(connection, tournamentID);
-      // FIXME need to prompt the user for times
-      final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
-      for (final String category : schedule.getSubjectiveStations()) {
-        final SubjectiveStation station = new SubjectiveStation(category, SchedParams.DEFAULT_SUBJECTIVE_MINUTES);
-        subjectiveStations.add(station);
-      }
       final SchedParams schedParams = new SchedParams(subjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
                                                       SchedParams.DEFAULT_CHANGETIME_MINUTES,
                                                       SchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
