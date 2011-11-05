@@ -8,7 +8,7 @@ subj_minutes = [20, 20, 20];
 
 % performance setup
 NRounds = 3;
-NTables = 2;
+NTables = 1;
 
 % judging groups
 NGroups = 1;
