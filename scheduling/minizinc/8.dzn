@@ -1,5 +1,5 @@
 TInc = 5;
-TMax_hours = 6;
+TMax_hours = 5;
 TMax_minutes = 0;
 
 % subjective setup
@@ -11,8 +11,8 @@ NRounds = 3;
 NTables = 2;
 
 % judging groups
-NGroups = 2;
-group_counts = [16, 12];
+NGroups = 1;
+group_counts = [8];
 
 alpha_perf_minutes = 5;
 
