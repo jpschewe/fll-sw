@@ -38,7 +38,6 @@ public class SchedParams {
    *          a team
    * @param performanceChangetimeMinutes the number of minutes between runs on
    *          the performance table for a team
-   * @param teams a list containing the number of teams in each judging group
    */
   public SchedParams(final List<SubjectiveStation> subjectiveParams,
                      final int performanceMinutes,

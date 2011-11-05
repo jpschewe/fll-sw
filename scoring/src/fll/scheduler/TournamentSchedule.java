@@ -619,7 +619,6 @@ public class TournamentSchedule implements Serializable {
    * Check if the specified team needs to stay around after their performance to
    * even up the table.
    * 
-   * @param schedule the schedule
    * @param si the TeamScheduleInfo for the team
    * @param round the round the team is competing at (zero based index)
    * @return the team one needs to compete against in an extra round or null if
@@ -1048,7 +1047,6 @@ public class TournamentSchedule implements Serializable {
   /**
    * Find the round of the opponent for a given team in a given round.
    * 
-   * @param matches
    * @param ti
    * @param round
    * @return the round number or -1 if no opponent
@@ -1070,7 +1068,6 @@ public class TournamentSchedule implements Serializable {
   /**
    * Find the opponent for a given team in a given round.
    * 
-   * @param matches
    * @param ti
    * @param round
    * @return the team number or null if no opponent
