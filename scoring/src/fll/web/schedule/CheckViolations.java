@@ -30,7 +30,10 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import fll.db.Queries;
 import fll.scheduler.ConstraintViolation;
+import fll.scheduler.SchedParams;
+import fll.scheduler.ScheduleChecker;
 import fll.scheduler.ScheduleParseException;
+import fll.scheduler.SubjectiveStation;
 import fll.scheduler.TournamentSchedule;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CellFileReader;
@@ -53,8 +56,10 @@ public class CheckViolations extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  public static final String SUBJECTIVE_HEADERS = "uploadSchedule_subjectiveHeaders";
+  public static final String SUBJECTIVE_STATIONS = "uploadSchedule_subjectiveStations";
+
   public static final String UNUSED_HEADERS = "uploadSchedule_unusedHeaders";
+
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -68,30 +73,35 @@ public class CheckViolations extends BaseFLLServlet {
       // of subjective headers
       // J2EE doesn't have things typed yet
       @SuppressWarnings("unchecked")
-      List<String> subjectiveHeaders = (List<String>) session.getAttribute(SUBJECTIVE_HEADERS);
-      if (null == subjectiveHeaders) {
+      List<SubjectiveStation> subjectiveStations = (List<SubjectiveStation>) session.getAttribute(SUBJECTIVE_STATIONS);
+      if (null == subjectiveStations) {
         // get unused headers
         final InputStream stream = new FileInputStream(scheduleFile);
         final CellFileReader reader = new ExcelCellReader(stream, sheetName);
         final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
         stream.close();
-        if(!columnInfo.getUnusedColumns().isEmpty()) {
+        if (!columnInfo.getUnusedColumns().isEmpty()) {
           session.setAttribute(UNUSED_HEADERS, columnInfo.getUnusedColumns());
+          session.setAttribute("default_duration", SchedParams.DEFAULT_SUBJECTIVE_MINUTES);
           WebUtils.sendRedirect(application, response, "/schedule/chooseSubjectiveHeaders.jsp");
           return;
         } else {
-          subjectiveHeaders = Collections.emptyList();
+          subjectiveStations = Collections.emptyList();
         }
       }
-      
+
       final InputStream stream = new FileInputStream(scheduleFile);
       final String fullname = scheduleFile.getName();
       final int dotIndex = fullname.lastIndexOf('.');
       final String name;
-      if(-1 != dotIndex) {
+      if (-1 != dotIndex) {
         name = fullname.substring(0, dotIndex);
       } else {
         name = fullname;
+      }
+      final List<String> subjectiveHeaders = new LinkedList<String>();
+      for (final SubjectiveStation station : subjectiveStations) {
+        subjectiveHeaders.add(station.getName());
       }
       final TournamentSchedule schedule = new TournamentSchedule(name, stream, sheetName, subjectiveHeaders);
       session.setAttribute("uploadSchedule_schedule", schedule);
@@ -100,7 +110,11 @@ public class CheckViolations extends BaseFLLServlet {
       final Connection connection = datasource.getConnection();
       final int tournamentID = Queries.getCurrentTournament(connection);
       final Collection<ConstraintViolation> violations = schedule.compareWithDatabase(connection, tournamentID);
-      violations.addAll(schedule.verifySchedule());
+      final SchedParams schedParams = new SchedParams(subjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
+                                                      SchedParams.DEFAULT_CHANGETIME_MINUTES,
+                                                      SchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
+      final ScheduleChecker checker = new ScheduleChecker(schedParams, schedule);
+      violations.addAll(checker.verifySchedule());
       if (violations.isEmpty()) {
         WebUtils.sendRedirect(application, response, "/schedule/CommitSchedule");
         return;

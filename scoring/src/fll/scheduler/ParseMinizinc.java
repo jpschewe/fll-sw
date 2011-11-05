@@ -24,7 +24,6 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
-import fll.scheduler.TeamScheduleInfo.PerformanceTime;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 
@@ -84,8 +83,9 @@ public class ParseMinizinc {
     nrounds = readIntProperty(properties, "NRounds");
     ntables = readIntProperty(properties, "NTables");
     final int tmaxHours = readIntProperty(properties, "TMax_hours");
-    tmax = tmaxHours
-        * 60 / tinc;
+    final int tmaxMinutes = readIntProperty(properties, "TMax_minutes");
+    tmax = (tmaxHours
+        * 60 + tmaxMinutes) / tinc;
     nsubjective = readIntProperty(properties, "NSubjective");
     final String groupCountsStr = properties.getProperty("group_counts");
     final int lbracket = groupCountsStr.indexOf('[');
@@ -371,8 +371,8 @@ public class ParseMinizinc {
       } else if (line.startsWith("sz = array4d")) {
         sz = parseS("sz");
       } else {
-        throw new ParseException("Unrecognized line: '"
-            + line + "'", 0);
+        LOGGER.warn("Unrecognized line: '"
+            + line + "', skipping");
       }
       line = reader.readLine();
     }
@@ -529,8 +529,8 @@ public class ParseMinizinc {
           py[group][team][table][side][t] = 1;
         }
       } else {
-        throw new ParseException("Unrecognized line: '"
-            + line + "'", 0);
+        LOGGER.warn("Unrecognized line: '"
+            + line + "', skipping");
       }
 
       line = reader.readLine();
