@@ -8,6 +8,9 @@ warn() { log "WARNING: $*" >&2; }
 error() { log "ERROR: $*" >&2; }
 fatal() { error "$*"; exit 1; }
 
+PATH=${PATH}:/home/jpschewe/projects/fll-sw/minizinc/minizinc-1.4/bin:/home/jpschewe/projects/fll-sw/scip
+export PATH
+
 if [ $# -lt 1 ]; then
     fatal "Usage: $0 <params.dzn>"
 fi
@@ -18,7 +21,7 @@ feasible=${2-0}
 if [ ${feasible} -ne 0 ]; then
     flatzinc_file="${param_file}.feasible.fzn"
 else
-    flatzinc_file="${param_file}.fzn"
+    flatzinc_file="${param_file}.optimal.fzn"
 fi
 
 "${mydir}/convert-schedule.sh" "${param_file}" ${feasible} || fatal "Error executing convert-schedule.sh"

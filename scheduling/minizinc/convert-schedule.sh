@@ -8,6 +8,9 @@ warn() { log "WARNING: $*" >&2; }
 error() { log "ERROR: $*" >&2; }
 fatal() { error "$*"; exit 1; }
 
+PATH=${PATH}:/home/jpschewe/projects/fll-sw/minizinc/minizinc-1.4/bin:/home/jpschewe/projects/fll-sw/scip
+export PATH
+
 if [ $# -lt 1 ]; then
         fatal "Usage: $0 <params.dzn>"
 fi
