@@ -8,10 +8,12 @@ package fll.scheduler;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.io.Serializable;
+
 /**
  * Parameters for the scheduler.
  */
-public class SchedParams {
+public class SchedParams implements Serializable {
 
   public static final int DEFAULT_TINC = 5;
 
@@ -76,7 +78,7 @@ public class SchedParams {
     return mPerformanceChangetimeMinutes;
   }
 
-  private final List<SubjectiveStation> mSubjectiveStations;
+  private final ArrayList<SubjectiveStation> mSubjectiveStations;
 
   /**
    * Number of subjective judging stations.
