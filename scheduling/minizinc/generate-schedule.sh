@@ -18,7 +18,7 @@ feasible=${2-0}
 if [ ${feasible} -ne 0 ]; then
     flatzinc_file="${param_file}.feasible.fzn"
 else
-    flatzinc_file="${param_file}.fzn"
+    flatzinc_file="${param_file}.optimal.fzn"
 fi
 
 "${mydir}/convert-schedule.sh" "${param_file}" ${feasible} || fatal "Error executing convert-schedule.sh"
@@ -29,8 +29,11 @@ log "Solving"
 #log "Result is in ${param_file}.result"
 
 # use scip
-#FIXME figure out how to set limits/gap to reduce search time?
+
+# all solutions
+#  -c "write allsolutions ${flatzinc_file}.scip.sol.all"
 /home/jpschewe/projects/fll-sw/scip-2.0.2.linux.x86_64.gnu.opt.spx \
+  -s "${mydir}/fll.set" \
   -l "${flatzinc_file}.scip.log" \
   -c "read ${flatzinc_file}" \
   -c "optimize" \

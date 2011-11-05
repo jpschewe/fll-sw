@@ -12,7 +12,6 @@ import java.util.Date;
 import java.util.LinkedList;
 
 import net.mtu.eggplant.util.DateUtils;
-import fll.scheduler.TeamScheduleInfo.SubjectiveTime;
 
 /**
  * Constraint violation during scheduling.

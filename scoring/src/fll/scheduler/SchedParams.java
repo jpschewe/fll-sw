@@ -6,10 +6,7 @@
 package fll.scheduler;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-
-import fll.Utilities;
 
 /**
  * Parameters for the scheduler.
@@ -33,11 +30,8 @@ public class SchedParams {
   public static final int DEFAULT_PERFORMANCE_CHANGETIME_MINUTES = 45;
 
   /**
-   * @param tinc the number of minutes per time slot
-   * @param maxHours the number of hours that the tournament should go
-   * @param subjectiveParams the parameters for the subjective categories, one entry for each subjective category
-   * @param nrounds the number of performance rounds
-   * @param ntables the number of performance tables
+   * @param subjectiveParams the parameters for the subjective categories, one
+   *          entry for each subjective category
    * @param performanceMinutes the number of minutes that the performance
    *          judging takes
    * @param changetimeMinutes the number of minutes between judging stations for
@@ -45,109 +39,15 @@ public class SchedParams {
    * @param performanceChangetimeMinutes the number of minutes between runs on
    *          the performance table for a team
    * @param teams a list containing the number of teams in each judging group
-   * @throws InconsistentSchedParams if one of the specified times isn't a
-   *           multiple of tinc
    */
-  public SchedParams(final int tinc,
-                     final int maxHours,
-                     final List<SubjectiveParams> subjectiveParams,
-                     final int nrounds,
-                     final int ntables,
+  public SchedParams(final List<SubjectiveStation> subjectiveParams,
                      final int performanceMinutes,
                      final int changetimeMinutes,
-                     final int performanceChangetimeMinutes,
-                     final List<Integer> teams) throws InconsistentSchedParams {
-    mTInc = tinc;
-    mMaxHours = maxHours;
-    mSubjectiveParams = new ArrayList<SubjectiveParams>(subjectiveParams);
-    mNRounds = nrounds;
-    mNTables = ntables;
+                     final int performanceChangetimeMinutes) {
+    mSubjectiveStations = new ArrayList<SubjectiveStation>(subjectiveParams);
     mPerformanceMinutes = performanceMinutes;
     mChangetimeMinutes = changetimeMinutes;
     mPerformanceChangetimeMinutes = performanceChangetimeMinutes;
-    mTeams = new ArrayList<Integer>(teams);
-
-    assertConsistentParameters();
-  }
-
-  /**
-   * Check internal parameters.
-   */
-  private void assertConsistentParameters() throws InconsistentSchedParams {
-    if (getMaxTimeSlots()
-        * getTInc() != Utilities.convertHoursToMinutes(getMaxHours())) {
-      throw new InconsistentSchedParams("Max Hours of "
-          + getMaxHours() + " is not a multiple of TInc " + getTInc());
-    }
-
-    for (int station = 0; station < getNSubjective(); ++station) {
-      if (getSubjectiveTimeSlots(station)
-          * getTInc() != getSubjectiveMinutes(station)) {
-        throw new InconsistentSchedParams("Subjective minutes of "
-            + getSubjectiveMinutes(station) + " is not a multiple of TInc " + getTInc() + " for station "
-            + getSubjectiveName(station));
-      }
-    }
-
-    if (getPerformanceTimeSlots()
-        * getTInc() != getPerformanceMinutes()) {
-      throw new InconsistentSchedParams("Performance minutes of "
-          + getPerformanceMinutes() + " is not a multiple of TInc " + getTInc());
-    }
-
-    if (getChangetimeSlots()
-        * getTInc() != getChangetimeMinutes()) {
-      throw new InconsistentSchedParams("Changetime minutes of "
-          + getChangetimeMinutes() + " is not a multiple of TInc " + getTInc());
-    }
-
-    if (getPerformanceChangetimeSlots()
-        * getTInc() != getPerformanceChangetimeMinutes()) {
-      throw new InconsistentSchedParams("Performance Changetime minutes of "
-          + getPerformanceChangetimeMinutes() + " is not a multiple of TInc " + getTInc());
-    }
-
-  }
-
-  private final int mTInc;
-
-  /**
-   * Number of minutes per time slot.
-   */
-  public int getTInc() {
-    return mTInc;
-  }
-
-  private final int mMaxHours;
-
-  /**
-   * Number of minutes per time slot.
-   */
-  public int getMaxHours() {
-    return mMaxHours;
-  }
-
-  public int getMaxTimeSlots() {
-    return Utilities.convertHoursToMinutes(getMaxHours())
-        / getTInc();
-  }
-
-  private final int mNRounds;
-
-  /**
-   * Number of performance rounds.
-   */
-  public int getNRounds() {
-    return mNRounds;
-  }
-
-  private final int mNTables;
-
-  /**
-   * Number of tables.
-   */
-  public int getNTables() {
-    return mNTables;
   }
 
   private final int mPerformanceMinutes;
@@ -159,11 +59,6 @@ public class SchedParams {
     return mPerformanceMinutes;
   }
 
-  public int getPerformanceTimeSlots() {
-    return getPerformanceMinutes()
-        / getTInc();
-  }
-
   private final int mChangetimeMinutes;
 
   /**
@@ -171,11 +66,6 @@ public class SchedParams {
    */
   public int getChangetimeMinutes() {
     return mChangetimeMinutes;
-  }
-
-  public int getChangetimeSlots() {
-    return getChangetimeMinutes()
-        / getTInc();
   }
 
   private int mPerformanceChangetimeMinutes;
@@ -187,68 +77,38 @@ public class SchedParams {
     return mPerformanceChangetimeMinutes;
   }
 
-  public int getPerformanceChangetimeSlots() {
-    return getPerformanceChangetimeMinutes()
-        / getTInc();
-  }
-
-  private final List<Integer> mTeams;
-
-  /**
-   * The number of teams for each judging group.
-   * 
-   * @return unmodifiable list
-   */
-  public List<Integer> getTeams() {
-    return Collections.unmodifiableList(mTeams);
-  }
-
-  private final List<SubjectiveParams> mSubjectiveParams;
+  private final List<SubjectiveStation> mSubjectiveStations;
 
   /**
    * Number of subjective judging stations.
    */
   public int getNSubjective() {
-    return mSubjectiveParams.size();
+    return mSubjectiveStations.size();
   }
 
   public String getSubjectiveName(final int station) {
-    return mSubjectiveParams.get(station).getName();
+    return mSubjectiveStations.get(station).getName();
   }
 
   /**
    * Number of minutes for a subjective judging.
    */
-  public int getSubjectiveMinutes(final int station) {
-    return mSubjectiveParams.get(station).getDurationMinutes();
-  }
-
-  public int getSubjectiveTimeSlots(final int station) {
-    return getSubjectiveMinutes(station)
-        / getTInc();
+  public long getSubjectiveMinutes(final int station) {
+    return mSubjectiveStations.get(station).getDurationMinutes();
   }
 
   /**
-   * Parameters for a subjective judging station.
+   * Find a station by name.
+   * 
+   * @return the station, null if no station by name found
    */
-  public static final class SubjectiveParams {
-    public SubjectiveParams(final String name,
-                            final int durationMinutes) {
-      mName = name;
-      mDurationMinutes = durationMinutes;
+  public SubjectiveStation getStationByName(final String name) {
+    for (final SubjectiveStation station : mSubjectiveStations) {
+      if (station.getName().equals(name)) {
+        return station;
+      }
     }
-
-    public String getName() {
-      return mName;
-    }
-
-    private final String mName;
-
-    public int getDurationMinutes() {
-      return mDurationMinutes;
-    }
-
-    private final int mDurationMinutes;
+    return null;
   }
 
 }
