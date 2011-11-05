@@ -830,13 +830,23 @@
 		<run-checkstyle config="checkstyle.xml" />
 	</target>
 
+  <target name="sloccount" description="Run sloccount on the code">
+    <exec executable="sloccount" dir="${basedir}" output="${basedir}/sloccount.sc">
+      <arg value="src"/>
+      <arg value="test-integration"/>
+      <arg value="test-unit"/>
+      <arg value="web"/>
+    </exec>
+  </target>
+  
 	<target name="continuous" description="Runs the continuous integration build">
 		<antcall target="clean" />
+		<antcall target="cpd.xml" />
+		<antcall target="sloccount" />
 		<antcall target="javadoc" />
 		<antcall target="findbugs" />
 		<antcall target="test.all" />
 		<antcall target="coverage.report" />
-		<antcall target="cpd.xml" />
 	</target>
 
 	<target name="findbugs" depends="compile" description="Executes findbugs to look for problems in the source.">
