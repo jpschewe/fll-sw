@@ -222,6 +222,9 @@
 			</not>
 		</condition>
 		<echo message="arch is ${arch}" />
+
+                <mkdir dir="${dir.build}" />
+
 	</target>
 
 
@@ -602,7 +605,7 @@
 	<!--
   ==================== Prepare Target ==================================
   -->
-	<target name="prepare" depends="init,tomcat.expand" description="prepare the build directory">
+	<target name="prepare" depends="init,tomcat.expand" description="prepare the web build directory">
 
 		<!-- Create build directory and copy static content -->
 		<mkdir dir="${dir.web}" />
@@ -868,7 +871,7 @@
 		<echo message="See ${dir.build}/findbugs/report.html for the findbugs report" />
 	</target>
 
-	<target name="cpd.text" description="Run Copy Paste Detector on the source and produce a text output">
+	<target name="cpd.text" description="Run Copy Paste Detector on the source and produce a text output" depends="init">
 		<cpd minimumTokenCount="100" outputFile="${dir.build}/cpd.txt" format="text">
 			<fileset dir="${dir.src}">
 				<include name="**/*.java" />
@@ -877,7 +880,7 @@
 		<echo message="See ${dir.build}/cpd.txt for the copy paste report" />
 	</target>
 
-	<target name="cpd.xml" description="Run Copy Paste Detector on the source and produce an XML output">
+	<target name="cpd.xml" description="Run Copy Paste Detector on the source and produce an XML output" depends="init">
 		<cpd minimumTokenCount="100" outputFile="${dir.build}/cpd.xml" format="xml">
 			<fileset dir="${dir.src}">
 				<include name="**/*.java" />
