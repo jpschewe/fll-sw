@@ -835,6 +835,8 @@
 
   <target name="sloccount" description="Run sloccount on the code">
     <exec executable="sloccount" dir="${basedir}" output="${basedir}/sloccount.sc">
+      <arg value="--wide"/>
+      <arg value="--details"/>
       <arg value="src"/>
       <arg value="test-integration"/>
       <arg value="test-unit"/>
