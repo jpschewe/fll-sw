@@ -442,7 +442,7 @@ public class TournamentSchedule implements Serializable {
   private static int countNumRounds(final String[] line) {
     final SortedSet<Integer> perfRounds = new TreeSet<Integer>();
     for (int i = 0; i < line.length; ++i) {
-      if (line[i].startsWith(BASE_PERF_HEADER)
+      if (null != line[i] && line[i].startsWith(BASE_PERF_HEADER)
           && line[i].length() > BASE_PERF_HEADER.length()) {
         final String perfNumberStr = line[i].substring(BASE_PERF_HEADER.length());
         final Integer perfNumber = Integer.valueOf(perfNumberStr);
