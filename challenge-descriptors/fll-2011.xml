@@ -192,8 +192,8 @@
     <goal initialValue="0" max="12" min="0" multiplier="1" name="respect"
       title="Respect">
     </goal>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="cooperation"
-      title="Cooperation">
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="coopertition"
+      title="Coopertition">
     </goal>
   </subjectiveCategory>
 
