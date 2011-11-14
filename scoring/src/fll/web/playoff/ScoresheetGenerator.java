@@ -144,7 +144,7 @@ public class ScoresheetGenerator {
                 + i)));
             m_name[j] = teamA.getTeamName();
             m_number[j] = teamA.getTeamNumber();
-            m_round[j] = "Playoff Round "
+            m_round[j] = "Round P"
                 + round;
             m_table[j] = request.getParameter("tableA"
                 + i);
