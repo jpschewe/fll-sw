@@ -613,8 +613,7 @@ public final class Queries {
     // Perform updates to the playoff data table if in playoff rounds.
     if ((runNumber > numSeedingRounds)
         && "1".equals(request.getParameter("Verified"))) {
-      updatePlayoffScore(connection, request, currentTournament,
-                         winnerCriteria, performanceElement, tiebreakerElement,
+      updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
                          teamNumber, runNumber, numSeedingRounds, teamScore);
     }
 
@@ -2260,7 +2259,10 @@ public final class Queries {
       rs = stmt.executeQuery("SELECT DISTINCT Teams.Region FROM Teams LEFT JOIN Tournaments ON Teams.Region = Tournaments.Name WHERE Tournaments.Name IS NULL");
       while (rs.next()) {
         final String region = rs.getString(1);
-        Tournament.createTournament(connection, region, region);
+        if (null != region
+            && region.trim().length() > 0) {
+          Tournament.createTournament(connection, region, region.trim());
+        }
       }
     } finally {
       SQLFunctions.close(rs);
