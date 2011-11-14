@@ -177,6 +177,12 @@ public final class Utilities {
       } else {
         prep.setString(index, data);
       }
+    } else if("char".equals(typeLower)) {
+      if(null == data || "".equals(data.trim())) {
+        prep.setNull(index, Types.CHAR);
+      } else {
+        prep.setString(index, data);
+      }
     } else if ("integer".equals(typeLower)) {
       if (null == data
           || "".equals(data.trim())) {
