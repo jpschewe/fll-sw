@@ -54,7 +54,21 @@ public class ScoresheetGenerator {
   private static final String SHORT_BLANK = "______";
 
   private static final char NON_BREAKING_SPACE = '\u00a0';
-  
+
+  private static final int MAX_TEAM_NAME_LEN = 45;
+
+  /**
+   * If a team name is longer than {@link #MAX_TEAM_NAME_LEN}, then truncate it.
+   */
+  private static String trimTeamName(final String name) {
+    if (name.length() > MAX_TEAM_NAME_LEN) {
+      return name.substring(0, MAX_TEAM_NAME_LEN - 3)
+          + "...";
+    } else {
+      return name;
+    }
+  }
+
   /**
    * Create a new ScoresheetGenerator object populated with form header data
    * provided in the given Map. The map should contain String[] objects, each of
@@ -142,7 +156,7 @@ public class ScoresheetGenerator {
             // Get teamA info
             final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamA"
                 + i)));
-            m_name[j] = teamA.getTeamName();
+            m_name[j] = trimTeamName(teamA.getTeamName());
             m_number[j] = teamA.getTeamNumber();
             m_round[j] = "Round P"
                 + round;
@@ -157,9 +171,9 @@ public class ScoresheetGenerator {
             // Get teamB info
             final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamB"
                 + i)));
-            m_name[j] = teamB.getTeamName();
+            m_name[j] = trimTeamName(teamB.getTeamName());
             m_number[j] = teamB.getTeamNumber();
-            m_round[j] = "Playoff Round "
+            m_round[j] = "Round P"
                 + round;
             m_table[j] = request.getParameter("tableB"
                 + i);
@@ -200,7 +214,7 @@ public class ScoresheetGenerator {
   private static final Font COURIER_10PT_NORMAL = FontFactory.getFont(FontFactory.COURIER, 10, Font.NORMAL);
 
   private static final int POINTS_PER_INCH = 72;
-  
+
   public void writeFile(final Connection connection,
                         final OutputStream out) throws DocumentException, SQLException {
 
@@ -313,15 +327,14 @@ public class ScoresheetGenerator {
       // Round number value cell
       final Paragraph rndV = new Paragraph(m_round[i], COURIER_10PT_NORMAL);
       final PdfPCell rndVc = new PdfPCell(team[i].getDefaultCell());
-      //rndVc.setColspan(2);
+      // rndVc.setColspan(2);
       rndVc.addElement(rndV);
       teamInfo.addCell(rndVc);
 
       final PdfPCell temp1 = new PdfPCell(team[i].getDefaultCell());
-      //temp1.setColspan(2);
+      // temp1.setColspan(2);
       temp1.addElement(new Paragraph("Judge ____", ARIAL_8PT_NORMAL));
       teamInfo.addCell(temp1);
-
 
       // Team number label cell
       final Paragraph nbrP = new Paragraph("Team #:", ARIAL_10PT_NORMAL);
@@ -353,15 +366,15 @@ public class ScoresheetGenerator {
       }
       final Paragraph divV = new Paragraph(divStr, COURIER_10PT_NORMAL);
       final PdfPCell divVc = new PdfPCell(team[i].getDefaultCell());
-      //divVc.setColspan(2);
+      // divVc.setColspan(2);
       divVc.addElement(divV);
       teamInfo.addCell(divVc);
 
       final PdfPCell temp2 = new PdfPCell(team[i].getDefaultCell());
-      //temp2.setColspan(2);
+      // temp2.setColspan(2);
       temp2.addElement(new Paragraph("Team ____", ARIAL_8PT_NORMAL));
       teamInfo.addCell(temp2);
-      
+
       // Team name label cell
       final Paragraph nameP = new Paragraph("Team Name:", ARIAL_10PT_NORMAL);
       nameP.setAlignment(Element.ALIGN_RIGHT);
@@ -382,7 +395,7 @@ public class ScoresheetGenerator {
       teamInfoCell.setColspan(2);
 
       team[i].addCell(teamInfoCell);
-      
+
       for (int j = 0; j < m_goalLabel.length; j++) {
         team[i].addCell(m_goalLabel[j]);
         team[i].addCell(m_goalValue[j]);
@@ -443,13 +456,10 @@ public class ScoresheetGenerator {
       setRevisionInfo(rootElement.getAttribute("revision"));
     }
 
-    final org.w3c.dom.Element performanceElement = (org.w3c.dom.Element) rootElement
-                                                                                    .getElementsByTagName("Performance")
+    final org.w3c.dom.Element performanceElement = (org.w3c.dom.Element) rootElement.getElementsByTagName("Performance")
                                                                                     .item(0);
     final List<org.w3c.dom.Element> goals = new NodelistElementCollectionAdapter(
-                                                                                 performanceElement
-                                                                                                   .getElementsByTagName("goal"))
-                                                                                                                                 .asList();
+                                                                                 performanceElement.getElementsByTagName("goal")).asList();
 
     m_goalLabel = new PdfPCell[goals.size()];
     m_goalValue = new PdfPCell[goals.size()];
@@ -480,10 +490,10 @@ public class ScoresheetGenerator {
               // replace spaces with "no-break" spaces
               boolean first = true;
               for (final org.w3c.dom.Element value : new NodelistElementCollectionAdapter(
-                                                                                          element
-                                                                                                 .getElementsByTagName("value"))) {
+                                                                                          element.getElementsByTagName("value"))) {
                 if (!first) {
-                  choices.append(" /" + NON_BREAKING_SPACE);
+                  choices.append(" /"
+                      + NON_BREAKING_SPACE);
                 } else {
                   first = false;
                 }
