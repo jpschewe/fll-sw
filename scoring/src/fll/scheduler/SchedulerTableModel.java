@@ -106,7 +106,7 @@ import javax.swing.table.AbstractTableModel;
           % NUM_COLUMNS_PER_ROUND) {
       case 0:
       case 3:
-        return schedInfo.getPerf(round);
+        return schedInfo.getPerfTime(round);
       case 1:
         return schedInfo.getPerfTableColor(round);
       case 2:

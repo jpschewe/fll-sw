@@ -22,60 +22,45 @@ public final class TeamScheduleInfo implements Serializable {
 
   private String judgingStation;
 
-  private final Date[] perf;
+  private final PerformanceTime[] perf;
 
   public void setPerf(final int idx,
-                      final Date d) {
-    perf[idx] = d;
+                      final PerformanceTime performance) {
+    perf[idx] = performance;
   }
 
   /**
    * @param idx zero based
    */
-  public Date getPerf(final int idx) {
+  public PerformanceTime getPerf(final int idx) {
     return perf[idx];
   }
 
-  private final String[] perfTableColor;
-
   /**
    * @param idx zero based
    */
-  public void setPerfTableColor(final int idx,
-                                final String v) {
-    perfTableColor[idx] = v;
+  public Date getPerfTime(final int idx) {
+    return perf[idx].getTime();
   }
 
   /**
    * @param idx zero based
    */
   public String getPerfTableColor(final int idx) {
-    return perfTableColor[idx];
-  }
-
-  private final int[] perfTableSide;
-
-  /**
-   * @param idx zero based
-   */
-  public void setPerfTableSide(final int idx,
-                               final int v) {
-    perfTableSide[idx] = v;
+    return perf[idx].getTable();
   }
 
   /**
    * @param idx zero based
    */
   public int getPerfTableSide(final int idx) {
-    return perfTableSide[idx];
+    return perf[idx].getSide();
   }
 
   public TeamScheduleInfo(final int numRounds,
                           final int teamNumber) {
     this.numberOfRounds = numRounds;
-    this.perf = new Date[numRounds];
-    this.perfTableColor = new String[numRounds];
-    this.perfTableSide = new int[numRounds];
+    this.perf = new PerformanceTime[numRounds];
     this.teamNumber = teamNumber;
   }
 

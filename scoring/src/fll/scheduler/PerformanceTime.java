@@ -12,12 +12,27 @@ import java.util.Date;
  * Represents performance judging time.
  */
 public final class PerformanceTime implements Comparable<PerformanceTime> {
-  public PerformanceTime(final Date time,
+
+  /**
+   * @param round zero-based index
+   * @param time the time
+   * @param table the table color
+   * @param side the table side
+   */
+  public PerformanceTime(final int round,
+                         final Date time,
                          final String table,
                          final int side) {
+    this.round = round;
     this.table = table;
     this.side = side;
     this.time = time == null ? null : new Date(time.getTime());
+  }
+
+  private final int round;
+
+  public int getRound() {
+    return round;
   }
 
   private final String table;
@@ -56,16 +71,29 @@ public final class PerformanceTime implements Comparable<PerformanceTime> {
     }
   }
 
+  private int compareTable(final PerformanceTime other) {
+    final int tableCompare = this.table.compareTo(other.table);
+    if (0 != tableCompare) {
+      return tableCompare;
+    } else {
+      return compareSide(other);
+    }
+  }
+
+  private int compareSide(final PerformanceTime other) {
+    return Integer.valueOf(this.side).compareTo(Integer.valueOf(other.side));
+  }
+
   public int compareTo(final PerformanceTime other) {
     if (null != this.time) {
       final int timeCompare = this.time.compareTo(other.time);
-      if (0 == timeCompare) {
-        return this.table.compareTo(other.table);
-      } else {
+      if (0 != timeCompare) {
         return timeCompare;
+      } else {
+        return compareTable(other);
       }
     } else if (null == other.time) {
-      return this.table.compareTo(other.table);
+      return compareTable(other);
     } else {
       return -1
           * other.compareTo(this);
