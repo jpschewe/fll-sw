@@ -586,7 +586,7 @@ public class SchedulerUI extends JFrame {
           } else if (null != violation.getPerformance()) {
             // need to check round which round
             int round = 0;
-            while (!violation.getPerformance().equals(schedInfo.getPerf(round))
+            while (!violation.getPerformance().equals(schedInfo.getPerfTime(round))
                 && round < schedInfo.getNumberOfRounds()) {
               ++round;
               if (round >= schedInfo.getNumberOfRounds()) {
