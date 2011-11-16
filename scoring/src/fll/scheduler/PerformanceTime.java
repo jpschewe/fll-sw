@@ -56,16 +56,29 @@ public final class PerformanceTime implements Comparable<PerformanceTime> {
     }
   }
 
+  private int compareTable(final PerformanceTime other) {
+    final int tableCompare = this.table.compareTo(other.table);
+    if (0 != tableCompare) {
+      return tableCompare;
+    } else {
+      return compareSide(other);
+    }
+  }
+
+  private int compareSide(final PerformanceTime other) {
+    return Integer.valueOf(this.side).compareTo(Integer.valueOf(other.side));
+  }
+
   public int compareTo(final PerformanceTime other) {
     if (null != this.time) {
       final int timeCompare = this.time.compareTo(other.time);
-      if (0 == timeCompare) {
-        return this.table.compareTo(other.table);
-      } else {
+      if (0 != timeCompare) {
         return timeCompare;
+      } else {
+        return compareTable(other);
       }
     } else if (null == other.time) {
-      return this.table.compareTo(other.table);
+      return compareTable(other);
     } else {
       return -1
           * other.compareTo(this);
