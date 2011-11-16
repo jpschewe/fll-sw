@@ -354,9 +354,8 @@ public class TournamentSchedule implements Serializable {
             throw new RuntimeException("Tables sides must be 1 or 2. Tournament: "
                 + tournamentID + " team: " + teamNumber);
           }
-          ti.setPerf(round, Queries.timeToDate(perfTime));
-          ti.setPerfTableColor(round, tableColor);
-          ti.setPerfTableSide(round, prevRound);
+          final PerformanceTime performance = new PerformanceTime(Queries.timeToDate(perfTime), tableColor, tableSide);
+          ti.setPerf(round, performance);
 
           prevRound = round;
         }
@@ -442,8 +441,8 @@ public class TournamentSchedule implements Serializable {
   private static int countNumRounds(final String[] line) {
     final SortedSet<Integer> perfRounds = new TreeSet<Integer>();
     for (int i = 0; i < line.length; ++i) {
-      if (null != line[i] && line[i].startsWith(BASE_PERF_HEADER)
-          && line[i].length() > BASE_PERF_HEADER.length()) {
+      if (null != line[i]
+          && line[i].startsWith(BASE_PERF_HEADER) && line[i].length() > BASE_PERF_HEADER.length()) {
         final String perfNumberStr = line[i].substring(BASE_PERF_HEADER.length());
         final Integer perfNumber = Integer.valueOf(perfNumberStr);
         if (!perfRounds.add(perfNumber)) {
@@ -1136,15 +1135,16 @@ public class TournamentSchedule implements Serializable {
           // If we got an empty string, then we must have hit the end
           return null;
         }
-        ti.setPerf(perfNum, parseDate(perf1Str));
         String table = line[ci.getPerfTableColumn(perfNum)];
         String[] tablePieces = table.split(" ");
         if (tablePieces.length != 2) {
           throw new RuntimeException("Error parsing table information from: "
               + table);
         }
-        ti.setPerfTableColor(perfNum, tablePieces[0]);
-        ti.setPerfTableSide(perfNum, Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1]).intValue());
+        final PerformanceTime performance = new PerformanceTime(parseDate(perf1Str), tablePieces[0],
+                                                                Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1])
+                                                                                                .intValue());
+        ti.setPerf(perfNum, performance);
         if (ti.getPerfTableSide(perfNum) > 2
             || ti.getPerfTableSide(perfNum) < 1) {
           final String message = "There are only two sides to the table, number must be 1 or 2 team: "
