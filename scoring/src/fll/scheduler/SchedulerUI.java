@@ -296,14 +296,14 @@ public class SchedulerUI extends JFrame {
       FileOutputStream fos = null;
       try {
         final String baseFilename = extractBasename(getCurrentFile());
-        final File pdfFile = new File(baseFilename
+        final File pdfFile = new File(getCurrentFile().getParentFile(), baseFilename
             + "-detailed.pdf");
-        LOGGER.info("Writing detailed schedules to "
+        LOGGER.info("Writing detailed schedule to "
             + pdfFile.getAbsolutePath());
 
         fos = new FileOutputStream(pdfFile);
         getScheduleData().outputDetailedSchedules(getSchedParams(), fos);
-        JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedules written to same directory as the schedule",
+        JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedule written '" + pdfFile.getAbsolutePath() +"'",
                                       "Information", JOptionPane.INFORMATION_MESSAGE);
       } catch (final DocumentException e) {
         final Formatter errorFormatter = new Formatter();
