@@ -32,7 +32,14 @@ public final class TeamScheduleInfo implements Serializable {
   /**
    * @param idx zero based
    */
-  public Date getPerf(final int idx) {
+  public PerformanceTime getPerf(final int idx) {
+    return perf[idx];
+  }
+
+  /**
+   * @param idx zero based
+   */
+  public Date getPerfTime(final int idx) {
     return perf[idx].getTime();
   }
 
