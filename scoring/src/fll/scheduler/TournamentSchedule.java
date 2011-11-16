@@ -748,12 +748,12 @@ public class TournamentSchedule implements Serializable {
     // list of teams staying around to even up the teams
     final List<TeamScheduleInfo> teamsStaying = new LinkedList<TeamScheduleInfo>();
 
-    final PdfPTable table = createTable(6);
-    table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
+    final PdfPTable table = createTable(7);
+    table.setWidths(new float[] { 2, 1, 3, 3, 2, 2, 2 });
 
     final PdfPCell tournamentCell = createHeaderCell("Tournament: "
         + name + " Performance");
-    tournamentCell.setColspan(6);
+    tournamentCell.setColspan(7);
     table.addCell(tournamentCell);
 
     table.addCell(createHeaderCell(TEAM_NUMBER_HEADER));
@@ -762,6 +762,7 @@ public class TournamentSchedule implements Serializable {
     table.addCell(createHeaderCell("Team Name"));
     table.addCell(createHeaderCell("Time"));
     table.addCell(createHeaderCell("Table"));
+    table.addCell(createHeaderCell("Round"));
     table.setHeaderRows(1);
 
     for (final Map.Entry<PerformanceTime, TeamScheduleInfo> entry : performanceTimes.entrySet()) {
@@ -784,6 +785,7 @@ public class TournamentSchedule implements Serializable {
       table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.getPerfTime(performance.getRound())), backgroundColor));
       table.addCell(createCell(si.getPerfTableColor(performance.getRound())
           + " " + si.getPerfTableSide(performance.getRound()), backgroundColor));
+      table.addCell(createCell(String.valueOf(performance.getRound() + 1)));
     }
 
     detailedSchedules.add(table);
