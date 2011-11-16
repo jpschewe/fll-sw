@@ -10,39 +10,11 @@ If you have development questions or suggestions, please contact:
   Jon Schewe	-- jpschewe@mtu.net
   Eric Engstrom -- engstrom@mtu.net   
 
-Jon is currently developing under Linux but Eric is doing most everything
-under Windows (WinXP).  Everything should work either location and perhaps
-even under MacOS 10, but we don't know anyone who can test that for us at
-the moment.
-
-We also tend to do development in XEmacs and tend to get particular about
-formatting, especially of the Java code.  Take a look at the formatting and
-if you have questions, just ask.  Try NOT to use tabs in the code and set
-the basic offset to 2 spaces.  Well commented code will greatly assist us in
-merging changes, and JavaDOC is almost a requirement.
-
-Before getting started, you'll need the following apps/tools to build
-and test things (newer versions should be fine):
-
-  jdk-1.5.x	(http://java.sun.com/)
-  ant-1.6.5+	(http://jakarta.apache.org/ant/)
-  cygwin-1.3.x  (http://www.cygwin.com) -- optional
-  jdee          (http://jdee.sunsite.dk) -- optional
-  eclipse       (http://www.eclipse.org) -- optional
-
-JDEE is a mode for [X]Emacs that makes Java development much easier, should
-  come with XEmacs. 
-JDK is obvious since much of what we do is java at the core.
-ANT is a make like tool for Java that integrates nicely with JDEE for [X]Emacs.
-Tomcat is the web-server-lite/JSP (Java Server Page) engine.
-Cygwin adds UN*X like interfaces to Windows, in particular, ssh and cvs.
-  [ you only need Cygwin if you are going to develop under Windows ]
-
 Please follow the coding standards put forward at
 http://mtu.net/~jpschewe/java/CodingStandards.html.
 
-Before checking in any code, please run the ant target test to ensure your
-code is correct.
+Before checking in any code, please run the ant target "before-checkin" to
+ensure your code is correct.
 
 There are some good ideas for JSP coding conventions here as well.
 http://developer.java.sun.com/developer/technicalArticles/javaserverpages/code_convention/
@@ -61,82 +33,5 @@ Documentation on iText (PDF library)
 - Homepage http://www.lowagie.com/iText/
 - docs http://www.lowagie.com/iText/docs.html
 - API http://itextdocs.lowagie.com/docs/
-
-----------
-Setup of each package:
-
-JDK:  
-  We presume that you already have knowledge of Java and how to install the
-  JDK for your platform.  Unfortunately, if you don't get past this hurdle,
-  the rest only gets worse.
-
-ANT: 
-  
-- compile with 'ant -lib lib/ant -lib lib/test compile'
-
-- start tomcat with startup in build/tomcat/bin
-
-- goto http://localhost:9080/fll-sw/index.jsp
-
-----------
-Eclipse can be used for development as well.
-
-- make sure you tell eclipse that ant needs the jar files in lib/ant and lib/test to execute
-
-----------
-SVN notes:
-
-To first check this out:
-> svn co https://svn.sourceforge.net/svnroot/fll-sw
-
-To get an update use
-> svn update
-from a directory in the source tree to update that directory and all
-subdirectories.  This will also delete files that have been removed from the
-repository.
-
-To commit changes:
-> svn commit
-from a directory inside the source tree and modified files, they will be
-flagged as such during an update, will be committed and you'll need to provide
-a log message with your favorite editor.
-
-----------
-Notes for running:
-
-- cookies must be enabled on any web browsers being used for the
-administration pages, specifically the uploading of team data
-
-- The team upload page assumes that the file is tab delimited.  It allows
-basic filtering to occur, but that should be done externally because it's very
-basic with little feedback.
-
-
-----------
-MISC:
-I've put all of the JSTL declarations at the top of init.jspf so it's not
-required on any other jsp file.  I would like it to be only in the files
-that need it, however then I sometimes end up including them twice because
-init.jspf depends on some.  This does have the side benefit of ensuring
-they're always available.  I'm not sure what this does to the overhead.
-
-See fll.web.ApplicationAttributes and fll.web.SessionAttributes for descriptions of the attributes.
-
-Useful websites:
-   http://mtu.net/~jpschewe/JonsInfra/index.html - JonsInfra documentation
-
-When you're compiling with ant the target compile.jsp, called from compile,
-will use jspc to compile the jsps for error checking.  Unfortunatly the
-error reporting isn't so good.  Most times you just get a
-NullPointerException.  This means that there is an error on the page, not
-an error with jspc.
-
-If you look at JSP-Variables.txt you'll find the variables that all JSPs
-define.
-
-fll-db.erd contains a diagram of the database.  You'll need DOME,
-http://web.htc.honeywell.com/dome, to view it.  The database diagram tool
-for dome is in database, if you add this directory to your tool search
-path, it should just work.
 
 -- eof README.developer
