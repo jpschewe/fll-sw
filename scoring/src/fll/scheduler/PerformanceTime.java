@@ -8,10 +8,12 @@ package fll.scheduler;
 
 import java.util.Date;
 
+import java.io.Serializable;
+
 /**
  * Represents performance judging time.
  */
-public final class PerformanceTime implements Comparable<PerformanceTime> {
+public final class PerformanceTime implements Comparable<PerformanceTime>, Serializable {
 
   /**
    * @param round zero-based index

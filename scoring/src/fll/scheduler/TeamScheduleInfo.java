@@ -72,7 +72,7 @@ public final class TeamScheduleInfo implements Serializable {
    */
   public int findRoundFortime(final Date time) {
     for (int round = 0; round < perf.length; ++round) {
-      if (perf[round].equals(time)) {
+      if (perf[round].getTime().equals(time)) {
         return round;
       }
     }
