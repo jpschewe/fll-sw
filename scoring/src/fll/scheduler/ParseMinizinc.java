@@ -352,7 +352,7 @@ public class ParseMinizinc {
     return sx;
   }
 
-  private static final String SCIP_FIRST_LINE = "solution status: optimal solution found";
+  private static final String SCIP_FIRST_LINE = "solution status: ";
 
   private void parseMinizinc() throws IOException, ParseException {
     while (null != line) {
@@ -387,7 +387,7 @@ public class ParseMinizinc {
   private void parse() throws IOException, ParseException {
     line = reader.readLine();
     if (null != line
-        && SCIP_FIRST_LINE.equals(line)) {
+        && line.startsWith(SCIP_FIRST_LINE)) {
       parseSCIP();
     } else {
       parseMinizinc();
