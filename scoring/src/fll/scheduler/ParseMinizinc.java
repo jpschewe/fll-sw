@@ -388,8 +388,10 @@ public class ParseMinizinc {
     line = reader.readLine();
     if (null != line
         && line.startsWith(SCIP_FIRST_LINE)) {
+      LOGGER.info("Parsing SCIP");
       parseSCIP();
     } else {
+      LOGGER.info("Parsing Minizinc");
       parseMinizinc();
     }
 
