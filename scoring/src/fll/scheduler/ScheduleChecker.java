@@ -424,15 +424,15 @@ public class ScheduleChecker {
     for (final TeamScheduleInfo si : schedule.getSchedule()) {
       final String judge = si.getJudgingStation();
       for (final SubjectiveTime subj : si.getSubjectiveTimes()) {
-        Map<String, SortedSet<Date>> map = subjectiveToTime.get(subj.getName());
-        if (null == map) {
-          map = new HashMap<String, SortedSet<Date>>();
-          subjectiveToTime.put(subj.getName(), map);
+        Map<String, SortedSet<Date>> judges = subjectiveToTime.get(subj.getName());
+        if (null == judges) {
+          judges = new HashMap<String, SortedSet<Date>>();
+          subjectiveToTime.put(subj.getName(), judges);
         }
-        SortedSet<Date> times = map.get(judge);
+        SortedSet<Date> times = judges.get(judge);
         if (null == times) {
           times = new TreeSet<Date>();
-          map.put(judge, times);
+          judges.put(judge, times);
         }
         times.add(subj.getTime());
       }
@@ -452,16 +452,19 @@ public class ScheduleChecker {
     }
 
     // find violations
-    for (final Map.Entry<String, Map<String, SortedSet<Date>>> topEntry : subjectiveToTime.entrySet()) {
-      final String category = topEntry.getKey();
-      for (final Map.Entry<String, SortedSet<Date>> entry : topEntry.getValue().entrySet()) {
+    for (final Map.Entry<String, Map<String, SortedSet<Date>>> categoryEntry : subjectiveToTime.entrySet()) {
+      final String category = categoryEntry.getKey();
+      final Map<String, SortedSet<Date>> judgeMap = categoryEntry.getValue();
+      for (final Map.Entry<String, SortedSet<Date>> judgeEntry : judgeMap.entrySet()) {
+        final String judge = judgeEntry.getKey();
+        final SortedSet<Date> times = judgeEntry.getValue();
         Date prev = null;
-        for (final Date current : entry.getValue()) {
+        for (final Date current : times) {
           if (null != prev) {
             if (prev.getTime()
                 + getSubjectiveDuration(category) > current.getTime()) {
               final String message = String.format("Overlap in %s for judge %s between %s and %s", category,
-                                                   entry.getKey(),
+                                                   judge,
                                                    TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(prev),
                                                    TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(current));
               violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, new SubjectiveTime(category,
