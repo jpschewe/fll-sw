@@ -18,7 +18,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import net.mtu.eggplant.util.Functions;
+import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import net.mtu.eggplant.xml.XMLUtils;
 
@@ -169,7 +169,7 @@ public final class SubjectiveUtils {
 
       final Boolean masterNoShow = XMLUtils.getBooleanAttributeValue(masterScore, "NoShow");
       final Boolean compareNoShow = XMLUtils.getBooleanAttributeValue(masterScore, "NoShow");
-      if (!Functions.safeEquals(masterNoShow, compareNoShow)) {
+      if (!ComparisonUtils.safeEquals(masterNoShow, compareNoShow)) {
         diffs.add(new BooleanSubjectiveScoreDifference(categoryTitle, "NoShow", teamNumber, judge, masterNoShow, compareNoShow));
       }
 
@@ -179,13 +179,13 @@ public final class SubjectiveUtils {
         if (fll.xml.XMLUtils.isEnumeratedGoal(goalDescription)) {
           final String masterValueStr = XMLUtils.getStringAttributeValue(masterScore, goalName);
           final String compareValueStr = XMLUtils.getStringAttributeValue(compareScore, goalName);
-          if (!Functions.safeEquals(masterValueStr, compareValueStr)) {
+          if (!ComparisonUtils.safeEquals(masterValueStr, compareValueStr)) {
             diffs.add(new StringSubjectiveScoreDifference(categoryTitle, goalTitle, teamNumber, judge, masterValueStr, compareValueStr));
           }
         } else {
           final Double masterValue = XMLUtils.getDoubleAttributeValue(masterScore, goalName);
           final Double compareValue = XMLUtils.getDoubleAttributeValue(compareScore, goalName);
-          if (!Functions.safeEquals(masterValue, compareValue)) {
+          if (!ComparisonUtils.safeEquals(masterValue, compareValue)) {
             diffs.add(new DoubleSubjectiveScoreDifference(categoryTitle, goalTitle, teamNumber, judge, masterValue, compareValue));
           }
         }

@@ -170,12 +170,12 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
     final Writer writer = new OutputStreamWriter(zipOut);
 
     zipOut.putNextEntry(new ZipEntry("challenge.xml"));
-    XMLUtils.writeXML(challengeDocument, writer);
+    XMLUtils.writeXML(challengeDocument, writer, "UTF-8");
     zipOut.closeEntry();
 
     zipOut.putNextEntry(new ZipEntry("score.xml"));
     final Document scoreDocument = DownloadSubjectiveData.createSubjectiveScoresDocument(challengeDocument, tournamentTeams.values(), connection, tournament);
-    XMLUtils.writeXML(scoreDocument, writer);
+    XMLUtils.writeXML(scoreDocument, writer, "UTF-8");
     zipOut.closeEntry();
 
     zipOut.close();

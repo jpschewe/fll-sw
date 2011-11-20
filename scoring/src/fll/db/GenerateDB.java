@@ -582,7 +582,7 @@ public final class GenerateDB {
       // dump the document into a byte array so we can push it into the
       // database
       final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      XMLUtils.writeXML(document, new OutputStreamWriter(baos));
+      XMLUtils.writeXML(document, new OutputStreamWriter(baos), "UTF-8");
       final byte[] bytes = baos.toByteArray();
       final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
       challengePrep.setAsciiStream(1, bais, bytes.length);

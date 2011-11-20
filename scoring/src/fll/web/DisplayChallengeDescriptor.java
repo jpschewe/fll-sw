@@ -56,7 +56,7 @@ public class DisplayChallengeDescriptor extends BaseFLLServlet {
       response.setContentType("text/xml");
       response.setHeader("Content-Disposition", "filename=challenge.xml");
 
-      XMLUtils.writeXML(challengeDocument, response.getWriter());
+      XMLUtils.writeXML(challengeDocument, response.getWriter(), "UTF-8");
     } catch (final SQLException sqle) {
       throw new RuntimeException("Error talking to the database", sqle);
     } finally {

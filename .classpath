@@ -50,7 +50,6 @@
 	<classpathentry kind="lib" path="scoring/lib/log4jdbc4-1.2beta2.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/iText-5.0.4.jar" sourcepath="scoring/lib/source/iText-src-5.0.4.zip"/>
 	<classpathentry kind="lib" path="scoring/lib/log4j-1.2.16.jar" sourcepath="scoring/lib/source/apache-log4j-1.2.16.zip"/>
-	<classpathentry kind="lib" path="scoring/lib/JonsInfra-1.2.jar" sourcepath="scoring/lib/source/JonsInfra-1.2-src.zip"/>
 	<classpathentry kind="lib" path="scoring/lib/test/fest/fest-assert-1.2.jar" sourcepath="scoring/lib/test/fest/fest-assert-1.2-sources.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/fest/fest-reflect-1.2.jar" sourcepath="scoring/lib/test/fest/fest-reflect-1.2-sources.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/fest/fest-swing-1.2.jar" sourcepath="scoring/lib/test/fest/fest-swing-1.2-sources.jar"/>
@@ -64,5 +63,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="scoring/lib/test/selenium-server-standalone-2.1.0.jar" sourcepath="scoring/lib/test/selenium-server-2.1.0-srcs.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/ant/checkstyle-5.4-all.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/JonsInfra-1.3.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
