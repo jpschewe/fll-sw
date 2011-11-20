@@ -569,10 +569,10 @@ public final class SubjectiveFrame extends JFrame {
       final Writer writer = new OutputStreamWriter(zipOut);
 
       zipOut.putNextEntry(new ZipEntry("challenge.xml"));
-      XMLUtils.writeXML(_challengeDocument, writer);
+      XMLUtils.writeXML(_challengeDocument, writer, "UTF-8");
       zipOut.closeEntry();
       zipOut.putNextEntry(new ZipEntry("score.xml"));
-      XMLUtils.writeXML(_scoreDocument, writer);
+      XMLUtils.writeXML(_scoreDocument, writer, "UTF-8");
       zipOut.closeEntry();
 
       zipOut.close();

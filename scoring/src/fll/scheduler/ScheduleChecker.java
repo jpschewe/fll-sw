@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import net.mtu.eggplant.util.Functions;
+import net.mtu.eggplant.util.ComparisonUtils;
 import fll.Utilities;
 
 /**
@@ -202,7 +202,7 @@ public class ScheduleChecker {
           violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, null, tableMessage));
         }
 
-        if (!Functions.safeEquals(ti.getDivision(), opponent.getDivision())) {
+        if (!ComparisonUtils.safeEquals(ti.getDivision(), opponent.getDivision())) {
           final String divMessage = String.format("Team %d in division %s is competing against team %d from division %s round %d",
                                                   ti.getTeamNumber(), ti.getDivision(), opponent.getTeamNumber(),
                                                   opponent.getDivision(), (round + 1));

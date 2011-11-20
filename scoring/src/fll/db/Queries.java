@@ -29,7 +29,7 @@ import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.mtu.eggplant.util.Functions;
+import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
@@ -3180,7 +3180,7 @@ public final class Queries {
       while (rs.next()) {
         final String compare = rs.getString(1);
         for (final String magicKey : keys) {
-          if (Functions.safeEquals(magicKey, compare)) {
+          if (ComparisonUtils.safeEquals(magicKey, compare)) {
             return true;
           }
         }

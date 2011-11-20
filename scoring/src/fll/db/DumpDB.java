@@ -88,7 +88,7 @@ public final class DumpDB extends BaseFLLServlet {
 
       // output the challenge descriptor
       output.putNextEntry(new ZipEntry("challenge.xml"));
-      XMLUtils.writeXML(challengeDocument, outputWriter);
+      XMLUtils.writeXML(challengeDocument, outputWriter, "UTF-8");
       output.closeEntry();
 
       // can't use Queries.getTablesInDB because it lowercases names and we need
