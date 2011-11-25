@@ -202,12 +202,14 @@ public class ScheduleChecker {
           violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, null, tableMessage));
         }
 
+        /* Not sure I like this check
         if (!Functions.safeEquals(ti.getDivision(), opponent.getDivision())) {
           final String divMessage = String.format("Team %d in division %s is competing against team %d from division %s round %d",
                                                   ti.getTeamNumber(), ti.getDivision(), opponent.getTeamNumber(),
                                                   opponent.getDivision(), (round + 1));
           violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, ti.getPerfTime(round), divMessage));
         }
+        */
 
         int opponentSide = -1;
         // figure out which round matches up
