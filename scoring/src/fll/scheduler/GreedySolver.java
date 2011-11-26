@@ -23,7 +23,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
 
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -87,6 +86,8 @@ public class GreedySolver {
 
   private final Date startTime;
 
+  private int solutionsFound = 0;
+  
   public static void main(final String[] args) {
     LogUtils.initializeLogging();
 
@@ -107,9 +108,10 @@ public class GreedySolver {
 
       final GreedySolver solver = new GreedySolver(startTime, datafile);
       final long start = System.currentTimeMillis();
-      solver.scheduleNextStation();
+      solver.solve();
       final long stop = System.currentTimeMillis();
-      LOGGER.info("Solve took: " + (stop - start) / 1000.0 + " seconds");
+      LOGGER.info("Solve took: "
+          + (stop - start) / 1000.0 + " seconds");
 
     } catch (final IOException e) {
       LOGGER.fatal("Error reading file", e);
@@ -591,82 +593,92 @@ public class GreedySolver {
   private int getNumPerformanceRounds() {
     return numPerformanceRounds;
   }
-
-  private int scheduleDepth = 0;
+  
+  /**
+   * Solve the problem.
+   * @return the number of solutions found
+   */
+  public int solve() {
+    scheduleNextStation();
+    
+    if(solutionsFound < 1) {
+      LOGGER.info("Infeasible problem, no solutions found");
+    } else {
+      LOGGER.info("Found " + solutionsFound + " solutions");
+    }
+    return solutionsFound;
+  }
 
   private boolean scheduleNextStation() {
-    NDC.push(String.valueOf(scheduleDepth));
-    ++scheduleDepth;
-    try {
-
-      if (scheduleFinished()) {
-        // TODO if solving for all schedules, need to track an index so that we
-        // don't clobber files
-        LOGGER.info("Schedule finished");
-        try {
-          outputSchedule();
-        } catch (final IOException ioe) {
-          throw new RuntimeException(ioe);
-        }
-
-        // TODO this is where we would decide if we're going to optimize or not,
-        // if so, then tighten the objective bound and return false
-        return true;
+    if (scheduleFinished()) {
+      ++solutionsFound;
+      
+      // TODO if solving for all schedules, need to track an index so that we
+      // don't clobber files
+      LOGGER.info("Schedule finished");
+      try {
+        outputSchedule();
+      } catch (final IOException ioe) {
+        throw new RuntimeException(ioe);
       }
 
-      while (!scheduleFinished()) {
-        int nextAvailableSlot = Integer.MAX_VALUE;
-        int subjectiveStation = -1;
-        int subjectiveGroup = -1;
-        for (int group = 0; group < getNumGroups(); ++group) {
-          for (int station = 0; station < getNumSubjectiveStations(); ++station) {
-            if (subjectiveStations[group][station] < nextAvailableSlot) {
-              nextAvailableSlot = subjectiveStations[group][station];
-              subjectiveStation = station;
-              subjectiveGroup = group;
-            }
-          }
-        }
-
-        int performanceTable = -1;
-        for (int table = 0; table < getNumTables(); ++table) {
-          if (performanceTables[table] < nextAvailableSlot) {
-            nextAvailableSlot = performanceTables[table];
-            performanceTable = table;
-          }
-        }
-
-        if (nextAvailableSlot >= getNumTimeslots()) {
-          // no more room
-          LOGGER.info("Hit max timeslots");
-          return false;
-        }
-
-        if (-1 == performanceTable) {
-          if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("subjective group: "
-                + subjectiveGroup + " station: " + subjectiveStation + " next available: " + nextAvailableSlot);
-          }
-
-          subjectiveStations[subjectiveGroup][subjectiveStation] += getSubjectiveAttemptOffset();
-          schedSubj(subjectiveGroup, subjectiveStation, nextAvailableSlot);
-        } else {
-          if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("performance table: "
-                + performanceTable + " next available: " + nextAvailableSlot);
-          }
-
-          performanceTables[performanceTable] += getPerformanceAttemptOffset();
-          schedPerf(performanceTable, nextAvailableSlot);
-        }
-      }
-
-      // TODO if we want to try all possibilities this should return false
-      LOGGER.info("Hit end of scheduleNextStation");
+      // TODO this is where we would decide if we're going to optimize or not,
+      // if so, then tighten the objective bound and return false
       return true;
-    } finally {
-      NDC.pop();
     }
+
+    while (!scheduleFinished()) {
+      int nextAvailableSlot = Integer.MAX_VALUE;
+      int subjectiveStation = -1;
+      int subjectiveGroup = -1;
+      for (int group = 0; group < getNumGroups(); ++group) {
+        for (int station = 0; station < getNumSubjectiveStations(); ++station) {
+          if (subjectiveStations[group][station] < nextAvailableSlot) {
+            nextAvailableSlot = subjectiveStations[group][station];
+            subjectiveStation = station;
+            subjectiveGroup = group;
+          }
+        }
+      }
+
+      int performanceTable = -1;
+      for (int table = 0; table < getNumTables(); ++table) {
+        if (performanceTables[table] < nextAvailableSlot) {
+          nextAvailableSlot = performanceTables[table];
+          performanceTable = table;
+        }
+      }
+
+      if (nextAvailableSlot >= getNumTimeslots()) {
+        // no more room
+        LOGGER.info("Hit max timeslots");
+        return false;
+      }
+
+      if (-1 == performanceTable) {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("subjective group: "
+              + subjectiveGroup + " station: " + subjectiveStation + " next available: " + nextAvailableSlot);
+        }
+
+        subjectiveStations[subjectiveGroup][subjectiveStation] += getSubjectiveAttemptOffset();
+        schedSubj(subjectiveGroup, subjectiveStation, nextAvailableSlot);
+      } else {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("performance table: "
+              + performanceTable + " next available: " + nextAvailableSlot);
+        }
+
+        performanceTables[performanceTable] += getPerformanceAttemptOffset();
+        schedPerf(performanceTable, nextAvailableSlot);
+      }
+    }
+
+    // TODO if we want to try all possibilities this should return false
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Hit end of scheduleNextStation");
+    }
+    return true;
   }
 
   private final int numSubjectiveStations;
@@ -701,9 +713,9 @@ public class GreedySolver {
   }
 
   private void outputSchedule() throws IOException {
-    final File schedule = new File(datafile.getAbsolutePath()
+    final File schedule = new File(datafile.getAbsolutePath() + "-" + solutionsFound
         + ".csv");
-    LOGGER.info("Schedule output to "
+    LOGGER.info("Solution output to "
         + schedule.getAbsolutePath());
 
     BufferedWriter writer = null;
