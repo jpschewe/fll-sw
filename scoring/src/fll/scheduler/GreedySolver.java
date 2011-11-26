@@ -236,33 +236,51 @@ public class GreedySolver {
                                    final int team,
                                    final int station,
                                    final int timeslot) {
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Attempting to assigning subjective group: "
+          + group + " team: " + team + " station: " + station + " time: " + timeslot);
+    }
+
     if (timeslot
         + getSubjectiveDuration(station) >= getNumTimeslots()) {
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("FAILED: too close to EOS");
+      }
       return false;
     }
 
     for (int otherCat = 0; otherCat < getNumSubjectiveStations(); ++otherCat) {
       if (!checkSubjFree(group, team, otherCat, timeslot, getSubjectiveDuration(station))) {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("FAILED: overlap with other subjective category: "
+              + otherCat);
+        }
         return false;
       }
     }
     if (!checkPerfFree(group, team, timeslot, getSubjectiveDuration(station))) {
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("FAILED: overlap with performance");
+      }
       return false;
     }
     // check all other teams at this station
     if (!checkSubjStationNoOverlap(group, station, timeslot)) {
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("FAILED: overlap on this station");
+      }
       return false;
     }
 
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Assigning subjective group: "
-          + group + " team: " + team + " station: " + station + " time: " + timeslot);
-    }
     subjectiveScheduled[group][team][station] = true;
     sz[group][team][station][timeslot] = true;
     for (int slot = timeslot; slot < timeslot
         + getSubjectiveDuration(station); ++slot) {
       sy[group][team][station][slot] = true;
+    }
+
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("SUCCESS");
     }
     return true;
   }
@@ -394,22 +412,43 @@ public class GreedySolver {
                                     final int timeslot,
                                     final int table,
                                     final int side) {
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Attempting to assigning performance group: "
+          + group + " team: " + team + " table: " + table + " side: " + side + " time: " + timeslot);
+    }
+
     if (timeslot
         + getPerformanceDuration() >= getNumTimeslots()) {
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("FAILED: too close to EOS");
+      }
       return false;
     }
     for (int station = 0; station < getNumSubjectiveStations(); ++station) {
       if (!checkSubjFree(group, team, station, timeslot, getPerformanceDuration())) {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("FAILED: overlap with subjective station: "
+              + station);
+        }
         return false;
       }
     }
     if (!checkPerfFree(group, team, timeslot, getPerformanceDuration())) {
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("FAILED: overlap with other performance");
+      }
       return false;
     }
     if (!checkPerfChangetime(group, team, timeslot)) {
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("FAILED: performance changetime");
+      }
       return false;
     }
     if (!checkPerfNoOverlap(group, table, side, timeslot)) {
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("FAILED: performance overlap");
+      }
       return false;
     }
 
@@ -423,6 +462,10 @@ public class GreedySolver {
     for (int slot = timeslot; slot < timeslot
         + getPerformanceDuration(); ++slot) {
       py[group][team][table][side][slot] = true;
+    }
+
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("SUCCESS");
     }
     return true;
   }
@@ -549,6 +592,7 @@ public class GreedySolver {
   private void schedSubj(final int group,
                          final int station,
                          final int timeslot) {
+    // TODO don't try different teams for the first slot of the first station
     final List<SchedTeam> teams = getPossibleSubjectiveTeams(group, station);
     for (final SchedTeam team : teams) {
       if (assignSubjective(team.getGroup(), team.getIndex(), station, timeslot)) {
@@ -600,8 +644,6 @@ public class GreedySolver {
    * @return the number of solutions found
    */
   public int solve() {
-    addBreaks();
-
     scheduleNextStation();
 
     if (solutionsFound < 1) {
@@ -666,7 +708,14 @@ public class GreedySolver {
         }
 
         subjectiveStations[subjectiveGroup][subjectiveStation] += getSubjectiveAttemptOffset();
-        schedSubj(subjectiveGroup, subjectiveStation, nextAvailableSlot);
+        if (checkSubjectiveBreaks(subjectiveStation, nextAvailableSlot)) {
+          schedSubj(subjectiveGroup, subjectiveStation, nextAvailableSlot);
+        } else {
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Overlaps breaks, skipping");
+          }
+        }
+
       } else {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("performance table: "
@@ -674,14 +723,17 @@ public class GreedySolver {
         }
 
         performanceTables[performanceTable] += getPerformanceAttemptOffset();
-        schedPerf(performanceTable, nextAvailableSlot);
+        if (checkPerformanceBreaks(nextAvailableSlot)) {
+          schedPerf(performanceTable, nextAvailableSlot);
+        } else {
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Overlaps breaks, skipping");
+          }
+        }
       }
     }
 
     // TODO if we want to try all possibilities this should return false
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Hit end of scheduleNextStation");
-    }
     return true;
   }
 
@@ -823,50 +875,49 @@ public class GreedySolver {
   }
 
   /**
-   * Put breaks into the solution.
+   * Check if the specified timeslot will overlap the subjective breaks.
    */
-  private void addBreaks() {
-    // performanceStart
-    for (int slot = 0; slot < Math.min(getNumTimeslots(), 60 / tinc); ++slot) {
-      for (final SchedTeam team : getAllTeams()) {
-        for (int table = 0; table < getNumTables(); ++table) {
-          py[team.getGroup()][team.getIndex()][table][0][slot] = true;
-          py[team.getGroup()][team.getIndex()][table][1][slot] = true;
-        }
-      }
-    }
-
-    // performanceLunchBreak
-    for (int slot = 210 / tinc; slot < Math.min(getNumTimeslots(), 210
-        / tinc + 30 / tinc); ++slot) {
-      for (final SchedTeam team : getAllTeams()) {
-        for (int table = 0; table < getNumTables(); ++table) {
-          py[team.getGroup()][team.getIndex()][table][0][slot] = true;
-          py[team.getGroup()][team.getIndex()][table][1][slot] = true;
-        }
-      }
-    }
+  private boolean checkSubjectiveBreaks(final int station,
+                                        final int timeslot) {
+    final int begin = timeslot;
+    final int end = timeslot
+        + getSubjectiveDuration(station);
 
     // subjectiveBreak1
-    for (int slot = 60 / tinc; slot < Math.min(getNumTimeslots(), 60
-        / tinc + 10 / tinc); ++slot) {
-      for (final SchedTeam team : getAllTeams()) {
-        for (int station = 0; station < getNumSubjectiveStations(); ++station) {
-          sy[team.getGroup()][team.getIndex()][station][slot] = true;
-        }
-      }
+    if (!(end <= 60 / tinc || begin > 60
+        / tinc + 10 / tinc)) {
+      return false;
     }
 
     // subjectiveLunchBreak
-    for (int slot = 190 / tinc; slot < Math.min(getNumTimeslots(), 190
-        / tinc + 30 / tinc); ++slot) {
-      for (final SchedTeam team : getAllTeams()) {
-        for (int station = 0; station < getNumSubjectiveStations(); ++station) {
-          sy[team.getGroup()][team.getIndex()][station][slot] = true;
-        }
-      }
+    if (!(end <= 190 / tinc || begin > 190
+        / tinc + 30 / tinc)) {
+      return false;
     }
 
+    return true;
+  }
+
+  /**
+   * Check if the specified timeslot will overlap the performance breaks.
+   */
+  private boolean checkPerformanceBreaks(final int timeslot) {
+    final int begin = timeslot;
+    final int end = timeslot
+        + getPerformanceDuration();
+
+    // performanceStart
+    if (begin < 60 / tinc) {
+      return false;
+    }
+
+    // performanceLunchBreak
+    if (!(end <= 210 / tinc || begin > 210
+        / tinc + 30 / tinc)) {
+      return false;
+    }
+
+    return true;
   }
 
   private static final Comparator<SchedTeam> lowestTeamIndex = new Comparator<SchedTeam>() {
