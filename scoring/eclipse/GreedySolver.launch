@@ -12,4 +12,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="fll.scheduler.GreedySolver"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="8:30&#10;${file_prompt:Choose data file}"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="fll-sw"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dapp.name=greedy-solver -Dlogroot=./"/>
 </launchConfiguration>
