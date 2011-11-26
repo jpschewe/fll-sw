@@ -8,6 +8,9 @@ warn() { log "WARNING: $*" >&2; }
 error() { log "ERROR: $*" >&2; }
 fatal() { error "$*"; exit 1; }
 
+PATH=${PATH}:/home/jpschewe/projects/fll-sw/minizinc/minizinc-1.4.1/bin:/home/jpschewe/projects/fll-sw/scip
+export PATH
+
 if [ $# -lt 1 ]; then
     fatal "Usage: $0 <params.dzn>"
 fi
@@ -32,7 +35,7 @@ log "Solving"
 
 # all solutions
 #  -c "write allsolutions ${flatzinc_file}.scip.sol.all"
-/home/jpschewe/projects/fll-sw/scip-2.0.2.linux.x86_64.gnu.opt.spx \
+scip \
   -s "${mydir}/fll.set" \
   -l "${flatzinc_file}.scip.log" \
   -c "read ${flatzinc_file}" \

@@ -312,7 +312,7 @@ sum(g in 1..NGroups) (
   sum(i in 1..group_counts[g]) (
     sum(b in 1..NTables) (
       sum(t in perfBreak1Start..perfBreak1End) (
-        pz[g,i,b,1,t] + pz[g,i,b,2,t]
+        py[g,i,b,1,t] + py[g,i,b,2,t]
 )))) = 0;
 
 % performanceLunchBreak
@@ -323,7 +323,7 @@ sum(g in 1..NGroups) (
   sum(i in 1..group_counts[g]) (
     sum(b in 1..NTables) (
       sum(t in perfLunchBreakStart..perfLunchBreakEnd) (
-        pz[g,i,b,1,t] + pz[g,i,b,2,t]
+        py[g,i,b,1,t] + py[g,i,b,2,t]
 )))) = 0;
 
 % subjectiveBreak1
@@ -334,7 +334,7 @@ sum(g in 1..NGroups) (
   sum(i in 1..group_counts[g]) (
     sum(n in 1..NSubjective) (
       sum(t in subjectiveBreak1Start..subjectiveBreak1End) (
-        sz[g,i,n,t]
+        sy[g,i,n,t]
 )))) = 0;
 
 % subjectiveLunchBreak
@@ -345,5 +345,5 @@ sum(g in 1..NGroups) (
   sum(i in 1..group_counts[g]) (
     sum(n in 1..NSubjective) (
       sum(t in subjectiveLunchBreakStart..subjectiveLunchBreakEnd) (
-        sz[g,i,n,t]
+        sy[g,i,n,t]
 )))) = 0;
