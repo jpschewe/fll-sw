@@ -87,7 +87,7 @@ public class GreedySolver {
   private final Date startTime;
 
   private int solutionsFound = 0;
-  
+
   public static void main(final String[] args) {
     LogUtils.initializeLogging();
 
@@ -236,6 +236,11 @@ public class GreedySolver {
                                    final int team,
                                    final int station,
                                    final int timeslot) {
+    if (timeslot
+        + getSubjectiveDuration(station) >= getNumTimeslots()) {
+      return false;
+    }
+
     for (int otherCat = 0; otherCat < getNumSubjectiveStations(); ++otherCat) {
       if (!checkSubjFree(group, team, otherCat, timeslot, getSubjectiveDuration(station))) {
         return false;
@@ -246,11 +251,6 @@ public class GreedySolver {
     }
     // check all other teams at this station
     if (!checkSubjStationNoOverlap(group, station, timeslot)) {
-      return false;
-    }
-
-    if (timeslot
-        + getSubjectiveDuration(station) >= getNumTimeslots()) {
       return false;
     }
 
@@ -275,8 +275,8 @@ public class GreedySolver {
                                             final int timeslot) {
     for (final SchedTeam team : getAllTeams()) {
       if (team.getGroup() == group) {
-        for (int slot = timeslot; slot < timeslot
-            + getSubjectiveDuration(station); ++slot) {
+        for (int slot = timeslot; slot < Math.min(getNumTimeslots(), timeslot
+            + getSubjectiveDuration(station)); ++slot) {
           if (sy[group][team.getIndex()][station][slot]) {
             return false;
           }
@@ -295,8 +295,8 @@ public class GreedySolver {
                                      final int timeslot) {
     for (final SchedTeam team : getAllTeams()) {
       if (team.getGroup() == group) {
-        for (int slot = timeslot; slot < timeslot
-            + getPerformanceDuration(); ++slot) {
+        for (int slot = timeslot; slot < Math.min(getNumTimeslots(), timeslot
+            + getPerformanceDuration()); ++slot) {
           if (py[group][team.getIndex()][table][side][slot]) {
             return false;
           }
@@ -394,6 +394,10 @@ public class GreedySolver {
                                     final int timeslot,
                                     final int table,
                                     final int side) {
+    if (timeslot
+        + getPerformanceDuration() >= getNumTimeslots()) {
+      return false;
+    }
     for (int station = 0; station < getNumSubjectiveStations(); ++station) {
       if (!checkSubjFree(group, team, station, timeslot, getPerformanceDuration())) {
         return false;
@@ -403,10 +407,6 @@ public class GreedySolver {
       return false;
     }
     if (!checkPerfChangetime(group, team, timeslot)) {
-      return false;
-    }
-    if (timeslot
-        + getPerformanceDuration() >= getNumTimeslots()) {
       return false;
     }
     if (!checkPerfNoOverlap(group, table, side, timeslot)) {
@@ -593,18 +593,22 @@ public class GreedySolver {
   private int getNumPerformanceRounds() {
     return numPerformanceRounds;
   }
-  
+
   /**
    * Solve the problem.
+   * 
    * @return the number of solutions found
    */
   public int solve() {
+    addBreaks();
+
     scheduleNextStation();
-    
-    if(solutionsFound < 1) {
+
+    if (solutionsFound < 1) {
       LOGGER.info("Infeasible problem, no solutions found");
     } else {
-      LOGGER.info("Found " + solutionsFound + " solutions");
+      LOGGER.info("Found "
+          + solutionsFound + " solutions");
     }
     return solutionsFound;
   }
@@ -612,7 +616,7 @@ public class GreedySolver {
   private boolean scheduleNextStation() {
     if (scheduleFinished()) {
       ++solutionsFound;
-      
+
       // TODO if solving for all schedules, need to track an index so that we
       // don't clobber files
       LOGGER.info("Schedule finished");
@@ -713,8 +717,8 @@ public class GreedySolver {
   }
 
   private void outputSchedule() throws IOException {
-    final File schedule = new File(datafile.getAbsolutePath() + "-" + solutionsFound
-        + ".csv");
+    final File schedule = new File(datafile.getAbsolutePath()
+        + "-" + solutionsFound + ".csv");
     LOGGER.info("Solution output to "
         + schedule.getAbsolutePath());
 
@@ -816,6 +820,53 @@ public class GreedySolver {
       }
     }
     return null;
+  }
+
+  /**
+   * Put breaks into the solution.
+   */
+  private void addBreaks() {
+    // performanceStart
+    for (int slot = 0; slot < Math.min(getNumTimeslots(), 60 / tinc); ++slot) {
+      for (final SchedTeam team : getAllTeams()) {
+        for (int table = 0; table < getNumTables(); ++table) {
+          py[team.getGroup()][team.getIndex()][table][0][slot] = true;
+          py[team.getGroup()][team.getIndex()][table][1][slot] = true;
+        }
+      }
+    }
+
+    // performanceLunchBreak
+    for (int slot = 210 / tinc; slot < Math.min(getNumTimeslots(), 210
+        / tinc + 30 / tinc); ++slot) {
+      for (final SchedTeam team : getAllTeams()) {
+        for (int table = 0; table < getNumTables(); ++table) {
+          py[team.getGroup()][team.getIndex()][table][0][slot] = true;
+          py[team.getGroup()][team.getIndex()][table][1][slot] = true;
+        }
+      }
+    }
+
+    // subjectiveBreak1
+    for (int slot = 60 / tinc; slot < Math.min(getNumTimeslots(), 60
+        / tinc + 10 / tinc); ++slot) {
+      for (final SchedTeam team : getAllTeams()) {
+        for (int station = 0; station < getNumSubjectiveStations(); ++station) {
+          sy[team.getGroup()][team.getIndex()][station][slot] = true;
+        }
+      }
+    }
+
+    // subjectiveLunchBreak
+    for (int slot = 190 / tinc; slot < Math.min(getNumTimeslots(), 190
+        / tinc + 30 / tinc); ++slot) {
+      for (final SchedTeam team : getAllTeams()) {
+        for (int station = 0; station < getNumSubjectiveStations(); ++station) {
+          sy[team.getGroup()][team.getIndex()][station][slot] = true;
+        }
+      }
+    }
+
   }
 
   private static final Comparator<SchedTeam> lowestTeamIndex = new Comparator<SchedTeam>() {
