@@ -631,6 +631,27 @@ public class GreedySolver {
       }
     }
     Collections.sort(possibles, fewestAssignments);
+
+    if (!possibles.isEmpty()) {
+      // if this is the first assignment to any station in this group, then only
+      // return 1
+      // possible value so that we don't try all teams.
+      boolean firstAssignment = true;
+      for (int s = 0; s < getNumSubjectiveStations()
+          && firstAssignment; ++s) {
+        for (final SchedTeam team : getAllTeams()) {
+          if (team.getGroup() == group) {
+            if (subjectiveScheduled[group][team.getIndex()][s]) {
+              firstAssignment = false;
+            }
+          }
+        }
+      }
+      if (firstAssignment) {
+        return Collections.singletonList(possibles.get(0));
+      }
+    }
+
     return possibles;
   }
 
@@ -652,7 +673,6 @@ public class GreedySolver {
   private boolean schedSubj(final int group,
                             final int station,
                             final int timeslot) {
-    // TODO don't try different teams for the first slot of the first station
     final List<SchedTeam> teams = getPossibleSubjectiveTeams(group, station);
     for (final SchedTeam team : teams) {
       if (assignSubjective(team.getGroup(), team.getIndex(), station, timeslot)) {
