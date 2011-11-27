@@ -6,6 +6,7 @@
 \usepackage{fullpage}
 \usepackage{float}
 \usepackage{alltt}
+\usepackage{enumerate}
 
 \usepackage[table,usenames,dvipsnames]{xcolor}
 
@@ -448,6 +449,24 @@ $Min (
   \times t)
   )
 ) $
+
+\FloatBarrier
+\subsubsection{Greedy version}
+The greedy solver has the following objective implemented. One could
+implement this in the MILP, but given that the greedy solver is working
+faster than the COTS MILP solver, I haven't implemented it in the MILP.
+
+The goal is to minimize based on the following criteria with most important
+first:
+\begin{enumerate}[1]
+\item Earliest performance end time. 
+\item Earliest subjective end time for the smallest division first. We want
+  to make the smallest division finish subjective first so that we can run
+  head to head for that division ealier.
+\item Number of warnings. Find the schedule with the fewest number of soft
+  constraint violations. 
+\end{enumerate}
+
 
 \FloatBarrier
 \subsection{YMax}
