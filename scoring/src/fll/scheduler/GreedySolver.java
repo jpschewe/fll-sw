@@ -99,9 +99,11 @@ public class GreedySolver {
   private final boolean optimize;
 
   private static final String OPTIMIZE_OPTION = "o";
+
   private static final String START_TIME_OPTION = "s";
+
   private static final String DATA_FILE_OPTION = "d";
-  
+
   private static Options buildOptions() {
     final Options options = new Options();
     Option option = new Option(START_TIME_OPTION, "startTime", true, "<HH:MM> The start time");
@@ -114,20 +116,20 @@ public class GreedySolver {
 
     option = new Option(OPTIMIZE_OPTION, "optimize", false, "Turn on optimization (default: false)");
     options.addOption(option);
-    
+
     return options;
   }
-  
+
   private static void usage(final Options options) {
     final HelpFormatter formatter = new HelpFormatter();
     formatter.printHelp("GreedySolver", options);
   }
-  
+
   public static void main(final String[] args) {
     LogUtils.initializeLogging();
 
     final Options options = buildOptions();
-    
+
     // parse options
     boolean optimize = false;
     Date startTime = null;
@@ -135,15 +137,15 @@ public class GreedySolver {
     try {
       final CommandLineParser parser = new PosixParser();
       final CommandLine cmd = parser.parse(options, args);
-      
-      if(cmd.hasOption(OPTIMIZE_OPTION)) {
+
+      if (cmd.hasOption(OPTIMIZE_OPTION)) {
         optimize = !optimize;
       }
-      
+
       startTime = TournamentSchedule.OUTPUT_DATE_FORMAT.get().parse(cmd.getOptionValue(START_TIME_OPTION));
       datafile = new File(cmd.getOptionValue(DATA_FILE_OPTION));
-      
-    } catch(final org.apache.commons.cli.ParseException pe) {
+
+    } catch (final org.apache.commons.cli.ParseException pe) {
       LOGGER.error(pe.getMessage());
       usage(options);
       System.exit(1);
@@ -151,8 +153,6 @@ public class GreedySolver {
       LOGGER.fatal(e.getMessage());
       System.exit(2);
     }
-    
-
 
     try {
       if (!datafile.canRead()) {
@@ -160,7 +160,7 @@ public class GreedySolver {
             + " is not readable");
         System.exit(4);
       }
-           
+
       final GreedySolver solver = new GreedySolver(startTime, datafile, optimize);
       final long start = System.currentTimeMillis();
       solver.solve();
@@ -799,11 +799,14 @@ public class GreedySolver {
         LOGGER.info("Schedule provides a better objective value");
         bestObjective = objective;
         // tighten down the constraints so that we find a better solution
-        numTimeslots = objective.getLatestPerformanceTime() + 1;
+        final int newNumTimeslots = objective.getLatestPerformanceTime() + 1;
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Tightening numTimeslots from "
+              + numTimeslots + " to " + newNumTimeslots);
+        }
+        numTimeslots = newNumTimeslots;
       }
 
-      // TODO this is where we would decide if we're going to optimize or not,
-      // if so, then tighten the objective bound and return false
       if (optimize) {
         return false;
       } else {
@@ -871,8 +874,11 @@ public class GreedySolver {
       }
     }
 
-    // TODO if we want to try all possibilities this should return false
-    return true;
+    if (optimize) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   private final int numSubjectiveStations;
