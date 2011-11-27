@@ -317,6 +317,12 @@ public class SchedulerUI extends JFrame {
         LOGGER.error(errorFormatter, e);
         JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
         return;
+      } catch (final Exception e) {
+        final Formatter errorFormatter = new Formatter();
+        errorFormatter.format("Unexpected Error writing detailed schedules: %s", e.getMessage());
+        LOGGER.error(errorFormatter, e);
+        JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
+        return;
       } finally {
         if (null != fos) {
           try {
