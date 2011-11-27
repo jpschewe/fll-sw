@@ -92,6 +92,9 @@
 
 		<pathelement location="${dir.lib}/commons-lang-2.0.jar" />
 
+		<!-- command line argument parsing -->
+		<pathelement location="${dir.lib}/commons-cli-1.2.jar" />
+
 		<!-- database -->
 		<pathelement location="${dir.lib}/hsqldb-1.8.0.7.jar" />
 		<pathelement location="${dir.lib}/log4jdbc4-1.2beta2.jar" />
@@ -223,7 +226,7 @@
 		</condition>
 		<echo message="arch is ${arch}" />
 
-                <mkdir dir="${dir.build}" />
+		<mkdir dir="${dir.build}" />
 
 	</target>
 
@@ -833,17 +836,17 @@
 		<run-checkstyle config="checkstyle.xml" />
 	</target>
 
-  <target name="sloccount" description="Run sloccount on the code">
-    <exec executable="sloccount" dir="${basedir}" output="${basedir}/sloccount.sc">
-      <arg value="--wide"/>
-      <arg value="--details"/>
-      <arg value="src"/>
-      <arg value="test-integration"/>
-      <arg value="test-unit"/>
-      <arg value="web"/>
-    </exec>
-  </target>
-  
+	<target name="sloccount" description="Run sloccount on the code">
+		<exec executable="sloccount" dir="${basedir}" output="${basedir}/sloccount.sc">
+			<arg value="--wide" />
+			<arg value="--details" />
+			<arg value="src" />
+			<arg value="test-integration" />
+			<arg value="test-unit" />
+			<arg value="web" />
+		</exec>
+	</target>
+
 	<target name="continuous" description="Runs the continuous integration build">
 		<antcall target="clean" />
 		<antcall target="cpd.xml" />
