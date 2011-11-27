@@ -22,6 +22,12 @@ import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.Logger;
 
 import fll.util.FLLRuntimeException;
@@ -88,25 +94,74 @@ public class GreedySolver {
 
   private int solutionsFound = 0;
 
+  private ObjectiveValue bestObjective = null;
+
+  private final boolean optimize;
+
+  private static final String OPTIMIZE_OPTION = "o";
+  private static final String START_TIME_OPTION = "s";
+  private static final String DATA_FILE_OPTION = "d";
+  
+  private static Options buildOptions() {
+    final Options options = new Options();
+    Option option = new Option(START_TIME_OPTION, "startTime", true, "<HH:MM> The start time");
+    option.setRequired(true);
+    options.addOption(option);
+
+    option = new Option(DATA_FILE_OPTION, "datafile", true, "<file> the file ");
+    option.setRequired(true);
+    options.addOption(option);
+
+    option = new Option(OPTIMIZE_OPTION, "optimize", false, "Turn on optimization (default: false)");
+    options.addOption(option);
+    
+    return options;
+  }
+  
+  private static void usage(final Options options) {
+    final HelpFormatter formatter = new HelpFormatter();
+    formatter.printHelp("GreedySolver", options);
+  }
+  
   public static void main(final String[] args) {
     LogUtils.initializeLogging();
 
-    if (args.length != 2) {
-      LOGGER.fatal("You must specify the start time (HH:MM) and data file");
+    final Options options = buildOptions();
+    
+    // parse options
+    boolean optimize = false;
+    Date startTime = null;
+    File datafile = null;
+    try {
+      final CommandLineParser parser = new PosixParser();
+      final CommandLine cmd = parser.parse(options, args);
+      
+      if(cmd.hasOption(OPTIMIZE_OPTION)) {
+        optimize = !optimize;
+      }
+      
+      startTime = TournamentSchedule.OUTPUT_DATE_FORMAT.get().parse(cmd.getOptionValue(START_TIME_OPTION));
+      datafile = new File(cmd.getOptionValue(DATA_FILE_OPTION));
+      
+    } catch(final org.apache.commons.cli.ParseException pe) {
+      LOGGER.error(pe.getMessage());
+      usage(options);
       System.exit(1);
+    } catch (final ParseException e) {
+      LOGGER.fatal(e.getMessage());
+      System.exit(2);
     }
+    
+
 
     try {
-      final Date startTime = TournamentSchedule.OUTPUT_DATE_FORMAT.get().parse(args[0]);
-
-      final File datafile = new File(args[1]);
       if (!datafile.canRead()) {
         LOGGER.fatal(datafile.getAbsolutePath()
             + " is not readable");
         System.exit(4);
       }
-
-      final GreedySolver solver = new GreedySolver(startTime, datafile);
+           
+      final GreedySolver solver = new GreedySolver(startTime, datafile, optimize);
       final long start = System.currentTimeMillis();
       solver.solve();
       final long stop = System.currentTimeMillis();
@@ -116,9 +171,6 @@ public class GreedySolver {
     } catch (final IOException e) {
       LOGGER.fatal("Error reading file", e);
       System.exit(4);
-    } catch (final ParseException e) {
-      LOGGER.fatal(e.getMessage());
-      System.exit(2);
     }
   }
 
@@ -126,10 +178,11 @@ public class GreedySolver {
    * @param datafile the minizinc datafile for the schedule to solve
    */
   public GreedySolver(final Date startTime,
-                      final File datafile) throws IOException {
+                      final File datafile,
+                      final boolean optimize) throws IOException {
+    this.startTime = new Date(startTime.getTime());
     this.datafile = datafile;
-
-    this.startTime = startTime;
+    this.optimize = optimize;
 
     final Properties properties = ParseMinizinc.parseMinizincData(datafile);
     LOGGER.debug(properties.toString());
@@ -655,22 +708,107 @@ public class GreedySolver {
     return solutionsFound;
   }
 
+  private int getNumWarnings() {
+    // FIXME how to get number of warnings
+    return 0;
+  }
+
+  private ObjectiveValue computeObjectiveValue() {
+    final int[] numTeams = new int[getNumGroups()];
+    final int[] latestSubjectiveTime = new int[getNumGroups()];
+    for (int group = 0; group < numTeams.length; ++group) {
+      numTeams[group] = subjectiveScheduled[group].length;
+      latestSubjectiveTime[group] = findLatestSubjectiveTime(group);
+    }
+    return new ObjectiveValue(solutionsFound, findLatestPerformanceTime(), numTeams, latestSubjectiveTime,
+                              getNumWarnings());
+  }
+
+  /**
+   * The slot that has the latest subjective time for a group of teams.
+   */
+  private int findLatestSubjectiveTime(final int group) {
+    for (int slot = getNumTimeslots() - 1; slot >= 0; --slot) {
+      for (int station = 0; station < getNumSubjectiveStations(); ++station) {
+        for (final SchedTeam team : getAllTeams()) {
+          if (team.getGroup() == group) {
+            if (sy[team.getGroup()][team.getIndex()][station][slot]) {
+              return slot;
+            }
+          }
+        }
+      }
+    }
+    LOGGER.warn("Got to end of findLatestSubjectiveTime("
+        + group + "), this implies that nothing was scheduled");
+    return 0;
+  }
+
+  /**
+   * The slot that has the last performance time.
+   */
+  private int findLatestPerformanceTime() {
+    for (int slot = getNumTimeslots() - 1; slot >= 0; --slot) {
+      for (int table = 0; table < getNumTables(); ++table) {
+        for (final SchedTeam team : getAllTeams()) {
+          if (py[team.getGroup()][team.getIndex()][table][0][slot]) {
+            return slot;
+          }
+          if (py[team.getGroup()][team.getIndex()][table][1][slot]) {
+            return slot;
+          }
+        }
+      }
+    }
+    LOGGER.warn("Got to end of findLatestPerformanceTime, this implies that nothing was scheduled");
+    return 0;
+  }
+
   private boolean scheduleNextStation() {
     if (scheduleFinished()) {
       ++solutionsFound;
 
-      // TODO if solving for all schedules, need to track an index so that we
-      // don't clobber files
-      LOGGER.info("Schedule finished");
+      LOGGER.info("Schedule finished num solutions: "
+          + solutionsFound);
+      final File scheduleFile = new File(datafile.getAbsolutePath()
+          + "-" + solutionsFound + ".csv");
+      final File objectiveFile = new File(datafile.getAbsolutePath()
+          + "-" + solutionsFound + ".obj");
+
+      LOGGER.info("Solution output to "
+          + scheduleFile.getAbsolutePath());
+
       try {
-        outputSchedule();
+        outputSchedule(scheduleFile);
       } catch (final IOException ioe) {
-        throw new RuntimeException(ioe);
+        throw new FLLRuntimeException("Error writing schedule", ioe);
+      }
+
+      final ObjectiveValue objective = computeObjectiveValue();
+
+      try {
+        final FileWriter objectiveWriter = new FileWriter(objectiveFile);
+        objectiveWriter.write(objective.toString());
+        objectiveWriter.close();
+      } catch (final IOException e) {
+        throw new FLLRuntimeException("Error writing objective", e);
+      }
+
+      if (null == bestObjective
+          || -1 == objective.compareTo(bestObjective)) {
+        LOGGER.info("Schedule provides a better objective value");
+        bestObjective = objective;
+        // tighten down the constraints so that we find a better solution
+        numTimeslots = objective.getLatestPerformanceTime() + 1;
       }
 
       // TODO this is where we would decide if we're going to optimize or not,
       // if so, then tighten the objective bound and return false
-      return true;
+      if (optimize) {
+        return false;
+      } else {
+        return true;
+      }
     }
 
     while (!scheduleFinished()) {
@@ -759,7 +897,7 @@ public class GreedySolver {
     return 1;
   }
 
-  private final int numTimeslots;
+  private int numTimeslots;
 
   /**
    * The number of timeslots available to schedule in.
@@ -768,12 +906,7 @@ public class GreedySolver {
     return numTimeslots;
   }
 
-  private void outputSchedule() throws IOException {
-    final File schedule = new File(datafile.getAbsolutePath()
-        + "-" + solutionsFound + ".csv");
-    LOGGER.info("Solution output to "
-        + schedule.getAbsolutePath());
-
+  private void outputSchedule(final File schedule) throws IOException {
     BufferedWriter writer = null;
     try {
       writer = new BufferedWriter(new FileWriter(schedule));
