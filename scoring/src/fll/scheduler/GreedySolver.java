@@ -185,7 +185,6 @@ public class GreedySolver {
     this.datafile = datafile;
     this.optimize = optimize;
 
-    // FIXME implement optimization handling
     if (this.optimize) {
       LOGGER.info("Optimization is turned on");
     }
@@ -597,7 +596,9 @@ public class GreedySolver {
       } else if (null == team2) {
         if (assignPerformance(team.getGroup(), team.getIndex(), timeslot, table, secondSide)) {
           team2 = team;
-          if (!scheduleNextStation()) {
+          final boolean result = scheduleNextStation();
+          if (!result
+              || optimize) {
             // if we get to this point we sould look for another solution
             unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, firstSide);
             unassignPerformance(team2.getGroup(), team2.getIndex(), timeslot, table, secondSide);
@@ -676,7 +677,9 @@ public class GreedySolver {
     final List<SchedTeam> teams = getPossibleSubjectiveTeams(group, station);
     for (final SchedTeam team : teams) {
       if (assignSubjective(team.getGroup(), team.getIndex(), station, timeslot)) {
-        if (!scheduleNextStation()) {
+        final boolean result = scheduleNextStation();
+        if (!result
+            || optimize) {
           unassignSubjective(team.getGroup(), team.getIndex(), station, timeslot);
         } else {
           return true;
@@ -909,7 +912,9 @@ public class GreedySolver {
 
     }
 
-    if (!scheduleNextStation()) {
+    final boolean result = scheduleNextStation();
+    if (!result
+        || optimize) {
       // need to undo assignments
       for (int i = 0; i < possibleSubjectiveStations.size(); ++i) {
         final int station = possibleSubjectiveStations.get(i);
@@ -920,10 +925,9 @@ public class GreedySolver {
       for (final int table : possiblePerformanceTables) {
         performanceTables[table] -= getPerformanceAttemptOffset();
       }
-      return false;
-    } else {
-      return true;
     }
+    return result;
+
   }
 
   private final int numSubjectiveStations;
