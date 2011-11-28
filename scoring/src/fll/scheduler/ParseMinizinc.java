@@ -550,11 +550,11 @@ public class ParseMinizinc {
       writer = new BufferedWriter(new FileWriter(schedule));
       writer.write(TournamentSchedule.TEAM_NUMBER_HEADER
           + ",");
+      writer.write(TournamentSchedule.DIVISION_HEADER
+          + ",");
       writer.write(TournamentSchedule.TEAM_NAME_HEADER
           + ",");
       writer.write(TournamentSchedule.ORGANIZATION_HEADER
-          + ",");
-      writer.write(TournamentSchedule.DIVISION_HEADER
           + ",");
       writer.write(TournamentSchedule.JUDGE_GROUP_HEADER);
       for (int subj = 0; subj < nsubjective; ++subj) {
@@ -581,7 +581,7 @@ public class ParseMinizinc {
           final int teamNum = (group + 1)
               * 100 + team;
           final int judgingGroup = group + 1;
-          writer.write(String.format("%d,Team %d, Org %d, D%d, G%d", teamNum, teamNum, teamNum, judgingGroup,
+          writer.write(String.format("%d,D%d, Team %d, Org %d, G%d", teamNum, judgingGroup, teamNum, teamNum,
                                      judgingGroup));
           for (int subj = 0; subj < nsubjective; ++subj) {
             final Date time = getTime(sz[group][team][subj], 1);
