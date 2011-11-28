@@ -589,34 +589,43 @@ public class GreedySolver {
     int firstSide = 0;
     int secondSide = 1;
 
-    for (final SchedTeam team : teams) {
-      if (null == team1) {
-        if (assignPerformance(team.getGroup(), team.getIndex(), timeslot, table, firstSide)) {
-          team1 = team;
-        }
-      } else if (null == team2) {
-        if (assignPerformance(team.getGroup(), team.getIndex(), timeslot, table, secondSide)) {
-          team2 = team;
-          final boolean result = scheduleNextStation();
-          if (!result
-              || optimize) {
-            // if we get to this point we sould look for another solution
-            unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, firstSide);
-            unassignPerformance(team2.getGroup(), team2.getIndex(), timeslot, table, secondSide);
-            team1 = null;
-            team2 = null;
+    boolean done = false;
+    while (!done) {
+      for (final SchedTeam team : teams) {
+        if (null == team1) {
+          if (assignPerformance(team.getGroup(), team.getIndex(), timeslot, table, firstSide)) {
+            team1 = team;
+          }
+        } else if (null == team2) {
+          if (assignPerformance(team.getGroup(), team.getIndex(), timeslot, table, secondSide)) {
+            team2 = team;
+            final boolean result = scheduleNextStation();
+            if (!result
+                || optimize) {
+              // if we get to this point we sould look for another solution
+              unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, firstSide);
+              unassignPerformance(team2.getGroup(), team2.getIndex(), timeslot, table, secondSide);
+              team1 = null;
+              team2 = null;
 
-            if (timeslot >= getNumTimeslots()) {
-              if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Hit max timeslots - perf");
+              if (timeslot >= getNumTimeslots()) {
+                if (LOGGER.isDebugEnabled()) {
+                  LOGGER.debug("Hit max timeslots - perf");
+                }
+                return false;
               }
-              return false;
+            } else {
+              return true;
             }
-
-          } else {
-            return true;
           }
         }
+      }
+      if (optimize
+          && firstSide == 0) {
+        firstSide = 1;
+        secondSide = 0;
+      } else {
+        done = true;
       }
     }
 
@@ -1054,7 +1063,7 @@ public class GreedySolver {
         final int teamNum = (team.getGroup() + 1)
             * 100 + team.getIndex();
         final int judgingGroup = team.getGroup() + 1;
-        writer.write(String.format("%d,D%d, Team %d, Org %d, G%d", teamNum, judgingGroup, teamNum, teamNum, 
+        writer.write(String.format("%d,D%d, Team %d, Org %d, G%d", teamNum, judgingGroup, teamNum, teamNum,
                                    judgingGroup));
         for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
           final Date time = getTime(sz[team.getGroup()][team.getIndex()][subj], 1);
