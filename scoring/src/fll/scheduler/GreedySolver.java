@@ -605,6 +605,14 @@ public class GreedySolver {
             unassignPerformance(team2.getGroup(), team2.getIndex(), timeslot, table, secondSide);
             team1 = null;
             team2 = null;
+
+            if (timeslot >= getNumTimeslots()) {
+              if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Hit max timeslots - perf");
+              }
+              return false;
+            }
+
           } else {
             return true;
           }
@@ -682,6 +690,12 @@ public class GreedySolver {
         if (!result
             || optimize) {
           unassignSubjective(team.getGroup(), team.getIndex(), station, timeslot);
+          if (timeslot >= getNumTimeslots()) {
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("Hit max timeslots - subj");
+            }
+            return false;
+          }
         } else {
           return true;
         }
@@ -835,42 +849,7 @@ public class GreedySolver {
 
       LOGGER.info("Schedule finished num solutions: "
           + solutionsFound);
-      final File scheduleFile = new File(datafile.getAbsolutePath()
-          + "-" + solutionsFound + ".csv");
-      final File objectiveFile = new File(datafile.getAbsolutePath()
-          + "-" + solutionsFound + ".obj");
-
-      LOGGER.info("Solution output to "
-          + scheduleFile.getAbsolutePath());
-
-      try {
-        outputSchedule(scheduleFile);
-      } catch (final IOException ioe) {
-        throw new FLLRuntimeException("Error writing schedule", ioe);
-      }
-
-      final ObjectiveValue objective = computeObjectiveValue(scheduleFile);
-
-      try {
-        final FileWriter objectiveWriter = new FileWriter(objectiveFile);
-        objectiveWriter.write(objective.toString());
-        objectiveWriter.close();
-      } catch (final IOException e) {
-        throw new FLLRuntimeException("Error writing objective", e);
-      }
-
-      if (null == bestObjective
-          || -1 == objective.compareTo(bestObjective)) {
-        LOGGER.info("Schedule provides a better objective value");
-        bestObjective = objective;
-        // tighten down the constraints so that we find a better solution
-        final int newNumTimeslots = objective.getLatestPerformanceTime() + 1;
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Tightening numTimeslots from "
-              + numTimeslots + " to " + newNumTimeslots);
-        }
-        numTimeslots = newNumTimeslots;
-      }
+      outputCurrentSolution();
 
       return true;
     }
@@ -919,7 +898,13 @@ public class GreedySolver {
         final boolean result = schedSubj(group, station, nextAvailableSlot);
         if (result) {
           return true;
+        } else if (nextAvailableSlot >= getNumTimeslots()) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Hit max timeslots - schedNext subj");
+          }
+          return false;
         }
+
       } else {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Overlaps breaks, skipping");
@@ -938,6 +923,11 @@ public class GreedySolver {
         final boolean result = schedPerf(table, nextAvailableSlot);
         if (result) {
           return true;
+        } else if (nextAvailableSlot >= getNumTimeslots()) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Hit max timeslots - schedNext perf");
+          }
+          return false;
         }
       } else {
         if (LOGGER.isTraceEnabled()) {
@@ -963,6 +953,45 @@ public class GreedySolver {
     }
     return result;
 
+  }
+
+  private void outputCurrentSolution() {
+    final File scheduleFile = new File(datafile.getAbsolutePath()
+        + "-" + solutionsFound + ".csv");
+    final File objectiveFile = new File(datafile.getAbsolutePath()
+        + "-" + solutionsFound + ".obj");
+
+    LOGGER.info("Solution output to "
+        + scheduleFile.getAbsolutePath());
+
+    try {
+      outputSchedule(scheduleFile);
+    } catch (final IOException ioe) {
+      throw new FLLRuntimeException("Error writing schedule", ioe);
+    }
+
+    final ObjectiveValue objective = computeObjectiveValue(scheduleFile);
+
+    try {
+      final FileWriter objectiveWriter = new FileWriter(objectiveFile);
+      objectiveWriter.write(objective.toString());
+      objectiveWriter.close();
+    } catch (final IOException e) {
+      throw new FLLRuntimeException("Error writing objective", e);
+    }
+
+    if (null == bestObjective
+        || -1 == objective.compareTo(bestObjective)) {
+      LOGGER.info("Schedule provides a better objective value");
+      bestObjective = objective;
+      // tighten down the constraints so that we find a better solution
+      final int newNumTimeslots = objective.getLatestPerformanceTime() + 1;
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Tightening numTimeslots from "
+            + numTimeslots + " to " + newNumTimeslots);
+      }
+      numTimeslots = newNumTimeslots;
+    }
   }
 
   private final int numSubjectiveStations;
