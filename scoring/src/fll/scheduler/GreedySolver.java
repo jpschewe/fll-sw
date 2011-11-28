@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -740,12 +741,44 @@ public class GreedySolver {
     return solutionsFound;
   }
 
-  private int getNumWarnings() {
-    // FIXME how to get number of warnings
-    return 0;
+  private int getNumWarnings(final File scheduleFile) {
+    final List<SubjectiveStation> subjectiveParams = new LinkedList<SubjectiveStation>();
+    final Collection<String> subjectiveHeaders = new LinkedList<String>();
+    for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
+      final String header = "Subj"
+          + (subj + 1);
+      subjectiveHeaders.add(header);
+      final SubjectiveStation station = new SubjectiveStation(header, getSubjectiveDuration(subj)
+          * tinc);
+      subjectiveParams.add(station);
+    }
+
+    try {
+      final TournamentSchedule schedule = new TournamentSchedule(datafile.getName(), scheduleFile, subjectiveHeaders);
+
+      final SchedParams params = new SchedParams(subjectiveParams, getPerformanceDuration()
+          * tinc, getChangetime()
+          * tinc, getPerformanceChangetime()
+          * tinc);
+      final ScheduleChecker checker = new ScheduleChecker(params, schedule);
+      final List<ConstraintViolation> violations = checker.verifySchedule();
+      for (final ConstraintViolation violation : violations) {
+        if (violation.isHard()) {
+          throw new FLLRuntimeException("Should not have any hard constraint violations from autosched: "
+              + violation.getMessage());
+        }
+      }
+      return violations.size();
+    } catch (final IOException e) {
+      throw new FLLRuntimeException("Should not have an IOException trying to get warnings from CSV file", e);
+    } catch (ParseException e) {
+      throw new FLLRuntimeException("Should not have an ParseException trying to get warnings from CSV file", e);
+    } catch (ScheduleParseException e) {
+      throw new FLLRuntimeException("Should not have an ScheduleParseException trying to get warnings from CSV file", e);
+    }
   }
 
-  private ObjectiveValue computeObjectiveValue() {
+  private ObjectiveValue computeObjectiveValue(final File scheduleFile) {
     final int[] numTeams = new int[getNumGroups()];
     final int[] latestSubjectiveTime = new int[getNumGroups()];
     for (int group = 0; group < numTeams.length; ++group) {
@@ -753,7 +786,7 @@ public class GreedySolver {
       latestSubjectiveTime[group] = findLatestSubjectiveTime(group);
     }
     return new ObjectiveValue(solutionsFound, findLatestPerformanceTime(), numTeams, latestSubjectiveTime,
-                              getNumWarnings());
+                              getNumWarnings(scheduleFile));
   }
 
   /**
@@ -816,7 +849,7 @@ public class GreedySolver {
         throw new FLLRuntimeException("Error writing schedule", ioe);
       }
 
-      final ObjectiveValue objective = computeObjectiveValue();
+      final ObjectiveValue objective = computeObjectiveValue(scheduleFile);
 
       try {
         final FileWriter objectiveWriter = new FileWriter(objectiveFile);
@@ -865,7 +898,9 @@ public class GreedySolver {
     }
 
     if (nextAvailableSlot >= getNumTimeslots()) {
-      LOGGER.info("Hit max timeslots");
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Hit max timeslots");
+      }
       return false;
     }
 
