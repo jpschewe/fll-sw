@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import net.mtu.eggplant.util.Functions;
 import fll.Utilities;
 
 /**
