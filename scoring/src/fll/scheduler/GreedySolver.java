@@ -1031,11 +1031,11 @@ public class GreedySolver {
       writer = new BufferedWriter(new FileWriter(schedule));
       writer.write(TournamentSchedule.TEAM_NUMBER_HEADER
           + ",");
+      writer.write(TournamentSchedule.DIVISION_HEADER
+          + ",");
       writer.write(TournamentSchedule.TEAM_NAME_HEADER
           + ",");
       writer.write(TournamentSchedule.ORGANIZATION_HEADER
-          + ",");
-      writer.write(TournamentSchedule.DIVISION_HEADER
           + ",");
       writer.write(TournamentSchedule.JUDGE_GROUP_HEADER);
       for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
@@ -1054,7 +1054,7 @@ public class GreedySolver {
         final int teamNum = (team.getGroup() + 1)
             * 100 + team.getIndex();
         final int judgingGroup = team.getGroup() + 1;
-        writer.write(String.format("%d,Team %d, Org %d, D%d, G%d", teamNum, teamNum, teamNum, judgingGroup,
+        writer.write(String.format("%d,D%d, Team %d, Org %d, G%d", teamNum, judgingGroup, teamNum, teamNum, 
                                    judgingGroup));
         for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
           final Date time = getTime(sz[team.getGroup()][team.getIndex()][subj], 1);
