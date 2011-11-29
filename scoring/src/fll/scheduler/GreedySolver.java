@@ -585,7 +585,6 @@ public class GreedySolver {
                             final int timeslot) {
     final List<SchedTeam> teams = getPossiblePerformanceTeams();
     SchedTeam team1 = null;
-    SchedTeam team2 = null;
     int firstSide = 0;
     int secondSide = 1;
 
@@ -596,17 +595,15 @@ public class GreedySolver {
           if (assignPerformance(team.getGroup(), team.getIndex(), timeslot, table, firstSide)) {
             team1 = team;
           }
-        } else if (null == team2) {
+        } else {
           if (assignPerformance(team.getGroup(), team.getIndex(), timeslot, table, secondSide)) {
-            team2 = team;
             final boolean result = scheduleNextStation();
             if (!result
                 || optimize) {
               // if we get to this point we sould look for another solution
               unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, firstSide);
-              unassignPerformance(team2.getGroup(), team2.getIndex(), timeslot, table, secondSide);
+              unassignPerformance(team.getGroup(), team.getIndex(), timeslot, table, secondSide);
               team1 = null;
-              team2 = null;
 
               if (timeslot >= getNumTimeslots()) {
                 if (LOGGER.isDebugEnabled()) {
@@ -981,12 +978,23 @@ public class GreedySolver {
 
     final ObjectiveValue objective = computeObjectiveValue(scheduleFile);
 
+    FileWriter objectiveWriter = null;
     try {
-      final FileWriter objectiveWriter = new FileWriter(objectiveFile);
+      objectiveWriter = new FileWriter(objectiveFile);
       objectiveWriter.write(objective.toString());
       objectiveWriter.close();
     } catch (final IOException e) {
       throw new FLLRuntimeException("Error writing objective", e);
+    } finally {
+      try {
+        if (null != objectiveWriter) {
+          objectiveWriter.close();
+        }
+      } catch (final IOException e2) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug(e2);
+        }
+      }
     }
 
     if (null == bestObjective
@@ -1090,7 +1098,7 @@ public class GreedySolver {
         }
         if (perfTimes.size() != getNumPerformanceRounds()) {
           throw new FLLRuntimeException("Expecting "
-              + getNumPerformanceRounds() + " performance times, but only found " + perfTimes.size() + " group: "
+              + getNumPerformanceRounds() + " performance times, but found " + perfTimes.size() + " group: "
               + (team.getGroup() + 1) + " team: " + (team.getIndex() + 1));
         }
         for (final PerformanceTime perfTime : perfTimes) {
