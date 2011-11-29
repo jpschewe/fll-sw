@@ -102,4 +102,8 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
     }
   }
 
+  @Override
+  public String toString() {
+    return "round: " + getRound() + " time: " + getTime() + " table: " + getTable() + " side: " + getSide();
+  }
 }
