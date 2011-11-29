@@ -6,9 +6,8 @@
 
 package fll.scheduler;
 
-import java.util.Date;
-
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Represents performance judging time.
@@ -104,6 +103,8 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
 
   @Override
   public String toString() {
-    return "round: " + getRound() + " time: " + getTime() + " table: " + getTable() + " side: " + getSide();
+    return "round: "
+        + getRound() + " time: " + TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(getTime()) + " table: "
+        + getTable() + " side: " + getSide();
   }
 }
