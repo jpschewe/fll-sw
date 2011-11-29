@@ -36,7 +36,9 @@ package fll.scheduler;
 
   @Override
   public boolean equals(final Object o) {
-    if (o == this) {
+    if (null == o) {
+      return false;
+    } else if (o == this) {
       return true;
     } else if (o.getClass() == SchedTeam.class) {
       final SchedTeam other = (SchedTeam) o;

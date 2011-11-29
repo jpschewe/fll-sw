@@ -133,9 +133,11 @@ import java.util.Arrays;
 
   @Override
   public boolean equals(final Object o) {
-    if (o == this) {
+    if (null == o) {
+      return false;
+    } else if (o == this) {
       return true;
-    } else if (o.getClass() == ObjectiveValue.class) {
+    } else if (o.getClass() == this.getClass()) {
       final ObjectiveValue other = (ObjectiveValue) o;
       return 0 == compareTo(other);
     } else {
@@ -152,7 +154,7 @@ import java.util.Arrays;
   public String toString() {
     final StringWriter strWriter = new StringWriter();
     final PrintWriter writer = new PrintWriter(strWriter);
-    
+
     writer.println("Solution: "
         + this.solutionNumber);
     writer.println("latestPerformanceTime: "
@@ -161,8 +163,9 @@ import java.util.Arrays;
       writer.println("group "
           + group + " numTeams: " + this.numTeams[group] + " latestSubjectiveTime: " + this.latestSubjectiveTime[group]);
     }
-    writer.println("Warnings: " + this.numWarnings);
-    
+    writer.println("Warnings: "
+        + this.numWarnings);
+
     writer.flush();
     return strWriter.toString();
   }
