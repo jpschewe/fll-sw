@@ -173,6 +173,9 @@ public class GreedySolver {
     } catch (final IOException e) {
       LOGGER.fatal("Error reading file", e);
       System.exit(4);
+    } catch(final RuntimeException e) {
+      LOGGER.fatal(e, e);
+      throw e;
     }
   }
 
@@ -617,6 +620,12 @@ public class GreedySolver {
           }
         }
       }
+
+      // undo partial assignment
+      if (null != team1) {
+        unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, firstSide);
+      }
+
       if (optimize
           && firstSide == 0) {
         firstSide = 1;
@@ -626,10 +635,6 @@ public class GreedySolver {
       }
     }
 
-    // undo partial assignment
-    if (null != team1) {
-      unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, firstSide);
-    }
     return false;
   }
 
@@ -1099,7 +1104,7 @@ public class GreedySolver {
         if (perfTimes.size() != getNumPerformanceRounds()) {
           throw new FLLRuntimeException("Expecting "
               + getNumPerformanceRounds() + " performance times, but found " + perfTimes.size() + " group: "
-              + (team.getGroup() + 1) + " team: " + (team.getIndex() + 1));
+              + (team.getGroup() + 1) + " team: " + (team.getIndex() + 1) + " perfs: " + perfTimes);
         }
         for (final PerformanceTime perfTime : perfTimes) {
           writer.write(",");
