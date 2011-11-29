@@ -635,6 +635,11 @@ public class GreedySolver {
       }
     }
 
+    // undo partial assignment
+    if (null != team1) {
+      unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, firstSide);
+    }
+
     return false;
   }
 
