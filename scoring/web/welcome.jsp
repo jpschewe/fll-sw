@@ -47,10 +47,6 @@ body {
 <table>
 <tr>
 
-<td valign="bottom">
-<img width='100%' src='<c:url value="/images/body_forward.jpg"/>' />
-</td>
-
      <%
      if(!logoFiles.isEmpty()) {
      %>
