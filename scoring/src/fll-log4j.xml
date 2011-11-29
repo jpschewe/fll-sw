@@ -46,7 +46,7 @@
  </logger>
 
  <!-- stuff for debugging -->
- <logger name="fll.scheduler.GreedySolver"><level value="TRACE"/></logger>
+ <!-- logger name="fll.scheduler.GreedySolver"><level value="TRACE"/></logger-->
  <!-- logger name="fll.db.DumpDB"><level value="TRACE"/></logger-->
  <!-- logger name="fll.web.FooterFilter"><level value="TRACE"/></logger-->
  <!-- logger name="fll.web.report.FinalComputedScores"><level value="TRACE"/></logger-->
