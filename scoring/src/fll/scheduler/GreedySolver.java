@@ -173,7 +173,7 @@ public class GreedySolver {
     } catch (final IOException e) {
       LOGGER.fatal("Error reading file", e);
       System.exit(4);
-    } catch(final RuntimeException e) {
+    } catch (final RuntimeException e) {
       LOGGER.fatal(e, e);
       throw e;
     }
@@ -588,50 +588,77 @@ public class GreedySolver {
                             final int timeslot) {
     final List<SchedTeam> teams = getPossiblePerformanceTeams();
     SchedTeam team1 = null;
-    int firstSide = 0;
-    int secondSide = 1;
 
-    boolean done = false;
-    while (!done) {
-      for (final SchedTeam team : teams) {
-        if (null == team1) {
-          if (assignPerformance(team.getGroup(), team.getIndex(), timeslot, table, firstSide)) {
+    final List<SchedTeam> possibleValues = new LinkedList<SchedTeam>();
+    for (final SchedTeam team : teams) {
+      if (null == team1) {
+        if (assignPerformance(team.getGroup(), team.getIndex(), timeslot, table, 0)) {
+          if (optimize) {
+            // just build up list of possible values
+            possibleValues.add(team);
+            unassignPerformance(team.getGroup(), team.getIndex(), timeslot, table, 0);
+          } else {
             team1 = team;
           }
-        } else {
-          if (assignPerformance(team.getGroup(), team.getIndex(), timeslot, table, secondSide)) {
-            final boolean result = scheduleNextStation();
-            if (!result
-                || optimize) {
-              // if we get to this point we sould look for another solution
-              unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, firstSide);
-              unassignPerformance(team.getGroup(), team.getIndex(), timeslot, table, secondSide);
-              team1 = null;
+        }
+      } else {
+        if (assignPerformance(team.getGroup(), team.getIndex(), timeslot, table, 1)) {
+          final boolean result = scheduleNextStation();
+          if (!result) {
+            // if we get to this point we should look for another solution
+            unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, 0);
+            unassignPerformance(team.getGroup(), team.getIndex(), timeslot, table, 1);
+            team1 = null;
 
-              if (timeslot >= getNumTimeslots()) {
-                if (LOGGER.isDebugEnabled()) {
-                  LOGGER.debug("Hit max timeslots - perf");
-                }
-                return false;
+            if (timeslot
+                + getPerformanceDuration() >= getNumTimeslots()) {
+              if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Hit max timeslots - perf");
               }
-            } else {
-              return true;
+              return false;
             }
+          } else {
+            return true;
           }
         }
       }
+    }
 
-      // undo partial assignment
-      if (null != team1) {
-        unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, firstSide);
-      }
+    // undo partial assignment
+    if (null != team1) {
+      unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, 0);
+      team1 = null;
+    }
 
-      if (optimize
-          && firstSide == 0) {
-        firstSide = 1;
-        secondSide = 0;
-      } else {
-        done = true;
+    if (optimize
+        && possibleValues.size() > 1) {
+      // try all possible values
+      for (final SchedTeam t1 : possibleValues) {
+        if (!assignPerformance(t1.getGroup(), t1.getIndex(), timeslot, table, 0)) {
+          throw new FLLRuntimeException("Internal error, should not have trouble assigning values here - 1");
+        }
+        for (final SchedTeam t2 : possibleValues) {
+          if (!t1.equals(t2)) {
+            if (!assignPerformance(t2.getGroup(), t2.getIndex(), timeslot, table, 1)) {
+              throw new FLLRuntimeException("Internal error, should not have trouble assigning values here - 2");
+            }
+            // ignore result as we want to try all values
+            scheduleNextStation();
+
+            unassignPerformance(t2.getGroup(), t2.getIndex(), timeslot, table, 1);
+
+            // in case a better answer was found
+            if (timeslot
+                + getPerformanceDuration() >= getNumTimeslots()) {
+              if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Hit max timeslots - perf optimize");
+              }
+              unassignPerformance(t1.getGroup(), t1.getIndex(), timeslot, table, 0);
+              return false;
+            }
+          }
+        }
+        unassignPerformance(t1.getGroup(), t1.getIndex(), timeslot, table, 0);
       }
     }
 
@@ -701,7 +728,7 @@ public class GreedySolver {
         if (!result
             || optimize) {
           unassignSubjective(team.getGroup(), team.getIndex(), station, timeslot);
-          if (timeslot >= getNumTimeslots()) {
+          if (timeslot + getSubjectiveDuration(station) >= getNumTimeslots()) {
             if (LOGGER.isDebugEnabled()) {
               LOGGER.debug("Hit max timeslots - subj");
             }
