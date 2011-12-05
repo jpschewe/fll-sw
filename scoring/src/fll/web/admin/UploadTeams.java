@@ -226,7 +226,19 @@ public final class UploadTeams extends BaseFLLServlet {
                 } else {
                   insertPrep.setString(column, null);
                 }
-                insertPrep.setString(column, null == value ? null : value.trim());
+                String finalValue = null;
+                if (null == value) {
+                  finalValue = value;
+                } else {
+                  int v = 0;
+                  try {
+                    v = Integer.parseInt(value.trim());
+                    finalValue = String.valueOf(v);
+                  } catch (NumberFormatException e) {
+                    finalValue = value.trim();
+                  }
+                }
+                insertPrep.setString(column, finalValue);
                 ++column;
               }
             }
@@ -423,8 +435,7 @@ public final class UploadTeams extends BaseFLLServlet {
       final Document challenge = Queries.getChallengeDocument(connection);
       final Element rootElement = challenge.getDocumentElement();
       for (final Element categoryElement : new NodelistElementCollectionAdapter(
-                                                                                rootElement
-                                                                                           .getElementsByTagName("subjectiveCategory"))) {
+                                                                                rootElement.getElementsByTagName("subjectiveCategory"))) {
         final String tableName = categoryElement.getAttribute("name");
         prep = connection.prepareStatement("DELETE FROM "
             + tableName);
@@ -453,7 +464,8 @@ public final class UploadTeams extends BaseFLLServlet {
         }
         try {
           final Number num = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumStr);
-          // TODO ticket:86 perhaps should check for double vs. int, but this works for
+          // TODO ticket:86 perhaps should check for double vs. int, but this
+          // works for
           // now
           final int teamNum = num.intValue();
           prep.setInt(1, teamNum);
@@ -476,9 +488,10 @@ public final class UploadTeams extends BaseFLLServlet {
         }
 
         for (int i = 1; i < numValues; i++) { // skip TeamNumber
-          String value = rs.getString(i+1);
-          if(null == value) {
-            // handle empty data as empty string instead of null, handled better elsewhere
+          String value = rs.getString(i + 1);
+          if (null == value) {
+            // handle empty data as empty string instead of null, handled better
+            // elsewhere
             value = "";
           }
           prep.setString(i + 1, value);
