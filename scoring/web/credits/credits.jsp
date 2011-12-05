@@ -74,6 +74,10 @@
 
 <li><a href="http://commons.apache.org/codec/">Commons Codec
  </a> - <a href="commons-codec-LICENSE.txt">License</a></li>
+ 
+<li><a href="http://jquery.com/">jQuery</a> - <a href="jQuery-license.txt">License</a></li>
+
+<li><a href="http://code.google.com/p/google-gson/">Gson</a> - <a href="Gson-license.txt">License</a></li>
   
 </ul>
 

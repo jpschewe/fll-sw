@@ -128,6 +128,9 @@
 
 		<!-- used for password hashes -->
 		<pathelement location="${dir.lib}/commons-codec-1.5.jar" />
+		
+		<!-- used to create json out of objects -->
+		<pathelement location="${dir.lib}/gson-2.0.jar" />
 
 		<path refid="cobertura.classpath" />
 
