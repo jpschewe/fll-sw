@@ -149,6 +149,16 @@ function start() {
 }
 </script>
 <!-- end stuff for automatic scrolling -->
+<%final String jQueryURL = response.encodeURL("/fll-sw/jquery-1.7.1.min.js");%>
+<script type="text/javascript" src="<%=jQueryURL%>"></script>
+<script type="text/javascript">
+  runScores = new Object();
+  runScores.set = function (teamNum, runNum /*Full runnumber, not playoff runnumber*/, score) {
+    $("#"+teamNum+"-"+runNum+"-score").html(score); }
+  runScores.get = function (teamNum, runNum) {
+    return $("#"+teamNum+"-"+runNum+"-score").html(); }
+    
+</script>
 
 <body onload='start()'>
 <!-- dummy tag and some blank lines for scolling -->
