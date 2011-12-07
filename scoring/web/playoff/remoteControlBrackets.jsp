@@ -145,19 +145,39 @@ function myScroll() {
 }
 
 function start() {
-    scrollTimer = window.setInterval('myScroll()',scrollPause);
+    //scrollTimer = window.setInterval('myScroll()',scrollPause);
 }
 </script>
 <!-- end stuff for automatic scrolling -->
 <%final String jQueryURL = response.encodeURL("/fll-sw/jquery-1.7.1.min.js");%>
 <script type="text/javascript" src="<%=jQueryURL%>"></script>
 <script type="text/javascript">
-  runScores = new Object();
-  runScores.set = function (teamNum, runNum /*Full runnumber, not playoff runnumber*/, score) {
-    $("#"+teamNum+"-"+runNum+"-score").html(score); }
-  runScores.get = function (teamNum, runNum) {
-    return $("#"+teamNum+"-"+runNum+"-score").html(); }
-    
+  <%final String ajaxURL = response.encodeURL("/fll-sw/ajax/");%>
+  var ajaxURL = '<%=ajaxURL%>';
+  <%final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournament); %>
+  var seedingRounds = <%=numSeedingRounds%>;
+  function iterate () {
+    $(".js-leaf").each(function() {
+      var lid = $(this).attr('id');
+      $.get(ajaxURL+"brackets.jsp", { row: lid.split("-")[0], round: lid.split("-")[1] }, function(data) {
+        var leaf;
+        if (data._team._teamNumber < 0) {
+          leaf = "<font class=\"TeamName\">" + data._team._teamName + "</font>"; 
+        } else {
+        var score;
+        $.get(ajaxURL+"runScore.jsp", { team: data._team._teamNumber, run: seedingRounds+lid.split("-")[1] }, function(data) { score = data; });
+          if (score != "NaN") {
+            leaf = "<font class=\"TeamNumber\">" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><font class=\"TeamScore\"> Score: " + score + "</font>";
+          } else {
+            leaf = "<font class=\"TeamNumber\">" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font>";
+          }
+        }
+        $(this).html(leaf);
+        }, "json");
+      });
+  }
+  
+  
 </script>
 
 <body onload='start()'>

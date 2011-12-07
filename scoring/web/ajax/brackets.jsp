@@ -64,5 +64,16 @@
   
   final JsonBracketData jsonbd = new JsonBracketData(bracketInfo);
   
-  out.print(jsonbd.getBracketLocationJson(Integer.parseInt(request.getParameter("round")), Integer.parseInt(request.getParameter("row"))));
+    //TODO: Send headers of text/plain.
+  
+  if ((request.getParameter("round") == null 
+       || request.getParameter("row") == null)
+       && request.getParameter("all") == null) {
+    out.print("{\"_rmsg\": \"Error: No Params\"}");
+  } else if (request.getParameter("all") == "1") {
+    //TODO: Implement function to get all bracket data into an array.
+    //out.print(jsonbd.getAllBracketDataJson());
+  } else {
+    out.print(jsonbd.getBracketLocationJson(Integer.parseInt(request.getParameter("round")), Integer.parseInt(request.getParameter("row"))));
+  }
 %>
