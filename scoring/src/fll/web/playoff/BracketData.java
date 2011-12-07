@@ -557,7 +557,7 @@ public class BracketData {
             + comment + "-->");
       }
     } else if (d instanceof TeamBracketCell) {
-      sb.append("<td width='400' class='Leaf' id='"+((TeamBracketCell) d).getTeam().getTeamNumber()+"-"+round+"'>");
+      sb.append("<td width='400' class='Leaf js-leaf' id='"+row+"-"+round+"'>");
       if (round == _finalsRound) {
         sb.append(getDisplayString(connection, tournament, round
             + _numSeedingRounds, ((TeamBracketCell) d).getTeam(), _showFinalScores, _showOnlyVerifiedScores));
