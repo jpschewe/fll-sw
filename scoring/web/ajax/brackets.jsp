@@ -19,6 +19,8 @@
    final Connection connection = datasource.getConnection();
   final int currentTournament = Queries.getCurrentTournament(connection);
 
+  //response.setContentType("text/plain");
+
   final String divisionKey = "playoffDivision";
   final String roundNumberKey = "playoffRoundNumber";
   final String displayName = (String)session.getAttribute("displayName");
@@ -64,16 +66,16 @@
   
   final JsonBracketData jsonbd = new JsonBracketData(bracketInfo);
   
+  String jsonResponse;
     //TODO: Send headers of text/plain.
   
   if ((request.getParameter("round") == null 
        || request.getParameter("row") == null)
        && request.getParameter("all") == null) {
-    out.print("{\"_rmsg\": \"Error: No Params\"}");
-  } else if (request.getParameter("all") == "1") {
-    //TODO: Implement function to get all bracket data into an array.
-    //out.print(jsonbd.getAllBracketDataJson());
+    jsonResponse = "{\"_rmsg\": \"Error: No Params\"}";
   } else {
-    out.print(jsonbd.getBracketLocationJson(Integer.parseInt(request.getParameter("round")), Integer.parseInt(request.getParameter("row"))));
-  }
+        jsonResponse = jsonbd.getBracketLocationJson(Integer.parseInt(request.getParameter("round")),
+                                                Integer.parseInt(request.getParameter("row")));
+      }
 %>
+<%=jsonResponse%>

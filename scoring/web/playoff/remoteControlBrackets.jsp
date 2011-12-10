@@ -119,33 +119,16 @@ FONT.TIE {
 <!-- stuff for automatic scrolling -->
 <script type="text/javascript">
 var scrollTimer;
-var scrollAmount = 2;    // scroll by 100 pixels each time
+var scrollAmount = 10;    // scroll by 10 pixels each tick
 var documentYposition = 0;
-var scrollPause = 100; // amount of time, in milliseconds, to pause between scrolls
+var scrollPause = 250; // amount of time, in milliseconds, to pause between scrolls
 
-//http://www.evolt.org/article/document_body_doctype_switching_and_more/17/30655/index.html
-function getScrollPosition() {
-  if (window.pageYOffset) {
-    return window.pageYOffset
-  } else if (document.documentElement && document.documentElement.scrollTop) {
-    return document.documentElement.scrollTop
-  } else if (document.body) {
-    return document.body.scrollTop
-  }
-}
-function myScroll() {
-  documentYposition += scrollAmount;
+function scroll() {
   window.scrollBy(0, scrollAmount);
-  if(getScrollPosition()+300 < documentYposition) { //wait 300 pixels until we refresh
-    window.clearInterval(scrollTimer);
-    window.scroll(0, 0); //scroll back to top and then refresh
-<%final String reloadURL = response.encodeURL("remoteControlBrackets.jsp");%>
-    location.href='<%=reloadURL%>';
-  }
 }
 
 function start() {
-    //scrollTimer = window.setInterval('myScroll()',scrollPause);
+    scrollTimer = window.setInterval('scroll()',scrollPause);
 }
 </script>
 <!-- end stuff for automatic scrolling -->
@@ -157,25 +140,42 @@ function start() {
   <%final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournament); %>
   var seedingRounds = <%=numSeedingRounds%>;
   function iterate () {
-    $(".js-leaf").each(function() {
-      var lid = $(this).attr('id');
-      $.get(ajaxURL+"brackets.jsp", { row: lid.split("-")[0], round: lid.split("-")[1] }, function(data) {
-        var leaf;
-        if (data._team._teamNumber < 0) {
-          leaf = "<font class=\"TeamName\">" + data._team._teamName + "</font>"; 
-        } else {
-        var score;
-        $.get(ajaxURL+"runScore.jsp", { team: data._team._teamNumber, run: seedingRounds+lid.split("-")[1] }, function(data) { score = data; });
-          if (score != "NaN") {
-            leaf = "<font class=\"TeamNumber\">" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><font class=\"TeamScore\"> Score: " + score + "</font>";
-          } else {
-            leaf = "<font class=\"TeamNumber\">" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font>";
+      $(".js-leaf").each(function() {
+          var lid = $(this).attr('id');
+          var leafEl = this;
+          $.ajax({
+          url: ajaxURL+"brackets.jsp?row="+lid.split("-")[0]+"&round="+lid.split("-")[1],
+          dataType: "json",
+          cache: false,
+          beforeSend: function(xhr){
+              xhr.overrideMimeType('text/plain');
           }
-        }
-        $(this).html(leaf);
-        }, "json");
-      });
-  }
+          }).done(function(data) {
+              if (data._team._teamNumber < 0) {
+                $(this).html("<font class=\"TeamName\">" + data._team._teamName + "</font>"); 
+                return;
+              } else { // /if team number meant a bye
+                  var score;
+                  $.ajax({
+                      url: ajaxURL+"runScore.jsp?team="+data._team._teamNumber+"&run="+(seedingRounds+parseInt(lid.split("-")[1])),
+                      cache: true,
+                      beforeSend: function(xhr){
+                          xhr.overrideMimeType('text/plain');
+                      } // /beforesend
+                  }).done(function(scoreData){
+                  console.log(scoreData.indexOf("NaN") == -1);
+                      if (scoreData.indexOf("NaN") == -1) {
+                          $(leafEl).html("<font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><font class=\"TeamScore\"> Score: " + scoreData + "</font><!-- updated -->");
+                          return;
+                      } else {
+                          $(this).html("<font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><!-- updated -->");
+                          return;
+                      } // /else
+                  }); // /.done
+              } // /if team num not a bye
+              }); // /first .ajax
+      }); // /.each
+  } // /iterate()
   
   
 </script>
