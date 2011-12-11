@@ -78,6 +78,8 @@
 <li><a href="http://jquery.com/">jQuery</a> - <a href="jQuery-license.txt">License</a></li>
 
 <li><a href="http://code.google.com/p/google-gson/">Gson</a> - <a href="Gson-license.txt">License</a></li>
+
+<li><a href="http://flesler.blogspot.com/2007/10/jqueryscrollto.html">jQuery ScrollTo</a> - <a href="jQuery-ScrollTo-LICENSE.txt">License</a></li>
   
 </ul>
 
