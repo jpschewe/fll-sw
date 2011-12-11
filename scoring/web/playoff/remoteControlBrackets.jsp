@@ -115,73 +115,160 @@ FONT.TIE {
 	padding-right: 5%
 }
 </style>
-
+<%final String jQueryURL = response.encodeURL("/fll-sw/jquery-1.7.1.min.js");%>
+<script type="text/javascript" src="<%=jQueryURL%>"></script>
+<%final String scrollToURL = response.encodeURL("/fll-sw/jquery.scrollTo-1.4.2-min.js");%>
+<script type="text/javascript" src="<%=scrollToURL%>"></script>
 <!-- stuff for automatic scrolling -->
 <script type="text/javascript">
 var scrollTimer;
-var scrollAmount = 10;    // scroll by 10 pixels each tick
+var scrollAmount = 2;    // scroll by 100 pixels each time
 var documentYposition = 0;
-var scrollPause = 250; // amount of time, in milliseconds, to pause between scrolls
+var scrollPause = 100; // amount of time, in milliseconds, to pause between scrolls
+var scrollTicksToSkip = 0;
 
-function scroll() {
-  window.scrollBy(0, scrollAmount);
-}
-
-function start() {
-    scrollTimer = window.setInterval('scroll()',scrollPause);
-}
 </script>
 <!-- end stuff for automatic scrolling -->
-<%final String jQueryURL = response.encodeURL("/fll-sw/jquery-1.7.1.min.js");%>
-<script type="text/javascript" src="<%=jQueryURL%>"></script>
 <script type="text/javascript">
   <%final String ajaxURL = response.encodeURL("/fll-sw/ajax/");%>
   var ajaxURL = '<%=ajaxURL%>';
   <%final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournament); %>
   var seedingRounds = <%=numSeedingRounds%>;
-  function iterate () {
-      $(".js-leaf").each(function() {
-          var lid = $(this).attr('id');
-          var leafEl = this;
-          $.ajax({
-          url: ajaxURL+"brackets.jsp?row="+lid.split("-")[0]+"&round="+lid.split("-")[1],
+  var currentRound = <%=playoffRoundNumber-1%>;
+  var foundNewest = false;
+  var rows = <%=bracketInfo.getNumRows()%>;
+  
+  var displayStrings = new Object();
+  displayStrings.getSpecialString = function (data, newest) {
+      if (newest) {
+          return "<a name=\"newest\"></a><font class=\"TeamName\">" + data._team._teamName + "</font>";
+      } else {
+          return "<font class=\"TeamName\">" + data._team._teamName + "</font>";
+      }
+  }
+  displayStrings.getTeamNameString = function (data, newest) {
+      if (newest) {
+          return "<a name=\"newest\"></a><font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font>";
+      } else {
+          return "<font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font>";
+      }
+  }
+  displayStrings.getTeamNameAndScoreString = function (data, scoreData, newest) {
+      if (newest) {
+          return "<a name=\"newest\"></a><font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><font class=\"TeamScore\"> Score: " + scoreData + ".0</font>";
+      } else {
+          return "<font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><font class=\"TeamScore\"> Score: " + scoreData + ".0</font>";
+      }
+  }
+
+  var ajaxList;
+  var ajaxArray;
+
+  function iterate() {
+      foundNewest = false;
+      $("a[name=newest]").remove();
+      $.ajax({
+          url: ajaxURL + "brackets.jsp?multi=" + ajaxList,
           dataType: "json",
           cache: false,
-          beforeSend: function(xhr){
+          beforeSend: function (xhr) {
               xhr.overrideMimeType('text/plain');
           }
-          }).done(function(data) {
-              if (data._team._teamNumber < 0) {
-                $(this).html("<font class=\"TeamName\">" + data._team._teamName + "</font>"); 
-                return;
+      }).done(function (mainData) {
+          $.each(mainData, function (index, data) {
+              var lid = ajaxArray[index];
+              //First and foremost, make sure rounds haven't advanced.
+              if (data.refresh == true) {
+                  window.location.reload();
+              }
+              if (data.leaf._team._teamNumber < 0) {
+                  if (data.leaf._team._teamNumber == -3) {
+                      return;
+                  }
+                  if ($("#" + lid).html() != displayStrings.getSpecialString(data.leaf, false) && !foundNewest) {
+                      $("#" + lid).html(displayStrings.getSpecialString(data.leaf, true));
+                      foundNewest = true;
+                  } else {
+                      $("#" + lid).html(displayStrings.getSpecialString(data.leaf, false));
+                  }
+                  return;
               } else { // /if team number meant a bye
                   var score;
-                  $.ajax({
-                      url: ajaxURL+"runScore.jsp?team="+data._team._teamNumber+"&run="+(seedingRounds+parseInt(lid.split("-")[1])),
-                      cache: true,
-                      beforeSend: function(xhr){
-                          xhr.overrideMimeType('text/plain');
-                      } // /beforesend
-                  }).done(function(scoreData){
-                  console.log(scoreData.indexOf("NaN") == -1);
-                      if (scoreData.indexOf("NaN") == -1) {
-                          $(leafEl).html("<font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><font class=\"TeamScore\"> Score: " + scoreData + "</font><!-- updated -->");
-                          return;
+                  //table label?
+                  if (data.leaf._table != undefined) {
+                      var row;
+                      //Are we on the top of a bracket or the bottom?
+                      if (data.leaf._dbLine % 2 == 1) {
+                          row = $("#" + lid).parent().next();
                       } else {
-                          $(this).html("<font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><!-- updated -->");
-                          return;
-                      } // /else
-                  }); // /.done
+                          row = $("#" + lid).parent().prev();
+                      }
+                      row.find("td[width=\"400\"]:nth-child(" + ((parseInt(lid.split("-")[1]) - currentRound)) + ")").eq(0).css('padding-right', '30px').attr('align', 'right').html('<span class="table_assignment">' + data.leaf._table + '</span>');
+                  }
+                  var scoreData = data.score;
+                  if (scoreData != -1) {
+                      if ($("#" + lid).html() != displayStrings.getTeamNameAndScoreString(data.leaf, scoreData, false) && !foundNewest) {
+                          $("#" + lid).html(displayStrings.getTeamNameAndScoreString(data.leaf, scoreData, true));
+                          foundNewest = true;
+                      } else {
+                          $("#" + lid).html(displayStrings.getTeamNameAndScoreString(data.leaf, scoreData, false));
+                      }
+                      return;
+                  } else {
+                      if ($("#" + lid).html() != displayStrings.getTeamNameString(data.leaf, false) && !foundNewest) {
+                          $("#" + lid).html(displayStrings.getTeamNameString(data.leaf, true));
+                          foundNewest = true;
+                      } else {
+                          $("#" + lid).html(displayStrings.getTeamNameString(data.leaf, false));
+                      }
+                      return;
+                  } // /else
+                  //}); // /.done
               } // /if team num not a bye
-              }); // /first .ajax
-      }); // /.each
+          }); // /.each of data
+      }).error(function (xhr, errstring, err) { 
+          window.location.reload();
+          console.log(xhr);
+          console.log(errstring);
+          console.log(err);
+      }); // /first .ajax
+      //}); // /.each
   } // /iterate()
-  
-  
+
+  function buildAJAXList() {
+      $(".js-leaf").each(function () {
+          if (typeof $(this).attr('id') == 'string') {
+              ajaxList = ajaxList + $(this).attr('id') + "|";
+          }
+      });
+      //remove last pipe
+      ajaxList = ajaxList.slice(0, ajaxList.length - 1);
+      ajaxList = ajaxList.replace(new RegExp("[a-z]", "g"), "");
+
+      ajaxArray = ajaxList.split("|");
+  }
+
+  function scrollMgr(nexttgt) {
+      if (nexttgt == 'top') {
+          scrollTimer = $.scrollTo($("#top"), rows * 1000, {
+              easing: 'linear'
+          });
+      }
+  }
+
+  function start() {
+      buildAJAXList();
+      scrollTimer = $.scrollTo($("#bottom"), rows * 1000, {
+          easing: 'linear'
+      });
+      window.setTimeout('scrollMgr("top")', (rows + 3) * 1000);
+      //window.setInterval('iterate()',10000);
+  }
 </script>
 
 <body onload='start()'>
 <!-- dummy tag and some blank lines for scolling -->
+<span id="top"></span>
 <div id="dummy" style="position: absolute"><br/>
 <br/>
 <br/>
@@ -195,7 +282,6 @@ function start() {
 <br/>
 <br/>
 <br/>
-
 <table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>
  <%
    if (playoffRoundNumber <= numPlayoffRounds) {
@@ -219,7 +305,9 @@ function start() {
    }//end if we have more than 2 teams
  %>
 </table>
+<span id="bottom">&nbsp;</span>
 </div>
+
 
 </body>
 </html>

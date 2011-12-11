@@ -2,11 +2,18 @@
 
 <%@ page import="fll.web.playoff.BracketData"%>
 <%@ page import="fll.web.playoff.JsonBracketData"%>
+<%@ page import="fll.web.playoff.JsonBracketData.BracketLeafResultSet"%>
 <%@ page import="fll.web.SessionAttributes" %>
 <%@ page import="javax.sql.DataSource" %>
 <%@ page import="java.util.List"%>
+<%@ page import="java.util.Arrays"%>
+<%@ page import="java.util.ArrayList"%>
+<%@ page import="java.util.Iterator"%>
+<%@ page import="org.w3c.dom.Element" %>
+<%@ page import="fll.web.ApplicationAttributes" %>
 <%@ page import="fll.db.Queries" %>
 <%@ page import="java.sql.Connection" %>
+<%@ page import="com.google.gson.Gson" %>
 
 <%
 	/*
@@ -66,16 +73,21 @@
   
   final JsonBracketData jsonbd = new JsonBracketData(bracketInfo);
   
-  String jsonResponse;
+  String jsonResponse = "";
     //TODO: Send headers of text/plain.
   
   if ((request.getParameter("round") == null 
        || request.getParameter("row") == null)
-       && request.getParameter("all") == null) {
+       && request.getParameter("multi") == null) {
     jsonResponse = "{\"_rmsg\": \"Error: No Params\"}";
+  } else if (request.getParameter("multi") != null) {
+    final Element rootElement = ApplicationAttributes.getChallengeDocument(application).getDocumentElement();
+    final Element perfElement = (Element) rootElement.getElementsByTagName("Performance").item(0);  
+    List<String> params = Arrays.asList(request.getParameter("multi").split("\\|"));
+    jsonResponse = jsonbd.getMultipleBracketLocationsJson(params, datasource, perfElement);
   } else {
-        jsonResponse = jsonbd.getBracketLocationJson(Integer.parseInt(request.getParameter("round")),
-                                                Integer.parseInt(request.getParameter("row")));
-      }
+    jsonResponse = jsonbd.getBracketLocationJson(Integer.parseInt(request.getParameter("round")), Integer.parseInt(request.getParameter("row")));
+  }
+  
 %>
 <%=jsonResponse%>
