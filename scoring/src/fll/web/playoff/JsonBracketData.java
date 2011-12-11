@@ -40,6 +40,10 @@ import fll.util.ScoreUtils;
     private BracketData _bracketdata;
     
     private Gson _gson;
+    
+    private Boolean _showFinalsScores = false;
+    
+    private Boolean _showOnlyVerifiedScores = true;
    
     private BracketData getBracketData() {
         return _bracketdata;
@@ -54,9 +58,12 @@ import fll.util.ScoreUtils;
         
         public Double score;
         
-        public BracketLeafResultSet(final BracketDataType bdt, final Double scr) {
+        public String originator;
+        
+        public BracketLeafResultSet(final BracketDataType bdt, final Double scr, final String origin) {
             leaf = bdt;
             score = scr;
+            originator = origin;
         }
     }
     
@@ -68,6 +75,16 @@ import fll.util.ScoreUtils;
         _bracketdata = bd;
         _gson = new Gson();
     }
+    
+    /**
+     * Constructor taking two extra booleans that govern output.
+     */
+    public JsonBracketData(final BracketData bd, final Boolean showFinals, final Boolean showOnlyVerified) {
+        this(bd);
+        _showFinalsScores = showFinals;
+        _showOnlyVerifiedScores = showOnlyVerified;
+    }
+        
     
     public String getBracketLocationJson(final int round, final int row) {
         if (round < this.getBracketData().getFirstRound())
@@ -92,11 +109,17 @@ import fll.util.ScoreUtils;
                 String[] params = item.split("-");
                 final BracketDataType bdt = this.getBracketData().getData(Integer.parseInt(params[1]), Integer.parseInt(params[0]));
                 final TeamScore teamScore = new DatabaseTeamScore(performanceElement, currentTournament, ((TeamBracketCell) bdt).getTeam().getTeamNumber(), Queries.getNumSeedingRounds(connection, currentTournament)+Integer.parseInt(params[1]), connection);
-                if (this.getBracketData().getData(Integer.parseInt(params[1]), Integer.parseInt(params[0])) != null) {
-                    if (Double.isNaN(ScoreUtils.computeTotalScore(teamScore))) {
-                        datalist.add(new BracketLeafResultSet(bdt, -1.0));
+                if (this.getBracketData().getData(Integer.parseInt(params[1]), Integer.parseInt(params[0])) != null && Integer.parseInt(params[1]) != Queries.getNumPlayoffRounds(connection, ((TeamBracketCell) bdt).getTeam().getDivision())) {
+                    if (Double.isNaN(ScoreUtils.computeTotalScore(teamScore)) /*NaN check here is to prevent isVerified from asking about team -1*/
+                        || !_showOnlyVerifiedScores 
+                        || Queries.isVerified(connection, currentTournament, ((TeamBracketCell) bdt).getTeam().getTeamNumber(), Queries.getNumSeedingRounds(connection, currentTournament)+Integer.parseInt(params[1]))) {
+                        if (Double.isNaN(ScoreUtils.computeTotalScore(teamScore))) {
+                            datalist.add(new BracketLeafResultSet(bdt, -1.0, item));
+                        } else {
+                            datalist.add(new BracketLeafResultSet(bdt, ScoreUtils.computeTotalScore(teamScore), item));
+                        }
                     } else {
-                        datalist.add(new BracketLeafResultSet(bdt, ScoreUtils.computeTotalScore(teamScore)));
+                        datalist.add(new BracketLeafResultSet(bdt, -1.0, item));
                     }
                 }
             }

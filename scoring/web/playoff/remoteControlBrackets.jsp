@@ -137,6 +137,7 @@ var scrollTicksToSkip = 0;
   var currentRound = <%=playoffRoundNumber-1%>;
   var foundNewest = false;
   var rows = <%=bracketInfo.getNumRows()%>;
+  var finalRound = <%=Queries.getNumPlayoffRounds(connection, division)+1%>;
   
   var displayStrings = new Object();
   displayStrings.getSpecialString = function (id, data, newest) {
@@ -176,7 +177,7 @@ var scrollTicksToSkip = 0;
           }
       }).done(function (mainData) {
           $.each(mainData, function (index, data) {
-              var lid = ajaxArray[index];
+              var lid = data.originator;
               //First and foremost, make sure rounds haven't advanced.
               if (data.refresh == true) {
                   window.location.reload();
@@ -192,19 +193,10 @@ var scrollTicksToSkip = 0;
                       $("#" + lid).html(displayStrings.getSpecialString(lid, data.leaf, false));
                   }
                   return;
-              } else { // /if team number meant a bye
+              } else if (lid.split("-")[1] != finalRound)/*Don't show final results!*/ { // /if team number meant a bye
                   var score;
                   //table label?
-                  if (data.leaf._table != undefined) {
-                      var row;
-                      //Are we on the top of a bracket or the bottom?
-                      if (data.leaf._dbLine % 2 == 1) {
-                          row = $("#" + lid).parent().next();
-                      } else {
-                          row = $("#" + lid).parent().prev();
-                      }
-                      row.find("td[width=\"400\"]:nth-child(" + ((parseInt(lid.split("-")[1]) - currentRound)) + ")").eq(0).css('padding-right', '30px').attr('align', 'right').html('<span class="table_assignment">' + data.leaf._table + '</span>');
-                  }
+                  placeTableLabel(lid, data.leaf._table, data.leaf._dbLine);
                   var scoreData = data.score;
                   if (scoreData != -1) {
                       if ($("#" + lid).html() != displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData, false) && !foundNewest) {
@@ -241,6 +233,24 @@ var scrollTicksToSkip = 0;
   }
   } // /iterate()
 
+  function placeTableLabel(lid, table, dbLine) {
+      if (table != undefined) {
+          var row;
+          //Are we on the top of a bracket or the bottom?
+          if (dbLine % 2 == 1) {
+              row = $("#" + lid).parent().next();
+          } else {
+              row = $("#" + lid).parent().prev();
+          }
+          //Selector is SUPPOSED to pick the nth cell with widths of 400, but I have to use this lazy switch to account for bridges, since it doesn't want to work.
+          var nthcell = ((parseInt(lid.split("-")[1]) - currentRound));
+          if (nthcell == 3) {
+              nthcell = 4;
+          } 
+              row.find("td[width=\"400\"]:nth-child(" +  nthcell + ")").eq(0).css('padding-right', '30px').attr('align', 'right').html('<span class="table_assignment">' + table + '</span><!-- '+lid+' -->');
+      }
+  }
+
   function buildAJAXList() {
       $(".js-leaf").each(function () {
           if (typeof $(this).attr('id') == 'string') {
@@ -250,8 +260,6 @@ var scrollTicksToSkip = 0;
       //remove last pipe
       ajaxList = ajaxList.slice(0, ajaxList.length - 1);
       ajaxList = ajaxList.replace(new RegExp("[a-z]", "g"), "");
-
-      ajaxArray = ajaxList.split("|");
   }
 
   function scrollMgr(nexttgt) {
@@ -259,16 +267,21 @@ var scrollTicksToSkip = 0;
           scrollTimer = $.scrollTo($("#top"), rows * 1000, {
               easing: 'linear'
           });
+          scrollTimer = $.scrollTo($("#top"), 3000);
+      } else if (nexttgt == 'bottom') {
+          scrollTimer = $.scrollTo($("#bottom"), rows * 1000, {
+              easing: 'linear'
+          });
+          scrollTimer = $.scrollTo($("#bottom"), 3000);
       }
   }
 
   function start() {
       buildAJAXList();
-      scrollTimer = $.scrollTo($("#bottom"), rows * 1000, {
-          easing: 'linear'
-      });
-      window.setTimeout('scrollMgr("top")', (rows + 3) * 1000);
-      //window.setInterval('iterate()',10000);
+      scrollMgr("top");
+      scrollMgr("bottom");
+      window.setInterval('scrollMgr("top");scrollMgr("bottom")', (rows * 2000)+6000);
+      window.setInterval('iterate()',10000);
   }
 </script>
 
