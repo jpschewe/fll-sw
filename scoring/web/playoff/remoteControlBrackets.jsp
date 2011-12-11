@@ -278,9 +278,9 @@ var scrollTicksToSkip = 0;
 
   function start() {
       buildAJAXList();
-      scrollMgr("top");
       scrollMgr("bottom");
-      window.setInterval('scrollMgr("top");scrollMgr("bottom")', (rows * 2000)+6000);
+      scrollMgr("top");
+      window.setInterval('scrollMgr("bottom");scrollMgr("top")', (rows * 2000)+6000);
       window.setInterval('iterate()',10000);
   }
 </script>
