@@ -139,23 +139,23 @@ var scrollTicksToSkip = 0;
   var rows = <%=bracketInfo.getNumRows()%>;
   
   var displayStrings = new Object();
-  displayStrings.getSpecialString = function (data, newest) {
+  displayStrings.getSpecialString = function (id, data, newest) {
       if (newest) {
-          return "<a name=\"newest\"></a><font class=\"TeamName\">" + data._team._teamName + "</font>";
+          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamName\">" + data._team._teamName + "</font>";
       } else {
           return "<font class=\"TeamName\">" + data._team._teamName + "</font>";
       }
   }
-  displayStrings.getTeamNameString = function (data, newest) {
+  displayStrings.getTeamNameString = function (id, data, newest) {
       if (newest) {
-          return "<a name=\"newest\"></a><font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font>";
+          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font>";
       } else {
           return "<font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font>";
       }
   }
-  displayStrings.getTeamNameAndScoreString = function (data, scoreData, newest) {
+  displayStrings.getTeamNameAndScoreString = function (id, data, scoreData, newest) {
       if (newest) {
-          return "<a name=\"newest\"></a><font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><font class=\"TeamScore\"> Score: " + scoreData + ".0</font>";
+          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><font class=\"TeamScore\"> Score: " + scoreData + ".0</font>";
       } else {
           return "<font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><font class=\"TeamScore\"> Score: " + scoreData + ".0</font>";
       }
@@ -185,11 +185,11 @@ var scrollTicksToSkip = 0;
                   if (data.leaf._team._teamNumber == -3) {
                       return;
                   }
-                  if ($("#" + lid).html() != displayStrings.getSpecialString(data.leaf, false) && !foundNewest) {
-                      $("#" + lid).html(displayStrings.getSpecialString(data.leaf, true));
+                  if ($("#" + lid).html() != displayStrings.getSpecialString(lid, data.leaf, false) && !foundNewest) {
+                      $("#" + lid).html(displayStrings.getSpecialString(lid, data.leaf, true));
                       foundNewest = true;
                   } else {
-                      $("#" + lid).html(displayStrings.getSpecialString(data.leaf, false));
+                      $("#" + lid).html(displayStrings.getSpecialString(lid, data.leaf, false));
                   }
                   return;
               } else { // /if team number meant a bye
@@ -207,19 +207,19 @@ var scrollTicksToSkip = 0;
                   }
                   var scoreData = data.score;
                   if (scoreData != -1) {
-                      if ($("#" + lid).html() != displayStrings.getTeamNameAndScoreString(data.leaf, scoreData, false) && !foundNewest) {
-                          $("#" + lid).html(displayStrings.getTeamNameAndScoreString(data.leaf, scoreData, true));
+                      if ($("#" + lid).html() != displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData, false) && !foundNewest) {
+                          $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData, true));
                           foundNewest = true;
                       } else {
-                          $("#" + lid).html(displayStrings.getTeamNameAndScoreString(data.leaf, scoreData, false));
+                          $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData, false));
                       }
                       return;
                   } else {
-                      if ($("#" + lid).html() != displayStrings.getTeamNameString(data.leaf, false) && !foundNewest) {
-                          $("#" + lid).html(displayStrings.getTeamNameString(data.leaf, true));
+                      if ($("#" + lid).html() != displayStrings.getTeamNameString(lid, data.leaf, false) && !foundNewest) {
+                          $("#" + lid).html(displayStrings.getTeamNameString(lid, data.leaf, true));
                           foundNewest = true;
                       } else {
-                          $("#" + lid).html(displayStrings.getTeamNameString(data.leaf, false));
+                          $("#" + lid).html(displayStrings.getTeamNameString(lid, data.leaf, false));
                       }
                       return;
                   } // /else
@@ -233,6 +233,12 @@ var scrollTicksToSkip = 0;
           console.log(err);
       }); // /first .ajax
       //}); // /.each
+  if ($("a[name=newest]").size() == 1) {
+      $("body").stop();
+      scrollTimer = $.scrollTo($("#top"), 1000, {
+          easing: 'linear'
+      });
+  }
   } // /iterate()
 
   function buildAJAXList() {
