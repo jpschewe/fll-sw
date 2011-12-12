@@ -109,7 +109,7 @@ import fll.util.ScoreUtils;
                 String[] params = item.split("-");
                 final BracketDataType bdt = this.getBracketData().getData(Integer.parseInt(params[1]), Integer.parseInt(params[0]));
                 final TeamScore teamScore = new DatabaseTeamScore(performanceElement, currentTournament, ((TeamBracketCell) bdt).getTeam().getTeamNumber(), Queries.getNumSeedingRounds(connection, currentTournament)+Integer.parseInt(params[1]), connection);
-                if (this.getBracketData().getData(Integer.parseInt(params[1]), Integer.parseInt(params[0])) != null && Integer.parseInt(params[1]) != Queries.getNumPlayoffRounds(connection, ((TeamBracketCell) bdt).getTeam().getDivision())) {
+                if (this.getBracketData().getData(Integer.parseInt(params[1]), Integer.parseInt(params[0])) != null) {
                     if (Double.isNaN(ScoreUtils.computeTotalScore(teamScore)) /*NaN check here is to prevent isVerified from asking about team -1*/
                         || !_showOnlyVerifiedScores 
                         || Queries.isVerified(connection, currentTournament, ((TeamBracketCell) bdt).getTeam().getTeamNumber(), Queries.getNumSeedingRounds(connection, currentTournament)+Integer.parseInt(params[1]))) {
