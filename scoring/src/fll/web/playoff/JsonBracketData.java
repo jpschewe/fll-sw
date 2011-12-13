@@ -113,7 +113,7 @@ import fll.util.ScoreUtils;
                     if (Double.isNaN(ScoreUtils.computeTotalScore(teamScore)) /*NaN check here is to prevent isVerified from asking about team -1*/
                         || !_showOnlyVerifiedScores 
                         || Queries.isVerified(connection, currentTournament, ((TeamBracketCell) bdt).getTeam().getTeamNumber(), Queries.getNumSeedingRounds(connection, currentTournament)+Integer.parseInt(params[1]))) {
-                        if (Double.isNaN(ScoreUtils.computeTotalScore(teamScore))) {
+                        if (Integer.parseInt(params[1]) == Queries.getNumPlayoffRounds(connection, ((TeamBracketCell) bdt).getTeam().getDivision()) /* If score of final round*/|| Double.isNaN(ScoreUtils.computeTotalScore(teamScore))) {
                             datalist.add(new BracketLeafResultSet(bdt, -1.0, item));
                         } else {
                             datalist.add(new BracketLeafResultSet(bdt, ScoreUtils.computeTotalScore(teamScore), item));
