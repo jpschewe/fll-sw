@@ -234,6 +234,8 @@ public final class ScoreEntry {
           formatter.format("if(%s == \"%s\") {%n", rawVarName, value);
           formatter.format("  document.scoreEntry.%s[%d].checked = true;%n", name, valueIdx);
           formatter.format("  %s = %f * %s;%n", computedVarName, valueScore, multiplier);
+          
+          formatter.format("  document.scoreEntry.%s_radioValue.value = '%s'%n", name, value.toUpperCase());
         }
         formatter.format("}%n");
       } else if (0 == min
@@ -452,7 +454,7 @@ public final class ScoreEntry {
           } else if ("goal".equals(goalEleName)) {
             if (XMLUtils.isEnumeratedGoal(goalEle)) {
               // enumerated
-              writer.println("  <td colspan='2'>");
+              writer.println("  <td>");
               generateEnumeratedGoalButtons(goalEle, name, writer);
               writer.println("  </td>");
             } else {
@@ -685,6 +687,11 @@ public final class ScoreEntry {
     }
 
     writer.println("        </table>");
+
+    writer.println("  <td align='right'>");
+    writer.println("    <input type='text' name='"
+        + goalName + "_radioValue' size='10' align='right' readonly tabindex='-1'>");
+
   }
 
   /**
