@@ -925,25 +925,42 @@ public class TournamentSchedule implements Serializable {
   public String computeGeneralSchedule() {
     Date minPerf = null;
     Date maxPerf = null;
-    final Map<String, Date> minSubjectiveTimes = new HashMap<String, Date>();
-    final Map<String, Date> maxSubjectiveTimes = new HashMap<String, Date>();
+    // category -> division -> date
+    final Map<String, Map<String, Date>> minSubjectiveTimes = new HashMap<String, Map<String, Date>>();
+    final Map<String, Map<String, Date>> maxSubjectiveTimes = new HashMap<String, Map<String, Date>>();
 
     for (final TeamScheduleInfo si : _schedule) {
+      final String division = si.getDivision();
       for (final SubjectiveTime stime : si.getSubjectiveTimes()) {
-        final Date currentMin = minSubjectiveTimes.get(stime.getName());
+        final Map<String, Date> minSubTimes;
+        if (minSubjectiveTimes.containsKey(stime.getName())) {
+          minSubTimes = minSubjectiveTimes.get(stime.getName());
+        } else {
+          minSubTimes = new HashMap<String, Date>();
+          minSubjectiveTimes.put(stime.getName(), minSubTimes);
+        }
+        final Map<String, Date> maxSubTimes;
+        if (maxSubjectiveTimes.containsKey(stime.getName())) {
+          maxSubTimes = maxSubjectiveTimes.get(stime.getName());
+        } else {
+          maxSubTimes = new HashMap<String, Date>();
+          maxSubjectiveTimes.put(stime.getName(), maxSubTimes);
+        }
+
+        final Date currentMin = minSubTimes.get(division);
         if (null == currentMin) {
-          minSubjectiveTimes.put(stime.getName(), stime.getTime());
+          minSubTimes.put(division, stime.getTime());
         } else {
           if (stime.getTime().before(currentMin)) {
-            minSubjectiveTimes.put(stime.getName(), stime.getTime());
+            minSubTimes.put(division, stime.getTime());
           }
         }
-        final Date currentMax = maxSubjectiveTimes.get(stime.getName());
+        final Date currentMax = maxSubTimes.get(division);
         if (null == currentMax) {
-          maxSubjectiveTimes.put(stime.getName(), stime.getTime());
+          maxSubTimes.put(division, stime.getTime());
         } else {
           if (stime.getTime().after(currentMax)) {
-            maxSubjectiveTimes.put(stime.getName(), stime.getTime());
+            maxSubTimes.put(division, stime.getTime());
           }
         }
 
@@ -971,12 +988,21 @@ public class TournamentSchedule implements Serializable {
 
     // print out the general schedule
     final Formatter output = new Formatter();
-    final Set<String> subjectiveKeys = new HashSet<String>();
-    subjectiveKeys.addAll(minSubjectiveTimes.keySet());
-    subjectiveKeys.addAll(maxSubjectiveTimes.keySet());
-    for (final String key : subjectiveKeys) {
-      output.format("Earliest %s start: %s%n", key, OUTPUT_DATE_FORMAT.get().format(minSubjectiveTimes.get(key)));
-      output.format("Latest %s start: %s%n", key, OUTPUT_DATE_FORMAT.get().format(maxSubjectiveTimes.get(key)));
+    final Set<String> categories = new HashSet<String>();
+    categories.addAll(minSubjectiveTimes.keySet());
+    categories.addAll(maxSubjectiveTimes.keySet());
+    for (final String category : categories) {
+      final Map<String, Date> minTimes = minSubjectiveTimes.get(category);
+      final Map<String, Date> maxTimes = maxSubjectiveTimes.get(category);
+      output.format("%s%n", category);
+
+      final Set<String> divisions = new HashSet<String>();
+      divisions.addAll(minTimes.keySet());
+      divisions.addAll(maxTimes.keySet());
+      for (final String division : divisions) {
+        output.format("    Earliest start for division %s: %s%n", division, OUTPUT_DATE_FORMAT.get().format(minTimes.get(division)));
+        output.format("    Latest start for division %s: %s%n", division, OUTPUT_DATE_FORMAT.get().format(maxTimes.get(division)));
+      }
     }
     output.format("Earliest performance start: %s%n", OUTPUT_DATE_FORMAT.get().format(minPerf));
     output.format("Latest performance start: %s%n", OUTPUT_DATE_FORMAT.get().format(maxPerf));
