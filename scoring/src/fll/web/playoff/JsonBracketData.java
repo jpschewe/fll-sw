@@ -49,21 +49,27 @@ import fll.util.ScoreUtils;
         return _bracketdata;
     }
     
-    public static class ForceJsRefresh {
+    public abstract static class JsonResults {
+    }
+    
+    public static class ForceJsRefresh extends JsonResults {
         public Boolean refresh = true;
     }
     
-    public static class BracketLeafResultSet {
+    public static class BracketLeafResultSet extends JsonResults {
         public BracketDataType leaf;
         
         public Double score;
         
         public String originator;
         
-        public BracketLeafResultSet(final BracketDataType bdt, final Double scr, final String origin) {
+        public BracketLeafResultSet (final BracketDataType bdt, final Double scr, final String origin) {
             leaf = bdt;
             score = scr;
             originator = origin;
+        }
+        public BracketLeafResultSet () { //Null constructor to have some sort of item in null lists
+            score = -1.0;
         }
     }
     
@@ -100,7 +106,7 @@ import fll.util.ScoreUtils;
    * @param ids A list of strings consisting of row, a dash (-) symbol, then round.
    */
     public String getMultipleBracketLocationsJson(final List<String> ids, DataSource datasource, final Element performanceElement) throws SQLException, ParseException {
-        List<BracketLeafResultSet> datalist = new ArrayList<BracketLeafResultSet>();
+        List<JsonResults> datalist = new ArrayList<JsonResults>();
         try {
             final Connection connection = datasource.getConnection();
             final int currentTournament = Queries.getCurrentTournament(connection);
@@ -109,8 +115,10 @@ import fll.util.ScoreUtils;
                 String[] params = item.split("-");
                 final BracketDataType bdt = this.getBracketData().getData(Integer.parseInt(params[1]), Integer.parseInt(params[0]));
                 final TeamScore teamScore = new DatabaseTeamScore(performanceElement, currentTournament, ((TeamBracketCell) bdt).getTeam().getTeamNumber(), Queries.getNumSeedingRounds(connection, currentTournament)+Integer.parseInt(params[1]), connection);
-                if (this.getBracketData().getData(Integer.parseInt(params[1]), Integer.parseInt(params[0])) != null) {
-                    if (Double.isNaN(ScoreUtils.computeTotalScore(teamScore)) /*NaN check here is to prevent isVerified from asking about team -1*/
+                if (this.getBracketData().getData(Integer.parseInt(params[1]), Integer.parseInt(params[0])) != null && Integer.parseInt(params[1])-1 != Queries.getNumPlayoffRounds(connection, ((TeamBracketCell) bdt).getTeam().getDivision())) {
+                    if (Queries.isNoShow(connection, currentTournament, ((TeamBracketCell) bdt).getTeam().getTeamNumber(), Integer.parseInt(params[1]))) {
+                        datalist.add(new BracketLeafResultSet(bdt, -2.0, item));
+                    } else if (Double.isNaN(ScoreUtils.computeTotalScore(teamScore)) /*NaN check here is to prevent isVerified from asking about team -1*/
                         || !_showOnlyVerifiedScores 
                         || Queries.isVerified(connection, currentTournament, ((TeamBracketCell) bdt).getTeam().getTeamNumber(), Queries.getNumSeedingRounds(connection, currentTournament)+Integer.parseInt(params[1]))) {
                         if (Integer.parseInt(params[1]) == Queries.getNumPlayoffRounds(connection, ((TeamBracketCell) bdt).getTeam().getDivision()) /* If score of final round*/|| Double.isNaN(ScoreUtils.computeTotalScore(teamScore))) {
@@ -127,6 +135,10 @@ import fll.util.ScoreUtils;
             throw new RuntimeException(e);
         } catch (final ParseException e) {
             throw new RuntimeException(e);
+        }
+        if (datalist.size() == 0) {
+            //Add some data, so gson's happy.
+            datalist.add(new BracketLeafResultSet());
         }
         return _gson.toJson(datalist);
     }
