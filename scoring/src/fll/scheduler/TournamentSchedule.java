@@ -150,6 +150,7 @@ public class TournamentSchedule implements Serializable {
     }
   };
 
+  // time->table side->team
   private final HashMap<Date, Map<String, List<TeamScheduleInfo>>> _matches = new HashMap<Date, Map<String, List<TeamScheduleInfo>>>();
 
   public Map<Date, Map<String, List<TeamScheduleInfo>>> getMatches() {
@@ -1048,6 +1049,9 @@ public class TournamentSchedule implements Serializable {
                                        final int round) {
     final List<TeamScheduleInfo> tableMatches = _matches.get(ti.getPerfTime(round)).get(ti.getPerfTableColor(round));
     if (tableMatches.size() > 1) {
+      if(tableMatches.get(0).equals(tableMatches.get(1))) {
+        throw new FLLRuntimeException("Internal error, _matches is inconsistent. Has team competing against itself");
+      }
       if (tableMatches.get(0).equals(ti)) {
         return tableMatches.get(1);
       } else {
