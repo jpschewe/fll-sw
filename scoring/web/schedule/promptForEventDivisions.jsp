@@ -14,19 +14,10 @@ ${message}
 <c:remove var="message" />
 
 <p>
-There are some warnings in the schedule.  
-</p>
- 
-<ul>
-<c:forEach items="${uploadSchedule_violations}" var="violation">
-  <li class='soft-violation'>${violation.message }</li>
-</c:forEach> 
-</ul>
-
-<p>
-Do you want to proceed and use this schedule?
-<a href='<c:url value="/schedule/promptForEventDivisions.jsp"/>'>Yes</a>
-<a href='<c:url value="/admin/index.jsp"/>'>No</a>
+Would you like to set the event divisions based upon the divisions in this schedule? 
+You will be prompted with the changes before they are committed.<br/>
+<a href='<c:url value="/schedule/GatherEventDivisionChanges"/>'>Yes</a>
+<a href='<c:url value="/schedule/CommitSchedule"/>'>No</a>
 </p>
 
 </body>
