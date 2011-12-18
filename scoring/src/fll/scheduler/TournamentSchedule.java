@@ -923,27 +923,29 @@ public class TournamentSchedule implements Serializable {
    * Compute the general schedule and return it as a string
    */
   public String computeGeneralSchedule() {
-    final Date[] minPerf = new Date[getNumberOfRounds()];
-    final Date[] maxPerf = new Date[getNumberOfRounds()];
+    Date minPerf = null;
+    Date maxPerf = null;
+    // division -> date
     final Map<String, Date> minSubjectiveTimes = new HashMap<String, Date>();
     final Map<String, Date> maxSubjectiveTimes = new HashMap<String, Date>();
 
     for (final TeamScheduleInfo si : _schedule) {
+      final String judgingStation = si.getJudgingStation();
       for (final SubjectiveTime stime : si.getSubjectiveTimes()) {
-        final Date currentMin = minSubjectiveTimes.get(stime.getName());
+        final Date currentMin = minSubjectiveTimes.get(judgingStation);
         if (null == currentMin) {
-          minSubjectiveTimes.put(stime.getName(), stime.getTime());
+          minSubjectiveTimes.put(judgingStation, stime.getTime());
         } else {
           if (stime.getTime().before(currentMin)) {
-            minSubjectiveTimes.put(stime.getName(), stime.getTime());
+            minSubjectiveTimes.put(judgingStation, stime.getTime());
           }
         }
-        final Date currentMax = maxSubjectiveTimes.get(stime.getName());
+        final Date currentMax = maxSubjectiveTimes.get(judgingStation);
         if (null == currentMax) {
-          maxSubjectiveTimes.put(stime.getName(), stime.getTime());
+          maxSubjectiveTimes.put(judgingStation, stime.getTime());
         } else {
           if (stime.getTime().after(currentMax)) {
-            maxSubjectiveTimes.put(stime.getName(), stime.getTime());
+            maxSubjectiveTimes.put(judgingStation, stime.getTime());
           }
         }
 
@@ -954,14 +956,14 @@ public class TournamentSchedule implements Serializable {
           // ignore the teams that cross round boundaries
           final int opponentRound = findOpponentRound(si, i);
           if (opponentRound == i) {
-            if (null == minPerf[i]
-                || si.getPerfTime(i).before(minPerf[i])) {
-              minPerf[i] = si.getPerfTime(i);
+            if (null == minPerf
+                || si.getPerfTime(i).before(minPerf)) {
+              minPerf = si.getPerfTime(i);
             }
 
-            if (null == maxPerf[i]
-                || si.getPerfTime(i).after(maxPerf[i])) {
-              maxPerf[i] = si.getPerfTime(i);
+            if (null == maxPerf
+                || si.getPerfTime(i).after(maxPerf)) {
+              maxPerf = si.getPerfTime(i);
             }
           }
         }
@@ -971,17 +973,17 @@ public class TournamentSchedule implements Serializable {
 
     // print out the general schedule
     final Formatter output = new Formatter();
-    final Set<String> subjectiveKeys = new HashSet<String>();
-    subjectiveKeys.addAll(minSubjectiveTimes.keySet());
-    subjectiveKeys.addAll(maxSubjectiveTimes.keySet());
-    for (final String key : subjectiveKeys) {
-      output.format("min %s: %s%n", key, OUTPUT_DATE_FORMAT.get().format(minSubjectiveTimes.get(key)));
-      output.format("max %s: %s%n", key, OUTPUT_DATE_FORMAT.get().format(maxSubjectiveTimes.get(key)));
+    final Set<String> stations = new HashSet<String>();
+    stations.addAll(minSubjectiveTimes.keySet());
+    stations.addAll(maxSubjectiveTimes.keySet());
+    for (final String station : stations) {
+      output.format("Subjective earliest start for judging station %s: %s%n", station,
+                    OUTPUT_DATE_FORMAT.get().format(minSubjectiveTimes.get(station)));
+      output.format("Subjective latest start for judging station %s: %s%n", station,
+                    OUTPUT_DATE_FORMAT.get().format(maxSubjectiveTimes.get(station)));
     }
-    for (int i = 0; i < getNumberOfRounds(); ++i) {
-      output.format("min performance round %d: %s%n", (i + 1), OUTPUT_DATE_FORMAT.get().format(minPerf[i]));
-      output.format("max performance round %d: %s%n", (i + 1), OUTPUT_DATE_FORMAT.get().format(maxPerf[i]));
-    }
+    output.format("Earliest performance start: %s%n", OUTPUT_DATE_FORMAT.get().format(minPerf));
+    output.format("Latest performance start: %s%n", OUTPUT_DATE_FORMAT.get().format(maxPerf));
     return output.toString();
   }
 
