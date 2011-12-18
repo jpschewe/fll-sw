@@ -155,10 +155,13 @@ var scrollTicksToSkip = 0;
       }
   }
   displayStrings.getTeamNameAndScoreString = function (id, data, scoreData, newest) {
+      if (scoreData != "No Show") {
+          scoreData += ".0";
+      }
       if (newest) {
-          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><font class=\"TeamScore\"> Score: " + scoreData + ".0</font>";
+          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><font class=\"TeamScore\"> Score: " + scoreData + "</font>";
       } else {
-          return "<font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><font class=\"TeamScore\"> Score: " + scoreData + ".0</font>";
+          return "<font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><font class=\"TeamScore\"> Score: " + scoreData + "</font>";
       }
   }
 
@@ -198,7 +201,7 @@ var scrollTicksToSkip = 0;
                   //table label?
                   placeTableLabel(lid, data.leaf._table, data.leaf._dbLine);
                   var scoreData = data.score;
-                  if (scoreData != -1) {
+                  if (scoreData >= 0) {
                       if ($("#" + lid).html() != displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData, false) && !foundNewest) {
                           $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData, true));
                           foundNewest = true;
@@ -214,7 +217,7 @@ var scrollTicksToSkip = 0;
                           $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, "No Show", false));
                       }
                       return;
-                  } else {
+                  } else if (scoreData == -1) {
                       if ($("#" + lid).html() != displayStrings.getTeamNameString(lid, data.leaf, false) && !foundNewest) {
                           $("#" + lid).html(displayStrings.getTeamNameString(lid, data.leaf, true));
                           foundNewest = true;
@@ -232,13 +235,6 @@ var scrollTicksToSkip = 0;
           console.log(errstring);
           console.log(err);
       }); // /first .ajax
-      //}); // /.each
-  if ($("a[name=newest]").size() == 1) {
-      $("body").stop();
-      scrollTimer = $.scrollTo($("#top"), 1000, {
-          easing: 'linear'
-      });
-  }
   } // /iterate()
 
   function placeTableLabel(lid, table, dbLine) {
