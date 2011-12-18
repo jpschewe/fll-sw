@@ -116,7 +116,7 @@ public class CheckViolations extends BaseFLLServlet {
       final ScheduleChecker checker = new ScheduleChecker(schedParams, schedule);
       violations.addAll(checker.verifySchedule());
       if (violations.isEmpty()) {
-        WebUtils.sendRedirect(application, response, "/schedule/CommitSchedule");
+        WebUtils.sendRedirect(application, response, "promptForEventDivisions.jsp");
         return;
       } else {
         session.setAttribute("uploadSchedule_violations", violations);
