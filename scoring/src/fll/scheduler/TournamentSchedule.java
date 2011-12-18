@@ -930,22 +930,22 @@ public class TournamentSchedule implements Serializable {
     final Map<String, Date> maxSubjectiveTimes = new HashMap<String, Date>();
 
     for (final TeamScheduleInfo si : _schedule) {
-      final String division = si.getDivision();
+      final String judgingStation = si.getJudgingStation();
       for (final SubjectiveTime stime : si.getSubjectiveTimes()) {
-        final Date currentMin = minSubjectiveTimes.get(division);
+        final Date currentMin = minSubjectiveTimes.get(judgingStation);
         if (null == currentMin) {
-          minSubjectiveTimes.put(division, stime.getTime());
+          minSubjectiveTimes.put(judgingStation, stime.getTime());
         } else {
           if (stime.getTime().before(currentMin)) {
-            minSubjectiveTimes.put(division, stime.getTime());
+            minSubjectiveTimes.put(judgingStation, stime.getTime());
           }
         }
-        final Date currentMax = maxSubjectiveTimes.get(division);
+        final Date currentMax = maxSubjectiveTimes.get(judgingStation);
         if (null == currentMax) {
-          maxSubjectiveTimes.put(division, stime.getTime());
+          maxSubjectiveTimes.put(judgingStation, stime.getTime());
         } else {
           if (stime.getTime().after(currentMax)) {
-            maxSubjectiveTimes.put(division, stime.getTime());
+            maxSubjectiveTimes.put(judgingStation, stime.getTime());
           }
         }
 
@@ -973,14 +973,14 @@ public class TournamentSchedule implements Serializable {
 
     // print out the general schedule
     final Formatter output = new Formatter();
-    final Set<String> divisions = new HashSet<String>();
-    divisions.addAll(minSubjectiveTimes.keySet());
-    divisions.addAll(maxSubjectiveTimes.keySet());
-    for (final String division : divisions) {
-      output.format("Subjective earliest start for division %s: %s%n", division,
-                    OUTPUT_DATE_FORMAT.get().format(minSubjectiveTimes.get(division)));
-      output.format("Subjective latest start for division %s: %s%n", division,
-                    OUTPUT_DATE_FORMAT.get().format(maxSubjectiveTimes.get(division)));
+    final Set<String> stations = new HashSet<String>();
+    stations.addAll(minSubjectiveTimes.keySet());
+    stations.addAll(maxSubjectiveTimes.keySet());
+    for (final String station : stations) {
+      output.format("Subjective earliest start for judging station %s: %s%n", station,
+                    OUTPUT_DATE_FORMAT.get().format(minSubjectiveTimes.get(station)));
+      output.format("Subjective latest start for judging station %s: %s%n", station,
+                    OUTPUT_DATE_FORMAT.get().format(maxSubjectiveTimes.get(station)));
     }
     output.format("Earliest performance start: %s%n", OUTPUT_DATE_FORMAT.get().format(minPerf));
     output.format("Latest performance start: %s%n", OUTPUT_DATE_FORMAT.get().format(maxPerf));
