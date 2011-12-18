@@ -157,9 +157,9 @@ ${message}
 	<div id='EventDivisionHelp' class='help' style='display: none'>
 	Typical tournaments have 2 groups of teams competing against each
 	other, one for division 1 and one for division 2. If your tournament
-	team groupings are not based solely on the divsion of the teams, e.g.
+	team groupings are not based solely on the division of the teams, e.g.
 	you have 2 groups of teams that are all division 1, use this page to
-	assign &ldquo;event divsions&rdquo; to divide your tournament&rsquo;s
+	assign &ldquo;event divisions&rdquo; to divide your tournament&rsquo;s
 	teams into the groups in which they will be competing.<br>
 	<a href='javascript:hide("EventDivisionHelp")'>[hide]</a></div>
 	</li>

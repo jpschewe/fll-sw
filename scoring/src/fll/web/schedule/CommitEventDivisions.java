@@ -9,6 +9,7 @@ package fll.web.schedule;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -20,7 +21,6 @@ import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 
 import fll.db.Queries;
-import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
@@ -31,10 +31,10 @@ import fll.web.WebUtils;
  * Commit the schedule in uploadSchedule_schedule to the database for the
  * current tournament.
  * 
- * @web.servlet name="CommitSchedule"
- * @web.servlet-mapping url-pattern="/schedule/CommitSchedule"
+ * @web.servlet name="CommitEventDivisions"
+ * @web.servlet-mapping url-pattern="/schedule/CommitEventDivisions"
  */
-public class CommitSchedule extends BaseFLLServlet {
+public class CommitEventDivisions extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -49,13 +49,17 @@ public class CommitSchedule extends BaseFLLServlet {
       final Connection connection = datasource.getConnection();
       final int tournamentID = Queries.getCurrentTournament(connection);
 
-      final TournamentSchedule schedule = SessionAttributes.getNonNullAttribute(session, UploadSchedule.SCHEDULE_KEY,
-                                                                                TournamentSchedule.class);
+      // can't put types inside a session
+      @SuppressWarnings("unchecked")
+      final List<EventDivisionInfo> eventDivisionInfo = SessionAttributes.getNonNullAttribute(session,
+                                                                                              GatherEventDivisionChanges.EVENT_DIVISION_INFO_KEY,
+                                                                                              List.class);
+      for (final EventDivisionInfo info : eventDivisionInfo) {
+        Queries.updateTeamEventDivision(connection, info.getTeamNumber(), tournamentID, info.getEventDivision());
+      }
+      session.removeAttribute(GatherEventDivisionChanges.EVENT_DIVISION_INFO_KEY);
 
-      schedule.storeSchedule(connection, tournamentID);
-
-      session.setAttribute(SessionAttributes.MESSAGE, "<p>Schedule successfully stored in the database</p>");
-      WebUtils.sendRedirect(application, response, "/admin/index.jsp");
+      WebUtils.sendRedirect(application, response, "/schedule/CommitSchedule");
       return;
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);

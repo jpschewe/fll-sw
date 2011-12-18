@@ -2197,6 +2197,25 @@ public final class Queries {
   }
 
   /**
+   * Update a team region.
+   */
+  public static void updateTeamEventDivision(final Connection connection,
+                                             final int number,
+                                             final int tournamentID,
+                                             final String eventDivision) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE TournamentTeams SET event_division = ? WHERE TeamNumber = ? AND Tournament = ?");
+      prep.setString(1, eventDivision);
+      prep.setInt(2, number);
+      prep.setInt(3, tournamentID);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
    * Update a team name.
    */
   public static void updateTeamName(final Connection connection,

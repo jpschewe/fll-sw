@@ -19,6 +19,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import fll.Utilities;
+import fll.util.FLLRuntimeException;
 
 /**
  * Check for violations in a schedule.
@@ -193,6 +194,9 @@ public class ScheduleChecker {
     final Set<String> tableSides = new HashSet<String>();
     for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
       final TeamScheduleInfo opponent = schedule.findOpponent(ti, round);
+      if(opponent.getTeamNumber() == ti.getTeamNumber()) {
+        throw new FLLRuntimeException("Internal error, findOpponent is broken and returned the same team");
+      }
       if (null != opponent) {
         if (!tableSides.add(ti.getPerfTableColor(round)
             + " " + ti.getPerfTableSide(round))) {
