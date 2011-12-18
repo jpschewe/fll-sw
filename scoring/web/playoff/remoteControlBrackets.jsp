@@ -206,6 +206,14 @@ var scrollTicksToSkip = 0;
                           $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, scoreData, false));
                       }
                       return;
+                  } else if (scoreData == -2) {
+                      if ($("#" + lid).html() != displayStrings.getTeamNameAndScoreString(lid, data.leaf, "No Show", false) && !foundNewest) {
+                          $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, "No Show", true));
+                          foundNewest = true;
+                      } else {
+                          $("#" + lid).html(displayStrings.getTeamNameAndScoreString(lid, data.leaf, "No Show", false));
+                      }
+                      return;
                   } else {
                       if ($("#" + lid).html() != displayStrings.getTeamNameString(lid, data.leaf, false) && !foundNewest) {
                           $("#" + lid).html(displayStrings.getTeamNameString(lid, data.leaf, true));
