@@ -7,6 +7,7 @@ package fll.db;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -84,7 +85,8 @@ public final class DumpDB extends BaseFLLServlet {
     try {
       stmt = connection.createStatement();
 
-      final OutputStreamWriter outputWriter = new OutputStreamWriter(output);
+      final Charset charset = Charset.forName("UTF-8");
+      final OutputStreamWriter outputWriter = new OutputStreamWriter(output, charset);
 
       // output the challenge descriptor
       output.putNextEntry(new ZipEntry("challenge.xml"));

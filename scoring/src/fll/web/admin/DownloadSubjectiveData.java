@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -99,7 +100,8 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
       final Element top = document.createElement("scores");
       document.appendChild(top);
 
-      for (final Element categoryDescription : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement()
+      for (final Element categoryDescription : new NodelistElementCollectionAdapter(
+                                                                                    challengeDocument.getDocumentElement()
                                                                                                      .getElementsByTagName("subjectiveCategory"))) {
         final String categoryName = categoryDescription.getAttribute("name");
         final Element categoryElement = document.createElement(categoryName);
@@ -132,7 +134,8 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
               prep2.setString(3, judge);
               rs2 = prep2.executeQuery();
               if (rs2.next()) {
-                for (final Element goalDescription : new NodelistElementCollectionAdapter(categoryDescription.getElementsByTagName("goal"))) {
+                for (final Element goalDescription : new NodelistElementCollectionAdapter(
+                                                                                          categoryDescription.getElementsByTagName("goal"))) {
                   final String goalName = goalDescription.getAttribute("name");
                   final String value = rs2.getString(goalName);
                   if (!rs2.wasNull()) {
@@ -167,14 +170,17 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
     final int tournament = Queries.getCurrentTournament(connection);
 
     final ZipOutputStream zipOut = new ZipOutputStream(stream);
-    final Writer writer = new OutputStreamWriter(zipOut);
+    final Charset charset = Charset.forName("UTF-8");
+    final Writer writer = new OutputStreamWriter(zipOut, charset);
 
     zipOut.putNextEntry(new ZipEntry("challenge.xml"));
     XMLUtils.writeXML(challengeDocument, writer, "UTF-8");
     zipOut.closeEntry();
 
     zipOut.putNextEntry(new ZipEntry("score.xml"));
-    final Document scoreDocument = DownloadSubjectiveData.createSubjectiveScoresDocument(challengeDocument, tournamentTeams.values(), connection, tournament);
+    final Document scoreDocument = DownloadSubjectiveData.createSubjectiveScoresDocument(challengeDocument,
+                                                                                         tournamentTeams.values(),
+                                                                                         connection, tournament);
     XMLUtils.writeXML(scoreDocument, writer, "UTF-8");
     zipOut.closeEntry();
 
