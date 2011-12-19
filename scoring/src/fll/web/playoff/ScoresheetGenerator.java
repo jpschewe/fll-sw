@@ -480,9 +480,11 @@ public class ScoresheetGenerator {
           m_goalLabel[realI].setVerticalAlignment(Element.ALIGN_TOP);
           try {
             final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
-            final String minStr = min == Math.round(min) ? String.valueOf((int)min) : String.valueOf(min);
+            final String minStr = FP.equals(min, Math.round(min), 1E-6) ? String.valueOf((int) min)
+                : String.valueOf(min);
             final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
-            final String maxStr = max == Math.round(max) ? String.valueOf((int)max) : String.valueOf(max);
+            final String maxStr = FP.equals(max, Math.round(max), 1E-6) ? String.valueOf((int) max)
+                : String.valueOf(max);
 
             // If element has child nodes, then we have an enumerated list
             // of choices. Otherwise it is either yes/no or a numeric field.
