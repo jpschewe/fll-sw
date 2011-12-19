@@ -115,10 +115,8 @@ FONT.TIE {
 	padding-right: 5%
 }
 </style>
-<%final String jQueryURL = response.encodeURL("/fll-sw/jquery-1.7.1.min.js");%>
-<script type="text/javascript" src="<%=jQueryURL%>"></script>
-<%final String scrollToURL = response.encodeURL("/fll-sw/jquery.scrollTo-1.4.2-min.js");%>
-<script type="text/javascript" src="<%=scrollToURL%>"></script>
+<script type="text/javascript" src="<c:url value='/jquery-1.7.1.min.js'/>"></script>
+<script type="text/javascript" src="<c:url value='/jquery.scrollTo-1.4.2-min.js'/>"></script>
 <!-- stuff for automatic scrolling -->
 <script type="text/javascript">
 var scrollTimer;
@@ -130,10 +128,8 @@ var scrollTicksToSkip = 0;
 </script>
 <!-- end stuff for automatic scrolling -->
 <script type="text/javascript">
-  <%final String ajaxURL = response.encodeURL("/fll-sw/ajax/");%>
-  var ajaxURL = '<%=ajaxURL%>';
-  <%final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournament); %>
-  var seedingRounds = <%=numSeedingRounds%>;
+  var ajaxURL = '<c:url value="/ajax/"/>';
+  var seedingRounds = <%=Queries.getNumSeedingRounds(connection, currentTournament)%>;
   var currentRound = <%=playoffRoundNumber-1%>;
   var foundNewest = false;
   var rows = <%=bracketInfo.getNumRows()%>;
