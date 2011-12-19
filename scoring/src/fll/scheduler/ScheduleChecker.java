@@ -194,10 +194,11 @@ public class ScheduleChecker {
     final Set<String> tableSides = new HashSet<String>();
     for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
       final TeamScheduleInfo opponent = schedule.findOpponent(ti, round);
-      if(opponent.getTeamNumber() == ti.getTeamNumber()) {
-        throw new FLLRuntimeException("Internal error, findOpponent is broken and returned the same team");
-      }
       if (null != opponent) {
+        if(opponent.getTeamNumber() == ti.getTeamNumber()) {
+          throw new FLLRuntimeException("Internal error, findOpponent is broken and returned the same team");
+        }
+        
         if (!tableSides.add(ti.getPerfTableColor(round)
             + " " + ti.getPerfTableSide(round))) {
           final String tableMessage = String.format("Team %d is competing on %s %d more than once", ti.getTeamNumber(),
