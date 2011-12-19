@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
+import net.mtu.eggplant.util.ComparisonUtils;
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
 
@@ -207,7 +207,7 @@ public class ScheduleChecker {
         }
 
         /* Not sure I like this check
-        if (!Functions.safeEquals(ti.getDivision(), opponent.getDivision())) {
+        if (!ComparisonUtils.safeEquals(ti.getDivision(), opponent.getDivision())) {
           final String divMessage = String.format("Team %d in division %s is competing against team %d from division %s round %d",
                                                   ti.getTeamNumber(), ti.getDivision(), opponent.getTeamNumber(),
                                                   opponent.getDivision(), (round + 1));

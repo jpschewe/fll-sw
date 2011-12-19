@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -566,13 +567,14 @@ public final class SubjectiveFrame extends JFrame {
     if (validateData()) {
 
       final ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(_file));
-      final Writer writer = new OutputStreamWriter(zipOut);
+      final Charset charset = Charset.forName("UTF-8");
+      final Writer writer = new OutputStreamWriter(zipOut, charset);
 
       zipOut.putNextEntry(new ZipEntry("challenge.xml"));
-      XMLUtils.writeXML(_challengeDocument, writer);
+      XMLUtils.writeXML(_challengeDocument, writer, "UTF-8");
       zipOut.closeEntry();
       zipOut.putNextEntry(new ZipEntry("score.xml"));
-      XMLUtils.writeXML(_scoreDocument, writer);
+      XMLUtils.writeXML(_scoreDocument, writer, "UTF-8");
       zipOut.closeEntry();
 
       zipOut.close();
