@@ -63,6 +63,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="scoring/lib/test/selenium-server-standalone-2.1.0.jar" sourcepath="scoring/lib/test/selenium-server-2.1.0-srcs.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/ant/checkstyle-5.4-all.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/JonsInfra-1.3.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/JonsInfra-1.3.jar" sourcepath="scoring/lib/source/JonsInfra-1.3-src.zip"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
