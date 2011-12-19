@@ -2,7 +2,7 @@ package fll.web.playoff;
 
 import java.util.List;
 import java.util.Iterator;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -49,14 +49,11 @@ import fll.util.ScoreUtils;
         return _bracketdata;
     }
     
-    public abstract static class JsonResults {
-    }
-    
-    public static class ForceJsRefresh extends JsonResults {
+    public static class ForceJsRefresh {
         public Boolean refresh = true;
     }
     
-    public static class BracketLeafResultSet extends JsonResults {
+    public static class BracketLeafResultSet {
         public BracketDataType leaf;
         
         public Double score;
@@ -106,7 +103,7 @@ import fll.util.ScoreUtils;
    * @param ids A list of strings consisting of row, a dash (-) symbol, then round.
    */
     public String getMultipleBracketLocationsJson(final List<String> ids, DataSource datasource, final Element performanceElement) throws SQLException, ParseException {
-        List<JsonResults> datalist = new ArrayList<JsonResults>();
+        List<BracketLeafResultSet> datalist = new LinkedList<BracketLeafResultSet>();
         try {
             final Connection connection = datasource.getConnection();
             final int currentTournament = Queries.getCurrentTournament(connection);
