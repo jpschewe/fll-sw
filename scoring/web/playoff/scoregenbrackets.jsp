@@ -84,7 +84,7 @@ final Connection connection = datasource.getConnection();
     <p><a href="index.jsp">Return to Playoff menu</a></p>
       <form name='printScoreSheets' method='post' action='ScoresheetServlet' target='_new'>
       <input type='hidden' name='numMatches' value='<%=numMatches %>'/>
-      <input type='submit' value='Print scoresheets'/>
+      <input type='submit' value='Print scoresheets'/> - <b>Print the scoresheets for the brackets that have their boxes checked.</b>
       <table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>
       <%=bracketInfo.getHtmlHeaderRow()%>
 <%  for(int rowIndex = 1; rowIndex <= bracketInfo.getNumRows(); rowIndex++) { %>
