@@ -552,4 +552,19 @@ public final class Utilities {
   public static long convertMinutesToMilliseconds(final long minutes) {
     return convertMinutesToSeconds(minutes) * MILLISECONDS_PER_SECOND;
   }
+
+  /**
+   * Get the name of the file without the extension (if there is one).
+   */
+  public static String extractBasename(final File selectedFile) {
+    final String name;
+    final String fullname = selectedFile.getName();
+    final int dotIndex = fullname.lastIndexOf('.');
+    if (-1 != dotIndex) {
+      name = fullname.substring(0, dotIndex);
+    } else {
+      name = fullname;
+    }
+    return name;
+  }
 }
