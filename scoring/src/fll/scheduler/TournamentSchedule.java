@@ -185,6 +185,10 @@ public class TournamentSchedule implements Serializable {
    */
   private final String name;
 
+  public String getName() {
+    return name;
+  }
+
   /**
    * The list of subjective stations for this schedule.
    */
@@ -753,7 +757,7 @@ public class TournamentSchedule implements Serializable {
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 2, 2 });
 
     final PdfPCell tournamentCell = createHeaderCell("Tournament: "
-        + name + " Performance");
+        + getName() + " Performance");
     tournamentCell.setColspan(7);
     table.addCell(tournamentCell);
 
@@ -848,7 +852,7 @@ public class TournamentSchedule implements Serializable {
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
 
     final PdfPCell tournamentCell = createHeaderCell("Tournament: "
-        + name + " - " + subjectiveStation);
+        + getName() + " - " + subjectiveStation);
     tournamentCell.setColspan(6);
     table.addCell(tournamentCell);
 
@@ -1049,7 +1053,7 @@ public class TournamentSchedule implements Serializable {
                                        final int round) {
     final List<TeamScheduleInfo> tableMatches = _matches.get(ti.getPerfTime(round)).get(ti.getPerfTableColor(round));
     if (tableMatches.size() > 1) {
-      if(tableMatches.get(0).equals(tableMatches.get(1))) {
+      if (tableMatches.get(0).equals(tableMatches.get(1))) {
         throw new FLLRuntimeException("Internal error, _matches is inconsistent. Has team competing against itself");
       }
       if (tableMatches.get(0).equals(ti)) {
