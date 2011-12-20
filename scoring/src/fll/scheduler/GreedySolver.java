@@ -101,7 +101,7 @@ public class GreedySolver {
   private final boolean optimize;
 
   private static final String ALTERNATE_OPTION = "a";
-  
+
   private static final String OPTIMIZE_OPTION = "o";
 
   private static final String START_TIME_OPTION = "s";
@@ -121,9 +121,10 @@ public class GreedySolver {
     option = new Option(OPTIMIZE_OPTION, "optimize", false, "Turn on optimization (default: false)");
     options.addOption(option);
 
-    option = new Option(ALTERNATE_OPTION, "alternate", false, "Alternate performance tables at large tournaments (default: false)");
+    option = new Option(ALTERNATE_OPTION, "alternate", false,
+                        "Alternate performance tables at large tournaments (default: false)");
     options.addOption(option);
-    
+
     return options;
   }
 
@@ -149,7 +150,7 @@ public class GreedySolver {
       if (cmd.hasOption(OPTIMIZE_OPTION)) {
         optimize = true;
       }
-      if(cmd.hasOption(ALTERNATE_OPTION)) {
+      if (cmd.hasOption(ALTERNATE_OPTION)) {
         alternate = true;
       }
 
@@ -206,8 +207,6 @@ public class GreedySolver {
     final Properties properties = ParseMinizinc.parseMinizincData(datafile);
     LOGGER.debug(properties.toString());
 
-    // TODO validate that all times are divisible by tinc
-
     tinc = ParseMinizinc.readIntProperty(properties, "TInc");
     ngroups = ParseMinizinc.readIntProperty(properties, "NGroups");
 
@@ -236,8 +235,14 @@ public class GreedySolver {
     }
     subjectiveDurations = new int[getNumSubjectiveStations()];
     for (int station = 0; station < subjDurs.length; ++station) {
-      subjectiveDurations[station] = Integer.valueOf(subjDurs[station].trim())
+      final int durationMinutes = Integer.valueOf(subjDurs[station].trim());
+      subjectiveDurations[station] = durationMinutes
           / tinc;
+      if (durationMinutes != subjectiveDurations[station]
+          * tinc) {
+        throw new FLLRuntimeException("Subjective duration for station "
+            + station + " isn't divisible by tinc");
+      }
     }
 
     final String groupCountsStr = properties.getProperty("group_counts");
@@ -256,32 +261,48 @@ public class GreedySolver {
       throw new FLLRuntimeException("Num groups and group_counts array not consistent");
     }
 
-    performanceDuration = ParseMinizinc.readIntProperty(properties, "alpha_perf_minutes")
+    final int performanceDurationMinutes = ParseMinizinc.readIntProperty(properties, "alpha_perf_minutes");
+    performanceDuration = performanceDurationMinutes
         / tinc;
-    changetime = ParseMinizinc.readIntProperty(properties, "ct_minutes")
+    if (performanceDurationMinutes != performanceDuration
+        * tinc) {
+      throw new FLLRuntimeException("Performance duration isn't divisible by tinc");
+    }
+    final int changetimeMinutes = ParseMinizinc.readIntProperty(properties, "ct_minutes");
+    changetime = changetimeMinutes
         / tinc;
-    performanceChangetime = ParseMinizinc.readIntProperty(properties, "pct_minutes")
+    if (changetimeMinutes != changetime
+        * tinc) {
+      throw new FLLRuntimeException("Changetime isn't divisible by tinc");
+    }
+    final int performanceChangetimeMinutes = ParseMinizinc.readIntProperty(properties, "pct_minutes");
+    performanceChangetime = performanceChangetimeMinutes
         / tinc;
+    if (performanceChangetimeMinutes != performanceChangetime
+        * tinc) {
+      throw new FLLRuntimeException("Performance changetime isn't divisible by tinc");
+    }
 
-    if(alternate) {
+    if (alternate) {
       // make sure that we alternate tables
       performanceAttemptOffset = performanceDuration;
 
       // make sure performanceDuration is even
-      if((performanceDuration & 1) == 1) {
-        throw new FLLRuntimeException("Number of timeslots for performance duration (" + performanceDuration + ") is not even and must be to alternate tables.");
+      if ((performanceDuration & 1) == 1) {
+        throw new FLLRuntimeException("Number of timeslots for performance duration ("
+            + performanceDuration + ") is not even and must be to alternate tables.");
       }
-      
+
       // make sure num tables is even
-      if((getNumTables() & 1) == 1) {
-        throw new FLLRuntimeException("Number of tables (" + getNumTables() + ") is not even and must be to alternate tables.");
+      if ((getNumTables() & 1) == 1) {
+        throw new FLLRuntimeException("Number of tables ("
+            + getNumTables() + ") is not even and must be to alternate tables.");
       }
-      
+
     } else {
       performanceAttemptOffset = 1;
     }
-    
-    
+
     sz = new boolean[groups.length][][][];
     sy = new boolean[groups.length][][][];
     pz = new boolean[groups.length][][][][];
@@ -290,11 +311,11 @@ public class GreedySolver {
     subjectiveStations = new int[groups.length][getNumSubjectiveStations()];
     performanceScheduled = new int[groups.length][];
     performanceTables = new int[getNumTables()];
-    if(alternate) {
-      for(int table=0; table < performanceTables.length; ++table) {
+    if (alternate) {
+      for (int table = 0; table < performanceTables.length; ++table) {
         // even is 0, odd is 1/2 performance duration
-        if((table & 1) == 1) {
-          performanceTables[table] = performanceDuration/2;
+        if ((table & 1) == 1) {
+          performanceTables[table] = performanceDuration / 2;
         } else {
           performanceTables[table] = 0;
         }
@@ -769,7 +790,8 @@ public class GreedySolver {
         if (!result
             || optimize) {
           unassignSubjective(team.getGroup(), team.getIndex(), station, timeslot);
-          if (timeslot + getSubjectiveDuration(station) >= getNumTimeslots()) {
+          if (timeslot
+              + getSubjectiveDuration(station) >= getNumTimeslots()) {
             if (LOGGER.isDebugEnabled()) {
               LOGGER.debug("Hit max timeslots - subj");
             }
@@ -1105,6 +1127,7 @@ public class GreedySolver {
   private int getPerformanceAttemptOffset() {
     return performanceAttemptOffset;
   }
+
   private final int performanceAttemptOffset;
 
   private int numTimeslots;
