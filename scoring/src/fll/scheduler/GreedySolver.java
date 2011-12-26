@@ -100,8 +100,6 @@ public class GreedySolver {
 
   private final boolean optimize;
 
-  private static final String ALTERNATE_OPTION = "a";
-
   private static final String OPTIMIZE_OPTION = "o";
 
   private static final String START_TIME_OPTION = "s";
@@ -121,10 +119,6 @@ public class GreedySolver {
     option = new Option(OPTIMIZE_OPTION, "optimize", false, "Turn on optimization (default: false)");
     options.addOption(option);
 
-    option = new Option(ALTERNATE_OPTION, "alternate", false,
-                        "Alternate performance tables at large tournaments (default: false)");
-    options.addOption(option);
-
     return options;
   }
 
@@ -142,16 +136,12 @@ public class GreedySolver {
     boolean optimize = false;
     Date startTime = null;
     File datafile = null;
-    boolean alternate = false;
     try {
       final CommandLineParser parser = new PosixParser();
       final CommandLine cmd = parser.parse(options, args);
 
       if (cmd.hasOption(OPTIMIZE_OPTION)) {
         optimize = true;
-      }
-      if (cmd.hasOption(ALTERNATE_OPTION)) {
-        alternate = true;
       }
 
       startTime = TournamentSchedule.OUTPUT_DATE_FORMAT.get().parse(cmd.getOptionValue(START_TIME_OPTION));
@@ -173,7 +163,7 @@ public class GreedySolver {
         System.exit(4);
       }
 
-      final GreedySolver solver = new GreedySolver(startTime, datafile, optimize, alternate);
+      final GreedySolver solver = new GreedySolver(startTime, datafile, optimize);
       final long start = System.currentTimeMillis();
       solver.solve();
       final long stop = System.currentTimeMillis();
@@ -194,8 +184,7 @@ public class GreedySolver {
    */
   public GreedySolver(final Date startTime,
                       final File datafile,
-                      final boolean optimize,
-                      final boolean alternate) throws IOException {
+                      final boolean optimize) throws IOException {
     this.startTime = new Date(startTime.getTime());
     this.datafile = datafile;
     this.optimize = optimize;
@@ -209,6 +198,28 @@ public class GreedySolver {
 
     tinc = ParseMinizinc.readIntProperty(properties, "TInc");
     ngroups = ParseMinizinc.readIntProperty(properties, "NGroups");
+
+    final int alternateValue = Integer.valueOf(properties.getProperty("alternate_tables", "0").trim());
+    final boolean alternate = alternateValue == 1;
+    LOGGER.debug("Alternate is: " + alternate);
+
+    final int perfOffsetMinutes = Integer.valueOf(properties.getProperty("perf_attempt_offset_minutes",
+                                                                         String.valueOf(tinc)).trim());
+    performanceAttemptOffset = perfOffsetMinutes
+        / tinc;
+    if (perfOffsetMinutes != performanceAttemptOffset
+        * tinc) {
+      throw new FLLRuntimeException("perf_attempt_offset_minutes isn't divisible by tinc");
+    }
+
+    final int subjOffsetMinutes = Integer.valueOf(properties.getProperty("subjective_attempt_offset_minutes",
+                                                                         String.valueOf(tinc)).trim());
+    subjectiveAttemptOffset = subjOffsetMinutes
+        / tinc;
+    if (subjOffsetMinutes != subjectiveAttemptOffset
+        * tinc) {
+      throw new FLLRuntimeException("subjective_attempt_offset_minutes isn't divisible by tinc");
+    }
 
     numPerformanceRounds = ParseMinizinc.readIntProperty(properties, "NRounds");
     numTables = ParseMinizinc.readIntProperty(properties, "NTables");
@@ -268,6 +279,7 @@ public class GreedySolver {
         * tinc) {
       throw new FLLRuntimeException("Performance duration isn't divisible by tinc");
     }
+    
     final int changetimeMinutes = ParseMinizinc.readIntProperty(properties, "ct_minutes");
     changetime = changetimeMinutes
         / tinc;
@@ -275,6 +287,7 @@ public class GreedySolver {
         * tinc) {
       throw new FLLRuntimeException("Changetime isn't divisible by tinc");
     }
+    
     final int performanceChangetimeMinutes = ParseMinizinc.readIntProperty(properties, "pct_minutes");
     performanceChangetime = performanceChangetimeMinutes
         / tinc;
@@ -284,9 +297,6 @@ public class GreedySolver {
     }
 
     if (alternate) {
-      // make sure that we alternate tables
-      performanceAttemptOffset = performanceDuration;
-
       // make sure performanceDuration is even
       if ((performanceDuration & 1) == 1) {
         throw new FLLRuntimeException("Number of timeslots for performance duration ("
@@ -299,8 +309,6 @@ public class GreedySolver {
             + getNumTables() + ") is not even and must be to alternate tables.");
       }
 
-    } else {
-      performanceAttemptOffset = 1;
     }
 
     sz = new boolean[groups.length][][][];
@@ -319,6 +327,7 @@ public class GreedySolver {
         } else {
           performanceTables[table] = 0;
         }
+        LOGGER.debug("Setting table " + table + " start to " + performanceTables[table]);
       }
     } else {
       Arrays.fill(performanceTables, 0);
@@ -1117,8 +1126,10 @@ public class GreedySolver {
    * slot. To try all possible combinations, this should be set to 1.
    */
   private int getSubjectiveAttemptOffset() {
-    return 1;
+    return subjectiveAttemptOffset;
   }
+
+  private final int subjectiveAttemptOffset;
 
   /**
    * Number of timeslots to increment by when trying the next performance time
