@@ -201,7 +201,8 @@ public class GreedySolver {
 
     final int alternateValue = Integer.valueOf(properties.getProperty("alternate_tables", "0").trim());
     final boolean alternate = alternateValue == 1;
-    LOGGER.debug("Alternate is: " + alternate);
+    LOGGER.debug("Alternate is: "
+        + alternate);
 
     final int perfOffsetMinutes = Integer.valueOf(properties.getProperty("perf_attempt_offset_minutes",
                                                                          String.valueOf(tinc)).trim());
@@ -211,6 +212,8 @@ public class GreedySolver {
         * tinc) {
       throw new FLLRuntimeException("perf_attempt_offset_minutes isn't divisible by tinc");
     }
+    LOGGER.debug("Performance attempt offset: "
+        + performanceAttemptOffset);
 
     final int subjOffsetMinutes = Integer.valueOf(properties.getProperty("subjective_attempt_offset_minutes",
                                                                          String.valueOf(tinc)).trim());
@@ -279,7 +282,7 @@ public class GreedySolver {
         * tinc) {
       throw new FLLRuntimeException("Performance duration isn't divisible by tinc");
     }
-    
+
     final int changetimeMinutes = ParseMinizinc.readIntProperty(properties, "ct_minutes");
     changetime = changetimeMinutes
         / tinc;
@@ -287,7 +290,7 @@ public class GreedySolver {
         * tinc) {
       throw new FLLRuntimeException("Changetime isn't divisible by tinc");
     }
-    
+
     final int performanceChangetimeMinutes = ParseMinizinc.readIntProperty(properties, "pct_minutes");
     performanceChangetime = performanceChangetimeMinutes
         / tinc;
@@ -327,7 +330,8 @@ public class GreedySolver {
         } else {
           performanceTables[table] = 0;
         }
-        LOGGER.debug("Setting table " + table + " start to " + performanceTables[table]);
+        LOGGER.debug("Setting table "
+            + table + " start to " + performanceTables[table]);
       }
     } else {
       Arrays.fill(performanceTables, 0);
@@ -965,13 +969,19 @@ public class GreedySolver {
     }
 
     // find possible values
-    int nextAvailableSlot = Integer.MAX_VALUE;
+    int nextAvailablePerfSlot = Integer.MAX_VALUE;
+    int nextAvailableSubjSlot = Integer.MAX_VALUE;
     final List<Integer> possibleSubjectiveStations = new ArrayList<Integer>();
     final List<Integer> subjectiveGroups = new ArrayList<Integer>();
     for (int group = 0; group < getNumGroups(); ++group) {
       for (int station = 0; station < getNumSubjectiveStations(); ++station) {
-        if (subjectiveStations[group][station] <= nextAvailableSlot) {
-          nextAvailableSlot = subjectiveStations[group][station];
+        if (subjectiveStations[group][station] <= nextAvailableSubjSlot) {
+          if (subjectiveStations[group][station] < nextAvailableSubjSlot) {
+            // previous subjective stations are no longer valid for this time
+            possibleSubjectiveStations.clear();
+            subjectiveGroups.clear();
+          }
+          nextAvailableSubjSlot = subjectiveStations[group][station];
           possibleSubjectiveStations.add(station);
           subjectiveGroups.add(group);
         }
@@ -980,13 +990,17 @@ public class GreedySolver {
 
     final List<Integer> possiblePerformanceTables = new LinkedList<Integer>();
     for (int table = 0; table < getNumTables(); ++table) {
-      if (performanceTables[table] <= nextAvailableSlot) {
-        nextAvailableSlot = performanceTables[table];
+      if (performanceTables[table] <= nextAvailablePerfSlot) {
+        if (performanceTables[table] < nextAvailablePerfSlot) {
+          // previous values are no longer valid
+          possiblePerformanceTables.clear();
+        }
+        nextAvailablePerfSlot = performanceTables[table];
         possiblePerformanceTables.add(table);
       }
     }
 
-    if (nextAvailableSlot >= getNumTimeslots()) {
+    if (Math.min(nextAvailablePerfSlot, nextAvailableSubjSlot) >= getNumTimeslots()) {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Hit max timeslots");
       }
@@ -994,57 +1008,58 @@ public class GreedySolver {
     }
 
     // try possible values
-    for (int i = 0; i < possibleSubjectiveStations.size(); ++i) {
-      final int station = possibleSubjectiveStations.get(i);
-      final int group = subjectiveGroups.get(i);
+    if (nextAvailableSubjSlot < nextAvailablePerfSlot) {
+      for (int i = 0; i < possibleSubjectiveStations.size(); ++i) {
+        final int station = possibleSubjectiveStations.get(i);
+        final int group = subjectiveGroups.get(i);
 
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("subjective group: "
-            + group + " station: " + station + " next available: " + nextAvailableSlot);
-      }
-
-      subjectiveStations[group][station] += getSubjectiveAttemptOffset();
-      if (checkSubjectiveBreaks(station, nextAvailableSlot)) {
-        final boolean result = schedSubj(group, station, nextAvailableSlot);
-        if (result) {
-          return true;
-        } else if (nextAvailableSlot >= getNumTimeslots()) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Hit max timeslots - schedNext subj");
-          }
-          return false;
-        }
-
-      } else {
         if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Overlaps breaks, skipping");
+          LOGGER.trace("subjective group: "
+              + group + " station: " + station + " next available: " + nextAvailableSubjSlot);
         }
-      }
-    }
 
-    for (final int table : possiblePerformanceTables) {
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("performance table: "
-            + table + " next available: " + nextAvailableSlot);
-      }
-
-      performanceTables[table] += getPerformanceAttemptOffset();
-      if (checkPerformanceBreaks(nextAvailableSlot)) {
-        final boolean result = schedPerf(table, nextAvailableSlot);
-        if (result) {
-          return true;
-        } else if (nextAvailableSlot >= getNumTimeslots()) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Hit max timeslots - schedNext perf");
+        subjectiveStations[group][station] += getSubjectiveAttemptOffset();
+        if (checkSubjectiveBreaks(station, nextAvailableSubjSlot)) {
+          final boolean result = schedSubj(group, station, nextAvailableSubjSlot);
+          if (result) {
+            return true;
+          } else if (nextAvailableSubjSlot >= getNumTimeslots()) {
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("Hit max timeslots - schedNext subj");
+            }
+            return false;
           }
-          return false;
-        }
-      } else {
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Overlaps breaks, skipping");
+
+        } else {
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Overlaps breaks, skipping");
+          }
         }
       }
+    } else {
+      for (final int table : possiblePerformanceTables) {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("performance table: "
+              + table + " next available: " + nextAvailablePerfSlot);
+        }
 
+        performanceTables[table] += getPerformanceAttemptOffset();
+        if (checkPerformanceBreaks(nextAvailablePerfSlot)) {
+          final boolean result = schedPerf(table, nextAvailablePerfSlot);
+          if (result) {
+            return true;
+          } else if (nextAvailablePerfSlot >= getNumTimeslots()) {
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("Hit max timeslots - schedNext perf");
+            }
+            return false;
+          }
+        } else {
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Overlaps breaks, skipping");
+          }
+        }
+      }
     }
 
     final boolean result = scheduleNextStation();
