@@ -150,7 +150,7 @@ public class TournamentSchedule implements Serializable {
     }
   };
 
-  // time->table side->team
+  // time->table->team
   private final HashMap<Date, Map<String, List<TeamScheduleInfo>>> _matches = new HashMap<Date, Map<String, List<TeamScheduleInfo>>>();
 
   public Map<Date, Map<String, List<TeamScheduleInfo>>> getMatches() {
