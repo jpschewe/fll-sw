@@ -6,7 +6,6 @@
 
 package fll.scheduler;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -32,6 +31,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.Logger;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 
@@ -1166,44 +1166,46 @@ public class GreedySolver {
   }
 
   private void outputSchedule(final File schedule) throws IOException {
-    BufferedWriter writer = null;
+    CSVWriter csv = null;
     try {
-      writer = new BufferedWriter(new FileWriter(schedule));
-      writer.write(TournamentSchedule.TEAM_NUMBER_HEADER
-          + ",");
-      writer.write(TournamentSchedule.DIVISION_HEADER
-          + ",");
-      writer.write(TournamentSchedule.TEAM_NAME_HEADER
-          + ",");
-      writer.write(TournamentSchedule.ORGANIZATION_HEADER
-          + ",");
-      writer.write(TournamentSchedule.JUDGE_GROUP_HEADER);
+      csv = new CSVWriter(new FileWriter(schedule));
+      final List<String> line = new ArrayList<String>();
+      line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
+      line.add(TournamentSchedule.DIVISION_HEADER);
+      line.add(TournamentSchedule.TEAM_NAME_HEADER);
+      line.add(TournamentSchedule.ORGANIZATION_HEADER);
+      line.add(TournamentSchedule.JUDGE_GROUP_HEADER);
       for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
-        writer.write(",Subj"
+        line.add("Subj"
             + (subj + 1));
       }
       for (int round = 0; round < getNumPerformanceRounds(); ++round) {
-        writer.write(","
-            + String.format(TournamentSchedule.PERF_HEADER_FORMAT, round + 1));
-        writer.write(","
-            + String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round + 1));
+        line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round + 1));
+        line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round + 1));
       }
-      writer.newLine();
+      csv.writeNext(line.toArray(new String[line.size()]));
+      line.clear();
 
       for (final SchedTeam team : getAllTeams()) {
         final int teamNum = (team.getGroup() + 1)
             * 100 + team.getIndex();
         final int judgingGroup = team.getGroup() + 1;
-        writer.write(String.format("%d,D%d, Team %d, Org %d, G%d", teamNum, judgingGroup, teamNum, teamNum,
-                                   judgingGroup));
+        line.add(String.valueOf(teamNum));
+        line.add("D"
+            + judgingGroup);
+        line.add("Team "
+            + teamNum);
+        line.add("Org "
+            + teamNum);
+        line.add("G"
+            + judgingGroup);
         for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
           final Date time = getTime(sz[team.getGroup()][team.getIndex()][subj], 1);
           if (null == time) {
             throw new RuntimeException("Could not find a subjective start for group: "
                 + (team.getGroup() + 1) + " team: " + (team.getIndex() + 1) + " subj: " + (subj + 1));
           }
-          writer.write(",");
-          writer.write(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(time));
+          line.add(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(time));
         }
 
         // find all performances for a team and then sort by time
@@ -1225,18 +1227,17 @@ public class GreedySolver {
               + (team.getGroup() + 1) + " team: " + (team.getIndex() + 1) + " perfs: " + perfTimes);
         }
         for (final PerformanceTime perfTime : perfTimes) {
-          writer.write(",");
-          writer.write(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(perfTime.getTime()));
-          writer.write(",");
-          writer.write(perfTime.getTable()
+          line.add(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(perfTime.getTime()));
+          line.add(perfTime.getTable()
               + " " + perfTime.getSide());
         }
 
-        writer.newLine();
+        csv.writeNext(line.toArray(new String[line.size()]));
+        line.clear();
       }
     } finally {
-      if (null != writer) {
-        writer.close();
+      if (null != csv) {
+        csv.close();
       }
     }
   }
