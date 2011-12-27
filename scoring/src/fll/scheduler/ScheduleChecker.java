@@ -191,29 +191,38 @@ public class ScheduleChecker {
     }
 
     // constraint: team:5
-    final Set<String> tableSides = new HashSet<String>();
+    final Map<String, PerformanceTime> tableSides = new HashMap<String, PerformanceTime>();
     for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
       final TeamScheduleInfo opponent = schedule.findOpponent(ti, round);
       if (null != opponent) {
-        if(opponent.getTeamNumber() == ti.getTeamNumber()) {
+        if (opponent.getTeamNumber() == ti.getTeamNumber()) {
           throw new FLLRuntimeException("Internal error, findOpponent is broken and returned the same team");
         }
-        
-        if (!tableSides.add(ti.getPerfTableColor(round)
-            + " " + ti.getPerfTableSide(round))) {
+
+        final String key = ti.getPerfTableColor(round)
+            + " " + ti.getPerfTableSide(round);
+        if (tableSides.containsKey(key)) {
+          final PerformanceTime otherTime = tableSides.get(key);
           final String tableMessage = String.format("Team %d is competing on %s %d more than once", ti.getTeamNumber(),
                                                     ti.getPerfTableColor(round), ti.getPerfTableSide(round));
-          violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, null, tableMessage));
+          violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, ti.getPerfTime(round),
+                                                 tableMessage));
+          violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, otherTime.getTime(),
+                                                 tableMessage));
+        } else {
+          tableSides.put(key, ti.getPerf(round));
         }
 
-        /* Not sure I like this check
-        if (!ComparisonUtils.safeEquals(ti.getDivision(), opponent.getDivision())) {
-          final String divMessage = String.format("Team %d in division %s is competing against team %d from division %s round %d",
-                                                  ti.getTeamNumber(), ti.getDivision(), opponent.getTeamNumber(),
-                                                  opponent.getDivision(), (round + 1));
-          violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, ti.getPerfTime(round), divMessage));
-        }
-        */
+        /*
+         * Not sure I like this check if
+         * (!ComparisonUtils.safeEquals(ti.getDivision(),
+         * opponent.getDivision())) { final String divMessage = String.format(
+         * "Team %d in division %s is competing against team %d from division %s round %d"
+         * , ti.getTeamNumber(), ti.getDivision(), opponent.getTeamNumber(),
+         * opponent.getDivision(), (round + 1)); violations.add(new
+         * ConstraintViolation(false, ti.getTeamNumber(), null, null,
+         * ti.getPerfTime(round), divMessage)); }
+         */
 
         int opponentSide = -1;
         // figure out which round matches up
@@ -226,7 +235,8 @@ public class ScheduleChecker {
         if (-1 == opponentSide) {
           final String message = String.format("Unable to find time match for rounds between team %d and team %d at time %s",
                                                ti.getTeamNumber(), opponent.getTeamNumber(),
-                                               TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(ti.getPerfTime(round)));
+                                               TournamentSchedule.OUTPUT_DATE_FORMAT.get()
+                                                                                    .format(ti.getPerfTime(round)));
           violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerfTime(round), message));
         } else {
           if (opponentSide == ti.getPerfTableSide(round)) {
@@ -243,7 +253,13 @@ public class ScheduleChecker {
               && opponent.equals(otherOpponent)) {
             final String message = String.format("Team %d competes against %d more than once rounds: %d, %d",
                                                  ti.getTeamNumber(), opponent.getTeamNumber(), (round + 1), (r + 1));
-            violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, null, message));
+            violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, ti.getPerfTime(round),
+                                                   message));
+            violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, ti.getPerfTime(r), message));
+            violations.add(new ConstraintViolation(false, opponent.getTeamNumber(), null, null, ti.getPerfTime(round),
+                                                   message));
+            violations.add(new ConstraintViolation(false, opponent.getTeamNumber(), null, null, ti.getPerfTime(r),
+                                                   message));
           }
         }
       } else {
@@ -281,17 +297,23 @@ public class ScheduleChecker {
       if (ti.getPerfTime(prevRound).getTime()
           + getPerformanceDuration() > ti.getPerfTime(round).getTime()) {
         final String message = String.format("Team %d is still in performance %d when they are to start performance %d: %s - %s",
-                                             ti.getTeamNumber(), prevRound + 1, round + 1,
-                                             TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(ti.getPerfTime(prevRound)),
+                                             ti.getTeamNumber(),
+                                             prevRound + 1,
+                                             round + 1,
+                                             TournamentSchedule.OUTPUT_DATE_FORMAT.get()
+                                                                                  .format(ti.getPerfTime(prevRound)),
                                              TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(ti.getPerfTime(round)));
         violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerfTime(round), message));
       } else if (ti.getPerfTime(prevRound).getTime()
           + getPerformanceDuration() + perfChangetime > ti.getPerfTime(round).getTime()) {
         final String message = String.format("Team %d doesn't have enough time (%d minutes) between performance %d and performance %d: %s - %s",
-                                             ti.getTeamNumber(), perfChangetime
+                                             ti.getTeamNumber(),
+                                             perfChangetime
                                                  / Utilities.MILLISECONDS_PER_SECOND / Utilities.SECONDS_PER_MINUTE,
-                                             prevRound + 1, round + 1,
-                                             TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(ti.getPerfTime(prevRound)),
+                                             prevRound + 1,
+                                             round + 1,
+                                             TournamentSchedule.OUTPUT_DATE_FORMAT.get()
+                                                                                  .format(ti.getPerfTime(prevRound)),
                                              TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(ti.getPerfTime(round)));
         violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerfTime(round), message));
       }
@@ -320,8 +342,8 @@ public class ScheduleChecker {
               && next.equals(otherOpponent)) {
             final String message = String.format("Team %d competes against %d more than once rounds: %d, extra",
                                                  ti.getTeamNumber(), next.getTeamNumber(), (r + 1));
-            violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, null, message));
-            violations.add(new ConstraintViolation(false, next.getTeamNumber(), null, null, null, message));
+            violations.add(new ConstraintViolation(false, ti.getTeamNumber(), null, null, ti.getPerfTime(r), message));
+            violations.add(new ConstraintViolation(false, next.getTeamNumber(), null, null, ti.getPerfTime(r), message));
           }
         }
 
@@ -340,7 +362,8 @@ public class ScheduleChecker {
                                                                                       .format(next.getPerfTime(round)),
                                                  TournamentSchedule.OUTPUT_DATE_FORMAT.get()
                                                                                       .format(ti.getPerfTime(round + 1)));
-            violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerfTime(round + 1), message));
+            violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerfTime(round + 1),
+                                                   message));
           } else if (next.getPerfTime(round).getTime()
               + getPerformanceDuration() + getPerformanceChangetime() > ti.getPerfTime(round + 1).getTime()) {
             final String message = String.format("Team %d doesn't have enough time (%d minutes) between performance %d and performance extra: %s - %s",
@@ -352,7 +375,8 @@ public class ScheduleChecker {
                                                                                       .format(next.getPerfTime(round)),
                                                  TournamentSchedule.OUTPUT_DATE_FORMAT.get()
                                                                                       .format(ti.getPerfTime(round + 1)));
-            violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerfTime(round + 1), message));
+            violations.add(new ConstraintViolation(true, ti.getTeamNumber(), null, null, ti.getPerfTime(round + 1),
+                                                   message));
           }
         }
 
@@ -469,8 +493,7 @@ public class ScheduleChecker {
           if (null != prev) {
             if (prev.getTime()
                 + getSubjectiveDuration(category) > current.getTime()) {
-              final String message = String.format("Overlap in %s for judge %s between %s and %s", category,
-                                                   judge,
+              final String message = String.format("Overlap in %s for judge %s between %s and %s", category, judge,
                                                    TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(prev),
                                                    TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(current));
               violations.add(new ConstraintViolation(true, ConstraintViolation.NO_TEAM, new SubjectiveTime(category,
