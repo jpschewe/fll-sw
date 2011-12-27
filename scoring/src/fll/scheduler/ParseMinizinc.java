@@ -24,6 +24,7 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
+import fll.Utilities;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 
@@ -78,15 +79,15 @@ public class ParseMinizinc {
     final Properties properties = parseMinizincData(datafile);
     LOGGER.debug(properties.toString());
 
-    tinc = readIntProperty(properties, "TInc");
-    ngroups = readIntProperty(properties, "NGroups");
-    nrounds = readIntProperty(properties, "NRounds");
-    ntables = readIntProperty(properties, "NTables");
-    final int tmaxHours = readIntProperty(properties, "TMax_hours");
-    final int tmaxMinutes = readIntProperty(properties, "TMax_minutes");
-    tmax = (tmaxHours
-        * 60 + tmaxMinutes) / tinc;
-    nsubjective = readIntProperty(properties, "NSubjective");
+    tinc = Utilities.readIntProperty(properties, "TInc");
+    ngroups = Utilities.readIntProperty(properties, "NGroups");
+    nrounds = Utilities.readIntProperty(properties, "NRounds");
+    ntables = Utilities.readIntProperty(properties, "NTables");
+    final int tmaxHours = Utilities.readIntProperty(properties, "TMax_hours");
+    final int tmaxMinutes = Utilities.readIntProperty(properties, "TMax_minutes");
+    tmax = (tmaxHours * 60 + tmaxMinutes)
+        / tinc;
+    nsubjective = Utilities.readIntProperty(properties, "NSubjective");
     final String groupCountsStr = properties.getProperty("group_counts");
     final int lbracket = groupCountsStr.indexOf('[');
     if (-1 == lbracket) {
@@ -698,21 +699,6 @@ public class ParseMinizinc {
     properties.load(strReader);
 
     return properties;
-  }
-
-  public static int readIntProperty(final Properties properties,
-                                    final String property) {
-    final String value = properties.getProperty(property);
-    if (null == value) {
-      throw new NullPointerException("Property '"
-          + property + "' doesn't have a value");
-    }
-    try {
-      return Integer.valueOf(value.trim());
-    } catch (final NumberFormatException e) {
-      throw new FLLRuntimeException("'"
-          + property + "' doesn't parse as a number '" + value.trim() + "'", e);
-    }
   }
 
   public static void main(final String[] args) {
