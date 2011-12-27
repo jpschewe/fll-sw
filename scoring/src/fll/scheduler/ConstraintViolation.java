@@ -18,6 +18,7 @@ import net.mtu.eggplant.util.DateUtils;
  */
 public final class ConstraintViolation {
 
+  // TODO use Team.Null_TEam_number
   public static final int NO_TEAM = -1;
 
   private final int team;
