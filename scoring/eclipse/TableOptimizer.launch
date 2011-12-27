@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/fll-sw/scoring/src/fll/scheduler/ParseMinizinc.java"/>
+<listEntry value="/fll-sw/scoring/src/fll/scheduler/TableOptimizer.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
@@ -9,7 +9,8 @@
 <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
 <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
 </listAttribute>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="fll.scheduler.ParseMinizinc"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="8:30&#10;${file_prompt:Choose data file}&#10;${file_prompt:Choose solution file}"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="fll.scheduler.TableOptimizer"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-s ${file_prompt:Choose schedule}"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="fll-sw"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dapp.name=greedy-solver -Dlogroot=./"/>
 </launchConfiguration>

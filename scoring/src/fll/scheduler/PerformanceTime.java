@@ -15,25 +15,16 @@ import java.util.Date;
 public final class PerformanceTime implements Comparable<PerformanceTime>, Serializable {
 
   /**
-   * @param round zero-based index
    * @param time the time
    * @param table the table color
    * @param side the table side
    */
-  public PerformanceTime(final int round,
-                         final Date time,
+  public PerformanceTime(final Date time,
                          final String table,
                          final int side) {
-    this.round = round;
     this.table = table;
     this.side = side;
     this.time = time == null ? null : new Date(time.getTime());
-  }
-
-  private final int round;
-
-  public int getRound() {
-    return round;
   }
 
   private final String table;
@@ -103,8 +94,7 @@ public final class PerformanceTime implements Comparable<PerformanceTime>, Seria
 
   @Override
   public String toString() {
-    return "round: "
-        + getRound() + " time: " + TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(getTime()) + " table: "
+    return "time: " + TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(getTime()) + " table: "
         + getTable() + " side: " + getSide();
   }
 }
