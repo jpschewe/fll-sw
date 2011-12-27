@@ -1,4 +1,0 @@
-# LP algorithm for solving initial LP relaxations (automatic 's'implex, 'p'rimal simplex, 'd'ual simplex, 'b'arrier, barrier with 'c'rossover)
-# [type: char, range: {spdbc}, default: s]
-#JPS lp/initalgorithm = s
-lp/initalgorithm = b
