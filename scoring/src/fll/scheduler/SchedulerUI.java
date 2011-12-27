@@ -304,8 +304,8 @@ public class SchedulerUI extends JFrame {
 
         fos = new FileOutputStream(pdfFile);
         getScheduleData().outputDetailedSchedules(getSchedParams(), fos);
-        JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedule written '" + pdfFile.getAbsolutePath() +"'",
-                                      "Information", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedule written '"
+            + pdfFile.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
       } catch (final DocumentException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error writing detailed schedules: %s", e.getMessage());
@@ -387,7 +387,8 @@ public class SchedulerUI extends JFrame {
               fis = null;
             }
 
-            final List<SubjectiveStation> subjectiveStations = gatherSubjectiveStationInformation(columnInfo);
+            final List<SubjectiveStation> subjectiveStations = gatherSubjectiveStationInformation(SchedulerUI.this,
+                                                                                                  columnInfo);
             schedParams = new SchedParams(subjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
                                           SchedParams.DEFAULT_CHANGETIME_MINUTES,
                                           SchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
@@ -695,8 +696,13 @@ public class SchedulerUI extends JFrame {
 
   /**
    * Prompt the user for which columns represent subjective categories.
+   * 
+   * @param parentComponent the parent for the dialog
+   * @param columnInfo the column information
+   * @return the list of subjective information the user choose
    */
-  private List<SubjectiveStation> gatherSubjectiveStationInformation(final ColumnInformation columnInfo) {
+  public static List<SubjectiveStation> gatherSubjectiveStationInformation(final Component parentComponent,
+                                                                           final ColumnInformation columnInfo) {
     final List<String> unusedColumns = columnInfo.getUnusedColumns();
     final List<JCheckBox> checkboxes = new LinkedList<JCheckBox>();
     final List<JFormattedTextField> subjectiveDurations = new LinkedList<JFormattedTextField>();
@@ -720,7 +726,7 @@ public class SchedulerUI extends JFrame {
     }
     final List<SubjectiveStation> subjectiveHeaders;
     if (!checkboxes.isEmpty()) {
-      JOptionPane.showMessageDialog(SchedulerUI.this, optionPanel, "Choose Subjective Columns",
+      JOptionPane.showMessageDialog(parentComponent, optionPanel, "Choose Subjective Columns",
                                     JOptionPane.QUESTION_MESSAGE);
       subjectiveHeaders = new LinkedList<SubjectiveStation>();
       for (int i = 0; i < checkboxes.size(); ++i) {
