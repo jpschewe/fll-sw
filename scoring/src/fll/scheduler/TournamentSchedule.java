@@ -361,8 +361,7 @@ public class TournamentSchedule implements Serializable {
             throw new RuntimeException("Tables sides must be 1 or 2. Tournament: "
                 + tournamentID + " team: " + teamNumber);
           }
-          final PerformanceTime performance = new PerformanceTime(round, Queries.timeToDate(perfTime), tableColor,
-                                                                  tableSide);
+          final PerformanceTime performance = new PerformanceTime(Queries.timeToDate(perfTime), tableColor, tableSide);
           ti.setPerf(round, performance);
 
           prevRound = round;
@@ -773,10 +772,11 @@ public class TournamentSchedule implements Serializable {
     for (final Map.Entry<PerformanceTime, TeamScheduleInfo> entry : performanceTimes.entrySet()) {
       final PerformanceTime performance = entry.getKey();
       final TeamScheduleInfo si = entry.getValue();
+      final int round = si.computeRound(performance);
 
       // check if team needs to stay and color the cell magenta if they do
       final BaseColor backgroundColor;
-      if (null != checkIfTeamNeedsToStay(si, performance.getRound())) {
+      if (null != checkIfTeamNeedsToStay(si, round)) {
         teamsStaying.add(si);
         backgroundColor = BaseColor.MAGENTA;
       } else {
@@ -787,10 +787,10 @@ public class TournamentSchedule implements Serializable {
       table.addCell(createCell(si.getDivision()));
       table.addCell(createCell(si.getOrganization()));
       table.addCell(createCell(si.getTeamName()));
-      table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.getPerfTime(performance.getRound())), backgroundColor));
-      table.addCell(createCell(si.getPerfTableColor(performance.getRound())
-          + " " + si.getPerfTableSide(performance.getRound()), backgroundColor));
-      table.addCell(createCell(String.valueOf(performance.getRound() + 1)));
+      table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.getPerfTime(round)), backgroundColor));
+      table.addCell(createCell(si.getPerfTableColor(round)
+          + " " + si.getPerfTableSide(round), backgroundColor));
+      table.addCell(createCell(String.valueOf(round + 1)));
     }
 
     detailedSchedules.add(table);
@@ -1122,7 +1122,7 @@ public class TournamentSchedule implements Serializable {
           throw new RuntimeException("Error parsing table information from: "
               + table);
         }
-        final PerformanceTime performance = new PerformanceTime(perfNum, parseDate(perf1Str), tablePieces[0],
+        final PerformanceTime performance = new PerformanceTime(parseDate(perf1Str), tablePieces[0],
                                                                 Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1])
                                                                                                 .intValue());
         ti.setPerf(perfNum, performance);
