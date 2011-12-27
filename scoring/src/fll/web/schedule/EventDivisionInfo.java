@@ -11,12 +11,6 @@ package fll.web.schedule;
  */
 public final class EventDivisionInfo {
 
-  /**
-   * @param teamNumber
-   * @param teamName
-   * @param division
-   * @param division2
-   */
   public EventDivisionInfo(final int teamNumber,
                            final String teamName,
                            final String division,
