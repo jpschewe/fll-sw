@@ -552,7 +552,7 @@ public final class Utilities {
   public static long convertMinutesToMilliseconds(final long minutes) {
     return convertMinutesToSeconds(minutes) * MILLISECONDS_PER_SECOND;
   }
-
+  
   /**
    * Get the name of the file without the extension (if there is one).
    */
