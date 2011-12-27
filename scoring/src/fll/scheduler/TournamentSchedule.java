@@ -153,7 +153,7 @@ public class TournamentSchedule implements Serializable {
   // time->table->team
   private final HashMap<Date, Map<String, List<TeamScheduleInfo>>> _matches = new HashMap<Date, Map<String, List<TeamScheduleInfo>>>();
 
-  public Map<Date, Map<String, List<TeamScheduleInfo>>> getMatches() {
+  /* package */Map<Date, Map<String, List<TeamScheduleInfo>>> getMatches() {
     // TODO should make read-only somehow
     return _matches;
   }
@@ -1018,7 +1018,24 @@ public class TournamentSchedule implements Serializable {
     }
 
     tableMatches.add(ti);
+  }
 
+  private void removeFromMatches(final TeamScheduleInfo ti,
+                                 final int round) {
+    if (!_matches.containsKey(ti.getPerfTime(round))) {
+      throw new IllegalArgumentException("Cannot find time info for "
+          + round + " in matches");
+    }
+    final Map<String, List<TeamScheduleInfo>> timeMatches = _matches.get(ti.getPerfTime(round));
+    if (!timeMatches.containsKey(ti.getPerfTableColor(round))) {
+      throw new IllegalArgumentException("Cannot find table info for "
+          + round + " in matches");
+    }
+    final List<TeamScheduleInfo> tableMatches = timeMatches.get(ti.getPerfTableColor(round));
+    if (!tableMatches.remove(ti)) {
+      throw new IllegalArgumentException("Cannot find team "
+          + ti.getTeamNumber() + " in the matches for round " + round);
+    }
   }
 
   /**
@@ -1437,5 +1454,43 @@ public class TournamentSchedule implements Serializable {
     public List<String> getUnusedColumns() {
       return unusedColumns;
     }
+  }
+
+  /**
+   * Find the {@link TeamScheduleInfo} object for the specified team number.
+   * 
+   * @return the schedule info or null if not found
+   */
+  public TeamScheduleInfo findScheduleInfo(final int team) {
+    for (final TeamScheduleInfo si : _schedule) {
+      if (si.getTeamNumber() == team) {
+        return si;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * @param team the team to rescheduled
+   * @param oldTime the old time that the team was scheduled at
+   * @param perfTime the new performance information
+   */
+  public void reassignTable(final int team,
+                            final Date oldTime,
+                            final PerformanceTime perfTime) {
+    final TeamScheduleInfo si = findScheduleInfo(team);
+    if (null == si) {
+      throw new IllegalArgumentException("Cannot find team "
+          + team + " in the schedule");
+    }
+    final int round = si.findRoundFortime(oldTime);
+    if (-1 == round) {
+      throw new IllegalArgumentException("Team "
+          + team + " does not have a performance at " + oldTime);
+    }
+
+    removeFromMatches(si, round);
+    si.setPerf(round, perfTime);
+    addToMatches(si, round);
   }
 }
