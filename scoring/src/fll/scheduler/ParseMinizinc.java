@@ -600,7 +600,7 @@ public class ParseMinizinc {
               for (int side = 0; side < 2; ++side) {
                 final Date time = getTime(pz[group][team][table][side], round + 1);
                 if (null != time) {
-                  perfTimes.add(new PerformanceTime(round, time, "Table"
+                  perfTimes.add(new PerformanceTime(time, "Table"
                       + (table + 1), (side + 1)));
                 }
               }
