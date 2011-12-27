@@ -202,8 +202,8 @@ public class GreedySolver {
 
     this.startTime = TournamentSchedule.OUTPUT_DATE_FORMAT.get().parse(properties.getProperty("start_time"));
 
-    tinc = ParseMinizinc.readIntProperty(properties, "TInc");
-    ngroups = ParseMinizinc.readIntProperty(properties, "NGroups");
+    tinc = Utilities.readIntProperty(properties, "TInc");
+    ngroups = Utilities.readIntProperty(properties, "NGroups");
 
     final int alternateValue = Integer.valueOf(properties.getProperty("alternate_tables", "0").trim());
     final boolean alternate = alternateValue == 1;
@@ -230,14 +230,14 @@ public class GreedySolver {
       throw new FLLRuntimeException("subjective_attempt_offset_minutes isn't divisible by tinc");
     }
 
-    numPerformanceRounds = ParseMinizinc.readIntProperty(properties, "NRounds");
-    numTables = ParseMinizinc.readIntProperty(properties, "NTables");
-    final int tmaxHours = ParseMinizinc.readIntProperty(properties, "TMax_hours");
-    final int tmaxMinutes = ParseMinizinc.readIntProperty(properties, "TMax_minutes");
+    numPerformanceRounds = Utilities.readIntProperty(properties, "NRounds");
+    numTables = Utilities.readIntProperty(properties, "NTables");
+    final int tmaxHours = Utilities.readIntProperty(properties, "TMax_hours");
+    final int tmaxMinutes = Utilities.readIntProperty(properties, "TMax_minutes");
     numTimeslots = (tmaxHours * 60 + tmaxMinutes)
         / tinc;
 
-    numSubjectiveStations = ParseMinizinc.readIntProperty(properties, "NSubjective");
+    numSubjectiveStations = Utilities.readIntProperty(properties, "NSubjective");
     final String subjDurationStr = properties.getProperty("subj_minutes");
     int lbracket = subjDurationStr.indexOf('[');
     if (-1 == lbracket) {
@@ -281,7 +281,7 @@ public class GreedySolver {
       throw new FLLRuntimeException("Num groups and group_counts array not consistent");
     }
 
-    final int performanceDurationMinutes = ParseMinizinc.readIntProperty(properties, "alpha_perf_minutes");
+    final int performanceDurationMinutes = Utilities.readIntProperty(properties, "alpha_perf_minutes");
     performanceDuration = performanceDurationMinutes
         / tinc;
     if (performanceDurationMinutes != performanceDuration
@@ -289,7 +289,7 @@ public class GreedySolver {
       throw new FLLRuntimeException("Performance duration isn't divisible by tinc");
     }
 
-    final int changetimeMinutes = ParseMinizinc.readIntProperty(properties, "ct_minutes");
+    final int changetimeMinutes = Utilities.readIntProperty(properties, "ct_minutes");
     changetime = changetimeMinutes
         / tinc;
     if (changetimeMinutes != changetime
@@ -297,7 +297,7 @@ public class GreedySolver {
       throw new FLLRuntimeException("Changetime isn't divisible by tinc");
     }
 
-    final int performanceChangetimeMinutes = ParseMinizinc.readIntProperty(properties, "pct_minutes");
+    final int performanceChangetimeMinutes = Utilities.readIntProperty(properties, "pct_minutes");
     performanceChangetime = performanceChangetimeMinutes
         / tinc;
     if (performanceChangetimeMinutes != performanceChangetime
