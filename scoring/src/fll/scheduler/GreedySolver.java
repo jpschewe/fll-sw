@@ -1030,36 +1030,12 @@ public class GreedySolver {
     }
 
     // find possible values
-    int nextAvailablePerfSlot = Integer.MAX_VALUE;
-    int nextAvailableSubjSlot = Integer.MAX_VALUE;
     final List<Integer> possibleSubjectiveStations = new ArrayList<Integer>();
     final List<Integer> subjectiveGroups = new ArrayList<Integer>();
-    for (int group = 0; group < getNumGroups(); ++group) {
-      for (int station = 0; station < getNumSubjectiveStations(); ++station) {
-        if (subjectiveStations[group][station] <= nextAvailableSubjSlot) {
-          if (subjectiveStations[group][station] < nextAvailableSubjSlot) {
-            // previous subjective stations are no longer valid for this time
-            possibleSubjectiveStations.clear();
-            subjectiveGroups.clear();
-          }
-          nextAvailableSubjSlot = subjectiveStations[group][station];
-          possibleSubjectiveStations.add(station);
-          subjectiveGroups.add(group);
-        }
-      }
-    }
+    final int nextAvailableSubjSlot = findNextAvailableSubjectiveSlot(possibleSubjectiveStations, subjectiveGroups);
 
     final List<Integer> possiblePerformanceTables = new LinkedList<Integer>();
-    for (int table = 0; table < getNumTables(); ++table) {
-      if (performanceTables[table] <= nextAvailablePerfSlot) {
-        if (performanceTables[table] < nextAvailablePerfSlot) {
-          // previous values are no longer valid
-          possiblePerformanceTables.clear();
-        }
-        nextAvailablePerfSlot = performanceTables[table];
-        possiblePerformanceTables.add(table);
-      }
-    }
+    final int nextAvailablePerfSlot = findNextAvailablePerformanceSlot(possiblePerformanceTables);
 
     if (Math.min(nextAvailablePerfSlot, nextAvailableSubjSlot) >= getNumTimeslots()) {
       if (LOGGER.isDebugEnabled()) {
@@ -1126,19 +1102,56 @@ public class GreedySolver {
     final boolean result = scheduleNextStation();
     if (!result
         || optimize) {
-      // need to undo assignments
-      for (int i = 0; i < possibleSubjectiveStations.size(); ++i) {
-        final int station = possibleSubjectiveStations.get(i);
-        final int group = subjectiveGroups.get(i);
-        subjectiveStations[group][station] -= getSubjectiveAttemptOffset();
-      }
-
-      for (final int table : possiblePerformanceTables) {
-        performanceTables[table] -= getPerformanceAttemptOffset();
+      // undo changes made above
+      if (nextAvailableSubjSlot <= nextAvailablePerfSlot) {
+        for (int i = 0; i < possibleSubjectiveStations.size(); ++i) {
+          final int station = possibleSubjectiveStations.get(i);
+          final int group = subjectiveGroups.get(i);
+          subjectiveStations[group][station] -= getSubjectiveAttemptOffset();
+        }
+      } else {
+        for (final int table : possiblePerformanceTables) {
+          performanceTables[table] -= getPerformanceAttemptOffset();
+        }
       }
     }
     return result;
 
+  }
+
+  private int findNextAvailablePerformanceSlot(final List<Integer> possiblePerformanceTables) {
+    int nextAvailablePerfSlot = Integer.MAX_VALUE;
+    for (int table = 0; table < getNumTables(); ++table) {
+      if (performanceTables[table] <= nextAvailablePerfSlot) {
+        if (performanceTables[table] < nextAvailablePerfSlot) {
+          // previous values are no longer valid
+          possiblePerformanceTables.clear();
+        }
+        nextAvailablePerfSlot = performanceTables[table];
+        possiblePerformanceTables.add(table);
+      }
+    }
+    return nextAvailablePerfSlot;
+  }
+
+  private int findNextAvailableSubjectiveSlot(final List<Integer> possibleSubjectiveStations,
+                                              final List<Integer> subjectiveGroups) {
+    int nextAvailableSubjSlot = Integer.MAX_VALUE;
+    for (int group = 0; group < getNumGroups(); ++group) {
+      for (int station = 0; station < getNumSubjectiveStations(); ++station) {
+        if (subjectiveStations[group][station] <= nextAvailableSubjSlot) {
+          if (subjectiveStations[group][station] < nextAvailableSubjSlot) {
+            // previous subjective stations are no longer valid for this time
+            possibleSubjectiveStations.clear();
+            subjectiveGroups.clear();
+          }
+          nextAvailableSubjSlot = subjectiveStations[group][station];
+          possibleSubjectiveStations.add(station);
+          subjectiveGroups.add(group);
+        }
+      }
+    }
+    return nextAvailableSubjSlot;
   }
 
   private void outputCurrentSolution() {
