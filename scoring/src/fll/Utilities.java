@@ -570,6 +570,21 @@ public final class Utilities {
   }
 
   /**
+   * Get the absolute name of the file without the extension (if there is one).
+   */
+  public static String extractAbsoluteBasename(final File selectedFile) {
+    final String name;
+    final String fullname = selectedFile.getAbsolutePath();
+    final int dotIndex = fullname.lastIndexOf('.');
+    if (-1 != dotIndex) {
+      name = fullname.substring(0, dotIndex);
+    } else {
+      name = fullname;
+    }
+    return name;
+  }
+
+  /**
    * Read an integer property and fail if the property doesn't have a value or
    * doesn't parse a a number.
    * 

@@ -1069,7 +1069,7 @@ public class GreedySolver {
     }
 
     // try possible values
-    if (nextAvailableSubjSlot < nextAvailablePerfSlot) {
+    if (nextAvailableSubjSlot <= nextAvailablePerfSlot) {
       for (int i = 0; i < possibleSubjectiveStations.size(); ++i) {
         final int station = possibleSubjectiveStations.get(i);
         final int group = subjectiveGroups.get(i);
@@ -1142,9 +1142,9 @@ public class GreedySolver {
   }
 
   private void outputCurrentSolution() {
-    final File scheduleFile = new File(datafile.getAbsolutePath()
+    final File scheduleFile = new File(Utilities.extractAbsoluteBasename(datafile)
         + "-" + solutionsFound + ".csv");
-    final File objectiveFile = new File(datafile.getAbsolutePath()
+    final File objectiveFile = new File(Utilities.extractAbsoluteBasename(datafile)
         + "-" + solutionsFound + ".obj");
 
     LOGGER.info("Solution output to "
