@@ -282,8 +282,8 @@
 		<buildscript-one-jar scripts.dir="${dir.build}/bin" src.dir="${dir.web}/WEB-INF/classes" scripts.path="base.classpath" script.name="ExportDocument" class.main="fll.xml.ExportDocument" java.args="-Dapp.name=exportDocument -Dlogroot=./" />
 		<buildscript-one-jar scripts.dir="${dir.build}/bin" src.dir="${dir.web}/WEB-INF/classes" scripts.path="base.classpath" script.name="SchedulerUI" class.main="fll.scheduler.SchedulerUI" java.args="-Dapp.name=scheduler-ui -Dlogroot=./" />
 		<buildscript-one-jar scripts.dir="${dir.build}/bin" src.dir="${dir.web}/WEB-INF/classes" scripts.path="base.classpath" script.name="GreedySolver" class.main="fll.scheduler.GreedySolver" java.args="-Dapp.name=greedy-solver -Dlogroot=./" />
+		<buildscript-one-jar scripts.dir="${dir.build}/bin" src.dir="${dir.web}/WEB-INF/classes" scripts.path="base.classpath" script.name="TableOptimizer" class.main="fll.scheduler.TableOptimizer" java.args="-Dapp.name=table-optimizer -Dlogroot=./" />
 
-		<buildscript-one-jar scripts.dir="${dir.build}/bin" src.dir="${dir.web}/WEB-INF/classes" scripts.path="base.classpath" script.name="ParseMinizinc" class.main="fll.scheduler.ParseMinizinc" java.args="-Dapp.name=parse-minizinc -Dlogroot=./" />
 
 		<!-- copy libraries over -->
 		<copy todir="${dir.build}/lib">

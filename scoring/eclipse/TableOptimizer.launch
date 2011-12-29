@@ -12,5 +12,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="fll.scheduler.TableOptimizer"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-s ${file_prompt:Choose schedule}"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="fll-sw"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dapp.name=greedy-solver -Dlogroot=./"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dapp.name=table-optimizer -Dlogroot=./"/>
 </launchConfiguration>
