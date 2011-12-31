@@ -265,7 +265,7 @@ public class TableOptimizer {
 
       final TournamentSchedule schedule = new TournamentSchedule(name, schedfile, subjectiveHeaders);
 
-      final TableOptimizer optimizer = new TableOptimizer(params, schedule, schedfile.getParentFile());
+      final TableOptimizer optimizer = new TableOptimizer(params, schedule, schedfile.getAbsoluteFile().getParentFile());
       final long start = System.currentTimeMillis();
       optimizer.optimize();
       final long stop = System.currentTimeMillis();
