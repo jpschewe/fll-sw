@@ -2135,7 +2135,7 @@ public final class Queries {
       prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Region, Division, TeamNumber) VALUES (?, ?, ?, ?, ?)");
       prep.setString(1, name);
       prep.setString(2, organization);
-      prep.setString(3, region);
+      prep.setString(3, region == null || "".equals(region) ? GenerateDB.DEFAULT_TEAM_REGION : region);
       prep.setString(4, division);
       prep.setInt(5, number);
       prep.executeUpdate();
@@ -2172,7 +2172,7 @@ public final class Queries {
       prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Region = ?, Division = ? WHERE TeamNumber = ?");
       prep.setString(1, name);
       prep.setString(2, organization);
-      prep.setString(3, region);
+      prep.setString(3, region == null || "".equals(region) ? GenerateDB.DEFAULT_TEAM_REGION : region);
       prep.setString(4, division);
       prep.setInt(5, number);
       prep.executeUpdate();

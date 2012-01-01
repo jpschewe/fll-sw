@@ -207,10 +207,13 @@ public final class ImportDB {
                 + num + ", " + name + ", " + org + ", " + div + ", " + region);
           }
           destPrep.setInt(1, num);
-          destPrep.setString(2, name == null ? GenerateDB.DEFAULT_TEAM_NAME : name);
+          destPrep.setString(2, name == null
+              || "".equals(name) ? GenerateDB.DEFAULT_TEAM_NAME : name);
           destPrep.setString(3, org);
-          destPrep.setString(4, div == null ? GenerateDB.DEFAULT_TEAM_DIVISION : div);
-          destPrep.setString(5, region == null ? GenerateDB.DEFAULT_TEAM_REGION : region);
+          destPrep.setString(4, div == null
+              || "".equals(div) ? GenerateDB.DEFAULT_TEAM_DIVISION : div);
+          destPrep.setString(5, region == null
+              || "".equals(region) ? GenerateDB.DEFAULT_TEAM_REGION : region);
           destPrep.executeUpdate();
         }
       }
