@@ -26,8 +26,9 @@ public final class CookieUtils {
 
   public static final String LOGIN_KEY = "fll-login";
 
-  private CookieUtils() {}
-  
+  private CookieUtils() {
+  }
+
   /**
    * Set the login cookie.
    * 
@@ -50,15 +51,17 @@ public final class CookieUtils {
    */
   public static Collection<Cookie> findLoginCookie(final HttpServletRequest request) {
     final Collection<Cookie> found = new LinkedList<Cookie>();
-    
+
     final Cookie[] cookies = request.getCookies();
-    if(null == cookies) {
+    if (null == cookies) {
       return found;
     }
-    
+
     for (final Cookie cookie : cookies) {
-      LOG.info("Checking cookie: "
-          + cookie.getName());
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Checking cookie: "
+            + cookie.getName());
+      }
       if (LOGIN_KEY.equals(cookie.getName())) {
         found.add(cookie);
       }
