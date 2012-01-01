@@ -1679,7 +1679,7 @@ public final class Queries {
    * @see #updateScoreTotals(Document, Connection, int)
    */
   public static void updateScoreTotals(final Document document,
-                                       final Connection connection) throws SQLException, ParseException {
+                                       final Connection connection) throws SQLException {
     final int tournament = getCurrentTournament(connection);
     updateScoreTotals(document, connection, tournament);
   }
@@ -1691,13 +1691,12 @@ public final class Queries {
    * @param connection connection to database, needs write privileges
    * @param tournament tournament to update score totals for
    * @throws SQLException if an error occurs
-   * @throws NumberFormantException if document has invalid numbers
    * @see #updatePerformanceScoreTotals(Document, Connection)
    * @see #updateSubjectiveScoreTotals(Document, Connection)
    */
   public static void updateScoreTotals(final Document document,
                                        final Connection connection,
-                                       final int tournament) throws SQLException, ParseException {
+                                       final int tournament) throws SQLException {
     updatePerformanceScoreTotals(document, connection, tournament);
 
     updateSubjectiveScoreTotals(document, connection, tournament);
@@ -1709,12 +1708,11 @@ public final class Queries {
    * @param document
    * @param connection
    * @throws SQLException
-   * @throws ParseException
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   public static void updateSubjectiveScoreTotals(final Document document,
                                                  final Connection connection,
-                                                 final int tournament) throws SQLException, ParseException {
+                                                 final int tournament) throws SQLException {
     final Element rootElement = document.getDocumentElement();
 
     PreparedStatement updatePrep = null;
@@ -1754,6 +1752,8 @@ public final class Queries {
         updatePrep.close();
         selectPrep.close();
       }
+    } catch (final ParseException e) {
+      throw new FLLRuntimeException("Error parsing data in the challenge descriptor, this shouldn't happen", e);
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(updatePrep);
@@ -1769,11 +1769,10 @@ public final class Queries {
    * @param connection connection to the database
    * @param tournament the tournament to update scores for.
    * @throws SQLException
-   * @throws ParseException
    */
   public static void updatePerformanceScoreTotals(final Document document,
                                                   final Connection connection,
-                                                  final int tournament) throws SQLException, ParseException {
+                                                  final int tournament) throws SQLException {
     final Element rootElement = document.getDocumentElement();
 
     PreparedStatement updatePrep = null;
@@ -1810,6 +1809,8 @@ public final class Queries {
       rs.close();
       updatePrep.close();
       selectPrep.close();
+    } catch (final ParseException e) {
+      throw new FLLRuntimeException("Error parsing data in the challenge descriptor, this shouldn't happen", e);
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(updatePrep);
