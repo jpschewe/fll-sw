@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Comparator;
 
+import fll.db.GenerateDB;
+
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -65,7 +67,8 @@ public final class Team implements Serializable {
   }
 
   public static final Comparator<Team> TEAM_NUMBER_COMPARATOR = new Comparator<Team>() {
-    public int compare(final Team one, final Team two) {
+    public int compare(final Team one,
+                       final Team two) {
       final int oneNum = one.getTeamNumber();
       final int twoNum = two.getTeamNumber();
       if (oneNum < twoNum) {
@@ -91,7 +94,8 @@ public final class Team implements Serializable {
    *         database.
    * @throws SQLException on a database access error.
    */
-  public static Team getTeamFromDatabase(final Connection connection, final int teamNumber) throws SQLException {
+  public static Team getTeamFromDatabase(final Connection connection,
+                                         final int teamNumber) throws SQLException {
     // First, handle known non-database team numbers...
     if (teamNumber == NULL_TEAM_NUMBER) {
       return NULL;
@@ -118,6 +122,10 @@ public final class Team implements Serializable {
         x._region = rs.getString(3);
         x._teamName = rs.getString(4);
         x._teamNumber = teamNumber;
+        if (null == x._region
+            || "".equals(x._region)) {
+          x._region = GenerateDB.DEFAULT_TEAM_REGION;
+        }
         return x;
       } else {
         return null;
