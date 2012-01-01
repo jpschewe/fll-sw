@@ -153,7 +153,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       removeNullRows(currentTournament, connection, categoryName, categoryElement);
     }
 
-    Queries.updateSubjectiveScoreTotals(challengeDocument, connection);
+    Queries.updateSubjectiveScoreTotals(challengeDocument, connection, currentTournament);
   }
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")
