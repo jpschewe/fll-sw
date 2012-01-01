@@ -711,6 +711,9 @@ public final class ImportDB {
     importPlayoffData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     importSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+
+    // update score totals
+    Queries.updateScoreTotals(document, destinationConnection, destTournamentID);
   }
 
   private static void importSchedule(final Connection sourceConnection,
