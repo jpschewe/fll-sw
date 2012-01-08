@@ -610,13 +610,6 @@ public final class Queries {
 
     final TeamScore teamScore = new HttpTeamScore(performanceElement, teamNumber, runNumber, request);
 
-    // Perform updates to the playoff data table if in playoff rounds.
-    if ((runNumber > numSeedingRounds)
-        && "1".equals(request.getParameter("Verified"))) {
-      updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
-                         teamNumber, runNumber, numSeedingRounds, teamScore);
-    }
-
     final StringBuffer columns = new StringBuffer();
     final StringBuffer values = new StringBuffer();
 
@@ -674,6 +667,14 @@ public final class Queries {
     } finally {
       SQLFunctions.close(stmt);
     }
+    
+    // Perform updates to the playoff data table if in playoff rounds.
+    if ((runNumber > numSeedingRounds)
+        && "1".equals(request.getParameter("Verified"))) {
+      updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
+                         teamNumber, runNumber, numSeedingRounds, teamScore);
+    }
+
 
     return sql;
   }
@@ -748,12 +749,6 @@ public final class Queries {
 
     final StringBuffer sql = new StringBuffer();
 
-    // Check if we need to update the PlayoffData table
-    if (runNumber > numSeedingRounds) {
-      updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
-                         teamNumber, runNumber, numSeedingRounds, teamScore);
-    }
-
     sql.append("UPDATE Performance SET ");
 
     sql.append("NoShow = "
@@ -801,6 +796,13 @@ public final class Queries {
     } finally {
       SQLFunctions.close(stmt);
     }
+    
+    // Check if we need to update the PlayoffData table
+    if (runNumber > numSeedingRounds) {
+      updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
+                         teamNumber, runNumber, numSeedingRounds, teamScore);
+    }
+
 
     return sql.toString();
   }
