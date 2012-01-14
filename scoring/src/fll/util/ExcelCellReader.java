@@ -154,11 +154,16 @@ public class ExcelCellReader extends CellFileReader {
           final double d = cell.getNumericCellValue();
           // test if a date!
           if (HSSFDateUtil.isCellDateFormatted(cell)) {
-            // format in form of M/D/YY
+            // make sure to format times like we expect them
             final Date date = HSSFDateUtil.getJavaDate(d);
             str = TournamentSchedule.DATE_FORMAT_AM_PM_SS.get().format(date);
           } else {
-            str = formatter.formatCellValue(cell, formulaEvaluator);
+            // check for integer
+            if (FP.equals(d, Math.round(d), 1e-10)) {
+              str = String.valueOf((int) d);
+            } else {
+              str = formatter.formatCellValue(cell, formulaEvaluator);
+            }
           }
         } else {
           str = formatter.formatCellValue(cell, formulaEvaluator);
