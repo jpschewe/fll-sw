@@ -112,10 +112,6 @@
 		<!-- icons -->
 		<pathelement location="${dir.lib}/jlfgr-1_0.jar" />
 
-		<!-- xerces XML parser -->
-		<pathelement location="${dir.lib}/xercesImpl.jar" />
-		<pathelement location="${dir.lib}/xml-apis.jar" />
-
 		<!-- Read and Write Excel files -->
 		<pathelement location="${dir.lib}/poi-3.6-20091214.jar" />
 		<pathelement location="${dir.lib}/poi-ooxml-3.6-20091214.jar" />
