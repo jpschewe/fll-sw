@@ -62,9 +62,6 @@
  <li><a href="http://xml.apache.org/xalan-j/">Xalan</a> - <a
   href="xalan-license.txt">License</a></li>
 
- <li><a href="http://xerces.apache.org/xerces2-j/">Xerces</a> - <a
-  href="xerces-license.txt">License</a></li>
-
  <li><a href="http://poi.apache.org/">POI</a> (Used for reading
  Excel files) - <a href="poi-license.txt">License</a></li>
 
