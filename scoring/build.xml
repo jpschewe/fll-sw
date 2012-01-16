@@ -112,10 +112,6 @@
 		<!-- icons -->
 		<pathelement location="${dir.lib}/jlfgr-1_0.jar" />
 
-		<!-- xerces XML parser -->
-		<pathelement location="${dir.lib}/xercesImpl.jar" />
-		<pathelement location="${dir.lib}/xml-apis.jar" />
-
 		<!-- Read and Write Excel files -->
 		<pathelement location="${dir.lib}/poi-3.6-20091214.jar" />
 		<pathelement location="${dir.lib}/poi-ooxml-3.6-20091214.jar" />
@@ -148,10 +144,7 @@
 		<pathelement location="${dir.lib}/commons-io-1.3.jar" />
 
 		<!-- JSTL libraries -->
-		<pathelement location="${dir.lib}/jstl.jar" />
-		<pathelement location="${dir.lib}/standard.jar" />
-		<pathelement location="${dir.lib}/serializer.jar" />
-		<pathelement location="${dir.lib}/xalan.jar" />
+		<pathelement location="${dir.lib}/jstl-1.2.jar" />
 
 		<!-- tomcat libraries -->
 		<pathelement location="${dir.tomcat.src}/lib/servlet-api.jar" />
