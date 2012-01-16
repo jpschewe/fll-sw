@@ -56,11 +56,7 @@
   href="log4j-license.txt">License</a></li>
 
  <li><a
-  href="http://jakarta.apache.org/taglibs/doc/standard-doc/intro.html">Jakarta
- Taglibs - Standard</a> - <a href="jstl-license.txt">License</a></li>
-
- <li><a href="http://xml.apache.org/xalan-j/">Xalan</a> - <a
-  href="xalan-license.txt">License</a></li>
+  href="http://jstl.java.net/">JSTL 1.2</a> - <a href="jstl-1.2-license.txt">License</a></li>
 
  <li><a href="http://poi.apache.org/">POI</a> (Used for reading
  Excel files) - <a href="poi-license.txt">License</a></li>
