@@ -62,12 +62,9 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
           pairedMap.put(Integer.parseInt(pair.split("\\-")[0]), Integer.parseInt(pair.split("\\-")[1]));
         }
         //JsonBD that request!
-        
-        //screw it steal from remoteControlbrackets.jsp
         final String divisionKey = "playoffDivision";
         final String roundNumberKey = "playoffRoundNumber";
         final String displayName = (String)session.getAttribute("displayName");
-
         final String sessionDivision;
         final Number sessionRoundNumber;
         if (null != displayName) {
@@ -79,7 +76,6 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
           sessionDivision = null;
           sessionRoundNumber = null;
         }
-
         final String division;
         if (null != sessionDivision) {
           division = sessionDivision;
@@ -93,7 +89,6 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
         } else {
           division = (String) application.getAttribute(divisionKey);
         }
-
         final int playoffRoundNumber;
         if (null != sessionRoundNumber) {
           playoffRoundNumber = sessionRoundNumber.intValue();
@@ -102,23 +97,6 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
         } else {
           playoffRoundNumber = ((Number) application.getAttribute(roundNumberKey)).intValue();
         }
-        //done screwing it
-        
-       // final String displayName = (String) session.getAttribute("displayName");
-       // final boolean hasDisplayName = displayName != null;
-      //  final String division;
-       // final Number nPlayoffRoundNumber;
-       // final int playoffRoundNumber;
-       // if (!hasDisplayName) {
-       //   //No special session attribute stuff
-       //   division = (String) application.getAttribute("playoffDivision");
-       //   nPlayoffRoundNumber = (Number) application.getAttribute("playoffRoundNumber");
-       // } else {
-       //   division = (String) application.getAttribute(displayName+"_playoffDivision");
-       //   nPlayoffRoundNumber = (Number) application.getAttribute(displayName + "_playoffRoundNumber");
-       // }
-        //playoffRoundNumber = nPlayoffRoundNumber.intValue();
-        //playoffRoundNumber = 1;
         JsonBracketData jsonbd = new JsonBracketData(new BracketData(connection, division, playoffRoundNumber, playoffRoundNumber + 2, 4, false, true));
         final Element rootElement = ApplicationAttributes.getChallengeDocument(application).getDocumentElement();
         final Element perfElement = (Element) rootElement.getElementsByTagName("Performance").item(0);  
