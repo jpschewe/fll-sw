@@ -28,6 +28,7 @@ final Connection connection = datasource.getConnection();
     <c:choose>
       <c:when test="${not empty param.delete}">
         <%Queries.deletePerformanceScore(connection, request);%>
+        <icep:push group="playoffs"/>
       </c:when>
       <c:when test="${not empty param.EditFlag}">
         <%Queries.updatePerformanceScore(challengeDocument, connection, request);%>
@@ -36,6 +37,10 @@ final Connection connection = datasource.getConnection();
         <%Queries.insertPerformanceScore(challengeDocument, connection, request);%>
       </c:otherwise>
     </c:choose>
+    <%-- push ajax if the score has verified flag. saves us a little bit of resources --%>
+    <c:if test="${param.Verified eq '1'}">
+      <icep:push group="playoffs"/>
+    </c:if>
     <c:redirect url="select_team.jsp"/>
                         
 

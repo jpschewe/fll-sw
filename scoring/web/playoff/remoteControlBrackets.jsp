@@ -69,7 +69,6 @@
 <head>
 <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
 <title>Playoff Round <%=playoffRoundNumber%>, Division <%=division%></title>
-</head>
 <style type='text/css'>
 TD.Leaf {
 	color: #ffffff;
@@ -115,18 +114,9 @@ FONT.TIE {
 	padding-right: 5%
 }
 </style>
+<script type="text/javascript" src="<c:url value='/playoff/code.icepush'/>"></script>
 <script type="text/javascript" src="<c:url value='/jquery-1.7.1.min.js'/>"></script>
 <script type="text/javascript" src="<c:url value='/jquery.scrollTo-1.4.2-min.js'/>"></script>
-<!-- stuff for automatic scrolling -->
-<script type="text/javascript">
-var scrollTimer;
-var scrollAmount = 2;    // scroll by 100 pixels each time
-var documentYposition = 0;
-var scrollPause = 100; // amount of time, in milliseconds, to pause between scrolls
-var scrollTicksToSkip = 0;
-
-</script>
-<!-- end stuff for automatic scrolling -->
 <script type="text/javascript">
   var ajaxURL = '<c:url value="/ajax/"/>';
   var seedingRounds = <%=Queries.getNumSeedingRounds(connection, currentTournament)%>;
@@ -168,7 +158,7 @@ var scrollTicksToSkip = 0;
       foundNewest = false;
       $("a[name=newest]").remove();
       $.ajax({
-          url: ajaxURL + "brackets.jsp?multi=" + ajaxList,
+          url: ajaxURL + "BracketQuery?multi=" + ajaxList,
           dataType: "json",
           cache: false,
           beforeSend: function (xhr) {
@@ -276,16 +266,17 @@ var scrollTicksToSkip = 0;
       }
   }
 
-  function start() {
+  $(document).ready(function() {
       buildAJAXList();
       scrollMgr("bottom");
       scrollMgr("top");
       window.setInterval('scrollMgr("bottom");scrollMgr("top")', (rows * 2000)+6000);
-      window.setInterval('iterate()',10000);
-  }
+      //window.setInterval('iterate()',10000);
+  });
 </script>
-
-<body onload='start()'>
+<icep:register group="playoffs" callback="function(){iterate();}"/>
+</head>
+<body>
 <!-- dummy tag and some blank lines for scolling -->
 <span id="top"></span>
 <div id="dummy" style="position: absolute"><br/>
