@@ -901,24 +901,28 @@ public class TournamentSchedule implements Serializable {
 
       if (!one.getDivision().equals(two.getDivision())) {
         return one.getDivision().compareTo(two.getDivision());
-      } else if (!one.getJudgingStation().equals(two.getJudgingStation())) {
-        return one.getJudgingStation().compareTo(two.getJudgingStation());
       } else {
         final SubjectiveTime oneTime = one.getSubjectiveTimeByName(name);
         final SubjectiveTime twoTime = two.getSubjectiveTimeByName(name);
 
+        final int timeCompare;
         if (oneTime == null) {
           if (twoTime == null) {
-            return 0;
+            timeCompare = 0;
           } else {
-            return -1;
+            timeCompare = -1;
           }
         } else {
           if (null == twoTime) {
-            return 1;
+            timeCompare = 1;
           } else {
-            return oneTime.getTime().compareTo(twoTime.getTime());
+            timeCompare = oneTime.getTime().compareTo(twoTime.getTime());
           }
+        }
+        if (timeCompare == 0) {
+          return one.getJudgingStation().compareTo(two.getJudgingStation());
+        } else {
+          return timeCompare;
         }
       }
     }
