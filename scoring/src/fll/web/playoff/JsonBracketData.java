@@ -119,17 +119,15 @@ public class JsonBracketData {
         final boolean realScore = !Double.isNaN(computedTeamScore);
         final boolean noShow = Queries.isNoShow(connection, currentTournament, tbc.getTeam().getTeamNumber(), numSeedingRounds+entry.getValue());
         //Sane request checks
-        if (tbc != null) {
-          if (noShow) {
-            datalist.add(new BracketLeafResultSet(tbc, -2.0, entry.getKey()+"-"+entry.getValue()));
-          } else if (!realScore
-              || !_showOnlyVerifiedScores
-              || Queries.isVerified(connection, currentTournament, teamNumber, Queries.getNumSeedingRounds(connection, currentTournament)+entry.getValue())) {
-            if (entry.getValue() == numPlayoffRounds || !realScore) {
-              datalist.add(new BracketLeafResultSet(tbc, -1.0, entry.getKey()+"-"+entry.getValue()));
-            } else {
-              datalist.add(new BracketLeafResultSet(tbc, computedTeamScore, entry.getKey()+"-"+entry.getValue()));
-            }
+        if (noShow) {
+          datalist.add(new BracketLeafResultSet(tbc, -2.0, entry.getKey()+"-"+entry.getValue()));
+        } else if (!realScore
+            || !_showOnlyVerifiedScores
+            || Queries.isVerified(connection, currentTournament, teamNumber, Queries.getNumSeedingRounds(connection, currentTournament)+entry.getValue())) {
+          if (entry.getValue() == numPlayoffRounds || !realScore) {
+            datalist.add(new BracketLeafResultSet(tbc, -1.0, entry.getKey()+"-"+entry.getValue()));
+          } else {
+            datalist.add(new BracketLeafResultSet(tbc, computedTeamScore, entry.getKey()+"-"+entry.getValue()));
           }
         }
       }
