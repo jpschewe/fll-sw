@@ -1,0 +1,5 @@
+  <servlet>
+    <servlet-name>icepush</servlet-name>
+    <servlet-class>org.icepush.servlet.ICEpushServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
