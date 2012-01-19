@@ -223,6 +223,26 @@ FONT.TIE {
       }); // /first .ajax
   } // /iterate()
 
+  var validColors = new Array();
+  validColors[0] = "maroon";
+  validColors[1] = "red";
+  validColors[2] = "orange";
+  validColors[3] = "yellow";
+  validColors[4] = "olive";
+  validColors[5] = "purple";
+  validColors[6] = "fuchsia";
+  validColors[7] = "white";
+  validColors[8] = "lime";
+  validColors[9] = "green";
+  validColors[10] = "navy";
+  validColors[11] = "blue";
+  validColors[12] = "aqua";
+  validColors[13] = "teal";
+  validColors[14] = "black";
+  validColors[15] = "silver";
+  validColors[16] = "gray";
+  //colors sourced from http://www.w3.org/TR/CSS2/syndata.html#color-units
+
   function placeTableLabel(lid, table, dbLine) {
       if (table != undefined) {
           var row;
@@ -239,6 +259,15 @@ FONT.TIE {
           } 
               row.find("td[width=\"400\"]:nth-child(" +  nthcell + ")").eq(0).css('padding-right', '30px').attr('align', 'right').html('<span class="table_assignment">' + table + '</span><!-- '+lid+' -->');
       }
+  }
+
+  function colorTableLabels() {
+      $(".table_assignment").each(function(index, label) {
+          //Sane color? Let's start by splitting the label text
+          if ($.inArray(label.innerHTML.split(" ")[0].toLowerCase(), validColors) == 1) {
+              label.style.backgroundColor = label.innerHTML.split(" ")[0];
+          }
+      });
   }
 
   function buildAJAXList() {
@@ -271,6 +300,7 @@ FONT.TIE {
       scrollMgr("bottom");
       scrollMgr("top");
       window.setInterval('scrollMgr("bottom");scrollMgr("top")', (rows * 2000)+6000);
+      colorTableLabels();
       //window.setInterval('iterate()',10000);
   });
 </script>
