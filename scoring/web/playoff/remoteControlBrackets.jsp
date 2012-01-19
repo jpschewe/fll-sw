@@ -221,6 +221,7 @@ FONT.TIE {
           console.log(errstring);
           console.log(err);
       }); // /first .ajax
+  colorTableLabels();
   } // /iterate()
 
   var validColors = new Array();
