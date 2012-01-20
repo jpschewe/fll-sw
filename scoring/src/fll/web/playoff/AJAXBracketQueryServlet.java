@@ -39,76 +39,100 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
       final Connection connection = datasource.getConnection();
       final ServletOutputStream os = response.getOutputStream();
       if (request.getParameter("round") != null && request.getParameter("row") != null) {
-          final String displayName = (String) session.getAttribute("displayName");
-          final String division;
-          final int playoffRoundNumber;
-          if (session.getAttribute(displayName+"_"+"playoffDivision") == null) {
-            //No special session attribute stuff
-            division = (String) session.getAttribute("playoffDivision");
-            playoffRoundNumber = ((Number) session.getAttribute("playoffRoundNumber")).intValue();
-          } else {
-            division = (String) session.getAttribute(displayName+"_"+"playoffDivision");
-            playoffRoundNumber = ((Number) session.getAttribute(displayName+"_"+"playoffRoundNumber")).intValue();
-          }
-          JsonBracketData jsonbd = new JsonBracketData(new BracketData(connection, division, playoffRoundNumber, playoffRoundNumber + 2, 4, false, true));
-          response.reset();
-          response.setContentType("text/plain");
-          os.print(jsonbd.getBracketLocationJson(Integer.parseInt(request.getParameter("round")), Integer.parseInt(request.getParameter("row"))));
-      } else if (request.getParameter("multi") != null) {
-        //Make row-round map
-        String[] pairs = request.getParameter("multi").split("\\|");
-        Map<Integer, Integer> pairedMap = new HashMap<Integer, Integer>();
-        for (String pair : pairs) {
-          pairedMap.put(Integer.parseInt(pair.split("\\-")[0]), Integer.parseInt(pair.split("\\-")[1]));
-        }
-        //JsonBD that request!
-        final String divisionKey = "playoffDivision";
-        final String roundNumberKey = "playoffRoundNumber";
-        final String displayName = (String)session.getAttribute("displayName");
-        final String sessionDivision;
-        final Number sessionRoundNumber;
-        if (null != displayName) {
-          sessionDivision = (String) application.getAttribute(displayName
-              + "_" + divisionKey);
-          sessionRoundNumber = (Number) application.getAttribute(displayName
-              + "_" + roundNumberKey);
-        } else {
-          sessionDivision = null;
-          sessionRoundNumber = null;
-        }
-        final String division;
-        if (null != sessionDivision) {
-          division = sessionDivision;
-        } else if (null == application.getAttribute(divisionKey)) {
-          final List<String> divisions = Queries.getEventDivisions(connection);
-          if (!divisions.isEmpty()) {
-            division = divisions.get(0);
-          } else {
-            throw new RuntimeException("No division specified and no divisions in the database!");
-          }
-        } else {
-          division = (String) application.getAttribute(divisionKey);
-        }
-        final int playoffRoundNumber;
-        if (null != sessionRoundNumber) {
-          playoffRoundNumber = sessionRoundNumber.intValue();
-        } else if (null == application.getAttribute(roundNumberKey)) {
-          playoffRoundNumber = 1;
-        } else {
-          playoffRoundNumber = ((Number) application.getAttribute(roundNumberKey)).intValue();
-        }
-        JsonBracketData jsonbd = new JsonBracketData(new BracketData(connection, division, playoffRoundNumber, playoffRoundNumber + 2, 4, false, true));
-        final Element rootElement = ApplicationAttributes.getChallengeDocument(application).getDocumentElement();
-        final Element perfElement = (Element) rootElement.getElementsByTagName("Performance").item(0);  
+        BracketData bd = constructBracketData(connection, session, application);
+        JsonBracketData jsonbd = new JsonBracketData(bd);
         response.reset();
         response.setContentType("text/plain");
-        os.print(jsonbd.getMultipleBracketLocationsJson(pairedMap, datasource, perfElement));
+        os.print(jsonbd.getBracketLocationJson(Integer.parseInt(request.getParameter("round")), Integer.parseInt(request.getParameter("row"))));
+      } else if (request.getParameter("multi") != null) {
+        //Send off request to helpers
+        handleMultipleQuery(parseInputToMap(request.getParameter("multi")), os, application, session, response, connection, datasource);
       } else {
+        response.reset();
+        response.setContentType("text/plain");
         os.print( "{\"_rmsg\": \"Error: No Params\"}");
       }
     } catch (final SQLException e) {
       throw new RuntimeException(e);
+    }
+  }
+  private Map<Integer, Integer> parseInputToMap(final String param) {
+    String[] pairs = param.split("\\|");
+    Map<Integer, Integer> pairedMap = new HashMap<Integer, Integer>();
+    for (String pair : pairs) {
+      pairedMap.put(Integer.parseInt(pair.split("\\-")[0]), Integer.parseInt(pair.split("\\-")[1]));
+    }
+    return pairedMap;
+  }
+  private void handleMultipleQuery(final Map<Integer, Integer> pairedMap,
+                                   final ServletOutputStream os,
+                                   final ServletContext application,
+                                   final HttpSession session,
+                                   final HttpServletResponse response,
+                                   final Connection connection, 
+                                   final DataSource datasource) {
+    try {
+      BracketData bd = constructBracketData(connection, session, application);
+      JsonBracketData jsonbd = new JsonBracketData(bd);
+      final Element rootElement = ApplicationAttributes.getChallengeDocument(application).getDocumentElement();
+      final Element perfElement = (Element) rootElement.getElementsByTagName("Performance").item(0);  
+      response.reset();
+      response.setContentType("text/plain");
+      os.print(jsonbd.getMultipleBracketLocationsJson(pairedMap, datasource, perfElement));
+    } catch (final SQLException e) {
+      throw new RuntimeException(e);
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
     } catch (final ParseException e) {
+      throw new RuntimeException(e);
+    } 
+  }
+  private BracketData constructBracketData(Connection connection, HttpSession session, ServletContext application) {
+    final String divisionKey = "playoffDivision";
+    final String roundNumberKey = "playoffRoundNumber";
+    final String displayNameKey = "displayName";
+    final String displayName = SessionAttributes.getAttribute(session, displayNameKey, String.class);
+    final String sessionDivision;
+    final Number sessionRoundNumber;
+    if (null != displayName) {
+      sessionDivision = ApplicationAttributes.getAttribute(application, displayName+"_"+divisionKey, String.class);
+      sessionRoundNumber = ApplicationAttributes.getAttribute(application, displayName+"_"+roundNumberKey, Number.class);
+    } else {
+      sessionDivision = null;
+      sessionRoundNumber = null;
+    }
+    final String division;
+    if (null != sessionDivision) {
+      division = sessionDivision;
+    } else if (null == ApplicationAttributes.getAttribute(application, divisionKey, String.class)) {
+      try {
+        final List<String> divisions = Queries.getEventDivisions(connection);
+        if (!divisions.isEmpty()) {
+          division = divisions.get(0);
+        } else {
+          throw new RuntimeException("No division specified and no divisions in the database!");
+        }
+      } catch (SQLException e) {
+        throw new RuntimeException(e);
+      }
+    } else {
+      division = ApplicationAttributes.getAttribute(application, divisionKey, String.class);
+    }
+    final int playoffRoundNumber;
+    if (null != sessionRoundNumber) {
+      playoffRoundNumber = sessionRoundNumber.intValue();
+    } else if (null == ApplicationAttributes.getAttribute(application, roundNumberKey, Number.class)) {
+      playoffRoundNumber = 1;
+    } else {
+      playoffRoundNumber = ApplicationAttributes.getAttribute(application, roundNumberKey, Number.class).intValue();
+    }
+    final int roundsLong = 2;
+    final int rowsPerTeam = 4;
+    final boolean showFinalsScores = false;
+    final boolean onlyShowVerifiedScores = true;
+    try {
+      return new BracketData(connection, division, playoffRoundNumber, playoffRoundNumber+roundsLong-1, rowsPerTeam, showFinalsScores, onlyShowVerifiedScores);
+    } catch (SQLException e) {
       throw new RuntimeException(e);
     }
   }
