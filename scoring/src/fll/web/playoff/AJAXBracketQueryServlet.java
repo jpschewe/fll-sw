@@ -126,7 +126,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     } else {
       playoffRoundNumber = ApplicationAttributes.getAttribute(application, roundNumberKey, Number.class).intValue();
     }
-    final int roundsLong = 2;
+    final int roundsLong = 3;
     final int rowsPerTeam = 4;
     final boolean showFinalsScores = false;
     final boolean onlyShowVerifiedScores = true;
