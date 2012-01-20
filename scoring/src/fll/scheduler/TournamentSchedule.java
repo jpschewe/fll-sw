@@ -150,9 +150,10 @@ public class TournamentSchedule implements Serializable {
     }
   };
 
+  // time->table->team
   private final HashMap<Date, Map<String, List<TeamScheduleInfo>>> _matches = new HashMap<Date, Map<String, List<TeamScheduleInfo>>>();
 
-  public Map<Date, Map<String, List<TeamScheduleInfo>>> getMatches() {
+  /* package */Map<Date, Map<String, List<TeamScheduleInfo>>> getMatches() {
     // TODO should make read-only somehow
     return _matches;
   }
@@ -183,6 +184,10 @@ public class TournamentSchedule implements Serializable {
    * Name of this tournament.
    */
   private final String name;
+
+  public String getName() {
+    return name;
+  }
 
   /**
    * The list of subjective stations for this schedule.
@@ -356,8 +361,7 @@ public class TournamentSchedule implements Serializable {
             throw new RuntimeException("Tables sides must be 1 or 2. Tournament: "
                 + tournamentID + " team: " + teamNumber);
           }
-          final PerformanceTime performance = new PerformanceTime(round, Queries.timeToDate(perfTime), tableColor,
-                                                                  tableSide);
+          final PerformanceTime performance = new PerformanceTime(Queries.timeToDate(perfTime), tableColor, tableSide);
           ti.setPerf(round, performance);
 
           prevRound = round;
@@ -752,7 +756,7 @@ public class TournamentSchedule implements Serializable {
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 2, 2 });
 
     final PdfPCell tournamentCell = createHeaderCell("Tournament: "
-        + name + " Performance");
+        + getName() + " Performance");
     tournamentCell.setColspan(7);
     table.addCell(tournamentCell);
 
@@ -768,10 +772,11 @@ public class TournamentSchedule implements Serializable {
     for (final Map.Entry<PerformanceTime, TeamScheduleInfo> entry : performanceTimes.entrySet()) {
       final PerformanceTime performance = entry.getKey();
       final TeamScheduleInfo si = entry.getValue();
+      final int round = si.computeRound(performance);
 
       // check if team needs to stay and color the cell magenta if they do
       final BaseColor backgroundColor;
-      if (null != checkIfTeamNeedsToStay(si, performance.getRound())) {
+      if (null != checkIfTeamNeedsToStay(si, round)) {
         teamsStaying.add(si);
         backgroundColor = BaseColor.MAGENTA;
       } else {
@@ -782,10 +787,10 @@ public class TournamentSchedule implements Serializable {
       table.addCell(createCell(si.getDivision()));
       table.addCell(createCell(si.getOrganization()));
       table.addCell(createCell(si.getTeamName()));
-      table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.getPerfTime(performance.getRound())), backgroundColor));
-      table.addCell(createCell(si.getPerfTableColor(performance.getRound())
-          + " " + si.getPerfTableSide(performance.getRound()), backgroundColor));
-      table.addCell(createCell(String.valueOf(performance.getRound() + 1)));
+      table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.getPerfTime(round)), backgroundColor));
+      table.addCell(createCell(si.getPerfTableColor(round)
+          + " " + si.getPerfTableSide(round), backgroundColor));
+      table.addCell(createCell(String.valueOf(round + 1)));
     }
 
     detailedSchedules.add(table);
@@ -847,7 +852,7 @@ public class TournamentSchedule implements Serializable {
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
 
     final PdfPCell tournamentCell = createHeaderCell("Tournament: "
-        + name + " - " + subjectiveStation);
+        + getName() + " - " + subjectiveStation);
     tournamentCell.setColspan(6);
     table.addCell(tournamentCell);
 
@@ -896,24 +901,28 @@ public class TournamentSchedule implements Serializable {
 
       if (!one.getDivision().equals(two.getDivision())) {
         return one.getDivision().compareTo(two.getDivision());
-      } else if (!one.getJudgingStation().equals(two.getJudgingStation())) {
-        return one.getJudgingStation().compareTo(two.getJudgingStation());
       } else {
         final SubjectiveTime oneTime = one.getSubjectiveTimeByName(name);
         final SubjectiveTime twoTime = two.getSubjectiveTimeByName(name);
 
+        final int timeCompare;
         if (oneTime == null) {
           if (twoTime == null) {
-            return 0;
+            timeCompare = 0;
           } else {
-            return -1;
+            timeCompare = -1;
           }
         } else {
           if (null == twoTime) {
-            return 1;
+            timeCompare = 1;
           } else {
-            return oneTime.getTime().compareTo(twoTime.getTime());
+            timeCompare = oneTime.getTime().compareTo(twoTime.getTime());
           }
+        }
+        if (timeCompare == 0) {
+          return one.getJudgingStation().compareTo(two.getJudgingStation());
+        } else {
+          return timeCompare;
         }
       }
     }
@@ -923,27 +932,29 @@ public class TournamentSchedule implements Serializable {
    * Compute the general schedule and return it as a string
    */
   public String computeGeneralSchedule() {
-    final Date[] minPerf = new Date[getNumberOfRounds()];
-    final Date[] maxPerf = new Date[getNumberOfRounds()];
+    Date minPerf = null;
+    Date maxPerf = null;
+    // division -> date
     final Map<String, Date> minSubjectiveTimes = new HashMap<String, Date>();
     final Map<String, Date> maxSubjectiveTimes = new HashMap<String, Date>();
 
     for (final TeamScheduleInfo si : _schedule) {
+      final String judgingStation = si.getJudgingStation();
       for (final SubjectiveTime stime : si.getSubjectiveTimes()) {
-        final Date currentMin = minSubjectiveTimes.get(stime.getName());
+        final Date currentMin = minSubjectiveTimes.get(judgingStation);
         if (null == currentMin) {
-          minSubjectiveTimes.put(stime.getName(), stime.getTime());
+          minSubjectiveTimes.put(judgingStation, stime.getTime());
         } else {
           if (stime.getTime().before(currentMin)) {
-            minSubjectiveTimes.put(stime.getName(), stime.getTime());
+            minSubjectiveTimes.put(judgingStation, stime.getTime());
           }
         }
-        final Date currentMax = maxSubjectiveTimes.get(stime.getName());
+        final Date currentMax = maxSubjectiveTimes.get(judgingStation);
         if (null == currentMax) {
-          maxSubjectiveTimes.put(stime.getName(), stime.getTime());
+          maxSubjectiveTimes.put(judgingStation, stime.getTime());
         } else {
           if (stime.getTime().after(currentMax)) {
-            maxSubjectiveTimes.put(stime.getName(), stime.getTime());
+            maxSubjectiveTimes.put(judgingStation, stime.getTime());
           }
         }
 
@@ -954,14 +965,14 @@ public class TournamentSchedule implements Serializable {
           // ignore the teams that cross round boundaries
           final int opponentRound = findOpponentRound(si, i);
           if (opponentRound == i) {
-            if (null == minPerf[i]
-                || si.getPerfTime(i).before(minPerf[i])) {
-              minPerf[i] = si.getPerfTime(i);
+            if (null == minPerf
+                || si.getPerfTime(i).before(minPerf)) {
+              minPerf = si.getPerfTime(i);
             }
 
-            if (null == maxPerf[i]
-                || si.getPerfTime(i).after(maxPerf[i])) {
-              maxPerf[i] = si.getPerfTime(i);
+            if (null == maxPerf
+                || si.getPerfTime(i).after(maxPerf)) {
+              maxPerf = si.getPerfTime(i);
             }
           }
         }
@@ -971,17 +982,17 @@ public class TournamentSchedule implements Serializable {
 
     // print out the general schedule
     final Formatter output = new Formatter();
-    final Set<String> subjectiveKeys = new HashSet<String>();
-    subjectiveKeys.addAll(minSubjectiveTimes.keySet());
-    subjectiveKeys.addAll(maxSubjectiveTimes.keySet());
-    for (final String key : subjectiveKeys) {
-      output.format("min %s: %s%n", key, OUTPUT_DATE_FORMAT.get().format(minSubjectiveTimes.get(key)));
-      output.format("max %s: %s%n", key, OUTPUT_DATE_FORMAT.get().format(maxSubjectiveTimes.get(key)));
+    final Set<String> stations = new HashSet<String>();
+    stations.addAll(minSubjectiveTimes.keySet());
+    stations.addAll(maxSubjectiveTimes.keySet());
+    for (final String station : stations) {
+      output.format("Subjective earliest start for judging station %s: %s%n", station,
+                    OUTPUT_DATE_FORMAT.get().format(minSubjectiveTimes.get(station)));
+      output.format("Subjective latest start for judging station %s: %s%n", station,
+                    OUTPUT_DATE_FORMAT.get().format(maxSubjectiveTimes.get(station)));
     }
-    for (int i = 0; i < getNumberOfRounds(); ++i) {
-      output.format("min performance round %d: %s%n", (i + 1), OUTPUT_DATE_FORMAT.get().format(minPerf[i]));
-      output.format("max performance round %d: %s%n", (i + 1), OUTPUT_DATE_FORMAT.get().format(maxPerf[i]));
-    }
+    output.format("Earliest performance start: %s%n", OUTPUT_DATE_FORMAT.get().format(minPerf));
+    output.format("Latest performance start: %s%n", OUTPUT_DATE_FORMAT.get().format(maxPerf));
     return output.toString();
   }
 
@@ -1011,7 +1022,24 @@ public class TournamentSchedule implements Serializable {
     }
 
     tableMatches.add(ti);
+  }
 
+  private void removeFromMatches(final TeamScheduleInfo ti,
+                                 final int round) {
+    if (!_matches.containsKey(ti.getPerfTime(round))) {
+      throw new IllegalArgumentException("Cannot find time info for "
+          + round + " in matches");
+    }
+    final Map<String, List<TeamScheduleInfo>> timeMatches = _matches.get(ti.getPerfTime(round));
+    if (!timeMatches.containsKey(ti.getPerfTableColor(round))) {
+      throw new IllegalArgumentException("Cannot find table info for "
+          + round + " in matches");
+    }
+    final List<TeamScheduleInfo> tableMatches = timeMatches.get(ti.getPerfTableColor(round));
+    if (!tableMatches.remove(ti)) {
+      throw new IllegalArgumentException("Cannot find team "
+          + ti.getTeamNumber() + " in the matches for round " + round);
+    }
   }
 
   /**
@@ -1046,6 +1074,9 @@ public class TournamentSchedule implements Serializable {
                                        final int round) {
     final List<TeamScheduleInfo> tableMatches = _matches.get(ti.getPerfTime(round)).get(ti.getPerfTableColor(round));
     if (tableMatches.size() > 1) {
+      if (tableMatches.get(0).equals(tableMatches.get(1))) {
+        throw new FLLRuntimeException("Internal error, _matches is inconsistent. Has team competing against itself");
+      }
       if (tableMatches.get(0).equals(ti)) {
         return tableMatches.get(1);
       } else {
@@ -1112,7 +1143,7 @@ public class TournamentSchedule implements Serializable {
           throw new RuntimeException("Error parsing table information from: "
               + table);
         }
-        final PerformanceTime performance = new PerformanceTime(perfNum, parseDate(perf1Str), tablePieces[0],
+        final PerformanceTime performance = new PerformanceTime(parseDate(perf1Str), tablePieces[0],
                                                                 Utilities.NUMBER_FORMAT_INSTANCE.parse(tablePieces[1])
                                                                                                 .intValue());
         ti.setPerf(perfNum, performance);
@@ -1427,5 +1458,43 @@ public class TournamentSchedule implements Serializable {
     public List<String> getUnusedColumns() {
       return unusedColumns;
     }
+  }
+
+  /**
+   * Find the {@link TeamScheduleInfo} object for the specified team number.
+   * 
+   * @return the schedule info or null if not found
+   */
+  public TeamScheduleInfo findScheduleInfo(final int team) {
+    for (final TeamScheduleInfo si : _schedule) {
+      if (si.getTeamNumber() == team) {
+        return si;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * @param team the team to rescheduled
+   * @param oldTime the old time that the team was scheduled at
+   * @param perfTime the new performance information
+   */
+  public void reassignTable(final int team,
+                            final Date oldTime,
+                            final PerformanceTime perfTime) {
+    final TeamScheduleInfo si = findScheduleInfo(team);
+    if (null == si) {
+      throw new IllegalArgumentException("Cannot find team "
+          + team + " in the schedule");
+    }
+    final int round = si.findRoundFortime(oldTime);
+    if (-1 == round) {
+      throw new IllegalArgumentException("Team "
+          + team + " does not have a performance at " + oldTime);
+    }
+
+    removeFromMatches(si, round);
+    si.setPerf(round, perfTime);
+    addToMatches(si, round);
   }
 }

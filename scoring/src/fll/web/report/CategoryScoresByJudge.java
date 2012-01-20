@@ -168,7 +168,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
               writer.write("</tr>");
             }// foreach team
             writer.write("<tr><td colspan='5'><hr/></td></tr>");
-            writer.write("</table");
+            writer.write("</table>");
             SQLFunctions.close(rs);
             SQLFunctions.close(prep);
           }// foreach judge

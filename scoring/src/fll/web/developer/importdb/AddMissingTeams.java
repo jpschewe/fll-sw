@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import fll.Team;
 import fll.Tournament;
 import fll.db.Queries;
+import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -64,7 +65,7 @@ public class AddMissingTeams extends BaseFLLServlet {
         final String dup = Queries.addTeam(destConnection, team.getTeamNumber(), team.getTeamName(), team.getOrganization(), team.getRegion(),
                                            team.getDivision(), tournamentID);
         if (null != dup) {
-          throw new RuntimeException(
+          throw new FLLRuntimeException(
                                      String
                                            .format(
                                                    "Internal error, team with number %d should not exist in the destination database, found match with team with name: %s",

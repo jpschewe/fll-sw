@@ -42,17 +42,30 @@ ${message}
       needs to be executed before any reports can be generated.  You will be
       returned to this page if there are no errors summarizing scores.</li>
 
-      <li><a href='finalComputedScores.pdf'>Final Computed Scores</a></li>
+      <li><a href='finalComputedScores.pdf'>Final Computed Scores</a>. This
+      is the report that the head judge will want to determine which teams
+      advance to the next tournament.</li>
 
-      <li><a href="CategorizedScores">Categorized Scores</a></li>
+      <li><a href="CategorizedScores">Categorized Scores</a>. This shows
+      the top teams in each category after standardization.  </li>
 
-      <li><a href="CategoryScoresByJudge">Categorized Scores by judge</a></li>
+      <li><a href="CategoryScoresByJudge">Categorized Scores by
+      judge</a>. This shows the top teams for each judge. This is useful
+      for checking the winners of each category when there is only 1 judge
+      for each team in a category.</li>
 
-      <li><a href="CategoryScoresByScoreGroup">Categorized Scores by Score Group</a>.  This displays the scaled scores for each category by score group (all judges that saw a team).</li>
+      <li><a href="CategoryScoresByScoreGroup">Categorized Scores by Score
+      Group</a>.  This displays the scaled scores for each category by
+      score group (all judges that saw a team). This is useful for checking
+      the winners of each category when there is more than 1 judge for each
+      team in a category.</li>
 
-      <li><a href="promptForNumFinalists.jsp">Schedule Finalists</a></li>
+      <li><a href="promptForNumFinalists.jsp">Schedule Finalists</a>. This
+      is used when one judge doesn't see all teams in a division and the
+      top teams need to be judged again to choose the winners.</li>
       
- <li><a href="RankingReport">Ranking Report for teams</a></li>        
+ <li><a href="RankingReport">Ranking Report for teams</a>. This is printed
+ at the end of the day and each team gets their page.</li>
 
     </ol>
 

@@ -29,7 +29,7 @@ import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.mtu.eggplant.util.Functions;
+import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
@@ -610,13 +610,6 @@ public final class Queries {
 
     final TeamScore teamScore = new HttpTeamScore(performanceElement, teamNumber, runNumber, request);
 
-    // Perform updates to the playoff data table if in playoff rounds.
-    if ((runNumber > numSeedingRounds)
-        && "1".equals(request.getParameter("Verified"))) {
-      updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
-                         teamNumber, runNumber, numSeedingRounds, teamScore);
-    }
-
     final StringBuffer columns = new StringBuffer();
     final StringBuffer values = new StringBuffer();
 
@@ -674,6 +667,14 @@ public final class Queries {
     } finally {
       SQLFunctions.close(stmt);
     }
+    
+    // Perform updates to the playoff data table if in playoff rounds.
+    if ((runNumber > numSeedingRounds)
+        && "1".equals(request.getParameter("Verified"))) {
+      updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
+                         teamNumber, runNumber, numSeedingRounds, teamScore);
+    }
+
 
     return sql;
   }
@@ -748,12 +749,6 @@ public final class Queries {
 
     final StringBuffer sql = new StringBuffer();
 
-    // Check if we need to update the PlayoffData table
-    if (runNumber > numSeedingRounds) {
-      updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
-                         teamNumber, runNumber, numSeedingRounds, teamScore);
-    }
-
     sql.append("UPDATE Performance SET ");
 
     sql.append("NoShow = "
@@ -801,6 +796,13 @@ public final class Queries {
     } finally {
       SQLFunctions.close(stmt);
     }
+    
+    // Check if we need to update the PlayoffData table
+    if (runNumber > numSeedingRounds) {
+      updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
+                         teamNumber, runNumber, numSeedingRounds, teamScore);
+    }
+
 
     return sql.toString();
   }
@@ -1674,21 +1676,32 @@ public final class Queries {
   }
 
   /**
-   * Total the scores in the database for the current tournament.
+   * Defaults to current tournament.
+   * 
+   * @see #updateScoreTotals(Document, Connection, int)
+   */
+  public static void updateScoreTotals(final Document document,
+                                       final Connection connection) throws SQLException {
+    final int tournament = getCurrentTournament(connection);
+    updateScoreTotals(document, connection, tournament);
+  }
+
+  /**
+   * Total the scores in the database for the specified tournament.
    * 
    * @param document the challenge document
    * @param connection connection to database, needs write privileges
+   * @param tournament tournament to update score totals for
    * @throws SQLException if an error occurs
-   * @throws NumberFormantException if document has invalid numbers
    * @see #updatePerformanceScoreTotals(Document, Connection)
    * @see #updateSubjectiveScoreTotals(Document, Connection)
    */
   public static void updateScoreTotals(final Document document,
-                                       final Connection connection) throws SQLException, ParseException {
+                                       final Connection connection,
+                                       final int tournament) throws SQLException {
+    updatePerformanceScoreTotals(document, connection, tournament);
 
-    updatePerformanceScoreTotals(document, connection);
-
-    updateSubjectiveScoreTotals(document, connection);
+    updateSubjectiveScoreTotals(document, connection, tournament);
   }
 
   /**
@@ -1697,12 +1710,11 @@ public final class Queries {
    * @param document
    * @param connection
    * @throws SQLException
-   * @throws ParseException
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   public static void updateSubjectiveScoreTotals(final Document document,
-                                                 final Connection connection) throws SQLException, ParseException {
-    final int tournament = getCurrentTournament(connection);
+                                                 final Connection connection,
+                                                 final int tournament) throws SQLException {
     final Element rootElement = document.getDocumentElement();
 
     PreparedStatement updatePrep = null;
@@ -1742,6 +1754,8 @@ public final class Queries {
         updatePrep.close();
         selectPrep.close();
       }
+    } catch (final ParseException e) {
+      throw new FLLRuntimeException("Error parsing data in the challenge descriptor, this shouldn't happen", e);
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(updatePrep);
@@ -1750,17 +1764,17 @@ public final class Queries {
   }
 
   /**
-   * Compute the total scores for all entered performance scores in the current
-   * tournament. Uses both verified and unverified scores.
+   * Compute the total scores for all entered performance scores. Uses both
+   * verified and unverified scores.
    * 
    * @param document the challenge document
    * @param connection connection to the database
+   * @param tournament the tournament to update scores for.
    * @throws SQLException
-   * @throws ParseException
    */
   public static void updatePerformanceScoreTotals(final Document document,
-                                                  final Connection connection) throws SQLException, ParseException {
-    final int tournament = getCurrentTournament(connection);
+                                                  final Connection connection,
+                                                  final int tournament) throws SQLException {
     final Element rootElement = document.getDocumentElement();
 
     PreparedStatement updatePrep = null;
@@ -1797,6 +1811,8 @@ public final class Queries {
       rs.close();
       updatePrep.close();
       selectPrep.close();
+    } catch (final ParseException e) {
+      throw new FLLRuntimeException("Error parsing data in the challenge descriptor, this shouldn't happen", e);
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(updatePrep);
@@ -2121,7 +2137,7 @@ public final class Queries {
       prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Region, Division, TeamNumber) VALUES (?, ?, ?, ?, ?)");
       prep.setString(1, name);
       prep.setString(2, organization);
-      prep.setString(3, region);
+      prep.setString(3, region == null || "".equals(region) ? GenerateDB.DEFAULT_TEAM_REGION : region);
       prep.setString(4, division);
       prep.setInt(5, number);
       prep.executeUpdate();
@@ -2158,7 +2174,7 @@ public final class Queries {
       prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Region = ?, Division = ? WHERE TeamNumber = ?");
       prep.setString(1, name);
       prep.setString(2, organization);
-      prep.setString(3, region);
+      prep.setString(3, region == null || "".equals(region) ? GenerateDB.DEFAULT_TEAM_REGION : region);
       prep.setString(4, division);
       prep.setInt(5, number);
       prep.executeUpdate();
@@ -2190,6 +2206,25 @@ public final class Queries {
       prep = connection.prepareStatement("UPDATE Teams SET Division = ? WHERE TeamNumber = ?");
       prep.setString(1, division);
       prep.setInt(2, number);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Update a team region.
+   */
+  public static void updateTeamEventDivision(final Connection connection,
+                                             final int number,
+                                             final int tournamentID,
+                                             final String eventDivision) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE TournamentTeams SET event_division = ? WHERE TeamNumber = ? AND Tournament = ?");
+      prep.setString(1, eventDivision);
+      prep.setInt(2, number);
+      prep.setInt(3, tournamentID);
       prep.executeUpdate();
     } finally {
       SQLFunctions.close(prep);
@@ -3180,7 +3215,7 @@ public final class Queries {
       while (rs.next()) {
         final String compare = rs.getString(1);
         for (final String magicKey : keys) {
-          if (Functions.safeEquals(magicKey, compare)) {
+          if (ComparisonUtils.safeEquals(magicKey, compare)) {
             return true;
           }
         }

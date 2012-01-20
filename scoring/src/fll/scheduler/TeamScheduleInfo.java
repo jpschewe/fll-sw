@@ -24,8 +24,15 @@ public final class TeamScheduleInfo implements Serializable {
 
   private final PerformanceTime[] perf;
 
-  public void setPerf(final int idx,
-                      final PerformanceTime performance) {
+  /**
+   * Set a performance time. This should only be called from
+   * {@link TournamentSchedule} otherwise things can get out of sync.
+   * 
+   * @param idx
+   * @param performance
+   */
+  /* package */void setPerf(final int idx,
+                            final PerformanceTime performance) {
     perf[idx] = performance;
   }
 
@@ -195,5 +202,21 @@ public final class TeamScheduleInfo implements Serializable {
 
   public Set<String> getKnownSubjectiveStations() {
     return Collections.unmodifiableSet(subjectiveTimes.keySet());
+  }
+
+  /**
+   * Figure out which round number (0-based) this performance time is for this
+   * team.
+   * 
+   * @param performance the performance to find
+   * @return the round number or -1 if the performance cannot be found
+   */
+  public int computeRound(final PerformanceTime performance) {
+    for (int round = 0; round < perf.length; ++round) {
+      if (performance.equals(perf[round])) {
+        return round;
+      }
+    }
+    return -1;
   }
 }

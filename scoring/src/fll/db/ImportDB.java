@@ -28,7 +28,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import net.mtu.eggplant.io.IOUtils;
-import net.mtu.eggplant.util.Functions;
+import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
@@ -207,10 +207,13 @@ public final class ImportDB {
                 + num + ", " + name + ", " + org + ", " + div + ", " + region);
           }
           destPrep.setInt(1, num);
-          destPrep.setString(2, name == null ? GenerateDB.DEFAULT_TEAM_NAME : name);
+          destPrep.setString(2, name == null
+              || "".equals(name) ? GenerateDB.DEFAULT_TEAM_NAME : name);
           destPrep.setString(3, org);
-          destPrep.setString(4, div == null ? GenerateDB.DEFAULT_TEAM_DIVISION : div);
-          destPrep.setString(5, region == null ? GenerateDB.DEFAULT_TEAM_REGION : region);
+          destPrep.setString(4, div == null
+              || "".equals(div) ? GenerateDB.DEFAULT_TEAM_DIVISION : div);
+          destPrep.setString(5, region == null
+              || "".equals(region) ? GenerateDB.DEFAULT_TEAM_REGION : region);
           destPrep.executeUpdate();
         }
       }
@@ -711,6 +714,9 @@ public final class ImportDB {
     importPlayoffData(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     importSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+
+    // update score totals
+    Queries.updateScoreTotals(document, destinationConnection, destTournamentID);
   }
 
   private static void importSchedule(final Connection sourceConnection,
@@ -1293,19 +1299,19 @@ public final class ImportDB {
         destRS = destPrep.executeQuery();
         if (destRS.next()) {
           final String destName = destRS.getString(1);
-          if (!Functions.safeEquals(destName, sourceName)) {
+          if (!ComparisonUtils.safeEquals(destName, sourceName)) {
             differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.NAME, sourceName, destName));
           }
           final String destRegion = destRS.getString(2);
-          if (!Functions.safeEquals(destRegion, sourceRegion)) {
+          if (!ComparisonUtils.safeEquals(destRegion, sourceRegion)) {
             differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.REGION, sourceRegion, destRegion));
           }
           final String destDivision = destRS.getString(3);
-          if (!Functions.safeEquals(destDivision, sourceDivision)) {
+          if (!ComparisonUtils.safeEquals(destDivision, sourceDivision)) {
             differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.DIVISION, sourceDivision, destDivision));
           }
           final String destOrganization = destRS.getString(4);
-          if (!Functions.safeEquals(destOrganization, sourceOrganization)) {
+          if (!ComparisonUtils.safeEquals(destOrganization, sourceOrganization)) {
             differences.add(new TeamPropertyDifference(teamNumber, TeamProperty.ORGANIZATION, sourceOrganization,
                                                        destOrganization));
           }

@@ -37,6 +37,8 @@ public class UploadSchedule extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
+  public static final String SCHEDULE_KEY = "uploadSchedule_schedule";
+  
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -45,7 +47,8 @@ public class UploadSchedule extends BaseFLLServlet {
     // clear out all session variables used
     session.removeAttribute("uploadSchedule_file");
     session.removeAttribute("uploadSchedule_sheet");
-    session.removeAttribute("uploadSchedule_schedule");
+    session.removeAttribute(SCHEDULE_KEY);
+    session.removeAttribute(GatherEventDivisionChanges.EVENT_DIVISION_INFO_KEY);
     session.removeAttribute("sheetName");
     session.removeAttribute("sheetNames");
     

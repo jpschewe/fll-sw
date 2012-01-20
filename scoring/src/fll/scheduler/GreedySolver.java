@@ -6,8 +6,8 @@
 
 package fll.scheduler;
 
-import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
@@ -32,6 +32,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.Logger;
 
+import au.com.bytecode.opencsv.CSVWriter;
+import fll.Utilities;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 
@@ -102,17 +104,15 @@ public class GreedySolver {
 
   private static final String OPTIMIZE_OPTION = "o";
 
-  private static final String START_TIME_OPTION = "s";
-
   private static final String DATA_FILE_OPTION = "d";
+
+  private final Collection<ScheduledBreak> subjectiveBreaks = new LinkedList<ScheduledBreak>();
+
+  private final Collection<ScheduledBreak> performanceBreaks = new LinkedList<ScheduledBreak>();
 
   private static Options buildOptions() {
     final Options options = new Options();
-    Option option = new Option(START_TIME_OPTION, "startTime", true, "<HH:MM> The start time");
-    option.setRequired(true);
-    options.addOption(option);
-
-    option = new Option(DATA_FILE_OPTION, "datafile", true, "<file> the file ");
+    Option option = new Option(DATA_FILE_OPTION, "datafile", true, "<file> the file ");
     option.setRequired(true);
     options.addOption(option);
 
@@ -134,26 +134,20 @@ public class GreedySolver {
 
     // parse options
     boolean optimize = false;
-    Date startTime = null;
     File datafile = null;
     try {
       final CommandLineParser parser = new PosixParser();
       final CommandLine cmd = parser.parse(options, args);
 
       if (cmd.hasOption(OPTIMIZE_OPTION)) {
-        optimize = !optimize;
+        optimize = true;
       }
 
-      startTime = TournamentSchedule.OUTPUT_DATE_FORMAT.get().parse(cmd.getOptionValue(START_TIME_OPTION));
       datafile = new File(cmd.getOptionValue(DATA_FILE_OPTION));
-
     } catch (final org.apache.commons.cli.ParseException pe) {
       LOGGER.error(pe.getMessage());
       usage(options);
       System.exit(1);
-    } catch (final ParseException e) {
-      LOGGER.fatal(e.getMessage());
-      System.exit(2);
     }
 
     try {
@@ -163,13 +157,16 @@ public class GreedySolver {
         System.exit(4);
       }
 
-      final GreedySolver solver = new GreedySolver(startTime, datafile, optimize);
+      final GreedySolver solver = new GreedySolver(datafile, optimize);
       final long start = System.currentTimeMillis();
       solver.solve();
       final long stop = System.currentTimeMillis();
       LOGGER.info("Solve took: "
           + (stop - start) / 1000.0 + " seconds");
 
+    } catch (final ParseException e) {
+      LOGGER.fatal(e, e);
+      System.exit(5);
     } catch (final IOException e) {
       LOGGER.fatal("Error reading file", e);
       System.exit(4);
@@ -180,35 +177,67 @@ public class GreedySolver {
   }
 
   /**
-   * @param datafile the minizinc datafile for the schedule to solve
+   * @param datafile the datafile for the schedule to solve
+   * @throws ParseException
    */
-  public GreedySolver(final Date startTime,
-                      final File datafile,
-                      final boolean optimize) throws IOException {
-    this.startTime = new Date(startTime.getTime());
+  public GreedySolver(final File datafile,
+                      final boolean optimize) throws IOException, ParseException {
     this.datafile = datafile;
     this.optimize = optimize;
-
     if (this.optimize) {
       LOGGER.info("Optimization is turned on");
     }
 
-    final Properties properties = ParseMinizinc.parseMinizincData(datafile);
+    final Properties properties = new Properties();
+    FileReader reader = null;
+    try {
+      reader = new FileReader(datafile);
+      properties.load(reader);
+    } finally {
+      if (null != reader) {
+        reader.close();
+      }
+    }
     LOGGER.debug(properties.toString());
 
-    // TODO validate that all times are divisible by tinc
+    this.startTime = TournamentSchedule.OUTPUT_DATE_FORMAT.get().parse(properties.getProperty("start_time"));
 
-    tinc = ParseMinizinc.readIntProperty(properties, "TInc");
-    ngroups = ParseMinizinc.readIntProperty(properties, "NGroups");
+    tinc = Utilities.readIntProperty(properties, "TInc");
+    ngroups = Utilities.readIntProperty(properties, "NGroups");
 
-    numPerformanceRounds = ParseMinizinc.readIntProperty(properties, "NRounds");
-    numTables = ParseMinizinc.readIntProperty(properties, "NTables");
-    final int tmaxHours = ParseMinizinc.readIntProperty(properties, "TMax_hours");
-    final int tmaxMinutes = ParseMinizinc.readIntProperty(properties, "TMax_minutes");
+    final int alternateValue = Integer.valueOf(properties.getProperty("alternate_tables", "0").trim());
+    final boolean alternate = alternateValue == 1;
+    LOGGER.debug("Alternate is: "
+        + alternate);
+
+    final int perfOffsetMinutes = Integer.valueOf(properties.getProperty("perf_attempt_offset_minutes",
+                                                                         String.valueOf(tinc)).trim());
+    performanceAttemptOffset = perfOffsetMinutes
+        / tinc;
+    if (perfOffsetMinutes != performanceAttemptOffset
+        * tinc) {
+      throw new FLLRuntimeException("perf_attempt_offset_minutes isn't divisible by tinc");
+    }
+    LOGGER.debug("Performance attempt offset: "
+        + performanceAttemptOffset);
+
+    final int subjOffsetMinutes = Integer.valueOf(properties.getProperty("subjective_attempt_offset_minutes",
+                                                                         String.valueOf(tinc)).trim());
+    subjectiveAttemptOffset = subjOffsetMinutes
+        / tinc;
+    if (subjOffsetMinutes != subjectiveAttemptOffset
+        * tinc) {
+      throw new FLLRuntimeException("subjective_attempt_offset_minutes isn't divisible by tinc");
+    }
+
+    numPerformanceRounds = Utilities.readIntProperty(properties, "NRounds");
+    numTables = Utilities.readIntProperty(properties, "NTables");
+    final int tmaxHours = Utilities.readIntProperty(properties, "TMax_hours");
+    final int tmaxMinutes = Utilities.readIntProperty(properties, "TMax_minutes");
     numTimeslots = (tmaxHours * 60 + tmaxMinutes)
         / tinc;
 
-    numSubjectiveStations = ParseMinizinc.readIntProperty(properties, "NSubjective");
+    numSubjectiveStations = Utilities.readIntProperty(properties, "NSubjective");
     final String subjDurationStr = properties.getProperty("subj_minutes");
     int lbracket = subjDurationStr.indexOf('[');
     if (-1 == lbracket) {
@@ -226,8 +255,14 @@ public class GreedySolver {
     }
     subjectiveDurations = new int[getNumSubjectiveStations()];
     for (int station = 0; station < subjDurs.length; ++station) {
-      subjectiveDurations[station] = Integer.valueOf(subjDurs[station].trim())
+      final int durationMinutes = Integer.valueOf(subjDurs[station].trim());
+      subjectiveDurations[station] = durationMinutes
           / tinc;
+      if (durationMinutes != subjectiveDurations[station]
+          * tinc) {
+        throw new FLLRuntimeException("Subjective duration for station "
+            + station + " isn't divisible by tinc");
+      }
     }
 
     final String groupCountsStr = properties.getProperty("group_counts");
@@ -245,6 +280,46 @@ public class GreedySolver {
     if (groups.length != ngroups) {
       throw new FLLRuntimeException("Num groups and group_counts array not consistent");
     }
+
+    final int performanceDurationMinutes = Utilities.readIntProperty(properties, "alpha_perf_minutes");
+    performanceDuration = performanceDurationMinutes
+        / tinc;
+    if (performanceDurationMinutes != performanceDuration
+        * tinc) {
+      throw new FLLRuntimeException("Performance duration isn't divisible by tinc");
+    }
+
+    final int changetimeMinutes = Utilities.readIntProperty(properties, "ct_minutes");
+    changetime = changetimeMinutes
+        / tinc;
+    if (changetimeMinutes != changetime
+        * tinc) {
+      throw new FLLRuntimeException("Changetime isn't divisible by tinc");
+    }
+
+    final int performanceChangetimeMinutes = Utilities.readIntProperty(properties, "pct_minutes");
+    performanceChangetime = performanceChangetimeMinutes
+        / tinc;
+    if (performanceChangetimeMinutes != performanceChangetime
+        * tinc) {
+      throw new FLLRuntimeException("Performance changetime isn't divisible by tinc");
+    }
+
+    if (alternate) {
+      // make sure performanceDuration is even
+      if ((performanceDuration & 1) == 1) {
+        throw new FLLRuntimeException("Number of timeslots for performance duration ("
+            + performanceDuration + ") is not even and must be to alternate tables.");
+      }
+
+      // make sure num tables is even
+      if ((getNumTables() & 1) == 1) {
+        throw new FLLRuntimeException("Number of tables ("
+            + getNumTables() + ") is not even and must be to alternate tables.");
+      }
+
+    }
+
     sz = new boolean[groups.length][][][];
     sy = new boolean[groups.length][][][];
     pz = new boolean[groups.length][][][][];
@@ -253,7 +328,20 @@ public class GreedySolver {
     subjectiveStations = new int[groups.length][getNumSubjectiveStations()];
     performanceScheduled = new int[groups.length][];
     performanceTables = new int[getNumTables()];
-    Arrays.fill(performanceTables, 0);
+    if (alternate) {
+      for (int table = 0; table < performanceTables.length; ++table) {
+        // even is 0, odd is 1/2 performance duration
+        if ((table & 1) == 1) {
+          performanceTables[table] = performanceDuration / 2;
+        } else {
+          performanceTables[table] = 0;
+        }
+        LOGGER.debug("Setting table "
+            + table + " start to " + performanceTables[table]);
+      }
+    } else {
+      Arrays.fill(performanceTables, 0);
+    }
     for (int group = 0; group < groups.length; ++group) {
       final int count = Integer.valueOf(groups[group].trim());
       sz[group] = new boolean[count][getNumSubjectiveStations()][getNumTimeslots()];
@@ -283,15 +371,63 @@ public class GreedySolver {
       Arrays.fill(performanceScheduled[group], 0);
     }
 
-    performanceDuration = ParseMinizinc.readIntProperty(properties, "alpha_perf_minutes")
-        / tinc;
-    changetime = ParseMinizinc.readIntProperty(properties, "ct_minutes")
-        / tinc;
-    performanceChangetime = ParseMinizinc.readIntProperty(properties, "pct_minutes")
-        / tinc;
+    parseBreaks(properties, startTime, tinc);
 
     // sort list of teams to make sure that the scheduler is deterministic
     Collections.sort(teams, lowestTeamIndex);
+  }
+
+  /**
+   * Read the breaks out of the data file.
+   * 
+   * @throws ParseException
+   */
+  private void parseBreaks(final Properties properties,
+                           final Date startTime,
+                           final int tinc) throws ParseException {
+    subjectiveBreaks.addAll(parseBreaks(properties, startTime, tinc, "subjective"));
+    performanceBreaks.addAll(parseBreaks(properties, startTime, tinc, "performance"));
+  }
+
+  private Collection<ScheduledBreak> parseBreaks(final Properties properties,
+                                                 final Date startTime,
+                                                 final int tinc,
+                                                 final String breakType) throws ParseException {
+    final Collection<ScheduledBreak> breaks = new LinkedList<ScheduledBreak>();
+
+    final int numBreaks = Integer.valueOf(properties.getProperty(String.format("num_%s_breaks", breakType), "0"));
+    final String startFormat = "%s_break_%d_start";
+    final String durationFormat = "%s_break_%d_duration";
+    for (int i = 0; i < numBreaks; ++i) {
+      final String startStr = properties.getProperty(String.format(startFormat, breakType, i));
+      final String durationStr = properties.getProperty(String.format(durationFormat, breakType, i));
+      if (null == startStr
+          || null == durationStr) {
+        throw new FLLRuntimeException(String.format("Missing start or duration for %s break %d", breakType, i));
+      }
+
+      final Date start = TournamentSchedule.OUTPUT_DATE_FORMAT.get().parse(startStr);
+      final int startMinutes = (int) ((start.getTime() - startTime.getTime())
+          / Utilities.MILLISECONDS_PER_SECOND / Utilities.SECONDS_PER_MINUTE);
+      final int startInc = startMinutes
+          / tinc;
+      if (startMinutes != startInc
+          * tinc) {
+        throw new FLLRuntimeException(String.format("%s break %d start isn't divisible by tinc", breakType, i));
+      }
+
+      final int durationMinutes = Integer.valueOf(durationStr);
+      final int durationInc = durationMinutes
+          / tinc;
+      if (durationMinutes != durationInc
+          * tinc) {
+        throw new FLLRuntimeException(String.format("%s break %d duration isn't divisible by tinc", breakType, i));
+      }
+
+      breaks.add(new ScheduledBreak(startInc, startInc
+          + durationInc));
+    }
+    return breaks;
   }
 
   private boolean assignSubjective(final int group,
@@ -728,7 +864,8 @@ public class GreedySolver {
         if (!result
             || optimize) {
           unassignSubjective(team.getGroup(), team.getIndex(), station, timeslot);
-          if (timeslot + getSubjectiveDuration(station) >= getNumTimeslots()) {
+          if (timeslot
+              + getSubjectiveDuration(station) >= getNumTimeslots()) {
             if (LOGGER.isDebugEnabled()) {
               LOGGER.debug("Hit max timeslots - subj");
             }
@@ -893,28 +1030,14 @@ public class GreedySolver {
     }
 
     // find possible values
-    int nextAvailableSlot = Integer.MAX_VALUE;
     final List<Integer> possibleSubjectiveStations = new ArrayList<Integer>();
     final List<Integer> subjectiveGroups = new ArrayList<Integer>();
-    for (int group = 0; group < getNumGroups(); ++group) {
-      for (int station = 0; station < getNumSubjectiveStations(); ++station) {
-        if (subjectiveStations[group][station] <= nextAvailableSlot) {
-          nextAvailableSlot = subjectiveStations[group][station];
-          possibleSubjectiveStations.add(station);
-          subjectiveGroups.add(group);
-        }
-      }
-    }
+    final int nextAvailableSubjSlot = findNextAvailableSubjectiveSlot(possibleSubjectiveStations, subjectiveGroups);
 
     final List<Integer> possiblePerformanceTables = new LinkedList<Integer>();
-    for (int table = 0; table < getNumTables(); ++table) {
-      if (performanceTables[table] <= nextAvailableSlot) {
-        nextAvailableSlot = performanceTables[table];
-        possiblePerformanceTables.add(table);
-      }
-    }
+    final int nextAvailablePerfSlot = findNextAvailablePerformanceSlot(possiblePerformanceTables);
 
-    if (nextAvailableSlot >= getNumTimeslots()) {
+    if (Math.min(nextAvailablePerfSlot, nextAvailableSubjSlot) >= getNumTimeslots()) {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Hit max timeslots");
       }
@@ -922,81 +1045,119 @@ public class GreedySolver {
     }
 
     // try possible values
-    for (int i = 0; i < possibleSubjectiveStations.size(); ++i) {
-      final int station = possibleSubjectiveStations.get(i);
-      final int group = subjectiveGroups.get(i);
+    if (nextAvailableSubjSlot <= nextAvailablePerfSlot) {
+      for (int i = 0; i < possibleSubjectiveStations.size(); ++i) {
+        final int station = possibleSubjectiveStations.get(i);
+        final int group = subjectiveGroups.get(i);
 
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("subjective group: "
-            + group + " station: " + station + " next available: " + nextAvailableSlot);
-      }
-
-      subjectiveStations[group][station] += getSubjectiveAttemptOffset();
-      if (checkSubjectiveBreaks(station, nextAvailableSlot)) {
-        final boolean result = schedSubj(group, station, nextAvailableSlot);
-        if (result) {
-          return true;
-        } else if (nextAvailableSlot >= getNumTimeslots()) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Hit max timeslots - schedNext subj");
-          }
-          return false;
-        }
-
-      } else {
         if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Overlaps breaks, skipping");
+          LOGGER.trace("subjective group: "
+              + group + " station: " + station + " next available: " + nextAvailableSubjSlot);
         }
-      }
-    }
 
-    for (final int table : possiblePerformanceTables) {
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("performance table: "
-            + table + " next available: " + nextAvailableSlot);
-      }
-
-      performanceTables[table] += getPerformanceAttemptOffset();
-      if (checkPerformanceBreaks(nextAvailableSlot)) {
-        final boolean result = schedPerf(table, nextAvailableSlot);
-        if (result) {
-          return true;
-        } else if (nextAvailableSlot >= getNumTimeslots()) {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Hit max timeslots - schedNext perf");
+        subjectiveStations[group][station] += getSubjectiveAttemptOffset();
+        if (checkSubjectiveBreaks(station, nextAvailableSubjSlot)) {
+          final boolean result = schedSubj(group, station, nextAvailableSubjSlot);
+          if (result) {
+            return true;
+          } else if (nextAvailableSubjSlot >= getNumTimeslots()) {
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("Hit max timeslots - schedNext subj");
+            }
+            return false;
           }
-          return false;
-        }
-      } else {
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Overlaps breaks, skipping");
+
+        } else {
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Overlaps breaks, skipping");
+          }
         }
       }
+    } else {
+      for (final int table : possiblePerformanceTables) {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("performance table: "
+              + table + " next available: " + nextAvailablePerfSlot);
+        }
 
+        performanceTables[table] += getPerformanceAttemptOffset();
+        if (checkPerformanceBreaks(nextAvailablePerfSlot)) {
+          final boolean result = schedPerf(table, nextAvailablePerfSlot);
+          if (result) {
+            return true;
+          } else if (nextAvailablePerfSlot >= getNumTimeslots()) {
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("Hit max timeslots - schedNext perf");
+            }
+            return false;
+          }
+        } else {
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Overlaps breaks, skipping");
+          }
+        }
+      }
     }
 
     final boolean result = scheduleNextStation();
     if (!result
         || optimize) {
-      // need to undo assignments
-      for (int i = 0; i < possibleSubjectiveStations.size(); ++i) {
-        final int station = possibleSubjectiveStations.get(i);
-        final int group = subjectiveGroups.get(i);
-        subjectiveStations[group][station] -= getSubjectiveAttemptOffset();
-      }
-
-      for (final int table : possiblePerformanceTables) {
-        performanceTables[table] -= getPerformanceAttemptOffset();
+      // undo changes made above
+      if (nextAvailableSubjSlot <= nextAvailablePerfSlot) {
+        for (int i = 0; i < possibleSubjectiveStations.size(); ++i) {
+          final int station = possibleSubjectiveStations.get(i);
+          final int group = subjectiveGroups.get(i);
+          subjectiveStations[group][station] -= getSubjectiveAttemptOffset();
+        }
+      } else {
+        for (final int table : possiblePerformanceTables) {
+          performanceTables[table] -= getPerformanceAttemptOffset();
+        }
       }
     }
     return result;
 
   }
 
+  private int findNextAvailablePerformanceSlot(final List<Integer> possiblePerformanceTables) {
+    int nextAvailablePerfSlot = Integer.MAX_VALUE;
+    for (int table = 0; table < getNumTables(); ++table) {
+      if (performanceTables[table] <= nextAvailablePerfSlot) {
+        if (performanceTables[table] < nextAvailablePerfSlot) {
+          // previous values are no longer valid
+          possiblePerformanceTables.clear();
+        }
+        nextAvailablePerfSlot = performanceTables[table];
+        possiblePerformanceTables.add(table);
+      }
+    }
+    return nextAvailablePerfSlot;
+  }
+
+  private int findNextAvailableSubjectiveSlot(final List<Integer> possibleSubjectiveStations,
+                                              final List<Integer> subjectiveGroups) {
+    int nextAvailableSubjSlot = Integer.MAX_VALUE;
+    for (int group = 0; group < getNumGroups(); ++group) {
+      for (int station = 0; station < getNumSubjectiveStations(); ++station) {
+        if (subjectiveStations[group][station] <= nextAvailableSubjSlot) {
+          if (subjectiveStations[group][station] < nextAvailableSubjSlot) {
+            // previous subjective stations are no longer valid for this time
+            possibleSubjectiveStations.clear();
+            subjectiveGroups.clear();
+          }
+          nextAvailableSubjSlot = subjectiveStations[group][station];
+          possibleSubjectiveStations.add(station);
+          subjectiveGroups.add(group);
+        }
+      }
+    }
+    return nextAvailableSubjSlot;
+  }
+
   private void outputCurrentSolution() {
-    final File scheduleFile = new File(datafile.getAbsolutePath()
+    final File scheduleFile = new File(Utilities.extractAbsoluteBasename(datafile)
         + "-" + solutionsFound + ".csv");
-    final File objectiveFile = new File(datafile.getAbsolutePath()
+    final File objectiveFile = new File(Utilities.extractAbsoluteBasename(datafile)
         + "-" + solutionsFound + ".obj");
 
     LOGGER.info("Solution output to "
@@ -1054,16 +1215,20 @@ public class GreedySolver {
    * slot. To try all possible combinations, this should be set to 1.
    */
   private int getSubjectiveAttemptOffset() {
-    return 1;
+    return subjectiveAttemptOffset;
   }
+
+  private final int subjectiveAttemptOffset;
 
   /**
    * Number of timeslots to increment by when trying the next performance time
    * slot. To try all possible combinations, this should be set to 1.
    */
   private int getPerformanceAttemptOffset() {
-    return 1;
+    return performanceAttemptOffset;
   }
+
+  private final int performanceAttemptOffset;
 
   private int numTimeslots;
 
@@ -1075,44 +1240,46 @@ public class GreedySolver {
   }
 
   private void outputSchedule(final File schedule) throws IOException {
-    BufferedWriter writer = null;
+    CSVWriter csv = null;
     try {
-      writer = new BufferedWriter(new FileWriter(schedule));
-      writer.write(TournamentSchedule.TEAM_NUMBER_HEADER
-          + ",");
-      writer.write(TournamentSchedule.DIVISION_HEADER
-          + ",");
-      writer.write(TournamentSchedule.TEAM_NAME_HEADER
-          + ",");
-      writer.write(TournamentSchedule.ORGANIZATION_HEADER
-          + ",");
-      writer.write(TournamentSchedule.JUDGE_GROUP_HEADER);
+      csv = new CSVWriter(new FileWriter(schedule));
+      final List<String> line = new ArrayList<String>();
+      line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
+      line.add(TournamentSchedule.DIVISION_HEADER);
+      line.add(TournamentSchedule.TEAM_NAME_HEADER);
+      line.add(TournamentSchedule.ORGANIZATION_HEADER);
+      line.add(TournamentSchedule.JUDGE_GROUP_HEADER);
       for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
-        writer.write(",Subj"
+        line.add("Subj"
             + (subj + 1));
       }
       for (int round = 0; round < getNumPerformanceRounds(); ++round) {
-        writer.write(","
-            + String.format(TournamentSchedule.PERF_HEADER_FORMAT, round + 1));
-        writer.write(","
-            + String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round + 1));
+        line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round + 1));
+        line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round + 1));
       }
-      writer.newLine();
+      csv.writeNext(line.toArray(new String[line.size()]));
+      line.clear();
 
       for (final SchedTeam team : getAllTeams()) {
         final int teamNum = (team.getGroup() + 1)
             * 100 + team.getIndex();
         final int judgingGroup = team.getGroup() + 1;
-        writer.write(String.format("%d,D%d, Team %d, Org %d, G%d", teamNum, judgingGroup, teamNum, teamNum,
-                                   judgingGroup));
+        line.add(String.valueOf(teamNum));
+        line.add("D"
+            + judgingGroup);
+        line.add("Team "
+            + teamNum);
+        line.add("Org "
+            + teamNum);
+        line.add("G"
+            + judgingGroup);
         for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
           final Date time = getTime(sz[team.getGroup()][team.getIndex()][subj], 1);
           if (null == time) {
             throw new RuntimeException("Could not find a subjective start for group: "
                 + (team.getGroup() + 1) + " team: " + (team.getIndex() + 1) + " subj: " + (subj + 1));
           }
-          writer.write(",");
-          writer.write(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(time));
+          line.add(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(time));
         }
 
         // find all performances for a team and then sort by time
@@ -1122,7 +1289,7 @@ public class GreedySolver {
             for (int side = 0; side < 2; ++side) {
               final Date time = getTime(pz[team.getGroup()][team.getIndex()][table][side], round + 1);
               if (null != time) {
-                perfTimes.add(new PerformanceTime(round, time, "Table"
+                perfTimes.add(new PerformanceTime(time, "Table"
                     + (table + 1), (side + 1)));
               }
             }
@@ -1134,18 +1301,17 @@ public class GreedySolver {
               + (team.getGroup() + 1) + " team: " + (team.getIndex() + 1) + " perfs: " + perfTimes);
         }
         for (final PerformanceTime perfTime : perfTimes) {
-          writer.write(",");
-          writer.write(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(perfTime.getTime()));
-          writer.write(",");
-          writer.write(perfTime.getTable()
+          line.add(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(perfTime.getTime()));
+          line.add(perfTime.getTable()
               + " " + perfTime.getSide());
         }
 
-        writer.newLine();
+        csv.writeNext(line.toArray(new String[line.size()]));
+        line.clear();
       }
     } finally {
-      if (null != writer) {
-        writer.close();
+      if (null != csv) {
+        csv.close();
       }
     }
   }
@@ -1184,16 +1350,17 @@ public class GreedySolver {
     final int end = timeslot
         + getSubjectiveDuration(station);
 
-    // subjectiveBreak1
-    if (!(end <= 60 / tinc || begin > 60
-        / tinc + 10 / tinc)) {
-      return false;
-    }
+    return checkBreak(begin, end, subjectiveBreaks);
+  }
 
-    // subjectiveLunchBreak
-    if (!(end <= 190 / tinc || begin > 190
-        / tinc + 30 / tinc)) {
-      return false;
+  private boolean checkBreak(final int begin,
+                             final int end,
+                             final Collection<ScheduledBreak> breaks) {
+    for (final ScheduledBreak b : breaks) {
+      if (b.end > begin
+          && b.start < end) {
+        return false;
+      }
     }
 
     return true;
@@ -1207,18 +1374,7 @@ public class GreedySolver {
     final int end = timeslot
         + getPerformanceDuration();
 
-    // performanceStart
-    if (begin < 60 / tinc) {
-      return false;
-    }
-
-    // performanceLunchBreak
-    if (!(end <= 210 / tinc || begin > 210
-        / tinc + 30 / tinc)) {
-      return false;
-    }
-
-    return true;
+    return checkBreak(begin, end, performanceBreaks);
   }
 
   private static final Comparator<SchedTeam> lowestTeamIndex = new Comparator<SchedTeam>() {
@@ -1276,4 +1432,15 @@ public class GreedySolver {
     }
   };
 
+  private static final class ScheduledBreak {
+    public ScheduledBreak(final int start,
+                          final int end) {
+      this.start = start;
+      this.end = end;
+    }
+
+    public final int start;
+
+    public final int end;
+  }
 }

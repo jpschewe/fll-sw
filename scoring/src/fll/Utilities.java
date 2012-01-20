@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -551,5 +552,55 @@ public final class Utilities {
   
   public static long convertMinutesToMilliseconds(final long minutes) {
     return convertMinutesToSeconds(minutes) * MILLISECONDS_PER_SECOND;
+  }
+  
+  /**
+   * Get the name of the file without the extension (if there is one).
+   */
+  public static String extractBasename(final File selectedFile) {
+    final String name;
+    final String fullname = selectedFile.getName();
+    final int dotIndex = fullname.lastIndexOf('.');
+    if (-1 != dotIndex) {
+      name = fullname.substring(0, dotIndex);
+    } else {
+      name = fullname;
+    }
+    return name;
+  }
+
+  /**
+   * Get the absolute name of the file without the extension (if there is one).
+   */
+  public static String extractAbsoluteBasename(final File selectedFile) {
+    final String name;
+    final String fullname = selectedFile.getAbsolutePath();
+    final int dotIndex = fullname.lastIndexOf('.');
+    if (-1 != dotIndex) {
+      name = fullname.substring(0, dotIndex);
+    } else {
+      name = fullname;
+    }
+    return name;
+  }
+
+  /**
+   * Read an integer property and fail if the property doesn't have a value or
+   * doesn't parse a a number.
+   * 
+   * @param properties where to read the property from
+   * @param property the property to read
+   * @return the value
+   * @throws NumberFormatException if there is a parse error
+   * @throws NullPointerException if no value is found
+   */
+  public static int readIntProperty(final Properties properties,
+                                    final String property) throws NumberFormatException, NullPointerException {
+    final String value = properties.getProperty(property);
+    if (null == value) {
+      throw new NullPointerException("Property '"
+          + property + "' doesn't have a value");
+    }
+    return Integer.valueOf(value.trim());
   }
 }

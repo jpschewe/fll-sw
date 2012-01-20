@@ -135,7 +135,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
               writer.write("</td>");
               writer.write("</tr>");
             }
-            writer.write("</table");
+            writer.write("</table>");
           }
         }
       }

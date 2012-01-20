@@ -51,6 +51,7 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
    <!--  setting event division for <c:out value="${teamNumber}"/> 
          to <c:out value="${new_division}"/> 
          in tournament <c:out value="${currentTournament}"/> -->
+         <%--  TODO: have this call Queries.setEventDivision --%>
    <sql:update dataSource="${datasource}">
     UPDATE TournamentTeams 
       SET event_division = '<c:out value="${new_division}" />' 

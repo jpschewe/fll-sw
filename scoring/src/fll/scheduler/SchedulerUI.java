@@ -59,6 +59,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import com.itextpdf.text.DocumentException;
 
+import fll.Utilities;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
@@ -194,7 +195,7 @@ public class SchedulerUI extends JFrame {
       try {
         final File selectedFile = getCurrentFile();
         final String sheetName = getCurrentSheetName();
-        final String name = extractBasename(selectedFile);
+        final String name = Utilities.extractBasename(selectedFile);
 
         final TournamentSchedule newData;
         if (null == sheetName) {
@@ -295,7 +296,7 @@ public class SchedulerUI extends JFrame {
     public void actionPerformed(final ActionEvent ae) {
       FileOutputStream fos = null;
       try {
-        final String baseFilename = extractBasename(getCurrentFile());
+        final String baseFilename = Utilities.extractBasename(getCurrentFile());
         final File pdfFile = new File(getCurrentFile().getParentFile(), baseFilename
             + "-detailed.pdf");
         LOGGER.info("Writing detailed schedule to "
@@ -303,8 +304,8 @@ public class SchedulerUI extends JFrame {
 
         fos = new FileOutputStream(pdfFile);
         getScheduleData().outputDetailedSchedules(getSchedParams(), fos);
-        JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedule written '" + pdfFile.getAbsolutePath() +"'",
-                                      "Information", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedule written '"
+            + pdfFile.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
       } catch (final DocumentException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error writing detailed schedules: %s", e.getMessage());
@@ -386,7 +387,8 @@ public class SchedulerUI extends JFrame {
               fis = null;
             }
 
-            final List<SubjectiveStation> subjectiveStations = gatherSubjectiveStationInformation(columnInfo);
+            final List<SubjectiveStation> subjectiveStations = gatherSubjectiveStationInformation(SchedulerUI.this,
+                                                                                                  columnInfo);
             schedParams = new SchedParams(subjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
                                           SchedParams.DEFAULT_CHANGETIME_MINUTES,
                                           SchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
@@ -395,7 +397,7 @@ public class SchedulerUI extends JFrame {
               subjectiveHeaders.add(station.getName());
             }
 
-            final String name = extractBasename(selectedFile);
+            final String name = Utilities.extractBasename(selectedFile);
 
             final TournamentSchedule schedule;
             if (csv) {
@@ -694,8 +696,13 @@ public class SchedulerUI extends JFrame {
 
   /**
    * Prompt the user for which columns represent subjective categories.
+   * 
+   * @param parentComponent the parent for the dialog
+   * @param columnInfo the column information
+   * @return the list of subjective information the user choose
    */
-  private List<SubjectiveStation> gatherSubjectiveStationInformation(final ColumnInformation columnInfo) {
+  public static List<SubjectiveStation> gatherSubjectiveStationInformation(final Component parentComponent,
+                                                                           final ColumnInformation columnInfo) {
     final List<String> unusedColumns = columnInfo.getUnusedColumns();
     final List<JCheckBox> checkboxes = new LinkedList<JCheckBox>();
     final List<JFormattedTextField> subjectiveDurations = new LinkedList<JFormattedTextField>();
@@ -719,7 +726,7 @@ public class SchedulerUI extends JFrame {
     }
     final List<SubjectiveStation> subjectiveHeaders;
     if (!checkboxes.isEmpty()) {
-      JOptionPane.showMessageDialog(SchedulerUI.this, optionPanel, "Choose Subjective Columns",
+      JOptionPane.showMessageDialog(parentComponent, optionPanel, "Choose Subjective Columns",
                                     JOptionPane.QUESTION_MESSAGE);
       subjectiveHeaders = new LinkedList<SubjectiveStation>();
       for (int i = 0; i < checkboxes.size(); ++i) {
@@ -738,20 +745,5 @@ public class SchedulerUI extends JFrame {
           + subjectiveHeaders);
     }
     return subjectiveHeaders;
-  }
-
-  /**
-   * Get the name of the file without the extension.
-   */
-  private static String extractBasename(final File selectedFile) {
-    final String name;
-    final String fullname = selectedFile.getName();
-    final int dotIndex = fullname.lastIndexOf('.');
-    if (-1 != dotIndex) {
-      name = fullname.substring(0, dotIndex);
-    } else {
-      name = fullname;
-    }
-    return name;
   }
 }
