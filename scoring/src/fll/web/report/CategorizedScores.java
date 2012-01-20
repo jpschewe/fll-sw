@@ -119,7 +119,6 @@ public class CategorizedScores extends BaseFLLServlet {
             final boolean scoreWasNull = rs.wasNull();
             writer.format("<tr>");
             writer.format("<td>%d</td>", teamNum);
-            writer.format("</td>");
             writer.format("<td>");
             if (null == org) {
               writer.format("");
@@ -168,7 +167,7 @@ public class CategorizedScores extends BaseFLLServlet {
           SQLFunctions.close(rs);
           SQLFunctions.close(prep);
           SQLFunctions.close(rawScorePrep);
-          writer.format("</table");
+          writer.format("</table>");
         }
       }
 

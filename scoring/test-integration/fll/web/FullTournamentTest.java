@@ -175,7 +175,7 @@ public class FullTournamentTest extends SeleneseTestBase {
           for (final String division : divisions) {
             printPlayoffScoresheets(division);
             LOGGER.info("Succssfully printed scoresheets round: "
-                + runNumber + "division: " + division);
+                + runNumber + " division: " + division);
           }
         }
 
