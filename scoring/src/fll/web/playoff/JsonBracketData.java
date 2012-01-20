@@ -40,26 +40,26 @@ public class JsonBracketData {
 
   private Gson _gson;
 
-  private Boolean _showFinalsScores = false;
+  private boolean _showFinalsScores = false;
 
-  private Boolean _showOnlyVerifiedScores = true;
+  private boolean _showOnlyVerifiedScores = true;
 
   private BracketData getBracketData() {
     return _bracketdata;
   }
 
   public static class ForceJsRefresh {
-    public Boolean refresh = true;
+    public boolean refresh = true;
   }
 
   public static class BracketLeafResultSet {
     public BracketDataType leaf;
 
-    public Double score;
+    public double score;
 
     public String originator;
 
-    public BracketLeafResultSet (final BracketDataType bdt, final Double scr, final String origin) {
+    public BracketLeafResultSet (final BracketDataType bdt, final double scr, final String origin) {
       leaf = bdt;
       score = scr;
       originator = origin;
@@ -81,7 +81,7 @@ public class JsonBracketData {
   /**
    * Constructor taking two extra booleans that govern output.
    */
-  public JsonBracketData(final BracketData bd, final Boolean showFinals, final Boolean showOnlyVerified) {
+  public JsonBracketData(final BracketData bd, final boolean showFinals, final boolean showOnlyVerified) {
     this(bd);
     _showFinalsScores = showFinals;
     _showOnlyVerifiedScores = showOnlyVerified;
@@ -101,7 +101,9 @@ public class JsonBracketData {
    * 
    * @param ids A map of key round and value row
    */
-  public String getMultipleBracketLocationsJson(final Map<Integer, Integer> ids, DataSource datasource, final Element performanceElement) throws SQLException, ParseException {
+  public String getMultipleBracketLocationsJson(final Map<Integer, Integer> ids,
+                                                DataSource datasource,
+                                                final Element performanceElement) throws SQLException, ParseException {
     List<BracketLeafResultSet> datalist = new LinkedList<BracketLeafResultSet>();
     try {
       final Connection connection = datasource.getConnection();
