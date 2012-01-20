@@ -298,9 +298,11 @@ FONT.TIE {
 
   $(document).ready(function() {
       buildAJAXList();
+      <c:if test="${empty param.scroll}">
       scrollMgr("bottom");
       scrollMgr("top");
       window.setInterval('scrollMgr("bottom");scrollMgr("top")', (rows * 2000)+6000);
+      </c:if>
       colorTableLabels();
       //window.setInterval('iterate()',10000);
   });
