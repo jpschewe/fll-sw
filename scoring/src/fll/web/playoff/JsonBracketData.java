@@ -1,25 +1,18 @@
 package fll.web.playoff;
 
 import java.util.List;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 
-import javax.sql.DataSource;
-
-import org.apache.log4j.Logger;
-
 import org.w3c.dom.Element;
 
 import com.google.gson.Gson;
 
 import fll.db.Queries;
-import fll.util.LogUtils;
 import fll.web.playoff.BracketData;
-import fll.web.playoff.BracketData.BracketDataType;
 import fll.web.playoff.BracketData.TeamBracketCell;
 import fll.web.playoff.TeamScore;
 import fll.web.playoff.DatabaseTeamScore;
@@ -33,8 +26,6 @@ import fll.util.ScoreUtils;
  */
 
 public class JsonBracketData {
-
-  private static final Logger LOG = LogUtils.getLogger();
 
   private BracketData _bracketdata;
 
@@ -125,7 +116,7 @@ public class JsonBracketData {
         } else if (!realScore
             || !_showOnlyVerifiedScores
             || Queries.isVerified(connection, currentTournament, teamNumber, Queries.getNumSeedingRounds(connection, currentTournament)+entry.getValue())) {
-          if (entry.getValue() == numPlayoffRounds || !realScore) {
+          if ((entry.getValue() == numPlayoffRounds && !_showFinalsScores) || !realScore) {
             datalist.add(new BracketLeafResultSet(tbc, -1.0, entry.getKey()+"-"+entry.getValue()));
           } else {
             datalist.add(new BracketLeafResultSet(tbc, computedTeamScore, entry.getKey()+"-"+entry.getValue()));
