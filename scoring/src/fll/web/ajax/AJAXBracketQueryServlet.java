@@ -1,4 +1,4 @@
-package fll.web.playoff;
+package fll.web.ajax;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -22,6 +22,8 @@ import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.playoff.BracketData;
+import fll.web.playoff.JsonBracketData;
 
 /**
  * Talk to client brackets in json.
