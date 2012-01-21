@@ -27,6 +27,7 @@ import org.w3c.dom.Element;
 
 import com.google.gson.Gson;
 
+import fll.Team;
 import fll.Tournament;
 import fll.db.GenerateDB;
 import fll.db.Queries;
@@ -73,12 +74,34 @@ public class JsonBracketDataTests {
     //See what json tells us
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
     query.put(1, 1);
-    Gson gson = new Gson();
-    final String jsonOut = jsonBrackets.getMultipleBracketLocationsJson(query, 
-                                                                        playoff.getConnection(), 
-                                                                        (Element) playoff.getChallengeDoc().getDocumentElement().getElementsByTagName("Performance").item(0));
+    final Gson gson = new Gson();
+    final Element scoreElement = (Element) playoff.getChallengeDoc().getDocumentElement().getElementsByTagName("Performance").item(0);
+    String jsonOut = jsonBrackets.getMultipleBracketLocationsJson(query, playoff.getConnection(), scoreElement);
     BracketLeafResultSet[] result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
     Assert.assertEquals(result[0].score, -1.0D, 0.0);
+    //check unverified
+    
+    //give opponent a score
+    insertScore(playoff.getConnection(), 2, 1, false, 20D);
+    query.clear();
+    query.put(3, 2);
+    jsonOut = jsonBrackets.getMultipleBracketLocationsJson(query, playoff.getConnection(), scoreElement);
+    result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
+    Assert.assertEquals(result[0].leaf.getTeam().getTeamNumber(), Team.NULL_TEAM_NUMBER);
+    
+    //advance 1 team all the way to finals
+    insertScore(playoff.getConnection(), 5, 2, true, 50D);
+    insertScore(playoff.getConnection(), 6, 2, true, 10D);
+    //score finals bit
+    insertScore(playoff.getConnection(), 5, 3, true, 99D);
+    //json shouldn't tell us the score for the finals round
+    query.clear();
+    query.put(23, 3);
+    jsonOut = jsonBrackets.getMultipleBracketLocationsJson(query, playoff.getConnection(), scoreElement);
+    result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
+    Assert.assertEquals(result[0].score, -1.0D, 0.0);
+    
+    
     SQLFunctions.close(playoff.getConnection());
   }
   private void insertScore(Connection connection, int team, int run, boolean verified, double score) throws SQLException{
