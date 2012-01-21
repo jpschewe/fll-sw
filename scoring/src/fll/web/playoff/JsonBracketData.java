@@ -53,14 +53,14 @@ public class JsonBracketData {
   }
 
   public static class BracketLeafResultSet {
-    public BracketDataType leaf;
+    public TeamBracketCell leaf;
 
     public double score;
 
     public String originator;
 
-    public BracketLeafResultSet (final BracketDataType bdt, final double scr, final String origin) {
-      leaf = bdt;
+    public BracketLeafResultSet (final TeamBracketCell tbc, final double scr, final String origin) {
+      leaf = tbc;
       score = scr;
       originator = origin;
     }
@@ -86,7 +86,7 @@ public class JsonBracketData {
     _showFinalsScores = showFinals;
     _showOnlyVerifiedScores = showOnlyVerified;
   }
-
+  
 
   public String getBracketLocationJson(final int round, final int row) {
     if (round < this.getBracketData().getFirstRound())
@@ -102,16 +102,15 @@ public class JsonBracketData {
    * @param ids A map of key round and value row
    */
   public String getMultipleBracketLocationsJson(final Map<Integer, Integer> ids,
-                                                DataSource datasource,
+                                                final Connection connection,
                                                 final Element performanceElement) throws SQLException, ParseException {
     List<BracketLeafResultSet> datalist = new LinkedList<BracketLeafResultSet>();
     try {
-      final Connection connection = datasource.getConnection();
       final int currentTournament = Queries.getCurrentTournament(connection);
       for (Map.Entry<Integer, Integer> entry : ids.entrySet()) {
         final TeamBracketCell tbc = (TeamBracketCell) this.getBracketData().getData(entry.getValue(), entry.getKey());
         if (tbc == null) {
-          throw new RuntimeException("Unable to retrieve data for identifier "+entry.getKey()+"-"+entry.getValue());
+          return "{\"refresh\":\"true\"}";
         }
         final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournament);
         final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection/*, tbc.getTeam().getDivision()*/); //Should pass division, but code was getting angry
@@ -131,7 +130,7 @@ public class JsonBracketData {
           } else {
             datalist.add(new BracketLeafResultSet(tbc, computedTeamScore, entry.getKey()+"-"+entry.getValue()));
           }
-        }
+        } 
       }
     } catch (final SQLException e) {
       throw new RuntimeException(e);
