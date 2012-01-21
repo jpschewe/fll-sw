@@ -96,8 +96,6 @@ bracketInfo.addStaticTableLabels(connection, currentTournament, divisionStr);
           <%=bracketInfo.getHtmlCell(connection, currentTournament, rowIndex, bracketInfo.getLastRound())%>
         </tr>
 <%  } %>
-    </table>
-    <!--  % Playoff.displayPrintableBrackets(connection, challengeDocument, divisionStr, out); % -->
-    
+    </table>    
   </body>
 </html>
