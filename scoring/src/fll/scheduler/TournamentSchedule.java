@@ -1106,7 +1106,7 @@ public class TournamentSchedule implements Serializable {
         return null;
       }
       final String teamNumberStr = line[ci.getTeamNumColumn()];
-      if (teamNumberStr.length() < 1) {
+      if (null == teamNumberStr || teamNumberStr.length() < 1) {
         // hit empty row
         return null;
       }
