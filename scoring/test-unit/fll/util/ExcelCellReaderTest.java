@@ -44,6 +44,29 @@ public class ExcelCellReaderTest {
     }
     Assert.assertTrue("Can't find line 19", found);
   }
+  
+  @Test
+  public void testEmptyFirstCell() throws InvalidFormatException, IOException, ParseException {
+    final InputStream stream = ExcelCellReaderTest.class.getResourceAsStream("data/excel-test.xls");
+    final ExcelCellReader reader = new ExcelCellReader(stream, "Northome");
+    String[] values;
+    boolean found = false;
+    while (null != (values = reader.readNext())) {
+      if (values.length > 0) { // skip empty lines
+        if ("line number".equals(values[1])) {
+          // skip header
+          continue;
+        }
+        // find a line 3 and check that column 1 is null
+        final Number lineNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(values[1]);
+        if (3 == lineNumber.intValue()) {
+          found = true;
+          Assert.assertNull("line 3 should have null for column 1", values[0]);
+        }
+      }
+    }
+    Assert.assertTrue("Can't find line 3, null first cell messed things up", found);    
+  }
 
   /**
    * Make sure that integers read in are kept as integers.
