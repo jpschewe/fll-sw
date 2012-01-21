@@ -603,4 +603,28 @@ public final class Utilities {
     }
     return Integer.valueOf(value.trim());
   }
+
+  /**
+   * If the string is longer than len, truncate it and append "..."
+   * 
+   * TODO move to JonsInfra
+   * 
+   * @param name the string
+   * @param len the max length for the string
+   * @return the string never longer than len characters
+   */
+  public static String trimString(final String name,
+                                  final int len) {
+    if (len <= 3) {
+      throw new IllegalArgumentException("Length must be longer than 3 otherwise all strings are just '...'");
+    }
+    if (null == name) {
+      return null;
+    } else if (name.length() > len) {
+      return name.substring(0, len - 3)
+          + "...";
+    } else {
+      return name;
+    }
+  }
 }
