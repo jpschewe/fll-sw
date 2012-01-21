@@ -17,6 +17,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 
 import fll.Team;
+import fll.Utilities;
 import fll.db.Queries;
 import fll.util.LogUtils;
 
@@ -38,6 +39,11 @@ public class BracketData {
 
   private static final Logger LOG = LogUtils.getLogger();
 
+  /**
+   * Max team name length before we start wrapping.
+   */
+  private static final int MAX_TEAM_NAME_LEN = 30;
+  
   /**
    * Data type for brackets.
    */
@@ -1044,7 +1050,7 @@ public class BracketData {
       sb.append("<font class='TeamNumber'>#");
       sb.append(team.getTeamNumber());
       sb.append("</font>&nbsp;<font class='TeamName'>");
-      sb.append(team.getTeamName());
+      sb.append(Utilities.trimString(team.getTeamName(), MAX_TEAM_NAME_LEN));
       sb.append("</font>");
       if (showScore
           && Queries.performanceScoreExists(connection, team, runNumber)

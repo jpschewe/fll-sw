@@ -112,7 +112,7 @@ public class TournamentScheduleTest {
       }
 
       // load schedule with matching team numbers
-      final URL scheduleResource = TournamentSchedule.class.getResource("data/16-16-test.xls");
+      final URL scheduleResource = TournamentScheduleTest.class.getResource("data/16-16-test.xls");
       Assert.assertNotNull(scheduleResource);
       InputStream scheduleStream = scheduleResource.openStream();
       final List<String> sheetNames = ExcelCellReader.getAllSheetNames(scheduleStream);
