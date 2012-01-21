@@ -42,7 +42,7 @@ public class BracketData {
   /**
    * Max team name length before we start wrapping.
    */
-  private static final int MAX_TEAM_NAME_LEN = 30;
+  public static final int MAX_TEAM_NAME_LEN = 30;
   
   /**
    * Data type for brackets.

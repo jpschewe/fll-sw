@@ -124,20 +124,28 @@ FONT.TIE {
   var foundNewest = false;
   var rows = <%=bracketInfo.getNumRows()%>;
   var finalRound = <%=Queries.getNumPlayoffRounds(connection, division)+1%>;
+  var maxNameLength = <%=BracketData.MAX_TEAM_NAME_LEN%>;
   
   var displayStrings = new Object();
+  displayStrings.parseTeamName = function (team) {
+      if (team.length > maxNameLength) {
+          return team.substring(0, maxNameLength-3)+"...";
+      } else {
+          return team;
+      }
+  }
   displayStrings.getSpecialString = function (id, data, newest) {
       if (newest) {
-          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamName\">" + data._team._teamName + "</font>";
+          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamName\">" + parseTeamName(data._team._teamName) + "</font>";
       } else {
-          return "<font class=\"TeamName\">" + data._team._teamName + "</font>";
+          return "<font class=\"TeamName\">" + parseTeamName(data._team._teamName) + "</font>";
       }
   }
   displayStrings.getTeamNameString = function (id, data, newest) {
       if (newest) {
-          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font>";
+          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + parseTeamName(data._team._teamName) + "</font>";
       } else {
-          return "<font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font>";
+          return "<font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + parseTeamName(data._team._teamName) + "</font>";
       }
   }
   displayStrings.getTeamNameAndScoreString = function (id, data, scoreData, newest) {
@@ -145,9 +153,9 @@ FONT.TIE {
           scoreData += ".0";
       }
       if (newest) {
-          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><font class=\"TeamScore\"> Score: " + scoreData + "</font>";
+          return "<a name=\"newest\" id=\""+id+"-n\"></a><font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + parseTeamName(data._team._teamName) + "</font><font class=\"TeamScore\"> Score: " + scoreData + "</font>";
       } else {
-          return "<font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + data._team._teamName + "</font><font class=\"TeamScore\"> Score: " + scoreData + "</font>";
+          return "<font class=\"TeamNumber\">#" + data._team._teamNumber + "</font> <font class=\"TeamName\">" + parseTeamName(data._team._teamName) + "</font><font class=\"TeamScore\"> Score: " + scoreData + "</font>";
       }
   }
 
