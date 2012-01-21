@@ -58,18 +58,6 @@ public class ScoresheetGenerator {
   private static final int MAX_TEAM_NAME_LEN = 45;
 
   /**
-   * If a team name is longer than {@link #MAX_TEAM_NAME_LEN}, then truncate it.
-   */
-  private static String trimTeamName(final String name) {
-    if (name.length() > MAX_TEAM_NAME_LEN) {
-      return name.substring(0, MAX_TEAM_NAME_LEN - 3)
-          + "...";
-    } else {
-      return name;
-    }
-  }
-
-  /**
    * Create a new ScoresheetGenerator object populated with form header data
    * provided in the given Map. The map should contain String[] objects, each of
    * length 1, keyed by the String objects listed below (this matches the
@@ -156,7 +144,7 @@ public class ScoresheetGenerator {
             // Get teamA info
             final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamA"
                 + i)));
-            m_name[j] = trimTeamName(teamA.getTeamName());
+            m_name[j] = Utilities.trimString(teamA.getTeamName(), MAX_TEAM_NAME_LEN);
             m_number[j] = teamA.getTeamNumber();
             m_round[j] = "Round P"
                 + round;
@@ -171,7 +159,7 @@ public class ScoresheetGenerator {
             // Get teamB info
             final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamB"
                 + i)));
-            m_name[j] = trimTeamName(teamB.getTeamName());
+            m_name[j] = Utilities.trimString(teamB.getTeamName(), MAX_TEAM_NAME_LEN);
             m_number[j] = teamB.getTeamNumber();
             m_round[j] = "Round P"
                 + round;
