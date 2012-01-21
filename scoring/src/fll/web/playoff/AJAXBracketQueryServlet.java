@@ -46,7 +46,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
         os.print(jsonbd.getBracketLocationJson(Integer.parseInt(request.getParameter("round")), Integer.parseInt(request.getParameter("row"))));
       } else if (request.getParameter("multi") != null) {
         //Send off request to helpers
-        handleMultipleQuery(parseInputToMap(request.getParameter("multi")), os, application, session, response, connection, datasource);
+        handleMultipleQuery(parseInputToMap(request.getParameter("multi")), os, application, session, response, connection);
       } else {
         response.reset();
         response.setContentType("text/plain");
@@ -69,8 +69,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
                                    final ServletContext application,
                                    final HttpSession session,
                                    final HttpServletResponse response,
-                                   final Connection connection, 
-                                   final DataSource datasource) {
+                                   final Connection connection) {
     try {
       BracketData bd = constructBracketData(connection, session, application);
       JsonBracketData jsonbd = new JsonBracketData(bd);
@@ -78,7 +77,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
       final Element perfElement = (Element) rootElement.getElementsByTagName("Performance").item(0);  
       response.reset();
       response.setContentType("text/plain");
-      os.print(jsonbd.getMultipleBracketLocationsJson(pairedMap, datasource, perfElement));
+      os.print(jsonbd.getMultipleBracketLocationsJson(pairedMap, connection, perfElement));
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     } catch (final IOException e) {
