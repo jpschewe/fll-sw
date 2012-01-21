@@ -6,11 +6,9 @@
 
 package fll.web.playoff;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -18,7 +16,6 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.ZipOutputStream;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -31,11 +28,9 @@ import org.w3c.dom.Element;
 import com.google.gson.Gson;
 
 import fll.Tournament;
-import fll.db.DumpDB;
 import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.util.LogUtils;
-import fll.web.playoff.BracketData.TeamBracketCell;
 import fll.web.playoff.JsonBracketData.BracketLeafResultSet;
 import fll.xml.ChallengeParser;
 
