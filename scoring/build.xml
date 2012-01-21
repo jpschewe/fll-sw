@@ -157,7 +157,7 @@
 		<pathelement location="${dir.tomcat.src}/lib/jsp-api.jar" />
 		
 		<!-- ajax push tablib -->
-		<pathelement location="${dir.lib}/lib/icepush-jsp-2.0.0-alpha3.jar" />
+		<pathelement location="${dir.lib}/icepush-jsp-2.0.0-alpha3.jar" />
 
 	</path>
 
