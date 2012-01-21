@@ -144,7 +144,7 @@ public class ExcelCellReader extends CellFileReader {
     }
 
     final List<String> data = new LinkedList<String>();
-    for (int cellIdx = row.getFirstCellNum(); cellIdx < row.getLastCellNum(); ++cellIdx) {
+    for (int cellIdx = 0; cellIdx < row.getLastCellNum(); ++cellIdx) {
       final Cell cell = row.getCell(cellIdx, Row.RETURN_NULL_AND_BLANK);
       if (null == cell) {
         data.add(null);
