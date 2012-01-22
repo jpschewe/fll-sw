@@ -176,7 +176,7 @@ FONT.TIE {
           $.each(mainData, function (index, data) {
               var lid = data.originator;
               //First and foremost, make sure rounds haven't advanced.
-              if (data.refresh == true) {
+              if (mainData.refresh == "true") {
                   window.location.reload();
               }
               if (data.leaf._team._teamNumber < 0) {
