@@ -46,8 +46,6 @@ public class ScoresheetServlet extends BaseFLLServlet {
                                 final HttpSession session) throws IOException,
       ServletException {
     try {
-      PushContext pc = PushContext.getInstance(application);
-      pc.push("playoffs");
       final DataSource datasource = SessionAttributes.getDataSource(session);
       final Connection connection = datasource.getConnection();
       final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
@@ -55,7 +53,10 @@ public class ScoresheetServlet extends BaseFLLServlet {
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
-
+      
+      PushContext pc = PushContext.getInstance(application);
+      pc.push("playoffs");
+      
       // Create the scoresheet generator - must provide correct number of
       // scoresheets
       final ScoresheetGenerator gen = new ScoresheetGenerator(request, connection, tournament, challengeDocument);
