@@ -223,13 +223,13 @@ FONT.TIE {
                   //}); // /.done
               } // /if team num not a bye
           }); // /.each of data
+          colorTableLabels();
       }).error(function (xhr, errstring, err) { 
           window.location.reload();
           console.log(xhr);
           console.log(errstring);
           console.log(err);
       }); // /first .ajax
-  colorTableLabels();
   } // /iterate()
 
   var validColors = new Array();
@@ -273,7 +273,7 @@ FONT.TIE {
   function colorTableLabels() {
       $(".table_assignment").each(function(index, label) {
           //Sane color? Let's start by splitting the label text
-          if ($.inArray(label.innerHTML.split(" ")[0].toLowerCase(), validColors) == 1) {
+          if ($.inArray(label.innerHTML.split(" ")[0].toLowerCase(), validColors) > 0) {
               label.style.backgroundColor = label.innerHTML.split(" ")[0];
           }
       });
