@@ -11,6 +11,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Map;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
@@ -41,11 +44,14 @@ public final class ScoreStandardization {
    * @param tournament which tournament to summarize scores for
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable param for column to set")
-  public static void summarizeScores(final Connection connection, final Document document, final int tournament) throws SQLException, ParseException {
-    if(tournament != Queries.getCurrentTournament(connection)) {
-      throw new FLLRuntimeException("Cannot compute summarized scores for a tournament other than the current tournament");
+  public static void summarizeScores(final Connection connection,
+                                     final Document document,
+                                     final int tournament) throws SQLException, ParseException {
+    if (tournament != Queries.getCurrentTournament(connection)) {
+      throw new FLLRuntimeException(
+                                    "Cannot compute summarized scores for a tournament other than the current tournament");
     }
-    
+
     Statement stmt = null;
     PreparedStatement deletePrep = null;
     PreparedStatement insertPrep = null;
@@ -100,7 +106,8 @@ public final class ScoreStandardization {
 
         // subjective
         final Element rootElement = document.getDocumentElement();
-        for (final Element catElement : new NodelistElementCollectionAdapter(rootElement.getElementsByTagName("subjectiveCategory"))) {
+        for (final Element catElement : new NodelistElementCollectionAdapter(
+                                                                             rootElement.getElementsByTagName("subjectiveCategory"))) {
           final String catName = catElement.getAttribute("name");
 
           // insert rows from the current tournament and category, keeping team
@@ -144,9 +151,10 @@ public final class ScoreStandardization {
   /**
    * Populate the StandardizedScore column of each subjective table.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable for column name in update")
-  public static void standardizeSubjectiveScores(final Connection connection, final Document document, final int tournament) throws SQLException {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable for column name in update")
+  public static void standardizeSubjectiveScores(final Connection connection,
+                                                 final Document document,
+                                                 final int tournament) throws SQLException {
     ResultSet rs = null;
     PreparedStatement updatePrep = null;
     PreparedStatement selectPrep = null;
@@ -157,7 +165,8 @@ public final class ScoreStandardization {
       final Element rootElement = document.getDocumentElement();
 
       // subjective categories
-      for (final Element catElement : new NodelistElementCollectionAdapter(rootElement.getElementsByTagName("subjectiveCategory"))) {
+      for (final Element catElement : new NodelistElementCollectionAdapter(
+                                                                           rootElement.getElementsByTagName("subjectiveCategory"))) {
         final String category = catElement.getAttribute("name");
 
         /*
@@ -171,7 +180,8 @@ public final class ScoreStandardization {
         // 2 - sg_stdev
         // 3 - judge
         updatePrep = connection.prepareStatement("UPDATE "
-            + category + " SET StandardizedScore = ((ComputedTotal - ?) * ? ) + ?  WHERE Judge = ?" + " AND Tournament = ?");
+            + category + " SET StandardizedScore = ((ComputedTotal - ?) * ? ) + ?  WHERE Judge = ?"
+            + " AND Tournament = ?");
         updatePrep.setDouble(3, mean);
         updatePrep.setInt(5, tournament);
 
@@ -221,38 +231,79 @@ public final class ScoreStandardization {
    * @param tournament the tournament to add scores for
    * @throws SQLException on an error talking to the database
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE"}, justification = "Generating columns to update")
-  public static void updateTeamTotalScores(final Connection connection, final Document document, final int tournament) throws SQLException, ParseException {
-    Statement stmt = null;
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable for column name in select")
+  public static void updateTeamTotalScores(final Connection connection,
+                                           final Document document,
+                                           final int tournament) throws SQLException, ParseException {
+    final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection, tournament);
+
+    PreparedStatement update = null;
+    ResultSet rs = null;
+    PreparedStatement perfSelect = null;
+    final Collection<PreparedStatement> subjectiveSelects = new LinkedList<PreparedStatement>();
     try {
-      final StringBuilder sql = new StringBuilder();
-      sql.append("UPDATE FinalScores SET OverallScore = ( ");
-
       final Element rootElement = document.getDocumentElement();
-      final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
-      final double performanceWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(performanceElement.getAttribute("weight")).doubleValue();
-
-      // performance
-      sql.append("performance * "
-          + performanceWeight);
-
-      // subjective categories
-      for (final Element catElement : new NodelistElementCollectionAdapter(rootElement.getElementsByTagName("subjectiveCategory"))) {
+      for (final Element catElement : new NodelistElementCollectionAdapter(
+                                                                           rootElement.getElementsByTagName("subjectiveCategory"))) {
         final String catName = catElement.getAttribute("name");
-        final double catWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(catElement.getAttribute("weight")).doubleValue();
-
-        sql.append(" + "
-            + catName + " * " + catWeight);
+        final double catWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(catElement.getAttribute("weight"))
+                                                                 .doubleValue();
+        final PreparedStatement prep = connection.prepareStatement("SELECT "
+            + catName + " * " + catWeight + " FROM FinalScores WHERE Tournament = ? AND TeamNumber = ?");
+        prep.setInt(1, tournament);
+        subjectiveSelects.add(prep);
       }
 
-      sql.append(" ) WHERE Tournament = "
-          + tournament);
+      final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
+      final double performanceWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(performanceElement.getAttribute("weight"))
+                                                                       .doubleValue();
+      perfSelect = connection.prepareStatement("SELECT performance * "
+          + performanceWeight + " FROM FinalScores WHERE TOurnament = ? AND TeamNumber = ?");
+      perfSelect.setInt(1, tournament);
 
-      stmt = connection.createStatement();
+      update = connection.prepareStatement("UPDATE FinalScores SET OverallScore = ? WHERE Tournament = ? AND TeamNumber = ?");
+      update.setInt(2, tournament);
 
-      stmt.executeUpdate(sql.toString());
+      // compute scores for all teams treating NULL as 0
+      for (final int teamNumber : tournamentTeams.keySet()) {
+        double overallScore = 0;
+
+        perfSelect.setInt(2, teamNumber);
+        rs = perfSelect.executeQuery();
+        if (rs.next()) {
+          final double score = rs.getDouble(1);
+          if (!rs.wasNull()) {
+            overallScore += score;
+          }
+        }
+        SQLFunctions.close(rs);
+        rs = null;
+
+        for (final PreparedStatement prep : subjectiveSelects) {
+          prep.setInt(2, teamNumber);
+          rs = prep.executeQuery();
+          if (rs.next()) {
+            final double value = rs.getDouble(1);
+            if (!rs.wasNull()) {
+              overallScore += value;
+            }
+          }
+          SQLFunctions.close(rs);
+          rs = null;
+        }
+
+        update.setDouble(1, overallScore);
+        update.setInt(3, teamNumber);
+        update.executeUpdate();
+      }
+
     } finally {
-      SQLFunctions.close(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(update);
+      SQLFunctions.close(perfSelect);
+      for (final PreparedStatement prep : subjectiveSelects) {
+        SQLFunctions.close(prep);
+      }
     }
   }
 
@@ -286,7 +337,8 @@ public final class ScoreStandardization {
     // SQLFunctions.closeResultSet(rs2);
     // SQLFuctions.closeStatement(stmt);
     // }
-    // TODO ticket:84 need some better error reporting here. See the Access VB code.
+    // TODO ticket:84 need some better error reporting here. See the Access VB
+    // code.
     // I'm not sure the best way to select from a ResultSet...
     return null;
   }
