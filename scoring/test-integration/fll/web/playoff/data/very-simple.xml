@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="Simple Tournament"
+ revision="1"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd"
+ bracketSort="ALPHA_TEAM"
+ >
+
+  <Performance minimumScore="0" weight="1.0">
+
+  <goal name="score" title="Score" max="100"/>
+  
+  <tiebreaker>
+  <!-- should be empty, but not allowed by the schema -->
+   <test winner='HIGH'>
+     <term goal='score' scoreType='computed'/>
+   </test>
+  </tiebreaker>
+
+ </Performance>
+
+</fll>
