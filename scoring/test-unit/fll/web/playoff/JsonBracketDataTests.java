@@ -89,6 +89,8 @@ public class JsonBracketDataTests {
     result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
     Assert.assertEquals(result[0].leaf.getTeam().getTeamNumber(), Team.NULL_TEAM_NUMBER);
     
+    //TODO: verify a score that has been entered as unverified and make sure we get data from it
+    
     //advance 1 team all the way to finals
     insertScore(playoff.getConnection(), 5, 2, true, 50D);
     insertScore(playoff.getConnection(), 6, 2, true, 10D);
