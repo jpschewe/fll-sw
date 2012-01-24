@@ -22,16 +22,20 @@ import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import net.mtu.eggplant.xml.XMLUtils;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.Utilities;
+import fll.util.LogUtils;
 import fll.xml.ChallengeParser;
 
 /**
  * Utils for the subjective scoring application.
  */
 public final class SubjectiveUtils {
+
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   private SubjectiveUtils() {
     // no instances
@@ -42,51 +46,73 @@ public final class SubjectiveUtils {
    * 
    * @param masterFile the first file to compare
    * @param compareFile the second file to compare
-   * @return null if the challenge descriptors are different, otherwise the differences
-   * @throws IOException 
-   * @throws ZipException 
+   * @return null if the challenge descriptors are different, otherwise the
+   *         differences
+   * @throws IOException
+   * @throws ZipException
    * @see #compareScoreDocuments(Document, Document, Document)
    */
-  public static Collection<SubjectiveScoreDifference> compareSubjectiveFiles(final File masterFile, final File compareFile) throws ZipException, IOException {
-    final ZipFile masterZipfile = new ZipFile(masterFile);
+  public static Collection<SubjectiveScoreDifference> compareSubjectiveFiles(final File masterFile,
+                                                                             final File compareFile)
+      throws ZipException, IOException {
+    ZipFile masterZipfile = null;
+    ZipFile compareZipfile = null;
 
-    final ZipEntry masterScoreZipEntry = masterZipfile.getEntry("score.xml");
-    if (null == masterScoreZipEntry) {
-      throw new RuntimeException("Master Zipfile does not contain score.xml as expected");
+    try {
+      masterZipfile = new ZipFile(masterFile);
+
+      final ZipEntry masterScoreZipEntry = masterZipfile.getEntry("score.xml");
+      if (null == masterScoreZipEntry) {
+        throw new RuntimeException("Master Zipfile does not contain score.xml as expected");
+      }
+      final InputStream masterScoreStream = masterZipfile.getInputStream(masterScoreZipEntry);
+      final Document masterScoreDocument = XMLUtils.parseXMLDocument(masterScoreStream);
+      masterScoreStream.close();
+
+      final InputStream masterChallengeStream = masterZipfile.getInputStream(masterZipfile.getEntry("challenge.xml"));
+      final Document masterChallengeDoc = ChallengeParser.parse(new InputStreamReader(masterChallengeStream));
+      masterChallengeStream.close();
+
+      compareZipfile = new ZipFile(compareFile);
+
+      final ZipEntry compareScoreZipEntry = compareZipfile.getEntry("score.xml");
+      if (null == compareScoreZipEntry) {
+        throw new RuntimeException("Compare Zipfile does not contain score.xml as expected");
+      }
+      final InputStream compareScoreStream = compareZipfile.getInputStream(compareScoreZipEntry);
+      final Document compareScoreDocument = XMLUtils.parseXMLDocument(compareScoreStream);
+      compareScoreStream.close();
+
+      final InputStream compareChallengeStream = compareZipfile.getInputStream(compareZipfile.getEntry("challenge.xml"));
+      final Document compareChallengeDoc = ChallengeParser.parse(new InputStreamReader(compareChallengeStream));
+      compareChallengeStream.close();
+
+      compareZipfile.close();
+
+      if (!fll.xml.XMLUtils.compareDocuments(masterChallengeDoc, compareChallengeDoc)) {
+        return null;
+      } else {
+        return compareScoreDocuments(masterChallengeDoc, masterScoreDocument, compareScoreDocument);
+      }
+    } finally {
+      if (null != masterZipfile) {
+        try {
+          masterZipfile.close();
+        } catch (final IOException e) {
+          LOGGER.debug("Error closing master zipfile", e);
+        }
+      }
+      if (null != compareZipfile) {
+        try {
+          compareZipfile.close();
+        } catch (final IOException e) {
+          LOGGER.debug("Error closing compare zipfile", e);
+        }
+      }
     }
-    final InputStream masterScoreStream = masterZipfile.getInputStream(masterScoreZipEntry);
-    final Document masterScoreDocument = XMLUtils.parseXMLDocument(masterScoreStream);
-    masterScoreStream.close();
-    
-    final InputStream masterChallengeStream = masterZipfile.getInputStream(masterZipfile.getEntry("challenge.xml"));
-    final Document masterChallengeDoc = ChallengeParser.parse(new InputStreamReader(masterChallengeStream));
-    masterChallengeStream.close();
 
-    masterZipfile.close();
-
-    final ZipFile compareZipfile = new ZipFile(compareFile);
-
-    final ZipEntry compareScoreZipEntry = compareZipfile.getEntry("score.xml");
-    if (null == compareScoreZipEntry) {
-      throw new RuntimeException("Compare Zipfile does not contain score.xml as expected");
-    }
-    final InputStream compareScoreStream = compareZipfile.getInputStream(compareScoreZipEntry);
-    final Document compareScoreDocument = XMLUtils.parseXMLDocument(compareScoreStream);
-    compareScoreStream.close();
-    
-    final InputStream compareChallengeStream = compareZipfile.getInputStream(compareZipfile.getEntry("challenge.xml"));
-    final Document compareChallengeDoc = ChallengeParser.parse(new InputStreamReader(compareChallengeStream));
-    compareChallengeStream.close();
-
-    compareZipfile.close();
-    
-    if(!fll.xml.XMLUtils.compareDocuments(masterChallengeDoc, compareChallengeDoc)) {      
-      return null;
-    } else {
-      return compareScoreDocuments(masterChallengeDoc, masterScoreDocument, compareScoreDocument);
-    }
   }
-  
+
   /**
    * Compare the scores between two documents.
    * 
@@ -96,7 +122,9 @@ public final class SubjectiveUtils {
    * @param compare the document to compare to master
    * @return the differences found in compare wrt. master
    */
-  public static Collection<SubjectiveScoreDifference> compareScoreDocuments(final Document challengeDocument, final Document master, final Document compare) {
+  public static Collection<SubjectiveScoreDifference> compareScoreDocuments(final Document challengeDocument,
+                                                                            final Document master,
+                                                                            final Document compare) {
     final Element masterScoresElement = master.getDocumentElement();
     final Element compareScoresElement = compare.getDocumentElement();
 
@@ -120,15 +148,19 @@ public final class SubjectiveUtils {
 
     final Element categoryDescription = fll.xml.XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
     if (null == categoryDescription) {
-      throw new RuntimeException("Cannot find subjective category description for category in score document category: "
-          + categoryName);
+      throw new RuntimeException(
+                                 "Cannot find subjective category description for category in score document category: "
+                                     + categoryName);
     }
 
-    final List<Element> goalDescriptions = new NodelistElementCollectionAdapter(categoryDescription.getElementsByTagName("goal")).asList();
+    final List<Element> goalDescriptions = new NodelistElementCollectionAdapter(
+                                                                                categoryDescription.getElementsByTagName("goal")).asList();
 
     // for each score element
-    final List<Element> masterScores = new NodelistElementCollectionAdapter(masterScoreCategory.getElementsByTagName("score")).asList();
-    final List<Element> compareScores = new NodelistElementCollectionAdapter(compareScoreCategory.getElementsByTagName("score")).asList();
+    final List<Element> masterScores = new NodelistElementCollectionAdapter(
+                                                                            masterScoreCategory.getElementsByTagName("score")).asList();
+    final List<Element> compareScores = new NodelistElementCollectionAdapter(
+                                                                             compareScoreCategory.getElementsByTagName("score")).asList();
     if (masterScores.size() != compareScores.size()) {
       throw new RuntimeException("Score documents have different number of score elements");
     }
@@ -138,12 +170,14 @@ public final class SubjectiveUtils {
     }
   }
 
-  private static Element findCorrespondingScoreElement(final Element masterScore, final List<Element> compareScores) {
+  private static Element findCorrespondingScoreElement(final Element masterScore,
+                                                       final List<Element> compareScores) {
     try {
       final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(masterScore.getAttribute("teamNumber")).intValue();
       final String judge = masterScore.getAttribute("judge");
       for (final Element compareScore : compareScores) {
-        final int compareTeamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(compareScore.getAttribute("teamNumber")).intValue();
+        final int compareTeamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(compareScore.getAttribute("teamNumber"))
+                                                                      .intValue();
         final String compareJudge = compareScore.getAttribute("judge");
         if (teamNumber == compareTeamNumber
             && judge.equals(compareJudge)) {
@@ -170,7 +204,8 @@ public final class SubjectiveUtils {
       final Boolean masterNoShow = XMLUtils.getBooleanAttributeValue(masterScore, "NoShow");
       final Boolean compareNoShow = XMLUtils.getBooleanAttributeValue(masterScore, "NoShow");
       if (!ComparisonUtils.safeEquals(masterNoShow, compareNoShow)) {
-        diffs.add(new BooleanSubjectiveScoreDifference(categoryTitle, "NoShow", teamNumber, judge, masterNoShow, compareNoShow));
+        diffs.add(new BooleanSubjectiveScoreDifference(categoryTitle, "NoShow", teamNumber, judge, masterNoShow,
+                                                       compareNoShow));
       }
 
       for (final Element goalDescription : goalDescriptions) {
@@ -180,13 +215,15 @@ public final class SubjectiveUtils {
           final String masterValueStr = XMLUtils.getStringAttributeValue(masterScore, goalName);
           final String compareValueStr = XMLUtils.getStringAttributeValue(compareScore, goalName);
           if (!ComparisonUtils.safeEquals(masterValueStr, compareValueStr)) {
-            diffs.add(new StringSubjectiveScoreDifference(categoryTitle, goalTitle, teamNumber, judge, masterValueStr, compareValueStr));
+            diffs.add(new StringSubjectiveScoreDifference(categoryTitle, goalTitle, teamNumber, judge, masterValueStr,
+                                                          compareValueStr));
           }
         } else {
           final Double masterValue = XMLUtils.getDoubleAttributeValue(masterScore, goalName);
           final Double compareValue = XMLUtils.getDoubleAttributeValue(compareScore, goalName);
           if (!ComparisonUtils.safeEquals(masterValue, compareValue)) {
-            diffs.add(new DoubleSubjectiveScoreDifference(categoryTitle, goalTitle, teamNumber, judge, masterValue, compareValue));
+            diffs.add(new DoubleSubjectiveScoreDifference(categoryTitle, goalTitle, teamNumber, judge, masterValue,
+                                                          compareValue));
           }
         }
 
@@ -201,7 +238,8 @@ public final class SubjectiveUtils {
    * 
    * @return null if not found
    */
-  private static Element getCategoryNode(final Element scoresElement, final String categoryName) {
+  private static Element getCategoryNode(final Element scoresElement,
+                                         final String categoryName) {
     for (final Element scoreCategory : new NodelistElementCollectionAdapter(scoresElement.getChildNodes())) {
       if (categoryName.equals(scoreCategory.getNodeName())) {
         return scoreCategory;

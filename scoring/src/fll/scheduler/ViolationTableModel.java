@@ -18,6 +18,7 @@ import javax.swing.table.AbstractTableModel;
  */
 /*package*/class ViolationTableModel extends AbstractTableModel {
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SE_BAD_FIELD" }, justification = "Not serializing these classes")
   private final List<ConstraintViolation> violations;
 
   private static final Comparator<ConstraintViolation> TEAM_NUMBER_COMPARATOR = new Comparator<ConstraintViolation>() {

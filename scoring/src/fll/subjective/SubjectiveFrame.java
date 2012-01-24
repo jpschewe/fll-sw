@@ -134,27 +134,35 @@ public final class SubjectiveFrame extends JFrame {
 
     getContentPane().setLayout(new BorderLayout());
 
-    final ZipFile zipfile = new ZipFile(file);
-    final ZipEntry challengeEntry = zipfile.getEntry("challenge.xml");
-    if (null == challengeEntry) {
-      throw new RuntimeException(
-                                 "Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
+    ZipFile zipfile = null;
+    try {
+      zipfile = new ZipFile(file);
+      final ZipEntry challengeEntry = zipfile.getEntry("challenge.xml");
+      if (null == challengeEntry) {
+        throw new RuntimeException(
+                                   "Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
+      }
+      final InputStream challengeStream = zipfile.getInputStream(challengeEntry);
+      _challengeDocument = ChallengeParser.parse(new InputStreamReader(challengeStream));
+      challengeStream.close();
+
+      final ZipEntry scoreEntry = zipfile.getEntry("score.xml");
+      if (null == scoreEntry) {
+        throw new RuntimeException(
+                                   "Unable to find score data in file, you probably choose the wrong file or it is corrupted");
+      }
+      final InputStream scoreStream = zipfile.getInputStream(scoreEntry);
+      _scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
+      scoreStream.close();
+    } finally {
+      if (null != zipfile) {
+        try {
+          zipfile.close();
+        } catch (final IOException e) {
+          LOGGER.debug("Error closing zipfile", e);
+        }
+      }
     }
-    final InputStream challengeStream = zipfile.getInputStream(challengeEntry);
-    _challengeDocument = ChallengeParser.parse(new InputStreamReader(challengeStream));
-    challengeStream.close();
-
-    final ZipEntry scoreEntry = zipfile.getEntry("score.xml");
-    if (null == scoreEntry) {
-      throw new RuntimeException(
-                                 "Unable to find score data in file, you probably choose the wrong file or it is corrupted");
-    }
-    final InputStream scoreStream = zipfile.getInputStream(scoreEntry);
-    _scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
-    scoreStream.close();
-
-    zipfile.close();
-
     final JPanel topPanel = new JPanel();
     getContentPane().add(topPanel, BorderLayout.NORTH);
 
@@ -231,10 +239,8 @@ public final class SubjectiveFrame extends JFrame {
     getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
     for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
-                                                                                _challengeDocument
-                                                                                                  .getDocumentElement()
-                                                                                                  .getElementsByTagName(
-                                                                                                                        "subjectiveCategory"))) {
+                                                                                _challengeDocument.getDocumentElement()
+                                                                                                  .getElementsByTagName("subjectiveCategory"))) {
       createSubjectiveTable(tabbedPane, subjectiveElement);
     }
 
@@ -245,7 +251,7 @@ public final class SubjectiveFrame extends JFrame {
       }
     });
     setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-    
+
     pack();
   }
 
@@ -272,11 +278,9 @@ public final class SubjectiveFrame extends JFrame {
 
     int g = 0;
     for (final Element goalDescription : new NodelistElementCollectionAdapter(
-                                                                              subjectiveElement
-                                                                                               .getElementsByTagName("goal"))) {
+                                                                              subjectiveElement.getElementsByTagName("goal"))) {
       final NodelistElementCollectionAdapter posValuesList = new NodelistElementCollectionAdapter(
-                                                                                                  goalDescription
-                                                                                                                 .getElementsByTagName("value"));
+                                                                                                  goalDescription.getElementsByTagName("value"));
       final TableColumn column = table.getColumnModel().getColumn(g + 4);
       if (posValuesList.hasNext()) {
         // enumerated
@@ -319,7 +323,8 @@ public final class SubjectiveFrame extends JFrame {
         int column = table.getSelectedColumn();
 
         // skip the no show when tabbing
-        while (!table.isCellEditable(row, column) || table.getColumnClass(column) == Boolean.class) {
+        while (!table.isCellEditable(row, column)
+            || table.getColumnClass(column) == Boolean.class) {
           column += 1;
 
           if (column == columnCount) {
@@ -437,9 +442,7 @@ public final class SubjectiveFrame extends JFrame {
   /* package */void quit() {
     if (validateData()) {
 
-      final int state = JOptionPane
-                                   .showConfirmDialog(
-                                                      SubjectiveFrame.this,
+      final int state = JOptionPane.showConfirmDialog(SubjectiveFrame.this,
                                                       "Save data?  Data will be saved in same file as it was read from.",
                                                       "Exit", JOptionPane.YES_NO_CANCEL_OPTION);
       if (JOptionPane.YES_OPTION == state) {
@@ -476,20 +479,16 @@ public final class SubjectiveFrame extends JFrame {
 
     final List<String> warnings = new LinkedList<String>();
     for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
-                                                                                _challengeDocument
-                                                                                                  .getDocumentElement()
-                                                                                                  .getElementsByTagName(
-                                                                                                                        "subjectiveCategory"))) {
+                                                                                _challengeDocument.getDocumentElement()
+                                                                                                  .getElementsByTagName("subjectiveCategory"))) {
       final String category = subjectiveElement.getAttribute("name");
       final String categoryTitle = subjectiveElement.getAttribute("title");
 
-      final List<Element> goals = new NodelistElementCollectionAdapter(subjectiveElement.getElementsByTagName("goal"))
-                                                                                                                      .asList();
+      final List<Element> goals = new NodelistElementCollectionAdapter(subjectiveElement.getElementsByTagName("goal")).asList();
       final Element categoryElement = (Element) _scoreDocument.getDocumentElement().getElementsByTagName(category)
                                                               .item(0);
       for (final Element scoreElement : new NodelistElementCollectionAdapter(
-                                                                             categoryElement
-                                                                                            .getElementsByTagName("score"))) {
+                                                                             categoryElement.getElementsByTagName("score"))) {
         int numValues = 0;
         for (final Element goalElement : goals) {
           final String goalName = goalElement.getAttribute("name");
