@@ -42,7 +42,7 @@ public class BracketData {
   /**
    * Max team name length before we start wrapping.
    */
-  private static final int MAX_TEAM_NAME_LEN = 30;
+  public static final int MAX_TEAM_NAME_LEN = 30;
   
   /**
    * Data type for brackets.
@@ -563,7 +563,7 @@ public class BracketData {
             + comment + "-->");
       }
     } else if (d instanceof TeamBracketCell) {
-      sb.append("<td width='400' class='Leaf'>");
+      sb.append("<td width='400' class='Leaf js-leaf' id='"+row+"-"+round+"'>");
       if (round == _finalsRound) {
         sb.append(getDisplayString(connection, tournament, round
             + _numSeedingRounds, ((TeamBracketCell) d).getTeam(), _showFinalScores, _showOnlyVerifiedScores));
@@ -1060,14 +1060,15 @@ public class BracketData {
         if (!scoreVerified) {
           sb.append("<span style='color:red'>");
         }
-        sb.append("<font class='TeamScore'>&nbsp;Score: ");
+        sb.append("<font class='TeamScore'>&nbsp;Score: <span id='");
+        sb.append(team.getTeamNumber() + "-" + runNumber + "-score'>");
         if (Playoff.isNoShow(connection, currentTournament, team, runNumber)) {
           sb.append("No Show");
         } else {
           // only display score if it's not a bye
           sb.append(Playoff.getPerformanceScore(connection, currentTournament, team, runNumber));
         }
-        sb.append("</font>");
+        sb.append("</span></font>");
         if (!scoreVerified) {
           sb.append("</span>");
         }

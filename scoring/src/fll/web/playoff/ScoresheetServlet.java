@@ -18,6 +18,7 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
+import org.icepush.PushContext;
 
 import com.itextpdf.text.DocumentException;
 
@@ -52,7 +53,10 @@ public class ScoresheetServlet extends BaseFLLServlet {
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=scoreSheet.pdf");
-
+      
+      PushContext pc = PushContext.getInstance(application);
+      pc.push("playoffs");
+      
       // Create the scoresheet generator - must provide correct number of
       // scoresheets
       final ScoresheetGenerator gen = new ScoresheetGenerator(request, connection, tournament, challengeDocument);

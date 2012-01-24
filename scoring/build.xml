@@ -124,6 +124,12 @@
 
 		<!-- used for password hashes -->
 		<pathelement location="${dir.lib}/commons-codec-1.5.jar" />
+		
+		<!-- used to create json out of objects -->
+		<pathelement location="${dir.lib}/gson-2.0.jar" />
+		
+		<!-- handles ajax pushes -->
+		<pathelement location="${dir.lib}/icepush-2.0.0-alpha3.jar" />
 
 		<path refid="cobertura.classpath" />
 
@@ -149,6 +155,9 @@
 		<!-- tomcat libraries -->
 		<pathelement location="${dir.tomcat.src}/lib/servlet-api.jar" />
 		<pathelement location="${dir.tomcat.src}/lib/jsp-api.jar" />
+		
+		<!-- ajax push tablib -->
+		<pathelement location="${dir.lib}/icepush-jsp-2.0.0-alpha3.jar" />
 
 	</path>
 

@@ -59,6 +59,9 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="scoring/lib/JonsInfra-1.3.jar" sourcepath="scoring/lib/source/JonsInfra-1.3-src.zip"/>
+	<classpathentry kind="lib" path="scoring/lib/gson-2.0.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/icepush-2.0.0-alpha3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/jstl-1.2.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/icepush-jsp-2.0.0-alpha3.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>

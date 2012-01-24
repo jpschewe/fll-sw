@@ -1,0 +1,5 @@
+
+  <servlet-mapping>
+    <servlet-name>icepush</servlet-name>
+    <url-pattern>*.icepush</url-pattern>
+  </servlet-mapping>
