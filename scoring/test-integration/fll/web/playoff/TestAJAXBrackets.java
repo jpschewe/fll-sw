@@ -41,6 +41,7 @@ public class TestAJAXBrackets extends SeleneseTestBase {
 
   @Test
   public void testAJAXBracketsInFull() throws IOException, SAXException {
+    try {
     // Setup our playoffs
     final InputStream challenge = TestAJAXBrackets.class.getResourceAsStream("data/very-simple.xml");
     IntegrationTestUtils.initializeDatabase(selenium, challenge, true);
@@ -121,6 +122,13 @@ public class TestAJAXBrackets extends SeleneseTestBase {
     selenium.selectWindow("brackets");
     selenium.runScript("window.iterate();");
     Assert.assertTrue(selenium.getEval("window.document.getElementById('1-1').innerHTML").contains("Score:"));
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final SAXException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
   }
 
   private void enterScore(Selenium selenium,
