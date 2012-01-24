@@ -176,8 +176,6 @@ public final class DumpDB extends BaseFLLServlet {
         dumpTableTypes(tableName.toLowerCase(), metadata, outputWriter);
       }
       output.closeEntry();
-      SQLFunctions.close(rs);
-      rs = null;
 
       output.putNextEntry(new ZipEntry(tableName
           + ".csv"));

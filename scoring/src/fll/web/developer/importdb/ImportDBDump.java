@@ -44,7 +44,12 @@ public class ImportDBDump extends BaseFLLServlet {
    * unique.
    */
   private static int _importdbCount = 0;
-
+  private static int getNextDBCount() {
+    synchronized(ImportDBDump.class) {
+      return _importdbCount++;
+    }
+  }
+  
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -60,7 +65,7 @@ public class ImportDBDump extends BaseFLLServlet {
       if (null != request.getAttribute("importdb")) {
 
         final String databaseName = "dbimport"
-            + String.valueOf(_importdbCount++);
+            + String.valueOf(getNextDBCount());
         final String url = "jdbc:hsqldb:mem:"
             + databaseName;
         // TODO ticket:88 should figure out how to clean up this database
