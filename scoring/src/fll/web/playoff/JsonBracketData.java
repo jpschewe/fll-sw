@@ -40,15 +40,23 @@ public class JsonBracketData {
   }
 
   public static class ForceJsRefresh {
-    public boolean refresh = true;
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SS_SHOULD_BE_STATIC" }, justification = "Read in the javascript")
+    @SuppressWarnings("unused")
+    private final boolean refresh = true;
   }
 
   public static class BracketLeafResultSet {
-    public TeamBracketCell leaf;
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_FIELD" }, justification = "Read in the javascript")
+    @SuppressWarnings("unused")
+    private final TeamBracketCell leaf;
 
-    public double score;
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_FIELD" }, justification = "Read in the javascript")
+    @SuppressWarnings("unused")
+    private final double score;
 
-    public String originator;
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_FIELD" }, justification = "Read in the javascript")
+    @SuppressWarnings("unused")
+    private final String originator;
 
     public BracketLeafResultSet(final TeamBracketCell tbc,
                                 final double scr,
@@ -61,6 +69,8 @@ public class JsonBracketData {
     public BracketLeafResultSet() { // Null constructor to have some sort of
                                     // item in null lists
       score = -1.0;
+      leaf = null;
+      originator = null;
     }
   }
 
