@@ -47,70 +47,83 @@ public class JsonBracketDataTests {
   }
 
   @Test
-  public void testRoundLimits() throws SQLException, ParseException, IOException, InstantiationException, ClassNotFoundException, IllegalAccessException {
+  public void testRoundLimits() throws SQLException, ParseException, IOException, InstantiationException,
+      ClassNotFoundException, IllegalAccessException {
     final PlayoffContainer playoff = makePlayoffs();
     final JsonBracketData jsonBrackets = new JsonBracketData(playoff.getBracketData());
 
-    //shouldn't be able to access out of context rounds
+    // shouldn't be able to access out of context rounds
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
     query.put(4, 1);
-    Assert.assertEquals("{\"refresh\":\"true\"}", 
-                        jsonBrackets.getMultipleBracketLocationsJson(query, 
-                                                                     playoff.getConnection(), 
-                                                                     (Element) playoff.getChallengeDoc().getDocumentElement().getElementsByTagName("Performance").item(0)));
-    //done
+    Assert.assertEquals("{\"refresh\":\"true\"}",
+                        jsonBrackets.getMultipleBracketLocationsJson(query,
+                                                                     playoff.getConnection(),
+                                                                     (Element) playoff.getChallengeDoc()
+                                                                                      .getDocumentElement()
+                                                                                      .getElementsByTagName("Performance")
+                                                                                      .item(0)));
+    // done
     SQLFunctions.close(playoff.getConnection());
   }
+
   /**
-   * Test score repression, aka not showing unverified scores and not showing finals info.
+   * Test score repression, aka not showing unverified scores and not showing
+   * finals info.
    */
   @Test
-  public void testScoreRepression() throws SQLException, ParseException, IOException, InstantiationException, ClassNotFoundException, IllegalAccessException {
+  public void testScoreRepression() throws SQLException, ParseException, IOException, InstantiationException,
+      ClassNotFoundException, IllegalAccessException {
     final PlayoffContainer playoff = makePlayoffs();
     final JsonBracketData jsonBrackets = new JsonBracketData(playoff.getBracketData());
 
-    //Start with adding some scores
+    // Start with adding some scores
     insertScore(playoff.getConnection(), 1, 1, false, 5D);
-    //See what json tells us
+    // See what json tells us
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
     query.put(1, 1);
     final Gson gson = new Gson();
-    final Element scoreElement = (Element) playoff.getChallengeDoc().getDocumentElement().getElementsByTagName("Performance").item(0);
+    final Element scoreElement = (Element) playoff.getChallengeDoc().getDocumentElement()
+                                                  .getElementsByTagName("Performance").item(0);
     String jsonOut = jsonBrackets.getMultipleBracketLocationsJson(query, playoff.getConnection(), scoreElement);
     BracketLeafResultSet[] result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
     Assert.assertEquals(result[0].score, -1.0D, 0.0);
-    //check unverified
-    
-    //give opponent a score
+    // check unverified
+
+    // give opponent a score
     insertScore(playoff.getConnection(), 2, 1, false, 20D);
     query.clear();
     query.put(3, 2);
     jsonOut = jsonBrackets.getMultipleBracketLocationsJson(query, playoff.getConnection(), scoreElement);
     result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
     Assert.assertEquals(result[0].leaf.getTeam().getTeamNumber(), Team.NULL_TEAM_NUMBER);
-    
-    //TODO: verify a score that has been entered as unverified and make sure we get data from it
-    
-    //advance 1 team all the way to finals
+
+    // TODO: verify a score that has been entered as unverified and make sure we
+    // get data from it
+
+    // advance 1 team all the way to finals
     insertScore(playoff.getConnection(), 5, 2, true, 50D);
     insertScore(playoff.getConnection(), 6, 2, true, 10D);
-    //score finals bit
+    // score finals bit
     insertScore(playoff.getConnection(), 5, 3, true, 99D);
-    //json shouldn't tell us the score for the finals round
+    // json shouldn't tell us the score for the finals round
     query.clear();
     query.put(23, 3);
     jsonOut = jsonBrackets.getMultipleBracketLocationsJson(query, playoff.getConnection(), scoreElement);
     result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
     Assert.assertEquals(result[0].score, -1.0D, 0.0);
-    
-    
+
     SQLFunctions.close(playoff.getConnection());
   }
-  private void insertScore(Connection connection, int team, int run, boolean verified, double score) throws SQLException{
+
+  private void insertScore(Connection connection,
+                           int team,
+                           int run,
+                           boolean verified,
+                           double score) throws SQLException {
     PreparedStatement ps = null;
     try {
       ps = connection.prepareStatement("INSERT INTO Performance (TeamNumber, Tournament, RunNumber, NoShow, Bye, Verified, Score, ComputedTotal)"
-                                       + " VALUES (?, 2, ?, false, false, ?, ?, ?)");
+          + " VALUES (?, 2, ?, false, false, ?, ?, ?)");
       ps.setInt(1, team);
       ps.setInt(2, run);
       ps.setBoolean(3, verified);
@@ -121,47 +134,58 @@ public class JsonBracketDataTests {
       SQLFunctions.close(ps);
     }
   }
+
   private class PlayoffContainer {
     private Connection c = null;
+
     private BracketData bd = null;
+
     private Document challengeDoc = null;
-    public PlayoffContainer(Connection con, BracketData brackets, Document doc) {
+
+    public PlayoffContainer(Connection con,
+                            BracketData brackets,
+                            Document doc) {
       c = con;
       bd = brackets;
       challengeDoc = doc;
     }
+
     public Connection getConnection() {
       return c;
     }
+
     public BracketData getBracketData() {
       return bd;
     }
+
     public Document getChallengeDoc() {
       return challengeDoc;
     }
 
   }
-  private PlayoffContainer makePlayoffs() throws IllegalAccessException, SQLException, ClassNotFoundException, InstantiationException, ParseException, IOException{
+
+  private PlayoffContainer makePlayoffs() throws IllegalAccessException, SQLException, ClassNotFoundException,
+      InstantiationException, ParseException, IOException {
     final String div = "1";
-    final String[] teamNames = new String[] {"A", "B", "C", "D", "E", "F"};
+    final String[] teamNames = new String[] { "A", "B", "C", "D", "E", "F" };
     Connection connection = null;
-    //load up basic descriptor
+    // load up basic descriptor
     final InputStream challengeDocIS = JsonBracketDataTests.class.getResourceAsStream("data/basic-brackets-json.xml");
     Assert.assertNotNull(challengeDocIS);
     final Document document = ChallengeParser.parse(new InputStreamReader(challengeDocIS));
     Assert.assertNotNull(document);
 
-    //in-memory db instance
+    // in-memory db instance
     Class.forName("org.hsqldb.jdbcDriver").newInstance();
     connection = DriverManager.getConnection("jdbc:hsqldb:mem:flldb-testJsonBrackets");
     GenerateDB.generateDB(document, connection, true);
 
     Tournament.createTournament(connection, "Playoff Test Tournament", "Test");
-    Queries.setCurrentTournament(connection, 2); //2 is tournament ID
-    Queries.setNumSeedingRounds(connection, 2, 0); 
-    //make teams
+    Queries.setCurrentTournament(connection, 2); // 2 is tournament ID
+    Queries.setNumSeedingRounds(connection, 2, 0);
+    // make teams
     for (int i = 0; i < teamNames.length; ++i) {
-      Assert.assertNull(Queries.addTeam(connection, i+1, teamNames[i], "htk", "mn", div, 2));
+      Assert.assertNull(Queries.addTeam(connection, i + 1, teamNames[i], "htk", "mn", div, 2));
     }
     Playoff.initializeBrackets(connection, document, div, false);
 
@@ -170,7 +194,8 @@ public class JsonBracketDataTests {
     final int rowsPerTeam = 4;
     final boolean showFinals = false;
     final boolean onlyVerifiedScores = true;
-    return new PlayoffContainer(connection, new BracketData(connection, div, firstRound, lastRound, rowsPerTeam, showFinals, onlyVerifiedScores), document);
+    return new PlayoffContainer(connection, new BracketData(connection, div, firstRound, lastRound, rowsPerTeam,
+                                                            showFinals, onlyVerifiedScores), document);
 
   }
 }
