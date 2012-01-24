@@ -44,12 +44,13 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
    OPTION {color:#e0e0e0; }
    .dark_bg  {font-size:10pt; font-weight:bold; background-color:black; color:#e0e0e0; }
   </style>
-
+<script type="text/javascript" src="<c:url value='/playoff/code.icepush'/>"></script>
+<script type="text/javascript" src="<c:url value='/jquery-1.7.1.min.js'/>"></script>
 <script language='javascript'>
 
 function editFlagBoxClicked() {
   var text = document.getElementById('select_number_text');
-  if(document.selectTeam.EditFlag.checked) {
+  if (document.selectTeam.EditFlag.checked) {
     document.selectTeam.RunNumber.disabled=false;
 		text.style.color = "black";
   } else {
@@ -57,29 +58,27 @@ function editFlagBoxClicked() {
 		text.style.color = "gray";
   }
 }
+
 function reloadRuns() {
-
-document.body.removeChild(document.getElementById('reloadruns'));
-document.verify.TeamNumber.length = 0;
-var s = document.createElement('script');
-s.type='text/javascript';
-s.id = 'reloadruns';
-s.src='unverifiedRunsObject.jsp?' + Math.random();
-document.body.appendChild(s);
+  document.body.removeChild(document.getElementById('reloadruns'));
+  document.verify.TeamNumber.length = 0;
+  var s = document.createElement('script');
+  s.type='text/javascript';
+  s.id = 'reloadruns';
+  s.src='unverifiedRunsObject.jsp?' + Math.random();
+  document.body.appendChild(s);
 }
 
 
-function init() {
+$(document).ready(function() {
   editFlagBoxClicked();
-  reloadRuns(); 
-}
-
-// Set to reload unverified runs every 5 seconds
-setInterval('reloadRuns()',30000);
+  reloadRuns();
+});
 </script>
+<icep:register group="dataentry" callback="function(){reloadRuns();}"/>
   </head>
-  <body onload="init()">
-
+  <body>
+  
       <!-- top info bar -->
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>
@@ -171,8 +170,7 @@ setInterval('reloadRuns()',30000);
           <td>
             <!-- pick team from a list -->
             <br>
-            <font face='arial' size='4'>Unverified Runs:</font><br>
-                  <p><a href="#" onclick="reloadRuns();">Reload Unverified Runs</a></p>            
+            <font face='arial' size='4'>Unverified Runs:</font><br>         
             <select size='20' name='TeamNumber' ondblclick='verify.submit()'>
             </select>
           </td>

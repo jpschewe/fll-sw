@@ -9,6 +9,8 @@ package fll.web.playoff;
 import java.io.IOException;
 import java.io.InputStream;
 
+import junit.framework.AssertionFailedError;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +43,7 @@ public class TestAJAXBrackets extends SeleneseTestBase {
 
   @Test
   public void testAJAXBracketsInFull() throws IOException, SAXException {
+    try {
     // Setup our playoffs
     final InputStream challenge = TestAJAXBrackets.class.getResourceAsStream("data/very-simple.xml");
     IntegrationTestUtils.initializeDatabase(selenium, challenge, true);
@@ -100,7 +103,7 @@ public class TestAJAXBrackets extends SeleneseTestBase {
     // JS_EVAL_TIMEOUT); // > 1 element with a style attrib that contains the
     // string 'blue'
 
-    selenium.setSpeed("100"); // I slow down selenium for the AJAX functions as
+    selenium.setSpeed("250"); // I slow down selenium for the AJAX functions as
                               // while they don't take that long, selenium spend
                               // a lot less
                               // time between entering data and checking for it
@@ -121,6 +124,19 @@ public class TestAJAXBrackets extends SeleneseTestBase {
     selenium.selectWindow("brackets");
     selenium.runScript("window.iterate();");
     Assert.assertTrue(selenium.getEval("window.document.getElementById('1-1').innerHTML").contains("Score:"));
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final SAXException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final AssertionFailedError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
   }
 
   private void enterScore(Selenium selenium,
