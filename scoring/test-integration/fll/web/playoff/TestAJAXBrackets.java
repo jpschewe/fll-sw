@@ -100,7 +100,7 @@ public class TestAJAXBrackets extends SeleneseTestBase {
     // JS_EVAL_TIMEOUT); // > 1 element with a style attrib that contains the
     // string 'blue'
 
-    selenium.setSpeed("100"); // I slow down selenium for the AJAX functions as
+    selenium.setSpeed("250"); // I slow down selenium for the AJAX functions as
                               // while they don't take that long, selenium spend
                               // a lot less
                               // time between entering data and checking for it
