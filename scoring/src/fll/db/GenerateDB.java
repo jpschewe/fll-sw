@@ -525,7 +525,6 @@ public final class GenerateDB {
     createInternalTournament(connection);
 
     PreparedStatement globalInsert = null;
-    PreparedStatement tournamentInsert = null;
     boolean check;
     try {
       globalInsert = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
@@ -562,7 +561,6 @@ public final class GenerateDB {
       Queries.setNumSeedingRounds(connection, INTERNAL_TOURNAMENT_ID, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
     } finally {
       SQLFunctions.close(globalInsert);
-      SQLFunctions.close(tournamentInsert);
     }
   }
 

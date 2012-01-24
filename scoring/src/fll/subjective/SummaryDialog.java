@@ -188,8 +188,10 @@ import org.w3c.dom.Element;
       _columnNames = columnNames;
     }
 
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SE_BAD_FIELD" }, justification = "Not serializing these classes")
     private final List<SummaryData> _summaryData;
 
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SE_BAD_FIELD" }, justification = "Not serializing these classes")
     private final List<String> _columnNames;
 
     @Override
@@ -249,8 +251,10 @@ import org.w3c.dom.Element;
       _categoryColumnNames = categoryColumnNames;
     }
 
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SE_BAD_FIELD" }, justification = "Not serializing these classes")
     private final List<SummaryData> _data;
 
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SE_BAD_FIELD" }, justification = "Not serializing these classes")
     private final List<String> _categoryColumnNames;
 
     @Override
