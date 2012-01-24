@@ -1286,8 +1286,8 @@ public class TournamentSchedule implements Serializable {
       deletePerfRounds = null;
       SQLFunctions.close(deleteSchedule);
       deleteSchedule = null;
-      SQLFunctions.close(deleteSchedule);
-      deleteSchedule = null;
+      SQLFunctions.close(deleteSubjective);
+      deleteSubjective = null;
       SQLFunctions.close(insertSchedule);
       insertSchedule = null;
       SQLFunctions.close(insertPerfRounds);
