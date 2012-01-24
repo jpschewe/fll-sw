@@ -40,24 +40,28 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     try {
       final Connection connection = datasource.getConnection();
       final ServletOutputStream os = response.getOutputStream();
-      if (request.getParameter("round") != null && request.getParameter("row") != null) {
+      if (request.getParameter("round") != null
+          && request.getParameter("row") != null) {
         BracketData bd = constructBracketData(connection, session, application);
         JsonBracketData jsonbd = new JsonBracketData(bd);
         response.reset();
         response.setContentType("text/plain");
-        os.print(jsonbd.getBracketLocationJson(Integer.parseInt(request.getParameter("round")), Integer.parseInt(request.getParameter("row"))));
+        os.print(jsonbd.getBracketLocationJson(Integer.parseInt(request.getParameter("round")),
+                                               Integer.parseInt(request.getParameter("row"))));
       } else if (request.getParameter("multi") != null) {
-        //Send off request to helpers
-        handleMultipleQuery(parseInputToMap(request.getParameter("multi")), os, application, session, response, connection);
+        // Send off request to helpers
+        handleMultipleQuery(parseInputToMap(request.getParameter("multi")), os, application, session, response,
+                            connection);
       } else {
         response.reset();
         response.setContentType("text/plain");
-        os.print( "{\"_rmsg\": \"Error: No Params\"}");
+        os.print("{\"_rmsg\": \"Error: No Params\"}");
       }
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     }
   }
+
   private Map<Integer, Integer> parseInputToMap(final String param) {
     String[] pairs = param.split("\\|");
     Map<Integer, Integer> pairedMap = new HashMap<Integer, Integer>();
@@ -66,6 +70,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     }
     return pairedMap;
   }
+
   private void handleMultipleQuery(final Map<Integer, Integer> pairedMap,
                                    final ServletOutputStream os,
                                    final ServletContext application,
@@ -76,7 +81,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
       BracketData bd = constructBracketData(connection, session, application);
       JsonBracketData jsonbd = new JsonBracketData(bd);
       final Element rootElement = ApplicationAttributes.getChallengeDocument(application).getDocumentElement();
-      final Element perfElement = (Element) rootElement.getElementsByTagName("Performance").item(0);  
+      final Element perfElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
       response.reset();
       response.setContentType("text/plain");
       os.print(jsonbd.getMultipleBracketLocationsJson(pairedMap, connection, perfElement));
@@ -86,9 +91,12 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
       throw new RuntimeException(e);
     } catch (final ParseException e) {
       throw new RuntimeException(e);
-    } 
+    }
   }
-  private BracketData constructBracketData(Connection connection, HttpSession session, ServletContext application) {
+
+  private BracketData constructBracketData(Connection connection,
+                                           HttpSession session,
+                                           ServletContext application) {
     final String divisionKey = "playoffDivision";
     final String roundNumberKey = "playoffRoundNumber";
     final String displayNameKey = "displayName";
@@ -96,8 +104,10 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     final String sessionDivision;
     final Number sessionRoundNumber;
     if (null != displayName) {
-      sessionDivision = ApplicationAttributes.getAttribute(application, displayName+"_"+divisionKey, String.class);
-      sessionRoundNumber = ApplicationAttributes.getAttribute(application, displayName+"_"+roundNumberKey, Number.class);
+      sessionDivision = ApplicationAttributes.getAttribute(application, displayName
+          + "_" + divisionKey, String.class);
+      sessionRoundNumber = ApplicationAttributes.getAttribute(application, displayName
+          + "_" + roundNumberKey, Number.class);
     } else {
       sessionDivision = null;
       sessionRoundNumber = null;
@@ -132,7 +142,8 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     final boolean showFinalsScores = false;
     final boolean onlyShowVerifiedScores = true;
     try {
-      return new BracketData(connection, division, playoffRoundNumber, playoffRoundNumber+roundsLong-1, rowsPerTeam, showFinalsScores, onlyShowVerifiedScores);
+      return new BracketData(connection, division, playoffRoundNumber, playoffRoundNumber
+          + roundsLong - 1, rowsPerTeam, showFinalsScores, onlyShowVerifiedScores);
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
