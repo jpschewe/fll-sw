@@ -41,22 +41,18 @@ public class JsonBracketData {
 
   public static class ForceJsRefresh {
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SS_SHOULD_BE_STATIC" }, justification = "Read in the javascript")
-    @SuppressWarnings("unused")
-    private final boolean refresh = true;
+    public final boolean refresh = true;
   }
 
   public static class BracketLeafResultSet {
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_FIELD" }, justification = "Read in the javascript")
-    @SuppressWarnings("unused")
-    private final TeamBracketCell leaf;
+    public final TeamBracketCell leaf;
 
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_FIELD" }, justification = "Read in the javascript")
-    @SuppressWarnings("unused")
-    private final double score;
+    public final double score;
 
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_FIELD" }, justification = "Read in the javascript")
-    @SuppressWarnings("unused")
-    private final String originator;
+    public final String originator;
 
     public BracketLeafResultSet(final TeamBracketCell tbc,
                                 final double scr,
