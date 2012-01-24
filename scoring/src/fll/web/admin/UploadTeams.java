@@ -227,9 +227,7 @@ public final class UploadTeams extends BaseFLLServlet {
                   insertPrep.setString(column, null);
                 }
                 String finalValue = null;
-                if (null == value) {
-                  finalValue = value;
-                } else {
+                if (null != value) {
                   int v = 0;
                   try {
                     v = Integer.parseInt(value.trim());
