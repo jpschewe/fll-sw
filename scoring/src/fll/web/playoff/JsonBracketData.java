@@ -110,23 +110,7 @@ public class JsonBracketData {
           return "{\"refresh\":\"true\"}";
         }
         final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournament);
-        final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection/*
-                                                                            * ,
-                                                                            * tbc
-                                                                            * .
-                                                                            * getTeam
-                                                                            * (
-                                                                            * ).
-                                                                            * getDivision
-                                                                            * ()
-                                                                            */); // Should
-                                                                                 // pass
-                                                                                 // division,
-                                                                                 // but
-                                                                                 // code
-                                                                                 // was
-                                                                                 // getting
-                                                                                 // angry
+        final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection); 
         final int teamNumber = tbc.getTeam().getTeamNumber();
         final TeamScore teamScore = new DatabaseTeamScore(performanceElement, currentTournament, teamNumber,
                                                           numSeedingRounds
