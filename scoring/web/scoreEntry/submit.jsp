@@ -41,6 +41,7 @@ final Connection connection = datasource.getConnection();
     <c:if test="${param.Verified eq '1'}">
       <icep:push group="playoffs"/>
     </c:if>
+    <icep:push group="dataentry"/>
     <c:redirect url="select_team.jsp"/>
                         
 
