@@ -50,21 +50,24 @@ public class JsonBracketData {
 
     public String originator;
 
-    public BracketLeafResultSet (final TeamBracketCell tbc, final double scr, final String origin) {
+    public BracketLeafResultSet(final TeamBracketCell tbc,
+                                final double scr,
+                                final String origin) {
       leaf = tbc;
       score = scr;
       originator = origin;
     }
-    public BracketLeafResultSet () { //Null constructor to have some sort of item in null lists
+
+    public BracketLeafResultSet() { // Null constructor to have some sort of
+                                    // item in null lists
       score = -1.0;
     }
   }
 
-
   /**
    * Constructor taking in all we need, a BracketData instance to work with.
    */
-  public JsonBracketData (final BracketData bd) {
+  public JsonBracketData(final BracketData bd) {
     _bracketdata = bd;
     _gson = new Gson();
   }
@@ -72,21 +75,24 @@ public class JsonBracketData {
   /**
    * Constructor taking two extra booleans that govern output.
    */
-  public JsonBracketData(final BracketData bd, final boolean showFinals, final boolean showOnlyVerified) {
+  public JsonBracketData(final BracketData bd,
+                         final boolean showFinals,
+                         final boolean showOnlyVerified) {
     this(bd);
     _showFinalsScores = showFinals;
     _showOnlyVerifiedScores = showOnlyVerified;
   }
-  
 
-  public String getBracketLocationJson(final int round, final int row) {
-    if (round < this.getBracketData().getFirstRound())
-    {
-      //Our instance of bracket data doesn't have that round, we better tell the javascript to get its act together.
+  public String getBracketLocationJson(final int round,
+                                       final int row) {
+    if (round < this.getBracketData().getFirstRound()) {
+      // Our instance of bracket data doesn't have that round, we better tell
+      // the javascript to get its act together.
       return _gson.toJson(new ForceJsRefresh());
     }
     return _gson.toJson(this.getBracketData().getData(round, row));
   }
+
   /**
    * Constructs a bracket data object with playoff data from the database.
    * 
@@ -104,24 +110,50 @@ public class JsonBracketData {
           return "{\"refresh\":\"true\"}";
         }
         final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournament);
-        final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection/*, tbc.getTeam().getDivision()*/); //Should pass division, but code was getting angry
+        final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection/*
+                                                                            * ,
+                                                                            * tbc
+                                                                            * .
+                                                                            * getTeam
+                                                                            * (
+                                                                            * ).
+                                                                            * getDivision
+                                                                            * ()
+                                                                            */); // Should
+                                                                                 // pass
+                                                                                 // division,
+                                                                                 // but
+                                                                                 // code
+                                                                                 // was
+                                                                                 // getting
+                                                                                 // angry
         final int teamNumber = tbc.getTeam().getTeamNumber();
-        final TeamScore teamScore = new DatabaseTeamScore(performanceElement, currentTournament, teamNumber, numSeedingRounds+entry.getValue(), connection);
+        final TeamScore teamScore = new DatabaseTeamScore(performanceElement, currentTournament, teamNumber,
+                                                          numSeedingRounds
+                                                              + entry.getValue(), connection);
         final double computedTeamScore = ScoreUtils.computeTotalScore(teamScore);
         final boolean realScore = !Double.isNaN(computedTeamScore);
-        final boolean noShow = Queries.isNoShow(connection, currentTournament, tbc.getTeam().getTeamNumber(), numSeedingRounds+entry.getValue());
-        //Sane request checks
+        final boolean noShow = Queries.isNoShow(connection, currentTournament, tbc.getTeam().getTeamNumber(),
+                                                numSeedingRounds
+                                                    + entry.getValue());
+        // Sane request checks
         if (noShow) {
-          datalist.add(new BracketLeafResultSet(tbc, -2.0, entry.getKey()+"-"+entry.getValue()));
+          datalist.add(new BracketLeafResultSet(tbc, -2.0, entry.getKey()
+              + "-" + entry.getValue()));
         } else if (!realScore
             || !_showOnlyVerifiedScores
-            || Queries.isVerified(connection, currentTournament, teamNumber, Queries.getNumSeedingRounds(connection, currentTournament)+entry.getValue())) {
-          if ((entry.getValue() == numPlayoffRounds && !_showFinalsScores) || !realScore) {
-            datalist.add(new BracketLeafResultSet(tbc, -1.0, entry.getKey()+"-"+entry.getValue()));
+            || Queries.isVerified(connection, currentTournament, teamNumber,
+                                  Queries.getNumSeedingRounds(connection, currentTournament)
+                                      + entry.getValue())) {
+          if ((entry.getValue() == numPlayoffRounds && !_showFinalsScores)
+              || !realScore) {
+            datalist.add(new BracketLeafResultSet(tbc, -1.0, entry.getKey()
+                + "-" + entry.getValue()));
           } else {
-            datalist.add(new BracketLeafResultSet(tbc, computedTeamScore, entry.getKey()+"-"+entry.getValue()));
+            datalist.add(new BracketLeafResultSet(tbc, computedTeamScore, entry.getKey()
+                + "-" + entry.getValue()));
           }
-        } 
+        }
       }
     } catch (final SQLException e) {
       throw new RuntimeException(e);
@@ -129,7 +161,7 @@ public class JsonBracketData {
       throw new RuntimeException(e);
     }
     if (datalist.size() == 0) {
-      //Add some data, so gson's happy.
+      // Add some data, so gson's happy.
       datalist.add(new BracketLeafResultSet());
     }
     return _gson.toJson(datalist);
