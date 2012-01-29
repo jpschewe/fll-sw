@@ -450,7 +450,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
             }
           }
         } // score groups
-        formatter.format("</tbody></table");
+        formatter.format("</tbody></table>");
       } // subjective categories
 
       // other categories
@@ -475,7 +475,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
             first = false;
           }
         }
-        formatter.format("</tbody></table");
+        formatter.format("</tbody></table>");
       } // other categories
 
       writer.write("<html><head>");
