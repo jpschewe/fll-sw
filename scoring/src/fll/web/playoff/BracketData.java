@@ -40,11 +40,6 @@ public class BracketData {
   private static final Logger LOG = LogUtils.getLogger();
 
   /**
-   * Max team name length before we start wrapping.
-   */
-  public static final int MAX_TEAM_NAME_LEN = 30;
-  
-  /**
    * Data type for brackets.
    */
   public abstract static class BracketDataType {
@@ -1050,7 +1045,7 @@ public class BracketData {
       sb.append("<font class='TeamNumber'>#");
       sb.append(team.getTeamNumber());
       sb.append("</font>&nbsp;<font class='TeamName'>");
-      sb.append(Utilities.trimString(team.getTeamName(), MAX_TEAM_NAME_LEN));
+      sb.append(Utilities.trimString(team.getTeamName(), Team.MAX_TEAM_NAME_LEN));
       sb.append("</font>");
       if (showScore
           && Queries.performanceScoreExists(connection, team, runNumber)

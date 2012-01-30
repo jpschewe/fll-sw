@@ -55,8 +55,6 @@ public class ScoresheetGenerator {
 
   private static final char NON_BREAKING_SPACE = '\u00a0';
 
-  private static final int MAX_TEAM_NAME_LEN = 45;
-
   /**
    * Create a new ScoresheetGenerator object populated with form header data
    * provided in the given Map. The map should contain String[] objects, each of
@@ -144,7 +142,7 @@ public class ScoresheetGenerator {
             // Get teamA info
             final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamA"
                 + i)));
-            m_name[j] = Utilities.trimString(teamA.getTeamName(), MAX_TEAM_NAME_LEN);
+            m_name[j] = teamA.getTrimmedTeamName();
             m_number[j] = teamA.getTeamNumber();
             m_round[j] = "Round P"
                 + round;
@@ -159,7 +157,7 @@ public class ScoresheetGenerator {
             // Get teamB info
             final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamB"
                 + i)));
-            m_name[j] = Utilities.trimString(teamB.getTeamName(), MAX_TEAM_NAME_LEN);
+            m_name[j] = teamB.getTrimmedTeamName();
             m_number[j] = teamB.getTeamNumber();
             m_round[j] = "Round P"
                 + round;
