@@ -1,7 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Team" %>
-<%@ page import="fll.Utilities" %>
 <%@ page import="fll.web.SessionAttributes"%>
 <%@ page import="fll.db.Queries"%>
 
@@ -121,9 +120,7 @@ setInterval('reloadRuns()',30000);
             <font face='arial' size='4'>Select team for this scorecard:</font><br>
             <select size='20' name='TeamNumber' ondblclick='selectTeam.submit()'>
               <c:forEach items="${tournamentTeams }" var="team">
-              <c:set var="untrimmedTeamName" value="${team.teamName }" scope="application"/>
-              <% pageContext.setAttribute("trimmedTeamName", Utilities.trimString((String) pageContext.findAttribute("untrimmedTeamName"), 50)); %>
-                <option value="${team.teamNumber }">${team.teamNumber }&nbsp;&nbsp;&nbsp;[${trimmedTeamName }]</option>
+                <option value="${team.teamNumber }">${team.teamNumber }&nbsp;&nbsp;&nbsp;[${team.trimmedTeamName }]</option>
               </c:forEach>
             </select>
           </td>
