@@ -1693,8 +1693,8 @@ public final class Queries {
    * @param connection connection to database, needs write privileges
    * @param tournament tournament to update score totals for
    * @throws SQLException if an error occurs
-   * @see #updatePerformanceScoreTotals(Document, Connection)
-   * @see #updateSubjectiveScoreTotals(Document, Connection)
+   * @see #updatePerformanceScoreTotals(Document, Connection, int)
+   * @see #updateSubjectiveScoreTotals(Document, Connection, int)
    */
   public static void updateScoreTotals(final Document document,
                                        final Connection connection,
