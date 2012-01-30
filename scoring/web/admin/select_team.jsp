@@ -3,6 +3,7 @@
 <%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
 
 <%@ page import="fll.Team" %>
+<%@ page import="fll.Utilities" %>
 <%@ page import="java.sql.Statement" %>
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.ResultSet" %>
@@ -78,7 +79,7 @@ ${message}
                 out.print(">");
                 out.print(String.valueOf(teamNumber));
                 out.print(" &nbsp;&nbsp;&nbsp;[");
-                out.print(teamName);
+                out.print(Utilities.trimString(teamName, Team.MAX_TEAM_NAME_LEN));
                 out.print("] ");
                 out.print(organization);
                 out.print(" (Div ");

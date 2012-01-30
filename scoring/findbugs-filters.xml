@@ -1,13 +1,19 @@
 <FindBugsFilter>
 
- <!-- ignore errors about missing serial version ids -->
- <Match>
-  <Bug pattern="SE_NO_SERIALVERSIONID" />
- </Match>
+  <!-- ignore errors about missing serial version ids -->
+  <Match>
+    <Bug pattern="SE_NO_SERIALVERSIONID" />
+  </Match>
 
- <!--  not internationalized at this point -->
- <Match>
-  <Bug pattern="DM_CONVERT_CASE" />
- </Match>
+  <!--  not internationalized at this point -->
+  <Match>
+    <Bug pattern="DM_CONVERT_CASE" />
+  </Match>
+
+  <!-- don't worry about default encoding yet, but maybe should -->
+  <Match>
+    <Bug pattern="DM_DEFAULT_ENCODING" />
+  </Match>
+
 </FindBugsFilter>
 

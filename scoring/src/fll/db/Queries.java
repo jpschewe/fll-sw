@@ -1693,8 +1693,8 @@ public final class Queries {
    * @param connection connection to database, needs write privileges
    * @param tournament tournament to update score totals for
    * @throws SQLException if an error occurs
-   * @see #updatePerformanceScoreTotals(Document, Connection)
-   * @see #updateSubjectiveScoreTotals(Document, Connection)
+   * @see #updatePerformanceScoreTotals(Document, Connection, int)
+   * @see #updateSubjectiveScoreTotals(Document, Connection, int)
    */
   public static void updateScoreTotals(final Document document,
                                        final Connection connection,
@@ -2588,6 +2588,7 @@ public final class Queries {
    * @return 1 is tournament, 2 is teamNumber, 3 is runNumber
    * @throws SQLException
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "NP_LOAD_OF_KNOWN_NULL_VALUE" }, justification = "Findbugs bug 3477957")
   private static PreparedStatement getScoreStatsPrep(final Connection connection) throws SQLException {
     PreparedStatement prep = null;
     try {
