@@ -182,6 +182,13 @@ public final class Team implements Serializable {
     _teamName = v;
   }
 
+  /**
+   * @return the team name shortened to {@link Team#MAX_TEAM_NAME_LEN}
+   */
+  public String getTrimmedTeamName() {
+    return Utilities.trimString(getTeamName(), Team.MAX_TEAM_NAME_LEN);
+  }
+
   private String _region;
 
   /**
@@ -213,6 +220,12 @@ public final class Team implements Serializable {
   }
 
   private String _eventDivision;
+
+  /**
+   * Max team name length. Used to keep names from
+   * wrapping in a number of places.
+   */
+  public static final int MAX_TEAM_NAME_LEN = 24;
 
   /**
    * The event division that a team is entered as.

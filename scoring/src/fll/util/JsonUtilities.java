@@ -31,11 +31,14 @@ public final class JsonUtilities {
   private JsonUtilities() {
   }
   public static class BracketLeafResultSet {
-    public TeamBracketCell leaf;
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
+    public final TeamBracketCell leaf;
 
-    public double score;
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
+    public final double score;
 
-    public String originator;
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
+    public final String originator;
 
     public BracketLeafResultSet(final TeamBracketCell tbc,
                                 final double scr,
@@ -48,6 +51,8 @@ public final class JsonUtilities {
     public BracketLeafResultSet() { // Null constructor to have some sort of
                                     // item in null lists
       score = -1.0;
+      leaf = null;
+      originator = null;
     }
   }
   public static String generateJsonBracketInfo(final Map<Integer, Integer> ids,

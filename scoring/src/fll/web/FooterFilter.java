@@ -136,7 +136,7 @@ public class FooterFilter implements Filter {
     formatter.format("  </tr>");
     formatter.format("  <tr><td>Software version: %s</td></tr>", Version.getVersion());
     formatter.format("</table>");
-    formatter.format("\n</body></html>");
+    formatter.format("%n</body></html>");
   }
 
   /**

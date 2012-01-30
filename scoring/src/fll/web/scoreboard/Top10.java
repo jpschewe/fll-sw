@@ -47,6 +47,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
+import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FP;
@@ -152,7 +153,7 @@ public class Top10 extends BaseFLLServlet {
         formatter.format("<td class='center' width='7%%'><b>%d</b></td>", rank);
         formatter.format("<td class='right' width='10%%'><b>%d</b></td>", rs.getInt("TeamNumber"));
         String teamName = rs.getString("TeamName");
-        teamName = null == teamName ? "&nbsp;" : Utilities.trimString(teamName, MAX_TEAM_NAME);
+        teamName = null == teamName ? "&nbsp;" : Utilities.trimString(teamName, Team.MAX_TEAM_NAME_LEN);
         formatter.format("<td class='left' width='28%%'><b>%s</b></td>", teamName);
         if (showOrg) {
           String organization = rs.getString("Organization");

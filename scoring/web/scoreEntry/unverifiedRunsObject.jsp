@@ -3,6 +3,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Team" %>
+<%@ page import="fll.Utilities" %>
 <%@ page import="fll.web.SessionAttributes"%>
 <%@ page import="fll.db.Queries"%>
 
@@ -35,7 +36,9 @@ final Connection connection = datasource.getConnection();
  </sql:query>
  <% int index = 0; %>
               <c:forEach var="row" items="${result.rowsByIndex}">
-                
-                document.verify.TeamNumber.options[<%= index %>]=new Option("Run ${row[1]} - ${row[0]}    [${row[2]}]", "${row[0]}-${row[1]}", true, false);
+              
+              <c:set var="untrimmedTeamName" value="${team.teamName }" scope="session"/>
+              <% pageContext.setAttribute("trimmedTeamName", Utilities.trimString((String) pageContext.findAttribute("untrimmedTeamName"), 50)); %>
+                document.verify.TeamNumber.options[<%= index %>]=new Option("Run ${row[1]} - ${row[0]}    [${trimmedTeamName}]", "${row[0]}-${row[1]}", true, false);
                 <% index = index + 1;  %>
               </c:forEach>

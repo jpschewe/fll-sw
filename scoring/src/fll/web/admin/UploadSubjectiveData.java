@@ -118,42 +118,49 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
                                         final int currentTournament,
                                         final Document challengeDocument,
                                         final Connection connection) throws SQLException, IOException, ParseException {
-    final ZipFile zipfile = new ZipFile(file);
-    // read in score data
-    final ZipEntry scoreZipEntry = zipfile.getEntry("score.xml");
-    if (null == scoreZipEntry) {
-      throw new RuntimeException("Zipfile does not contain score.xml as expected");
-    }
-    final InputStream scoreStream = zipfile.getInputStream(scoreZipEntry);
-    final Document scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
-    scoreStream.close();
-    zipfile.close();
+    ZipFile zipfile = null;
+    try {
+      zipfile = new ZipFile(file);
+      // read in score data
+      final ZipEntry scoreZipEntry = zipfile.getEntry("score.xml");
+      if (null == scoreZipEntry) {
+        throw new RuntimeException("Zipfile does not contain score.xml as expected");
+      }
+      final InputStream scoreStream = zipfile.getInputStream(scoreZipEntry);
+      final Document scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
+      scoreStream.close();
+      zipfile.close();
 
-    final Element scoresElement = scoreDocument.getDocumentElement();
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("first element: "
-          + scoresElement);
-    }
-
-    for (final Element scoreCategoryNode : new NodelistElementCollectionAdapter(scoresElement.getChildNodes())) {
+      final Element scoresElement = scoreDocument.getDocumentElement();
       if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("An element: "
-            + scoreCategoryNode);
-      }
-      final Element scoreCategoryElement = scoreCategoryNode;
-      final String categoryName = scoreCategoryElement.getNodeName();
-      final Element categoryElement = fll.xml.XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
-      if (null == categoryElement) {
-        throw new RuntimeException(
-                                   "Cannot find subjective category description for category in score document category: "
-                                       + categoryName);
+        LOGGER.trace("first element: "
+            + scoresElement);
       }
 
-      saveCategoryData(currentTournament, connection, scoreCategoryElement, categoryName, categoryElement);
-      removeNullRows(currentTournament, connection, categoryName, categoryElement);
+      for (final Element scoreCategoryNode : new NodelistElementCollectionAdapter(scoresElement.getChildNodes())) {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("An element: "
+              + scoreCategoryNode);
+        }
+        final Element scoreCategoryElement = scoreCategoryNode;
+        final String categoryName = scoreCategoryElement.getNodeName();
+        final Element categoryElement = fll.xml.XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
+        if (null == categoryElement) {
+          throw new RuntimeException(
+                                     "Cannot find subjective category description for category in score document category: "
+                                         + categoryName);
+        }
+
+        saveCategoryData(currentTournament, connection, scoreCategoryElement, categoryName, categoryElement);
+        removeNullRows(currentTournament, connection, categoryName, categoryElement);
+      }
+
+      Queries.updateSubjectiveScoreTotals(challengeDocument, connection, currentTournament);
+    } finally {
+      if (null != zipfile) {
+        zipfile.close();
+      }
     }
-
-    Queries.updateSubjectiveScoreTotals(challengeDocument, connection, currentTournament);
   }
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")

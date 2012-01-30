@@ -6,6 +6,7 @@
 <%@ page import="java.util.List"%>
 <%@ page import="fll.db.Queries" %>
 <%@ page import="java.sql.Connection" %>
+<%@ page import="fll.Team" %>
 
 <%
 	/*
@@ -124,7 +125,7 @@ FONT.TIE {
   var foundNewest = false;
   var rows = <%=bracketInfo.getNumRows()%>;
   var finalRound = <%=Queries.getNumPlayoffRounds(connection, division)+1%>;
-  var maxNameLength = <%=BracketData.MAX_TEAM_NAME_LEN%>;
+  var maxNameLength = <%=Team.MAX_TEAM_NAME_LEN%>;
   
   var displayStrings = new Object();
   displayStrings.parseTeamName = function (team) {

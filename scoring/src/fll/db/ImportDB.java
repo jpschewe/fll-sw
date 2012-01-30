@@ -174,9 +174,6 @@ public final class ImportDB {
     Connection memConnection = null;
     Statement memStmt = null;
     ResultSet memRS = null;
-    PreparedStatement insertPrep = null;
-    PreparedStatement checkPrep = null;
-    ResultSet checkRS = null;
     Utilities.loadDBDriver();
 
     try {
@@ -192,7 +189,6 @@ public final class ImportDB {
       memStmt = memConnection.createStatement();
 
       // load the teams table into the destination database
-      destStmt = destConnection.createStatement();
       memRS = memStmt.executeQuery("SELECT TeamNumber, TeamName, Organization, Division, Region FROM Teams");
       destPrep = destConnection.prepareStatement("INSERT INTO Teams (TeamNumber, TeamName, Organization, Division, Region) VALUES (?, ?, ?, ?, ?)");
       while (memRS.next()) {
@@ -241,16 +237,12 @@ public final class ImportDB {
       memStmt.executeUpdate("SHUTDOWN");
 
       // shutdown new database
+      destStmt = destConnection.createStatement();
       destStmt.executeUpdate("SHUTDOWN COMPACT");
     } finally {
       SQLFunctions.close(memRS);
       SQLFunctions.close(memStmt);
       SQLFunctions.close(memConnection);
-
-      SQLFunctions.close(insertPrep);
-
-      SQLFunctions.close(checkRS);
-      SQLFunctions.close(checkPrep);
 
       SQLFunctions.close(destPrep);
       SQLFunctions.close(destStmt);

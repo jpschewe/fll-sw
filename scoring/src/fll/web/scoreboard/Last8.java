@@ -45,6 +45,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
+import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.LogUtils;
@@ -111,7 +112,7 @@ public class Last8 extends BaseFLLServlet {
         formatter.format("<tr>");
         formatter.format("<td class='left' width='10%%'><b>%d</b></td>", rs.getInt("TeamNumber"));
         String teamName = rs.getString("TeamName");
-        teamName = null == teamName ? "&nbsp;" : Utilities.trimString(teamName, Top10.MAX_TEAM_NAME);
+        teamName = null == teamName ? "&nbsp;" : Utilities.trimString(teamName, Team.MAX_TEAM_NAME_LEN);
         formatter.format("<td class='left' width='28%%'><b>%s</b></td>", teamName);
         if (showOrg) {
           String organization = rs.getString("Organization");
