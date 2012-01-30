@@ -806,39 +806,6 @@
 		<antcall target="tomcat.stop" />
 	</target>
 
-	<!-- ===================== Checkstyle =================== -->
-	<taskdef resource="checkstyletask.properties">
-		<classpath>
-			<pathelement location="${dir.lib}/ant/checkstyle-5.4-all.jar" />
-		</classpath>
-	</taskdef>
-
-	<macrodef name="run-checkstyle">
-		<attribute name="config" />
-
-		<sequential>
-			<mkdir dir="${dir.build}" />
-
-			<checkstyle failOnViolation="false" config="@{config}">
-				<fileset dir="${dir.src}">
-					<include name="**/*.java" />
-				</fileset>
-				<fileset dir="${dir.test.unit}">
-					<include name="**/*.java" />
-				</fileset>
-				<fileset dir="${dir.test.integration}">
-					<include name="**/*.java" />
-				</fileset>
-				<formatter type="plain" />
-				<formatter type="xml" toFile="${dir.build}/checkstyle_report.xml" />
-			</checkstyle>
-		</sequential>
-	</macrodef>
-
-	<target name="checkstyle" description="Check for code convention violations">
-		<run-checkstyle config="checkstyle.xml" />
-	</target>
-
 	<target name="sloccount" description="Run sloccount on the code">
 		<exec executable="sloccount" dir="${basedir}" output="${basedir}/sloccount.sc">
 			<arg value="--wide" />
