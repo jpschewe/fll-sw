@@ -3,7 +3,6 @@ package fll.web.ajax;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +18,11 @@ import javax.sql.DataSource;
 import org.w3c.dom.Element;
 
 import fll.db.Queries;
+import fll.util.JsonUtilities;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.playoff.BracketData;
-import fll.web.playoff.JsonBracketData;
 
 /**
  * Talk to client brackets in json.
@@ -40,15 +39,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     try {
       final Connection connection = datasource.getConnection();
       final ServletOutputStream os = response.getOutputStream();
-      if (request.getParameter("round") != null
-          && request.getParameter("row") != null) {
-        BracketData bd = constructBracketData(connection, session, application);
-        JsonBracketData jsonbd = new JsonBracketData(bd);
-        response.reset();
-        response.setContentType("text/plain");
-        os.print(jsonbd.getBracketLocationJson(Integer.parseInt(request.getParameter("round")),
-                                               Integer.parseInt(request.getParameter("row"))));
-      } else if (request.getParameter("multi") != null) {
+      if (request.getParameter("multi") != null) {
         // Send off request to helpers
         handleMultipleQuery(parseInputToMap(request.getParameter("multi")), os, application, session, response,
                             connection);
@@ -79,24 +70,21 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
                                    final Connection connection) {
     try {
       BracketData bd = constructBracketData(connection, session, application);
-      JsonBracketData jsonbd = new JsonBracketData(bd);
       final Element rootElement = ApplicationAttributes.getChallengeDocument(application).getDocumentElement();
       final Element perfElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
+      final boolean showOnlyVerifiedScores = true;
+      final boolean showFinalsScores = false;
       response.reset();
       response.setContentType("text/plain");
-      os.print(jsonbd.getMultipleBracketLocationsJson(pairedMap, connection, perfElement));
-    } catch (final SQLException e) {
-      throw new RuntimeException(e);
+      os.print(JsonUtilities.generateJsonBracketInfo(pairedMap, connection, perfElement, bd, showOnlyVerifiedScores, showFinalsScores));
     } catch (final IOException e) {
-      throw new RuntimeException(e);
-    } catch (final ParseException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private BracketData constructBracketData(Connection connection,
-                                           HttpSession session,
-                                           ServletContext application) {
+  private BracketData constructBracketData(final Connection connection,
+                                           final HttpSession session,
+                                           final ServletContext application) {
     final String divisionKey = "playoffDivision";
     final String roundNumberKey = "playoffRoundNumber";
     final String displayNameKey = "displayName";

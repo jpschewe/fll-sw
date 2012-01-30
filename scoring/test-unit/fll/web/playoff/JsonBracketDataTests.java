@@ -31,8 +31,9 @@ import fll.Team;
 import fll.Tournament;
 import fll.db.GenerateDB;
 import fll.db.Queries;
+import fll.util.JsonUtilities;
 import fll.util.LogUtils;
-import fll.web.playoff.JsonBracketData.BracketLeafResultSet;
+import fll.util.JsonUtilities.BracketLeafResultSet;
 import fll.xml.ChallengeParser;
 
 /**
@@ -41,6 +42,8 @@ import fll.xml.ChallengeParser;
  * @author jjkoletar
  */
 public class JsonBracketDataTests {
+  private static final boolean SHOW_ONLY_VERIFIED = true;
+  private static final boolean SHOW_FINAL_ROUNDS = false;
   @Before
   public void setUp() {
     LogUtils.initializeLogging();
@@ -50,18 +53,20 @@ public class JsonBracketDataTests {
   public void testRoundLimits() throws SQLException, ParseException, IOException, InstantiationException,
       ClassNotFoundException, IllegalAccessException {
     final PlayoffContainer playoff = makePlayoffs();
-    final JsonBracketData jsonBrackets = new JsonBracketData(playoff.getBracketData());
-
+    
     // shouldn't be able to access out of context rounds
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
     query.put(4, 1);
     Assert.assertEquals("{\"refresh\":\"true\"}",
-                        jsonBrackets.getMultipleBracketLocationsJson(query,
-                                                                     playoff.getConnection(),
-                                                                     (Element) playoff.getChallengeDoc()
-                                                                                      .getDocumentElement()
-                                                                                      .getElementsByTagName("Performance")
-                                                                                      .item(0)));
+                        JsonUtilities.generateJsonBracketInfo(query,
+                                                              playoff.getConnection(),
+                                                              (Element) playoff.getChallengeDoc()
+                                                                               .getDocumentElement()
+                                                                               .getElementsByTagName("Performance")
+                                                                               .item(0),
+                                                              playoff.getBracketData(),
+                                                              SHOW_ONLY_VERIFIED,
+                                                              SHOW_FINAL_ROUNDS));
     // done
     SQLFunctions.close(playoff.getConnection());
   }
@@ -74,7 +79,6 @@ public class JsonBracketDataTests {
   public void testScoreRepression() throws SQLException, ParseException, IOException, InstantiationException,
       ClassNotFoundException, IllegalAccessException {
     final PlayoffContainer playoff = makePlayoffs();
-    final JsonBracketData jsonBrackets = new JsonBracketData(playoff.getBracketData());
 
     // Start with adding some scores
     insertScore(playoff.getConnection(), 1, 1, false, 5D);
@@ -84,7 +88,7 @@ public class JsonBracketDataTests {
     final Gson gson = new Gson();
     final Element scoreElement = (Element) playoff.getChallengeDoc().getDocumentElement()
                                                   .getElementsByTagName("Performance").item(0);
-    String jsonOut = jsonBrackets.getMultipleBracketLocationsJson(query, playoff.getConnection(), scoreElement);
+    String jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), scoreElement, playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     BracketLeafResultSet[] result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
     Assert.assertEquals(result[0].score, -1.0D, 0.0);
     // check unverified
@@ -93,7 +97,7 @@ public class JsonBracketDataTests {
     insertScore(playoff.getConnection(), 2, 1, false, 20D);
     query.clear();
     query.put(3, 2);
-    jsonOut = jsonBrackets.getMultipleBracketLocationsJson(query, playoff.getConnection(), scoreElement);
+    jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), scoreElement, playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
     Assert.assertEquals(result[0].leaf.getTeam().getTeamNumber(), Team.NULL_TEAM_NUMBER);
 
@@ -108,18 +112,18 @@ public class JsonBracketDataTests {
     // json shouldn't tell us the score for the finals round
     query.clear();
     query.put(23, 3);
-    jsonOut = jsonBrackets.getMultipleBracketLocationsJson(query, playoff.getConnection(), scoreElement);
+    jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), scoreElement, playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
     Assert.assertEquals(result[0].score, -1.0D, 0.0);
 
     SQLFunctions.close(playoff.getConnection());
   }
 
-  private void insertScore(Connection connection,
-                           int team,
-                           int run,
-                           boolean verified,
-                           double score) throws SQLException {
+  private void insertScore(final Connection connection,
+                           final int team,
+                           final int run,
+                           final boolean verified,
+                           final double score) throws SQLException {
     PreparedStatement ps = null;
     try {
       ps = connection.prepareStatement("INSERT INTO Performance (TeamNumber, Tournament, RunNumber, NoShow, Bye, Verified, Score, ComputedTotal)"
@@ -142,9 +146,9 @@ public class JsonBracketDataTests {
 
     private Document challengeDoc = null;
 
-    public PlayoffContainer(Connection con,
-                            BracketData brackets,
-                            Document doc) {
+    public PlayoffContainer(final Connection con,
+                            final BracketData brackets,
+                            final Document doc) {
       c = con;
       bd = brackets;
       challengeDoc = doc;
