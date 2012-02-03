@@ -439,18 +439,9 @@
 				<sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/tomcat-cobertura.ser" />
 
 				<classpath>
-					<!--
-          include multiple directories to find tools.jar depending on if
-          java.home expands to jre directory and if tools is used
-          -->
-					<!--
-          <pathelement location="${java.home}/lib/tools.jar" /> <pathelement
-          location="${java.home}/../lib/tools.jar" />
-          -->
-
 					<!-- tomcat jars -->
 					<pathelement location="${dir.tomcat}/bin/bootstrap.jar" />
-					<pathelement location="${dir.tomcat}/bin/commons-logging-api.jar" />
+					<pathelement location="${dir.tomcat}/bin/tomcat-juli.jar" />
 
 					<!-- for running inside unit tests -->
 					<path id="cobertura.classpath" />
