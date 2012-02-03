@@ -1,6 +1,4 @@
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
-<html>
-<!--
+<%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -15,16 +13,20 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
--->
+--%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<%@page contentType="text/html; charset=UTF-8" %>
+<html>
 <head>
    <title>JSP Chat</title>
 </head>
 
 <body bgcolor="#FFFFFF">
 
-<form method="POST" action='chat' name="loginForm">
-<input type="hidden" name="action" value="login"/>
-Nickname: <input type="text" name="nickname"/>
+<form method="POST" action='chat' target="_top" name="loginForm">
+<input type="hidden" name="action" value="login">
+Nickname: <input type="text" name="nickname">
+<input type="submit">
 </form>
 
 </body>

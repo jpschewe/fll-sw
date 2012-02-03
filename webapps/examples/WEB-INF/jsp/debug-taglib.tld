@@ -17,7 +17,7 @@
 -->
 <!DOCTYPE taglib
         PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN"
-	"http://java.sun.com/j2ee/dtd/web-jsptaglibrary_1_2.dtd">
+        "http://java.sun.com/j2ee/dtd/web-jsptaglibrary_1_2.dtd">
 
 <!-- a tag library descriptor -->
 
@@ -36,19 +36,19 @@
     <validator-class>validators.DebugValidator</validator-class>
   </validator>
 
-  <!-- This is a dummy tag solely to satisfy DTD requirements -->  
+  <!-- This is a dummy tag solely to satisfy DTD requirements -->
   <tag>
     <name>log</name>
     <tag-class>examples.LogTag</tag-class>
     <body-content>TAGDEPENDENT</body-content>
     <description>
-	Perform a server side action; Log the message.
+        Perform a server side action; Log the message.
     </description>
     <attribute>
-	<name>toBrowser</name>
-	<required>false</required>
+        <name>toBrowser</name>
+        <required>false</required>
     </attribute>
   </tag>
-  
+
 
 </taglib>

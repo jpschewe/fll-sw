@@ -1,5 +1,4 @@
-<html>
-<!--
+<%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -14,8 +13,8 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
--->
-
+--%>
+<html>
 <body bgcolor="white">
 <font size=5 color="red">
 <%! String[] fruits; %>
@@ -24,19 +23,19 @@
 <jsp:setProperty name="foo" property="fruit" param="fruit" />
 <hr>
 The checked fruits (got using request) are: <br>
-<% 
-	fruits = request.getParameterValues("fruit");
+<%
+    fruits = request.getParameterValues("fruit");
 %>
 <ul>
 <%
     if (fruits != null) {
-	  for (int i = 0; i < fruits.length; i++) {
+      for (int i = 0; i < fruits.length; i++) {
 %>
 <li>
 <%
-	      out.println (util.HTMLFilter.filter(fruits[i]));
-	  }
-	} else out.println ("none selected");
+          out.println (util.HTMLFilter.filter(fruits[i]));
+      }
+    } else out.println ("none selected");
 %>
 </ul>
 <br>
@@ -44,19 +43,19 @@ The checked fruits (got using request) are: <br>
 
 The checked fruits (got using beans) are <br>
 
-<% 
-		fruits = foo.getFruit();
+<%
+        fruits = foo.getFruit();
 %>
 <ul>
 <%
     if (!fruits[0].equals("1")) {
-	  for (int i = 0; i < fruits.length; i++) {
+      for (int i = 0; i < fruits.length; i++) {
 %>
 <li>
 <%
-		  out.println (util.HTMLFilter.filter(fruits[i]));
-	  }
-	} else out.println ("none selected");
+          out.println (util.HTMLFilter.filter(fruits[i]));
+      }
+    } else out.println ("none selected");
 %>
 </ul>
 </font>

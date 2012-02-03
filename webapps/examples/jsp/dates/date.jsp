@@ -1,5 +1,4 @@
-<html>
-<!--
+<%--
  Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -14,7 +13,8 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
--->
+--%>
+<html>
 
 <%@ page session="false"%>
 
@@ -23,17 +23,17 @@
 
 <font size=4>
 <ul>
-<li>	Day of month: is  <jsp:getProperty name="clock" property="dayOfMonth"/>
-<li>	Year: is  <jsp:getProperty name="clock" property="year"/>
-<li>	Month: is  <jsp:getProperty name="clock" property="month"/>
-<li>	Time: is  <jsp:getProperty name="clock" property="time"/>
-<li>	Date: is  <jsp:getProperty name="clock" property="date"/>
-<li>	Day: is  <jsp:getProperty name="clock" property="day"/>
-<li>	Day Of Year: is  <jsp:getProperty name="clock" property="dayOfYear"/>
-<li>	Week Of Year: is  <jsp:getProperty name="clock" property="weekOfYear"/>
-<li>	era: is  <jsp:getProperty name="clock" property="era"/>
-<li>	DST Offset: is  <jsp:getProperty name="clock" property="DSTOffset"/>
-<li>	Zone Offset: is  <jsp:getProperty name="clock" property="zoneOffset"/>
+<li>    Day of month: is  <jsp:getProperty name="clock" property="dayOfMonth"/>
+<li>    Year: is  <jsp:getProperty name="clock" property="year"/>
+<li>    Month: is  <jsp:getProperty name="clock" property="month"/>
+<li>    Time: is  <jsp:getProperty name="clock" property="time"/>
+<li>    Date: is  <jsp:getProperty name="clock" property="date"/>
+<li>    Day: is  <jsp:getProperty name="clock" property="day"/>
+<li>    Day Of Year: is  <jsp:getProperty name="clock" property="dayOfYear"/>
+<li>    Week Of Year: is  <jsp:getProperty name="clock" property="weekOfYear"/>
+<li>    era: is  <jsp:getProperty name="clock" property="era"/>
+<li>    DST Offset: is  <jsp:getProperty name="clock" property="DSTOffset"/>
+<li>    Zone Offset: is  <jsp:getProperty name="clock" property="zoneOffset"/>
 </ul>
 </font>
 

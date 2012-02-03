@@ -21,7 +21,7 @@ package util;
  *
  * @author Craig R. McClanahan
  * @author Tim Tye
- * @version $Revision: 467217 $ $Date: 2006-10-24 05:14:34 +0200 (Tue, 24 Oct 2006) $
+ * @version $Id: HTMLFilter.java 939315 2010-04-29 14:11:01Z kkolinko $
  */
 
 public final class HTMLFilter {
@@ -41,7 +41,7 @@ public final class HTMLFilter {
 
         char content[] = new char[message.length()];
         message.getChars(0, message.length(), content, 0);
-        StringBuffer result = new StringBuffer(content.length + 50);
+        StringBuilder result = new StringBuilder(content.length + 50);
         for (int i = 0; i < content.length; i++) {
             switch (content[i]) {
             case '<':
