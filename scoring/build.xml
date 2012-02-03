@@ -345,7 +345,7 @@
 	</target>
 
 	<import file="${dir.tomcat.src}/bin/catalina-tasks.xml" />
-	<target name="generate.jsp" depends="prepare,tomcat.expand" description="Generate Java sources for JSP files" unless="jsp.notRequired">
+	<target name="generate.jsp" depends="prepare,tomcat.expand,generate-descriptor" description="Generate Java sources for JSP files" unless="jsp.notRequired">
 
 		<jasper validateXml="false" uriroot="${dir.web}" webXmlFragment="${dir.src.jsp}/generated_web.xml" outputDir="${dir.src.jsp}" />
 
