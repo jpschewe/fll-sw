@@ -52,23 +52,22 @@ import fll.xml.XMLUtils;
 
 /**
  * Handle scheduling of finalists.
- * 
  */
 @WebServlet("/report/FinalistSchedulerUI")
 public class FinalistSchedulerUI extends BaseFLLServlet {
 
   private static final ThreadLocal<DateFormat> DATE_FORMAT = new ThreadLocal<DateFormat>() {
-    @Override 
+    @Override
     protected DateFormat initialValue() {
       return new SimpleDateFormat("HH:mm");
     }
   };
-  
+
   /**
    * Key into session that contains the division finalists Map.
    */
   private static final String DIVISION_FINALISTS_KEY = "divisionFinalists";
-  
+
   /**
    * Key into session that contains the names for the categories.
    */
@@ -98,7 +97,9 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
           || null == session.getAttribute(CATEGORIES_KEY)) {
         // no categories cache, need to compute them
         final List<String> subjectiveCategories = new LinkedList<String>();
-        for (final Element subjectiveElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+        for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
+                                                                                    challengeDocument.getDocumentElement()
+                                                                                                     .getElementsByTagName("subjectiveCategory"))) {
           final String categoryTitle = subjectiveElement.getAttribute("title");
           subjectiveCategories.add(categoryTitle);
         }
@@ -110,7 +111,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
       }
       // can't type inside the session, but we know the type
       @SuppressWarnings("unchecked")
-      final List<String> categories = (List<String>) session.getAttribute(CATEGORIES_KEY);
+      final List<String> categories = SessionAttributes.getNonNullAttribute(session, CATEGORIES_KEY, List.class);
 
       if (null != request.getParameter("init")
           || null == session.getAttribute(EXTRA_CATEGORIES_FINALISTS_KEY)) {
@@ -121,7 +122,9 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
       }
       // can't type inside the session, but we know the type
       @SuppressWarnings("unchecked")
-      final Map<String, List<Integer>> extraCategoryFinalists = (Map<String, List<Integer>>) session.getAttribute(EXTRA_CATEGORIES_FINALISTS_KEY);
+      final Map<String, List<Integer>> extraCategoryFinalists = SessionAttributes.getNonNullAttribute(session,
+                                                                                                      EXTRA_CATEGORIES_FINALISTS_KEY,
+                                                                                                      Map.class);
       // done with initialization of session
 
       // process request parameters
@@ -184,7 +187,8 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
         final int numFinalists = SessionAttributes.getNonNullAttribute(session, "numFinalists", Integer.class);
         final String division = SessionAttributes.getNonNullAttribute(session, "division", String.class);
         response.setContentType("text/html");
-        displayProposedFinalists(response, connection, challengeDocument, numFinalists, division, extraCategoryFinalists, new ColorChooser());
+        displayProposedFinalists(response, connection, challengeDocument, numFinalists, division,
+                                 extraCategoryFinalists, new ColorChooser());
         return;
       } else if (null != request.getParameter("submit-finalists")) {
         // store the data
@@ -200,39 +204,41 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
         session.setAttribute(DIVISION_FINALISTS_KEY, divisionFinalists);
 
         // prompt for times
-        response.sendRedirect(response.encodeRedirectURL("promptForFinalistTimes.jsp"));        
+        response.sendRedirect(response.encodeRedirectURL("promptForFinalistTimes.jsp"));
         return;
-      } else if(null != request.getParameter("submit-times")) {
+      } else if (null != request.getParameter("submit-times")) {
         final String hourStr = request.getParameter("hour");
-        if(null == hourStr) {
+        if (null == hourStr) {
           throw new FLLRuntimeException("Missing 'hour' parameter");
         }
         final int hour = Utilities.NUMBER_FORMAT_INSTANCE.parse(hourStr).intValue();
-        if(hour < 0 || hour > 24) {
+        if (hour < 0
+            || hour > 24) {
           throw new FLLRuntimeException("Hour must be between 0 and 24");
         }
-        
+
         final String minuteStr = request.getParameter("minute");
-        if(null == minuteStr) {
+        if (null == minuteStr) {
           throw new FLLRuntimeException("Missing 'minute' parameter");
         }
         final int minute = Utilities.NUMBER_FORMAT_INSTANCE.parse(minuteStr).intValue();
-        if(minute < 0 || minute > 59) {
+        if (minute < 0
+            || minute > 59) {
           throw new FLLRuntimeException("minute must be between 0 and 59");
         }
         final Calendar start = Calendar.getInstance();
         start.set(Calendar.HOUR_OF_DAY, hour);
         start.set(Calendar.MINUTE, minute);
-        
+
         final String intervalStr = request.getParameter("interval");
-        if(null == intervalStr) {
+        if (null == intervalStr) {
           throw new FLLRuntimeException("Missing 'interval' parameter");
         }
         final int interval = Utilities.NUMBER_FORMAT_INSTANCE.parse(intervalStr).intValue();
-        if(interval < 1) {
+        if (interval < 1) {
           throw new FLLRuntimeException("interval must be greater than 0");
         }
-        
+
         // display the schedule
         final String division = SessionAttributes.getNonNullAttribute(session, "division", String.class);
         response.setContentType("text/html");
@@ -272,7 +278,9 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
 
     // can't type inside the session, but we know the type
     @SuppressWarnings("unchecked")
-    final Map<String, Collection<Integer>> divisionFinalists = (Map<String, Collection<Integer>>)SessionAttributes.getAttribute(session, DIVISION_FINALISTS_KEY, Map.class);
+    final Map<String, Collection<Integer>> divisionFinalists = SessionAttributes.getNonNullAttribute(session,
+                                                                                                     DIVISION_FINALISTS_KEY,
+                                                                                                     Map.class);
 
     // call schedule
     final List<Map<String, Integer>> schedule = ScoreUtils.scheduleFinalists(divisionFinalists);
@@ -289,7 +297,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
       formatter.format("<th>%s</th>", categoryTitle);
     }
     formatter.format("</tr>");
-    
+
     for (final Map<String, Integer> timeSlot : schedule) {
       formatter.format("<tr>");
       formatter.format("<td>%s</td>", DATE_FORMAT.get().format(start.getTime()));
@@ -321,7 +329,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
 
     formatter.format("</body></html>");
   }
-  
+
   /**
    * Display the proposed finalists and allow the user to pick which ones to
    * actually schedule.
@@ -333,8 +341,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
    *          team numbers
    * @throws IOException
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
   private void displayProposedFinalists(final HttpServletResponse response,
                                         final Connection connection,
                                         final Document challengeDocument,
@@ -360,8 +367,7 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
       formatter.format("<h1>Choose finalists to be scheduled</h1>");
       formatter.format("<hr/>");
 
-      formatter
-               .format("<p>Below are the proposed finalists, please choose at least one team per category per division that should be called back for finalist judging");
+      formatter.format("<p>Below are the proposed finalists, please choose at least one team per category per division that should be called back for finalist judging");
       formatter.format("<form action='FinalistSchedulerUI' method='POST'>");
 
       // display the teams by division and score group
@@ -369,13 +375,14 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
 
       formatter.format("<h2>Division: %s</h2>", division);
 
-      for (final Element subjectiveElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement()
-                                                                       .getElementsByTagName("subjectiveCategory"))) {
+      for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
+                                                                                  challengeDocument.getDocumentElement()
+                                                                                                   .getElementsByTagName("subjectiveCategory"))) {
         final String categoryTitle = subjectiveElement.getAttribute("title");
         final String categoryName = subjectiveElement.getAttribute("name");
 
-
-        final Map<String, Collection<Integer>> scoreGroups = Queries.computeScoreGroups(connection, currentTournament, division, categoryName);
+        final Map<String, Collection<Integer>> scoreGroups = Queries.computeScoreGroups(connection, currentTournament,
+                                                                                        division, categoryName);
         if (LOG.isDebugEnabled()) {
           LOG.debug("Found score groups for category "
               + categoryName + " division " + division + ": " + scoreGroups);
@@ -385,21 +392,22 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
         formatter.format("<tr><th colspan='6'>%s</th></tr>", categoryTitle);
         formatter.format("<tr><th>Score Group</th><th>Team #</th><th>Team Name</th><th>Finalist?</th><th>Combined</th><th>Standardized</th><th>Raw</th></tr>");
 
-        for(final Map.Entry<String, Collection<Integer>> entry : scoreGroups.entrySet()) {
+        for (final Map.Entry<String, Collection<Integer>> entry : scoreGroups.entrySet()) {
           final String scoreGroup = entry.getKey();
           final String teamSelect = StringUtils.join(entry.getValue().iterator(), ", ");
-          prep = connection.prepareStatement("SELECT Teams.TeamNumber, FinalScores." + categoryName
-              + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
-              + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " " + ascDesc
-              + " LIMIT " + numFinalists);
+          prep = connection.prepareStatement("SELECT Teams.TeamNumber, FinalScores."
+              + categoryName + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
+              + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores."
+              + categoryName + " " + ascDesc + " LIMIT " + numFinalists);
           prep.setInt(1, currentTournament);
-          rawPrep = connection.prepareStatement("SELECT StandardizedScore,ComputedTotal FROM " + categoryName + " WHERE TeamNumber = ? AND Tournament = ?");
+          rawPrep = connection.prepareStatement("SELECT StandardizedScore,ComputedTotal FROM "
+              + categoryName + " WHERE TeamNumber = ? AND Tournament = ?");
           rawPrep.setInt(2, currentTournament);
-          
+
           boolean first = true;
           rs = prep.executeQuery();
           while (rs.next()) {
-            final int teamNum = rs.getInt(1);            
+            final int teamNum = rs.getInt(1);
             final double finalScore = rs.getDouble(2);
             final boolean finalScoreNull = rs.wasNull();
             if (teamColors.containsKey(teamNum)) {
@@ -407,17 +415,17 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
             } else {
               teamColors.put(teamNum, null);
             }
-            
+
             rawPrep.setInt(1, teamNum);
             rawRS = rawPrep.executeQuery();
             final StringBuilder standardized = new StringBuilder();
             final StringBuilder raw = new StringBuilder();
             boolean rawFirst = true;
             boolean standardizedFirst = true;
-            while(rawRS.next()) {              
+            while (rawRS.next()) {
               final double standardizedScore = rawRS.getDouble(1);
-              if(!rawRS.wasNull()) {
-                if(standardizedFirst) {
+              if (!rawRS.wasNull()) {
+                if (standardizedFirst) {
                   standardizedFirst = false;
                 } else {
                   standardized.append(",");
@@ -425,8 +433,8 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
                 standardized.append(Utilities.NUMBER_FORMAT_INSTANCE.format(standardizedScore));
               }
               final double rawScore = rawRS.getDouble(2);
-              if(!rawRS.wasNull()) {
-                if(rawFirst) {
+              if (!rawRS.wasNull()) {
+                if (rawFirst) {
                   rawFirst = false;
                 } else {
                   raw.append(",");
@@ -434,18 +442,20 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
                 raw.append(Utilities.NUMBER_FORMAT_INSTANCE.format(rawScore));
               }
             }
-            
+
             try {
               final Team team = Team.getTeamFromDatabase(connection, teamNum);
-              formatter.format("<tr class='team-%s'><td>%s</td><td>%s</td><td>%s</td><td><input type='checkbox' name='%s' value='%s' %s/><td>%s</td><td>%s</td><td>%s</td></tr>", teamNum, scoreGroup,
-                               teamNum, team.getTeamName(), categoryTitle, teamNum, first ? "checked" : "", finalScoreNull ? "" : Utilities.NUMBER_FORMAT_INSTANCE.format(finalScore), standardized.toString(), raw.toString());
+              formatter.format("<tr class='team-%s'><td>%s</td><td>%s</td><td>%s</td><td><input type='checkbox' name='%s' value='%s' %s/><td>%s</td><td>%s</td><td>%s</td></tr>",
+                               teamNum, scoreGroup, teamNum, team.getTeamName(), categoryTitle, teamNum,
+                               first ? "checked" : "",
+                               finalScoreNull ? "" : Utilities.NUMBER_FORMAT_INSTANCE.format(finalScore),
+                               standardized.toString(), raw.toString());
             } catch (final SQLException e) {
               throw new RuntimeException("Error getting information for team "
                   + teamNum, e);
             }
 
-            
-            if(first) {
+            if (first) {
               first = false;
             }
           }
@@ -469,9 +479,9 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
             teamColors.put(teamNum, null);
           }
 
-          formatter.format("<tr class='team-%s'><td>%s</td><td><input type='checkbox' name='%s' value='%s' %s/></tr>", teamNum, teamNum,
-                           categoryTitle, teamNum, first ? "checked" : "");
-          if(first) {
+          formatter.format("<tr class='team-%s'><td>%s</td><td><input type='checkbox' name='%s' value='%s' %s/></tr>",
+                           teamNum, teamNum, categoryTitle, teamNum, first ? "checked" : "");
+          if (first) {
             first = false;
           }
         }
@@ -531,10 +541,11 @@ public class FinalistSchedulerUI extends BaseFLLServlet {
 
     private int _teamColorIndex = 0;
 
-    private final String[] _teamColors = { "#CD5555", "#EE0000", "#FF6347", "#00FFAA", "#D19275", "#00B2EE", "#FF7D40", "#FFDAB9", "#FCB514", "#FFEC8B",
-                                          "#C8F526", "#7CFC00", "#4AC948", "#62B1F6", "#AAAAFF", "#8470FF", "#AB82FF", "#A020F0", "#E066FF", "#DB70DB",
-                                          "#FF00CC", "#FF34B3", "#FF0066", "#FF0033", "#FF030D", };
+    private final String[] _teamColors = { "#CD5555", "#EE0000", "#FF6347", "#00FFAA", "#D19275", "#00B2EE", "#FF7D40",
+                                          "#FFDAB9", "#FCB514", "#FFEC8B", "#C8F526", "#7CFC00", "#4AC948", "#62B1F6",
+                                          "#AAAAFF", "#8470FF", "#AB82FF", "#A020F0", "#E066FF", "#DB70DB", "#FF00CC",
+                                          "#FF34B3", "#FF0066", "#FF0033", "#FF030D", };
 
   }
-  
+
 }

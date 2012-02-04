@@ -24,6 +24,7 @@ import org.w3c.dom.Document;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -45,8 +46,8 @@ public class CommitTeam extends BaseFLLServlet {
     }
 
     final StringBuilder message = new StringBuilder();
-    final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
-    final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
+    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+    final DataSource datasource = SessionAttributes.getDataSource(session);
 
     try {
       final Connection connection = datasource.getConnection();

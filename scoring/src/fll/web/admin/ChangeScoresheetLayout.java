@@ -37,7 +37,7 @@ public class ChangeScoresheetLayout extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
-    final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
+    final DataSource datasource = SessionAttributes.getDataSource(session);
 
     try {
       final Connection connection = datasource.getConnection();

@@ -51,7 +51,7 @@ public class GatherTeamData extends BaseFLLServlet {
     }
 
     final StringBuilder message = new StringBuilder();
-    final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
+    final DataSource datasource = SessionAttributes.getDataSource(session);
 
     try {
       final Connection connection = datasource.getConnection();

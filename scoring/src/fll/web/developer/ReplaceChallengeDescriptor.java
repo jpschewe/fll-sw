@@ -48,7 +48,7 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
 
     try {
-      final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
+      final DataSource datasource = SessionAttributes.getDataSource(session);
       final Connection connection = datasource.getConnection();
 
       

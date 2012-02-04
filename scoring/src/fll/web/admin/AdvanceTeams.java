@@ -43,7 +43,7 @@ public class AdvanceTeams extends BaseFLLServlet {
     }
 
     final StringBuilder message = new StringBuilder();
-    final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
+    final DataSource datasource = SessionAttributes.getDataSource(session);
 
     // can't put types inside a session
     @SuppressWarnings("unchecked")
@@ -52,7 +52,7 @@ public class AdvanceTeams extends BaseFLLServlet {
     try {
       final Connection connection = datasource.getConnection();
 
-      for(final Team team : teamsToAdvance) {
+      for (final Team team : teamsToAdvance) {
         Queries.advanceTeam(connection, team.getTeamNumber());
       }
       message.append("<p><i>Successfully advanced teams</i></p>");
