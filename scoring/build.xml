@@ -367,17 +367,6 @@
         </fileset>
       </classpath-elements>
     </compile>
-    <!--
-    <javac destdir="${dir.src.jsp}" optimize="${compile.optimize}"
-    debug="${compile.debug}" deprecation="${compile.deprecation}"
-    failonerror="true" srcdir="${dir.src.jsp}" excludes="**/*.smap">
-    <classpath> <path refid="compile.classpath" /> <fileset
-    dir="${dir.web}/WEB-INF/lib"> <include name="*.jar" /> </fileset>
-    <fileset dir="${dir.tomcat}/lib"> <include name="*.jar" /> </fileset>
-    <fileset dir="${dir.tomcat}/bin"> <include name="*.jar" /> </fileset>
-  </classpath> <include name="**" /> <exclude name="tags/**" />
-  </javac>
-    -->
   </target>
 
 
@@ -428,13 +417,6 @@
     <attribute name="inside.test" />
 
     <sequential>
-      <!-- for when running the unit tests -->
-      <!--
-      <copy todir="${dir.tomcat}/shared/lib"> <fileset
-      dir="${dir.lib}/cobertura"> <include name="*.jar" /> </fileset>
-    </copy>
-      -->
-
       <java classname="org.apache.catalina.startup.Bootstrap" fork="true" spawn="@{spawn}" taskname="tomcat">
         <sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/tomcat-cobertura.ser" />
 
