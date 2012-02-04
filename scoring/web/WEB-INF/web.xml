@@ -3,7 +3,7 @@
 <web-app metadata-complete="false">
  <distributable />
 
-<!-- AJAX push -->
+ <!-- AJAX push -->
  <servlet>
   <servlet-name>icepush</servlet-name>
   <servlet-class>org.icepush.servlet.ICEpushServlet</servlet-class>
