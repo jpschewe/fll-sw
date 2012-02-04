@@ -529,12 +529,6 @@
       </fileset>
     </chmod>
 
-    <!-- get the correct web.xml file -->
-    <!--
-    copy file="web/WEB-INF/${dist.web.config}"
-    tofile="${dir.web}/WEB-INF/web.xml" overwrite="true" /
-    -->
-
     <!-- copy web stuff -->
     <copy todir="${dir.dist}">
       <fileset dir="${dir.build}">
@@ -631,13 +625,6 @@
         <include name="jsr305.jar" />
       </fileset>
     </copy>
-
-    <!-- get the correct web.xml file -->
-    <!--
-    copy file="web/WEB-INF/${web.config}"
-    tofile="${dir.web}/WEB-INF/web.xml" overwrite="true" /
-    -->
-
   </target>
 
   <!-- ==================== Selenium ==================== -->
