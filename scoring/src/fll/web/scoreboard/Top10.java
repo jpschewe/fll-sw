@@ -62,18 +62,18 @@ import fll.xml.XMLUtils;
 public class Top10 extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-  
+
   /**
    * Max number of characters in a team name to display.
    */
   public static final int MAX_TEAM_NAME = 12;
+
   /**
    * Max number of characters in an organization to display.
    */
   public static final int MAX_ORG_NAME = 20;
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = {
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Determine sort order based upon winner criteria")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Determine sort order based upon winner criteria")
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -94,7 +94,7 @@ public class Top10 extends BaseFLLServlet {
 
       final int currentTournament = Queries.getCurrentTournament(connection);
 
-      final Integer divisionIndexObj = (Integer) session.getAttribute("divisionIndex");
+      final Integer divisionIndexObj = SessionAttributes.getAttribute(session, "divisionIndex", Integer.class);
       int divisionIndex;
       if (null == divisionIndexObj) {
         divisionIndex = 0;
@@ -130,8 +130,11 @@ public class Top10 extends BaseFLLServlet {
       final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
 
       prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore FROM"
-          + " (SELECT TeamNumber, " + winnerCriteria.getMinMaxString() + "(ComputedTotal) AS MaxOfComputedScore FROM verified_performance WHERE Tournament = ? "
-          + " AND NoShow = False AND Bye = False GROUP BY TeamNumber) AS T2" + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams"
+          + " (SELECT TeamNumber, "
+          + winnerCriteria.getMinMaxString()
+          + "(ComputedTotal) AS MaxOfComputedScore FROM verified_performance WHERE Tournament = ? "
+          + " AND NoShow = False AND Bye = False GROUP BY TeamNumber) AS T2"
+          + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams"
           + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber AND current_tournament_teams.event_division = ?"
           + " ORDER BY T2.MaxOfComputedScore " + winnerCriteria.getSortString() + " LIMIT 10");
       prep.setInt(1, currentTournament);

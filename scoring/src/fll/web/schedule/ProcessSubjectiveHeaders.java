@@ -25,7 +25,6 @@ import fll.web.WebUtils;
 /**
  * Processes results of chooseSubjectiveHeaders.jsp and redirects to
  * {@link CheckViolations}.
- * 
  */
 @WebServlet("/schedule/ProcessSubjectiveHeaders")
 public class ProcessSubjectiveHeaders extends BaseFLLServlet {
@@ -38,9 +37,8 @@ public class ProcessSubjectiveHeaders extends BaseFLLServlet {
 
     // J2EE doesn't have things typed yet
     @SuppressWarnings("unchecked")
-    final List<String> unusedHeaders = (List<String>) SessionAttributes.getNonNullAttribute(session,
-                                                                                            CheckViolations.UNUSED_HEADERS,
-                                                                                            List.class);
+    final List<String> unusedHeaders = SessionAttributes.getNonNullAttribute(session, CheckViolations.UNUSED_HEADERS,
+                                                                             List.class);
 
     // get params for subjectiveHeader
     final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();

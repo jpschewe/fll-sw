@@ -49,7 +49,6 @@ import fll.web.WebUtils;
  * Read uploadSchedule_file and uploadSchedule_sheet, then check for constraint
  * violations. Stores the schedule in uploadSchedule_schedule, type
  * {@link TournamentSchedule}.
- * 
  */
 @WebServlet("/schedule/CheckViolations")
 public class CheckViolations extends BaseFLLServlet {
@@ -73,7 +72,8 @@ public class CheckViolations extends BaseFLLServlet {
       // of subjective headers
       // J2EE doesn't have things typed yet
       @SuppressWarnings("unchecked")
-      List<SubjectiveStation> subjectiveStations = (List<SubjectiveStation>) session.getAttribute(SUBJECTIVE_STATIONS);
+      List<SubjectiveStation> subjectiveStations = SessionAttributes.getAttribute(session, SUBJECTIVE_STATIONS,
+                                                                                  List.class);
       if (null == subjectiveStations) {
         // get unused headers
         final InputStream stream = new FileInputStream(scheduleFile);

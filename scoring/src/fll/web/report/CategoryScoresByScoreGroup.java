@@ -53,7 +53,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
 
-    final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
+    final DataSource datasource = SessionAttributes.getDataSource(session);
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);

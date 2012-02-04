@@ -51,7 +51,7 @@ public class GatherAdvancementData extends BaseFLLServlet {
       LOGGER.trace("Top of GatherAdvancementData.doPost");
     }
 
-    final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
+    final DataSource datasource = SessionAttributes.getDataSource(session);
 
     final String[] teamsToAdvance = request.getParameterValues("advance");
 

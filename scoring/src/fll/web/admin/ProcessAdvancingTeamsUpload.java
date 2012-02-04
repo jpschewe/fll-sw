@@ -77,7 +77,7 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
       }
 
       // process as if the user had selected these teams
-      final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
+      final DataSource datasource = SessionAttributes.getDataSource(session);
       final Connection connection = datasource.getConnection();
       GatherAdvancementData.processAdvancementData(response, session, false, connection, teams);
     } catch (final SQLException sqle) {
