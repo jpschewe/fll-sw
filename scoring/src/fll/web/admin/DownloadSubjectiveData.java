@@ -37,6 +37,7 @@ import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.db.Queries;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -54,7 +55,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
     final DataSource datasource = SessionAttributes.getDataSource(session);
     try {
       final Connection connection = datasource.getConnection();
-      final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
+      final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
       if (Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
         response.reset();
         response.setContentType("application/zip");
