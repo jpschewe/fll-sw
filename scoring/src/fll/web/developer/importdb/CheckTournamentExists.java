@@ -11,6 +11,7 @@ import java.sql.SQLException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -29,9 +30,8 @@ import fll.web.SessionAttributes;
  * Servlet to check if the tournament exists in the dest database.
  * 
  * @author jpschewe
- * @web.servlet name="CheckTournamentExists"
- * @web.servlet-mapping url-pattern="/developer/importdb/CheckTournamentExists"
  */
+@WebServlet("/developer/importdb/CheckTournamentExists")
 public class CheckTournamentExists extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();

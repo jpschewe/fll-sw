@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -27,9 +28,8 @@ import fll.web.SessionAttributes;
 
 /**
  * Advance teams to the next tournament.
- * @web.servlet name="AdvanceTeams"
- * @web.servlet-mapping url-pattern="/admin/AdvanceTeams"
  */
+@WebServlet("/admin/AdvanceTeams")
 public class AdvanceTeams extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

@@ -39,6 +39,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -55,9 +56,8 @@ import fll.util.LogUtils;
 /**
  * Initialize web attributes.
  * 
- * @web.filter name="Init Filter"
- * @web.filter-mapping url-pattern="/*"
  */
+@WebFilter("/*")
 public class InitFilter implements Filter {
 
   private static final Logger LOGGER = LogUtils.getLogger();

@@ -1,5 +1,0 @@
- <!-- at some point we may want to specialize this by exception -->
- <error-page>
-  <exception-type>java.lang.Exception</exception-type>
-  <location>/errorHandler.jsp</location>
- </error-page>

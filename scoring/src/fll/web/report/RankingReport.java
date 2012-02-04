@@ -16,6 +16,7 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -47,9 +48,8 @@ import fll.web.SessionAttributes;
 
 /**
  * @author jpschewe
- * @web.servlet name="RankingReport"
- * @web.servlet-mapping url-pattern="/report/RankingReport"
  */
+@WebServlet("/report/RankingReport")
 public class RankingReport extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();

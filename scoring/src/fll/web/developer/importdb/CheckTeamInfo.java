@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -31,9 +32,8 @@ import fll.web.SessionAttributes;
  * Servlet to check team information between the source and dest database.
  * 
  * @author jpschewe
- * @web.servlet name="CheckTeamInfo"
- * @web.servlet-mapping url-pattern="/developer/importdb/CheckTeamInfo"
  */
+@WebServlet("/developer/importdb/CheckTeamInfo")
 public class CheckTeamInfo extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();

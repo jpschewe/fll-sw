@@ -18,6 +18,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -29,9 +30,8 @@ import fll.util.LogUtils;
 /**
  * Ensure that all HTML pages get the same footer.
  * 
- * @web.filter name="Footer Filter"
- * @web.filter-mapping url-pattern="/*"
  */
+@WebFilter("/*")
 public class FooterFilter implements Filter {
 
   private static final Logger LOGGER = LogUtils.getLogger();

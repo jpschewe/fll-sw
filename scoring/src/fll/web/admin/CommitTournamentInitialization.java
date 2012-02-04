@@ -13,6 +13,7 @@ import java.util.Enumeration;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -30,9 +31,8 @@ import fll.web.SessionAttributes;
 /**
  * Set the current tournament.
  * 
- * @web.servlet name="CommitTournamentInitialization"
- * @web.servlet-mapping url-pattern="/admin/CommitTournamentInitialization"
  */
+@WebServlet("/admin/CommitTournamentInitialization")
 public class CommitTournamentInitialization extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
@@ -53,8 +53,6 @@ public class CommitTournamentInitialization extends BaseFLLServlet {
       insertPrep = connection
                              .prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division) SELECT Teams.TeamNumber, ?, Teams.Division FROM Teams WHERE Teams.Region = ?");
 
-      // J2EE doesn't have things typed yet
-      @SuppressWarnings("unchecked")
       final Enumeration<String> paramNames = request.getParameterNames();
       while (paramNames.hasMoreElements()) {
         final String param = paramNames.nextElement().replaceAll("&amp;", "&");                                                                   

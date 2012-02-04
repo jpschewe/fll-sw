@@ -20,6 +20,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -49,9 +50,8 @@ import fll.web.WebUtils;
  * violations. Stores the schedule in uploadSchedule_schedule, type
  * {@link TournamentSchedule}.
  * 
- * @web.servlet name="CheckViolations"
- * @web.servlet-mapping url-pattern="/schedule/CheckViolations"
  */
+@WebServlet("/schedule/CheckViolations")
 public class CheckViolations extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

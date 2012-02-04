@@ -11,6 +11,7 @@ import java.sql.SQLException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -30,6 +31,7 @@ import fll.web.SessionAttributes;
  * 
  * @author jpschewe
  */
+@WebServlet("/developer/importdb/CreateTournament")
 public class CreateTournament extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();
@@ -103,7 +105,8 @@ public class CreateTournament extends BaseFLLServlet {
 
     if (null != sourceTournament.getNextTournament()) {
       final Tournament sourceNextTournament = sourceTournament.getNextTournament();
-      final Tournament destNextTournament = Tournament.findTournamentByName(destConnection, sourceNextTournament.getName());
+      final Tournament destNextTournament = Tournament.findTournamentByName(destConnection,
+                                                                            sourceNextTournament.getName());
       if (null == destNextTournament) {
         createTournament(sourceConnection, destConnection, sourceNextTournament.getName(), message, session);
         Tournament.setNextTournament(destConnection, tournamentName, sourceNextTournament.getName());
