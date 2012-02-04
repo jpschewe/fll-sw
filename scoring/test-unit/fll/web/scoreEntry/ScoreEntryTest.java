@@ -9,16 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.ParseException;
-import java.util.Enumeration;
-import java.util.Set;
-
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,6 +18,7 @@ import org.w3c.dom.Document;
 
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
+import fll.web.DummyServletContext;
 import fll.xml.ChallengeParser;
 import fll.xml.ChallengeParserTest;
 
@@ -38,9 +30,11 @@ public class ScoreEntryTest {
 
   /**
    * Just returns the document when asked.
+   * 
+   * TODO use a mocking library to do this.
    */
-  private static class TestServletContext implements ServletContext {
-
+  private static class TestServletContext extends DummyServletContext {
+    @Override
     public Object getAttribute(final String attr) {
       if(ApplicationAttributes.CHALLENGE_DOCUMENT.equals(attr)) {
         final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml");
@@ -52,105 +46,6 @@ public class ScoreEntryTest {
       return null;
       }
     }
-
-    public Enumeration<?> getAttributeNames() {
-      return null;
-    }
-
-    public ServletContext getContext(final String arg0) {
-      return null;
-    }
-
-    public String getContextPath() {
-      return null;
-    }
-
-    public String getInitParameter(final String arg0) {
-      return null;
-    }
-
-    public Enumeration<?> getInitParameterNames() {
-      return null;
-    }
-
-    public int getMajorVersion() {
-      return 0;
-    }
-
-    public String getMimeType(final String arg0) {
-      return null;
-    }
-
-    public int getMinorVersion() {
-      return 0;
-    }
-
-    public RequestDispatcher getNamedDispatcher(final String arg0) {
-      return null;
-    }
-
-    public String getRealPath(final String arg0) {
-      return null;
-    }
-
-    public RequestDispatcher getRequestDispatcher(final String arg0) {
-      return null;
-    }
-
-    public URL getResource(final String arg0) throws MalformedURLException {
-      return null;
-    }
-
-    public InputStream getResourceAsStream(final String arg0) {
-      return null;
-    }
-
-    public Set<?> getResourcePaths(final String arg0) {
-      return null;
-    }
-
-    public String getServerInfo() {
-      return null;
-    }
-
-    @Deprecated
-    public Servlet getServlet(final String arg0) throws ServletException {
-      return null;
-    }
-
-    public String getServletContextName() {
-      return null;
-    }
-
-    @Deprecated
-    public Enumeration<?> getServletNames() {
-      return null;
-    }
-
-    @Deprecated
-    public Enumeration<?> getServlets() {
-      return null;
-    }
-
-    public void log(final String arg0) {
-    }
-
-    @Deprecated
-    public void log(final Exception arg0,
-                    final String arg1) {
-    }
-
-    public void log(final String arg0,
-                    final Throwable arg1) {
-    }
-
-    public void removeAttribute(final String arg0) {
-    }
-
-    public void setAttribute(final String arg0,
-                             final Object arg1) {
-    }
-
   }
 
   @Before

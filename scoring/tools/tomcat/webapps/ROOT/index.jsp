@@ -1,228 +1,223 @@
-<!--
-  Licensed to the Apache Software Foundation (ASF) under one or more
-  contributor license agreements.  See the NOTICE file distributed with
-  this work for additional information regarding copyright ownership.
-  The ASF licenses this file to You under the Apache License, Version 2.0
-  (the "License"); you may not use this file except in compliance with
-  the License.  You may obtain a copy of the License at
+<%--
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
 
-      http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+--%>
+<!DOCTYPE html>
 <%@ page session="false" %>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<%
+java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy");
+request.setAttribute("year", sdf.format(new java.util.Date()));
+request.setAttribute("tomcat7Url", "http://tomcat.apache.org/");
+request.setAttribute("tomcat7DocUrl", "/docs/");
+request.setAttribute("tomcat7ExamplesUrl", "/examples/");
+%>
+<html lang="en">
     <head>
-    <title><%= application.getServerInfo() %></title>
-    <style type="text/css">
-    /*<![CDATA[*/
-      body {
-          color: #000000;
-          background-color: #FFFFFF;
-	  font-family: Arial, "Times New Roman", Times, serif;
-          margin: 10px 0px;
-      }
+        <title><%=request.getServletContext().getServerInfo() %></title>
+        <link href="favicon.ico" rel="icon" type="image/x-icon" />
+        <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" />
+        <link href="tomcat.css" rel="stylesheet" type="text/css" />
+    </head>
 
-    img {
-       border: none;
-    }
-    
-    a:link, a:visited {
-        color: blue
-    }
+    <body>
+        <div id="wrapper">
+            <div id="navigation" class="curved container">
+                <span id="nav-home"><a href="${tomcat7Url}">Home</a></span>
+                <span id="nav-hosts"><a href="${tomcat7DocUrl}">Documentation</a></span>
+                <span id="nav-config"><a href="${tomcat7DocUrl}config/">Configuration</a></span>
+                <span id="nav-examples"><a href="${tomcat7ExamplesUrl}">Examples</a></span>
+                <span id="nav-wiki"><a href="http://wiki.apache.org/tomcat/FrontPage">Wiki</a></span>
+                <span id="nav-lists"><a href="${tomcat7Url}lists.html">Mailing Lists</a></span>
+                <span id="nav-help"><a href="${tomcat7Url}findhelp.html">Find Help</a></span>
+                <br class="separator" />
+            </div>
+            <div id="asf-box">
+                <h1>${pageContext.servletContext.serverInfo}</h1>
+            </div>
+            <div id="upper" class="curved container">
+                <div id="congrats" class="curved container">
+                    <h2>If you're seeing this, you've successfully installed Tomcat. Congratulations!</h2>
+                </div>
+                <div id="notice">
+                    <img src="tomcat.png" alt="[tomcat logo]" />
+                    <div id="tasks">
+                        <h3>Recommended Reading:</h3>
+                        <h4><a href="${tomcat7DocUrl}security-howto.html">Security Considerations HOW-TO</a></h4>
+                        <h4><a href="${tomcat7DocUrl}manager-howto.html">Manager Application HOW-TO</a></h4>
+                        <h4><a href="${tomcat7DocUrl}cluster-howto.html">Clustering/Session Replication HOW-TO</a></h4>
+                    </div>
+                </div>
+                <div id="actions">
+                    <div class="button">
+                        <a class="container shadow" href="/manager/status"><span>Server Status</span></a>
+                    </div>
+                    <div class="button">
+                        <a class="container shadow" href="/manager/html"><span>Manager App</span></a>
+                    </div>
+                    <div class="button">
+                        <a class="container shadow" href="/host-manager/html"><span>Host Manager</span></a>
+                    </div>
+                </div>
+                <!--
+                <br class="separator" />
+                -->
+                <br class="separator" />
+            </div>
+            <div id="middle" class="curved container">
+                <h3>Developer Quick Start</h3>
+                <div class="col25">
+                    <div class="container">
+                        <p><a href="${tomcat7DocUrl}setup.html">Tomcat Setup</a></p>
+                        <p><a href="${tomcat7DocUrl}appdev/">First Web Application</a></p>
+                    </div>
+                </div>
+                <div class="col25">
+                    <div class="container">
+                        <p><a href="${tomcat7DocUrl}realm-howto.html">Realms &amp; AAA</a></p>
+                        <p><a href="${tomcat7DocUrl}jndi-datasource-examples-howto.html">JDBC DataSources</a></p>
+                    </div>
+                </div>
+                <div class="col25">
+                    <div class="container">
+                        <p><a href="${tomcat7ExamplesUrl}servlets/">Servlet Examples</a></p>
+                        <p><a href="${tomcat7ExamplesUrl}jsp/">JSP Examples</a></p>
+                    </div>
+                </div>
+                <div class="col25">
+                    <div class="container">
+                        <p><a href="http://wiki.apache.org/tomcat/Specifications">Servlet Specifications</a></p>
+                        <p><a href="http://wiki.apache.org/tomcat/TomcatVersions">Tomcat Versions</a></p>
+                    </div>
+                </div>
+                <br class="separator" />
+            </div>
+            <div id="lower">
+                <div id="low-manage" class="">
+                    <div class="curved container">
+                        <h3>Managing Tomcat</h3>
+                        <p>For security, access to the <a href="/manager/html">manager webapp</a> is restricted.
+                        Users are defined in:</p>
+                        <pre>$CATALINA_HOME/conf/tomcat-users.xml</pre>
+                        <p>In Tomcat 7.0 access to the manager application is split between
+                           different users. &nbsp; <a href="${tomcat7DocUrl}manager-howto.html">Read more...</a></p>
+                        <br />
+                        <h4><a href="${tomcat7DocUrl}RELEASE-NOTES.txt">Release Notes</a></h4>
+                        <h4><a href="${tomcat7DocUrl}changelog.html">Changelog</a></h4>
+                        <h4><a href="${tomcat7Url}migration.html">Migration Guide</a></h4>
+                        <h4><a href="${tomcat7Url}security.html">Security Notices</a></h4>
+                    </div>
+                </div>
+                <div id="low-docs" class="">
+                    <div class="curved container">
+                        <h3>Documentation</h3>
+                        <h4><a href="${tomcat7DocUrl}">Tomcat 7.0 Documentation</a></h4>
+                        <h4><a href="${tomcat7DocUrl}config/">Tomcat 7.0 Configuration</a></h4>
+                        <h4><a href="http://wiki.apache.org/tomcat/FrontPage">Tomcat Wiki</a></h4>
+                        <p>Find additional important configuration information in:</p>
+                        <pre>$CATALINA_HOME/RUNNING.txt</pre>
+                        <p>Developers may be interested in:</p>
+                        <ul>
+                            <li><a href="http://tomcat.apache.org/bugreport.html">Tomcat 7.0 Bug Database</a></li>
+                            <li><a href="${tomcat7DocUrl}api/index.html">Tomcat 7.0 JavaDocs</a></li>
+                            <li><a href="http://svn.apache.org/repos/asf/tomcat/tc7.0.x/">Tomcat 7.0 SVN Repository</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="low-help" class="">
+                    <div class="curved container">
+                        <h3>Getting Help</h3>
+                        <h4><a href="${tomcat7Url}faq/">FAQ</a> and <a href="${tomcat7Url}lists.html">Mailing Lists</a></h4>
+                        <p>The following mailing lists are available:</p>
+                        <ul>
+                            <li id="list-announce"><strong><a href="mailto:announce-subscribe@tomcat.apache.org">announce@tomcat.apache.org</a><br />
+                                Important announcements, releases, security vulnerability notifications. (Low volume).</strong>
+                            </li>
+                            <li><a href="mailto:users-subscribe@tomcat.apache.org">users@tomcat.apache.org</a><br />
+                                User support and discussion
+                            </li>
+                            <li><a href="mailto:taglibs-user-subscribe@tomcat.apache.org">taglibs-user@tomcat.apache.org</a><br />
+                                User support and discussion for <a href="${tomcat7Url}taglibs/">Apache Taglibs</a>
+                            </li>
+                            <li><a href="mailto:dev-subscribe@tomcat.apache.org">dev@tomcat.apache.org</a><br />
+                                Development mailing list, including commit messages
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <br class="separator" />
+            </div>
+            <div id="footer" class="curved container">
+                <div class="col20">
+                    <div class="container">
+                        <h4>Other Downloads</h4>
+                        <ul>
+                            <li><a href="${tomcat7Url}download-connectors.cgi">Tomcat Connectors</a></li>
+                            <li><a href="${tomcat7Url}download-native.cgi">Tomcat Native</a></li>
+                            <li><a href="${tomcat7Url}taglibs/">Taglibs</a></li>
+                            <li><a href="${tomcat7DocUrl}deployer-howto.html">Deployer</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col20">
+                    <div class="container">
+                        <h4>Other Documentation</h4>
+                        <ul>
+                            <li><a href="${tomcat7Url}connectors-doc/">Tomcat Connectors</a></li>
+                            <li><a href="${tomcat7Url}connectors-doc/">mod_jk Documentation</a></li>
+                            <li><a href="${tomcat7Url}native-doc/">Tomcat Native</a></li>
+                            <li><a href="${tomcat7DocUrl}deployer-howto.html">Deployer</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col20">
+                    <div class="container">
+                        <h4>Get Involved</h4>
+                        <ul>
+                            <li><a href="${tomcat7Url}getinvolved.html">Overview</a></li>
+                            <li><a href="${tomcat7Url}svn.html">SVN Repositories</a></li>
+                            <li><a href="${tomcat7Url}lists.html">Mailing Lists</a></li>
+                            <li><a href="http://wiki.apache.org/tomcat/FrontPage">Wiki</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col20">
+                    <div class="container">
+                        <h4>Miscellaneous</h4>
+                        <ul>
+                            <li><a href="${tomcat7Url}contact.html">Contact</a></li>
+                            <li><a href="${tomcat7Url}legal.html">Legal</a></li>
+                            <li><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></li>
+                            <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col20">
+                    <div class="container">
+                        <h4>Apache Software Foundation</h4>
+                        <ul>
+                            <li><a href="${tomcat7Url}whoweare.html">Who We Are</a></li>
+                            <li><a href="${tomcat7Url}heritage.html">Heritage</a></li>
+                            <li><a href="http://www.apache.org">Apache Home</a></li>
+                            <li><a href="${tomcat7Url}resources.html">Resources</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <br class="separator" />
+            </div>
+            <p class="copyright">Copyright &copy;1999-${year} Apache Software Foundation.  All Rights Reserved</p>
+        </div>
+    </body>
 
-    th {
-        font-family: Verdana, "Times New Roman", Times, serif;
-        font-size: 110%;
-        font-weight: normal;
-        font-style: italic;
-        background: #D2A41C;
-        text-align: left;
-    }
-
-    td {
-        color: #000000;
-	font-family: Arial, Helvetica, sans-serif;
-    }
-    
-    td.menu {
-        background: #FFDC75;
-    }
-
-    .center {
-        text-align: center;
-    }
-
-    .code {
-        color: #000000;
-        font-family: "Courier New", Courier, monospace;
-        font-size: 110%;
-        margin-left: 2.5em;
-    }
-    
-     #banner {
-        margin-bottom: 12px;
-     }
-
-     p#congrats {
-         margin-top: 0;
-         font-weight: bold;
-         text-align: center;
-     }
-
-     p#footer {
-         text-align: right;
-         font-size: 80%;
-     }
-     /*]]>*/
-   </style>
-</head>
-
-<body>
-
-<!-- Header -->
-<table id="banner" width="100%">
-    <tr>
-      <td align="left" style="width:130px">
-        <a href="http://tomcat.apache.org/">
-	  <img src="tomcat.gif" height="92" width="130" alt="The Mighty Tomcat - MEOW!"/>
-	</a>
-      </td>
-      <td align="left" valign="top"><b><%= application.getServerInfo() %></b></td>
-      <td align="right">
-        <a href="http://www.apache.org/">
-	  <img src="asf-logo-wide.gif" height="51" width="537" alt="The Apache Software Foundation"/>
-	</a>
-       </td>
-     </tr>
-</table>
-
-<table>
-    <tr>
-
-        <!-- Table of Contents -->
-        <td valign="top">
-            <table width="100%" border="1" cellspacing="0" cellpadding="3">
-                <tr>
-		  <th>Administration</th>
-                </tr>
-                <tr>
-		  <td class="menu">
-		    <a href="manager/status">Status</a><br/>
-                    <!--<a href="admin">Tomcat&nbsp;Administration</a><br/>-->
-                    <a href="manager/html">Tomcat&nbsp;Manager</a><br/>
-                    &nbsp;
-                  </td>
-                </tr>
-            </table>
-
-	    <br />
-            <table width="100%" border="1" cellspacing="0" cellpadding="3">
-                <tr>
-		  <th>Documentation</th>
-                </tr>
-                <tr>
-                  <td class="menu">
-                    <a href="RELEASE-NOTES.txt">Release&nbsp;Notes</a><br/>
-                    <a href="docs/changelog.html">Change&nbsp;Log</a><br/>
-                    <a href="docs">Tomcat&nbsp;Documentation</a><br/>                        &nbsp;
-                    &nbsp;
-		    </td>
-                </tr>
-            </table>
-	    
-            <br/>
-            <table width="100%" border="1" cellspacing="0" cellpadding="3">
-                <tr>
-                  <th>Tomcat Online</th>
-                </tr>
-                <tr>
-                  <td class="menu">
-                    <a href="http://tomcat.apache.org/">Home&nbsp;Page</a><br/>
-		    <a href="http://tomcat.apache.org/faq/">FAQ</a><br/>
-                    <a href="http://tomcat.apache.org/bugreport.html">Bug&nbsp;Database</a><br/>
-                    <a href="http://issues.apache.org/bugzilla/buglist.cgi?bug_status=UNCONFIRMED&amp;bug_status=NEW&amp;bug_status=ASSIGNED&amp;bug_status=REOPENED&amp;bug_status=RESOLVED&amp;resolution=LATER&amp;resolution=REMIND&amp;resolution=---&amp;bugidtype=include&amp;product=Tomcat+5&amp;cmdtype=doit&amp;order=Importance">Open Bugs</a><br/>
-                    <a href="http://mail-archives.apache.org/mod_mbox/tomcat-users/">Users&nbsp;Mailing&nbsp;List</a><br/>
-                    <a href="http://mail-archives.apache.org/mod_mbox/tomcat-dev/">Developers&nbsp;Mailing&nbsp;List</a><br/>
-                    <a href="irc://irc.freenode.net/#tomcat">IRC</a><br/>
-		    &nbsp;
-                  </td>
-                </tr>
-            </table>
-	    
-            <br/>
-            <table width="100%" border="1" cellspacing="0" cellpadding="3">
-                <tr>
-                  <th>Examples</th>
-                </tr>
-                <tr>
-                  <td class="menu">
-                    <a href="examples/servlets/">Servlets Examples</a><br/>
-                    <a href="examples/jsp/">JSP Examples</a><br/>
-                    <a href="webdav/">WebDAV&nbsp;capabilities</a><br/>
-     		    &nbsp;
-                  </td>
-                </tr>
-            </table>
-	    
-            <br/>
-            <table width="100%" border="1" cellspacing="0" cellpadding="3">
-                <tr>
-		  <th>Miscellaneous</th>
-                </tr>
-                <tr>
-                  <td class="menu">
-                    <a href="http://java.sun.com/products/jsp">Sun's&nbsp;Java&nbsp;Server&nbsp;Pages&nbsp;Site</a><br/>
-                    <a href="http://java.sun.com/products/servlet">Sun's&nbsp;Servlet&nbsp;Site</a><br/>
-    		    &nbsp;
-                  </td>
-                </tr>
-            </table>
-        </td>
-
-        <td style="width:20px">&nbsp;</td>
-	
-        <!-- Body -->
-        <td align="left" valign="top">
-          <p id="congrats">If you're seeing this page via a web browser, it means you've setup Tomcat successfully. Congratulations!</p>
- 
-          <p>As you may have guessed by now, this is the default Tomcat home page. It can be found on the local filesystem at:</p>
-          <p class="code">$CATALINA_HOME/webapps/ROOT/index.jsp</p>
-	  
-          <p>where "$CATALINA_HOME" is the root of the Tomcat installation directory. If you're seeing this page, and you don't think you should be, then you're either a user who has arrived at new installation of Tomcat, or you're an administrator who hasn't got his/her setup quite right. Providing the latter is the case, please refer to the <a href="docs">Tomcat Documentation</a> for more detailed setup and administration information than is found in the INSTALL file.</p>
-
-            <p><b>NOTE: For security reasons, using the manager webapp
-            is restricted to users with role "manager".</b>
-            Users are defined in <code>$CATALINA_HOME/conf/tomcat-users.xml</code>.</p>
-
-            <p>Included with this release are a host of sample Servlets and JSPs (with associated source code), extensive documentation, and an introductory guide to developing web applications.</p>
-
-            <p>Tomcat mailing lists are available at the Tomcat project web site:</p>
-
-           <ul>
-               <li><b><a href="mailto:users@tomcat.apache.org">users@tomcat.apache.org</a></b> for general questions related to configuring and using Tomcat</li>
-               <li><b><a href="mailto:dev@tomcat.apache.org">dev@tomcat.apache.org</a></b> for developers working on Tomcat</li>
-           </ul>
-
-            <p>Thanks for using Tomcat!</p>
-
-            <p id="footer"><img src="tomcat-power.gif" width="77" height="80" alt="Powered by Tomcat"/><br/>
-	    &nbsp;
-
-	    Copyright &copy; 1999-2010 Apache Software Foundation<br/>
-            All Rights Reserved
-            </p>
-        </td>
-
-    </tr>
-</table>
-
-</body>
 </html>
