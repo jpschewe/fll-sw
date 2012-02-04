@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app metadata-complete="false">
+ <distributable />
+
+<!-- AJAX push -->
+ <servlet>
+  <servlet-name>icepush</servlet-name>
+  <servlet-class>org.icepush.servlet.ICEpushServlet</servlet-class>
+  <load-on-startup>1</load-on-startup>
+ </servlet>
+
+ <servlet-mapping>
+  <servlet-name>icepush</servlet-name>
+  <url-pattern>*.icepush</url-pattern>
+ </servlet-mapping>
+
+
+ <session-config>
+  <session-timeout>30</session-timeout>
+ </session-config>
+
+ <welcome-file-list>
+  <welcome-file>
+   index.jsp
+  </welcome-file>
+ </welcome-file-list>
+
+ <!-- at some point we may want to specialize this by exception -->
+ <error-page>
+  <exception-type>java.lang.Exception</exception-type>
+  <location>/errorHandler.jsp</location>
+ </error-page>
+
+</web-app>

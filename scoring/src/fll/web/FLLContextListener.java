@@ -8,12 +8,13 @@ package fll.web;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 
 /**
  * Take care of initializing some variables in the servlet context.
  * 
- * @web.listener
  */
+@WebListener
 public class FLLContextListener implements ServletContextListener {
 
   /**

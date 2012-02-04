@@ -22,6 +22,7 @@ import java.util.zip.ZipOutputStream;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -42,9 +43,8 @@ import fll.web.SessionAttributes;
 /**
  * Commit the changes made by editTeam.jsp.
  * 
- * @web.servlet name="DownloadSubjectiveData"
- * @web.servlet-mapping url-pattern="/admin/subjective-data.fll"
  */
+@WebServlet("/admin/subjective-data.fll")
 public class DownloadSubjectiveData extends BaseFLLServlet {
 
   protected void processRequest(final HttpServletRequest request,

@@ -24,6 +24,7 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -52,9 +53,8 @@ import fll.xml.XMLUtils;
 /**
  * Handle scheduling of finalists.
  * 
- * @web.servlet name="FinalistSchedulerUI"
- * @web.servlet-mapping url-pattern="/report/FinalistSchedulerUI"
  */
+@WebServlet("/report/FinalistSchedulerUI")
 public class FinalistSchedulerUI extends BaseFLLServlet {
 
   private static final ThreadLocal<DateFormat> DATE_FORMAT = new ThreadLocal<DateFormat>() {

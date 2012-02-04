@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -50,9 +51,8 @@ import fll.web.SessionAttributes;
  * Java code for uploading team data to the database. Called from
  * filterTeams.jsp and columnSelection.jsp.
  * 
- * @web.servlet name="UploadTeams"
- * @web.servlet-mapping url-pattern="/admin/UploadTeams"
  */
+@WebServlet("/admin/UploadTeams")
 public final class UploadTeams extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

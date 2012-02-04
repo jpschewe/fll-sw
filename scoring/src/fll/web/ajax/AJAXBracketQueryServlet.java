@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -27,9 +28,8 @@ import fll.web.playoff.BracketData;
 /**
  * Talk to client brackets in json.
  * 
- * @web.servlet name="AJAXBracketQuery"
- * @web.servlet-mapping url-pattern="/ajax/BracketQuery"
  */
+@WebServlet("/ajax/BracketQuery")
 public class AJAXBracketQueryServlet extends BaseFLLServlet {
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,

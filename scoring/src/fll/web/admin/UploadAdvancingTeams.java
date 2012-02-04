@@ -11,6 +11,7 @@ import java.sql.SQLException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -26,9 +27,8 @@ import fll.web.SessionAttributes;
 /**
  * Upload the teams to be advanced.
  * 
- * @web.servlet name="UploadAdvancingTeams"
- * @web.servlet-mapping url-pattern="/admin/UploadAdvancingTeams"
  */
+@WebServlet("/admin/UploadAdvancingTeams")
 public final class UploadAdvancingTeams extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

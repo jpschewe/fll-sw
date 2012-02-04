@@ -7,6 +7,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -32,9 +33,8 @@ import fll.xml.ChallengeParser;
  * Import a database dump into the existing database.
  * 
  * @author jpschewe
- * @web.servlet name="ImportDBDump"
- * @web.servlet-mapping url-pattern="/developer/importdb/ImportDBDump"
  */
+@WebServlet("/developer/importdb/ImportDBDump")
 public class ImportDBDump extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();

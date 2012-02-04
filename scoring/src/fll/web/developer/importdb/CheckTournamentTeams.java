@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -30,9 +31,8 @@ import fll.web.SessionAttributes;
  * Servlet to check that all of the teams are in the right tournament.
  * 
  * @author jpschewe
- * @web.servlet name="CheckTournamentTeams"
- * @web.servlet-mapping url-pattern="/developer/importdb/CheckTournamentTeams"
  */
+@WebServlet("/developer/importdb/CheckTournamentTeams")
 public class CheckTournamentTeams extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();

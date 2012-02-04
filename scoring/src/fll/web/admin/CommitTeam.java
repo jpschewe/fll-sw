@@ -12,6 +12,7 @@ import java.text.ParseException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -29,9 +30,8 @@ import fll.web.SessionAttributes;
 /**
  * Commit the changes made by editTeam.jsp.
  * 
- * @web.servlet name="CommitTeam"
- * @web.servlet-mapping url-pattern="/admin/CommitTeam"
  */
+@WebServlet("/admin/CommitTeam")
 public class CommitTeam extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

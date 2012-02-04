@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -35,9 +36,8 @@ import fll.web.SessionAttributes;
 /**
  * Gather information for editing or adding a team and put it in the session.
  * 
- * @web.servlet name="GatherTeamData"
- * @web.servlet-mapping url-pattern="/admin/GatherTeamData"
  */
+@WebServlet("/admin/GatherTeamData")
 public class GatherTeamData extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

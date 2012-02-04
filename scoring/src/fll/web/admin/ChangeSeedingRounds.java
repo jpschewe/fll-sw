@@ -11,6 +11,7 @@ import java.sql.SQLException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -26,9 +27,8 @@ import fll.web.SessionAttributes;
 /**
  * Change the number of seeding rounds.
  * 
- * @web.servlet name="ChangeSeedingRounds"
- * @web.servlet-mapping url-pattern="/admin/ChangeSeedingRounds"
  */
+@WebServlet("/admin/ChangeSeedingRounds")
 public class ChangeSeedingRounds extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

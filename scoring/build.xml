@@ -248,7 +248,7 @@
   ==================== Compile Target ==================================
   -->
 
-  <target name="compile" depends="prepare,compile.classes,compile.jsp,generate-descriptor" description="Compile Java sources">
+  <target name="compile" depends="prepare,compile.classes,compile.jsp" description="Compile Java sources">
 
     <!-- copy scripts -->
     <copy todir="${dir.build}/bin">
@@ -345,7 +345,7 @@
   </target>
 
   <import file="${dir.tomcat.src}/bin/catalina-tasks.xml" />
-  <target name="generate.jsp" depends="prepare,tomcat.expand,generate-descriptor" description="Generate Java sources for JSP files" unless="jsp.notRequired">
+  <target name="generate.jsp" depends="prepare,tomcat.expand" description="Generate Java sources for JSP files" unless="jsp.notRequired">
 
     <jasper validateXml="false" uriroot="${dir.web}" webXmlFragment="${dir.src.jsp}/generated_web.xml" outputDir="${dir.src.jsp}" />
 
@@ -852,33 +852,6 @@
         <include name="**/*.java" />
       </fileset>
     </cpd>
-  </target>
-
-  <!-- XDoclet -->
-  <path id="xdoclet.classpath">
-    <fileset dir="${dir.lib}/ant/xdoclet">
-      <include name="*.jar" />
-    </fileset>
-    <!-- tomcat libraries -->
-    <pathelement location="${dir.tomcat.src}/lib/servlet-api.jar" />
-    <pathelement location="${dir.tomcat.src}/lib/jsp-api.jar" />
-  </path>
-
-  <taskdef name="webdoclet" classname="xdoclet.modules.web.WebDocletTask" classpathref="xdoclet.classpath" />
-
-  <target name="generate-descriptor" depends="prepare">
-    <webdoclet destdir="${dir.web}/WEB-INF" mergeDir="${basedir}/xdoclet-merge" excludedtags="@version,@author" verbose="false">
-
-      <fileset dir="${dir.src}">
-        <include name="**/*.java" />
-        <contains text="@web" />
-      </fileset>
-
-      <deploymentdescriptor servletspec="2.4" sessiontimeout="30">
-      </deploymentdescriptor>
-
-
-    </webdoclet>
   </target>
 
 </project>

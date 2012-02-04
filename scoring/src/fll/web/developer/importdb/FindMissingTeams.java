@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -31,9 +32,8 @@ import fll.web.SessionAttributes;
  * Servlet to find teams that are missing via {@link ImportDB#findMissingTeams(Connection, Connection, String)}.
  * 
  * @author jpschewe
- * @web.servlet name="FindMissingTeams"
- * @web.servlet-mapping url-pattern="/developer/importdb/FindMissingTeams"
  */
+@WebServlet("/developer/importdb/FindMissingTeams")
 public class FindMissingTeams extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();

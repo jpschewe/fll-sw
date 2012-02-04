@@ -13,6 +13,7 @@ import java.util.Collection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,9 +28,8 @@ import fll.util.LogUtils;
 /**
  * Log a user out of the application.
  * 
- * @web.servlet name="DoLogout"
- * @web.servlet-mapping url-pattern="/DoLogout"
  */
+@WebServlet("/DoLogout")
 public class DoLogout extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

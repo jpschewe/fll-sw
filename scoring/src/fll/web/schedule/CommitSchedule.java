@@ -12,6 +12,7 @@ import java.sql.SQLException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -31,9 +32,8 @@ import fll.web.WebUtils;
  * Commit the schedule in uploadSchedule_schedule to the database for the
  * current tournament.
  * 
- * @web.servlet name="CommitSchedule"
- * @web.servlet-mapping url-pattern="/schedule/CommitSchedule"
  */
+@WebServlet("/schedule/CommitSchedule")
 public class CommitSchedule extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

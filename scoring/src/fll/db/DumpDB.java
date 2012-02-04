@@ -19,6 +19,7 @@ import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -39,9 +40,8 @@ import fll.web.SessionAttributes;
 /**
  * Dump the database.
  * 
- * @web.servlet name="DumpDB"
- * @web.servlet-mapping url-pattern="/admin/database.flldb"
  */
+@WebServlet("/admin/database.flldb")
 public final class DumpDB extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

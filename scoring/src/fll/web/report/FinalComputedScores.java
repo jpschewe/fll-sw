@@ -17,6 +17,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -57,9 +58,8 @@ import fll.xml.XMLUtils;
 /**
  * Final computed scores report.
  * 
- * @web.servlet name="FinalComputedScores"
- * @web.servlet-mapping url-pattern="/report/finalComputedScores.pdf"
  */
+@WebServlet("/report/finalComputedScores.pdf")
 public final class FinalComputedScores extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

@@ -37,6 +37,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -57,10 +58,7 @@ import fll.web.SessionAttributes;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
-/**
- * @web.servlet name="Top10"
- * @web.servlet-mapping url-pattern="/scoreboard/Top10"
- */
+@WebServlet("/scoreboard/Top10")
 public class Top10 extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
