@@ -53,6 +53,7 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FP;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.xml.WinnerType;
@@ -126,7 +127,7 @@ public class Top10 extends BaseFLLServlet {
                        Queries.getColorForDivisionIndex(divisionIndex), divisions.get(divisionIndex));
       formatter.format("</tr>");
 
-      final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
+      final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
       final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
 
       prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore FROM"

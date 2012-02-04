@@ -70,7 +70,7 @@ public class RankingReport extends BaseFLLServlet {
     try {
       final DataSource datasource = SessionAttributes.getDataSource(session);
       final Connection connection = datasource.getConnection();
-      final org.w3c.dom.Document challengeDocument = (org.w3c.dom.Document) application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
+      final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
       // create simple doc and write to a ByteArrayOutputStream
       final Document document = new Document(PageSize.LETTER);
