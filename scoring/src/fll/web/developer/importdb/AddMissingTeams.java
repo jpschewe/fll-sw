@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -33,9 +34,8 @@ import fll.web.SessionAttributes;
  * Add teams after promptCreateMissingTeams.jsp.
  * 
  * @author jpschewe
- * @web.servlet name="AddMissingTeams"
- * @web.servlet-mapping url-pattern="/developer/importdb/AddMissingTeams"
  */
+@WebServlet("/developer/importdb/AddMissingTeams")
 public class AddMissingTeams extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();

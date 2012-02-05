@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -35,9 +36,8 @@ import fll.web.WebUtils;
  * uploadSchedule_sheet.
  * </p>
  * 
- * @web.servlet name="GetSheetNames"
- * @web.servlet-mapping url-pattern="/schedule/GetSheetNames"
  */
+@WebServlet("/schedule/GetSheetNames")
 public class GetSheetNames extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

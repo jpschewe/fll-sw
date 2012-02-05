@@ -17,6 +17,7 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -41,9 +42,8 @@ import fll.xml.XMLUtils;
  * Display the report for scores by score group.
  * 
  * @author jpschewe
- * @web.servlet name="CategoryScoresByScoreGroup"
- * @web.servlet-mapping url-pattern="/report/CategoryScoresByScoreGroup"
  */
+@WebServlet("/report/CategoryScoresByScoreGroup")
 public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
@@ -53,7 +53,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
 
-    final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
+    final DataSource datasource = SessionAttributes.getDataSource(session);
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);

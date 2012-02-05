@@ -12,6 +12,7 @@ import java.sql.SQLException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -25,10 +26,7 @@ import org.w3c.dom.ProcessingInstruction;
 
 import fll.db.Queries;
 
-/**
- * @web.servlet name="DisplayChallengeDescriptor"
- * @web.servlet-mapping url-pattern="/challenge.xml"
- */
+@WebServlet("/challenge.xml")
 public class DisplayChallengeDescriptor extends BaseFLLServlet {
 
   /**

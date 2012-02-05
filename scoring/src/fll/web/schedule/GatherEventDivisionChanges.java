@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -34,9 +35,8 @@ import fll.web.WebUtils;
  * Commit the schedule in uploadSchedule_schedule to the database for the
  * current tournament.
  * 
- * @web.servlet name="GatherEventDivisionChanges"
- * @web.servlet-mapping url-pattern="/schedule/GatherEventDivisionChanges"
  */
+@WebServlet("/schedule/GatherEventDivisionChanges")
 public class GatherEventDivisionChanges extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

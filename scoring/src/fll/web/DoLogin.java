@@ -13,6 +13,7 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -25,9 +26,8 @@ import fll.db.Queries;
 /**
  * Handle login credentials and if incorrect redirect back to login page.
  * 
- * @web.servlet name="DoLogin"
- * @web.servlet-mapping url-pattern="/DoLogin"
  */
+@WebServlet("/DoLogin")
 public class DoLogin extends BaseFLLServlet {
 
   @Override

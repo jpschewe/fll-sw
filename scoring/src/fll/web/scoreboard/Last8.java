@@ -36,6 +36,7 @@ import java.util.Formatter;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -52,10 +53,7 @@ import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
-/**
- * @web.servlet name="Last8"
- * @web.servlet-mapping url-pattern="/scoreboard/Last8"
- */
+@WebServlet("/scoreboard/Last8")
 public class Last8 extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

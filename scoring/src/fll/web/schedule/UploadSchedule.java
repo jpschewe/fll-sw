@@ -11,6 +11,7 @@ import java.io.IOException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -30,9 +31,8 @@ import fll.web.WebUtils;
  * Saves an uploaded schedule into a temporary file referenced by the session
  * variable "uploadSchedule_file" (type {@link File}).
  * 
- * @web.servlet name="UploadSchedule"
- * @web.servlet-mapping url-pattern="/schedule/UploadSchedule"
  */
+@WebServlet("/schedule/UploadSchedule")
 public class UploadSchedule extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

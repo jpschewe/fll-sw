@@ -12,6 +12,7 @@ import java.sql.SQLException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -30,9 +31,8 @@ import fll.web.WebUtils;
 /**
  * Check if a schedule exists for the current tournament.
  * 
- * @web.servlet name="CheckScheduleExists"
- * @web.servlet-mapping url-pattern="/schedule/CheckScheduleExists"
  */
+@WebServlet("/schedule/CheckScheduleExists")
 public class CheckScheduleExists extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

@@ -19,6 +19,7 @@ import java.util.zip.ZipFile;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -45,9 +46,8 @@ import fll.web.UploadProcessor;
 /**
  * Java code behind uploading subjective scores
  * 
- * @web.servlet name="UploadSubjectiveData"
- * @web.servlet-mapping url-pattern="/admin/UploadSubjectiveData"
  */
+@WebServlet("/admin/UploadSubjectiveData")
 public final class UploadSubjectiveData extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

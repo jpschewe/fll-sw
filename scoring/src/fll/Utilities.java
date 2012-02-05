@@ -47,6 +47,7 @@ import fll.db.DataSourceSpy;
 import fll.db.ImportDB;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 
 /**
  * Some handy utilities.
@@ -178,8 +179,9 @@ public final class Utilities {
       } else {
         prep.setString(index, data);
       }
-    } else if("char".equals(typeLower)) {
-      if(null == data || "".equals(data.trim())) {
+    } else if ("char".equals(typeLower)) {
+      if (null == data
+          || "".equals(data.trim())) {
         prep.setNull(index, Types.CHAR);
       } else {
         prep.setString(index, data);
@@ -498,6 +500,12 @@ public final class Utilities {
   }
 
   /**
+   * Application attribute to hold names of all displays.
+   * Type is Set<String>
+   */
+  public static final String DISPLAY_NAMES_KEY = "displayNames";
+
+  /**
    * Add a display name to the list of known displays. Synchronized to avoid
    * race conditions.
    * 
@@ -508,12 +516,12 @@ public final class Utilities {
                                                     final String name) {
     // ServletContext isn't type safe
     @SuppressWarnings("unchecked")
-    Set<String> displayNames = (Set<String>) application.getAttribute("displayNames");
+    Set<String> displayNames = ApplicationAttributes.getAttribute(application, DISPLAY_NAMES_KEY, Set.class);
     if (null == displayNames) {
       displayNames = new HashSet<String>();
     }
     displayNames.add(name);
-    application.setAttribute("displayNames", displayNames);
+    application.setAttribute(DISPLAY_NAMES_KEY, displayNames);
   }
 
   /**
@@ -539,7 +547,8 @@ public final class Utilities {
    * Convert hours to minutes.
    */
   public static int convertHoursToMinutes(final int hours) {
-    return hours * MINUTES_PER_HOUR;
+    return hours
+        * MINUTES_PER_HOUR;
   }
 
   public static final long SECONDS_PER_MINUTE = 60;
@@ -547,13 +556,15 @@ public final class Utilities {
   public static final long MILLISECONDS_PER_SECOND = 1000;
 
   public static long convertMinutesToSeconds(final long minutes) {
-    return minutes * SECONDS_PER_MINUTE;
+    return minutes
+        * SECONDS_PER_MINUTE;
   }
-  
+
   public static long convertMinutesToMilliseconds(final long minutes) {
-    return convertMinutesToSeconds(minutes) * MILLISECONDS_PER_SECOND;
+    return convertMinutesToSeconds(minutes)
+        * MILLISECONDS_PER_SECOND;
   }
-  
+
   /**
    * Get the name of the file without the extension (if there is one).
    */
@@ -605,9 +616,8 @@ public final class Utilities {
   }
 
   /**
-   * If the string is longer than len, truncate it and append "..."
-   * 
-   * TODO move to JonsInfra
+   * If the string is longer than len, truncate it and append "..." TODO move to
+   * JonsInfra
    * 
    * @param name the string
    * @param len the max length for the string
