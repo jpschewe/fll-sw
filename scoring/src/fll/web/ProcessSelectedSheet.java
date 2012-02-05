@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -16,10 +17,8 @@ import javax.servlet.http.HttpSession;
 /**
  * Grap the sheetName parameter and put it into the session.
  * 
- * @web.servlet name="ProcessSelectedSheet"
- * @web.servlet-mapping url-pattern="/ProcessSelectedSheet"
- * 
  */
+@WebServlet("/ProcessSelectedSheet")
 public final class ProcessSelectedSheet extends BaseFLLServlet {
 
   protected void processRequest(final HttpServletRequest request,

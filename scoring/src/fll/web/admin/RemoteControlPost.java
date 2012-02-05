@@ -11,6 +11,7 @@ import java.util.Collection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -21,10 +22,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
-/**
- * @web.servlet name="RemoteControlPost"
- * @web.servlet-mapping url-pattern="/admin/RemoteControlPost"
- */
+@WebServlet("/admin/RemoteControlPost")
 public class RemoteControlPost extends BaseFLLServlet {
 
   private static final Logger LOGGER = Logger.getLogger(RemoteControlPost.class.getName());

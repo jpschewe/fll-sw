@@ -11,6 +11,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -31,10 +32,8 @@ import fll.util.LogUtils;
  * "uploadRedirect". The sheet name will be stored in the session attribute
  * "sheetName".
 
- * @web.servlet name="UploadSpreadsheet"
- * @web.servlet-mapping url-pattern="/UploadSpreadsheet"
- * 
  */
+@WebServlet("/UploadSpreadsheet")
 public final class UploadSpreadsheet extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();

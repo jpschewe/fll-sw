@@ -22,6 +22,7 @@ import java.util.zip.ZipOutputStream;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -36,15 +37,15 @@ import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.db.Queries;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
 /**
  * Commit the changes made by editTeam.jsp.
  * 
- * @web.servlet name="DownloadSubjectiveData"
- * @web.servlet-mapping url-pattern="/admin/subjective-data.fll"
  */
+@WebServlet("/admin/subjective-data.fll")
 public class DownloadSubjectiveData extends BaseFLLServlet {
 
   protected void processRequest(final HttpServletRequest request,
@@ -54,7 +55,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
     final DataSource datasource = SessionAttributes.getDataSource(session);
     try {
       final Connection connection = datasource.getConnection();
-      final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
+      final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
       if (Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
         response.reset();
         response.setContentType("application/zip");

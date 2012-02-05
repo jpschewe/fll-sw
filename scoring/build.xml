@@ -248,7 +248,7 @@
   ==================== Compile Target ==================================
   -->
 
-  <target name="compile" depends="prepare,compile.classes,compile.jsp,generate-descriptor" description="Compile Java sources">
+  <target name="compile" depends="prepare,compile.classes,compile.jsp" description="Compile Java sources">
 
     <!-- copy scripts -->
     <copy todir="${dir.build}/bin">
@@ -345,7 +345,7 @@
   </target>
 
   <import file="${dir.tomcat.src}/bin/catalina-tasks.xml" />
-  <target name="generate.jsp" depends="prepare,tomcat.expand,generate-descriptor" description="Generate Java sources for JSP files" unless="jsp.notRequired">
+  <target name="generate.jsp" depends="prepare" description="Generate Java sources for JSP files" unless="jsp.notRequired">
 
     <jasper validateXml="false" uriroot="${dir.web}" webXmlFragment="${dir.src.jsp}/generated_web.xml" outputDir="${dir.src.jsp}" />
 
@@ -367,17 +367,6 @@
         </fileset>
       </classpath-elements>
     </compile>
-    <!--
-    <javac destdir="${dir.src.jsp}" optimize="${compile.optimize}"
-    debug="${compile.debug}" deprecation="${compile.deprecation}"
-    failonerror="true" srcdir="${dir.src.jsp}" excludes="**/*.smap">
-    <classpath> <path refid="compile.classpath" /> <fileset
-    dir="${dir.web}/WEB-INF/lib"> <include name="*.jar" /> </fileset>
-    <fileset dir="${dir.tomcat}/lib"> <include name="*.jar" /> </fileset>
-    <fileset dir="${dir.tomcat}/bin"> <include name="*.jar" /> </fileset>
-  </classpath> <include name="**" /> <exclude name="tags/**" />
-  </javac>
-    -->
   </target>
 
 
@@ -428,13 +417,6 @@
     <attribute name="inside.test" />
 
     <sequential>
-      <!-- for when running the unit tests -->
-      <!--
-      <copy todir="${dir.tomcat}/shared/lib"> <fileset
-      dir="${dir.lib}/cobertura"> <include name="*.jar" /> </fileset>
-    </copy>
-      -->
-
       <java classname="org.apache.catalina.startup.Bootstrap" fork="true" spawn="@{spawn}" taskname="tomcat">
         <sysproperty key="net.sourceforge.cobertura.datafile" value="${dir.coverage}/tomcat-cobertura.ser" />
 
@@ -529,12 +511,6 @@
       </fileset>
     </chmod>
 
-    <!-- get the correct web.xml file -->
-    <!--
-    copy file="web/WEB-INF/${dist.web.config}"
-    tofile="${dir.web}/WEB-INF/web.xml" overwrite="true" /
-    -->
-
     <!-- copy web stuff -->
     <copy todir="${dir.dist}">
       <fileset dir="${dir.build}">
@@ -581,12 +557,6 @@
       <tag name="pre" scope="constructors,methods" description="PreConditions" />
       <tag name="post" scope="constructors,methods" description="PostConditions" />
       <tag name="invariant" scope="types,constructors" description="Invariants" />
-      <tag name="web.servlet" scope="types" />
-      <tag name="web.servlet-init-param" scope="types" />
-      <tag name="web.servlet-mapping" scope="types" />
-      <tag name="web.listener" scope="types" />
-      <tag name="web.filter" scope="types" />
-      <tag name="web.filter-mapping" scope="types" />
 
       <classpath>
         <path refid="compile.classpath" />
@@ -637,13 +607,6 @@
         <include name="jsr305.jar" />
       </fileset>
     </copy>
-
-    <!-- get the correct web.xml file -->
-    <!--
-    copy file="web/WEB-INF/${web.config}"
-    tofile="${dir.web}/WEB-INF/web.xml" overwrite="true" /
-    -->
-
   </target>
 
   <!-- ==================== Selenium ==================== -->
@@ -852,33 +815,6 @@
         <include name="**/*.java" />
       </fileset>
     </cpd>
-  </target>
-
-  <!-- XDoclet -->
-  <path id="xdoclet.classpath">
-    <fileset dir="${dir.lib}/ant/xdoclet">
-      <include name="*.jar" />
-    </fileset>
-    <!-- tomcat libraries -->
-    <pathelement location="${dir.tomcat.src}/lib/servlet-api.jar" />
-    <pathelement location="${dir.tomcat.src}/lib/jsp-api.jar" />
-  </path>
-
-  <taskdef name="webdoclet" classname="xdoclet.modules.web.WebDocletTask" classpathref="xdoclet.classpath" />
-
-  <target name="generate-descriptor" depends="prepare">
-    <webdoclet destdir="${dir.web}/WEB-INF" mergeDir="${basedir}/xdoclet-merge" excludedtags="@version,@author" verbose="false">
-
-      <fileset dir="${dir.src}">
-        <include name="**/*.java" />
-        <contains text="@web" />
-      </fileset>
-
-      <deploymentdescriptor servletspec="2.4" sessiontimeout="30">
-      </deploymentdescriptor>
-
-
-    </webdoclet>
   </target>
 
 </project>

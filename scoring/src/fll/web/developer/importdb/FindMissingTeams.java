@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -28,12 +29,12 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
 /**
- * Servlet to find teams that are missing via {@link ImportDB#findMissingTeams(Connection, Connection, String)}.
+ * Servlet to find teams that are missing via
+ * {@link ImportDB#findMissingTeams(Connection, Connection, String)}.
  * 
  * @author jpschewe
- * @web.servlet name="FindMissingTeams"
- * @web.servlet-mapping url-pattern="/developer/importdb/FindMissingTeams"
  */
+@WebServlet("/developer/importdb/FindMissingTeams")
 public class FindMissingTeams extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();
@@ -50,15 +51,15 @@ public class FindMissingTeams extends BaseFLLServlet {
       final String tournament = SessionAttributes.getNonNullAttribute(session, "selectedTournament", String.class);
       final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
       sourceConnection = sourceDataSource.getConnection();
-      
+
       final DataSource destDataSource = SessionAttributes.getDataSource(session);
       destConnection = destDataSource.getConnection();
 
       final List<Team> missingTeams = ImportDB.findMissingTeams(sourceConnection, destConnection, tournament);
-      if(missingTeams.isEmpty()) {
+      if (missingTeams.isEmpty()) {
         session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTeamInfo");
       } else {
-        session.setAttribute("missingTeams", missingTeams);       
+        session.setAttribute("missingTeams", missingTeams);
         session.setAttribute(SessionAttributes.REDIRECT_URL, "promptCreateMissingTeams.jsp");
       }
     } catch (final SQLException sqle) {
@@ -70,7 +71,8 @@ public class FindMissingTeams extends BaseFLLServlet {
     }
 
     session.setAttribute("message", message.toString());
-    response.sendRedirect(response.encodeRedirectURL((String) session.getAttribute("redirect_url")));
+    response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getNonNullAttribute(session, "redirect_url",
+                                                                                           String.class)));
   }
 
 }

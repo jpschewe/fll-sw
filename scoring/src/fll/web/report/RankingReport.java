@@ -16,6 +16,7 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -47,9 +48,8 @@ import fll.web.SessionAttributes;
 
 /**
  * @author jpschewe
- * @web.servlet name="RankingReport"
- * @web.servlet-mapping url-pattern="/report/RankingReport"
  */
+@WebServlet("/report/RankingReport")
 public class RankingReport extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();
@@ -70,7 +70,7 @@ public class RankingReport extends BaseFLLServlet {
     try {
       final DataSource datasource = SessionAttributes.getDataSource(session);
       final Connection connection = datasource.getConnection();
-      final org.w3c.dom.Document challengeDocument = (org.w3c.dom.Document) application.getAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
+      final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
       // create simple doc and write to a ByteArrayOutputStream
       final Document document = new Document(PageSize.LETTER);

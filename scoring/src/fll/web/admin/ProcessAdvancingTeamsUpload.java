@@ -19,6 +19,7 @@ import java.util.LinkedList;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -38,9 +39,8 @@ import fll.web.SessionAttributes;
 /**
  * Process the uploaded data and forward to GatherAdvancementData.
  * 
- * @web.servlet name="ProcessAdvancingTeamsUpload"
- * @web.servlet-mapping url-pattern="/admin/ProcessAdvancingTeamsUpload"
  */
+@WebServlet("/admin/ProcessAdvancingTeamsUpload")
 public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
@@ -77,7 +77,7 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
       }
 
       // process as if the user had selected these teams
-      final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
+      final DataSource datasource = SessionAttributes.getDataSource(session);
       final Connection connection = datasource.getConnection();
       GatherAdvancementData.processAdvancementData(response, session, false, connection, teams);
     } catch (final SQLException sqle) {

@@ -12,6 +12,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -34,9 +35,8 @@ import fll.xml.ChallengeParser;
  * Create a new database either from an xml descriptor or from a database dump.
  * 
  * @author jpschewe
- * @web.servlet name="CreateDB"
- * @web.servlet-mapping url-pattern="/setup/CreateDB"
  */
+@WebServlet("/setup/CreateDB")
 public class CreateDB extends BaseFLLServlet {
 
   private static final Logger LOG = LogUtils.getLogger();

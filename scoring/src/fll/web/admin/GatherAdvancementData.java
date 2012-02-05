@@ -19,6 +19,7 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -36,9 +37,8 @@ import fll.web.SessionAttributes;
 
 /**
  * Gather data for advancement of teams.
- * @web.servlet name="GatherAdvancementData"
- * @web.servlet-mapping url-pattern="/admin/GatherAdvancementData"
  */
+@WebServlet("/admin/GatherAdvancementData")
 public class GatherAdvancementData extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
@@ -51,7 +51,7 @@ public class GatherAdvancementData extends BaseFLLServlet {
       LOGGER.trace("Top of GatherAdvancementData.doPost");
     }
 
-    final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
+    final DataSource datasource = SessionAttributes.getDataSource(session);
 
     final String[] teamsToAdvance = request.getParameterValues("advance");
 

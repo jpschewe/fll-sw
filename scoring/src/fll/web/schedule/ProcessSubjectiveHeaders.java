@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -24,10 +25,8 @@ import fll.web.WebUtils;
 /**
  * Processes results of chooseSubjectiveHeaders.jsp and redirects to
  * {@link CheckViolations}.
- * 
- * @web.servlet name="ProcessSubjectiveHeaders"
- * @web.servlet-mapping url-pattern="/schedule/ProcessSubjectiveHeaders"
  */
+@WebServlet("/schedule/ProcessSubjectiveHeaders")
 public class ProcessSubjectiveHeaders extends BaseFLLServlet {
 
   @Override
@@ -38,9 +37,8 @@ public class ProcessSubjectiveHeaders extends BaseFLLServlet {
 
     // J2EE doesn't have things typed yet
     @SuppressWarnings("unchecked")
-    final List<String> unusedHeaders = (List<String>) SessionAttributes.getNonNullAttribute(session,
-                                                                                            CheckViolations.UNUSED_HEADERS,
-                                                                                            List.class);
+    final List<String> unusedHeaders = SessionAttributes.getNonNullAttribute(session, CheckViolations.UNUSED_HEADERS,
+                                                                             List.class);
 
     // get params for subjectiveHeader
     final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();

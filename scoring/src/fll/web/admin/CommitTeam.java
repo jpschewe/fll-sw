@@ -12,6 +12,7 @@ import java.text.ParseException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -23,15 +24,15 @@ import org.w3c.dom.Document;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
 /**
  * Commit the changes made by editTeam.jsp.
  * 
- * @web.servlet name="CommitTeam"
- * @web.servlet-mapping url-pattern="/admin/CommitTeam"
  */
+@WebServlet("/admin/CommitTeam")
 public class CommitTeam extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
@@ -45,8 +46,8 @@ public class CommitTeam extends BaseFLLServlet {
     }
 
     final StringBuilder message = new StringBuilder();
-    final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
-    final DataSource datasource = (DataSource) session.getAttribute(SessionAttributes.DATASOURCE);
+    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+    final DataSource datasource = SessionAttributes.getDataSource(session);
 
     try {
       final Connection connection = datasource.getConnection();

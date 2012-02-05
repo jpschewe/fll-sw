@@ -5,6 +5,7 @@
  */
 package fll.web;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 
 import org.apache.log4j.Logger;
@@ -13,8 +14,8 @@ import fll.util.LogUtils;
 
 /**
  * @author jpschewe
- * @web.servlet load-on-startup="1" name="log4j-init"
  */
+@WebServlet(urlPatterns="/log4j-init", loadOnStartup=1)
 public class Log4jInit extends HttpServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
