@@ -11,6 +11,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -67,6 +68,12 @@ public final class Utilities {
     NUMBER_FORMAT_INSTANCE.setMinimumFractionDigits(2);
   }
 
+  /**
+   * Character set to use throughout the software. Currently set to UTF-8. 
+   */
+  public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+  
+  
   private Utilities() {
   }
 

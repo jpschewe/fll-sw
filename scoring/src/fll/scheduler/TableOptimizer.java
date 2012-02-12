@@ -7,8 +7,9 @@
 package fll.scheduler;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -322,7 +323,7 @@ public class TableOptimizer {
   private void writeSchedule(final File outputFile) throws IOException {
     CSVWriter csv = null;
     try {
-      csv = new CSVWriter(new FileWriter(outputFile));
+      csv = new CSVWriter(new OutputStreamWriter(new FileOutputStream(outputFile), Utilities.DEFAULT_CHARSET));
 
       final List<String> line = new ArrayList<String>();
       line.add(TournamentSchedule.TEAM_NUMBER_HEADER);

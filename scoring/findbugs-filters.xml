@@ -10,10 +10,5 @@
     <Bug pattern="DM_CONVERT_CASE" />
   </Match>
 
-  <!-- don't worry about default encoding yet, but maybe should -->
-  <Match>
-    <Bug pattern="DM_DEFAULT_ENCODING" />
-  </Match>
-
 </FindBugsFilter>
 
