@@ -8,8 +8,8 @@ package fll.web.admin;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -38,7 +38,6 @@ import fll.web.SessionAttributes;
 
 /**
  * Process the uploaded data and forward to GatherAdvancementData.
- * 
  */
 @WebServlet("/admin/ProcessAdvancingTeamsUpload")
 public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
@@ -127,7 +126,8 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
       // determine if the file is tab separated or comma separated, check the
       // first line for tabs and if they aren't found, assume it's comma
       // separated
-      final BufferedReader breader = new BufferedReader(new FileReader(file));
+      final BufferedReader breader = new BufferedReader(new InputStreamReader(new FileInputStream(file),
+                                                                              Utilities.DEFAULT_CHARSET));
       try {
         final String firstLine = breader.readLine();
         if (null == firstLine) {

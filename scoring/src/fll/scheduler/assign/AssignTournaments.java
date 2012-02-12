@@ -7,9 +7,11 @@
 package fll.scheduler.assign;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -30,10 +32,10 @@ import net.mtu.eggplant.util.BasicFileFilter;
 
 import org.apache.log4j.Logger;
 
-import fll.util.LogUtils;
-
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
+import fll.Utilities;
+import fll.util.LogUtils;
 
 /**
  * 
@@ -108,10 +110,11 @@ public class AssignTournaments {
       final AssignTournaments assign = new AssignTournaments(file, tournaments);
       final List<TeamInfo> allTeams = assign.loadTeamInformation();
       assign.schedule(allTeams);
-      
+
       final File outputFile = new File("assignments.csv");
       assign.writeSchedule(outputFile);
-      LOGGER.info("Wrote assignments to " + outputFile.getAbsolutePath());
+      LOGGER.info("Wrote assignments to "
+          + outputFile.getAbsolutePath());
     }
 
   }
@@ -167,7 +170,8 @@ public class AssignTournaments {
       return Collections.emptyList();
     }
 
-    final CSVReader csvreader = new CSVReader(new FileReader(file));
+    final CSVReader csvreader = new CSVReader(new InputStreamReader(new FileInputStream(file),
+                                                                    Utilities.DEFAULT_CHARSET));
     findColumns(csvreader);
 
     return parseData(csvreader);
@@ -231,7 +235,7 @@ public class AssignTournaments {
    * 
    * @throws IOException
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="DM_EXIT", justification="Method is documented to cause an exit")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DM_EXIT", justification = "Method is documented to cause an exit")
   private void findColumns(final CSVReader csvreader) throws IOException {
     initializeColumnAssignments();
 
@@ -266,33 +270,29 @@ public class AssignTournaments {
 
   private final Map<String, Map<String, TournamentInfo>> tournaments;
 
-  public AssignTournaments(final File file, final Map<String, Map<String, TournamentInfo>> tournaments) {
+  public AssignTournaments(final File file,
+                           final Map<String, Map<String, TournamentInfo>> tournaments) {
     this.file = file;
     this.tournaments = tournaments;
   }
 
   public void writeSchedule(final File file) throws IOException, ParseException {
-    final CSVWriter writer = new CSVWriter(new FileWriter(file));
-    final String[] header = { "Tournament", "Team Name", "Team Number", "Division", "Registration Date", "Pref 1", "Pref 2", "Pref 3" };
+    final CSVWriter writer = new CSVWriter(
+                                           new OutputStreamWriter(new FileOutputStream(file), Utilities.DEFAULT_CHARSET));
+    final String[] header = { "Tournament", "Team Name", "Team Number", "Division", "Registration Date", "Pref 1",
+                             "Pref 2", "Pref 3" };
 
     writer.writeNext(header);
     for (final Map<String, TournamentInfo> tournamentMap : tournaments.values()) {
       for (final TournamentInfo tournament : tournamentMap.values()) {
         final Set<TeamInfo> teams = tournament.getTeams();
         LOGGER.info(tournament.getName()
-            + " div: " + tournament.getDivision() + " min: " + tournament.getMin() + " max: " + tournament.getMax() + " teams: " + teams.size());
-        for(final TeamInfo team : teams) {
-          String[] line = 
-          {
-           tournament.getName(),
-           team.getName(),
-           String.valueOf(team.getNumber()),
-           team.getDivision(),
-           formatSignupDate(team.getRegistrationDate()),
-           team.getPref1(),
-           team.getPref2(),
-           team.getPref3()
-          };
+            + " div: " + tournament.getDivision() + " min: " + tournament.getMin() + " max: " + tournament.getMax()
+            + " teams: " + teams.size());
+        for (final TeamInfo team : teams) {
+          String[] line = { tournament.getName(), team.getName(), String.valueOf(team.getNumber()), team.getDivision(),
+                           formatSignupDate(team.getRegistrationDate()), team.getPref1(), team.getPref2(),
+                           team.getPref3() };
           writer.writeNext(line);
         }
       }
@@ -311,7 +311,8 @@ public class AssignTournaments {
     for (final TeamInfo team : allTeams) {
       final Map<String, TournamentInfo> divTournaments = tournaments.get(team.getDivision());
       if (null == divTournaments) {
-        throw new RuntimeException(String.format("No tournaments for division: '%s' team: %d", team.getDivision(), team.getNumber()));
+        throw new RuntimeException(String.format("No tournaments for division: '%s' team: %d", team.getDivision(),
+                                                 team.getNumber()));
       } else {
         if (!tryToAssignToTournament(team, divTournaments, team.getPref1())) {
           if (!tryToAssignToTournament(team, divTournaments, team.getPref2())) {
@@ -327,7 +328,8 @@ public class AssignTournaments {
     for (final TeamInfo team : unassigned) {
       final Map<String, TournamentInfo> divTournaments = tournaments.get(team.getDivision());
       if (null == divTournaments) {
-        throw new RuntimeException(String.format("No tournaments for division: %s team: %d", team.getDivision(), team.getNumber()));
+        throw new RuntimeException(String.format("No tournaments for division: %s team: %d", team.getDivision(),
+                                                 team.getNumber()));
       } else {
         boolean assigned = false;
         for (final TournamentInfo tournament : divTournaments.values()) {
@@ -337,14 +339,18 @@ public class AssignTournaments {
           }
         }
         if (!assigned) {
-          throw new RuntimeException(String.format("Unable to find any teams for team: %d - this is a programming error", team.getNumber()));
+          throw new RuntimeException(
+                                     String.format("Unable to find any teams for team: %d - this is a programming error",
+                                                   team.getNumber()));
         }
       }
     }
 
   }
 
-  private boolean tryToAssignToTournament(final TeamInfo team, final Map<String, TournamentInfo> divTournaments, final String pref) {
+  private boolean tryToAssignToTournament(final TeamInfo team,
+                                          final Map<String, TournamentInfo> divTournaments,
+                                          final String pref) {
     final TournamentInfo preferredTournament = divTournaments.get(pref);
     if (null == preferredTournament) {
       LOGGER.warn(String.format("Unknown tournament '%s' team: %s div: %s", pref, team.getNumber(), team.getDivision()));

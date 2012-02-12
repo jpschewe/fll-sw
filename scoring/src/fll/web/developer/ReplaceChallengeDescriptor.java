@@ -24,6 +24,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
+import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -51,19 +52,19 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
       final DataSource datasource = SessionAttributes.getDataSource(session);
       final Connection connection = datasource.getConnection();
 
-      
       final Document curDoc = ApplicationAttributes.getChallengeDocument(application);
-      
+
       // must be first to ensure the form parameters are set
       UploadProcessor.processUpload(request);
 
       // create a new empty database from an XML descriptor
       final FileItem xmlFileItem = (FileItem) request.getAttribute("xmldoc");
-      
-      final Document newDoc= ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream()));
-      
+
+      final Document newDoc = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
+                                                                          Utilities.DEFAULT_CHARSET));
+
       final String compareMessage = ChallengeParser.compareStructure(curDoc, newDoc);
-      if(null == compareMessage) {
+      if (null == compareMessage) {
         GenerateDB.insertOrUpdateChallengeDocument(newDoc, connection);
         application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, newDoc);
         message.append("<p><i>Successfully replaced challenge descriptor</i></p>");
@@ -86,7 +87,7 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Top of ReplaceChallengeDescriptor.doPost");
     }
-    
+
     session.setAttribute("message", message.toString());
     response.sendRedirect(response.encodeRedirectURL("index.jsp"));
 

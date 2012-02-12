@@ -6,8 +6,9 @@
 package fll.xml;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.text.ParseException;
@@ -83,7 +84,7 @@ public final class ChallengeParser {
       System.exit(1);
     }
     try {
-      final FileReader input = new FileReader(challengeFile);
+      final Reader input = new InputStreamReader(new FileInputStream(challengeFile), Utilities.DEFAULT_CHARSET);
       final Document challengeDocument = ChallengeParser.parse(input);
       if (null == challengeDocument) {
         LOG.fatal("Error parsing challenge descriptor");
@@ -213,7 +214,8 @@ public final class ChallengeParser {
           goals.put(name, element);
 
           // check initial values
-          final double initialValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("initialValue")).doubleValue();
+          final double initialValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("initialValue"))
+                                                                      .doubleValue();
           if (XMLUtils.isEnumeratedGoal(element)) {
             boolean foundMatch = false;
             for (final Element valueEle : new NodelistElementCollectionAdapter(element.getChildNodes())) {
@@ -223,46 +225,53 @@ public final class ChallengeParser {
               }
             }
             if (!foundMatch) {
-              throw new RuntimeException(String.format("Initial value for %s(%f) does not match the score of any value element within the goal", name,
-                                                       initialValue));
+              throw new RuntimeException(
+                                         String.format("Initial value for %s(%f) does not match the score of any value element within the goal",
+                                                       name, initialValue));
             }
 
           } else {
             final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
             final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
             if (FP.lessThan(initialValue, min, INITIAL_VALUE_TOLERANCE)) {
-              throw new RuntimeException(String.format("Initial value for %s(%f) is less than min(%f)", name, initialValue, min));
+              throw new RuntimeException(String.format("Initial value for %s(%f) is less than min(%f)", name,
+                                                       initialValue, min));
             }
             if (FP.greaterThan(initialValue, max, INITIAL_VALUE_TOLERANCE)) {
-              throw new RuntimeException(String.format("Initial value for %s(%f) is greater than max(%f)", name, initialValue, max));
+              throw new RuntimeException(String.format("Initial value for %s(%f) is greater than max(%f)", name,
+                                                       initialValue, max));
             }
           }
         }
 
         // for all computedGoals
-        for (final Element computedGoalElement : new NodelistElementCollectionAdapter(childElement.getElementsByTagName("computedGoal"))) {
+        for (final Element computedGoalElement : new NodelistElementCollectionAdapter(
+                                                                                      childElement.getElementsByTagName("computedGoal"))) {
 
           // for all termElements
-          for (final Element termElement : new NodelistElementCollectionAdapter(computedGoalElement.getElementsByTagName("term"))) {
+          for (final Element termElement : new NodelistElementCollectionAdapter(
+                                                                                computedGoalElement.getElementsByTagName("term"))) {
 
             // check that the computed goal only references goals
             final String referencedGoalName = termElement.getAttribute("goal");
             if (!goals.containsKey(referencedGoalName)) {
               throw new RuntimeException("Computed goal '"
-                  + computedGoalElement.getAttribute("name") + "' references goal '" + referencedGoalName + "' which is not a standard goal");
+                  + computedGoalElement.getAttribute("name") + "' references goal '" + referencedGoalName
+                  + "' which is not a standard goal");
             }
           }
 
           // for all goalRef elements
-          for (final Element goalRefElement : new NodelistElementCollectionAdapter(computedGoalElement.getElementsByTagName("goalRef"))) {
+          for (final Element goalRefElement : new NodelistElementCollectionAdapter(
+                                                                                   computedGoalElement.getElementsByTagName("goalRef"))) {
 
             // can't reference a non-enum goal with goalRef in enumCond
             final String referencedGoalName = goalRefElement.getAttribute("goal");
             final Element referencedGoalElement = goals.get(referencedGoalName);
             if (!XMLUtils.isEnumeratedGoal(referencedGoalElement)) {
               throw new RuntimeException("Computed goal '"
-                  + computedGoalElement.getAttribute("name") + "' has a goalRef element that references goal '" + referencedGoalName + " "
-                  + referencedGoalElement + "' which is not an enumerated goal");
+                  + computedGoalElement.getAttribute("name") + "' has a goalRef element that references goal '"
+                  + referencedGoalName + " " + referencedGoalElement + "' which is not an enumerated goal");
             }
           }
 
@@ -276,8 +285,9 @@ public final class ChallengeParser {
           // can't use the raw score of an enum inside a polynomial term
           if ("raw".equals(goalValueType)
               && (XMLUtils.isEnumeratedGoal(referencedGoalElement) || XMLUtils.isComputedGoal(referencedGoalElement))) {
-            throw new RuntimeException("Cannot use the raw score from an enumerated or computed goal in a polynomial term.  Referenced goal '"
-                + referencedGoalName + "'");
+            throw new RuntimeException(
+                                       "Cannot use the raw score from an enumerated or computed goal in a polynomial term.  Referenced goal '"
+                                           + referencedGoalName + "'");
           }
         }
 
@@ -307,11 +317,14 @@ public final class ChallengeParser {
       return goalCompareMessage;
     }
 
-    final List<Element> curSubCats = new NodelistElementCollectionAdapter(curDocRoot.getElementsByTagName("subjectiveCategory")).asList();
-    final List<Element> newSubCats = new NodelistElementCollectionAdapter(newDocRoot.getElementsByTagName("subjectiveCategory")).asList();
+    final List<Element> curSubCats = new NodelistElementCollectionAdapter(
+                                                                          curDocRoot.getElementsByTagName("subjectiveCategory")).asList();
+    final List<Element> newSubCats = new NodelistElementCollectionAdapter(
+                                                                          newDocRoot.getElementsByTagName("subjectiveCategory")).asList();
     if (curSubCats.size() != newSubCats.size()) {
       return "New document has "
-          + newSubCats.size() + " subjective categories, current document has " + curSubCats.size() + " subjective categories";
+          + newSubCats.size() + " subjective categories, current document has " + curSubCats.size()
+          + " subjective categories";
     }
     final Map<String, Map<String, String>> curCats = new HashMap<String, Map<String, String>>();
     for (final Element ele : curSubCats) {
@@ -343,7 +356,8 @@ public final class ChallengeParser {
                                                final Map<String, String> newGoals) {
     if (curGoals.size() != newGoals.size()) {
       return "New document has "
-          + newGoals.size() + " goals in category '" + category + "', current document has " + curGoals.size() + " goals";
+          + newGoals.size() + " goals in category '" + category + "', current document has " + curGoals.size()
+          + " goals";
     }
 
     for (final Map.Entry<String, String> curEntry : curGoals.entrySet()) {
@@ -355,8 +369,8 @@ public final class ChallengeParser {
       final String newDef = newGoals.get(curEntry.getKey());
       if (!curDef.equals(newDef)) {
         return "Database definition for goal '"
-            + curEntry.getKey() + "' in category '" + category + "' is different in the new document from the current document" + " '" + curDef + "' vs '"
-            + newDef + "'";
+            + curEntry.getKey() + "' in category '" + category
+            + "' is different in the new document from the current document" + " '" + curDef + "' vs '" + newDef + "'";
       }
     }
     return null;

@@ -22,6 +22,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
+import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.ImportDB;
 import fll.util.LogUtils;
@@ -59,7 +60,8 @@ public class CreateDB extends BaseFLLServlet {
         if (null == xmlFileItem) {
           message.append("<p class='error'>XML description document not specified</p>");
         } else {
-          final Document document = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream()));
+          final Document document = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
+                                                                                Utilities.DEFAULT_CHARSET));
 
           final String db = getServletConfig().getServletContext().getRealPath("/WEB-INF/flldb");
           GenerateDB.generateDB(document, db, forceRebuild);
