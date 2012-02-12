@@ -70,7 +70,8 @@ public final class SubjectiveUtils {
       masterScoreStream.close();
 
       final InputStream masterChallengeStream = masterZipfile.getInputStream(masterZipfile.getEntry("challenge.xml"));
-      final Document masterChallengeDoc = ChallengeParser.parse(new InputStreamReader(masterChallengeStream));
+      final Document masterChallengeDoc = ChallengeParser.parse(new InputStreamReader(masterChallengeStream,
+                                                                                      Utilities.DEFAULT_CHARSET));
       masterChallengeStream.close();
 
       compareZipfile = new ZipFile(compareFile);
@@ -84,7 +85,8 @@ public final class SubjectiveUtils {
       compareScoreStream.close();
 
       final InputStream compareChallengeStream = compareZipfile.getInputStream(compareZipfile.getEntry("challenge.xml"));
-      final Document compareChallengeDoc = ChallengeParser.parse(new InputStreamReader(compareChallengeStream));
+      final Document compareChallengeDoc = ChallengeParser.parse(new InputStreamReader(compareChallengeStream,
+                                                                                       Utilities.DEFAULT_CHARSET));
       compareChallengeStream.close();
 
       compareZipfile.close();

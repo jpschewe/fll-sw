@@ -310,16 +310,16 @@ public final class ImportDB {
     while (null != (entry = zipfile.getNextEntry())) {
       final String name = entry.getName();
       if ("challenge.xml".equals(name)) {
-        final Reader reader = new InputStreamReader(zipfile);
+        final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
         challengeDocument = ChallengeParser.parse(reader);
       } else if (name.endsWith(".csv")) {
         final String tablename = name.substring(0, name.indexOf(".csv")).toLowerCase();
-        final Reader reader = new InputStreamReader(zipfile);
+        final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
         final String content = IOUtils.readIntoString(reader);
         tableData.put(tablename, content);
       } else if (name.endsWith(".types")) {
         final String tablename = name.substring(0, name.indexOf(".types")).toLowerCase();
-        final Reader reader = new InputStreamReader(zipfile);
+        final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
         final CSVReader csvreader = new CSVReader(reader);
         final Map<String, String> columnTypes = new HashMap<String, String>();
 

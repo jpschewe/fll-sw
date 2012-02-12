@@ -7,9 +7,13 @@
 package fll.scheduler;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -189,9 +193,9 @@ public class GreedySolver {
     }
 
     final Properties properties = new Properties();
-    FileReader reader = null;
+    Reader reader = null;
     try {
-      reader = new FileReader(datafile);
+      reader = new InputStreamReader(new FileInputStream(datafile), Utilities.DEFAULT_CHARSET);
       properties.load(reader);
     } finally {
       if (null != reader) {
@@ -1171,9 +1175,9 @@ public class GreedySolver {
 
     final ObjectiveValue objective = computeObjectiveValue(scheduleFile);
 
-    FileWriter objectiveWriter = null;
+    Writer objectiveWriter = null;
     try {
-      objectiveWriter = new FileWriter(objectiveFile);
+      objectiveWriter = new OutputStreamWriter(new FileOutputStream(objectiveFile), Utilities.DEFAULT_CHARSET);
       objectiveWriter.write(objective.toString());
       objectiveWriter.close();
     } catch (final IOException e) {
@@ -1242,7 +1246,7 @@ public class GreedySolver {
   private void outputSchedule(final File schedule) throws IOException {
     CSVWriter csv = null;
     try {
-      csv = new CSVWriter(new FileWriter(schedule));
+      csv = new CSVWriter(new OutputStreamWriter(new FileOutputStream(schedule), Utilities.DEFAULT_CHARSET));
       final List<String> line = new ArrayList<String>();
       line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
       line.add(TournamentSchedule.DIVISION_HEADER);
