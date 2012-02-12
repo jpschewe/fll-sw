@@ -7,11 +7,13 @@
 package fll.util;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import au.com.bytecode.opencsv.CSVReader;
+import fll.Utilities;
 
 /**
  * Read csv files.
@@ -23,15 +25,16 @@ public class CSVCellReader extends CellFileReader {
   /**
    * @see CSVReader#CSVReader(java.io.Reader, char)
    */
-  public CSVCellReader(final File file, final char separator) throws FileNotFoundException {
-    delegate = new CSVReader(new FileReader(file), separator);
+  public CSVCellReader(final File file,
+                       final char separator) throws FileNotFoundException {
+    delegate = new CSVReader(new InputStreamReader(new FileInputStream(file), Utilities.DEFAULT_CHARSET), separator);
   }
-  
+
   /**
    * @see CSVReader#CSVReader(java.io.Reader)
    */
   public CSVCellReader(final File file) throws FileNotFoundException {
-    delegate = new CSVReader(new FileReader(file));
+    delegate = new CSVReader(new InputStreamReader(new FileInputStream(file), Utilities.DEFAULT_CHARSET));
   }
 
   /**
@@ -42,7 +45,7 @@ public class CSVCellReader extends CellFileReader {
   }
 
   /**
-   * @throws IOException 
+   * @throws IOException
    * @see fll.util.CellFileReader#readNext()
    */
   public String[] readNext() throws IOException {

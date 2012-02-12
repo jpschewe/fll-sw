@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -71,6 +70,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.Utilities;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.xml.ChallengeParser;
@@ -143,7 +143,7 @@ public final class SubjectiveFrame extends JFrame {
                                    "Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
       }
       final InputStream challengeStream = zipfile.getInputStream(challengeEntry);
-      _challengeDocument = ChallengeParser.parse(new InputStreamReader(challengeStream));
+      _challengeDocument = ChallengeParser.parse(new InputStreamReader(challengeStream, Utilities.DEFAULT_CHARSET));
       challengeStream.close();
 
       final ZipEntry scoreEntry = zipfile.getEntry("score.xml");
@@ -566,14 +566,13 @@ public final class SubjectiveFrame extends JFrame {
     if (validateData()) {
 
       final ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(_file));
-      final Charset charset = Charset.forName("UTF-8");
-      final Writer writer = new OutputStreamWriter(zipOut, charset);
+      final Writer writer = new OutputStreamWriter(zipOut, Utilities.DEFAULT_CHARSET);
 
       zipOut.putNextEntry(new ZipEntry("challenge.xml"));
-      XMLUtils.writeXML(_challengeDocument, writer, "UTF-8");
+      XMLUtils.writeXML(_challengeDocument, writer, Utilities.DEFAULT_CHARSET.name());
       zipOut.closeEntry();
       zipOut.putNextEntry(new ZipEntry("score.xml"));
-      XMLUtils.writeXML(_scoreDocument, writer, "UTF-8");
+      XMLUtils.writeXML(_scoreDocument, writer, Utilities.DEFAULT_CHARSET.name());
       zipOut.closeEntry();
 
       zipOut.close();
