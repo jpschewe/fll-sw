@@ -13,54 +13,25 @@
 
 <h2>Division SPECIFIED</h2>
 
-<div id='categories'>
-  <ul>
-    <li>
-    <input class='category_name' type='text' id='cat_1'/>
-
-    <ul id='category_1'>
-      <li class='team_1'>
-      <input type='text' id='num_1_1' onblur='lookup(1,1)'/>
-      <input id='name_1_1' readonly/>
-      <input id='org_1_1' readonly/>
-      </li>
-      
-      <li class='team_1'>
-      <input type='text' id='num_1_2' onblur='lookup(1,2)'/>
-      <input id='name_1_2' readonly/>
-      <input id='org_1_2' readonly/>
-      </li>
-      
-    </ul>
-    <button id='add-team_1' onclick='addTeam(1)'>Add Team</button>
-    
-  </li>
-
+<ul id='categories'>
   <li>
-  <input class='category_name' type='text' id='cat_2'/>
+  <input class='category_name' type='text' id='name_1'/>
 
-  <ul id='category_2'>
-    <li class='team_2'>
-    <input type='text' id='num_2_1' onblur='lookup(2,1)'/>
-    <input id='name_2_1' readonly/>
-    <input id='org_2_1' readonly/>
-    </li>
-
-    <li class='team_2'>
-    <input type='text' id='num_2_2' onblur='lookup(2,2)'/>
-    <input id='name_2_2' readonly/>
-    <input id='org_2_2' readonly/>
+  <ul id='category_1'>
+    <li class='team_1'>
+    <input type='text' id='num_1_1''/>
+    <input id='name_1_1' readonly/>
+    <input id='org_1_1' readonly/>
     </li>
     
-    <li><button id='add-team_2' onclick='addTeam(2)'>Add Team</button></li>
   </ul>
+  <button id='add-team_1' onclick='addTeam(1)'>Add Team</button>
   
 </li>
 
 </ul>
 
 
-</div>
 <button id='add-category'>Add Category</button>
 
 
