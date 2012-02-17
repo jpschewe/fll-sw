@@ -33,6 +33,7 @@
             _teams = value;
         } else {
 	    //FIXME load some test data
+	    alert("Loading test data");
 	    new Team(1, "Team 1", "Org 1");
 	}
     }
