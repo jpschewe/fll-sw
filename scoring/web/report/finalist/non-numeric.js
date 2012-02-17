@@ -8,6 +8,10 @@ $(document).ready(function() {
     //FIXME populate with current values
     var savedCategories = [];
 
+    //if(savedCategories.length == 0) {
+    //	var catIdx = addCategory();
+    //	addTeam(catIdx);
+    //}
     
     $("#add-category").click(function() {
 	addCategory();
@@ -37,9 +41,22 @@ function addCategory() {
     catEle.append(addButton);
     addButton.click(function() {
 	addTeam(catIdx);
-	
-	return catIdx;
     });
+    
+    addTeam(catIdx);
+    return catIdx;
+}
+
+function teamNumId(category, teamIdx) {
+    return "num_" + category + "_" + teamIdx;
+}
+
+function teamNameId(category, teamIdx) {
+    return "name_" + category + "_" + teamIdx;
+}
+
+function teamOrgId(category, teamIdx) {
+    return "org_" + category + "_" + teamIdx;
 }
 
 /**
@@ -51,18 +68,25 @@ function addTeam(category) {
     var catEle = $("#category_" + category);
     var teamIdx = catEle.children().size() + 1;
     
-    var teamEle = $("<li class='team_" + category + "'></li>");
+    var teamEle = $("<li></li>");
     catEle.append(teamEle);
     
-    var numEle = $("<input type='text' id='num_" + category + "_" + teamIdx + "'/>");
+    var numEle = $("<input type='text' id='" + teamNumId(category, teamIdx) + "'/>");
     teamEle.append(numEle);
     teamEle.change(function() {
-        alert("Here");
+	var teamNum = $("#" + teamNumId(category, teamIdx)).val();
+	var team = $.finalists.lookupTeam(teamNum);
+	if(typeof(team) == 'undefined') {
+	    alert("Team number " + teamNum + " does not exist");
+	} else {
+	    $("#" + teamNameId(category, teamIdx)).val(team.name);
+	    $("#" + teamOrgId(category, teamIdx)).val(team.org);
+	}
     });
     
-    var nameEle = $("<input id='name_" + category + "_" + teamIdx + "' readonly/>");
+    var nameEle = $("<input id='" + teamNameId(category, teamIdx) +"' readonly/>");
     teamEle.append(nameEle);
-    var orgEle = $("<input id='org_" + category + "_" + teamIdx + "' readonly/>");
+    var orgEle = $("<input id='" + teamOrgId(category, teamIdx) + "' readonly/>");
     teamEle.append(orgEle);
     
     
