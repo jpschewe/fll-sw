@@ -6,29 +6,41 @@
 
 $(document).ready(function() {
     //FIXME populate with current values
+    var savedCategories = [];
+
     
     $("#add-category").click(function() {
-	var catEle = $("<li></li>");
-	$("#categories").append(catEle);
-	
-	var catIdx = $("#categories").children().size() + 1;
-	
-	var nameEle = $("<input class='category_name' type='text' id='name_" + catIdx + "'/>");
-	catEle.append(nameEle);
-	
-	var teamList = $("<ul id='category_" + catIdx + "'></ul>");
-	catEle.append(teamList);
-
-	var addButton = $("<button id='add-team_" + catIdx + "'>Add Team</button>");
-	catEle.append(addButton);
-	addButton.click(function() {
-	    addTeam(catIdx);
-	});
-
+	addCategory();
     });
 
-    
+
 }); // end ready function
+
+/**
+ * Create the elements for a category
+ *
+ * @return the category index
+ */
+function addCategory() {
+    var catEle = $("<li></li>");
+    $("#categories").append(catEle);
+    
+    var catIdx = $("#categories").children().size() + 1;
+    
+    var nameEle = $("<input class='category_name' type='text' id='name_" + catIdx + "'/>");
+    catEle.append(nameEle);
+    
+    var teamList = $("<ul id='category_" + catIdx + "'></ul>");
+    catEle.append(teamList);
+
+    var addButton = $("<button id='add-team_" + catIdx + "'>Add Team</button>");
+    catEle.append(addButton);
+    addButton.click(function() {
+	addTeam(catIdx);
+	
+	return catIdx;
+    });
+}
 
 /**
  * Add a new team element to the category.
@@ -44,10 +56,9 @@ function addTeam(category) {
     
     var numEle = $("<input type='text' id='num_" + category + "_" + teamIdx + "'/>");
     teamEle.append(numEle);
-    //FIXME
-    //teamEle.focusLost(function() {
-    //    alert("Here");
-    //});
+    teamEle.change(function() {
+        alert("Here");
+    });
     
     var nameEle = $("<input id='name_" + category + "_" + teamIdx + "' readonly/>");
     teamEle.append(nameEle);
@@ -59,12 +70,12 @@ function addTeam(category) {
 }
 
 /*
-var num = document.getElementById(num_field).value
-var name = $.finalists.lookup_name(num);
-if(typeof(name) != 'undefined') {
-    document.getElementById(name_field).value = name;
-} else {
-    document.getElementById(name_field).value = '';
-    alert("Team number " + num + " does not exist");
-}
+  var num = document.getElementById(num_field).value
+  var name = $.finalists.lookup_name(num);
+  if(typeof(name) != 'undefined') {
+  document.getElementById(name_field).value = name;
+  } else {
+  document.getElementById(name_field).value = '';
+  alert("Team number " + num + " does not exist");
+  }
 */
