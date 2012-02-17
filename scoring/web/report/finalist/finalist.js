@@ -8,9 +8,9 @@
     if (!$) {
         throw new Error("jQuery needs to be loaded!");
     }
-    //if (!$.jStorage) {
-    //    throw new Error("jStorage needs to be loaded!");
-    //}
+    if (!$.jStorage) {
+        throw new Error("jStorage needs to be loaded!");
+    }
 
     var STORAGE_PREFIX = "fll.finalists";
 
@@ -21,19 +21,20 @@
      * Save the current state to local storage.
      */
     function _save() {
-        //FIXME $.jStorage.set(STORAGE_PREFIX + "_teams", _teams);
+        $.jStorage.set(STORAGE_PREFIX + "_teams", _teams);
     }
 
     /**
      * Load the current state from local storage.
      */
     function _load() {
-        //FIXME var value = $.jStorage.get(STORAGE_PREFIX + "_teams");
-        //FIXME if (null != value) {
-        //FIXME     _teams = value;
-        //FIXME }
-	//FIXME load some test data
-	new Team(1, "Team 1", "Org 1");
+        var value = $.jStorage.get(STORAGE_PREFIX + "_teams");
+        if (null != value) {
+            _teams = value;
+        } else {
+	    //FIXME load some test data
+	    new Team(1, "Team 1", "Org 1");
+	}
     }
     
     /**
