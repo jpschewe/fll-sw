@@ -23,7 +23,7 @@
 	 */
 	function _save() {
 		$.jStorage.set(STORAGE_PREFIX + "_teams", _teams);
-		$.jStorage.set(STORAGE_PREFIX + "_categories", _teams);
+		$.jStorage.set(STORAGE_PREFIX + "_categories", _categories);
 	}
 
 	/**
