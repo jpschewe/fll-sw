@@ -91,6 +91,21 @@
 		this.name = name;
 		this.catId = category_id;
 		this.teams = []
+		
+		this.setName = function(newName) {
+			if (this.name == newName) {
+				return true;
+			}
+
+			if (_check_duplicate_category(newName)) {
+				return false;
+			} else {
+				this.name = newName;
+				_save();
+				return true;
+			}
+		}
+		
 		_categories[this.catId] = this;
 		_save();
 	}
@@ -119,20 +134,6 @@
 			} else {
 				var newCategory = new Category(categoryName);
 				return newCategory;
-			}
-		},
-
-		setCategoryName : function(category, name) {
-			if (category.name == name) {
-				return true;
-			}
-
-			if (_check_duplicate_category(name)) {
-				return false;
-			} else {
-				category.name = name;
-				_save();
-				return true;
 			}
 		},
 
