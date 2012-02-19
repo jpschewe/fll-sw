@@ -37,8 +37,9 @@ function addCategory() {
 			+ category.catId + "'/>");
 	catEle.append(nameEle);
 	nameEle.change(function() {
-		if(!$.finalists.setCategoryName(category, nameEle.val())) {
-			alert("There already exists a category with the name '" + nameEle.val()
+		var newName = nameEle.val();
+		if (!category.setName(newName)) {
+			alert("There already exists a category with the name '" + newName
 					+ "'");
 			nameEle.val(category.name);
 		}
