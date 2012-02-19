@@ -88,6 +88,9 @@ function addTeam(category) {
 			+ "'/>");
 	teamEle.append(numEle);
 	teamEle.change(function() {
+		// FIXME need to add to the appropriate category
+		// FIXME need to check for empty and clear out fields and remove from
+		// category
 		var teamNum = $("#" + teamNumId(category, teamIdx)).val();
 		var team = $.finalists.lookupTeam(teamNum);
 		if (typeof (team) == 'undefined') {
@@ -107,11 +110,3 @@ function addTeam(category) {
 
 	return teamIdx;
 }
-
-/*
- * var num = document.getElementById(num_field).value var name =
- * $.finalists.lookup_name(num); if(typeof(name) != 'undefined') {
- * document.getElementById(name_field).value = name; } else {
- * document.getElementById(name_field).value = ''; alert("Team number " + num + "
- * does not exist"); }
- */

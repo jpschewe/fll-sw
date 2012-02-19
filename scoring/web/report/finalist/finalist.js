@@ -90,8 +90,8 @@
 
 		this.name = name;
 		this.catId = category_id;
-		this.teams = []
-		
+		this.teams = [];
+
 		this.setName = function(newName) {
 			if (this.name == newName) {
 				return true;
@@ -104,8 +104,26 @@
 				_save();
 				return true;
 			}
-		}
-		
+		};
+
+		this.addTeam = function(teamNum) {
+			this.teams.push(teamNum);
+			_save();
+		};
+
+		this.removeTeam = function(teamNum) {
+			var index = this.teams.indexOf(teamNum);
+			if (index != -1) {
+				this.teams.splice(index, 1);
+			}
+			_save();
+		};
+
+		this.clearTeams = function() {
+			this.teams = [];
+			_save();
+		};
+
 		_categories[this.catId] = this;
 		_save();
 	}
@@ -175,24 +193,6 @@
 			});
 			return category;
 		},
-
-		addTeamToCategory : function(category, teamNum) {
-			category.teams.push(teamNum);
-			_save();
-		},
-
-		removeTeamFromCategory : function(category, teamNum) {
-			var index = category.teams.indexOf(teamNum);
-			if (index != -1) {
-				category.teams.splice(index, 1);
-			}
-			_save();
-		},
-
-		clearTeamsInCategory : function(category) {
-			category.teams = [];
-			_save();
-		}
 
 	};
 
