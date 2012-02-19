@@ -38,7 +38,7 @@
 			alert("Loading test data");
 			new Team(1, "Team 1", "Org 1");
 		}
-		value = $.jStorage.get(STORAGE_PREFIX + "_categoires");
+		value = $.jStorage.get(STORAGE_PREFIX + "_categories");
 		if (null != value) {
 			_categories = value;
 		}
@@ -115,8 +115,8 @@
 			var index = this.teams.indexOf(teamNum);
 			if (index != -1) {
 				this.teams.splice(index, 1);
+				_save();
 			}
-			_save();
 		};
 
 		this.clearTeams = function() {

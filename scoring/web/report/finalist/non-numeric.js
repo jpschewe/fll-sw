@@ -52,10 +52,10 @@ function addCategory() {
 			+ "'>Add Team</button>");
 	catEle.append(addButton);
 	addButton.click(function() {
-		addTeam(category.catId);
+		addTeam(category);
 	});
 
-	addTeam(category.catId);
+	addTeam(category);
 	return category;
 }
 
@@ -78,33 +78,41 @@ function teamOrgId(category, teamIdx) {
  *         later
  */
 function addTeam(category) {
-	var catEle = $("#category_" + category);
+	var catEle = $("#category_" + category.catId);
 	var teamIdx = catEle.children().size() + 1;
 
 	var teamEle = $("<li></li>");
 	catEle.append(teamEle);
 
-	var numEle = $("<input type='text' id='" + teamNumId(category, teamIdx)
+	var numEle = $("<input type='text' id='" + teamNumId(category.catId, teamIdx)
 			+ "'/>");
 	teamEle.append(numEle);
-	teamEle.change(function() {
-		// FIXME need to add to the appropriate category
-		// FIXME need to check for empty and clear out fields and remove from
-		// category
-		var teamNum = $("#" + teamNumId(category, teamIdx)).val();
-		var team = $.finalists.lookupTeam(teamNum);
-		if (typeof (team) == 'undefined') {
-			alert("Team number " + teamNum + " does not exist");
+	numEle.change(function() {
+		var teamNum = $(this).val();
+		var prevTeam = $(this).data('oldVal');
+		if ("" == teamNum) {
+			category.removeTeam(prevTeam);
+			$("#" + teamNameId(category.catId, teamIdx)).val("");
+			$("#" + teamOrgId(category.catId, teamIdx)).val("");
 		} else {
-			$("#" + teamNameId(category, teamIdx)).val(team.name);
-			$("#" + teamOrgId(category, teamIdx)).val(team.org);
+			var team = $.finalists.lookupTeam(teamNum);
+			if (typeof (team) == 'undefined') {
+				alert("Team number " + teamNum + " does not exist");
+				$(this).val(prevTeam);
+				teamNum = prevTeam; // for the set of oldVal below
+			} else {
+				$("#" + teamNameId(category.catId, teamIdx)).val(team.name);
+				$("#" + teamOrgId(category.catId, teamIdx)).val(team.org);
+				category.addTeam(teamNum);
+			}
 		}
+		$(this).data('oldVal', teamNum);
 	});
 
-	var nameEle = $("<input id='" + teamNameId(category, teamIdx)
+	var nameEle = $("<input id='" + teamNameId(category.catId, teamIdx)
 			+ "' readonly/>");
 	teamEle.append(nameEle);
-	var orgEle = $("<input id='" + teamOrgId(category, teamIdx)
+	var orgEle = $("<input id='" + teamOrgId(category.catId, teamIdx)
 			+ "' readonly/>");
 	teamEle.append(orgEle);
 
