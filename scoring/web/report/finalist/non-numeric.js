@@ -9,7 +9,7 @@ $(document).ready(function() {
 	var savedCategories = [];
 
 	// if(savedCategories.length == 0) {
-	// var catIdx = addCategory();
+	// var category = addCategory();
 	// addTeam(catIdx);
 	// }
 
@@ -25,26 +25,37 @@ $(document).ready(function() {
  * @return the category index
  */
 function addCategory() {
+	var category = $.finalists.addCategory("");
+	if (null == category) {
+		return;
+	}
+
 	var catEle = $("<li></li>");
 	$("#categories").append(catEle);
 
-	var catIdx = $("#categories").children().size() + 1;
-
 	var nameEle = $("<input class='category_name' type='text' id='name_"
-			+ catIdx + "'/>");
+			+ category.catId + "'/>");
 	catEle.append(nameEle);
-
-	var teamList = $("<ul id='category_" + catIdx + "'></ul>");
-	catEle.append(teamList);
-
-	var addButton = $("<button id='add-team_" + catIdx + "'>Add Team</button>");
-	catEle.append(addButton);
-	addButton.click(function() {
-		addTeam(catIdx);
+	nameEle.change(function() {
+		if(!$.finalists.setCategoryName(category, nameEle.val())) {
+			alert("There already exists a category with the name '" + nameEle.val()
+					+ "'");
+			nameEle.val(category.name);
+		}
 	});
 
-	addTeam(catIdx);
-	return catIdx;
+	var teamList = $("<ul id='category_" + category.catId + "'></ul>");
+	catEle.append(teamList);
+
+	var addButton = $("<button id='add-team_" + category.catId
+			+ "'>Add Team</button>");
+	catEle.append(addButton);
+	addButton.click(function() {
+		addTeam(category.catId);
+	});
+
+	addTeam(category.catId);
+	return category;
 }
 
 function teamNumId(category, teamIdx) {
