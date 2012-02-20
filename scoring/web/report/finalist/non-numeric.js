@@ -28,6 +28,10 @@ $(document).ready(
 				}
 			});
 
+			$("#add-category").click(function() {
+				addCategory();
+			});
+
 		}); // end ready function
 
 function addCategoryElement(category) {
