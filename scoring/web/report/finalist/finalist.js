@@ -92,38 +92,6 @@
 		this.catId = category_id;
 		this.teams = [];
 
-		this.setName = function(newName) {
-			if (this.name == newName) {
-				return true;
-			}
-
-			if (_check_duplicate_category(newName)) {
-				return false;
-			} else {
-				this.name = newName;
-				_save();
-				return true;
-			}
-		};
-
-		this.addTeam = function(teamNum) {
-			this.teams.push(teamNum);
-			_save();
-		};
-
-		this.removeTeam = function(teamNum) {
-			var index = this.teams.indexOf(teamNum);
-			if (index != -1) {
-				this.teams.splice(index, 1);
-				_save();
-			}
-		};
-
-		this.clearTeams = function() {
-			this.teams = [];
-			_save();
-		};
-
 		_categories[this.catId] = this;
 		_save();
 	}
@@ -132,7 +100,7 @@
 	 * Schedule timeslot.
 	 */
 	function Timeslot() {
-		this.time = 0; //FIXME need to have this passed in once stored
+		this.time = 0; // FIXME need to have this passed in once stored
 		this.categories = {};
 		
 		this.addTeam = function(categoryId, teamNum) {
@@ -216,8 +184,41 @@
 			return category;
 		},
 		
+		setCategoryName : function(category, newName) {
+			if (category.name == newName) {
+				return true;
+			}
+
+			if (_check_duplicate_category(newName)) {
+				return false;
+			} else {
+				category.name = newName;
+				_save();
+				return true;
+			}
+		},
+
+		addTeamToCategory : function(category, teamNum) {
+			category.teams.push(teamNum);
+			_save();
+		},
+
+		removeTeamFromCategory : function(category, teamNum) {
+			var index = category.teams.indexOf(teamNum);
+			if (index != -1) {
+				category.teams.splice(index, 1);
+				_save();
+			}
+		},
+
+		clearTeamsInCategory : function(category) {
+			category.teams = [];
+			_save();
+		}
+
 		/**
 		 * Create the finalist schedule.
+		 * 
 		 * @return array of timeslots
 		 */
 

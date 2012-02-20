@@ -38,7 +38,7 @@ function addCategory() {
 	catEle.append(nameEle);
 	nameEle.change(function() {
 		var newName = nameEle.val();
-		if (!category.setName(newName)) {
+		if (!$.finalist.setCategoryName(category, newName)) {
 			alert("There already exists a category with the name '" + newName
 					+ "'");
 			nameEle.val(category.name);
@@ -91,7 +91,7 @@ function addTeam(category) {
 		var teamNum = $(this).val();
 		var prevTeam = $(this).data('oldVal');
 		if ("" == teamNum) {
-			category.removeTeam(prevTeam);
+			$.finalist.removeTeamFromCategory(category, prevTeam);
 			$("#" + teamNameId(category.catId, teamIdx)).val("");
 			$("#" + teamOrgId(category.catId, teamIdx)).val("");
 		} else {
@@ -103,7 +103,7 @@ function addTeam(category) {
 			} else {
 				$("#" + teamNameId(category.catId, teamIdx)).val(team.name);
 				$("#" + teamOrgId(category.catId, teamIdx)).val(team.org);
-				category.addTeam(teamNum);
+				$.finalist.addTeamToCategory(teamNum);
 			}
 		}
 		$(this).data('oldVal', teamNum);
