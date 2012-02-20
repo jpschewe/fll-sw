@@ -127,6 +127,28 @@
 		_categories[this.catId] = this;
 		_save();
 	}
+	
+	/**
+	 * Schedule timeslot.
+	 */
+	function Timeslot() {
+		this.time = 0; //FIXME need to have this passed in once stored
+		this.categories = {};
+		
+		this.addTeam = function(categoryId, teamNum) {
+			this.categories[categoryId] = teamNum;
+		};
+		this.clear = function() {
+			this.categories = {};
+		};
+		/**
+		 * Check if this timeslot is busy for the specified category
+		 */
+		this.busy = function(categoryId) {
+			return this.categories[categoryId] != null;
+		};
+		
+	}
 
 	// //////////////////////// PUBLIC INTERFACE /////////////////////////
 	$.finalist = {
@@ -193,6 +215,11 @@
 			});
 			return category;
 		},
+		
+		/**
+		 * Create the finalist schedule.
+		 * @return array of timeslots
+		 */
 
 	};
 
