@@ -77,6 +77,7 @@
 	 * this new category.
 	 */
 	function Category(name) {
+		//FIXME needs flag for numeric or not
 		var category_id;
 		// find the next available id
 		for (category_id = 0; category_id < Number.MAX_VALUE
@@ -100,7 +101,6 @@
 	 * Schedule timeslot.
 	 */
 	function Timeslot() {
-		this.time = 0; // FIXME need to have this passed in once stored
 		this.categories = {};
 	}
 
@@ -205,11 +205,11 @@
 		addTeamToTimeslot : function(timeslot, categoryId, teamNum) {
 			timeslot.categories[categoryId] = teamNum;
 		},
-		
+
 		clearTimeslot : function(timeslot) {
 			timeslot.categories = {};
 		},
-		
+
 		/**
 		 * Check if this timeslot is busy for the specified category
 		 */
@@ -217,13 +217,92 @@
 			return timeslot.categories[categoryId] != null;
 		},
 		
+		isTeamInTimeslot : function(timeslot, teamNum) {
+			console.log("Checking for team: " + teamNum + " in timeslot");
+			var found = false;
+			$.each(timeslot.categories, function(catId, slotTeamNum) {
+				console.log("  Comparing against catId: " + catId + " slotTeamNum: " + slotTeamNum);
+				if(teamNum == slotTeamNum) {
+					found = true;
+				}
+			});
+			return found;
+		},
 
-	/**
-	 * Create the finalist schedule.
-	 * 
-	 * @return array of timeslots
-	 */
+		/**
+		 * Create the finalist schedule.
+		 * 
+		 * @return array of timeslots in order from earliest to latest
+		 */
+		scheduleFinalists : function() {
+		    // Create map of teamNum -> [categories]
+		    var finalistsCount = {};
+		    $.each($.finalist.getCategories(), function(i, category) {
+		    	console.log("Walking categories i: " + i + " category.name: " + category.name);
+		    	$.each(category.teams, function(j, teamNum) {
+		    		console.log("  Walking teams j: " + j + " team: " + teamNum);
+		    		if(null == finalistsCount[teamNum]) {
+		    			finalistsCount[teamNum] = [];
+		    		} 
+		    		finalistsCount[teamNum].push(category);		    				
+		    		console.log("  Adding to finalistsCount[" + teamNum + "] " + category.name);
+		    	});
+		    });		    
+		    
+		    // sort the map so that the team in the most categories is first, this
+		    // should ensure the minimum amount of time to do the finalist judging
+		    var sortedTeams = [];
+		    $.each(finalistsCount, function(teamNum, categories) {
+		    	console.log("Walking finalistsCount teamNum: " + teamNum + " num categories: " + categories.length);
+		    	sortedTeams.push(teamNum);
+		    });		    
+			sortedTeams.sort(function(a, b) {
+				console.log("a is: " + a);
+				console.log("b is: " + b);
+				var aCategories = finalistsCount[a];
+				var bCategories = finalistsCount[b];
+				
+				//var aCount = finalistsCount[a].length;
+				//var bCount = finalistsCount[b].length;
+				if (aCount == bCount) {
+					return 0;
+				} else if (aCount < bCount) {
+					return -1;
+				} else {
+					return 1;
+				}
+			});
+			console.log("Sorted teams: " + sortedTeams);
 
+			// list of Timeslots
+			var schedule = [];
+			$.each(sortedTeams, function(i, teamNum) {
+				var teamCategories = finalistsCount[teamNum];
+				$.each(teamCategories, function(j, category) {
+					var scheduled = false;
+					$.each(schedule, function(k, slot) {
+						if(!scheduled && !$.finalist.isTimeslotBusy(slot, category.catId) && !$.finalist.isTeamInTimeslot(slot, teamNum)) {
+							console.log("Adding team " + teamNum + " to slot for category: " + category.catId);
+							$.finalist.addTeamToTimeslot(slot, category.catId, teamNum);
+							scheduled = true;
+						}
+					}); // foreach timeslot
+					if(!scheduled) {
+						var newSlot = new Timeslot();
+						schedule.push(newSlot);
+						console.log("Adding team " + teamNum + " to new slot for category: " + category.catId);
+						$.finalist.addTeamToTimeslot(newSlot, category.catId, teamNum);
+					}
+				}); // foreach category
+			}); // foreach sorted team
+			
+		    return schedule;
+		},
+		
+		
+
+		//FIXME handle timeslot duration on output
+		
 	};
 
 	_load();
