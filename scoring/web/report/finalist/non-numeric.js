@@ -5,8 +5,8 @@
  */
 
 $(document).ready(function() {
+	$.each($.finalist)
 	// FIXME populate with current values
-	var savedCategories = [];
 
 	// if(savedCategories.length == 0) {
 	// var category = addCategory();
@@ -25,7 +25,7 @@ $(document).ready(function() {
  * @return the category index
  */
 function addCategory() {
-	var category = $.finalists.addCategory("");
+	var category = $.finalist.addCategory("");
 	if (null == category) {
 		return;
 	}
@@ -95,7 +95,7 @@ function addTeam(category) {
 			$("#" + teamNameId(category.catId, teamIdx)).val("");
 			$("#" + teamOrgId(category.catId, teamIdx)).val("");
 		} else {
-			var team = $.finalists.lookupTeam(teamNum);
+			var team = $.finalist.lookupTeam(teamNum);
 			if (typeof (team) == 'undefined') {
 				alert("Team number " + teamNum + " does not exist");
 				$(this).val(prevTeam);

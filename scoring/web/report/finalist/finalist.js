@@ -129,7 +129,7 @@
 	}
 
 	// //////////////////////// PUBLIC INTERFACE /////////////////////////
-	$.finalists = {
+	$.finalist = {
 		/**
 		 * Find a team by number.
 		 */
