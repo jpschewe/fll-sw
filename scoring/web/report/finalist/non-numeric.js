@@ -4,32 +4,33 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-$(document).ready(function() {
-	$.each($.finalist)
-	// FIXME populate with current values
+$(document).ready(
+		function() {
+			$("#categories").empty();
 
-	// if(savedCategories.length == 0) {
-	// var category = addCategory();
-	// addTeam(catIdx);
-	// }
+			$.each($.finalist.getCategories(), function(i, category) {
+				console.log("Category name is " + category.name + " id: "
+						+ category.catId);
+				addCategoryElement(category);
+				addedCategory = true;
 
-	$("#add-category").click(function() {
-		addCategory();
-	});
+				var addedTeam = false;
+				$.each(category.teams, function(j, teamNum) {
+					console.log("  Team : " + teamNum);
+					addedTeam = true;
+					var teamIdx = addTeam(category);
+					var team = $.finalist.lookupTeam(teamNum);
+					populateTeamInformation(category, teamIdx, team);
 
-}); // end ready function
+				});
+				if (!addedTeam) {
+					addTeam(category);
+				}
+			});
 
-/**
- * Create the elements for a category
- * 
- * @return the category index
- */
-function addCategory() {
-	var category = $.finalist.addCategory("");
-	if (null == category) {
-		return;
-	}
+		}); // end ready function
 
+function addCategoryElement(category) {
 	var catEle = $("<li></li>");
 	$("#categories").append(catEle);
 
@@ -44,6 +45,7 @@ function addCategory() {
 			nameEle.val(category.name);
 		}
 	});
+	nameEle.val(category.name);
 
 	var teamList = $("<ul id='category_" + category.catId + "'></ul>");
 	catEle.append(teamList);
@@ -54,6 +56,20 @@ function addCategory() {
 	addButton.click(function() {
 		addTeam(category);
 	});
+}
+
+/**
+ * Add a new empty category to the page.
+ * 
+ * @return the category index
+ */
+function addCategory() {
+	var category = $.finalist.addCategory("");
+	if (null == category) {
+		return;
+	}
+
+	addCategoryElement(category);
 
 	addTeam(category);
 	return category;
@@ -71,8 +87,15 @@ function teamOrgId(category, teamIdx) {
 	return "org_" + category + "_" + teamIdx;
 }
 
+function populateTeamInformation(category, teamIdx, team) {
+	$("#" + teamNumId(category.catId, teamIdx)).val(team.num);
+	$("#" + teamNumId(category.catId, teamIdx)).data('oldVal', team.num);
+	$("#" + teamNameId(category.catId, teamIdx)).val(team.name);
+	$("#" + teamOrgId(category.catId, teamIdx)).val(team.org);
+}
+
 /**
- * Add a new team element to the category.
+ * Add a new empty team to the page for the specified category
  * 
  * @return the index for the team which can be used to populate the elements
  *         later
@@ -84,8 +107,8 @@ function addTeam(category) {
 	var teamEle = $("<li></li>");
 	catEle.append(teamEle);
 
-	var numEle = $("<input type='text' id='" + teamNumId(category.catId, teamIdx)
-			+ "'/>");
+	var numEle = $("<input type='text' id='"
+			+ teamNumId(category.catId, teamIdx) + "'/>");
 	teamEle.append(numEle);
 	numEle.change(function() {
 		var teamNum = $(this).val();
@@ -101,9 +124,8 @@ function addTeam(category) {
 				$(this).val(prevTeam);
 				teamNum = prevTeam; // for the set of oldVal below
 			} else {
-				$("#" + teamNameId(category.catId, teamIdx)).val(team.name);
-				$("#" + teamOrgId(category.catId, teamIdx)).val(team.org);
-				$.finalist.addTeamToCategory(teamNum);
+				populateTeamInformation(category, teamIdx, team);
+				$.finalist.addTeamToCategory(category, teamNum);
 			}
 		}
 		$(this).data('oldVal', teamNum);
