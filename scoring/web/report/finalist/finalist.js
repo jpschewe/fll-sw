@@ -95,27 +95,13 @@
 		_categories[this.catId] = this;
 		_save();
 	}
-	
+
 	/**
 	 * Schedule timeslot.
 	 */
 	function Timeslot() {
 		this.time = 0; // FIXME need to have this passed in once stored
 		this.categories = {};
-		
-		this.addTeam = function(categoryId, teamNum) {
-			this.categories[categoryId] = teamNum;
-		};
-		this.clear = function() {
-			this.categories = {};
-		};
-		/**
-		 * Check if this timeslot is busy for the specified category
-		 */
-		this.busy = function(categoryId) {
-			return this.categories[categoryId] != null;
-		};
-		
 	}
 
 	// //////////////////////// PUBLIC INTERFACE /////////////////////////
@@ -183,7 +169,7 @@
 			});
 			return category;
 		},
-		
+
 		setCategoryName : function(category, newName) {
 			if (category.name == newName) {
 				return true;
@@ -214,13 +200,29 @@
 		clearTeamsInCategory : function(category) {
 			category.teams = [];
 			_save();
-		}
+		},
 
+		addTeamToTimeslot : function(timeslot, categoryId, teamNum) {
+			timeslot.categories[categoryId] = teamNum;
+		},
+		
+		clearTimeslot : function(timeslot) {
+			timeslot.categories = {};
+		},
+		
 		/**
-		 * Create the finalist schedule.
-		 * 
-		 * @return array of timeslots
+		 * Check if this timeslot is busy for the specified category
 		 */
+		isTimeslotBusy : function(timeslot, categoryId) {
+			return timeslot.categories[categoryId] != null;
+		},
+		
+
+	/**
+	 * Create the finalist schedule.
+	 * 
+	 * @return array of timeslots
+	 */
 
 	};
 
