@@ -17,7 +17,7 @@
 	// //////////////////////// PRIVATE METHODS ////////////////////////
 	var _teams = {};
 	var _categories = {};
-
+	
 	/**
 	 * Save the current state to local storage.
 	 */
@@ -36,7 +36,7 @@
 		} else {
 			// FIXME load some test data
 			alert("Loading test data");
-			new Team(1, "Team 1", "Org 1");
+			new Team(1, "Div I", "Team 1", "Org 1");
 		}
 		value = $.jStorage.get(STORAGE_PREFIX + "_categories");
 		if (null != value) {
@@ -60,12 +60,13 @@
 	/**
 	 * Constructor for a Team.
 	 */
-	function Team(num, name, org) {
+	function Team(num, division, name, org) {
 		if (typeof (_teams[num]) != 'undefined') {
 			throw "Team already exists with number: " + num;
 		}
 
 		this.num = num;
+		this.division = division;
 		this.name = name;
 		this.org = org;
 		_teams[num] = this;
