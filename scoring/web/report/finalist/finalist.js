@@ -75,9 +75,13 @@
 	/**
 	 * Constructor for a category. Finds the first free ID and assigns it to
 	 * this new category.
+	 * 
+	 * @param name
+	 *            the name of the category
+	 * @param numeric
+	 *            boolean stating if this is a numeric or non-numeric category
 	 */
-	function Category(name) {
-		//FIXME needs flag for numeric or not
+	function Category(name, numeric) {
 		var category_id;
 		// find the next available id
 		for (category_id = 0; category_id < Number.MAX_VALUE
@@ -90,6 +94,7 @@
 		}
 
 		this.name = name;
+		this.numeric = numeric;
 		this.catId = category_id;
 		this.teams = [];
 
@@ -118,25 +123,74 @@
 		 * 
 		 * @param category_name
 		 *            the name of the category
+		 * @param numeric boolean if this is a numeric category or not 
 		 * @returns the new category or Null if there is a duplicate
 		 */
-		addCategory : function(categoryName) {
+		addCategory : function(categoryName, numeric) {
 			if (_check_duplicate_category(categoryName)) {
 				alert("There already exists a category with the name '"
 						+ categoryName + "'");
 				return null;
 			} else {
-				var newCategory = new Category(categoryName);
+				var newCategory = new Category(categoryName, numeric);
 				return newCategory;
 			}
 		},
 
 		/**
-		 * Get the categories known to the system.
+		 * Get the non-numeric categories known to the system.
 		 * 
 		 * @returns {Array} sorted by name
 		 */
-		getCategories : function() {
+		getNonNumericCategories : function() {
+			var categories = [];
+			$.each(_categories, function(i, val) {
+				if (!val.numeric) {
+					categories.push(val);
+				}
+			});
+			categories.sort(function(a, b) {
+				if (a.name == b.name) {
+					return 0;
+				} else if (a.name < b.name) {
+					return -1;
+				} else {
+					return 1;
+				}
+			});
+			return categories;
+		},
+
+		/**
+		 * Get the numeric categories known to the system.
+		 * 
+		 * @returns {Array} sorted by name
+		 */
+		getNumericCategories : function() {
+			var categories = [];
+			$.each(_categories, function(i, val) {
+				if (val.numeric) {
+					categories.push(val);
+				}
+			});
+			categories.sort(function(a, b) {
+				if (a.name == b.name) {
+					return 0;
+				} else if (a.name < b.name) {
+					return -1;
+				} else {
+					return 1;
+				}
+			});
+			return categories;
+		},
+
+		/**
+		 * Get the all categories known to the system.
+		 * 
+		 * @returns {Array} sorted by name
+		 */
+		getAllCategories : function() {
 			var categories = [];
 			$.each(_categories, function(i, val) {
 				categories.push(val);
@@ -216,13 +270,14 @@
 		isTimeslotBusy : function(timeslot, categoryId) {
 			return timeslot.categories[categoryId] != null;
 		},
-		
+
 		isTeamInTimeslot : function(timeslot, teamNum) {
 			console.log("Checking for team: " + teamNum + " in timeslot");
 			var found = false;
 			$.each(timeslot.categories, function(catId, slotTeamNum) {
-				console.log("  Comparing against catId: " + catId + " slotTeamNum: " + slotTeamNum);
-				if(teamNum == slotTeamNum) {
+				console.log("  Comparing against catId: " + catId
+						+ " slotTeamNum: " + slotTeamNum);
+				if (teamNum == slotTeamNum) {
 					found = true;
 				}
 			});
@@ -235,35 +290,42 @@
 		 * @return array of timeslots in order from earliest to latest
 		 */
 		scheduleFinalists : function() {
-		    // Create map of teamNum -> [categories]
-		    var finalistsCount = {};
-		    $.each($.finalist.getCategories(), function(i, category) {
-		    	console.log("Walking categories i: " + i + " category.name: " + category.name);
-		    	$.each(category.teams, function(j, teamNum) {
-		    		console.log("  Walking teams j: " + j + " team: " + teamNum);
-		    		if(null == finalistsCount[teamNum]) {
-		    			finalistsCount[teamNum] = [];
-		    		} 
-		    		finalistsCount[teamNum].push(category);		    				
-		    		console.log("  Adding to finalistsCount[" + teamNum + "] " + category.name);
-		    	});
-		    });		    
-		    
-		    // sort the map so that the team in the most categories is first, this
-		    // should ensure the minimum amount of time to do the finalist judging
-		    var sortedTeams = [];
-		    $.each(finalistsCount, function(teamNum, categories) {
-		    	console.log("Walking finalistsCount teamNum: " + teamNum + " num categories: " + categories.length);
-		    	sortedTeams.push(teamNum);
-		    });		    
+			// Create map of teamNum -> [categories]
+			var finalistsCount = {};
+			$.each($.finalist.getAllCategories(), function(i, category) {
+				console.log("Walking categories i: " + i + " category.name: "
+						+ category.name);
+				$.each(category.teams, function(j, teamNum) {
+					console
+							.log("  Walking teams j: " + j + " team: "
+									+ teamNum);
+					if (null == finalistsCount[teamNum]) {
+						finalistsCount[teamNum] = [];
+					}
+					finalistsCount[teamNum].push(category);
+					console.log("  Adding to finalistsCount[" + teamNum + "] "
+							+ category.name);
+				});
+			});
+
+			// sort the map so that the team in the most categories is first,
+			// this
+			// should ensure the minimum amount of time to do the finalist
+			// judging
+			var sortedTeams = [];
+			$.each(finalistsCount, function(teamNum, categories) {
+				console.log("Walking finalistsCount teamNum: " + teamNum
+						+ " num categories: " + categories.length);
+				sortedTeams.push(teamNum);
+			});
 			sortedTeams.sort(function(a, b) {
 				console.log("a is: " + a);
 				console.log("b is: " + b);
 				var aCategories = finalistsCount[a];
 				var bCategories = finalistsCount[b];
-				
-				//var aCount = finalistsCount[a].length;
-				//var bCount = finalistsCount[b].length;
+
+				// var aCount = finalistsCount[a].length;
+				// var bCount = finalistsCount[b].length;
 				if (aCount == bCount) {
 					return 0;
 				} else if (aCount < bCount) {
@@ -280,29 +342,38 @@
 				var teamCategories = finalistsCount[teamNum];
 				$.each(teamCategories, function(j, category) {
 					var scheduled = false;
-					$.each(schedule, function(k, slot) {
-						if(!scheduled && !$.finalist.isTimeslotBusy(slot, category.catId) && !$.finalist.isTeamInTimeslot(slot, teamNum)) {
-							console.log("Adding team " + teamNum + " to slot for category: " + category.catId);
-							$.finalist.addTeamToTimeslot(slot, category.catId, teamNum);
-							scheduled = true;
-						}
-					}); // foreach timeslot
-					if(!scheduled) {
+					$.each(schedule,
+							function(k, slot) {
+								if (!scheduled
+										&& !$.finalist.isTimeslotBusy(slot,
+												category.catId)
+										&& !$.finalist.isTeamInTimeslot(slot,
+												teamNum)) {
+									console.log("Adding team " + teamNum
+											+ " to slot for category: "
+											+ category.catId);
+									$.finalist.addTeamToTimeslot(slot,
+											category.catId, teamNum);
+									scheduled = true;
+								}
+							}); // foreach timeslot
+					if (!scheduled) {
 						var newSlot = new Timeslot();
 						schedule.push(newSlot);
-						console.log("Adding team " + teamNum + " to new slot for category: " + category.catId);
-						$.finalist.addTeamToTimeslot(newSlot, category.catId, teamNum);
+						console.log("Adding team " + teamNum
+								+ " to new slot for category: "
+								+ category.catId);
+						$.finalist.addTeamToTimeslot(newSlot, category.catId,
+								teamNum);
 					}
 				}); // foreach category
 			}); // foreach sorted team
-			
-		    return schedule;
-		},
-		
-		
 
-		//FIXME handle timeslot duration on output
-		
+			return schedule;
+		},
+
+	// FIXME handle timeslot duration on output
+
 	};
 
 	_load();

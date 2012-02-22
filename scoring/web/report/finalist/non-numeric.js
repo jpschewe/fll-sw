@@ -8,7 +8,7 @@ $(document).ready(
 		function() {
 			$("#categories").empty();
 
-			$.each($.finalist.getCategories(), function(i, category) {
+			$.each($.finalist.getNonNumericCategories(), function(i, category) {
 				console.log("Category name is " + category.name + " id: "
 						+ category.catId);
 				addCategoryElement(category);
@@ -68,7 +68,7 @@ function addCategoryElement(category) {
  * @return the category index
  */
 function addCategory() {
-	var category = $.finalist.addCategory("");
+	var category = $.finalist.addCategory("", false);
 	if (null == category) {
 		return;
 	}

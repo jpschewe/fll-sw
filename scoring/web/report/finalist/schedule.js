@@ -34,7 +34,7 @@ $(document).ready(
 			$("#schedule").append(headerRow);
 
 			headerRow.append($("<th>Time Slot</th>"));
-			$.each($.finalist.getCategories(), function(i, category) {
+			$.each($.finalist.getAllCategories(), function(i, category) {
 				var header = $("<th>" + category.name + "</th>");
 				headerRow.append(header);
 			});
