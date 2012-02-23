@@ -131,6 +131,7 @@ public class TestAJAXBrackets extends SeleneseTestBase {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     } catch (final AssertionFailedError e) {
+      LogUtils.getLogger().error("Assertion error: " + e.getMessage());
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     } catch (final RuntimeException e) {
