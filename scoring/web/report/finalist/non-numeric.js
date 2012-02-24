@@ -6,7 +6,7 @@
 
 $(document).ready(
 		function() {
-			$("#division").text($.finalist.getCurrentDivisionName());
+			$("#division").text($.finalist.getCurrentDivision());
 
 			$("#categories").empty();
 
