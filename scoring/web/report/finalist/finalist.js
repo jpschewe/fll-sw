@@ -18,7 +18,9 @@
 	var _teams = {};
 	var _categories = {};
 	var _tournament = null;
-	
+	var _divisions = [];
+	var _currentDivisionIndex = null;
+
 	/**
 	 * Save the current state to local storage.
 	 */
@@ -26,6 +28,9 @@
 		$.jStorage.set(STORAGE_PREFIX + "_teams", _teams);
 		$.jStorage.set(STORAGE_PREFIX + "_categories", _categories);
 		$.jStorage.set(STORAGE_PREFIX + "_tournament", _tournament);
+		$.jStorage.set(STORAGE_PREFIX + "_divisions", _divisions);
+		$.jStorage.set(STORAGE_PREFIX + "_currentDivisionIndex",
+				_currentDivisionIndex);
 	}
 
 	/**
@@ -43,6 +48,14 @@
 		value = $.jStorage.get(STORAGE_PREFIX + "_tournament");
 		if (null != value) {
 			_tournament = value;
+		}
+		value = $.jStorage.get(STORAGE_PREFIX + "_divisions");
+		if (null != value) {
+			_divisions = value;
+		}
+		value = $.jStorage.get(STORAGE_PREFIX + "_currentDivisionIndex");
+		if (null != value) {
+			_currentDivisionIndex = value;
 		}
 	}
 
@@ -129,16 +142,54 @@
 			_clear_local_storage();
 			_teams = {};
 			_categories = {};
+			_divisions = [];
 			_tournament = null;
 		},
-		
+
 		getTournament : function() {
 			return _tournament;
 		},
-		
+
 		setTournament : function(tournament) {
 			_tournament = tournament;
 			_save();
+		},
+
+		/**
+		 * Add a division to the list of known divisions. If the division
+		 * already exists it is not added.
+		 */
+		addDivision : function(division) {
+			if (-1 == $.inArray(division, _divisions)) {
+				_divisions.push(division);
+			}
+			_save();
+		},
+
+		getDivisions : function() {
+			return _divisions;
+		},
+
+		setCurrentDivisionIndex : function(divisionIndex) {
+			console.log("Set division index to " + divisionIndex);
+			_currentDivisionIndex = divisionIndex;
+			_save();
+		},
+
+		getCurrentDivisionIndex : function() {
+			return _currentDivisionIndex;
+		},
+
+		getCurrentDivisionName : function() {
+			console.log("_divisions: " + _divisions);
+			console.log("_currentDivisionIndex: " + _currentDivisionIndex);
+			if (null == _divisions || _currentDivisionIndex == null
+					|| _currentDivisionIndex < -1
+					|| _currentDivisionIndex >= _divisions.length) {
+				return "Unknown";
+			} else {
+				return _divisions[_currentDivisionIndex];
+			}
 		},
 
 		/**
