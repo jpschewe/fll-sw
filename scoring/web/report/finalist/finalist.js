@@ -19,7 +19,7 @@
 	var _categories = {};
 	var _tournament = null;
 	var _divisions = [];
-	var _currentDivisionIndex = null;
+	var _currentDivision = null;
 
 	/**
 	 * Save the current state to local storage.
@@ -29,8 +29,7 @@
 		$.jStorage.set(STORAGE_PREFIX + "_categories", _categories);
 		$.jStorage.set(STORAGE_PREFIX + "_tournament", _tournament);
 		$.jStorage.set(STORAGE_PREFIX + "_divisions", _divisions);
-		$.jStorage.set(STORAGE_PREFIX + "_currentDivisionIndex",
-				_currentDivisionIndex);
+		$.jStorage.set(STORAGE_PREFIX + "_currentDivision", _currentDivision);
 	}
 
 	/**
@@ -53,9 +52,9 @@
 		if (null != value) {
 			_divisions = value;
 		}
-		value = $.jStorage.get(STORAGE_PREFIX + "_currentDivisionIndex");
+		value = $.jStorage.get(STORAGE_PREFIX + "_currentDivision");
 		if (null != value) {
-			_currentDivisionIndex = value;
+			_currentDivision = value;
 		}
 	}
 
@@ -170,26 +169,18 @@
 			return _divisions;
 		},
 
-		setCurrentDivisionIndex : function(divisionIndex) {
-			console.log("Set division index to " + divisionIndex);
-			_currentDivisionIndex = divisionIndex;
+		setCurrentDivision : function(division) {
+			console.log("Set division to " + division);
+			_currentDivision = division;
 			_save();
 		},
 
-		getCurrentDivisionIndex : function() {
-			return _currentDivisionIndex;
+		getCurrentDivision : function() {
+			return _currentDivision;
 		},
-
-		getCurrentDivisionName : function() {
-			console.log("_divisions: " + _divisions);
-			console.log("_currentDivisionIndex: " + _currentDivisionIndex);
-			if (null == _divisions || _currentDivisionIndex == null
-					|| _currentDivisionIndex < -1
-					|| _currentDivisionIndex >= _divisions.length) {
-				return "Unknown";
-			} else {
-				return _divisions[_currentDivisionIndex];
-			}
+		
+		getDivisionByIndex : function(divIndex) {
+			return _divisions[divIndex];
 		},
 
 		/**
@@ -471,20 +462,20 @@
 
 			return schedule;
 		},
-		
+
 		displayNavbar : function() {
 			var element;
-			if(window.location.pathname.match(/params.html$/)) {
+			if (window.location.pathname.match(/params.html$/)) {
 				element = $("<span></span>")
 			} else {
 				element = $("<a href='params.html'></a>")
 			}
 			element.text("Parameters");
 			$("#navbar").append(element);
-			
+
 			$("#navbar").append($("<span> - </span>"));
 
-			if(window.location.pathname.match(/non-numeric.html$/)) {
+			if (window.location.pathname.match(/non-numeric.html$/)) {
 				element = $("<span></span>")
 			} else {
 				element = $("<a href='non-numeric.html'></a>")
@@ -494,7 +485,7 @@
 
 			$("#navbar").append($("<span> - </span>"));
 
-			if(window.location.pathname.match(/schedule.html$/)) {
+			if (window.location.pathname.match(/schedule.html$/)) {
 				element = $("<span></span>")
 			} else {
 				element = $("<a href='schedule.html'></a>")

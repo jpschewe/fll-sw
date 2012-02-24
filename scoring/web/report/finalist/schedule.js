@@ -28,7 +28,7 @@ String.prototype.padL = function(width, pad) {
 
 $(document).ready(
 		function() {
-			$("#division").text($.finalist.getCurrentDivisionName());
+			$("#division").text($.finalist.getCurrentDivision());
 
 			// output header
 			var headerRow = $("<tr></tr>");

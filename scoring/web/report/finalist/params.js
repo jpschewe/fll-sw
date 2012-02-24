@@ -10,17 +10,19 @@ $(document).ready(
 
 			$.each($.finalist.getDivisions(), function(i, division) {
 				console.log("Division " + division);
-				var divisionOption = $("<option value='" + i + "'>"
-						+ division + "</option>");
+				var divisionOption = $("<option value='" + i + "'>" + division
+						+ "</option>");
 				$("#divisions").append(divisionOption);
 			});
-			$.finalist.setCurrentDivisionIndex($("#divisions").val());
-			
+			$.finalist.setCurrentDivision($.finalist.getDivisionByIndex($(
+					"#divisions").val()));
+
 			$("#divisions").change(function() {
-				var div = $(this).val();
-				$.finalist.setCurrentDivisionIndex(div);
+				var divIndex = $(this).val();
+				var div = $.finalist.getDivisionByIndex(divIndex);
+				$.finalist.setCurrentDivision(div);
 			});
 
 			$.finalist.displayNavbar();
-			
+
 		}); // end ready function
