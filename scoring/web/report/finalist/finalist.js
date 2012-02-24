@@ -17,7 +17,7 @@
 	// //////////////////////// PRIVATE METHODS ////////////////////////
 	var _teams = {};
 	var _categories = {};
-	
+
 	/**
 	 * Save the current state to local storage.
 	 */
@@ -33,15 +33,22 @@
 		var value = $.jStorage.get(STORAGE_PREFIX + "_teams");
 		if (null != value) {
 			_teams = value;
-		} else {
-			// FIXME load some test data
-			alert("Loading test data");
-			new Team(1, "Div I", "Team 1", "Org 1");
 		}
 		value = $.jStorage.get(STORAGE_PREFIX + "_categories");
 		if (null != value) {
 			_categories = value;
 		}
+	}
+
+	/**
+	 * Clear anything from local storage with a prefix of STORAGE_PREFIX.
+	 */
+	function _clear_local_storage() {
+		$.each($.jStorage.index(), function(index, value) {
+			if (value.substring(0, STORAGE_PREFIX.length) == STORAGE_PREFIX) {
+				$.jStorage.deleteKey(value);
+			}
+		});
 	}
 
 	/**
@@ -112,6 +119,19 @@
 
 	// //////////////////////// PUBLIC INTERFACE /////////////////////////
 	$.finalist = {
+		clearAllData : function() {
+			_clear_local_storage();
+			_teams = {};
+			_categories = {};
+		},
+
+		/**
+		 * Create a new team.
+		 */
+		addTeam : function(num, division, name, org) {
+			return new Team(num, division, name, org);
+		},
+
 		/**
 		 * Find a team by number.
 		 */
@@ -120,11 +140,23 @@
 		},
 
 		/**
+		 * Get all teams.
+		 */
+		getAllTeams : function() {
+			var teams = [];
+			$.each(_teams, function(i, val) {
+				teams.push(val);
+			});
+			return teams;
+		},
+
+		/**
 		 * Create a new category.
 		 * 
 		 * @param category_name
 		 *            the name of the category
-		 * @param numeric boolean if this is a numeric category or not 
+		 * @param numeric
+		 *            boolean if this is a numeric category or not
 		 * @returns the new category or Null if there is a duplicate
 		 */
 		addCategory : function(categoryName, numeric) {
