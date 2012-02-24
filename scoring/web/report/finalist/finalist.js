@@ -87,7 +87,7 @@
 	 */
 	function Team(num, division, name, org) {
 		if (typeof (_teams[num]) != 'undefined') {
-			throw "Team already exists with number: " + num;
+			throw new Error("Team already exists with number: " + num);
 		}
 
 		this.num = num;
@@ -116,7 +116,7 @@
 
 		if (category_id == Number.MAX_VALUE
 				|| category_id + 1 == Number.MAX_VALUE) {
-			throw "No free category IDs";
+			throw new Error("No free category IDs");
 		}
 
 		this.name = name;
