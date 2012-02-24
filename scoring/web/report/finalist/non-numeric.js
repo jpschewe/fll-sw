@@ -6,6 +6,8 @@
 
 $(document).ready(
 		function() {
+			$("#division").text($.finalist.getCurrentDivisionName());
+			
 			$("#categories").empty();
 
 			$.each($.finalist.getNonNumericCategories(), function(i, category) {
