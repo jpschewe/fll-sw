@@ -21,4 +21,6 @@ $(document).ready(
 				$.finalist.setCurrentDivisionIndex(div);
 			});
 
+			$.finalist.displayNavbar();
+			
 		}); // end ready function

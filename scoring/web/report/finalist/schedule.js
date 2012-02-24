@@ -28,6 +28,7 @@ String.prototype.padL = function(width, pad) {
 
 $(document).ready(
 		function() {
+			$("#division").text($.finalist.getCurrentDivisionName());
 
 			// output header
 			var headerRow = $("<tr></tr>");
@@ -69,4 +70,5 @@ $(document).ready(
 				time.setTime(time.getTime() + (duration * 60 * 1000));
 			}); // foreach timeslot
 
+			$.finalist.displayNavbar();
 		});

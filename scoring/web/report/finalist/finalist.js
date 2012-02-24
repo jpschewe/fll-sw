@@ -471,6 +471,38 @@
 
 			return schedule;
 		},
+		
+		displayNavbar : function() {
+			var element;
+			if(window.location.pathname.match(/params.html$/)) {
+				element = $("<span></span>")
+			} else {
+				element = $("<a href='params.html'></a>")
+			}
+			element.text("Parameters");
+			$("#navbar").append(element);
+			
+			$("#navbar").append($("<span> - </span>"));
+
+			if(window.location.pathname.match(/non-numeric.html$/)) {
+				element = $("<span></span>")
+			} else {
+				element = $("<a href='non-numeric.html'></a>")
+			}
+			element.text("Non-numeric Categories");
+			$("#navbar").append(element);
+
+			$("#navbar").append($("<span> - </span>"));
+
+			if(window.location.pathname.match(/schedule.html$/)) {
+				element = $("<span></span>")
+			} else {
+				element = $("<a href='schedule.html'></a>")
+			}
+			element.text("Schedule");
+			$("#navbar").append(element);
+
+		},
 
 	// FIXME handle timeslot duration on output
 

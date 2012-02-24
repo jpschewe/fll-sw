@@ -7,7 +7,7 @@
 $(document).ready(
 		function() {
 			$("#division").text($.finalist.getCurrentDivisionName());
-			
+
 			$("#categories").empty();
 
 			$.each($.finalist.getNonNumericCategories(), function(i, category) {
@@ -34,6 +34,7 @@ $(document).ready(
 				addCategory();
 			});
 
+			$.finalist.displayNavbar();
 		}); // end ready function
 
 function addCategoryElement(category) {
