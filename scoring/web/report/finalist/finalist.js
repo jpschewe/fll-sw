@@ -17,13 +17,15 @@
 	// //////////////////////// PRIVATE METHODS ////////////////////////
 	var _teams = {};
 	var _categories = {};
-
+	var _tournament = null;
+	
 	/**
 	 * Save the current state to local storage.
 	 */
 	function _save() {
 		$.jStorage.set(STORAGE_PREFIX + "_teams", _teams);
 		$.jStorage.set(STORAGE_PREFIX + "_categories", _categories);
+		$.jStorage.set(STORAGE_PREFIX + "_tournament", _tournament);
 	}
 
 	/**
@@ -37,6 +39,10 @@
 		value = $.jStorage.get(STORAGE_PREFIX + "_categories");
 		if (null != value) {
 			_categories = value;
+		}
+		value = $.jStorage.get(STORAGE_PREFIX + "_tournament");
+		if (null != value) {
+			_tournament = value;
 		}
 	}
 
@@ -123,6 +129,16 @@
 			_clear_local_storage();
 			_teams = {};
 			_categories = {};
+			_tournament = null;
+		},
+		
+		getTournament : function() {
+			return _tournament;
+		},
+		
+		setTournament : function(tournament) {
+			_tournament = tournament;
+			_save();
 		},
 
 		/**
