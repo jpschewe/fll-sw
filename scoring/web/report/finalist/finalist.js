@@ -178,7 +178,7 @@
 		getCurrentDivision : function() {
 			return _currentDivision;
 		},
-		
+
 		getDivisionByIndex : function(divIndex) {
 			return _divisions[divIndex];
 		},
@@ -330,8 +330,10 @@
 		},
 
 		addTeamToCategory : function(category, teamNum) {
-			category.teams.push(teamNum);
-			_save();
+			if (-1 == $.inArray(teamNum, category.teams)) {
+				category.teams.push(teamNum);
+				_save();
+			}
 		},
 
 		removeTeamFromCategory : function(category, teamNum) {
@@ -387,15 +389,17 @@
 				console.log("Walking categories i: " + i + " category.name: "
 						+ category.name);
 				$.each(category.teams, function(j, teamNum) {
-					console
-							.log("  Walking teams j: " + j + " team: "
-									+ teamNum);
-					if (null == finalistsCount[teamNum]) {
-						finalistsCount[teamNum] = [];
+					var team = $.finalist.lookupTeam(teamNum);
+					if (team.division == $.finalist.getCurrentDivision()) {
+						console.log("  Walking teams j: " + j + " team: "
+								+ teamNum);
+						if (null == finalistsCount[teamNum]) {
+							finalistsCount[teamNum] = [];
+						}
+						finalistsCount[teamNum].push(category);
+						console.log("  Adding to finalistsCount[" + teamNum
+								+ "] " + category.name);
 					}
-					finalistsCount[teamNum].push(category);
-					console.log("  Adding to finalistsCount[" + teamNum + "] "
-							+ category.name);
 				});
 			});
 

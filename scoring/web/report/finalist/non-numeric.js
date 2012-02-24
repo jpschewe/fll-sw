@@ -19,10 +19,12 @@ $(document).ready(
 				var addedTeam = false;
 				$.each(category.teams, function(j, teamNum) {
 					console.log("  Team : " + teamNum);
-					addedTeam = true;
-					var teamIdx = addTeam(category);
 					var team = $.finalist.lookupTeam(teamNum);
-					populateTeamInformation(category, teamIdx, team);
+					if (team.division == $.finalist.getCurrentDivision()) {
+						addedTeam = true;
+						var teamIdx = addTeam(category);
+						populateTeamInformation(category, teamIdx, team);
+					}
 
 				});
 				if (!addedTeam) {

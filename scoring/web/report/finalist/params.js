@@ -10,8 +10,12 @@ $(document).ready(
 
 			$.each($.finalist.getDivisions(), function(i, division) {
 				console.log("Division " + division);
-				var divisionOption = $("<option value='" + i + "'>" + division
-						+ "</option>");
+				var selected = "";
+				if (division == $.finalist.getCurrentDivision()) {
+					selected = " selected ";
+				}
+				var divisionOption = $("<option value='" + i + "'" + selected
+						+ ">" + division + "</option>");
 				$("#divisions").append(divisionOption);
 			});
 			$.finalist.setCurrentDivision($.finalist.getDivisionByIndex($(

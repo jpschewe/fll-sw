@@ -58,7 +58,7 @@ $(document).ready(
 						+ ":" + time.getMinutes().toString().padL(2, "0")
 						+ "</td>"));
 
-				$.each($.finalist.getCategories(), function(i, category) {
+				$.each($.finalist.getAllCategories(), function(i, category) {
 					var teamNum = slot.categories[category.catId]
 					if (teamNum == null) {
 						row.append($("<td>&nbsp;</td>"));
