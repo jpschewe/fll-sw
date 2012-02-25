@@ -7,7 +7,6 @@
 <script type='text/javascript' src='../../extlib/jquery.json-2.3.min.js'></script>
 <script type='text/javascript' src='../../extlib/jstorage.js'></script>
 <script type='text/javascript' src='finalist.js'></script>
-<!-- FIXME script type='text/javascript' src='schedule.js'></script -->
 <script type='text/javascript'>
 	var _loadingTournament = "Test";
 
@@ -16,23 +15,29 @@
 	}
 
 	function loadData() {
-		console.log("Loading teams");
+		console.log("Loading data");
 
 		//FIXME generate this list
 
 		$.finalist.addDivision("Div I");
 		$.finalist.addDivision("Div II");
 
-		var team1 = $.finalist.addTeam(1, "Div I", "Team 1", "Org 1");
+		var team1 = $.finalist.lookupTeam(1);
+		if (null == team1) {
+			team1 = $.finalist.addTeam(1, "Div I", "Team 1", "Org 1");
+		}
 
 		// add all numeric categories
-		var designCategory = $.finalist.addCategory("Design", true);
+		var designCategory = $.finalist.getCategoryByName("Design");
+		if (null == designCategory) {
+			designCategory = $.finalist.addCategory("Design", true);
+		}
 
 		// need judging group for each category for each team
-		$.finalist.addCategoryScore(team1, designCategory, 102.5, "D1A");
+		$.finalist.setCategoryScore(team1, designCategory, 102.5, "D1A");
 
 		// add overall score
-		$.finalist.addOverallScore(team1, 572.3, "D1A");
+		$.finalist.setOverallScore(team1, 572.3, "D1A");
 
 		$.finalist.setTournament(_loadingTournament);
 	}
@@ -53,6 +58,7 @@
 			$("#choose_numSelected").show();
 		});
 		$("#keep").click(function() {
+			loadData();
 			$("#choose_clear").hide();
 			$("#choose_numSelected").show();
 		});
@@ -85,9 +91,8 @@
  <div id='choose_clear'>
   You already have data loaded for this tournament. Would you like to
   clear the existing data and load from scratch?
-  <button id='clear'>Yes, clear the data and reload</button>
-  <button id='keep'>No, leave the data alone</button>
-  <!-- FIXME would like to have a refresh team information option -->
+  <button id='clear'>Yes, clear the data</button>
+  <button id='keep'>No, just refresh the data</button>
  </div>
 
  <form id='choose_numSelected' action='params.html'>
