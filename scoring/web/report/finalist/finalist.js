@@ -216,7 +216,7 @@
 			return _teams[teamNum];
 		},
 
-		addOverallScore : function(team, score, group) {
+		setOverallScore : function(team, score, group) {
 			team.overallScore = score;
 			team.overallJudgingGroup = group;
 			_save();
@@ -238,7 +238,7 @@
 			return team.categoryGroups[category.catId];
 		},
 
-		addCategoryScore : function(team, category, score, group) {
+		setCategoryScore : function(team, category, score, group) {
 			team.categoryScores[category.catId] = score;
 			team.categoryGroups[category.catId] = group;
 			_save;
@@ -356,6 +356,16 @@
 			var category = null;
 			$.each(_categories, function(i, val) {
 				if (val.catId == toFind) {
+					category = val;
+				}
+			});
+			return category;
+		},
+
+		getCategoryByName : function(toFind) {
+			var category = null;
+			$.each(_categories, function(i, val) {
+				if (val.name == toFind) {
 					category = val;
 				}
 			});
