@@ -20,6 +20,7 @@
 	var _tournament = null;
 	var _divisions = [];
 	var _currentDivision = null;
+	var _numTeamsAutoSelected = 2;
 
 	/**
 	 * Save the current state to local storage.
@@ -30,6 +31,7 @@
 		$.jStorage.set(STORAGE_PREFIX + "_tournament", _tournament);
 		$.jStorage.set(STORAGE_PREFIX + "_divisions", _divisions);
 		$.jStorage.set(STORAGE_PREFIX + "_currentDivision", _currentDivision);
+		$.jStorage.set(STORAGE_PREFIX + "_numTeamsAutoSelected", _numTeamsAutoSelected);
 	}
 
 	/**
@@ -55,6 +57,10 @@
 		value = $.jStorage.get(STORAGE_PREFIX + "_currentDivision");
 		if (null != value) {
 			_currentDivision = value;
+		}
+		value = $.jStorage.get(STORAGE_PREFIX + "_numTeamsAutoSelected");
+		if (null != value) {
+			_numTeamsAutoSelected = value;
 		}
 	}
 
@@ -147,6 +153,15 @@
 			_categories = {};
 			_divisions = [];
 			_tournament = null;
+		},
+		
+		setNumTeamsAutoSelected : function(num) {
+			_numTeamsAutoSelected = num;
+			_save();
+		},
+		
+		getNumTeamsAutoSelected : function() {
+			return _numTeamsAutoSelected;
 		},
 
 		getTournament : function() {

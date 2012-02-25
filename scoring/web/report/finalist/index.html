@@ -40,10 +40,16 @@
 	$(document)
 			.ready(
 					function() {
+						var numTeamsAutoSelected = $.finalist
+								.getNumTeamsAutoSelected();
+						$("#numSelected").val(numTeamsAutoSelected);
+						$("#numSelected").change(function() {
+							$.finalist.setNumTeamsAutoSelected($(this).val());
+						});
+
 						var allTeams = $.finalist.getAllTeams();
-						console.log("All teams: " + allTeams + " is null: "
-								+ (null == allTeams));
 						var tournament = $.finalist.getTournament();
+
 						if (null != allTeams && allTeams.length > 0) {
 							if (tournament != _loadingTournament) {
 								console.log("Clearing data for tournament: "
@@ -70,13 +76,24 @@
 
 <body>
 
-	<p>
-		This page is just javascript that loads initializes the local storage
-		and then redirects to <a href='params.html'>finalst schedule
-			params</a>
-	</p>
+ <p>
+  This page is just javascript that loads initializes the local storage
+  and then redirects to <a href='params.html'>finalist schedule
+   params</a>
+ </p>
 
-	<!-- FIXME should add form elements to the document -->
+ <!-- FIXME should add form elements to the document -->
 
+ <p>
+  Please choose the number of teams that should be automatically
+  selected from each judging group. You will have an opportunity to
+  change these selections. <select id='numSelected'><option
+    value='0'>0</option>
+   <option value='1'>1</option>
+   <option value='2'>2</option>
+   <option value='3'>3</option>
+   <option value='4'>4</option>
+   <option value='5'>5</option></select>
+ </p>
 </body>
 </html>
