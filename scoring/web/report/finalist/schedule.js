@@ -40,15 +40,8 @@ $(document).ready(
 				headerRow.append(header);
 			});
 
-			// FIXME duration, startHour, startMinute needs to be specified up
-			// front
-			var duration = 20;
-			var startHour = 14;
-			var startMinute = 0;
-
-			var time = new Date();
-			time.setHours(startHour);
-			time.setMinutes(startMinute);
+			var duration = $.finalist.getDuration();
+			var time = $.finalist.getStartTime();
 			var schedule = $.finalist.scheduleFinalists();
 			$.each(schedule, function(i, slot) {
 				var row = $("<tr></tr>");
