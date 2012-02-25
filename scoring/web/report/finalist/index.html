@@ -37,55 +37,60 @@
 		$.finalist.setTournament(_loadingTournament);
 	}
 
-	$(document)
-			.ready(
-					function() {
-						var numTeamsAutoSelected = $.finalist
-								.getNumTeamsAutoSelected();
-						$("#numSelected").val(numTeamsAutoSelected);
-						$("#numSelected").change(function() {
-							$.finalist.setNumTeamsAutoSelected($(this).val());
-						});
+	$(document).ready(function() {
+		var numTeamsAutoSelected = $.finalist.getNumTeamsAutoSelected();
+		$("#numSelected").val(numTeamsAutoSelected);
+		$("#numSelected").change(function() {
+			$.finalist.setNumTeamsAutoSelected($(this).val());
+		});
 
-						var allTeams = $.finalist.getAllTeams();
-						var tournament = $.finalist.getTournament();
+		$("#choose_numSelected").hide();
+		$("#choose_clear").hide();
+		$("#clear").click(function() {
+			clearData();
+			loadData();
+			$("#choose_clear").hide();
+			$("#choose_numSelected").show();
+		});
+		$("#keep").click(function() {
+			$("#choose_clear").hide();
+			$("#choose_numSelected").show();
+		});
 
-						if (null != allTeams && allTeams.length > 0) {
-							if (tournament != _loadingTournament) {
-								console.log("Clearing data for tournament: "
-										+ tournament);
-								clearData();
-								loadData();
-							} else {
-								console
-										.log("Data already exists for tournament ");
-								var result = confirm("You have data already loaded for this tournament, would you like to clear it?");
-								if (result) {
-									clearData();
-									loadData();
-								}
-							}
-						} else {
-							loadData();
-						}
-						//FIXME redirect to params.html
-						// window.location = "params.html";
-					});
+		var allTeams = $.finalist.getAllTeams();
+		var tournament = $.finalist.getTournament();
+
+		if (null != allTeams && allTeams.length > 0) {
+			if (tournament != _loadingTournament) {
+				console.log("Clearing data for old tournament: " + tournament);
+				clearData();
+				loadData();
+				$("#choose_clear").hide();
+				$("#choose_numSelected").show();
+			} else {
+				$("#choose_clear").show();
+			}
+		} else {
+			loadData();
+			$("#choose_clear").hide();
+			$("#choose_numSelected").show();
+		}
+	});
 </script>
 
 </head>
 
 <body>
 
- <p>
-  This page is just javascript that loads initializes the local storage
-  and then redirects to <a href='params.html'>finalist schedule
-   params</a>
- </p>
+ <div id='choose_clear'>
+  You already have data loaded for this tournament. Would you like to
+  clear the existing data and load from scratch?
+  <button id='clear'>Yes, clear the data and reload</button>
+  <button id='keep'>No, leave the data alone</button>
+  <!-- FIXME would like to have a refresh team information option -->
+ </div>
 
- <!-- FIXME should add form elements to the document -->
- 
- <p>
+ <form id='choose_numSelected' action='params.html'>
   Please choose the number of teams that should be automatically
   selected from each judging group. You will have an opportunity to
   change these selections. <select id='numSelected'><option
@@ -94,8 +99,10 @@
    <option value='2'>2</option>
    <option value='3'>3</option>
    <option value='4'>4</option>
-   <option value='5'>5</option></select>
- </p>
- 
+   <option value='5'>5</option></select> <br /> <input type='submit'
+   value='Next' />
+ </form>
+
+
 </body>
 </html>
