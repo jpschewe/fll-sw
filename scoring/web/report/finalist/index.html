@@ -23,12 +23,17 @@
 		$.finalist.addDivision("Div I");
 		$.finalist.addDivision("Div II");
 
-		$.finalist.addTeam(1, "Div I", "Team 1", "Org 1");
+		var team1 = $.finalist.addTeam(1, "Div I", "Team 1", "Org 1");
 
-		//FIXME need judging group for each category for each team
-		
-		//FIXME add all numeric categories
-		
+		// add all numeric categories
+		var designCategory = $.finalist.addCategory("Design", true);
+
+		// need judging group for each category for each team
+		$.finalist.addCategoryScore(team1, designCategory, 102.5, "D1A");
+
+		// add overall score
+		$.finalist.addOverallScore(team1, 572.3, "D1A");
+
 		$.finalist.setTournament(_loadingTournament);
 	}
 

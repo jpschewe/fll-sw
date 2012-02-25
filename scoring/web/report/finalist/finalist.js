@@ -94,6 +94,10 @@
 		this.division = division;
 		this.name = name;
 		this.org = org;
+		this.categoryScores = {};
+		this.categoryGroups = {};
+		this.overallScore = null;
+		this.overallGroup = null;
 		_teams[num] = this;
 		_save();
 	}
@@ -195,6 +199,34 @@
 		 */
 		lookupTeam : function(teamNum) {
 			return _teams[teamNum];
+		},
+
+		addOverallScore : function(team, score, group) {
+			team.overallScore = score;
+			team.overallJudgingGroup = group;
+			_save();
+		},
+
+		getOverallScore : function(team) {
+			return team.overallScore;
+		},
+
+		getOverallGroup : function(team) {
+			return team.overallJudgingGroup;
+		},
+
+		getCategoryScore : function(team, category) {
+			return team.categoryScores[category.catId];
+		},
+
+		getCategoryGroup : function(team, category) {
+			return team.categoryGroups[category.catId];
+		},
+
+		addCategoryScore : function(team, category, score, group) {
+			team.categoryScores[category.catId] = score;
+			team.categoryGroups[category.catId] = group;
+			_save;
 		},
 
 		/**
