@@ -21,6 +21,9 @@
 	var _divisions = [];
 	var _currentDivision = null;
 	var _numTeamsAutoSelected = 2;
+	var _startHour = 2;
+	var _startMinute = 0;
+	var _duration = 20;
 
 	/**
 	 * Save the current state to local storage.
@@ -31,7 +34,11 @@
 		$.jStorage.set(STORAGE_PREFIX + "_tournament", _tournament);
 		$.jStorage.set(STORAGE_PREFIX + "_divisions", _divisions);
 		$.jStorage.set(STORAGE_PREFIX + "_currentDivision", _currentDivision);
-		$.jStorage.set(STORAGE_PREFIX + "_numTeamsAutoSelected", _numTeamsAutoSelected);
+		$.jStorage.set(STORAGE_PREFIX + "_numTeamsAutoSelected",
+				_numTeamsAutoSelected);
+		$.jStorage.set(STORAGE_PREFIX + "_startHour", _startHour);
+		$.jStorage.set(STORAGE_PREFIX + "_startMinute", _startMinute);
+		$.jStorage.set(STORAGE_PREFIX + "_duration", _duration);
 	}
 
 	/**
@@ -61,6 +68,18 @@
 		value = $.jStorage.get(STORAGE_PREFIX + "_numTeamsAutoSelected");
 		if (null != value) {
 			_numTeamsAutoSelected = value;
+		}
+		value = $.jStorage.get(STORAGE_PREFIX + "_startHour");
+		if (null != value) {
+			_startHour = value;
+		}
+		value = $.jStorage.get(STORAGE_PREFIX + "_startMinute");
+		if (null != value) {
+			_startMinute = value;
+		}
+		value = $.jStorage.get(STORAGE_PREFIX + "_duration");
+		if (null != value) {
+			_duration = value;
 		}
 	}
 
@@ -154,12 +173,12 @@
 			_divisions = [];
 			_tournament = null;
 		},
-		
+
 		setNumTeamsAutoSelected : function(num) {
 			_numTeamsAutoSelected = num;
 			_save();
 		},
-		
+
 		getNumTeamsAutoSelected : function() {
 			return _numTeamsAutoSelected;
 		},
@@ -524,6 +543,40 @@
 			return schedule;
 		},
 
+		setStartHour : function(hour) {
+			_startHour = hour;
+			_save();
+		},
+		
+		getStartHour : function() {
+			return _startHour;
+		},
+
+		setStartMinute : function(minute) {
+			_startMinute = minute;
+			_save();
+		},
+		
+		getStartMinute : function() {
+			return _startMinute;
+		},
+		
+		getStartTime : function() {
+			var time = new Date();
+			time.setHours(_startHour);
+			time.setMinutes(_startMinute);
+			return time;
+		},
+		
+		setDuration : function(v) {
+			_duration = v;
+			_save();
+		},
+		
+		getDuration : function() {
+			return _duration;
+		},
+
 		displayNavbar : function() {
 			var element;
 			if (window.location.pathname.match(/params.html$/)) {
@@ -555,9 +608,6 @@
 			$("#navbar").append(element);
 
 		},
-
-	// FIXME handle timeslot duration on output
-
 	};
 
 	_load();
