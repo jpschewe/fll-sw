@@ -12,6 +12,8 @@ import java.net.NetworkInterface;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +23,8 @@ import javax.servlet.http.HttpServletResponse;
  * Some utilities for dealing with the web.
  */
 public final class WebUtils {
+
+  private static final Pattern needsEscape = Pattern.compile("[\'\"\\\\]");
 
   private WebUtils() {
     // no instances
@@ -98,6 +102,19 @@ public final class WebUtils {
       }
     }
     return urls;
+  }
+
+  /**
+   * Take a string and quote it for Javascript.
+   */
+  public static String quoteJavascriptString(final String str) {
+    if (null == str
+        || "".equals(str)) {
+      return "\"\"";
+    } else {
+      final Matcher escapeMatcher = WebUtils.needsEscape.matcher(str);
+      return '"' + escapeMatcher.replaceAll("\\\\$0") + '"';
+    }
   }
 
 }
