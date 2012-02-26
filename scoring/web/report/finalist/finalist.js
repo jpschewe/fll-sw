@@ -170,8 +170,9 @@
 			_clear_local_storage();
 			_teams = {};
 			_categories = {};
-			_divisions = [];
 			_tournament = null;
+			_divisions = [];
+			_currentDivision = null;
 		},
 
 		setNumTeamsAutoSelected : function(num) {
