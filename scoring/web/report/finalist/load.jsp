@@ -27,16 +27,10 @@
 <%FinalistLoad.outputTeamVariables(out, session);%>
 	
 <%FinalistLoad.outputCategories(out, application);%>
+	
+<%FinalistLoad.outputCategoryScores(out, application, session);%>
 
-	//FIXME generate this list
-
-		// need judging group for each category for each team
-		$.finalist.setCategoryScore(team29, robot_designCategory, 102.5, "D1A");
-
-		// add overall score
-		$.finalist.setOverallScore(team29, 572.3, "D1A");
-
-		$.finalist.setTournament(_loadingTournament);
+	$.finalist.setTournament(_loadingTournament);
 	}
 
 	$(document).ready(function() {

@@ -8,6 +8,8 @@ package fll.web.report.finalist;
 
 import java.io.Writer;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Formatter;
 
@@ -15,6 +17,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Document;
@@ -22,6 +25,8 @@ import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.db.Queries;
+import fll.scheduler.TeamScheduleInfo;
+import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
@@ -34,9 +39,9 @@ public class FinalistLoad {
   /**
    * The name of the javascript variable that represents the team.
    */
-  public static String getTeamVarName(final Team team) {
+  public static String getTeamVarName(final int teamNumber) {
     return "team"
-        + team.getTeamNumber();
+        + teamNumber;
   }
 
   /**
@@ -55,7 +60,7 @@ public class FinalistLoad {
    */
   public static void outputTeamVarDefinition(final Formatter output,
                                              final Team team) {
-    final String teamVarName = getTeamVarName(team);
+    final String teamVarName = getTeamVarName(team.getTeamNumber());
     output.format("var %s = $.finalist.lookupTeam(%d);%n", teamVarName, team.getTeamNumber());
     output.format("if(null == %s) {%n", teamVarName);
     output.format("  %s = $.finalist.addTeam(%d, %s, %s, %s);%n", teamVarName, team.getTeamNumber(),
@@ -101,9 +106,8 @@ public class FinalistLoad {
   public static void outputCategories(final Writer writer,
                                       final ServletContext application) {
     final Document document = ApplicationAttributes.getChallengeDocument(application);
-    final Formatter output = new Formatter(writer);
-
     final Element rootElement = document.getDocumentElement();
+    final Formatter output = new Formatter(writer);
 
     for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
                                                                                 rootElement.getElementsByTagName("subjectiveCategory"))) {
@@ -117,7 +121,67 @@ public class FinalistLoad {
       output.format("  %s = $.finalist.addCategory(%s, true);%n", catVarName, quotedCatTitle);
       output.format("}%n");
     }
+  }
 
+  public static void outputCategoryScores(final Writer writer,
+                                          final ServletContext application,
+                                          final HttpSession session) throws SQLException {
+    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final Connection connection = datasource.getConnection();
+    final Document document = ApplicationAttributes.getChallengeDocument(application);
+    final Element rootElement = document.getDocumentElement();
+    final int tournament = Queries.getCurrentTournament(connection);
+    final Formatter output = new Formatter(writer);
+
+    final TournamentSchedule schedule;
+    if (TournamentSchedule.scheduleExistsInDatabase(connection, tournament)) {
+      schedule = new TournamentSchedule(connection, tournament);
+    } else {
+      schedule = null;
+    }
+
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT * from FinalScores WHERE tournament = ?");
+      prep.setInt(1, tournament);
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final int teamNumber = rs.getInt("TeamNumber");
+
+        final String teamVar = getTeamVarName(teamNumber);
+        final double overallScore = rs.getDouble("OverallScore");
+        final String overallGroup;
+        if (null == schedule) {
+          overallGroup = "Unknown";
+        } else {
+          final TeamScheduleInfo si = schedule.getSchedInfoForTeam(teamNumber);
+          overallGroup = si.getJudgingStation();
+        }
+        output.format("$.finalist.setOverallScore(%s, %.2f, %s);%n", teamVar, overallScore,
+                      WebUtils.quoteJavascriptString(overallGroup));
+
+        for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
+                                                                                    rootElement.getElementsByTagName("subjectiveCategory"))) {
+          final String categoryName = subjectiveElement.getAttribute("name");
+          final String categoryVar = getCategoryVarName(categoryName);
+          final double catScore = rs.getDouble(categoryName);
+          final String group;
+          if (null == schedule) {
+            group = Queries.computeScoreGroupForTeam(connection, tournament, categoryName, teamNumber);
+          } else {
+            final TeamScheduleInfo si = schedule.getSchedInfoForTeam(teamNumber);
+            group = si.getJudgingStation();
+          }
+
+          output.format("$.finalist.setCategoryScore(%s, %s, %.2f, %s);%n", teamVar, categoryVar, catScore,
+                        WebUtils.quoteJavascriptString(group));
+        } // foreach category
+      }// foreach team
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
   }
 
 }
