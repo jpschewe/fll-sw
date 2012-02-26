@@ -85,7 +85,7 @@ public class FinalistLoad {
     final DataSource datasource = SessionAttributes.getDataSource(session);
     final Connection connection = datasource.getConnection();
     final Formatter output = new Formatter(writer);
-    for (final String division : Queries.getDivisions(connection)) {
+    for (final String division : Queries.getEventDivisions(connection)) {
       output.format("$.finalist.addDivision(%s);%n", WebUtils.quoteJavascriptString(division));
     }
   }
