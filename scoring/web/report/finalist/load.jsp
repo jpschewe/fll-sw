@@ -15,7 +15,7 @@
 	var _loadingTournament =
 <%=FinalistLoad.currentTournament(session)%>
 	;
-	
+
 	function clearData() {
 		$.finalist.clearAllData();
 	}
@@ -25,16 +25,13 @@
 <%FinalistLoad.outputDivisions(out, session);%>
 	
 <%FinalistLoad.outputTeamVariables(out, session);%>
+	
+<%FinalistLoad.outputCategories(out, application);%>
+
 	//FIXME generate this list
 
-		// add all numeric categories
-		var designCategory = $.finalist.getCategoryByName("Design");
-		if (null == designCategory) {
-			designCategory = $.finalist.addCategory("Design", true);
-		}
-
 		// need judging group for each category for each team
-		$.finalist.setCategoryScore(team29, designCategory, 102.5, "D1A");
+		$.finalist.setCategoryScore(team29, robot_designCategory, 102.5, "D1A");
 
 		// add overall score
 		$.finalist.setOverallScore(team29, 572.3, "D1A");
@@ -88,25 +85,25 @@
 
 <body>
 
- <div id='choose_clear'>
-  You already have data loaded for this tournament. Would you like to
-  clear the existing data and load from scratch?
-  <button id='clear'>Yes, clear the data</button>
-  <button id='keep'>No, just refresh the data</button>
- </div>
+	<div id='choose_clear'>
+		You already have data loaded for this tournament. Would you like to
+		clear the existing data and load from scratch?
+		<button id='clear'>Yes, clear the data</button>
+		<button id='keep'>No, just refresh the data</button>
+	</div>
 
- <form id='choose_numSelected' action='params.html'>
-  Please choose the number of teams that should be automatically
-  selected from each judging group. You will have an opportunity to
-  change these selections. <select id='numSelected'><option
-    value='0'>0</option>
-   <option value='1'>1</option>
-   <option value='2'>2</option>
-   <option value='3'>3</option>
-   <option value='4'>4</option>
-   <option value='5'>5</option></select> <br /> <input type='submit'
-   value='Next' />
- </form>
+	<form id='choose_numSelected' action='params.html'>
+		Please choose the number of teams that should be automatically
+		selected from each judging group. You will have an opportunity to
+		change these selections. <select id='numSelected'><option
+				value='0'>0</option>
+			<option value='1'>1</option>
+			<option value='2'>2</option>
+			<option value='3'>3</option>
+			<option value='4'>4</option>
+			<option value='5'>5</option></select> <br /> <input type='submit'
+			value='Next' />
+	</form>
 
 
 </body>
