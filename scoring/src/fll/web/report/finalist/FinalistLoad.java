@@ -158,7 +158,7 @@ public class FinalistLoad {
           final TeamScheduleInfo si = schedule.getSchedInfoForTeam(teamNumber);
           overallGroup = si.getJudgingStation();
         }
-        output.format("$.finalist.setOverallScore(%s, %.2f, %s);%n", teamVar, overallScore,
+        output.format("$.finalist.setOverallScore(%s, %.02f, %s);%n", teamVar, overallScore,
                       WebUtils.quoteJavascriptString(overallGroup));
 
         for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
@@ -174,7 +174,7 @@ public class FinalistLoad {
             group = si.getJudgingStation();
           }
 
-          output.format("$.finalist.setCategoryScore(%s, %s, %.2f, %s);%n", teamVar, categoryVar, catScore,
+          output.format("$.finalist.setCategoryScore(%s, %s, %.02f, %s);%n", teamVar, categoryVar, catScore,
                         WebUtils.quoteJavascriptString(group));
         } // foreach category
       }// foreach team
