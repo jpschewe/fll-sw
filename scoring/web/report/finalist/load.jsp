@@ -27,9 +27,12 @@
 <%FinalistLoad.outputTeamVariables(out, session);%>
 	
 <%FinalistLoad.outputCategories(out, application);%>
-	
+	var championship = $.finalist
+				.getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
+		if (null == championship) {
+			$.finalist.addCategory($.finalist.CHAMPIONSHIP_NAME, true);
+		}
 <%FinalistLoad.outputCategoryScores(out, application, session);%>
-
 	$.finalist.setTournament(_loadingTournament);
 	}
 
@@ -87,10 +90,8 @@
 	</div>
 
 	<form id='choose_numSelected' action='params.html'>
-		Please choose the number of teams that should be automatically
-		selected from each judging group. You will have an opportunity to
-		change these selections. <select id='numSelected'><option
-				value='0'>0</option>
+		Please choose the number of teams that should be selected from each
+		judging group. <select id='numSelected'><option value='0'>0</option>
 			<option value='1'>1</option>
 			<option value='2'>2</option>
 			<option value='3'>3</option>
