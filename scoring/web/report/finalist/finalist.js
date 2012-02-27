@@ -166,6 +166,8 @@
 
 	// //////////////////////// PUBLIC INTERFACE /////////////////////////
 	$.finalist = {
+		CHAMPIONSHIP_NAME : "Championship",
+
 		clearAllData : function() {
 			_clear_local_storage();
 			_teams = {};
@@ -407,7 +409,8 @@
 		},
 
 		addTeamToCategory : function(category, teamNum) {
-			if (-1 == $.inArray(teamNum, category.teams)) {
+			var index = category.teams.indexOf(teamNum);
+			if (-1 == index) {
 				category.teams.push(teamNum);
 				_save();
 			}
@@ -467,6 +470,7 @@
 						+ category.name);
 				$.each(category.teams, function(j, teamNum) {
 					var team = $.finalist.lookupTeam(teamNum);
+					console.log("Looking for team: " + teamNum + " team: " + team);
 					if (team.division == $.finalist.getCurrentDivision()) {
 						console.log("  Walking teams j: " + j + " team: "
 								+ teamNum);
@@ -496,8 +500,8 @@
 				var aCategories = finalistsCount[a];
 				var bCategories = finalistsCount[b];
 
-				// var aCount = finalistsCount[a].length;
-				// var bCount = finalistsCount[b].length;
+				 var aCount = aCategories.length;
+				 var bCount = bCategories.length;
 				if (aCount == bCount) {
 					return 0;
 				} else if (aCount < bCount) {
@@ -548,7 +552,7 @@
 			_startHour = hour;
 			_save();
 		},
-		
+
 		getStartHour : function() {
 			return _startHour;
 		},
@@ -557,23 +561,23 @@
 			_startMinute = minute;
 			_save();
 		},
-		
+
 		getStartMinute : function() {
 			return _startMinute;
 		},
-		
+
 		getStartTime : function() {
 			var time = new Date();
 			time.setHours(_startHour);
 			time.setMinutes(_startMinute);
 			return time;
 		},
-		
+
 		setDuration : function(v) {
 			_duration = v;
 			_save();
 		},
-		
+
 		getDuration : function() {
 			return _duration;
 		},
@@ -596,6 +600,16 @@
 				element = $("<a href='non-numeric.html'></a>")
 			}
 			element.text("Non-numeric Categories");
+			$("#navbar").append(element);
+
+			$("#navbar").append($("<span> - </span>"));
+
+			if (window.location.pathname.match(/championship.html$/)) {
+				element = $("<span></span>")
+			} else {
+				element = $("<a href='championship.html'></a>")
+			}
+			element.text($.finalist.CHAMPIONSHIP_NAME);
 			$("#navbar").append(element);
 
 			$("#navbar").append($("<span> - </span>"));
