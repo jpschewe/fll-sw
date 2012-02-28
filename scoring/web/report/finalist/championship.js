@@ -10,7 +10,7 @@ function initializeTeamsInCategory(currentCategory, teams, scoreGroups) {
 		if (team.division == $.finalist.getCurrentDivision()) {
 			if (!checkedEnoughTeams) {
 				$.finalist.addTeamToCategory(currentCategory, team.num);
-				
+
 				var group = $.finalist.getOverallGroup(team);
 				scoreGroups[group] = scoreGroups[group] - 1;
 
@@ -34,11 +34,11 @@ function initializeFinalistCounts(teams) {
 		// initialize to 0
 		var numFinalists = 0;
 		$.each($.finalist.getAllCategories(), function(j, category) {
-			if(-1 != category.teams.indexOf(team.num)) {
+			if ($.finalist.isTeamInCategory(category, team.num)) {
 				numFinalists = numFinalists + 1;
 			}
 		});
-		$("#" + getNumFinalistsId(team)).text(numFinalists);		
+		$("#" + getNumFinalistsId(team)).text(numFinalists);
 	});
 }
 
@@ -48,15 +48,16 @@ $(document)
 					var currentCategory = $.finalist
 							.getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
 					var currentDivision = $.finalist.getCurrentDivision();
-					
-					var previouslyVisited = $.finalist
-							.isCategoryVisited(currentCategory, currentDivision);
-					$.finalist.setCategoryVisited(currentCategory, currentDivision);
+
+					var previouslyVisited = $.finalist.isCategoryVisited(
+							currentCategory, currentDivision);
+					$.finalist.setCategoryVisited(currentCategory,
+							currentDivision);
 
 					$("#division").text(currentDivision);
 					$("#data").empty();
 
-					var headerRow = $("<tr><th>Finalist?</th><th>Score Group</th><th>Team #</th><th>Team Name</th><th>Score</th><th>Num Finalists</th></tr>");
+					var headerRow = $("<tr><th>Finalist?</th><th>Score Group</th><th>Team #</th><th>Team Name</th><th>Score</th><th>Num Categories</th></tr>");
 					$("#data").append(headerRow);
 
 					var teams = $.finalist.getAllTeams();
@@ -85,7 +86,8 @@ $(document)
 
 					if (!previouslyVisited) {
 						// initialize teams in category
-						initializeTeamsInCategory(currentCategory, teams, scoreGroups);
+						initializeTeamsInCategory(currentCategory, teams,
+								scoreGroups);
 					}
 
 					$.each(teams, function(i, team) {
@@ -98,8 +100,10 @@ $(document)
 							var finalistCheck = $("<input type='checkbox'/>");
 							finalistCol.append(finalistCheck);
 							finalistCheck.change(function() {
-								var finalistDisplay = $("#" + getNumFinalistsId(team));
-								var numFinalists = parseInt(finalistDisplay.text(), 10);
+								var finalistDisplay = $("#"
+										+ getNumFinalistsId(team));
+								var numFinalists = parseInt(finalistDisplay
+										.text(), 10);
 								if ($(this).attr("checked") == undefined) {
 									$.finalist.removeTeamFromCategory(
 											currentCategory, team.num);
@@ -133,12 +137,13 @@ $(document)
 							row.append(scoreCol);
 							scoreCol.text($.finalist.getOverallScore(team));
 
-							var numFinalistCol = $("<td id='" + getNumFinalistsId(team) + "'></td>");
+							var numFinalistCol = $("<td id='"
+									+ getNumFinalistsId(team) + "'></td>");
 							row.append(numFinalistCol);
 						} // in correct division
 					}); // build data for each team
 
 					initializeFinalistCounts(teams);
-					
+
 					$.finalist.displayNavbar();
 				}); // end ready function
