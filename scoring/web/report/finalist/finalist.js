@@ -15,15 +15,29 @@
 	var STORAGE_PREFIX = "fll.finalists";
 
 	// //////////////////////// PRIVATE METHODS ////////////////////////
-	var _teams = {};
-	var _categories = {};
-	var _tournament = null;
-	var _divisions = [];
-	var _currentDivision = null;
-	var _numTeamsAutoSelected = 2;
-	var _startHour = 2;
-	var _startMinute = 0;
-	var _duration = 20;
+	var _teams;
+	var _categories;
+	var _tournament;
+	var _divisions;
+	var _currentDivision;
+	var _numTeamsAutoSelected;
+	var _startHour;
+	var _startMinute;
+	var _duration;
+	var _categoriesVisited;
+
+	function _init_variables() {
+		_teams = {};
+		_categories = {};
+		_tournament = null;
+		_divisions = [];
+		_currentDivision = null;
+		_numTeamsAutoSelected = 2;
+		_startHour = 2;
+		_startMinute = 0;
+		_duration = 20;
+		_categoriesVisited = {};
+	}
 
 	/**
 	 * Save the current state to local storage.
@@ -39,12 +53,16 @@
 		$.jStorage.set(STORAGE_PREFIX + "_startHour", _startHour);
 		$.jStorage.set(STORAGE_PREFIX + "_startMinute", _startMinute);
 		$.jStorage.set(STORAGE_PREFIX + "_duration", _duration);
+		$.jStorage.set(STORAGE_PREFIX + "_categoriesVisited",
+				_categoriesVisited);
 	}
 
 	/**
 	 * Load the current state from local storage.
 	 */
 	function _load() {
+		_init_variables();
+
 		var value = $.jStorage.get(STORAGE_PREFIX + "_teams");
 		if (null != value) {
 			_teams = value;
@@ -80,6 +98,10 @@
 		value = $.jStorage.get(STORAGE_PREFIX + "_duration");
 		if (null != value) {
 			_duration = value;
+		}
+		value = $.jStorage.get(STORAGE_PREFIX + "_categoriesVisited");
+		if (null != value) {
+			_categoriesVisited = value;
 		}
 	}
 
@@ -170,11 +192,23 @@
 
 		clearAllData : function() {
 			_clear_local_storage();
-			_teams = {};
-			_categories = {};
-			_tournament = null;
-			_divisions = [];
-			_currentDivision = null;
+			_init_variables();
+		},
+
+		setCategoryVisited : function(category, division) {
+			var visited = _categoriesVisited[division];
+			if (null == visited) {
+				visited = [];
+				_categoriesVisited[division] = visited;
+			}
+			if (-1 == visited.indexOf(category.catId)) {
+				_categoriesVisited[division].push(category.catId);
+			}
+		},
+
+		isCategoryVisited : function(category, division) {
+			var visited = _categoriesVisited[division];
+			return null != visited && -1 != visited.indexOf(category.catId);
 		},
 
 		setNumTeamsAutoSelected : function(num) {
@@ -211,7 +245,6 @@
 		},
 
 		setCurrentDivision : function(division) {
-			console.log("Set division to " + division);
 			_currentDivision = division;
 			_save();
 		},
@@ -424,6 +457,10 @@
 			}
 		},
 
+		isTeamInCategory : function(category, teamNum) {
+			return -1 != category.teams.indexOf(teamNum);
+		},
+
 		clearTeamsInCategory : function(category) {
 			category.teams = [];
 			_save();
@@ -470,7 +507,8 @@
 						+ category.name);
 				$.each(category.teams, function(j, teamNum) {
 					var team = $.finalist.lookupTeam(teamNum);
-					console.log("Looking for team: " + teamNum + " team: " + team);
+					console.log("Looking for team: " + teamNum + " team: "
+							+ team);
 					if (team.division == $.finalist.getCurrentDivision()) {
 						console.log("  Walking teams j: " + j + " team: "
 								+ teamNum);
@@ -500,8 +538,8 @@
 				var aCategories = finalistsCount[a];
 				var bCategories = finalistsCount[b];
 
-				 var aCount = aCategories.length;
-				 var bCount = bCategories.length;
+				var aCount = aCategories.length;
+				var bCount = bCategories.length;
 				if (aCount == bCount) {
 					return 0;
 				} else if (aCount < bCount) {
