@@ -42,6 +42,57 @@ function initializeFinalistCounts(teams) {
 	});
 }
 
+function createTeamTable(teams, currentDivision, currentCategory) {
+	$.each(teams, function(i, team) {
+		if (team.division == currentDivision) {
+			var row = $("<tr></tr>");
+			$("#data").append(row);
+
+			var finalistCol = $("<td></td>");
+			row.append(finalistCol);
+			var finalistCheck = $("<input type='checkbox'/>");
+			finalistCol.append(finalistCheck);
+			finalistCheck.change(function() {
+				var finalistDisplay = $("#" + getNumFinalistsId(team));
+				var numFinalists = parseInt(finalistDisplay.text(), 10);
+				if ($(this).attr("checked") == undefined) {
+					$.finalist
+							.removeTeamFromCategory(currentCategory, team.num);
+					numFinalists = numFinalists - 1;
+				} else {
+					$.finalist.addTeamToCategory(currentCategory, team.num);
+					numFinalists = numFinalists + 1;
+				}
+				finalistDisplay.text(numFinalists);
+			});
+			if ($.finalist.isTeamInCategory(currentCategory, team.num)) {
+				finalistCheck.attr("checked", true);
+			}
+
+			var sgCol = $("<td></td>");
+			row.append(sgCol);
+			var group = $.finalist.getOverallGroup(team);
+			sgCol.text(group);
+
+			var numCol = $("<td></td>");
+			row.append(numCol);
+			numCol.text(team.num);
+
+			var nameCol = $("<td></td>");
+			row.append(nameCol);
+			nameCol.text(team.name);
+
+			var scoreCol = $("<td></td>");
+			row.append(scoreCol);
+			scoreCol.text($.finalist.getOverallScore(team));
+
+			var numFinalistCol = $("<td id='" + getNumFinalistsId(team)
+					+ "'></td>");
+			row.append(numFinalistCol);
+		} // in correct division
+	}); // build data for each team
+}
+
 $(document)
 		.ready(
 				function() {
@@ -90,58 +141,7 @@ $(document)
 								scoreGroups);
 					}
 
-					$.each(teams, function(i, team) {
-						if (team.division == $.finalist.getCurrentDivision()) {
-							var row = $("<tr></tr>");
-							$("#data").append(row);
-
-							var finalistCol = $("<td></td>");
-							row.append(finalistCol);
-							var finalistCheck = $("<input type='checkbox'/>");
-							finalistCol.append(finalistCheck);
-							finalistCheck.change(function() {
-								var finalistDisplay = $("#"
-										+ getNumFinalistsId(team));
-								var numFinalists = parseInt(finalistDisplay
-										.text(), 10);
-								if ($(this).attr("checked") == undefined) {
-									$.finalist.removeTeamFromCategory(
-											currentCategory, team.num);
-									numFinalists = numFinalists - 1;
-								} else {
-									$.finalist.addTeamToCategory(
-											currentCategory, team.num);
-									numFinalists = numFinalists + 1;
-								}
-								finalistDisplay.text(numFinalists);
-							});
-							if ($.finalist.isTeamInCategory(currentCategory,
-									team.num)) {
-								finalistCheck.attr("checked", true);
-							}
-
-							var sgCol = $("<td></td>");
-							row.append(sgCol);
-							var group = $.finalist.getOverallGroup(team);
-							sgCol.text(group);
-
-							var numCol = $("<td></td>");
-							row.append(numCol);
-							numCol.text(team.num);
-
-							var nameCol = $("<td></td>");
-							row.append(nameCol);
-							nameCol.text(team.name);
-
-							var scoreCol = $("<td></td>");
-							row.append(scoreCol);
-							scoreCol.text($.finalist.getOverallScore(team));
-
-							var numFinalistCol = $("<td id='"
-									+ getNumFinalistsId(team) + "'></td>");
-							row.append(numFinalistCol);
-						} // in correct division
-					}); // build data for each team
+					createTeamTable(teams, currentDivision, currentCategory);
 
 					initializeFinalistCounts(teams);
 
