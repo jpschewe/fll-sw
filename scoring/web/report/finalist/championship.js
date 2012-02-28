@@ -25,6 +25,23 @@ function initializeTeamsInCategory(currentCategory, teams, scoreGroups) {
 	});
 }
 
+function getNumFinalistsId(team) {
+	return "num_finalists_" + team.num;
+}
+
+function initializeFinalistCounts(teams) {
+	$.each(teams, function(i, team) {
+		// initialize to 0
+		var numFinalists = 0;
+		$.each($.finalist.getAllCategories(), function(j, category) {
+			if(-1 != category.teams.indexOf(team.num)) {
+				numFinalists = numFinalists + 1;
+			}
+		});
+		$("#" + getNumFinalistsId(team)).text(numFinalists);		
+	});
+}
+
 $(document)
 		.ready(
 				function() {
@@ -81,13 +98,18 @@ $(document)
 							var finalistCheck = $("<input type='checkbox'/>");
 							finalistCol.append(finalistCheck);
 							finalistCheck.change(function() {
+								var finalistDisplay = $("#" + getNumFinalistsId(team));
+								var numFinalists = parseInt(finalistDisplay.text(), 10);
 								if ($(this).attr("checked") == undefined) {
 									$.finalist.removeTeamFromCategory(
 											currentCategory, team.num);
+									numFinalists = numFinalists - 1;
 								} else {
 									$.finalist.addTeamToCategory(
 											currentCategory, team.num);
+									numFinalists = numFinalists + 1;
 								}
+								finalistDisplay.text(numFinalists);
 							});
 							if ($.finalist.isTeamInCategory(currentCategory,
 									team.num)) {
@@ -111,10 +133,12 @@ $(document)
 							row.append(scoreCol);
 							scoreCol.text($.finalist.getOverallScore(team));
 
-							var numFinalistCol = $("<td></td>");
+							var numFinalistCol = $("<td id='" + getNumFinalistsId(team) + "'></td>");
 							row.append(numFinalistCol);
 						} // in correct division
-					});
+					}); // build data for each team
 
+					initializeFinalistCounts(teams);
+					
 					$.finalist.displayNavbar();
 				}); // end ready function
