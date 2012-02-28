@@ -442,6 +442,7 @@
 		},
 
 		addTeamToCategory : function(category, teamNum) {
+			teamNum = parseInt(teamNum, 10);
 			var index = category.teams.indexOf(teamNum);
 			if (-1 == index) {
 				category.teams.push(teamNum);
@@ -450,6 +451,7 @@
 		},
 
 		removeTeamFromCategory : function(category, teamNum) {
+			teamNum = parseInt(teamNum, 10);
 			var index = category.teams.indexOf(teamNum);
 			if (index != -1) {
 				category.teams.splice(index, 1);
@@ -458,6 +460,7 @@
 		},
 
 		isTeamInCategory : function(category, teamNum) {
+			teamNum = parseInt(teamNum, 10);
 			return -1 != category.teams.indexOf(teamNum);
 		},
 
