@@ -625,7 +625,7 @@
 
 		displayNavbar : function() {
 			var element;
-			if (window.location.pathname.match(/params.html$/)) {
+			if (window.location.pathname.match(/\/params.html$/)) {
 				element = $("<span></span>")
 			} else {
 				element = $("<a href='params.html'></a>")
@@ -635,7 +635,7 @@
 
 			$("#navbar").append($("<span> - </span>"));
 
-			if (window.location.pathname.match(/non-numeric.html$/)) {
+			if (window.location.pathname.match(/\/non-numeric.html$/)) {
 				element = $("<span></span>")
 			} else {
 				element = $("<a href='non-numeric.html'></a>")
@@ -645,7 +645,23 @@
 
 			$("#navbar").append($("<span> - </span>"));
 
-			if (window.location.pathname.match(/championship.html$/)) {
+			$.each($.finalist.getNumericCategories(), function(i, category) {
+				if (category.name != $.finalist.CHAMPIONSHIP_NAME) {
+					if (window.location.pathname.match(/\/numeric.html$/)
+							&& window.location.search == "?" + category.catId) {
+						element = $("<span></span>")
+					} else {
+						element = $("<a href='numeric.html?" + category.catId
+								+ "'></a>")
+					}
+					element.text(category.name);
+					$("#navbar").append(element);
+
+					$("#navbar").append($("<span> - </span>"));
+				}
+			});
+
+			if (window.location.pathname.match(/\/championship.html$/)) {
 				element = $("<span></span>")
 			} else {
 				element = $("<a href='championship.html'></a>")
@@ -655,7 +671,7 @@
 
 			$("#navbar").append($("<span> - </span>"));
 
-			if (window.location.pathname.match(/schedule.html$/)) {
+			if (window.location.pathname.match(/\/schedule.html$/)) {
 				element = $("<span></span>")
 			} else {
 				element = $("<a href='schedule.html'></a>")

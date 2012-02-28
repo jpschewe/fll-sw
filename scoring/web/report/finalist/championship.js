@@ -11,7 +11,7 @@ function initializeTeamsInCategory(currentCategory, teams, scoreGroups) {
 			if (!checkedEnoughTeams) {
 				$.finalist.addTeamToCategory(currentCategory, team.num);
 
-				var group = $.finalist.getOverallGroup(team);
+				var group = $.finalist.getCategoryGroup(team, currentCategory);
 				scoreGroups[group] = scoreGroups[group] - 1;
 
 				checkedEnoughTeams = true;
@@ -71,7 +71,7 @@ function createTeamTable(teams, currentDivision, currentCategory) {
 
 			var sgCol = $("<td></td>");
 			row.append(sgCol);
-			var group = $.finalist.getOverallGroup(team);
+			var group = $.finalist.getCategoryGroup(team, currentCategory);
 			sgCol.text(group);
 
 			var numCol = $("<td></td>");
@@ -84,7 +84,7 @@ function createTeamTable(teams, currentDivision, currentCategory) {
 
 			var scoreCol = $("<td></td>");
 			row.append(scoreCol);
-			scoreCol.text($.finalist.getOverallScore(team));
+			scoreCol.text($.finalist.getCategoryScore(team, currentCategory));
 
 			var numFinalistCol = $("<td id='" + getNumFinalistsId(team)
 					+ "'></td>");
@@ -114,8 +114,8 @@ $(document)
 					var teams = $.finalist.getAllTeams();
 					// sort with highest score first
 					teams.sort(function(a, b) {
-						var aScore = $.finalist.getOverallScore(a);
-						var bScore = $.finalist.getOverallScore(b);
+						var aScore = $.finalist.getCategoryScore(a, currentCategory);
+						var bScore = $.finalist.getCategoryScore(b, currentCategory);
 						if (aScore == bScore) {
 							return 0;
 						} else if (aScore < bScore) {
@@ -129,7 +129,7 @@ $(document)
 					var scoreGroups = {};
 					$.each(teams, function(i, team) {
 						if (team.division == currentDivision) {
-							var group = $.finalist.getOverallGroup(team);
+							var group = $.finalist.getCategoryGroup(team, currentCategory);
 							scoreGroups[group] = $.finalist
 									.getNumTeamsAutoSelected();
 						}

@@ -30,7 +30,7 @@
 	var championship = $.finalist
 				.getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
 		if (null == championship) {
-			$.finalist.addCategory($.finalist.CHAMPIONSHIP_NAME, true);
+			championship = $.finalist.addCategory($.finalist.CHAMPIONSHIP_NAME, true);
 		}
 <%FinalistLoad.outputCategoryScores(out, application, session);%>
 	$.finalist.setTournament(_loadingTournament);

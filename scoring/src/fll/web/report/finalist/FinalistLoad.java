@@ -158,7 +158,7 @@ public class FinalistLoad {
           final TeamScheduleInfo si = schedule.getSchedInfoForTeam(teamNumber);
           overallGroup = si.getJudgingStation();
         }
-        output.format("$.finalist.setOverallScore(%s, %.02f, %s);%n", teamVar, overallScore,
+        output.format("$.finalist.setCategoryScore(%s, championship, %.02f, %s);%n", teamVar, overallScore,
                       WebUtils.quoteJavascriptString(overallGroup));
 
         for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
