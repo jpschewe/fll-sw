@@ -29,8 +29,30 @@ $(document)
 
 					var championshipCategory = $.finalist
 							.getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
+
+					// compute the set of all score groups
+					var scoreGroups = {};
 					$.each(teams, function(i, team) {
 						if (team.division == $.finalist.getCurrentDivision()) {
+							var group = $.finalist.getOverallGroup(team);
+							scoreGroups[group] = $.finalist
+									.getNumTeamsAutoSelected();
+						}
+					});
+
+					var checkedEnoughTeams = false;
+					$.each(teams, function(i, team) {
+						if (team.division == $.finalist.getCurrentDivision()) {
+							// see if we've checked enough teams
+							if (!checkedEnoughTeams) {
+								checkedEnoughTeams = true;
+								$.each(scoreGroups, function(key, value) {
+									if (value > 0) {
+										checkedEnoughTeams = false;
+									}
+								});
+							}
+
 							var row = $("<tr></tr>");
 							$("#data").append(row);
 
@@ -47,12 +69,16 @@ $(document)
 											championshipCategory, team.num);
 								}
 							});
-
-							// FIXME auto check boxes until have enough
+							if (!checkedEnoughTeams) {
+								finalistCheck.attr("checked", true);
+								finalistCheck.change();
+							}
 
 							var sgCol = $("<td></td>");
 							row.append(sgCol);
-							sgCol.text($.finalist.getOverallGroup(team));
+							var group = $.finalist.getOverallGroup(team);
+							sgCol.text(group);
+							scoreGroups[group] = scoreGroups[group] - 1;
 
 							var numCol = $("<td></td>");
 							row.append(numCol);
