@@ -661,10 +661,16 @@
 				}
 			});
 
-			if (window.location.pathname.match(/\/championship.html$/)) {
+			// make sure that championship is last 
+			var championshipCategory = $.finalist
+					.getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
+			if (window.location.pathname.match(/\/numeric.html$/)
+					&& window.location.search == "?"
+							+ championshipCategory.catId) {
 				element = $("<span></span>")
 			} else {
-				element = $("<a href='championship.html'></a>")
+				element = $("<a href='numeric.html?"
+						+ championshipCategory.catId + "'></a>")
 			}
 			element.text($.finalist.CHAMPIONSHIP_NAME);
 			$("#navbar").append(element);
