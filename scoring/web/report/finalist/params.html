@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
-<html>
+<html manifest='finalist.appcache'>
 <head>
 <title>Finalist Scheduling</title>
 
@@ -11,28 +11,29 @@
 </head>
 
 <body>
- <div id='navbar'></div>
- <hr />
+	<div id='navbar'></div>
+	<hr />
 
- <h1>Finalist Schedule Parameters</h1>
+	<h1>Finalist Schedule Parameters</h1>
 
- <p>Now that you have reached this page all data is cached locally.
-  You may now disconnect from the network and continue scheduling.</p>
+	<div id='local-ready'>All data for finalist scheduling is now
+		cached. You may now disconnect from the network and continue
+		scheduling.</div>
 
- <p>
-  Select the appropriate division: <select id='divisions'></select>
- </p>
+	<p>
+		Select the appropriate division: <select id='divisions'></select>
+	</p>
 
- <p>Choose the start time for the finalist scheduling and the
-  duration in minutes</p>
- <p>
-  Start time (hour and minute): <input type="text" id="hour" size="2"
-   maxlength="2" /> : <input type="text" id="minute" size="2"
-   maxlength="2" />
- </p>
- <p>
-  Interval (minutes): <input type="text" id="duration" size="4" />
- </p>
+	<p>Choose the start time for the finalist scheduling and the
+		duration in minutes</p>
+	<p>
+		Start time (hour and minute): <input type="text" id="hour" size="2"
+			maxlength="2" /> : <input type="text" id="minute" size="2"
+			maxlength="2" />
+	</p>
+	<p>
+		Interval (minutes): <input type="text" id="duration" size="4" />
+	</p>
 
 
 </body>

@@ -1,0 +1,13 @@
+CACHE MANIFEST
+# FIXME make this an md5 hash using ant?
+# version 11
+
+# external javascript libraries
+../../extlib/jquery-1.7.1.min.js
+../../extlib/jquery.json-2.3.min.js
+../../extlib/jstorage.js
+
+finalist.js
+
+params.html
+params.js
