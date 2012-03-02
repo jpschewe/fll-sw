@@ -686,6 +686,82 @@
 			$("#navbar").append(element);
 
 		},
+		
+
+		handleCacheEvent: function (e) {
+			console.log("cache event: " + e.type);
+			var appCache = window.applicationCache;
+			switch (appCache.status) {
+			  case appCache.UNCACHED: // UNCACHED == 0
+			    console.log('cache state:UNCACHED');
+			    break;
+			  case appCache.IDLE: // IDLE == 1
+			    console.log('cache state:IDLE');
+			    $("#cache-ready").show();
+			    break;
+			  case appCache.CHECKING: // CHECKING == 2
+			    console.log('cache state:CHECKING');
+			    break;
+			  case appCache.DOWNLOADING: // DOWNLOADING == 3
+			    console.log('cache state:DOWNLOADING');
+			    break;
+			  case appCache.UPDATEREADY:  // UPDATEREADY == 4
+			    console.log('cache state:UPDATEREADY');
+			    $("#cache-ready").show();
+			    break;
+			  case appCache.OBSOLETE: // OBSOLETE == 5
+			    console.log('cache state:OBSOLETE');
+			    break;
+			  default:
+			    return 'cache state:UKNOWN CACHE STATUS';
+			    break;
+			};
+		},
+
+		setupAppCache : function () {
+			$("#cache-ready").hide();
+			
+			var appCache = window.applicationCache;
+			if (!appCache) {
+				alert("Your browser doesn't support application caching. This app cannot be run offline");
+				return;
+			}
+
+			// Fired after the first cache of the manifest.
+			appCache.addEventListener('cached', $.finalist.handleCacheEvent, false);
+
+			// Checking for an update. Always the first event fired in the sequence.
+			appCache.addEventListener('checking', $.finalist.handleCacheEvent, false);
+
+			// An update was found. The browser is fetching resources.
+			appCache.addEventListener('downloading', $.finalist.handleCacheEvent, false);
+
+			// The manifest returns 404 or 410, the download failed,
+			// or the manifest changed while the download was in progress.
+			appCache.addEventListener('error', $.finalist.handleCacheEvent, false);
+
+			// Fired after the first download of the manifest.
+			appCache.addEventListener('noupdate', $.finalist.handleCacheEvent, false);
+
+			// Fired if the manifest file returns a 404 or 410.
+			// This results in the application cache being deleted.
+			appCache.addEventListener('obsolete', $.finalist.handleCacheEvent, false);
+
+			// Fired for each resource listed in the manifest as it is being fetched.
+			appCache.addEventListener('progress', $.finalist.handleCacheEvent, false);
+
+			// Fired when the manifest resources have been newly redownloaded.
+			appCache.addEventListener('updateready', $.finalist.handleCacheEvent, false);
+			
+			appCache.addEventListener('error', function(e) {
+				console.log("Error loading the appcache manifest");
+			}, false);
+
+			if (appCache.status == appCache.UPDATEREADY || appCache.status == appCache.IDLE) {
+				console.log("poll: cache ready");
+				$("#cache-ready").show();
+			}
+		}
 	};
 
 	_load();
