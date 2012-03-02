@@ -99,13 +99,7 @@ function createTeamTable(teams, currentDivision, currentCategory) {
 $(document)
 		.ready(
 				function() {
-					var searchStart = window.location.search.indexOf("?");
-					if (-1 == searchStart) {
-						alert("You must visit this page from a link that specifies the category!");
-						return;
-					}
-					var categoryId = parseInt(window.location.search
-							.substring(searchStart + 1), 10);
+					var categoryId = $.finalist.getCurrentCategoryId();
 					var currentCategory = $.finalist
 							.getCategoryById(categoryId);
 					if (null == currentCategory) {
