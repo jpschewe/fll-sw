@@ -22,10 +22,10 @@ function initializeTeamsInCategory(currentCategory, teams, scoreGroups) {
 							checkedEnoughTeams = false;
 						}
 					});
-				}
-			}
-		}
-	});
+				} // if championship
+			} // if not enough teams
+		} // if current division
+	}); // foreach team
 }
 
 function getNumFinalistsId(team) {

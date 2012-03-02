@@ -11,7 +11,6 @@ $(document).ready(
 			$("#divisions").empty();
 
 			$.each($.finalist.getDivisions(), function(i, division) {
-				console.log("Division " + division);
 				var selected = "";
 				if (division == $.finalist.getCurrentDivision()) {
 					selected = " selected ";
