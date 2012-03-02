@@ -493,11 +493,8 @@
 		},
 
 		isTeamInTimeslot : function(timeslot, teamNum) {
-			console.log("Checking for team: " + teamNum + " in timeslot");
 			var found = false;
 			$.each(timeslot.categories, function(catId, slotTeamNum) {
-				console.log("  Comparing against catId: " + catId
-						+ " slotTeamNum: " + slotTeamNum);
 				if (teamNum == slotTeamNum) {
 					found = true;
 				}
@@ -514,21 +511,13 @@
 			// Create map of teamNum -> [categories]
 			var finalistsCount = {};
 			$.each($.finalist.getAllCategories(), function(i, category) {
-				console.log("Walking categories i: " + i + " category.name: "
-						+ category.name);
 				$.each(category.teams, function(j, teamNum) {
 					var team = $.finalist.lookupTeam(teamNum);
-					console.log("Looking for team: " + teamNum + " team: "
-							+ team);
 					if (team.division == $.finalist.getCurrentDivision()) {
-						console.log("  Walking teams j: " + j + " team: "
-								+ teamNum);
 						if (null == finalistsCount[teamNum]) {
 							finalistsCount[teamNum] = [];
 						}
 						finalistsCount[teamNum].push(category);
-						console.log("  Adding to finalistsCount[" + teamNum
-								+ "] " + category.name);
 					}
 				});
 			});
@@ -539,13 +528,9 @@
 			// judging
 			var sortedTeams = [];
 			$.each(finalistsCount, function(teamNum, categories) {
-				console.log("Walking finalistsCount teamNum: " + teamNum
-						+ " num categories: " + categories.length);
 				sortedTeams.push(teamNum);
 			});
 			sortedTeams.sort(function(a, b) {
-				console.log("a is: " + a);
-				console.log("b is: " + b);
 				var aCategories = finalistsCount[a];
 				var bCategories = finalistsCount[b];
 
@@ -559,7 +544,6 @@
 					return 1;
 				}
 			});
-			console.log("Sorted teams: " + sortedTeams);
 
 			// list of Timeslots
 			var schedule = [];
@@ -574,9 +558,6 @@
 												category.catId)
 										&& !$.finalist.isTeamInTimeslot(slot,
 												teamNum)) {
-									console.log("Adding team " + teamNum
-											+ " to slot for category: "
-											+ category.catId);
 									$.finalist.addTeamToTimeslot(slot,
 											category.catId, teamNum);
 									scheduled = true;
@@ -585,9 +566,6 @@
 					if (!scheduled) {
 						var newSlot = new Timeslot();
 						schedule.push(newSlot);
-						console.log("Adding team " + teamNum
-								+ " to new slot for category: "
-								+ category.catId);
 						$.finalist.addTeamToTimeslot(newSlot, category.catId,
 								teamNum);
 					}
@@ -632,7 +610,6 @@
 		},
 
 		setCurrentCategoryId : function(catId) {
-			console.log("Setting current category id to: " + catId);
 			_currentCategoryId = catId;
 			_save();
 		},
@@ -668,13 +645,9 @@
 					if (window.location.pathname.match(/\/numeric.html$/)
 							&& window.location.search == "?" + category.catId) {
 						element = $("<span></span>")
-						element.click(function() {
-							console.log("Clicked " + category.name);
-						});
 					} else {
 						element = $("<a href='numeric.html'></a>");
 						element.click(function() {
-							console.log("Clicked " + category.name);
 							$.finalist.setCurrentCategoryId(category.catId);
 						});
 					}
@@ -696,7 +669,6 @@
 				element = $("<a href='numeric.html'></a>")
 				element
 						.click(function() {
-							console.log("Got click on championship link");
 							$.finalist
 									.setCurrentCategoryId(championshipCategory.catId);
 						});
@@ -717,28 +689,28 @@
 		},
 
 		handleCacheEvent : function(e) {
-			console.log("cache event: " + e.type);
+			$.finalist.log("cache event: " + e.type);
 			var appCache = window.applicationCache;
 			switch (appCache.status) {
 			case appCache.UNCACHED: // UNCACHED == 0
-				console.log('cache state:UNCACHED');
+				$.finalist.log('cache state:UNCACHED');
 				break;
 			case appCache.IDLE: // IDLE == 1
-				console.log('cache state:IDLE');
+				$.finalist.log('cache state:IDLE');
 				$("#cache-ready").show();
 				break;
 			case appCache.CHECKING: // CHECKING == 2
-				console.log('cache state:CHECKING');
+				$.finalist.log('cache state:CHECKING');
 				break;
 			case appCache.DOWNLOADING: // DOWNLOADING == 3
-				console.log('cache state:DOWNLOADING');
+				$.finalist.log('cache state:DOWNLOADING');
 				break;
 			case appCache.UPDATEREADY: // UPDATEREADY == 4
-				console.log('cache state:UPDATEREADY');
+				$.finalist.log('cache state:UPDATEREADY');
 				$("#cache-ready").show();
 				break;
 			case appCache.OBSOLETE: // OBSOLETE == 5
-				console.log('cache state:OBSOLETE');
+				$.finalist.log('cache state:OBSOLETE');
 				break;
 			default:
 				return 'cache state:UKNOWN CACHE STATUS';
@@ -793,15 +765,22 @@
 					$.finalist.handleCacheEvent, false);
 
 			appCache.addEventListener('error', function(e) {
-				console.log("Error loading the appcache manifest");
+				$.finalist.log("Error loading the appcache manifest");
 			}, false);
 
 			if (appCache.status == appCache.UPDATEREADY
 					|| appCache.status == appCache.IDLE) {
-				console.log("poll: cache ready");
+				$.finalist.log("poll: cache ready");
 				$("#cache-ready").show();
 			}
-		}
+		},
+
+		log : function(str) {
+			if (typeof (console) != 'undefined') {
+				console.log(str);
+			}
+		},
+
 	};
 
 	_load();

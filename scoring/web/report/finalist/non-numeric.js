@@ -11,14 +11,11 @@ $(document).ready(
 			$("#categories").empty();
 
 			$.each($.finalist.getNonNumericCategories(), function(i, category) {
-				console.log("Category name is " + category.name + " id: "
-						+ category.catId);
 				addCategoryElement(category);
 				addedCategory = true;
 
 				var addedTeam = false;
 				$.each(category.teams, function(j, teamNum) {
-					console.log("  Team : " + teamNum);
 					var team = $.finalist.lookupTeam(teamNum);
 					if (team.division == $.finalist.getCurrentDivision()) {
 						addedTeam = true;
