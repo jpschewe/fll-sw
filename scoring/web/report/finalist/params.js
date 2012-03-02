@@ -13,7 +13,7 @@ function handleCacheEvent(e) {
 	    break;
 	  case appCache.IDLE: // IDLE == 1
 	    console.log('cache state:IDLE');
-	    $("#local-ready").show();
+	    $("#cache-ready").show();
 	    break;
 	  case appCache.CHECKING: // CHECKING == 2
 	    console.log('cache state:CHECKING');
@@ -23,7 +23,7 @@ function handleCacheEvent(e) {
 	    break;
 	  case appCache.UPDATEREADY:  // UPDATEREADY == 4
 	    console.log('cache state:UPDATEREADY');
-	    $("#local-ready").show();
+	    $("#cache-ready").show();
 	    break;
 	  case appCache.OBSOLETE: // OBSOLETE == 5
 	    console.log('cache state:OBSOLETE');
@@ -35,7 +35,7 @@ function handleCacheEvent(e) {
 }
 
 function setupAppCache() {
-	$("#local-ready").hide();
+	$("#cache-ready").hide();
 	
 	var appCache = window.applicationCache;
 	if (!appCache) {
@@ -70,12 +70,12 @@ function setupAppCache() {
 	appCache.addEventListener('updateready', handleCacheEvent, false);
 	
 	appCache.addEventListener('error', function(e) {
-		alert("Error loading the appcache manifest");
+		console.log("Error loading the appcache manifest");
 	}, false);
 
 	if (appCache.status == appCache.UPDATEREADY || appCache.status == appCache.IDLE) {
 		console.log("poll: cache ready");
-		$("#local-ready").show();
+		$("#cache-ready").show();
 	}
 }
 
