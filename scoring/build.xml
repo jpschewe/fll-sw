@@ -208,6 +208,10 @@
 
   <!-- ==================== Setup/Prepare/Clean ==================== -->
   <target name="init">
+    <tstamp>
+      <format property="TODAY" pattern="yyyy-MM-dd_HH:mm:ss" />
+    </tstamp>
+    
     <tstamp />
 
     <uptodate property="jsp.notRequired" targetfile="${dir.src.jsp}/.timestamp">
@@ -580,6 +584,10 @@
       <fileset dir="web">
         <exclude name="**/*.java" />
       </fileset>
+      <filterset>
+        <filter token="APP-VERSION" value="${app.version}" />
+        <filter token="TODAY" value="${TODAY}" />
+      </filterset>
     </copy>
 
     <!-- Copy static files from external dependencies as needed -->
@@ -589,6 +597,7 @@
       </fileset>
       <filterset>
         <filter token="APP-VERSION" value="${app.version}" />
+        <filter token="TODAY" value="${TODAY}" />
       </filterset>
     </copy>
     <copy todir="${dir.web}/WEB-INF/lib">
