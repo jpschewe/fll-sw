@@ -151,8 +151,6 @@
 		this.org = org;
 		this.categoryScores = {};
 		this.categoryGroups = {};
-		this.overallScore = null;
-		this.overallGroup = null;
 		_teams[num] = this;
 		_save();
 	}
@@ -277,20 +275,6 @@
 		 */
 		lookupTeam : function(teamNum) {
 			return _teams[teamNum];
-		},
-
-		setOverallScore : function(team, score, group) {
-			team.overallScore = score;
-			team.overallJudgingGroup = group;
-			_save();
-		},
-
-		getOverallScore : function(team) {
-			return team.overallScore;
-		},
-
-		getOverallGroup : function(team) {
-			return team.overallJudgingGroup;
 		},
 
 		getCategoryScore : function(team, category) {
