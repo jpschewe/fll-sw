@@ -51,15 +51,19 @@ $(document).ready(
 						+ ":" + time.getMinutes().toString().padL(2, "0")
 						+ "</td>"));
 
-				$.each($.finalist.getAllCategories(), function(i, category) {
-					var teamNum = slot.categories[category.catId]
-					if (teamNum == null) {
-						row.append($("<td>&nbsp;</td>"));
-					} else {
-						var team = $.finalist.lookupTeam(teamNum);
-						row.append($("<td>" + teamNum + " - " + team.name + "</td>"));
-					}
-				}); // foreach category
+				$.each($.finalist.getAllCategories(),
+						function(i, category) {
+							var teamNum = slot.categories[category.catId]
+							if (teamNum == null) {
+								row.append($("<td>&nbsp;</td>"));
+							} else {
+								var team = $.finalist.lookupTeam(teamNum);
+								var group = $.finalist.getCategoryGroup(team,
+										category);
+								row.append($("<td>" + teamNum + " - "
+										+ team.name + " (" + group + ")</td>"));
+							}
+						}); // foreach category
 
 				time.setTime(time.getTime() + (duration * 60 * 1000));
 			}); // foreach timeslot
