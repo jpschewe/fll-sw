@@ -45,6 +45,10 @@ function addCategoryElement(category) {
 	catEle.append(nameEle);
 	nameEle.change(function() {
 		var newName = nameEle.val();
+		if(null == newName || "" == newName) {
+			alert("All categories must have non-empty names");
+			nameEle.val(category.name);
+		}
 		if (!$.finalist.setCategoryName(category, newName)) {
 			alert("There already exists a category with the name '" + newName
 					+ "'");
@@ -74,6 +78,7 @@ function addCategory() {
 	if (null == category) {
 		return;
 	}
+	$.finalist.setCategoryName(category, "Category " + category.catId);
 
 	addCategoryElement(category);
 
