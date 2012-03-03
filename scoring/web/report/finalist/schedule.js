@@ -56,7 +56,8 @@ $(document).ready(
 					if (teamNum == null) {
 						row.append($("<td>&nbsp;</td>"));
 					} else {
-						row.append($("<td>" + teamNum + "</td>"));
+						var team = $.finalist.lookupTeam(teamNum);
+						row.append($("<td>" + teamNum + " - " + team.name + "</td>"));
 					}
 				}); // foreach category
 
