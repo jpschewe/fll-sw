@@ -60,7 +60,7 @@ ${message}
       the winners of each category when there is more than 1 judge for each
       team in a category.</li>
 
-      <li><a href="promptForNumFinalists.jsp">Schedule Finalists</a>. This
+      <li><a href="finalist/load.jsp">Schedule Finalists</a>. This
       is used when one judge doesn't see all teams in a division and the
       top teams need to be judged again to choose the winners.</li>
       
