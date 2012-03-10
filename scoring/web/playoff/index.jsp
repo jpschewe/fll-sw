@@ -32,7 +32,6 @@ final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
           <form name='check' action='check.jsp' method='get'>
           Select Division:
           <select name='division'>
-            <option value='__all__' selected>All</option>
             <c:forEach items="${divisions }" var="division">
             <option value='${division}'>${division}</option>
             </c:forEach>
