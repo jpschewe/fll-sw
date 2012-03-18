@@ -29,7 +29,6 @@ import fll.util.LogUtils;
 
 /**
  * Ensure that all HTML pages get the same footer.
- * 
  */
 @WebFilter("/*")
 public class FooterFilter implements Filter {
@@ -47,7 +46,9 @@ public class FooterFilter implements Filter {
    * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest,
    *      javax.servlet.ServletResponse, javax.servlet.FilterChain)
    */
-  public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
+  public void doFilter(final ServletRequest request,
+                       final ServletResponse response,
+                       final FilterChain chain) throws IOException, ServletException {
     if (response instanceof HttpServletResponse
         && request instanceof HttpServletRequest) {
       final HttpServletResponse httpResponse = (HttpServletResponse) response;
@@ -55,23 +56,32 @@ public class FooterFilter implements Filter {
       final ByteResponseWrapper wrapper = new ByteResponseWrapper(httpResponse);
       chain.doFilter(request, wrapper);
 
+      final String path = httpRequest.getRequestURI();
+
       final String contentType = wrapper.getContentType();
       if (wrapper.isStringUsed()) {
         if ("text/html".equals(contentType)) {
           final String url = httpRequest.getRequestURI();
-          
+
           final String origStr = wrapper.getString();
           if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace(new Formatter().format("html page: %s content type: %s ###%s###", httpRequest.getRequestURL(), contentType, origStr));
+            LOGGER.trace(new Formatter().format("html page: %s content type: %s ###%s###", httpRequest.getRequestURL(),
+                                                contentType, origStr));
           }
 
           final PrintWriter writer = response.getWriter();
 
           final CharArrayWriter caw = new CharArrayWriter();
           final int bodyIndex = origStr.indexOf("</body>");
-          if (-1 != bodyIndex && !noFooter(url)) {
+          if (-1 != bodyIndex
+              && !noFooter(url)) {
             caw.write(origStr.substring(0, bodyIndex - 1));
-            addFooter(caw, httpRequest);
+            if (path.startsWith(httpRequest.getContextPath()
+                + "/public")) {
+              addPublicFooter(caw, httpRequest);
+            } else {
+              addFooter(caw, httpRequest);
+            }
             response.setContentLength(caw.toString().length());
             writer.print(caw.toString());
           } else {
@@ -81,7 +91,8 @@ public class FooterFilter implements Filter {
         } else {
           final String origStr = wrapper.getString();
           if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace(new Formatter().format("non-html text page: %s content type: %s ###%s###", httpRequest.getRequestURL(), contentType, origStr));
+            LOGGER.trace(new Formatter().format("non-html text page: %s content type: %s ###%s###",
+                                                httpRequest.getRequestURL(), contentType, origStr));
           }
 
           final PrintWriter writer = response.getWriter();
@@ -90,7 +101,8 @@ public class FooterFilter implements Filter {
         }
       } else if (wrapper.isBinaryUsed()) {
         if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace(new Formatter().format("binary page: %s content type: %s", httpRequest.getRequestURL(), contentType));
+          LOGGER.trace(new Formatter().format("binary page: %s content type: %s", httpRequest.getRequestURL(),
+                                              contentType));
         }
 
         final byte[] origData = wrapper.getBinary();
@@ -98,8 +110,9 @@ public class FooterFilter implements Filter {
         out.write(origData);
         out.close();
       } else {
-        if(LOGGER.isDebugEnabled()) {
-          LOGGER.debug("No output stream used, just returning page: " + httpRequest.getRequestURL());
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("No output stream used, just returning page: "
+              + httpRequest.getRequestURL());
         }
       }
     } else {
@@ -108,24 +121,25 @@ public class FooterFilter implements Filter {
   }
 
   /**
-   *  
    * @param url the url to check
    * @return true for all urls that should have no footer
    */
   private static boolean noFooter(final String url) {
-    if(url.endsWith("welcome.jsp")) {
+    if (url.endsWith("welcome.jsp")) {
       return true;
-    } else if(url.indexOf("scoreBoard") != -1 && !url.endsWith("index.jsp")) {
+    } else if (url.indexOf("scoreBoard") != -1
+        && !url.endsWith("index.jsp")) {
       return true;
     } else {
-    return false;
+      return false;
     }
   }
-  
+
   /**
    * Writer the footer to the char array writer.
    */
-  private static void addFooter(final CharArrayWriter caw, final HttpServletRequest request) throws IOException {
+  private static void addFooter(final CharArrayWriter caw,
+                                final HttpServletRequest request) throws IOException {
     final String contextPath = request.getContextPath();
     final Formatter formatter = new Formatter(caw);
     formatter.format("<hr />");
@@ -133,6 +147,23 @@ public class FooterFilter implements Filter {
     formatter.format("  <tr>");
     formatter.format("    <td><a href='%s/index.jsp' target='_top'>Main Index</a></td>", contextPath);
     formatter.format("    <td><a href='%s/admin/index.jsp' target='_top'>Admin Index</a></td>", contextPath);
+    formatter.format("  </tr>");
+    formatter.format("  <tr><td>Software version: %s</td></tr>", Version.getVersion());
+    formatter.format("</table>");
+    formatter.format("%n</body></html>");
+  }
+
+  /**
+   * Writer the footer for public pages to the char array writer.
+   */
+  private static void addPublicFooter(final CharArrayWriter caw,
+                                      final HttpServletRequest request) throws IOException {
+    final String contextPath = request.getContextPath();
+    final Formatter formatter = new Formatter(caw);
+    formatter.format("<hr />");
+    formatter.format("<table>");
+    formatter.format("  <tr>");
+    formatter.format("    <td><a href='%s/public/index.jsp' target='_top'>Public Index</a></td>", contextPath);
     formatter.format("  </tr>");
     formatter.format("  <tr><td>Software version: %s</td></tr>", Version.getVersion());
     formatter.format("</table>");
