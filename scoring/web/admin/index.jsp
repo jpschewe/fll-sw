@@ -19,6 +19,11 @@
 
 %>
 
+<c:if test="${not empty param.ScorePageText}">
+  <c:set var="ScorePageText" value="${param.ScorePageText}" scope="application"/>
+</c:if>
+
+
 <html>
 <head>
 <title>Administration</title>
@@ -207,6 +212,15 @@ ${message}
 
 <p>Tournament day:</p>
 <ol>
+      <li>
+        <form action='index.jsp' method='post'>
+          Score page text: 
+          <input type='text' name='ScorePageText' value='<c:out value="${ScorePageText}"/>'>
+          <input type='submit' value='Change text'>
+        </form>
+      </li>
+
+
 	<li><a href='<c:url value="judges.jsp"/>'>Assign Judges</a></li>
 	
 	<li><a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a>

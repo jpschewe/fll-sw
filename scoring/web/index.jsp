@@ -13,10 +13,6 @@ final Connection connection = datasource.getConnection();
 pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
 %>
 
-<c:if test="${not empty param.ScorePageText}">
-  <c:set var="ScorePageText" value="${param.ScorePageText}" scope="application"/>
-</c:if>
-
 
 <html>
   <head>
@@ -50,14 +46,6 @@ pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
       <li><a href="admin/index.jsp">Administration</a></li>
 
       <li><a href='display.jsp'>Big Screen Display</a>  Follow this link on the computer that's used to display scores with the projector.</li>
-
-      <li>
-        <form action='index.jsp' method='post'>
-          Score page text: 
-          <input type='text' name='ScorePageText' value='<c:out value="${ScorePageText}"/>'>
-          <input type='submit' value='Change text'>
-        </form>
-      </li>
 
       <li><a href="subjective-app.jar">Subjective Scoring Application</a> (Executable Jar file) - run with "java -jar subjective-app.jar"</li>
 
