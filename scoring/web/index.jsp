@@ -31,7 +31,9 @@ pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
 
       <li>Current Tournament -&gt; <%=Queries.getCurrentTournamentName(connection)%></li>
 
-      <li><a href="wiki/wiki/InstructionsForRunningTheSoftware.html">Instructions (from Wiki)</a></li>
+  <li><a href="public">Public landing page</a></li>
+
+  <li><a href="wiki/wiki/InstructionsForRunningTheSoftware.html">Instructions (from Wiki)</a></li>
 
       <li><a href="wiki/wiki/WikiStart.html">Wiki Documentation</a></li>
 
