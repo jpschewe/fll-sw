@@ -1,14 +1,14 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="java.sql.Connection" %>
-<%@ page import="javax.sql.DataSource" %>
+<%@ page import="java.sql.Connection"%>
+<%@ page import="javax.sql.DataSource"%>
 
-<%@ page import="fll.db.Queries" %>
+<%@ page import="fll.db.Queries"%>
 <%@ page import="fll.web.SessionAttributes"%>
 
 <%
-final DataSource datasource = SessionAttributes.getDataSource(session);
-final Connection connection = datasource.getConnection();
+  final DataSource datasource = SessionAttributes.getDataSource(session);
+  final Connection connection = datasource.getConnection();
 %>
 
 <html>
@@ -33,9 +33,25 @@ final Connection connection = datasource.getConnection();
 
   <li>Current Tournament -&gt; <%=Queries.getCurrentTournamentName(connection)%></li>
 
-  <li><a href='../challenge.xml'>Challenge Descriptor</a></li>
+  <li><a href='<c:url value="/challenge.xml"/>'>Challenge
+    Descriptor</a></li>
 
-  <li><a href="credits/credits.jsp">Credits</a></li>
+  <li><a href='<c:url value="/welcome.jsp"/>'>Welcome Page</a>
+  <li><a href='<c:url value="/scoreboard/main.jsp" />'>Performance
+    Scoreboard</a></li>
+
+  <li><a href='<c:url value="/scoreboard/allteams.jsp"/>'>All
+    Teams, All Performance Runs</a></li>
+  <li><a href='<c:url value="/scoreboard/Last8"/>'>Last 8
+    performance scores</a></li>
+  <li><a href='<c:url value="/scoreboard/Top10"/>'>Top 10
+    performance scores</a></li>
+
+
+
+
+
+  <li><a href='<c:url value="/credits/credits.jsp"/>'>Credits</a></li>
 
  </ul>
 

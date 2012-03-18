@@ -26,7 +26,7 @@ final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
       <ol>
         <li>If using the automatic table assignment feature for scoresheet generation, make
         certain to set up labels for each of your tables, available from the Admin page or by
-        clicking <a href='/fll-sw/admin/tables.jsp'>here</a>.</li>
+        clicking <a href='<c:url value="/admin/tables.jsp"/>'>here</a>.</li>
 
         <li>Check to make sure all teams have scores entered for each seeding round.<br/>
           <form name='check' action='check.jsp' method='get'>
