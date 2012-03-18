@@ -640,8 +640,6 @@ public class BracketData {
         sb.append("</td>");
       }
     } else if (d instanceof BigScreenTableAssignmentCell) {
-      // TODO ticket:8 Add a background-color:rgb(r,g,b) to the td style attribute based
-      // on a color from the database table information
       sb.append("<td align='right' style='padding-right:30px'><span class='table_assignment'>");
       sb.append(((BigScreenTableAssignmentCell) d).getTable());
       sb.append("</span></td>");
