@@ -127,8 +127,16 @@ public class FooterFilter implements Filter {
   private static boolean noFooter(final String url) {
     if (url.endsWith("welcome.jsp")) {
       return true;
-    } else if (url.indexOf("scoreBoard") != -1
+    } else if (url.indexOf("scoreboard") != -1
         && !url.endsWith("index.jsp")) {
+      return true;
+    } else if(url.indexOf("playoff/remoteMain.jsp") != -1) {
+      return true;
+    } else if(url.indexOf("playoff/title.jsp") != -1) {
+      return true;
+    } else if(url.indexOf("playoff/remoteControlBrackets.jsp") != -1) {
+      return true;
+    } else if(url.indexOf("playoff/sponsors.jsp") != -1) {
       return true;
     } else {
       return false;
