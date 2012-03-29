@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
+<html manifest='finalist.appcache'>
+<head>
+<title>Finalist Scheduling</title>
+
+<script type='text/javascript' src='../../extlib/jquery-1.7.1.min.js'></script>
+<script type='text/javascript' src='../../extlib/jquery.json-2.3.min.js'></script>
+<script type='text/javascript' src='../../extlib/jstorage.js'></script>
+<script type='text/javascript' src='finalist.js'></script>
+<script type='text/javascript' src='params.js'></script>
+</head>
+
+<body>
+	<div id='navbar'></div>
+	<hr />
+
+	<h1>Finalist Schedule Parameters</h1>
+
+	<div id='cache-ready'>All data for finalist scheduling is now
+		cached. You may now disconnect from the network and continue
+		scheduling.</div>
+
+	<p>
+		Select the appropriate division: <select id='divisions'></select>
+	</p>
+
+	<p>Choose the start time for the finalist scheduling and the
+		duration in minutes</p>
+	<p>
+		Start time (hour and minute): <input type="text" id="hour" size="2"
+			maxlength="2" /> : <input type="text" id="minute" size="2"
+			maxlength="2" />
+	</p>
+	<p>
+		Interval (minutes): <input type="text" id="duration" size="4" />
+	</p>
+
+
+</body>
+</html>

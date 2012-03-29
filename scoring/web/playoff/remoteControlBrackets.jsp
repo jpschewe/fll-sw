@@ -116,8 +116,8 @@ FONT.TIE {
 }
 </style>
 <script type="text/javascript" src="<c:url value='/playoff/code.icepush'/>"></script>
-<script type="text/javascript" src="<c:url value='/jquery-1.7.1.min.js'/>"></script>
-<script type="text/javascript" src="<c:url value='/jquery.scrollTo-1.4.2-min.js'/>"></script>
+<script type="text/javascript" src="<c:url value='/extlib/jquery-1.7.1.min.js'/>"></script>
+<script type="text/javascript" src="<c:url value='/extlib/jquery.scrollTo-1.4.2-min.js'/>"></script>
 <script type="text/javascript">
   var ajaxURL = '<c:url value="/ajax/"/>';
   var seedingRounds = <%=Queries.getNumSeedingRounds(connection, currentTournament)%>;

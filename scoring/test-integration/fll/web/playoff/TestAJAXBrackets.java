@@ -103,7 +103,7 @@ public class TestAJAXBrackets extends SeleneseTestBase {
     // JS_EVAL_TIMEOUT); // > 1 element with a style attrib that contains the
     // string 'blue'
 
-    selenium.setSpeed("250"); // I slow down selenium for the AJAX functions as
+    selenium.setSpeed("300"); // I slow down selenium for the AJAX functions as
                               // while they don't take that long, selenium spend
                               // a lot less
                               // time between entering data and checking for it
@@ -131,6 +131,7 @@ public class TestAJAXBrackets extends SeleneseTestBase {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     } catch (final AssertionFailedError e) {
+      LogUtils.getLogger().error("Assertion error: " + e.getMessage());
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     } catch (final RuntimeException e) {
