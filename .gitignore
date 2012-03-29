@@ -9,3 +9,4 @@ scoring/override.properties
 *.log*
 scoring/web/sponsor_logos/*.jpg
 cobertura.ser
+.DS_Store

@@ -1,0 +1,20 @@
+CACHE MANIFEST
+# version @TODAY@
+
+../../extlib/jquery-1.7.1.min.js
+../../extlib/jquery.json-2.3.min.js
+../../extlib/jstorage.js
+
+finalist.js
+
+params.html
+params.js
+
+non-numeric.html
+non-numeric.js
+
+numeric.html
+numeric.js
+
+schedule.html
+schedule.js

@@ -65,6 +65,41 @@ public final class Queries {
   }
 
   /**
+   * Compute the score group for a team. Normally this comes from the schedule,
+   * but it may need to be computed off of the judges.
+   */
+  public static String computeScoreGroupForTeam(final Connection connection,
+                                                final int tournament,
+                                                final String categoryName,
+                                                final int teamNumber) throws SQLException {
+    // otherwise build up the score group name based upon the judges
+    final StringBuilder scoreGroup = new StringBuilder();
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT Judge FROM "
+          + categoryName + " WHERE TeamNumber = ? AND Tournament = ? AND ComputedTotal IS NOT NULL ORDER BY Judge");
+      prep.setInt(2, tournament);
+      prep.setInt(1, teamNumber);
+      rs = prep.executeQuery();
+      boolean first = true;
+      while (rs.next()) {
+        if (!first) {
+          scoreGroup.append("-");
+        } else {
+          first = false;
+        }
+        scoreGroup.append(rs.getString(1));
+      }
+      SQLFunctions.close(rs);
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+    return scoreGroup.toString();
+  }
+
+  /**
    * Compute the score groups that each team are in for a given category.
    * 
    * @param connection the connection to the database
@@ -667,14 +702,13 @@ public final class Queries {
     } finally {
       SQLFunctions.close(stmt);
     }
-    
+
     // Perform updates to the playoff data table if in playoff rounds.
     if ((runNumber > numSeedingRounds)
         && "1".equals(request.getParameter("Verified"))) {
       updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
                          teamNumber, runNumber, numSeedingRounds, teamScore);
     }
-
 
     return sql;
   }
@@ -796,13 +830,12 @@ public final class Queries {
     } finally {
       SQLFunctions.close(stmt);
     }
-    
+
     // Check if we need to update the PlayoffData table
     if (runNumber > numSeedingRounds) {
       updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
                          teamNumber, runNumber, numSeedingRounds, teamScore);
     }
-
 
     return sql.toString();
   }
@@ -2137,7 +2170,8 @@ public final class Queries {
       prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Region, Division, TeamNumber) VALUES (?, ?, ?, ?, ?)");
       prep.setString(1, name);
       prep.setString(2, organization);
-      prep.setString(3, region == null || "".equals(region) ? GenerateDB.DEFAULT_TEAM_REGION : region);
+      prep.setString(3, region == null
+          || "".equals(region) ? GenerateDB.DEFAULT_TEAM_REGION : region);
       prep.setString(4, division);
       prep.setInt(5, number);
       prep.executeUpdate();
@@ -2174,7 +2208,8 @@ public final class Queries {
       prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Region = ?, Division = ? WHERE TeamNumber = ?");
       prep.setString(1, name);
       prep.setString(2, organization);
-      prep.setString(3, region == null || "".equals(region) ? GenerateDB.DEFAULT_TEAM_REGION : region);
+      prep.setString(3, region == null
+          || "".equals(region) ? GenerateDB.DEFAULT_TEAM_REGION : region);
       prep.setString(4, division);
       prep.setInt(5, number);
       prep.executeUpdate();
