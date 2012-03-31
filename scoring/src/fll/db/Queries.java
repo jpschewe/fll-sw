@@ -1584,12 +1584,12 @@ public final class Queries {
     PreparedStatement prep = null;
     try {
       if (!paramExists) {
-        prep = connection.prepareStatement("INSERT INTO tournament_parameters (param, param_value, tournament) VALUES (?, ?, ?)");
+        prep = connection.prepareStatement("INSERT INTO tournament_parameters (param_value, param, tournament) VALUES (?, ?, ?)");
       } else {
         prep = connection.prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?");
       }
-      prep.setString(1, paramName);
-      prep.setInt(2, paramValue);
+      prep.setInt(1, paramValue);
+      prep.setString(2, paramName);
       prep.setInt(3, tournament);
 
       prep.executeUpdate();
