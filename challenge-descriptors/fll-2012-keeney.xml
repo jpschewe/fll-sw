@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="Anoka FLL 2012 Challenge: Climate Connections" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 1">
+
+  <Performance minimumScore="0" weight="1.0">
+
+    <goal name="bury_carbon_dioxide" title="Carbon Dioxide in Underground Reservoir"
+      multiplier="5" max="4" />
+
+    <goal name="construct_levees_red" title="Upright Levees touching RED Shore"
+      multiplier="5" max="8" />
+
+    <goal name="construct_levees_green" title="Upright Levees touching GREEN Shore"
+      multiplier="4" max="8" />
+    <restriction lowerBound="0" upperBound="8"
+      message="There are only 3 levees on the table">
+      <term goal="construct_levees_red" scoreType="raw" />
+      <term goal="construct_levees_green" scoreType="raw" />
+    </restriction>
+
+    <goal name="test_levees" title="Test Levee - Storm Activated"
+      multiplier="15" />
+
+    <goal name="raise_flood_barrier" title="Flood Barrier Raised"
+      multiplier="15" />
+
+    <goal name="elevate_house" title="House Elevated" multiplier="25" />
+
+    <goal name="turn_off_lights" title="House Lights turned Off"
+      multiplier="20" />
+
+    <goal name="open_window" title="House Window Open" multiplier="25" />
+
+    <goal name="get_people_together_pink" title="Three or more red/white citizens touching the pink"
+      multiplier="10" />
+
+    <goal name="get_people_together_green"
+      title="Three or more blue/gray leaders touching the green mountain and/or city"
+      multiplier="10" />
+
+    <goal name="get_people_together_research"
+      title="Three or more black/white scientists touching the research area"
+      multiplier="10" />
+
+    <goal name="find_agreement" title="Align the Arrows" multiplier="40" />
+
+    <goal name="fund_research" title="Money to Research Area or Underground Reservoir"
+      multiplier="15" />
+
+    <goal name="deliver_machine" title="Ice Core Drilling Machine delivered to Research area"
+      multiplier="20" />
+
+    <goal name="drill_assembly" title="Drilling Machine Assemble Raised Completed"
+      multiplier="10" />
+
+    <goal name="ice_core" title="Ice Core" initialValue="0">
+      <value score="30" title="IN BASE" value="in_base" />
+      <value score="20" title="EXTRACTED NOT IN BASE" value="extracted" />
+      <value score="0" title="NOT EXTRACTED" value="none" />
+    </goal>
+
+    <goal name="deliver_buoy" title="Ice Buoy Delivered to Research Area"
+      multiplier="25" />
+
+    <goal name="insulate_house" title="Both Insulations in Green Grid Area"
+      multiplier="10" />
+
+    <goal name="ride_bicycle" title="Bike in Green Grid Area"
+      multiplier="10" />
+
+    <goal name="telecommute" title="Computer in Green Grid Area"
+      multiplier="10" />
+
+    <goal name="study_wildlife_bear" title="Study Wildlife - Bear in Research Area"
+      initialValue="0">
+      <value score="15" title="Upright" value="upright" />
+      <value score="10" title="Sleeping" value="sleeping" />
+      <value score="0" title="None" value="none" />
+    </goal>
+
+    <goal name="study_wildlife_snowmobile" title="Study Wildlife - Snowmobile in Research Area"
+      multiplier="10" />
+
+    <goal name="beat_clock" title="Beat the Clock - Robot in Research Area"
+      initialValue="0">
+      <value score="15" title="Research Area" value="research_area" />
+      <value score="10" title="Yellow Grid Area" value="yellow_area" />
+      <value score="0" title="None" value="none" />
+    </goal>
+
+    <tiebreaker>
+      <test winner='HIGH'>
+        <term goal='bury_carbon_dioxide' scoreType='computed' />
+      </test>
+      <test winner='HIGH'>
+        <term goal='deliver_buoy' scoreType='computed' />
+      </test>
+      <test winner='HIGH'>
+        <term goal='get_people_together_pink' scoreType='computed' />
+        <term goal='get_people_together_green' scoreType='computed' />
+        <term goal='get_people_together_research' scoreType='computed' />
+      </test>
+      <test winner='HIGH'>
+        <term goal='elevate_house' scoreType='computed' />
+      </test>
+      <test winner='HIGH'>
+        <term goal='open_window' scoreType='computed' />
+      </test>
+      <test winner='HIGH'>
+        <term goal='deliver_machine' scoreType='computed' />
+      </test>
+      <test winner='HIGH'>
+        <term goal='beat_clock' scoreType='computed' />
+      </test>
+      <test winner='HIGH'>
+        <term goal='ice_core' scoreType='computed' />
+      </test>
+      <test winner='HIGH'>
+        <term goal='study_wildlife_bear' scoreType='computed' />
+      </test>
+    </tiebreaker>
+
+  </Performance>
+  
+
+	<subjectiveCategory name="teamwork" title="Teamwork"
+		weight="1.0">
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="roles"
+			title="Roles and Responsibilities">
+		</goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1"
+			name="professionalism" title="Gracious Professionalism">
+		</goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="dynamics"
+			title="Problem Solving &amp; Team Dynamics &amp; Communications">
+		</goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="confidence"
+			title="Confidence &amp; Enthusiasm">
+		</goal>
+		<goal initialValue="0" max="20" min="0" multiplier="1" name="fll_values"
+			title="FLL Values">
+		</goal>
+	</subjectiveCategory>
+
+  <subjectiveCategory name="robot_design" title="Robot Engineering"
+    weight="1.0">
+    <goal initialValue="0" max="12" min="0" multiplier="1"
+      name="durability" title="Durability" />
+    <goal initialValue="0" max="12" min="0" multiplier="1"
+      name="mechanical_efficiency" title="Mechanical Efficiency">
+    </goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1"
+      name="mechanization" title="Mechanization">
+    </goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1"
+      name="attachments" title="Attachments and Sensors">
+    </goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1"
+	  name="kids_work"
+      title="Kids Did the Work">
+    </goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1"
+	  name="design_process"
+      title="Design Process">
+    </goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1"
+	  name="mission_strategy"
+      title="Mission Strategy">
+    </goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1"
+	  name="innovation"
+      title="Innovation">
+    </goal>
+  </subjectiveCategory>
+
+  <subjectiveCategory name="robot_programming"
+    title="Robot Programming" weight="1.0">
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="code_structure"
+      title="Code Structure and Reuse">
+    </goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1"
+      name="kids_work" title="Kids Did the Work">
+    </goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="quality"
+      title="Programming Quality">
+    </goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="efficiency"
+      title="Programming Efficiency">
+    </goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="automation"
+      title="Automation/Navigation">
+    </goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="design_process"
+      title="Design Process">
+    </goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="mission_strategy"
+      title="Mission Strategy">
+    </goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation"
+      title="Innovation">
+    </goal>
+  </subjectiveCategory>
+
+
+</fll>
