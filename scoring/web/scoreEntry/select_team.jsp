@@ -46,7 +46,7 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
   </style>
 <script type="text/javascript" src="<c:url value='/playoff/code.icepush'/>"></script>
 <script type="text/javascript" src="<c:url value='/extlib/jquery-1.7.1.min.js'/>"></script>
-<script language='javascript'>
+<script type='text/javascript'>
 
 function editFlagBoxClicked() {
   var text = document.getElementById('select_number_text');
