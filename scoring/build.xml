@@ -800,7 +800,7 @@ jar="${dir.lib}/test/selenium-server-standalone-2.20.0.jar" fork="true" spawn="t
 		<antcall target="sloccount" />
 		<antcall target="javadoc" />
 		<antcall target="findbugs" />
-		<antcall target="test.all" />
+		<antcall target="test.single" />
 		<antcall target="coverage.report" />
 	</target>
 
