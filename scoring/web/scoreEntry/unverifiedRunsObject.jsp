@@ -42,7 +42,7 @@
  <c:set var="untrimmedTeamName" value="${row[2]}" scope="page" />
  <%
    pageContext.setAttribute("trimmedTeamName",
-                              Utilities.trimString((String) pageContext.findAttribute("untrimmedTeamName"), 50));
+                              Utilities.trimString((String) pageContext.findAttribute("untrimmedTeamName"), Team.MAX_TEAM_NAME_LEN));
  %>
                 document.verify.TeamNumber.options[<%=index%>]=new Option("Run ${row[1]} - ${row[0]}    [${trimmedTeamName}]", "${row[0]}-${row[1]}", true, false);
                 <%
