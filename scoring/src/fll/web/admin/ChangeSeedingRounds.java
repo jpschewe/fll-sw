@@ -26,7 +26,6 @@ import fll.web.SessionAttributes;
 
 /**
  * Change the number of seeding rounds.
- * 
  */
 @WebServlet("/admin/ChangeSeedingRounds")
 public class ChangeSeedingRounds extends BaseFLLServlet {
@@ -42,20 +41,25 @@ public class ChangeSeedingRounds extends BaseFLLServlet {
 
     try {
       final Connection connection = datasource.getConnection();
+      final int tournament = Queries.getCurrentTournament(connection);
 
-      final String seedingRoundsParam = request.getParameter("seedingRounds");
-      if (null != seedingRoundsParam
-          && !"".equals(seedingRoundsParam)) {
-        final int newSeedingRounds = Integer.valueOf(seedingRoundsParam);
-        if (newSeedingRounds < 0) {
-          message.append("<p class='error'>Cannot have negative number of seeding rounds</p>");
-        } else {
-          final int tournament = Queries.getCurrentTournament(connection);
-          Queries.setNumSeedingRounds(connection, tournament, newSeedingRounds);
-          message.append(String.format("<p id='success'><i>Changed number of seeing rounds to %s</i></p>", newSeedingRounds));
-        }
+      if (Queries.isPlayoffDataInitialized(connection, tournament)) {
+        message.append("<p class='error'>You cannot change the number of seeding rounds once the playoffs are initialized</p>");
       } else {
-        message.append("<p class='error'>You must specify the number of seeding rounds, ignoring request</p>");
+        final String seedingRoundsParam = request.getParameter("seedingRounds");
+        if (null != seedingRoundsParam
+            && !"".equals(seedingRoundsParam)) {
+          final int newSeedingRounds = Integer.valueOf(seedingRoundsParam);
+          if (newSeedingRounds < 0) {
+            message.append("<p class='error'>Cannot have negative number of seeding rounds</p>");
+          } else {
+            Queries.setNumSeedingRounds(connection, tournament, newSeedingRounds);
+            message.append(String.format("<p id='success'><i>Changed number of seeing rounds to %s</i></p>",
+                                         newSeedingRounds));
+          }
+        } else {
+          message.append("<p class='error'>You must specify the number of seeding rounds, ignoring request</p>");
+        }
       }
 
     } catch (final SQLException e) {
