@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="MN FIRST LEGO League Tournament"
+  bracketSort="RANDOM"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 1">
+
+  <Performance minimumScore="0" weight="1.0">
+
+    <goal name="pollution_reversal" title="Pollution Balls touching Mat"
+      multiplier="4" max="2"
+      />
+
+    <goal name="corn_harvest" title="Corn Harvest (one piece)"
+      initialValue="0">
+      <value score="9" title="In Base" value="in_base"/>
+      <value score="5" title="On Mat" value="on_mat"/>
+      <value score="0" title="None" value="none"/>
+    </goal>
+
+    <goal name="fishing" title="Big Fish in Base"
+      multiplier="3" max="3"/>
+
+    <goal name="pizza_ice_cream" title="Pizza and Ice Cream in Base"
+      multiplier="7" max="2"/>
+
+    <goal name="farm_fresh_produce" title="Yellow Truck in Base"
+      multiplier="9"/>
+
+    <goal name="distant_travel" title="Distant Travel"
+      multiplier="9"/>
+
+    <goal name="cooking_time" title="Cooking Timer pointing Red"
+      multiplier="14"
+      />
+
+    <goal name="storage_temperature" title="Storage Temperature"
+      multiplier="20"/>
+
+    <goal name="pest_removal" title="Pest Removal (Rats in Base)"
+      multiplier="15" max="2"/>
+
+    <goal name="refrig_ground_transport" title="Refrigerated Ground Transport"
+      initialValue="0">
+      <value score="20" title="Dock" value="dock"/>
+      <value score="12" title="Base" value="base"/>
+      <value score="0" title="None" value="none"/>
+    </goal>
+    <goal name="fish_inside_trailer" title="Fish Inside Trailer (Only at Dock)"
+      multiplier="0" max="3" />
+    <!-- need to have the trailer on the dock to get the fish bonus -->
+    <computedGoal name="fish_trailer_bonus" title="Fish Trailer Bonus">
+      <switch>
+        <case>
+          <enumCondition>
+            <left>
+              <goalRef goal="refrig_ground_transport"/>
+            </left>
+            <equal-to/>
+            <right>
+              <stringConstant value="dock"/>
+            </right>
+          </enumCondition>
+          <result>
+            <term scoreType="raw" coefficient="6" goal="fish_inside_trailer"/>
+          </result>
+        </case>
+        <default>
+          <constant value="0"/>
+        </default>
+      </switch>
+    </computedGoal>
+
+    <goal name="groceries" title="Groceries on Table"
+      multiplier="2" max="12"/>
+
+    <!-- multiplier is 7 or 12 depending on if bacteria is outside base -->
+    <goal name="disinfect" title="Disinfect Dispensers Empty"
+      multiplier="0" max="4"/>
+    <goal name="bacteria_outside_base" title="Bacteria Touching Mat Outside Base"
+      multiplier="0"/>
+    <computedGoal name="disinfect_score" title="Disinfect Score">
+      <switch>
+        <case>
+          <condition>
+            <left>
+              <term scoreType="raw" goal="bacteria_outside_base"/>
+            </left>
+            <greater-than/>
+            <right>
+              <constant value="0"/>
+            </right>
+          </condition>
+          <result>
+            <term scoreType="raw" coefficient="7" goal="disinfect"/>
+          </result>
+        </case>
+        <default>
+          <term scoreType="raw" coefficient="12" goal="disinfect"/>
+        </default>
+      </switch>
+    </computedGoal>
+
+    <goal name="hand_wash_bacterial" title="Hand Wash/Bacterial in Sink"
+      multiplier="3" max="60"/>
+
+    <goal name="hand_wash_viral" title="Number Virus in Sink"
+      multiplier="0" max="16"/>
+    <computedGoal name="hand_wash_viral_score" title="Hand Wash/Viral">
+      <switch>
+        <case>
+          <condition>
+            <left>
+              <term goal="hand_wash_viral" scoreType="raw"/>
+            </left>
+            <greater-than-or-equal/>
+            <right>
+              <constant value="9"/>
+            </right>
+          </condition>
+          <result>
+            <constant value="13"/>
+          </result>
+        </case>
+        <case>
+          <condition>
+            <left>
+              <term goal="hand_wash_viral" scoreType="raw"/>
+            </left>
+            <greater-than-or-equal/>
+            <right>
+              <constant value="1"/>
+            </right>
+          </condition>
+          <result>
+            <constant value="6"/>
+          </result>
+        </case>
+        <default>
+          <constant value="0"/>
+        </default>
+      </switch>
+    </computedGoal>
+
+    <goal name="good_bacteria" title="Yellow Bacteria in Base"
+      multiplier="6" max="12" />
+
+
+    <restriction lowerBound="0" upperBound="3"
+      message="There are only 3 big fish on the table">
+      <term goal="fishing" scoreType="raw"/>
+      <term goal="fish_inside_trailer" scoreType="raw"/>
+    </restriction>
+    
+    <tiebreaker>
+      <test winner='HIGH'>
+        <term goal='groceries' scoreType='computed' />
+      </test>
+
+      <test winner='HIGH'>
+        <term goal='disinfect_score' scoreType='computed' />
+      </test>
+
+      <test winner='HIGH'>
+        <term goal='hand_wash_bacterial' scoreType='computed' />
+      </test>
+      
+    </tiebreaker>
+
+  </Performance>
+
+
+</fll>
