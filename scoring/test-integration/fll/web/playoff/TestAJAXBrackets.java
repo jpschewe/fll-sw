@@ -9,8 +9,6 @@ package fll.web.playoff;
 import java.io.IOException;
 import java.io.InputStream;
 
-import junit.framework.AssertionFailedError;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -137,11 +135,6 @@ public class TestAJAXBrackets extends SeleneseTestBase {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     } catch (final SAXException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
-    } catch (final AssertionFailedError e) {
-      LogUtils.getLogger().error("Assertion error: "
-          + e.getMessage());
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     } catch (final RuntimeException e) {
