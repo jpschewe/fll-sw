@@ -68,6 +68,7 @@ public final class Queries {
    * Compute the score group for a team. Normally this comes from the schedule,
    * but it may need to be computed off of the judges.
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate table name from category")
   public static String computeScoreGroupForTeam(final Connection connection,
                                                 final int tournament,
                                                 final String categoryName,
