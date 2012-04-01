@@ -159,6 +159,16 @@ public final class IntegrationTestUtils {
         selenium.waitForPageToLoad(WAIT_FOR_PAGE_TIMEOUT);
         final boolean success = selenium.isTextPresent("Successfully initialized database");
         Assert.assertTrue("Database was not successfully initialized", success);
+        
+        // setup user
+        selenium.type("user", TEST_USERNAME);
+        selenium.type("pass", TEST_PASSWORD);
+        selenium.type("pass_check", TEST_PASSWORD);
+        selenium.click("submit_create_user");
+        selenium.waitForPageToLoad(WAIT_FOR_PAGE_TIMEOUT);
+        final boolean userSuccess = selenium.isTextPresent("Successfully created user");
+        Assert.assertTrue("Problem creating user", userSuccess);
+
       } finally {
         if (!dumpFile.delete()) {
           dumpFile.deleteOnExit();
