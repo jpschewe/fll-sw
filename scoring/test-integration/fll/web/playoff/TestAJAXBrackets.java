@@ -52,13 +52,6 @@ public class TestAJAXBrackets extends SeleneseTestBase {
         IntegrationTestUtils.addTeam(selenium, i, ""
             + i, "htk", "mn", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
       }
-      // init brackets
-      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-          + "playoff");
-      selenium.select("xpath=//form[@name='initialize']//select[@name='division']", "value=1");
-      selenium.click("id=initialize_brackets");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-      Assert.assertFalse(selenium.isTextPresent("Exception"));
       // table labels
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
           + "admin/tables.jsp");
@@ -66,9 +59,19 @@ public class TestAJAXBrackets extends SeleneseTestBase {
       selenium.type("name=SideB0", "Table 2");
       selenium.click("id=finished");
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      
+      // change num seeding rounds
       selenium.select("xpath=//form[@id='changeSeedingRounds']//select[@name='seedingRounds']", "value=0");
       selenium.click("name=changeSeedingRounds");
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+      // init brackets
+      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+          + "playoff");
+      selenium.select("xpath=//form[@name='initialize']//select[@name='division']", "value=1");
+      selenium.click("id=initialize_brackets");
+      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      Assert.assertFalse(selenium.isTextPresent("Exception"));
 
       // open brackets
       selenium.openWindow(TestUtils.URL_ROOT
@@ -129,9 +132,6 @@ public class TestAJAXBrackets extends SeleneseTestBase {
       selenium.selectWindow("brackets");
       selenium.runScript("window.iterate();");
 
-      LogUtils.getLogger().error("Just before asserting for Score:");
-      IntegrationTestUtils.storeScreenshot(selenium);
-      
       Assert.assertTrue(selenium.getEval("window.document.getElementById('1-1').innerHTML").contains("Score:"));
     } catch (final IOException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
@@ -147,10 +147,9 @@ public class TestAJAXBrackets extends SeleneseTestBase {
     } catch (final RuntimeException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
-    } catch(final Throwable t) {
-      LogUtils.getLogger().error("Caught unknown throwable: " + t.getClass());
+    } catch(final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
-      throw new RuntimeException(t);
+      throw e;      
     }
   }
 
