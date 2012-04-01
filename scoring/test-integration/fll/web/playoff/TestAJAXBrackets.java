@@ -123,6 +123,7 @@ public class TestAJAXBrackets extends SeleneseTestBase {
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
     selenium.selectWindow("brackets");
     selenium.runScript("window.iterate();");
+    LogUtils.getLogger().error("Just before asserting for Score:");
     Assert.assertTrue(selenium.getEval("window.document.getElementById('1-1').innerHTML").contains("Score:"));
     } catch (final IOException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
