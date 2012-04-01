@@ -128,7 +128,10 @@ public class TestAJAXBrackets extends SeleneseTestBase {
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
       selenium.selectWindow("brackets");
       selenium.runScript("window.iterate();");
+
       LogUtils.getLogger().error("Just before asserting for Score:");
+      IntegrationTestUtils.storeScreenshot(selenium);
+      
       Assert.assertTrue(selenium.getEval("window.document.getElementById('1-1').innerHTML").contains("Score:"));
     } catch (final IOException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
@@ -144,6 +147,10 @@ public class TestAJAXBrackets extends SeleneseTestBase {
     } catch (final RuntimeException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
+    } catch(final Throwable t) {
+      LogUtils.getLogger().error("Caught unknown throwable: " + t.getClass());
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw new RuntimeException(t);
     }
   }
 
