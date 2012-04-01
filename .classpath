@@ -49,7 +49,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/scoring/lib/source/commons-codec-1.5-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="scoring/lib/test/selenium-server-standalone-2.1.0.jar" sourcepath="scoring/lib/test/selenium-server-2.1.0-srcs.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-cli-1.2.jar" sourcepath="scoring/lib/source/commons-cli-1.2-sources.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:platform:/resource/fll-sw/scoring/lib/source/commons-cli-1.2-javadoc.jar!/"/>
@@ -62,5 +61,6 @@
 	<classpathentry kind="lib" path="scoring/lib/icepush-jsp-2.0.0-alpha3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/findbugs-2.0.0/lib/annotations.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/findbugs-2.0.0/lib/jsr305.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/selenium-server-standalone-2.20.0.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
