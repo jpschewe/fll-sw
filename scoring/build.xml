@@ -817,7 +817,7 @@
     <antcall target="findbugs" />
     <!--antcall target="test.all" /-->
     <antcall target="test.single">
-      <param name="junit.test.class" value="fll.web.FullTournamentTest"/>
+      <param name="junit.test.class" value="fll.web.WebTest"/>
     </antcall>
     <!-- antcall target="test.integration"/ -->
     <antcall target="tomcat.check-logs"/>
