@@ -816,9 +816,10 @@
     <antcall target="javadoc" />
     <antcall target="findbugs" />
     <!--antcall target="test.all" /-->
-    <antcall target="test.single">
+    <!--antcall target="test.single">
       <param name="junit.test.class" value="fll.web.slideshow.SlideshowTest"/>
-    </antcall>
+    </antcall-->
+    <angcall target="test.integration"/>
     <antcall target="tomcat.check-logs"/>
     <antcall target="coverage.report" />
   </target>
