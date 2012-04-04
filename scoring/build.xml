@@ -815,8 +815,7 @@
     <antcall target="sloccount" />
     <antcall target="javadoc" />
     <antcall target="findbugs" />
-    <!--antcall target="test.all" /-->
-    <antcall target="test.integration" />
+    <antcall target="test.all" />
     <antcall target="tomcat.check-logs" />
     <antcall target="coverage.report" />
   </target>
