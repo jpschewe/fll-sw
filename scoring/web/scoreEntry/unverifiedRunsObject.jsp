@@ -1,25 +1,25 @@
-<%@ page contentType="text/javascript" %>
+<%@ page contentType="text/javascript"%>
 
-<%@ include file="/WEB-INF/jspf/init.jspf" %>
+<%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.Team" %>
-<%@ page import="fll.Utilities" %>
+<%@ page import="fll.Team"%>
+<%@ page import="fll.Utilities"%>
 <%@ page import="fll.web.SessionAttributes"%>
 <%@ page import="fll.db.Queries"%>
 
-<%@ page import="java.util.Collection" %>
+<%@ page import="java.util.Collection"%>
 
-<%@ page import="java.sql.Statement" %>
-<%@ page import="java.sql.ResultSet" %>
-<%@ page import="java.sql.Connection" %>
-<%@ page import="javax.sql.DataSource" %>
+<%@ page import="java.sql.Statement"%>
+<%@ page import="java.sql.ResultSet"%>
+<%@ page import="java.sql.Connection"%>
+<%@ page import="javax.sql.DataSource"%>
 
-<%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
+<%@ page import="net.mtu.eggplant.util.sql.SQLFunctions"%>
 
 <%
-final DataSource datasource = SessionAttributes.getDataSource(session);
-final Connection connection = datasource.getConnection();
-      pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
+  final DataSource datasource = SessionAttributes.getDataSource(session);
+  final Connection connection = datasource.getConnection();
+  pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
 %>
 
 
@@ -34,11 +34,18 @@ final Connection connection = datasource.getConnection();
        AND Teams.TeamNumber = Performance.TeamNumber
        ORDER BY Performance.RunNumber, Teams.TeamNumber
  </sql:query>
- <% int index = 0; %>
-              <c:forEach var="row" items="${result.rowsByIndex}">
-              
-              <c:set var="untrimmedTeamName" value="${team.teamName }" scope="session"/>
-              <% pageContext.setAttribute("trimmedTeamName", Utilities.trimString((String) pageContext.findAttribute("untrimmedTeamName"), 50)); %>
-                document.verify.TeamNumber.options[<%= index %>]=new Option("Run ${row[1]} - ${row[0]}    [${trimmedTeamName}]", "${row[0]}-${row[1]}", true, false);
-                <% index = index + 1;  %>
-              </c:forEach>
+<%
+  int index = 0;
+%>
+<c:forEach var="row" items="${result.rowsByIndex}">
+
+ <c:set var="untrimmedTeamName" value="${row[2]}" scope="page" />
+ <%
+   pageContext.setAttribute("trimmedTeamName",
+                              Utilities.trimString((String) pageContext.findAttribute("untrimmedTeamName"), Team.MAX_TEAM_NAME_LEN));
+ %>
+                document.verify.TeamNumber.options[<%=index%>]=new Option("Run ${row[1]} - ${row[0]}    [${trimmedTeamName}]", "${row[0]}-${row[1]}", true, false);
+                <%
+   index = index + 1;
+ %>
+</c:forEach>
