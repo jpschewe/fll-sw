@@ -1444,6 +1444,10 @@ public final class Queries {
    * @return the tournament ID
    */
   public static int getCurrentTournament(final Connection connection) throws SQLException {
+    if (!Queries.globalParameterExists(connection, GlobalParameters.CURRENT_TOURNAMENT)) {
+      final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
+      setCurrentTournament(connection, dummyTournament.getTournamentID());
+    }
     return getIntGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT);
   }
 
