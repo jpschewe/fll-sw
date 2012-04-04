@@ -42,6 +42,7 @@ public class TestPlayoffs extends SeleneseTestBase {
    */
   @Test
   public void testNotAdvanced() throws IOException {
+    LogUtils.getLogger().info("Top of test not advanced");
     try {
       // initialize database using simple challenge descriptor that just has 1
       // goal from 1 - 100
@@ -112,6 +113,7 @@ public class TestPlayoffs extends SeleneseTestBase {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     }
+    LogUtils.getLogger().info("Bottom of test not advanced");
   }
 
   private void enterTeamScore(final int teamNumber) throws IOException {
