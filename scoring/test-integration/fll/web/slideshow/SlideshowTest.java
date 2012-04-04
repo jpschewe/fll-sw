@@ -45,6 +45,8 @@ public class SlideshowTest extends SeleneseTestBase {
     LogUtils.getLogger().info("Top testSLideshowInterval");
     final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
     IntegrationTestUtils.initializeDatabase(selenium, challengeStream, true);
+    
+    IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
     // add a dummy team so that we have something in the database
     IntegrationTestUtils.addTeam(selenium, 1, "team", "org", "dummy", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
