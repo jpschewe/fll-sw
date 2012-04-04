@@ -17,6 +17,7 @@ import org.junit.Test;
 import com.thoughtworks.selenium.SeleneseTestBase;
 
 import fll.TestUtils;
+import fll.db.GenerateDB;
 import fll.util.LogUtils;
 import fll.web.InitializeDatabaseTest;
 import fll.web.IntegrationTestUtils;
@@ -30,17 +31,26 @@ public class SlideshowTest extends SeleneseTestBase {
   @Override
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    super.setUp(TestUtils.URL_ROOT + "/setup");
+    super.setUp(TestUtils.URL_ROOT
+        + "/setup");
   }
 
   /**
    * Test setting slideshow interval and make sure it doesn't error.
-   * @throws IOException 
+   * 
+   * @throws IOException
    */
   @Test
   public void testSlideshowInterval() throws IOException {
+    LogUtils.getLogger().info("Top testSLideshowInterval");
     final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
     IntegrationTestUtils.initializeDatabase(selenium, challengeStream, true);
+    
+    IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
+
+    // add a dummy team so that we have something in the database
+    IntegrationTestUtils.addTeam(selenium, 1, "team", "org", "dummy", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
+
     try {
       selenium.click("link=Admin Index");
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
@@ -52,13 +62,15 @@ public class SlideshowTest extends SeleneseTestBase {
       selenium.type("slideInterval", "5");
       selenium.click("submit");
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-      
-      Assert.assertTrue("Didn't get success from commit", selenium.isTextPresent("Successfully set remote control parameters"));
-      
-      selenium.open(TestUtils.URL_ROOT + "/slideshow/index.jsp");
+
+      Assert.assertTrue("Didn't get success from commit",
+                        selenium.isTextPresent("Successfully set remote control parameters"));
+
+      selenium.open(TestUtils.URL_ROOT
+          + "/slideshow/index.jsp");
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
       Assert.assertFalse("Got error", selenium.isTextPresent("An error has occurred"));
-      
+
     } catch (final RuntimeException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
@@ -66,6 +78,7 @@ public class SlideshowTest extends SeleneseTestBase {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     }
+    LogUtils.getLogger().info("Bottom testSLideshowInterval");
   }
 
 }
