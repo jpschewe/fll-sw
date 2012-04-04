@@ -20,6 +20,7 @@ import org.w3c.dom.Element;
 
 import fll.db.Queries;
 import fll.util.JsonUtilities;
+import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -27,7 +28,6 @@ import fll.web.playoff.BracketData;
 
 /**
  * Talk to client brackets in json.
- * 
  */
 @WebServlet("/ajax/BracketQuery")
 public class AJAXBracketQueryServlet extends BaseFLLServlet {
@@ -39,10 +39,10 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     try {
       final Connection connection = datasource.getConnection();
       final ServletOutputStream os = response.getOutputStream();
-      if (request.getParameter("multi") != null) {
+      final String multiParam = request.getParameter("multi");
+      if (multiParam != null) {
         // Send off request to helpers
-        handleMultipleQuery(parseInputToMap(request.getParameter("multi")), os, application, session, response,
-                            connection);
+        handleMultipleQuery(parseInputToMap(multiParam), os, application, session, response, connection);
       } else {
         response.reset();
         response.setContentType("text/plain");
@@ -54,10 +54,23 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
   }
 
   private Map<Integer, Integer> parseInputToMap(final String param) {
-    String[] pairs = param.split("\\|");
-    Map<Integer, Integer> pairedMap = new HashMap<Integer, Integer>();
-    for (String pair : pairs) {
-      pairedMap.put(Integer.parseInt(pair.split("\\-")[0]), Integer.parseInt(pair.split("\\-")[1]));
+    LogUtils.getLogger().info("ParseInputToMap param: "
+        + param);
+    final String[] pairs = param.split("\\|");
+    final Map<Integer, Integer> pairedMap = new HashMap<Integer, Integer>();
+    for (final String pair : pairs) {
+      LogUtils.getLogger().info("ParseInputToMap pair: "
+          + pair);
+      final String[] pieces = pair.split("\\-");
+      if (pieces.length >= 2) {
+        final String one = pieces[0];
+        final String two = pieces[1];
+        LogUtils.getLogger().info("ParseInputToMap one: "
+            + one);
+        LogUtils.getLogger().info("ParseInputToMap two: "
+            + two);
+        pairedMap.put(Integer.parseInt(one), Integer.parseInt(two));
+      }
     }
     return pairedMap;
   }
@@ -76,7 +89,8 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
       final boolean showFinalsScores = false;
       response.reset();
       response.setContentType("text/plain");
-      os.print(JsonUtilities.generateJsonBracketInfo(pairedMap, connection, perfElement, bd, showOnlyVerifiedScores, showFinalsScores));
+      os.print(JsonUtilities.generateJsonBracketInfo(pairedMap, connection, perfElement, bd, showOnlyVerifiedScores,
+                                                     showFinalsScores));
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
