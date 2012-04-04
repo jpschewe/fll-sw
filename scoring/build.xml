@@ -796,7 +796,7 @@
   <target name="tomcat.check-logs" description="Check for errors in the tomcat logs">
     <fileset id="matches" dir="${dir.tomcat}/logs">
       <patternset id="files">
-        <include name="localhost*.log"/>
+        <include name="localhost*.log" />
       </patternset>
       <containsregexp expression="(SEVERE)|(ERROR)" />
     </fileset>
@@ -817,10 +817,10 @@
     <antcall target="findbugs" />
     <!--antcall target="test.all" /-->
     <antcall target="test.single">
-      <param name="junit.test.class" value="fll.web.WebTest"/>
+      <param name="junit.test.class" value="fll.web.WebTest" />
     </antcall>
-    <antcall target="test.integration"/>
-    <antcall target="tomcat.check-logs"/>
+    <antcall target="test.integration" />
+    <antcall target="tomcat.check-logs" />
     <antcall target="coverage.report" />
   </target>
 

@@ -39,6 +39,7 @@ public class SlideshowTest extends SeleneseTestBase {
    */
   @Test
   public void testSlideshowInterval() throws IOException {
+    LogUtils.getLogger().info("Top testSLideshowInterval");
     final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
     IntegrationTestUtils.initializeDatabase(selenium, challengeStream, true);
     try {
@@ -66,6 +67,7 @@ public class SlideshowTest extends SeleneseTestBase {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     }
+    LogUtils.getLogger().info("Bottom testSLideshowInterval");
   }
 
 }
