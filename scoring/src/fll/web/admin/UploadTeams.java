@@ -440,13 +440,20 @@ public final class UploadTeams extends BaseFLLServlet {
             + tableName);
         prep.executeUpdate();
       }
+      
+      prep = connection.prepareStatement("DELETE FROM sched_subjective");
+      prep.executeUpdate();
+      prep = connection.prepareStatement("DELETE FROM sched_perf_rounds");
+      prep.executeUpdate();
+      prep = connection.prepareStatement("DELETE FROM schedule");
+      prep.executeUpdate();
 
       final List<String> internalTeams = new LinkedList<String>();
       internalTeams.add(String.valueOf(Team.BYE.getTeamNumber()));
       internalTeams.add(String.valueOf(Team.TIE.getTeamNumber()));
       internalTeams.add(String.valueOf(Team.NULL.getTeamNumber()));
-      prep = connection.prepareStatement("DELETE FROM Teams WHERE TeamNumber NOT IN Region ( "
-          + StringUtils.join(internalTeams, ".") + " )");
+      prep = connection.prepareStatement("DELETE FROM Teams WHERE TeamNumber NOT IN ( "
+          + StringUtils.join(internalTeams, ",") + " )");
       prep.executeUpdate();
 
       // now copy the data over converting the team number to an integer
