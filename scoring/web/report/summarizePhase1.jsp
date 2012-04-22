@@ -56,6 +56,7 @@ ScoreStandardization.summarizeScores(connection, challengeDocument, currentTourn
             FROM Judges 
             WHERE id = '${row.Judge}'
             AND Tournament = <%=currentTournament %>
+            AND category = '<x:out select="./@name"/>'
           </sql:query>
           <c:forEach items="${divResult.rows }" var="divRow">
             <tr>
