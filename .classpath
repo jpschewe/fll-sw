@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="scoring/src"/>
 	<classpathentry kind="src" output="scoring/build/classes/test" path="scoring/test-unit"/>
 	<classpathentry kind="src" output="scoring/build/classes/test" path="scoring/test-integration"/>
-	<classpathentry kind="lib" path="scoring/lib/commons-lang-2.0.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/httpunit.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="http://httpunit.sourceforge.net/doc/api"/>
@@ -62,5 +61,6 @@
 	<classpathentry kind="lib" path="scoring/lib/findbugs-2.0.0/lib/annotations.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/findbugs-2.0.0/lib/jsr305.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/selenium-server-standalone-2.20.0.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/commons-lang3-3.1.jar" sourcepath="scoring/lib/source/commons-lang3-3.1-sources.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
