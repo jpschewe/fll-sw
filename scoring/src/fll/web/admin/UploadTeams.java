@@ -32,11 +32,13 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;
@@ -50,7 +52,6 @@ import fll.web.SessionAttributes;
 /**
  * Java code for uploading team data to the database. Called from
  * filterTeams.jsp and columnSelection.jsp.
- * 
  */
 @WebServlet("/admin/UploadTeams")
 public final class UploadTeams extends BaseFLLServlet {
@@ -440,8 +441,12 @@ public final class UploadTeams extends BaseFLLServlet {
         prep.executeUpdate();
       }
 
-      prep = connection.prepareStatement("DELETE FROM Teams WHERE Region <> ?");
-      prep.setString(1, GenerateDB.INTERNAL_REGION);
+      final List<String> internalTeams = new LinkedList<String>();
+      internalTeams.add(String.valueOf(Team.BYE.getTeamNumber()));
+      internalTeams.add(String.valueOf(Team.TIE.getTeamNumber()));
+      internalTeams.add(String.valueOf(Team.NULL.getTeamNumber()));
+      prep = connection.prepareStatement("DELETE FROM Teams WHERE TeamNumber NOT IN Region ( "
+          + StringUtils.join(internalTeams, ".") + " )");
       prep.executeUpdate();
 
       // now copy the data over converting the team number to an integer
