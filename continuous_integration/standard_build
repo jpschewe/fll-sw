@@ -8,7 +8,7 @@ fatal() { error "$*"; exit 1; }
 mydir=$(cd "$(dirname "$0")" && pwd -L) || fatal "Unable to determine script directory"
 
 if [ -z "${WORKSPACE}" ]; then
-    echo "WORKSPACE not defined, cannot continue"
+    fatal "WORKSPACE not defined, cannot continue"
 fi
 
 cd "${WORKSPACE}"
@@ -16,8 +16,6 @@ cd "${WORKSPACE}"
 #clean up from previous run
 git clean -xdf || fatal "Unable to clean workspace"
 
-branch=$(git branch | grep '*' | awk -F'* ' '{print $2}') || fatal "Unable to get branch name"
-log "Building branch ${branch}"
-
 cd scoring
-./ant.sh continuous
+./ant.sh continuous || fatal "Error running continuous integration tests"
+
