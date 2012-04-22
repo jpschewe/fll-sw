@@ -2236,7 +2236,7 @@ public final class Queries {
   }
 
   /**
-   * Update a team region.
+   * Update a team division.
    */
   public static void updateTeamDivision(final Connection connection,
                                         final int number,
@@ -2253,7 +2253,7 @@ public final class Queries {
   }
 
   /**
-   * Update a team region.
+   * Update a team event division.
    */
   public static void updateTeamEventDivision(final Connection connection,
                                              final int number,
