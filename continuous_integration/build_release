@@ -1,18 +1,25 @@
-#!/bin/bash -ex
+#!/bin/sh
+
+debug() { ! "${log_debug-false}" || log "DEBUG: $*" >&2; }
+log() { printf '%s\n' "$*"; }
+warn() { log "WARNING: $*" >&2; }
+error() { log "ERROR: $*" >&2; }
+fatal() { error "$*"; exit 1; }
+mydir=$(cd "$(dirname "$0")" && pwd -L) || fatal "Unable to determine script directory"
 
 if [ -z "${WORKSPACE}" ]; then
-    echo "WORKSPACE not defined, cannot continue"
+    fatal "WORKSPACE not defined, cannot continue"
 fi
 
 cd "${WORKSPACE}"
 
 #clean up from previous run
-git clean -xdf
+git clean -xdf || fatal "Error cleaning workspace"
 
 cd scoring
 
 # get wiki documentation
-./get-wiki
+./get-wiki || fatal "Error getting wiki documentation"
 
-./ant.sh dist
+./ant.sh dist || fatal "Error building distribution"
 
