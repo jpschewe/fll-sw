@@ -1,13 +1,21 @@
-#!/bin/bash -ex
+#!/bin/sh
+
+debug() { ! "${log_debug-false}" || log "DEBUG: $*" >&2; }
+log() { printf '%s\n' "$*"; }
+warn() { log "WARNING: $*" >&2; }
+error() { log "ERROR: $*" >&2; }
+fatal() { error "$*"; exit 1; }
+mydir=$(cd "$(dirname "$0")" && pwd -L) || fatal "Unable to determine script directory"
 
 if [ -z "${WORKSPACE}" ]; then
-    echo "WORKSPACE not defined, cannot continue"
+    fatal "WORKSPACE not defined, cannot continue"
 fi
 
 cd "${WORKSPACE}"
 
 #clean up from previous run
-git clean -xdf
+git clean -xdf || fatal "Unable to clean workspace"
 
 cd scoring
-./ant.sh continuous
+./ant.sh continuous || fatal "Error running continuous integration tests"
+
