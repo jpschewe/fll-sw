@@ -117,7 +117,7 @@ public final class Team implements Serializable {
         final Team x = new Team();
         x._division = rs.getString(1);
         x._organization = rs.getString(2);
-        x._teamName = rs.getString(4);
+        x._teamName = rs.getString(3);
         x._teamNumber = teamNumber;
         return x;
       } else {
