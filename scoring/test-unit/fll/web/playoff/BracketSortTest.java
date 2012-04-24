@@ -95,11 +95,10 @@ public class BracketSortTest {
       // Team>();
       for (int i = 0; i < teamNames.length; ++i) {
         final String otherTeam = Queries.addTeam(connection, teamNames.length
-            - i, teamNames[i], null, GenerateDB.DEFAULT_TEAM_REGION, divisionStr);
+            - i, teamNames[i], null, divisionStr);
         Assert.assertNull(otherTeam);
         // final Team team = new Team();
         // team.setDivision(divisionStr);
-        // team.setRegion("DUMMY");
         // team.setTeamName(teamNames[i]);
         // team.setTeamNumber(teamNames.length
         // - i);

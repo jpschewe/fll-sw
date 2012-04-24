@@ -65,7 +65,7 @@ ${message}
 	<div id='UploadTeamsHelp' class='help' style='display: none'>
           Each column of the input file needs to matched against the
           required data for teams. This information includes: team number,
-          team name, organization, region, division. The team number
+          team name, organization, initial tournament, division. The team number
           must be a number and is required. The other columns are
           not required, but are a good idea to include. You will be prompted
           to pick a column from your data file to match against each piece
@@ -79,34 +79,12 @@ ${message}
 	</form>
 	</li>
 
-	<li><a
-		href='AddTournamentsForRegions'>Add
-	tournaments for all Regions</a> <a
-		href='javascript:display("AddForAllHelp")'>[help]</a>
-	<div id='AddForAllHelp' class='help' style='display: none'>Click
-	here to automatically create a tournament for each unique region name
-	from the imported team data file. If you choose not to use this link,
-	you must manually create tournaments through the &ldquo;Edit
-	Tournaments&rdquo; interface, below.<br>
-	<a href='javascript:hide("AddForAllHelp")'>[hide]</a></div>
-	</li>
-
-	<li><a href='<c:url value="tournamentInitialization.jsp"/>'>
-	Initialize tournament teams by region</a> <a
-		href='javascript:display("InitByRegionHelp")'>[help]</a>
-	<div id='InitByRegionHelp' class='help' style='display: none'>
-	Teams are initially assigned to the DUMMY tournament. Click here to
-	automatically assign each team to the tournament with the exact same
-	name as the region to which the team is assigned.<br>
-	<a href='javascript:hide("InitByRegionHelp")'>[hide]</a></div>
-	</li>
-
 	<li><a href='<c:url value="tournaments.jsp"/>'>Edit Tournaments</a>
   
  <a href='javascript:display("EditTournamentHelp")'>[help]</a>
 	<div id='EditTournamentHelp' class='help' style='display: none'>
 	This is an optional step. Use this page to modify the tournaments
-	created by the &ldquo;Add tournaments for all Regions&rdquo; step
+	created by team import step
 	above, to assign tournament advancement (e.g. teams may advance from
 	regional tournaments to the state tournament), or to create new
 	tournaments.<br>

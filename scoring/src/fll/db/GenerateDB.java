@@ -43,12 +43,6 @@ public final class GenerateDB {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  /**
-   * Region name for internal teams. These teams should not be deleted. This is
-   * also the name of a special tournament.
-   */
-  public static final String INTERNAL_REGION = "INTERNAL";
-
   private GenerateDB() {
     // no instances
   }
@@ -79,15 +73,13 @@ public final class GenerateDB {
 
   public static final String DEFAULT_TEAM_DIVISION = "1";
 
-  public static final String DEFAULT_TEAM_REGION = "DUMMY";
-
-  public static final String DUMMY_TOURNAMENT_NAME = DEFAULT_TEAM_REGION;
+  public static final String DUMMY_TOURNAMENT_NAME = "DUMMY";
 
   public static final String DROP_TOURNAMENT_NAME = "DROP";
 
   public static final int INTERNAL_TOURNAMENT_ID = -1;
 
-  public static final String INTERNAL_TOURNAMENT_NAME = INTERNAL_REGION;
+  public static final String INTERNAL_TOURNAMENT_NAME = "INTERNAL";
 
   /**
    * Generate a completely new DB from document. This also stores the document
@@ -133,28 +125,22 @@ public final class GenerateDB {
             + "  TeamName varchar(255) default '" + DEFAULT_TEAM_NAME + "' NOT NULL," //
             + "  Organization varchar(255)," //
             + "  Division varchar(32) default '" + DEFAULT_TEAM_DIVISION + "' NOT NULL," //
-            + "  Region varchar(255) default '" + DEFAULT_TEAM_REGION + "' NOT NULL," //
             + "  CONSTRAINT teams_pk PRIMARY KEY (TeamNumber)" + ")");
 
         // add the bye team so that references work
-        prep = connection.prepareStatement("INSERT INTO Teams(TeamNumber, TeamName, Region) VALUES(?, ?, ?)");
+        prep = connection.prepareStatement("INSERT INTO Teams(TeamNumber, TeamName) VALUES(?, ?)");
         prep.setInt(1, Team.BYE.getTeamNumber());
         prep.setString(2, Team.BYE.getTeamName());
-        prep.setString(3, INTERNAL_REGION);
         prep.executeUpdate();
 
         // add the tie team so that references work
-        prep = connection.prepareStatement("INSERT INTO Teams(TeamNumber, TeamName, Region) VALUES(?, ?, ?)");
         prep.setInt(1, Team.TIE.getTeamNumber());
         prep.setString(2, Team.TIE.getTeamName());
-        prep.setString(3, INTERNAL_REGION);
         prep.executeUpdate();
 
         // add the null team so that references work
-        prep = connection.prepareStatement("INSERT INTO Teams(TeamNumber, TeamName, Region) VALUES(?, ?, ?)");
         prep.setInt(1, Team.NULL.getTeamNumber());
         prep.setString(2, Team.NULL.getTeamName());
-        prep.setString(3, INTERNAL_REGION);
         prep.executeUpdate();
 
         SQLFunctions.close(prep);

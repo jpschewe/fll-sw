@@ -48,7 +48,7 @@ public class TestAJAXBrackets extends SeleneseTestBase {
       IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
       for (int i = 1; i < 6; ++i) {
         IntegrationTestUtils.addTeam(selenium, i, ""
-            + i, "htk", "mn", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
+            + i, "htk", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
       }
       // table labels
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
