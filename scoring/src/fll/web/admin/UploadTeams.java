@@ -381,6 +381,17 @@ public final class UploadTeams extends BaseFLLServlet {
                                     final HttpServletResponse response,
                                     final HttpSession session,
                                     final JspWriter out) throws SQLException, IOException {
+    final String teamNumberColumn = request.getParameter("TeamNumber");
+    if (null == teamNumberColumn
+        || "".equals(teamNumberColumn)) {
+      // Error, redirect back to teamColumnSelection.jsp with error message
+      session.setAttribute("errorMessage", "You must specify a column for TeamNumber");
+      response.sendRedirect(response.encodeRedirectURL("teamColumnSelection.jsp"));
+      return false;
+    }
+
+    final String tournamentColumn = request.getParameter("tournament");
+
     Statement stmt = null;
     ResultSet rs = null;
     PreparedStatement prep = null;
@@ -388,15 +399,6 @@ public final class UploadTeams extends BaseFLLServlet {
       final StringBuffer dbColumns = new StringBuffer();
       final StringBuffer dataColumns = new StringBuffer();
       final StringBuffer values = new StringBuffer();
-
-      final String teamNumberColumn = request.getParameter("TeamNumber");
-      if (null == teamNumberColumn
-          || "".equals(teamNumberColumn)) {
-        // Error, redirect back to teamColumnSelection.jsp with error message
-        session.setAttribute("errorMessage", "You must specify a column for TeamNumber");
-        response.sendRedirect(response.encodeRedirectURL("teamColumnSelection.jsp"));
-        return false;
-      }
 
       // always have TeamNumber
       dbColumns.append("TeamNumber");
@@ -408,7 +410,7 @@ public final class UploadTeams extends BaseFLLServlet {
       while (paramIter.hasMoreElements()) {
         final String parameter = (String) paramIter.nextElement();
         if (null != parameter
-            && !"".equals(parameter) && !"TeamNumber".equals(parameter)) {
+            && !"".equals(parameter) && !"TeamNumber".equals(parameter) && !"tournament".equals(parameter)) {
           final String value = request.getParameter(parameter);
           if (null != value
               && !"".equals(value)) {
@@ -440,7 +442,7 @@ public final class UploadTeams extends BaseFLLServlet {
             + tableName);
         prep.executeUpdate();
       }
-      
+
       prep = connection.prepareStatement("DELETE FROM sched_subjective");
       prep.executeUpdate();
       prep = connection.prepareStatement("DELETE FROM sched_perf_rounds");
@@ -512,21 +514,56 @@ public final class UploadTeams extends BaseFLLServlet {
           throw new FLLRuntimeException("Got error inserting teamNumber "
               + teamNumStr + " into Teams table, probably have two teams with the same team number", sqle);
         }
-      }
+      }// for each row imported
 
-      // put all teams in the DUMMY tournament by default and make the event
-      // division the same as the team division
-      stmt.executeUpdate("DELETE FROM TournamentTeams");
-      final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
-      final int dummyTournamentID = dummyTournament.getTournamentID();
-      stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) SELECT "
-          + dummyTournamentID + ", Teams.TeamNumber, Teams.Division FROM Teams");
-
-      return true;
     } finally {
       SQLFunctions.close(stmt);
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
+    }
+
+    setTournamentTeams(connection, teamNumberColumn, tournamentColumn);
+
+    return true;
+  }
+
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = {
+                                                             "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
+                                                             "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate the list of columns for FilteredTeams table, Can't use PreparedStatement for constant value to select when inserting dummy tournament id")
+  static private void setTournamentTeams(final Connection connection,
+                                         final String teamNumberColumn,
+                                         final String tournamentColumn) throws SQLException {
+    Statement stmt = null;
+    PreparedStatement selectPrep = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      if (null == tournamentColumn) {
+        // put all teams in the DUMMY tournament by default and make the event
+        // division the same as the team division
+        stmt.executeUpdate("DELETE FROM TournamentTeams");
+        final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
+        final int dummyTournamentID = dummyTournament.getTournamentID();
+        stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) SELECT "
+            + dummyTournamentID + ", Teams.TeamNumber, Teams.Division FROM Teams");
+      } else {
+        rs = stmt.executeQuery("SELECT "
+            + teamNumberColumn + ", " + tournamentColumn + " FROM FilteredTeams");
+        while (rs.next()) {
+          final int teamNumber = rs.getInt(1);
+          final String tournamentName = rs.getString(2);
+          Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
+          if (null == tournament) {
+            Tournament.createTournament(connection, tournamentName, tournamentName);
+            tournament = Tournament.findTournamentByName(connection, tournamentName);
+          }
+          Queries.changeTeamCurrentTournament(connection, teamNumber, tournament.getTournamentID());
+        }
+      }
+    } finally {
+      SQLFunctions.close(stmt);
+      SQLFunctions.close(rs);
+      SQLFunctions.close(selectPrep);
     }
   }
 
