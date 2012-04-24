@@ -49,7 +49,7 @@ public class SlideshowTest extends SeleneseTestBase {
     IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
     // add a dummy team so that we have something in the database
-    IntegrationTestUtils.addTeam(selenium, 1, "team", "org", "dummy", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
+    IntegrationTestUtils.addTeam(selenium, 1, "team", "org", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
 
     try {
       selenium.click("link=Admin Index");

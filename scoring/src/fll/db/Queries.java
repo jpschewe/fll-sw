@@ -181,7 +181,7 @@ public final class Queries {
       stmt = connection.createStatement();
 
       prep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.Organization"//
-          + ", Teams.TeamName, Teams.Region"//
+          + ", Teams.TeamName"//
           + ", Teams.Division, TournamentTeams.event_division" //
           + " FROM Teams, TournamentTeams" //
           + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber"//
@@ -193,7 +193,6 @@ public final class Queries {
         team.setTeamNumber(rs.getInt("TeamNumber"));
         team.setOrganization(rs.getString("Organization"));
         team.setTeamName(rs.getString("TeamName"));
-        team.setRegion(rs.getString("Region"));
         team.setDivision(rs.getString("Division"));
         team.setEventDivision(rs.getString("event_division"));
         tournamentTeams.put(Integer.valueOf(team.getTeamNumber()), team);
@@ -1618,29 +1617,6 @@ public final class Queries {
   }
 
   /**
-   * Get a list of regions in the DB ordered by region.
-   * 
-   * @return list of regions as strings
-   */
-  public static List<String> getRegions(final Connection connection) throws SQLException {
-    final List<String> retval = new LinkedList<String>();
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT DISTINCT Region FROM Teams ORDER BY Region");
-      while (rs.next()) {
-        final String region = rs.getString(1);
-        retval.add(region);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
-    }
-    return retval;
-  }
-
-  /**
    * Delete a team from the database. This clears team from the Teams table and
    * all tables specified by the challengeDocument. It is not an error if the
    * team doesn't exist.
@@ -2138,16 +2114,14 @@ public final class Queries {
                                final int number,
                                final String name,
                                final String organization,
-                               final String region,
                                final String division) throws SQLException {
-    return addTeam(connection, number, name, organization, region, division, getCurrentTournament(connection));
+    return addTeam(connection, number, name, organization, division, getCurrentTournament(connection));
   }
 
   public static String addTeam(final Connection connection,
                                final int number,
                                final String name,
                                final String organization,
-                               final String region,
                                final String division,
                                final int tournament) throws SQLException {
     if (Team.isInternalTeamNumber(number)) {
@@ -2172,13 +2146,11 @@ public final class Queries {
       }
       SQLFunctions.close(prep);
 
-      prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Region, Division, TeamNumber) VALUES (?, ?, ?, ?, ?)");
+      prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Division, TeamNumber) VALUES (?, ?, ?, ?, ?)");
       prep.setString(1, name);
       prep.setString(2, organization);
-      prep.setString(3, region == null
-          || "".equals(region) ? GenerateDB.DEFAULT_TEAM_REGION : region);
-      prep.setString(4, division);
-      prep.setInt(5, number);
+      prep.setString(3, division);
+      prep.setInt(4, number);
       prep.executeUpdate();
       SQLFunctions.close(prep);
 
@@ -2203,20 +2175,17 @@ public final class Queries {
                                 final int number,
                                 final String name,
                                 final String organization,
-                                final String region,
                                 final String division) throws SQLException {
 
     final String prevDivision = getDivisionOfTeam(connection, number);
 
     PreparedStatement prep = null;
     try {
-      prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Region = ?, Division = ? WHERE TeamNumber = ?");
+      prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Division = ? WHERE TeamNumber = ?");
       prep.setString(1, name);
       prep.setString(2, organization);
-      prep.setString(3, region == null
-          || "".equals(region) ? GenerateDB.DEFAULT_TEAM_REGION : region);
-      prep.setString(4, division);
-      prep.setInt(5, number);
+      prep.setString(3, division);
+      prep.setInt(4, number);
       prep.executeUpdate();
       SQLFunctions.close(prep);
       prep = null;
@@ -2302,46 +2271,6 @@ public final class Queries {
       prep.executeUpdate();
     } finally {
       SQLFunctions.close(prep);
-    }
-  }
-
-  /**
-   * Update a team region.
-   */
-  public static void updateTeamRegion(final Connection connection,
-                                      final int number,
-                                      final String region) throws SQLException {
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("UPDATE Teams SET Region = ? WHERE TeamNumber = ?");
-      prep.setString(1, region);
-      prep.setInt(2, number);
-      prep.executeUpdate();
-    } finally {
-      SQLFunctions.close(prep);
-    }
-  }
-
-  /**
-   * Insert a tournament for each region found in the teams table, if it doesn't
-   * already exist. Sets name and location equal to the region name.
-   */
-  public static void insertTournamentsForRegions(final Connection connection) throws SQLException {
-    ResultSet rs = null;
-    Statement stmt = null;
-    try {
-      stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT DISTINCT Teams.Region FROM Teams LEFT JOIN Tournaments ON Teams.Region = Tournaments.Name WHERE Tournaments.Name IS NULL");
-      while (rs.next()) {
-        final String region = rs.getString(1);
-        if (null != region
-            && region.trim().length() > 0) {
-          Tournament.createTournament(connection, region, region.trim());
-        }
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
     }
   }
 

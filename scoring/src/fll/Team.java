@@ -12,8 +12,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Comparator;
 
-import fll.db.GenerateDB;
-
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -111,7 +109,7 @@ public final class Team implements Serializable {
     ResultSet rs = null;
     try {
 
-      stmt = connection.prepareStatement("SELECT Division, Organization, Region, TeamName FROM Teams"
+      stmt = connection.prepareStatement("SELECT Division, Organization, TeamName FROM Teams"
           + " WHERE TeamNumber = ?");
       stmt.setInt(1, teamNumber);
       rs = stmt.executeQuery();
@@ -119,13 +117,8 @@ public final class Team implements Serializable {
         final Team x = new Team();
         x._division = rs.getString(1);
         x._organization = rs.getString(2);
-        x._region = rs.getString(3);
         x._teamName = rs.getString(4);
         x._teamNumber = teamNumber;
-        if (null == x._region
-            || "".equals(x._region)) {
-          x._region = GenerateDB.DEFAULT_TEAM_REGION;
-        }
         return x;
       } else {
         return null;
@@ -187,21 +180,6 @@ public final class Team implements Serializable {
    */
   public String getTrimmedTeamName() {
     return Utilities.trimString(getTeamName(), Team.MAX_TEAM_NAME_LEN);
-  }
-
-  private String _region;
-
-  /**
-   * Region that the team comes from.
-   * 
-   * @return region
-   */
-  public String getRegion() {
-    return _region;
-  }
-
-  public void setRegion(final String v) {
-    _region = v;
   }
 
   private String _division;

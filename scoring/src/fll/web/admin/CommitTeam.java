@@ -88,8 +88,7 @@ public class CommitTeam extends BaseFLLServlet {
                 + teamNumber);
           }
           final String otherTeam = Queries.addTeam(connection, teamNumber, request.getParameter("teamName"),
-                                                   request.getParameter("organization"),
-                                                   request.getParameter("region"), division);
+                                                   request.getParameter("organization"), division);
           if (null != otherTeam) {
             message.append("<p class='error'>Error, team number "
                 + teamNumber + " is already assigned.</p>");
@@ -104,7 +103,7 @@ public class CommitTeam extends BaseFLLServlet {
                 + teamNumber + " team info");
           }
           Queries.updateTeam(connection, teamNumber, request.getParameter("teamName"),
-                             request.getParameter("organization"), request.getParameter("region"), division);
+                             request.getParameter("organization"), division);
           message.append("<p id='success'>Successfully updated a team's info</p>");
         }
 

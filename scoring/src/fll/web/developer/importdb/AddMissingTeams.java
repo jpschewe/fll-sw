@@ -62,19 +62,17 @@ public class AddMissingTeams extends BaseFLLServlet {
       @SuppressWarnings(value = "unchecked")
       final List<Team> missingTeams = SessionAttributes.getNonNullAttribute(session, "missingTeams", List.class);
       for (final Team team : missingTeams) {
-        final String dup = Queries.addTeam(destConnection, team.getTeamNumber(), team.getTeamName(), team.getOrganization(), team.getRegion(),
-                                           team.getDivision(), tournamentID);
+        final String dup = Queries.addTeam(destConnection, team.getTeamNumber(), team.getTeamName(),
+                                           team.getOrganization(), team.getDivision(), tournamentID);
         if (null != dup) {
           throw new FLLRuntimeException(
-                                     String
-                                           .format(
-                                                   "Internal error, team with number %d should not exist in the destination database, found match with team with name: %s",
-                                                   team.getTeamNumber(), dup));
+                                        String.format("Internal error, team with number %d should not exist in the destination database, found match with team with name: %s",
+                                                      team.getTeamNumber(), dup));
         }
       }
-      
+
       session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTeamInfo");
-      
+
     } catch (final SQLException sqle) {
       LOG.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);

@@ -65,7 +65,7 @@ ${message}
 	<div id='UploadTeamsHelp' class='help' style='display: none'>
           Each column of the input file needs to matched against the
           required data for teams. This information includes: team number,
-          team name, organization, region, division. The team number
+          team name, organization, initial tournament, division. The team number
           must be a number and is required. The other columns are
           not required, but are a good idea to include. You will be prompted
           to pick a column from your data file to match against each piece
@@ -84,7 +84,7 @@ ${message}
  <a href='javascript:display("EditTournamentHelp")'>[help]</a>
 	<div id='EditTournamentHelp' class='help' style='display: none'>
 	This is an optional step. Use this page to modify the tournaments
-	created by the &ldquo;Add tournaments for all Regions&rdquo; step
+	created by team import step
 	above, to assign tournament advancement (e.g. teams may advance from
 	regional tournaments to the state tournament), or to create new
 	tournaments.<br>
