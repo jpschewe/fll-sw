@@ -103,10 +103,6 @@ public class FullTournamentTest extends SeleneseTestBase {
 
       loadTeams();
 
-      createTournamentsForRegions();
-
-      initializeTournamentsByRegion();
-
       final Connection serverConnection = TestUtils.createTestDBConnection();
       Assert.assertNotNull("Could not create test database connection", serverConnection);
 
@@ -341,26 +337,6 @@ public class FullTournamentTest extends SeleneseTestBase {
     Assert.assertTrue("Error assigning judges", selenium.isElementPresent("success"));
   }
 
-  private void initializeTournamentsByRegion() throws IOException, SAXException {
-    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "admin/tournamentInitialization.jsp");
-    selenium.submit("name=form");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-    Assert.assertFalse(selenium.isTextPresent("Exception"));
-
-    selenium.click("id=continue");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-    Assert.assertFalse(selenium.isTextPresent("Exception"));
-    Assert.assertTrue("Error assigning judges", selenium.isElementPresent("success"));
-
-  }
-
-  private void createTournamentsForRegions() throws IOException {
-    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "admin/AddTournamentsForRegions");
-    Assert.assertNotNull(selenium.isElementPresent("id=success"));
-  }
-
   private void loadTeams() throws IOException, SAXException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/");
@@ -392,7 +368,7 @@ public class FullTournamentTest extends SeleneseTestBase {
     selenium.select("TeamNumber", "tea_number");
     selenium.select("TeamName", "tea_name");
     selenium.select("Organization", "org_name");
-    selenium.select("Region", "eve_name");
+    selenium.select("tournament", "eve_name");
     selenium.select("Division", "div_name");
     selenium.click("id=next");
 
