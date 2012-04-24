@@ -66,10 +66,6 @@ function confirmChangeTournament() {
         <td><input type='text' name='organization' size='64' value='${organization }'></td>
       </tr>
       <tr>
-        <td>Region</td>
-        <td><input type='text' name='region' value='${region }'></td>
-      </tr>
-      <tr>
         <td>Division (required)</td>
         <td>
           <c:forEach items="${divisions}" var="possibleDivision">

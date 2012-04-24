@@ -52,7 +52,6 @@ public class DisplayTournamentAssignments extends BaseFLLServlet {
 
       prep = connection.prepareStatement("select Teams.TeamNumber"// 
     + " ,Teams.TeamName"// 
-    + " ,Teams.Region"//
     + " ,Teams.Division" //
     + " ,TournamentTeams.event_division"//
   + " FROM Teams,TournamentTeams"//
@@ -64,7 +63,7 @@ public class DisplayTournamentAssignments extends BaseFLLServlet {
         formatter.format("<h1>%s</h1>", tournament.getName());
         
         formatter.format("<table border='1'>");
-        formatter.format("<tr><th>Number</th><th>Name</th><th>Region</th><th>Division</th><th>Event Division</th></tr>");
+        formatter.format("<tr><th>Number</th><th>Name</th><th>Division</th><th>Event Division</th></tr>");
         prep.setInt(1, tournament.getTournamentID());
         rs = prep.executeQuery();
         while(rs.next()) {
@@ -75,13 +74,10 @@ public class DisplayTournamentAssignments extends BaseFLLServlet {
           final String teamName = rs.getString(2);
           formatter.format("<td>%s</td>", teamName);
           
-          final String region = rs.getString(3);
-          formatter.format("<td>%s</td>", region);
-          
-          final String division = rs.getString(4);
+          final String division = rs.getString(3);
           formatter.format("<td>%s</td>", division);
           
-          final String eventDivision = rs.getString(5);
+          final String eventDivision = rs.getString(4);
           formatter.format("<td>%s</td>", eventDivision);
           
           formatter.format("</tr>");          

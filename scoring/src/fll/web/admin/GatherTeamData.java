@@ -68,7 +68,6 @@ public class GatherTeamData extends BaseFLLServlet {
         session.setAttribute("teamNumber", null);
         session.setAttribute("teamName", null);
         session.setAttribute("organization", null);
-        session.setAttribute("region", null);
         session.setAttribute("division", null);
         session.setAttribute("teamPrevTournament", null);
         session.setAttribute("teamCurrentTournament", null);
@@ -104,7 +103,6 @@ public class GatherTeamData extends BaseFLLServlet {
         final Team team = Team.getTeamFromDatabase(connection, teamNumber);
         session.setAttribute("teamName", team.getTeamName());
         session.setAttribute("organization", team.getOrganization());
-        session.setAttribute("region", team.getRegion());
         session.setAttribute("division", team.getDivision());
         final int teamCurrentTournamentID = Queries.getTeamCurrentTournament(connection, teamNumber);
         final Tournament teamCurrentTournament = Tournament.findTournamentByID(connection, teamCurrentTournamentID);

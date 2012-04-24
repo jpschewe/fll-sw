@@ -10,7 +10,10 @@ final DataSource datasource = SessionAttributes.getDataSource(session);
 final Connection connection = datasource.getConnection();
 
 if(null == session.getAttribute("columnSelectOptions")) {
-  throw new RuntimeException("Error columnSelectOptions not set.  Please start back at administration page and go forward.");
+	session.setAttribute(SessionAttributes.MESSAGE, 
+			"<p class='error'>Error columnSelectOptions not set.</p>");
+	response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+	return;
 }
 %>
   

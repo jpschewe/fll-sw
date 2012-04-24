@@ -97,7 +97,6 @@ public class TournamentScheduleTest {
       Assert.assertFalse(existsBefore);
 
       // load teams into the database
-      final String testRegion = "test region";
       for (int teamNumber = 1; teamNumber <= 32; ++teamNumber) {
         final String division;
         if (teamNumber < 17) {
@@ -107,7 +106,7 @@ public class TournamentScheduleTest {
         }
         final String dup = Queries.addTeam(memConnection, teamNumber, teamNumber
             + " Name", teamNumber
-            + " School", testRegion, division, tournament.getTournamentID());
+            + " School", division, tournament.getTournamentID());
         Assert.assertNull(dup);
       }
 
@@ -120,7 +119,7 @@ public class TournamentScheduleTest {
       Assert.assertEquals("Expecting exactly 1 sheet in schedule spreadsheet", 1, sheetNames.size());
 
       final String sheetName = sheetNames.get(0);
-      
+
       // determine the subjective columns
       scheduleStream = scheduleResource.openStream();
       final CellFileReader reader = new ExcelCellReader(scheduleStream, sheetName);
@@ -140,7 +139,8 @@ public class TournamentScheduleTest {
       }
 
       scheduleStream = scheduleResource.openStream();
-      final TournamentSchedule schedule = new TournamentSchedule("Test Tournament", scheduleStream, sheetName, subjectiveHeaders);
+      final TournamentSchedule schedule = new TournamentSchedule("Test Tournament", scheduleStream, sheetName,
+                                                                 subjectiveHeaders);
       scheduleStream.close();
 
       schedule.storeSchedule(memConnection, tournament.getTournamentID());

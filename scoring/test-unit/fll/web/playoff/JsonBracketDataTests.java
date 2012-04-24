@@ -43,7 +43,9 @@ import fll.xml.ChallengeParser;
  */
 public class JsonBracketDataTests {
   private static final boolean SHOW_ONLY_VERIFIED = true;
+
   private static final boolean SHOW_FINAL_ROUNDS = false;
+
   @Before
   public void setUp() {
     LogUtils.initializeLogging();
@@ -53,20 +55,16 @@ public class JsonBracketDataTests {
   public void testRoundLimits() throws SQLException, ParseException, IOException, InstantiationException,
       ClassNotFoundException, IllegalAccessException {
     final PlayoffContainer playoff = makePlayoffs();
-    
+
     // shouldn't be able to access out of context rounds
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
     query.put(4, 1);
     Assert.assertEquals("{\"refresh\":\"true\"}",
-                        JsonUtilities.generateJsonBracketInfo(query,
-                                                              playoff.getConnection(),
-                                                              (Element) playoff.getChallengeDoc()
-                                                                               .getDocumentElement()
+                        JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(),
+                                                              (Element) playoff.getChallengeDoc().getDocumentElement()
                                                                                .getElementsByTagName("Performance")
-                                                                               .item(0),
-                                                              playoff.getBracketData(),
-                                                              SHOW_ONLY_VERIFIED,
-                                                              SHOW_FINAL_ROUNDS));
+                                                                               .item(0), playoff.getBracketData(),
+                                                              SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS));
     // done
     SQLFunctions.close(playoff.getConnection());
   }
@@ -88,7 +86,9 @@ public class JsonBracketDataTests {
     final Gson gson = new Gson();
     final Element scoreElement = (Element) playoff.getChallengeDoc().getDocumentElement()
                                                   .getElementsByTagName("Performance").item(0);
-    String jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), scoreElement, playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
+    String jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), scoreElement,
+                                                           playoff.getBracketData(), SHOW_ONLY_VERIFIED,
+                                                           SHOW_FINAL_ROUNDS);
     BracketLeafResultSet[] result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
     Assert.assertEquals(result[0].score, -1.0D, 0.0);
     // check unverified
@@ -97,7 +97,8 @@ public class JsonBracketDataTests {
     insertScore(playoff.getConnection(), 2, 1, false, 20D);
     query.clear();
     query.put(3, 2);
-    jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), scoreElement, playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
+    jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), scoreElement,
+                                                    playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
     Assert.assertEquals(result[0].leaf.getTeam().getTeamNumber(), Team.NULL_TEAM_NUMBER);
 
@@ -112,7 +113,8 @@ public class JsonBracketDataTests {
     // json shouldn't tell us the score for the finals round
     query.clear();
     query.put(23, 3);
-    jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), scoreElement, playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
+    jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), scoreElement,
+                                                    playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
     Assert.assertEquals(result[0].score, -1.0D, 0.0);
 
@@ -189,7 +191,7 @@ public class JsonBracketDataTests {
     Queries.setNumSeedingRounds(connection, 2, 0);
     // make teams
     for (int i = 0; i < teamNames.length; ++i) {
-      Assert.assertNull(Queries.addTeam(connection, i + 1, teamNames[i], "htk", "mn", div, 2));
+      Assert.assertNull(Queries.addTeam(connection, i + 1, teamNames[i], "htk", div, 2));
     }
     Playoff.initializeBrackets(connection, document, div, false);
 

@@ -88,10 +88,10 @@ if(null == errorMessage || "".equals(errorMessage)) {
         </tr>
 
         <tr>
-          <td>Region</td>
+          <td>Initial Tournament</td>
           <td>Text - 255 characters</td>
           <td>
-            <select name='Region'>
+            <select name='tournament'>
             <option value='' selected>None</option>
             <%=session.getAttribute("columnSelectOptions")%>
             </select>

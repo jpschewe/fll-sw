@@ -53,7 +53,7 @@ public class TestPlayoffs extends SeleneseTestBase {
       // add 4 teams to dummy tournament
       for (int teamNumber = 0; teamNumber < 4; ++teamNumber) {
         IntegrationTestUtils.addTeam(selenium, teamNumber, "team "
-            + teamNumber, "org", "dummy", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
+            + teamNumber, "org", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
       }
 
       // set seeding rounds to 1
