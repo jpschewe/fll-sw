@@ -2146,7 +2146,7 @@ public final class Queries {
       }
       SQLFunctions.close(prep);
 
-      prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Division, TeamNumber) VALUES (?, ?, ?, ?, ?)");
+      prep = connection.prepareStatement("INSERT INTO Teams (TeamName, Organization, Division, TeamNumber) VALUES (?, ?, ?, ?)");
       prep.setString(1, name);
       prep.setString(2, organization);
       prep.setString(3, division);
