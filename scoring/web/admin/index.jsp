@@ -79,16 +79,6 @@ ${message}
 	</form>
 	</li>
 
-	<li><a href='<c:url value="tournamentInitialization.jsp"/>'>
-	Initialize tournament teams by region</a> <a
-		href='javascript:display("InitByRegionHelp")'>[help]</a>
-	<div id='InitByRegionHelp' class='help' style='display: none'>
-	Teams are initially assigned to the DUMMY tournament. Click here to
-	automatically assign each team to the tournament with the exact same
-	name as the region to which the team is assigned.<br>
-	<a href='javascript:hide("InitByRegionHelp")'>[hide]</a></div>
-	</li>
-
 	<li><a href='<c:url value="tournaments.jsp"/>'>Edit Tournaments</a>
   
  <a href='javascript:display("EditTournamentHelp")'>[help]</a>
