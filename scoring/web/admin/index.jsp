@@ -79,18 +79,6 @@ ${message}
 	</form>
 	</li>
 
-	<li><a
-		href='AddTournamentsForRegions'>Add
-	tournaments for all Regions</a> <a
-		href='javascript:display("AddForAllHelp")'>[help]</a>
-	<div id='AddForAllHelp' class='help' style='display: none'>Click
-	here to automatically create a tournament for each unique region name
-	from the imported team data file. If you choose not to use this link,
-	you must manually create tournaments through the &ldquo;Edit
-	Tournaments&rdquo; interface, below.<br>
-	<a href='javascript:hide("AddForAllHelp")'>[hide]</a></div>
-	</li>
-
 	<li><a href='<c:url value="tournamentInitialization.jsp"/>'>
 	Initialize tournament teams by region</a> <a
 		href='javascript:display("InitByRegionHelp")'>[help]</a>
