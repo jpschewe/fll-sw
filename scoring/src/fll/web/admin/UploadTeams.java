@@ -538,15 +538,15 @@ public final class UploadTeams extends BaseFLLServlet {
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
-      if (null == tournamentColumn) {
-        // put all teams in the DUMMY tournament by default and make the event
-        // division the same as the team division
-        stmt.executeUpdate("DELETE FROM TournamentTeams");
-        final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
-        final int dummyTournamentID = dummyTournament.getTournamentID();
-        stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) SELECT "
-            + dummyTournamentID + ", Teams.TeamNumber, Teams.Division FROM Teams");
-      } else {
+      // put all teams in the DUMMY tournament by default and make the event
+      // division the same as the team division
+      stmt.executeUpdate("DELETE FROM TournamentTeams");
+      final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
+      final int dummyTournamentID = dummyTournament.getTournamentID();
+      stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) SELECT "
+          + dummyTournamentID + ", Teams.TeamNumber, Teams.Division FROM Teams");
+
+      if (null != tournamentColumn) {
         rs = stmt.executeQuery("SELECT "
             + teamNumberColumn + ", " + tournamentColumn + " FROM FilteredTeams");
         while (rs.next()) {
