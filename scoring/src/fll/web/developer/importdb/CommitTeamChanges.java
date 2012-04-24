@@ -101,9 +101,6 @@ public class CommitTeamChanges extends BaseFLLServlet {
     case ORGANIZATION:
       Queries.updateTeamOrganization(connection, teamNumber, value);
       break;
-    case REGION:
-      Queries.updateTeamRegion(connection, teamNumber, value);
-      break;
     case DIVISION:
       Queries.updateTeamDivision(connection, teamNumber, value);
       break;

@@ -245,7 +245,6 @@ public final class IntegrationTestUtils {
                              final int teamNumber,
                              final String teamName,
                              final String organization,
-                             final String region,
                              final String division,
                              final String tournament) throws IOException {
     try {
@@ -258,7 +257,6 @@ public final class IntegrationTestUtils {
       selenium.type("teamNumber", String.valueOf(teamNumber));
       selenium.type("teamName", teamName);
       selenium.type("organization", organization);
-      selenium.type("region", region);
       selenium.click("id=division_text_choice");
       selenium.type("division_text", division);
 
