@@ -385,6 +385,7 @@ public final class UploadTeams extends BaseFLLServlet {
     if (null == teamNumberColumn
         || "".equals(teamNumberColumn)) {
       // Error, redirect back to teamColumnSelection.jsp with error message
+      // FIXME use standard message type when upload servlet is modified
       session.setAttribute("errorMessage", "You must specify a column for TeamNumber");
       response.sendRedirect(response.encodeRedirectURL("teamColumnSelection.jsp"));
       return false;
@@ -476,9 +477,16 @@ public final class UploadTeams extends BaseFLLServlet {
         }
         try {
           final Number num = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumStr);
-          // TODO ticket:86 perhaps should check for double vs. int, but this
-          // works for
-          // now
+
+          if ((Math.floor(num.doubleValue()) != Math.ceil(num.doubleValue()))
+              || num.intValue() < 0) {
+            session.setAttribute(SessionAttributes.MESSAGE,
+                                 "<p class='error'>All team numbers must be positive integers: "
+                                     + num + "</p>");
+            response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+            return false;
+          }
+
           final int teamNum = num.intValue();
           prep.setInt(1, teamNum);
         } catch (final ParseException e) {
