@@ -102,7 +102,7 @@
     <!-- pdf library -->
     <pathelement location="${dir.lib}/iText-5.0.4.jar" />
 
-    <pathelement location="${dir.lib}/opencsv-2.1-jps.jar" />
+    <pathelement location="${dir.lib}/opencsv-jps-2.4.jar" />
 
     <!-- logging -->
     <pathelement location="${dir.lib}/log4j-1.2.16.jar" />
