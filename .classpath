@@ -26,7 +26,6 @@
 	<classpathentry kind="lib" path="scoring/tools/tomcat/lib/jsp-api.jar"/>
 	<classpathentry kind="lib" path="scoring/tools/tomcat/lib/servlet-api.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/jlfgr-1_0.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/opencsv-2.1-jps.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/poi-3.6-20091214.jar" sourcepath="scoring/lib/source/poi-src-3.6-20091214.zip"/>
 	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-3.6-20091214.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-schemas-3.6-20091214.jar"/>
@@ -62,5 +61,6 @@
 	<classpathentry kind="lib" path="scoring/lib/findbugs-2.0.0/lib/jsr305.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/selenium-server-standalone-2.20.0.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-lang3-3.1.jar" sourcepath="scoring/lib/source/commons-lang3-3.1-sources.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/opencsv-jps-2.4.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
