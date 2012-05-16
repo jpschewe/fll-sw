@@ -408,6 +408,7 @@ public final class Utilities {
             LOGGER.trace("Configuring test database server");
           }
           _testDatabaseServer = new Server();
+          _testDatabaseServer.setAddress("localhost");
           _testDatabaseServer.setPort(9042);
           _testDatabaseServer.setDatabasePath(0, database);
           _testDatabaseServer.setDatabaseName(0, "fll");
