@@ -478,7 +478,7 @@ public final class ImportDB {
     if (dbVersion < 6) {
       upgrade2To6(connection);
     }
-    if(dbVersion < 7) {
+    if (dbVersion < 7) {
       upgrade6To7(connection);
     }
     final int newVersion = Queries.getDatabaseVersion(connection);
@@ -546,7 +546,7 @@ public final class ImportDB {
       prep = null;
     }
   }
-  
+
   private static void upgrade6To7(final Connection connection) throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
@@ -554,9 +554,22 @@ public final class ImportDB {
     try {
       stmt = connection.createStatement();
 
+      prep = connection.prepareStatement("UPDATE TournamentTeams SET event_division = ? WHERE TeamNumber = ? AND Tournament = ?");
+
+      // set event_division based upon team division when NULL
+      rs = stmt.executeQuery("SELECT TeamNumber, Tournament FROM TournamentTeams WHERE event_division is NULL");
+      while (rs.next()) {
+        final int teamNumber = rs.getInt(1);
+        final int tournament = rs.getInt(2);
+        final String division = Queries.getDivisionOfTeam(connection, teamNumber);
+        prep.setInt(2, teamNumber);
+        prep.setInt(3, tournament);
+        prep.setString(1, division);
+      }
+
       // add score_group column
       stmt.executeUpdate("ALTER TABLE TournamentTeams ADD COLUMN judging_station varchar(64)");
-      
+
       // set score_group equal to event division
       stmt.executeUpdate("UPDATE TournamentTeams SET judging_station = event_division");
 
@@ -1105,9 +1118,11 @@ public final class ImportDB {
         if (!Team.isInternalTeamNumber(teamNumber)) {
           final String eventDivision = sourceRS.getString(2);
           final String judgingStation = sourceRS.getString(3);
+          final String actualEventDivision = eventDivision == null ? GenerateDB.DEFAULT_TEAM_DIVISION : eventDivision;
+          final String actualJudgingStation = judgingStation == null ? actualEventDivision : judgingStation;
           destPrep.setInt(2, teamNumber);
-          destPrep.setString(3, eventDivision == null ? GenerateDB.DEFAULT_TEAM_DIVISION : eventDivision);
-          destPrep.setString(4, judgingStation);
+          destPrep.setString(3, actualEventDivision);
+          destPrep.setString(4, actualJudgingStation);
           destPrep.executeUpdate();
         }
       }
