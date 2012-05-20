@@ -31,7 +31,6 @@ import fll.web.WebUtils;
 /**
  * Commit the schedule in uploadSchedule_schedule to the database for the
  * current tournament.
- * 
  */
 @WebServlet("/schedule/CommitSchedule")
 public class CommitSchedule extends BaseFLLServlet {
@@ -54,6 +53,8 @@ public class CommitSchedule extends BaseFLLServlet {
 
       schedule.storeSchedule(connection, tournamentID);
 
+      assignJudgingStations(connection, tournamentID, schedule);
+
       session.setAttribute(SessionAttributes.MESSAGE, "<p>Schedule successfully stored in the database</p>");
       WebUtils.sendRedirect(application, response, "/admin/index.jsp");
       return;
@@ -61,6 +62,14 @@ public class CommitSchedule extends BaseFLLServlet {
       LOGGER.error("There was an error talking to the database", e);
       throw new FLLRuntimeException("There was an error talking to the database", e);
     }
-
   }
+
+  private void assignJudgingStations(final Connection connection,
+                                     final int tournamentID,
+                                     final TournamentSchedule schedule) throws SQLException {
+    //FIXME how to make sure teams are in the tournament first?
+    // FIXME default judging_station to be the event_division
+    
+  }
+
 }
