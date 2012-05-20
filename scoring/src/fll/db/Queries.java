@@ -1883,10 +1883,11 @@ public final class Queries {
     } else {
       PreparedStatement prep = null;
       try {
-        prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division) VALUES (?, ?, ?)");
+        prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division, judging_station) VALUES (?, ?, ?, ?)");
         prep.setInt(1, teamNumber);
         prep.setInt(2, currentTournament.getNextTournament().getTournamentID());
         prep.setString(3, getDivisionOfTeam(connection, teamNumber));
+        prep.setString(4, getDivisionOfTeam(connection, teamNumber));
         prep.executeUpdate();
 
         return true;
@@ -1980,7 +1981,7 @@ public final class Queries {
       deleteTeamFromTournamet(connection, document, teamNumber, currentTournament);
 
       // set new tournament
-      prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division) VALUES (?, ?, ?)");
+      prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division, judging_station) VALUES (?, ?, ?, ?)");
       prep.setInt(1, teamNumber);
       prep.setInt(2, newTournament);
       final String division = getDivisionOfTeam(connection, teamNumber);
@@ -1989,6 +1990,7 @@ public final class Queries {
             + teamNumber + " is " + division);
       }
       prep.setString(3, division);
+      prep.setString(4, division);
       prep.executeUpdate();
       SQLFunctions.close(prep);
 
@@ -2154,10 +2156,11 @@ public final class Queries {
       prep.executeUpdate();
       SQLFunctions.close(prep);
 
-      prep = connection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) VALUES(?, ?, ?)");
+      prep = connection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station) VALUES(?, ?, ?, ?)");
       prep.setInt(1, tournament);
       prep.setInt(2, number);
       prep.setString(3, division);
+      prep.setString(4, division);
       prep.executeUpdate();
       SQLFunctions.close(prep);
 
