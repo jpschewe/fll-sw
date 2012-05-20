@@ -1095,17 +1095,19 @@ public final class ImportDB {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
       SQLFunctions.close(destPrep);
-      sourcePrep = sourceConnection.prepareStatement("SELECT TeamNumber, event_division FROM TournamentTeams WHERE Tournament = ?");
+      sourcePrep = sourceConnection.prepareStatement("SELECT TeamNumber, event_division, judging_station FROM TournamentTeams WHERE Tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
-      destPrep = destinationConnection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) VALUES (?, ?, ?)");
+      destPrep = destinationConnection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station) VALUES (?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
         final int teamNumber = sourceRS.getInt(1);
         if (!Team.isInternalTeamNumber(teamNumber)) {
           final String eventDivision = sourceRS.getString(2);
+          final String judgingStation = sourceRS.getString(3);
           destPrep.setInt(2, teamNumber);
           destPrep.setString(3, eventDivision == null ? GenerateDB.DEFAULT_TEAM_DIVISION : eventDivision);
+          destPrep.setString(4, judgingStation);
           destPrep.executeUpdate();
         }
       }
