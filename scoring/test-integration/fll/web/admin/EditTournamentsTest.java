@@ -41,7 +41,7 @@ public class EditTournamentsTest extends SeleneseTestBase {
       selenium.click("link=Admin Index");
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
-      selenium.click("link=Edit Tournaments");
+      selenium.click("link=Add or Edit Tournaments");
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
       selenium.click("addRow");
