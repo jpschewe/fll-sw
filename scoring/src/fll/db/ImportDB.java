@@ -478,6 +478,9 @@ public final class ImportDB {
     if (dbVersion < 6) {
       upgrade2To6(connection);
     }
+    if(dbVersion < 7) {
+      upgrade6To7(connection);
+    }
     final int newVersion = Queries.getDatabaseVersion(connection);
     if (newVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
@@ -534,6 +537,30 @@ public final class ImportDB {
       }
 
       setDBVersion(connection, 6);
+    } finally {
+      SQLFunctions.close(rs);
+      rs = null;
+      SQLFunctions.close(stmt);
+      stmt = null;
+      SQLFunctions.close(prep);
+      prep = null;
+    }
+  }
+  
+  private static void upgrade6To7(final Connection connection) throws SQLException {
+    Statement stmt = null;
+    ResultSet rs = null;
+    PreparedStatement prep = null;
+    try {
+      stmt = connection.createStatement();
+
+      // add score_group column
+      stmt.executeUpdate("ALTER TABLE TournamentTeams ADD COLUMN judging_station varchar(64)");
+      
+      // set score_group equal to event division
+      stmt.executeUpdate("UPDATE TournamentTeams SET judging_station = event_division");
+
+      setDBVersion(connection, 7);
     } finally {
       SQLFunctions.close(rs);
       rs = null;
