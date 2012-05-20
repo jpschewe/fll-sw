@@ -174,7 +174,7 @@ public final class GenerateDB {
       if (forceRebuild
           || !tables.contains("TournamentTeams".toLowerCase())) {
         stmt.executeUpdate("CREATE TABLE TournamentTeams ("
-            + " ,TeamNumber integer NOT NULL" //
+            + "  TeamNumber integer NOT NULL" //
             + " ,Tournament INTEGER NOT NULL" //
             + " ,event_division varchar(32) default '" + DEFAULT_TEAM_DIVISION + "' NOT NULL" //
             + " ,judging_station varchar(64) NOT NULL"
