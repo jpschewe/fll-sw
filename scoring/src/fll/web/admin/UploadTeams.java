@@ -478,7 +478,7 @@ public final class UploadTeams extends BaseFLLServlet {
         try {
           final Number num = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumStr);
 
-          if ((Math.floor(num.doubleValue()) != Math.ceil(num.doubleValue()))
+          if (((int) Math.floor(num.doubleValue()) != (int) Math.ceil(num.doubleValue()))
               || num.intValue() < 0) {
             session.setAttribute(SessionAttributes.MESSAGE,
                                  "<p class='error'>All team numbers must be positive integers: "
