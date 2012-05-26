@@ -1106,7 +1106,8 @@ public class TournamentSchedule implements Serializable {
         return null;
       }
       final String teamNumberStr = line[ci.getTeamNumColumn()];
-      if (null == teamNumberStr || teamNumberStr.length() < 1) {
+      if (null == teamNumberStr
+          || teamNumberStr.length() < 1) {
         // hit empty row
         return null;
       }
@@ -1314,8 +1315,15 @@ public class TournamentSchedule implements Serializable {
     for (final TeamScheduleInfo si : _schedule) {
       scheduleTeamNumbers.add(si.getTeamNumber());
       if (!dbTeams.containsKey(si.getTeamNumber())) {
+        // TODO: could support adding teams to the database based upon the
+        // schedule
         violations.add(new ConstraintViolation(true, si.getTeamNumber(), null, null, null, "Team "
             + si.getTeamNumber() + " is in schedule, but not in database"));
+      }
+
+      if (null == si.getJudgingStation()) {
+        violations.add(new ConstraintViolation(true, si.getTeamNumber(), null, null, null, "Team "
+            + si.getTeamNumber() + " has no judging station specified"));
       }
     }
     for (final Integer dbNum : dbTeams.keySet()) {
