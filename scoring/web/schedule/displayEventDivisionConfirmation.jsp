@@ -42,7 +42,7 @@
   <a href='<c:url value="/schedule/CommitEventDivisions"/>'>Yes,
    these changes look OK</a><br /> <a
    href='<c:url value="/schedule/CommitSchedule"/>'>No, don't assign
-   event divisions</a><br /> <input type="submit" />
+   event divisions</a><br /> 
  </form>
 
 </body>
