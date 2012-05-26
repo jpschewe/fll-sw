@@ -2000,6 +2000,32 @@ public final class Queries {
   }
 
   /**
+   * Set the judging station for a given team at the specified tournament.
+   * 
+   * @param connection db connection
+   * @param teamNumber the team's number
+   * @param tournamentID the tournament
+   * @param judgingStation the new judging station
+   * @return true if the update occurrred, false if the team isn't in the
+   *         tournament
+   */
+  public static boolean updateTeamJudgingStation(final Connection connection,
+                                                 final int teamNumber,
+                                                 final int tournamentID,
+                                                 final String judgingStation) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE TournamentTeams SET judging_station = ? WHERE TeamNumber = ? AND Tournament = ?");
+      prep.setString(1, judgingStation);
+      prep.setInt(2, teamNumber);
+      prep.setInt(3, tournamentID);
+      return prep.executeUpdate() > 0;
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
    * Demote the team to it's previous tournament. This will delete all scores
    * for the team in it's current tournament.
    * 

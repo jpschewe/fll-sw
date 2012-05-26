@@ -21,6 +21,7 @@ import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 
 import fll.db.Queries;
+import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -64,12 +65,19 @@ public class CommitSchedule extends BaseFLLServlet {
     }
   }
 
+  /**
+   * Set judging_station to be the info from the schedule
+   */
   private void assignJudgingStations(final Connection connection,
                                      final int tournamentID,
                                      final TournamentSchedule schedule) throws SQLException {
-    //FIXME how to make sure teams are in the tournament first?
-    // FIXME default judging_station to be the event_division
-    
+
+    for (final TeamScheduleInfo si : schedule.getSchedule()) {
+      final String station = si.getJudgingStation();
+      final int teamNumber = si.getTeamNumber();
+      Queries.updateTeamJudgingStation(connection, teamNumber, tournamentID, station);
+    }
+
   }
 
 }
