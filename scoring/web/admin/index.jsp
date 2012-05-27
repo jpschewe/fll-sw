@@ -207,7 +207,7 @@ ${message}
       </li>
 
 
-	<li><a href='<c:url value="judges.jsp"/>'>Assign Judges</a></li>
+	<li><a href='<c:url value="GatherJudgeInformation"/>'>Assign Judges</a></li>
 	
  
 	<li><a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a>
