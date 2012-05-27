@@ -123,7 +123,8 @@ public final class Judges {
           final String id = rs.getString(1);
           final String category = rs.getString(2);
           final String division = rs.getString(3);
-          generateRow(out, subjectiveCategories, divisions, row, id, category, division);
+          final JudgeInformation judge = new JudgeInformation(id, category, division);
+          generateRow(out, subjectiveCategories, divisions, row, judge);
         }
       } finally {
         SQLFunctions.close(rs);
@@ -138,7 +139,8 @@ public final class Judges {
       String division = request.getParameter("div"
           + row);
       while (null != category) {
-        generateRow(out, subjectiveCategories, divisions, row, id, category, division);
+        final JudgeInformation judge = new JudgeInformation(id, category, division);
+        generateRow(out, subjectiveCategories, divisions, row, judge);
 
         row++;
         id = request.getParameter("id"
@@ -155,7 +157,7 @@ public final class Judges {
     final int tableRows = Math.max(Math.max(numRows, subjectiveCategories.size()), row);
 
     for (; row < tableRows; row++) {
-      generateRow(out, subjectiveCategories, divisions, row, null, null, null);
+      generateRow(out, subjectiveCategories, divisions, row, new JudgeInformation(null, null, null));
     }
 
     out.println("</table>");
@@ -194,23 +196,18 @@ public final class Judges {
    * @param divisions List of divisions as Strings, "All" is always the first
    *          element in the list
    * @param row the row being generated, used for naming form elements
-   * @param id id of judge, can be null
-   * @param cat category of judge, can be null
-   * @param division division judge is scoring, can be null
    */
   private static void generateRow(final JspWriter out,
                                   final List<Element> subjectiveCategories,
                                   final List<String> divisions,
                                   final int row,
-                                  final String id,
-                                  final String cat,
-                                  final String division) throws IOException {
+                                  final JudgeInformation judge) throws IOException {
     out.println("<tr>");
     out.print("  <td><input type='text' name='id"
         + row + "'");
-    if (null != id) {
+    if (null != judge.getId()) {
       out.print(" value='"
-          + id + "'");
+          + judge.getId() + "'");
     }
     out.println("></td>");
 
@@ -221,7 +218,7 @@ public final class Judges {
       final String categoryTitle = category.getAttribute("title");
       out.print("  <option value='"
           + categoryName + "'");
-      if (categoryName.equals(cat)) {
+      if (categoryName.equals(judge.getCategory())) {
         out.print(" selected");
       }
       out.println(">"
@@ -234,7 +231,7 @@ public final class Judges {
     for (final String div : divisions) {
       out.print("  <option value='"
           + div + "'");
-      if (div.equals(division)) {
+      if (div.equals(judge.getDivision())) {
         out.print(" selected");
       }
       out.println(">"
