@@ -6,10 +6,12 @@
 
 package fll;
 
+import java.io.Serializable;
+
 /**
  * Judge information.
  */
-public final class JudgeInformation {
+public final class JudgeInformation implements Serializable {
   private final String id;
 
   public String getId() {
