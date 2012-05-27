@@ -78,21 +78,6 @@ public final class Judges {
       out.println("<!-- found a row "
           + rowIndex + "-->");
     }
-    if (null != request.getParameter("add_rows")) {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("<!-- adding another row to "
-            + rowIndex + "-->");
-      }
-      try {
-        final Integer numRows = Integer.valueOf(request.getParameter("num_rows"));
-        rowIndex += numRows;
-      } catch (final NumberFormatException nfe) {
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("Got exception reading number of rows, defaulting to 1", nfe);
-        }
-        rowIndex += 1;
-      }
-    }
 
     final int numRows = rowIndex + 1;
 
