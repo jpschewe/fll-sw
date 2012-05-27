@@ -27,12 +27,11 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.JudgeInformation;
 import fll.db.Queries;
-import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 import fll.xml.XMLUtils;
@@ -41,8 +40,6 @@ import fll.xml.XMLUtils;
  * Java code used in judges.jsp
  */
 public final class Judges {
-
-  private static final Logger LOG = LogUtils.getLogger();
 
   private Judges() {
 
@@ -439,56 +436,5 @@ public final class Judges {
     // finally redirect to index.jsp
     session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'><i>Successfully assigned judges</i></p>");
     response.sendRedirect(response.encodeRedirectURL("index.jsp"));
-  }
-
-  /**
-   * Judge information for use in a collection.
-   */
-  private static final class JudgeInformation {
-    private final String id;
-
-    public String getId() {
-      return id;
-    }
-
-    private final String category;
-
-    public String getCategory() {
-      return category;
-    }
-
-    private final String division;
-
-    public String getDivision() {
-      return division;
-    }
-
-    public JudgeInformation(final String id,
-                            final String category,
-                            final String division) {
-      this.id = id;
-      this.category = category;
-      this.division = division;
-    }
-
-    @Override
-    public int hashCode() {
-      return id.hashCode();
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-      if (null == o) {
-        return false;
-      } else if (o == this) {
-        return true;
-      } else if (o.getClass().equals(JudgeInformation.class)) {
-        final JudgeInformation other = (JudgeInformation) o;
-        return getId().equals(other.getId())
-            && getCategory().equals(other.getCategory()) && getDivision().equals(other.getDivision());
-      } else {
-        return false;
-      }
-    }
   }
 }
