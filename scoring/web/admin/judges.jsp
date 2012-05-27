@@ -11,7 +11,11 @@
 <script type='text/javascript'>
 	//FIXME need to get these values from Java
 	var maxIndex = 31;
-	var divisions = [ "All", "1.0", "2.0" ];
+	
+	var divisions = [ "All" ];
+	divisions.push("1.0");
+	divisions.push("2.0");
+	
 	var categories = {};
 	categories['core_values'] = "Core Values";
 	categories['project'] = "Project";
