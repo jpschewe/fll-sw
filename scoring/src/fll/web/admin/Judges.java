@@ -111,8 +111,8 @@ public final class Judges {
     }
 
     if (null != errorString) {
-      out.println("<p id='error'><font color='red'>"
-          + errorString + "</font></p>");
+      out.println("<p id='error' class='error'>"
+          + errorString + "</p>");
     }
 
     // get list of divisions and add "All" as a possible value
