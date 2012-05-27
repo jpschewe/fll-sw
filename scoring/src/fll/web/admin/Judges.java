@@ -46,11 +46,6 @@ public final class Judges {
   }
 
   /**
-   * String used for all divisions when assigning judges.
-   */
-  public static final String ALL_DIVISIONS = "All";
-
-  /**
    * Generate the judges page
    */
   public static void generatePage(final JspWriter out,
@@ -80,16 +75,11 @@ public final class Judges {
 
     String errorString = null;
     if (null != request.getParameter("finished")) {
-      out.println("<form action='judges.jsp' method='POST' name='judges'>");
       errorString = generateVerifyTable(out, subjectiveCategories, request, challengeDocument);
       if (null == errorString) {
         // everything is good
-        out.println("</form>");
         return;
       }
-    } else if (null != request.getParameter("commit")) {
-      commitData(request, response, session, connection, Queries.getCurrentTournament(connection));
-      return;
     }
 
     if (null != errorString) {
@@ -99,7 +89,7 @@ public final class Judges {
 
     // get list of divisions and add "All" as a possible value
     final List<String> divisions = Queries.getEventDivisions(connection);
-    divisions.add(0, ALL_DIVISIONS);
+    divisions.add(0, GatherJudgeInformation.ALL_DIVISIONS);
 
     out.println("<p>Judges ID's must be unique.  They can be just the name of the judge.  Keep in mind that this ID needs to be entered on the judging forms.  There must be at least 1 judge for each category.</p>");
 
@@ -305,6 +295,8 @@ public final class Judges {
     if (error.length() > 0) {
       return error.toString();
     } else {
+      out.println("<form action='judges.jsp' method='POST' name='CommitJudges'>");
+
       out.println("<p>If everything looks ok, click Commit, otherwise click Cancel and you'll go back to the edit page.</p>");
       // generate final table with submit button
       out.println("<table border='1'><tr><th>ID</th><th>Category</th><th>Division</th></tr>");
@@ -347,91 +339,10 @@ public final class Judges {
       out.println("</table>");
       out.println("<input type='submit' name='commit' value='Commit'>");
       out.println("<input type='submit' name='cancel' value='Cancel'>");
+      out.println("</form>");
 
       return null;
     }
   }
 
-  /**
-   * Commit the subjective data from request to the database and redirect
-   * response back to index.jsp.
-   * 
-   * @param tournament the current tournament
-   */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
-  private static void commitData(final HttpServletRequest request,
-                                 final HttpServletResponse response,
-                                 final HttpSession session,
-                                 final Connection connection,
-                                 final int tournament) throws SQLException, IOException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      // save old judge information
-      final Set<JudgeInformation> oldJudgeInfo = new HashSet<JudgeInformation>();
-      prep = connection.prepareStatement("SELECT id, category, event_division FROM Judges WHERE Tournament = ?");
-      prep.setInt(1, tournament);
-      rs = prep.executeQuery();
-      while (rs.next()) {
-        final String id = rs.getString(1);
-        final String category = rs.getString(2);
-        final String division = rs.getString(3);
-        oldJudgeInfo.add(new JudgeInformation(id, category, division));
-      }
-
-      // delete old data in judges
-      prep = connection.prepareStatement("DELETE FROM Judges where Tournament = ?");
-      prep.setInt(1, tournament);
-      prep.executeUpdate();
-      SQLFunctions.close(prep);
-      prep = null;
-
-      // walk request parameters and insert data into database
-      prep = connection.prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES(?, ?, ?, ?)");
-      prep.setInt(4, tournament);
-      int row = 0;
-      String id = request.getParameter("id"
-          + row);
-      String category = request.getParameter("cat"
-          + row);
-      String division = request.getParameter("div"
-          + row);
-      final Set<JudgeInformation> newJudgeInfo = new HashSet<JudgeInformation>();
-      while (null != category) {
-        prep.setString(1, id);
-        prep.setString(2, category);
-        prep.setString(3, division);
-        prep.executeUpdate();
-        final JudgeInformation info = new JudgeInformation(id, category, division);
-        newJudgeInfo.add(info);
-
-        row++;
-        id = request.getParameter("id"
-            + row);
-        category = request.getParameter("cat"
-            + row);
-        division = request.getParameter("div"
-            + row);
-      }
-
-      // figure out which ones are no longer there and remove all of their old
-      // scores
-      oldJudgeInfo.removeAll(newJudgeInfo);
-      for (final JudgeInformation oldInfo : oldJudgeInfo) {
-        prep = connection.prepareStatement(String.format("DELETE FROM %s WHERE Judge = ? AND Tournament = ?",
-                                                         oldInfo.getCategory()));
-        prep.setString(1, oldInfo.getId());
-        prep.setInt(2, tournament);
-        prep.executeUpdate();
-      }
-
-    } finally {
-      SQLFunctions.close(prep);
-      SQLFunctions.close(rs);
-    }
-
-    // finally redirect to index.jsp
-    session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'><i>Successfully assigned judges</i></p>");
-    response.sendRedirect(response.encodeRedirectURL("index.jsp"));
-  }
 }

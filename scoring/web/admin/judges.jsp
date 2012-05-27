@@ -12,15 +12,16 @@
 	//FIXME need to get these values from Java
 	var maxIndex = 31;
 	
-	var divisions = [ "All" ];
-	divisions.push("1.0");
-	divisions.push("2.0");
-	
+	var divisions = [];
+	<c:forEach items="${DIVISIONS}" var="divName">
+		divisions.push("${divName}");
+	</c:forEach>
+		
 	var categories = {};
-	categories['core_values'] = "Core Values";
-	categories['project'] = "Project";
-	categories['robot_design'] = "Robot Design";
-	categories['robot_programming'] = "Robot Programming";
+	<c:forEach items="${CATEGORIES}" var="cat">
+	  categories["${cat.key}"] = "${cat.value}";
+	</c:forEach>
+	
 </script>
 
 <script type='text/javascript' src='../extlib/jquery-1.7.1.min.js'></script>
