@@ -95,10 +95,10 @@ public final class Judges {
     }
 
     final int numRows = rowIndex + 1;
-    out.println("<form action='judges.jsp' method='POST' name='judges'>");
 
     String errorString = null;
     if (null != request.getParameter("finished")) {
+      out.println("<form action='judges.jsp' method='POST' name='judges'>");
       errorString = generateVerifyTable(out, subjectiveCategories, request, challengeDocument);
       if (null == errorString) {
         // everything is good
@@ -124,7 +124,7 @@ public final class Judges {
     if (checkForEnteredSubjectiveScores(connection, subjectiveCategories, tournament)) {
       out.println("<p class='error'>Subjective scores have already been entered for this tournament, changing the judges may cause some scores to be deleted</p>");
     }
-    out.println("<table border='1'><tr><th>ID</th><th>Category</th><th>Division</th></tr>");
+    out.println("<table border='1' id='data'><tr><th>ID</th><th>Category</th><th>Division</th></tr>");
 
     int row = 0; // keep track of which row we're generating
 
@@ -177,11 +177,6 @@ public final class Judges {
     }
 
     out.println("</table>");
-    out.println("<input type='text' name='num_rows' value='1' size='10'/>");
-    out.println("<input type='submit' name='add_rows' value='Add Rows'/><br/>");
-    out.println("<input type='submit' name='finished' value='Finished'/><br/>");
-
-    out.println("</form>");
   }
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
