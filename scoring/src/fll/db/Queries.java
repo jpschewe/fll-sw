@@ -1445,7 +1445,8 @@ public final class Queries {
   public static int getCurrentTournament(final Connection connection) throws SQLException {
     if (!Queries.globalParameterExists(connection, GlobalParameters.CURRENT_TOURNAMENT)) {
       final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
-      setCurrentTournament(connection, dummyTournament.getTournamentID());
+      // Call setGlobalParameter directly to avoid infinite recursion
+      setGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT, String.valueOf(dummyTournament.getTournamentID()));
     }
     return getIntGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT);
   }
