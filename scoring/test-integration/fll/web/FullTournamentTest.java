@@ -297,9 +297,11 @@ public class FullTournamentTest extends SeleneseTestBase {
     SQLFunctions.close(rs);
     SQLFunctions.close(prep);
     while (!selenium.isElementPresent("name=id"
-        + String.valueOf(numJudges - 1))) {
+        + String.valueOf(numJudges))) {
       if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Adding a row to the judges entry form");
+        LOGGER.debug("Adding a row to the judges entry form to get to: "
++ numJudges);
+        IntegrationTestUtils.storeScreenshot(selenium);
       }
       selenium.click("id=add_rows");
       try {
