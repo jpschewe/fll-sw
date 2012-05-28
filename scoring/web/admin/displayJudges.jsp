@@ -43,7 +43,7 @@
 
  </table>
 
- <a href='CommitJudges'>Commit</a>
- <a href='index.jsp'>Cancel</a>
+ <a href='CommitJudges' id='commit'>Commit</a>
+ <a href='index.jsp' id='cancel'>Cancel</a>
 </body>
 </html>

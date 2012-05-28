@@ -349,7 +349,7 @@ public class FullTournamentTest extends SeleneseTestBase {
     Assert.assertFalse("Got error from judges assignment", selenium.isElementPresent("error"));
 
     // commit judges information
-    selenium.click("commit");
+    selenium.click("id=commit");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
     Assert.assertTrue("Error assigning judges", selenium.isElementPresent("success"));
   }
