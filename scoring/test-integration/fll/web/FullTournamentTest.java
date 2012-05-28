@@ -284,8 +284,13 @@ public class FullTournamentTest extends SeleneseTestBase {
                             final String testTournamentName) throws IOException, SAXException, SQLException {
     ResultSet rs;
     PreparedStatement prep;
+    
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "admin/judges.jsp");
+                                  + "admin/index.jsp");
+    
+    selenium.click("id=assign_judges");
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    
 
     // need to add rows to form if test database has more judges than
     // categories
@@ -343,7 +348,7 @@ public class FullTournamentTest extends SeleneseTestBase {
     }
 
     // submit those values
-    selenium.click("finished");
+    selenium.click("id=finished");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
     Assert.assertFalse("Got error from judges assignment", selenium.isElementPresent("error"));
