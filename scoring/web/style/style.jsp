@@ -18,6 +18,13 @@ BODY {
 .error {
   color: red;
   font-weight: bold;
+  background-color: black;
+}
+
+.warning {
+  color: yellow;
+  font-weight: bold;
+  background-color: black;
 }
 
 .hard-violation {
