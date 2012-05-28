@@ -1,8 +1,6 @@
 <%@page import="fll.web.admin.GatherJudgeInformation"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="fll.web.admin.Judges"%>
-
 <html>
 <head>
 <title>Judge Assignments</title>
@@ -42,8 +40,12 @@
   judge. Keep in mind that this ID needs to be entered on the judging
   forms. There must be at least 1 judge for each category.</p>
 
+ ${message}
+ <%-- clear out the message, so that we don't see it again --%>
+ <c:remove var="message" />
 
- <form action='judges.jsp' method='POST' name='VerifyJudges'>
+
+ <form action='VerifyJudges' method='POST' name='judges'>
 
 
 

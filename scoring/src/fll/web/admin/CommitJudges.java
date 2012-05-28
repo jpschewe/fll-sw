@@ -110,7 +110,7 @@ public class CommitJudges extends BaseFLLServlet {
           + row);
       final Set<JudgeInformation> newJudgeInfo = new HashSet<JudgeInformation>();
       while (null != category) {
-        prep.setString(1, id);
+        prep.setString(1, id.trim().toUpperCase());
         prep.setString(2, category);
         prep.setString(3, division);
         prep.executeUpdate();
