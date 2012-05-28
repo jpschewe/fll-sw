@@ -52,6 +52,8 @@
  <!-- logger name="fll.web.report.FinalComputedScores"><level value="TRACE"/></logger-->
  <!-- logger name="fll.web.admin.GatherTeamData"><level value="TRACE"/></logger-->
  <!-- logger name="fll.db.ImportDB"><level value="TRACE"/></logger-->
+  <logger name="fll.web.FullTournamentTest"><level value="TRACE"/></logger>
+ 
  
  <!--  database connection information -->
  <!-- logger name="database"><level value="TRACE"/></logger-->
