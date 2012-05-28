@@ -302,7 +302,6 @@ public class FullTournamentTest extends SeleneseTestBase {
         LOGGER.debug("Adding a row to the judges entry form");
       }
       selenium.click("id=add_rows");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
     }
 
     // assign judges from database
