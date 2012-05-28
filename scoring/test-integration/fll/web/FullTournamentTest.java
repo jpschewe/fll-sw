@@ -310,8 +310,14 @@ public class FullTournamentTest extends SeleneseTestBase {
         throw new RuntimeException(e);
       }
     }
+    
 
     // assign judges from database
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Assigning judges");
+      IntegrationTestUtils.storeScreenshot(selenium);
+    }
+    
     int judgeIndex = 1;
     prep = testDataConn.prepareStatement("SELECT id, category, Division FROM Judges WHERE Tournament = ?");
     prep.setString(1, testTournamentName);
@@ -330,6 +336,11 @@ public class FullTournamentTest extends SeleneseTestBase {
     }
     SQLFunctions.close(rs);
     SQLFunctions.close(prep);
+
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("After assigning judges");
+      IntegrationTestUtils.storeScreenshot(selenium);
+    }
 
     // submit those values
     selenium.click("finished");
