@@ -101,7 +101,7 @@ public class CommitJudges extends BaseFLLServlet {
       // walk request parameters and insert data into database
       prep = connection.prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES(?, ?, ?, ?)");
       prep.setInt(4, tournament);
-      int row = 0;
+      int row = 1;
       String id = request.getParameter("id"
           + row);
       String category = request.getParameter("cat"

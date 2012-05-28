@@ -93,6 +93,7 @@ public final class Judges {
 
     out.println("<p>Judges ID's must be unique.  They can be just the name of the judge.  Keep in mind that this ID needs to be entered on the judging forms.  There must be at least 1 judge for each category.</p>");
 
+    //FIXME get this into the JSP
     if (checkForEnteredSubjectiveScores(connection, subjectiveCategories, tournament)) {
       out.println("<p class='error'>Subjective scores have already been entered for this tournament, changing the judges may cause some scores to be deleted</p>");
     }
