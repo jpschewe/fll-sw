@@ -82,11 +82,20 @@ public class GatherJudgeInformation extends BaseFLLServlet {
       final int tournament = Queries.getCurrentTournament(connection);
       final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
+      final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
+                                                                                      challengeDocument.getDocumentElement()
+                                                                                                       .getElementsByTagName("subjectiveCategory")).asList();
+
+      if (checkForEnteredSubjectiveScores(connection, subjectiveCategories, tournament)) {
+        session.setAttribute(SessionAttributes.MESSAGE,
+                             "<p class='error'>Subjective scores have already been entered for this tournament, changing the judges may cause some scores to be deleted</p>");
+      }
+
       session.setAttribute(JUDGES_KEY, gatherJudges(connection, tournament));
 
       session.setAttribute(DIVISIONS_KEY, gatherDivisions(connection));
 
-      session.setAttribute(CATEGORIES_KEY, gatherCategories(challengeDocument));
+      session.setAttribute(CATEGORIES_KEY, gatherCategories(challengeDocument, subjectiveCategories));
 
       response.sendRedirect(response.encodeRedirectURL("judges.jsp"));
 
@@ -96,6 +105,30 @@ public class GatherJudgeInformation extends BaseFLLServlet {
     }
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
+  private static boolean checkForEnteredSubjectiveScores(final Connection connection,
+                                                         final List<Element> subjectiveCategories,
+                                                         final int tournament) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      for (final Element category : subjectiveCategories) {
+        final String categoryName = category.getAttribute("name");
+        prep = connection.prepareStatement(String.format("SELECT * FROM %s WHERE Tournament = ?", categoryName));
+        prep.setInt(1, tournament);
+        rs = prep.executeQuery();
+        if (rs.next()) {
+          return true;
+        }
+      }
+      return false;
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+
+  }
+
   private List<String> gatherDivisions(final Connection connection) throws SQLException {
     final List<String> divisions = Queries.getEventDivisions(connection);
     divisions.add(0, ALL_DIVISIONS);
@@ -103,11 +136,8 @@ public class GatherJudgeInformation extends BaseFLLServlet {
     return divisions;
   }
 
-  private Map<String, String> gatherCategories(final Document challengeDocument) {
-    final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
-                                                                                    challengeDocument.getDocumentElement()
-                                                                                                     .getElementsByTagName("subjectiveCategory")).asList();
-
+  private Map<String, String> gatherCategories(final Document challengeDocument,
+                                               final List<Element> subjectiveCategories) {
     final Map<String, String> categories = new HashMap<String, String>();
     for (final Element element : subjectiveCategories) {
       final String categoryName = element.getAttribute("name");
