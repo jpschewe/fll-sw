@@ -101,7 +101,7 @@
 
   <input type='text' name='num_rows' id='num_rows' value='1' size='10' />
   <button id='add_rows'>Add Rows</button>
-  <br /> <input type='submit' name='finished' value='Finished' /><br />
+  <br /> <input type='submit' id='finished' name='finished' value='Finished' /><br />
 
  </form>
 
