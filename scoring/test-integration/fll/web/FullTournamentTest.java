@@ -300,7 +300,7 @@ public class FullTournamentTest extends SeleneseTestBase {
         + String.valueOf(numJudges))) {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Adding a row to the judges entry form to get to: "
-+ numJudges);
+            + numJudges);
         IntegrationTestUtils.storeScreenshot(selenium);
       }
       selenium.click("id=add_rows");
