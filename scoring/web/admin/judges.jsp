@@ -1,3 +1,4 @@
+<%@page import="fll.web.admin.GatherJudgeInformation"%>
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%@ page import="fll.web.admin.Judges"%>
@@ -6,48 +7,101 @@
 <head>
 <title>Judge Assignments</title>
 <link rel="stylesheet" type="text/css"
-	href="<c:url value='/style/style.jsp'/>" />
-
-<script type='text/javascript'>
-	//FIXME need to get these values from Java
-	var maxIndex = 31;
-	
-	var divisions = [];
-	<c:forEach items="${DIVISIONS}" var="divName">
-		divisions.push("${divName}");
-	</c:forEach>
-		
-	var categories = {};
-	<c:forEach items="${CATEGORIES}" var="cat">
-	  categories["${cat.key}"] = "${cat.value}";
-	</c:forEach>
-	
-</script>
+ href="<c:url value='/style/style.jsp'/>" />
 
 <script type='text/javascript' src='../extlib/jquery-1.7.1.min.js'></script>
+
+<script type='text/javascript'>
+	
+	var maxIndex = ${fn:length(JUDGES)};
+
+	var divisions = [];
+	<c:forEach items="${DIVISIONS}" var="divName">
+	divisions.push("${divName}");
+	</c:forEach>
+
+	var categories = {};
+	<c:forEach items="${CATEGORIES}" var="cat">
+	categories["${cat.key}"] = "${cat.value}";
+	</c:forEach>
+</script>
+
 <script type='text/javascript' src='judges.js'></script>
+
+
 
 </head>
 
 <body>
-	<h1>
-		<x:out select="$challengeDocument/fll/@title" />
-		(Judge Assignments)
-	</h1>
+ <h1>
+  <x:out select="$challengeDocument/fll/@title" />
+  (Judge Assignments)
+ </h1>
 
-	<form action='judges.jsp' method='POST' name='judges'>
+ <p>Judges ID's must be unique. They can be just the name of the
+  judge. Keep in mind that this ID needs to be entered on the judging
+  forms. There must be at least 1 judge for each category.</p>
 
 
-		<%
-			Judges.generatePage(out, application, request, response);
-		%>
+ <form action='judges.jsp' method='POST' name='VerifyJudges'>
 
-		<input type='text' name='num_rows' id='num_rows' value='1' size='10' />
-		<button id='add_rows'>Add Rows</button> <br/>
 
-		<input type='submit' name='finished' value='Finished' /><br />
 
-	</form>
+  <table border='1' id='data'>
+   <tr>
+    <th>ID</th>
+    <th>Category</th>
+    <th>Division</th>
+   </tr>
+
+   <c:forEach items="${JUDGES }" var="judge" varStatus="loopStatus">
+
+    <tr>
+
+     <td><input type='text' value='${judge.id }'
+      name='id${loopStatus.count}' /></td>
+     <td><select name='cat${loopStatus.count }'>
+       <c:forEach items="${CATEGORIES}" var="cat">
+
+        <c:choose>
+         <c:when test="${judge.category == cat.key }">
+          <option value="${cat.key}" selected>${cat.value }</option>
+         </c:when>
+         <c:otherwise>
+          <option value="${cat.key}">${cat.value }</option>
+         </c:otherwise>
+        </c:choose>
+
+       </c:forEach>
+
+     </select></td>
+
+     <td><select name='div${loopStatus.count }'>
+       <c:forEach items="${DIVISIONS}" var="divSel">
+
+        <c:choose>
+         <c:when test="${judge.division == divSel }">
+          <option value="${divSel}" selected>${divSel }</option>
+         </c:when>
+         <c:otherwise>
+          <option value="${divSel}">${divSel }</option>
+         </c:otherwise>
+        </c:choose>
+
+       </c:forEach>
+     </select></td>
+
+    </tr>
+
+   </c:forEach>
+
+  </table>
+
+  <input type='text' name='num_rows' id='num_rows' value='1' size='10' />
+  <button id='add_rows'>Add Rows</button>
+  <br /> <input type='submit' name='finished' value='Finished' /><br />
+
+ </form>
 
 </body>
 </html>
