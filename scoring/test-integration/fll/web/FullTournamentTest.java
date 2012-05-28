@@ -312,7 +312,7 @@ public class FullTournamentTest extends SeleneseTestBase {
     }
 
     // assign judges from database
-    int judgeIndex = 0;
+    int judgeIndex = 1;
     prep = testDataConn.prepareStatement("SELECT id, category, Division FROM Judges WHERE Tournament = ?");
     prep.setString(1, testTournamentName);
     rs = prep.executeQuery();
