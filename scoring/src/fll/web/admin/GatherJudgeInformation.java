@@ -34,6 +34,7 @@ import org.w3c.dom.Element;
 
 import fll.JudgeInformation;
 import fll.db.Queries;
+import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -76,6 +77,7 @@ public class GatherJudgeInformation extends BaseFLLServlet {
       LOGGER.trace("Top of GatherJudgeInformation.processRequest");
     }
 
+    final StringBuilder message = new StringBuilder();
     try {
       final DataSource datasource = SessionAttributes.getDataSource(session);
       final Connection connection = datasource.getConnection();
@@ -86,9 +88,12 @@ public class GatherJudgeInformation extends BaseFLLServlet {
                                                                                       challengeDocument.getDocumentElement()
                                                                                                        .getElementsByTagName("subjectiveCategory")).asList();
 
+      if (!TournamentSchedule.scheduleExistsInDatabase(connection, tournament)) {
+        message.append("<p class='warning'>You have not loaded a schedule. If you intend to do so you should go back to the <a href='index.jsp'>admin page</a> and do this before assigning judges.</p>");
+      }
+
       if (checkForEnteredSubjectiveScores(connection, subjectiveCategories, tournament)) {
-        session.setAttribute(SessionAttributes.MESSAGE,
-                             "<p class='error'>Subjective scores have already been entered for this tournament, changing the judges may cause some scores to be deleted</p>");
+        message.append("<p class='error'>Subjective scores have already been entered for this tournament, changing the judges may cause some scores to be deleted</p>");
       }
 
       session.setAttribute(JUDGES_KEY, gatherJudges(connection, tournament));
@@ -98,6 +103,8 @@ public class GatherJudgeInformation extends BaseFLLServlet {
       session.setAttribute(CATEGORIES_KEY, gatherCategories(subjectiveCategories));
 
       response.sendRedirect(response.encodeRedirectURL("judges.jsp"));
+
+      session.setAttribute(SessionAttributes.MESSAGE, message.toString());
 
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
