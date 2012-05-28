@@ -95,7 +95,7 @@ public class GatherJudgeInformation extends BaseFLLServlet {
 
       session.setAttribute(DIVISIONS_KEY, gatherDivisions(connection));
 
-      session.setAttribute(CATEGORIES_KEY, gatherCategories(challengeDocument, subjectiveCategories));
+      session.setAttribute(CATEGORIES_KEY, gatherCategories(subjectiveCategories));
 
       response.sendRedirect(response.encodeRedirectURL("judges.jsp"));
 
@@ -136,8 +136,7 @@ public class GatherJudgeInformation extends BaseFLLServlet {
     return divisions;
   }
 
-  private Map<String, String> gatherCategories(final Document challengeDocument,
-                                               final List<Element> subjectiveCategories) {
+  private Map<String, String> gatherCategories(final List<Element> subjectiveCategories) {
     final Map<String, String> categories = new HashMap<String, String>();
     for (final Element element : subjectiveCategories) {
       final String categoryName = element.getAttribute("name");
