@@ -105,7 +105,7 @@ public class VerifyJudges extends BaseFLLServlet {
     if (error.length() > 0) {
       session.setAttribute(SessionAttributes.MESSAGE, "<p class='error' id='error'>"
           + error.toString() + "</p>");
-      response.sendRedirect(response.encodeRedirectURL("judges.jsp"));
+      response.sendRedirect(response.encodeRedirectURL("GatherJudgeInformation"));
     } else {
       response.sendRedirect(response.encodeRedirectURL("displayJudges.jsp"));
     }
