@@ -26,7 +26,7 @@ function addRows(numRows) {
 		var judgeIdx = maxIndex + 1;
 		maxIndex = judgeIdx;
 
-		var row = $("<tr></tr>>");
+		var row = $("<tr></tr>");
 		$("#data").append(row);
 
 		var idCol = $("<td></td>");
