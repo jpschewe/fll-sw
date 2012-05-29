@@ -7,8 +7,10 @@
 package fll.web.admin;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +28,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.JudgeInformation;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -67,12 +70,16 @@ public class VerifyJudges extends BaseFLLServlet {
       hash.put(categoryName, new HashSet<String>());
     }
 
+    final Collection<JudgeInformation> judges = new LinkedList<JudgeInformation>();
+    
     // walk request and push judge id into the Set, if not null or empty,
     // in the value for each category in the hash.
     int row = 1;
     String id = request.getParameter("id"
         + row);
     String category = request.getParameter("cat"
+        + row);
+    String division = request.getParameter("div"
         + row);
     while (null != category) {
       if (null != id) {
@@ -81,6 +88,9 @@ public class VerifyJudges extends BaseFLLServlet {
         if (id.length() > 0) {
           final Set<String> set = hash.get(category);
           set.add(id);
+
+          final JudgeInformation judge = new JudgeInformation(id, category, division);
+          judges.add(judge);
         }
       }
 
@@ -89,7 +99,11 @@ public class VerifyJudges extends BaseFLLServlet {
           + row);
       category = request.getParameter("cat"
           + row);
+      division = request.getParameter("div"
+          + row);
     }
+    
+    session.setAttribute(GatherJudgeInformation.JUDGES_KEY, judges);
 
     // now walk the keys of the hash and make sure that all values have a list
     // of size > 0, otherwise append an error to error.
