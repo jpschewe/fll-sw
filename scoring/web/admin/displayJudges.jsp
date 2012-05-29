@@ -26,7 +26,7 @@
   <tr>
    <th>ID</th>
    <th>Category</th>
-   <th>Division</th>
+   <th>Judging Station</th>
   </tr>
 
   <c:forEach items="${JUDGES }" var="judge">
@@ -35,7 +35,7 @@
 
     <td>${judge.id }</td>
     <td>${judge.category }</td>
-    <td>${judge.division }</td>
+    <td>${judge.station }</td>
 
    </tr>
 

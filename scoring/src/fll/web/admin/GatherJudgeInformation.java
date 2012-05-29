@@ -58,9 +58,9 @@ public class GatherJudgeInformation extends BaseFLLServlet {
   public static final String CATEGORIES_KEY = "CATEGORIES";
 
   /**
-   * Collection of String with all divisions that judges can be assigned to.
+   * Collection of String with all stations that judges can be assigned to.
    */
-  public static final String DIVISIONS_KEY = "DIVISIONS";
+  public static final String STATIONS_KEY = "JUDGING_STATIONS";
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -98,7 +98,7 @@ public class GatherJudgeInformation extends BaseFLLServlet {
 
       session.setAttribute(JUDGES_KEY, gatherJudges(connection, tournament));
 
-      session.setAttribute(DIVISIONS_KEY, gatherDivisions(connection));
+      session.setAttribute(STATIONS_KEY, gatherJudgingStations(connection, tournament));
 
       session.setAttribute(CATEGORIES_KEY, gatherCategories(subjectiveCategories));
 
@@ -136,11 +136,10 @@ public class GatherJudgeInformation extends BaseFLLServlet {
 
   }
 
-  private List<String> gatherDivisions(final Connection connection) throws SQLException {
-    final List<String> divisions = Queries.getEventDivisions(connection);
-    divisions.add(0, ALL_DIVISIONS);
+  private List<String> gatherJudgingStations(final Connection connection, final int tournament) throws SQLException {
+    final List<String> stations = Queries.getJudgingStations(connection, tournament);
 
-    return divisions;
+    return stations;
   }
 
   private Map<String, String> gatherCategories(final List<Element> subjectiveCategories) {
@@ -160,14 +159,14 @@ public class GatherJudgeInformation extends BaseFLLServlet {
     ResultSet rs = null;
     PreparedStatement stmt = null;
     try {
-      stmt = connection.prepareStatement("SELECT id, category, event_division FROM Judges WHERE Tournament = ?");
+      stmt = connection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?");
       stmt.setInt(1, tournament);
       rs = stmt.executeQuery();
       while (rs.next()) {
         final String id = rs.getString(1);
         final String category = rs.getString(2);
-        final String division = rs.getString(3);
-        final JudgeInformation judge = new JudgeInformation(id, category, division);
+        final String station = rs.getString(3);
+        final JudgeInformation judge = new JudgeInformation(id, category, station);
         judges.add(judge);
       }
     } finally {

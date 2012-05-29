@@ -79,7 +79,7 @@ public class VerifyJudges extends BaseFLLServlet {
         + row);
     String category = request.getParameter("cat"
         + row);
-    String division = request.getParameter("div"
+    String station = request.getParameter("station"
         + row);
     while (null != category) {
       if (null != id) {
@@ -89,7 +89,7 @@ public class VerifyJudges extends BaseFLLServlet {
           final Set<String> set = hash.get(category);
           set.add(id);
 
-          final JudgeInformation judge = new JudgeInformation(id, category, division);
+          final JudgeInformation judge = new JudgeInformation(id, category, station);
           judges.add(judge);
         }
       }
@@ -99,7 +99,7 @@ public class VerifyJudges extends BaseFLLServlet {
           + row);
       category = request.getParameter("cat"
           + row);
-      division = request.getParameter("div"
+      station = request.getParameter("station"
           + row);
     }
     

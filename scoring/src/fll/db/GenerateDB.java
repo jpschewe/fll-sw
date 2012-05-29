@@ -193,8 +193,8 @@ public final class GenerateDB {
           + "  id varchar(64) NOT NULL,"//
           + "  category varchar(64) NOT NULL," //
           + "  Tournament INTEGER NOT NULL," //
-          + "  event_division varchar(32) NOT NULL," //
-          + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,event_division)"//
+          + "  station varchar(64) NOT NULL," //
+          + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,station)"//
           + " ,CONSTRAINT judges_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
           + ")");
 

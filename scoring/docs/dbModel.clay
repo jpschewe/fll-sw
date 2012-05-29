@@ -120,6 +120,9 @@
 <column auto-increment="false" column-size="32" decimal-digits="0" default-value="'1'" id="1f769f17:1248908e683:-7e31" mandatory="true" name="event_division">
 <data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
 </column>
+<column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="6fa1619d:1379acd40f9:-7fc6" mandatory="true" name="judging_station">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
 </column-list>
 <primary-key id="1f769f17:1248908e683:-7e38" name="PK_TOURNAMENTTEAMS">
 <primary-key-column name="TeamNumber"/>
@@ -166,7 +169,7 @@
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d5e" mandatory="true" name="Tournament">
 <data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
 </column>
-<column auto-increment="false" column-size="32" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d5d" mandatory="true" name="event_division">
+<column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d5d" mandatory="true" name="station">
 <data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
 </column>
 </column-list>
@@ -174,7 +177,7 @@
 <primary-key-column name="id"/>
 <primary-key-column name="category"/>
 <primary-key-column name="Tournament"/>
-<primary-key-column name="event_division"/>
+<primary-key-column name="station"/>
 </primary-key>
 <foreign-key-list>
 <foreign-key id="1f769f17:1248908e683:-7d2d" name="FK_Judges_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
