@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -52,8 +53,7 @@ public class CommitJudges extends BaseFLLServlet {
       final DataSource datasource = SessionAttributes.getDataSource(session);
       final Connection connection = datasource.getConnection();
 
-      commitData(request, connection, Queries.getCurrentTournament(connection));
-      
+      commitData(session, connection, Queries.getCurrentTournament(connection));
 
       // finally redirect to index.jsp
       session.setAttribute(SessionAttributes.MESSAGE, "<p id='success'><i>Successfully assigned judges</i></p>");
@@ -73,7 +73,7 @@ public class CommitJudges extends BaseFLLServlet {
    * @param tournament the current tournament
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
-  private static void commitData(final HttpServletRequest request,
+  private static void commitData(final HttpSession session,
                                  final Connection connection,
                                  final int tournament) throws SQLException, IOException {
     PreparedStatement prep = null;
@@ -98,32 +98,23 @@ public class CommitJudges extends BaseFLLServlet {
       SQLFunctions.close(prep);
       prep = null;
 
-      // walk request parameters and insert data into database
       prep = connection.prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES(?, ?, ?, ?)");
       prep.setInt(4, tournament);
-      int row = 1;
-      String id = request.getParameter("id"
-          + row);
-      String category = request.getParameter("cat"
-          + row);
-      String division = request.getParameter("div"
-          + row);
+
+      // can't put types inside a session
+      @SuppressWarnings("unchecked")
+      final Collection<JudgeInformation> judges = SessionAttributes.getNonNullAttribute(session,
+                                                                                        GatherJudgeInformation.JUDGES_KEY,
+                                                                                        Collection.class);
+
       final Set<JudgeInformation> newJudgeInfo = new HashSet<JudgeInformation>();
-      while (null != category) {
-        prep.setString(1, id.trim().toUpperCase());
-        prep.setString(2, category);
-        prep.setString(3, division);
-        prep.executeUpdate();
-        final JudgeInformation info = new JudgeInformation(id, category, division);
+      for (final JudgeInformation info : judges) {
         newJudgeInfo.add(info);
 
-        row++;
-        id = request.getParameter("id"
-            + row);
-        category = request.getParameter("cat"
-            + row);
-        division = request.getParameter("div"
-            + row);
+        prep.setString(1, info.getId());
+        prep.setString(2, info.getCategory());
+        prep.setString(3, info.getDivision());
+        prep.executeUpdate();
       }
 
       // figure out which ones are no longer there and remove all of their old
