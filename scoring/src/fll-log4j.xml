@@ -18,17 +18,13 @@
   </layout>
  </appender>
 
- <!--
-  appender name="SYSLOG" class="org.apache.log4j.net.SyslogAppender">
-  <param name="syslogHost" value="localhost"/> <param name="facility"
-  value="USER"/> <layout class="org.apache.log4j.PatternLayout"> <param
-  name="conversionPattern" value="%d [%p]: %m%n"/> </layout> </appender
- -->
+ <!-- appender name="SYSLOG" class="org.apache.log4j.net.SyslogAppender"> 
+  <param name="syslogHost" value="localhost"/> <param name="facility" value="USER"/> 
+  <layout class="org.apache.log4j.PatternLayout"> <param name="conversionPattern" 
+  value="%d [%p]: %m%n"/> </layout> </appender -->
 
- <!--
-  for debugging the database, set levels to something lower than fatal
-  to actually see log output
- -->
+ <!-- for debugging the database, set levels to something lower than fatal 
+  to actually see log output -->
  <logger name="log4jdbc.debug">
   <level value="FATAL" />
  </logger>
@@ -46,33 +42,35 @@
  </logger>
 
  <!-- stuff for debugging -->
- <!-- logger name="fll.scheduler.GreedySolver"><level value="TRACE"/></logger-->
- <!-- logger name="fll.db.DumpDB"><level value="TRACE"/></logger-->
- <!-- logger name="fll.web.FooterFilter"><level value="TRACE"/></logger-->
- <!-- logger name="fll.web.report.FinalComputedScores"><level value="TRACE"/></logger-->
- <!-- logger name="fll.web.admin.GatherTeamData"><level value="TRACE"/></logger-->
- <!-- logger name="fll.db.ImportDB"><level value="TRACE"/></logger-->
-  <logger name="fll.web.FullTournamentTest"><level value="TRACE"/></logger>
- 
- 
- <!--  database connection information -->
- <!-- logger name="database"><level value="TRACE"/></logger-->
- 
- <!--  log SQL queries -->
- <!-- logger name="jdbc.sqlonly"><level value="TRACE"/></logger-->
- 
- <!--  log SQL timing -->
- <!--  logger name="jdbc.sqltiming"><level value="TRACE"/></logger-->
- 
- <!--  log everything, except result sets - this can be lots of information -->
- <!--  logger name="jdbc.audit"><level value="TRACE"/></logger-->
- 
- <!--  log result sets -->
- <!--  logger name="jdbc.resultset"><level value="TRACE"/></logger-->
-  
- <!--  log connection open/close - helps tracking down leaks -->
- <logger name="jdbc.connection"><level value="WARN"/></logger>
- 
+ <!-- logger name="fll.scheduler.GreedySolver"><level value="TRACE"/></logger -->
+ <!-- logger name="fll.db.DumpDB"><level value="TRACE"/></logger -->
+ <!-- logger name="fll.web.FooterFilter"><level value="TRACE"/></logger -->
+ <!-- logger name="fll.web.report.FinalComputedScores"><level value="TRACE"/></logger -->
+ <!-- logger name="fll.web.admin.GatherTeamData"><level value="TRACE"/></logger -->
+ <!-- logger name="fll.db.ImportDB"><level value="TRACE"/></logger -->
+ <!-- logger name="fll.web.FullTournamentTest"><level value="TRACE"/></logger -->
+
+
+ <!-- database connection information -->
+ <!-- logger name="database"><level value="TRACE"/></logger -->
+
+ <!-- log SQL queries -->
+ <!-- logger name="jdbc.sqlonly"><level value="TRACE"/></logger -->
+
+ <!-- log SQL timing -->
+ <!-- logger name="jdbc.sqltiming"><level value="TRACE"/></logger -->
+
+ <!-- log everything, except result sets - this can be lots of information -->
+ <!-- logger name="jdbc.audit"><level value="TRACE"/></logger -->
+
+ <!-- log result sets -->
+ <!-- logger name="jdbc.resultset"><level value="TRACE"/></logger -->
+
+ <!-- log connection open/close - helps tracking down leaks -->
+ <logger name="jdbc.connection">
+  <level value="WARN" />
+ </logger>
+
  <!-- end stuff for debugging -->
 
  <root>
