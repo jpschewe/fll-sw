@@ -353,10 +353,21 @@ public class FullTournamentTest extends SeleneseTestBase {
 
     Assert.assertFalse("Got error from judges assignment", selenium.isElementPresent("error"));
 
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Verifying judges");
+      IntegrationTestUtils.storeScreenshot(selenium);
+    }
+
     // commit judges information
     selenium.click("id=commit");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
     Assert.assertTrue("Error assigning judges", selenium.isElementPresent("success"));
+    
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("After committing judges");
+      IntegrationTestUtils.storeScreenshot(selenium);
+    }
+
   }
 
   private void loadTeams() throws IOException, SAXException {
