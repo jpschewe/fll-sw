@@ -547,6 +547,12 @@ public final class ImportDB {
     }
   }
 
+  /**
+   * Add judging_station to TournamentTeams.
+   * Rename event_division to station in Judges 
+   * @param connection
+   * @throws SQLException
+   */
   private static void upgrade6To7(final Connection connection) throws SQLException {
     Statement stmt = null;
     ResultSet rs = null;
@@ -572,6 +578,9 @@ public final class ImportDB {
 
       // set score_group equal to event division
       stmt.executeUpdate("UPDATE TournamentTeams SET judging_station = event_division");
+      
+      // rename event_division to station in Judges
+      stmt.executeUpdate("ALTER TABLE Judges ALTER COLUMN event_division RENAME TO station");
 
       setDBVersion(connection, 7);
     } finally {
@@ -1150,10 +1159,10 @@ public final class ImportDB {
       destPrep.executeUpdate();
       SQLFunctions.close(destPrep);
 
-      destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES (?, ?, ?, ?)");
+      destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES (?, ?, ?, ?)");
       destPrep.setInt(4, destTournamentID);
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT id, category, event_division FROM Judges WHERE Tournament = ?");
+      sourcePrep = sourceConnection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {

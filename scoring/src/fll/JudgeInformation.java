@@ -24,18 +24,18 @@ public final class JudgeInformation implements Serializable {
     return category;
   }
 
-  private final String division;
+  private final String station;
 
-  public String getDivision() {
-    return division;
+  public String getStation() {
+    return station;
   }
 
   public JudgeInformation(final String id,
                           final String category,
-                          final String division) {
+                          final String station) {
     this.id = id;
     this.category = category;
-    this.division = division;
+    this.station = station;
   }
 
   @Override
@@ -52,7 +52,7 @@ public final class JudgeInformation implements Serializable {
     } else if (o.getClass().equals(JudgeInformation.class)) {
       final JudgeInformation other = (JudgeInformation) o;
       return getId().equals(other.getId())
-          && getCategory().equals(other.getCategory()) && getDivision().equals(other.getDivision());
+          && getCategory().equals(other.getCategory()) && getStation().equals(other.getStation());
     } else {
       return false;
     }

@@ -13,9 +13,9 @@
 	
 	var maxIndex = ${fn:length(JUDGES)};
 
-	var divisions = [];
-	<c:forEach items="${DIVISIONS}" var="divName">
-	divisions.push("${divName}");
+	var judging_stations = [];
+	<c:forEach items="${JUDGING_STATIONS}" var="stationName">
+	judging_stations.push("${stationName}");
 	</c:forEach>
 
 	var categories = {};
@@ -53,7 +53,7 @@
    <tr>
     <th>ID</th>
     <th>Category</th>
-    <th>Division</th>
+    <th>Judging Station</th>
    </tr>
 
    <c:forEach items="${JUDGES }" var="judge" varStatus="loopStatus">
@@ -78,15 +78,15 @@
 
      </select></td>
 
-     <td><select name='div${loopStatus.count }'>
-       <c:forEach items="${DIVISIONS}" var="divSel">
+     <td><select name='station${loopStatus.count }'>
+       <c:forEach items="${JUDGING_STATIONS}" var="stationSel">
 
         <c:choose>
-         <c:when test="${judge.division == divSel }">
-          <option value="${divSel}" selected>${divSel }</option>
+         <c:when test="${judge.station == stationSel }">
+          <option value="${stationSel}" selected>${stationSel }</option>
          </c:when>
          <c:otherwise>
-          <option value="${divSel}">${divSel }</option>
+          <option value="${stationSel}">${stationSel }</option>
          </c:otherwise>
         </c:choose>
 

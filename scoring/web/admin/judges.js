@@ -44,14 +44,14 @@ function addRows(numRows) {
 			category.append(option);
 		});
 
-		var divisionCol = $("<td></td>");
-		row.append(divisionCol);
-		var division = $("<select name='div" + judgeIdx + "'></select>");
-		divisionCol.append(division);
-		$.each(divisions, function(i, divName) {
-			var option = $("<option value='" + divName + "'>" + divName
+		var stationCol = $("<td></td>");
+		row.append(stationCol);
+		var station = $("<select name='station" + judgeIdx + "'></select>");
+		stationCol.append(station);
+		$.each(judging_stations, function(i, stationName) {
+			var option = $("<option value='" + stationName + "'>" + stationName
 					+ "</option>");
-			division.append(option);
+			station.append(option);
 		});
 
 	}

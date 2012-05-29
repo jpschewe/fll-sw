@@ -335,7 +335,7 @@ public class FullTournamentTest extends SeleneseTestBase {
           + judgeIndex, id);
       selenium.type("cat"
           + judgeIndex, category);
-      selenium.type("div"
+      selenium.type("station"
           + judgeIndex, division);
       ++judgeIndex;
     }

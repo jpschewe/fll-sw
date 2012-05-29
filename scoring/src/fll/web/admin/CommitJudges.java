@@ -81,14 +81,14 @@ public class CommitJudges extends BaseFLLServlet {
     try {
       // save old judge information
       final Set<JudgeInformation> oldJudgeInfo = new HashSet<JudgeInformation>();
-      prep = connection.prepareStatement("SELECT id, category, event_division FROM Judges WHERE Tournament = ?");
+      prep = connection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?");
       prep.setInt(1, tournament);
       rs = prep.executeQuery();
       while (rs.next()) {
         final String id = rs.getString(1);
         final String category = rs.getString(2);
-        final String division = rs.getString(3);
-        oldJudgeInfo.add(new JudgeInformation(id, category, division));
+        final String station = rs.getString(3);
+        oldJudgeInfo.add(new JudgeInformation(id, category, station));
       }
 
       // delete old data in judges
@@ -98,7 +98,7 @@ public class CommitJudges extends BaseFLLServlet {
       SQLFunctions.close(prep);
       prep = null;
 
-      prep = connection.prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES(?, ?, ?, ?)");
+      prep = connection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES(?, ?, ?, ?)");
       prep.setInt(4, tournament);
 
       // can't put types inside a session
@@ -113,7 +113,7 @@ public class CommitJudges extends BaseFLLServlet {
 
         prep.setString(1, info.getId());
         prep.setString(2, info.getCategory());
-        prep.setString(3, info.getDivision());
+        prep.setString(3, info.getStation());
         prep.executeUpdate();
       }
 

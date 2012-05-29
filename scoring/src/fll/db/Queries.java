@@ -287,6 +287,35 @@ public final class Queries {
   }
 
   /**
+   * Get the list of judging stations for the specified tournament as a List of
+   * Strings.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament to get the stations for
+   * @return the judging stations
+   */
+  public static List<String> getJudgingStations(final Connection connection,
+                                                final int tournament) throws SQLException {
+    final List<String> result = new LinkedList<String>();
+
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT DISTINCT judging_station FROM TournamentTeams WHERE tournament = ? ORDER BY judging_station");
+      prep.setInt(1, tournament);
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final String station = rs.getString(1);
+        result.add(station);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+    return result;
+  }
+
+  /**
    * Category name used for the overall rank for a team in the map returned by
    * {@link #getTeamRankings(Connection, Document)}.
    */
@@ -1152,7 +1181,7 @@ public final class Queries {
    * @return the event division for the team
    * @throws SQLException on a database error
    * @throws RuntimeException if <code>teamNumber</code> cannot be found in
-   *           TournamenTeams for the specified tournament
+   *           TournamentTeams for the specified tournament
    */
   public static String getEventDivision(final Connection connection,
                                         final int teamNumber,
@@ -1161,6 +1190,38 @@ public final class Queries {
     ResultSet rs = null;
     try {
       prep = connection.prepareStatement("SELECT event_division FROM TournamentTeams WHERE TeamNumber = ? AND Tournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, tournamentID);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        return rs.getString(1);
+      } else {
+        throw new RuntimeException("Couldn't find team number "
+            + teamNumber + " in the list of tournament teams! Tournament: " + tournamentID);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Get the judging station that a team is in for the specified tournament.
+   * 
+   * @param teamNumber the team's number
+   * @param tournamentID ID of tournament
+   * @return the judging station for the team
+   * @throws SQLException on a database error
+   * @throws RuntimeException if <code>teamNumber</code> cannot be found in
+   *           TournamentTeams for the specified tournament
+   */
+  public static String getJudgingStation(final Connection connection,
+                                        final int teamNumber,
+                                        final int tournamentID) throws SQLException, RuntimeException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT judging_station FROM TournamentTeams WHERE TeamNumber = ? AND Tournament = ?");
       prep.setInt(1, teamNumber);
       prep.setInt(2, tournamentID);
       rs = prep.executeQuery();
@@ -1446,7 +1507,8 @@ public final class Queries {
     if (!Queries.globalParameterExists(connection, GlobalParameters.CURRENT_TOURNAMENT)) {
       final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
       // Call setGlobalParameter directly to avoid infinite recursion
-      setGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT, String.valueOf(dummyTournament.getTournamentID()));
+      setGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT,
+                         String.valueOf(dummyTournament.getTournamentID()));
     }
     return getIntGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT);
   }
