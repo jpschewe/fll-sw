@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.seleniumhq.jetty7.util.log.Log;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -555,6 +556,9 @@ public class FullTournamentTest extends SeleneseTestBase {
       WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "admin/subjective-data.fll");
       WebResponse response = WebTestUtils.loadPage(conversation, request);
+      if(!"application.zip".equals(response.getContentType())) {
+        LOGGER.error("Got non-zip content: " + response.getText());
+      }
       Assert.assertEquals("application/zip", response.getContentType());
       final InputStream zipStream = response.getInputStream();
       final FileOutputStream outputStream = new FileOutputStream(subjectiveZip);
