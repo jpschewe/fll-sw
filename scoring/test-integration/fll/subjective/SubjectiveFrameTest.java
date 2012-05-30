@@ -178,7 +178,7 @@ public class SubjectiveFrameTest {
           Assert.assertEquals("Category "
               + title, expected, table.rowCount());
         } else {
-          Assert.fail("Unknow category '"
+          Assert.fail("Unknown category '"
               + title + "'");
         }
       }
@@ -301,7 +301,7 @@ public class SubjectiveFrameTest {
       final TableCell teamCell = table.cell("306");
       for (int column = 0; column < 5; ++column) {
         final TableCell dataCell = TableCell.row(teamCell.row).column(teamCell.column
-            + 4 + column);
+            + SubjectiveTableModel.NUM_COLUMNS_LEFT_OF_SCORES + column);
         table.click(dataCell, MouseButton.LEFT_BUTTON);
         table.pressAndReleaseKey(KeyPressInfo.keyCode(KeyEvent.VK_BACK_SPACE));
         table.pressAndReleaseKey(KeyPressInfo.keyCode(KeyEvent.VK_TAB));
