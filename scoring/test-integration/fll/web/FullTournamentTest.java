@@ -554,7 +554,7 @@ public class FullTournamentTest extends SeleneseTestBase {
                                      final String testTournament) throws SQLException, IOException,
       MalformedURLException, SAXException, ParseException {
 
-    final File subjectiveZip = File.createTempFile("fll", "zip", new File("screenshots"));
+    final File subjectiveZip = File.createTempFile("fll", ".zip", new File("screenshots"));
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
