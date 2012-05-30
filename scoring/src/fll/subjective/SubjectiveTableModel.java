@@ -29,7 +29,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
 
   private static final Logger LOG = LogUtils.getLogger();
 
-  private static final int NUM_COLUMNS_LEFT_OF_SCORES = 5;
+  public static final int NUM_COLUMNS_LEFT_OF_SCORES = 5;
   
   /**
    * @param scoreDocument XML document that represents the teams that are being
