@@ -68,6 +68,8 @@ public class VerifyJudges extends BaseFLLServlet {
                                                                                       challengeDocument.getDocumentElement()
                                                                                                        .getElementsByTagName("subjectiveCategory")).asList();
 
+      //FIXME put hidden field in for num rows in judges.jsp
+      
       final Collection<JudgeInformation> judges = new LinkedList<JudgeInformation>();
 
       // walk request and push judge id into the Set, if not null or empty,
@@ -106,8 +108,8 @@ public class VerifyJudges extends BaseFLLServlet {
           boolean found = false;
 
           for (final JudgeInformation judge : judges) {
-            if (judge.getCategory() == categoryName
-                && judge.getStation() == jstation) {
+            if (judge.getCategory().equals(categoryName)
+                && judge.getStation().equals(jstation)) {
               found = true;
             }
           }
@@ -126,7 +128,7 @@ public class VerifyJudges extends BaseFLLServlet {
       if (error.length() > 0) {
         session.setAttribute(SessionAttributes.MESSAGE, "<p class='error' id='error'>"
             + error.toString() + "</p>");
-        response.sendRedirect(response.encodeRedirectURL("GatherJudgeInformation"));
+        response.sendRedirect(response.encodeRedirectURL("judges.jsp"));
       } else {
         response.sendRedirect(response.encodeRedirectURL("displayJudges.jsp"));
       }
