@@ -554,7 +554,7 @@ public class FullTournamentTest extends SeleneseTestBase {
                                      final String testTournament) throws SQLException, IOException,
       MalformedURLException, SAXException, ParseException {
 
-    final File subjectiveZip = File.createTempFile("fll", "zip");
+    final File subjectiveZip = File.createTempFile("fll", "zip", new File("screenshots"));
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -587,12 +587,13 @@ public class FullTournamentTest extends SeleneseTestBase {
                                                                                                    .getElementsByTagName("subjectiveCategory"))) {
         final String category = subjectiveElement.getAttribute("name");
         final String title = subjectiveElement.getAttribute("title");
+
         // find appropriate table model
         final TableModel tableModel = subjective.getTableModelForTitle(title);
+        Assert.assertNotNull(tableModel);
 
         final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
         Assert.assertTrue("Can't find TeamNumber column in subjective table model", teamNumberColumn >= 0);
-
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Found team number column at "
               + teamNumberColumn);
@@ -604,22 +605,23 @@ public class FullTournamentTest extends SeleneseTestBase {
         rs = prep.executeQuery();
         while (rs.next()) {
           final int teamNumber = rs.getInt("TeamNumber");
-          // find row number in table
 
+          // find row number in table
           int rowIndex = -1;
-          for (int rowIdx = 0; rowIdx < tableModel.getRowCount()
-              && rowIndex == -1; ++rowIdx) {
+          for (int rowIdx = 0; rowIdx < tableModel.getRowCount(); ++rowIdx) {
             final Object teamNumberRaw = tableModel.getValueAt(rowIdx, teamNumberColumn);
             Assert.assertNotNull(teamNumberRaw);
             final int value = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberRaw.toString()).intValue();
 
             if (LOGGER.isTraceEnabled()) {
               LOGGER.trace("Checking if "
-                  + teamNumber + " equals " + value + " raw: " + teamNumberRaw + "? " + (value == teamNumber));
+                  + teamNumber + " equals " + value + " raw: " + teamNumberRaw + "? " + (value == teamNumber)
+                  + " rowIdx: " + rowIdx + " numRows: " + tableModel.getRowCount());
             }
 
             if (value == teamNumber) {
               rowIndex = rowIdx;
+              break;
             }
           }
           Assert.assertTrue("Can't find team "
