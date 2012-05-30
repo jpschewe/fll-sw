@@ -63,7 +63,7 @@ public class SubjectiveFrameTest {
   public static void tearDownOnce() {
     noExitSecurityManagerInstaller.uninstall();
   }
-  
+
   @BeforeClass
   public static void setUpOnce() {
     FailOnThreadViolationRepaintManager.install();
@@ -165,10 +165,8 @@ public class SubjectiveFrameTest {
       expectedRowCounts.put("Programming", 29);
       expectedRowCounts.put("Research Project Assessment", 58);
       for (final Element categoryDescription : new NodelistElementCollectionAdapter(
-                                                                                    document
-                                                                                            .getDocumentElement()
-                                                                                            .getElementsByTagName(
-                                                                                                                  "subjectiveCategory"))) {
+                                                                                    document.getDocumentElement()
+                                                                                            .getElementsByTagName("subjectiveCategory"))) {
         final String title = categoryDescription.getAttribute("title");
 
         tabbedPane.selectTab(title);
@@ -182,7 +180,7 @@ public class SubjectiveFrameTest {
               + title + "'");
         }
       }
-      
+
       window.button(JButtonMatcher.withText("Quit")).click();
       final JOptionPaneFixture optionPane = JOptionPaneFinder.findOptionPane().using(window.robot);
       optionPane.button(JButtonMatcher.withText("Yes")).click();
@@ -239,7 +237,7 @@ public class SubjectiveFrameTest {
       final String prevValue = table.valueAt(dataCell);
       table.enterValue(dataCell, "50");
       Assert.assertEquals("Value should have reverted", prevValue, table.valueAt(dataCell));
-      
+
       window.button(JButtonMatcher.withText("Quit")).click();
       final JOptionPaneFixture optionPane = JOptionPaneFinder.findOptionPane().using(window.robot);
       optionPane.button(JButtonMatcher.withText("Yes")).click();
@@ -299,7 +297,7 @@ public class SubjectiveFrameTest {
       final JTableFixture table = window.table();
       // find 306
       final TableCell teamCell = table.cell("306");
-      for (int column = 0; column < 5; ++column) {
+      for (int column = 0; column < SubjectiveTableModel.NUM_COLUMNS_LEFT_OF_SCORES + 1; ++column) {
         final TableCell dataCell = TableCell.row(teamCell.row).column(teamCell.column
             + SubjectiveTableModel.NUM_COLUMNS_LEFT_OF_SCORES + column);
         table.click(dataCell, MouseButton.LEFT_BUTTON);
@@ -320,5 +318,5 @@ public class SubjectiveFrameTest {
       throw e;
     }
   }
-  
+
 }
