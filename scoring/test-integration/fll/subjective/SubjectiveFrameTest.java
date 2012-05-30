@@ -297,7 +297,8 @@ public class SubjectiveFrameTest {
       final JTableFixture table = window.table();
       // find 306
       final TableCell teamCell = table.cell("306");
-      for (int column = 0; column < SubjectiveTableModel.NUM_COLUMNS_LEFT_OF_SCORES + 1; ++column) {
+      final int numSubCategories = 5;
+      for (int column = 0; column < numSubCategories; ++column) {
         final TableCell dataCell = TableCell.row(teamCell.row).column(teamCell.column
             + SubjectiveTableModel.NUM_COLUMNS_LEFT_OF_SCORES + column);
         table.click(dataCell, MouseButton.LEFT_BUTTON);
