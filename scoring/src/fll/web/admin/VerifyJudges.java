@@ -7,9 +7,10 @@
 package fll.web.admin;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
@@ -29,6 +31,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.JudgeInformation;
+import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -51,77 +54,95 @@ public class VerifyJudges extends BaseFLLServlet {
       LOGGER.trace("Top of VerifyJudges.processRequest");
     }
 
-    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+    try {
+      final DataSource datasource = SessionAttributes.getDataSource(session);
+      final Connection connection = datasource.getConnection();
 
-    // keep track of any errors
-    final StringBuffer error = new StringBuffer();
+      final int tournament = Queries.getCurrentTournament(connection);
 
-    // keep track of which categories have judges
-    final Map<String, Set<String>> hash = new HashMap<String, Set<String>>();
+      final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
-    // populate a hash where key is category name and value is an empty
-    // Set. Use set so there are no duplicates
-    final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
-                                                                                    challengeDocument.getDocumentElement()
-                                                                                                     .getElementsByTagName("subjectiveCategory")).asList();
+      // keep track of any errors
+      final StringBuilder error = new StringBuilder();
 
-    for (final Element element : subjectiveCategories) {
-      final String categoryName = element.getAttribute("name");
-      hash.put(categoryName, new HashSet<String>());
-    }
+      // keep track of which categories have judges
+      final Map<String, Set<String>> hash = new HashMap<String, Set<String>>();
 
-    final Collection<JudgeInformation> judges = new LinkedList<JudgeInformation>();
-    
-    // walk request and push judge id into the Set, if not null or empty,
-    // in the value for each category in the hash.
-    int row = 1;
-    String id = request.getParameter("id"
-        + row);
-    String category = request.getParameter("cat"
-        + row);
-    String station = request.getParameter("station"
-        + row);
-    while (null != category) {
-      if (null != id) {
-        id = id.trim();
-        id = id.toUpperCase();
-        if (id.length() > 0) {
-          final Set<String> set = hash.get(category);
-          set.add(id);
+      // populate a hash where key is category name and value is an empty
+      // Set. Use set so there are no duplicates
+      final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
+                                                                                      challengeDocument.getDocumentElement()
+                                                                                                       .getElementsByTagName("subjectiveCategory")).asList();
 
-          final JudgeInformation judge = new JudgeInformation(id, category, station);
-          judges.add(judge);
+      final Collection<JudgeInformation> judges = new LinkedList<JudgeInformation>();
+
+      // walk request and push judge id into the Set, if not null or empty,
+      // in the value for each category in the hash.
+      int row = 1;
+      String id = request.getParameter("id"
+          + row);
+      String category = request.getParameter("cat"
+          + row);
+      String station = request.getParameter("station"
+          + row);
+      while (null != category) {
+        if (null != id) {
+          id = id.trim();
+          id = id.toUpperCase();
+          if (id.length() > 0) {
+            final Set<String> set = hash.get(category);
+            set.add(id);
+
+            final JudgeInformation judge = new JudgeInformation(id, category, station);
+            judges.add(judge);
+          }
         }
+
+        row++;
+        id = request.getParameter("id"
+            + row);
+        category = request.getParameter("cat"
+            + row);
+        station = request.getParameter("station"
+            + row);
       }
 
-      row++;
-      id = request.getParameter("id"
-          + row);
-      category = request.getParameter("cat"
-          + row);
-      station = request.getParameter("station"
-          + row);
-    }
-    
-    session.setAttribute(GatherJudgeInformation.JUDGES_KEY, judges);
+      // check that each judging station has a judge for each category
+      final Collection<String> judgingStations = Queries.getJudgingStations(connection, tournament);
+      for (final String jstation : judgingStations) {
+        for (final Element element : subjectiveCategories) {
+          final String categoryName = element.getAttribute("name");
+          boolean found = false;
 
-    // now walk the keys of the hash and make sure that all values have a list
-    // of size > 0, otherwise append an error to error.
-    for (final Map.Entry<String, Set<String>> entry : hash.entrySet()) {
-      final String categoryName = entry.getKey();
-      final Set<String> set = entry.getValue();
-      if (set.isEmpty()) {
-        error.append("You must specify at least one judge for "
-            + categoryName + "<br>");
+          for (final JudgeInformation judge : judges) {
+            if (judge.getCategory() == categoryName
+                && judge.getStation() == jstation) {
+              found = true;
+            }
+          }
+
+          if (!found) {
+            error.append("You must specify at least one judge for category '"
+                + categoryName + "' at judging station '" + jstation + "'<br/>");
+          }
+
+        }
+
       }
-    }
 
-    if (error.length() > 0) {
-      session.setAttribute(SessionAttributes.MESSAGE, "<p class='error' id='error'>"
-          + error.toString() + "</p>");
-      response.sendRedirect(response.encodeRedirectURL("GatherJudgeInformation"));
-    } else {
-      response.sendRedirect(response.encodeRedirectURL("displayJudges.jsp"));
+      session.setAttribute(GatherJudgeInformation.JUDGES_KEY, judges);
+
+      if (error.length() > 0) {
+        session.setAttribute(SessionAttributes.MESSAGE, "<p class='error' id='error'>"
+            + error.toString() + "</p>");
+        response.sendRedirect(response.encodeRedirectURL("GatherJudgeInformation"));
+      } else {
+        response.sendRedirect(response.encodeRedirectURL("displayJudges.jsp"));
+      }
+
+    } catch (final SQLException e) {
+      LOGGER.error("There was an error talking to the database", e);
+      throw new RuntimeException("There was an error talking to the database", e);
     }
 
   }
