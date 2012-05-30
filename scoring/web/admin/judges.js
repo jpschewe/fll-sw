@@ -14,10 +14,20 @@ $(document).ready(function() {
 		}
 
 		addRows(numRows);
-		
+
 		// keep form from submitting
 		return false;
 	});
+
+	var numCategories = 0;
+	$.each(categories, function(catId, catName) {
+		numCategories = numCategories+1;
+	});
+
+	var missingRows = (judging_stations.length * numCategories) - maxIndex;
+	if (missingRows > 0) {
+		addRows(missingRows);
+	}
 
 }); // end ready function
 

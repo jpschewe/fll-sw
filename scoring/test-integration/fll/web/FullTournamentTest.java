@@ -280,6 +280,40 @@ public class FullTournamentTest extends SeleneseTestBase {
     Assert.assertTrue(selenium.isElementPresent("id=success"));
   }
 
+  private void assignJudge(final String id,
+                           final String category,
+                           final String station,
+                           final int judgeIndex) throws IOException {
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Assigning judge '"
+          + id + "' cat: '" + category + "' station: '" + station + "' index: " + judgeIndex);
+    }
+
+    // make sure the row exists
+    while (!selenium.isElementPresent("name=id"
+        + String.valueOf(judgeIndex))) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Adding a row to the judges entry form to get to: "
+            + judgeIndex);
+        IntegrationTestUtils.storeScreenshot(selenium);
+      }
+      selenium.click("id=add_rows");
+      try {
+        Thread.sleep(2000); // let the javascript do it's work
+      } catch (final InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    selenium.type("id"
+        + judgeIndex, id);
+    selenium.type("cat"
+        + judgeIndex, category);
+    selenium.type("station"
+        + judgeIndex, station);
+
+  }
+
   private void assignJudges(final Connection testDataConn,
                             final String testTournamentName) throws IOException, SAXException, SQLException {
     ResultSet rs;
@@ -290,30 +324,6 @@ public class FullTournamentTest extends SeleneseTestBase {
 
     selenium.click("id=assign_judges");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-
-    // need to add rows to form if test database has more judges than
-    // categories
-    prep = testDataConn.prepareStatement("SELECT COUNT(id) FROM Judges WHERE Tournament = ?");
-    prep.setString(1, testTournamentName);
-    rs = prep.executeQuery();
-    Assert.assertTrue("Could not find judges information in test data", rs.next());
-    final int numJudges = rs.getInt(1);
-    SQLFunctions.close(rs);
-    SQLFunctions.close(prep);
-    while (!selenium.isElementPresent("name=id"
-        + String.valueOf(numJudges))) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Adding a row to the judges entry form to get to: "
-            + numJudges);
-        IntegrationTestUtils.storeScreenshot(selenium);
-      }
-      selenium.click("id=add_rows");
-      try {
-        Thread.sleep(2000); // let the javascript do it's work
-      } catch (final InterruptedException e) {
-        throw new RuntimeException(e);
-      }
-    }
 
     // assign judges from database
     if (LOGGER.isDebugEnabled()) {
@@ -329,13 +339,19 @@ public class FullTournamentTest extends SeleneseTestBase {
       final String id = rs.getString(1);
       final String category = rs.getString(2);
       final String division = rs.getString(3);
-      selenium.type("id"
-          + judgeIndex, id);
-      selenium.type("cat"
-          + judgeIndex, category);
-      selenium.type("station"
-          + judgeIndex, division);
-      ++judgeIndex;
+
+      if ("All".equals(division)) {
+
+        final String[] stations = selenium.getSelectOptions("station1");
+        for (final String station : stations) {
+          assignJudge(id, category, station, judgeIndex);
+          ++judgeIndex;
+        }
+
+      } else {
+        assignJudge(id, category, division, judgeIndex);
+        ++judgeIndex;
+      }      
     }
     SQLFunctions.close(rs);
     SQLFunctions.close(prep);
@@ -579,8 +595,7 @@ public class FullTournamentTest extends SeleneseTestBase {
       }
       outputStream.close();
       zipStream.close();
-      
-      
+
       final SubjectiveFrame subjective = new SubjectiveFrame(subjectiveZip);
 
       // insert scores into zip
