@@ -356,6 +356,7 @@ public final class GenerateDB {
       stmt = connection.createStatement();
       
       stmt.executeUpdate("DROP TABLE IF EXISTS authentication CASCADE");
+      connection.commit();
       stmt.executeUpdate("CREATE TABLE authentication ("
           + "  user varchar(64) NOT NULL" //
           + " ,pass char(32)"//
