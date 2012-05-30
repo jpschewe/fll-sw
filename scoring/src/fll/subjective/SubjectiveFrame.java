@@ -281,7 +281,7 @@ public final class SubjectiveFrame extends JFrame {
                                                                               subjectiveElement.getElementsByTagName("goal"))) {
       final NodelistElementCollectionAdapter posValuesList = new NodelistElementCollectionAdapter(
                                                                                                   goalDescription.getElementsByTagName("value"));
-      final TableColumn column = table.getColumnModel().getColumn(g + 4);
+      final TableColumn column = table.getColumnModel().getColumn(g + SubjectiveTableModel.NUM_COLUMNS_LEFT_OF_SCORES);
       if (posValuesList.hasNext()) {
         // enumerated
         final Vector<String> posValues = new Vector<String>();
