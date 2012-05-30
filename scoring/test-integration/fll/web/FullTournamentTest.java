@@ -284,13 +284,12 @@ public class FullTournamentTest extends SeleneseTestBase {
                             final String testTournamentName) throws IOException, SAXException, SQLException {
     ResultSet rs;
     PreparedStatement prep;
-    
+
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-                                  + "admin/index.jsp");
-    
+        + "admin/index.jsp");
+
     selenium.click("id=assign_judges");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-    
 
     // need to add rows to form if test database has more judges than
     // categories
@@ -315,14 +314,13 @@ public class FullTournamentTest extends SeleneseTestBase {
         throw new RuntimeException(e);
       }
     }
-    
 
     // assign judges from database
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Assigning judges");
       IntegrationTestUtils.storeScreenshot(selenium);
     }
-    
+
     int judgeIndex = 1;
     prep = testDataConn.prepareStatement("SELECT id, category, Division FROM Judges WHERE Tournament = ?");
     prep.setString(1, testTournamentName);
@@ -362,7 +360,7 @@ public class FullTournamentTest extends SeleneseTestBase {
     selenium.click("id=commit");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
     Assert.assertTrue("Error assigning judges", selenium.isElementPresent("success"));
-    
+
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("After committing judges");
       IntegrationTestUtils.storeScreenshot(selenium);
@@ -567,8 +565,9 @@ public class FullTournamentTest extends SeleneseTestBase {
           + "admin/subjective-data.fll");
       WebResponse response = WebTestUtils.loadPage(conversation, request);
       final String contentType = response.getContentType();
-      if(!"application/zip".equals(contentType)) {
-        LOGGER.error("Got non-zip content: " + response.getText());
+      if (!"application/zip".equals(contentType)) {
+        LOGGER.error("Got non-zip content: "
+            + response.getText());
       }
       Assert.assertEquals("application/zip", contentType);
       final InputStream zipStream = response.getInputStream();
@@ -591,6 +590,14 @@ public class FullTournamentTest extends SeleneseTestBase {
         // find appropriate table model
         final TableModel tableModel = subjective.getTableModelForTitle(title);
 
+        final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
+        Assert.assertTrue("Can't find TeamNumber column in subjective table model", teamNumberColumn >= 0);
+
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Found team number column at "
+              + teamNumberColumn);
+        }
+
         prep = testDataConn.prepareStatement("SELECT * FROM "
             + category + " WHERE Tournament = ?");
         prep.setString(1, testTournament);
@@ -598,14 +605,19 @@ public class FullTournamentTest extends SeleneseTestBase {
         while (rs.next()) {
           final int teamNumber = rs.getInt("TeamNumber");
           // find row number in table
-          final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
-          Assert.assertTrue("Can't find TeamNumber column in subjective table model", teamNumberColumn >= 0);
+
           int rowIndex = -1;
           for (int rowIdx = 0; rowIdx < tableModel.getRowCount()
               && rowIndex == -1; ++rowIdx) {
             final Object teamNumberRaw = tableModel.getValueAt(rowIdx, teamNumberColumn);
             Assert.assertNotNull(teamNumberRaw);
             final int value = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberRaw.toString()).intValue();
+
+            if (LOGGER.isTraceEnabled()) {
+              LOGGER.trace("Checking if "
+                  + teamNumber + " equals " + value + " raw: " + teamNumberRaw + "? " + (value == teamNumber));
+            }
+
             if (value == teamNumber) {
               rowIndex = rowIdx;
             }
