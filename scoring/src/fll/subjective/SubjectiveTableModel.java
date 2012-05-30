@@ -111,7 +111,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   }
 
   public int getColumnCount() {
-    return 7 + getNumGoals();
+    return NUM_COLUMNS_LEFT_OF_SCORES + getNumGoals() + 2;
   }
 
   public Object getValueAt(final int row, final int column) {
