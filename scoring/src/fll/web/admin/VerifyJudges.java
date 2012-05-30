@@ -10,11 +10,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -65,9 +62,6 @@ public class VerifyJudges extends BaseFLLServlet {
       // keep track of any errors
       final StringBuilder error = new StringBuilder();
 
-      // keep track of which categories have judges
-      final Map<String, Set<String>> hash = new HashMap<String, Set<String>>();
-
       // populate a hash where key is category name and value is an empty
       // Set. Use set so there are no duplicates
       final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
@@ -90,9 +84,6 @@ public class VerifyJudges extends BaseFLLServlet {
           id = id.trim();
           id = id.toUpperCase();
           if (id.length() > 0) {
-            final Set<String> set = hash.get(category);
-            set.add(id);
-
             final JudgeInformation judge = new JudgeInformation(id, category, station);
             judges.add(judge);
           }
