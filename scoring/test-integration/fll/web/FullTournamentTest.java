@@ -579,6 +579,8 @@ public class FullTournamentTest extends SeleneseTestBase {
       }
       outputStream.close();
       zipStream.close();
+      
+      
       final SubjectiveFrame subjective = new SubjectiveFrame(subjectiveZip);
 
       // insert scores into zip
@@ -665,9 +667,6 @@ public class FullTournamentTest extends SeleneseTestBase {
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull(response.getElementWithID("success"));
     } finally {
-      if (!subjectiveZip.delete()) {
-        subjectiveZip.deleteOnExit();
-      }
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
     }
