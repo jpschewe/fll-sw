@@ -131,7 +131,7 @@ public class CommitTeam extends BaseFLLServlet {
     }
 
     if (message.length() > 0) {
-      session.setAttribute("message", message.toString());
+      session.setAttribute(SessionAttributes.MESSAGE, message.toString());
     }
 
     if (SessionAttributes.getNonNullAttribute(session, "addTeam", Boolean.class)) {
