@@ -41,6 +41,17 @@ import fll.web.SessionAttributes;
 public class GatherTeamData extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
+  /**
+   * Key for team number in session when redirecting to pages for further
+   * editing. Value is an int.
+   */
+  public static final String TEAM_NUMBER = "teamNumber";
+  
+  /**
+   * Key for checking if we're adding a team or not.
+   * Value is a boolean.
+   */
+  public static final String ADD_TEAM = "addTeam";
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -64,8 +75,8 @@ public class GatherTeamData extends BaseFLLServlet {
 
       if ("1".equals(request.getParameter("addTeam"))) {
         // put blanks in for all values
-        session.setAttribute("addTeam", true);
-        session.setAttribute("teamNumber", null);
+        session.setAttribute(ADD_TEAM, true);
+        session.setAttribute(TEAM_NUMBER, null);
         session.setAttribute("teamName", null);
         session.setAttribute("organization", null);
         session.setAttribute("division", null);
@@ -75,7 +86,7 @@ public class GatherTeamData extends BaseFLLServlet {
         session.setAttribute("playoffsInitialized",
                              Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
       } else {
-        session.setAttribute("addTeam", false);
+        session.setAttribute(ADD_TEAM, false);
 
         // check parsing the team number to be sure that we fail right away
         final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("teamNumber")).intValue();
@@ -99,7 +110,7 @@ public class GatherTeamData extends BaseFLLServlet {
         }
 
         // get the team information and put it in the session
-        session.setAttribute("teamNumber", teamNumber);
+        session.setAttribute(TEAM_NUMBER, teamNumber);
         final Team team = Team.getTeamFromDatabase(connection, teamNumber);
         session.setAttribute("teamName", team.getTeamName());
         session.setAttribute("organization", team.getOrganization());

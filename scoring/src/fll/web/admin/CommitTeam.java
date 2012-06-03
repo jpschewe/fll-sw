@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Collection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -30,12 +31,17 @@ import fll.web.SessionAttributes;
 
 /**
  * Commit the changes made by editTeam.jsp.
- * 
  */
 @WebServlet("/admin/CommitTeam")
 public class CommitTeam extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
+
+  /**
+   * Key for storing the list of event divisions. Value is a Collection of
+   * String.
+   */
+  public static final String ALL_EVENT_DIVISIONS = "all_event_divisions";
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -72,7 +78,7 @@ public class CommitTeam extends BaseFLLServlet {
           message.append("<p class='error'>Error advancing team</p>");
           LOGGER.error("Error advancing team: "
               + teamNumber);
-        }else {
+        } else {
           message.append("<p id='success'>Successfully advanced a team</p>");
         }
       } else if (null != request.getParameter("demote")) {
@@ -118,6 +124,22 @@ public class CommitTeam extends BaseFLLServlet {
         }
       }
 
+      if (message.length() > 0) {
+        session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+      }
+
+      final String eventDivision = Queries.getEventDivision(connection, teamNumber);
+      final Collection<String> allEventDivisions = Queries.getEventDivisions(connection);
+      if (!allEventDivisions.contains(eventDivision)) {
+        session.setAttribute(ALL_EVENT_DIVISIONS, allEventDivisions);
+        session.setAttribute(GatherTeamData.TEAM_NUMBER, teamNumber);
+        response.sendRedirect(response.encodeRedirectURL("chooseEventDivision.jsp"));
+      } else if (SessionAttributes.getNonNullAttribute(session, GatherTeamData.ADD_TEAM, Boolean.class)) {
+        response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+      } else {
+        response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
+      }
+
     } catch (final ParseException pe) {
       LOGGER.error("Error parsing team number, this is an internal error", pe);
       throw new RuntimeException("Error parsing team number, this is an internal error", pe);
@@ -126,19 +148,6 @@ public class CommitTeam extends BaseFLLServlet {
       throw new RuntimeException("There was an error talking to the database", e);
     }
 
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Bottom of CommitTeam.doPost");
-    }
-
-    if (message.length() > 0) {
-      session.setAttribute(SessionAttributes.MESSAGE, message.toString());
-    }
-
-    if (SessionAttributes.getNonNullAttribute(session, "addTeam", Boolean.class)) {
-      response.sendRedirect(response.encodeRedirectURL("index.jsp"));
-    } else {
-      response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
-    }
   }
 
   /**
