@@ -8,7 +8,7 @@
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-<script language='javascript'>
+<script type='text/javascript'>
 //confirm deleting a team
 function confirmDeleteTeam() {
   return confirm("Are you sure you want to delete team ${teamNumber}?  Any data associated with that team will be removed from the database, including any scores that have been entered.  You also need to download the files for subjective score entry again.  It is not advisable to do this while the tournament that the team is in is running.");
