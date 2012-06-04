@@ -43,6 +43,21 @@ public class CommitTeam extends BaseFLLServlet {
    */
   public static final String ALL_EVENT_DIVISIONS = "all_event_divisions";
 
+  /**
+   * Value is String.
+   */
+  public static final String TEAM_NAME = "teamName";
+
+  /**
+   * Value is String
+   */
+  public static final String DIVISION = "division";
+
+  /**
+   * Value is String
+   */
+  public static final String ORGANIZATION = "organization";
+
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -59,85 +74,109 @@ public class CommitTeam extends BaseFLLServlet {
       final Connection connection = datasource.getConnection();
       // parse the numbers first so that we don't get a partial commit
       final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("teamNumber")).intValue();
-      final String division = resolveDivision(request);
+      session.setAttribute(GatherTeamData.TEAM_NUMBER, teamNumber);
 
+      final String division = resolveDivision(request);
+      session.setAttribute(DIVISION, division);
+      session.setAttribute(CommitEventDivision.EVENT_DIVISION, division);
+
+      final String teamName = request.getParameter("teamName");
+      session.setAttribute(TEAM_NAME, teamName);
+
+      final String organization = request.getParameter("organization");
+      session.setAttribute(ORGANIZATION, organization);
+
+      String redirect = null;
       if (null != request.getParameter("delete")) {
         if (LOGGER.isInfoEnabled()) {
           LOGGER.info("Deleting "
               + teamNumber);
         }
         Queries.deleteTeam(teamNumber, challengeDocument, connection);
-        message.append("<p id='success'>Successfully deleted a team</p>");
-      } else if (null != request.getParameter("advance")) {
-        if (LOGGER.isInfoEnabled()) {
-          LOGGER.info("Advancing "
-              + teamNumber);
-        }
-        final boolean result = Queries.advanceTeam(connection, teamNumber);
-        if (!result) {
-          message.append("<p class='error'>Error advancing team</p>");
-          LOGGER.error("Error advancing team: "
-              + teamNumber);
-        } else {
-          message.append("<p id='success'>Successfully advanced a team</p>");
-        }
-      } else if (null != request.getParameter("demote")) {
-        if (LOGGER.isInfoEnabled()) {
-          LOGGER.info("Demoting team: "
-              + teamNumber);
-        }
-        Queries.demoteTeam(connection, challengeDocument, teamNumber);
-      } else if (null != request.getParameter("commit")) {
-        if (SessionAttributes.getNonNullAttribute(session, "addTeam", Boolean.class)) {
+        message.append("<p id='success'>Successfully deleted team "
+            + teamNumber + "</p>");
+
+        redirect = "select_team.jsp";
+      } else {
+        if (null != request.getParameter("advance")) {
           if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Adding "
+            LOGGER.info("Advancing "
                 + teamNumber);
           }
-          final String otherTeam = Queries.addTeam(connection, teamNumber, request.getParameter("teamName"),
-                                                   request.getParameter("organization"), division);
-          if (null != otherTeam) {
-            message.append("<p class='error'>Error, team number "
-                + teamNumber + " is already assigned.</p>");
-            LOGGER.error("TeamNumber "
-                + teamNumber + " is already assigned");
-          } else {
-            message.append("<p id='success'>Successfully added a team</p>");
-          }
-        } else {
-          if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Updating "
-                + teamNumber + " team info");
-          }
-          Queries.updateTeam(connection, teamNumber, request.getParameter("teamName"),
-                             request.getParameter("organization"), division);
-          message.append("<p id='success'>Successfully updated a team's info</p>");
-        }
 
-        // this will be null if the tournament can't be changed
-        final String newTournamentStr = request.getParameter("currentTournament");
-        if (null != newTournamentStr) {
-          final int newTournament = Utilities.NUMBER_FORMAT_INSTANCE.parse(newTournamentStr).intValue();
-          final int teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
-          if (teamCurrentTournament != newTournament) {
-            Queries.changeTeamCurrentTournament(connection, teamNumber, newTournament);
+          final boolean result = Queries.advanceTeam(connection, teamNumber);
+          if (!result) {
+            message.append("<p class='error'>Error advancing team</p>");
+            LOGGER.error("Error advancing team: "
+                + teamNumber);
+            redirect = "select_team.jsp";
+          } else {
+            message.append("<p id='success'>Successfully advanced team "
+                + teamNumber + "</p>");
           }
-        }
-      }
+        } else if (null != request.getParameter("demote")) {
+          if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Demoting team: "
+                + teamNumber);
+          }
+
+          Queries.demoteTeam(connection, challengeDocument, teamNumber);
+          message.append("<p id='success'>Successfully demoted team "
+              + teamNumber + "</p>");
+        } else if (null != request.getParameter("commit")) {
+          // this will be null if the tournament can't be changed
+          final String newTournamentStr = request.getParameter("currentTournament");
+          final int newTournament = newTournamentStr == null ? -1
+              : Utilities.NUMBER_FORMAT_INSTANCE.parse(newTournamentStr).intValue();
+
+          if (SessionAttributes.getNonNullAttribute(session, GatherTeamData.ADD_TEAM, Boolean.class)) {
+            if (LOGGER.isInfoEnabled()) {
+              LOGGER.info("Adding "
+                  + teamNumber);
+            }
+
+            final String otherTeam = Queries.addTeam(connection, teamNumber, teamName, organization, division,
+                                                     newTournament);
+            if (null != otherTeam) {
+              message.append("<p class='error'>Error, team number "
+                  + teamNumber + " is already assigned.</p>");
+              LOGGER.error("TeamNumber "
+                  + teamNumber + " is already assigned");
+            } else {
+              message.append("<p id='success'>Successfully added team "
+                  + teamNumber + "</p>");
+            }
+          } else {
+            if (null != newTournamentStr) {
+              final int teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
+              if (teamCurrentTournament != newTournament) {
+                Queries.changeTeamCurrentTournament(connection, teamNumber, newTournament);
+              }
+            }
+          }
+
+        } // commit
+      } // not deleting team
 
       if (message.length() > 0) {
         session.setAttribute(SessionAttributes.MESSAGE, message.toString());
       }
 
-      final String eventDivision = Queries.getEventDivision(connection, teamNumber);
-      final Collection<String> allEventDivisions = Queries.getEventDivisions(connection);
-      if (!allEventDivisions.contains(eventDivision)) {
-        session.setAttribute(ALL_EVENT_DIVISIONS, allEventDivisions);
-        session.setAttribute(GatherTeamData.TEAM_NUMBER, teamNumber);
-        response.sendRedirect(response.encodeRedirectURL("chooseEventDivision.jsp"));
-      } else if (SessionAttributes.getNonNullAttribute(session, GatherTeamData.ADD_TEAM, Boolean.class)) {
-        response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+      if (null == redirect) {
+        final int teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
+
+        final Collection<String> allEventDivisions = Queries.getEventDivisions(connection, teamCurrentTournament);
+        if (!allEventDivisions.isEmpty()
+            && !allEventDivisions.contains(division)) {
+          session.setAttribute(ALL_EVENT_DIVISIONS, allEventDivisions);
+          session.setAttribute(GatherTeamData.TEAM_NUMBER, teamNumber);
+          response.sendRedirect(response.encodeRedirectURL("chooseEventDivision.jsp"));
+        } else {
+          session.setAttribute(CommitEventDivision.EVENT_DIVISION, division);
+          response.sendRedirect(response.encodeRedirectURL("SaveTeamData"));
+        }
       } else {
-        response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
+        response.sendRedirect(response.encodeRedirectURL(redirect));
       }
 
     } catch (final ParseException pe) {
