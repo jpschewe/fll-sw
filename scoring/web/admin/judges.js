@@ -6,6 +6,8 @@
 
 $(document).ready(function() {
 
+	$("#total_num_rows").val(maxIndex);
+
 	$("#add_rows").click(function() {
 		var numRowsStr = $("#num_rows").val();
 		var numRows = 1;
@@ -35,6 +37,7 @@ function addRows(numRows) {
 	for (rowIndex = 0; rowIndex < numRows; ++rowIndex) {
 		var judgeIdx = maxIndex + 1;
 		maxIndex = judgeIdx;
+		$("#total_num_rows").val(maxIndex);
 
 		var row = $("<tr></tr>");
 		$("#data").append(row);
