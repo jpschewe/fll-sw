@@ -9,6 +9,7 @@ package fll.web.admin;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.JudgeInformation;
+import fll.Utilities;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -68,20 +70,23 @@ public class VerifyJudges extends BaseFLLServlet {
                                                                                       challengeDocument.getDocumentElement()
                                                                                                        .getElementsByTagName("subjectiveCategory")).asList();
 
-      //FIXME put hidden field in for num rows in judges.jsp
-      
+      final int numRows = Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("total_num_rows")).intValue();
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Found num rows: "
+            + numRows);
+      }
+
       final Collection<JudgeInformation> judges = new LinkedList<JudgeInformation>();
 
       // walk request and push judge id into the Set, if not null or empty,
       // in the value for each category in the hash.
-      int row = 1;
-      String id = request.getParameter("id"
-          + row);
-      String category = request.getParameter("cat"
-          + row);
-      String station = request.getParameter("station"
-          + row);
-      while (null != category) {
+      for (int row = 1; row <= numRows; ++row) {
+        String id = request.getParameter("id"
+            + row);
+        final String category = request.getParameter("cat"
+            + row);
+        final String station = request.getParameter("station"
+            + row);
         if (null != id) {
           id = id.trim();
           id = id.toUpperCase();
@@ -90,14 +95,6 @@ public class VerifyJudges extends BaseFLLServlet {
             judges.add(judge);
           }
         }
-
-        row++;
-        id = request.getParameter("id"
-            + row);
-        category = request.getParameter("cat"
-            + row);
-        station = request.getParameter("station"
-            + row);
       }
 
       // check that each judging station has a judge for each category
@@ -133,6 +130,9 @@ public class VerifyJudges extends BaseFLLServlet {
         response.sendRedirect(response.encodeRedirectURL("displayJudges.jsp"));
       }
 
+    } catch (final ParseException e) {
+      LOGGER.error("Unable to parse num_rows parameter", e);
+      throw new RuntimeException(e);
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);

@@ -47,7 +47,7 @@
 
  <form action='VerifyJudges' method='POST' name='judges'>
 
-
+ <input type='hidden' name='total_num_rows' id='total_num_rows' />
 
   <table border='1' id='data'>
    <tr>
