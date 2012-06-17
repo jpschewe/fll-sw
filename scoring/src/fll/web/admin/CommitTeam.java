@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.Collection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -36,12 +35,6 @@ import fll.web.SessionAttributes;
 public class CommitTeam extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-
-  /**
-   * Key for storing the list of event divisions. Value is a Collection of
-   * String.
-   */
-  public static final String ALL_EVENT_DIVISIONS = "all_event_divisions";
 
   /**
    * Value is String.
@@ -163,18 +156,7 @@ public class CommitTeam extends BaseFLLServlet {
       }
 
       if (null == redirect) {
-        final int teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
-
-        final Collection<String> allEventDivisions = Queries.getEventDivisions(connection, teamCurrentTournament);
-        if (!allEventDivisions.isEmpty()
-            && !allEventDivisions.contains(division)) {
-          session.setAttribute(ALL_EVENT_DIVISIONS, allEventDivisions);
-          session.setAttribute(GatherTeamData.TEAM_NUMBER, teamNumber);
-          response.sendRedirect(response.encodeRedirectURL("chooseEventDivision.jsp"));
-        } else {
-          session.setAttribute(CommitEventDivision.EVENT_DIVISION, division);
-          response.sendRedirect(response.encodeRedirectURL("SaveTeamData"));
-        }
+        response.sendRedirect(response.encodeRedirectURL("CheckEventDivisionNeeded"));
       } else {
         response.sendRedirect(response.encodeRedirectURL(redirect));
       }
