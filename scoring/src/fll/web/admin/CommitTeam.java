@@ -116,39 +116,39 @@ public class CommitTeam extends BaseFLLServlet {
           Queries.demoteTeam(connection, challengeDocument, teamNumber);
           message.append("<p id='success'>Successfully demoted team "
               + teamNumber + "</p>");
-        } else if (null != request.getParameter("commit")) {
-          // this will be null if the tournament can't be changed
-          final String newTournamentStr = request.getParameter("currentTournament");
-          final int newTournament = newTournamentStr == null ? -1
-              : Utilities.NUMBER_FORMAT_INSTANCE.parse(newTournamentStr).intValue();
+        }
 
-          if (SessionAttributes.getNonNullAttribute(session, GatherTeamData.ADD_TEAM, Boolean.class)) {
-            if (LOGGER.isInfoEnabled()) {
-              LOGGER.info("Adding "
-                  + teamNumber);
-            }
+        // this will be null if the tournament can't be changed
+        final String newTournamentStr = request.getParameter("currentTournament");
+        final int newTournament = newTournamentStr == null ? -1
+            : Utilities.NUMBER_FORMAT_INSTANCE.parse(newTournamentStr).intValue();
 
-            final String otherTeam = Queries.addTeam(connection, teamNumber, teamName, organization, division,
-                                                     newTournament);
-            if (null != otherTeam) {
-              message.append("<p class='error'>Error, team number "
-                  + teamNumber + " is already assigned.</p>");
-              LOGGER.error("TeamNumber "
-                  + teamNumber + " is already assigned");
-            } else {
-              message.append("<p id='success'>Successfully added team "
-                  + teamNumber + "</p>");
-            }
-          } else {
-            if (null != newTournamentStr) {
-              final int teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
-              if (teamCurrentTournament != newTournament) {
-                Queries.changeTeamCurrentTournament(connection, teamNumber, newTournament);
-              }
-            }
+        if (SessionAttributes.getNonNullAttribute(session, GatherTeamData.ADD_TEAM, Boolean.class)) {
+          if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Adding "
+                + teamNumber);
           }
 
-        } // commit
+          final String otherTeam = Queries.addTeam(connection, teamNumber, teamName, organization, division,
+                                                   newTournament);
+          if (null != otherTeam) {
+            message.append("<p class='error'>Error, team number "
+                + teamNumber + " is already assigned.</p>");
+            LOGGER.error("TeamNumber "
+                + teamNumber + " is already assigned");
+          } else {
+            message.append("<p id='success'>Successfully added team "
+                + teamNumber + "</p>");
+          }
+        } else {
+          if (null != newTournamentStr) {
+            final int teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
+            if (teamCurrentTournament != newTournament) {
+              Queries.changeTeamCurrentTournament(connection, teamNumber, newTournament);
+            }
+          }
+        }
+
       } // not deleting team
 
       if (message.length() > 0) {

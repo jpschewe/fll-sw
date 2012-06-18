@@ -127,11 +127,11 @@ function confirmChangeTournament() {
     </c:choose>
             
     <c:if test="${not empty teamCurrentTournament.nextTournament}">
-      <input type='submit' name='advance' value='Advance Team To Next Tournament (Other changes will be ignored)'>
+      <input type='submit' name='advance' value='Advance Team To Next Tournament'>
     </c:if>
 
     <c:if test="${not empty teamPrevTournament}">
-      <input type='submit' name='demote' value='Demote Team To Previous Tournament (Other changes will be ignored)' onclick='return confirmDemoteTeam()'>
+      <input type='submit' name='demote' value='Demote Team To Previous Tournament' onclick='return confirmDemoteTeam()'>
 	</c:if>
 	        
     <c:if test="${not addTeam}">
