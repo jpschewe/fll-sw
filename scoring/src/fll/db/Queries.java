@@ -1252,6 +1252,26 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
   }
+  
+  /**
+   * Set judging station for a team.
+   */
+  public static void setJudgingStation(final Connection connection,
+                                      final int teamNumber,
+                                      final int tournament,
+                                      final String judgingStation) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE TournamentTeams SET judging_station = ? WHERE TeamNumber = ? AND Tournament = ?");
+      prep.setString(1, judgingStation);
+      prep.setInt(2, teamNumber);
+      prep.setInt(3, tournament);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
 
   /**
    * Get a list of team numbers that have fewer runs than seeding rounds. This

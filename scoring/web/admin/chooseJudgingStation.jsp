@@ -9,15 +9,15 @@
 
 <body>
 
-	<form method="POST" action="CommitEventDivision">
+	<form method="POST" action="CommitJudgingStation">
 		<p>Team ${teamNumber} is assigned to a tournament that is using
-			event divisions. You need to specify which event division this team
+			judging stations. You need to specify which judging station this team
 			is to be in.</p>
 
-		<select name='event_division'>
-			<c:forEach items="${all_event_divisions }" var="ediv">
+		<select name='judging_station'>
+			<c:forEach items="${all_judging_stations }" var="val">
 
-				<option value='${ediv }'>${ediv }</option>
+				<option value='${val }'>${val }</option>
 
 			</c:forEach>
 		</select> <br /> <input type='submit' name='submit' value='Commit' />

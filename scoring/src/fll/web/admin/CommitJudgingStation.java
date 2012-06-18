@@ -17,19 +17,19 @@ import javax.servlet.http.HttpSession;
 import fll.web.BaseFLLServlet;
 
 /**
- * Commit the changes made by chooseEventDivision.jsp
+ * Commit the changes made by chooseJudgingStation.jsp
  */
-@WebServlet("/admin/CommitEventDivision")
-public class CommitEventDivision extends BaseFLLServlet {
+@WebServlet("/admin/CommitJudgingStation")
+public class CommitJudgingStation extends BaseFLLServlet {
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
     // store in session until final commit
-    final String eventDivision = request.getParameter("event_division");
-    session.setAttribute(CommitTeam.EVENT_DIVISION, eventDivision);
+    final String judgingStation = request.getParameter("judging_station");
+    session.setAttribute(CheckJudgingStationNeeded.JUDGING_STATION, judgingStation);
 
-    response.sendRedirect(response.encodeRedirectURL("CheckJudgingStationNeeded"));
+    response.sendRedirect(response.encodeRedirectURL("SaveTeamData"));
   }
 }
