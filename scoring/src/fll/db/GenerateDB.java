@@ -39,7 +39,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 6;
+  public static final int DATABASE_VERSION = 7;
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -174,10 +174,11 @@ public final class GenerateDB {
       if (forceRebuild
           || !tables.contains("TournamentTeams".toLowerCase())) {
         stmt.executeUpdate("CREATE TABLE TournamentTeams ("
-            + "  TeamNumber integer NOT NULL," //
-            + "  Tournament INTEGER NOT NULL," //
-            + "  event_division varchar(32) default '" + DEFAULT_TEAM_DIVISION + "' NOT NULL," //
-            + "  CONSTRAINT tournament_teams_pk PRIMARY KEY (TeamNumber, Tournament)" //
+            + "  TeamNumber integer NOT NULL" //
+            + " ,Tournament INTEGER NOT NULL" //
+            + " ,event_division varchar(32) default '" + DEFAULT_TEAM_DIVISION + "' NOT NULL" //
+            + " ,judging_station varchar(64) NOT NULL"
+            + " ,CONSTRAINT tournament_teams_pk PRIMARY KEY (TeamNumber, Tournament)" //
             + " ,CONSTRAINT tournament_teams_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)" //
             + " ,CONSTRAINT tournament_teams_fk2 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" + ")");
       }
@@ -192,8 +193,8 @@ public final class GenerateDB {
           + "  id varchar(64) NOT NULL,"//
           + "  category varchar(64) NOT NULL," //
           + "  Tournament INTEGER NOT NULL," //
-          + "  event_division varchar(32) NOT NULL," //
-          + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,event_division)"//
+          + "  station varchar(64) NOT NULL," //
+          + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,station)"//
           + " ,CONSTRAINT judges_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
           + ")");
 
@@ -355,6 +356,7 @@ public final class GenerateDB {
       stmt = connection.createStatement();
       
       stmt.executeUpdate("DROP TABLE IF EXISTS authentication CASCADE");
+      connection.commit();
       stmt.executeUpdate("CREATE TABLE authentication ("
           + "  user varchar(64) NOT NULL" //
           + " ,pass char(32)"//

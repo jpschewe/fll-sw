@@ -78,8 +78,9 @@ ${message}
 	  <input type="submit" id='upload_teams' value="Upload">
 	</form>
 	</li>
+ 
 
-	<li><a href='<c:url value="tournaments.jsp"/>'>Edit Tournaments</a>
+	<li><a href='<c:url value="tournaments.jsp"/>'>Add or Edit Tournaments</a>
   
  <a href='javascript:display("EditTournamentHelp")'>[help]</a>
 	<div id='EditTournamentHelp' class='help' style='display: none'>
@@ -91,7 +92,9 @@ ${message}
 	<a href='javascript:hide("EditTournamentHelp")'>[hide]</a></div>
 	</li>
 
+
     <li><a  href='DisplayTournamentAssignments'>Display Tournament Assignments</a></li>
+
     
 	<li>
 	<form id='currentTournament' action='SetCurrentTournament'
@@ -118,6 +121,7 @@ ${message}
 	</select> <input type='submit' name='change_tournament' value='Change tournament'></form>
 	</li>
  
+ 
     <li>Upload schedule for current tournament.
     <a href='javascript:display("ScheduleHelp")'>[help]</a>
     <div id='ScheduleHelp' class='help' style='display: none'>
@@ -133,6 +137,7 @@ ${message}
     <input type="submit" value="Upload Schedule"/>
     </form>
     </li>
+    
 
 	<li><a href='edit_event_division.jsp'> Assign
 	event divisions to teams in current tournament</a>. <a
@@ -146,6 +151,7 @@ ${message}
 	teams into the groups in which they will be competing.<br>
 	<a href='javascript:hide("EventDivisionHelp")'>[hide]</a></div>
 	</li>
+ 
 
 	<li>
 	<form id='changeScoresheetLayoutNUp'
@@ -166,6 +172,7 @@ ${message}
 	</select> <input type='submit' name='changeScoresheetLayoutNUp' value='Commit'>
 	</form>
 	</li>
+ 
 
 	<li>
 	<form id='changeSeedingRounds' action='ChangeSeedingRounds'
@@ -186,6 +193,7 @@ ${message}
 	</form>
 	</li>
 
+
 </ol>
 
 <p>Tournament day:</p>
@@ -199,10 +207,12 @@ ${message}
       </li>
 
 
-	<li><a href='<c:url value="judges.jsp"/>'>Assign Judges</a></li>
+	<li><a href='<c:url value="GatherJudgeInformation"/>' id='assign_judges'>Assign Judges</a></li>
 	
+ 
 	<li><a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a>
 	(for scoresheet printing during playoffs)</li>
+
 
 
     <c:if test="${not playoffsInitialized}">
@@ -213,12 +223,16 @@ ${message}
 	a team</a></li>
     </c:if>
     
+    
 	<li><a href='<c:url value="select_team.jsp"/>'>Edit team data</a></li>
+
 
 	<li><a href="subjective-data.fll">Download
 	the datafile for subjective score entry.</a> Should be downloaded after
 	each subjective score upload to lessen chance of data loss due to
 	overwrite.</li>
+ 
+ 
 	<li>
 	<form name='uploadSubjective'
 		ACTION='<c:url value="UploadSubjectiveData"/>' METHOD="POST"
@@ -227,13 +241,16 @@ ${message}
 	<input type="submit" value="Upload"/></form>
 	</li>
 
+
 	<li><a href='remoteControl.jsp'>Remote control of display</a></li>
 </ol>
 
 <p>After the tournament</p>
 <ul>
 	<li><a href='database.flldb'>Download database</a></li>
+ 
 	<li><a href="GatherAdvancementData">Advance teams</a></li>
+ 
 	<li>
 	<form id='uploadAdvancingTeams' 
 	    ACTION="<c:url value='/UploadSpreadsheet'/>"

@@ -268,12 +268,28 @@ public final class Queries {
    * @see #getCurrentTournament(Connection)
    */
   public static List<String> getEventDivisions(final Connection connection) throws SQLException {
+    final int currentTournament = getCurrentTournament(connection);
+    return getEventDivisions(connection, currentTournament);
+  }
+
+  /**
+   * Get the list of event divisions at the specified tournament as a List of
+   * Strings.
+   * 
+   * @param connection the database connection
+   * @return the List of divisions. List of strings.
+   * @throws SQLException on a database error
+   * @see #getCurrentTournament(Connection)
+   */
+  public static List<String> getEventDivisions(final Connection connection,
+                                               final int tournament) throws SQLException {
     final List<String> list = new LinkedList<String>();
 
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT DISTINCT event_division FROM current_tournament_teams ORDER BY event_division");
+      prep = connection.prepareStatement("SELECT DISTINCT event_division FROM TournamentTeams WHERE Tournament = ? ORDER BY event_division");
+      prep.setInt(1, tournament);
       rs = prep.executeQuery();
       while (rs.next()) {
         final String division = rs.getString(1);
@@ -284,6 +300,35 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
     return list;
+  }
+
+  /**
+   * Get the list of judging stations for the specified tournament as a List of
+   * Strings.
+   * 
+   * @param connection database connection
+   * @param tournament the tournament to get the stations for
+   * @return the judging stations
+   */
+  public static List<String> getJudgingStations(final Connection connection,
+                                                final int tournament) throws SQLException {
+    final List<String> result = new LinkedList<String>();
+
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT DISTINCT judging_station FROM TournamentTeams WHERE tournament = ? ORDER BY judging_station");
+      prep.setInt(1, tournament);
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final String station = rs.getString(1);
+        result.add(station);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+    return result;
   }
 
   /**
@@ -1152,7 +1197,7 @@ public final class Queries {
    * @return the event division for the team
    * @throws SQLException on a database error
    * @throws RuntimeException if <code>teamNumber</code> cannot be found in
-   *           TournamenTeams for the specified tournament
+   *           TournamentTeams for the specified tournament
    */
   public static String getEventDivision(final Connection connection,
                                         final int teamNumber,
@@ -1175,6 +1220,58 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
   }
+
+  /**
+   * Get the judging station that a team is in for the specified tournament.
+   * 
+   * @param teamNumber the team's number
+   * @param tournamentID ID of tournament
+   * @return the judging station for the team
+   * @throws SQLException on a database error
+   * @throws RuntimeException if <code>teamNumber</code> cannot be found in
+   *           TournamentTeams for the specified tournament
+   */
+  public static String getJudgingStation(final Connection connection,
+                                         final int teamNumber,
+                                         final int tournamentID) throws SQLException, RuntimeException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT judging_station FROM TournamentTeams WHERE TeamNumber = ? AND Tournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, tournamentID);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        return rs.getString(1);
+      } else {
+        throw new RuntimeException("Couldn't find team number "
+            + teamNumber + " in the list of tournament teams! Tournament: " + tournamentID);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+  
+  /**
+   * Set judging station for a team.
+   */
+  public static void setJudgingStation(final Connection connection,
+                                      final int teamNumber,
+                                      final int tournament,
+                                      final String judgingStation) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE TournamentTeams SET judging_station = ? WHERE TeamNumber = ? AND Tournament = ?");
+      prep.setString(1, judgingStation);
+      prep.setInt(2, teamNumber);
+      prep.setInt(3, tournament);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
 
   /**
    * Get a list of team numbers that have fewer runs than seeding rounds. This
@@ -1445,7 +1542,9 @@ public final class Queries {
   public static int getCurrentTournament(final Connection connection) throws SQLException {
     if (!Queries.globalParameterExists(connection, GlobalParameters.CURRENT_TOURNAMENT)) {
       final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
-      setCurrentTournament(connection, dummyTournament.getTournamentID());
+      // Call setGlobalParameter directly to avoid infinite recursion
+      setGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT,
+                         String.valueOf(dummyTournament.getTournamentID()));
     }
     return getIntGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT);
   }
@@ -1883,10 +1982,11 @@ public final class Queries {
     } else {
       PreparedStatement prep = null;
       try {
-        prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division) VALUES (?, ?, ?)");
+        prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division, judging_station) VALUES (?, ?, ?, ?)");
         prep.setInt(1, teamNumber);
         prep.setInt(2, currentTournament.getNextTournament().getTournamentID());
         prep.setString(3, getDivisionOfTeam(connection, teamNumber));
+        prep.setString(4, getDivisionOfTeam(connection, teamNumber));
         prep.executeUpdate();
 
         return true;
@@ -1979,19 +2079,47 @@ public final class Queries {
     try {
       deleteTeamFromTournamet(connection, document, teamNumber, currentTournament);
 
-      // set new tournament
-      prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division) VALUES (?, ?, ?)");
-      prep.setInt(1, teamNumber);
-      prep.setInt(2, newTournament);
       final String division = getDivisionOfTeam(connection, teamNumber);
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Division for team "
             + teamNumber + " is " + division);
       }
+
+      // set new tournament
+      prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division, judging_station) VALUES (?, ?, ?, ?)");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, newTournament);
       prep.setString(3, division);
+      prep.setString(4, division);
       prep.executeUpdate();
       SQLFunctions.close(prep);
 
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Set the judging station for a given team at the specified tournament.
+   * 
+   * @param connection db connection
+   * @param teamNumber the team's number
+   * @param tournamentID the tournament
+   * @param judgingStation the new judging station
+   * @return true if the update occurrred, false if the team isn't in the
+   *         tournament
+   */
+  public static boolean updateTeamJudgingStation(final Connection connection,
+                                                 final int teamNumber,
+                                                 final int tournamentID,
+                                                 final String judgingStation) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE TournamentTeams SET judging_station = ? WHERE TeamNumber = ? AND Tournament = ?");
+      prep.setString(1, judgingStation);
+      prep.setInt(2, teamNumber);
+      prep.setInt(3, tournamentID);
+      return prep.executeUpdate() > 0;
     } finally {
       SQLFunctions.close(prep);
     }
@@ -2153,17 +2281,39 @@ public final class Queries {
       prep.setInt(4, number);
       prep.executeUpdate();
       SQLFunctions.close(prep);
+      prep = null;
 
-      prep = connection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) VALUES(?, ?, ?)");
+      prep = connection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station) VALUES (?, ?, ?, ?)");
       prep.setInt(1, tournament);
       prep.setInt(2, number);
       prep.setString(3, division);
+      prep.setString(4, division);
       prep.executeUpdate();
       SQLFunctions.close(prep);
+      prep = null;
 
       return null;
     } finally {
       SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Set event division for a team.
+   */
+  public static void setEventDivision(final Connection connection,
+                                      final int teamNumber,
+                                      final int tournament,
+                                      final String eventDivision) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE TournamentTeams SET event_division = ? WHERE TeamNumber = ? AND Tournament = ?");
+      prep.setString(1, eventDivision);
+      prep.setInt(2, teamNumber);
+      prep.setInt(3, tournament);
+      prep.executeUpdate();
+    } finally {
       SQLFunctions.close(prep);
     }
   }
@@ -2176,9 +2326,6 @@ public final class Queries {
                                 final String name,
                                 final String organization,
                                 final String division) throws SQLException {
-
-    final String prevDivision = getDivisionOfTeam(connection, number);
-
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("UPDATE Teams SET TeamName = ?, Organization = ?, Division = ? WHERE TeamNumber = ?");
@@ -2187,18 +2334,6 @@ public final class Queries {
       prep.setString(3, division);
       prep.setInt(4, number);
       prep.executeUpdate();
-      SQLFunctions.close(prep);
-      prep = null;
-
-      // update event divisions that were referencing the old division
-      prep = connection.prepareStatement("UPDATE TournamentTeams SET event_division = ? WHERE TeamNumber = ? AND event_division = ?");
-      prep.setString(1, division);
-      prep.setInt(2, number);
-      prep.setString(3, prevDivision);
-      prep.executeUpdate();
-      SQLFunctions.close(prep);
-      prep = null;
-
     } finally {
       SQLFunctions.close(prep);
     }
@@ -2678,7 +2813,7 @@ public final class Queries {
         return rs.getString(1);
       } else {
         throw new RuntimeException("Unable to find team number "
-            + teamNumber + "in the database.");
+            + teamNumber + " in the database.");
       }
     } finally {
       SQLFunctions.close(rs);
