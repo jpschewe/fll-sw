@@ -58,6 +58,10 @@ public class SaveTeamData extends BaseFLLServlet {
       final String eventDivision = SessionAttributes.getNonNullAttribute(session, CommitTeam.EVENT_DIVISION,
                                                                          String.class);
 
+      final String judgingStation = SessionAttributes.getNonNullAttribute(session,
+                                                                          CheckJudgingStationNeeded.JUDGING_STATION,
+                                                                          String.class);
+
       // store changes
       if (LOGGER.isInfoEnabled()) {
         LOGGER.info("Updating "
@@ -73,6 +77,8 @@ public class SaveTeamData extends BaseFLLServlet {
       final int teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
       Queries.setEventDivision(connection, teamNumber, teamCurrentTournament, eventDivision);
 
+      Queries.setJudgingStation(connection, teamNumber, teamCurrentTournament, judgingStation);
+      
       if (message.length() > 0) {
         session.setAttribute(SessionAttributes.MESSAGE, message.toString());
       }

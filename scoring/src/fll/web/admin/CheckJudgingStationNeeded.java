@@ -27,19 +27,19 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
 /**
- * Check if the team being added/edited needs event divisions set. Assumes that
- * the team number and event division are set in the session.
+ * Check if the team being added/edited needs judging station set. Assumes that
+ * the team number and judging station are set in the session.
  */
-@WebServlet("/admin/CheckEventDivisionNeeded")
-public class CheckEventDivisionNeeded extends BaseFLLServlet {
+@WebServlet("/admin/CheckJudgingStationNeeded")
+public class CheckJudgingStationNeeded extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
   /**
-   * Key for storing the list of event divisions. Value is a Collection of
-   * String.
+   * Key for storing the current judging station for a team. Value is a
+   * {@link String}.
    */
-  public static final String ALL_EVENT_DIVISIONS = "all_event_divisions";
+  public static final String JUDGING_STATION = "judging_station";
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -53,31 +53,27 @@ public class CheckEventDivisionNeeded extends BaseFLLServlet {
 
       final int teamNumber = SessionAttributes.getNonNullAttribute(session, GatherTeamData.TEAM_NUMBER, Integer.class);
 
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Top CheckEventDivisionNeeded team: "
-            + teamNumber);
-      }
-
       final int teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
 
-      final String eventDivision = Queries.getEventDivision(connection, teamNumber, teamCurrentTournament);
-      session.setAttribute(CommitTeam.EVENT_DIVISION, eventDivision);
+      final String judgingStation = Queries.getJudgingStation(connection, teamNumber, teamCurrentTournament);
+      session.setAttribute(JUDGING_STATION, judgingStation);
 
       @SuppressWarnings("unchecked")
-      final Collection<String> allEventDivisions = (Collection<String>) SessionAttributes.getNonNullAttribute(session,
-                                                                                                              CheckEventDivisionNeeded.ALL_EVENT_DIVISIONS,
-                                                                                                              Collection.class);
+      final Collection<String> allJudgingStations = (Collection<String>) SessionAttributes.getNonNullAttribute(session,
+                                                                                                               CommitTeam.ALL_JUDGING_STATIONS,
+                                                                                                               Collection.class);
 
       if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Current event division: "
-            + eventDivision + " all: " + allEventDivisions + " tournament: " + teamCurrentTournament);
+        LOGGER.trace("team: "
+            + teamNumber + " judgingStation: " + judgingStation + " all: " + allJudgingStations);
       }
 
-      if (!allEventDivisions.isEmpty()
-          && !allEventDivisions.contains(eventDivision)) {
-        response.sendRedirect(response.encodeRedirectURL("chooseEventDivision.jsp"));
+      if (!allJudgingStations.isEmpty()
+          && !allJudgingStations.contains(judgingStation)) {
+        response.sendRedirect(response.encodeRedirectURL("chooseJudgingStation.jsp"));
       } else {
-        response.sendRedirect(response.encodeRedirectURL("CheckJudgingStationNeeded"));
+        session.setAttribute(JUDGING_STATION, judgingStation);
+        response.sendRedirect(response.encodeRedirectURL("SaveTeamData"));
       }
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
