@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Collection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -51,6 +52,17 @@ public class CommitTeam extends BaseFLLServlet {
    */
   public static final String ORGANIZATION = "organization";
 
+  /**
+   * Key for storing the list of judging stations. Value is a
+   * {@link java.util.Collection} of {@link String}.
+   */
+  public static final String ALL_JUDGING_STATIONS = "all_judging_stations";
+
+  /**
+   * Key for session. Value is a string.
+   */
+  public static final String EVENT_DIVISION = "event_division";
+
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -71,7 +83,6 @@ public class CommitTeam extends BaseFLLServlet {
 
       final String division = resolveDivision(request);
       session.setAttribute(DIVISION, division);
-      session.setAttribute(CommitEventDivision.EVENT_DIVISION, division);
 
       final String teamName = request.getParameter("teamName");
       session.setAttribute(TEAM_NAME, teamName);
@@ -91,6 +102,20 @@ public class CommitTeam extends BaseFLLServlet {
 
         redirect = "select_team.jsp";
       } else {
+        // this will be null if the tournament can't be changed
+        final String newTournamentStr = request.getParameter("currentTournament");
+        final int newTournament = newTournamentStr == null ? -1
+            : Utilities.NUMBER_FORMAT_INSTANCE.parse(newTournamentStr).intValue();
+
+        if (null != newTournamentStr) {
+          // need to get these before the team is put in the tournament.
+          final Collection<String> allEventDivisions = Queries.getEventDivisions(connection, newTournament);
+          session.setAttribute(CheckEventDivisionNeeded.ALL_EVENT_DIVISIONS, allEventDivisions);
+          
+          final Collection<String> allJudgingStations = Queries.getJudgingStations(connection, newTournament);
+          session.setAttribute(CommitTeam.ALL_JUDGING_STATIONS, allJudgingStations);
+        }
+
         if (null != request.getParameter("advance")) {
           if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Advancing "
@@ -117,11 +142,6 @@ public class CommitTeam extends BaseFLLServlet {
           message.append("<p id='success'>Successfully demoted team "
               + teamNumber + "</p>");
         }
-
-        // this will be null if the tournament can't be changed
-        final String newTournamentStr = request.getParameter("currentTournament");
-        final int newTournament = newTournamentStr == null ? -1
-            : Utilities.NUMBER_FORMAT_INSTANCE.parse(newTournamentStr).intValue();
 
         if (SessionAttributes.getNonNullAttribute(session, GatherTeamData.ADD_TEAM, Boolean.class)) {
           if (LOGGER.isInfoEnabled()) {

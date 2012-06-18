@@ -22,20 +22,15 @@ import fll.web.BaseFLLServlet;
 @WebServlet("/admin/CommitEventDivision")
 public class CommitEventDivision extends BaseFLLServlet {
 
-  /**
-   * Key for session. Value is a string.
-   */
-  public static final String EVENT_DIVISION = "event_division";
-
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
     // store in session until final commit
     final String eventDivision = request.getParameter("event_division");
-    session.setAttribute(EVENT_DIVISION, eventDivision);
+    session.setAttribute(CommitTeam.EVENT_DIVISION, eventDivision);
 
-    // TODO check on judging station here
+    // FIXME redirect to judging station check
     response.sendRedirect(response.encodeRedirectURL("SaveTeamData"));
 
   }

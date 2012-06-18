@@ -55,7 +55,7 @@ public class SaveTeamData extends BaseFLLServlet {
 
       final String organization = SessionAttributes.getAttribute(session, CommitTeam.ORGANIZATION, String.class);
 
-      final String eventDivision = SessionAttributes.getNonNullAttribute(session, CommitEventDivision.EVENT_DIVISION,
+      final String eventDivision = SessionAttributes.getNonNullAttribute(session, CommitTeam.EVENT_DIVISION,
                                                                          String.class);
 
       // store changes

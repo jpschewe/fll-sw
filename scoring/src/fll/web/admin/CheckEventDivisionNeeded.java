@@ -52,19 +52,34 @@ public class CheckEventDivisionNeeded extends BaseFLLServlet {
       final Connection connection = datasource.getConnection();
 
       final int teamNumber = SessionAttributes.getNonNullAttribute(session, GatherTeamData.TEAM_NUMBER, Integer.class);
+
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Top CheckEventDivisionNeeded team: "
+            + teamNumber);
+      }
+
       final int teamCurrentTournament = Queries.getTeamCurrentTournament(connection, teamNumber);
 
-      final String eventDivision = SessionAttributes.getNonNullAttribute(session, CommitEventDivision.EVENT_DIVISION,
-                                                                         String.class);
+      final String eventDivision = Queries.getEventDivision(connection, teamNumber, teamCurrentTournament);
+      session.setAttribute(CommitTeam.EVENT_DIVISION, eventDivision);
 
-      final Collection<String> allEventDivisions = Queries.getEventDivisions(connection, teamCurrentTournament);
+      @SuppressWarnings("unchecked")
+      final Collection<String> allEventDivisions = (Collection<String>) SessionAttributes.getNonNullAttribute(session,
+                                                                                                              CheckEventDivisionNeeded.ALL_EVENT_DIVISIONS,
+                                                                                                              Collection.class);
+
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Current event division: "
+            + eventDivision + " all: " + allEventDivisions + " tournament: " + teamCurrentTournament);
+      }
+
       if (!allEventDivisions.isEmpty()
           && !allEventDivisions.contains(eventDivision)) {
         session.setAttribute(CheckEventDivisionNeeded.ALL_EVENT_DIVISIONS, allEventDivisions);
         session.setAttribute(GatherTeamData.TEAM_NUMBER, teamNumber);
         response.sendRedirect(response.encodeRedirectURL("chooseEventDivision.jsp"));
       } else {
-        session.setAttribute(CommitEventDivision.EVENT_DIVISION, eventDivision);
+        // FIXME redirect to judging station check
         response.sendRedirect(response.encodeRedirectURL("SaveTeamData"));
       }
     } catch (final SQLException e) {
