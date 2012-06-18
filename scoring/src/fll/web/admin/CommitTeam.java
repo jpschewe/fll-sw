@@ -136,6 +136,7 @@ public class CommitTeam extends BaseFLLServlet {
                 + teamNumber + " is already assigned.</p>");
             LOGGER.error("TeamNumber "
                 + teamNumber + " is already assigned");
+            redirect = "index.jsp";
           } else {
             message.append("<p id='success'>Successfully added team "
                 + teamNumber + "</p>");
