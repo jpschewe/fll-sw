@@ -29,6 +29,8 @@ public final class SubjectiveTableModel extends AbstractTableModel {
 
   private static final Logger LOG = LogUtils.getLogger();
 
+  public static final int NUM_COLUMNS_LEFT_OF_SCORES = 5;
+  
   /**
    * @param scoreDocument XML document that represents the teams that are being
    *          scored along with the judges and the current set of scores
@@ -56,14 +58,16 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     case 2:
       return "Division";
     case 3:
+      return "Judging Station";
+    case 4:
       return "Judge";
     default:
-      if (column == getNumGoals() + 4) {
+      if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES) {
         return "No Show";
-      } else if (column == getNumGoals() + 5) {
+      } else if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES + 1) {
         return "Total Score";
       } else {
-        return getGoalDescription(column - 4).getAttribute("title");
+        return getGoalDescription(column - NUM_COLUMNS_LEFT_OF_SCORES).getAttribute("title");
       }
     }
   }
@@ -80,15 +84,17 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       return String.class;
     case 3:
       return String.class;
+    case 4:
+      return String.class;
     default:
-      if (column == getNumGoals() + 4) {
+      if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES) {
         // No Show
         return Boolean.class;
-      } else if (column == getNumGoals() + 5) {
+      } else if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES + 1) {
         // Total Score
         return Double.class;
       } else {
-        final Element goalEle = getGoalDescription(column - 4);
+        final Element goalEle = getGoalDescription(column - NUM_COLUMNS_LEFT_OF_SCORES);
         if (XMLUtils.isEnumeratedGoal(goalEle)) {
           return String.class;
         } else if (XMLUtils.isComputedGoal(goalEle)) {
@@ -105,7 +111,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   }
 
   public int getColumnCount() {
-    return 6 + getNumGoals();
+    return NUM_COLUMNS_LEFT_OF_SCORES + getNumGoals() + 2;
   }
 
   public Object getValueAt(final int row, final int column) {
@@ -127,16 +133,18 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       case 2:
         return scoreEle.getAttribute("division");
       case 3:
+        return scoreEle.getAttribute("judging_station");
+      case 4:
         return scoreEle.getAttribute("judge");
       default:
-        if (column == getNumGoals() + 4) {
+        if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES) {
           return Boolean.valueOf(scoreEle.getAttribute("NoShow"));
-        } else if (column == getNumGoals() + 5) {
+        } else if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES + 1) {
           // compute total score
           final double newTotalScore = ScoreUtils.computeTotalScore(getTeamScore(row));
           return newTotalScore;
         } else {
-          final Element goalDescription = getGoalDescription(column - 4);
+          final Element goalDescription = getGoalDescription(column - NUM_COLUMNS_LEFT_OF_SCORES);
           final String goalName = goalDescription.getAttribute("name");
           // the order really matters here because a computed goal will never
           // have an entry in scoreEle
@@ -177,17 +185,20 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       // Division
       return false;
     case 3:
+      // Judging Station
+      return false;
+    case 4:
       // Judge
       return false;
     default:
-      if (column == getNumGoals() + 4) {
+      if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES) {
         // No Show
         return true;
-      } else if (column == getNumGoals() + 5) {
+      } else if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES + 1) {
         // Total Score
         return false;
       } else {
-        final Element goalDescription = getGoalDescription(column - 4);
+        final Element goalDescription = getGoalDescription(column - NUM_COLUMNS_LEFT_OF_SCORES);
         if (XMLUtils.isComputedGoal(goalDescription)) {
           return false;
         } else if ("goal".equals(goalDescription.getNodeName())) {
@@ -213,7 +224,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     boolean error = false;
     final Element element = getScoreElement(row);
 
-    if (column == getNumGoals() + 4) {
+    if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES) {
       // No Show
       if (value instanceof Boolean) {
         element.setAttribute("NoShow", value.toString());
@@ -225,7 +236,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         if (b) {
           // delete all scores for that team
           for (int i = 0; i < getNumGoals(); i++) {
-            setValueAt(null, row, i + 4);
+            setValueAt(null, row, i + NUM_COLUMNS_LEFT_OF_SCORES);
           }
         }
       } else {
@@ -237,7 +248,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       // scores to be set to null
       error = true;
     } else {
-      final Element goalDescription = getGoalDescription(column - 4);
+      final Element goalDescription = getGoalDescription(column - NUM_COLUMNS_LEFT_OF_SCORES);
       final String goalName = goalDescription.getAttribute("name");
       // support deleting a value
       if (null == value
@@ -323,7 +334,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     for (int i = 0; i < getNumGoals(); ++i) {
       final Element goalEle = getGoalDescription(i);
       if (XMLUtils.isComputedGoal(goalEle)) {
-        fireTableCellUpdated(row, i + 4);
+        fireTableCellUpdated(row, i + NUM_COLUMNS_LEFT_OF_SCORES);
       }
     }
   }

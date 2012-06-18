@@ -40,7 +40,7 @@ ScoreStandardization.summarizeScores(connection, challengeDocument, currentTourn
         <th>Judge</th>
         <th>Category</th>
         <th>Num Teams Scored</th>
-        <th>Division</th>
+        <th>Judging Station</th>
       </tr>
       <x:forEach select="$challengeDocument/fll/subjectiveCategory">
         <sql:query var="result" dataSource="${datasource}">
@@ -52,7 +52,7 @@ ScoreStandardization.summarizeScores(connection, challengeDocument, currentTourn
         </sql:query>
         <c:forEach items="${result.rows}" var="row">
           <sql:query var="divResult" dataSource="${datasource}">
-            SELECT event_division 
+            SELECT station 
             FROM Judges 
             WHERE id = '${row.Judge}'
             AND Tournament = <%=currentTournament %>
@@ -63,7 +63,7 @@ ScoreStandardization.summarizeScores(connection, challengeDocument, currentTourn
               <td>${row.Judge}</td>
               <td><x:out select="./@title"/></td>
               <td>${row.numTeams}</td>
-              <td>${divRow.event_division }</td>
+              <td>${divRow.station }</td>
             </tr>
           </c:forEach>
         </c:forEach>

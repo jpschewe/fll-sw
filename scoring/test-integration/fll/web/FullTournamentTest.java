@@ -280,33 +280,58 @@ public class FullTournamentTest extends SeleneseTestBase {
     Assert.assertTrue(selenium.isElementPresent("id=success"));
   }
 
+  private void assignJudge(final String id,
+                           final String category,
+                           final String station,
+                           final int judgeIndex) throws IOException {
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Assigning judge '"
+          + id + "' cat: '" + category + "' station: '" + station + "' index: " + judgeIndex);
+    }
+
+    // make sure the row exists
+    while (!selenium.isElementPresent("name=id"
+        + String.valueOf(judgeIndex))) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Adding a row to the judges entry form to get to: "
+            + judgeIndex);
+        IntegrationTestUtils.storeScreenshot(selenium);
+      }
+      selenium.click("id=add_rows");
+      try {
+        Thread.sleep(2000); // let the javascript do it's work
+      } catch (final InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    selenium.type("id"
+        + judgeIndex, id);
+    selenium.type("cat"
+        + judgeIndex, category);
+    selenium.type("station"
+        + judgeIndex, station);
+
+  }
+
   private void assignJudges(final Connection testDataConn,
                             final String testTournamentName) throws IOException, SAXException, SQLException {
     ResultSet rs;
     PreparedStatement prep;
-    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "admin/judges.jsp");
 
-    // need to add rows to form if test database has more judges than
-    // categories
-    prep = testDataConn.prepareStatement("SELECT COUNT(id) FROM Judges WHERE Tournament = ?");
-    prep.setString(1, testTournamentName);
-    rs = prep.executeQuery();
-    Assert.assertTrue("Could not find judges information in test data", rs.next());
-    final int numJudges = rs.getInt(1);
-    SQLFunctions.close(rs);
-    SQLFunctions.close(prep);
-    while (!selenium.isElementPresent("name=id"
-        + String.valueOf(numJudges - 1))) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Adding a row to the judges entry form");
-      }
-      selenium.click("name=add_rows");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-    }
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
+        + "admin/index.jsp");
+
+    selenium.click("id=assign_judges");
+    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
     // assign judges from database
-    int judgeIndex = 0;
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Assigning judges");
+      IntegrationTestUtils.storeScreenshot(selenium);
+    }
+
+    int judgeIndex = 1;
     prep = testDataConn.prepareStatement("SELECT id, category, Division FROM Judges WHERE Tournament = ?");
     prep.setString(1, testTournamentName);
     rs = prep.executeQuery();
@@ -314,27 +339,49 @@ public class FullTournamentTest extends SeleneseTestBase {
       final String id = rs.getString(1);
       final String category = rs.getString(2);
       final String division = rs.getString(3);
-      selenium.type("id"
-          + judgeIndex, id);
-      selenium.type("cat"
-          + judgeIndex, category);
-      selenium.type("div"
-          + judgeIndex, division);
-      ++judgeIndex;
+
+      if ("All".equals(division)) {
+
+        final String[] stations = selenium.getSelectOptions("station1");
+        for (final String station : stations) {
+          assignJudge(id, category, station, judgeIndex);
+          ++judgeIndex;
+        }
+
+      } else {
+        assignJudge(id, category, division, judgeIndex);
+        ++judgeIndex;
+      }      
     }
     SQLFunctions.close(rs);
     SQLFunctions.close(prep);
 
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("After assigning judges");
+      IntegrationTestUtils.storeScreenshot(selenium);
+    }
+
     // submit those values
-    selenium.click("finished");
+    selenium.click("id=finished");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
     Assert.assertFalse("Got error from judges assignment", selenium.isElementPresent("error"));
 
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Verifying judges");
+      IntegrationTestUtils.storeScreenshot(selenium);
+    }
+
     // commit judges information
-    selenium.click("commit");
+    selenium.click("id=commit");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
     Assert.assertTrue("Error assigning judges", selenium.isElementPresent("success"));
+
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("After committing judges");
+      IntegrationTestUtils.storeScreenshot(selenium);
+    }
+
   }
 
   private void loadTeams() throws IOException, SAXException {
@@ -523,7 +570,7 @@ public class FullTournamentTest extends SeleneseTestBase {
                                      final String testTournament) throws SQLException, IOException,
       MalformedURLException, SAXException, ParseException {
 
-    final File subjectiveZip = File.createTempFile("fll", "zip");
+    final File subjectiveZip = File.createTempFile("fll", ".zip", new File("screenshots"));
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -533,7 +580,12 @@ public class FullTournamentTest extends SeleneseTestBase {
       WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
           + "admin/subjective-data.fll");
       WebResponse response = WebTestUtils.loadPage(conversation, request);
-      Assert.assertEquals("application/zip", response.getContentType());
+      final String contentType = response.getContentType();
+      if (!"application/zip".equals(contentType)) {
+        LOGGER.error("Got non-zip content: "
+            + response.getText());
+      }
+      Assert.assertEquals("application/zip", contentType);
       final InputStream zipStream = response.getInputStream();
       final FileOutputStream outputStream = new FileOutputStream(subjectiveZip);
       final byte[] buffer = new byte[512];
@@ -543,6 +595,7 @@ public class FullTournamentTest extends SeleneseTestBase {
       }
       outputStream.close();
       zipStream.close();
+
       final SubjectiveFrame subjective = new SubjectiveFrame(subjectiveZip);
 
       // insert scores into zip
@@ -551,8 +604,17 @@ public class FullTournamentTest extends SeleneseTestBase {
                                                                                                    .getElementsByTagName("subjectiveCategory"))) {
         final String category = subjectiveElement.getAttribute("name");
         final String title = subjectiveElement.getAttribute("title");
+
         // find appropriate table model
         final TableModel tableModel = subjective.getTableModelForTitle(title);
+        Assert.assertNotNull(tableModel);
+
+        final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
+        Assert.assertTrue("Can't find TeamNumber column in subjective table model", teamNumberColumn >= 0);
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Found team number column at "
+              + teamNumberColumn);
+        }
 
         prep = testDataConn.prepareStatement("SELECT * FROM "
             + category + " WHERE Tournament = ?");
@@ -560,17 +622,23 @@ public class FullTournamentTest extends SeleneseTestBase {
         rs = prep.executeQuery();
         while (rs.next()) {
           final int teamNumber = rs.getInt("TeamNumber");
+
           // find row number in table
-          final int teamNumberColumn = findColumnByName(tableModel, "TeamNumber");
-          Assert.assertTrue("Can't find TeamNumber column in subjective table model", teamNumberColumn >= 0);
           int rowIndex = -1;
-          for (int rowIdx = 0; rowIdx < tableModel.getRowCount()
-              && rowIndex == -1; ++rowIdx) {
+          for (int rowIdx = 0; rowIdx < tableModel.getRowCount(); ++rowIdx) {
             final Object teamNumberRaw = tableModel.getValueAt(rowIdx, teamNumberColumn);
             Assert.assertNotNull(teamNumberRaw);
             final int value = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumberRaw.toString()).intValue();
+
+            if (LOGGER.isTraceEnabled()) {
+              LOGGER.trace("Checking if "
+                  + teamNumber + " equals " + value + " raw: " + teamNumberRaw + "? " + (value == teamNumber)
+                  + " rowIdx: " + rowIdx + " numRows: " + tableModel.getRowCount());
+            }
+
             if (value == teamNumber) {
               rowIndex = rowIdx;
+              break;
             }
           }
           Assert.assertTrue("Can't find team "
@@ -614,9 +682,6 @@ public class FullTournamentTest extends SeleneseTestBase {
       Assert.assertTrue(response.isHTML());
       Assert.assertNotNull(response.getElementWithID("success"));
     } finally {
-      if (!subjectiveZip.delete()) {
-        subjectiveZip.deleteOnExit();
-      }
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
     }

@@ -94,7 +94,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
     PreparedStatement prep = null;
     PreparedStatement prep2 = null;
     try {
-      prep = connection.prepareStatement("SELECT id, event_division FROM Judges WHERE category = ? AND Tournament = ?");
+      prep = connection.prepareStatement("SELECT id, station FROM Judges WHERE category = ? AND Tournament = ?");
       prep.setInt(2, currentTournament);
 
       final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
@@ -112,18 +112,20 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
         rs = prep.executeQuery();
         while (rs.next()) {
           final String judge = rs.getString(1);
-          final String division = rs.getString(2);
+          final String judgingStation = rs.getString(2);
 
           for (final Team team : teams) {
-            final String teamDiv = Queries.getEventDivision(connection, team.getTeamNumber());
-            if (Judges.ALL_DIVISIONS.equals(division)
-                || division.equals(teamDiv)) {
+            final String teamJudgingStation = Queries.getJudgingStation(connection, team.getTeamNumber(), currentTournament);
+            if (judgingStation.equals(teamJudgingStation)) {
+              final String teamDiv = Queries.getEventDivision(connection, team.getTeamNumber());
+
               final Element scoreElement = document.createElement("score");
               categoryElement.appendChild(scoreElement);
 
               scoreElement.setAttribute("teamName", team.getTeamName());
               scoreElement.setAttribute("teamNumber", String.valueOf(team.getTeamNumber()));
               scoreElement.setAttribute("division", teamDiv);
+              scoreElement.setAttribute("judging_station", teamJudgingStation);
               scoreElement.setAttribute("organization", team.getOrganization());
               scoreElement.setAttribute("judge", judge);
               scoreElement.setAttribute("NoShow", "false");

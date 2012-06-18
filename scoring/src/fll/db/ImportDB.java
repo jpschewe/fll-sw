@@ -478,6 +478,9 @@ public final class ImportDB {
     if (dbVersion < 6) {
       upgrade2To6(connection);
     }
+    if (dbVersion < 7) {
+      upgrade6To7(connection);
+    }
     final int newVersion = Queries.getDatabaseVersion(connection);
     if (newVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
@@ -534,6 +537,52 @@ public final class ImportDB {
       }
 
       setDBVersion(connection, 6);
+    } finally {
+      SQLFunctions.close(rs);
+      rs = null;
+      SQLFunctions.close(stmt);
+      stmt = null;
+      SQLFunctions.close(prep);
+      prep = null;
+    }
+  }
+
+  /**
+   * Add judging_station to TournamentTeams.
+   * Rename event_division to station in Judges 
+   * @param connection
+   * @throws SQLException
+   */
+  private static void upgrade6To7(final Connection connection) throws SQLException {
+    Statement stmt = null;
+    ResultSet rs = null;
+    PreparedStatement prep = null;
+    try {
+      stmt = connection.createStatement();
+
+      prep = connection.prepareStatement("UPDATE TournamentTeams SET event_division = ? WHERE TeamNumber = ? AND Tournament = ?");
+
+      // set event_division based upon team division when NULL
+      rs = stmt.executeQuery("SELECT TeamNumber, Tournament FROM TournamentTeams WHERE event_division is NULL");
+      while (rs.next()) {
+        final int teamNumber = rs.getInt(1);
+        final int tournament = rs.getInt(2);
+        final String division = Queries.getDivisionOfTeam(connection, teamNumber);
+        prep.setInt(2, teamNumber);
+        prep.setInt(3, tournament);
+        prep.setString(1, division);
+      }
+
+      // add score_group column
+      stmt.executeUpdate("ALTER TABLE TournamentTeams ADD COLUMN judging_station varchar(64)");
+
+      // set score_group equal to event division
+      stmt.executeUpdate("UPDATE TournamentTeams SET judging_station = event_division");
+      
+      // rename event_division to station in Judges
+      stmt.executeUpdate("ALTER TABLE Judges ALTER COLUMN event_division RENAME TO station");
+
+      setDBVersion(connection, 7);
     } finally {
       SQLFunctions.close(rs);
       rs = null;
@@ -1068,17 +1117,21 @@ public final class ImportDB {
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
       SQLFunctions.close(destPrep);
-      sourcePrep = sourceConnection.prepareStatement("SELECT TeamNumber, event_division FROM TournamentTeams WHERE Tournament = ?");
+      sourcePrep = sourceConnection.prepareStatement("SELECT TeamNumber, event_division, judging_station FROM TournamentTeams WHERE Tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
-      destPrep = destinationConnection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) VALUES (?, ?, ?)");
+      destPrep = destinationConnection.prepareStatement("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station) VALUES (?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
         final int teamNumber = sourceRS.getInt(1);
         if (!Team.isInternalTeamNumber(teamNumber)) {
           final String eventDivision = sourceRS.getString(2);
+          final String judgingStation = sourceRS.getString(3);
+          final String actualEventDivision = eventDivision == null ? GenerateDB.DEFAULT_TEAM_DIVISION : eventDivision;
+          final String actualJudgingStation = judgingStation == null ? actualEventDivision : judgingStation;
           destPrep.setInt(2, teamNumber);
-          destPrep.setString(3, eventDivision == null ? GenerateDB.DEFAULT_TEAM_DIVISION : eventDivision);
+          destPrep.setString(3, actualEventDivision);
+          destPrep.setString(4, actualJudgingStation);
           destPrep.executeUpdate();
         }
       }
@@ -1106,10 +1159,10 @@ public final class ImportDB {
       destPrep.executeUpdate();
       SQLFunctions.close(destPrep);
 
-      destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, event_division, Tournament) VALUES (?, ?, ?, ?)");
+      destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES (?, ?, ?, ?)");
       destPrep.setInt(4, destTournamentID);
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT id, category, event_division FROM Judges WHERE Tournament = ?");
+      sourcePrep = sourceConnection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {

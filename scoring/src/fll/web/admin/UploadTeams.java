@@ -478,7 +478,7 @@ public final class UploadTeams extends BaseFLLServlet {
         try {
           final Number num = Utilities.NUMBER_FORMAT_INSTANCE.parse(teamNumStr);
 
-          if ((Math.floor(num.doubleValue()) != Math.ceil(num.doubleValue()))
+          if (((int) Math.floor(num.doubleValue()) != (int) Math.ceil(num.doubleValue()))
               || num.intValue() < 0) {
             session.setAttribute(SessionAttributes.MESSAGE,
                                  "<p class='error'>All team numbers must be positive integers: "
@@ -551,8 +551,8 @@ public final class UploadTeams extends BaseFLLServlet {
       stmt.executeUpdate("DELETE FROM TournamentTeams");
       final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
       final int dummyTournamentID = dummyTournament.getTournamentID();
-      stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division) SELECT "
-          + dummyTournamentID + ", Teams.TeamNumber, Teams.Division FROM Teams");
+      stmt.executeUpdate("INSERT INTO TournamentTeams (Tournament, TeamNumber, event_division, judging_station) SELECT "
+          + dummyTournamentID + ", Teams.TeamNumber, Teams.Division, Teams.Division FROM Teams");
 
       if (null != tournamentColumn) {
         rs = stmt.executeQuery("SELECT "

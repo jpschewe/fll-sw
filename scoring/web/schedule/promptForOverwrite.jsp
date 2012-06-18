@@ -15,7 +15,7 @@ ${message}
 
 <p>
 A schedule already exists for the current tournament, should it be overwritten?<br/>
-<a href='<c:url value="/schedule/GetSheetNames"/>'>Yes</a><br/>
+<a href='<c:url value="/schedule/GetSheetNames"/>'>Yes</a>
 <a href='<c:url value="/admin/index.jsp"/>'>No</a><br/>
 </p>
 

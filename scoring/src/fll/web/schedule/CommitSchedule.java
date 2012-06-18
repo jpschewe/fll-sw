@@ -21,6 +21,7 @@ import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 
 import fll.db.Queries;
+import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -31,7 +32,6 @@ import fll.web.WebUtils;
 /**
  * Commit the schedule in uploadSchedule_schedule to the database for the
  * current tournament.
- * 
  */
 @WebServlet("/schedule/CommitSchedule")
 public class CommitSchedule extends BaseFLLServlet {
@@ -54,6 +54,8 @@ public class CommitSchedule extends BaseFLLServlet {
 
       schedule.storeSchedule(connection, tournamentID);
 
+      assignJudgingStations(connection, tournamentID, schedule);
+
       session.setAttribute(SessionAttributes.MESSAGE, "<p>Schedule successfully stored in the database</p>");
       WebUtils.sendRedirect(application, response, "/admin/index.jsp");
       return;
@@ -61,6 +63,21 @@ public class CommitSchedule extends BaseFLLServlet {
       LOGGER.error("There was an error talking to the database", e);
       throw new FLLRuntimeException("There was an error talking to the database", e);
     }
+  }
+
+  /**
+   * Set judging_station to be the info from the schedule
+   */
+  private void assignJudgingStations(final Connection connection,
+                                     final int tournamentID,
+                                     final TournamentSchedule schedule) throws SQLException {
+
+    for (final TeamScheduleInfo si : schedule.getSchedule()) {
+      final String station = si.getJudgingStation();
+      final int teamNumber = si.getTeamNumber();
+      Queries.updateTeamJudgingStation(connection, teamNumber, tournamentID, station);
+    }
 
   }
+
 }
