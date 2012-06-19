@@ -43,15 +43,28 @@ public class CreateTournament extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
 
     try {
-      final String answer = (String) request.getAttribute("submit");
+      final String answer = (String) request.getParameter("submit");
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("Submit to CreateTournament: '"
+            + answer + "'");
+      }
+
       if ("Yes".equals(answer)) {
         createSelectedTournament(session);
       } else {
+        message.append("<p>Canceled request to create tournament</p>");
         session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
       }
     } catch (final SQLException sqle) {
       LOG.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
+    }
+
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Message is: "
+          + message);
+      LOG.trace("Redirect URL is: "
+          + SessionAttributes.getRedirectURL(session));
     }
 
     session.setAttribute("message", message.toString());
