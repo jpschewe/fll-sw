@@ -69,11 +69,10 @@ public final class Utilities {
   }
 
   /**
-   * Character set to use throughout the software. Currently set to UTF-8. 
+   * Character set to use throughout the software. Currently set to UTF-8.
    */
   public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
-  
-  
+
   private Utilities() {
   }
 
@@ -401,7 +400,8 @@ public final class Utilities {
     dataSource.setUser("sa");
 
     // startup test database server
-    if (Boolean.getBoolean("inside.test")) {
+    if (Boolean.getBoolean("inside.test")
+        && !myURL.contains(":mem:")) {
       synchronized (TEST_DATABASE_SERVER_LOCK) {
         if (null == _testDatabaseServer) {
           if (LOGGER.isTraceEnabled()) {
@@ -508,8 +508,7 @@ public final class Utilities {
   }
 
   /**
-   * Application attribute to hold names of all displays.
-   * Type is Set<String>
+   * Application attribute to hold names of all displays. Type is Set<String>
    */
   public static final String DISPLAY_NAMES_KEY = "displayNames";
 
