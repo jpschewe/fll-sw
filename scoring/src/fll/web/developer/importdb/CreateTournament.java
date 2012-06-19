@@ -42,16 +42,32 @@ public class CreateTournament extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
 
+    // unset redirect url
+    session.setAttribute(SessionAttributes.REDIRECT_URL, null);
+
     try {
-      final String answer = (String) request.getAttribute("submit");
+      final String answer = (String) request.getParameter("submit");
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("Submit to CreateTournament: '"
+            + answer + "'");
+      }
+
       if ("Yes".equals(answer)) {
-        createSelectedTournament(session);
+        createSelectedTournament(message, session);
       } else {
+        message.append("<p>Canceled request to create tournament</p>");
         session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
       }
     } catch (final SQLException sqle) {
       LOG.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
+    }
+
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Message is: "
+          + message);
+      LOG.trace("Redirect URL is: "
+          + SessionAttributes.getRedirectURL(session));
     }
 
     session.setAttribute("message", message.toString());
@@ -65,9 +81,8 @@ public class CreateTournament extends BaseFLLServlet {
    * @param session the session
    * @throws SQLException
    */
-  private static void createSelectedTournament(final HttpSession session) throws SQLException {
-    final StringBuilder message = new StringBuilder();
-
+  private static void createSelectedTournament(final StringBuilder message,
+                                               final HttpSession session) throws SQLException {
     Connection sourceConnection = null;
     Connection destConnection = null;
     try {
@@ -79,8 +94,6 @@ public class CreateTournament extends BaseFLLServlet {
       destConnection = destDataSource.getConnection();
 
       createTournament(sourceConnection, destConnection, tournament, message, session);
-
-      session.setAttribute("message", message.toString());
     } finally {
       SQLFunctions.close(sourceConnection);
       SQLFunctions.close(destConnection);
@@ -110,14 +123,20 @@ public class CreateTournament extends BaseFLLServlet {
       if (null == destNextTournament) {
         createTournament(sourceConnection, destConnection, sourceNextTournament.getName(), message, session);
         Tournament.setNextTournament(destConnection, tournamentName, sourceNextTournament.getName());
-
-        session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentExists");
       } else {
+        LOG.error("Cannot find tournament "
+            + tournamentName + " in imported database");
+
         message.append("<p class='error'>Cannot find tournament "
             + tournamentName + " in imported database!</p>");
         session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
       }
     }
+
+    if (null == SessionAttributes.getRedirectURL(session)) {
+      session.setAttribute(SessionAttributes.REDIRECT_URL, "CheckTournamentExists");
+    }
+
   }
 
 }

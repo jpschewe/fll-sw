@@ -44,7 +44,7 @@ public class ImportDBDump extends BaseFLLServlet {
    * unique.
    */
   private static int _importdbCount = 0;
-  private static int getNextDBCount() {
+  public static int getNextDBCount() {
     synchronized(ImportDBDump.class) {
       return _importdbCount++;
     }
