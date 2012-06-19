@@ -36,7 +36,7 @@ ${message}
 <form name="promptCreateMissingTeams" action="AddMissingTeams">
 <p>The following teams are in the source database and not in the dest database. OK to add teams?</p>
 
-<table>
+<table border='1'>
   <tr><th>Team Number</th><th>Team Name</th></tr>
   <c:forEach items="${missingTeams}" var="team">
     <tr>

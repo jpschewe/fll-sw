@@ -20,8 +20,11 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
 
+import fll.Tournament;
 import fll.db.ImportDB;
+import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -59,6 +62,12 @@ public class ExecuteImport extends BaseFLLServlet {
       } else {
         ImportDB.importDatabase(sourceConnection, destConnection, tournament);
         
+        // update score totals
+        final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
+        final int destTournamentID = destTournament.getTournamentID();
+        final Document document = Queries.getChallengeDocument(destConnection);
+        Queries.updateScoreTotals(document, destConnection, destTournamentID);
+
         message.append(String.format("<p>Import of tournament %s successful. You may now optionally select another tournament to import.</p>", tournament));
         session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
       }
