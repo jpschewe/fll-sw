@@ -7,12 +7,15 @@
 <%@ page import="java.sql.Statement"%>
 <%@ page import="java.sql.ResultSet"%>
 
+<c:if test="${not servletLoaded }">
+<c:redirect url="index.jsp"/>
+</c:if>
+<c:remove var="servletLoaded"/>
+
 <%
   final DataSource datasource = SessionAttributes.getDataSource(session);
   final Connection connection = datasource.getConnection();
   final int currentTournamentID = Queries.getCurrentTournament(connection);
-  final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournamentID);
-  final int scoresheetsPerPage = Queries.getScoresheetLayoutNUp(connection);
   
 %>
 
@@ -174,17 +177,17 @@ ${message}
 	<form id='changeSeedingRounds' action='ChangeSeedingRounds'
 		method='post'>Select the number of seeding runs. <select
 		name='seedingRounds'>
-		<%
-		  for (int i = 0; i <= 10; i++) {
-		    out.print("<option value='"
-		        + i + "'");
-		    if (numSeedingRounds == i) {
-		      out.print(" selected");
-		    }
-		    out.println(">"
-		        + i + "</option>");
-		  }
-		%>
+		<c:forEach begin="0" end="10" var="numRounds">
+		<c:choose>
+		<c:when test="${numRounds == numSeedingRounds}">
+<option selected value='${numRounds}'>${numRounds}</option>
+</c:when>
+<c:otherwise>
+<option value='${numSheets}'>${numSheets }</option>
+</c:otherwise>
+</c:choose>
+
+					</c:forEach>
 	</select> <input type='submit' name='changeSeedingRounds' value='Commit'>
 	</form>
 	</li>
