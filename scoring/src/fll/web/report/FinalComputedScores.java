@@ -230,9 +230,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
                            final TournamentSchedule schedule,
                            final List<Element> subjectiveCategories,
                            final PdfPTable divTable) throws SQLException {
-
-    final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
-
     ResultSet rawScoreRS = null;
     PreparedStatement teamPrep = null;
     ResultSet teamsRS = null;
@@ -253,7 +250,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       query.append(" AND current_tournament_teams.event_division = ?");
       query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
       query.append(" ORDER BY FinalScores.OverallScore "
-          + ascDesc + ", Teams.TeamNumber");
+          + winnerCriteria.getSortString() + ", Teams.TeamNumber");
       teamPrep = connection.prepareStatement(query.toString());
       teamPrep.setInt(1, tournament.getTournamentID());
       teamPrep.setString(2, division);
@@ -317,7 +314,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
         rawLabel.setBorder(0);
         curteam.addCell(rawLabel);
 
-        insertRawScoreColumns(connection, tournament, ascDesc, subjectiveCategories, weights, teamNumber, curteam);
+        insertRawScoreColumns(connection, tournament, winnerCriteria.getSortString(), subjectiveCategories, weights, teamNumber, curteam);
 
         // Column for the highest performance score of the seeding rounds
         scorePrep.setInt(1, teamNumber);
