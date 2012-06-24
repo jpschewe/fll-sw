@@ -54,7 +54,6 @@ public class CategorizedScores extends BaseFLLServlet {
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
-    final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
 
     final Formatter writer = new Formatter(response.getWriter());
     writer.format("<html><body>");
@@ -100,14 +99,14 @@ public class CategorizedScores extends BaseFLLServlet {
               + " AND TournamentTeams.Tournament = FinalScores.Tournament"//
               + " AND TournamentTeams.event_division = ?"//
               + " AND FinalScores.Tournament = ?"//
-              + " ORDER BY FinalScores." + categoryName + " " + ascDesc);
+              + " ORDER BY FinalScores." + categoryName + " " + winnerCriteria.getSortString());
           prep.setString(1, division);
           prep.setInt(2, currentTournament);
           rawScorePrep = connection.prepareStatement("SELECT ComputedTotal"//
               + " FROM " + categoryName //                    
               + " WHERE TeamNumber = ?" //
               + " AND Tournament = ?" //
-              + " ORDER BY ComputedTotal " + ascDesc // get the best score
+              + " ORDER BY ComputedTotal " + winnerCriteria.getSortString() // get the best score
           );
           rawScorePrep.setInt(2, currentTournament);
           rs = prep.executeQuery();
