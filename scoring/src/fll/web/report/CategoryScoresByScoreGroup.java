@@ -6,14 +6,12 @@
 package fll.web.report;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -26,12 +24,22 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
-import org.apache.commons.lang3.StringUtils;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.itextpdf.text.BadElementException;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+
+import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
+import fll.scheduler.TournamentSchedule;
+import fll.util.PdfUtils;
+import fll.util.SimpleFooterHandler;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -46,107 +54,130 @@ import fll.xml.XMLUtils;
 @WebServlet("/report/CategoryScoresByScoreGroup")
 public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name, winner criteria determines sort")
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-
-    final DataSource datasource = SessionAttributes.getDataSource(session);
-    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
-
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
-    final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
-
-    final PrintWriter writer = response.getWriter();
-    writer.write("<html><body>");
-    writer.write("<h1>FLL Categorized Score Summary by score group</h1>");
-    writer.write("<hr/>");
-
-    // cache the subjective categories title->dbname
-    final Map<String, String> subjectiveCategories = new HashMap<String, String>();
-    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
-      final String title = subjectiveElement.getAttribute("title");
-      final String name = subjectiveElement.getAttribute("name");
-      subjectiveCategories.put(title, name);
-    }
-
-    ResultSet rs = null;
-    PreparedStatement prep = null;
     try {
+      final DataSource datasource = SessionAttributes.getDataSource(session);
       final Connection connection = datasource.getConnection();
+      final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+      final int tournamentID = Queries.getCurrentTournament(connection);
+      final Tournament tournament = Tournament.findTournamentByID(connection, tournamentID);
+      response.reset();
+      response.setContentType("application/pdf");
+      response.setHeader("Content-Disposition", "filename=categoryScoresByJudgingStation.pdf");
 
-      final int currentTournament = Queries.getCurrentTournament(connection);
+      final Document pdfDoc = PdfUtils.createPdfDoc(response.getOutputStream(), new SimpleFooterHandler());
 
-      // foreach division
-      for (final String division : Queries.getEventDivisions(connection)) {
-        // foreach subjective category
-        for(final Map.Entry<String, String> entry : subjectiveCategories.entrySet()) {
-          final String categoryTitle = entry.getKey();
-          final String categoryName = entry.getValue();
+      generateReport(connection, pdfDoc, challengeDocument, tournament);
 
-          final Map<String, Collection<Integer>> scoreGroups = Queries.computeScoreGroups(connection, currentTournament, division, categoryName);
+      pdfDoc.close();
 
-          // select from FinalScores
-          for(final Map.Entry<String, Collection<Integer>> scoreGroupEntry : scoreGroups.entrySet()) {
-            final String scoreGroup = scoreGroupEntry.getKey();
-            writer.write("<h3>"
-                + categoryTitle + " Division: " + division + " Score Group: " + scoreGroup + "</h3>");
-            writer.write("<table border='0'>");
-            writer.write("<tr><th colspan='3'>Team # / Organization / Team Name</th><th>Scaled Score</th></tr>");
+    } catch (final SQLException e) {
+      throw new RuntimeException(e);
+    } catch (final DocumentException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-            final String teamSelect = StringUtils.join(scoreGroupEntry.getValue().iterator(), ", ");
-            prep = connection.prepareStatement("SELECT Teams.TeamNumber,Teams.Organization,Teams.TeamName,FinalScores."
-                + categoryName + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( " + teamSelect
-                + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores." + categoryName + " " + ascDesc);
-            prep.setInt(1, currentTournament);
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table column, winner criteria determines sort")
+  private void generateReport(final Connection connection,
+                              final Document pdfDoc,
+                              final org.w3c.dom.Document challengeDocument,
+                              final Tournament tournament) throws SQLException, DocumentException {
+
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      final Element root = challengeDocument.getDocumentElement();
+      final String challengeTitle = root.getAttribute("title");
+      final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+
+      final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
+                                                                                      root.getElementsByTagName("subjectiveCategory")).asList();
+      final Collection<String> eventDivisions = Queries.getEventDivisions(connection);
+      final Collection<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
+
+      for (final Element catElement : subjectiveCategories) {
+        final String catName = catElement.getAttribute("name");
+        final String catTitle = catElement.getAttribute("title");
+
+        for (final String division : eventDivisions) {
+          for (final String judgingStation : judgingStations) {
+            final PdfPTable table = PdfUtils.createTable(4);
+
+            createHeader(table, challengeTitle, catTitle, division, judgingStation, tournament);
+
+            prep = connection.prepareStatement("SELECT "//
+                + " Teams.TeamNumber, Teams.TeamName, Teams.Organization, FinalScores." + catName //
+                + " FROM Teams, FinalScores" //
+                + " WHERE FinalScores.Tournament = ?" //
+                + " AND FinalScores.TeamNumber = Teams.TeamNumber" + " AND FinalScores.TeamNumber IN (" //
+                + "   SELECT TeamNumber FROM TournamentTeams"//
+                + "   WHERE Tournament = ?" //
+                + "   AND event_division = ?" //
+                + "   AND judging_station = ?)" //
+                + " ORDER BY " + catName + " " + winnerCriteria.getSortString() //
+            );
+            prep.setInt(1, tournament.getTournamentID());
+            prep.setInt(2, tournament.getTournamentID());
+            prep.setString(3, division);
+            prep.setString(4, judgingStation);
+
             rs = prep.executeQuery();
             while (rs.next()) {
-              final int teamNum = rs.getInt(1);
-              final String org = rs.getString(2);
-              final String name = rs.getString(3);
-              final double score = rs.getDouble(4);
-              final boolean scoreWasNull = rs.wasNull();
-              writer.write("<tr>");
-              writer.write("<td>");
-              writer.write(teamNum);
-              writer.write("</td>");
-              writer.write("<td>");
-              if (null == org) {
-                writer.write("");
-              } else {
-                writer.write(org);
+              table.addCell(PdfUtils.createCell(String.valueOf(rs.getInt(1))));
+              table.addCell(PdfUtils.createCell(rs.getString(2)));
+              table.addCell(PdfUtils.createCell(rs.getString(3)));
+              double score = rs.getDouble(4);
+              if (rs.wasNull()) {
+                score = Double.NaN;
               }
-              writer.write("</td>");
-              writer.write("<td>");
-              if (null == name) {
-                writer.write("");
+              if (Double.isNaN(score)) {
+                table.addCell(PdfUtils.createCell("No Score"));
               } else {
-                writer.write(name);
+                table.addCell(PdfUtils.createCell(Utilities.NUMBER_FORMAT_INSTANCE.format(score)));
               }
-              writer.write("</td>");
-              if (!scoreWasNull) {
-                writer.write("<td>");
-                writer.write(Utilities.NUMBER_FORMAT_INSTANCE.format(score));
-              } else {
-                writer.write("<td align='center' class='warn'>No Score");
-              }
-              writer.write("</td>");
-              writer.write("</tr>");
             }
-            writer.write("</table>");
-          }
-        }
-      }
+            
+            pdfDoc.add(table);
 
-    } catch (final SQLException sqle) {
-      throw new RuntimeException(sqle);
+            pdfDoc.add(new Paragraph(Chunk.NEWLINE));
+
+          } // foreach station
+        } // foreach division
+      } // foreach category
+
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
     }
 
-    writer.write("</body></html>");
   }
+
+  private void createHeader(final PdfPTable table,
+                            final String challengeTitle,
+                            final String catTitle,
+                            final String division,
+                            final String judgingStation,
+                            final Tournament tournament) throws BadElementException {
+    final PdfPCell tournamentCell = PdfUtils.createHeaderCell(String.format("%s - %s", challengeTitle,
+                                                                            tournament.getName()));
+    tournamentCell.setColspan(4);
+    table.addCell(tournamentCell);
+
+    final PdfPCell categoryHeader = PdfUtils.createHeaderCell(String.format("Category: %s - Division: %s - JudgingStation: %s",
+                                                                            catTitle, division, judgingStation));
+    categoryHeader.setColspan(4);
+    table.addCell(categoryHeader);
+
+    table.addCell(PdfUtils.createHeaderCell(TournamentSchedule.TEAM_NUMBER_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(TournamentSchedule.TEAM_NAME_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(TournamentSchedule.ORGANIZATION_HEADER));
+    table.addCell(PdfUtils.createHeaderCell("Scaled Score"));
+
+    table.setHeaderRows(3);
+  }
+
 }
