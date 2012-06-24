@@ -6,14 +6,21 @@
 
 package fll.util;
 
+import java.io.OutputStream;
+
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
+import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfPageEvent;
+import com.itextpdf.text.pdf.PdfWriter;
 
 
 /**
@@ -75,6 +82,25 @@ public final class PdfUtils {
   public static PdfPCell createCell(final String text) throws BadElementException {
     final PdfPCell cell = createBasicCell(new Chunk(text));
     return cell;
+  }
+
+  /**
+   * Create a simple PDF document using letter orientation.
+   * The document is opened by this method.
+   */
+  public static Document createPdfDoc(final OutputStream out,
+                                final PdfPageEvent pageHandler) throws DocumentException {
+    final Document pdfDoc = new Document(PageSize.LETTER);
+    final PdfWriter writer = PdfWriter.getInstance(pdfDoc, out);
+    writer.setPageEvent(pageHandler);
+  
+    // Measurements are always in points (72 per inch) - This sets up 1/2 inch
+    // margins
+    pdfDoc.setMargins(0.5f * 72, 0.5f * 72, 0.5f * 72, 0.5f * 72);
+    
+    pdfDoc.open();
+    
+    return pdfDoc;
   }
   
 }

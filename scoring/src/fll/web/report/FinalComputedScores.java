@@ -35,12 +35,10 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Tournament;
 import fll.Utilities;
@@ -49,6 +47,8 @@ import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
+import fll.util.PdfUtils;
+import fll.util.SimpleFooterHandler;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
@@ -57,7 +57,6 @@ import fll.xml.XMLUtils;
 
 /**
  * Final computed scores report.
- * 
  */
 @WebServlet("/report/finalComputedScores.pdf")
 public final class FinalComputedScores extends BaseFLLServlet {
@@ -128,7 +127,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     try {
       // This creates our new PDF document and declares it to be in portrait
       // orientation
-      final Document pdfDoc = createPdfDoc(out, pageHandler);
+      final Document pdfDoc = PdfUtils.createPdfDoc(out, pageHandler);
 
       final Element rootElement = challengeDocument.getDocumentElement();
 
@@ -314,7 +313,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
         rawLabel.setBorder(0);
         curteam.addCell(rawLabel);
 
-        insertRawScoreColumns(connection, tournament, winnerCriteria.getSortString(), subjectiveCategories, weights, teamNumber, curteam);
+        insertRawScoreColumns(connection, tournament, winnerCriteria.getSortString(), subjectiveCategories, weights,
+                              teamNumber, curteam);
 
         // Column for the highest performance score of the seeding rounds
         scorePrep.setInt(1, teamNumber);
@@ -545,19 +545,6 @@ public final class FinalComputedScores extends BaseFLLServlet {
     // each page - 1 row for box header, 2 rows text headers and 1 for
     // the horizontal line.
     divTable.setHeaderRows(4);
-  }
-
-  private Document createPdfDoc(final OutputStream out,
-                                final SimpleFooterHandler pageHandler) throws DocumentException {
-    final Document pdfDoc = new Document(PageSize.LETTER);
-    final PdfWriter writer = PdfWriter.getInstance(pdfDoc, out);
-    writer.setPageEvent(pageHandler);
-
-    // Measurements are always in points (72 per inch) - This sets up 1/2 inch
-    // margins
-    pdfDoc.setMargins(0.5f * 72, 0.5f * 72, 0.5f * 72, 0.5f * 72);
-    pdfDoc.open();
-    return pdfDoc;
   }
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Winner type is used to determine sort order")

@@ -47,11 +47,9 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
 import fll.Tournament;
@@ -64,6 +62,7 @@ import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.util.PdfUtils;
+import fll.util.SimpleFooterHandler;
 
 /**
  * Tournament schedule. Can parse the schedule from a spreadsheet or CSV file.
@@ -655,16 +654,7 @@ public class TournamentSchedule implements Serializable {
   public void outputDetailedSchedules(final SchedParams params,
                                       final OutputStream output) throws DocumentException, IOException {
     // print out detailed schedules
-    final Document detailedSchedules = new Document(PageSize.LETTER); // portrait
-
-    // Measurements are always in points (72 per inch)
-    // This sets up 1/4 inch margins
-    detailedSchedules.setMargins(0.25f * 72, 0.25f * 72, 0.35f * 72, 0.35f * 72);
-
-    // output to a PDF
-    PdfWriter.getInstance(detailedSchedules, output);
-
-    detailedSchedules.open();
+    final Document detailedSchedules = PdfUtils.createPdfDoc(output, new SimpleFooterHandler());
 
     for (final String subjectiveStation : subjectiveStations) {
       outputSubjectiveSchedule(detailedSchedules, subjectiveStation);
