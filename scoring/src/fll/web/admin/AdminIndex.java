@@ -47,12 +47,18 @@ public class AdminIndex extends BaseFLLServlet {
     final DataSource datasource = SessionAttributes.getDataSource(session);
     try {
       final Connection connection = datasource.getConnection();
+      final int currentTournamentID = Queries.getCurrentTournament(connection);
 
       session.setAttribute("playoffsInitialized",
                            Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
 
       final int scoresheetsPerPage = Queries.getScoresheetLayoutNUp(connection);
       session.setAttribute("scoressheetsPerPage", scoresheetsPerPage);
+      
+      final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournamentID);
+      session.setAttribute("numSeedingRounds", numSeedingRounds);
+
+      session.setAttribute("servletLoaded", true);
       
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
