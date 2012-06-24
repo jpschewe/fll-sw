@@ -4,7 +4,7 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-package fll.web.report;
+package fll.util;
 
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Font;
@@ -17,10 +17,9 @@ import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.PdfWriter;
 
 /**
- * Put page number
- * in the footer.
+ * Put page number in the footer of a PDF document.
  */
-class SimpleFooterHandler extends PdfPageEventHelper {
+public class SimpleFooterHandler extends PdfPageEventHelper {
 
   private PdfTemplate _tpl;
 
@@ -32,7 +31,8 @@ class SimpleFooterHandler extends PdfPageEventHelper {
   }
 
   @Override
-  public void onOpenDocument(final PdfWriter writer, final Document document) {
+  public void onOpenDocument(final PdfWriter writer,
+                             final Document document) {
     _headerFooterFont = TIMES_12PT_NORMAL.getBaseFont();
 
     // initialization of the footer template
@@ -41,10 +41,11 @@ class SimpleFooterHandler extends PdfPageEventHelper {
   }
 
   @Override
-  public void onEndPage(final PdfWriter writer, final Document document) {
+  public void onEndPage(final PdfWriter writer,
+                        final Document document) {
     final PdfContentByte cb = writer.getDirectContent();
     cb.saveState();
-    
+
     // compose the footer
     final String text = "Page "
         + writer.getPageNumber() + " of ";
@@ -65,7 +66,8 @@ class SimpleFooterHandler extends PdfPageEventHelper {
   }
 
   @Override
-  public void onCloseDocument(final PdfWriter writer, final Document document) {
+  public void onCloseDocument(final PdfWriter writer,
+                              final Document document) {
     _tpl.beginText();
     _tpl.setFontAndSize(_headerFooterFont, 12);
     _tpl.setTextMatrix(0, 0);
