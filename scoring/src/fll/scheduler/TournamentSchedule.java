@@ -41,20 +41,15 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
 import fll.Tournament;
@@ -66,6 +61,8 @@ import fll.util.ExcelCellReader;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
+import fll.util.PdfUtils;
+import fll.util.SimpleFooterHandler;
 
 /**
  * Tournament schedule. Can parse the schedule from a spreadsheet or CSV file.
@@ -657,16 +654,7 @@ public class TournamentSchedule implements Serializable {
   public void outputDetailedSchedules(final SchedParams params,
                                       final OutputStream output) throws DocumentException, IOException {
     // print out detailed schedules
-    final Document detailedSchedules = new Document(PageSize.LETTER); // portrait
-
-    // Measurements are always in points (72 per inch)
-    // This sets up 1/4 inch margins
-    detailedSchedules.setMargins(0.25f * 72, 0.25f * 72, 0.35f * 72, 0.35f * 72);
-
-    // output to a PDF
-    PdfWriter.getInstance(detailedSchedules, output);
-
-    detailedSchedules.open();
+    final Document detailedSchedules = PdfUtils.createPdfDoc(output, new SimpleFooterHandler());
 
     for (final String subjectiveStation : subjectiveStations) {
       outputSubjectiveSchedule(detailedSchedules, subjectiveStation);
@@ -752,21 +740,21 @@ public class TournamentSchedule implements Serializable {
     // list of teams staying around to even up the teams
     final List<TeamScheduleInfo> teamsStaying = new LinkedList<TeamScheduleInfo>();
 
-    final PdfPTable table = createTable(7);
+    final PdfPTable table = PdfUtils.createTable(7);
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 2, 2 });
 
-    final PdfPCell tournamentCell = createHeaderCell("Tournament: "
+    final PdfPCell tournamentCell = PdfUtils.createHeaderCell("Tournament: "
         + getName() + " Performance");
     tournamentCell.setColspan(7);
     table.addCell(tournamentCell);
 
-    table.addCell(createHeaderCell(TEAM_NUMBER_HEADER));
-    table.addCell(createHeaderCell(DIVISION_HEADER));
-    table.addCell(createHeaderCell("School or Organization"));
-    table.addCell(createHeaderCell("Team Name"));
-    table.addCell(createHeaderCell("Time"));
-    table.addCell(createHeaderCell("Table"));
-    table.addCell(createHeaderCell("Round"));
+    table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(DIVISION_HEADER));
+    table.addCell(PdfUtils.createHeaderCell("School or Organization"));
+    table.addCell(PdfUtils.createHeaderCell("Team Name"));
+    table.addCell(PdfUtils.createHeaderCell("Time"));
+    table.addCell(PdfUtils.createHeaderCell("Table"));
+    table.addCell(PdfUtils.createHeaderCell("Round"));
     table.setHeaderRows(1);
 
     for (final Map.Entry<PerformanceTime, TeamScheduleInfo> entry : performanceTimes.entrySet()) {
@@ -783,14 +771,14 @@ public class TournamentSchedule implements Serializable {
         backgroundColor = null;
       }
 
-      table.addCell(createCell(String.valueOf(si.getTeamNumber())));
-      table.addCell(createCell(si.getDivision()));
-      table.addCell(createCell(si.getOrganization()));
-      table.addCell(createCell(si.getTeamName()));
-      table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.getPerfTime(round)), backgroundColor));
-      table.addCell(createCell(si.getPerfTableColor(round)
+      table.addCell(PdfUtils.createCell(String.valueOf(si.getTeamNumber())));
+      table.addCell(PdfUtils.createCell(si.getDivision()));
+      table.addCell(PdfUtils.createCell(si.getOrganization()));
+      table.addCell(PdfUtils.createCell(si.getTeamName()));
+      table.addCell(PdfUtils.createCell(OUTPUT_DATE_FORMAT.get().format(si.getPerfTime(round)), backgroundColor));
+      table.addCell(PdfUtils.createCell(si.getPerfTableColor(round)
           + " " + si.getPerfTableSide(round), backgroundColor));
-      table.addCell(createCell(String.valueOf(round + 1)));
+      table.addCell(PdfUtils.createCell(String.valueOf(round + 1)));
     }
 
     detailedSchedules.add(table);
@@ -798,9 +786,9 @@ public class TournamentSchedule implements Serializable {
     // output teams staying
     if (!teamsStaying.isEmpty()) {
       final String formatString = "Team %d will please stay at the table and compete again - score will not count.";
-      final PdfPTable stayingTable = createTable(1);
+      final PdfPTable stayingTable = PdfUtils.createTable(1);
       for (final TeamScheduleInfo si : teamsStaying) {
-        stayingTable.addCell(createCell(new Formatter().format(formatString, si.getTeamNumber()).toString(),
+        stayingTable.addCell(PdfUtils.createCell(new Formatter().format(formatString, si.getTeamNumber()).toString(),
                                         BaseColor.MAGENTA));
       }
       detailedSchedules.add(stayingTable);
@@ -810,68 +798,32 @@ public class TournamentSchedule implements Serializable {
     detailedSchedules.add(Chunk.NEXTPAGE);
   }
 
-  private static PdfPCell createCell(final String text) throws BadElementException {
-    final PdfPCell cell = createBasicCell(new Chunk(text));
-    return cell;
-  }
-
-  private static PdfPCell createCell(final String text,
-                                     final BaseColor backgroundColor) throws BadElementException {
-    final PdfPCell cell = createCell(text);
-    if (null != backgroundColor) {
-      cell.setBackgroundColor(backgroundColor);
-    }
-    return cell;
-  }
-
-  private static PdfPCell createBasicCell(final Chunk chunk) throws BadElementException {
-    final PdfPCell cell = new PdfPCell(new Phrase(chunk));
-    cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-    cell.setUseDescender(true);
-    return cell;
-  }
-
-  private static PdfPCell createHeaderCell(final String text) throws BadElementException {
-    final Chunk chunk = new Chunk(text);
-    chunk.getFont().setStyle(Font.BOLD);
-    final PdfPCell cell = createBasicCell(chunk);
-
-    return cell;
-  }
-
-  private static PdfPTable createTable(final int columns) throws BadElementException {
-    final PdfPTable table = new PdfPTable(columns);
-    // table.setCellsFitPage(true);
-    table.setWidthPercentage(100);
-    return table;
-  }
-
   private void outputSubjectiveSchedule(final Document detailedSchedules,
                                         final String subjectiveStation) throws DocumentException {
-    final PdfPTable table = createTable(6);
+    final PdfPTable table = PdfUtils.createTable(6);
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
 
-    final PdfPCell tournamentCell = createHeaderCell("Tournament: "
+    final PdfPCell tournamentCell = PdfUtils.createHeaderCell("Tournament: "
         + getName() + " - " + subjectiveStation);
     tournamentCell.setColspan(6);
     table.addCell(tournamentCell);
 
-    table.addCell(createHeaderCell(TEAM_NUMBER_HEADER));
-    table.addCell(createHeaderCell(DIVISION_HEADER));
-    table.addCell(createHeaderCell("School or Organization"));
-    table.addCell(createHeaderCell("Team Name"));
-    table.addCell(createHeaderCell(subjectiveStation));
-    table.addCell(createHeaderCell(JUDGE_GROUP_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(DIVISION_HEADER));
+    table.addCell(PdfUtils.createHeaderCell("School or Organization"));
+    table.addCell(PdfUtils.createHeaderCell("Team Name"));
+    table.addCell(PdfUtils.createHeaderCell(subjectiveStation));
+    table.addCell(PdfUtils.createHeaderCell(JUDGE_GROUP_HEADER));
     table.setHeaderRows(2);
 
     Collections.sort(_schedule, getComparatorForSubjective(subjectiveStation));
     for (final TeamScheduleInfo si : _schedule) {
-      table.addCell(createCell(String.valueOf(si.getTeamNumber())));
-      table.addCell(createCell(si.getDivision()));
-      table.addCell(createCell(si.getOrganization()));
-      table.addCell(createCell(si.getTeamName()));
-      table.addCell(createCell(OUTPUT_DATE_FORMAT.get().format(si.getSubjectiveTimeByName(subjectiveStation).getTime())));
-      table.addCell(createCell(si.getJudgingStation()));
+      table.addCell(PdfUtils.createCell(String.valueOf(si.getTeamNumber())));
+      table.addCell(PdfUtils.createCell(si.getDivision()));
+      table.addCell(PdfUtils.createCell(si.getOrganization()));
+      table.addCell(PdfUtils.createCell(si.getTeamName()));
+      table.addCell(PdfUtils.createCell(OUTPUT_DATE_FORMAT.get().format(si.getSubjectiveTimeByName(subjectiveStation).getTime())));
+      table.addCell(PdfUtils.createCell(si.getJudgingStation()));
     }
 
     detailedSchedules.add(table);
