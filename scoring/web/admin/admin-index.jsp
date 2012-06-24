@@ -14,9 +14,6 @@
   final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournamentID);
   final int scoresheetsPerPage = Queries.getScoresheetLayoutNUp(connection);
   
-  session.setAttribute("playoffsInitialized",
-                       Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
-
 %>
 
 <c:if test="${not empty param.ScorePageText}">
@@ -158,17 +155,16 @@ ${message}
 		action='ChangeScoresheetLayout' method='post'>Select the
 	number of scoresheets per printed page. <select
 		name='scoresheetsPerPage'>
-		<%
-		  for (int i = 1; i <= 2; i++) {
-		    out.print("<option value='"
-		        + i + "'");
-		    if (scoresheetsPerPage == i) {
-		      out.print(" selected");
-		    }
-		    out.println(">"
-		        + i + "</option>");
-		  }
-		%>
+		<c:forEach begin="0" end="2" var="numSheets">
+		<c:choose>
+		<c:when test="${numSheets == scoressheetsPerPage}">
+<option selected value='${numSheets}'>${numSheets }</option>
+</c:when>
+<c:otherwise>
+<option value='${numSheets}'>${numSheets }</option>
+</c:otherwise>
+</c:choose>
+					</c:forEach>
 	</select> <input type='submit' name='changeScoresheetLayoutNUp' value='Commit'>
 	</form>
 	</li>
