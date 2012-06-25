@@ -8,6 +8,7 @@ package fll.web.admin;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -24,10 +25,13 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
 
 import fll.Tournament;
 import fll.db.Queries;
+import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -50,9 +54,12 @@ public class AdminIndex extends BaseFLLServlet {
       message.append(existingMessage);
     }
 
+    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+
     final DataSource datasource = SessionAttributes.getDataSource(session);
     ResultSet rs = null;
     Statement stmt = null;
+    PreparedStatement prep = null;
     try {
       final Connection connection = datasource.getConnection();
       stmt = connection.createStatement();
@@ -82,6 +89,21 @@ public class AdminIndex extends BaseFLLServlet {
       }
       session.setAttribute("teamsUploaded", teamsUploaded);
 
+      session.setAttribute("scheduleUploaded",
+                           TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID));
+
+      session.setAttribute("judgesAssigned", Queries.isJudgesProperlyAssigned(connection, challengeDocument));
+
+      boolean tablesAssigned = false;
+      prep = connection.prepareStatement("SELECT COUNT(*) FROM tablenames WHERE Tournament = ?");
+      prep.setInt(1, currentTournamentID);
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final int count = rs.getInt(1);
+        tablesAssigned = count > 0;
+      }
+      session.setAttribute("tablesAssigned", tablesAssigned);
+
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
           + sqle.getMessage() + "</p>");
@@ -90,6 +112,7 @@ public class AdminIndex extends BaseFLLServlet {
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(stmt);
+      SQLFunctions.close(prep);
     }
 
     session.setAttribute(SessionAttributes.MESSAGE, message.toString());
