@@ -88,7 +88,7 @@ public class Last8 extends BaseFLLServlet {
       formatter.format("<center>");
       formatter.format("<table border='1' cellpadding='0' cellspacing='0' width='98%%'>");
       formatter.format("<tr>");
-      int numColumns = 6;
+      int numColumns = 5;
       if (!showOrg) {
         --numColumns;
       }
@@ -97,11 +97,14 @@ public class Last8 extends BaseFLLServlet {
 
       // scores here
       prep = connection.prepareStatement("SELECT Teams.TeamNumber"
-          + ", Teams.Organization, Teams.TeamName, current_tournament_teams.event_division"
-          + ", verified_performance.Tournament, verified_performance.RunNumber"
-          + ", verified_performance.Bye, verified_performance.NoShow, verified_performance.TimeStamp, verified_performance.ComputedTotal"
-          + " FROM Teams,verified_performance,current_tournament_teams WHERE verified_performance.Tournament = ?"
-          + "  AND Teams.TeamNumber = verified_performance.TeamNumber AND Teams.TeamNumber = current_tournament_teams.TeamNumber"
+          + ", Teams.Organization" //
+          + ", Teams.TeamName" //
+          + ", current_tournament_teams.event_division" //
+          + ", verified_performance.Bye" //
+          + ", verified_performance.NoShow" //
+          + ", verified_performance.ComputedTotal" //
+          + " FROM Teams,verified_performance,current_tournament_teams WHERE verified_performance.Tournament = ?" //
+          + "  AND Teams.TeamNumber = verified_performance.TeamNumber AND Teams.TeamNumber = current_tournament_teams.TeamNumber" //
           + "  AND verified_performance.Bye = False ORDER BY verified_performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 8");
       prep.setInt(1, currentTournament);
       rs = prep.executeQuery();
@@ -118,7 +121,6 @@ public class Last8 extends BaseFLLServlet {
           formatter.format("<td class='left'><b>%s</b></td>", organization);
         }
         formatter.format("<td class='right' width='5%%'><b>%s</b></td>", rs.getString("event_division"));
-        formatter.format("<td class='right' width='5%%'><b>%d</b></td>", rs.getInt("RunNumber"));
 
         formatter.format("<td class='right' width='8%%'><b>");
         if (rs.getBoolean("NoShow")) {
