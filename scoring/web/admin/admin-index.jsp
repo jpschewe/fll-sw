@@ -169,7 +169,7 @@
 								<option selected value='${numRounds}'>${numRounds}</option>
 							</c:when>
 							<c:otherwise>
-								<option value='${numSheets}'>${numSheets }</option>
+								<option value='${numRounds}'>${numRounds }</option>
 							</c:otherwise>
 						</c:choose>
 
