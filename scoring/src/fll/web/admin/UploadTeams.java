@@ -608,6 +608,6 @@ public final class UploadTeams extends BaseFLLServlet {
 
   private static int _emptyHeaderCount = 0;
 
-  private static final Pattern ILLEGAL_CHAR_PATTERN = Pattern.compile("[ #?/\\-,:]");
+  private static final Pattern ILLEGAL_CHAR_PATTERN = Pattern.compile("[ #?/\\-,:.]");
 
 }
