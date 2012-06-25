@@ -108,7 +108,9 @@
 		</li>
 
 
-		<li>Upload schedule for current tournament. <a
+		<li><c:if test="${scheduleUploaded }">
+				<span class='bold'>[DONE] </span>
+			</c:if> Upload schedule for current tournament. <a
 			href='javascript:display("ScheduleHelp")'>[help]</a>
 			<div id='ScheduleHelp' class='help' style='display: none'>
 				Uploading the schedule isn't required, but if uploaded will be used
@@ -120,8 +122,7 @@
 				ENCTYPE="multipart/form-data">
 				<input type="file" size="32" name="scheduleFile" /> <input
 					type="submit" value="Upload Schedule" />
-			</form>
-		</li>
+			</form></li>
 
 
 		<li><a href='edit_event_division.jsp'> Assign event divisions
@@ -192,12 +193,16 @@
 		</li>
 
 
-		<li><a href='<c:url value="GatherJudgeInformation"/>'
-			id='assign_judges'>Assign Judges</a></li>
+		<li><c:if test="${judgesAssigned }">
+				<span class='bold'>[DONE] </span>
+			</c:if> <a href='<c:url value="GatherJudgeInformation"/>' id='assign_judges'>Assign
+				Judges</a></li>
 
 
-		<li><a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a>
-			(for scoresheet printing during playoffs)</li>
+		<li><c:if test="${tablesAssigned}">
+				<span class='bold'>[DONE] </span>
+			</c:if> <a href='<c:url value="tables.jsp"/>'>Assign Table Labels</a> (for
+			scoresheet printing during playoffs)</li>
 
 
 
