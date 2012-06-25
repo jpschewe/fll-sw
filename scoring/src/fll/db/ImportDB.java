@@ -43,6 +43,7 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.TeamPropertyDifference.TeamProperty;
 import fll.util.LogUtils;
+import fll.web.developer.importdb.ImportDBDump;
 import fll.web.developer.importdb.TournamentDifference;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
@@ -178,7 +179,7 @@ public final class ImportDB {
 
     try {
       final String url = "jdbc:hsqldb:mem:dbimport"
-          + String.valueOf(_importdbCount++);
+          + String.valueOf(ImportDBDump.getNextDBCount());
       memConnection = DriverManager.getConnection(url);
 
       final Document challengeDocument = loadDatabaseDump(zipfile, memConnection);
@@ -268,12 +269,6 @@ public final class ImportDB {
       }
     }
   }
-
-  /**
-   * Keep track of the number of database imports so that the database names are
-   * unique.
-   */
-  private static int _importdbCount = 0;
 
   /**
    * <p>
@@ -548,8 +543,9 @@ public final class ImportDB {
   }
 
   /**
-   * Add judging_station to TournamentTeams.
-   * Rename event_division to station in Judges 
+   * Add judging_station to TournamentTeams. Rename event_division to station in
+   * Judges
+   * 
    * @param connection
    * @throws SQLException
    */
@@ -578,7 +574,7 @@ public final class ImportDB {
 
       // set score_group equal to event division
       stmt.executeUpdate("UPDATE TournamentTeams SET judging_station = event_division");
-      
+
       // rename event_division to station in Judges
       stmt.executeUpdate("ALTER TABLE Judges ALTER COLUMN event_division RENAME TO station");
 

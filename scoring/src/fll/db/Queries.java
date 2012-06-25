@@ -361,7 +361,7 @@ public final class Queries {
     final List<String> divisions = getEventDivisions(connection);
 
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
-    final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
+    final String ascDesc = winnerCriteria.getSortString();
 
     // find the performance ranking
     determinePerformanceRanking(connection, ascDesc, tournament, divisions, rankingMap);
@@ -1452,8 +1452,6 @@ public final class Queries {
     final List<Team> retval = new ArrayList<Team>();
     final int currentTournament = getCurrentTournament(connection);
 
-    final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
-
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
@@ -1462,8 +1460,8 @@ public final class Queries {
           + " WHERE performance_seeding_max.Tournament = ?" //
           + " AND performance_seeding_max.TeamNumber = current_tournament_teams.TeamNumber" //
           + " AND current_tournament_teams.event_division = ?" //
-          + " ORDER BY performance_seeding_max.Score " + ascDesc //
-          + ", performance_seeding_max.average " + ascDesc //
+          + " ORDER BY performance_seeding_max.Score " + winnerCriteria.getSortString() //
+          + ", performance_seeding_max.average " + winnerCriteria.getSortString() //
           + ", random");
       prep.setInt(1, currentTournament);
       prep.setString(2, divisionStr);
