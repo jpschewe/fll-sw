@@ -1,3 +1,12 @@
+* Debug importing a database into a current database and make sure that creating a tournament works.
+
+* 27 - track the number of teams per judge by assigning teams to judging stations
+
+* Upgrade opencsv
+
+* Make sure team numbers are integers
+
+
 Release 3.0
 * Restrictions are now checked on the client side instead of by the server and sending users back to the score entry page on an error.
 

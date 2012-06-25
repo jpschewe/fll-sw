@@ -53,8 +53,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
-    final String ascDesc = WinnerType.HIGH == winnerCriteria ? "DESC" : "ASC";
-
+    
     final PrintWriter writer = response.getWriter();
     writer.write("<html><body>");
     writer.write("<h1>FLL Categorized Score Summary by judge</h1>");
@@ -115,7 +114,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
                 + " AND Tournament = ?"//
                 + " AND Judge = ?"//
                 + " AND " + categoryName + ".ComputedTotal IS NOT NULL"//
-                + " ORDER BY " + categoryName + ".ComputedTotal " + ascDesc // get best score first
+                + " ORDER BY " + categoryName + ".ComputedTotal " + winnerCriteria.getSortString() // get best score first
                                                ); 
             prep.setInt(1, currentTournament);
             prep.setString(2, judge);

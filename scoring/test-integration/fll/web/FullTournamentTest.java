@@ -351,7 +351,7 @@ public class FullTournamentTest extends SeleneseTestBase {
       } else {
         assignJudge(id, category, division, judgeIndex);
         ++judgeIndex;
-      }      
+      }
     }
     SQLFunctions.close(rs);
     SQLFunctions.close(prep);
@@ -444,8 +444,6 @@ public class FullTournamentTest extends SeleneseTestBase {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "report/CategoryScoresByJudge");
 
-    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "report/CategoryScoresByScoreGroup");
 
     // PDF reports need to be done with httpunit
     final WebConversation conversation = WebTestUtils.getConversation();
@@ -453,6 +451,12 @@ public class FullTournamentTest extends SeleneseTestBase {
         + "report/finalComputedScores.pdf");
     WebResponse response = WebTestUtils.loadPage(conversation, request);
     Assert.assertEquals("application/pdf", response.getContentType());
+
+    request = new GetMethodWebRequest(TestUtils.URL_ROOT
+        + "report/CategoryScoresByScoreGroup");
+    response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertEquals("application/pdf", response.getContentType());
+
   }
 
   private void checkRankAndScores(final Connection serverConnection,
