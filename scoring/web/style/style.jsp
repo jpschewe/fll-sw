@@ -34,3 +34,9 @@ BODY {
 .soft-violation {
   background-color: yellow;
 }
+
+.bold {
+  font-weight: bold;
+}
+  
+  
