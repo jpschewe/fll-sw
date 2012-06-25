@@ -100,24 +100,16 @@ ${message}
 	<form id='currentTournament' action='SetCurrentTournament'
 		method="post">Current Tournament: <select id='currentTournamentSelect'
 		name='currentTournament'>
-		<%
-		  final Statement stmt = connection.createStatement();
-		  final ResultSet rs = stmt.executeQuery("Select tournament_id,Name,Location from Tournaments ORDER BY Name");
-		  while (rs.next()) {
-		    final int tournamentID = rs.getInt(1);
-		    final String tournament = rs.getString(2);
-		    final String location = rs.getString(3);
-		    out.print("<option value='"
-		        + tournamentID + "'");
-		    if (currentTournamentID == tournamentID) {
-		      out.print(" selected");
-		    }
-		    out.println(">"
-		        + location + " [ " + tournament + " ]</option>");
-		  }
-		  rs.close();
-		  stmt.close();
-		%>
+		<c:forEach items="${tournaments }" var="tournament">
+		<c:choose>
+		<c:when test="${tournament.tournamentID == currentTournamentID}">
+				<option selected value='${tournament.tournamentID }'>${tournament.location} [ ${tournament.name } ] </option>
+		</c:when>
+		<c:otherwise>
+				<option value='${tournament.tournamentID }'>${tournament.location} [ ${tournament.name } ] </option>
+		</c:otherwise>
+		</c:choose>
+		</c:forEach>
 	</select> <input type='submit' name='change_tournament' value='Change tournament'></form>
 	</li>
  
