@@ -9,6 +9,7 @@ package fll.web.admin;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -20,6 +21,7 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 
+import fll.Tournament;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
@@ -48,6 +50,7 @@ public class AdminIndex extends BaseFLLServlet {
     try {
       final Connection connection = datasource.getConnection();
       final int currentTournamentID = Queries.getCurrentTournament(connection);
+      session.setAttribute("currentTournamentID", currentTournamentID);
 
       session.setAttribute("playoffsInitialized",
                            Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
@@ -59,6 +62,9 @@ public class AdminIndex extends BaseFLLServlet {
       session.setAttribute("numSeedingRounds", numSeedingRounds);
 
       session.setAttribute("servletLoaded", true);
+      
+      final List<Tournament> tournaments = Tournament.getTournaments(connection);
+      session.setAttribute("tournaments", tournaments);
       
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
