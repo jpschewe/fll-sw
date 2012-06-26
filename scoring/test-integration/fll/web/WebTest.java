@@ -76,7 +76,7 @@ public class WebTest extends SeleneseTestBase {
 
     IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
-    IntegrationTestUtils.setTournament(selenium, "STATE");
+    IntegrationTestUtils.setTournament(selenium, GenerateDB.DROP_TOURNAMENT_NAME);
   }
 
 }
