@@ -58,7 +58,7 @@ public class WebTest extends SeleneseTestBase {
     for (final String page : pages) {
       LOG.info("Testing page #"
           + page + "#");
-      IntegrationTestUtils.initializeDatabaseFromDump(selenium, WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
+      IntegrationTestUtils.initializeDatabaseFromDump(selenium, TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
 
       final String url = TestUtils.URL_ROOT
           + page;
@@ -72,7 +72,7 @@ public class WebTest extends SeleneseTestBase {
    */
   @Test
   public void testChangeTournament() throws IOException {
-    IntegrationTestUtils.initializeDatabaseFromDump(selenium, WebTest.class.getResourceAsStream("/fll/data/test-database.zip"));
+    IntegrationTestUtils.initializeDatabaseFromDump(selenium, TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
 
     IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
