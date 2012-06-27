@@ -85,7 +85,6 @@ public class FullTournamentTest extends SeleneseTestBase {
     final int numSeedingRounds = 3;
 
     Connection testDataConn = null;
-    Statement stmt = null;
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -94,8 +93,6 @@ public class FullTournamentTest extends SeleneseTestBase {
       testDataConn = DriverManager.getConnection("jdbc:hsqldb:res:/fll/web/data/flldb-ft");
       final String testTournamentName = "Field";
       Assert.assertNotNull("Error connecting to test data database", testDataConn);
-
-      stmt = testDataConn.createStatement();
 
       // --- initialize database ---
       final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml");
@@ -114,7 +111,7 @@ public class FullTournamentTest extends SeleneseTestBase {
 
       /*
        * --- Enter 3 runs for each team --- Use data from test data base,
-       * converted from Field 2005. Enter 4th run and rest of playoffs
+       * converted from Field 2005. Enter 4th run and rest of playoffs.
        */
       prep = testDataConn.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?");
       prep.setString(1, testTournamentName);
@@ -123,6 +120,7 @@ public class FullTournamentTest extends SeleneseTestBase {
       final int maxRuns = rs.getInt(1);
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
+      prep = null;
 
       final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(
                                                                                      FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
@@ -219,7 +217,6 @@ public class FullTournamentTest extends SeleneseTestBase {
       throw e;
     } finally {
       SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
       SQLFunctions.close(prep);
       SQLFunctions.close(testDataConn);
       // Utilities.closeConnection(connection);
