@@ -74,17 +74,17 @@ public class FullTournamentTest extends SeleneseTestBase {
   private static void loadTestData(final Connection testDataConn) throws SQLException, IOException {
     final String[] tableNames = { "teamwork", "robustdesign", "research", "programming", "performance", "judges" };
     for (final String table : tableNames) {
-      final InputStream typeStream = FullTournamentTest.class.getResourceAsStream(table
-          + ".types");
-      Assert.assertNotNull("Cannot find table data for "
-          + table, typeStream);
+      final InputStream typeStream = FullTournamentTest.class.getResourceAsStream("data/"
+          + table + ".types");
+      Assert.assertNotNull("Missing test data "
+          + table + ".types", typeStream);
       final Reader typeReader = new InputStreamReader(typeStream);
       final Map<String, String> columnTypes = ImportDB.loadTypeInfo(typeReader);
 
-      final InputStream tableStream = FullTournamentTest.class.getResourceAsStream(table
-          + ".csv");
-      Assert.assertNotNull("Cannot find table data for "
-          + table, tableStream);
+      final InputStream tableStream = FullTournamentTest.class.getResourceAsStream("data/"
+          + table + ".csv");
+      Assert.assertNotNull("Missing test data "
+          + table + ".csv", tableStream);
       final Reader tableReader = new InputStreamReader(tableStream);
       Utilities.loadCSVFile(testDataConn, table, columnTypes, tableReader);
 
