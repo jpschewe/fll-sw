@@ -44,7 +44,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
         handleMultipleQuery(parseInputToMap(multiParam), os, application, session, response, connection);
       } else {
         response.reset();
-        response.setContentType("text/plain");
+        response.setContentType("application/json");
         os.print("{\"_rmsg\": \"Error: No Params\"}");
       }
     } catch (final SQLException e) {
@@ -79,7 +79,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
       final boolean showOnlyVerifiedScores = true;
       final boolean showFinalsScores = false;
       response.reset();
-      response.setContentType("text/plain");
+      response.setContentType("application/json");
       os.print(JsonUtilities.generateJsonBracketInfo(pairedMap, connection, perfElement, bd, showOnlyVerifiedScores,
                                                      showFinalsScores));
     } catch (final IOException e) {
