@@ -85,7 +85,7 @@ public class ImportDBTest {
    */
   @Test
   public void testLoadFromDumpIntoNewDB() throws IOException, SQLException {
-    final InputStream dumpFileIS = ImportDBTest.class.getResourceAsStream("data/test-database.zip");
+    final InputStream dumpFileIS = TestUtils.class.getResourceAsStream("data/testdb.flldb");
     Assert.assertNotNull("Cannot find test data", dumpFileIS);
 
     final File tempFile = File.createTempFile("flltest", null);
