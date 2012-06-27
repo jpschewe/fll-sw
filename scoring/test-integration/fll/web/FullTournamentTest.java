@@ -10,14 +10,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
+import java.util.Map;
 
 import javax.swing.table.TableModel;
 
@@ -44,6 +45,7 @@ import com.thoughtworks.selenium.SeleneseTestBase;
 import fll.TestUtils;
 import fll.Tournament;
 import fll.Utilities;
+import fll.db.ImportDB;
 import fll.subjective.SubjectiveFrame;
 import fll.util.FP;
 import fll.util.LogUtils;
@@ -67,6 +69,29 @@ public class FullTournamentTest extends SeleneseTestBase {
   }
 
   /**
+   * Load the data data from CSV files into the specified connection.
+   */
+  private static void loadTestData(final Connection testDataConn) throws SQLException, IOException {
+    final String[] tableNames = { "teamwork", "robustdesign", "research", "programming", "performance", "judges" };
+    for (final String table : tableNames) {
+      final InputStream typeStream = FullTournamentTest.class.getResourceAsStream("data/"
+          + table + ".types");
+      Assert.assertNotNull("Missing test data "
+          + table + ".types", typeStream);
+      final Reader typeReader = new InputStreamReader(typeStream);
+      final Map<String, String> columnTypes = ImportDB.loadTypeInfo(typeReader);
+
+      final InputStream tableStream = FullTournamentTest.class.getResourceAsStream("data/"
+          + table + ".csv");
+      Assert.assertNotNull("Missing test data "
+          + table + ".csv", tableStream);
+      final Reader tableReader = new InputStreamReader(tableStream);
+      Utilities.loadCSVFile(testDataConn, table, columnTypes, tableReader);
+
+    }
+  }
+
+  /**
    * Test a full tournament. This tests to make sure everything works normally.
    * 
    * @throws MalformedURLException
@@ -85,17 +110,17 @@ public class FullTournamentTest extends SeleneseTestBase {
     final int numSeedingRounds = 3;
 
     Connection testDataConn = null;
-    Statement stmt = null;
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
       Class.forName("org.hsqldb.jdbcDriver").newInstance();
 
-      testDataConn = DriverManager.getConnection("jdbc:hsqldb:res:/fll/web/data/flldb-ft");
-      final String testTournamentName = "Field";
+      testDataConn = DriverManager.getConnection("jdbc:hsqldb:mem:full-tournament-test");
       Assert.assertNotNull("Error connecting to test data database", testDataConn);
 
-      stmt = testDataConn.createStatement();
+      loadTestData(testDataConn);
+
+      final String testTournamentName = "Field";
 
       // --- initialize database ---
       final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml");
@@ -114,7 +139,7 @@ public class FullTournamentTest extends SeleneseTestBase {
 
       /*
        * --- Enter 3 runs for each team --- Use data from test data base,
-       * converted from Field 2005. Enter 4th run and rest of playoffs
+       * converted from Field 2005. Enter 4th run and rest of playoffs.
        */
       prep = testDataConn.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?");
       prep.setString(1, testTournamentName);
@@ -123,6 +148,7 @@ public class FullTournamentTest extends SeleneseTestBase {
       final int maxRuns = rs.getInt(1);
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
+      prep = null;
 
       final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(
                                                                                      FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
@@ -219,7 +245,6 @@ public class FullTournamentTest extends SeleneseTestBase {
       throw e;
     } finally {
       SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
       SQLFunctions.close(prep);
       SQLFunctions.close(testDataConn);
       // Utilities.closeConnection(connection);
@@ -443,7 +468,6 @@ public class FullTournamentTest extends SeleneseTestBase {
 
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "report/CategoryScoresByJudge");
-
 
     // PDF reports need to be done with httpunit
     final WebConversation conversation = WebTestUtils.getConversation();

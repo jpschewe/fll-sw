@@ -662,51 +662,11 @@
     <fail message="Some tests failed. See the test report for what failed and why." if="test.failed" />
   </target>
 
-  <target name="install.testdb" description="install the test database">
-    <delete>
-      <fileset dir="${dir.web}/WEB-INF">
-        <include name="flldb.*" />
-      </fileset>
-    </delete>
-    <copy todir="${dir.web}/WEB-INF">
-      <fileset dir="${basedir}/test-data">
-        <include name="testdb.*" />
-      </fileset>
-      <mapper type="glob" from="testdb.*" to="flldb.*" />
-    </copy>
-  </target>
-
-  <target name="savedb">
-    <!-- save current database -->
-    <mkdir dir="${dir.build}/db-save" />
-    <move todir="${dir.build}/db-save">
-      <fileset dir="${dir.web}/WEB-INF">
-        <include name="flldb.*" />
-      </fileset>
-    </move>
-  </target>
-
-  <target name="restoredb">
-    <!-- restore database -->
-    <move todir="${dir.web}/WEB-INF">
-      <fileset dir="${dir.build}/db-save">
-        <include name="flldb.*" />
-      </fileset>
-    </move>
-    <delete dir="${dir.build}/db-save" />
-
-  </target>
-
   <macrodef name="run-tests">
     <attribute name="working-dir" />
     <attribute name="dir.src" />
 
     <sequential>
-      <antcall target="savedb" />
-
-      <!-- copy in test database -->
-      <antcall target="install.testdb" />
-
       <mkdir dir="${dir.build}/screenshots" />
       <touch file="${dir.build}/screenshots/dummy.txt" />
 
@@ -734,8 +694,6 @@
           <include name="flldb.*" />
         </fileset>
       </delete>
-
-      <antcall target="restoredb" />
     </sequential>
   </macrodef>
 
