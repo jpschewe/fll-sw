@@ -271,6 +271,26 @@ public final class ImportDB {
   }
 
   /**
+   * Load type info from reader and return in a Map.
+   * 
+   * @param reader where to read the data from
+   * @return key is column name, value is type
+   */
+  public static Map<String, String> loadTypeInfo(final Reader reader) throws IOException {
+    final CSVReader csvreader = new CSVReader(reader);
+    final Map<String, String> columnTypes = new HashMap<String, String>();
+
+    String[] line;
+    while (null != (line = csvreader.readNext())) {
+      if (line.length != 2) {
+        throw new RuntimeException("Typeinfo file has incorrect number of columns, should be 2");
+      }
+      columnTypes.put(line[0].toLowerCase(), line[1]);
+    }
+    return columnTypes;
+  }
+
+  /**
    * <p>
    * Load a database dumped as a zipfile into an existing empty database. No
    * checks are done, csv files are expected to be in the zipfile and they are
@@ -312,18 +332,7 @@ public final class ImportDB {
       } else if (name.endsWith(".types")) {
         final String tablename = name.substring(0, name.indexOf(".types")).toLowerCase();
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
-        final CSVReader csvreader = new CSVReader(reader);
-        final Map<String, String> columnTypes = new HashMap<String, String>();
-
-        String[] line;
-        while (null != (line = csvreader.readNext())) {
-          if (line.length != 2) {
-            throw new RuntimeException(name
-                + " has incorrect number of columns, should be 2");
-          }
-          columnTypes.put(line[0].toLowerCase(), line[1]);
-        }
-
+        final Map<String, String> columnTypes = loadTypeInfo(reader);
         typeInfo.put(tablename, columnTypes);
       } else {
         LOG.warn("Unexpected file found in imported zip file, skipping: "
