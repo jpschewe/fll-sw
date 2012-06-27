@@ -539,7 +539,6 @@ public class FullTournamentTest extends SeleneseTestBase {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
     }
-    // TODO ticket:82 check scores?
   }
 
   /**
