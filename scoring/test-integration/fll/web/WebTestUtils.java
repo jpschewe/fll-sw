@@ -10,18 +10,22 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URL;
 
 import junit.framework.Assert;
 
 import org.xml.sax.SAXException;
 
+import com.google.gson.Gson;
 import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebForm;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 
 import fll.TestUtils;
+import fll.web.developer.QueryHandler;
 
 /**
  * Utilities for web tests.
@@ -103,7 +107,42 @@ public final class WebTestUtils {
     response = conversation.getResponse(request);
     Assert.assertTrue("Received non-HTML response from web server", response.isHTML());
 
+    final URL responseURL = response.getURL();
+    final String address = responseURL.getPath();
+    Assert.assertTrue("Unexpected URL after login: " + address, address.endsWith("fll-sw/"));
+
     return conversation;
+  }
+
+  /**
+   * Submit a query to developer/QueryHandler, parse the JSON and return it.
+   */
+  public static QueryHandler.ResultData executeServerQuery(final String query) throws IOException, SAXException {
+    final WebConversation conversation = getConversation();
+    final WebRequest request = new PostMethodWebRequest(TestUtils.URL_ROOT
+        + "developer/QueryHandler");
+    request.setParameter(QueryHandler.QUERY_PARAMETER, query);
+
+    final WebResponse response = loadPage(conversation, request);
+    final String contentType = response.getContentType();
+    if (!"application/json".equals(contentType)) {
+      final String text = response.getText();
+      final File output = File.createTempFile("json-error", ".html", new File("screenshots"));
+      final FileWriter writer = new FileWriter(output);
+      writer.write(text);
+      writer.close();
+      Assert.fail("Error JSON from QueryHandler: "
+          + response.getURL() + " Contents of error page written to: " + output.getAbsolutePath());
+    }
+
+    final String responseData = response.getText();
+
+    final Gson gson = new Gson();
+    QueryHandler.ResultData result = gson.fromJson(responseData, QueryHandler.ResultData.class);
+    Assert.assertNull("SQL Error: "
+        + result.error, result.error);
+
+    return result;
   }
 
 }

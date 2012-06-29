@@ -44,6 +44,11 @@ public class QueryHandler extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
   
+  /**
+   * Parameter that the query is expected to be in. 
+   */
+  public static final String QUERY_PARAMETER = "query";
+
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -56,7 +61,7 @@ public class QueryHandler extends BaseFLLServlet {
     ResultSet rs = null;
     try {
       Connection connection = datasource.getConnection();
-      final String query = request.getParameter("query");
+      final String query = request.getParameter(QUERY_PARAMETER);
       stmt = connection.createStatement();
       rs = stmt.executeQuery(query);
 
@@ -86,16 +91,21 @@ public class QueryHandler extends BaseFLLServlet {
     response.setCharacterEncoding("UTF-8");
     response.getWriter().write(resultJson);
 
-
   }
 
+  /**
+   * Object that comes back out of the servlet {@link QueryHandler}.
+   */
   public static class ResultData {
     /**
      * If there is an error, this will be non-null.
      */
     public String error = null;
+
     public final List<String> columnNames = new LinkedList<String>();
 
     public final List<Map<String, String>> data = new LinkedList<Map<String, String>>();
   }
+  
+  
 }
