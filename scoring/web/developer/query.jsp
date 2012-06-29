@@ -1,72 +1,71 @@
-<%@ include file="/WEB-INF/jspf/init.jspf" %>
+<%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <html>
-  <head>
-    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
-    <title>Developer Database Commands</title>
-  </head>
+<head>
+<link rel="stylesheet" type="text/css"
+	href="<c:url value='/style/style.jsp'/>" />
+<title>Developer Database Commands</title>
 
-  <body>
-    <h1><x:out select="$challengeDocument/fll/@title"/> (Developer Database Commands)</h1>
+<script type='text/javascript' src='../extlib/jquery-1.7.1.min.js'></script>
+<script type='text/javascript' src='../extlib/jquery.json-2.3.min.js'></script>
+<script type='text/javascript' src='query.js'></script>
 
-    <p><font color='red'><b>This page is intended for developers only.  If you
-    don't know what you're doing, LEAVE THIS PAGE!</b></font></p>
+<style>
+table {
+	border-collapse: collapse;
+}
 
-    <c:if test="${not empty param.message}">
-      <p><i><c:out value="${param.message}"/></i></p>
-    </c:if>
+table,th,td {
+	border: 1px solid black;
+}
+</style>
+</head>
 
-<form name='query_json' method='post' action='QueryHandler'>
-      <p>Enter query (JSON)
-      <textarea name='query' rows='5' cols='60'><c:out value="${param.query}"/></textarea><br/>
-      <input type='submit' value='Execute Query'/>
-</form>
+<body>
+	<h1>
+		<x:out select="$challengeDocument/fll/@title" />
+		(Developer Database Commands)
+	</h1>
 
-    <form name='query' method='post'>
-      <p>Enter query
-      <textarea name='query' rows='5' cols='60'><c:out value="${param.query}"/></textarea><br/>
-      <input type='submit' value='Execute Query'/>      
-      </p>
-      <c:if test="${not empty param.query}">
-        <sql:query dataSource="${datasource}" var="query_result" scope="page" sql="${param.query}"/>
-        <p>Results</p>
-        <table id='queryResult' border='1'>
-          <tr>
-            <c:forEach var="columnName" items="${query_result.columnNames}">
-              <th><c:out value="${columnName}"/></th>
-            </c:forEach>
-          </tr>
-          <c:forEach var="row" items="${query_result.rowsByIndex}">
-            <tr>
-              <c:forEach var="column" items="${row}">
-                <td>
-                <c:choose>
-                <c:when test="${empty column }">
-                --NULL--
-                </c:when>
-                <c:otherwise>
-                ${column }
-                </c:otherwise>
-                </c:choose>
-                </td>
-              </c:forEach>
-            </tr>
-          </c:forEach>
-        </table>
-      </c:if>
-    </form>
-        
-    <form name='update' method='post'>
-      <p>Enter update
-             <textarea name='update' rows='5' cols='60'><c:out value="${param.update}"/></textarea>
-      </p>
-      <c:if test="${not empty param.update}">
-        <sql:update dataSource="${datasource}" var="update_result" scope="page" sql="${param.update}"/>
-        <p>Modified rows: <c:out value="${update_result}"/></p>
-      </c:if>
-      <input type='submit' value='Execute Update'/>
-    </form>
+	<p>
+		<font color='red'><b>This page is intended for developers
+				only. If you don't know what you're doing, LEAVE THIS PAGE!</b></font>
+	</p>
+
+	<c:if test="${not empty param.message}">
+		<p>
+			<i><c:out value="${param.message}" /></i>
+		</p>
+	</c:if>
+
+	<p>
+		Enter query
+		<!--  must be on single line -->
+		<textarea id='query' name='query' rows='5' cols='60'></textarea>
+		<br />
+		<button id='execute_query'>Execute Query</button>
+	</p>
+	<table id='query_result'>
+	</table>
+
+	<form name='update' method='post'>
+		<p>
+			Enter update
+			<textarea name='update' rows='5' cols='60'>
+				<c:out value="${param.update}" />
+			</textarea>
+		</p>
+		<c:if test="${not empty param.update}">
+			<sql:update dataSource="${datasource}" var="update_result"
+				scope="page" sql="${param.update}" />
+			<p>
+				Modified rows:
+				<c:out value="${update_result}" />
+			</p>
+		</c:if>
+		<input type='submit' value='Execute Update' />
+	</form>
 
 
-  </body>
+</body>
 </html>

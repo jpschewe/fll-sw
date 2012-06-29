@@ -27,31 +27,30 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
+import org.apache.log4j.Logger;
+
 import com.google.gson.Gson;
 
+import fll.util.LogUtils;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
 /**
  * Handle AJAX query from database query page. Expects the parameter "query" to
- * be set and returns a JSON object with the results.
- * 
- * <pre>
- * { 
- *   columnsNames: ["one", "two", ...], 
- *   data: [ {"one" => row0_0, "two" => row0_1, ...}, 
- *           {"one" => row_1_0, "two => row1_1, ...} ...]
- * }
- * </pre>
+ * be set and returns a JSON object of type {@link ResultData}.
  */
 @WebServlet("/developer/QueryHandler")
 public class QueryHandler extends BaseFLLServlet {
 
+  private static final Logger LOGGER = LogUtils.getLogger();
+  
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
+    final ResultData result = new ResultData();
+
     DataSource datasource = SessionAttributes.getDataSource(session);
     Statement stmt = null;
     ResultSet rs = null;
@@ -61,7 +60,6 @@ public class QueryHandler extends BaseFLLServlet {
       stmt = connection.createStatement();
       rs = stmt.executeQuery(query);
 
-      final ResultData result = new ResultData();
       ResultSetMetaData meta = rs.getMetaData();
       for (int columnNum = 1; columnNum <= meta.getColumnCount(); ++columnNum) {
         result.columnNames.add(meta.getColumnName(columnNum));
@@ -75,21 +73,27 @@ public class QueryHandler extends BaseFLLServlet {
         result.data.add(row);
       }
 
-      final Gson gson = new Gson();
-      final String resultJson = gson.toJson(result);
-      response.setContentType("application/json");
-      response.setCharacterEncoding("UTF-8");
-      response.getWriter().write(resultJson);
-
     } catch (final SQLException e) {
-      throw new RuntimeException(e);
+      result.error = e.getMessage();
+      LOGGER.error("Exception doing developer query", e);
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(stmt);
     }
+    final Gson gson = new Gson();
+    final String resultJson = gson.toJson(result);
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
+    response.getWriter().write(resultJson);
+
+
   }
 
-  private static class ResultData {
+  public static class ResultData {
+    /**
+     * If there is an error, this will be non-null.
+     */
+    public String error = null;
     public final List<String> columnNames = new LinkedList<String>();
 
     public final List<Map<String, String>> data = new LinkedList<Map<String, String>>();
