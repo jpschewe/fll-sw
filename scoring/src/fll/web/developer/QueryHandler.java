@@ -62,7 +62,7 @@ public class QueryHandler extends BaseFLLServlet {
 
       ResultSetMetaData meta = rs.getMetaData();
       for (int columnNum = 1; columnNum <= meta.getColumnCount(); ++columnNum) {
-        result.columnNames.add(meta.getColumnName(columnNum));
+        result.columnNames.add(meta.getColumnName(columnNum).toLowerCase());
       }
       while (rs.next()) {
         final Map<String, String> row = new HashMap<String, String>();
