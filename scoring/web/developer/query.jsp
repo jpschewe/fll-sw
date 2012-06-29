@@ -16,6 +16,12 @@
       <p><i><c:out value="${param.message}"/></i></p>
     </c:if>
 
+<form name='query_json' method='post' action='QueryHandler'>
+      <p>Enter query (JSON)
+      <textarea name='query' rows='5' cols='60'><c:out value="${param.query}"/></textarea><br/>
+      <input type='submit' value='Execute Query'/>
+</form>
+
     <form name='query' method='post'>
       <p>Enter query
       <textarea name='query' rows='5' cols='60'><c:out value="${param.query}"/></textarea><br/>
