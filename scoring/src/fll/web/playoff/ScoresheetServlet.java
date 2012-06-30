@@ -29,7 +29,6 @@ import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 
 @WebServlet("/playoff/ScoresheetServlet")
 public class ScoresheetServlet extends BaseFLLServlet {
@@ -48,7 +47,7 @@ public class ScoresheetServlet extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
     Connection connection = null;
     try {
-      final DataSource datasource = SessionAttributes.getDataSource(session);
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
       final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
       final int tournament = Queries.getCurrentTournament(connection);

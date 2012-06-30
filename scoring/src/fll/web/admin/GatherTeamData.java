@@ -30,8 +30,8 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 
 /**
  * Gather information for editing or adding a team and put it in the session.
@@ -61,7 +61,7 @@ public class GatherTeamData extends BaseFLLServlet {
     }
 
     final StringBuilder message = new StringBuilder();
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
       connection = datasource.getConnection();

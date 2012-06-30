@@ -78,7 +78,7 @@ public class GatherJudgeInformation extends BaseFLLServlet {
     }
 
     final StringBuilder message = new StringBuilder();
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
       connection = datasource.getConnection();

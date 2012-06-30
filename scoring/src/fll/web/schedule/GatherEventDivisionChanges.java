@@ -29,6 +29,7 @@ import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
@@ -53,7 +54,7 @@ public class GatherEventDivisionChanges extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
       connection = datasource.getConnection();

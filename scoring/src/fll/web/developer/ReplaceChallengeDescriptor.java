@@ -31,7 +31,6 @@ import fll.db.GenerateDB;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 import fll.xml.ChallengeParser;
 
@@ -52,7 +51,7 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
 
     Connection connection = null;
     try {
-      final DataSource datasource = SessionAttributes.getDataSource(session);
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
 
       final Document curDoc = ApplicationAttributes.getChallengeDocument(application);

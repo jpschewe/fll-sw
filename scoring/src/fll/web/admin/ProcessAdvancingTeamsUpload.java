@@ -35,6 +35,7 @@ import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -79,7 +80,7 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
       }
 
       // process as if the user had selected these teams
-      final DataSource datasource = SessionAttributes.getDataSource(session);
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
       GatherAdvancementData.processAdvancementData(response, session, false, connection, teams);
     } catch (final SQLException sqle) {

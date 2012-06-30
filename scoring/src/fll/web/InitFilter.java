@@ -79,7 +79,7 @@ public class InitFilter implements Filter {
       }
 
       if (needsSecurity) {
-        if (!checkSecurity(httpRequest, httpResponse, session)) {
+        if (!checkSecurity(httpRequest, httpResponse, application, session)) {
           LOGGER.debug("Returning after checkSecurity did redirect");
           return;
         }
@@ -173,9 +173,10 @@ public class InitFilter implements Filter {
    */
   private boolean checkSecurity(final HttpServletRequest request,
                                 final HttpServletResponse response,
+                                final ServletContext application,
                                 final HttpSession session) throws IOException {
 
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
     Connection connection = null;
     try {
@@ -242,14 +243,14 @@ public class InitFilter implements Filter {
 
       // initialize the datasource
       final DataSource datasource;
-      if (null == SessionAttributes.getDataSource(session)) {
+      if (null == ApplicationAttributes.getDataSource(application)) {
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Datasource not available, creating");
         }
         datasource = Utilities.createDataSource(database);
-        session.setAttribute(SessionAttributes.DATASOURCE, datasource);
+        application.setAttribute(ApplicationAttributes.DATASOURCE, datasource);
       } else {
-        datasource = SessionAttributes.getDataSource(session);
+        datasource = ApplicationAttributes.getDataSource(application);
       }
 
       // Initialize the connection

@@ -42,7 +42,6 @@ import fll.util.PdfUtils;
 import fll.util.SimpleFooterHandler;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
@@ -60,7 +59,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
     Connection connection = null;
     try {
-      final DataSource datasource = SessionAttributes.getDataSource(session);
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
       final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
       final int tournamentID = Queries.getCurrentTournament(connection);

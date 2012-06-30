@@ -10,6 +10,6 @@
 
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Edit Tournaments)</h1>
-<% Tournaments.generatePage(out, session, request, response); %>
+<% Tournaments.generatePage(out, application, session, request, response); %>
 
 </body></html>

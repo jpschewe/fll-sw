@@ -56,7 +56,7 @@ public class AdminIndex extends BaseFLLServlet {
 
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     ResultSet rs = null;
     ResultSet rs2 = null;
     Statement stmt = null;

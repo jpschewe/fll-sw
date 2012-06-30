@@ -32,7 +32,6 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
@@ -48,7 +47,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
 
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);

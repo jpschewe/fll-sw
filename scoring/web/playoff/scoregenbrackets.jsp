@@ -2,7 +2,7 @@
 
 <%@ page import="fll.web.playoff.BracketData" %>
 
-<%@ page import="fll.web.SessionAttributes" %>
+<%@ page import="fll.web.ApplicationAttributes" %>
 <%@ page import="fll.db.Queries" %>
 <%@ page import="java.sql.Connection" %>
 <%@ page import="javax.sql.DataSource" %>
@@ -13,9 +13,9 @@
   Parameters:
     division - String for the division
 */
-final DataSource datasource = SessionAttributes.getDataSource(session);
+final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();
-  final Document challengeDocument = (Document)application.getAttribute("challengeDocument");
+  final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
   final int currentTournament = Queries.getCurrentTournament(connection);
 
   final String divisionStr = request.getParameter("division");

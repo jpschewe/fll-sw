@@ -4,11 +4,11 @@
 <%@ page import="javax.sql.DataSource" %>
 
 <%@ page import="fll.db.Queries" %>
-<%@ page import="fll.web.SessionAttributes"%>
+<%@ page import="fll.web.ApplicationAttributes"%>
 <%@ page import="fll.web.WebUtils"%>
 
 <%
-final DataSource datasource = SessionAttributes.getDataSource(session);
+final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();
 pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
 %>

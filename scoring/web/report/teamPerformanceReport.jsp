@@ -2,14 +2,13 @@
 
 <%@ page import="fll.db.Queries" %>
 <%@ page import="java.sql.Connection" %>
-<%@ page import="fll.web.SessionAttributes"%>
 <%@ page import="fll.web.ApplicationAttributes" %>
 <%@ page import="javax.sql.DataSource" %>
 <%@ page import="org.w3c.dom.Document" %>
 
 <%
 final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
-final DataSource datasource = SessionAttributes.getDataSource(session);
+final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();
 pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection));
 %>

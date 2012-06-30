@@ -28,7 +28,6 @@ import fll.db.ImportDB;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 import fll.xml.ChallengeParser;
 
@@ -67,7 +66,7 @@ public class CreateDB extends BaseFLLServlet {
           GenerateDB.generateDB(document, db, forceRebuild);
 
           // remove application & session variables that depend on the database
-          session.removeAttribute(SessionAttributes.DATASOURCE);
+          session.removeAttribute(ApplicationAttributes.DATASOURCE);
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
           application.removeAttribute(ApplicationAttributes.DATABASE);
 
@@ -82,7 +81,7 @@ public class CreateDB extends BaseFLLServlet {
         ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileItem.getInputStream()), database);
 
         // remove application variables that depend on the database
-        session.removeAttribute(SessionAttributes.DATASOURCE);
+        session.removeAttribute(ApplicationAttributes.DATASOURCE);
         application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
         application.removeAttribute(ApplicationAttributes.DATABASE);
 

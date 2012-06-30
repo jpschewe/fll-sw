@@ -32,8 +32,8 @@ import org.apache.log4j.Logger;
 import com.google.gson.Gson;
 
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 
 /**
  * Handle AJAX query from database query page. Expects the parameter "query" to
@@ -57,7 +57,7 @@ public class QueryHandler extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
     final ResultData result = new ResultData();
 
-    DataSource datasource = SessionAttributes.getDataSource(session);
+    DataSource datasource = ApplicationAttributes.getDataSource(application);
     Statement stmt = null;
     ResultSet rs = null;
     Connection connection = null;
