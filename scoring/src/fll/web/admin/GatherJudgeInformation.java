@@ -78,9 +78,10 @@ public class GatherJudgeInformation extends BaseFLLServlet {
     }
 
     final StringBuilder message = new StringBuilder();
+    final DataSource datasource = SessionAttributes.getDataSource(session);
+    Connection connection = null;
     try {
-      final DataSource datasource = SessionAttributes.getDataSource(session);
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
       final int tournament = Queries.getCurrentTournament(connection);
       final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
@@ -109,6 +110,8 @@ public class GatherJudgeInformation extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
+    } finally {
+      SQLFunctions.close(connection);
     }
   }
 
@@ -136,7 +139,8 @@ public class GatherJudgeInformation extends BaseFLLServlet {
 
   }
 
-  private List<String> gatherJudgingStations(final Connection connection, final int tournament) throws SQLException {
+  private List<String> gatherJudgingStations(final Connection connection,
+                                             final int tournament) throws SQLException {
     final List<String> stations = Queries.getJudgingStations(connection, tournament);
 
     return stations;

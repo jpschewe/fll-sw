@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
@@ -75,8 +77,9 @@ public class CommitTeam extends BaseFLLServlet {
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
     final DataSource datasource = SessionAttributes.getDataSource(session);
 
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
       // parse the numbers first so that we don't get a partial commit
       final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("teamNumber")).intValue();
       session.setAttribute(GatherTeamData.TEAM_NUMBER, teamNumber);
@@ -111,7 +114,7 @@ public class CommitTeam extends BaseFLLServlet {
           // need to get these before the team is put in the tournament.
           final Collection<String> allEventDivisions = Queries.getEventDivisions(connection, newTournament);
           session.setAttribute(CheckEventDivisionNeeded.ALL_EVENT_DIVISIONS, allEventDivisions);
-          
+
           final Collection<String> allJudgingStations = Queries.getJudgingStations(connection, newTournament);
           session.setAttribute(CommitTeam.ALL_JUDGING_STATIONS, allJudgingStations);
         }
@@ -188,6 +191,8 @@ public class CommitTeam extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
+    } finally {
+      SQLFunctions.close(connection);
     }
 
   }

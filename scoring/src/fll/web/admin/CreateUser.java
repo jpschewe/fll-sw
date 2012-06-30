@@ -30,7 +30,6 @@ import fll.web.SessionAttributes;
 
 /**
  * Create a user if.
- * 
  */
 @WebServlet("/admin/CreateUser")
 public class CreateUser extends BaseFLLServlet {
@@ -43,8 +42,9 @@ public class CreateUser extends BaseFLLServlet {
 
     PreparedStatement prep = null;
     final DataSource datasource = SessionAttributes.getDataSource(session);
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       // check for authentication table
       if (!Queries.isAuthenticationEmpty(connection)) {
@@ -86,6 +86,7 @@ public class CreateUser extends BaseFLLServlet {
       throw new RuntimeException(e);
     } finally {
       SQLFunctions.close(prep);
+      SQLFunctions.close(connection);
     }
 
   }

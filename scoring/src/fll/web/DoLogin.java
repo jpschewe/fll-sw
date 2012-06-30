@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 
@@ -27,13 +29,12 @@ import fll.util.LogUtils;
 
 /**
  * Handle login credentials and if incorrect redirect back to login page.
- * 
  */
 @WebServlet("/DoLogin")
 public class DoLogin extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-  
+
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -51,8 +52,9 @@ public class DoLogin extends BaseFLLServlet {
                              final HttpServletResponse response,
                              final HttpSession session) throws IOException, ServletException {
     final DataSource datasource = SessionAttributes.getDataSource(session);
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       // check for authentication table
       if (Queries.isAuthenticationEmpty(connection)) {
@@ -86,7 +88,7 @@ public class DoLogin extends BaseFLLServlet {
           CookieUtils.setLoginCookie(response, magicKey);
 
           String redirect = SessionAttributes.getRedirectURL(session);
-          if(null == redirect) {
+          if (null == redirect) {
             redirect = "index.jsp";
           }
           response.sendRedirect(response.encodeRedirectURL(redirect));
@@ -100,6 +102,8 @@ public class DoLogin extends BaseFLLServlet {
       return;
     } catch (final SQLException e) {
       throw new RuntimeException(e);
+    } finally {
+      SQLFunctions.close(connection);
     }
   }
 

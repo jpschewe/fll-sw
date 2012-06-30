@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
@@ -67,9 +69,10 @@ public class RankingReport extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
 
+    Connection connection = null;
     try {
       final DataSource datasource = SessionAttributes.getDataSource(session);
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
       final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
       // create simple doc and write to a ByteArrayOutputStream
@@ -84,7 +87,8 @@ public class RankingReport extends BaseFLLServlet {
       document.addTitle("Ranking Report");
 
       // add content
-      final Map<String, Map<Integer, Map<String, Integer>>> rankingMap = Queries.getTeamRankings(connection, challengeDocument);
+      final Map<String, Map<Integer, Map<String, Integer>>> rankingMap = Queries.getTeamRankings(connection,
+                                                                                                 challengeDocument);
       for (final Map.Entry<String, Map<Integer, Map<String, Integer>>> divEntry : rankingMap.entrySet()) {
         final String division = divEntry.getKey();
         for (final Map.Entry<Integer, Map<String, Integer>> teamEntry : divEntry.getValue().entrySet()) {
@@ -101,8 +105,7 @@ public class RankingReport extends BaseFLLServlet {
           para.add(new Chunk("Division "
               + division, TITLE_FONT));
           para.add(Chunk.NEWLINE);
-          para
-              .add(new Chunk(
+          para.add(new Chunk(
                              "Each team is ranked in each category in the judging group and division they were judged in (if mutiple judging groups exist). Performance and Overall score are ranked by division only. Team may have the same rank if they were tied or were in different judging groups. ",
                              RANK_VALUE_FONT));
           para.add(Chunk.NEWLINE);
@@ -146,6 +149,8 @@ public class RankingReport extends BaseFLLServlet {
     } catch (final DocumentException e) {
       LOG.error(e, e);
       throw new RuntimeException(e);
+    } finally {
+      SQLFunctions.close(connection);
     }
   }
 
@@ -153,7 +158,8 @@ public class RankingReport extends BaseFLLServlet {
    * Be able to initialize the header table at the end of a page.
    */
   private static final class PageEventHandler extends PdfPageEventHelper {
-    public PageEventHandler(final String challengeTitle, final String tournament) {
+    public PageEventHandler(final String challengeTitle,
+                            final String tournament) {
       _tournament = tournament;
       _challengeTitle = challengeTitle;
       _formattedDate = DateFormat.getDateInstance().format(new Date());
@@ -167,7 +173,8 @@ public class RankingReport extends BaseFLLServlet {
 
     @Override
     // initialization of the header table
-    public void onEndPage(final PdfWriter writer, final Document document) {
+    public void onEndPage(final PdfWriter writer,
+                          final Document document) {
       final PdfPTable header = new PdfPTable(2);
       final Phrase p = new Phrase();
       final Chunk ck = new Chunk(_challengeTitle

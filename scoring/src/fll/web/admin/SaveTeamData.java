@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 
 import fll.db.Queries;
@@ -39,8 +41,9 @@ public class SaveTeamData extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
     final DataSource datasource = SessionAttributes.getDataSource(session);
 
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       final String origMessage = SessionAttributes.getMessage(session);
       if (null != origMessage) {
@@ -78,7 +81,7 @@ public class SaveTeamData extends BaseFLLServlet {
       Queries.setEventDivision(connection, teamNumber, teamCurrentTournament, eventDivision);
 
       Queries.setJudgingStation(connection, teamNumber, teamCurrentTournament, judgingStation);
-      
+
       if (message.length() > 0) {
         session.setAttribute(SessionAttributes.MESSAGE, message.toString());
       }
@@ -92,6 +95,8 @@ public class SaveTeamData extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
+    } finally {
+      SQLFunctions.close(connection);
     }
 
   }

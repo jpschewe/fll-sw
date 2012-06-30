@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 
 import fll.Team;
@@ -49,8 +51,9 @@ public class AdvanceTeams extends BaseFLLServlet {
     @SuppressWarnings("unchecked")
     final List<Team> teamsToAdvance = SessionAttributes.getNonNullAttribute(session, "advancingTeams", List.class);
 
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       for (final Team team : teamsToAdvance) {
         Queries.advanceTeam(connection, team.getTeamNumber());
@@ -59,6 +62,8 @@ public class AdvanceTeams extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
+    } finally {
+      SQLFunctions.close(connection);
     }
 
     if (LOGGER.isTraceEnabled()) {

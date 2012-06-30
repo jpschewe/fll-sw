@@ -50,101 +50,108 @@ public final class Tournaments {
   /**
    * Generate the tournaments page
    */
-  public static void generatePage(final JspWriter out, final HttpSession session, final HttpServletRequest request, final HttpServletResponse response)
-      throws SQLException, IOException, ParseException {
+  public static void generatePage(final JspWriter out,
+                                  final HttpSession session,
+                                  final HttpServletRequest request,
+                                  final HttpServletResponse response) throws SQLException, IOException, ParseException {
     final DataSource datasource = SessionAttributes.getDataSource(session);
-    final Connection connection = datasource.getConnection();
+    Connection connection = null;
+    try {
+      connection = datasource.getConnection();
 
-    final String numRowsStr = request.getParameter("numRows");
-    int numRows;
-    if (null == numRowsStr) {
-      numRows = 0;
-    } else {
-      try {
-        numRows = Utilities.NUMBER_FORMAT_INSTANCE.parse(numRowsStr).intValue();
-      } catch (final ParseException nfe) {
+      final String numRowsStr = request.getParameter("numRows");
+      int numRows;
+      if (null == numRowsStr) {
         numRows = 0;
-      }
-    }
-    if (null != request.getParameter("addRow")) {
-      numRows++;
-    }
-
-    out.println("<form action='tournaments.jsp' method='POST' name='tournaments'>");
-
-    final boolean verified;
-    if (null != request.getParameter("commit")
-        && verifyData(out, request)) {
-      verified = true;
-    } else {
-      verified = false;
-    }
-
-    if (verified) {
-      commitData(session, request, response, connection);
-    } else {
-      out
-         .println("<p><b>Tournament name's must be unique and next tournament must refer to the name of another tournament listed.  Tournaments can be removed by erasing the name.</b></p>");
-
-      out.println("<table border='1'><tr><th>Name</th><th>Location</th><th>Next Tournament</th></tr>");
-
-      int row = 0; // keep track of which row we're generating
-
-      if (null == request.getParameter("name0")) {
-        // this is the first time the page has been visited so we need to read
-        // the names out of the DB
-        final Iterator<Tournament> tournaments = Tournament.getTournaments(connection).iterator();
-        for (row = 0; tournaments.hasNext(); row++) {
-          final Tournament tournament = tournaments.next();
-          final String nextName;
-          if (null != tournament.getNextTournament()) {
-            nextName = tournament.getNextTournament().getName();
-          } else {
-            nextName = null;
-          }
-          generateRow(out, row, tournament.getTournamentID(), tournament.getName(), tournament.getLocation(), nextName);
-        }
       } else {
-        // need to walk the parameters to see what we've been passed
-        String keyStr = request.getParameter("key"
-            + row);
-        String name = request.getParameter("name"
-            + row);
-        String location = request.getParameter("location"
-            + row);
-        String nextName = request.getParameter("next"
-            + row);
-        while (null != keyStr) {
-          final int key = Integer.valueOf(keyStr);
-          generateRow(out, row, key, name, location, nextName);
-
-          row++;
-          keyStr = request.getParameter("key"
-              + row);
-          name = request.getParameter("name"
-              + row);
-          location = request.getParameter("location"
-              + row);
-          nextName = request.getParameter("next"
-              + row);
+        try {
+          numRows = Utilities.NUMBER_FORMAT_INSTANCE.parse(numRowsStr).intValue();
+        } catch (final ParseException nfe) {
+          numRows = 0;
         }
       }
-
-      // if there aren't enough names in the database, generate some more
-      final int tableRows = Math.max(numRows, row);
-
-      for (; row < tableRows; row++) {
-        generateRow(out, row, null, null, null, null);
+      if (null != request.getParameter("addRow")) {
+        numRows++;
       }
 
-      out.println("</table>");
-      out.println("<input type='hidden' name='numRows' value='"
-          + tableRows + "'>");
-      out.println("<input type='submit' name='addRow' value='Add Row'>");
-      out.println("<input type='submit' name='commit' value='Finished'>");
-    }
+      out.println("<form action='tournaments.jsp' method='POST' name='tournaments'>");
 
-    out.println("</form>");
+      final boolean verified;
+      if (null != request.getParameter("commit")
+          && verifyData(out, request)) {
+        verified = true;
+      } else {
+        verified = false;
+      }
+
+      if (verified) {
+        commitData(session, request, response, connection);
+      } else {
+        out.println("<p><b>Tournament name's must be unique and next tournament must refer to the name of another tournament listed.  Tournaments can be removed by erasing the name.</b></p>");
+
+        out.println("<table border='1'><tr><th>Name</th><th>Location</th><th>Next Tournament</th></tr>");
+
+        int row = 0; // keep track of which row we're generating
+
+        if (null == request.getParameter("name0")) {
+          // this is the first time the page has been visited so we need to read
+          // the names out of the DB
+          final Iterator<Tournament> tournaments = Tournament.getTournaments(connection).iterator();
+          for (row = 0; tournaments.hasNext(); row++) {
+            final Tournament tournament = tournaments.next();
+            final String nextName;
+            if (null != tournament.getNextTournament()) {
+              nextName = tournament.getNextTournament().getName();
+            } else {
+              nextName = null;
+            }
+            generateRow(out, row, tournament.getTournamentID(), tournament.getName(), tournament.getLocation(),
+                        nextName);
+          }
+        } else {
+          // need to walk the parameters to see what we've been passed
+          String keyStr = request.getParameter("key"
+              + row);
+          String name = request.getParameter("name"
+              + row);
+          String location = request.getParameter("location"
+              + row);
+          String nextName = request.getParameter("next"
+              + row);
+          while (null != keyStr) {
+            final int key = Integer.valueOf(keyStr);
+            generateRow(out, row, key, name, location, nextName);
+
+            row++;
+            keyStr = request.getParameter("key"
+                + row);
+            name = request.getParameter("name"
+                + row);
+            location = request.getParameter("location"
+                + row);
+            nextName = request.getParameter("next"
+                + row);
+          }
+        }
+
+        // if there aren't enough names in the database, generate some more
+        final int tableRows = Math.max(numRows, row);
+
+        for (; row < tableRows; row++) {
+          generateRow(out, row, null, null, null, null);
+        }
+
+        out.println("</table>");
+        out.println("<input type='hidden' name='numRows' value='"
+            + tableRows + "'>");
+        out.println("<input type='submit' name='addRow' value='Add Row'>");
+        out.println("<input type='submit' name='commit' value='Finished'>");
+      }
+
+      out.println("</form>");
+    } finally {
+      SQLFunctions.close(connection);
+    }
   }
 
   /**
@@ -159,8 +166,12 @@ public final class Tournaments {
    * @throws SQLException
    * @throws IllegalArgumentException
    */
-  private static void generateRow(final JspWriter out, final int row, final Integer key, final String name, final String location, final String nextName)
-      throws IOException, IllegalArgumentException, SQLException {
+  private static void generateRow(final JspWriter out,
+                                  final int row,
+                                  final Integer key,
+                                  final String name,
+                                  final String location,
+                                  final String nextName) throws IOException, IllegalArgumentException, SQLException {
     out.println("<tr>");
 
     out.print("  <input type='hidden' name='key"
@@ -221,7 +232,8 @@ public final class Tournaments {
    * @return true if everything is ok, false otherwise and write message to out
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "XSS_REQUEST_PARAMETER_TO_JSP_WRITER", justification = "Need to write out the name specified as part of the error message")
-  private static boolean verifyData(final JspWriter out, final HttpServletRequest request) throws IOException {
+  private static boolean verifyData(final JspWriter out,
+                                    final HttpServletRequest request) throws IOException {
     final Map<String, String> tournamentNames = new HashMap<String, String>();
     boolean retval = true;
 
@@ -289,59 +301,62 @@ public final class Tournaments {
     return retval;
   }
 
-  private static void createAndInsertTournaments(final HttpServletRequest request, final Connection connection) throws SQLException {
-      int row = 0;
-      String keyStr = request.getParameter("key"
-          + row);
-      String name = request.getParameter("name"
-          + row);
-      String location = request.getParameter("location"
-          + row);
-      while (null != keyStr) {
-        final int key = Integer.valueOf(keyStr);
-        if (NEW_TOURNAMENT_KEY == key) {
-          if (null != name
-              && !"".equals(name)) {
-            // new tournament
-            Queries.createTournament(connection, name, location);
-            if (LOGGER.isDebugEnabled()) {
-              LOGGER.debug("Adding a new tournament "
-                  + name);
-            }
-          }
-        } else if (null == name
-            || "".equals(name)) {
-          // delete if no name
-          Queries.deleteTournament(connection, key);
+  private static void createAndInsertTournaments(final HttpServletRequest request,
+                                                 final Connection connection) throws SQLException {
+    int row = 0;
+    String keyStr = request.getParameter("key"
+        + row);
+    String name = request.getParameter("name"
+        + row);
+    String location = request.getParameter("location"
+        + row);
+    while (null != keyStr) {
+      final int key = Integer.valueOf(keyStr);
+      if (NEW_TOURNAMENT_KEY == key) {
+        if (null != name
+            && !"".equals(name)) {
+          // new tournament
+          Queries.createTournament(connection, name, location);
           if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Deleting a tournament "
-                + key);
-          }
-        } else {
-          // update with new values
-          Queries.updateTournament(connection, key, name, location);
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Updating a tournament "
-                + key + " to " + name);
+            LOGGER.debug("Adding a new tournament "
+                + name);
           }
         }
-
-        row++;
-        keyStr = request.getParameter("key"
-            + row);
-        name = request.getParameter("name"
-            + row);
-        location = request.getParameter("location"
-            + row);
+      } else if (null == name
+          || "".equals(name)) {
+        // delete if no name
+        Queries.deleteTournament(connection, key);
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Deleting a tournament "
+              + key);
+        }
+      } else {
+        // update with new values
+        Queries.updateTournament(connection, key, name, location);
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Updating a tournament "
+              + key + " to " + name);
+        }
       }
+
+      row++;
+      keyStr = request.getParameter("key"
+          + row);
+      name = request.getParameter("name"
+          + row);
+      location = request.getParameter("location"
+          + row);
+    }
   }
 
   /**
    * Commit the subjective data from request to the database and redirect
    * response back to index.jsp.
    */
-  private static void commitData(final HttpSession session, final HttpServletRequest request, final HttpServletResponse response, final Connection connection)
-      throws SQLException, IOException {
+  private static void commitData(final HttpSession session,
+                                 final HttpServletRequest request,
+                                 final HttpServletResponse response,
+                                 final Connection connection) throws SQLException, IOException {
     createAndInsertTournaments(request, connection);
     setNextTournaments(request, connection);
 
@@ -352,7 +367,8 @@ public final class Tournaments {
     response.sendRedirect(response.encodeRedirectURL("index.jsp"));
   }
 
-  private static void setNextTournaments(final HttpServletRequest request, final Connection connection) throws SQLException {
+  private static void setNextTournaments(final HttpServletRequest request,
+                                         final Connection connection) throws SQLException {
     PreparedStatement setNextPrep = null;
     try {
       setNextPrep = connection.prepareStatement("UPDATE Tournaments SET NextTournament = ? WHERE tournament_id = ?");

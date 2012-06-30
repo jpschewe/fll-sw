@@ -38,13 +38,11 @@ import fll.xml.XMLUtils;
 
 /**
  * Display the report for scores by score group.
- * 
  */
 @WebServlet("/report/CategorizedScores")
 public class CategorizedScores extends BaseFLLServlet {
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name, winner criteria determines sort")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name, winner criteria determines sort")
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -62,7 +60,9 @@ public class CategorizedScores extends BaseFLLServlet {
 
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
-    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
+                                                                                challengeDocument.getDocumentElement()
+                                                                                                 .getElementsByTagName("subjectiveCategory"))) {
       final String title = subjectiveElement.getAttribute("title");
       final String name = subjectiveElement.getAttribute("name");
       subjectiveCategories.put(title, name);
@@ -72,8 +72,9 @@ public class CategorizedScores extends BaseFLLServlet {
     PreparedStatement prep = null;
     PreparedStatement rawScorePrep = null;
     ResultSet rawScoreRS = null;
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
 
@@ -103,10 +104,13 @@ public class CategorizedScores extends BaseFLLServlet {
           prep.setString(1, division);
           prep.setInt(2, currentTournament);
           rawScorePrep = connection.prepareStatement("SELECT ComputedTotal"//
-              + " FROM " + categoryName //                    
+              + " FROM " + categoryName //
               + " WHERE TeamNumber = ?" //
               + " AND Tournament = ?" //
-              + " ORDER BY ComputedTotal " + winnerCriteria.getSortString() // get the best score
+              + " ORDER BY ComputedTotal " + winnerCriteria.getSortString() // get
+                                                                            // the
+                                                                            // best
+                                                                            // score
           );
           rawScorePrep.setInt(2, currentTournament);
           rs = prep.executeQuery();
@@ -176,7 +180,8 @@ public class CategorizedScores extends BaseFLLServlet {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
       SQLFunctions.close(rawScoreRS);
-      SQLFunctions.close(rawScorePrep);      
+      SQLFunctions.close(rawScorePrep);
+      SQLFunctions.close(connection);
     }
 
     writer.format("</body></html>");

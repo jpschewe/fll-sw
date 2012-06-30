@@ -62,9 +62,9 @@ public class GatherTeamData extends BaseFLLServlet {
 
     final StringBuilder message = new StringBuilder();
     final DataSource datasource = SessionAttributes.getDataSource(session);
-
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       // store map of tournaments in session
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
@@ -139,6 +139,8 @@ public class GatherTeamData extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
+    } finally {
+      SQLFunctions.close(connection);
     }
 
     if (LOGGER.isTraceEnabled()) {

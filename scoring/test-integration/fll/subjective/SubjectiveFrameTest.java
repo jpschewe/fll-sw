@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.fest.swing.core.KeyPressInfo;
@@ -84,6 +85,7 @@ public class SubjectiveFrameTest {
 
   @Before
   public void setUp() throws IOException, SQLException {
+    Connection connection = null;
     try {
       LogUtils.initializeLogging();
 
@@ -96,7 +98,7 @@ public class SubjectiveFrameTest {
 
       ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), database);
 
-      final Connection connection = Utilities.createDataSource(database).getConnection();
+      connection = Utilities.createDataSource(database).getConnection();
 
       document = Queries.getChallengeDocument(connection);
 
@@ -140,6 +142,8 @@ public class SubjectiveFrameTest {
     } catch (final SQLException e) {
       TestUtils.saveScreenshot();
       throw e;
+    } finally {
+      SQLFunctions.close(connection);
     }
   }
 

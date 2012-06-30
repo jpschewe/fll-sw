@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 
 import fll.db.Queries;
@@ -31,7 +33,6 @@ import fll.web.WebUtils;
 /**
  * Commit the schedule in uploadSchedule_schedule to the database for the
  * current tournament.
- * 
  */
 @WebServlet("/schedule/CommitEventDivisions")
 public class CommitEventDivisions extends BaseFLLServlet {
@@ -45,8 +46,9 @@ public class CommitEventDivisions extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
     final DataSource datasource = SessionAttributes.getDataSource(session);
 
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
       final int tournamentID = Queries.getCurrentTournament(connection);
 
       // can't put types inside a session
@@ -64,6 +66,8 @@ public class CommitEventDivisions extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new FLLRuntimeException("There was an error talking to the database", e);
+    } finally {
+      SQLFunctions.close(connection);
     }
 
   }

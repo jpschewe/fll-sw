@@ -73,20 +73,30 @@ public class FinalistLoad {
   public static void outputTeamVariables(final Writer writer,
                                          final HttpSession session) throws SQLException {
     final DataSource datasource = SessionAttributes.getDataSource(session);
-    final Connection connection = datasource.getConnection();
-    final Formatter output = new Formatter(writer);
-    for (final Team team : Queries.getTournamentTeams(connection).values()) {
-      outputTeamVarDefinition(output, team);
+    Connection connection = null;
+    try {
+      connection = datasource.getConnection();
+      final Formatter output = new Formatter(writer);
+      for (final Team team : Queries.getTournamentTeams(connection).values()) {
+        outputTeamVarDefinition(output, team);
+      }
+    } finally {
+      SQLFunctions.close(connection);
     }
   }
 
   public static void outputDivisions(final Writer writer,
                                      final HttpSession session) throws SQLException {
     final DataSource datasource = SessionAttributes.getDataSource(session);
-    final Connection connection = datasource.getConnection();
-    final Formatter output = new Formatter(writer);
-    for (final String division : Queries.getEventDivisions(connection)) {
-      output.format("$.finalist.addDivision(%s);%n", WebUtils.quoteJavascriptString(division));
+    Connection connection = null;
+    try {
+      connection = datasource.getConnection();
+      final Formatter output = new Formatter(writer);
+      for (final String division : Queries.getEventDivisions(connection)) {
+        output.format("$.finalist.addDivision(%s);%n", WebUtils.quoteJavascriptString(division));
+      }
+    } finally {
+      SQLFunctions.close(connection);
     }
   }
 
@@ -95,9 +105,14 @@ public class FinalistLoad {
    */
   public static String currentTournament(final HttpSession session) throws SQLException {
     final DataSource datasource = SessionAttributes.getDataSource(session);
-    final Connection connection = datasource.getConnection();
-    final String name = Queries.getCurrentTournamentName(connection);
-    return WebUtils.quoteJavascriptString(name);
+    Connection connection = null;
+    try {
+      connection = datasource.getConnection();
+      final String name = Queries.getCurrentTournamentName(connection);
+      return WebUtils.quoteJavascriptString(name);
+    } finally {
+      SQLFunctions.close(connection);
+    }
   }
 
   /**
@@ -127,22 +142,25 @@ public class FinalistLoad {
                                           final ServletContext application,
                                           final HttpSession session) throws SQLException {
     final DataSource datasource = SessionAttributes.getDataSource(session);
-    final Connection connection = datasource.getConnection();
-    final Document document = ApplicationAttributes.getChallengeDocument(application);
-    final Element rootElement = document.getDocumentElement();
-    final int tournament = Queries.getCurrentTournament(connection);
-    final Formatter output = new Formatter(writer);
-
-    final TournamentSchedule schedule;
-    if (TournamentSchedule.scheduleExistsInDatabase(connection, tournament)) {
-      schedule = new TournamentSchedule(connection, tournament);
-    } else {
-      schedule = null;
-    }
+    Connection connection = null;
 
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
+
+      connection = datasource.getConnection();
+      final Document document = ApplicationAttributes.getChallengeDocument(application);
+      final Element rootElement = document.getDocumentElement();
+      final int tournament = Queries.getCurrentTournament(connection);
+      final Formatter output = new Formatter(writer);
+
+      final TournamentSchedule schedule;
+      if (TournamentSchedule.scheduleExistsInDatabase(connection, tournament)) {
+        schedule = new TournamentSchedule(connection, tournament);
+      } else {
+        schedule = null;
+      }
+
       prep = connection.prepareStatement("SELECT * from FinalScores WHERE tournament = ?");
       prep.setInt(1, tournament);
       rs = prep.executeQuery();
@@ -181,6 +199,7 @@ public class FinalistLoad {
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
+      SQLFunctions.close(connection);
     }
   }
 
