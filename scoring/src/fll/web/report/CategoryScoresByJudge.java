@@ -42,8 +42,7 @@ import fll.xml.XMLUtils;
 @WebServlet("/report/CategoryScoresByJudge")
 public class CategoryScoresByJudge extends BaseFLLServlet {
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = {
-  "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name, winner criteria determines sort")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name, winner criteria determines sort")
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
@@ -53,7 +52,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
-    
+
     final PrintWriter writer = response.getWriter();
     writer.write("<html><body>");
     writer.write("<h1>FLL Categorized Score Summary by judge</h1>");
@@ -61,7 +60,9 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
 
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
-    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
+                                                                                challengeDocument.getDocumentElement()
+                                                                                                 .getElementsByTagName("subjectiveCategory"))) {
       final String title = subjectiveElement.getAttribute("title");
       final String name = subjectiveElement.getAttribute("name");
       subjectiveCategories.put(title, name);
@@ -71,40 +72,43 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
     PreparedStatement prep = null;
     PreparedStatement judgesPrep = null;
     ResultSet judgesRS = null;
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
 
       // foreach division
       for (final String division : Queries.getEventDivisions(connection)) {
-        
+
         // foreach subjective category
-        for(final Map.Entry<String, String> entry : subjectiveCategories.entrySet()) {
+        for (final Map.Entry<String, String> entry : subjectiveCategories.entrySet()) {
           final String categoryTitle = entry.getKey();
           final String categoryName = entry.getValue();
 
-          judgesPrep = connection.prepareStatement("SELECT DISTINCT " + categoryName + ".Judge"//
-                                                  + " FROM " + categoryName + ",current_tournament_teams"//
-                                                  + " WHERE " + categoryName + ".TeamNumber = current_tournament_teams.TeamNumber"
-                                                  + " AND " + categoryName + ".Tournament = ?"
-                                                  + " AND current_tournament_teams.event_division = ?");          
+          judgesPrep = connection.prepareStatement("SELECT DISTINCT "
+              + categoryName
+              + ".Judge"//
+              + " FROM " + categoryName
+              + ",current_tournament_teams"//
+              + " WHERE " + categoryName + ".TeamNumber = current_tournament_teams.TeamNumber" + " AND " + categoryName
+              + ".Tournament = ?" + " AND current_tournament_teams.event_division = ?");
           judgesPrep.setInt(1, currentTournament);
           judgesPrep.setString(2, division);
           judgesRS = judgesPrep.executeQuery();
-                    
+
           // select from FinalScores
-          while(judgesRS.next()) {
+          while (judgesRS.next()) {
             final String judge = judgesRS.getString(1);
-            
+
             writer.write("<h3>"
-                + categoryTitle + " Division: " + division + " Judge: " + judge+ "</h3>");
-            
+                + categoryTitle + " Division: " + division + " Judge: " + judge + "</h3>");
+
             writer.write("<table border='0'>");
             writer.write("<tr><th colspan='3'>Team # / Organization / Team Name</th><th>Raw Score</th><th>Scaled Score</th></tr>");
-            
+
             prep = connection.prepareStatement("SELECT"//
-                +" Teams.TeamNumber"//
+                + " Teams.TeamNumber"//
                 + ",Teams.Organization"//
                 + ",Teams.TeamName"//
                 + "," + categoryName + ".ComputedTotal"//
@@ -114,8 +118,11 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
                 + " AND Tournament = ?"//
                 + " AND Judge = ?"//
                 + " AND " + categoryName + ".ComputedTotal IS NOT NULL"//
-                + " ORDER BY " + categoryName + ".ComputedTotal " + winnerCriteria.getSortString() // get best score first
-                                               ); 
+                + " ORDER BY " + categoryName + ".ComputedTotal " + winnerCriteria.getSortString() // get
+                                                                                                   // best
+                                                                                                   // score
+                                                                                                   // first
+            );
             prep.setInt(1, currentTournament);
             prep.setString(2, judge);
             rs = prep.executeQuery();
@@ -127,7 +134,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
               final boolean scoreWasNull = rs.wasNull();
               final double rawScore = rs.getDouble(5);
               final boolean rawScoreWasNull = rs.wasNull();
-              
+
               writer.write("<tr>");
               writer.write("<td>");
               writer.write(teamNum);
@@ -146,7 +153,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
                 writer.write(name);
               }
               writer.write("</td>");
-              
+
               if (!scoreWasNull) {
                 writer.write("<td>");
                 writer.write(Utilities.NUMBER_FORMAT_INSTANCE.format(score));
@@ -154,7 +161,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
                 writer.write("<td align='center' class='warn'>No Score");
               }
               writer.write("</td>");
-              
+
               if (!rawScoreWasNull) {
                 writer.write("<td>");
                 writer.write(Utilities.NUMBER_FORMAT_INSTANCE.format(rawScore));
@@ -162,7 +169,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
                 writer.write("<td align='center' class='warn'>No Score");
               }
               writer.write("</td>");
-              
+
               writer.write("</tr>");
             }// foreach team
             writer.write("<tr><td colspan='5'><hr/></td></tr>");
@@ -173,7 +180,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
           SQLFunctions.close(judgesRS);
           SQLFunctions.close(judgesPrep);
         }// foreach category
-        
+
       }// foreach division
 
     } catch (final SQLException sqle) {
@@ -183,6 +190,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
       SQLFunctions.close(prep);
       SQLFunctions.close(judgesRS);
       SQLFunctions.close(judgesPrep);
+      SQLFunctions.close(connection);
     }
 
     writer.write("</body></html>");

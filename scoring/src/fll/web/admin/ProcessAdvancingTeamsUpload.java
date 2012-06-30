@@ -52,6 +52,7 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
     final String advanceFile = SessionAttributes.getNonNullAttribute(session, "advanceFile", String.class);
     final File file = new File(advanceFile);
+    Connection connection = null;
     try {
       if (!file.exists()
           || !file.canRead()) {
@@ -77,7 +78,7 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
 
       // process as if the user had selected these teams
       final DataSource datasource = SessionAttributes.getDataSource(session);
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
       GatherAdvancementData.processAdvancementData(response, session, false, connection, teams);
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error saving advancment data into the database: "
@@ -98,6 +99,7 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
       if (!file.delete()) {
         file.deleteOnExit();
       }
+      SQLFunctions.close(connection);
     }
   }
 

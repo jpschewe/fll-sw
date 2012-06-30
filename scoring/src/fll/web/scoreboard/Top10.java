@@ -68,8 +68,9 @@ public class Top10 extends BaseFLLServlet {
 
     PreparedStatement prep = null;
     ResultSet rs = null;
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
 
@@ -156,6 +157,7 @@ public class Top10 extends BaseFLLServlet {
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
+      SQLFunctions.close(connection);
     }
 
     if (LOGGER.isTraceEnabled()) {

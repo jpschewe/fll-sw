@@ -602,12 +602,14 @@ public final class ScoreEntry {
     final int runNumber = SessionAttributes.getNonNullAttribute(session, "lRunNumber", Number.class).intValue();
 
     final DataSource datasource = SessionAttributes.getDataSource(session);
-    final Connection connection = datasource.getConnection();
-    final int tournament = Queries.getCurrentTournament(connection);
 
     PreparedStatement prep = null;
     ResultSet rs = null;
+    Connection connection = null;
     try {
+      connection = datasource.getConnection();
+      final int tournament = Queries.getCurrentTournament(connection);
+      
       prep = connection.prepareStatement("SELECT * from Performance"
           + " WHERE TeamNumber = ?" //
           + " AND RunNumber = ?"//
@@ -662,6 +664,7 @@ public final class ScoreEntry {
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
+      SQLFunctions.close(connection);
     }
   }
 

@@ -58,9 +58,10 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
+    Connection connection = null;
     try {
       final DataSource datasource = SessionAttributes.getDataSource(session);
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
       final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
       final int tournamentID = Queries.getCurrentTournament(connection);
       final Tournament tournament = Tournament.findTournamentByID(connection, tournamentID);
@@ -78,6 +79,8 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
       throw new RuntimeException(e);
     } catch (final DocumentException e) {
       throw new RuntimeException(e);
+    } finally {
+      SQLFunctions.close(connection);
     }
   }
 
@@ -140,7 +143,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
                 table.addCell(PdfUtils.createCell(Utilities.NUMBER_FORMAT_INSTANCE.format(score)));
               }
             }
-            
+
             pdfDoc.add(table);
 
             pdfDoc.add(new Paragraph(Chunk.NEWLINE));

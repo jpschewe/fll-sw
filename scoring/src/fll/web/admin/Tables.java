@@ -24,7 +24,7 @@ import fll.db.Queries;
 import fll.web.SessionAttributes;
 
 /**
- * Java code used in judges.jsp
+ * Java code used in tables.jsp
  * 
  * @version $Revision$
  */
@@ -35,102 +35,108 @@ public final class Tables {
   }
 
   /**
-   * Generate the judges page
+   * Generate the tables page
    */
-  public static void generatePage(final JspWriter out, final HttpSession session, final HttpServletRequest request, final HttpServletResponse response)
-      throws SQLException, IOException, ParseException {
+  public static void generatePage(final JspWriter out,
+                                  final HttpSession session,
+                                  final HttpServletRequest request,
+                                  final HttpServletResponse response) throws SQLException, IOException, ParseException {
     final DataSource datasource = SessionAttributes.getDataSource(session);
-    final Connection connection = datasource.getConnection();
-    final int tournament = Queries.getCurrentTournament(connection);
-    final String submitButton = request.getParameter("submit");
+    Connection connection = null;
+    try {
+      connection = datasource.getConnection();
+      final int tournament = Queries.getCurrentTournament(connection);
+      final String submitButton = request.getParameter("submit");
 
-    int rowIndex = 0;
-    while (null != request.getParameter("SideA"
-        + (rowIndex + 1))) {
-      ++rowIndex;
-      out.println("<!-- found a row "
+      int rowIndex = 0;
+      while (null != request.getParameter("SideA"
+          + (rowIndex + 1))) {
+        ++rowIndex;
+        out.println("<!-- found a row "
+            + rowIndex + "-->");
+      }
+      if ("Add Row".equals(submitButton)) {
+        out.println("<!-- adding another row to "
+            + rowIndex + "-->");
+        ++rowIndex;
+      }
+      out.println("<!-- final count of rows is "
           + rowIndex + "-->");
-    }
-    if ("Add Row".equals(submitButton)) {
-      out.println("<!-- adding another row to "
-          + rowIndex + "-->");
-      ++rowIndex;
-    }
-    out.println("<!-- final count of rows is "
-        + rowIndex + "-->");
-    final int numRows = rowIndex + 1;
+      final int numRows = rowIndex + 1;
 
-    out.println("<form action='tables.jsp' method='POST' name='tables'>");
+      out.println("<form action='tables.jsp' method='POST' name='tables'>");
 
-    String errorString = null;
-    if ("Finished".equals(submitButton)) {
-      errorString = commitData(request, response, session, connection, Queries.getCurrentTournament(connection));
-    }
-
-    if (null == submitButton
-        || "Add Row".equals(submitButton) || null != errorString) {
-      if (null != errorString) {
-        out.println("<p id='error'><font color='red'>"
-            + errorString + "</font></p>");
+      String errorString = null;
+      if ("Finished".equals(submitButton)) {
+        errorString = commitData(request, response, session, connection, Queries.getCurrentTournament(connection));
       }
 
-      out
-         .println("<p>Table labels should be unique. These labels must occur in pairs, where a label refers to a single side of a table. E.g. If the skirt of a table was red on one side and green on the other, the labels could be Red and Green, but if the table was red all around they could be Red1 and Red2.</p>");
+      if (null == submitButton
+          || "Add Row".equals(submitButton) || null != errorString) {
+        if (null != errorString) {
+          out.println("<p id='error'><font color='red'>"
+              + errorString + "</font></p>");
+        }
 
-      out.println("<table border='1'><tr><th>Side A</th><th>Side B</th><th>Delete?</th></tr>");
+        out.println("<p>Table labels should be unique. These labels must occur in pairs, where a label refers to a single side of a table. E.g. If the skirt of a table was red on one side and green on the other, the labels could be Red and Green, but if the table was red all around they could be Red1 and Red2.</p>");
 
-      int row = 0; // keep track of which row we're generating
+        out.println("<table border='1'><tr><th>Side A</th><th>Side B</th><th>Delete?</th></tr>");
 
-      if (null == request.getParameter("SideA0")) {
-        // this is the first time the page has been visited so we need to read
-        // the table labels out of the DB
-        ResultSet rs = null;
-        PreparedStatement stmt = null;
-        try {
-          stmt = connection.prepareStatement("SELECT SideA,SideB FROM tablenames WHERE Tournament = ? ORDER BY PairID");
-          stmt.setInt(1, tournament);
-          rs = stmt.executeQuery();
-          for (row = 0; rs.next(); row++) {
-            final String sideA = rs.getString(1);
-            final String sideB = rs.getString(2);
-            generateRow(out, row, sideA, sideB, "");
+        int row = 0; // keep track of which row we're generating
+
+        if (null == request.getParameter("SideA0")) {
+          // this is the first time the page has been visited so we need to read
+          // the table labels out of the DB
+          ResultSet rs = null;
+          PreparedStatement stmt = null;
+          try {
+            stmt = connection.prepareStatement("SELECT SideA,SideB FROM tablenames WHERE Tournament = ? ORDER BY PairID");
+            stmt.setInt(1, tournament);
+            rs = stmt.executeQuery();
+            for (row = 0; rs.next(); row++) {
+              final String sideA = rs.getString(1);
+              final String sideB = rs.getString(2);
+              generateRow(out, row, sideA, sideB, "");
+            }
+          } finally {
+            SQLFunctions.close(rs);
+            SQLFunctions.close(stmt);
           }
-        } finally {
-          SQLFunctions.close(rs);
-          SQLFunctions.close(stmt);
-        }
-      } else {
-        // need to walk the parameters to see what we've been passed
-        String sideA = request.getParameter("SideA"
-            + row);
-        String sideB = request.getParameter("SideB"
-            + row);
-        String delete = request.getParameter("delete"
-            + row);
-        while (null != sideA) {
-          generateRow(out, row, sideA, sideB, delete);
+        } else {
+          // need to walk the parameters to see what we've been passed
+          String sideA = request.getParameter("SideA"
+              + row);
+          String sideB = request.getParameter("SideB"
+              + row);
+          String delete = request.getParameter("delete"
+              + row);
+          while (null != sideA) {
+            generateRow(out, row, sideA, sideB, delete);
 
-          row++;
-          sideA = request.getParameter("SideA"
-              + row);
-          sideB = request.getParameter("SideB"
-              + row);
-          delete = request.getParameter("delete"
-              + row);
+            row++;
+            sideA = request.getParameter("SideA"
+                + row);
+            sideB = request.getParameter("SideB"
+                + row);
+            delete = request.getParameter("delete"
+                + row);
+          }
         }
+
+        final int tableRows = Math.max(numRows, row);
+        for (; row < tableRows; row++) {
+          generateRow(out, row, null, null, null);
+        }
+
+        out.println("</table>");
+        out.println("<input type='submit' name='submit' id='add_row' value='Add Row'>");
+        out.println("<input type='submit' name='submit' id='finished' value='Finished'>");
       }
 
-      final int tableRows = Math.max(numRows, row);
-      for (; row < tableRows; row++) {
-        generateRow(out, row, null, null, null);
-      }
-
-      out.println("</table>");
-      out.println("<input type='submit' name='submit' id='add_row' value='Add Row'>");
-      out.println("<input type='submit' name='submit' id='finished' value='Finished'>");
+      out.println("</form>");
+    } finally {
+      SQLFunctions.close(connection);
     }
-
-    out.println("</form>");
   }
 
   /**
@@ -144,7 +150,11 @@ public final class Tables {
    * @param delete Either "checked" or null, depending on whether the check box
    *          should initially be checked or not.
    */
-  private static void generateRow(final JspWriter out, final int row, final String sideA, final String sideB, final String delete) throws IOException {
+  private static void generateRow(final JspWriter out,
+                                  final int row,
+                                  final String sideA,
+                                  final String sideB,
+                                  final String delete) throws IOException {
     out.println("<tr>");
     out.print("  <td><input type='text' name='SideA"
         + row + "'");
@@ -175,8 +185,11 @@ public final class Tables {
    * 
    * @param tournament the current tournament
    */
-  private static String commitData(final HttpServletRequest request, final HttpServletResponse response, final HttpSession session, final Connection connection, final int tournament)
-      throws SQLException, IOException {
+  private static String commitData(final HttpServletRequest request,
+                                   final HttpServletResponse response,
+                                   final HttpSession session,
+                                   final Connection connection,
+                                   final int tournament) throws SQLException, IOException {
     Statement stmt = null;
     PreparedStatement prep = null;
     try {

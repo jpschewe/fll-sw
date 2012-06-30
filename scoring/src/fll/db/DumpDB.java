@@ -39,7 +39,6 @@ import fll.web.SessionAttributes;
 
 /**
  * Dump the database.
- * 
  */
 @WebServlet("/admin/database.flldb")
 public final class DumpDB extends BaseFLLServlet {
@@ -51,8 +50,9 @@ public final class DumpDB extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
     final DataSource datasource = SessionAttributes.getDataSource(session);
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
       final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
       response.reset();
@@ -67,6 +67,8 @@ public final class DumpDB extends BaseFLLServlet {
       }
     } catch (final SQLException sqle) {
       throw new RuntimeException(sqle);
+    } finally {
+      SQLFunctions.close(connection);
     }
   }
 
@@ -117,11 +119,11 @@ public final class DumpDB extends BaseFLLServlet {
    * @param outputWriter
    * @return true if column information for the specified table name was found
    * @throws SQLException
-   * @throws IOException 
+   * @throws IOException
    */
-  private static boolean dumpTableTypes(final String tableName, 
-                                     final DatabaseMetaData metadata,
-                                     final OutputStreamWriter outputWriter) throws SQLException, IOException {
+  private static boolean dumpTableTypes(final String tableName,
+                                        final DatabaseMetaData metadata,
+                                        final OutputStreamWriter outputWriter) throws SQLException, IOException {
     boolean retval = false;
     ResultSet rs = null;
     try {
@@ -129,7 +131,7 @@ public final class DumpDB extends BaseFLLServlet {
       rs = metadata.getColumns(null, null, tableName, "%");
       while (rs.next()) {
         retval = true;
-        
+
         String typeName = rs.getString("TYPE_NAME");
         final String columnName = rs.getString("COLUMN_NAME");
         if ("varchar".equalsIgnoreCase(typeName)) {
@@ -169,10 +171,10 @@ public final class DumpDB extends BaseFLLServlet {
       output.putNextEntry(new ZipEntry(tableName
           + ".types"));
       boolean dumpedTypes = dumpTableTypes(tableName, metadata, outputWriter);
-      if(!dumpedTypes) {
+      if (!dumpedTypes) {
         dumpedTypes = dumpTableTypes(tableName.toUpperCase(), metadata, outputWriter);
       }
-      if(!dumpedTypes) {
+      if (!dumpedTypes) {
         dumpTableTypes(tableName.toLowerCase(), metadata, outputWriter);
       }
       output.closeEntry();

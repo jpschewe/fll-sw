@@ -61,8 +61,9 @@ public class AdminIndex extends BaseFLLServlet {
     ResultSet rs2 = null;
     Statement stmt = null;
     PreparedStatement prep = null;
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
       stmt = connection.createStatement();
 
       final int currentTournamentID = Queries.getCurrentTournament(connection);
@@ -115,6 +116,7 @@ public class AdminIndex extends BaseFLLServlet {
       SQLFunctions.close(rs2);
       SQLFunctions.close(stmt);
       SQLFunctions.close(prep);
+      SQLFunctions.close(connection);
     }
 
     session.setAttribute(SessionAttributes.MESSAGE, message.toString());

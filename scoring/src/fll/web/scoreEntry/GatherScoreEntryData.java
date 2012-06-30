@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -32,7 +34,6 @@ import fll.web.SessionAttributes;
 
 /**
  * Gather the data required for scoreEntry.jsp.
- * 
  */
 @WebServlet("/scoreEntry/GatherScoreEntryData")
 public class GatherScoreEntryData extends BaseFLLServlet {
@@ -42,12 +43,12 @@ public class GatherScoreEntryData extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-
+    Connection connection = null;
     try {
       final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
       session.setAttribute("EditFlag", request.getParameter("EditFlag"));
-      
+
       // support the unverified runs select box
       final String lTeamNum = request.getParameter("TeamNumber");
       if (null == lTeamNum) {
@@ -69,7 +70,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
         teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(lTeamNum).intValue();
       }
       final DataSource datasource = SessionAttributes.getDataSource(session);
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
       final int tournament = Queries.getCurrentTournament(connection);
       final int numSeedingRounds = Queries.getNumSeedingRounds(connection, tournament);
       session.setAttribute("numSeedingRounds", numSeedingRounds);
@@ -104,8 +105,9 @@ public class GatherScoreEntryData extends BaseFLLServlet {
           }
         } else {
           if (!Queries.performanceScoreExists(connection, teamNumber, runNumber)) {
-            session.setAttribute(SessionAttributes.MESSAGE, "<p name='error' class='error'>Team has not yet competed in run "
-                + runNumber + ".  Please choose a valid run number.</p>");
+            session.setAttribute(SessionAttributes.MESSAGE,
+                                 "<p name='error' class='error'>Team has not yet competed in run "
+                                     + runNumber + ".  Please choose a valid run number.</p>");
             response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
             return;
           }
@@ -190,6 +192,8 @@ public class GatherScoreEntryData extends BaseFLLServlet {
       throw new RuntimeException(pe);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
+    } finally {
+      SQLFunctions.close(connection);
     }
   }
 

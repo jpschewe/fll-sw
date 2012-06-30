@@ -69,8 +69,9 @@ public final class UploadTeams extends BaseFLLServlet {
     final String fileName = SessionAttributes.getNonNullAttribute(session, "spreadsheetFile", String.class);
 
     File file = null;
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
       file = new File(fileName);
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Wrote teams data to: "
@@ -91,6 +92,7 @@ public final class UploadTeams extends BaseFLLServlet {
       LOGGER.error(e, e);
       throw new RuntimeException("Error saving team data into the database", e);
     } finally {
+      SQLFunctions.close(connection);
       if (null != file) {
         if (!file.delete()) {
           file.deleteOnExit();
