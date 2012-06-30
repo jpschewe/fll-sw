@@ -641,6 +641,17 @@
   </target>
 
   <!-- ==================== Tests  ==================== -->
+  <macrodef name="delete-database">
+    <sequential>
+      <!-- delete existing database -->
+      <delete>
+        <fileset dir="${dir.web}/WEB-INF">
+          <include name="flldb.*" />
+        </fileset>
+      </delete>
+    </sequential>
+  </macrodef>
+
   <target name="test.all" depends="test.unit,test.integration" description="Run all tests" />
 
   <target name="test.all.pass" depends="test.all" description="Run all tests and fail if any tests fail">
@@ -667,6 +678,8 @@
     <attribute name="dir.src" />
 
     <sequential>
+      <delete-database />
+
       <mkdir dir="${dir.build}/screenshots" />
       <touch file="${dir.build}/screenshots/dummy.txt" />
 
@@ -688,12 +701,7 @@
         </batchtest>
       </junit>
 
-      <!-- delete test database -->
-      <delete>
-        <fileset dir="${dir.web}/WEB-INF">
-          <include name="flldb.*" />
-        </fileset>
-      </delete>
+      <delete-database />
     </sequential>
   </macrodef>
 
@@ -701,6 +709,7 @@
   <target name="test.single" depends="compile,compile.test.all" description="Run a single unit test specified by junit.test.class property.">
     <antcall target="tomcat.start.test" />
     <antcall target="selenium.start" />
+    <delete-database />
 
     <mkdir dir="${dir.build}/screenshots" />
 
