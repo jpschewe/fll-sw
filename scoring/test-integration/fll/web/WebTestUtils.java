@@ -109,7 +109,13 @@ public final class WebTestUtils {
 
     final URL responseURL = response.getURL();
     final String address = responseURL.getPath();
-    Assert.assertTrue("Unexpected URL after login: " + address, address.endsWith("fll-sw/"));
+    final boolean correctAddress;
+    if(address.contains("login.jsp")) {
+      correctAddress = false;
+    } else {
+      correctAddress = true;
+    }
+    Assert.assertTrue("Unexpected URL after login: " + address, correctAddress);
 
     return conversation;
   }
