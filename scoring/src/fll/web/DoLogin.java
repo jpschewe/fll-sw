@@ -20,8 +20,10 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.log4j.Logger;
 
 import fll.db.Queries;
+import fll.util.LogUtils;
 
 /**
  * Handle login credentials and if incorrect redirect back to login page.
@@ -30,6 +32,8 @@ import fll.db.Queries;
 @WebServlet("/DoLogin")
 public class DoLogin extends BaseFLLServlet {
 
+  private static final Logger LOGGER = LogUtils.getLogger();
+  
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -52,6 +56,7 @@ public class DoLogin extends BaseFLLServlet {
 
       // check for authentication table
       if (Queries.isAuthenticationEmpty(connection)) {
+        LOGGER.warn("No authentication information in the database");
         session.setAttribute(SessionAttributes.MESSAGE,
                              "<p class='error'>No authentication information in the database - see administrator</p>");
         response.sendRedirect(response.encodeRedirectURL("login.jsp"));
@@ -63,6 +68,7 @@ public class DoLogin extends BaseFLLServlet {
       final String pass = request.getParameter("pass");
       if (null == user
           || user.isEmpty() || null == pass || pass.isEmpty()) {
+        LOGGER.warn("Form fields missing");
         session.setAttribute(SessionAttributes.MESSAGE,
                              "<p class='error'>You must fill out all fields in the form.</p>");
         response.sendRedirect(response.encodeRedirectURL("login.jsp"));
@@ -79,11 +85,16 @@ public class DoLogin extends BaseFLLServlet {
           Queries.addValidLogin(connection, magicKey);
           CookieUtils.setLoginCookie(response, magicKey);
 
-          response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
+          String redirect = SessionAttributes.getRedirectURL(session);
+          if(null == redirect) {
+            redirect = "index.jsp";
+          }
+          response.sendRedirect(response.encodeRedirectURL(redirect));
           return;
         }
       }
 
+      LOGGER.warn("Incorrect login credentials");
       session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>Incorrect login information provided</p>");
       response.sendRedirect(response.encodeRedirectURL("login.jsp"));
       return;
