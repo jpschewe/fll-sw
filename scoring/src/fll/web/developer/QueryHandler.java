@@ -49,6 +49,7 @@ public class QueryHandler extends BaseFLLServlet {
    */
   public static final String QUERY_PARAMETER = "query";
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Executing query from user")
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -59,8 +60,9 @@ public class QueryHandler extends BaseFLLServlet {
     DataSource datasource = SessionAttributes.getDataSource(session);
     Statement stmt = null;
     ResultSet rs = null;
+    Connection connection = null;
     try {
-      Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
       final String query = request.getParameter(QUERY_PARAMETER);
       stmt = connection.createStatement();
       rs = stmt.executeQuery(query);
@@ -84,6 +86,7 @@ public class QueryHandler extends BaseFLLServlet {
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(stmt);
+      SQLFunctions.close(connection);
     }
     final Gson gson = new Gson();
     final String resultJson = gson.toJson(result);
@@ -100,6 +103,7 @@ public class QueryHandler extends BaseFLLServlet {
     /**
      * If there is an error, this will be non-null.
      */
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Used in the web pages")
     public String error = null;
 
     public final List<String> columnNames = new LinkedList<String>();
