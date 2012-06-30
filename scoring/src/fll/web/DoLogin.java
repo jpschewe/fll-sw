@@ -41,7 +41,7 @@ public class DoLogin extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
 
-    doLogin(request, response, session);
+    doLogin(request, response, application, session);
   }
 
   /**
@@ -50,8 +50,9 @@ public class DoLogin extends BaseFLLServlet {
    */
   public static void doLogin(final HttpServletRequest request,
                              final HttpServletResponse response,
+                             final ServletContext application,
                              final HttpSession session) throws IOException, ServletException {
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
       connection = datasource.getConnection();

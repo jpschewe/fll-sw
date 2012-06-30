@@ -14,9 +14,11 @@
 <%@ page import="fll.Utilities"%>
 <%@ page import="fll.db.Queries"%>
 <%@ page import="fll.web.SessionAttributes"%>
+<%@ page import="fll.web.ApplicationAttributes" %>
+
 
 <%
-	final DataSource datasource = SessionAttributes.getDataSource(session);
+	final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();
       final int currentTournament = Queries.getCurrentTournament(connection);
 

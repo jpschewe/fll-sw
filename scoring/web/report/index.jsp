@@ -3,14 +3,14 @@
 <%@ page import="net.mtu.eggplant.util.sql.SQLFunctions"%>
 
 <%@ page import="fll.db.Queries"%>
-<%@ page import="fll.web.SessionAttributes"%>
+<%@ page import="fll.web.ApplicationAttributes"%>
 <%@ page import="javax.sql.DataSource"%>
 <%@ page import="java.sql.Statement"%>
 <%@ page import="java.sql.ResultSet"%>
 <%@ page import="java.sql.Connection"%>
 
 <%
-  final DataSource datasource = SessionAttributes.getDataSource(session);
+  final DataSource datasource = ApplicationAttributes.getDataSource(application);
   final Connection connection = datasource.getConnection();
   final Statement stmt = connection.createStatement();
   final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = "

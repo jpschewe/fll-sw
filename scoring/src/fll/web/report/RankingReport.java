@@ -46,7 +46,6 @@ import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 
 /**
  * @author jpschewe
@@ -71,7 +70,7 @@ public class RankingReport extends BaseFLLServlet {
 
     Connection connection = null;
     try {
-      final DataSource datasource = SessionAttributes.getDataSource(session);
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
       final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 

@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -21,6 +22,7 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.db.Queries;
+import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 
 /**
@@ -38,10 +40,11 @@ public final class Tables {
    * Generate the tables page
    */
   public static void generatePage(final JspWriter out,
+                                  final ServletContext application,
                                   final HttpSession session,
                                   final HttpServletRequest request,
                                   final HttpServletResponse response) throws SQLException, IOException, ParseException {
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
       connection = datasource.getConnection();

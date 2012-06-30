@@ -46,6 +46,7 @@ import fll.db.Queries;
 import fll.util.CellFileReader;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -64,7 +65,7 @@ public final class UploadTeams extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
     final String fileName = SessionAttributes.getNonNullAttribute(session, "spreadsheetFile", String.class);
 

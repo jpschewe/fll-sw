@@ -24,6 +24,7 @@ import fll.Utilities;
 import fll.db.ImportDB;
 import fll.db.Queries;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
@@ -81,7 +82,7 @@ public class ImportDBDump extends BaseFLLServlet {
         final ZipInputStream zipfile = new ZipInputStream(dumpFileItem.getInputStream());
         ImportDB.loadDatabaseDump(zipfile, memConnection);
 
-        final DataSource destDataSource = SessionAttributes.getDataSource(session);
+        final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
         destConnection = destDataSource.getConnection();
         final String docMessage = checkChallengeDescriptors(memConnection, destConnection);
         if (null == docMessage) {

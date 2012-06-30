@@ -56,7 +56,7 @@ public class VerifyJudges extends BaseFLLServlet {
 
     Connection connection = null;
     try {
-      final DataSource datasource = SessionAttributes.getDataSource(session);
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
 
       final int tournament = Queries.getCurrentTournament(connection);

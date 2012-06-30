@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -32,6 +33,7 @@ import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.SessionAttributes;
 
 /**
@@ -51,10 +53,11 @@ public final class Tournaments {
    * Generate the tournaments page
    */
   public static void generatePage(final JspWriter out,
+                                  final ServletContext application,
                                   final HttpSession session,
                                   final HttpServletRequest request,
                                   final HttpServletResponse response) throws SQLException, IOException, ParseException {
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
       connection = datasource.getConnection();

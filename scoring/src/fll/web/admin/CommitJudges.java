@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 import fll.JudgeInformation;
 import fll.db.Queries;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -49,7 +50,7 @@ public class CommitJudges extends BaseFLLServlet {
       LOGGER.trace("Top of CommitJudges.processRequest");
     }
 
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
       connection = datasource.getConnection();

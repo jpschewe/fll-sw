@@ -24,6 +24,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import fll.db.Queries;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.DoLogin;
 import fll.web.SessionAttributes;
@@ -41,7 +42,7 @@ public class CreateUser extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
 
     PreparedStatement prep = null;
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
       connection = datasource.getConnection();
@@ -81,7 +82,7 @@ public class CreateUser extends BaseFLLServlet {
       session.setAttribute(SessionAttributes.MESSAGE, "<p id='success-create-user'>Successfully created user</p>");
 
       // do a login
-      DoLogin.doLogin(request, response, session);
+      DoLogin.doLogin(request, response, application, session);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     } finally {

@@ -24,8 +24,8 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.Tournament;
 import fll.util.FLLRuntimeException;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 
 @WebServlet("/admin/DisplayTournamentAssignments")
 public class DisplayTournamentAssignments extends BaseFLLServlet {
@@ -40,7 +40,7 @@ public class DisplayTournamentAssignments extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     PreparedStatement prep = null;
     ResultSet rs = null;
     Connection connection = null;

@@ -75,7 +75,7 @@ public class CommitTeam extends BaseFLLServlet {
 
     final StringBuilder message = new StringBuilder();
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
     Connection connection = null;
     try {

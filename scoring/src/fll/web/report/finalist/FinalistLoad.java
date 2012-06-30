@@ -14,7 +14,6 @@ import java.sql.SQLException;
 import java.util.Formatter;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -28,7 +27,6 @@ import fll.db.Queries;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
-import fll.web.SessionAttributes;
 import fll.web.WebUtils;
 
 /**
@@ -71,8 +69,8 @@ public class FinalistLoad {
   }
 
   public static void outputTeamVariables(final Writer writer,
-                                         final HttpSession session) throws SQLException {
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+                                         final ServletContext application) throws SQLException {
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
       connection = datasource.getConnection();
@@ -86,8 +84,8 @@ public class FinalistLoad {
   }
 
   public static void outputDivisions(final Writer writer,
-                                     final HttpSession session) throws SQLException {
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+                                     final ServletContext application) throws SQLException {
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
       connection = datasource.getConnection();
@@ -103,8 +101,8 @@ public class FinalistLoad {
   /**
    * @return the current tournament name as a quoted javascript string
    */
-  public static String currentTournament(final HttpSession session) throws SQLException {
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+  public static String currentTournament(final ServletContext application) throws SQLException {
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {
       connection = datasource.getConnection();
@@ -139,9 +137,8 @@ public class FinalistLoad {
   }
 
   public static void outputCategoryScores(final Writer writer,
-                                          final ServletContext application,
-                                          final HttpSession session) throws SQLException {
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+                                          final ServletContext application) throws SQLException {
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
 
     PreparedStatement prep = null;

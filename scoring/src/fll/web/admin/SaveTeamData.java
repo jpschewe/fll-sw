@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 
 import fll.db.Queries;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -39,7 +40,7 @@ public class SaveTeamData extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
     Connection connection = null;
     try {
