@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.sql.Connection;
@@ -35,16 +34,12 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.io.LogWriter;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.hsqldb.Server;
 import org.hsqldb.jdbc.jdbcDataSource;
-import org.slf4j.LoggerFactory;
 
 import au.com.bytecode.opencsv.CSVReader;
-import fll.db.DataSourceSpy;
 import fll.db.ImportDB;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -364,14 +359,10 @@ public final class Utilities {
     }
   }
 
-  private static Server _testDatabaseServer = null;
-
-  private static final Object TEST_DATABASE_SERVER_LOCK = new Object();
-
   /**
    * Create a datasource for the specified database
    * 
-   * @param database the database to connect to
+   * @param database the database to connect to, assumed to be a filename
    * @return a datasource
    */
   public static DataSource createDataSource(final String database) {
@@ -382,57 +373,24 @@ public final class Utilities {
       LOGGER.debug("myURL: "
           + myURL);
     }
-    return createDataSource(database, myURL);
+    return createDataSourceFromURL(myURL);
   }
 
   /**
-   * Create a {@link DataSource} attached to the specified database with the
-   * specified URL.
+   * Create a {@link DataSource} attached database with the specified URL.
    * 
-   * @param database the name of the database, for debugging
    * @param myURL the URL to the database
    * @return the DataSource
    */
-  public static DataSource createDataSource(final String database,
-                                            final String myURL) {
+  public static DataSource createDataSourceFromURL(final String myURL) {
     final jdbcDataSource dataSource = new jdbcDataSource();
     dataSource.setDatabase(myURL);
     dataSource.setUser("sa");
 
-    // startup test database server
-    if (Boolean.getBoolean("inside.test")
-        && !myURL.contains(":mem:")) {
-      synchronized (TEST_DATABASE_SERVER_LOCK) {
-        if (null == _testDatabaseServer) {
-          if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Configuring test database server");
-          }
-          _testDatabaseServer = new Server();
-          _testDatabaseServer.setAddress("localhost");
-          _testDatabaseServer.setPort(9042);
-          _testDatabaseServer.setDatabasePath(0, database);
-          _testDatabaseServer.setDatabaseName(0, "fll");
-          _testDatabaseServer.setNoSystemExit(true);
-          _testDatabaseServer.setErrWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"),
-                                                                         LogWriter.LogLevel.ERROR)));
-          _testDatabaseServer.setLogWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"),
-                                                                         LogWriter.LogLevel.DEBUG)));
-          _testDatabaseServer.setTrace(true);
-        }
-        if (1 != _testDatabaseServer.getState()) {
-          if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Starting database server for testing");
-          }
-          _testDatabaseServer.start();
-        }
-      }
-
-      System.setProperty("log4jdbc.enabled", "true");
-      final DataSourceSpy debugDatasource = new DataSourceSpy(dataSource);
-      return debugDatasource;
-    } else {
-      return dataSource;
-    }
+    // System.setProperty("log4jdbc.enabled", "true");
+    // final DataSourceSpy debugDatasource = new DataSourceSpy(dataSource);
+    // return debugDatasource;
+    return dataSource;
   }
 
   /**
