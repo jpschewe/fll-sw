@@ -39,7 +39,7 @@
             password=""
             driverClassName="org.hsqldb.jdbcDriver"
             url="jdbc:hsqldb:file:${catalina.base}/work/flldb"
-            maxActive="8"
+            maxActive="20"
             maxIdle="4"
             
             removeAbandoned="true"
