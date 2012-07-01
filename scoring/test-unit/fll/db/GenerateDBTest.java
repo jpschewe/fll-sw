@@ -5,9 +5,10 @@
  */
 package fll.db;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -40,15 +41,18 @@ public class GenerateDBTest {
   /**
    * Test creating a new database from scratch and creating over an existing
    * database.
+   * @throws IOException 
    */
   @Test
-  public void testCreateDB() throws SQLException, UnsupportedEncodingException {
+  public void testCreateDB() throws SQLException, IOException {
     final InputStream stream = GenerateDBTest.class.getResourceAsStream("data/challenge-test.xml");
     Assert.assertNotNull(stream);
     final Document document = ChallengeParser.parse(new InputStreamReader(stream));
     Assert.assertNotNull(document);
 
-    final String database = "testdb";
+    final File tempFile = File.createTempFile("flltest", null);
+    final String database = tempFile.getAbsolutePath();
+
     final DataSource datasource = Utilities.createDataSource(database);
 
     Connection connection = null;
@@ -59,6 +63,10 @@ public class GenerateDBTest {
       GenerateDB.generateDB(document, connection, true);
     } finally {
       SQLFunctions.close(connection);
+      
+      if (!tempFile.delete()) {
+        tempFile.deleteOnExit();
+      }
     }
 
     TestUtils.deleteDatabase(database);
