@@ -213,6 +213,19 @@ public class InitFilter implements Filter {
     // nothing
   }
 
+  public static void initDataSource(final ServletContext application) {
+    final String database = application.getRealPath("/WEB-INF/flldb");
+    
+    // initialize the datasource
+    if (null == ApplicationAttributes.getDataSource(application)) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Datasource not available, creating");
+      }
+      final DataSource datasource = Utilities.createDataSource(database);
+      application.setAttribute(ApplicationAttributes.DATASOURCE, datasource);
+    } 
+  }
+  
   /**
    * @param request
    * @param response
@@ -228,30 +241,8 @@ public class InitFilter implements Filter {
         application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "FLL");
       }
 
-      application.setAttribute(ApplicationAttributes.DATABASE, application.getRealPath("/WEB-INF/flldb"));
-      final String database = ApplicationAttributes.getDatabase(application);
-
-      final boolean dbExists = Utilities.testHSQLDB(database);
-      if (!dbExists) {
-        LOGGER.warn("Database files not ok, redirecting to setup");
-        session.setAttribute(SessionAttributes.MESSAGE,
-                             "<p class='error'>The database does not exist yet or there is a problem with the database files. Please create the database.<br/></p>");
-        response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-            + "/setup/index.jsp"));
-        return false;
-      }
-
-      // initialize the datasource
-      final DataSource datasource;
-      if (null == ApplicationAttributes.getDataSource(application)) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Datasource not available, creating");
-        }
-        datasource = Utilities.createDataSource(database);
-        application.setAttribute(ApplicationAttributes.DATASOURCE, datasource);
-      } else {
-        datasource = ApplicationAttributes.getDataSource(application);
-      }
+      initDataSource(application);
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
       // Initialize the connection
       Connection connection = null;

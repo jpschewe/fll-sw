@@ -96,9 +96,9 @@ public class SubjectiveFrameTest {
       final File tempFile = File.createTempFile("flltest", null);
       database = tempFile.getAbsolutePath();
 
-      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), database);
-
       connection = Utilities.createDataSource(database).getConnection();
+
+      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
 
       document = Queries.getChallengeDocument(connection);
 

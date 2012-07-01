@@ -55,9 +55,9 @@ public class ImportDBTest {
     ResultSet rs = null;
     Connection connection = null;
     try {
-      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), database);
-
       connection = Utilities.createDataSource(database).getConnection();
+
+      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
 
       // check that team 8777 has a no show in research
       stmt = connection.createStatement();
@@ -95,22 +95,22 @@ public class ImportDBTest {
     final File temp = File.createTempFile("fll", ".zip");
     Connection connection = null;
     try {
-      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), database);
+      connection = Utilities.createDataSource(database).getConnection();
+
+      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
 
       // dump to temp file
       final FileOutputStream fos = new FileOutputStream(temp);
       final ZipOutputStream zipOut = new ZipOutputStream(fos);
 
-      connection = Utilities.createDataSource(database).getConnection();
       final Document challengeDocument = Queries.getChallengeDocument(connection);
       Assert.assertNotNull(challengeDocument);
       DumpDB.dumpDatabase(zipOut, connection, challengeDocument);
       fos.close();
-      connection.close();
 
       // load from temp file
       final FileInputStream fis = new FileInputStream(temp);
-      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(fis), database);
+      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(fis), connection);
       fis.close();
     } finally {
       SQLFunctions.close(connection);

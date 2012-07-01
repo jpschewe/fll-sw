@@ -31,15 +31,6 @@ public final class ApplicationAttributes {
   }
 
   /**
-   * {@link String} that holds the path to the database.
-   */
-  public static final String DATABASE = "database";
-
-  public static String getDatabase(final ServletContext application) {
-    return getAttribute(application, DATABASE, String.class);
-  }
-
-  /**
    * {@link org.w3c.dom.Document} that holds the current challenge descriptor.
    */
   public static final String CHALLENGE_DOCUMENT = "challengeDocument";

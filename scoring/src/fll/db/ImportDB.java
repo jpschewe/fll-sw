@@ -27,6 +27,8 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.sql.DataSource;
+
 import net.mtu.eggplant.io.IOUtils;
 import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -163,29 +165,24 @@ public final class ImportDB {
    * <code>database</code>.
    * 
    * @param zipfile the dump file to read
-   * @param database the path to the database to load into
+   * @param destConnection where to load the data
    * @throws IOException if there is an error reading the dump file
    * @throws SQLException if there is an error importing the data
    */
   public static void loadFromDumpIntoNewDB(final ZipInputStream zipfile,
-                                           final String database) throws IOException, SQLException {
-    Connection destConnection = null;
-    Statement destStmt = null;
+                                           final Connection destConnection) throws IOException, SQLException {
     PreparedStatement destPrep = null;
     Connection memConnection = null;
     Statement memStmt = null;
     ResultSet memRS = null;
-    Utilities.loadDBDriver();
-
     try {
       final String url = "jdbc:hsqldb:mem:dbimport"
           + String.valueOf(ImportDBDump.getNextDBCount());
-      memConnection = DriverManager.getConnection(url);
+      final DataSource memSource = Utilities.createDataSourceFromURL(url);
+      memConnection = memSource.getConnection();
 
       final Document challengeDocument = loadDatabaseDump(zipfile, memConnection);
-      GenerateDB.generateDB(challengeDocument, database, true);
-
-      destConnection = Utilities.createDataSource(database).getConnection();
+      GenerateDB.generateDB(challengeDocument, destConnection, true);
 
       memStmt = memConnection.createStatement();
 
@@ -233,18 +230,12 @@ public final class ImportDB {
 
       // remove in-memory database
       memStmt.executeUpdate("SHUTDOWN");
-
-      // shutdown new database
-      destStmt = destConnection.createStatement();
-      destStmt.executeUpdate("SHUTDOWN COMPACT");
     } finally {
       SQLFunctions.close(memRS);
       SQLFunctions.close(memStmt);
       SQLFunctions.close(memConnection);
 
       SQLFunctions.close(destPrep);
-      SQLFunctions.close(destStmt);
-      SQLFunctions.close(destConnection);
     }
   }
 

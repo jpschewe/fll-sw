@@ -7,6 +7,7 @@ package fll.web.setup;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.zip.ZipInputStream;
 
@@ -16,6 +17,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
+
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -28,6 +32,7 @@ import fll.db.ImportDB;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.web.InitFilter;
 import fll.web.UploadProcessor;
 import fll.xml.ChallengeParser;
 
@@ -46,8 +51,12 @@ public class CreateDB extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
-
+    InitFilter.initDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    Connection connection = null;
     try {
+      connection = datasource.getConnection();
+
       // must be first to ensure the form parameters are set
       UploadProcessor.processUpload(request);
 
@@ -62,13 +71,9 @@ public class CreateDB extends BaseFLLServlet {
           final Document document = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
                                                                                 Utilities.DEFAULT_CHARSET));
 
-          final String db = getServletConfig().getServletContext().getRealPath("/WEB-INF/flldb");
-          GenerateDB.generateDB(document, db, forceRebuild);
+          GenerateDB.generateDB(document, connection, forceRebuild);
 
-          // remove application & session variables that depend on the database
-          session.removeAttribute(ApplicationAttributes.DATASOURCE);
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
-          application.removeAttribute(ApplicationAttributes.DATABASE);
 
           message.append("<p id='success'><i>Successfully initialized database</i></p>");
         }
@@ -76,14 +81,10 @@ public class CreateDB extends BaseFLLServlet {
         // import a database from a dump
         final FileItem dumpFileItem = (FileItem) request.getAttribute("dbdump");
 
-        final String database = application.getRealPath("/WEB-INF/flldb");
-
-        ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileItem.getInputStream()), database);
+        ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileItem.getInputStream()), connection);
 
         // remove application variables that depend on the database
-        session.removeAttribute(ApplicationAttributes.DATASOURCE);
         application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
-        application.removeAttribute(ApplicationAttributes.DATABASE);
 
         message.append("<p id='success'><i>Successfully initialized database from dump</i></p>");
       } else {
@@ -104,6 +105,8 @@ public class CreateDB extends BaseFLLServlet {
           + sqle.getMessage() + "</p>");
       LOG.error(sqle, sqle);
       throw new RuntimeException("Error loading data into the database", sqle);
+    } finally {
+      SQLFunctions.close(connection);
     }
 
     session.setAttribute("message", message.toString());
