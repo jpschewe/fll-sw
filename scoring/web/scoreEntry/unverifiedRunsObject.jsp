@@ -4,7 +4,7 @@
 
 <%@ page import="fll.Team"%>
 <%@ page import="fll.Utilities"%>
-<%@ page import="fll.web.SessionAttributes"%>
+<%@ page import="fll.web.ApplicationAttributes"%>
 <%@ page import="fll.db.Queries"%>
 
 <%@ page import="java.util.Collection"%>
@@ -17,7 +17,7 @@
 <%@ page import="net.mtu.eggplant.util.sql.SQLFunctions"%>
 
 <%
-  final DataSource datasource = SessionAttributes.getDataSource(session);
+  final DataSource datasource = ApplicationAttributes.getDataSource(application);
   final Connection connection = datasource.getConnection();
   pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
 %>

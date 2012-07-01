@@ -26,6 +26,7 @@ import fll.Tournament;
 import fll.db.ImportDB;
 import fll.db.Queries;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -52,7 +53,7 @@ public class ExecuteImport extends BaseFLLServlet {
       final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
       sourceConnection = sourceDataSource.getConnection();
       
-      final DataSource destDataSource = SessionAttributes.getDataSource(session);
+      final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
       destConnection = destDataSource.getConnection();
 
       final boolean differences = ImportDB.checkForDifferences(sourceConnection, destConnection, tournament);

@@ -19,16 +19,21 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.log4j.Logger;
 
 import fll.db.Queries;
+import fll.util.LogUtils;
 
 /**
  * Handle login credentials and if incorrect redirect back to login page.
- * 
  */
 @WebServlet("/DoLogin")
 public class DoLogin extends BaseFLLServlet {
+
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -36,7 +41,7 @@ public class DoLogin extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
 
-    doLogin(request, response, session);
+    doLogin(request, response, application, session);
   }
 
   /**
@@ -45,13 +50,16 @@ public class DoLogin extends BaseFLLServlet {
    */
   public static void doLogin(final HttpServletRequest request,
                              final HttpServletResponse response,
+                             final ServletContext application,
                              final HttpSession session) throws IOException, ServletException {
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       // check for authentication table
       if (Queries.isAuthenticationEmpty(connection)) {
+        LOGGER.warn("No authentication information in the database");
         session.setAttribute(SessionAttributes.MESSAGE,
                              "<p class='error'>No authentication information in the database - see administrator</p>");
         response.sendRedirect(response.encodeRedirectURL("login.jsp"));
@@ -63,6 +71,7 @@ public class DoLogin extends BaseFLLServlet {
       final String pass = request.getParameter("pass");
       if (null == user
           || user.isEmpty() || null == pass || pass.isEmpty()) {
+        LOGGER.warn("Form fields missing");
         session.setAttribute(SessionAttributes.MESSAGE,
                              "<p class='error'>You must fill out all fields in the form.</p>");
         response.sendRedirect(response.encodeRedirectURL("login.jsp"));
@@ -79,16 +88,23 @@ public class DoLogin extends BaseFLLServlet {
           Queries.addValidLogin(connection, magicKey);
           CookieUtils.setLoginCookie(response, magicKey);
 
-          response.sendRedirect(response.encodeRedirectURL(SessionAttributes.getRedirectURL(session)));
+          String redirect = SessionAttributes.getRedirectURL(session);
+          if (null == redirect) {
+            redirect = "index.jsp";
+          }
+          response.sendRedirect(response.encodeRedirectURL(redirect));
           return;
         }
       }
 
+      LOGGER.warn("Incorrect login credentials");
       session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>Incorrect login information provided</p>");
       response.sendRedirect(response.encodeRedirectURL("login.jsp"));
       return;
     } catch (final SQLException e) {
       throw new RuntimeException(e);
+    } finally {
+      SQLFunctions.close(connection);
     }
   }
 

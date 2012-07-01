@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.sql.Connection;
@@ -35,16 +34,12 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
-import net.mtu.eggplant.io.LogWriter;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.hsqldb.Server;
 import org.hsqldb.jdbc.jdbcDataSource;
-import org.slf4j.LoggerFactory;
 
 import au.com.bytecode.opencsv.CSVReader;
-import fll.db.DataSourceSpy;
 import fll.db.ImportDB;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -249,59 +244,6 @@ public final class Utilities {
   }
 
   /**
-   * Check to see if the database files can be written to. Will check each of
-   * the files that HSQLDB uses for the database and ensure they're all readable
-   * and writable. If there are any problems a {@link RuntimeException} will be
-   * thrown.
-   * 
-   * @return true if the database is ok
-   * @throws RuntimeException on any error
-   */
-  public static boolean testHSQLDB(final String baseFilename) {
-    final File baseFile = new File(baseFilename);
-    final File dir = baseFile.getParentFile();
-    if (null == dir) {
-      LOGGER.warn("There is no parent file for "
-          + baseFile.getAbsolutePath());
-      return false;
-    }
-    if (!dir.isDirectory()) {
-      LOGGER.warn("Database directory "
-          + dir.getAbsolutePath() + " is not a directory");
-      return false;
-    }
-    if (!dir.canWrite()) {
-      LOGGER.warn("Database directory "
-          + dir.getAbsolutePath() + " is not writable");
-      return false;
-    }
-    if (!dir.canRead()) {
-      LOGGER.warn("Database directory "
-          + dir.getAbsolutePath() + " is not readable");
-      return false;
-    }
-
-    for (final String extension : HSQL_DB_EXTENSIONS) {
-      final File file = new File(baseFilename
-          + extension);
-      if (file.exists()
-          && !file.canWrite()) {
-        LOGGER.warn("Database file "
-            + file.getAbsolutePath() + " exists and is not writable");
-        return false;
-      }
-      if (file.exists()
-          && !file.canRead()) {
-        LOGGER.warn("Database file "
-            + file.getAbsolutePath() + " exists and is not readable");
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  /**
    * Extensions used by HSQL for it's database files. These extensions include
    * the dot.
    */
@@ -364,76 +306,58 @@ public final class Utilities {
     }
   }
 
-  private static Server _testDatabaseServer = null;
-
-  private static final Object TEST_DATABASE_SERVER_LOCK = new Object();
-
   /**
    * Create a datasource for the specified database
    * 
-   * @param database the database to connect to
+   * @param database the database to connect to, assumed to be a filename
    * @return a datasource
    */
-  public static DataSource createDataSource(final String database) {
+  public static DataSource createFileDataSource(final String database) {
     final String myURL;
     myURL = "jdbc:hsqldb:file:"
-        + database + ";shutdown=true";
+        + database;
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("myURL: "
           + myURL);
     }
-    return createDataSource(database, myURL);
+    return createDataSourceFromURL(myURL);
   }
 
   /**
-   * Create a {@link DataSource} attached to the specified database with the
-   * specified URL.
+   * Create a datasource for the specified memory database
    * 
-   * @param database the name of the database, for debugging
+   * @param database the database to connect to, assumed to be a filename
+   * @return a datasource
+   */
+  public static DataSource createMemoryDataSource(final String database) {
+    final String myURL;
+    myURL = "jdbc:hsqldb:mem:"
+        + database;
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("myURL: "
+          + myURL);
+    }
+    return createDataSourceFromURL(myURL);
+  }
+
+  /**
+   * Create a {@link DataSource} attached database with the specified URL.
+   * 
    * @param myURL the URL to the database
    * @return the DataSource
    */
-  public static DataSource createDataSource(final String database,
-                                            final String myURL) {
+  private static DataSource createDataSourceFromURL(final String myURL) {
     final jdbcDataSource dataSource = new jdbcDataSource();
     dataSource.setDatabase(myURL);
     dataSource.setUser("sa");
 
-    // startup test database server
-    if (Boolean.getBoolean("inside.test")
-        && !myURL.contains(":mem:")) {
-      synchronized (TEST_DATABASE_SERVER_LOCK) {
-        if (null == _testDatabaseServer) {
-          if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Configuring test database server");
-          }
-          _testDatabaseServer = new Server();
-          _testDatabaseServer.setAddress("localhost");
-          _testDatabaseServer.setPort(9042);
-          _testDatabaseServer.setDatabasePath(0, database);
-          _testDatabaseServer.setDatabaseName(0, "fll");
-          _testDatabaseServer.setNoSystemExit(true);
-          _testDatabaseServer.setErrWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"),
-                                                                         LogWriter.LogLevel.ERROR)));
-          _testDatabaseServer.setLogWriter(new PrintWriter(new LogWriter(LoggerFactory.getLogger("database"),
-                                                                         LogWriter.LogLevel.DEBUG)));
-          _testDatabaseServer.setTrace(true);
-        }
-        if (1 != _testDatabaseServer.getState()) {
-          if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Starting database server for testing");
-          }
-          _testDatabaseServer.start();
-        }
-      }
-
-      System.setProperty("log4jdbc.enabled", "true");
-      final DataSourceSpy debugDatasource = new DataSourceSpy(dataSource);
-      return debugDatasource;
-    } else {
-      return dataSource;
-    }
+    return dataSource;
   }
+  
+  //TODO get datasource debugging back in at some point?
+  // System.setProperty("log4jdbc.enabled", "true");
+  // final DataSourceSpy debugDatasource = new DataSourceSpy(dataSource);
+  // return debugDatasource;
 
   /**
    * Filter used to select only graphics files

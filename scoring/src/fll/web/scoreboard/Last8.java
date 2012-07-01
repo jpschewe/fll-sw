@@ -1,29 +1,7 @@
 /*
- * Copyright (c) 2008
- *      Jon Schewe.  All rights reserved
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- * I'd appreciate comments/suggestions on the code jpschewe@mtu.net
+ * Copyright (c) 2012 INSciTE.  All rights reserved
+ * INSciTE is on the web at: http://www.hightechkids.org
+ * This code is released under GPL; see LICENSE.txt for details.
  */
 package fll.web.scoreboard;
 
@@ -50,8 +28,8 @@ import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 
 @WebServlet("/scoreboard/Last8")
 public class Last8 extends BaseFLLServlet {
@@ -66,15 +44,16 @@ public class Last8 extends BaseFLLServlet {
       LOGGER.trace("Entering doPost");
     }
 
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final Formatter formatter = new Formatter(response.getWriter());
     final String showOrgStr = request.getParameter("showOrganization");
     final boolean showOrg = null == showOrgStr ? true : Boolean.parseBoolean(showOrgStr);
 
     PreparedStatement prep = null;
     ResultSet rs = null;
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
 
@@ -88,7 +67,7 @@ public class Last8 extends BaseFLLServlet {
       formatter.format("<center>");
       formatter.format("<table border='1' cellpadding='0' cellspacing='0' width='98%%'>");
       formatter.format("<tr>");
-      int numColumns = 6;
+      int numColumns = 5;
       if (!showOrg) {
         --numColumns;
       }
@@ -97,11 +76,14 @@ public class Last8 extends BaseFLLServlet {
 
       // scores here
       prep = connection.prepareStatement("SELECT Teams.TeamNumber"
-          + ", Teams.Organization, Teams.TeamName, current_tournament_teams.event_division"
-          + ", verified_performance.Tournament, verified_performance.RunNumber"
-          + ", verified_performance.Bye, verified_performance.NoShow, verified_performance.TimeStamp, verified_performance.ComputedTotal"
-          + " FROM Teams,verified_performance,current_tournament_teams WHERE verified_performance.Tournament = ?"
-          + "  AND Teams.TeamNumber = verified_performance.TeamNumber AND Teams.TeamNumber = current_tournament_teams.TeamNumber"
+          + ", Teams.Organization" //
+          + ", Teams.TeamName" //
+          + ", current_tournament_teams.event_division" //
+          + ", verified_performance.Bye" //
+          + ", verified_performance.NoShow" //
+          + ", verified_performance.ComputedTotal" //
+          + " FROM Teams,verified_performance,current_tournament_teams WHERE verified_performance.Tournament = ?" //
+          + "  AND Teams.TeamNumber = verified_performance.TeamNumber AND Teams.TeamNumber = current_tournament_teams.TeamNumber" //
           + "  AND verified_performance.Bye = False ORDER BY verified_performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 8");
       prep.setInt(1, currentTournament);
       rs = prep.executeQuery();
@@ -118,7 +100,6 @@ public class Last8 extends BaseFLLServlet {
           formatter.format("<td class='left'><b>%s</b></td>", organization);
         }
         formatter.format("<td class='right' width='5%%'><b>%s</b></td>", rs.getString("event_division"));
-        formatter.format("<td class='right' width='5%%'><b>%d</b></td>", rs.getInt("RunNumber"));
 
         formatter.format("<td class='right' width='8%%'><b>");
         if (rs.getBoolean("NoShow")) {
@@ -141,6 +122,7 @@ public class Last8 extends BaseFLLServlet {
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
+      SQLFunctions.close(connection);
     }
 
     if (LOGGER.isTraceEnabled()) {

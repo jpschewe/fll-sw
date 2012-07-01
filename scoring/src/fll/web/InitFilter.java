@@ -1,29 +1,7 @@
 /*
- * Copyright (c) 2008
- *      Jon Schewe.  All rights reserved
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- * I'd appreciate comments/suggestions on the code jpschewe@mtu.net
+ * Copyright (c) 2012 INSciTE.  All rights reserved
+ * INSciTE is on the web at: http://www.hightechkids.org
+ * This code is released under GPL; see LICENSE.txt for details.
  */
 package fll.web;
 
@@ -45,6 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
@@ -55,7 +35,6 @@ import fll.util.LogUtils;
 
 /**
  * Initialize web attributes.
- * 
  */
 @WebFilter("/*")
 public class InitFilter implements Filter {
@@ -100,7 +79,7 @@ public class InitFilter implements Filter {
       }
 
       if (needsSecurity) {
-        if (!checkSecurity(httpRequest, httpResponse, session)) {
+        if (!checkSecurity(httpRequest, httpResponse, application, session)) {
           LOGGER.debug("Returning after checkSecurity did redirect");
           return;
         }
@@ -194,12 +173,14 @@ public class InitFilter implements Filter {
    */
   private boolean checkSecurity(final HttpServletRequest request,
                                 final HttpServletResponse response,
+                                final ServletContext application,
                                 final HttpSession session) throws IOException {
 
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       if (Queries.isAuthenticationEmpty(connection)) {
         LOGGER.debug("Returning true from checkSecurity for empty auth");
@@ -220,6 +201,8 @@ public class InitFilter implements Filter {
       }
     } catch (final SQLException e) {
       throw new RuntimeException(e);
+    } finally {
+      SQLFunctions.close(connection);
     }
   }
 
@@ -230,6 +213,19 @@ public class InitFilter implements Filter {
     // nothing
   }
 
+  public static void initDataSource(final ServletContext application) {
+    final String database = application.getRealPath("/WEB-INF/flldb");
+    
+    // initialize the datasource
+    if (null == ApplicationAttributes.getDataSource(application)) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Datasource not available, creating");
+      }
+      final DataSource datasource = Utilities.createFileDataSource(database);
+      application.setAttribute(ApplicationAttributes.DATASOURCE, datasource);
+    } 
+  }
+  
   /**
    * @param request
    * @param response
@@ -245,69 +241,52 @@ public class InitFilter implements Filter {
         application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "FLL");
       }
 
-      application.setAttribute(ApplicationAttributes.DATABASE, application.getRealPath("/WEB-INF/flldb"));
-      final String database = ApplicationAttributes.getDatabase(application);
-
-      final boolean dbExists = Utilities.testHSQLDB(database);
-      if (!dbExists) {
-        LOGGER.warn("Database files not ok, redirecting to setup");
-        session.setAttribute(SessionAttributes.MESSAGE,
-                             "<p class='error'>The database does not exist yet or there is a problem with the database files. Please create the database.<br/></p>");
-        response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-            + "/setup/index.jsp"));
-        return false;
-      }
-
-      // initialize the datasource
-      final DataSource datasource;
-      if (null == SessionAttributes.getDataSource(session)) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Datasource not available, creating");
-        }
-        datasource = Utilities.createDataSource(database);
-        session.setAttribute(SessionAttributes.DATASOURCE, datasource);
-      } else {
-        datasource = SessionAttributes.getDataSource(session);
-      }
+      initDataSource(application);
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
       // Initialize the connection
-      final Connection connection = datasource.getConnection();
+      Connection connection = null;
+      try {
+        connection = datasource.getConnection();
 
-      // check if the database is initialized
-      final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
-      if (!dbinitialized) {
-        LOGGER.warn("Database not initialized, redirecting to setup");
-        session.setAttribute(SessionAttributes.MESSAGE,
-                             "<p class='error'>The database is not yet initialized. Please create the database.</p>");
-        response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-            + "/setup/index.jsp"));
-        return false;
-      }
-
-      // load the challenge descriptor
-      if (null == ApplicationAttributes.getChallengeDocument(application)) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Loading challenge descriptor");
-        }
-        try {
-          final Document document = Queries.getChallengeDocument(connection);
-          if (null == document) {
-            LOGGER.warn("Could not find challenge descriptor");
-            session.setAttribute(SessionAttributes.MESSAGE,
-                                 "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
-            response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-                + "/setup/index.jsp"));
-            return false;
-          }
-          application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, document);
-        } catch (final FLLRuntimeException e) {
-          LOGGER.error("Error getting challenge document", e);
-          session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>"
-              + e.getMessage() + " Please create the database.</p>");
+        // check if the database is initialized
+        final boolean dbinitialized = Utilities.testDatabaseInitialized(connection);
+        if (!dbinitialized) {
+          LOGGER.warn("Database not initialized, redirecting to setup");
+          session.setAttribute(SessionAttributes.MESSAGE,
+                               "<p class='error'>The database is not yet initialized. Please create the database.</p>");
           response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
               + "/setup/index.jsp"));
           return false;
         }
+
+        // load the challenge descriptor
+        if (null == ApplicationAttributes.getChallengeDocument(application)) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Loading challenge descriptor");
+          }
+          try {
+            final Document document = Queries.getChallengeDocument(connection);
+            if (null == document) {
+              LOGGER.warn("Could not find challenge descriptor");
+              session.setAttribute(SessionAttributes.MESSAGE,
+                                   "<p class='error'>Could not find xml challenge description in the database! Please create the database.</p>");
+              response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+                  + "/setup/index.jsp"));
+              return false;
+            }
+            application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, document);
+          } catch (final FLLRuntimeException e) {
+            LOGGER.error("Error getting challenge document", e);
+            session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>"
+                + e.getMessage() + " Please create the database.</p>");
+            response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
+                + "/setup/index.jsp"));
+            return false;
+          }
+        }
+      } finally {
+        SQLFunctions.close(connection);
       }
 
       // TODO ticket:87 allow static data to be cached

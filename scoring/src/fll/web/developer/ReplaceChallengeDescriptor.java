@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.log4j.Logger;
@@ -29,7 +31,6 @@ import fll.db.GenerateDB;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 import fll.xml.ChallengeParser;
 
@@ -48,9 +49,10 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
 
     final StringBuilder message = new StringBuilder();
 
+    Connection connection = null;
     try {
-      final DataSource datasource = SessionAttributes.getDataSource(session);
-      final Connection connection = datasource.getConnection();
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      connection = datasource.getConnection();
 
       final Document curDoc = ApplicationAttributes.getChallengeDocument(application);
 
@@ -82,6 +84,8 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
           + sqle.getMessage() + "</p>");
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error talking to the database", sqle);
+    } finally {
+      SQLFunctions.close(connection);
     }
 
     if (LOGGER.isTraceEnabled()) {

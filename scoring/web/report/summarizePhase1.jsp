@@ -3,7 +3,6 @@
 <%@ page import="fll.ScoreStandardization" %>
 <%@ page import="fll.db.Queries" %>
 <%@ page import="fll.web.ApplicationAttributes"%>
-<%@ page import="fll.web.SessionAttributes" %>
       
 <%@ page import="org.w3c.dom.Document" %>
 
@@ -13,7 +12,7 @@
 
 <%
 final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
-final DataSource datasource = SessionAttributes.getDataSource(session);
+final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();
 final int currentTournament = Queries.getCurrentTournament(connection);
   

@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 
 import fll.db.Queries;
@@ -27,7 +29,6 @@ import fll.util.LogUtils;
 
 /**
  * Log a user out of the application.
- * 
  */
 @WebServlet("/DoLogout")
 public class DoLogout extends BaseFLLServlet {
@@ -40,7 +41,7 @@ public class DoLogout extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
     final Collection<Cookie> loginCookies = CookieUtils.findLoginCookie(request);
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final String hostHeader = request.getHeader("host");
     final int colonIndex = hostHeader.indexOf(":");
     final String domain;
@@ -58,13 +59,16 @@ public class DoLogout extends BaseFLLServlet {
       delCookie.setDomain(domain);
       response.addCookie(delCookie);
 
+      Connection connection = null;
       try {
-        final Connection connection = datasource.getConnection();
+        connection = datasource.getConnection();
         Queries.removeValidLogin(connection, loginCookie.getValue());
         LOGGER.debug("Removed cookie from DB: "
             + loginCookie.getValue());
       } catch (final SQLException e) {
         throw new RuntimeException(e);
+      } finally {
+        SQLFunctions.close(connection);
       }
     }
     response.sendRedirect(response.encodeRedirectURL(request.getContextPath()));

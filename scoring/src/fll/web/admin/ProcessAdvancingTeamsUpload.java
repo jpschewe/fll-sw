@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
@@ -33,6 +35,7 @@ import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -52,6 +55,7 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
     final String advanceFile = SessionAttributes.getNonNullAttribute(session, "advanceFile", String.class);
     final File file = new File(advanceFile);
+    Connection connection = null;
     try {
       if (!file.exists()
           || !file.canRead()) {
@@ -76,8 +80,8 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
       }
 
       // process as if the user had selected these teams
-      final DataSource datasource = SessionAttributes.getDataSource(session);
-      final Connection connection = datasource.getConnection();
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      connection = datasource.getConnection();
       GatherAdvancementData.processAdvancementData(response, session, false, connection, teams);
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error saving advancment data into the database: "
@@ -98,6 +102,7 @@ public final class ProcessAdvancingTeamsUpload extends BaseFLLServlet {
       if (!file.delete()) {
         file.deleteOnExit();
       }
+      SQLFunctions.close(connection);
     }
   }
 

@@ -30,8 +30,8 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 
 /**
  * Gather information for editing or adding a team and put it in the session.
@@ -61,10 +61,10 @@ public class GatherTeamData extends BaseFLLServlet {
     }
 
     final StringBuilder message = new StringBuilder();
-    final DataSource datasource = SessionAttributes.getDataSource(session);
-
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       // store map of tournaments in session
       final List<Tournament> tournaments = Tournament.getTournaments(connection);
@@ -139,6 +139,8 @@ public class GatherTeamData extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
+    } finally {
+      SQLFunctions.close(connection);
     }
 
     if (LOGGER.isTraceEnabled()) {
