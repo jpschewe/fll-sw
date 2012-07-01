@@ -244,59 +244,6 @@ public final class Utilities {
   }
 
   /**
-   * Check to see if the database files can be written to. Will check each of
-   * the files that HSQLDB uses for the database and ensure they're all readable
-   * and writable. If there are any problems a {@link RuntimeException} will be
-   * thrown.
-   * 
-   * @return true if the database is ok
-   * @throws RuntimeException on any error
-   */
-  public static boolean testHSQLDB(final String baseFilename) {
-    final File baseFile = new File(baseFilename);
-    final File dir = baseFile.getParentFile();
-    if (null == dir) {
-      LOGGER.warn("There is no parent file for "
-          + baseFile.getAbsolutePath());
-      return false;
-    }
-    if (!dir.isDirectory()) {
-      LOGGER.warn("Database directory "
-          + dir.getAbsolutePath() + " is not a directory");
-      return false;
-    }
-    if (!dir.canWrite()) {
-      LOGGER.warn("Database directory "
-          + dir.getAbsolutePath() + " is not writable");
-      return false;
-    }
-    if (!dir.canRead()) {
-      LOGGER.warn("Database directory "
-          + dir.getAbsolutePath() + " is not readable");
-      return false;
-    }
-
-    for (final String extension : HSQL_DB_EXTENSIONS) {
-      final File file = new File(baseFilename
-          + extension);
-      if (file.exists()
-          && !file.canWrite()) {
-        LOGGER.warn("Database file "
-            + file.getAbsolutePath() + " exists and is not writable");
-        return false;
-      }
-      if (file.exists()
-          && !file.canRead()) {
-        LOGGER.warn("Database file "
-            + file.getAbsolutePath() + " exists and is not readable");
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  /**
    * Extensions used by HSQL for it's database files. These extensions include
    * the dot.
    */
