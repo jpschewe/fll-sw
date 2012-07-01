@@ -1,29 +1,7 @@
 /*
- * Copyright (c) 2008
- *      Jon Schewe.  All rights reserved
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- * I'd appreciate comments/suggestions on the code jpschewe@mtu.net
+ * Copyright (c) 2012 INSciTE.  All rights reserved
+ * INSciTE is on the web at: http://www.hightechkids.org
+ * This code is released under GPL; see LICENSE.txt for details.
  */
 package fll.web.scoreboard;
 
@@ -83,15 +61,16 @@ public class Top10 extends BaseFLLServlet {
       LOGGER.trace("Entering doPost");
     }
 
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final Formatter formatter = new Formatter(response.getWriter());
     final String showOrgStr = request.getParameter("showOrganization");
     final boolean showOrg = null == showOrgStr ? true : Boolean.parseBoolean(showOrgStr);
 
     PreparedStatement prep = null;
     ResultSet rs = null;
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
 
@@ -178,6 +157,7 @@ public class Top10 extends BaseFLLServlet {
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
+      SQLFunctions.close(connection);
     }
 
     if (LOGGER.isTraceEnabled()) {

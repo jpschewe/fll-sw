@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
-import javax.sql.DataSource;
 
 /**
  * Keys for session variables. Each key has an associated accessor function as
@@ -80,16 +79,6 @@ public final class SessionAttributes {
 
   public static String getMessage(final HttpSession session) {
     return getAttribute(session, MESSAGE, String.class);
-  }
-
-  /**
-   * {@link javax.sql.DataSource} that is connected to the tournament database.
-   * Initialized in 'jspf/init.jspf'.
-   */
-  public static final String DATASOURCE = "datasource";
-
-  public static DataSource getDataSource(final HttpSession session) {
-    return getAttribute(session, DATASOURCE, DataSource.class);
   }
 
   /**

@@ -27,6 +27,8 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.sql.DataSource;
+
 import net.mtu.eggplant.io.IOUtils;
 import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -163,29 +165,23 @@ public final class ImportDB {
    * <code>database</code>.
    * 
    * @param zipfile the dump file to read
-   * @param database the path to the database to load into
+   * @param destConnection where to load the data
    * @throws IOException if there is an error reading the dump file
    * @throws SQLException if there is an error importing the data
    */
   public static void loadFromDumpIntoNewDB(final ZipInputStream zipfile,
-                                           final String database) throws IOException, SQLException {
-    Connection destConnection = null;
-    Statement destStmt = null;
+                                           final Connection destConnection) throws IOException, SQLException {
     PreparedStatement destPrep = null;
     Connection memConnection = null;
     Statement memStmt = null;
     ResultSet memRS = null;
-    Utilities.loadDBDriver();
-
     try {
-      final String url = "jdbc:hsqldb:mem:dbimport"
-          + String.valueOf(ImportDBDump.getNextDBCount());
-      memConnection = DriverManager.getConnection(url);
+      final String databaseName = "dbimport" + String.valueOf(ImportDBDump.getNextDBCount()); 
+      final DataSource memSource = Utilities.createMemoryDataSource(databaseName);
+      memConnection = memSource.getConnection();
 
       final Document challengeDocument = loadDatabaseDump(zipfile, memConnection);
-      GenerateDB.generateDB(challengeDocument, database, true);
-
-      destConnection = Utilities.createDataSource(database).getConnection();
+      GenerateDB.generateDB(challengeDocument, destConnection, true);
 
       memStmt = memConnection.createStatement();
 
@@ -233,18 +229,12 @@ public final class ImportDB {
 
       // remove in-memory database
       memStmt.executeUpdate("SHUTDOWN");
-
-      // shutdown new database
-      destStmt = destConnection.createStatement();
-      destStmt.executeUpdate("SHUTDOWN COMPACT");
     } finally {
       SQLFunctions.close(memRS);
       SQLFunctions.close(memStmt);
       SQLFunctions.close(memConnection);
 
       SQLFunctions.close(destPrep);
-      SQLFunctions.close(destStmt);
-      SQLFunctions.close(destConnection);
     }
   }
 
@@ -268,6 +258,26 @@ public final class ImportDB {
                                     nextTournament.getTournamentID());
       }
     }
+  }
+
+  /**
+   * Load type info from reader and return in a Map.
+   * 
+   * @param reader where to read the data from
+   * @return key is column name, value is type
+   */
+  public static Map<String, String> loadTypeInfo(final Reader reader) throws IOException {
+    final CSVReader csvreader = new CSVReader(reader);
+    final Map<String, String> columnTypes = new HashMap<String, String>();
+
+    String[] line;
+    while (null != (line = csvreader.readNext())) {
+      if (line.length != 2) {
+        throw new RuntimeException("Typeinfo file has incorrect number of columns, should be 2");
+      }
+      columnTypes.put(line[0].toLowerCase(), line[1]);
+    }
+    return columnTypes;
   }
 
   /**
@@ -312,18 +322,7 @@ public final class ImportDB {
       } else if (name.endsWith(".types")) {
         final String tablename = name.substring(0, name.indexOf(".types")).toLowerCase();
         final Reader reader = new InputStreamReader(zipfile, Utilities.DEFAULT_CHARSET);
-        final CSVReader csvreader = new CSVReader(reader);
-        final Map<String, String> columnTypes = new HashMap<String, String>();
-
-        String[] line;
-        while (null != (line = csvreader.readNext())) {
-          if (line.length != 2) {
-            throw new RuntimeException(name
-                + " has incorrect number of columns, should be 2");
-          }
-          columnTypes.put(line[0].toLowerCase(), line[1]);
-        }
-
+        final Map<String, String> columnTypes = loadTypeInfo(reader);
         typeInfo.put(tablename, columnTypes);
       } else {
         LOG.warn("Unexpected file found in imported zip file, skipping: "

@@ -47,28 +47,6 @@ public final class GenerateDB {
     // no instances
   }
 
-  /**
-   * Create a new database <code>database</code> and then call
-   * {@link #generateDB(Document, Connection, boolean)}.
-   * 
-   * @param database name for the database to generate
-   */
-  public static void generateDB(final Document document,
-                                final String database,
-                                final boolean forceRebuild) throws SQLException, UnsupportedEncodingException {
-    Connection connection = null;
-    try {
-      LOGGER.info("Creating database connection to database: "
-          + database);
-      connection = Utilities.createDataSource(database).getConnection();
-      LOGGER.info("Received connection: "
-          + connection);
-      generateDB(document, connection, forceRebuild);
-    } finally {
-      SQLFunctions.close(connection);
-    }
-  }
-
   public static final String DEFAULT_TEAM_NAME = "<No Name>";
 
   public static final String DEFAULT_TEAM_DIVISION = "1";

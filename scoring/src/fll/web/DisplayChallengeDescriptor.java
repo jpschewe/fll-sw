@@ -41,7 +41,7 @@ public class DisplayChallengeDescriptor extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
     Connection connection = null;
     try {
-      final DataSource datasource = SessionAttributes.getDataSource(session);
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
 
       // get challenge document from the database as it will be modified to

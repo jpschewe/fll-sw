@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.Team" %>
-<%@ page import="fll.web.SessionAttributes"%>
+<%@ page import="fll.web.ApplicationAttributes"%>
 <%@ page import="fll.db.Queries"%>
 
 <%@ page import="java.util.Collection" %>
@@ -14,7 +14,7 @@
 <%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
 
 <%
-final DataSource datasource = SessionAttributes.getDataSource(session);
+final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();
 final Statement stmt = connection.createStatement();
 final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = " + Queries.getCurrentTournament(connection));

@@ -6,6 +6,7 @@
 package fll.web;
 
 import javax.servlet.ServletContext;
+import javax.sql.DataSource;
 
 import org.w3c.dom.Document;
 
@@ -19,17 +20,14 @@ import org.w3c.dom.Document;
  */
 public final class ApplicationAttributes {
 
+  /**
+   * {@link javax.sql.DataSource} that is connected to the tournament database.
+   * Initialized in 'jspf/init.jspf'.
+   */
+  public static final String DATASOURCE = "datasource";
+
   private ApplicationAttributes() {
     // no instances
-  }
-
-  /**
-   * {@link String} that holds the path to the database.
-   */
-  public static final String DATABASE = "database";
-
-  public static String getDatabase(final ServletContext application) {
-    return getAttribute(application, DATABASE, String.class);
   }
 
   /**
@@ -79,6 +77,10 @@ public final class ApplicationAttributes {
     } else {
       throw new RuntimeException(String.format("Expecting application attribute '%s' to be of type '%s', but was of type '%s'", attribute, clazz, o.getClass()));
     }
+  }
+
+  public static DataSource getDataSource(ServletContext application) {
+    return getAttribute(application, ApplicationAttributes.DATASOURCE, DataSource.class);
   }
 
 }

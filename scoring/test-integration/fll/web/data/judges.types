@@ -1,0 +1,4 @@
+"id","VARCHAR(64)"
+"category","VARCHAR(64)"
+"tournament","VARCHAR(128)"
+"division","VARCHAR(32)"

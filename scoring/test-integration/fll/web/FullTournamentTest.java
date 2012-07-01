@@ -10,14 +10,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
+import java.util.Map;
 
 import javax.swing.table.TableModel;
 
@@ -42,11 +43,12 @@ import com.meterware.httpunit.WebResponse;
 import com.thoughtworks.selenium.SeleneseTestBase;
 
 import fll.TestUtils;
-import fll.Tournament;
 import fll.Utilities;
+import fll.db.ImportDB;
 import fll.subjective.SubjectiveFrame;
 import fll.util.FP;
 import fll.util.LogUtils;
+import fll.web.developer.QueryHandler;
 import fll.web.scoreEntry.ScoreEntry;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
@@ -64,6 +66,29 @@ public class FullTournamentTest extends SeleneseTestBase {
     LogUtils.initializeLogging();
     super.setUp(TestUtils.URL_ROOT
         + "setup");
+  }
+
+  /**
+   * Load the data data from CSV files into the specified connection.
+   */
+  private static void loadTestData(final Connection testDataConn) throws SQLException, IOException {
+    final String[] tableNames = { "teamwork", "robustdesign", "research", "programming", "performance", "judges" };
+    for (final String table : tableNames) {
+      final InputStream typeStream = FullTournamentTest.class.getResourceAsStream("data/"
+          + table + ".types");
+      Assert.assertNotNull("Missing test data "
+          + table + ".types", typeStream);
+      final Reader typeReader = new InputStreamReader(typeStream);
+      final Map<String, String> columnTypes = ImportDB.loadTypeInfo(typeReader);
+
+      final InputStream tableStream = FullTournamentTest.class.getResourceAsStream("data/"
+          + table + ".csv");
+      Assert.assertNotNull("Missing test data "
+          + table + ".csv", tableStream);
+      final Reader tableReader = new InputStreamReader(tableStream);
+      Utilities.loadCSVFile(testDataConn, table, columnTypes, tableReader);
+
+    }
   }
 
   /**
@@ -85,26 +110,23 @@ public class FullTournamentTest extends SeleneseTestBase {
     final int numSeedingRounds = 3;
 
     Connection testDataConn = null;
-    Statement stmt = null;
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
       Class.forName("org.hsqldb.jdbcDriver").newInstance();
 
-      testDataConn = DriverManager.getConnection("jdbc:hsqldb:res:/fll/web/data/flldb-ft");
-      final String testTournamentName = "Field";
+      testDataConn = DriverManager.getConnection("jdbc:hsqldb:mem:full-tournament-test");
       Assert.assertNotNull("Error connecting to test data database", testDataConn);
 
-      stmt = testDataConn.createStatement();
+      loadTestData(testDataConn);
+
+      final String testTournamentName = "Field";
 
       // --- initialize database ---
       final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml");
       IntegrationTestUtils.initializeDatabase(selenium, challengeDocIS, true);
 
       loadTeams();
-
-      final Connection serverConnection = TestUtils.createTestDBConnection();
-      Assert.assertNotNull("Could not create test database connection", serverConnection);
 
       IntegrationTestUtils.setTournament(selenium, testTournamentName);
 
@@ -114,7 +136,7 @@ public class FullTournamentTest extends SeleneseTestBase {
 
       /*
        * --- Enter 3 runs for each team --- Use data from test data base,
-       * converted from Field 2005. Enter 4th run and rest of playoffs
+       * converted from Field 2005. Enter 4th run and rest of playoffs.
        */
       prep = testDataConn.prepareStatement("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = ?");
       prep.setString(1, testTournamentName);
@@ -123,6 +145,7 @@ public class FullTournamentTest extends SeleneseTestBase {
       final int maxRuns = rs.getInt(1);
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
+      prep = null;
 
       final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(
                                                                                      FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
@@ -185,7 +208,7 @@ public class FullTournamentTest extends SeleneseTestBase {
 
       checkReports();
 
-      checkRankAndScores(serverConnection, testTournamentName);
+      checkRankAndScores(testTournamentName);
 
     } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
@@ -219,7 +242,6 @@ public class FullTournamentTest extends SeleneseTestBase {
       throw e;
     } finally {
       SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
       SQLFunctions.close(prep);
       SQLFunctions.close(testDataConn);
       // Utilities.closeConnection(connection);
@@ -444,7 +466,6 @@ public class FullTournamentTest extends SeleneseTestBase {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "report/CategoryScoresByJudge");
 
-
     // PDF reports need to be done with httpunit
     final WebConversation conversation = WebTestUtils.getConversation();
     WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
@@ -459,63 +480,56 @@ public class FullTournamentTest extends SeleneseTestBase {
 
   }
 
-  private void checkRankAndScores(final Connection serverConnection,
-                                  final String testTournamentName) throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      // check ranking and scores
-      final double scoreFP = 1E-1; // just check to one decimal place
+  private void checkRankAndScores(final String testTournamentName) throws IOException, SAXException {
+    // check ranking and scores
+    final double scoreFP = 1E-1; // just check to one decimal place
 
-      final Tournament testTournament = Tournament.findTournamentByName(serverConnection, testTournamentName);
-      final int testTournamentID = testTournament.getTournamentID();
-      prep = serverConnection.prepareStatement("SELECT FinalScores.TeamNumber, FinalScores.OverallScore FROM"
-          + " FinalScores, current_tournament_teams WHERE FinalScores.TeamNumber = "
-          + " current_tournament_teams.TeamNumber AND FinalScores.Tournament = ? AND"
-          + " current_tournament_teams.event_division = ? ORDER BY" + " FinalScores.OverallScore DESC");
-      prep.setInt(1, testTournamentID);
+    final String sqlTemplate = "SELECT FinalScores.TeamNumber AS team_number, FinalScores.OverallScore AS score" //
+        + " FROM FinalScores, current_tournament_teams, Tournaments" //
+        + " WHERE FinalScores.TeamNumber = current_tournament_teams.TeamNumber" //
+        + " AND Tournaments.Name = '%s'" + " AND FinalScores.Tournament = Tournaments.tournament_id" //
+        + " AND current_tournament_teams.event_division = '%s'" //
+        + " ORDER BY FinalScores.OverallScore DESC";
 
-      // division 1
-      final int[] division1ExpectedRank = { 2636, 3127, 3439, 4462, 3125, 2116, 2104, 2113 };
-      final double[] division1ExpectedScores = { 472.76, 423.58, 411.04, 378.04, 374.86, 346.63, 325.95, 310.61 };
-      String division = "DivI/Gr4-6";
-      prep.setString(2, division);
-      rs = prep.executeQuery();
-      int rank = 0;
-      while (rs.next()) {
-        final int teamNumber = rs.getInt(1);
-        Assert.assertEquals("Division I Ranking is incorrect for rank: "
-            + rank, division1ExpectedRank[rank], teamNumber);
-        final double score = rs.getDouble(2);
-        Assert.assertEquals("Overall score incorrect for team: "
-            + teamNumber, division1ExpectedScores[rank], score, scoreFP);
+    // division 1
+    final int[] division1ExpectedRank = { 2636, 3127, 3439, 4462, 3125, 2116, 2104, 2113 };
+    final double[] division1ExpectedScores = { 472.76, 423.58, 411.04, 378.04, 374.86, 346.63, 325.95, 310.61 };
+    String division = "DivI/Gr4-6";
 
-        ++rank;
-      }
-      SQLFunctions.close(rs);
+    final String div1Query = String.format(sqlTemplate, testTournamentName, division);
+    final QueryHandler.ResultData div1Result = WebTestUtils.executeServerQuery(div1Query);
 
-      // division 2
-      final int[] division2ExpectedRank = { 3208, 3061, 2863, 2110, 3063, 353, 3129, 2043 };
-      final double[] division2ExpectedScores = { 546.78, 512.05, 426.02, 410.23, 407.15, 355.42, 350.14, 348.75 };
-      division = "DivII/Gr7-9";
-      prep.setString(2, division);
-      rs = prep.executeQuery();
-      rank = 0;
-      while (rs.next()) {
-        final int teamNumber = rs.getInt(1);
-        Assert.assertEquals("Division II Ranking is incorrect for rank: "
-            + rank, division2ExpectedRank[rank], teamNumber);
-        final double score = rs.getDouble(2);
-        Assert.assertEquals("Overall score incorrect for team: "
-            + teamNumber, division2ExpectedScores[rank], score, scoreFP);
+    int rank = 0;
+    for (final Map<String, String> row : div1Result.data) {
+      final int teamNumber = Integer.valueOf(row.get("team_number"));
+      Assert.assertEquals("Division I Ranking is incorrect for rank: "
+          + rank, division1ExpectedRank[rank], teamNumber);
+      final double score = Double.valueOf(row.get("score"));
+      Assert.assertEquals("Overall score incorrect for team: "
+          + teamNumber, division1ExpectedScores[rank], score, scoreFP);
 
-        ++rank;
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
+      ++rank;
     }
-    // TODO ticket:82 check scores?
+
+    // division 2
+    final int[] division2ExpectedRank = { 3208, 3061, 2863, 2110, 3063, 353, 3129, 2043 };
+    final double[] division2ExpectedScores = { 546.78, 512.05, 426.02, 410.23, 407.15, 355.42, 350.14, 348.75 };
+    division = "DivII/Gr7-9";
+
+    final String div2Query = String.format(sqlTemplate, testTournamentName, division);
+    final QueryHandler.ResultData div2Result = WebTestUtils.executeServerQuery(div2Query);
+
+    rank = 0;
+    for (final Map<String, String> row : div2Result.data) {
+      final int teamNumber = Integer.valueOf(row.get("team_number"));
+      Assert.assertEquals("Division II Ranking is incorrect for rank: "
+          + rank, division2ExpectedRank[rank], teamNumber);
+      final double score = Double.valueOf(row.get("score"));
+      Assert.assertEquals("Overall score incorrect for team: "
+          + teamNumber, division2ExpectedScores[rank], score, scoreFP);
+
+      ++rank;
+    }
   }
 
   /**
