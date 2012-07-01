@@ -42,7 +42,7 @@ public class CreateUser extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
 
     PreparedStatement prep = null;
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
     Connection connection = null;
     try {
       connection = datasource.getConnection();

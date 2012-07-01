@@ -79,7 +79,7 @@ public class InitFilter implements Filter {
       }
 
       if (needsSecurity) {
-        if (!checkSecurity(httpRequest, httpResponse, application, session)) {
+        if (!checkSecurity(httpRequest, httpResponse, session)) {
           LOGGER.debug("Returning after checkSecurity did redirect");
           return;
         }
@@ -173,10 +173,9 @@ public class InitFilter implements Filter {
    */
   private boolean checkSecurity(final HttpServletRequest request,
                                 final HttpServletResponse response,
-                                final ServletContext application,
                                 final HttpSession session) throws IOException {
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
 
     Connection connection = null;
     try {
@@ -213,19 +212,6 @@ public class InitFilter implements Filter {
     // nothing
   }
 
-  public static void initDataSource(final ServletContext application) {
-    final String database = application.getRealPath("/WEB-INF/flldb");
-    
-    // initialize the datasource
-    if (null == ApplicationAttributes.getDataSource(application)) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Datasource not available, creating");
-      }
-      final DataSource datasource = Utilities.createFileDataSource(database);
-      application.setAttribute(ApplicationAttributes.DATASOURCE, datasource);
-    } 
-  }
-  
   /**
    * @param request
    * @param response
@@ -241,8 +227,7 @@ public class InitFilter implements Filter {
         application.setAttribute(ApplicationAttributes.SCORE_PAGE_TEXT, "FLL");
       }
 
-      initDataSource(application);
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      final DataSource datasource = ApplicationAttributes.getDataSource();
 
       // Initialize the connection
       Connection connection = null;

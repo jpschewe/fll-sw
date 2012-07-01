@@ -57,7 +57,7 @@ public final class Tournaments {
                                   final HttpSession session,
                                   final HttpServletRequest request,
                                   final HttpServletResponse response) throws SQLException, IOException, ParseException {
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
     Connection connection = null;
     try {
       connection = datasource.getConnection();

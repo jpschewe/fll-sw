@@ -601,7 +601,7 @@ public final class ScoreEntry {
     final int teamNumber = SessionAttributes.getNonNullAttribute(session, "team", Team.class).getTeamNumber();
     final int runNumber = SessionAttributes.getNonNullAttribute(session, "lRunNumber", Number.class).intValue();
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
 
     PreparedStatement prep = null;
     ResultSet rs = null;

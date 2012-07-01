@@ -46,7 +46,7 @@ public class AdvanceTeams extends BaseFLLServlet {
     }
 
     final StringBuilder message = new StringBuilder();
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
 
     // can't put types inside a session
     @SuppressWarnings("unchecked")

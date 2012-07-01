@@ -65,7 +65,7 @@ public final class UploadTeams extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
 
     final StringBuilder message = new StringBuilder();
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
 
     final String fileName = SessionAttributes.getNonNullAttribute(session, "spreadsheetFile", String.class);
 

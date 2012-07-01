@@ -13,7 +13,7 @@
   Parameters:
     division - String for the division
 */
-final DataSource datasource = ApplicationAttributes.getDataSource(application);
+final DataSource datasource = ApplicationAttributes.getDataSource();
 final Connection connection = datasource.getConnection();
   final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
   final int currentTournament = Queries.getCurrentTournament(connection);

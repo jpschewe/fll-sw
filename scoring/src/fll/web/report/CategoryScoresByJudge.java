@@ -47,7 +47,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);

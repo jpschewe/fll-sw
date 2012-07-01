@@ -50,7 +50,7 @@ public class CommitJudges extends BaseFLLServlet {
       LOGGER.trace("Top of CommitJudges.processRequest");
     }
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
     Connection connection = null;
     try {
       connection = datasource.getConnection();

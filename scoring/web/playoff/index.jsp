@@ -8,7 +8,7 @@
 <%@ page import="java.sql.Connection" %>
   
 <%
-final DataSource datasource = ApplicationAttributes.getDataSource(application);
+final DataSource datasource = ApplicationAttributes.getDataSource();
 final Connection connection = datasource.getConnection();
 final List<String> divisions = Queries.getEventDivisions(connection);
 pageContext.setAttribute("divisions", divisions);

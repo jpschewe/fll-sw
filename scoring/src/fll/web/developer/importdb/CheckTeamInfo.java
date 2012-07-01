@@ -52,7 +52,7 @@ public class CheckTeamInfo extends BaseFLLServlet {
       final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
       sourceConnection = sourceDataSource.getConnection();
       
-      final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
+      final DataSource destDataSource = ApplicationAttributes.getDataSource();
       destConnection = destDataSource.getConnection();
 
       final List<TeamPropertyDifference> teamDifferences = ImportDB.checkTeamInfo(sourceConnection, destConnection, tournament);

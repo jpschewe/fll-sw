@@ -8,7 +8,7 @@
 <%@ page import="fll.web.WebUtils"%>
 
 <%
-final DataSource datasource = ApplicationAttributes.getDataSource(application);
+final DataSource datasource = ApplicationAttributes.getDataSource();
 final Connection connection = datasource.getConnection();
 pageContext.setAttribute("urls", WebUtils.getAllURLs(request));
 %>

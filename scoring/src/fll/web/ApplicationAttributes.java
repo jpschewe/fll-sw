@@ -5,6 +5,9 @@
  */
 package fll.web;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
@@ -79,8 +82,19 @@ public final class ApplicationAttributes {
     }
   }
 
-  public static DataSource getDataSource(ServletContext application) {
-    return getAttribute(application, ApplicationAttributes.DATASOURCE, DataSource.class);
+  /**
+   * Get the datasource used. 
+   */
+  public static DataSource getDataSource() {
+    try {
+      final Context initCtx = new InitialContext();
+      final Context envCtx = (Context) initCtx.lookup("java:comp/env");
+      final DataSource datasource = (DataSource) envCtx.lookup("jdbc/FLLDB");
+
+      return datasource;
+    } catch (final NamingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

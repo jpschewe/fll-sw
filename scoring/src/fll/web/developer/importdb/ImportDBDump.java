@@ -57,7 +57,6 @@ public class ImportDBDump extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
 
-    Utilities.loadDBDriver();
     Connection destConnection = null;
     try {
       // must be first to ensure the form parameters are set
@@ -81,7 +80,7 @@ public class ImportDBDump extends BaseFLLServlet {
         final ZipInputStream zipfile = new ZipInputStream(dumpFileItem.getInputStream());
         ImportDB.loadDatabaseDump(zipfile, memConnection);
 
-        final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
+        final DataSource destDataSource = ApplicationAttributes.getDataSource();
         destConnection = destDataSource.getConnection();
         final String docMessage = checkChallengeDescriptors(memConnection, destConnection);
         if (null == docMessage) {

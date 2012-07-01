@@ -56,7 +56,7 @@ table,th,td {
 			</textarea>
 		</p>
 		<c:if test="${not empty param.update}">
-			<sql:update dataSource="${datasource}" var="update_result"
+			<sql:update dataSource="jdbc/FLLDB" var="update_result"
 				scope="page" sql="${param.update}" />
 			<p>
 				Modified rows:

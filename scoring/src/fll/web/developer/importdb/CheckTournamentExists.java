@@ -58,7 +58,7 @@ public class CheckTournamentExists extends BaseFLLServlet {
         session.setAttribute("selectedTournament", selectedTournament);
 
         // Check if the tournament exists
-        final DataSource datasource = ApplicationAttributes.getDataSource(application);
+        final DataSource datasource = ApplicationAttributes.getDataSource();
         connection = datasource.getConnection();
         final Tournament tournament = Tournament.findTournamentByName(connection, selectedTournament);
         if (null == tournament) {

@@ -44,7 +44,7 @@ public class Last8 extends BaseFLLServlet {
       LOGGER.trace("Entering doPost");
     }
 
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
     final Formatter formatter = new Formatter(response.getWriter());
     final String showOrgStr = request.getParameter("showOrganization");
     final boolean showOrg = null == showOrgStr ? true : Boolean.parseBoolean(showOrgStr);

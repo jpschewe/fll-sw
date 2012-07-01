@@ -7,7 +7,7 @@
 <%@ page import="fll.web.ApplicationAttributes"%>
 
 <%
-final DataSource datasource = ApplicationAttributes.getDataSource(application);
+final DataSource datasource = ApplicationAttributes.getDataSource();
 final Connection connection = datasource.getConnection();
 pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
 %>
@@ -20,7 +20,7 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
 </c:if>
 <c:if test="${param.submit == 'Commit'}">
  <%--  form submission --%>
- <sql:query var="result" dataSource="${datasource}">
+ <sql:query var="result" dataSource="jdbc/FLLDB">
   SELECT TeamNumber
     FROM current_tournament_teams
 </sql:query>
@@ -52,7 +52,7 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
          to <c:out value="${new_division}"/> 
          in tournament <c:out value="${currentTournament}"/> -->
          <%--  TODO: have this call Queries.setEventDivision --%>
-   <sql:update dataSource="${datasource}">
+   <sql:update dataSource="jdbc/FLLDB">
     UPDATE TournamentTeams 
       SET event_division = '<c:out value="${new_division}" />' 
       WHERE TeamNumber = <c:out value="${teamNumber}" />
@@ -60,13 +60,13 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
   </sql:update>
   
   <%-- clear out judges --%>
-  <sql:update dataSource='${datasource}'>
+  <sql:update dataSource='jdbc/FLLDB'>
   DELETE FROM Judges WHERE Tournament = ${currentTournament } 
   </sql:update>
   
   <%-- clear out subjective scores --%>
   <x:forEach select="$challengeDocument/fll/subjectiveCategory">
-    <sql:update dataSource='${datasource}'>
+    <sql:update dataSource='jdbc/FLLDB'>
     DELETE FROM <x:out select="./@name"/> WHERE Tournament = ${currentTournament } 
     </sql:update>
   </x:forEach>
@@ -86,7 +86,7 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
 <h1><x:out select="$challengeDocument/fll/@title" /> (Edit Event
 Division)</h1>
 
- <sql:query var="result" dataSource="${datasource}">
+ <sql:query var="result" dataSource="jdbc/FLLDB">
   SELECT id FROM Judges WHERE Tournament = ${currentTournament } LIMIT 1
 </sql:query>
  <c:forEach items="${result.rows}" var="row">
@@ -103,7 +103,7 @@ and enter a new division name. Once you've entered a new division name
 you may press commit at the bottom and this division name will be added
 to the radio buttons.</p>
 
-<sql:query var="result" dataSource="${datasource}">
+<sql:query var="result" dataSource="jdbc/FLLDB">
 SELECT Teams.TeamNumber, Teams.TeamName, current_tournament_teams.event_division 
   FROM current_tournament_teams, Teams 
   WHERE current_tournament_teams.TeamNumber = Teams.TeamNumber 

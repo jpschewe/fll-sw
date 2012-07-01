@@ -40,7 +40,7 @@ public class SetCurrentTournament extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
 
     Connection connection = null;
     try {

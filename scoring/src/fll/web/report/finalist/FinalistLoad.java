@@ -70,7 +70,7 @@ public class FinalistLoad {
 
   public static void outputTeamVariables(final Writer writer,
                                          final ServletContext application) throws SQLException {
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
     Connection connection = null;
     try {
       connection = datasource.getConnection();
@@ -85,7 +85,7 @@ public class FinalistLoad {
 
   public static void outputDivisions(final Writer writer,
                                      final ServletContext application) throws SQLException {
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
     Connection connection = null;
     try {
       connection = datasource.getConnection();
@@ -102,7 +102,7 @@ public class FinalistLoad {
    * @return the current tournament name as a quoted javascript string
    */
   public static String currentTournament(final ServletContext application) throws SQLException {
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
     Connection connection = null;
     try {
       connection = datasource.getConnection();
@@ -138,7 +138,7 @@ public class FinalistLoad {
 
   public static void outputCategoryScores(final Writer writer,
                                           final ServletContext application) throws SQLException {
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
     Connection connection = null;
 
     PreparedStatement prep = null;

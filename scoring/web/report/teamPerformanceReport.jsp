@@ -8,7 +8,7 @@
 
 <%
 final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
-final DataSource datasource = ApplicationAttributes.getDataSource(application);
+final DataSource datasource = ApplicationAttributes.getDataSource();
 final Connection connection = datasource.getConnection();
 pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection));
 %>
@@ -21,7 +21,7 @@ pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection))
 
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Team <c:out value="${param.TeamNumber}"/> Performance Scores)</h1>
-    <sql:query var="result" dataSource="${datasource}">
+    <sql:query var="result" dataSource="jdbc/FLLDB">
       SELECT RunNumber, ComputedTotal, NoShow
         FROM Performance
         WHERE TeamNumber = <c:out value="${param.TeamNumber}"/>

@@ -17,13 +17,13 @@
 <%@ page import="net.mtu.eggplant.util.sql.SQLFunctions"%>
 
 <%
-  final DataSource datasource = ApplicationAttributes.getDataSource(application);
+  final DataSource datasource = ApplicationAttributes.getDataSource();
   final Connection connection = datasource.getConnection();
   pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
 %>
 
 
-<sql:query var="result" dataSource="${datasource}">
+<sql:query var="result" dataSource="jdbc/FLLDB">
    SELECT
      Performance.TeamNumber
     ,Performance.RunNumber

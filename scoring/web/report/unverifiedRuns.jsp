@@ -7,7 +7,7 @@
 <%@ page import="javax.sql.DataSource" %>
 
 <%
-final DataSource datasource = ApplicationAttributes.getDataSource(application);
+final DataSource datasource = ApplicationAttributes.getDataSource();
 final Connection connection = datasource.getConnection();
       pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
 %>
@@ -27,7 +27,7 @@ final Connection connection = datasource.getConnection();
   <th>Team #</th>
   <th>Run Number</th>
  </tr>
- <sql:query var="result" dataSource="${datasource}">
+ <sql:query var="result" dataSource="jdbc/FLLDB">
    SELECT
      TeamNumber
     ,RunNumber

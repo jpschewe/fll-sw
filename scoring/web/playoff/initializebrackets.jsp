@@ -15,7 +15,7 @@
    enableThird - has value 'yes' if we are to have 3rd/4th place brackets
    */
 
-  final DataSource datasource = ApplicationAttributes.getDataSource(application);
+  final DataSource datasource = ApplicationAttributes.getDataSource();
   final Connection connection = datasource.getConnection();
   final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
 

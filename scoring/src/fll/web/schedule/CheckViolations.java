@@ -110,7 +110,7 @@ public class CheckViolations extends BaseFLLServlet {
       final TournamentSchedule schedule = new TournamentSchedule(name, stream, sheetName, subjectiveHeaders);
       session.setAttribute("uploadSchedule_schedule", schedule);
 
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      final DataSource datasource = ApplicationAttributes.getDataSource();
       connection = datasource.getConnection();
       final int tournamentID = Queries.getCurrentTournament(connection);
       final Collection<ConstraintViolation> violations = schedule.compareWithDatabase(connection, tournamentID);

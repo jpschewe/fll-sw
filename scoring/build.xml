@@ -83,6 +83,8 @@
   </path>
   <taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
 
+  <property name="hsql.jar" value="${dir.lib}/test/hsqldb-1.8.0.7.jar" />
+  
   <path id="base.classpath">
     <!-- the classpath without the classes dir -->
     <pathelement location="${dir.lib}/xmlunit-1.2.jar" />
@@ -94,7 +96,7 @@
     <pathelement location="${dir.lib}/commons-cli-1.2.jar" />
 
     <!-- database -->
-    <pathelement location="${dir.lib}/hsqldb-1.8.0.7.jar" />
+    <pathelement location="${hsql.jar}" />
     <pathelement location="${dir.lib}/log4jdbc4-1.2beta2.jar" />
 
     <!-- pdf library -->
@@ -616,6 +618,10 @@
         <include name="jsr305.jar" />
       </fileset>
     </copy>
+    
+    <!-- get the database jar file into the top-level lib directory -->
+    <copy todir="${dir.tomcat}/lib" file="${hsql.jar}" />
+    
   </target>
 
   <!-- ==================== Selenium ==================== -->

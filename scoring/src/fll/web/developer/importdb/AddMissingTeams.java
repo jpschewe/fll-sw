@@ -54,7 +54,7 @@ public class AddMissingTeams extends BaseFLLServlet {
       final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
       sourceConnection = sourceDataSource.getConnection();
 
-      final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
+      final DataSource destDataSource = ApplicationAttributes.getDataSource();
       destConnection = destDataSource.getConnection();
 
       final Tournament tournament = Tournament.findTournamentByName(destConnection, tournamentName);

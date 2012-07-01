@@ -7,7 +7,7 @@
 <%@ page import="javax.sql.DataSource" %>
   
 <%
-  	final DataSource datasource = ApplicationAttributes.getDataSource(application);
+  	final DataSource datasource = ApplicationAttributes.getDataSource();
   final Connection connection = datasource.getConnection();
   pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection));
   pageContext.setAttribute("divisions", Queries.getEventDivisions(connection));
@@ -35,7 +35,7 @@
            <th>Organization </th>
            <th>Score</th>
           </tr>
-          <sql:query var="result" dataSource="${datasource}">
+          <sql:query var="result" dataSource="jdbc/FLLDB">
             SELECT Teams.TeamNumber,Teams.TeamName,Teams.Organization,Performance.ComputedTotal,Performance.NoShow
                      FROM Teams,Performance,current_tournament_teams
                      WHERE Performance.RunNumber = <c:out value="${param.RunNumber}"/>

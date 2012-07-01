@@ -69,7 +69,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
         runNumberStr = request.getParameter("RunNumber");
         teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(lTeamNum).intValue();
       }
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      final DataSource datasource = ApplicationAttributes.getDataSource();
       connection = datasource.getConnection();
       final int tournament = Queries.getCurrentTournament(connection);
       final int numSeedingRounds = Queries.getNumSeedingRounds(connection, tournament);

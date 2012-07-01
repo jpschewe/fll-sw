@@ -53,7 +53,7 @@ public class ExecuteImport extends BaseFLLServlet {
       final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
       sourceConnection = sourceDataSource.getConnection();
       
-      final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
+      final DataSource destDataSource = ApplicationAttributes.getDataSource();
       destConnection = destDataSource.getConnection();
 
       final boolean differences = ImportDB.checkForDifferences(sourceConnection, destConnection, tournament);

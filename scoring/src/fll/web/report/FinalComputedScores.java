@@ -69,7 +69,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
     Connection connection = null;
     try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      final DataSource datasource = ApplicationAttributes.getDataSource();
       connection = datasource.getConnection();
       final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
       final int tournamentID = Queries.getCurrentTournament(connection);

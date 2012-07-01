@@ -12,7 +12,7 @@
     division - String for the division
 */
 
-final DataSource datasource = ApplicationAttributes.getDataSource(application);
+final DataSource datasource = ApplicationAttributes.getDataSource();
 final Connection connection = datasource.getConnection();
 final int currentTournament = Queries.getCurrentTournament(connection);
 

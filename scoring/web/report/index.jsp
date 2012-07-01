@@ -10,7 +10,7 @@
 <%@ page import="java.sql.Connection"%>
 
 <%
-  final DataSource datasource = ApplicationAttributes.getDataSource(application);
+  final DataSource datasource = ApplicationAttributes.getDataSource();
   final Connection connection = datasource.getConnection();
   final Statement stmt = connection.createStatement();
   final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = "

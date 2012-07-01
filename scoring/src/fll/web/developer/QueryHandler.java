@@ -57,7 +57,7 @@ public class QueryHandler extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
     final ResultData result = new ResultData();
 
-    DataSource datasource = ApplicationAttributes.getDataSource(application);
+    DataSource datasource = ApplicationAttributes.getDataSource();
     Statement stmt = null;
     ResultSet rs = null;
     Connection connection = null;

@@ -41,7 +41,7 @@ public class DoLogout extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
     final Collection<Cookie> loginCookies = CookieUtils.findLoginCookie(request);
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
     final String hostHeader = request.getHeader("host");
     final int colonIndex = hostHeader.indexOf(":");
     final String domain;

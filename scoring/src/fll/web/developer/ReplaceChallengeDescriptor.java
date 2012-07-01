@@ -51,7 +51,7 @@ public class ReplaceChallengeDescriptor extends BaseFLLServlet {
 
     Connection connection = null;
     try {
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      final DataSource datasource = ApplicationAttributes.getDataSource();
       connection = datasource.getConnection();
 
       final Document curDoc = ApplicationAttributes.getChallengeDocument(application);

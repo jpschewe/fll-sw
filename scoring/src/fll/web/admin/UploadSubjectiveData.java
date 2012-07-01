@@ -66,7 +66,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       final FileItem subjectiveFileItem = (FileItem) request.getAttribute("subjectiveFile");
       subjectiveFileItem.write(file);
 
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      final DataSource datasource = ApplicationAttributes.getDataSource();
       connection = datasource.getConnection();
       saveSubjectiveData(file, Queries.getCurrentTournament(connection),
                          ApplicationAttributes.getChallengeDocument(application), connection);

@@ -32,7 +32,6 @@ import fll.db.ImportDB;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.InitFilter;
 import fll.web.UploadProcessor;
 import fll.xml.ChallengeParser;
 
@@ -51,8 +50,7 @@ public class CreateDB extends BaseFLLServlet {
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
     final StringBuilder message = new StringBuilder();
-    InitFilter.initDataSource(application);
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
     Connection connection = null;
     try {
       connection = datasource.getConnection();

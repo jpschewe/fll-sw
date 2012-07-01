@@ -11,7 +11,7 @@
 <%@ page import="javax.sql.DataSource"%>
 
 <%
-  final DataSource datasource = ApplicationAttributes.getDataSource(application);
+  final DataSource datasource = ApplicationAttributes.getDataSource();
   final Connection connection = datasource.getConnection();
   final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
   final String division = request.getParameter("division");

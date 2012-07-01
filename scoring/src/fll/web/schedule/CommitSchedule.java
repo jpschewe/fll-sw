@@ -46,7 +46,7 @@ public class CommitSchedule extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final DataSource datasource = ApplicationAttributes.getDataSource();
 
     Connection connection = null;
     try {

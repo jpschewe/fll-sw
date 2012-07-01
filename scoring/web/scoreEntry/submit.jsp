@@ -11,7 +11,7 @@
 <%
 final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
-final DataSource datasource = ApplicationAttributes.getDataSource(application);
+final DataSource datasource = ApplicationAttributes.getDataSource();
 final Connection connection = datasource.getConnection();
 %>
 

@@ -10,7 +10,7 @@
 <!-- query string <c:out value="${request.queryString}"/> -->
   
 <%
-final DataSource datasource = ApplicationAttributes.getDataSource(application);
+final DataSource datasource = ApplicationAttributes.getDataSource();
 final Connection connection = datasource.getConnection();
 
 if(null == session.getAttribute("columnSelectOptions")) {

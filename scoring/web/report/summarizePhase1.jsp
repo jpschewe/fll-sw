@@ -12,7 +12,7 @@
 
 <%
 final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
-final DataSource datasource = ApplicationAttributes.getDataSource(application);
+final DataSource datasource = ApplicationAttributes.getDataSource();
 final Connection connection = datasource.getConnection();
 final int currentTournament = Queries.getCurrentTournament(connection);
   
@@ -42,7 +42,7 @@ ScoreStandardization.summarizeScores(connection, challengeDocument, currentTourn
         <th>Judging Station</th>
       </tr>
       <x:forEach select="$challengeDocument/fll/subjectiveCategory">
-        <sql:query var="result" dataSource="${datasource}">
+        <sql:query var="result" dataSource="jdbc/FLLDB">
           SELECT Judge, COUNT(*) AS numTeams 
           FROM <x:out select="./@name"/> 
           WHERE Tournament = <%=currentTournament%> 
@@ -50,7 +50,7 @@ ScoreStandardization.summarizeScores(connection, challengeDocument, currentTourn
           GROUP BY Judge
         </sql:query>
         <c:forEach items="${result.rows}" var="row">
-          <sql:query var="divResult" dataSource="${datasource}">
+          <sql:query var="divResult" dataSource="jdbc/FLLDB">
             SELECT station 
             FROM Judges 
             WHERE id = '${row.Judge}'

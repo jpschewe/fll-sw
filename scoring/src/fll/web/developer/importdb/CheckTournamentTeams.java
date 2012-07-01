@@ -51,7 +51,7 @@ public class CheckTournamentTeams extends BaseFLLServlet {
       final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
       sourceConnection = sourceDataSource.getConnection();
       
-      final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
+      final DataSource destDataSource = ApplicationAttributes.getDataSource();
       destConnection = destDataSource.getConnection();
 
       final List<TournamentDifference> tournamentDifferences = ImportDB.computeMissingFromTournamentTeams(sourceConnection, destConnection, tournament);
