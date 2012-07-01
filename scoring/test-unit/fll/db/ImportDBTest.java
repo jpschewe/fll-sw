@@ -55,7 +55,7 @@ public class ImportDBTest {
     ResultSet rs = null;
     Connection connection = null;
     try {
-      connection = Utilities.createDataSource(database).getConnection();
+      connection = Utilities.createFileDataSource(database).getConnection();
 
       ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
 
@@ -95,7 +95,7 @@ public class ImportDBTest {
     final File temp = File.createTempFile("fll", ".zip");
     Connection connection = null;
     try {
-      connection = Utilities.createDataSource(database).getConnection();
+      connection = Utilities.createFileDataSource(database).getConnection();
 
       ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
 

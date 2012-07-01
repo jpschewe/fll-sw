@@ -176,9 +176,8 @@ public final class ImportDB {
     Statement memStmt = null;
     ResultSet memRS = null;
     try {
-      final String url = "jdbc:hsqldb:mem:dbimport"
-          + String.valueOf(ImportDBDump.getNextDBCount());
-      final DataSource memSource = Utilities.createDataSourceFromURL(url);
+      final String databaseName = "dbimport" + String.valueOf(ImportDBDump.getNextDBCount()); 
+      final DataSource memSource = Utilities.createMemoryDataSource(databaseName);
       memConnection = memSource.getConnection();
 
       final Document challengeDocument = loadDatabaseDump(zipfile, memConnection);

@@ -53,7 +53,7 @@ public class GenerateDBTest {
     final File tempFile = File.createTempFile("flltest", null);
     final String database = tempFile.getAbsolutePath();
 
-    final DataSource datasource = Utilities.createDataSource(database);
+    final DataSource datasource = Utilities.createFileDataSource(database);
 
     Connection connection = null;
     try {
