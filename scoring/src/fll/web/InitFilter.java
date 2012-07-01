@@ -221,7 +221,7 @@ public class InitFilter implements Filter {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Datasource not available, creating");
       }
-      final DataSource datasource = Utilities.createDataSource(database);
+      final DataSource datasource = Utilities.createFileDataSource(database);
       application.setAttribute(ApplicationAttributes.DATASOURCE, datasource);
     } 
   }

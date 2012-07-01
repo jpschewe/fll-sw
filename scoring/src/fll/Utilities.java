@@ -312,10 +312,27 @@ public final class Utilities {
    * @param database the database to connect to, assumed to be a filename
    * @return a datasource
    */
-  public static DataSource createDataSource(final String database) {
+  public static DataSource createFileDataSource(final String database) {
     final String myURL;
     myURL = "jdbc:hsqldb:file:"
-        + database + ";shutdown=true";
+        + database;
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("myURL: "
+          + myURL);
+    }
+    return createDataSourceFromURL(myURL);
+  }
+
+  /**
+   * Create a datasource for the specified memory database
+   * 
+   * @param database the database to connect to, assumed to be a filename
+   * @return a datasource
+   */
+  public static DataSource createMemoryDataSource(final String database) {
+    final String myURL;
+    myURL = "jdbc:hsqldb:mem:"
+        + database;
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("myURL: "
           + myURL);
@@ -329,16 +346,18 @@ public final class Utilities {
    * @param myURL the URL to the database
    * @return the DataSource
    */
-  public static DataSource createDataSourceFromURL(final String myURL) {
+  private static DataSource createDataSourceFromURL(final String myURL) {
     final jdbcDataSource dataSource = new jdbcDataSource();
     dataSource.setDatabase(myURL);
     dataSource.setUser("sa");
 
-    // System.setProperty("log4jdbc.enabled", "true");
-    // final DataSourceSpy debugDatasource = new DataSourceSpy(dataSource);
-    // return debugDatasource;
     return dataSource;
   }
+  
+  //TODO get datasource debugging back in at some point?
+  // System.setProperty("log4jdbc.enabled", "true");
+  // final DataSourceSpy debugDatasource = new DataSourceSpy(dataSource);
+  // return debugDatasource;
 
   /**
    * Filter used to select only graphics files
