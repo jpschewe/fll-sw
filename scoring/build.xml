@@ -626,7 +626,7 @@
 
   <!-- ==================== Selenium ==================== -->
   <target name="selenium.start" description="Start Selenium">
-    <java jar="${dir.lib}/test/selenium-server-standalone-2.20.0.jar" fork="true" spawn="true" taskname="selenium" />
+    <java jar="${dir.lib}/test/selenium-server-standalone-2.24.1.jar" fork="true" spawn="true" taskname="selenium" />
   </target>
 
   <target name="selenium.stop" description="Shutdown Selenium">
