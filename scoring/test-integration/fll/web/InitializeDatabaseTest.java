@@ -7,12 +7,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverBackedSelenium;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
-import com.thoughtworks.selenium.Selenium;
-
-import fll.TestUtils;
 import fll.util.LogUtils;
 
 /**
@@ -20,20 +16,18 @@ import fll.util.LogUtils;
  */
 public class InitializeDatabaseTest {
 
-  private Selenium selenium;
+  private WebDriver selenium;
 
   @Before
   public void setUp() {
     LogUtils.initializeLogging();
 
-    WebDriver driver = new FirefoxDriver();
-    selenium = new WebDriverBackedSelenium(driver, TestUtils.URL_ROOT
-        + "setup");
+    selenium = new FirefoxDriver();
   }
 
   @After
   public void tearDown() {
-    selenium.close();
+    selenium.quit();
   }
 
   @Test
