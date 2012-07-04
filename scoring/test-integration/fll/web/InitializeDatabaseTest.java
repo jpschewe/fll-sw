@@ -5,10 +5,8 @@ import java.io.InputStream;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverBackedSelenium;
-import org.openqa.selenium.firefox.FirefoxDriver;
 
+import com.thoughtworks.selenium.DefaultSelenium;
 import com.thoughtworks.selenium.Selenium;
 
 import fll.TestUtils;
@@ -25,9 +23,13 @@ public class InitializeDatabaseTest {
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
 
-    WebDriver driver = new FirefoxDriver();
-    selenium = new WebDriverBackedSelenium(driver, TestUtils.URL_ROOT
-        + "setup");
+//    WebDriver driver = new FirefoxDriver();
+//    selenium = new WebDriverBackedSelenium(driver, TestUtils.URL_ROOT
+//        + "setup");
+    selenium = new DefaultSelenium("localhost", 4444, "*firefox", TestUtils.URL_ROOT
+                                   + "setup");
+                               selenium.start();
+
   }
 
   @Test
