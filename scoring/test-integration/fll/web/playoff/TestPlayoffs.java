@@ -9,6 +9,7 @@ package fll.web.playoff;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +21,7 @@ import fll.TestUtils;
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
 import fll.web.IntegrationTestUtils;
+b.IntegrationTestUtils;
 
 /**
  * Test things about the playoffs.
@@ -35,6 +37,12 @@ public class TestPlayoffs {
         + "setup");
     selenium.start();
   }
+  
+  @After
+  public void tearDown() {
+    selenium.close();
+  }
+
 
   /**
    * Test that when trying to enter a score for a team that hasn't advanced to a

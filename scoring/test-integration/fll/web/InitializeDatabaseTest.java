@@ -3,6 +3,7 @@ package fll.web;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
@@ -22,16 +23,17 @@ public class InitializeDatabaseTest {
   private Selenium selenium;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     LogUtils.initializeLogging();
 
     WebDriver driver = new FirefoxDriver();
     selenium = new WebDriverBackedSelenium(driver, TestUtils.URL_ROOT
         + "setup");
-//    selenium = new DefaultSelenium("localhost", 4444, "*firefox", TestUtils.URL_ROOT
-//                                   + "setup");
-//                               selenium.start();
+  }
 
+  @After
+  public void tearDown() {
+    selenium.close();
   }
 
   @Test

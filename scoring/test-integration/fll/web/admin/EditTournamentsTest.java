@@ -11,6 +11,7 @@ import java.io.InputStream;
 
 import junit.framework.Assert;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,6 +36,11 @@ public class EditTournamentsTest {
     selenium = new DefaultSelenium("localhost", 4444, "*firefox", TestUtils.URL_ROOT
         + "setup");
     selenium.start();
+  }
+
+  @After
+  public void tearDown() {
+    selenium.close();
   }
 
   @Test

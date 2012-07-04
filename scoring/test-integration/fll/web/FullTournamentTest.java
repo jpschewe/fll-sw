@@ -26,6 +26,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,12 +63,18 @@ public class FullTournamentTest {
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private Selenium selenium;
+
   @Before
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
     selenium = new DefaultSelenium("localhost", 4444, "*firefox", TestUtils.URL_ROOT
         + "setup");
     selenium.start();
+  }
+
+  @After
+  public void tearDown() {
+    selenium.close();
   }
 
   /**
