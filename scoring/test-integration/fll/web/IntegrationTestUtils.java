@@ -15,6 +15,7 @@ import java.io.InputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -72,6 +73,89 @@ public final class IntegrationTestUtils {
   /**
    * Initialize the database using the given challenge descriptor.
    * 
+   * @param driver the test controller
+   * @param challengeStream the challenge descriptor
+   * @param forceRebuild if true, then force the database to be rebuilt
+   * @throws IOException
+   */
+  public static void initializeDatabase(final WebDriver driver,
+                                        final InputStream challengeStream,
+                                        final boolean forceRebuild) throws IOException {
+    try {
+      Assert.assertNotNull(challengeStream);
+      final File challengeFile = IntegrationTestUtils.storeInputStreamToFile(challengeStream);
+      try {
+        driver.get(TestUtils.URL_ROOT
+            + "setup/");
+
+        if (null != driver.findElement(By.name("submit_login"))) {
+          login(driver);
+
+          driver.get(TestUtils.URL_ROOT
+              + "setup/");
+        }
+
+        final WebElement fileEle = driver.findElement(By.name("xmldocument"));
+        Assert.assertNotNull(fileEle);
+        fileEle.sendKeys(challengeFile.getAbsolutePath());
+
+        if (forceRebuild) {
+          final WebElement rebuildEle = driver.findElement(By.name("force_rebuild"));
+          Assert.assertNotNull(rebuildEle);
+          rebuildEle.click();
+        }
+
+        final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
+        Assert.assertNotNull(reinitDB);
+        reinitDB.click();
+
+        final Alert confirmCreateDB = driver.switchTo().alert();
+        LOGGER.info("Confirmation text: "
+            + confirmCreateDB.getText());
+        confirmCreateDB.accept();
+
+        Assert.assertNotNull("Error initializing database", driver.findElement(By.id("success")));
+
+        // setup user
+        final WebElement userElement = driver.findElement(By.name("user"));
+        Assert.assertNotNull(userElement);
+        userElement.sendKeys(TEST_USERNAME);
+
+        final WebElement passElement = driver.findElement(By.name("pass"));
+        Assert.assertNotNull(passElement);
+        passElement.sendKeys(TEST_PASSWORD);
+
+        final WebElement passCheckElement = driver.findElement(By.name("pass_check"));
+        Assert.assertNotNull(passCheckElement);
+        passCheckElement.sendKeys(TEST_PASSWORD);
+
+        final WebElement submitElement = driver.findElement(By.name("submit_create_user"));
+        Assert.assertNotNull(submitElement);
+        submitElement.click();
+
+        Assert.assertNotNull("Error creating user", driver.findElement(By.id("success-create-user")));
+
+        login(driver);
+      } finally {
+        if (!challengeFile.delete()) {
+          challengeFile.deleteOnExit();
+        }
+      }
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(driver);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(driver);
+      throw e;
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(driver);
+      throw e;
+    }
+  }
+
+  /**
+   * Initialize the database using the given challenge descriptor.
+   * 
    * @param selenium the test controller
    * @param challengeStream the challenge descriptor
    * @param forceRebuild if true, then force the database to be rebuilt
@@ -80,6 +164,12 @@ public final class IntegrationTestUtils {
   public static void initializeDatabase(final Selenium selenium,
                                         final InputStream challengeStream,
                                         final boolean forceRebuild) throws IOException {
+    if (selenium instanceof WrapsDriver) {
+      final WebDriver driver = ((WrapsDriver) selenium).getWrappedDriver();
+      initializeDatabase(driver, challengeStream, forceRebuild);
+      return;
+    }
+
     try {
       Assert.assertNotNull(challengeStream);
       final File challengeFile = IntegrationTestUtils.storeInputStreamToFile(challengeStream);
@@ -207,14 +297,8 @@ public final class IntegrationTestUtils {
     }
 
     final File baseFile = File.createTempFile("fll", null, new File("screenshots"));
-    // FIXME need to use takes screenshot
     final File screenshot = new File(baseFile.getAbsolutePath()
         + ".png");
-    /*
-     * if driver instanceof TakesScreenshot File scrFile =
-     * ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
-     * FileUtils.copyFile(scrFile, screenshot);
-     */
     selenium.captureScreenshot(screenshot.getAbsolutePath());
     LOGGER.error("Screenshot saved to "
         + screenshot.getAbsolutePath());
