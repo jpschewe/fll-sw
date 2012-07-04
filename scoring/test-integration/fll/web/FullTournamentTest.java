@@ -66,7 +66,7 @@ public class FullTournamentTest extends SeleneseTestBase {
     LogUtils.initializeLogging();
     super.setUp(TestUtils.URL_ROOT
         + "setup");
-    selenium.setTimeout("120000");
+    selenium.setTimeout("1200000");
   }
 
   /**
