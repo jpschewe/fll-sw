@@ -12,10 +12,9 @@ import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.xml.sax.SAXException;
-
-import com.thoughtworks.selenium.DefaultSelenium;
-import com.thoughtworks.selenium.Selenium;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
@@ -28,19 +27,17 @@ public class WebTest {
 
   private static final Logger LOG = LogUtils.getLogger();
 
-  private Selenium selenium;
+  private WebDriver selenium;
 
   @Before
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    selenium = new DefaultSelenium("localhost", 4444, "*firefox", TestUtils.URL_ROOT
-        + "setup");
-    selenium.start();
+    selenium = new FirefoxDriver();
   }
 
   @After
   public void tearDown() {
-    selenium.close();
+    selenium.quit();
   }
 
   /**

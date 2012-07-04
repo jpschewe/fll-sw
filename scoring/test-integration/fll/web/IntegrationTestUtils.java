@@ -21,7 +21,7 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.internal.WrapsDriver;
+import org.openqa.selenium.support.ui.Select;
 
 import com.thoughtworks.selenium.Selenium;
 
@@ -61,6 +61,29 @@ public final class IntegrationTestUtils {
       final boolean error = selenium.isTextPresent("Exception");
       Assert.assertFalse("Error loading: "
           + url, error);
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
+  }
+
+  /**
+   * Load a page and check to make sure the page didn't crash.
+   * 
+   * @param selenium the test controller
+   * @param url the page to load
+   * @throws IOException
+   */
+  public static void loadPage(final WebDriver selenium,
+                              final String url) throws IOException {
+    try {
+      selenium.get(url);
+
+      Assert.assertNull("Error loading: "
+          + url, selenium.findElement(By.id("exception-handler")));
     } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
@@ -164,12 +187,6 @@ public final class IntegrationTestUtils {
   public static void initializeDatabase(final Selenium selenium,
                                         final InputStream challengeStream,
                                         final boolean forceRebuild) throws IOException {
-    if (selenium instanceof WrapsDriver) {
-      final WebDriver driver = ((WrapsDriver) selenium).getWrappedDriver();
-      initializeDatabase(driver, challengeStream, forceRebuild);
-      return;
-    }
-
     try {
       Assert.assertNotNull(challengeStream);
       final File challengeFile = IntegrationTestUtils.storeInputStreamToFile(challengeStream);
@@ -207,12 +224,7 @@ public final class IntegrationTestUtils {
         final boolean userSuccess = selenium.isTextPresent("Successfully created user");
         Assert.assertTrue("Problem creating user", userSuccess);
 
-        if (selenium instanceof WrapsDriver) {
-          final WebDriver driver = ((WrapsDriver) selenium).getWrappedDriver();
-          login(driver);
-        } else {
-          login(selenium);
-        }
+        login(selenium);
       } finally {
         if (!challengeFile.delete()) {
           challengeFile.deleteOnExit();
@@ -289,13 +301,79 @@ public final class IntegrationTestUtils {
     }
   }
 
-  public static void storeScreenshot(final Selenium selenium) throws IOException {
-    if (selenium instanceof WrapsDriver) {
-      final WebDriver driver = ((WrapsDriver) selenium).getWrappedDriver();
-      storeScreenshot(driver);
-      return;
-    }
+  /**
+   * Initialize a database from a zip file.
+   * 
+   * @param selenium the test controller
+   * @param inputStream input stream that has database to load in it, this input
+   *          stream is closed by this method upon successful completion
+   * @throws IOException
+   */
+  public static void initializeDatabaseFromDump(final WebDriver selenium,
+                                                final InputStream inputStream) throws IOException {
+    try {
+      Assert.assertNotNull(inputStream);
+      final File dumpFile = IntegrationTestUtils.storeInputStreamToFile(inputStream);
+      try {
+        selenium.get(TestUtils.URL_ROOT
+            + "setup/");
 
+        if (null != selenium.findElement(By.name("submit_login"))) {
+          login(selenium);
+
+          selenium.get(TestUtils.URL_ROOT
+              + "setup/");
+        }
+
+        final WebElement dbEle = selenium.findElement(By.name("dbdump"));
+        Assert.assertNotNull(dbEle);
+        dbEle.sendKeys(dumpFile.getAbsolutePath());
+
+        final WebElement createEle = selenium.findElement(By.name("createdb"));
+        Assert.assertNotNull(createEle);
+        createEle.click();
+
+        Assert.assertNotNull("Error initializing database", selenium.findElement(By.id("success")));
+
+        // setup user
+        final WebElement userElement = selenium.findElement(By.name("user"));
+        Assert.assertNotNull(userElement);
+        userElement.sendKeys(TEST_USERNAME);
+
+        final WebElement passElement = selenium.findElement(By.name("pass"));
+        Assert.assertNotNull(passElement);
+        passElement.sendKeys(TEST_PASSWORD);
+
+        final WebElement passCheckElement = selenium.findElement(By.name("pass_check"));
+        Assert.assertNotNull(passCheckElement);
+        passCheckElement.sendKeys(TEST_PASSWORD);
+
+        final WebElement submitElement = selenium.findElement(By.name("submit_create_user"));
+        Assert.assertNotNull(submitElement);
+        submitElement.click();
+
+        Assert.assertNotNull("Error creating user", selenium.findElement(By.id("success-create-user")));
+
+        login(selenium);
+      } finally {
+        if (!dumpFile.delete()) {
+          dumpFile.deleteOnExit();
+        }
+      }
+      login(selenium);
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
+  }
+
+  public static void storeScreenshot(final Selenium selenium) throws IOException {
     final File baseFile = File.createTempFile("fll", null, new File("screenshots"));
     final File screenshot = new File(baseFile.getAbsolutePath()
         + ".png");
@@ -482,7 +560,52 @@ public final class IntegrationTestUtils {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     }
+  }
 
+  /**
+   * Set the current tournament by name.
+   * 
+   * @param tournamentName the name of the tournament to make the current
+   *          tournament
+   * @throws IOException
+   */
+  public static void setTournament(final WebDriver selenium,
+                                   final String tournamentName) throws IOException {
+    try {
+      loadPage(selenium, TestUtils.URL_ROOT
+          + "admin/index.jsp");
+
+      final WebElement currentTournament = selenium.findElement(By.name("currentTournamentSelect"));
+      Assert.assertNotNull(currentTournament);
+
+      final Select currentTournamentSel = new Select(currentTournament);
+      String tournamentID = null;
+      for (final WebElement option : currentTournamentSel.getAllSelectedOptions()) {
+        final String text = option.getText();
+        if (text.endsWith("[ "
+            + tournamentName + " ]")) {
+          tournamentID = option.getAttribute("value");
+        }
+      }
+      Assert.assertNotNull("Could not find tournament with name: "
+          + tournamentName, tournamentID);
+
+      currentTournamentSel.selectByValue(tournamentID);
+
+      final WebElement changeTournament = selenium.findElement(By.name("change_tournament"));
+      changeTournament.click();
+
+      Assert.assertNotNull(selenium.findElement(By.id("success")));
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
   }
 
 }
