@@ -40,7 +40,8 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebForm;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.thoughtworks.selenium.SeleneseTestBase;
+import com.thoughtworks.selenium.DefaultSelenium;
+import com.thoughtworks.selenium.Selenium;
 
 import fll.TestUtils;
 import fll.Tournament;
@@ -56,16 +57,17 @@ import fll.xml.XMLUtils;
 /**
  * Test a full tournament.
  */
-public class FullTournamentTest extends SeleneseTestBase {
+public class FullTournamentTest {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
+  private Selenium selenium;
   @Before
-  @Override
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    super.setUp(TestUtils.URL_ROOT
+    selenium = new DefaultSelenium("localhost", 4444, "*firefox", TestUtils.URL_ROOT
         + "setup");
+    selenium.start();
   }
 
   /**
