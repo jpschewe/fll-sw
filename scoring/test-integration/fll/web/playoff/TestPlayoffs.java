@@ -13,7 +13,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.thoughtworks.selenium.SeleneseTestBase;
+import com.thoughtworks.selenium.DefaultSelenium;
+import com.thoughtworks.selenium.Selenium;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
@@ -23,14 +24,16 @@ import fll.web.IntegrationTestUtils;
 /**
  * Test things about the playoffs.
  */
-public class TestPlayoffs extends SeleneseTestBase {
+public class TestPlayoffs {
+
+  private Selenium selenium;
 
   @Before
-  @Override
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    super.setUp(TestUtils.URL_ROOT
+    selenium = new DefaultSelenium("localhost", 4444, "*firefox", TestUtils.URL_ROOT
         + "setup");
+    selenium.start();
   }
 
   /**
