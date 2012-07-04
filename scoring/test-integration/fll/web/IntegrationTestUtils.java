@@ -14,6 +14,9 @@ import java.io.InputStream;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 import com.thoughtworks.selenium.Selenium;
 
@@ -80,13 +83,13 @@ public final class IntegrationTestUtils {
         selenium.open(TestUtils.URL_ROOT
             + "setup/");
         selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-        
-        if(selenium.isTextPresent("Login to FLL")) {
+
+        if (selenium.isTextPresent("Login to FLL")) {
           login(selenium);
 
           selenium.open(TestUtils.URL_ROOT
-                        + "setup/");
-                    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+              + "setup/");
+          selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
         }
 
         selenium.attachFile("xmldocument", challengeFile.getAbsolutePath());
@@ -146,12 +149,12 @@ public final class IntegrationTestUtils {
             + "setup/");
         selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
-        if(selenium.isTextPresent("Login to FLL")) {
+        if (selenium.isTextPresent("Login to FLL")) {
           login(selenium);
 
           selenium.open(TestUtils.URL_ROOT
-                        + "setup/");
-                    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+              + "setup/");
+          selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
         }
 
         selenium.type("dbdump", dumpFile.getAbsolutePath());
@@ -159,7 +162,7 @@ public final class IntegrationTestUtils {
         selenium.waitForPageToLoad(WAIT_FOR_PAGE_TIMEOUT);
         final boolean success = selenium.isTextPresent("Successfully initialized database");
         Assert.assertTrue("Database was not successfully initialized", success);
-        
+
         // setup user
         selenium.type("user", TEST_USERNAME);
         selenium.type("pass", TEST_PASSWORD);
@@ -189,8 +192,14 @@ public final class IntegrationTestUtils {
 
   public static void storeScreenshot(final Selenium selenium) throws IOException {
     final File baseFile = File.createTempFile("fll", null, new File("screenshots"));
+    //FIXME need to use takes screenshot
     final File screenshot = new File(baseFile.getAbsolutePath()
-        + ".png");
+                                     + ".png");
+    /*
+     * if driver instanceof TakesScreenshot
+     * File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+     * FileUtils.copyFile(scrFile, screenshot);
+     */
     selenium.captureScreenshot(screenshot.getAbsolutePath());
     LOGGER.error("Screenshot saved to "
         + screenshot.getAbsolutePath());
@@ -236,6 +245,26 @@ public final class IntegrationTestUtils {
     selenium.type("pass", TEST_PASSWORD);
     selenium.click("submit_login");
     selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+  }
+
+  /**
+   * Login to fll
+   */
+  public static void login(final WebDriver driver) {
+    driver.get(TestUtils.URL_ROOT
+        + "login.jsp");
+
+    final WebElement userElement = driver.findElement(By.name("user"));
+    Assert.assertNotNull(userElement);
+    userElement.sendKeys(TEST_USERNAME);
+
+    final WebElement passElement = driver.findElement(By.name("pass"));
+    Assert.assertNotNull(passElement);
+    passElement.sendKeys(TEST_PASSWORD);
+
+    final WebElement submitElement = driver.findElement(By.name("submit_login"));
+    Assert.assertNotNull(submitElement);
+    submitElement.click();
   }
 
   /**
