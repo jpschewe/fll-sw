@@ -9,6 +9,7 @@ package fll.web.playoff;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,13 +33,18 @@ public class TestAJAXBrackets {
   public static String JS_EVAL_TIMEOUT = "10000";
 
   private Selenium selenium;
-  
+
   @Before
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
     selenium = new DefaultSelenium("localhost", 4444, "*firefox", TestUtils.URL_ROOT
-                                   + "setup");
-                               selenium.start();
+        + "setup");
+    selenium.start();
+  }
+
+  @After
+  public void tearDown() {
+    selenium.close();
   }
 
   @Test
@@ -59,7 +65,7 @@ public class TestAJAXBrackets {
       selenium.type("name=SideB0", "Table 2");
       selenium.click("id=finished");
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-      
+
       // change num seeding rounds
       selenium.select("xpath=//form[@id='changeSeedingRounds']//select[@name='seedingRounds']", "value=0");
       selenium.click("name=changeSeedingRounds");
@@ -142,9 +148,9 @@ public class TestAJAXBrackets {
     } catch (final RuntimeException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
-    } catch(final AssertionError e) {
+    } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;      
+      throw e;
     }
   }
 
