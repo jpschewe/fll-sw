@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -71,6 +72,21 @@ public final class IntegrationTestUtils {
   }
 
   /**
+   * Check if an element exists.
+   */
+  public static boolean elementExists(final WebDriver selenium,
+                                      final By search) {
+    boolean elementFound = false;
+    try {
+      selenium.findElement(search);
+      elementFound = true;
+    } catch (NoSuchElementException e) {
+      elementFound = false;
+    }
+    return elementFound;
+  }
+
+  /**
    * Load a page and check to make sure the page didn't crash.
    * 
    * @param selenium the test controller
@@ -82,8 +98,7 @@ public final class IntegrationTestUtils {
     try {
       selenium.get(url);
 
-      Assert.assertNull("Error loading: "
-          + url, selenium.findElement(By.id("exception-handler")));
+      Assert.assertFalse("Error loading page", elementExists(selenium, By.id("exception-handler")));
     } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
@@ -119,17 +134,14 @@ public final class IntegrationTestUtils {
         }
 
         final WebElement fileEle = driver.findElement(By.name("xmldocument"));
-        Assert.assertNotNull(fileEle);
         fileEle.sendKeys(challengeFile.getAbsolutePath());
 
         if (forceRebuild) {
           final WebElement rebuildEle = driver.findElement(By.name("force_rebuild"));
-          Assert.assertNotNull(rebuildEle);
           rebuildEle.click();
         }
 
         final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
-        Assert.assertNotNull(reinitDB);
         reinitDB.click();
 
         final Alert confirmCreateDB = driver.switchTo().alert();
@@ -137,26 +149,22 @@ public final class IntegrationTestUtils {
             + confirmCreateDB.getText());
         confirmCreateDB.accept();
 
-        Assert.assertNotNull("Error initializing database", driver.findElement(By.id("success")));
+        driver.findElement(By.id("success"));
 
         // setup user
         final WebElement userElement = driver.findElement(By.name("user"));
-        Assert.assertNotNull(userElement);
         userElement.sendKeys(TEST_USERNAME);
 
         final WebElement passElement = driver.findElement(By.name("pass"));
-        Assert.assertNotNull(passElement);
         passElement.sendKeys(TEST_PASSWORD);
 
         final WebElement passCheckElement = driver.findElement(By.name("pass_check"));
-        Assert.assertNotNull(passCheckElement);
         passCheckElement.sendKeys(TEST_PASSWORD);
 
         final WebElement submitElement = driver.findElement(By.name("submit_create_user"));
-        Assert.assertNotNull(submitElement);
         submitElement.click();
 
-        Assert.assertNotNull("Error creating user", driver.findElement(By.id("success-create-user")));
+        driver.findElement(By.id("success-create-user"));
 
         login(driver);
       } finally {
@@ -318,7 +326,7 @@ public final class IntegrationTestUtils {
         selenium.get(TestUtils.URL_ROOT
             + "setup/");
 
-        if (null != selenium.findElement(By.name("submit_login"))) {
+        if (elementExists(selenium, By.name("submit_login"))) {
           login(selenium);
 
           selenium.get(TestUtils.URL_ROOT
@@ -326,33 +334,27 @@ public final class IntegrationTestUtils {
         }
 
         final WebElement dbEle = selenium.findElement(By.name("dbdump"));
-        Assert.assertNotNull(dbEle);
         dbEle.sendKeys(dumpFile.getAbsolutePath());
 
         final WebElement createEle = selenium.findElement(By.name("createdb"));
-        Assert.assertNotNull(createEle);
         createEle.click();
 
-        Assert.assertNotNull("Error initializing database", selenium.findElement(By.id("success")));
+        selenium.findElement(By.id("success"));
 
         // setup user
         final WebElement userElement = selenium.findElement(By.name("user"));
-        Assert.assertNotNull(userElement);
         userElement.sendKeys(TEST_USERNAME);
 
         final WebElement passElement = selenium.findElement(By.name("pass"));
-        Assert.assertNotNull(passElement);
         passElement.sendKeys(TEST_PASSWORD);
 
         final WebElement passCheckElement = selenium.findElement(By.name("pass_check"));
-        Assert.assertNotNull(passCheckElement);
         passCheckElement.sendKeys(TEST_PASSWORD);
 
         final WebElement submitElement = selenium.findElement(By.name("submit_create_user"));
-        Assert.assertNotNull(submitElement);
         submitElement.click();
 
-        Assert.assertNotNull("Error creating user", selenium.findElement(By.id("success-create-user")));
+        selenium.findElement(By.id("success-create-user"));
 
         login(selenium);
       } finally {
@@ -457,15 +459,12 @@ public final class IntegrationTestUtils {
         + "login.jsp");
 
     final WebElement userElement = driver.findElement(By.name("user"));
-    Assert.assertNotNull(userElement);
     userElement.sendKeys(TEST_USERNAME);
 
     final WebElement passElement = driver.findElement(By.name("pass"));
-    Assert.assertNotNull(passElement);
     passElement.sendKeys(TEST_PASSWORD);
 
     final WebElement submitElement = driver.findElement(By.name("submit_login"));
-    Assert.assertNotNull(submitElement);
     submitElement.click();
   }
 
@@ -576,7 +575,6 @@ public final class IntegrationTestUtils {
           + "admin/index.jsp");
 
       final WebElement currentTournament = selenium.findElement(By.name("currentTournamentSelect"));
-      Assert.assertNotNull(currentTournament);
 
       final Select currentTournamentSel = new Select(currentTournament);
       String tournamentID = null;
