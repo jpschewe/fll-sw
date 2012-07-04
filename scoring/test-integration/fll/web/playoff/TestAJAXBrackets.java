@@ -16,7 +16,7 @@ import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
-import com.thoughtworks.selenium.SeleneseTestBase;
+import com.thoughtworks.selenium.DefaultSelenium;
 import com.thoughtworks.selenium.Selenium;
 
 import fll.TestUtils;
@@ -27,16 +27,18 @@ import fll.web.IntegrationTestUtils;
 /**
  * Test the AJAX Brackets
  */
-public class TestAJAXBrackets extends SeleneseTestBase {
+public class TestAJAXBrackets {
 
   public static String JS_EVAL_TIMEOUT = "10000";
 
+  private Selenium selenium;
+  
   @Before
-  @Override
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    super.setUp(TestUtils.URL_ROOT
-        + "setup");
+    selenium = new DefaultSelenium("localhost", 4444, "*firefox", TestUtils.URL_ROOT
+                                   + "setup");
+                               selenium.start();
   }
 
   @Test

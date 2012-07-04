@@ -14,7 +14,8 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.thoughtworks.selenium.SeleneseTestBase;
+import com.thoughtworks.selenium.DefaultSelenium;
+import com.thoughtworks.selenium.Selenium;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
@@ -25,14 +26,16 @@ import fll.web.IntegrationTestUtils;
 /**
  * 
  */
-public class SlideshowTest extends SeleneseTestBase {
+public class SlideshowTest {
+
+  private Selenium selenium;
 
   @Before
-  @Override
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    super.setUp(TestUtils.URL_ROOT
-        + "/setup");
+    selenium = new DefaultSelenium("localhost", 4444, "*firefox", TestUtils.URL_ROOT
+        + "setup");
+    selenium.start();
   }
 
   /**
@@ -45,7 +48,7 @@ public class SlideshowTest extends SeleneseTestBase {
     LogUtils.getLogger().info("Top testSLideshowInterval");
     final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
     IntegrationTestUtils.initializeDatabase(selenium, challengeStream, true);
-    
+
     IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
     // add a dummy team so that we have something in the database

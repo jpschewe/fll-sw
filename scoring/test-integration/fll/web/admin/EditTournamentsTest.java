@@ -14,7 +14,8 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.thoughtworks.selenium.SeleneseTestBase;
+import com.thoughtworks.selenium.DefaultSelenium;
+import com.thoughtworks.selenium.Selenium;
 
 import fll.TestUtils;
 import fll.util.LogUtils;
@@ -24,13 +25,16 @@ import fll.web.IntegrationTestUtils;
 /**
  * Test editing the tournaments list
  */
-public class EditTournamentsTest extends SeleneseTestBase {
+public class EditTournamentsTest {
+
+  private Selenium selenium;
 
   @Before
-  @Override
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    super.setUp(TestUtils.URL_ROOT + "setup");
+    selenium = new DefaultSelenium("localhost", 4444, "*firefox", TestUtils.URL_ROOT
+        + "setup");
+    selenium.start();
   }
 
   @Test
@@ -57,14 +61,15 @@ public class EditTournamentsTest extends SeleneseTestBase {
       final String lastRowName = "name"
           + lastRowIdx;
       final String lastRowValue = selenium.getValue(lastRowName);
-      Assert.assertTrue("There should not be a value in the last row", null == lastRowValue || "".equals(lastRowValue));
+      Assert.assertTrue("There should not be a value in the last row", null == lastRowValue
+          || "".equals(lastRowValue));
 
       selenium.type(lastRowName, "test tournament");
       selenium.click("commit");
       selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
-      
-      Assert.assertTrue("Didn't get success from commit", selenium.isTextPresent("Successfully committed tournament changes"));
+      Assert.assertTrue("Didn't get success from commit",
+                        selenium.isTextPresent("Successfully committed tournament changes"));
     } catch (final RuntimeException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;

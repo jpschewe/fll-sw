@@ -13,7 +13,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import com.thoughtworks.selenium.SeleneseTestBase;
+import com.thoughtworks.selenium.DefaultSelenium;
+import com.thoughtworks.selenium.Selenium;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
@@ -22,15 +23,18 @@ import fll.util.LogUtils;
 /**
  * Basic tests of loading pages.
  */
-public class WebTest extends SeleneseTestBase {
+public class WebTest {
 
   private static final Logger LOG = LogUtils.getLogger();
+
+  private Selenium selenium;
 
   @Before
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    super.setUp(TestUtils.URL_ROOT
-                + "setup");
+    selenium = new DefaultSelenium("localhost", 4444, "*firefox", TestUtils.URL_ROOT
+        + "setup");
+    selenium.start();
   }
 
   /**
@@ -38,7 +42,7 @@ public class WebTest extends SeleneseTestBase {
    */
   @Test
   public void testPages() throws SAXException, MalformedURLException, IOException {
-    final String[] pages = new String[] { // 
+    final String[] pages = new String[] { //
         "", //
         "display.jsp", //
         "index.jsp", //
@@ -58,7 +62,8 @@ public class WebTest extends SeleneseTestBase {
     for (final String page : pages) {
       LOG.info("Testing page #"
           + page + "#");
-      IntegrationTestUtils.initializeDatabaseFromDump(selenium, TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
+      IntegrationTestUtils.initializeDatabaseFromDump(selenium,
+                                                      TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
 
       final String url = TestUtils.URL_ROOT
           + page;
@@ -68,11 +73,13 @@ public class WebTest extends SeleneseTestBase {
 
   /**
    * Test changing tournaments to DUMMY and then back to State.
-   * @throws IOException 
+   * 
+   * @throws IOException
    */
   @Test
   public void testChangeTournament() throws IOException {
-    IntegrationTestUtils.initializeDatabaseFromDump(selenium, TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
+    IntegrationTestUtils.initializeDatabaseFromDump(selenium,
+                                                    TestUtils.class.getResourceAsStream("/fll/data/testdb.flldb"));
 
     IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
