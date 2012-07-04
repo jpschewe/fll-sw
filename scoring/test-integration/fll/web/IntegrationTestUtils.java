@@ -12,11 +12,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.internal.WrapsDriver;
 
 import com.thoughtworks.selenium.Selenium;
 
@@ -113,7 +117,12 @@ public final class IntegrationTestUtils {
         final boolean userSuccess = selenium.isTextPresent("Successfully created user");
         Assert.assertTrue("Problem creating user", userSuccess);
 
-        login(selenium);
+        if (selenium instanceof WrapsDriver) {
+          final WebDriver driver = ((WrapsDriver) selenium).getWrappedDriver();
+          login(driver);
+        } else {
+          login(selenium);
+        }
       } finally {
         if (!challengeFile.delete()) {
           challengeFile.deleteOnExit();
@@ -191,13 +200,19 @@ public final class IntegrationTestUtils {
   }
 
   public static void storeScreenshot(final Selenium selenium) throws IOException {
+    if (selenium instanceof WrapsDriver) {
+      final WebDriver driver = ((WrapsDriver) selenium).getWrappedDriver();
+      storeScreenshot(driver);
+      return;
+    }
+
     final File baseFile = File.createTempFile("fll", null, new File("screenshots"));
-    //FIXME need to use takes screenshot
+    // FIXME need to use takes screenshot
     final File screenshot = new File(baseFile.getAbsolutePath()
-                                     + ".png");
+        + ".png");
     /*
-     * if driver instanceof TakesScreenshot
-     * File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+     * if driver instanceof TakesScreenshot File scrFile =
+     * ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
      * FileUtils.copyFile(scrFile, screenshot);
      */
     selenium.captureScreenshot(screenshot.getAbsolutePath());
@@ -207,6 +222,31 @@ public final class IntegrationTestUtils {
     final File htmlFile = new File(baseFile.getAbsolutePath()
         + ".html");
     final String html = selenium.getHtmlSource();
+    final FileWriter writer = new FileWriter(htmlFile);
+    writer.write(html);
+    writer.close();
+    LOGGER.error("HTML saved to "
+        + htmlFile.getAbsolutePath());
+
+  }
+
+  public static void storeScreenshot(final WebDriver driver) throws IOException {
+    final File baseFile = File.createTempFile("fll", null, new File("screenshots"));
+
+    final File screenshot = new File(baseFile.getAbsolutePath()
+        + ".png");
+    if (driver instanceof TakesScreenshot) {
+      final File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+      FileUtils.copyFile(scrFile, screenshot);
+      LOGGER.error("Screenshot saved to "
+          + screenshot.getAbsolutePath());
+    } else {
+      LOGGER.warn("Unable to get screenshot");
+    }
+
+    final File htmlFile = new File(baseFile.getAbsolutePath()
+        + ".html");
+    final String html = driver.getPageSource();
     final FileWriter writer = new FileWriter(htmlFile);
     writer.write(html);
     writer.close();
