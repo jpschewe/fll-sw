@@ -92,7 +92,7 @@ public final class IntegrationTestUtils {
           selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
         }
 
-        selenium.attachFile("xmldocument", challengeFile.getAbsolutePath());
+        selenium.attachFile("xmldocument", challengeFile.toURI().toURL().toString());
         if (forceRebuild) {
           selenium.click("force_rebuild");
         }
