@@ -7,7 +7,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
 
 import fll.util.LogUtils;
 
@@ -22,7 +21,7 @@ public class InitializeDatabaseTest {
   public void setUp() {
     LogUtils.initializeLogging();
 
-    selenium = new FirefoxDriver();
+    selenium = IntegrationTestUtils.createWebDriver();
   }
 
   @After

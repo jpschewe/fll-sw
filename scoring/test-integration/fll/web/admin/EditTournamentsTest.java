@@ -17,7 +17,6 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
 
 import fll.util.LogUtils;
 import fll.web.InitializeDatabaseTest;
@@ -33,7 +32,7 @@ public class EditTournamentsTest {
   @Before
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    selenium = new FirefoxDriver();
+    selenium = IntegrationTestUtils.createWebDriver();
   }
 
   @After
