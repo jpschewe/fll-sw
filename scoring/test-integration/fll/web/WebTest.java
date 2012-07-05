@@ -13,7 +13,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.xml.sax.SAXException;
 
 import fll.TestUtils;
@@ -32,7 +31,7 @@ public class WebTest {
   @Before
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    selenium = new FirefoxDriver();
+    selenium = IntegrationTestUtils.createWebDriver();
   }
 
   @After
