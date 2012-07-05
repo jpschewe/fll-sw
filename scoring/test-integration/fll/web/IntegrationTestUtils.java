@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -22,8 +23,11 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.Wait;
 
+import com.google.common.base.Function;
 import com.thoughtworks.selenium.Selenium;
 
 import fll.TestUtils;
@@ -149,7 +153,15 @@ public final class IntegrationTestUtils {
             + confirmCreateDB.getText());
         confirmCreateDB.accept();
 
-        driver.findElement(By.id("success"));
+        // wait up to 30 second for success element
+        final Wait<WebDriver> wait = new FluentWait<WebDriver>(driver).withTimeout(30, TimeUnit.SECONDS)
+                                                                      .pollingEvery(5, TimeUnit.SECONDS)
+                                                                      .ignoring(NoSuchElementException.class);
+        wait.until(new Function<WebDriver, WebElement>() {
+          public WebElement apply(WebDriver driver) {
+            return driver.findElement(By.id("success"));
+          }
+        });
 
         // setup user
         final WebElement userElement = driver.findElement(By.name("user"));
