@@ -574,7 +574,7 @@ public final class IntegrationTestUtils {
       loadPage(selenium, TestUtils.URL_ROOT
           + "admin/index.jsp");
 
-      final WebElement currentTournament = selenium.findElement(By.name("currentTournamentSelect"));
+      final WebElement currentTournament = selenium.findElement(By.id("currentTournamentSelect"));
 
       final Select currentTournamentSel = new Select(currentTournament);
       String tournamentID = null;
