@@ -532,6 +532,58 @@ public final class IntegrationTestUtils {
   }
 
   /**
+   * Add a team to a tournament.
+   */
+  public static void addTeam(final WebDriver selenium,
+                             final int teamNumber,
+                             final String teamName,
+                             final String organization,
+                             final String division,
+                             final String tournament) throws IOException {
+    try {
+      loadPage(selenium, TestUtils.URL_ROOT
+          + "admin/index.jsp");
+
+      selenium.findElement(By.linkText("Add a team")).click();
+
+      selenium.findElement(By.name("teamNumber")).sendKeys(String.valueOf(teamNumber));
+      selenium.findElement(By.name("teamName")).sendKeys(teamName);
+      selenium.findElement(By.name("organization")).sendKeys(organization);
+      selenium.findElement(By.id("division_text_choice")).click();
+      selenium.findElement(By.name("division_text")).sendKeys(division);
+
+      final WebElement currentTournament = selenium.findElement(By.id("currentTournamentSelect"));
+      final Select currentTournamentSel = new Select(currentTournament);
+      String tournamentID = null;
+      for (final WebElement option : currentTournamentSel.getOptions()) {
+        final String text = option.getText();
+        if (text.equals(tournament)) {
+          tournamentID = option.getAttribute("value");
+        }
+      }
+      Assert.assertNotNull("Could not find tournament with name: "
+          + tournament, tournamentID);
+
+      currentTournamentSel.selectByValue(tournamentID);
+
+      selenium.findElement(By.name("commit")).click();
+
+      selenium.findElement(By.id("success"));
+
+    } catch (final AssertionError e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final RuntimeException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    } catch (final IOException e) {
+      IntegrationTestUtils.storeScreenshot(selenium);
+      throw e;
+    }
+
+  }
+
+  /**
    * Set the current tournament by name.
    * 
    * @param tournamentName the name of the tournament to make the current
