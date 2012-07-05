@@ -79,7 +79,7 @@ public final class IntegrationTestUtils {
   /**
    * Check if an element exists.
    */
-  public static boolean elementExists(final WebDriver selenium,
+  public static boolean isElementPresent(final WebDriver selenium,
                                       final By search) {
     boolean elementFound = false;
     try {
@@ -103,7 +103,7 @@ public final class IntegrationTestUtils {
     try {
       selenium.get(url);
 
-      Assert.assertFalse("Error loading page", elementExists(selenium, By.id("exception-handler")));
+      Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
     } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
@@ -339,7 +339,7 @@ public final class IntegrationTestUtils {
         selenium.get(TestUtils.URL_ROOT
             + "setup/");
 
-        if (elementExists(selenium, By.name("submit_login"))) {
+        if (isElementPresent(selenium, By.name("submit_login"))) {
           login(selenium);
 
           selenium.get(TestUtils.URL_ROOT

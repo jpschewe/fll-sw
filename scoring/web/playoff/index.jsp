@@ -43,7 +43,7 @@ final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
           <b>WARNING: Do not initialize playoff brackets for a division until all seeding
           runs for that division have been recorded!</b><br>
           <form name='initialize' action='initializebrackets.jsp' method='post'>
-          Select Division: <select name='division'>
+          Select Division: <select id='initialize-division' name='division'>
             <c:forEach items="${divisions }" var="division">
             <option value='${division}'>${division}</option>
             </c:forEach>
