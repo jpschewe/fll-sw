@@ -578,7 +578,7 @@ public final class IntegrationTestUtils {
 
       final Select currentTournamentSel = new Select(currentTournament);
       String tournamentID = null;
-      for (final WebElement option : currentTournamentSel.getAllSelectedOptions()) {
+      for (final WebElement option : currentTournamentSel.getOptions()) {
         final String text = option.getText();
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("setTournament option: "
