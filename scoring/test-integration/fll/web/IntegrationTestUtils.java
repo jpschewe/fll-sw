@@ -580,6 +580,10 @@ public final class IntegrationTestUtils {
       String tournamentID = null;
       for (final WebElement option : currentTournamentSel.getAllSelectedOptions()) {
         final String text = option.getText();
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("setTournament option: "
+              + text);
+        }
         if (text.endsWith("[ "
             + tournamentName + " ]")) {
           tournamentID = option.getAttribute("value");
