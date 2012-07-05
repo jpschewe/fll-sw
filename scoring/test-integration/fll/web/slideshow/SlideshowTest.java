@@ -9,14 +9,12 @@ package fll.web.slideshow;
 import java.io.IOException;
 import java.io.InputStream;
 
-import junit.framework.Assert;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.thoughtworks.selenium.DefaultSelenium;
-import com.thoughtworks.selenium.Selenium;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
@@ -29,19 +27,17 @@ import fll.web.IntegrationTestUtils;
  */
 public class SlideshowTest {
 
-  private Selenium selenium;
+  private WebDriver selenium;
 
   @Before
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    selenium = new DefaultSelenium("localhost", 4444, "*firefox", TestUtils.URL_ROOT
-        + "setup");
-    selenium.start();
+    selenium = new FirefoxDriver();
   }
 
   @After
   public void tearDown() {
-    selenium.close();
+    selenium.quit();
   }
 
   /**
@@ -61,24 +57,18 @@ public class SlideshowTest {
     IntegrationTestUtils.addTeam(selenium, 1, "team", "org", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
 
     try {
-      selenium.click("link=Admin Index");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      selenium.findElement(By.linkText("Admin Index")).click();
 
-      selenium.click("link=Remote control of display");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      selenium.findElement(By.linkText("Remote control of display")).click();
 
-      selenium.click("slideshow");
-      selenium.type("slideInterval", "5");
-      selenium.click("submit");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      selenium.findElement(By.id("slideshow")).click();
+      selenium.findElement(By.name("slideInterval")).sendKeys("5");
+      selenium.findElement(By.name("submit")).click();
 
-      Assert.assertTrue("Didn't get success from commit",
-                        selenium.isTextPresent("Successfully set remote control parameters"));
+      selenium.findElement(By.id("success"));
 
-      selenium.open(TestUtils.URL_ROOT
+      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
           + "/slideshow/index.jsp");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-      Assert.assertFalse("Got error", selenium.isTextPresent("An error has occurred"));
 
     } catch (final RuntimeException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
@@ -89,5 +79,4 @@ public class SlideshowTest {
     }
     LogUtils.getLogger().info("Bottom testSLideshowInterval");
   }
-
 }
