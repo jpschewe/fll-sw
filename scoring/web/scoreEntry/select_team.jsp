@@ -117,7 +117,7 @@ $(document).ready(function() {
           <td>
             <br>
             <font face='arial' size='4'>Select team for this scorecard:</font><br>
-            <select size='20' name='TeamNumber' ondblclick='selectTeam.submit()'>
+            <select size='20' id='select-teamnumber' name='TeamNumber' ondblclick='selectTeam.submit()'>
               <c:forEach items="${tournamentTeams }" var="team">
                 <option value="${team.teamNumber }">${team.teamNumber }&nbsp;&nbsp;&nbsp;[${team.trimmedTeamName }]</option>
               </c:forEach>
