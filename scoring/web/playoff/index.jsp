@@ -31,7 +31,7 @@ final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
         <li>Check to make sure all teams have scores entered for each seeding round.<br/>
           <form name='check' action='check.jsp' method='get'>
           Select Division:
-          <select name='division'>
+          <select id='check-division' name='division'>
             <c:forEach items="${divisions }" var="division">
             <option value='${division}'>${division}</option>
             </c:forEach>
