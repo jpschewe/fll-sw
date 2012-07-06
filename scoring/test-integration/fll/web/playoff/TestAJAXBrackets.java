@@ -134,7 +134,7 @@ public class TestAJAXBrackets {
 
       selenium.switchTo().window(bracketsWindow.getWindowHandle());
       // getEval("window.document.getElementById('1-1').innerHTML")
-      Assert.assertFalse(selenium.findElement(By.id("1-1")).getText().contains("Score:"));
+      Assert.assertFalse("Should not find score yet", selenium.findElement(By.id("1-1")).getText().contains("Score:"));
 
       // verify
       selenium.switchTo().window(scoreEntryWindow.getWindowHandle());
@@ -160,7 +160,7 @@ public class TestAJAXBrackets {
       }
 
       // Assert.assertTrue(selenium.getEval("window.document.getElementById('1-1').innerHTML").contains("Score:"));
-      Assert.assertTrue(selenium.findElement(By.id("1-1")).getText().contains("Score:"));
+      Assert.assertTrue("Should find score", selenium.findElement(By.id("1-1")).getText().contains("Score:"));
 
     } catch (final IOException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
