@@ -129,8 +129,12 @@ public class TestAJAXBrackets {
       enterScore("1", 1);
 
       selenium.switchTo().window(bracketsWindow.getWindowHandle());
+      final String scoreTextBefore = selenium.findElement(By.id("1-1")).getText();
+      if(LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Score text before: " + scoreTextBefore);
+      }
       // getEval("window.document.getElementById('1-1').innerHTML")
-      Assert.assertFalse("Should not find score yet", selenium.findElement(By.id("1-1")).getText().contains("Score:"));
+      Assert.assertFalse("Should not find score yet #" + scoreTextBefore + "#", scoreTextBefore.contains("Score:"));
 
       // verify
       selenium.switchTo().window(scoreEntryWindow.getWindowHandle());
@@ -155,8 +159,12 @@ public class TestAJAXBrackets {
         throw new RuntimeException("WebDriver is not capable of Javascript execution");
       }
 
-      // Assert.assertTrue(selenium.getEval("window.document.getElementById('1-1').innerHTML").contains("Score:"));
-      Assert.assertTrue("Should find score", selenium.findElement(By.id("1-1")).getText().contains("Score:"));
+      final String scoreTextAfter = selenium.findElement(By.id("1-1")).getText();
+      if(LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Score text after: " + scoreTextAfter);
+      }
+      // Assert.assertTrue(selenium.getEval("window.document.getElementById('1-1').innerHTML").contains("Score:"));      
+      Assert.assertTrue("Should find score in #" + scoreTextAfter + "#", scoreTextAfter.contains("Score:"));
 
     } catch (final IOException e) {
       IntegrationTestUtils.storeScreenshot(selenium);

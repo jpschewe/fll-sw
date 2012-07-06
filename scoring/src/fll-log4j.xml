@@ -51,6 +51,7 @@
  <!-- logger name="fll.web.FullTournamentTest"><level value="TRACE"/></logger-->
  <!-- logger name="fll.web.admin.VerifyJudges"><level value="TRACE"/></logger-->
  <logger name="fll.web.IntegrationTestUtils"><level value="TRACE"/></logger>
+ <logger name="fll.web.playoff.TestAJAXBrackets"><level value="TRACE"/></logger>
 
 
  <!-- database connection information -->
