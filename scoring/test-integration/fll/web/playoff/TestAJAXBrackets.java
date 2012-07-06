@@ -9,42 +9,47 @@ package fll.web.playoff;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.Select;
 import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
-import com.thoughtworks.selenium.DefaultSelenium;
-import com.thoughtworks.selenium.Selenium;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
 import fll.util.LogUtils;
 import fll.web.IntegrationTestUtils;
+import fll.web.WebWindow;
 
 /**
  * Test the AJAX Brackets
  */
 public class TestAJAXBrackets {
 
+  private static final Logger LOGGER = LogUtils.getLogger();
+
   public static String JS_EVAL_TIMEOUT = "10000";
 
-  private Selenium selenium;
+  private WebDriver selenium;
 
   @Before
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    selenium = new DefaultSelenium("localhost", 4444, "*firefox", TestUtils.URL_ROOT
-        + "setup");
-    selenium.start();
+    selenium = IntegrationTestUtils.createWebDriver();
   }
 
   @After
   public void tearDown() {
-    selenium.close();
+    selenium.quit();
   }
 
   @Test
@@ -61,38 +66,41 @@ public class TestAJAXBrackets {
       // table labels
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
           + "admin/tables.jsp");
-      selenium.type("name=SideA0", "Blue 1");
-      selenium.type("name=SideB0", "Table 2");
-      selenium.click("id=finished");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+      selenium.findElement(By.name("SideA0")).sendKeys("Blue 1");
+      selenium.findElement(By.name("SideB0")).sendKeys("Table 2");
+      selenium.findElement(By.id("finished")).click();
 
       // change num seeding rounds
-      selenium.select("xpath=//form[@id='changeSeedingRounds']//select[@name='seedingRounds']", "value=0");
-      selenium.click("name=changeSeedingRounds");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      final Select seedingRoundsSelection = new Select(selenium.findElement(By.name("seedingRounds")));
+      seedingRoundsSelection.selectByValue("0");
+      selenium.findElement(By.name("changeSeedingRounds")).click();
 
       // init brackets
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
           + "playoff");
-      selenium.select("xpath=//form[@name='initialize']//select[@name='division']", "value=1");
-      selenium.click("id=initialize_brackets");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-      Assert.assertFalse(selenium.isTextPresent("Exception"));
+
+      final Select initDiv = new Select(selenium.findElement(By.id("initialize-division")));
+      initDiv.selectByValue("1");
+      selenium.findElement(By.id("initialize_brackets")).click();
+      Assert.assertFalse("Error loading page",
+                         IntegrationTestUtils.isElementPresent(selenium, By.id("exception-handler")));
 
       // open brackets
-      selenium.openWindow(TestUtils.URL_ROOT
-          + "playoff/remoteControlBrackets.jsp?scroll=false", "brackets");
-      selenium.waitForPopUp("brackets", IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      final WebWindow bracketsWindow = new WebWindow(selenium, TestUtils.URL_ROOT
+          + "playoff/remoteControlBrackets.jsp?scroll=false");
+
       // open score entry
-      selenium.openWindow(TestUtils.URL_ROOT
-          + "scoreEntry/select_team.jsp", "scoreentry");
-      selenium.waitForPopUp("scoreentry", IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      final WebWindow scoreEntryWindow = new WebWindow(selenium, TestUtils.URL_ROOT
+          + "scoreEntry/select_team.jsp");
+
       // give windows a little time to get their bearings
-      selenium.runScript("var timerRan = false;setTimeout('timerRan=true;', 5000);");
-      selenium.waitForCondition("window.timerRan", JS_EVAL_TIMEOUT);
+      // selenium.runScript("var timerRan = false;setTimeout('timerRan=true;', 5000);");
+      // selenium.waitForCondition("window.timerRan", JS_EVAL_TIMEOUT);
+
       // Use HTTPUnit to assign table labels instead of selenium
-      WebConversation wc = new WebConversation();
-      PostMethodWebRequest tableLabels = new PostMethodWebRequest(TestUtils.URL_ROOT
+      final WebConversation wc = new WebConversation();
+      final PostMethodWebRequest tableLabels = new PostMethodWebRequest(TestUtils.URL_ROOT
           + "playoff/ScoresheetServlet");
       tableLabels.setParameter("numMatches", "2");
       tableLabels.setParameter("print1", "1");
@@ -104,41 +112,56 @@ public class TestAJAXBrackets {
       wc.getResponse(tableLabels);
 
       // check for a blue cell
-      selenium.selectWindow("brackets"); // TODO: I can't find a way selenium is
-                                         // OK with that checks for a present
-                                         // CSS
-                                         // property, nor a string of JS
-                                         // selenium
-                                         // is OK with to check for the element.
+      selenium.switchTo().window(bracketsWindow.getWindowHandle());
+      // TODO: I can't find a way selenium is
+      // OK with that checks for a present CSS property, nor a string of JS
+      // selenium is OK with to check for the element.
       // selenium.waitForCondition("window.document.getElementsByClassName('table_assignment')[0].style.backgroundColor=='blue'",
       // JS_EVAL_TIMEOUT); // > 1 element with a style attrib that contains the
       // string 'blue'
 
-      selenium.setSpeed("300"); // I slow down selenium for the AJAX functions
-                                // as
-                                // while they don't take that long, selenium
-                                // spend
-                                // a lot less
-                                // time between entering data and checking for
-                                // it
-                                // than it can keep up with.
-      // enter unverified score for team 1
-      enterScore(selenium, "1", 1);
-      selenium.selectWindow("brackets");
-      Assert.assertFalse(selenium.getEval("window.document.getElementById('1-1').innerHTML").contains("Score:"));
-      // verify
-      selenium.selectWindow("scoreentry");
-      selenium.select("xpath=//form[@name='verify']//select[@name='TeamNumber']", "value=1-1");
-      selenium.click("id=verify_submit");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-      selenium.click("id=Verified_yes");
-      selenium.click("id=submit");
-      selenium.getConfirmation();
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-      selenium.selectWindow("brackets");
-      selenium.runScript("window.iterate();");
+      // I slow down selenium for the AJAX functions
+      // as they don't take that long, selenium
+      // spends a lot less
+      // time between entering data and checking for
+      // it than it can keep up with.
+      // JPS may need to add some wait calls to replace this
+      // selenium.setSpeed("300");
 
-      Assert.assertTrue(selenium.getEval("window.document.getElementById('1-1').innerHTML").contains("Score:"));
+      // enter unverified score for team 1
+      selenium.switchTo().window(scoreEntryWindow.getWindowHandle());
+      enterScore("1", 1);
+
+      selenium.switchTo().window(bracketsWindow.getWindowHandle());
+      // getEval("window.document.getElementById('1-1').innerHTML")
+      Assert.assertFalse(selenium.findElement(By.id("1-1")).getText().contains("Score:"));
+
+      // verify
+      selenium.switchTo().window(scoreEntryWindow.getWindowHandle());
+
+      final Select verifySelect = new Select(selenium.findElement(By.id("select-verify-teamnumber")));
+      verifySelect.selectByValue("1-1");
+      selenium.findElement(By.id("verify_submit")).click();
+
+      selenium.findElement(By.id("Verified_yes")).click();
+      selenium.findElement(By.id("submit")).click();
+
+      final Alert confirmVerifyChange = selenium.switchTo().alert();
+      LOGGER.info("Confirmation text: "
+          + confirmVerifyChange.getText());
+      confirmVerifyChange.accept();
+
+      selenium.switchTo().window(bracketsWindow.getWindowHandle());
+      if (selenium instanceof JavascriptExecutor) {
+        final JavascriptExecutor js = (JavascriptExecutor) selenium;
+        js.executeScript("window.iterate();");
+      } else {
+        throw new RuntimeException("WebDriver is not capable of Javascript execution");
+      }
+
+      // Assert.assertTrue(selenium.getEval("window.document.getElementById('1-1').innerHTML").contains("Score:"));
+      Assert.assertTrue(selenium.findElement(By.id("1-1")).getText().contains("Score:"));
+
     } catch (final IOException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
@@ -154,19 +177,20 @@ public class TestAJAXBrackets {
     }
   }
 
-  private void enterScore(Selenium selenium,
-                          String team,
-                          int score) {
-    selenium.selectWindow("scoreentry");
-    selenium.select("xpath=//form[@name='selectTeam']//select[@name='TeamNumber']", "value="
-        + team);
-    selenium.click("id=enter_submit");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+  private void enterScore(final String team,
+                          final int score) {
+    final Select teamSelect = new Select(selenium.findElement(By.id("select-teamnumber")));
+    teamSelect.selectByValue(team);
+    selenium.findElement(By.id("enter_submit")).click();
+
     for (int i = 0; i < score; i++) {
-      selenium.click("id=inc_score_1");
+      selenium.findElement(By.id("inc_score_1")).click();
     }
-    selenium.click("id=submit");
-    selenium.getConfirmation();
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    selenium.findElement(By.id("submit")).click();
+
+    final Alert confirmScoreChange = selenium.switchTo().alert();
+    LOGGER.info("Confirmation text: "
+        + confirmScoreChange.getText());
+    confirmScoreChange.accept();
   }
 }

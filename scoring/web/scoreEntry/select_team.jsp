@@ -171,7 +171,7 @@ $(document).ready(function() {
             <!-- pick team from a list -->
             <br>
             <font face='arial' size='4'>Unverified Runs:</font><br>         
-            <select size='20' name='TeamNumber' ondblclick='verify.submit()'>
+            <select size='20' id='select-verify-teamnumber' name='TeamNumber' ondblclick='verify.submit()'>
             </select>
           </td>
         </tr>
