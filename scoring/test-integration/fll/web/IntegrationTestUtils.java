@@ -680,7 +680,7 @@ public final class IntegrationTestUtils {
    */
   public static WebDriver createWebDriver() {
     final WebDriver selenium = new FirefoxDriver();
-    selenium.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+//    selenium.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
     selenium.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
     return selenium;
   }
