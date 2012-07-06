@@ -80,11 +80,7 @@ public class TestAJAXBrackets {
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
           + "playoff");
 
-      final Select initDiv = new Select(selenium.findElement(By.id("initialize-division")));
-      initDiv.selectByValue("1");
-      selenium.findElement(By.id("initialize_brackets")).click();
-      Assert.assertFalse("Error loading page",
-                         IntegrationTestUtils.isElementPresent(selenium, By.id("exception-handler")));
+      IntegrationTestUtils.initializePlayoffsForDivision(selenium, "1");
 
       // open brackets
       final WebWindow bracketsWindow = new WebWindow(selenium, TestUtils.URL_ROOT

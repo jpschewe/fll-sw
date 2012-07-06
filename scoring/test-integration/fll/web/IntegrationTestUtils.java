@@ -80,7 +80,7 @@ public final class IntegrationTestUtils {
    * Check if an element exists.
    */
   public static boolean isElementPresent(final WebDriver selenium,
-                                      final By search) {
+                                         final By search) {
     boolean elementFound = false;
     try {
       selenium.findElement(search);
@@ -680,9 +680,21 @@ public final class IntegrationTestUtils {
    */
   public static WebDriver createWebDriver() {
     final WebDriver selenium = new FirefoxDriver();
-//    selenium.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+    // selenium.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
     selenium.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
     return selenium;
+  }
+
+  public static void initializePlayoffsForDivision(final WebDriver selenium,
+                                                   final String division) throws IOException {
+    loadPage(selenium, TestUtils.URL_ROOT
+        + "playoff");
+
+    final Select initDiv = new Select(selenium.findElement(By.id("initialize-division")));
+    initDiv.selectByValue(division);
+    selenium.findElement(By.id("initialize_brackets")).click();
+    Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
+
   }
 
 }

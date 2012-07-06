@@ -82,11 +82,7 @@ public class TestPlayoffs {
       }
 
       // initialize playoffs
-      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-          + "playoff");
-      final Select initDiv = new Select(selenium.findElement(By.id("initialize-division")));
-      initDiv.selectByValue("1");
-      selenium.findElement(By.id("initialize_brackets")).click();
+      IntegrationTestUtils.initializePlayoffsForDivision(selenium, "1");
       
       Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("exception-handler")));
 
