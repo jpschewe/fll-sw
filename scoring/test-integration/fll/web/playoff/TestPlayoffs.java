@@ -84,7 +84,7 @@ public class TestPlayoffs {
       // initialize playoffs
       IntegrationTestUtils.initializePlayoffsForDivision(selenium, "1");
       
-      Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("exception-handler")));
+      IntegrationTestUtils.assertNoException(selenium);
 
       // enter score for teams 3 and 0 with 3 winning
       enterTeamScore(3);

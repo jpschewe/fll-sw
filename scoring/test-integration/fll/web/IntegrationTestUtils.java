@@ -103,7 +103,7 @@ public final class IntegrationTestUtils {
     try {
       selenium.get(url);
 
-      Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
+      assertNoException(selenium);
     } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
@@ -111,6 +111,10 @@ public final class IntegrationTestUtils {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     }
+  }
+  
+  public static void assertNoException(final WebDriver selenium) {
+    Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
   }
 
   /**
