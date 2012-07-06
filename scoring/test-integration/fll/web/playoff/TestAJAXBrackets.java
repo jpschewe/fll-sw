@@ -40,11 +40,19 @@ public class TestAJAXBrackets {
   public static String JS_EVAL_TIMEOUT = "10000";
 
   private WebDriver selenium;
-
+  private JavascriptExecutor seleniumJS;
+  
   @Before
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
     selenium = IntegrationTestUtils.createWebDriver();
+    
+    if (selenium instanceof JavascriptExecutor) {
+      seleniumJS = (JavascriptExecutor) selenium;
+    } else {
+      throw new RuntimeException("WebDriver is not capable of Javascript execution");
+    }
+
   }
 
   @After
@@ -129,12 +137,13 @@ public class TestAJAXBrackets {
       enterScore("1", 1);
 
       selenium.switchTo().window(bracketsWindow.getWindowHandle());
-      final String scoreTextBefore = selenium.findElement(By.id("1-1")).getText();
+      //String scoreTextBefore = selenium.findElement(By.id("1-1")).getText();
+      // getEval("window.document.getElementById('1-1').innerHTML")
+      final String scoreTextBefore = String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-1').innerHTML"));        
       if(LOGGER.isDebugEnabled()) {
         LOGGER.debug("Score text before: " + scoreTextBefore);
       }
-      // getEval("window.document.getElementById('1-1').innerHTML")
-      Assert.assertFalse("Should not find score yet #" + scoreTextBefore + "#", scoreTextBefore.contains("Score:"));
+      Assert.assertFalse("Should not find score yet '" + scoreTextBefore + "'", scoreTextBefore.contains("Score:"));
 
       // verify
       selenium.switchTo().window(scoreEntryWindow.getWindowHandle());
@@ -152,19 +161,15 @@ public class TestAJAXBrackets {
       confirmVerifyChange.accept();
 
       selenium.switchTo().window(bracketsWindow.getWindowHandle());
-      if (selenium instanceof JavascriptExecutor) {
-        final JavascriptExecutor js = (JavascriptExecutor) selenium;
-        js.executeScript("window.iterate();");
-      } else {
-        throw new RuntimeException("WebDriver is not capable of Javascript execution");
-      }
+        seleniumJS.executeScript("window.iterate();");
 
-      final String scoreTextAfter = selenium.findElement(By.id("1-1")).getText();
+//      final String scoreTextAfter = selenium.findElement(By.id("1-1")).getText();
+        final String scoreTextAfter = String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-1').innerHTML"));        
       if(LOGGER.isDebugEnabled()) {
         LOGGER.debug("Score text after: " + scoreTextAfter);
       }
       // Assert.assertTrue(selenium.getEval("window.document.getElementById('1-1').innerHTML").contains("Score:"));      
-      Assert.assertTrue("Should find score in #" + scoreTextAfter + "#", scoreTextAfter.contains("Score:"));
+      Assert.assertTrue("Should find score in '" + scoreTextAfter + "'", scoreTextAfter.contains("Score:"));
 
     } catch (final IOException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
