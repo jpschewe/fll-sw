@@ -132,7 +132,7 @@ public final class IntegrationTestUtils {
         driver.get(TestUtils.URL_ROOT
             + "setup/");
 
-        if (null != driver.findElement(By.name("submit_login"))) {
+        if (!isElementPresent(driver, By.name("submit_login"))) {
           login(driver);
 
           driver.get(TestUtils.URL_ROOT
