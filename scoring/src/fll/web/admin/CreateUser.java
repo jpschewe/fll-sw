@@ -24,13 +24,13 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import fll.db.Queries;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.DoLogin;
 import fll.web.SessionAttributes;
 
 /**
  * Create a user if.
- * 
  */
 @WebServlet("/admin/CreateUser")
 public class CreateUser extends BaseFLLServlet {
@@ -42,9 +42,10 @@ public class CreateUser extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
 
     PreparedStatement prep = null;
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       // check for authentication table
       if (!Queries.isAuthenticationEmpty(connection)) {
@@ -81,11 +82,12 @@ public class CreateUser extends BaseFLLServlet {
       session.setAttribute(SessionAttributes.MESSAGE, "<p id='success-create-user'>Successfully created user</p>");
 
       // do a login
-      DoLogin.doLogin(request, response, session);
+      DoLogin.doLogin(request, response, application, session);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     } finally {
       SQLFunctions.close(prep);
+      SQLFunctions.close(connection);
     }
 
   }

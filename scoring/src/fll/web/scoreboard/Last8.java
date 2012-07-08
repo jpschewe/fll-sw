@@ -28,8 +28,8 @@ import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 
 @WebServlet("/scoreboard/Last8")
 public class Last8 extends BaseFLLServlet {
@@ -44,15 +44,16 @@ public class Last8 extends BaseFLLServlet {
       LOGGER.trace("Entering doPost");
     }
 
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final Formatter formatter = new Formatter(response.getWriter());
     final String showOrgStr = request.getParameter("showOrganization");
     final boolean showOrg = null == showOrgStr ? true : Boolean.parseBoolean(showOrgStr);
 
     PreparedStatement prep = null;
     ResultSet rs = null;
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
 
@@ -121,6 +122,7 @@ public class Last8 extends BaseFLLServlet {
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
+      SQLFunctions.close(connection);
     }
 
     if (LOGGER.isTraceEnabled()) {

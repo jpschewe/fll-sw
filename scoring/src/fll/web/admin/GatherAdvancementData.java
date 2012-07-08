@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 
 import fll.Team;
@@ -32,8 +34,8 @@ import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 
 /**
  * Gather data for advancement of teams.
@@ -51,12 +53,13 @@ public class GatherAdvancementData extends BaseFLLServlet {
       LOGGER.trace("Top of GatherAdvancementData.doPost");
     }
 
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
     final String[] teamsToAdvance = request.getParameterValues("advance");
 
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       final Collection<Integer> teamNumbers;
       if (null != teamsToAdvance) {
@@ -77,6 +80,8 @@ public class GatherAdvancementData extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
+    } finally {
+      SQLFunctions.close(connection);
     }
 
   }
@@ -91,7 +96,8 @@ public class GatherAdvancementData extends BaseFLLServlet {
                                                   final HttpSession session,
                                                   final boolean sendToSelect,
                                                   final Connection connection,
-                                                  final Collection<Integer> teamNumbers) throws SQLException, IOException {
+                                                  final Collection<Integer> teamNumbers) throws SQLException,
+      IOException {
     final StringBuilder message = new StringBuilder();
     final Map<Integer, String> currentTournament = new HashMap<Integer, String>();
     final Map<Integer, String> nextTournament = new HashMap<Integer, String>();

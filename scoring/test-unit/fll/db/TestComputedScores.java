@@ -66,10 +66,10 @@ public class TestComputedScores {
       final InputStream dumpFileIS = TestComputedScores.class.getResourceAsStream("data/plymouth-2009-11-21.zip");
       Assert.assertNotNull("Cannot find test data", dumpFileIS);
       
+      connection = Utilities.createFileDataSource(database).getConnection();
 
-      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), database);
+      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
 
-      connection = Utilities.createDataSource(database).getConnection();
       
       final Document document = Queries.getChallengeDocument(connection);
       final Element rootElement = document.getDocumentElement();

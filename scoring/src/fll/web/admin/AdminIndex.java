@@ -56,12 +56,14 @@ public class AdminIndex extends BaseFLLServlet {
 
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
     ResultSet rs = null;
+    ResultSet rs2 = null;
     Statement stmt = null;
     PreparedStatement prep = null;
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
       stmt = connection.createStatement();
 
       final int currentTournamentID = Queries.getCurrentTournament(connection);
@@ -97,9 +99,9 @@ public class AdminIndex extends BaseFLLServlet {
       boolean tablesAssigned = false;
       prep = connection.prepareStatement("SELECT COUNT(*) FROM tablenames WHERE Tournament = ?");
       prep.setInt(1, currentTournamentID);
-      rs = prep.executeQuery();
-      while (rs.next()) {
-        final int count = rs.getInt(1);
+      rs2 = prep.executeQuery();
+      while (rs2.next()) {
+        final int count = rs2.getInt(1);
         tablesAssigned = count > 0;
       }
       session.setAttribute("tablesAssigned", tablesAssigned);
@@ -111,8 +113,10 @@ public class AdminIndex extends BaseFLLServlet {
       throw new RuntimeException("Error saving team data into the database", sqle);
     } finally {
       SQLFunctions.close(rs);
+      SQLFunctions.close(rs2);
       SQLFunctions.close(stmt);
       SQLFunctions.close(prep);
+      SQLFunctions.close(connection);
     }
 
     session.setAttribute(SessionAttributes.MESSAGE, message.toString());

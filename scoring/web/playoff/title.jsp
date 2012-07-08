@@ -1,13 +1,14 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.web.SessionAttributes" %>
+<%@ page import="fll.web.ApplicationAttributes" %>
 <%@ page import="javax.sql.DataSource" %>
 <%@ page import="java.util.List"%>
 <%@ page import="fll.db.Queries" %>
 <%@ page import="java.sql.Connection" %>
   
   <%
-    	final DataSource datasource = SessionAttributes.getDataSource(session);
+    	final DataSource datasource = ApplicationAttributes.getDataSource(application);
       final Connection connection = datasource.getConnection();
 
      final String divisionKey = "playoffDivision";

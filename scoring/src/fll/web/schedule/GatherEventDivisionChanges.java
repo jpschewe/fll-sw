@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 
 import fll.Team;
@@ -27,6 +29,7 @@ import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
@@ -34,7 +37,6 @@ import fll.web.WebUtils;
 /**
  * Commit the schedule in uploadSchedule_schedule to the database for the
  * current tournament.
- * 
  */
 @WebServlet("/schedule/GatherEventDivisionChanges")
 public class GatherEventDivisionChanges extends BaseFLLServlet {
@@ -52,30 +54,34 @@ public class GatherEventDivisionChanges extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    final DataSource datasource = SessionAttributes.getDataSource(session);
-
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       final TournamentSchedule schedule = SessionAttributes.getNonNullAttribute(session, UploadSchedule.SCHEDULE_KEY,
                                                                                 TournamentSchedule.class);
-      
+
       final List<EventDivisionInfo> eventDivisionInfo = new LinkedList<EventDivisionInfo>();
-      for(final TeamScheduleInfo si : schedule.getSchedule()) {
-          final Team team = Team.getTeamFromDatabase(connection, si.getTeamNumber());
-          if(null == team) {
-            throw new FLLRuntimeException("Team " + si.getTeamNumber() + " could not be found in the database");
-          }
-          final EventDivisionInfo info = new EventDivisionInfo(team.getTeamNumber(), team.getTeamName(), team.getDivision(), si.getDivision());
-          eventDivisionInfo.add(info);
+      for (final TeamScheduleInfo si : schedule.getSchedule()) {
+        final Team team = Team.getTeamFromDatabase(connection, si.getTeamNumber());
+        if (null == team) {
+          throw new FLLRuntimeException("Team "
+              + si.getTeamNumber() + " could not be found in the database");
+        }
+        final EventDivisionInfo info = new EventDivisionInfo(team.getTeamNumber(), team.getTeamName(),
+                                                             team.getDivision(), si.getDivision());
+        eventDivisionInfo.add(info);
       }
       session.setAttribute(EVENT_DIVISION_INFO_KEY, eventDivisionInfo);
-      
+
       WebUtils.sendRedirect(application, response, "/schedule/displayEventDivisionConfirmation.jsp");
       return;
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new FLLRuntimeException("There was an error talking to the database", e);
+    } finally {
+      SQLFunctions.close(connection);
     }
 
   }

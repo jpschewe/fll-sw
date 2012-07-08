@@ -4,7 +4,7 @@
 
 <%@ page import="fll.db.Queries"%>
 <%@ page import="fll.web.playoff.Playoff"%>
-<%@ page import="fll.web.SessionAttributes"%>
+<%@ page import="fll.web.ApplicationAttributes"%>
 <%@ page import="javax.sql.DataSource"%>
 <%@ page import="java.sql.Connection"%>
 
@@ -15,7 +15,7 @@
    enableThird - has value 'yes' if we are to have 3rd/4th place brackets
    */
 
-  final DataSource datasource = SessionAttributes.getDataSource(session);
+  final DataSource datasource = ApplicationAttributes.getDataSource(application);
   final Connection connection = datasource.getConnection();
   final Document challengeDocument = (Document) application.getAttribute("challengeDocument");
 

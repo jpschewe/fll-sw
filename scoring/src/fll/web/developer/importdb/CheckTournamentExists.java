@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 
 import fll.Tournament;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -57,7 +58,7 @@ public class CheckTournamentExists extends BaseFLLServlet {
         session.setAttribute("selectedTournament", selectedTournament);
 
         // Check if the tournament exists
-        final DataSource datasource = SessionAttributes.getDataSource(session);
+        final DataSource datasource = ApplicationAttributes.getDataSource(application);
         connection = datasource.getConnection();
         final Tournament tournament = Tournament.findTournamentByName(connection, selectedTournament);
         if (null == tournament) {

@@ -13,7 +13,7 @@
 <script type='text/javascript' src='finalist.js'></script>
 <script type='text/javascript'>
 	var _loadingTournament =
-<%=FinalistLoad.currentTournament(session)%>
+<%=FinalistLoad.currentTournament(application)%>
 	;
 
 	function clearData() {
@@ -22,9 +22,9 @@
 
 	function loadData() {
 		console.log("Loading data");
-<%FinalistLoad.outputDivisions(out, session);%>
+<%FinalistLoad.outputDivisions(out, application);%>
 	
-<%FinalistLoad.outputTeamVariables(out, session);%>
+<%FinalistLoad.outputTeamVariables(out, application);%>
 	
 <%FinalistLoad.outputCategories(out, application);%>
 	var championship = $.finalist
@@ -32,7 +32,7 @@
 		if (null == championship) {
 			championship = $.finalist.addCategory($.finalist.CHAMPIONSHIP_NAME, true);
 		}
-<%FinalistLoad.outputCategoryScores(out, application, session);%>
+<%FinalistLoad.outputCategoryScores(out, application);%>
 	$.finalist.setTournament(_loadingTournament);
 	}
 
