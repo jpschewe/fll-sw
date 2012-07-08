@@ -109,7 +109,7 @@ public final class IntegrationTestUtils {
       throw e;
     }
   }
-  
+
   public static void assertNoException(final WebDriver selenium) {
     Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
   }
@@ -673,7 +673,7 @@ public final class IntegrationTestUtils {
    */
   public static WebDriver createWebDriver() {
     final WebDriver selenium = new FirefoxDriver();
-    // selenium.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+    selenium.manage().timeouts().implicitlyWait(250, TimeUnit.MILLISECONDS);
     selenium.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
     return selenium;
   }
