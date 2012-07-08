@@ -76,8 +76,8 @@ public final class IntegrationTestUtils {
   /**
    * Check if an element exists.
    */
-  public static boolean elementExists(final WebDriver selenium,
-                                      final By search) {
+  public static boolean isElementPresent(final WebDriver selenium,
+                                         final By search) {
     boolean elementFound = false;
     try {
       selenium.findElement(search);
@@ -100,7 +100,7 @@ public final class IntegrationTestUtils {
     try {
       selenium.get(url);
 
-      Assert.assertFalse("Error loading page", elementExists(selenium, By.id("exception-handler")));
+      assertNoException(selenium);
     } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
@@ -108,6 +108,10 @@ public final class IntegrationTestUtils {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     }
+  }
+  
+  public static void assertNoException(final WebDriver selenium) {
+    Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
   }
 
   /**
@@ -328,7 +332,7 @@ public final class IntegrationTestUtils {
         selenium.get(TestUtils.URL_ROOT
             + "setup/");
 
-        if (elementExists(selenium, By.name("submit_login"))) {
+        if (isElementPresent(selenium, By.name("submit_login"))) {
           login(selenium);
 
           selenium.get(TestUtils.URL_ROOT
@@ -669,9 +673,21 @@ public final class IntegrationTestUtils {
    */
   public static WebDriver createWebDriver() {
     final WebDriver selenium = new FirefoxDriver();
-    selenium.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+    // selenium.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
     selenium.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
     return selenium;
+  }
+
+  public static void initializePlayoffsForDivision(final WebDriver selenium,
+                                                   final String division) throws IOException {
+    loadPage(selenium, TestUtils.URL_ROOT
+        + "playoff");
+
+    final Select initDiv = new Select(selenium.findElement(By.id("initialize-division")));
+    initDiv.selectByValue(division);
+    selenium.findElement(By.id("initialize_brackets")).click();
+    Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
+
   }
 
 }
