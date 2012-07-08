@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 import fll.JudgeInformation;
 import fll.db.Queries;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -49,9 +50,10 @@ public class CommitJudges extends BaseFLLServlet {
       LOGGER.trace("Top of CommitJudges.processRequest");
     }
 
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    Connection connection = null;
     try {
-      final DataSource datasource = SessionAttributes.getDataSource(session);
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
 
       commitData(session, connection, Queries.getCurrentTournament(connection));
 
@@ -62,6 +64,8 @@ public class CommitJudges extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new RuntimeException("There was an error talking to the database", e);
+    } finally {
+      SQLFunctions.close(connection);
     }
 
   }

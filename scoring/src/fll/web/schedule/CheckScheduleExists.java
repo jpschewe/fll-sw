@@ -18,19 +18,20 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 import fll.web.WebUtils;
 
 /**
  * Check if a schedule exists for the current tournament.
- * 
  */
 @WebServlet("/schedule/CheckScheduleExists")
 public class CheckScheduleExists extends BaseFLLServlet {
@@ -42,10 +43,10 @@ public class CheckScheduleExists extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    final DataSource datasource = SessionAttributes.getDataSource(session);
-
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
       final int tournamentID = Queries.getCurrentTournament(connection);
 
       if (TournamentSchedule.scheduleExistsInDatabase(connection, tournamentID)) {
@@ -61,6 +62,8 @@ public class CheckScheduleExists extends BaseFLLServlet {
     } catch (final SQLException e) {
       LOGGER.error("There was an error talking to the database", e);
       throw new FLLRuntimeException("There was an error talking to the database", e);
+    } finally {
+      SQLFunctions.close(connection);
     }
 
   }

@@ -26,6 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import net.mtu.eggplant.util.sql.SQLFunctions;
+
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
@@ -41,6 +43,7 @@ import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.WebUtils;
@@ -67,6 +70,7 @@ public class CheckViolations extends BaseFLLServlet {
 
     final File scheduleFile = SessionAttributes.getNonNullAttribute(session, "uploadSchedule_file", File.class);
     final String sheetName = SessionAttributes.getNonNullAttribute(session, "uploadSchedule_sheet", String.class);
+    Connection connection = null;
     try {
       // if uploadSchedule_subjectiveHeaders is set, then use this as the list
       // of subjective headers
@@ -106,8 +110,8 @@ public class CheckViolations extends BaseFLLServlet {
       final TournamentSchedule schedule = new TournamentSchedule(name, stream, sheetName, subjectiveHeaders);
       session.setAttribute("uploadSchedule_schedule", schedule);
 
-      final DataSource datasource = SessionAttributes.getDataSource(session);
-      final Connection connection = datasource.getConnection();
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      connection = datasource.getConnection();
       final int tournamentID = Queries.getCurrentTournament(connection);
       final Collection<ConstraintViolation> violations = schedule.compareWithDatabase(connection, tournamentID);
       final SchedParams schedParams = new SchedParams(subjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
@@ -146,6 +150,8 @@ public class CheckViolations extends BaseFLLServlet {
       final String message = "Error parsing schedule";
       LOGGER.error(message, e);
       throw new FLLRuntimeException(message, e);
+    } finally {
+      SQLFunctions.close(connection);
     }
   }
 

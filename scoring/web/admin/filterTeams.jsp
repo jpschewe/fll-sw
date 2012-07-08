@@ -3,6 +3,7 @@
 <%@ page import="fll.web.admin.UploadTeams" %>
 
 <%@ page import="fll.web.SessionAttributes" %>
+<%@ page import="fll.web.ApplicationAttributes" %>
 
 <%@ page import="java.sql.Connection" %>
 <%@ page import="javax.sql.DataSource" %>
@@ -20,7 +21,7 @@
 </c:if>
   
 <%
-final DataSource datasource = SessionAttributes.getDataSource(session);
+final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();
 
 if(null == session.getAttribute("columnSelectOptions")) {

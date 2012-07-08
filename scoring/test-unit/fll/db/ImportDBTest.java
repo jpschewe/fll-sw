@@ -39,43 +39,45 @@ public class ImportDBTest {
   }
 
   /**
-   * Make sure that no show scores in the subjective data import properly. 
-   * @throws IOException 
-   * @throws SQLException 
+   * Make sure that no show scores in the subjective data import properly.
+   * 
+   * @throws IOException
+   * @throws SQLException
    */
   @Test
   public void testImportSubjectiveNoShow() throws IOException, SQLException {
     final InputStream dumpFileIS = ImportDBTest.class.getResourceAsStream("data/mays-20110108-database.flldb");
     Assert.assertNotNull("Cannot find test data", dumpFileIS);
-   
+
     final File tempFile = File.createTempFile("flltest", null);
     final String database = tempFile.getAbsolutePath();
     Statement stmt = null;
     ResultSet rs = null;
+    Connection connection = null;
     try {
-      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), database);
+      connection = Utilities.createFileDataSource(database).getConnection();
 
+      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
 
-      final Connection connection = Utilities.createDataSource(database).getConnection();
-      
       // check that team 8777 has a no show in research
       stmt = connection.createStatement();
       rs = stmt.executeQuery("SELECT NoShow FROM research WHERE TeamNumber = 8777");
       Assert.assertTrue("Should have a row", rs.next());
-      Assert.assertTrue("Should have a no show", rs.getBoolean(1));      
+      Assert.assertTrue("Should have a no show", rs.getBoolean(1));
 
       connection.close();
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(stmt);
-      
+      SQLFunctions.close(connection);
+
       if (!tempFile.delete()) {
         tempFile.deleteOnExit();
       }
     }
     TestUtils.deleteDatabase(database);
   }
-  
+
   /**
    * Test
    * {@link ImportDB#loadFromDumpIntoNewDB(java.util.zip.ZipInputStream, String)}
@@ -91,26 +93,27 @@ public class ImportDBTest {
     final File tempFile = File.createTempFile("flltest", null);
     final String database = tempFile.getAbsolutePath();
     final File temp = File.createTempFile("fll", ".zip");
-
+    Connection connection = null;
     try {
-      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), database);
+      connection = Utilities.createFileDataSource(database).getConnection();
+
+      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
 
       // dump to temp file
       final FileOutputStream fos = new FileOutputStream(temp);
       final ZipOutputStream zipOut = new ZipOutputStream(fos);
 
-      final Connection connection = Utilities.createDataSource(database).getConnection();
       final Document challengeDocument = Queries.getChallengeDocument(connection);
       Assert.assertNotNull(challengeDocument);
       DumpDB.dumpDatabase(zipOut, connection, challengeDocument);
       fos.close();
-      connection.close();
 
       // load from temp file
       final FileInputStream fis = new FileInputStream(temp);
-      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(fis), database);
+      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(fis), connection);
       fis.close();
     } finally {
+      SQLFunctions.close(connection);
       if (!tempFile.delete()) {
         tempFile.deleteOnExit();
       }

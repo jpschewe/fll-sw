@@ -4,10 +4,10 @@
 
 <%@ page import="java.sql.Connection"%>
 <%@ page import="javax.sql.DataSource"%>
-<%@ page import="fll.web.SessionAttributes"%>
+<%@ page import="fll.web.ApplicationAttributes"%>
 
 <%
-final DataSource datasource = SessionAttributes.getDataSource(session);
+final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();
 pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
 %>

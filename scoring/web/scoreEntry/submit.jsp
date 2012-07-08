@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.web.ApplicationAttributes"%>
-<%@ page import="fll.web.SessionAttributes" %>
+
 
 <%@ page import="java.sql.Connection"%>
 <%@ page import="javax.sql.DataSource" %>
@@ -11,7 +11,7 @@
 <%
 final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
-final DataSource datasource = SessionAttributes.getDataSource(session);
+final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();
 %>
 

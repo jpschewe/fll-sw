@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 
 import fll.db.ImportDB;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -50,7 +51,7 @@ public class CheckTournamentTeams extends BaseFLLServlet {
       final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
       sourceConnection = sourceDataSource.getConnection();
       
-      final DataSource destDataSource = SessionAttributes.getDataSource(session);
+      final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
       destConnection = destDataSource.getConnection();
 
       final List<TournamentDifference> tournamentDifferences = ImportDB.computeMissingFromTournamentTeams(sourceConnection, destConnection, tournament);

@@ -39,11 +39,9 @@ import fll.Team;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 
 /**
  * Commit the changes made by editTeam.jsp.
- * 
  */
 @WebServlet("/admin/subjective-data.fll")
 public class DownloadSubjectiveData extends BaseFLLServlet {
@@ -52,9 +50,10 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    final DataSource datasource = SessionAttributes.getDataSource(session);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    Connection connection = null;
     try {
-      final Connection connection = datasource.getConnection();
+      connection = datasource.getConnection();
       final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
       if (Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
         response.reset();
@@ -69,6 +68,8 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
       }
     } catch (final SQLException e) {
       throw new RuntimeException(e);
+    } finally {
+      SQLFunctions.close(connection);
     }
   }
 
@@ -115,7 +116,8 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
           final String judgingStation = rs.getString(2);
 
           for (final Team team : teams) {
-            final String teamJudgingStation = Queries.getJudgingStation(connection, team.getTeamNumber(), currentTournament);
+            final String teamJudgingStation = Queries.getJudgingStation(connection, team.getTeamNumber(),
+                                                                        currentTournament);
             if (judgingStation.equals(teamJudgingStation)) {
               final String teamDiv = Queries.getEventDivision(connection, team.getTeamNumber());
 

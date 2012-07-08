@@ -2,6 +2,7 @@
 
 <%@ page import="fll.web.playoff.BracketData"%>
 <%@ page import="fll.web.SessionAttributes" %>
+<%@ page import="fll.web.ApplicationAttributes" %>
 <%@ page import="javax.sql.DataSource" %>
 <%@ page import="java.util.List"%>
 <%@ page import="fll.db.Queries" %>
@@ -15,7 +16,7 @@
   playoffRoundNumber - Integer for the playoff round number, counted from the 1st playoff round
    */
 
-   final DataSource datasource = SessionAttributes.getDataSource(session);
+   final DataSource datasource = ApplicationAttributes.getDataSource(application);
    final Connection connection = datasource.getConnection();
   final int currentTournament = Queries.getCurrentTournament(connection);
 

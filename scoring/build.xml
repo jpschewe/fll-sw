@@ -74,8 +74,6 @@
   <property name="compile.deprecation" value="true" />
   <property name="compile.optimize" value="false" />
 
-  <property name="inside.test" value="false" />
-
   <!-- ==================== Classpaths =========================== -->
   <path id="cobertura.classpath">
     <fileset dir="${dir.lib}/cobertura">
@@ -385,16 +383,12 @@
   <target name="tomcat.reload" description="Load new code into tomcat">
     <antcall target="tomcat.stop" />
     <antcall target="compile" />
-    <antcall target="tomcat.start.test" />
-  </target>
-
-  <target name="tomcat.start.test" description="start up tomcat for testing - starts the database in server mode">
-    <run-tomcat operation="start" spawn="true" inside.test="true" />
+    <antcall target="tomcat.start" />
   </target>
 
   <target name="tomcat.start" depends="tomcat.expand" description="start up tomcat">
     <echo message="Starting tomcat" />
-    <run-tomcat operation="start" spawn="true" inside.test="false" />
+    <run-tomcat operation="start" spawn="true" />
 
     <echo message="Waiting for tomcat to startup" />
     <waitfor maxwait="5" maxwaitunit="minute" checkevery="1000" checkeveryunit="millisecond" timeoutproperty="fll-sw.timeout">
@@ -405,7 +399,7 @@
 
   <target name="tomcat.stop" depends="tomcat.expand" description="shut down tomcat">
     <echo message="Shutting down tomcat" />
-    <run-tomcat operation="stop" spawn="false" inside.test="${inside.test}" />
+    <run-tomcat operation="stop" spawn="false" />
 
     <echo message="Waiting for tomcat to shutdown" />
     <waitfor maxwait="5" maxwaitunit="minute" checkevery="1000" checkeveryunit="millisecond">
@@ -418,7 +412,6 @@
   <macrodef name="run-tomcat">
     <attribute name="spawn" />
     <attribute name="operation" />
-    <attribute name="inside.test" />
 
     <sequential>
       <java classname="org.apache.catalina.startup.Bootstrap" fork="true" spawn="@{spawn}" taskname="tomcat">
@@ -439,12 +432,6 @@
         <sysproperty key="catalina.base" file="${dir.tomcat}" />
         <sysproperty key="catalina.home" file="${dir.tomcat}" />
         <sysproperty key="java.io.tmpdir" file="${dir.tomcat}/temp" />
-
-        <!--
-        only defined when called from the unit tests, will end up empty
-        otherwise
-        -->
-        <sysproperty key="inside.test" value="@{inside.test}" />
 
         <arg line="@{operation}" />
       </java>
@@ -641,6 +628,17 @@
   </target>
 
   <!-- ==================== Tests  ==================== -->
+  <macrodef name="delete-database">
+    <sequential>
+      <!-- delete existing database -->
+      <delete>
+        <fileset dir="${dir.web}/WEB-INF">
+          <include name="flldb.*" />
+        </fileset>
+      </delete>
+    </sequential>
+  </macrodef>
+
   <target name="test.all" depends="test.unit,test.integration" description="Run all tests" />
 
   <target name="test.all.pass" depends="test.all" description="Run all tests and fail if any tests fail">
@@ -667,6 +665,8 @@
     <attribute name="dir.src" />
 
     <sequential>
+      <delete-database />
+
       <mkdir dir="${dir.build}/screenshots" />
       <touch file="${dir.build}/screenshots/dummy.txt" />
 
@@ -688,19 +688,15 @@
         </batchtest>
       </junit>
 
-      <!-- delete test database -->
-      <delete>
-        <fileset dir="${dir.web}/WEB-INF">
-          <include name="flldb.*" />
-        </fileset>
-      </delete>
+      <delete-database />
     </sequential>
   </macrodef>
 
   <!-- one shot tests -->
   <target name="test.single" depends="compile,compile.test.all" description="Run a single unit test specified by junit.test.class property.">
-    <antcall target="tomcat.start.test" />
+    <antcall target="tomcat.start" />
     <antcall target="selenium.start" />
+    <delete-database />
 
     <mkdir dir="${dir.build}/screenshots" />
 
@@ -728,7 +724,7 @@
     <!-- setup cobertura flush application -->
     <copy file="${dir.lib}/cobertura/coberturaFlush.war" todir="${dir.tomcat}/webapps" />
 
-    <antcall target="tomcat.start.test" />
+    <antcall target="tomcat.start" />
     <antcall target="selenium.start" />
 
     <run-tests working-dir="${dir.build}" dir.src="${dir.test.integration}" />

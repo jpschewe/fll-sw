@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 
 import fll.Tournament;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -53,7 +54,7 @@ public class CreateTournament extends BaseFLLServlet {
       }
 
       if ("Yes".equals(answer)) {
-        createSelectedTournament(message, session);
+        createSelectedTournament(message, application, session);
       } else {
         message.append("<p>Canceled request to create tournament</p>");
         session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");
@@ -82,6 +83,7 @@ public class CreateTournament extends BaseFLLServlet {
    * @throws SQLException
    */
   private static void createSelectedTournament(final StringBuilder message,
+                                               final ServletContext application,
                                                final HttpSession session) throws SQLException {
     Connection sourceConnection = null;
     Connection destConnection = null;
@@ -90,7 +92,7 @@ public class CreateTournament extends BaseFLLServlet {
       final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
       sourceConnection = sourceDataSource.getConnection();
 
-      final DataSource destDataSource = SessionAttributes.getDataSource(session);
+      final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
       destConnection = destDataSource.getConnection();
 
       createTournament(sourceConnection, destConnection, tournament, message, session);

@@ -10,6 +10,6 @@
 
   <body>
     <h1><x:out select="$challengeDocument/fll/@title"/> (Table Labels)</h1>
-<% Tables.generatePage(out, session, request, response); %>
+<% Tables.generatePage(out, application, session, request, response); %>
 
 </body></html>

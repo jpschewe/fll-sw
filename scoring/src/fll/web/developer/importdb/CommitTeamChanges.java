@@ -26,6 +26,7 @@ import fll.db.Queries;
 import fll.db.TeamPropertyDifference;
 import fll.db.TeamPropertyDifference.TeamProperty;
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
@@ -51,7 +52,7 @@ public class CommitTeamChanges extends BaseFLLServlet {
       final DataSource sourceDataSource = SessionAttributes.getNonNullAttribute(session, "dbimport", DataSource.class);
       sourceConnection = sourceDataSource.getConnection();
 
-      final DataSource destDataSource = SessionAttributes.getDataSource(session);
+      final DataSource destDataSource = ApplicationAttributes.getDataSource(application);
       destConnection = destDataSource.getConnection();
 
       @SuppressWarnings(value = "unchecked")

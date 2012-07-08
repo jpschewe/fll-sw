@@ -1,13 +1,13 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="fll.db.Queries" %>
-<%@ page import="fll.web.SessionAttributes"%>
+<%@ page import="fll.web.ApplicationAttributes"%>
   
 <%@ page import="java.sql.Connection" %>
 <%@ page import="javax.sql.DataSource" %>
   
 <%
-  	final DataSource datasource = SessionAttributes.getDataSource(session);
+  	final DataSource datasource = ApplicationAttributes.getDataSource(application);
   final Connection connection = datasource.getConnection();
   pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection));
   pageContext.setAttribute("divisions", Queries.getEventDivisions(connection));

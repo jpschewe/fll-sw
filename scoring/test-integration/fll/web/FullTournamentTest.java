@@ -50,12 +50,12 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 
 import fll.TestUtils;
-import fll.Tournament;
 import fll.Utilities;
 import fll.db.ImportDB;
 import fll.subjective.SubjectiveFrame;
 import fll.util.FP;
 import fll.util.LogUtils;
+import fll.web.developer.QueryHandler;
 import fll.web.scoreEntry.ScoreEntry;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
@@ -140,9 +140,6 @@ public class FullTournamentTest {
 
       loadTeams();
 
-      final Connection serverConnection = TestUtils.createTestDBConnection();
-      Assert.assertNotNull("Could not create test database connection", serverConnection);
-
       IntegrationTestUtils.setTournament(selenium, testTournamentName);
 
       assignJudges(testDataConn, testTournamentName);
@@ -223,7 +220,7 @@ public class FullTournamentTest {
 
       checkReports();
 
-      checkRankAndScores(serverConnection, testTournamentName);
+      checkRankAndScores(testTournamentName);
 
     } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
@@ -478,63 +475,56 @@ public class FullTournamentTest {
 
   }
 
-  private void checkRankAndScores(final Connection serverConnection,
-                                  final String testTournamentName) throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      // check ranking and scores
-      final double scoreFP = 1E-1; // just check to one decimal place
+  private void checkRankAndScores(final String testTournamentName) throws IOException, SAXException {
+    // check ranking and scores
+    final double scoreFP = 1E-1; // just check to one decimal place
 
-      final Tournament testTournament = Tournament.findTournamentByName(serverConnection, testTournamentName);
-      final int testTournamentID = testTournament.getTournamentID();
-      prep = serverConnection.prepareStatement("SELECT FinalScores.TeamNumber, FinalScores.OverallScore FROM"
-          + " FinalScores, current_tournament_teams WHERE FinalScores.TeamNumber = "
-          + " current_tournament_teams.TeamNumber AND FinalScores.Tournament = ? AND"
-          + " current_tournament_teams.event_division = ? ORDER BY" + " FinalScores.OverallScore DESC");
-      prep.setInt(1, testTournamentID);
+    final String sqlTemplate = "SELECT FinalScores.TeamNumber AS team_number, FinalScores.OverallScore AS score" //
+        + " FROM FinalScores, current_tournament_teams, Tournaments" //
+        + " WHERE FinalScores.TeamNumber = current_tournament_teams.TeamNumber" //
+        + " AND Tournaments.Name = '%s'" + " AND FinalScores.Tournament = Tournaments.tournament_id" //
+        + " AND current_tournament_teams.event_division = '%s'" //
+        + " ORDER BY FinalScores.OverallScore DESC";
 
-      // division 1
-      final int[] division1ExpectedRank = { 2636, 3127, 3439, 4462, 3125, 2116, 2104, 2113 };
-      final double[] division1ExpectedScores = { 472.76, 423.58, 411.04, 378.04, 374.86, 346.63, 325.95, 310.61 };
-      String division = "DivI/Gr4-6";
-      prep.setString(2, division);
-      rs = prep.executeQuery();
-      int rank = 0;
-      while (rs.next()) {
-        final int teamNumber = rs.getInt(1);
-        Assert.assertEquals("Division I Ranking is incorrect for rank: "
-            + rank, division1ExpectedRank[rank], teamNumber);
-        final double score = rs.getDouble(2);
-        Assert.assertEquals("Overall score incorrect for team: "
-            + teamNumber, division1ExpectedScores[rank], score, scoreFP);
+    // division 1
+    final int[] division1ExpectedRank = { 2636, 3127, 3439, 4462, 3125, 2116, 2104, 2113 };
+    final double[] division1ExpectedScores = { 472.76, 423.58, 411.04, 378.04, 374.86, 346.63, 325.95, 310.61 };
+    String division = "DivI/Gr4-6";
 
-        ++rank;
-      }
-      SQLFunctions.close(rs);
+    final String div1Query = String.format(sqlTemplate, testTournamentName, division);
+    final QueryHandler.ResultData div1Result = WebTestUtils.executeServerQuery(div1Query);
 
-      // division 2
-      final int[] division2ExpectedRank = { 3208, 3061, 2863, 2110, 3063, 353, 3129, 2043 };
-      final double[] division2ExpectedScores = { 546.78, 512.05, 426.02, 410.23, 407.15, 355.42, 350.14, 348.75 };
-      division = "DivII/Gr7-9";
-      prep.setString(2, division);
-      rs = prep.executeQuery();
-      rank = 0;
-      while (rs.next()) {
-        final int teamNumber = rs.getInt(1);
-        Assert.assertEquals("Division II Ranking is incorrect for rank: "
-            + rank, division2ExpectedRank[rank], teamNumber);
-        final double score = rs.getDouble(2);
-        Assert.assertEquals("Overall score incorrect for team: "
-            + teamNumber, division2ExpectedScores[rank], score, scoreFP);
+    int rank = 0;
+    for (final Map<String, String> row : div1Result.data) {
+      final int teamNumber = Integer.valueOf(row.get("team_number"));
+      Assert.assertEquals("Division I Ranking is incorrect for rank: "
+          + rank, division1ExpectedRank[rank], teamNumber);
+      final double score = Double.valueOf(row.get("score"));
+      Assert.assertEquals("Overall score incorrect for team: "
+          + teamNumber, division1ExpectedScores[rank], score, scoreFP);
 
-        ++rank;
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
+      ++rank;
     }
-    // TODO ticket:82 check scores?
+
+    // division 2
+    final int[] division2ExpectedRank = { 3208, 3061, 2863, 2110, 3063, 353, 3129, 2043 };
+    final double[] division2ExpectedScores = { 546.78, 512.05, 426.02, 410.23, 407.15, 355.42, 350.14, 348.75 };
+    division = "DivII/Gr7-9";
+
+    final String div2Query = String.format(sqlTemplate, testTournamentName, division);
+    final QueryHandler.ResultData div2Result = WebTestUtils.executeServerQuery(div2Query);
+
+    rank = 0;
+    for (final Map<String, String> row : div2Result.data) {
+      final int teamNumber = Integer.valueOf(row.get("team_number"));
+      Assert.assertEquals("Division II Ranking is incorrect for rank: "
+          + rank, division2ExpectedRank[rank], teamNumber);
+      final double score = Double.valueOf(row.get("score"));
+      Assert.assertEquals("Overall score incorrect for team: "
+          + teamNumber, division2ExpectedScores[rank], score, scoreFP);
+
+      ++rank;
+    }
   }
 
   /**

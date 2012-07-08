@@ -40,12 +40,10 @@ import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
-import fll.web.SessionAttributes;
 import fll.web.UploadProcessor;
 
 /**
  * Java code behind uploading subjective scores
- * 
  */
 @WebServlet("/admin/UploadSubjectiveData")
 public final class UploadSubjectiveData extends BaseFLLServlet {
@@ -60,6 +58,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
     final StringBuilder message = new StringBuilder();
 
     final File file = File.createTempFile("fll", null);
+    Connection connection = null;
     try {
       // must be first to ensure the form parameters are set
       UploadProcessor.processUpload(request);
@@ -67,8 +66,8 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       final FileItem subjectiveFileItem = (FileItem) request.getAttribute("subjectiveFile");
       subjectiveFileItem.write(file);
 
-      final DataSource datasource = SessionAttributes.getDataSource(session);
-      final Connection connection = datasource.getConnection();
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      connection = datasource.getConnection();
       saveSubjectiveData(file, Queries.getCurrentTournament(connection),
                          ApplicationAttributes.getChallengeDocument(application), connection);
       message.append("<p id='success'><i>Subjective data uploaded successfully</i></p>");
@@ -98,6 +97,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
             + file.getAbsolutePath() + ", setting to delete on exit");
         file.deleteOnExit();
       }
+      SQLFunctions.close(connection);
     }
 
     session.setAttribute("message", message.toString());
