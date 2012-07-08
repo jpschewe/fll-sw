@@ -137,9 +137,8 @@ public class TestAJAXBrackets {
       enterScore("1", 1);
 
       selenium.switchTo().window(bracketsWindow.getWindowHandle());
-      //String scoreTextBefore = selenium.findElement(By.id("1-1")).getText();
-      // getEval("window.document.getElementById('1-1').innerHTML")
-      final String scoreTextBefore = String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-1').innerHTML"));        
+      final String scoreTextBefore = selenium.findElement(By.id("1-1")).getText();
+//      final String scoreTextBefore = String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-1').innerHTML"));        
       if(LOGGER.isDebugEnabled()) {
         LOGGER.debug("Score text before: " + scoreTextBefore);
       }
@@ -163,12 +162,11 @@ public class TestAJAXBrackets {
       selenium.switchTo().window(bracketsWindow.getWindowHandle());
         seleniumJS.executeScript("window.iterate();");
 
-//      final String scoreTextAfter = selenium.findElement(By.id("1-1")).getText();
-        final String scoreTextAfter = String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-1').innerHTML"));        
+      final String scoreTextAfter = selenium.findElement(By.id("1-1")).getText();
+//        final String scoreTextAfter = String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-1').innerHTML"));        
       if(LOGGER.isDebugEnabled()) {
         LOGGER.debug("Score text after: " + scoreTextAfter);
       }
-      // Assert.assertTrue(selenium.getEval("window.document.getElementById('1-1').innerHTML").contains("Score:"));      
       Assert.assertTrue("Should find score in '" + scoreTextAfter + "'", scoreTextAfter.contains("Score:"));
 
     } catch (final IOException e) {
