@@ -346,7 +346,7 @@ public class FullTournamentTest {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/index.jsp");
 
-    selenium.findElement(By.id("assign_judges"));
+    selenium.findElement(By.id("assign_judges")).click();
 
     // assign judges from database
     if (LOGGER.isDebugEnabled()) {
