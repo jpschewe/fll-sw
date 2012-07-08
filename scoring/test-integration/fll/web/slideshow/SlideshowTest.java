@@ -8,6 +8,7 @@ package fll.web.slideshow;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
@@ -32,6 +33,7 @@ public class SlideshowTest {
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
     selenium = IntegrationTestUtils.createWebDriver();
+    selenium.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
   }
 
   @After
