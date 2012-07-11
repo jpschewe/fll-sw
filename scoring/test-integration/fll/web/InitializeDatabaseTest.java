@@ -3,24 +3,30 @@ package fll.web;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
 
-import com.thoughtworks.selenium.SeleneseTestBase;
-
-import fll.TestUtils;
 import fll.util.LogUtils;
 
 /**
  * Test initializing the database via the web.
  */
-public class InitializeDatabaseTest extends SeleneseTestBase {
+public class InitializeDatabaseTest {
+
+  private WebDriver selenium;
 
   @Before
-  @Override
-  public void setUp() throws Exception {
+  public void setUp() {
     LogUtils.initializeLogging();
-    super.setUp(TestUtils.URL_ROOT + "setup");
+
+    selenium = IntegrationTestUtils.createWebDriver();
+  }
+
+  @After
+  public void tearDown() {
+    selenium.quit();
   }
 
   @Test

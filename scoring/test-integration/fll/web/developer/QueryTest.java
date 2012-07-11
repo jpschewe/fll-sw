@@ -11,9 +11,8 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
 import org.xml.sax.SAXException;
-
-import com.thoughtworks.selenium.SeleneseTestBase;
 
 import fll.TestUtils;
 import fll.util.LogUtils;
@@ -23,16 +22,16 @@ import fll.web.WebTestUtils;
 /**
  * Test that we can get database query results from {@link QueryHandler}.
  */
-public class QueryTest extends SeleneseTestBase {
+public class QueryTest {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  @Override
+  private WebDriver selenium;
+
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     LogUtils.initializeLogging();
-    super.setUp(TestUtils.URL_ROOT
-        + "setup");
+    selenium = IntegrationTestUtils.createWebDriver();
   }
 
   @Test

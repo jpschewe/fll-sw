@@ -6,12 +6,12 @@
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
   </head>
 
-  <body>
+  <body id='exception-handler'>
   ${message}
   
     <h1>An error has occurred</h1>
 
-    <p><font color="red">An error has occurred!</font><br/>  Error messages:</p>
+    <p><font class="error">An error has occurred!</font><br/>  Error messages:</p>
     <ul>
 <%
 Throwable e = exception;
