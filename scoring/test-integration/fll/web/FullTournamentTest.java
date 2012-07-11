@@ -314,7 +314,7 @@ public class FullTournamentTest {
     }
 
     // make sure the row exists
-    while (!IntegrationTestUtils.isElementPresent(selenium, By.id("name"
+    while (!IntegrationTestUtils.isElementPresent(selenium, By.name("id"
         + String.valueOf(judgeIndex)))) {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Adding a row to the judges entry form to get to: "
