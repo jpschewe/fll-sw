@@ -329,14 +329,13 @@ public class FullTournamentTest {
       }
     }
 
-    
     selenium.findElement(By.name("id"
         + judgeIndex)).sendKeys(id);
-    
+
     final Select categorySelect = new Select(selenium.findElement(By.name("cat"
         + judgeIndex)));
     categorySelect.selectByValue(category);
-    
+
     final Select stationSelect = new Select(selenium.findElement(By.name("station"
         + judgeIndex)));
     stationSelect.selectByValue(station);
@@ -897,7 +896,8 @@ public class FullTournamentTest {
           // need to get the score entry form
           IntegrationTestUtils.loadPage(selenium, selectTeamPage);
 
-          new Select(selenium.findElement(By.id("select-verify-teamnumber"))).selectByValue(teamNumber + "-" + runNumber);
+          new Select(selenium.findElement(By.id("select-verify-teamnumber"))).selectByValue(teamNumber
+              + "-" + runNumber);
 
           // submit the page
           selenium.findElement(By.id("verify_submit")).click();
@@ -913,17 +913,18 @@ public class FullTournamentTest {
             if (XMLUtils.isEnumeratedGoal(element)) {
               // need check if the right radio button is selected
               final String value = rs.getString(name);
-              final String id = ScoreEntry.getIDForEnumRadio(name, value);
 
-              final String formValue = selenium.findElement(By.id(id)).getAttribute("value");
+              final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
+                  .getAttribute("value");
               Assert.assertNotNull("Null value for goal: "
                   + name, formValue);
 
               Assert.assertEquals("Wrong enum selected for goal: "
-                  + name, "on", formValue);
+                  + name, value.toLowerCase(), formValue.toLowerCase());
             } else if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
                 && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-              final String formValue = selenium.findElement(By.name(name)).getAttribute("value");
+              final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
+                                               .getAttribute("value");
               Assert.assertNotNull("Null value for goal: "
                   + name, formValue);
 
@@ -931,12 +932,12 @@ public class FullTournamentTest {
               final int value = rs.getInt(name);
               final String expectedValue;
               if (value == 0) {
-                expectedValue = "off";
+                expectedValue = "no";
               } else {
-                expectedValue = "on";
+                expectedValue = "yes";
               }
               Assert.assertEquals("Wrong value for goal: "
-                  + name, expectedValue, formValue);
+                  + name, expectedValue.toLowerCase(), formValue.toLowerCase());
             } else {
               final String formValue = selenium.findElement(By.name(name)).getAttribute("value");
               Assert.assertNotNull("Null value for goal: "
@@ -966,7 +967,8 @@ public class FullTournamentTest {
 
         // check for errors
         Assert.assertEquals(selectTeamPage, selenium.getCurrentUrl());
-        Assert.assertTrue("Error submitting form, not on select team page", selenium.getPageSource().contains("Unverified Runs"));
+        Assert.assertTrue("Error submitting form, not on select team page",
+                          selenium.getPageSource().contains("Unverified Runs"));
 
       } else {
         Assert.fail("Cannot find scores for "
