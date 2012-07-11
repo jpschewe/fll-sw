@@ -61,7 +61,7 @@ public class TestAJAXBrackets {
   }
 
   @Test
-  public void testAJAXBracketsInFull() throws IOException, SAXException {
+  public void testAJAXBracketsInFull() throws IOException, SAXException, InterruptedException {
     try {
       // Setup our playoffs
       final InputStream challenge = TestAJAXBrackets.class.getResourceAsStream("data/very-simple.xml");
@@ -160,7 +160,10 @@ public class TestAJAXBrackets {
       confirmVerifyChange.accept();
 
       selenium.switchTo().window(bracketsWindow.getWindowHandle());
-        seleniumJS.executeScript("window.iterate();");
+      seleniumJS.executeScript("window.iterate();");
+
+      // give the web server a chance to catch up
+      Thread.sleep(30000);
 
       final String scoreTextAfter = selenium.findElement(By.id("1-1")).getText();
 //        final String scoreTextAfter = String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-1').innerHTML"));        
