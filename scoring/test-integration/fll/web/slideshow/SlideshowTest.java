@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,13 +28,17 @@ import fll.web.IntegrationTestUtils;
  */
 public class SlideshowTest {
 
+  private static final Logger LOGGER = LogUtils.getLogger();
+  
   private WebDriver selenium;
 
   @Before
   public void setUp() throws Exception {
+    LOGGER.info("Top of setup");
     LogUtils.initializeLogging();
     selenium = IntegrationTestUtils.createWebDriver();
     selenium.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
+    LOGGER.info("Bottom of setup");
   }
 
   @After
@@ -48,7 +53,7 @@ public class SlideshowTest {
    */
   @Test
   public void testSlideshowInterval() throws IOException {
-    LogUtils.getLogger().info("Top testSLideshowInterval");
+    LOGGER.info("Top testSlideshowInterval");
     final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
     IntegrationTestUtils.initializeDatabase(selenium, challengeStream, true);
 
@@ -78,6 +83,6 @@ public class SlideshowTest {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     }
-    LogUtils.getLogger().info("Bottom testSLideshowInterval");
+    LOGGER.info("Bottom testSlideshowInterval");
   }
 }
