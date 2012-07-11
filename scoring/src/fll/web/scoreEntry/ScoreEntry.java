@@ -235,7 +235,7 @@ public final class ScoreEntry {
           formatter.format("  document.scoreEntry.%s[%d].checked = true;%n", name, valueIdx);
           formatter.format("  %s = %f * %s;%n", computedVarName, valueScore, multiplier);
           
-          formatter.format("  document.scoreEntry.%s_radioValue.value = '%s'%n", name, value.toUpperCase());
+          formatter.format("  document.scoreEntry.%s.value = '%s'%n", getElementNameForYesNoDisplay(name), value.toUpperCase());
         }
         formatter.format("}%n");
       } else if (0 == min
@@ -695,6 +695,13 @@ public final class ScoreEntry {
     writer.println("    <input type='text' name='"
         + goalName + "_radioValue' size='10' align='right' readonly tabindex='-1'>");
 
+  }
+  
+  /**
+   * Name of the element that stores the textual value of the specified yes/no value.
+   */
+  public static String getElementNameForYesNoDisplay(final String goalName) {
+    return goalName + "_radioValue";
   }
 
   /**

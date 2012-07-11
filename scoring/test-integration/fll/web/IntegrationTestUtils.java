@@ -11,11 +11,20 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
-
-import com.thoughtworks.selenium.Selenium;
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.Select;
 
 import fll.TestUtils;
 import fll.util.LogUtils;
@@ -38,21 +47,33 @@ public final class IntegrationTestUtils {
   }
 
   /**
+   * Check if an element exists.
+   */
+  public static boolean isElementPresent(final WebDriver selenium,
+                                         final By search) {
+    boolean elementFound = false;
+    try {
+      selenium.findElement(search);
+      elementFound = true;
+    } catch (NoSuchElementException e) {
+      elementFound = false;
+    }
+    return elementFound;
+  }
+
+  /**
    * Load a page and check to make sure the page didn't crash.
    * 
    * @param selenium the test controller
    * @param url the page to load
    * @throws IOException
    */
-  public static void loadPage(final Selenium selenium,
+  public static void loadPage(final WebDriver selenium,
                               final String url) throws IOException {
     try {
-      selenium.open(url);
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      selenium.get(url);
 
-      final boolean error = selenium.isTextPresent("Exception");
-      Assert.assertFalse("Error loading: "
-          + url, error);
+      assertNoException(selenium);
     } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
@@ -62,68 +83,82 @@ public final class IntegrationTestUtils {
     }
   }
 
+  public static void assertNoException(final WebDriver selenium) {
+    Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
+  }
+
   /**
    * Initialize the database using the given challenge descriptor.
    * 
-   * @param selenium the test controller
+   * @param driver the test controller
    * @param challengeStream the challenge descriptor
    * @param forceRebuild if true, then force the database to be rebuilt
    * @throws IOException
    */
-  public static void initializeDatabase(final Selenium selenium,
+  public static void initializeDatabase(final WebDriver driver,
                                         final InputStream challengeStream,
                                         final boolean forceRebuild) throws IOException {
     try {
       Assert.assertNotNull(challengeStream);
       final File challengeFile = IntegrationTestUtils.storeInputStreamToFile(challengeStream);
       try {
-        selenium.open(TestUtils.URL_ROOT
+        driver.get(TestUtils.URL_ROOT
             + "setup/");
-        selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-        
-        if(selenium.isTextPresent("Login to FLL")) {
-          login(selenium);
 
-          selenium.open(TestUtils.URL_ROOT
-                        + "setup/");
-                    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+        if (isElementPresent(driver, By.name("submit_login"))) {
+          login(driver);
+
+          driver.get(TestUtils.URL_ROOT
+              + "setup/");
         }
 
-        selenium.type("xmldocument", challengeFile.getAbsolutePath());
+        final WebElement fileEle = driver.findElement(By.name("xmldocument"));
+        fileEle.sendKeys(challengeFile.getAbsolutePath());
+
         if (forceRebuild) {
-          selenium.click("force_rebuild");
+          final WebElement rebuildEle = driver.findElement(By.name("force_rebuild"));
+          rebuildEle.click();
         }
-        selenium.click("reinitializeDatabase");
-        Assert.assertTrue(selenium.getConfirmation()
-                                  .matches("^This will erase ALL scores in the database fll \\(if it already exists\\), are you sure[\\s\\S]$"));
-        selenium.waitForPageToLoad(WAIT_FOR_PAGE_TIMEOUT);
 
-        final boolean success = selenium.isTextPresent("Successfully initialized database");
-        Assert.assertTrue("Database was not successfully initialized", success);
+        final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
+        reinitDB.click();
+
+        final Alert confirmCreateDB = driver.switchTo().alert();
+        LOGGER.info("Confirmation text: "
+            + confirmCreateDB.getText());
+        confirmCreateDB.accept();
+
+        driver.findElement(By.id("success"));
 
         // setup user
-        selenium.type("user", TEST_USERNAME);
-        selenium.type("pass", TEST_PASSWORD);
-        selenium.type("pass_check", TEST_PASSWORD);
-        selenium.click("submit_create_user");
-        selenium.waitForPageToLoad(WAIT_FOR_PAGE_TIMEOUT);
-        final boolean userSuccess = selenium.isTextPresent("Successfully created user");
-        Assert.assertTrue("Problem creating user", userSuccess);
+        final WebElement userElement = driver.findElement(By.name("user"));
+        userElement.sendKeys(TEST_USERNAME);
 
-        login(selenium);
+        final WebElement passElement = driver.findElement(By.name("pass"));
+        passElement.sendKeys(TEST_PASSWORD);
+
+        final WebElement passCheckElement = driver.findElement(By.name("pass_check"));
+        passCheckElement.sendKeys(TEST_PASSWORD);
+
+        final WebElement submitElement = driver.findElement(By.name("submit_create_user"));
+        submitElement.click();
+
+        driver.findElement(By.id("success-create-user"));
+
+        login(driver);
       } finally {
         if (!challengeFile.delete()) {
           challengeFile.deleteOnExit();
         }
       }
     } catch (final AssertionError e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
+      IntegrationTestUtils.storeScreenshot(driver);
       throw e;
     } catch (final RuntimeException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
+      IntegrationTestUtils.storeScreenshot(driver);
       throw e;
     } catch (final IOException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
+      IntegrationTestUtils.storeScreenshot(driver);
       throw e;
     }
   }
@@ -136,39 +171,46 @@ public final class IntegrationTestUtils {
    *          stream is closed by this method upon successful completion
    * @throws IOException
    */
-  public static void initializeDatabaseFromDump(final Selenium selenium,
+  public static void initializeDatabaseFromDump(final WebDriver selenium,
                                                 final InputStream inputStream) throws IOException {
     try {
       Assert.assertNotNull(inputStream);
       final File dumpFile = IntegrationTestUtils.storeInputStreamToFile(inputStream);
       try {
-        selenium.open(TestUtils.URL_ROOT
+        selenium.get(TestUtils.URL_ROOT
             + "setup/");
-        selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
 
-        if(selenium.isTextPresent("Login to FLL")) {
+        if (isElementPresent(selenium, By.name("submit_login"))) {
           login(selenium);
 
-          selenium.open(TestUtils.URL_ROOT
-                        + "setup/");
-                    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+          selenium.get(TestUtils.URL_ROOT
+              + "setup/");
         }
 
-        selenium.type("dbdump", dumpFile.getAbsolutePath());
-        selenium.click("createdb");
-        selenium.waitForPageToLoad(WAIT_FOR_PAGE_TIMEOUT);
-        final boolean success = selenium.isTextPresent("Successfully initialized database");
-        Assert.assertTrue("Database was not successfully initialized", success);
-        
-        // setup user
-        selenium.type("user", TEST_USERNAME);
-        selenium.type("pass", TEST_PASSWORD);
-        selenium.type("pass_check", TEST_PASSWORD);
-        selenium.click("submit_create_user");
-        selenium.waitForPageToLoad(WAIT_FOR_PAGE_TIMEOUT);
-        final boolean userSuccess = selenium.isTextPresent("Successfully created user");
-        Assert.assertTrue("Problem creating user", userSuccess);
+        final WebElement dbEle = selenium.findElement(By.name("dbdump"));
+        dbEle.sendKeys(dumpFile.getAbsolutePath());
 
+        final WebElement createEle = selenium.findElement(By.name("createdb"));
+        createEle.click();
+
+        selenium.findElement(By.id("success"));
+
+        // setup user
+        final WebElement userElement = selenium.findElement(By.name("user"));
+        userElement.sendKeys(TEST_USERNAME);
+
+        final WebElement passElement = selenium.findElement(By.name("pass"));
+        passElement.sendKeys(TEST_PASSWORD);
+
+        final WebElement passCheckElement = selenium.findElement(By.name("pass_check"));
+        passCheckElement.sendKeys(TEST_PASSWORD);
+
+        final WebElement submitElement = selenium.findElement(By.name("submit_create_user"));
+        submitElement.click();
+
+        selenium.findElement(By.id("success-create-user"));
+
+        login(selenium);
       } finally {
         if (!dumpFile.delete()) {
           dumpFile.deleteOnExit();
@@ -186,18 +228,24 @@ public final class IntegrationTestUtils {
       throw e;
     }
   }
-
-  public static void storeScreenshot(final Selenium selenium) throws IOException {
+  
+  public static void storeScreenshot(final WebDriver driver) throws IOException {
     final File baseFile = File.createTempFile("fll", null, new File("screenshots"));
+
     final File screenshot = new File(baseFile.getAbsolutePath()
         + ".png");
-    selenium.captureScreenshot(screenshot.getAbsolutePath());
-    LOGGER.error("Screenshot saved to "
-        + screenshot.getAbsolutePath());
+    if (driver instanceof TakesScreenshot) {
+      final File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+      FileUtils.copyFile(scrFile, screenshot);
+      LOGGER.error("Screenshot saved to "
+          + screenshot.getAbsolutePath());
+    } else {
+      LOGGER.warn("Unable to get screenshot");
+    }
 
     final File htmlFile = new File(baseFile.getAbsolutePath()
         + ".html");
-    final String html = selenium.getHtmlSource();
+    final String html = driver.getPageSource();
     final FileWriter writer = new FileWriter(htmlFile);
     writer.write(html);
     writer.close();
@@ -229,19 +277,24 @@ public final class IntegrationTestUtils {
   /**
    * Login to fll
    */
-  public static void login(final Selenium selenium) {
-    selenium.open(TestUtils.URL_ROOT
+  public static void login(final WebDriver driver) {
+    driver.get(TestUtils.URL_ROOT
         + "login.jsp");
-    selenium.type("user", TEST_USERNAME);
-    selenium.type("pass", TEST_PASSWORD);
-    selenium.click("submit_login");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+
+    final WebElement userElement = driver.findElement(By.name("user"));
+    userElement.sendKeys(TEST_USERNAME);
+
+    final WebElement passElement = driver.findElement(By.name("pass"));
+    passElement.sendKeys(TEST_PASSWORD);
+
+    final WebElement submitElement = driver.findElement(By.name("submit_login"));
+    submitElement.click();
   }
 
   /**
    * Add a team to a tournament.
    */
-  public static void addTeam(final Selenium selenium,
+  public static void addTeam(final WebDriver selenium,
                              final int teamNumber,
                              final String teamName,
                              final String organization,
@@ -251,30 +304,31 @@ public final class IntegrationTestUtils {
       loadPage(selenium, TestUtils.URL_ROOT
           + "admin/index.jsp");
 
-      selenium.click("link=Add a team");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      selenium.findElement(By.linkText("Add a team")).click();
 
-      selenium.type("teamNumber", String.valueOf(teamNumber));
-      selenium.type("teamName", teamName);
-      selenium.type("organization", organization);
-      selenium.click("id=division_text_choice");
-      selenium.type("division_text", division);
+      selenium.findElement(By.name("teamNumber")).sendKeys(String.valueOf(teamNumber));
+      selenium.findElement(By.name("teamName")).sendKeys(teamName);
+      selenium.findElement(By.name("organization")).sendKeys(organization);
+      selenium.findElement(By.id("division_text_choice")).click();
+      selenium.findElement(By.name("division_text")).sendKeys(division);
 
-      final String[] options = selenium.getSelectOptions("currentTournamentSelect");
+      final WebElement currentTournament = selenium.findElement(By.id("currentTournamentSelect"));
+      final Select currentTournamentSel = new Select(currentTournament);
       String tournamentID = null;
-      for (int i = 0; i < options.length; ++i) {
-        if (options[i].equals(tournament)) {
-          tournamentID = options[i];
+      for (final WebElement option : currentTournamentSel.getOptions()) {
+        final String text = option.getText();
+        if (text.equals(tournament)) {
+          tournamentID = option.getAttribute("value");
         }
       }
       Assert.assertNotNull("Could not find tournament with name: "
           + tournament, tournamentID);
-      selenium.select("currentTournamentSelect", tournamentID);
 
-      selenium.click("name=commit");
+      currentTournamentSel.selectByValue(tournamentID);
 
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-      Assert.assertTrue(selenium.isElementPresent("id=success"));
+      selenium.findElement(By.name("commit")).click();
+
+      selenium.findElement(By.id("success"));
 
     } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
@@ -296,29 +350,36 @@ public final class IntegrationTestUtils {
    *          tournament
    * @throws IOException
    */
-  public static void setTournament(final Selenium selenium,
+  public static void setTournament(final WebDriver selenium,
                                    final String tournamentName) throws IOException {
     try {
       loadPage(selenium, TestUtils.URL_ROOT
           + "admin/index.jsp");
 
-      final String[] options = selenium.getSelectOptions("currentTournamentSelect");
+      final WebElement currentTournament = selenium.findElement(By.id("currentTournamentSelect"));
+
+      final Select currentTournamentSel = new Select(currentTournament);
       String tournamentID = null;
-      for (int i = 0; i < options.length; ++i) {
-        if (options[i].endsWith("[ "
+      for (final WebElement option : currentTournamentSel.getOptions()) {
+        final String text = option.getText();
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("setTournament option: "
+              + text);
+        }
+        if (text.endsWith("[ "
             + tournamentName + " ]")) {
-          tournamentID = options[i];
+          tournamentID = option.getAttribute("value");
         }
       }
       Assert.assertNotNull("Could not find tournament with name: "
           + tournamentName, tournamentID);
 
-      selenium.select("currentTournamentSelect", tournamentID);
+      currentTournamentSel.selectByValue(tournamentID);
 
-      selenium.click("change_tournament");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      final WebElement changeTournament = selenium.findElement(By.name("change_tournament"));
+      changeTournament.click();
 
-      Assert.assertTrue(selenium.isElementPresent("id=success"));
+      Assert.assertNotNull(selenium.findElement(By.id("success")));
     } catch (final AssertionError e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
@@ -329,6 +390,27 @@ public final class IntegrationTestUtils {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     }
+  }
+
+  /**
+   * Create a web driver and set appropriate timeouts on it.
+   */
+  public static WebDriver createWebDriver() {
+    final WebDriver selenium = new FirefoxDriver();
+    selenium.manage().timeouts().implicitlyWait(250, TimeUnit.MILLISECONDS);
+    selenium.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
+    return selenium;
+  }
+
+  public static void initializePlayoffsForDivision(final WebDriver selenium,
+                                                   final String division) throws IOException {
+    loadPage(selenium, TestUtils.URL_ROOT
+        + "playoff");
+
+    final Select initDiv = new Select(selenium.findElement(By.id("initialize-division")));
+    initDiv.selectByValue(division);
+    selenium.findElement(By.id("initialize_brackets")).click();
+    Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
 
   }
 
