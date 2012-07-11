@@ -8,13 +8,14 @@ package fll.web.slideshow;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
-import junit.framework.Assert;
-
+import org.apache.log4j.Logger;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.thoughtworks.selenium.SeleneseTestBase;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 
 import fll.TestUtils;
 import fll.db.GenerateDB;
@@ -25,14 +26,24 @@ import fll.web.IntegrationTestUtils;
 /**
  * 
  */
-public class SlideshowTest extends SeleneseTestBase {
+public class SlideshowTest {
+
+  private static final Logger LOGGER = LogUtils.getLogger();
+  
+  private WebDriver selenium;
 
   @Before
-  @Override
   public void setUp() throws Exception {
+    LOGGER.info("Top of setup");
     LogUtils.initializeLogging();
-    super.setUp(TestUtils.URL_ROOT
-        + "/setup");
+    selenium = IntegrationTestUtils.createWebDriver();
+    selenium.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
+    LOGGER.info("Bottom of setup");
+  }
+
+  @After
+  public void tearDown() {
+    selenium.quit();
   }
 
   /**
@@ -42,34 +53,28 @@ public class SlideshowTest extends SeleneseTestBase {
    */
   @Test
   public void testSlideshowInterval() throws IOException {
-    LogUtils.getLogger().info("Top testSLideshowInterval");
+    LOGGER.info("Top testSlideshowInterval");
     final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
     IntegrationTestUtils.initializeDatabase(selenium, challengeStream, true);
-    
+
     IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
     // add a dummy team so that we have something in the database
     IntegrationTestUtils.addTeam(selenium, 1, "team", "org", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
 
     try {
-      selenium.click("link=Admin Index");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      selenium.findElement(By.linkText("Admin Index")).click();
 
-      selenium.click("link=Remote control of display");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      selenium.findElement(By.linkText("Remote control of display")).click();
 
-      selenium.click("slideshow");
-      selenium.type("slideInterval", "5");
-      selenium.click("submit");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+      selenium.findElement(By.id("slideshow")).click();
+      selenium.findElement(By.name("slideInterval")).sendKeys("5");
+      selenium.findElement(By.name("submit")).click();
 
-      Assert.assertTrue("Didn't get success from commit",
-                        selenium.isTextPresent("Successfully set remote control parameters"));
+      selenium.findElement(By.id("success"));
 
-      selenium.open(TestUtils.URL_ROOT
+      IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
           + "/slideshow/index.jsp");
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-      Assert.assertFalse("Got error", selenium.isTextPresent("An error has occurred"));
 
     } catch (final RuntimeException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
@@ -78,7 +83,6 @@ public class SlideshowTest extends SeleneseTestBase {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     }
-    LogUtils.getLogger().info("Bottom testSLideshowInterval");
+    LOGGER.info("Bottom testSlideshowInterval");
   }
-
 }

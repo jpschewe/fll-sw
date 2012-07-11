@@ -18,6 +18,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.table.TableModel;
@@ -26,9 +28,15 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -40,7 +48,6 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebForm;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.thoughtworks.selenium.SeleneseTestBase;
 
 import fll.TestUtils;
 import fll.Utilities;
@@ -56,16 +63,21 @@ import fll.xml.XMLUtils;
 /**
  * Test a full tournament.
  */
-public class FullTournamentTest extends SeleneseTestBase {
+public class FullTournamentTest {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
+  private WebDriver selenium;
+
   @Before
-  @Override
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
-    super.setUp(TestUtils.URL_ROOT
-        + "setup");
+    selenium = IntegrationTestUtils.createWebDriver();
+  }
+
+  @After
+  public void tearDown() {
+    selenium.quit();
   }
 
   /**
@@ -96,17 +108,17 @@ public class FullTournamentTest extends SeleneseTestBase {
    * 
    * @throws MalformedURLException
    * @throws IOException
-   * @throws SAXException
    * @throws ClassNotFoundException
    * @throws InstantiationException
    * @throws IllegalAccessException
    * @throws ParseException
    * @throws SQLException
    * @throws InterruptedException
+   * @throws SAXException
    */
   @Test
-  public void testFullTournament() throws IOException, SAXException, ClassNotFoundException, InstantiationException,
-      IllegalAccessException, ParseException, SQLException, InterruptedException {
+  public void testFullTournament() throws IOException, ClassNotFoundException, InstantiationException,
+      IllegalAccessException, ParseException, SQLException, InterruptedException, SAXException {
     final int numSeedingRounds = 3;
 
     Connection testDataConn = null;
@@ -156,7 +168,7 @@ public class FullTournamentTest extends SeleneseTestBase {
       prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?");
       boolean initializedPlayoff = false;
       prep.setString(1, testTournamentName);
-      final String[] divisions = getDivisions();
+      final List<String> divisions = getDivisions();
       for (int runNumber = 1; runNumber <= maxRuns; ++runNumber) {
 
         if (runNumber > numSeedingRounds) {
@@ -171,7 +183,7 @@ public class FullTournamentTest extends SeleneseTestBase {
                     + division);
               }
               checkSeedingRoundsForDivision(division);
-              initializePlayoffsForDivision(division);
+              IntegrationTestUtils.initializePlayoffsForDivision(selenium, division);
             }
             initializedPlayoff = true;
           }
@@ -219,9 +231,6 @@ public class FullTournamentTest extends SeleneseTestBase {
     } catch (final IOException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
-    } catch (final SAXException e) {
-      IntegrationTestUtils.storeScreenshot(selenium);
-      throw e;
     } catch (final ClassNotFoundException e) {
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
@@ -252,54 +261,47 @@ public class FullTournamentTest extends SeleneseTestBase {
    * Make sure there are no teams with more or less than seeding rounds for the
    * specified division.
    */
-  private void checkSeedingRoundsForDivision(final String division) throws IOException, SAXException {
+  private void checkSeedingRoundsForDivision(final String division) throws IOException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "playoff");
-    selenium.select("xpath=//form[@name='check']//select[@name='division']", "value="
-        + division);
-    selenium.click("id=check_seeding_rounds");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    final Select select = new Select(selenium.findElement(By.id("check-division")));
+    select.selectByValue(division);
+    selenium.findElement(By.id("check_seeding_rounds")).click();
+
     Assert.assertTrue("Found teams with less than seeding rounds division: '"
-        + division + "'", selenium.isElementPresent("id=no_teams_fewer"));
+        + division + "'", IntegrationTestUtils.isElementPresent(selenium, By.id("no_teams_fewer")));
     Assert.assertTrue("Found teams with more than seeding rounds division: '"
-        + division + "'", selenium.isElementPresent("id=no_teams_more"));
-  }
-
-  private void initializePlayoffsForDivision(final String division) throws IOException, SAXException {
-    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "playoff");
-    selenium.select("xpath=//form[@name='initialize']//select[@name='division']", "value="
-        + division);
-    selenium.click("id=initialize_brackets");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-
-    Assert.assertFalse(selenium.isTextPresent("Exception"));
+        + division + "'", IntegrationTestUtils.isElementPresent(selenium, By.id("no_teams_more")));
   }
 
   /**
    * @return
-   * @throws SAXException
    * @throws IOException
    */
-  private String[] getDivisions() throws IOException, SAXException {
+  private List<String> getDivisions() throws IOException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "playoff");
-    final String[] divisions = selenium.getSelectOptions("xpath=//form[@name='initialize']//select[@name='division']");
-    Assert.assertNotNull("Cannot find divisions options", divisions);
-    Assert.assertTrue("Should have some divisions", divisions.length > 0);
+
+    final List<String> divisions = new LinkedList<String>();
+    final Select select = new Select(selenium.findElement(By.id("initialize-division")));
+    for (final WebElement option : select.getOptions()) {
+      final String text = option.getText();
+      divisions.add(text);
+    }
+
+    Assert.assertFalse(divisions.isEmpty());
     return divisions;
   }
 
-  private void assignTableLabels() throws IOException, SAXException {
+  private void assignTableLabels() throws IOException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/tables.jsp");
-    selenium.type("SideA0", "red");
-    selenium.type("SideB0", "blue");
-    selenium.click("id=finished");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    selenium.findElement(By.name("SideA0")).sendKeys("red");
+    selenium.findElement(By.name("SideB0")).sendKeys("blue");
+    selenium.findElement(By.id("finished")).click();
 
-    Assert.assertFalse(selenium.isElementPresent("id=error"));
-    Assert.assertTrue(selenium.isElementPresent("id=success"));
+    Assert.assertFalse(IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
+    Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
   }
 
   private void assignJudge(final String id,
@@ -312,14 +314,14 @@ public class FullTournamentTest extends SeleneseTestBase {
     }
 
     // make sure the row exists
-    while (!selenium.isElementPresent("name=id"
-        + String.valueOf(judgeIndex))) {
+    while (!IntegrationTestUtils.isElementPresent(selenium, By.name("id"
+        + String.valueOf(judgeIndex)))) {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Adding a row to the judges entry form to get to: "
             + judgeIndex);
         IntegrationTestUtils.storeScreenshot(selenium);
       }
-      selenium.click("id=add_rows");
+      selenium.findElement(By.id("add_rows")).click();
       try {
         Thread.sleep(2000); // let the javascript do it's work
       } catch (final InterruptedException e) {
@@ -327,25 +329,28 @@ public class FullTournamentTest extends SeleneseTestBase {
       }
     }
 
-    selenium.type("id"
-        + judgeIndex, id);
-    selenium.type("cat"
-        + judgeIndex, category);
-    selenium.type("station"
-        + judgeIndex, station);
+    selenium.findElement(By.name("id"
+        + judgeIndex)).sendKeys(id);
+
+    final Select categorySelect = new Select(selenium.findElement(By.name("cat"
+        + judgeIndex)));
+    categorySelect.selectByValue(category);
+
+    final Select stationSelect = new Select(selenium.findElement(By.name("station"
+        + judgeIndex)));
+    stationSelect.selectByValue(station);
 
   }
 
   private void assignJudges(final Connection testDataConn,
-                            final String testTournamentName) throws IOException, SAXException, SQLException {
+                            final String testTournamentName) throws IOException, SQLException {
     ResultSet rs;
     PreparedStatement prep;
 
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/index.jsp");
 
-    selenium.click("id=assign_judges");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    selenium.findElement(By.id("assign_judges")).click();
 
     // assign judges from database
     if (LOGGER.isDebugEnabled()) {
@@ -364,8 +369,9 @@ public class FullTournamentTest extends SeleneseTestBase {
 
       if ("All".equals(division)) {
 
-        final String[] stations = selenium.getSelectOptions("station1");
-        for (final String station : stations) {
+        final Select select = new Select(selenium.findElement(By.name("station1")));
+        for (final WebElement option : select.getOptions()) {
+          final String station = option.getText();
           assignJudge(id, category, station, judgeIndex);
           ++judgeIndex;
         }
@@ -384,10 +390,10 @@ public class FullTournamentTest extends SeleneseTestBase {
     }
 
     // submit those values
-    selenium.click("id=finished");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    selenium.findElement(By.id("finished")).click();
 
-    Assert.assertFalse("Got error from judges assignment", selenium.isElementPresent("error"));
+    Assert.assertFalse("Got error from judges assignment",
+                       IntegrationTestUtils.isElementPresent(selenium, By.id("error")));
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Verifying judges");
@@ -395,9 +401,8 @@ public class FullTournamentTest extends SeleneseTestBase {
     }
 
     // commit judges information
-    selenium.click("id=commit");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-    Assert.assertTrue("Error assigning judges", selenium.isElementPresent("success"));
+    selenium.findElement(By.id("commit")).click();
+    Assert.assertTrue("Error assigning judges", IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("After committing judges");
@@ -406,7 +411,7 @@ public class FullTournamentTest extends SeleneseTestBase {
 
   }
 
-  private void loadTeams() throws IOException, SAXException {
+  private void loadTeams() throws IOException {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "admin/");
 
@@ -415,13 +420,11 @@ public class FullTournamentTest extends SeleneseTestBase {
     final File teamsFile = IntegrationTestUtils.storeInputStreamToFile(teamsIS);
     teamsIS.close();
     try {
-      selenium.type("id=teams_file", teamsFile.getAbsolutePath());
+      selenium.findElement(By.id("teams_file")).sendKeys(teamsFile.getAbsolutePath());
 
-      selenium.click("id=upload_teams");
+      selenium.findElement(By.id("upload_teams")).click();
 
-      selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-
-      Assert.assertFalse(selenium.isTextPresent("Exception"));
+      IntegrationTestUtils.assertNoException(selenium);
     } finally {
       if (!teamsFile.delete()) {
         teamsFile.deleteOnExit();
@@ -429,21 +432,18 @@ public class FullTournamentTest extends SeleneseTestBase {
     }
 
     // skip past the filter page
-    selenium.click("id=next");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-    Assert.assertFalse(selenium.isTextPresent("Exception"));
+    selenium.findElement(By.id("next")).click();
+    IntegrationTestUtils.assertNoException(selenium);
 
     // team column selection
-    selenium.select("TeamNumber", "tea_number");
-    selenium.select("TeamName", "tea_name");
-    selenium.select("Organization", "org_name");
-    selenium.select("tournament", "eve_name");
-    selenium.select("Division", "div_name");
-    selenium.click("id=next");
-
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-    Assert.assertFalse(selenium.isTextPresent("Exception"));
-    Assert.assertTrue(selenium.isElementPresent("id=success"));
+    new Select(selenium.findElement(By.name("TeamNumber"))).selectByValue("tea_number");
+    new Select(selenium.findElement(By.name("TeamName"))).selectByValue("tea_name");
+    new Select(selenium.findElement(By.name("Organization"))).selectByValue("org_name");
+    new Select(selenium.findElement(By.name("tournament"))).selectByValue("eve_name");
+    new Select(selenium.findElement(By.name("Division"))).selectByValue("div_name");
+    selenium.findElement(By.id("next")).click();
+    IntegrationTestUtils.assertNoException(selenium);
+    Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
   }
 
   private void computeFinalScores() throws IOException {
@@ -451,10 +451,9 @@ public class FullTournamentTest extends SeleneseTestBase {
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "report/summarizePhase1.jsp");
 
-    selenium.click("id=continue");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+    selenium.findElement(By.id("continue")).click();
 
-    Assert.assertTrue(selenium.isElementPresent("id=success"));
+    Assert.assertTrue(IntegrationTestUtils.isElementPresent(selenium, By.id("success")));
   }
 
   private void checkReports() throws IOException, SAXException {
@@ -536,13 +535,13 @@ public class FullTournamentTest extends SeleneseTestBase {
    * Visit the printable brackets for the division specified and print the
    * brackets.
    * 
-   * @throws SAXException
    * @throws IOException
    * @throws MalformedURLException
    * @throws InterruptedException
+   * @throws SAXException
    */
   private static void printPlayoffScoresheets(final String division) throws MalformedURLException, IOException,
-      SAXException, InterruptedException {
+      InterruptedException, SAXException {
     final WebConversation conversation = WebTestUtils.getConversation();
     WebRequest request = new GetMethodWebRequest(TestUtils.URL_ROOT
         + "playoff/index.jsp");
@@ -582,11 +581,12 @@ public class FullTournamentTest extends SeleneseTestBase {
    * @param challengeDocument the challenge descriptor
    * @param testTournament the name of the tournament to enter scores for
    * @throws SQLException
+   * @throws SAXException
    */
   private void enterSubjectiveScores(final Connection testDataConn,
                                      final Document challengeDocument,
                                      final String testTournament) throws SQLException, IOException,
-      MalformedURLException, SAXException, ParseException {
+      MalformedURLException, ParseException, SAXException {
 
     final File subjectiveZip = File.createTempFile("fll", ".zip", new File("screenshots"));
     PreparedStatement prep = null;
@@ -713,13 +713,13 @@ public class FullTournamentTest extends SeleneseTestBase {
    * @param name the name of the element
    * @param value the value to set the score element to
    * @throws IOException if there is an error writing to the form
-   * @throws SAXException if there is an error clicking the buttons
    * @throws ParseException if there is an error parsing the default value of
    *           the form element as a number
+   * @throws SAXException
    */
   public static void setFormScoreElement(final WebForm form,
                                          final String name,
-                                         final int value) throws IOException, SAXException, ParseException {
+                                         final int value) throws IOException, ParseException, SAXException {
     // must be a number
     final double defaultValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(form.getParameterValue(name)).doubleValue();
     final double difference = value
@@ -753,8 +753,8 @@ public class FullTournamentTest extends SeleneseTestBase {
                                      final Element performanceElement,
                                      final String testTournament,
                                      final int runNumber,
-                                     final int teamNumber) throws SQLException, IOException, SAXException,
-      MalformedURLException, ParseException {
+                                     final int teamNumber) throws SQLException, IOException, MalformedURLException,
+      ParseException {
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
@@ -775,15 +775,13 @@ public class FullTournamentTest extends SeleneseTestBase {
             + "scoreEntry/select_team.jsp");
 
         // select this entry
-        selenium.select("xpath=//form[@name='selectTeam']//select[@name='TeamNumber']", "value="
-            + teamNumber);
+        new Select(selenium.findElement(By.id("select-teamnumber"))).selectByValue(String.valueOf(teamNumber));
 
         // submit the page
-        selenium.click("id=enter_submit");
-        selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+        selenium.findElement(By.id("enter_submit")).click();
 
         if (rs.getBoolean("NoShow")) {
-          selenium.click("id=no_show");
+          selenium.findElement(By.id("no_show")).click();
         } else {
           // walk over challenge descriptor to get all element names and then
           // use the values from rs
@@ -800,8 +798,7 @@ public class FullTournamentTest extends SeleneseTestBase {
             if (XMLUtils.isEnumeratedGoal(element)) {
               final String valueStr = rs.getString(name);
               final String radioID = ScoreEntry.getIDForEnumRadio(name, valueStr);
-              selenium.click("id="
-                  + radioID);
+              selenium.findElement(By.id(radioID)).click();
             } else if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
                 && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
               final int value = rs.getInt(name);
@@ -813,8 +810,7 @@ public class FullTournamentTest extends SeleneseTestBase {
                 buttonID = name
                     + "_yes";
               }
-              selenium.click("id="
-                  + buttonID);
+              selenium.findElement(By.id(buttonID)).click();
             } else {
               final int initialValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("initialValue"))
                                                                        .intValue();
@@ -837,21 +833,23 @@ public class FullTournamentTest extends SeleneseTestBase {
                 buttonID = null;
               }
               for (int i = 0; i < difference; ++i) {
-                selenium.click("id="
-                    + buttonID);
+                selenium.findElement(By.id(buttonID)).click();
               }
 
             }
           }
 
-          selenium.click("id=submit");
+          selenium.findElement(By.id("submit")).click();
         }
 
-        selenium.getConfirmation();
+        final Alert confirmScoreChange = selenium.switchTo().alert();
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Confirmation text: "
+              + confirmScoreChange.getText());
+        }
+        confirmScoreChange.accept();
 
-        selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-
-        Assert.assertFalse("Errors: ", selenium.isElementPresent("name=error"));
+        Assert.assertFalse("Errors: ", IntegrationTestUtils.isElementPresent(selenium, By.name("error")));
       } else {
         Assert.fail("Cannot find scores for "
             + teamNumber + " run " + runNumber);
@@ -866,13 +864,14 @@ public class FullTournamentTest extends SeleneseTestBase {
   /**
    * Enter a teams performance score. Data is pulled from testDataConn and
    * pushed to the website.
+   * @throws InterruptedException 
    */
   private void verifyPerformanceScore(final Connection testDataConn,
                                       final Element performanceElement,
                                       final String testTournament,
                                       final int runNumber,
-                                      final int teamNumber) throws SQLException, IOException, SAXException,
-      MalformedURLException, ParseException {
+                                      final int teamNumber) throws SQLException, IOException, MalformedURLException,
+      ParseException, InterruptedException {
     final String selectTeamPage = TestUtils.URL_ROOT
         + "scoreEntry/select_team.jsp";
 
@@ -896,22 +895,13 @@ public class FullTournamentTest extends SeleneseTestBase {
           return;
         } else {
           // need to get the score entry form
-          selenium.open(selectTeamPage);
-          selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+          IntegrationTestUtils.loadPage(selenium, selectTeamPage);
 
-          final String selectorRegexp = "regexp:Run "
-              + runNumber + "\\s-\\s" + teamNumber;
-          // verify that teamNumber is in the list
-          Assert.assertTrue("Can't find team number: "
-              + teamNumber + " run number: " + runNumber + " in verify list", selenium.isTextPresent(selectorRegexp));
-
-          // select this entry
-          selenium.select("xpath=//form[@name='verify']//select[@name='TeamNumber']", "label="
-              + selectorRegexp);
+          new Select(selenium.findElement(By.id("select-verify-teamnumber"))).selectByValue(teamNumber
+              + "-" + runNumber);
 
           // submit the page
-          selenium.click("id=verify_submit");
-          selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+          selenium.findElement(By.id("verify_submit")).click();
 
           // walk over challenge descriptor to get all element names and then
           // use the values from rs
@@ -924,19 +914,18 @@ public class FullTournamentTest extends SeleneseTestBase {
             if (XMLUtils.isEnumeratedGoal(element)) {
               // need check if the right radio button is selected
               final String value = rs.getString(name);
-              final String id = ScoreEntry.getIDForEnumRadio(name, value);
 
-              final String formValue = selenium.getValue("id="
-                  + id);
+              final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
+                  .getAttribute("value");
               Assert.assertNotNull("Null value for goal: "
                   + name, formValue);
 
               Assert.assertEquals("Wrong enum selected for goal: "
-                  + name, "on", formValue);
+                  + name, value.toLowerCase(), formValue.toLowerCase());
             } else if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
                 && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-              final String formValue = selenium.getValue("name="
-                  + name);
+              final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
+                                               .getAttribute("value");
               Assert.assertNotNull("Null value for goal: "
                   + name, formValue);
 
@@ -944,15 +933,14 @@ public class FullTournamentTest extends SeleneseTestBase {
               final int value = rs.getInt(name);
               final String expectedValue;
               if (value == 0) {
-                expectedValue = "off";
+                expectedValue = "no";
               } else {
-                expectedValue = "on";
+                expectedValue = "yes";
               }
               Assert.assertEquals("Wrong value for goal: "
-                  + name, expectedValue, formValue);
+                  + name, expectedValue.toLowerCase(), formValue.toLowerCase());
             } else {
-              final String formValue = selenium.getValue("name="
-                  + name);
+              final String formValue = selenium.findElement(By.name(name)).getAttribute("value");
               Assert.assertNotNull("Null value for goal: "
                   + name, formValue);
 
@@ -964,19 +952,27 @@ public class FullTournamentTest extends SeleneseTestBase {
           }
 
           // Set the verified field to yes
-          selenium.click("id=Verified_yes");
+          selenium.findElement(By.id("Verified_yes")).click();
 
           // submit score
-          selenium.click("id=submit");
+          selenium.findElement(By.id("submit")).click();
         }
 
         // confirm selection, not going to bother checking the text
-        selenium.getConfirmation();
-        selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
+        final Alert confirmScoreChange = selenium.switchTo().alert();
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Confirmation text: "
+              + confirmScoreChange.getText());
+        }
+        confirmScoreChange.accept();
 
-        // check for errors
-        Assert.assertEquals(selectTeamPage, selenium.getLocation());
-        Assert.assertTrue("Error submitting form, not on select team page", selenium.isTextPresent("Unverified Runs"));
+        // give the web server a chance to catch up
+        Thread.sleep(1000);
+
+        // check for errors        
+        Assert.assertEquals(selectTeamPage, selenium.getCurrentUrl());
+        Assert.assertTrue("Error submitting form, not on select team page",
+                          selenium.getPageSource().contains("Unverified Runs"));
 
       } else {
         Assert.fail("Cannot find scores for "
@@ -991,22 +987,18 @@ public class FullTournamentTest extends SeleneseTestBase {
 
   /**
    * Check display pages that aren't shown otherwise.
+   * 
+   * @throws IOException
    */
-  private void checkDisplays() {
-    selenium.open(TestUtils.URL_ROOT
+  private void checkDisplays() throws IOException {
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "scoreboard/main.jsp");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-    Assert.assertFalse("Error loading scoreboard", selenium.isTextPresent("An error has occurred"));
 
-    selenium.open(TestUtils.URL_ROOT
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "playoff/remoteMain.jsp");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-    Assert.assertFalse("Error loading playoffs", selenium.isTextPresent("An error has occurred"));
 
-    selenium.open(TestUtils.URL_ROOT
+    IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
         + "welcome.jsp");
-    selenium.waitForPageToLoad(IntegrationTestUtils.WAIT_FOR_PAGE_TIMEOUT);
-    Assert.assertFalse("Error loading welcome", selenium.isTextPresent("An error has occurred"));
   }
 
   /**
