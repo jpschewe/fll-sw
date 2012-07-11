@@ -329,12 +329,17 @@ public class FullTournamentTest {
       }
     }
 
+    
     selenium.findElement(By.name("id"
         + judgeIndex)).sendKeys(id);
-    selenium.findElement(By.name("cat"
-        + judgeIndex)).sendKeys(category);
-    selenium.findElement(By.name("station"
-        + judgeIndex)).sendKeys(station);
+    
+    final Select categorySelect = new Select(selenium.findElement(By.name("cat"
+        + judgeIndex)));
+    categorySelect.selectByValue(category);
+    
+    final Select stationSelect = new Select(selenium.findElement(By.name("station"
+        + judgeIndex)));
+    stationSelect.selectByValue(station);
 
   }
 
