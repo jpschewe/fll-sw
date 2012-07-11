@@ -864,13 +864,14 @@ public class FullTournamentTest {
   /**
    * Enter a teams performance score. Data is pulled from testDataConn and
    * pushed to the website.
+   * @throws InterruptedException 
    */
   private void verifyPerformanceScore(final Connection testDataConn,
                                       final Element performanceElement,
                                       final String testTournament,
                                       final int runNumber,
                                       final int teamNumber) throws SQLException, IOException, MalformedURLException,
-      ParseException {
+      ParseException, InterruptedException {
     final String selectTeamPage = TestUtils.URL_ROOT
         + "scoreEntry/select_team.jsp";
 
@@ -965,7 +966,10 @@ public class FullTournamentTest {
         }
         confirmScoreChange.accept();
 
-        // check for errors
+        // give the web server a chance to catch up
+        Thread.sleep(1000);
+
+        // check for errors        
         Assert.assertEquals(selectTeamPage, selenium.getCurrentUrl());
         Assert.assertTrue("Error submitting form, not on select team page",
                           selenium.getPageSource().contains("Unverified Runs"));
