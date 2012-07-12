@@ -976,16 +976,7 @@ public class FullTournamentTest {
         Thread.sleep(1000);
 
         // check for errors     
-        if(LOGGER.isTraceEnabled()) {
-          LOGGER.trace("verify: Getting current url");
-        }
         Assert.assertEquals(selectTeamPage, selenium.getCurrentUrl());
-        if(LOGGER.isTraceEnabled()) {
-          LOGGER.trace("verify: Getting page source");
-        }
-        Assert.assertTrue("Error submitting form, not on select team page",
-                          selenium.getPageSource().contains("Unverified Runs"));
-
       } else {
         Assert.fail("Cannot find scores for "
             + teamNumber + " run " + runNumber);
