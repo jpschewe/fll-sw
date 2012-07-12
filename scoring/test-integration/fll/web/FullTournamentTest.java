@@ -195,10 +195,16 @@ public class FullTournamentTest {
         // for each score in a run
         while (rs.next()) {
           final int teamNumber = rs.getInt(1);
+          if(LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Entering performance score for " + teamNumber);
+          }
           enterPerformanceScore(testDataConn, performanceElement, testTournamentName, runNumber, teamNumber);
           // give the web server a chance to catch up
           Thread.sleep(100);
           verifyPerformanceScore(testDataConn, performanceElement, testTournamentName, runNumber, teamNumber);
+          if(LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Finished entering performance score for " + teamNumber);
+          }
         }
 
         if (runNumber > numSeedingRounds
@@ -961,7 +967,7 @@ public class FullTournamentTest {
         // confirm selection, not going to bother checking the text
         final Alert confirmScoreChange = selenium.switchTo().alert();
         if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Confirmation text: "
+          LOGGER.trace("verify Confirmation text: "
               + confirmScoreChange.getText());
         }
         confirmScoreChange.accept();
