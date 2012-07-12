@@ -977,6 +977,9 @@ public class FullTournamentTest {
 
         // check for errors     
         Assert.assertEquals(selectTeamPage, selenium.getCurrentUrl());
+        Assert.assertTrue("Error submitting form, not on select team page",
+                          selenium.getPageSource().contains("Unverified Runs"));
+
       } else {
         Assert.fail("Cannot find scores for "
             + teamNumber + " run " + runNumber);
