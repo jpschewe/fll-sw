@@ -975,8 +975,14 @@ public class FullTournamentTest {
         // give the web server a chance to catch up
         Thread.sleep(1000);
 
-        // check for errors        
+        // check for errors     
+        if(LOGGER.isTraceEnabled()) {
+          LOGGER.trace("verify: Getting current url");
+        }
         Assert.assertEquals(selectTeamPage, selenium.getCurrentUrl());
+        if(LOGGER.isTraceEnabled()) {
+          LOGGER.trace("verify: Getting page source");
+        }
         Assert.assertTrue("Error submitting form, not on select team page",
                           selenium.getPageSource().contains("Unverified Runs"));
 
