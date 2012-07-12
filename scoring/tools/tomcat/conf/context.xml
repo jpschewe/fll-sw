@@ -42,9 +42,9 @@
             maxActive="100"
             maxIdle="4"
             
-            removeAbandoned="true"
- removeAbandonedTimeout="60"
-logAbandoned="true"
             />
+<!--             removeAbandoned="true"
+ removeAbandonedTimeout="60"
+logAbandoned="true" -->
             
 </Context>
