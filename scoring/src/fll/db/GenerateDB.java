@@ -154,7 +154,8 @@ public final class GenerateDB {
         stmt.executeUpdate("CREATE TABLE TournamentTeams ("
             + "  TeamNumber integer NOT NULL" //
             + " ,Tournament INTEGER NOT NULL" //
-            + " ,event_division varchar(32) default '" + DEFAULT_TEAM_DIVISION + "' NOT NULL" //
+            + " ,event_division varchar(32) default '" + DEFAULT_TEAM_DIVISION
+            + "' NOT NULL" //
             + " ,judging_station varchar(64) NOT NULL"
             + " ,CONSTRAINT tournament_teams_pk PRIMARY KEY (TeamNumber, Tournament)" //
             + " ,CONSTRAINT tournament_teams_fk1 FOREIGN KEY(TeamNumber) REFERENCES Teams(TeamNumber)" //
@@ -289,13 +290,13 @@ public final class GenerateDB {
           + " WHERE NoShow = 0" //
           + " AND RunNumber <= ("//
           // compute the run number for the current tournament
-          + "   SELECT param_value FROM tournament_parameters" //
+          + "   SELECT CONVERT(param_value, INTEGER) FROM tournament_parameters" //
           + "     WHERE param = 'SeedingRounds' AND tournament = ("
           + "       SELECT MAX(tournament) FROM tournament_parameters"//
           + "         WHERE param = 'SeedingRounds'"//
           + "           AND ( tournament = -1 OR tournament = ("//
           // current tournament
-          + "             SELECT param_value FROM global_parameters"//
+          + "             SELECT CONVERT(param_value, INTEGER) FROM global_parameters"//
           + "               WHERE  param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'  )"//
           + "        ) )" + " ) GROUP BY TeamNumber, Tournament");
 
@@ -304,7 +305,7 @@ public final class GenerateDB {
       prep = connection.prepareStatement("CREATE VIEW current_tournament_teams AS "//
           + " SELECT * FROM TournamentTeams" //
           + " WHERE Tournament IN " //
-          + " (SELECT param_value " // " +
+          + " (SELECT CONVERT(param_value, INTEGER) " // " +
           + "      FROM global_parameters " //
           + "      WHERE param = '" + GlobalParameters.CURRENT_TOURNAMENT + "'"//
           + "  )");
@@ -326,13 +327,12 @@ public final class GenerateDB {
 
   /**
    * Create the 'authentication' table. Drops the table if it exists.
-   * 
    */
   public static void createAuthentication(final Connection connection) throws SQLException {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
-      
+
       stmt.executeUpdate("DROP TABLE IF EXISTS authentication CASCADE");
       connection.commit();
       stmt.executeUpdate("CREATE TABLE authentication ("
@@ -347,13 +347,12 @@ public final class GenerateDB {
 
   /**
    * Create the 'valid_login' table. Drops the table if it exists.
-   * 
    */
   public static void createValidLogin(final Connection connection) throws SQLException {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
-      
+
       stmt.executeUpdate("DROP TABLE IF EXISTS valid_login CASCADE");
       stmt.executeUpdate("CREATE TABLE valid_login ("
           + "  magic_key varchar(64) NOT NULL" //
@@ -693,9 +692,9 @@ public final class GenerateDB {
           sql.append(" ,CONSTRAINT sched_perf_rounds_fk1 FOREIGN KEY(tournament, team_number) REFERENCES schedule(tournament, team_number)");
         }
         sql.append(")");
-        stmt.executeUpdate(sql.toString());        
+        stmt.executeUpdate(sql.toString());
       }
-      
+
       if (forceRebuild) {
         stmt.executeUpdate("DROP TABLE IF EXISTS sched_subjective CASCADE");
       }
@@ -712,9 +711,9 @@ public final class GenerateDB {
           sql.append(" ,CONSTRAINT sched_subjective_fk1 FOREIGN KEY(tournament, team_number) REFERENCES schedule(tournament, team_number)");
         }
         sql.append(")");
-        stmt.executeUpdate(sql.toString());        
+        stmt.executeUpdate(sql.toString());
       }
-      
+
     } finally {
       SQLFunctions.close(stmt);
       stmt = null;
