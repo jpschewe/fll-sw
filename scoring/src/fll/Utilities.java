@@ -195,7 +195,7 @@ public final class Utilities {
         final long value = Long.valueOf(data);
         prep.setLong(index, value);
       }
-    } else if ("float".equals(typeLower)) {
+    } else if ("float".equals(typeLower) || "double".equals(typeLower)) {
       if (null == data
           || "".equals(data.trim())) {
         prep.setNull(index, Types.DOUBLE);
