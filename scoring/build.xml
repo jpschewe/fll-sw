@@ -94,7 +94,7 @@
     <pathelement location="${dir.lib}/commons-cli-1.2.jar" />
 
     <!-- database -->
-    <pathelement location="${dir.lib}/hsqldb-1.8.0.7.jar" />
+    <pathelement location="${dir.lib}/hsqldb-20120703.001730-11.jar" />
     <pathelement location="${dir.lib}/log4jdbc4-1.2beta2.jar" />
 
     <!-- pdf library -->
