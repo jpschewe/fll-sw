@@ -3271,7 +3271,7 @@ public final class Queries {
     Map<String, String> retval = new HashMap<String, String>();
     try {
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT user, pass FROM fll_authentication");
+      rs = stmt.executeQuery("SELECT fll_user, fll_pass FROM fll_authentication");
       while (rs.next()) {
         final String user = rs.getString(1);
         final String pass = rs.getString(2);
