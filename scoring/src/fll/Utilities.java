@@ -37,7 +37,7 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.hsqldb.jdbc.jdbcDataSource;
+import org.hsqldb.jdbc.JDBCDataSource;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fll.db.ImportDB;
@@ -347,7 +347,7 @@ public final class Utilities {
    * @return the DataSource
    */
   private static DataSource createDataSourceFromURL(final String myURL) {
-    final jdbcDataSource dataSource = new jdbcDataSource();
+    final JDBCDataSource dataSource = new JDBCDataSource();
     dataSource.setDatabase(myURL);
     dataSource.setUser("sa");
 
