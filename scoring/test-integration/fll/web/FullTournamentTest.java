@@ -500,6 +500,10 @@ public class FullTournamentTest {
 
     int rank = 0;
     for (final Map<String, String> row : div1Result.data) {
+      if(LOGGER.isTraceEnabled()) {
+        LOGGER.trace("checkRankAndScores - row: " + row);
+      }
+      
       final int teamNumber = Integer.valueOf(row.get("team_number"));
       Assert.assertEquals("Division I Ranking is incorrect for rank: "
           + rank, division1ExpectedRank[rank], teamNumber);
