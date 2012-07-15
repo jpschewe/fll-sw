@@ -74,7 +74,7 @@ public class CreateUser extends BaseFLLServlet {
       }
 
       final String hashedPass = DigestUtils.md5Hex(pass);
-      prep = connection.prepareStatement("INSERT INTO authentication (user, pass) VALUES(?, ?)");
+      prep = connection.prepareStatement("INSERT INTO fll_authentication (user, pass) VALUES(?, ?)");
       prep.setString(1, user);
       prep.setString(2, hashedPass);
       prep.executeUpdate();
