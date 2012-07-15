@@ -483,7 +483,7 @@ public class FullTournamentTest {
     // check ranking and scores
     final double scoreFP = 1E-1; // just check to one decimal place
 
-    final String sqlTemplate = "SELECT FinalScores.TeamNumber AS team_number, FinalScores.OverallScore AS score" //
+    final String sqlTemplate = "SELECT FinalScores.TeamNumber, FinalScores.OverallScore" //
         + " FROM FinalScores, current_tournament_teams, Tournaments" //
         + " WHERE FinalScores.TeamNumber = current_tournament_teams.TeamNumber" //
         + " AND Tournaments.Name = '%s'" + " AND FinalScores.Tournament = Tournaments.tournament_id" //
@@ -504,10 +504,10 @@ public class FullTournamentTest {
         LOGGER.trace("checkRankAndScores - row: " + row);
       }
       
-      final int teamNumber = Integer.valueOf(row.get("team_number"));
+      final int teamNumber = Integer.valueOf(row.get("teamnumber"));
       Assert.assertEquals("Division I Ranking is incorrect for rank: "
           + rank, division1ExpectedRank[rank], teamNumber);
-      final double score = Double.valueOf(row.get("score"));
+      final double score = Double.valueOf(row.get("overallscore"));
       Assert.assertEquals("Overall score incorrect for team: "
           + teamNumber, division1ExpectedScores[rank], score, scoreFP);
 
@@ -524,10 +524,10 @@ public class FullTournamentTest {
 
     rank = 0;
     for (final Map<String, String> row : div2Result.data) {
-      final int teamNumber = Integer.valueOf(row.get("team_number"));
+      final int teamNumber = Integer.valueOf(row.get("teamnumber"));
       Assert.assertEquals("Division II Ranking is incorrect for rank: "
           + rank, division2ExpectedRank[rank], teamNumber);
-      final double score = Double.valueOf(row.get("score"));
+      final double score = Double.valueOf(row.get("overallscore"));
       Assert.assertEquals("Overall score incorrect for team: "
           + teamNumber, division2ExpectedScores[rank], score, scoreFP);
 
