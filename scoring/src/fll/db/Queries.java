@@ -3233,7 +3233,7 @@ public final class Queries {
    */
   public static boolean isAuthenticationEmpty(final Connection connection) throws SQLException {
     final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
-    if (!tables.contains("authentication")) {
+    if (!tables.contains("fll_authentication")) {
       GenerateDB.createAuthentication(connection);
       return true;
     }
@@ -3242,7 +3242,7 @@ public final class Queries {
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT * from authentication");
+      rs = stmt.executeQuery("SELECT * from fll_authentication");
       if (rs.next()) {
         return false;
       } else {
@@ -3271,7 +3271,7 @@ public final class Queries {
     Map<String, String> retval = new HashMap<String, String>();
     try {
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT user, pass FROM authentication");
+      rs = stmt.executeQuery("SELECT user, pass FROM fll_authentication");
       while (rs.next()) {
         final String user = rs.getString(1);
         final String pass = rs.getString(2);

@@ -333,12 +333,12 @@ public final class GenerateDB {
     try {
       stmt = connection.createStatement();
 
-      stmt.executeUpdate("DROP TABLE IF EXISTS authentication CASCADE");
+      stmt.executeUpdate("DROP TABLE IF EXISTS fll_authentication CASCADE");
       connection.commit();
-      stmt.executeUpdate("CREATE TABLE authentication ("
+      stmt.executeUpdate("CREATE TABLE fll_authentication ("
           + "  user varchar(64) NOT NULL" //
           + " ,pass char(32)"//
-          + " ,CONSTRAINT authentication_pk PRIMARY KEY (user)" //
+          + " ,CONSTRAINT fll_authentication_pk PRIMARY KEY (user)" //
           + ")");
     } finally {
       SQLFunctions.close(stmt);
