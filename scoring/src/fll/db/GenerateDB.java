@@ -336,9 +336,9 @@ public final class GenerateDB {
       stmt.executeUpdate("DROP TABLE IF EXISTS fll_authentication CASCADE");
       connection.commit();
       stmt.executeUpdate("CREATE TABLE fll_authentication ("
-          + "  user varchar(64) NOT NULL" //
-          + " ,pass char(32)"//
-          + " ,CONSTRAINT fll_authentication_pk PRIMARY KEY (user)" //
+          + "  fll_user varchar(64) NOT NULL" //
+          + " ,fll_pass char(32)"//
+          + " ,CONSTRAINT fll_authentication_pk PRIMARY KEY (fll_user)" //
           + ")");
     } finally {
       SQLFunctions.close(stmt);
