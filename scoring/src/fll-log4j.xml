@@ -43,14 +43,6 @@
 
  <!-- stuff for debugging -->
  <!-- logger name="fll.scheduler.GreedySolver"><level value="TRACE"/></logger -->
- <!-- logger name="fll.db.DumpDB"><level value="TRACE"/></logger -->
- <!-- logger name="fll.web.FooterFilter"><level value="TRACE"/></logger -->
- <!-- logger name="fll.web.report.FinalComputedScores"><level value="TRACE"/></logger -->
- <!-- logger name="fll.web.admin"><level value="TRACE"/></logger -->
- <!-- logger name="fll.db.ImportDB"><level value="TRACE"/></logger -->
- <!-- logger name="fll.web.admin.VerifyJudges"><level value="TRACE"/></logger-->
- <!-- logger name="fll.web.IntegrationTestUtils"><level value="TRACE"/></logger-->
- <logger name="fll.web.FullTournamentTest"><level value="TRACE"/></logger>
 
 
  <!-- database connection information -->
