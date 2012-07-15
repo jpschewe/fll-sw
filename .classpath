@@ -60,7 +60,7 @@
 	<classpathentry kind="lib" path="scoring/lib/findbugs-2.0.0/lib/jsr305.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-lang3-3.1.jar" sourcepath="scoring/lib/source/commons-lang3-3.1-sources.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/opencsv-jps-2.4.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/test/hsqldb-1.8.0.7.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/test/hsqldb-20120703.001730-11.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/selenium-server-standalone-2.24.1.jar" sourcepath="scoring/lib/test/selenium-java-2.24.1-srcs.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>

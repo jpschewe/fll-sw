@@ -83,7 +83,7 @@
   </path>
   <taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
 
-  <property name="hsql.jar" value="${dir.lib}/test/hsqldb-1.8.0.7.jar" />
+  <property name="hsql.jar" value="${dir.lib}/test/hsqldb-20120703.001730-11.jar" />
   
   <path id="base.classpath">
     <!-- the classpath without the classes dir -->
