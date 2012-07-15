@@ -80,6 +80,9 @@ public class DoLogin extends BaseFLLServlet {
       final String hashedPass = DigestUtils.md5Hex(pass);
 
       // compare login information
+      if(LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Checking user: " + user + " hashedPass: " + hashedPass);
+      }
       final Map<String, String> authInfo = Queries.getAuthInfo(connection);
       for (final Map.Entry<String, String> entry : authInfo.entrySet()) {
         if (user.equals(entry.getKey())
@@ -94,10 +97,14 @@ public class DoLogin extends BaseFLLServlet {
           }
           response.sendRedirect(response.encodeRedirectURL(redirect));
           return;
+        } else {
+          if(LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Didn't match user: " + entry.getKey() + " pass: " + entry.getValue());
+          }
         }
       }
 
-      LOGGER.warn("Incorrect login credentials");
+      LOGGER.warn("Incorrect login credentials user: " + user);
       session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>Incorrect login information provided</p>");
       response.sendRedirect(response.encodeRedirectURL("login.jsp"));
       return;

@@ -9,7 +9,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="scoring/lib/hsqldb-1.8.0.7.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/hsqldb-20120703.001730-11.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-io-1.3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-fileupload-1.1.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/slf4j-api-1.5.3.jar"/>
