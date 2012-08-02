@@ -30,18 +30,21 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   private static final Logger LOG = LogUtils.getLogger();
 
   public static final int NUM_COLUMNS_LEFT_OF_SCORES = 5;
-  
+
   /**
    * @param scoreDocument XML document that represents the teams that are being
    *          scored along with the judges and the current set of scores
    * @param subjectiveElement subjective category
    */
-  public SubjectiveTableModel(final Document scoreDocument, final Element subjectiveElement) {
+  public SubjectiveTableModel(final Document scoreDocument,
+                              final Element subjectiveElement) {
     _scoreDocument = scoreDocument;
     _subjectiveElement = subjectiveElement;
     _goals = new NodelistElementCollectionAdapter(subjectiveElement.getChildNodes()).asList();
-    final Element categoryScoreElement = (Element) (_scoreDocument.getDocumentElement()).getElementsByTagName(subjectiveElement.getAttribute("name")).item(0);
-    final List<Element> scoreElements = new NodelistElementCollectionAdapter(categoryScoreElement.getElementsByTagName("score")).asList();
+    final Element categoryScoreElement = (Element) (_scoreDocument.getDocumentElement()).getElementsByTagName(subjectiveElement.getAttribute("name"))
+                                                                                        .item(0);
+    final List<Element> scoreElements = new NodelistElementCollectionAdapter(
+                                                                             categoryScoreElement.getElementsByTagName("score")).asList();
     _scoreElements = new Element[scoreElements.size()];
     for (int i = 0; i < scoreElements.size(); i++) {
       _scoreElements[i] = scoreElements.get(i);
@@ -62,18 +65,21 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     case 4:
       return "Judge";
     default:
-      if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES) {
+      if (column == getNumGoals()
+          + NUM_COLUMNS_LEFT_OF_SCORES) {
         return "No Show";
-      } else if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES + 1) {
+      } else if (column == getNumGoals()
+          + NUM_COLUMNS_LEFT_OF_SCORES + 1) {
         return "Total Score";
       } else {
-        return getGoalDescription(column - NUM_COLUMNS_LEFT_OF_SCORES).getAttribute("title");
+        return getGoalDescription(column
+            - NUM_COLUMNS_LEFT_OF_SCORES).getAttribute("title");
       }
     }
   }
 
   @Override
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="DB_DUPLICATE_SWITCH_CLAUSES", justification="Duplicate switch clauses causes this method to be consistent with the other methods and adds to clarity")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DB_DUPLICATE_SWITCH_CLAUSES", justification = "Duplicate switch clauses causes this method to be consistent with the other methods and adds to clarity")
   public Class<?> getColumnClass(final int column) {
     switch (column) {
     case 0:
@@ -87,14 +93,17 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     case 4:
       return String.class;
     default:
-      if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES) {
+      if (column == getNumGoals()
+          + NUM_COLUMNS_LEFT_OF_SCORES) {
         // No Show
         return Boolean.class;
-      } else if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES + 1) {
+      } else if (column == getNumGoals()
+          + NUM_COLUMNS_LEFT_OF_SCORES + 1) {
         // Total Score
         return Double.class;
       } else {
-        final Element goalEle = getGoalDescription(column - NUM_COLUMNS_LEFT_OF_SCORES);
+        final Element goalEle = getGoalDescription(column
+            - NUM_COLUMNS_LEFT_OF_SCORES);
         if (XMLUtils.isEnumeratedGoal(goalEle)) {
           return String.class;
         } else if (XMLUtils.isComputedGoal(goalEle)) {
@@ -111,10 +120,12 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   }
 
   public int getColumnCount() {
-    return NUM_COLUMNS_LEFT_OF_SCORES + getNumGoals() + 2;
+    return NUM_COLUMNS_LEFT_OF_SCORES
+        + getNumGoals() + 2;
   }
 
-  public Object getValueAt(final int row, final int column) {
+  public Object getValueAt(final int row,
+                           final int column) {
     try {
       final Element scoreEle = getScoreElement(row);
       switch (column) {
@@ -137,10 +148,12 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       case 4:
         return scoreEle.getAttribute("judge");
       default:
-        if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES) {
+        if (column == getNumGoals()
+            + NUM_COLUMNS_LEFT_OF_SCORES) {
           return Boolean.valueOf(scoreEle.getAttribute("NoShow"));
-        } else if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES + 1) {
-          if(Boolean.valueOf(scoreEle.getAttribute("NoShow"))) {
+        } else if (column == getNumGoals()
+            + NUM_COLUMNS_LEFT_OF_SCORES + 1) {
+          if (Boolean.valueOf(scoreEle.getAttribute("NoShow"))) {
             return 0;
           } else {
             // compute total score
@@ -148,7 +161,8 @@ public final class SubjectiveTableModel extends AbstractTableModel {
             return newTotalScore;
           }
         } else {
-          final Element goalDescription = getGoalDescription(column - NUM_COLUMNS_LEFT_OF_SCORES);
+          final Element goalDescription = getGoalDescription(column
+              - NUM_COLUMNS_LEFT_OF_SCORES);
           final String goalName = goalDescription.getAttribute("name");
           // the order really matters here because a computed goal will never
           // have an entry in scoreEle
@@ -176,8 +190,9 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   }
 
   @Override
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="DB_DUPLICATE_SWITCH_CLAUSES", justification="Duplicate switch clauses causes this method to be consistent with the other methods and adds to clarity")
-  public boolean isCellEditable(final int row, final int column) {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DB_DUPLICATE_SWITCH_CLAUSES", justification = "Duplicate switch clauses causes this method to be consistent with the other methods and adds to clarity")
+  public boolean isCellEditable(final int row,
+                                final int column) {
     switch (column) {
     case 0:
       // TeamNumber
@@ -195,20 +210,23 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       // Judge
       return false;
     default:
-      if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES) {
+      if (column == getNumGoals()
+          + NUM_COLUMNS_LEFT_OF_SCORES) {
         // No Show
         return true;
-      } else if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES + 1) {
+      } else if (column == getNumGoals()
+          + NUM_COLUMNS_LEFT_OF_SCORES + 1) {
         // Total Score
         return false;
       } else {
         // if no show, then no scores can be entered
         final Element scoreEle = getScoreElement(row);
-        if(Boolean.valueOf(scoreEle.getAttribute("NoShow"))) {
+        if (Boolean.valueOf(scoreEle.getAttribute("NoShow"))) {
           return false;
         }
-        
-        final Element goalDescription = getGoalDescription(column - NUM_COLUMNS_LEFT_OF_SCORES);
+
+        final Element goalDescription = getGoalDescription(column
+            - NUM_COLUMNS_LEFT_OF_SCORES);
         if (XMLUtils.isComputedGoal(goalDescription)) {
           return false;
         } else if ("goal".equals(goalDescription.getNodeName())) {
@@ -222,7 +240,9 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   }
 
   @Override
-  public void setValueAt(final Object value, final int row, final int column) {
+  public void setValueAt(final Object value,
+                         final int row,
+                         final int column) {
     setValueAt(value, row, column, true);
   }
 
@@ -230,11 +250,15 @@ public final class SubjectiveTableModel extends AbstractTableModel {
    * Set the value of a cell and only set it's modified flag if setModified is
    * true. This allows us to use setValueAt to reset incorrect values.
    */
-  private void setValueAt(final Object value, final int row, final int column, final boolean setModified) {
+  private void setValueAt(final Object value,
+                          final int row,
+                          final int column,
+                          final boolean setModified) {
     boolean error = false;
     final Element element = getScoreElement(row);
 
-    if (column == getNumGoals() + NUM_COLUMNS_LEFT_OF_SCORES) {
+    if (column == getNumGoals()
+        + NUM_COLUMNS_LEFT_OF_SCORES) {
       // No Show
       if (value instanceof Boolean) {
         element.setAttribute("NoShow", value.toString());
@@ -246,7 +270,8 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         if (b) {
           // delete all scores for that team
           for (int i = 0; i < getNumGoals(); i++) {
-            setValueAt(null, row, i + NUM_COLUMNS_LEFT_OF_SCORES);
+            setValueAt(null, row, i
+                + NUM_COLUMNS_LEFT_OF_SCORES);
           }
         }
       } else {
@@ -258,7 +283,8 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       // scores to be set to null
       error = true;
     } else {
-      final Element goalDescription = getGoalDescription(column - NUM_COLUMNS_LEFT_OF_SCORES);
+      final Element goalDescription = getGoalDescription(column
+          - NUM_COLUMNS_LEFT_OF_SCORES);
       final String goalName = goalDescription.getAttribute("name");
       // support deleting a value
       if (null == value
@@ -269,7 +295,8 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           element.setAttribute("modified", Boolean.TRUE.toString());
         }
       } else {
-        final List<Element> posValues = new NodelistElementCollectionAdapter(goalDescription.getElementsByTagName("value")).asList();
+        final List<Element> posValues = new NodelistElementCollectionAdapter(
+                                                                             goalDescription.getElementsByTagName("value")).asList();
         if (posValues.size() > 0) {
           // enumerated, convert from title to value
           boolean found = false;
@@ -344,7 +371,8 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     for (int i = 0; i < getNumGoals(); ++i) {
       final Element goalEle = getGoalDescription(i);
       if (XMLUtils.isComputedGoal(goalEle)) {
-        fireTableCellUpdated(row, i + NUM_COLUMNS_LEFT_OF_SCORES);
+        fireTableCellUpdated(row, i
+            + NUM_COLUMNS_LEFT_OF_SCORES);
       }
     }
   }
@@ -368,7 +396,8 @@ public final class SubjectiveTableModel extends AbstractTableModel {
    * @param judge
    * @return the row index, -1 if one cannot be found
    */
-  public int getRowForTeamAndJudge(final int teamNumber, final String judge) {
+  public int getRowForTeamAndJudge(final int teamNumber,
+                                   final String judge) {
     try {
       for (int index = 0; index < _scoreElements.length; ++index) {
         final Element scoreEle = _scoreElements[index];
