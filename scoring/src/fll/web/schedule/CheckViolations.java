@@ -72,6 +72,9 @@ public class CheckViolations extends BaseFLLServlet {
     final String sheetName = SessionAttributes.getNonNullAttribute(session, "uploadSchedule_sheet", String.class);
     Connection connection = null;
     try {
+      final DataSource datasource = ApplicationAttributes.getDataSource(application);
+      connection = datasource.getConnection();
+
       // if uploadSchedule_subjectiveHeaders is set, then use this as the list
       // of subjective headers
       // J2EE doesn't have things typed yet
@@ -110,8 +113,6 @@ public class CheckViolations extends BaseFLLServlet {
       final TournamentSchedule schedule = new TournamentSchedule(name, stream, sheetName, subjectiveHeaders);
       session.setAttribute("uploadSchedule_schedule", schedule);
 
-      final DataSource datasource = ApplicationAttributes.getDataSource(application);
-      connection = datasource.getConnection();
       final int tournamentID = Queries.getCurrentTournament(connection);
       final Collection<ConstraintViolation> violations = schedule.compareWithDatabase(connection, tournamentID);
       final SchedParams schedParams = new SchedParams(subjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,

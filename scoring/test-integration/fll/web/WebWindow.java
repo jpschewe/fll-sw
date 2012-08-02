@@ -115,7 +115,7 @@ public class WebWindow {
   private void checkForClosed() {
     if (handle == null
         || handle.equals(""))
-      throw new WebDriverException("Web Window closed or not initialized");
+      throw new WebDriverException("Web Window closed or not initialized handle: " + handle);
   }
 
   private String injectAnchorTag(final String id,
