@@ -449,7 +449,7 @@ public class FullTournamentTest {
   private void computeFinalScores() throws IOException {
     // compute final scores
     IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
-        + "report/SummarizePhase.jsp");
+        + "report/SummarizePhase1");
 
     selenium.findElement(By.id("continue")).click();
 
