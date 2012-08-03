@@ -43,7 +43,7 @@
  <c:remove var="message" />
 
  <ol>
-  <li><a href="summarizePhase1.jsp">Compute summarized scores</a>.
+  <li><a href="SummarizePhase1">Compute summarized scores</a>.
    This needs to be executed before any reports can be generated. You
    will be returned to this page if there are no errors summarizing
    scores.</li>
