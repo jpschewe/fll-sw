@@ -50,6 +50,7 @@ public class CreateDB extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
+    String redirect = null;
     final StringBuilder message = new StringBuilder();
     InitFilter.initDataSource(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -92,26 +93,29 @@ public class CreateDB extends BaseFLLServlet {
             + request + "</p>");
       }
 
+      redirect = "/admin/createUsername.jsp";
     } catch (final FileUploadException fue) {
       message.append("<p class='error'>Error handling the file upload: "
           + fue.getMessage() + "</p>");
       LOG.error(fue, fue);
+      redirect = "/setup";
     } catch (final IOException ioe) {
       message.append("<p class='error'>Error reading challenge descriptor: "
           + ioe.getMessage() + "</p>");
       LOG.error(ioe, ioe);
+      redirect = "/setup";
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error loading data into the database: "
           + sqle.getMessage() + "</p>");
       LOG.error(sqle, sqle);
-      throw new RuntimeException("Error loading data into the database", sqle);
+      redirect = "/setup";
     } finally {
       SQLFunctions.close(connection);
     }
 
     session.setAttribute("message", message.toString());
     response.sendRedirect(response.encodeRedirectURL(request.getContextPath()
-        + "/admin/createUsername.jsp"));
+        + redirect));
 
   }
 
