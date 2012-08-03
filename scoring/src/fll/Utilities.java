@@ -126,8 +126,13 @@ public final class Utilities {
         if (null == type) {
           type = "longvarchar";
         }
+        // handle old dumps with no size
         if (type.equalsIgnoreCase("varchar")) {
           type = "varchar(255)";
+        }
+        // handle old dumps with no size
+        if (type.equalsIgnoreCase("char")) {
+          type = "char(255)";
         }
         columnTypes[columnIndex] = type;
         createTable.append(columnName);
@@ -180,7 +185,7 @@ public final class Utilities {
       } else {
         prep.setString(index, data);
       }
-    } else if ("char".equals(typeLower)) {
+    } else if (typeLower.startsWith("char")) {
       if (null == data
           || "".equals(data.trim())) {
         prep.setNull(index, Types.CHAR);
