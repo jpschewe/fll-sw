@@ -133,7 +133,7 @@ public final class DumpDB extends BaseFLLServlet {
 
         String typeName = rs.getString("TYPE_NAME");
         final String columnName = rs.getString("COLUMN_NAME");
-        if ("varchar".equalsIgnoreCase(typeName)) {
+        if ("varchar".equalsIgnoreCase(typeName) || "char".equalsIgnoreCase(typeName)) {
           typeName = typeName
               + "(" + rs.getInt("COLUMN_SIZE") + ")";
         }
