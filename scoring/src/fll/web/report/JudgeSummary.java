@@ -6,11 +6,13 @@
 
 package fll.web.report;
 
+import java.io.Serializable;
+
 /**
  * Information about how many teams a judge has seen. Used for display when
  * summarizing scores.
  */
-public final class JudgeSummary {
+public final class JudgeSummary implements Serializable {
 
   private final String mJudge;
 
