@@ -1,19 +1,5 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="fll.db.Queries" %>
-<%@ page import="fll.web.ApplicationAttributes" %>
-<%@ page import="javax.sql.DataSource" %>
-<%@ page import="java.util.List" %>
-
-<%@ page import="java.sql.Connection" %>
-  
-<%
-final DataSource datasource = ApplicationAttributes.getDataSource(application);
-final Connection connection = datasource.getConnection();
-final List<String> divisions = Queries.getEventDivisions(connection);
-pageContext.setAttribute("divisions", divisions);
-final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
-%>
   
 <html>
   <head>
@@ -32,7 +18,7 @@ final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
           <form name='check' action='check.jsp' method='get'>
           Select Division:
           <select id='check-division' name='division'>
-            <c:forEach items="${divisions }" var="division">
+            <c:forEach items="${playoffDivisions }" var="division">
             <option value='${division}'>${division}</option>
             </c:forEach>
           </select>
@@ -44,7 +30,7 @@ final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
           runs for that division have been recorded!</b><br>
           <form name='initialize' action='initializebrackets.jsp' method='post'>
           Select Division: <select id='initialize-division' name='division'>
-            <c:forEach items="${divisions }" var="division">
+            <c:forEach items="${playoffDivisions }" var="division">
             <option value='${division}'>${division}</option>
             </c:forEach>
           </select><br>
@@ -56,32 +42,38 @@ final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
           <form name='admin' action='adminbrackets.jsp' method='get'>
             <b>Printable Brackets</b><br/>
             Select Division: <select name='division'>
-            <c:forEach items="${divisions }" var="division">
+            <c:forEach items="${playoffDivisions }" var="division">
             <option value='${division}'>${division}</option>
             </c:forEach>
             </select>
             from round <select name='firstRound'>
-<%
-for(int numRounds = 1; numRounds <= numPlayoffRounds; numRounds++) {
-  out.print("<option value='" + numRounds + "'");
-  if(numRounds == 1) {
-    out.print(" selected");
-  }
-  out.println(">" + numRounds + "</option>");
-}
-%>
-            </select> to <select name='lastRound'>
-<%
-// numPlayoffRounds+1 == the column in which the 1st place winner is displayed
-for(int numRounds = 2; numRounds <= numPlayoffRounds+1; numRounds++) {
-  out.print("<option value='" + numRounds + "'");
-  if(numRounds == numPlayoffRounds+1) {
-    out.print(" selected");
-  }
-  out.println(">" + numRounds + "</option>");
-}
-%>
+            <c:forEach begin="1" end="${numPlayoffRounds }" var="numRounds">
+            <c:choose>
+            <c:when test="${numRounds == 1 }">
+            <option value='${numRounds }' selected>${numRounds }</option>
+            </c:when>
+            <c:otherwise>
+            <option value='${numRounds }'>${numRounds }</option>
+            </c:otherwise>
+            </c:choose>
+            </c:forEach>
+            </select>
+            
+            to 
+            <!-- numPlayoffRounds+1 == the column in which the 1st place winner is displayed  -->
+            <select name='lastRound'>
+                        <c:forEach begin="2" end="${numPlayoffRounds+1 }" var="numRounds">
+            <c:choose>
+            <c:when test="${numRounds == numPlayoffRounds+1 }">
+            <option value='${numRounds }' selected>${numRounds }</option>
+            </c:when>
+            <c:otherwise>
+            <option value='${numRounds }'>${numRounds }</option>
+            </c:otherwise>
+            </c:choose>
+            </c:forEach>            
 </select>
+
             <input type='submit' id='display_printable_brackets' value='Display Brackets'>
           </form>               
         </li>
@@ -90,31 +82,36 @@ for(int numRounds = 2; numRounds <= numPlayoffRounds+1; numRounds++) {
           <form name='printable' action='scoregenbrackets.jsp' method='get'>
             <b>Scoresheet Generation Brackets</b><br/>
             Select Division: <select name='division'>
-            <c:forEach items="${divisions }" var="division">
+            <c:forEach items="${playoffDivisions }" var="division">
             <option value='${division}'>${division}</option>
             </c:forEach>            </select>
             from round <select name='firstRound'>
-<%
-for(int numRounds = 1; numRounds <= numPlayoffRounds; numRounds++) {
-  out.print("<option value='" + numRounds + "'");
-  if(numRounds == 1) {
-    out.print(" selected");
-  }
-  out.println(">" + numRounds + "</option>");
-}
-%>
-            </select> to <select name='lastRound'>
-<%
-// numPlayoffRounds+1 == the column in which the 1st place winner is displayed
-for(int numRounds = 2; numRounds <= numPlayoffRounds+1; numRounds++) {
-  out.print("<option value='" + numRounds + "'");
-  if(numRounds == numPlayoffRounds+1) {
-    out.print(" selected");
-  }
-  out.println(">" + numRounds + "</option>");
-}
-%>
+                        <c:forEach begin="1" end="${numPlayoffRounds }" var="numRounds">
+            <c:choose>
+            <c:when test="${numRounds == 1 }">
+            <option value='${numRounds }' selected>${numRounds }</option>
+            </c:when>
+            <c:otherwise>
+            <option value='${numRounds }'>${numRounds }</option>
+            </c:otherwise>
+            </c:choose>
+            </c:forEach>            
+            </select> to 
+            
+                        <!-- numPlayoffRounds+1 == the column in which the 1st place winner is displayed  -->            
+            <select name='lastRound'>
+                                    <c:forEach begin="2" end="${numPlayoffRounds+1 }" var="numRounds">
+            <c:choose>
+            <c:when test="${numRounds == numPlayoffRounds+1 }">
+            <option value='${numRounds }' selected>${numRounds }</option>
+            </c:when>
+            <c:otherwise>
+            <option value='${numRounds }'>${numRounds }</option>
+            </c:otherwise>
+            </c:choose>
+            </c:forEach>
             </select>
+            
             <input type='submit' id='display_scoregen_brackets' value='Display Brackets'>
           </form>
         </li>
