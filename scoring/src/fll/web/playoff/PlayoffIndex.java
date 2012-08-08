@@ -64,8 +64,11 @@ public class PlayoffIndex extends BaseFLLServlet {
       final int currentTournamentID = Queries.getCurrentTournament(connection);
       session.setAttribute("currentTournamentID", currentTournamentID);
 
-      final List<String> divisions = Queries.getEventDivisions(connection);
-      session.setAttribute("playoffDivisions", divisions);
+      final List<String> divisions = Queries.getEventDivisions(connection, currentTournamentID);
+      session.setAttribute("eventDivisions", divisions);
+
+      final List<String> playoffDivisions = Playoff.getPlayoffDivisions(connection, currentTournamentID);
+      session.setAttribute("playoffDivisions", playoffDivisions);
 
       final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
       session.setAttribute("numPlayoffRounds", numPlayoffRounds);

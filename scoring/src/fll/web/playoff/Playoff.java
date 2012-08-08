@@ -77,7 +77,8 @@ public final class Playoff {
       filterTeamsToDivision(connection, teams, divisionStr);
       // sort by team name
       Collections.sort(teams, new Comparator<Team>() {
-        public int compare(final Team one, final Team two) {
+        public int compare(final Team one,
+                           final Team two) {
           return one.getTeamName().compareTo(two.getTeamName());
         }
       });
@@ -111,7 +112,8 @@ public final class Playoff {
           randoms[i] = generator.nextDouble();
         }
         Collections.sort(seedingOrder, new Comparator<Team>() {
-          public int compare(final Team one, final Team two) {
+          public int compare(final Team one,
+                             final Team two) {
             final int oneIdx = seedingOrder.indexOf(one);
             final int twoIdx = seedingOrder.indexOf(two);
             return Double.compare(randoms[oneIdx], randoms[twoIdx]);
@@ -150,8 +152,9 @@ public final class Playoff {
    * @throws RuntimeException
    * @throws SQLException
    */
-  private static void filterTeamsToDivision(final Connection connection, final List<Team> teams, final String divisionStr) throws SQLException,
-      RuntimeException {
+  private static void filterTeamsToDivision(final Connection connection,
+                                            final List<Team> teams,
+                                            final String divisionStr) throws SQLException, RuntimeException {
     final Iterator<Team> iter = teams.iterator();
     while (iter.hasNext()) {
       final Team t = iter.next();
@@ -196,7 +199,8 @@ public final class Playoff {
                                 final Team teamB,
                                 final TeamScore teamBScore,
                                 final int runNumber) throws SQLException, ParseException {
-    final TeamScore teamAScore = new DatabaseTeamScore(performanceElement, tournament, teamA.getTeamNumber(), runNumber, connection);
+    final TeamScore teamAScore = new DatabaseTeamScore(performanceElement, tournament, teamA.getTeamNumber(),
+                                                       runNumber, connection);
     final Team retval = pickWinner(tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB, teamBScore);
     teamAScore.cleanup();
     teamBScore.cleanup();
@@ -230,8 +234,10 @@ public final class Playoff {
                                 final Team teamA,
                                 final Team teamB,
                                 final int runNumber) throws SQLException, ParseException {
-    final TeamScore teamAScore = new DatabaseTeamScore(performanceElement, tournament, teamA.getTeamNumber(), runNumber, connection);
-    final TeamScore teamBScore = new DatabaseTeamScore(performanceElement, tournament, teamB.getTeamNumber(), runNumber, connection);
+    final TeamScore teamAScore = new DatabaseTeamScore(performanceElement, tournament, teamA.getTeamNumber(),
+                                                       runNumber, connection);
+    final TeamScore teamBScore = new DatabaseTeamScore(performanceElement, tournament, teamB.getTeamNumber(),
+                                                       runNumber, connection);
     final Team retval = pickWinner(tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB, teamBScore);
     teamAScore.cleanup();
     teamBScore.cleanup();
@@ -323,7 +329,9 @@ public final class Playoff {
    * 
    * @throws SQLException on a database error
    */
-  public static void insertBye(final Connection connection, final Team team, final int runNumber) throws SQLException {
+  public static void insertBye(final Connection connection,
+                               final Team team,
+                               final int runNumber) throws SQLException {
     final int tournament = Queries.getCurrentTournament(connection);
     PreparedStatement prep = null;
     try {
@@ -348,8 +356,10 @@ public final class Playoff {
    * @throws SQLException on a database error
    * @throws IllegalArgumentException if no score exists
    */
-  public static double getPerformanceScore(final Connection connection, final int tournament, final Team team, final int runNumber) throws SQLException,
-      IllegalArgumentException {
+  public static double getPerformanceScore(final Connection connection,
+                                           final int tournament,
+                                           final Team team,
+                                           final int runNumber) throws SQLException, IllegalArgumentException {
     if (null == team) {
       throw new IllegalArgumentException("Cannot get score for null team");
     } else {
@@ -378,7 +388,10 @@ public final class Playoff {
    * @throws SQLException on a database error
    * @throws IllegalArgumentException if no score exists
    */
-  public static boolean isNoShow(final Connection connection, final int tournament, final Team team, final int runNumber) throws SQLException {
+  public static boolean isNoShow(final Connection connection,
+                                 final int tournament,
+                                 final Team team,
+                                 final int runNumber) throws SQLException {
     return Queries.isNoShow(connection, tournament, team.getTeamNumber(), runNumber);
   }
 
@@ -388,12 +401,17 @@ public final class Playoff {
    * @throws SQLException on a database error
    * @throws IllegalArgumentException if no score exists
    */
-  public static boolean isBye(final Connection connection, final int tournament, final Team team, final int runNumber) throws SQLException {
+  public static boolean isBye(final Connection connection,
+                              final int tournament,
+                              final Team team,
+                              final int runNumber) throws SQLException {
     return Queries.isBye(connection, tournament, team.getTeamNumber(), runNumber);
   }
 
-  public static void initializeBrackets(final Connection connection, final Document challengeDocument, final String division, final boolean enableThird)
-      throws IOException, SQLException, ParseException {
+  public static void initializeBrackets(final Connection connection,
+                                        final Document challengeDocument,
+                                        final String division,
+                                        final boolean enableThird) throws IOException, SQLException, ParseException {
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("initializing brackets for division: "
@@ -419,7 +437,8 @@ public final class Playoff {
     // round 1 teams)
     // Note: Our math will rely on the length of the list returned by
     // buildInitialBracketOrder to be a power of 2. It always should be.
-    final List<Team> firstRound = buildInitialBracketOrder(connection, bracketSort, winnerCriteria, division, tournamentTeams);
+    final List<Team> firstRound = buildInitialBracketOrder(connection, bracketSort, winnerCriteria, division,
+                                                           tournamentTeams);
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("initial bracket order: "
@@ -620,4 +639,36 @@ public final class Playoff {
   private static boolean isPowerOfTwoFast(final int n) {
     return ((n != 0) && (n & (n - 1)) == 0);
   }
+
+  /**
+   * Get the list of playoff divisions at the specified tournament as a List of
+   * Strings. This may be different from the event divisions for the overall
+   * tournament if one has defined virtual divisions for running the playoffs
+   * over a subset of teams.
+   * 
+   * @param connection the database connection
+   * @return the List of divisions. List of strings.
+   * @throws SQLException on a database error
+   */
+  public static List<String> getPlayoffDivisions(final Connection connection,
+                                                 final int tournament) throws SQLException {
+    final List<String> list = new LinkedList<String>();
+
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT DISTINCT event_division FROM PlayoffData WHERE Tournament = ? ORDER BY event_division");
+      prep.setInt(1, tournament);
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final String division = rs.getString(1);
+        list.add(division);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+    return list;
+  }
+
 }
