@@ -159,7 +159,11 @@ public class TestAJAXBrackets {
           + confirmVerifyChange.getText());
       confirmVerifyChange.accept();
 
+      // give the web server a chance to catch up
+      Thread.sleep(1000);
+
       selenium.switchTo().window(bracketsWindow.getWindowHandle());
+      // run the javascript to refresh everything
       seleniumJS.executeScript("window.iterate();");
 
       // give the web server a chance to catch up
