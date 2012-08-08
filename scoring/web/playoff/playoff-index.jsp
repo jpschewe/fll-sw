@@ -17,11 +17,11 @@
 		<x:out select="$challengeDocument/fll/@title" />
 		(Playoff menu)
 	</h1>
-	
-		${message}
+
+	${message}
 	<%-- clear out the message, so that we don't see it again --%>
 	<c:remove var="message" />
-	
+
 	<ol>
 		<li>If using the automatic table assignment feature for
 			scoresheet generation, make certain to set up labels for each of your
@@ -41,7 +41,8 @@
 			</form>
 		<li><b>WARNING: Do not initialize playoff brackets for a
 				division until all seeding runs for that division have been
-				recorded!</b><br>
+				recorded!</b> Doing so will automatically add bye runs to the teams that
+			don't have enough seeding runs.<br />
 			<form name='initialize' action='initializebrackets.jsp' method='post'>
 				Select Division: <select id='initialize-division' name='division'>
 					<c:forEach items="${eventDivisions }" var="division">
