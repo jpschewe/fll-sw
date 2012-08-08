@@ -160,7 +160,7 @@ public class TestAJAXBrackets {
       confirmVerifyChange.accept();
 
       selenium.switchTo().window(bracketsWindow.getWindowHandle());
-      seleniumJS.executeScript("window.iterate();");
+//      seleniumJS.executeScript("window.iterate();");
 
       // give the web server a chance to catch up
       Thread.sleep(30000);
