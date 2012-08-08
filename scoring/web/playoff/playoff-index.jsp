@@ -17,6 +17,11 @@
 		<x:out select="$challengeDocument/fll/@title" />
 		(Playoff menu)
 	</h1>
+	
+		${message}
+	<%-- clear out the message, so that we don't see it again --%>
+	<c:remove var="message" />
+	
 	<ol>
 		<li>If using the automatic table assignment feature for
 			scoresheet generation, make certain to set up labels for each of your
@@ -66,7 +71,7 @@
 								</c:choose>
 							</c:forEach>
 						</select> to
-						<!-- numPlayoffRounds+1 == the column in which the 1st place winner is displayed  -->
+						<%-- numPlayoffRounds+1 == the column in which the 1st place winner is displayed  --%>
 						<select name='lastRound'>
 							<c:forEach begin="2" end="${numPlayoffRounds+1 }" var="numRounds">
 								<c:choose>
@@ -103,7 +108,7 @@
 							</c:forEach>
 						</select> to
 
-						<!-- numPlayoffRounds+1 == the column in which the 1st place winner is displayed  -->
+						<%-- numPlayoffRounds+1 == the column in which the 1st place winner is displayed  --%>
 						<select name='lastRound'>
 							<c:forEach begin="2" end="${numPlayoffRounds+1 }" var="numRounds">
 								<c:choose>
