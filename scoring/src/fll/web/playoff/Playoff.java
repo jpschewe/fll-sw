@@ -5,7 +5,6 @@
  */
 package fll.web.playoff;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -411,7 +410,7 @@ public final class Playoff {
   public static void initializeBrackets(final Connection connection,
                                         final Document challengeDocument,
                                         final String division,
-                                        final boolean enableThird) throws IOException, SQLException, ParseException {
+                                        final boolean enableThird) throws SQLException {
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("initializing brackets for division: "

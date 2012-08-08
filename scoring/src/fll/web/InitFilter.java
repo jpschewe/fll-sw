@@ -112,7 +112,7 @@ public class InitFilter implements Filter {
             || path.startsWith(contextPath
                 + "/schedule/") //
             || path.startsWith(contextPath
-                + "/playoff/initializebrackets.jsp") //
+                + "/playoff/InitializeBrackets") //
             || path.startsWith(contextPath
                 + "/playoff/scoregenbrackets.jsp") //
         || path.startsWith(contextPath
