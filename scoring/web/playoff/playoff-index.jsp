@@ -43,7 +43,7 @@
 				division until all seeding runs for that division have been
 				recorded!</b> Doing so will automatically add bye runs to the teams that
 			don't have enough seeding runs.<br />
-			<form name='initialize' action='initializebrackets.jsp' method='post'>
+			<form name='initialize' action='InitializeBrackets' method='post'>
 				Select Division: <select id='initialize-division' name='division'>
 					<c:forEach items="${eventDivisions }" var="division">
 						<option value='${division}'>${division}</option>
