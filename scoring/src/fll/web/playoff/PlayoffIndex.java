@@ -4,7 +4,7 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-package fll.web.admin;
+package fll.web.playoff;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -25,21 +25,18 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
 
-import fll.Tournament;
 import fll.db.Queries;
-import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
 /**
- * Index page for admin.
+ * Index page for playoffs.
  */
-@WebServlet("/admin/index.jsp")
-public class AdminIndex extends BaseFLLServlet {
+@WebServlet("/playoff/index.jsp")
+public class PlayoffIndex extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -54,8 +51,6 @@ public class AdminIndex extends BaseFLLServlet {
       message.append(existingMessage);
     }
 
-    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
-
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     ResultSet rs = null;
     ResultSet rs2 = null;
@@ -69,40 +64,11 @@ public class AdminIndex extends BaseFLLServlet {
       final int currentTournamentID = Queries.getCurrentTournament(connection);
       session.setAttribute("currentTournamentID", currentTournamentID);
 
-      session.setAttribute("playoffsInitialized",
-                           Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
+      final List<String> divisions = Queries.getEventDivisions(connection);
+      session.setAttribute("playoffDivisions", divisions);
 
-      final int scoresheetsPerPage = Queries.getScoresheetLayoutNUp(connection);
-      session.setAttribute("scoressheetsPerPage", scoresheetsPerPage);
-
-      final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournamentID);
-      session.setAttribute("numSeedingRounds", numSeedingRounds);
-
-      final List<Tournament> tournaments = Tournament.getTournaments(connection);
-      session.setAttribute("tournaments", tournaments);
-
-      boolean teamsUploaded = false;
-      rs = stmt.executeQuery("SELECT COUNT(*) FROM Teams WHERE TeamNumber >= 0");
-      while (rs.next()) {
-        final int count = rs.getInt(1);
-        teamsUploaded = count > 0;
-      }
-      session.setAttribute("teamsUploaded", teamsUploaded);
-
-      session.setAttribute("scheduleUploaded",
-                           TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID));
-
-      session.setAttribute("judgesAssigned", Queries.isJudgesProperlyAssigned(connection, challengeDocument));
-
-      boolean tablesAssigned = false;
-      prep = connection.prepareStatement("SELECT COUNT(*) FROM tablenames WHERE Tournament = ?");
-      prep.setInt(1, currentTournamentID);
-      rs2 = prep.executeQuery();
-      while (rs2.next()) {
-        final int count = rs2.getInt(1);
-        tablesAssigned = count > 0;
-      }
-      session.setAttribute("tablesAssigned", tablesAssigned);
+      final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
+      session.setAttribute("numPlayoffRounds", numPlayoffRounds);
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
@@ -120,7 +86,7 @@ public class AdminIndex extends BaseFLLServlet {
     session.setAttribute("servletLoaded", true);
 
     session.setAttribute(SessionAttributes.MESSAGE, message.toString());
-    response.sendRedirect(response.encodeRedirectURL("admin-index.jsp"));
+    response.sendRedirect(response.encodeRedirectURL("playoff-index.jsp"));
   }
 
 }
