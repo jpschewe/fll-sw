@@ -1,5 +1,9 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
+<c:if test="${not servletLoaded }">
+	<c:redirect url="index.jsp" />
+</c:if>
+<c:remove var="servletLoaded" />
 
 <html>
 <head>
