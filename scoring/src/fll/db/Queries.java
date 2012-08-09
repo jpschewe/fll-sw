@@ -1252,14 +1252,14 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
   }
-  
+
   /**
    * Set judging station for a team.
    */
   public static void setJudgingStation(final Connection connection,
-                                      final int teamNumber,
-                                      final int tournament,
-                                      final String judgingStation) throws SQLException {
+                                       final int teamNumber,
+                                       final int tournament,
+                                       final String judgingStation) throws SQLException {
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("UPDATE TournamentTeams SET judging_station = ? WHERE TeamNumber = ? AND Tournament = ?");
@@ -1271,7 +1271,6 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
   }
-
 
   /**
    * Get a list of team numbers that have fewer runs than seeding rounds. This
@@ -2850,8 +2849,9 @@ public final class Queries {
    * @throws SQLException on database errors.
    */
   public static int getNumPlayoffRounds(final Connection connection) throws SQLException {
+    final int tournament = getCurrentTournament(connection);
     int numRounds = 0;
-    for (final String division : getEventDivisions(connection)) {
+    for (final String division : Playoff.getPlayoffDivisions(connection, tournament)) {
       final int x = getFirstPlayoffRoundSize(connection, division);
       if (x > 0) {
         numRounds = Math.max((int) Math.round(Math.log(x)
@@ -2865,7 +2865,7 @@ public final class Queries {
    * Get size of first playoff round.
    * 
    * @param connection Database connection to use.
-   * @param division The division for which to look up round 1 size.
+   * @param division The playoff division for which to look up round 1 size.
    * @return The size of the first round of the playoffs. This is always a power
    *         of 2, and is greater than the number of teams in the tournament by
    *         the number of byes in the first round.
