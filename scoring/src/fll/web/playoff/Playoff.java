@@ -9,7 +9,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -362,12 +361,15 @@ public final class Playoff {
     if (null == team) {
       throw new IllegalArgumentException("Cannot get score for null team");
     } else {
-      Statement stmt = null;
+      PreparedStatement stmt = null;
       ResultSet rs = null;
       try {
-        stmt = connection.createStatement();
-        rs = stmt.executeQuery("SELECT ComputedTotal FROM Performance WHERE TeamNumber = "
-            + team.getTeamNumber() + " AND Tournament = " + tournament + " AND RunNumber = " + runNumber);
+        stmt = connection.prepareStatement("SELECT ComputedTotal FROM Performance WHERE TeamNumber = ?"
+            + " AND Tournament = ?" + " AND RunNumber = ?");
+        stmt.setInt(1, team.getTeamNumber());
+        stmt.setInt(2, tournament);
+        stmt.setInt(3, runNumber);
+        rs = stmt.executeQuery();
         if (rs.next()) {
           return rs.getDouble(1);
         } else {
