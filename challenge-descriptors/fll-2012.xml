@@ -195,7 +195,7 @@
     <value score="0" title="None" value="none"/>
   </goal>
   
-  <goal name="similarity" title="Pointer is Paralell" multiplier="45"/>
+  <goal name="similarity" title="Pointer is Parallel" multiplier="45"/>
   
   <goal name="ball_game_balls" title="Balls on Rack" multiplier="10" max="7"/>
   
