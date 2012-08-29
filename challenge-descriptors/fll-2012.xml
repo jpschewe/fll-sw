@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fll title="MN FIRST LEGO League Tournament" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 1">
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 2">
   
   <Performance minimumScore="0" weight="1.0">
     <goal name="wood_working" title="Wood Working" initialValue="0">
@@ -53,8 +53,7 @@
   
   <goal name="orange_quilting" title="Orange Quilts Touching" multiplier="30" max="2"/>
   
-  <!-- TODO: Not have to zero-key this goal, so refs don't mess it up -->
-  <goal name="cardio_exercise_major" title="Cardio Dot" multiplier="0" max="8" min="0" initialValue="2"/>
+  <goal name="cardio_exercise_major" title="Cardio Dot" multiplier="0" max="9" min="1" initialValue="3"/>
   <goal name="cardio_exercise_minor" title="Cardio Ticks" multiplier="0" max="5"/>
   <!-- 
   On the Challenge's image of the Pointer Position, it shows major and minor portions.
@@ -87,6 +86,7 @@
     <variable name="progression_scale_1">
       <term scoreType="raw" goal="cardio_exercise_major" coefficient="6"/>
       <term scoreType="raw" goal="cardio_exercise_minor"/>
+      <constant value="-6"/>
     </variable>
     <variable name="progression_scale_1_max_points">
       <constant value="120"/>
@@ -94,7 +94,7 @@
     <variable name="progression_scale_2">
       <term scoreType="raw" goal="cardio_exercise_major" coefficient="6"/>
       <term scoreType="raw" goal="cardio_exercise_minor"/>
-      <constant value="-24"/>
+      <constant value="-30"/>
     </variable>
     <variable name="progression_scale_2_max_points">
       <constant value="166"/>
@@ -102,7 +102,7 @@
     <variable name="progression_scale_3">
       <term scoreType="raw" goal="cardio_exercise_major" coefficient="6"/>
       <term scoreType="raw" goal="cardio_exercise_minor"/>
-      <constant value="-36"/>
+      <constant value="-42"/>
     </variable>
     <variable name="bonus">
       <constant value="10"/>
@@ -181,7 +181,10 @@
       </default>
     </switch>
   </computedGoal>
-  
+  <restriction lowerBound="6" upperBound="54" message="Invalid Cardio Entries">
+    <term scoreType="raw" goal="cardio_exercise_major" coefficient="6"/>
+    <term scoreType="raw" goal="cardio_exercise_minor"/>
+  </restriction>
   
   <goal name="flexibility" title="Yellow Loops in Base" multiplier="20" max="2"/>
   
@@ -199,5 +202,47 @@
   
   </Performance>
   
-  <!-- TODO: Add subjective stuff. -->
+  <subjectiveCategory name="core_values" title="Core Values" weight="1.0">
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="discovery" title="Discovery"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="team_spirit" title="Team Spirit"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="integration" title="Integration"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="effectiveness" title="Effectiveness"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="efficiency" title="Efficiency"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Do the Work"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="inclusion" title="Inclusion"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="respect" title="Respect"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="coopertition" title="Coopertition"></goal>
+  </subjectiveCategory>
+  <subjectiveCategory name="project" title="Project" weight="1.0">
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="problem_identification" title="Problem Identification"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="sources_information" title="Sources of Information"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="problem_analysis" title="Problem Analysis"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="review" title="Review Existing Solutions"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="team_solution" title="Team Solution"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="implementation" title="Implementation"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="presentation_effectiveness" title="Presentation Effectiveness"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="creativity" title="Creativity"></goal>
+   <goal initialValue="0" max="12" min="0" multiplier="1" name="sharing" title="Sharing"></goal>
+  </subjectiveCategory>
+  <subjectiveCategory name="robot_design" title="Robot Design" weight="0.5">
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="durability" title="Durability"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="mechanical_efficiency" title="Mechanical Efficiency"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="mechanization" title="Mechanization"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="attachments" title="Attachments and Sensors"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Did the Work"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="design_process" title="Design Process"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="mission_strategy" title="Mission Strategy"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation"></goal>
+  </subjectiveCategory>
+  <subjectiveCategory name="robot_programming" title="Robot Programming" weight="0.5">
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="code_structure" title="Code Structure and Reuse"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Did the Work"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="quality" title="Programming Quality"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="efficiency" title="Programming Efficiency"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="automation" title="Automation/Navigation"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="design_process" title="Design Process"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="mission_strategy" title="Mission Strategy"></goal>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation"></goal>
+  </subjectiveCategory>
 </fll>
