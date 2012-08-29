@@ -84,10 +84,6 @@
     The same happens for scale 3, and the subset of scale 2 with the 10 point bonus.
   -->
   <computedGoal name="cardio_progression" title="Cardio Progression">
-    <variable name="major_zero_keyed">
-      <term scoreType="raw" goal="cardio_exercise_major"/>
-      <constant value="-1"/>
-    </variable>
     <variable name="progression_scale_1">
       <term scoreType="raw" goal="cardio_exercise_major" coefficient="6"/>
       <term scoreType="raw" goal="cardio_exercise_minor"/>
