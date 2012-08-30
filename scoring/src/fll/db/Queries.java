@@ -1126,7 +1126,9 @@ public final class Queries {
   }
 
   /**
-   * Update a row in the playoff table.
+   * Update a row in the playoff table. Assign the specified team and printed
+   * flags for the row found by (event_division, Tournament, PlayoffRound,
+   * LineNumber).
    */
   private static void updatePlayoffTable(final Connection connection,
                                          final int teamNumber,
@@ -1134,7 +1136,6 @@ public final class Queries {
                                          final int currentTournament,
                                          final int playoffRound,
                                          final int lineNumber) throws SQLException {
-    //FIXME use run number here
     PreparedStatement prep = null;
     try {
       // TODO ticket:5 cache this for later, should make Queries be an
