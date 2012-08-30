@@ -446,13 +446,17 @@ public final class Playoff {
           + firstRound);
     }
 
+    // FIXME need to figure out how to compute this for multiple sets of
+    // brackets. run_number may overlap, but never for the same team
+    final int baseRunNumber = Queries.getNumSeedingRounds(connection, currentTournament);
+
     PreparedStatement insertStmt = null;
     PreparedStatement selStmt = null;
     ResultSet rs = null;
     try {
-      //FIXME needs to insert run_number
       insertStmt = connection.prepareStatement("INSERT INTO PlayoffData"
-          + " (Tournament, event_division, PlayoffRound, LineNumber, Team)" + " VALUES (?, ?, ?, ?, ?)");
+          + " (Tournament, event_division, PlayoffRound, LineNumber, Team, run_number)" //
+          + " VALUES (?, ?, ?, ?, ?, ?)");
 
       // Insert those teams into the database.
       // At this time we let the table assignment field default to NULL.
@@ -460,6 +464,7 @@ public final class Playoff {
       insertStmt.setInt(1, currentTournament);
       insertStmt.setString(2, division);
       insertStmt.setInt(3, 1);
+      insertStmt.setInt(6, 1 + baseRunNumber);
       int lineNbr = 1;
       while (it.hasNext()) {
         insertStmt.setInt(4, lineNbr);
@@ -477,6 +482,7 @@ public final class Playoff {
       insertStmt.setString(2, division);
       while (currentRoundSize > 0) {
         insertStmt.setInt(3, roundNumber);
+        insertStmt.setInt(6, roundNumber + baseRunNumber);
         lineNbr = currentRoundSize;
         if (enableThird
             && currentRoundSize <= 2) {
