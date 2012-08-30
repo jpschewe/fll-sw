@@ -28,7 +28,6 @@ import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Tournament;
-import fll.Utilities;
 import fll.util.LogUtils;
 
 /**
@@ -39,7 +38,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 7;
+  public static final int DATABASE_VERSION = 8;
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -136,12 +135,13 @@ public final class GenerateDB {
       stmt.executeUpdate("CREATE TABLE PlayoffData ("
           + " event_division varchar(32) NOT NULL," //
           + " Tournament INTEGER  NOT NULL," //
-          + " PlayoffRound integer NOT NULL," //
-          + " LineNumber integer NOT NULL," //
+          + " PlayoffRound integer NOT NULL," // roud of this set of playoff brackets
+          + " LineNumber integer NOT NULL," // the line in the brackets that are displayed
           + " Team integer default " + Team.NULL_TEAM_NUMBER + "," //
           + " AssignedTable varchar(64) default NULL," //
           + " Printed boolean default FALSE," //
-          + " CONSTRAINT playoff_data_pk PRIMARY KEY (event_division, Tournament, PlayoffRound, LineNumber)" //
+          + " run_number integer NOT NULL," // the performance run number for this score
+          + " CONSTRAINT playoff_data_pk PRIMARY KEY (event_division, Tournament, run_number, LineNumber)" //
           + ",CONSTRAINT playoff_data_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
           + ",CONSTRAINT playoff_data_fk2 FOREIGN KEY(Team) REFERENCES Teams(TeamNumber)" + ")"); //
 

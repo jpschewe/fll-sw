@@ -176,7 +176,8 @@ public final class ImportDB {
     Statement memStmt = null;
     ResultSet memRS = null;
     try {
-      final String databaseName = "dbimport" + String.valueOf(ImportDBDump.getNextDBCount()); 
+      final String databaseName = "dbimport"
+          + String.valueOf(ImportDBDump.getNextDBCount());
       final DataSource memSource = Utilities.createMemoryDataSource(databaseName);
       memConnection = memSource.getConnection();
 
@@ -475,6 +476,9 @@ public final class ImportDB {
     if (dbVersion < 7) {
       upgrade6To7(connection);
     }
+    if (dbVersion < 8) {
+      upgrade7To8(connection);
+    }
     final int newVersion = Queries.getDatabaseVersion(connection);
     if (newVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
@@ -534,6 +538,34 @@ public final class ImportDB {
     } finally {
       SQLFunctions.close(rs);
       rs = null;
+      SQLFunctions.close(stmt);
+      stmt = null;
+      SQLFunctions.close(prep);
+      prep = null;
+    }
+  }
+
+  /**
+   * Add run_number to the playoff table.
+   */
+  private static void upgrade7To8(final Connection connection) throws SQLException {
+    Statement stmt = null;
+    PreparedStatement prep = null;
+    try {
+      stmt = connection.createStatement();
+      stmt.executeUpdate("ALTER TABLE PlayoffData ADD COLUMN run_number integer");
+
+      final List<Tournament> tournaments = Tournament.getTournaments(connection);
+      for (final Tournament tournament : tournaments) {
+        final int seedingRounds = Queries.getNumSeedingRounds(connection, tournament.getTournamentID());
+
+        prep = connection.prepareStatement("UPDATE PlayoffData SET run_number = ? + PlayoffRound");
+        prep.setInt(1, seedingRounds);
+        prep.executeUpdate();
+      }
+      
+      setDBVersion(connection, 8);
+    } finally {
       SQLFunctions.close(stmt);
       stmt = null;
       SQLFunctions.close(prep);
@@ -881,15 +913,15 @@ public final class ImportDB {
       destPrep.executeUpdate();
       SQLFunctions.close(destPrep);
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT event_division, PlayoffRound, LineNumber, Team, AssignedTable, Printed "
+      sourcePrep = sourceConnection.prepareStatement("SELECT event_division, PlayoffRound, LineNumber, Team, AssignedTable, Printed, run_number "
           + "FROM PlayoffData WHERE Tournament=?");
       sourcePrep.setInt(1, sourceTournamentID);
       destPrep = destinationConnection.prepareStatement("INSERT INTO PlayoffData (Tournament, event_division, PlayoffRound,"
-          + "LineNumber, Team, AssignedTable, Printed) VALUES (?, ?, ?, ?, ?, ?, ?)");
+          + "LineNumber, Team, AssignedTable, Printed, run_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
-        for (int i = 1; i <= 6; i++) {
+        for (int i = 1; i <= 7; i++) {
           Object sourceObj = sourceRS.getObject(i);
           if ("".equals(sourceObj)) {
             sourceObj = null;
