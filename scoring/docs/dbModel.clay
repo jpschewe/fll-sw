@@ -101,7 +101,7 @@
 <primary-key-column name="event_division"/>
 <primary-key-column name="Tournament"/>
 <primary-key-column name="LineNumber"/>
-<primary-key-column name="run_number"/>
+<primary-key-column name="PlayoffRound"/>
 </primary-key>
 <foreign-key-list>
 <foreign-key id="1f769f17:1248908e683:-7e97" name="FK_PlayoffData_2" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TEAMS" referenced-table="Teams" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
