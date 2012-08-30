@@ -445,9 +445,11 @@ public final class Playoff {
       LOGGER.debug("initial bracket order: "
           + firstRound);
     }
+    //FIXME add exception if any team in this playoff is involved in an unfinished playoff
 
     // FIXME need to figure out how to compute this for multiple sets of
-    // brackets. run_number may overlap, but never for the same team
+    // brackets. run_number may overlap, but never for the same team with the
+    // exception of the NULL team
     final int baseRunNumber = Queries.getNumSeedingRounds(connection, currentTournament);
 
     PreparedStatement insertStmt = null;
@@ -482,7 +484,8 @@ public final class Playoff {
       insertStmt.setString(2, division);
       while (currentRoundSize > 0) {
         insertStmt.setInt(3, roundNumber);
-        insertStmt.setInt(6, roundNumber + baseRunNumber);
+        insertStmt.setInt(6, roundNumber
+            + baseRunNumber);
         lineNbr = currentRoundSize;
         if (enableThird
             && currentRoundSize <= 2) {
