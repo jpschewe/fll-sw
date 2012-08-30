@@ -135,15 +135,19 @@ public final class GenerateDB {
       stmt.executeUpdate("CREATE TABLE PlayoffData ("
           + " event_division varchar(32) NOT NULL," //
           + " Tournament INTEGER  NOT NULL," //
-          + " PlayoffRound integer NOT NULL," // roud of this set of playoff brackets
-          + " LineNumber integer NOT NULL," // the line in the brackets that are displayed
+          + " PlayoffRound integer NOT NULL," // round of this set of playoff
+                                              // brackets
+          + " LineNumber integer NOT NULL," // the line in the brackets that are
+                                            // displayed
           + " Team integer default " + Team.NULL_TEAM_NUMBER + "," //
           + " AssignedTable varchar(64) default NULL," //
           + " Printed boolean default FALSE," //
-          + " run_number integer NOT NULL," // the performance run number for this score
-          + " CONSTRAINT playoff_data_pk PRIMARY KEY (event_division, Tournament, PlayoffRounds, LineNumber)" //
+          + " run_number integer NOT NULL," // the performance run number for
+                                            // this score
+          + " CONSTRAINT playoff_data_pk PRIMARY KEY (event_division, Tournament, PlayoffRound, LineNumber)" //
           + ",CONSTRAINT playoff_data_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
-          + ",CONSTRAINT playoff_data_fk2 FOREIGN KEY(Team) REFERENCES Teams(TeamNumber)" + ")"); //
+          + ",CONSTRAINT playoff_data_fk2 FOREIGN KEY(Team) REFERENCES Teams(TeamNumber)" //
+          + ")");
 
       // table to hold team numbers of teams in this tournament
       if (forceRebuild) {
