@@ -127,6 +127,7 @@ public class ScoresheetGenerator {
       PreparedStatement updatePrep = null;
       try {
         // build up the SQL
+        //FIXME use run number here
         updatePrep = connection.prepareStatement("UPDATE PlayoffData SET Printed=true, AssignedTable=?"
             + " WHERE event_division=? AND Tournament=? AND PlayoffRound=? AND Team=?");
         // could do division here, too, but since getting it from Team object,

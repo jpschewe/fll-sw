@@ -450,6 +450,7 @@ public final class Playoff {
     PreparedStatement selStmt = null;
     ResultSet rs = null;
     try {
+      //FIXME needs to insert run_number
       insertStmt = connection.prepareStatement("INSERT INTO PlayoffData"
           + " (Tournament, event_division, PlayoffRound, LineNumber, Team)" + " VALUES (?, ?, ?, ?, ?)");
 

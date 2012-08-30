@@ -141,7 +141,7 @@ public final class GenerateDB {
           + " AssignedTable varchar(64) default NULL," //
           + " Printed boolean default FALSE," //
           + " run_number integer NOT NULL," // the performance run number for this score
-          + " CONSTRAINT playoff_data_pk PRIMARY KEY (event_division, Tournament, PlayoffRound, LineNumber)" //
+          + " CONSTRAINT playoff_data_pk PRIMARY KEY (event_division, Tournament, PlayoffRounds, LineNumber)" //
           + ",CONSTRAINT playoff_data_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
           + ",CONSTRAINT playoff_data_fk2 FOREIGN KEY(Team) REFERENCES Teams(TeamNumber)" + ")"); //
 
