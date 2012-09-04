@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="MN FIRST LEGO League Tournament" xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 3">
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="MN FIRST LEGO League Tournament" xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 4">
   <Performance minimumScore="0" weight="1.0">
-    <goal name="wood_working" title="Wood Working" initialValue="0">
+    <goal name="wood_working" title="Chair - Wood Working" initialValue="0">
       <value score="25" title="Under table" value="under"/>
       <value score="15" title="In base" value="base"/>
       <value score="0" title="None" value="none"/>
     </goal>
     
-    <goal name="medicine" title="Medicine in Base" multiplier="25"/>
+    <goal name="medicine" title="Green Medicine in Base" multiplier="25"/>
     
     <goal name="service_animal" title="Service Animal in Base" multiplier="20"/>
     
@@ -34,7 +34,7 @@
       </switch>
     </computedGoal>
     
-    <goal name="strength_exercise" title="Weight Location" initialValue="0">
+    <goal name="strength_exercise" title="Raised Weight Location" initialValue="0">
       <value score="25" title="High" value="high"/>
       <value score="15" title="Low" value="low"/>
       <value score="0" title="Below" value="below"/>
@@ -50,8 +50,8 @@
     
     <goal name="orange_quilting" title="Orange Quilts Touching" multiplier="30" max="2"/>
     
-    <goal name="cardio_exercise_major" title="Cardio Dot" multiplier="0" max="9" min="1" initialValue="3"/>
-    <goal name="cardio_exercise_minor" title="Cardio Ticks" multiplier="0" max="5"/>
+    <goal name="cardio_exercise_major" title="Large Cardio Dot" multiplier="0" max="9" min="1" initialValue="3"/>
+    <goal name="cardio_exercise_minor" title="Small Cardio Ticks" multiplier="0" max="5"/>
     <!-- 
     On the Challenge's image of the Pointer Position, it shows major and minor portions.
     The major portions are indicated by a physical LEGO light, while the minor portions
@@ -185,15 +185,15 @@
     
     <goal name="flexibility" title="Yellow Loops in Base" multiplier="20" max="2"/>
     
-    <goal name="transitions" title="Bridge Position" initialValue="0">
+    <goal name="transitions" title="Ending Bridge Position" initialValue="0">
       <value score="65" title="Balanced" value="balanced"/>
       <value score="45" title="Tilted" value="tilted"/>
       <value score="0" title="None" value="none"/>
     </goal>
     
-    <goal name="similarity" title="Pointer is Parallel" multiplier="45"/>
+    <goal name="similarity" title="Both Pointers are Paralell" multiplier="45"/>
     
-    <goal name="ball_game_balls" title="Balls on Rack" multiplier="10" max="7" initialValue="7"/>
+    <goal name="ball_game_balls" title="Total Balls on Rack" multiplier="10" max="7" initialValue="7"/>
     
     <goal name="ball_game_center_ball" title="Team's Ball in Center" multiplier="60"/>
     
