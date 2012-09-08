@@ -9,6 +9,7 @@ package fll.web.playoff;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -23,6 +24,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
+import fll.Team;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -34,6 +36,11 @@ import fll.web.SessionAttributes;
  */
 @WebServlet("/playoff/InitializeBrackets")
 public class InitializeBrackets extends BaseFLLServlet {
+
+  /**
+   * Collection of teams at this tournament in a Collection<Team>.
+   */
+  public static final String TEAMS = "teams";
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -56,30 +63,41 @@ public class InitializeBrackets extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
     Connection connection = null;
+    String redirect = "index.jsp";
     try {
       connection = datasource.getConnection();
 
       final String divisionStr = request.getParameter("division");
+
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("division: '"
+            + divisionStr + "'");
+      }
+
       if (null == divisionStr) {
         message.append("<p class='error'>No division specified.</p>");
-        return;
-      }
-
-      final String thirdFourthPlaceBrackets = request.getParameter("enableThird");
-      boolean enableThird;
-      if (null == thirdFourthPlaceBrackets) {
-        enableThird = false;
+      } else if (PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION.equals(divisionStr)) {
+        final Collection<Team> teams = Queries.getTournamentTeams(connection).values();
+        session.setAttribute(TEAMS, teams);
+        redirect = "create_playoff_division.jsp";
       } else {
-        enableThird = true;
-      }
 
-      if (Queries.isPlayoffDataInitialized(connection, divisionStr)) {
-        message.append("<p class='warning'>Playoffs have already been initialized for division "
-            + divisionStr + ".</p>");
-      } else {
-        Playoff.initializeBrackets(connection, challengeDocument, divisionStr, enableThird);
-        message.append("<p>Playoffs have been successfully initialized for division "
-            + divisionStr + ".</p>");
+        final String thirdFourthPlaceBrackets = request.getParameter("enableThird");
+        boolean enableThird;
+        if (null == thirdFourthPlaceBrackets) {
+          enableThird = false;
+        } else {
+          enableThird = true;
+        }
+
+        if (Queries.isPlayoffDataInitialized(connection, divisionStr)) {
+          message.append("<p class='warning'>Playoffs have already been initialized for division "
+              + divisionStr + ".</p>");
+        } else {
+          Playoff.initializeBrackets(connection, challengeDocument, divisionStr, enableThird);
+          message.append("<p>Playoffs have been successfully initialized for division "
+              + divisionStr + ".</p>");
+        }
       }
 
     } catch (final SQLException sqle) {
@@ -92,7 +110,7 @@ public class InitializeBrackets extends BaseFLLServlet {
     }
 
     session.setAttribute(SessionAttributes.MESSAGE, message.toString());
-    response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+    response.sendRedirect(response.encodeRedirectURL(redirect));
   }
 
 }

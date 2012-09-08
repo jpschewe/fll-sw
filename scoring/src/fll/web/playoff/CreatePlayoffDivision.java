@@ -8,10 +8,7 @@ package fll.web.playoff;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -33,14 +30,12 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 
 /**
- * Index page for playoffs.
+ * Create a new playoff division.
  */
-@WebServlet("/playoff/index.jsp")
-public class PlayoffIndex extends BaseFLLServlet {
+@WebServlet("/playoff/CreatePlayoffDivision")
+public class CreatePlayoffDivision extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-  
-  public static final String CREATE_NEW_PLAYOFF_DIVISION = "Create Playoff Division...";
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -53,51 +48,41 @@ public class PlayoffIndex extends BaseFLLServlet {
       message.append(existingMessage);
     }
 
+    String redirect = "index.jsp";
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    ResultSet rs = null;
-    ResultSet rs2 = null;
-    Statement stmt = null;
-    PreparedStatement prep = null;
     Connection connection = null;
     try {
       connection = datasource.getConnection();
-      stmt = connection.createStatement();
 
-      
       final int currentTournamentID = Queries.getCurrentTournament(connection);
-      session.setAttribute("currentTournamentID", currentTournamentID);
 
-      final List<String> divisions = Queries.getEventDivisions(connection, currentTournamentID);
-      
-      // add the option of creating new event divisions
-      divisions.add(CREATE_NEW_PLAYOFF_DIVISION);
-      
-      session.setAttribute("eventDivisions", divisions);
-
-      
       final List<String> playoffDivisions = Playoff.getPlayoffDivisions(connection, currentTournamentID);
-      session.setAttribute("playoffDivisions", playoffDivisions);
 
-      final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
-      session.setAttribute("numPlayoffRounds", numPlayoffRounds);
-
+      final String name = request.getParameter("division_name");
+      if (null == name
+          || "".equals(name)) {
+        message.append("<p class='error'>You need to specify a name for the palyoff division</p>");
+        redirect = "create_playoff_division.jsp";
+      } else if (playoffDivisions.contains(name)) {
+        message.append("<p class='error'>The division '"
+            + name + "' already exists, please pick a different name");
+        redirect = "create_playoff_division.jsp";
+      } else {
+        // FIXME check that teams aren't involved in an unfinished playoff
+        message.append("<p class='error'>Creating playoff divisions not implemented yet</p>");
+      }
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
           + sqle.getMessage() + "</p>");
       LOGGER.error(sqle, sqle);
-      throw new RuntimeException("Error saving team data into the database", sqle);
+      throw new RuntimeException("Error talking to the database", sqle);
     } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(rs2);
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(prep);
       SQLFunctions.close(connection);
     }
 
-    session.setAttribute("servletLoaded", true);
-
     session.setAttribute(SessionAttributes.MESSAGE, message.toString());
-    response.sendRedirect(response.encodeRedirectURL("playoff-index.jsp"));
+    response.sendRedirect(response.encodeRedirectURL(redirect));
+
   }
 
 }
