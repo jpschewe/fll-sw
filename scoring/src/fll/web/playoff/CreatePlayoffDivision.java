@@ -9,6 +9,7 @@ package fll.web.playoff;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -22,6 +23,7 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
 
 import fll.db.Queries;
 import fll.util.LogUtils;
@@ -50,6 +52,7 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
 
     String redirect = "index.jsp";
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
     Connection connection = null;
     try {
       connection = datasource.getConnection();
@@ -58,18 +61,47 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
 
       final List<String> playoffDivisions = Playoff.getPlayoffDivisions(connection, currentTournamentID);
 
-      final String name = request.getParameter("division_name");
-      if (null == name
-          || "".equals(name)) {
+      final String divisionStr = request.getParameter("division_name");
+      if (null == divisionStr
+          || "".equals(divisionStr)) {
         message.append("<p class='error'>You need to specify a name for the palyoff division</p>");
         redirect = "create_playoff_division.jsp";
-      } else if (playoffDivisions.contains(name)) {
+      } else if (playoffDivisions.contains(divisionStr)) {
         message.append("<p class='error'>The division '"
-            + name + "' already exists, please pick a different name");
+            + divisionStr + "' already exists, please pick a different name");
         redirect = "create_playoff_division.jsp";
       } else {
-        // FIXME check that teams aren't involved in an unfinished playoff
-        message.append("<p class='error'>Creating playoff divisions not implemented yet</p>");
+        final String[] selectedTeams = request.getParameterValues("selected_team");
+        final List<Integer> teamNumbers = new LinkedList<Integer>();
+        for (final String teamStr : selectedTeams) {
+          final int num = Integer.valueOf(teamStr);
+          teamNumbers.add(num);
+        }
+
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Selected team numbers: "
+              + teamNumbers);
+        }
+
+        final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournamentID, teamNumbers);
+        if (null != errors) {
+          message.append(errors);
+          redirect = "create_playoff_division.jsp";
+        } else {
+
+          message.append("<p class='error'>Creating playoff divisions not implemented yet</p>");
+
+          // final boolean enableThird =
+          // SessionAttributes.getNonNullAttribute(session,
+          // InitializeBrackets.ENABLE_THIRD_PLACE,
+          // Boolean.class);
+          // FIXME initializeBrackets doesn't handle custom divisions
+          // Playoff.initializeBrackets(connection, challengeDocument,
+          // divisionStr, enableThird);
+          message.append("<p>Playoffs have been successfully initialized for division "
+              + divisionStr + ".</p>");
+        }
+
       }
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "

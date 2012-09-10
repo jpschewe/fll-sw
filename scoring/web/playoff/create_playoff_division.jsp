@@ -35,7 +35,7 @@
 			<c:forEach items="${teams }" var="team">
 				<tr>
 
-					<td><input type="checkbox" name="${team.teamNumber }" /></td>
+					<td><input name="selected_team" type="checkbox" value="${team.teamNumber }" /></td>
 
 					<td>${team.teamNumber }</td>
 
