@@ -22,6 +22,7 @@ import java.util.Random;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -409,6 +410,15 @@ public final class Playoff {
     return Queries.isBye(connection, tournament, team.getTeamNumber(), runNumber);
   }
 
+  /**
+   * @param connection the connection
+   * @param challengeDocument challenge descriptor
+   * @param division the division to initialize
+   * @param enableThird true if 3rd place bracket needs to be computed
+   * @throws SQLException on database error
+   * @throws RuntimeException if teams for the brackets are involved in
+   *           unfinished playoffs
+   */
   public static void initializeBrackets(final Connection connection,
                                         final Document challengeDocument,
                                         final String division,
@@ -418,9 +428,21 @@ public final class Playoff {
       LOGGER.debug("initializing brackets for division: "
           + division + " enableThird: " + enableThird);
     }
+    final int currentTournament = Queries.getCurrentTournament(connection);
 
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-    final int currentTournament = Queries.getCurrentTournament(connection);
+
+    final List<Integer> teamNumbers = new LinkedList<Integer>();
+    for (final Team t : tournamentTeams.values()) {
+      teamNumbers.add(t.getTeamNumber());
+    }
+
+    final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournament, teamNumbers);
+    if (null != errors) {
+      throw new RuntimeException("Some teams are involved in unfinished playoffs: "
+          + errors);
+    }
+
     final List<String[]> tournamentTables = Queries.getTournamentTables(connection);
 
     final BracketSortType bracketSort = XMLUtils.getBracketSort(challengeDocument);
@@ -445,7 +467,6 @@ public final class Playoff {
       LOGGER.debug("initial bracket order: "
           + firstRound);
     }
-    //FIXME add exception if any team in this playoff is involved in an unfinished playoff
 
     // FIXME need to figure out how to compute this for multiple sets of
     // brackets. run_number may overlap, but never for the same team with the
@@ -680,6 +701,79 @@ public final class Playoff {
       SQLFunctions.close(prep);
     }
     return list;
+  }
+
+  /**
+   * Check if some teams are involved in an playoff bracket that isn't finished.
+   * 
+   * @return null if no teams are involved in an unfinished playoff
+   */
+  public static String involvedInUnfinishedPlayoff(final Connection connection,
+                                                   final int tournament,
+                                                   final List<Integer> teamNumbers) throws SQLException {
+    final StringBuilder message = new StringBuilder();
+
+    final String teamNumbersStr = StringUtils.join(teamNumbers, ",");
+
+    PreparedStatement divisionsPrep = null;
+    ResultSet divisions = null;
+    PreparedStatement checkPrep = null;
+    ResultSet check = null;
+    PreparedStatement detailPrep = null;
+    ResultSet detail = null;
+    try {
+      divisionsPrep = connection.prepareStatement("SELECT DISTINCT event_division from PlayoffData WHERE"
+          + " Tournament = ?" + " AND Team IN ( " + teamNumbersStr + " )");
+      divisionsPrep.setInt(1, tournament);
+      divisions = divisionsPrep.executeQuery();
+
+      checkPrep = connection.prepareStatement("SELECT * FROM PlayoffData WHERE" //
+          + " run_number = " //
+          + "   (SELECT MAX(run_number) FROM PlayoffData WHERE event_division = ?)" //
+          + "     AND team = ?");
+      checkPrep.setInt(2, Team.NULL.getTeamNumber());
+
+      detailPrep = connection.prepareStatement("SELECT DISTINCT Team from PlayoffData WHERE event_division = ?" //
+          + " AND Team IN ( " + teamNumbersStr + " )");
+
+      while (divisions.next()) {
+        final String eventDivision = divisions.getString(1);
+
+        checkPrep.setString(1, eventDivision);
+        check = checkPrep.executeQuery();
+        if (check.next()) {
+
+          detailPrep.setString(1, eventDivision);
+          detail = detailPrep.executeQuery();
+          while (detail.next()) {
+            final int teamNumber = detail.getInt(1);
+            message.append("<li>Team "
+                + teamNumber + " is involved in the playoff for '" + eventDivision + "', which isn't finished</li>");
+          }
+          SQLFunctions.close(detail);
+          detail = null;
+
+        }
+        SQLFunctions.close(check);
+        check = null;
+      }
+
+    } finally {
+      SQLFunctions.close(detail);
+      SQLFunctions.close(detailPrep);
+      SQLFunctions.close(check);
+      SQLFunctions.close(checkPrep);
+      SQLFunctions.close(divisions);
+      SQLFunctions.close(divisionsPrep);
+    }
+
+    if (message.length() == 0) {
+      return null;
+    } else {
+      return "<ul class='error'>"
+          + message.toString() + "</ul>";
+    }
+
   }
 
 }

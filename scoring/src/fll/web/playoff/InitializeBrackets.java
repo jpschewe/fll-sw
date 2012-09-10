@@ -42,6 +42,11 @@ public class InitializeBrackets extends BaseFLLServlet {
    */
   public static final String TEAMS = "teams";
 
+  /**
+   * Boolean if third place brackets should be enabled.
+   */
+  public static final String ENABLE_THIRD_PLACE = "enableThird";
+
   private static final Logger LOGGER = LogUtils.getLogger();
 
   @Override
@@ -89,6 +94,7 @@ public class InitializeBrackets extends BaseFLLServlet {
         } else {
           enableThird = true;
         }
+        session.setAttribute(ENABLE_THIRD_PLACE, enableThird);
 
         if (Queries.isPlayoffDataInitialized(connection, divisionStr)) {
           message.append("<p class='warning'>Playoffs have already been initialized for division "
