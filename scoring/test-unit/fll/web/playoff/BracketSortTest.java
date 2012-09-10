@@ -90,11 +90,11 @@ public class BracketSortTest {
 
       final List<Team> order = Playoff.buildInitialBracketOrder(connection, bracketSort, winnerCriteria, divisionStr, tournamentTeams);
       Assert.assertEquals("A", order.get(0).getTeamName());
-      Assert.assertEquals("B", order.get(1).getTeamName());
-      Assert.assertEquals("C", order.get(2).getTeamName());
-      Assert.assertEquals("D", order.get(3).getTeamName());
-      Assert.assertEquals("E", order.get(4).getTeamName());
-      Assert.assertEquals(Team.BYE, order.get(5));
+      Assert.assertEquals(Team.BYE, order.get(1));
+      Assert.assertEquals("B", order.get(2).getTeamName());
+      Assert.assertEquals("C", order.get(3).getTeamName());
+      Assert.assertEquals("D", order.get(4).getTeamName());
+      Assert.assertEquals("E", order.get(5).getTeamName());
       Assert.assertEquals("F", order.get(6).getTeamName());
       Assert.assertEquals(Team.BYE, order.get(7));
 
