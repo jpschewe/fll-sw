@@ -432,17 +432,6 @@ public final class Playoff {
 
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
 
-    final List<Integer> teamNumbers = new LinkedList<Integer>();
-    for (final Team t : tournamentTeams.values()) {
-      teamNumbers.add(t.getTeamNumber());
-    }
-
-    final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournament, teamNumbers);
-    if (null != errors) {
-      throw new RuntimeException("Some teams are involved in unfinished playoffs: "
-          + errors);
-    }
-
     final List<String[]> tournamentTables = Queries.getTournamentTables(connection);
 
     final BracketSortType bracketSort = XMLUtils.getBracketSort(challengeDocument);
@@ -462,6 +451,16 @@ public final class Playoff {
     // buildInitialBracketOrder to be a power of 2. It always should be.
     final List<Team> firstRound = buildInitialBracketOrder(connection, bracketSort, winnerCriteria, division,
                                                            tournamentTeams);
+
+    final List<Integer> teamNumbers = new LinkedList<Integer>();
+    for (final Team t : firstRound) {
+      teamNumbers.add(t.getTeamNumber());
+    }
+    final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournament, teamNumbers);
+    if (null != errors) {
+      throw new RuntimeException("Some teams are involved in unfinished playoffs: "
+          + errors);
+    }
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("initial bracket order: "
