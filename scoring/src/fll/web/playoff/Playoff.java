@@ -71,74 +71,64 @@ public final class Playoff {
       throw new NullPointerException("Connection cannot be null");
     }
 
+    final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
+    filterTeamsToDivision(connection, teams, divisionStr);
+
+    final List<Team> seedingOrder;
     if (BracketSortType.ALPHA_TEAM == bracketSort) {
-      final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
-      filterTeamsToDivision(connection, teams, divisionStr);
+      seedingOrder = teams;
+
       // sort by team name
-      Collections.sort(teams, new Comparator<Team>() {
+      Collections.sort(seedingOrder, new Comparator<Team>() {
         public int compare(final Team one,
                            final Team two) {
           return one.getTeamName().compareTo(two.getTeamName());
         }
       });
 
-      final int[] seeding = computeInitialBrackets(teams.size());
-      final int byesNeeded = seeding.length
-          - teams.size();
-
-      // give byes to the last byesNeeded teams.
-      final List<Team> list = new LinkedList<Team>();
-      for (int teamIdx = 0; teamIdx < teams.size(); ++teamIdx) {
-        list.add(teams.get(teamIdx));
-        if (teamIdx >= teams.size()
-            - byesNeeded) {
-          list.add(Team.BYE);
+    } else if (BracketSortType.RANDOM == bracketSort) {
+      seedingOrder = teams;
+      // assign a random number to each team
+      final double[] randoms = new double[seedingOrder.size()];
+      final Random generator = new Random();
+      for (int i = 0; i < randoms.length; ++i) {
+        randoms[i] = generator.nextDouble();
+      }
+      Collections.sort(seedingOrder, new Comparator<Team>() {
+        public int compare(final Team one,
+                           final Team two) {
+          final int oneIdx = seedingOrder.indexOf(one);
+          final int twoIdx = seedingOrder.indexOf(two);
+          return Double.compare(randoms[oneIdx], randoms[twoIdx]);
         }
-      }
-      if (list.size() != seeding.length) {
-        throw new InternalError("Programming error, list size should be the same as seeding length");
-      }
-      return list;
+      });
     } else {
-      final List<Team> seedingOrder;
-      if (BracketSortType.RANDOM == bracketSort) {
-        seedingOrder = new ArrayList<Team>(tournamentTeams.values());
-        filterTeamsToDivision(connection, seedingOrder, divisionStr);
-        // assign a random number to each team
-        final double[] randoms = new double[seedingOrder.size()];
-        final Random generator = new Random();
-        for (int i = 0; i < randoms.length; ++i) {
-          randoms[i] = generator.nextDouble();
-        }
-        Collections.sort(seedingOrder, new Comparator<Team>() {
-          public int compare(final Team one,
-                             final Team two) {
-            final int oneIdx = seedingOrder.indexOf(one);
-            final int twoIdx = seedingOrder.indexOf(two);
-            return Double.compare(randoms[oneIdx], randoms[twoIdx]);
-          }
-        });
-      } else {
-        // standard seeding
-        seedingOrder = Queries.getPlayoffSeedingOrder(connection, winnerCriteria, divisionStr, tournamentTeams);
-      }
-
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("seedingOrder: "
-            + seedingOrder);
-      }
-      final int[] seeding = computeInitialBrackets(seedingOrder.size());
-      final List<Team> list = new LinkedList<Team>();
-      for (final int element : seeding) {
-        if (element > seedingOrder.size()) {
-          list.add(Team.BYE);
-        } else {
-          final Team team = (Team) seedingOrder.get(element - 1);
-          list.add(team);
-        }
-      }
-      return list;
+      // standard seeding
+      seedingOrder = Queries.getPlayoffSeedingOrder(connection, winnerCriteria, teams);
     }
+
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("seedingOrder: "
+          + seedingOrder);
+    }
+
+    final int[] seeding = computeInitialBrackets(seedingOrder.size());
+
+    // give byes to the last byesNeeded teams.
+    final List<Team> list = new LinkedList<Team>();
+    for (final int element : seeding) {
+      if (element > seedingOrder.size()) {
+        list.add(Team.BYE);
+      } else {
+        final Team team = seedingOrder.get(element - 1);
+        list.add(team);
+      }
+    }
+
+    if (list.size() != seeding.length) {
+      throw new InternalError("Programming error, list size should be the same as seeding length");
+    }
+    return list;
 
   }
 

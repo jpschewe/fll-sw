@@ -1472,9 +1472,14 @@ public final class Queries {
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to choose ascending or descending order based upon winner criteria")
   public static List<Team> getPlayoffSeedingOrder(final Connection connection,
                                                   final WinnerType winnerCriteria,
-                                                  final String divisionStr,
-                                                  final Map<Integer, Team> tournamentTeams) throws SQLException,
-      RuntimeException {
+                                                  final Collection<Team> teams) throws SQLException, RuntimeException {
+
+    final List<Integer> teamNumbers = new LinkedList<Integer>();
+    for (final Team t : teams) {
+      teamNumbers.add(t.getTeamNumber());
+    }
+
+    final String teamNumbersStr = StringUtils.join(teamNumbers, ",");
 
     final List<Team> retval = new ArrayList<Team>();
     final int currentTournament = getCurrentTournament(connection);
@@ -1486,17 +1491,16 @@ public final class Queries {
           + " FROM performance_seeding_max, current_tournament_teams" //
           + " WHERE performance_seeding_max.Tournament = ?" //
           + " AND performance_seeding_max.TeamNumber = current_tournament_teams.TeamNumber" //
-          + " AND current_tournament_teams.event_division = ?" //
+          + " AND current_tournament_teams.TeamNumber = IN( " + teamNumbersStr + " )" //
           + " ORDER BY performance_seeding_max.Score " + winnerCriteria.getSortString() //
           + ", performance_seeding_max.average " + winnerCriteria.getSortString() //
           + ", random");
       prep.setInt(1, currentTournament);
-      prep.setString(2, divisionStr);
 
       rs = prep.executeQuery();
       while (rs.next()) {
         final int teamNumber = rs.getInt(1);
-        final Team team = tournamentTeams.get(Integer.valueOf(teamNumber));
+        final Team team = Team.getTeamFromDatabase(connection, teamNumber);
         if (null == team) {
           throw new RuntimeException("Couldn't find team number "
               + teamNumber + " in the list of tournament teams!");
