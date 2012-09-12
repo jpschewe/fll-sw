@@ -1491,7 +1491,7 @@ public final class Queries {
           + " FROM performance_seeding_max, current_tournament_teams" //
           + " WHERE performance_seeding_max.Tournament = ?" //
           + " AND performance_seeding_max.TeamNumber = current_tournament_teams.TeamNumber" //
-          + " AND current_tournament_teams.TeamNumber = IN( " + teamNumbersStr + " )" //
+          + " AND current_tournament_teams.TeamNumber IN ( " + teamNumbersStr + " )" //
           + " ORDER BY performance_seeding_max.Score " + winnerCriteria.getSortString() //
           + ", performance_seeding_max.average " + winnerCriteria.getSortString() //
           + ", random");
