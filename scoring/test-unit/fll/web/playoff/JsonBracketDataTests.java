@@ -78,6 +78,22 @@ public class JsonBracketDataTests {
       ClassNotFoundException, IllegalAccessException {
     final PlayoffContainer playoff = makePlayoffs();
 
+    /*
+     * Initial bracket order:
+     * 
+     *  1A
+     *  BYE
+     *  
+     *  4D
+     *  5E
+     *  
+     *  3C
+     *  6F
+     *  
+     *  BYE
+     *  2B
+     */
+    
     // Start with adding some scores
     insertScore(playoff.getConnection(), 1, 1, false, 5D);
     // See what json tells us
