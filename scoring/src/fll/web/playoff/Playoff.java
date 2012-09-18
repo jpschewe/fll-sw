@@ -457,10 +457,18 @@ public final class Playoff {
           + firstRound);
     }
 
-    // FIXME need to figure out how to compute this for multiple sets of
-    // brackets. run_number may overlap, but never for the same team with the
-    // exception of the NULL team
-    final int baseRunNumber = Queries.getNumSeedingRounds(connection, currentTournament);
+    final int maxRoundForTeams = Playoff.getMaxPerformanceRound(connection, currentTournament, teamNumbers);
+
+
+    // the performance run number that is equal to playoff round 0, the round
+    // before the first playoff round
+    // for the teams
+    final int baseRunNumber;
+    if (0 == maxRoundForTeams) {
+      baseRunNumber = Queries.getNumSeedingRounds(connection, currentTournament);
+    } else {
+      baseRunNumber = maxRoundForTeams;
+    }
 
     PreparedStatement insertStmt = null;
     PreparedStatement selStmt = null;
@@ -476,11 +484,15 @@ public final class Playoff {
       insertStmt.setInt(1, currentTournament);
       insertStmt.setString(2, division);
       insertStmt.setInt(3, 1);
+
+      // run_number may overlap, but never for the same team with the
+      // exception of the NULL team
       insertStmt.setInt(6, 1 + baseRunNumber);
       int lineNbr = 1;
       while (it.hasNext()) {
         insertStmt.setInt(4, lineNbr);
         insertStmt.setInt(5, it.next().getTeamNumber());
+        
         insertStmt.executeUpdate();
 
         lineNbr++;
@@ -608,6 +620,46 @@ public final class Playoff {
   }
 
   /**
+   * Determine the max performance run number used by any of the listed teams in
+   * playoff rounds.
+   * 
+   * @param connection the database connection
+   * @param currentTournament the tournament
+   * @param teamNumbers the team numbers to check
+   * @return the max performance run number or 0 if no teams are in the playoffs
+   *         yet
+   * @throws SQLException
+   */
+  private static int getMaxPerformanceRound(final Connection connection,
+                                            final int currentTournament,
+                                            final List<Integer> teamNumbers) throws SQLException {
+
+    final String teamNumbersStr = StringUtils.join(teamNumbers, ",");
+
+    PreparedStatement prep = null;
+    ResultSet result = null;
+    try {
+      prep = connection.prepareStatement("SELECT MAX(run_number) from PlayoffData WHERE" //
+          + " Tournament = ?" //
+          + " AND Team IN ( " + teamNumbersStr + " )");
+      prep.setInt(1, currentTournament);
+      result = prep.executeQuery();
+
+      if (result.next()) {
+        final int maxPerformanceRound = result.getInt(1);
+        return maxPerformanceRound;
+      } else {
+        return 0;
+      }
+
+    } finally {
+      SQLFunctions.close(result);
+      SQLFunctions.close(prep);
+    }
+
+  }
+
+  /**
    * Compute the assignments to the initial playoff brackets.
    * 
    * @param numTeams will be rounded up to the next power of 2
@@ -711,8 +763,9 @@ public final class Playoff {
     PreparedStatement detailPrep = null;
     ResultSet detail = null;
     try {
-      divisionsPrep = connection.prepareStatement("SELECT DISTINCT event_division from PlayoffData WHERE"
-          + " Tournament = ?" + " AND Team IN ( " + teamNumbersStr + " )");
+      divisionsPrep = connection.prepareStatement("SELECT DISTINCT event_division from PlayoffData WHERE" //
+          + " Tournament = ?" //
+          + " AND Team IN ( " + teamNumbersStr + " )");
       divisionsPrep.setInt(1, tournament);
       divisions = divisionsPrep.executeQuery();
 
