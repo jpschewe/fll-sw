@@ -95,9 +95,11 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
           // SessionAttributes.getNonNullAttribute(session,
           // InitializeBrackets.ENABLE_THIRD_PLACE,
           // Boolean.class);
+          
           // FIXME initializeBrackets doesn't handle custom divisions
           // Playoff.initializeBrackets(connection, challengeDocument,
           // divisionStr, enableThird);
+          
           message.append("<p>Playoffs have been successfully initialized for division "
               + divisionStr + ".</p>");
         }
