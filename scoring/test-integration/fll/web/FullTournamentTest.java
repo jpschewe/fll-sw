@@ -204,9 +204,9 @@ public class FullTournamentTest {
         if (runNumber > numSeedingRounds
             && runNumber != maxRuns) {
           for (final String division : divisions) {
+            LOGGER.info("Printing scoresheets round: "
+                + runNumber + " division '" + division + "'");
             printPlayoffScoresheets(division);
-            LOGGER.info("Succssfully printed scoresheets round: "
-                + runNumber + " division: " + division);
           }
         }
 
