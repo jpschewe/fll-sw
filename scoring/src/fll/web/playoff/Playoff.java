@@ -422,15 +422,8 @@ public final class Playoff {
 
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
 
-    final List<String[]> tournamentTables = Queries.getTournamentTables(connection);
-
     final BracketSortType bracketSort = XMLUtils.getBracketSort(challengeDocument);
     final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
-
-    // Work-around for if they didn't initialize tournament table labels.
-    if (tournamentTables.size() == 0) {
-      tournamentTables.add(new String[] { "", "" });
-    }
 
     // Iterator over table name pairs.
     // Iterator<String[]> tableIt = tournamentTables.iterator();
