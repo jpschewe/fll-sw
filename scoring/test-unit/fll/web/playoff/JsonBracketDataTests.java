@@ -78,12 +78,28 @@ public class JsonBracketDataTests {
       ClassNotFoundException, IllegalAccessException {
     final PlayoffContainer playoff = makePlayoffs();
 
+    /*
+     * Initial bracket order:
+     *
+     * 1A
+     * 2B
+     * 
+     * 3C
+     * 4D
+     * 
+     * 5E
+     * BYE
+     * 
+     * 6F
+     * BYE
+     */
+    
     // Start with adding an unverified score
     insertScore(playoff.getConnection(), 1, 1, false, 5D);
     // See what json tells us
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
     // Ask for round 1 leaf 1
-    query.put(1, 1);
+    query.put(1, 1); // row 1 , round 1
     final Gson gson = new Gson();
     final Element scoreElement = (Element) playoff.getChallengeDoc().getDocumentElement()
                                                   .getElementsByTagName("Performance").item(0);
@@ -93,14 +109,14 @@ public class JsonBracketDataTests {
     BracketLeafResultSet[] result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
     // assert score is -1, indicating no score
     Assert.assertEquals(result[0].score, -1.0D, 0.0);
-    // /check unverified
 
+    
     // test to make sure 2 unverified scores for opposing teams produces no result
     // give opponent a score
     insertScore(playoff.getConnection(), 2, 1, false, 20D);
     query.clear();
     // ask for round we just entered score for
-    query.put(3, 2);
+    query.put(3, 2); // row 3, round 2
     jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), scoreElement,
                                                     playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
