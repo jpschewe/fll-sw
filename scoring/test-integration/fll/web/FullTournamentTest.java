@@ -56,6 +56,7 @@ import fll.subjective.SubjectiveFrame;
 import fll.util.FP;
 import fll.util.LogUtils;
 import fll.web.developer.QueryHandler;
+import fll.web.playoff.PlayoffIndex;
 import fll.web.scoreEntry.ScoreEntry;
 import fll.xml.ChallengeParser;
 import fll.xml.XMLUtils;
@@ -275,7 +276,8 @@ public class FullTournamentTest {
   }
 
   /**
-   * @return
+   * Get the divisions in this tournament.
+   * 
    * @throws IOException
    */
   private List<String> getDivisions() throws IOException {
@@ -286,7 +288,9 @@ public class FullTournamentTest {
     final Select select = new Select(selenium.findElement(By.id("initialize-division")));
     for (final WebElement option : select.getOptions()) {
       final String text = option.getText();
-      divisions.add(text);
+      if (!PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION.equals(text)) {
+        divisions.add(text);
+      }
     }
 
     Assert.assertFalse(divisions.isEmpty());
@@ -500,10 +504,11 @@ public class FullTournamentTest {
 
     int rank = 0;
     for (final Map<String, String> row : div1Result.data) {
-      if(LOGGER.isTraceEnabled()) {
-        LOGGER.trace("checkRankAndScores - row: " + row);
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("checkRankAndScores - row: "
+            + row);
       }
-      
+
       final int teamNumber = Integer.valueOf(row.get("teamnumber"));
       Assert.assertEquals("Division I Ranking is incorrect for rank: "
           + rank, division1ExpectedRank[rank], teamNumber);
@@ -868,7 +873,8 @@ public class FullTournamentTest {
   /**
    * Enter a teams performance score. Data is pulled from testDataConn and
    * pushed to the website.
-   * @throws InterruptedException 
+   * 
+   * @throws InterruptedException
    */
   private void verifyPerformanceScore(final Connection testDataConn,
                                       final Element performanceElement,
@@ -920,7 +926,7 @@ public class FullTournamentTest {
               final String value = rs.getString(name);
 
               final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
-                  .getAttribute("value");
+                                               .getAttribute("value");
               Assert.assertNotNull("Null value for goal: "
                   + name, formValue);
 
@@ -973,7 +979,7 @@ public class FullTournamentTest {
         // give the web server a chance to catch up
         Thread.sleep(1000);
 
-        // check for errors        
+        // check for errors
         Assert.assertEquals(selectTeamPage, selenium.getCurrentUrl());
         Assert.assertTrue("Error submitting form, not on select team page",
                           selenium.getPageSource().contains("Unverified Runs"));
