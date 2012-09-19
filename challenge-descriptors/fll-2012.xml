@@ -197,6 +197,27 @@
     <goal name="ball_game_balls" title="Total Balls on Rack" multiplier="10" max="7" initialValue="7"/>
     
     <goal name="ball_game_center_ball" title="Team's Ball in Center" multiplier="60"/>
+
+
+    <tiebreaker>
+      <test winner='HIGH'>
+        <term goal='blue_quilting' scoreType='computed' />
+        <term goal='orange_quilting' scoreType='computed' />
+      </test>
+
+      <test winner='HIGH'>
+        <term goal='bowling' scoreType='raw' />
+      </test>
+
+      <test winner='HIGH'>
+        <term goal='flexibility' scoreType='computed' />
+      </test>
+
+      <test winner='HIGH'>
+        <term goal='cardio_progression' scoreType='computed' />
+      </test>
+      
+    </tiebreaker>
     
   </Performance>
 
