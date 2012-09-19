@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="MN FIRST LEGO League Tournament" xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 5">
+
+  <Performance minimumScore="0" weight="1.0">
+    <goal name="wood_working" title="Chair - Wood Working" initialValue="0">
+      <value score="25" title="Under table" value="under"/>
+      <value score="15" title="In base" value="base"/>
+      <value score="0" title="None" value="none"/>
+    </goal>
+    
+    <goal name="medicine" title="Green Medicine in Base" multiplier="25"/>
+    
+    <goal name="service_animal" title="Service Animal in Base" multiplier="20"/>
+    
+    <goal name="bowling" title="Bowling Pins Down" multiplier="0" max="6"/>
+    <computedGoal name="bowling_score" title="Bowling Pins Score">
+      <switch>
+        <case>
+          <condition>
+            <left>
+              <term scoreType="raw" goal="bowling"/>
+            </left>
+            <equal-to/>
+            <right>
+              <constant value="6"/>
+            </right>
+          </condition>
+          <result>
+            <term scoreType="raw" coefficient="10" goal="bowling"/>
+          </result>
+        </case>
+        <default>
+          <term scoreType="raw" coefficient="7" goal="bowling"/>
+        </default>
+      </switch>
+    </computedGoal>
+    
+    <goal name="strength_exercise" title="Raised Weight Location" initialValue="0">
+      <value score="25" title="High" value="high"/>
+      <value score="15" title="Low" value="low"/>
+      <value score="0" title="Below" value="below"/>
+    </goal>
+    
+    <goal name="stove" title="All Burners Black" multiplier="25"/>
+    
+    <goal name="gardening" title="Plants in Garden" multiplier="25"/>
+    
+    <goal name="video_call" title="Video Call Flags Up" multiplier="20" max="2"/>
+    
+    <goal name="blue_quilting" title="Blue Quilts Touching" multiplier="15" max="2"/>
+    
+    <goal name="orange_quilting" title="Orange Quilts Touching" multiplier="30" max="2"/>
+    
+    <goal name="cardio_exercise_major" title="Large Cardio Dot" multiplier="0" max="9" min="1" initialValue="3"/>
+    <goal name="cardio_exercise_minor" title="Small Cardio Ticks" multiplier="0" max="5"/>
+    <!-- 
+    On the Challenge's image of the Pointer Position, it shows major and minor portions.
+    The major portions are indicated by a physical LEGO light, while the minor portions
+    are just evenly split. The Challenge just provided a chart keying major and minor
+    ticks to scores, but that would be far too lengthy to transpose. If we look at the
+    pattern of the score changes from tick to tick (1 increment = 1 tick), we can see it
+    first increments by five points each time, then by three, then by one point. I 
+    divided these up into progression scales. "Progression" is the total number of
+    ticks from the bottom of the chart, leaving the default progression amount at 12 ticks.
+    Progression scales:
+      - Scale 1: Increment by 5 points, goes from progression 0 to progression 24
+      - Scale 2: Increment by 3 points, goes from progression 25 to progression 36
+        - Note: There is a 10 point bonus added at the jump from 6-0 to 6-1.
+      - Scale 3: Increment by 1 points, ranges from progression 37 until progression 48
+
+    To calculate a score based off of a major and minor tick, the following thought process
+    occurs:
+    
+      - Compute total progression from the very bottom of the entire scale. 
+        - Does it fit into scale 1? Compute and go. Add -60 point offset.
+        - Does it fit into scale 2?
+          - If so, we must first account for the minimum number of points one could recieve
+            purely based off of the fact we're in scale 2. This number is 120 points. (progression 24)
+            Next, we can use a coefficient to calculate the number of points to be added in in scale 2.
+          
+      The same happens for scale 3, and the subset of scale 2 with the 10 point bonus.
+  -->
+    <computedGoal name="cardio_progression" title="Cardio Progression">
+      <variable name="progression_scale_1">
+        <term scoreType="raw" goal="cardio_exercise_major" coefficient="6"/>
+        <term scoreType="raw" goal="cardio_exercise_minor"/>
+        <constant value="-6"/>
+      </variable>
+      <variable name="progression_scale_1_max_points">
+        <constant value="120"/>
+      </variable>
+      <variable name="progression_scale_2">
+        <term scoreType="raw" goal="cardio_exercise_major" coefficient="6"/>
+        <term scoreType="raw" goal="cardio_exercise_minor"/>
+        <constant value="-30"/>
+      </variable>
+      <variable name="progression_scale_2_max_points">
+        <constant value="166"/>
+      </variable>
+      <variable name="progression_scale_3">
+        <term scoreType="raw" goal="cardio_exercise_major" coefficient="6"/>
+        <term scoreType="raw" goal="cardio_exercise_minor"/>
+        <constant value="-42"/>
+      </variable>
+      <variable name="bonus">
+        <constant value="10"/>
+      </variable>
+      <variable name="offset">
+        <constant value="-60"/>
+      </variable>
+      <switch>
+        <case>
+          <condition>
+            <left>
+              <variableRef variable="progression_scale_1"/>
+            </left>
+            <less-than-or-equal/>
+            <right>
+              <constant value="24"/>
+            </right>
+          </condition>
+          <result>
+            <variableRef variable="progression_scale_1" coefficient="5"/>
+            <variableRef variable="offset"/>
+          </result>
+        </case>
+        <case>
+          <condition>
+            <left>
+              <variableRef variable="progression_scale_1"/>
+            </left>
+            <less-than-or-equal/>
+            <right>
+              <constant value="30"/>
+            </right>
+          </condition>
+          <result>
+            <variableRef variable="progression_scale_2" coefficient="3"/>
+            <variableRef variable="offset"/>
+            <variableRef variable="progression_scale_1_max_points"/>
+          </result>
+        </case>
+        <case>
+          <condition>
+            <left>
+              <variableRef variable="progression_scale_1"/>
+            </left>
+            <less-than-or-equal/>
+            <right>
+              <constant value="36"/>
+            </right>
+          </condition>
+          <result>
+            <variableRef variable="progression_scale_2" coefficient="3"/>
+            <variableRef variable="offset"/>
+            <variableRef variable="progression_scale_1_max_points"/>
+            <variableRef variable="bonus"/>
+            <!-- at this point, a 10 point bonus appears, although the progression is identical. -->
+          </result>
+        </case>
+        <case>
+          <condition>
+            <left>
+              <variableRef variable="progression_scale_1"/>
+            </left>
+            <less-than-or-equal/>
+            <right>
+              <constant value="48"/>
+            </right>
+          </condition>
+          <result>
+            <variableRef variable="progression_scale_3" coefficient="1"/>
+            <variableRef variable="offset"/>
+            <variableRef variable="progression_scale_2_max_points"/>
+          </result>
+        </case>
+        <default>
+          <constant value="-1"/>
+        </default>
+      </switch>
+    </computedGoal>
+    <restriction lowerBound="6" upperBound="54" message="Invalid Cardio Entries">
+      <term scoreType="raw" goal="cardio_exercise_major" coefficient="6"/>
+      <term scoreType="raw" goal="cardio_exercise_minor"/>
+    </restriction>
+    
+    <goal name="flexibility" title="Yellow Loops in Base" multiplier="20" max="2"/>
+    
+    <goal name="transitions" title="Ending Bridge Position" initialValue="0">
+      <value score="65" title="Balanced" value="balanced"/>
+      <value score="45" title="Tilted" value="tilted"/>
+      <value score="0" title="None" value="none"/>
+    </goal>
+    
+    <goal name="similarity" title="Both Pointers are Paralell" multiplier="45"/>
+    
+    <goal name="ball_game_balls" title="Total Balls on Rack" multiplier="10" max="7" initialValue="7"/>
+    
+    <goal name="ball_game_center_ball" title="Team's Ball in Center" multiplier="60"/>
+
+
+    <tiebreaker>
+      <test winner='HIGH'>
+        <term goal='blue_quilting' scoreType='computed' />
+        <term goal='orange_quilting' scoreType='computed' />
+      </test>
+
+      <test winner='HIGH'>
+        <term goal='bowling' scoreType='raw' />
+      </test>
+
+      <test winner='HIGH'>
+        <term goal='flexibility' scoreType='computed' />
+      </test>
+
+      <test winner='HIGH'>
+        <term goal='cardio_progression' scoreType='computed' />
+      </test>
+      
+    </tiebreaker>
+    
+  </Performance>
+
+  
+  <subjectiveCategory name="robot_design" title="Robot Design - Design" weight="0.5">
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="durability" title="Durability"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="mechanical_efficiency" title="Mechanical Efficiency"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="mechanization" title="Mechanization"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="attachments" title="Attachments and Sensors"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Did the Work"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="design_process" title="Design Process"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="mission_strategy" title="Mission Strategy"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation"/>
+  </subjectiveCategory>
+
+  <subjectiveCategory name="project" title="Project" weight="1.0">
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="problem_identification" title="Problem Identification"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="sources_information" title="Sources of Information"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="problem_analysis" title="Problem Analysis"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="review" title="Review Existing Solutions"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="team_solution" title="Team Solution"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="implementation" title="Implementation"/>
+
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="sharing" title="Sharing"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="creativity" title="Creativity"/>
+    
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="presentation_effectiveness" title="Presentation Effectiveness"/>
+  </subjectiveCategory>
+  
+
+  <subjectiveCategory name="core_values" title="Core Values" weight="1.0">
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="discovery" title="Discovery"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="team_spirit" title="Team Spirit"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="integration" title="Integration"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="effectiveness" title="Effectiveness"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="efficiency" title="Efficiency"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Do the Work"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="inclusion" title="Inclusion"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="respect" title="Respect"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="coopertition" title="Coopertition"/>
+  </subjectiveCategory>
+    
+
+  <subjectiveCategory name="robot_programming" title="Robot Design - Programming" weight="0.5">
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="code_structure" title="Code Structure and Reuse"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Did the Work"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="quality" title="Programming Quality"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="efficiency" title="Programming Efficiency"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="automation" title="Automation/Navigation"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="design_process" title="Design Process"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="mission_strategy" title="Mission Strategy"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation"/>
+  </subjectiveCategory>
+
+  
+</fll>
