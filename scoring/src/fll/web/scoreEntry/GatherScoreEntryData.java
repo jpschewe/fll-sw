@@ -115,6 +115,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
         }
       } else {
         if (nextRunNumber > numSeedingRounds) {
+          //FIXME how to do this check with custom playoff divisions?
           if (!Queries.isPlayoffDataInitialized(connection, Queries.getEventDivision(connection, teamNumber))) {
             session.setAttribute(SessionAttributes.MESSAGE,
                                  "Selected team has completed its seeding runs. The playoff brackets"
@@ -128,6 +129,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
             return;
           } else if (!Queries.didTeamReachPlayoffRound(connection, nextRunNumber, teamNumber,
                                                        Queries.getEventDivision(connection, teamNumber))) {
+            //FIXME how to do this check with custom playoff divisions?
             session.setAttribute(SessionAttributes.MESSAGE,
                                  "<p name='error' class='error'>Selected team has not advanced to the next playoff round.</p>");
             response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
@@ -138,6 +140,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
       }
       session.setAttribute("lRunNumber", lRunNumber);
 
+      //FIXME need to compute this properly for custom playoff divisions
       final String roundText;
       if (lRunNumber > numSeedingRounds) {
         roundText = "Playoff&nbsp;Round&nbsp;"
