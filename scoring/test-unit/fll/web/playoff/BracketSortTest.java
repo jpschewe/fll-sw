@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -88,7 +89,10 @@ public class BracketSortTest {
       final BracketSortType bracketSort = XMLUtils.getBracketSort(document);
       final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(document);
 
-      final List<Team> order = Playoff.buildInitialBracketOrder(connection, bracketSort, winnerCriteria, divisionStr, tournamentTeams);
+      final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
+      Team.filterTeamsToEventDivision(connection, teams, divisionStr);
+
+      final List<Team> order = Playoff.buildInitialBracketOrder(connection, bracketSort, winnerCriteria, teams);
       Assert.assertEquals("A", order.get(0).getTeamName());
       Assert.assertEquals(Team.BYE, order.get(1));
       Assert.assertEquals("D", order.get(2).getTeamName());

@@ -9,7 +9,10 @@ package fll.web.playoff;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -79,6 +82,16 @@ public class InitializeBrackets extends BaseFLLServlet {
             + divisionStr + "'");
       }
 
+      final String thirdFourthPlaceBrackets = request.getParameter("enableThird");
+      boolean enableThird;
+      if (null == thirdFourthPlaceBrackets) {
+        enableThird = false;
+      } else {
+        enableThird = true;
+      }
+      session.setAttribute(ENABLE_THIRD_PLACE, enableThird);
+
+
       if (null == divisionStr) {
         message.append("<p class='error'>No division specified.</p>");
       } else if (PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION.equals(divisionStr)) {
@@ -87,20 +100,15 @@ public class InitializeBrackets extends BaseFLLServlet {
         redirect = "create_playoff_division.jsp";
       } else {
 
-        final String thirdFourthPlaceBrackets = request.getParameter("enableThird");
-        boolean enableThird;
-        if (null == thirdFourthPlaceBrackets) {
-          enableThird = false;
-        } else {
-          enableThird = true;
-        }
-        session.setAttribute(ENABLE_THIRD_PLACE, enableThird);
-
         if (Queries.isPlayoffDataInitialized(connection, divisionStr)) {
           message.append("<p class='warning'>Playoffs have already been initialized for division "
               + divisionStr + ".</p>");
         } else {
-          Playoff.initializeBrackets(connection, challengeDocument, divisionStr, enableThird);
+          final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
+          final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
+          Team.filterTeamsToEventDivision(connection, teams, divisionStr);
+
+          Playoff.initializeBrackets(connection, challengeDocument, divisionStr, enableThird, teams);
           message.append("<p>Playoffs have been successfully initialized for division "
               + divisionStr + ".</p>");
         }

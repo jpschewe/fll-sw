@@ -25,6 +25,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
+import fll.Team;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -89,17 +90,17 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
           redirect = "create_playoff_division.jsp";
         } else {
 
-          message.append("<p class='error'>Creating playoff divisions not implemented yet</p>");
+          final boolean enableThird = SessionAttributes.getNonNullAttribute(session,
+                                                                            InitializeBrackets.ENABLE_THIRD_PLACE,
+                                                                            Boolean.class);
 
-          // final boolean enableThird =
-          // SessionAttributes.getNonNullAttribute(session,
-          // InitializeBrackets.ENABLE_THIRD_PLACE,
-          // Boolean.class);
-          
-          // FIXME initializeBrackets doesn't handle custom divisions
-          // Playoff.initializeBrackets(connection, challengeDocument,
-          // divisionStr, enableThird);
-          
+          final List<Team> teams = new LinkedList<Team>();
+          for(final int number : teamNumbers) {
+            final Team team = Team.getTeamFromDatabase(connection, number);
+            teams.add(team);
+          }
+          Playoff.initializeBrackets(connection, challengeDocument, divisionStr, enableThird, teams);
+
           message.append("<p>Playoffs have been successfully initialized for division "
               + divisionStr + ".</p>");
         }

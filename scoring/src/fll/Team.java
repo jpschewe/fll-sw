@@ -11,6 +11,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+
+import fll.db.Queries;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -247,6 +251,28 @@ public final class Team implements Serializable {
    */
   public boolean isInternal() {
     return isInternalTeamNumber(getTeamNumber());
+  }
+
+  /**
+   * Filter the specified list to just the teams in the specified event
+   * division.
+   * 
+   * @param teams list that is modified
+   * @param divisionStr the division to keep
+   * @throws RuntimeException
+   * @throws SQLException
+   */
+  public static void filterTeamsToEventDivision(final Connection connection,
+                                            final List<Team> teams,
+                                            final String divisionStr) throws SQLException, RuntimeException {
+    final Iterator<Team> iter = teams.iterator();
+    while (iter.hasNext()) {
+      final Team t = iter.next();
+      final String eventDivision = Queries.getEventDivision(connection, t.getTeamNumber());
+      if (!eventDivision.equals(divisionStr)) {
+        iter.remove();
+      }
+    }
   }
 
   /**
