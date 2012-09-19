@@ -3165,6 +3165,40 @@ public final class Queries {
   }
 
   /**
+   * Get the max performance run number completed for the specified team in the
+   * current tournament. This does not check the verified flag.
+   * 
+   * @param connection database connection
+   * @param teamNumber the team to check
+   * @return the max run number or 0 if no performance runs have been completed
+   * @throws SQLException
+   */
+  public static int maxPerformanceRunNumberCompleted(final Connection connection,
+                                                     final int teamNumber) throws SQLException {
+    final int tournament = getCurrentTournament(connection);
+
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT MAX(RunNumber) FROM Performance"
+          + " WHERE TeamNumber = ? AND Tournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, tournament);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        final int runNumber = rs.getInt(1);
+        return runNumber;
+      } else {
+        return 0;
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+
+  }
+
+  /**
    * Returns true if the score has been verified, i.e. double-checked.
    */
   public static boolean isVerified(final Connection connection,

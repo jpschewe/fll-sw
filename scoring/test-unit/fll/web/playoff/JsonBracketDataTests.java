@@ -14,7 +14,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -209,7 +211,12 @@ public class JsonBracketDataTests {
     for (int i = 0; i < teamNames.length; ++i) {
       Assert.assertNull(Queries.addTeam(connection, i + 1, teamNames[i], "htk", div, 2));
     }
-    Playoff.initializeBrackets(connection, document, div, false);
+    
+    final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
+    final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
+    Team.filterTeamsToEventDivision(connection, teams, div);
+
+    Playoff.initializeBrackets(connection, document, div, false, teams);
 
     final int firstRound = 1;
     final int lastRound = 3;
