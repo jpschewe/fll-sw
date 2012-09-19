@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="MN FIRST LEGO League Tournament" xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 4">
+<fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="MN FIRST LEGO League Tournament" xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 5">
+
   <Performance minimumScore="0" weight="1.0">
     <goal name="wood_working" title="Chair - Wood Working" initialValue="0">
       <value score="25" title="Under table" value="under"/>
@@ -198,7 +199,35 @@
     <goal name="ball_game_center_ball" title="Team's Ball in Center" multiplier="60"/>
     
   </Performance>
+
   
+  <subjectiveCategory name="robot_design" title="Robot Design - Design" weight="0.5">
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="durability" title="Durability"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="mechanical_efficiency" title="Mechanical Efficiency"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="mechanization" title="Mechanization"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="attachments" title="Attachments and Sensors"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Did the Work"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="design_process" title="Design Process"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="mission_strategy" title="Mission Strategy"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation"/>
+  </subjectiveCategory>
+
+  <subjectiveCategory name="project" title="Project" weight="1.0">
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="problem_identification" title="Problem Identification"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="sources_information" title="Sources of Information"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="problem_analysis" title="Problem Analysis"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="review" title="Review Existing Solutions"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="team_solution" title="Team Solution"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="implementation" title="Implementation"/>
+
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="sharing" title="Sharing"/>
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="creativity" title="Creativity"/>
+    
+    <goal initialValue="0" max="12" min="0" multiplier="1" name="presentation_effectiveness" title="Presentation Effectiveness"/>
+  </subjectiveCategory>
+  
+
   <subjectiveCategory name="core_values" title="Core Values" weight="1.0">
     <goal initialValue="0" max="12" min="0" multiplier="1" name="discovery" title="Discovery"/>
     <goal initialValue="0" max="12" min="0" multiplier="1" name="team_spirit" title="Team Spirit"/>
@@ -210,32 +239,9 @@
     <goal initialValue="0" max="12" min="0" multiplier="1" name="respect" title="Respect"/>
     <goal initialValue="0" max="12" min="0" multiplier="1" name="coopertition" title="Coopertition"/>
   </subjectiveCategory>
-  
-  <subjectiveCategory name="project" title="Project" weight="1.0">
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="problem_identification" title="Problem Identification"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="sources_information" title="Sources of Information"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="problem_analysis" title="Problem Analysis"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="review" title="Review Existing Solutions"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="team_solution" title="Team Solution"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="implementation" title="Implementation"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="presentation_effectiveness" title="Presentation Effectiveness"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="creativity" title="Creativity"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="sharing" title="Sharing"/>
-  </subjectiveCategory>
-  
-  <subjectiveCategory name="robot_design" title="Robot Design" weight="0.5">
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="durability" title="Durability"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="mechanical_efficiency" title="Mechanical Efficiency"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="mechanization" title="Mechanization"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="attachments" title="Attachments and Sensors"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Did the Work"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="design_process" title="Design Process"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="mission_strategy" title="Mission Strategy"/>
-    <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation"/>
-  </subjectiveCategory>
-  
-  <subjectiveCategory name="robot_programming" title="Robot Programming" weight="0.5">
+    
+
+  <subjectiveCategory name="robot_programming" title="Robot Design - Programming" weight="0.5">
     <goal initialValue="0" max="12" min="0" multiplier="1" name="code_structure" title="Code Structure and Reuse"/>
     <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work" title="Kids Did the Work"/>
     <goal initialValue="0" max="12" min="0" multiplier="1" name="quality" title="Programming Quality"/>
@@ -245,4 +251,6 @@
     <goal initialValue="0" max="12" min="0" multiplier="1" name="mission_strategy" title="Mission Strategy"/>
     <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation" title="Innovation"/>
   </subjectiveCategory>
+
+  
 </fll>
