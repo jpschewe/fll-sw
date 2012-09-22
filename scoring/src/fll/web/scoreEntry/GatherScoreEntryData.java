@@ -126,9 +126,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
                                      + " the box for doing so.</p>");
             response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
             return;
-          } else if (!Queries.didTeamReachPlayoffRound(connection, nextRunNumber, teamNumber,
-                                                       Queries.getEventDivision(connection, teamNumber))) {
-            // FIXME how to do this check with custom playoff divisions?
+          } else if (!Queries.didTeamReachPlayoffRound(connection, nextRunNumber, teamNumber)) {
             session.setAttribute(SessionAttributes.MESSAGE,
                                  "<p name='error' class='error'>Selected team has not advanced to the next playoff round.</p>");
             response.sendRedirect(response.encodeRedirectURL("select_team.jsp"));
