@@ -607,8 +607,6 @@ public final class Playoff {
 
     PreparedStatement divisionsPrep = null;
     ResultSet divisions = null;
-    PreparedStatement maxPrep = null;
-    ResultSet max = null;
     int maxRunNumber = 0;
     try {
       divisionsPrep = connection.prepareStatement("SELECT DISTINCT event_division from PlayoffData WHERE" //
@@ -617,31 +615,51 @@ public final class Playoff {
       divisionsPrep.setInt(1, currentTournament);
       divisions = divisionsPrep.executeQuery();
 
-      maxPrep = connection.prepareStatement("SELECT MAX(run_number) FROM PlayoffData WHERE" //
-          + " event_division = ?");
-
       while (divisions.next()) {
         final String eventDivision = divisions.getString(1);
 
-        maxPrep.setString(1, eventDivision);
-        max = maxPrep.executeQuery();
-        if (max.next()) {
-          final int runNumber = max.getInt(1);
+        final int runNumber = getMaxPerformanceRound(connection, eventDivision);
+        if (-1 != runNumber) {
           maxRunNumber = Math.max(maxRunNumber, runNumber);
         }
-        SQLFunctions.close(max);
-        max = null;
       }
 
     } finally {
-      SQLFunctions.close(max);
-      SQLFunctions.close(maxPrep);
       SQLFunctions.close(divisions);
       SQLFunctions.close(divisionsPrep);
     }
 
     return maxRunNumber;
 
+  }
+
+  /**
+   * Get max performance run number for playoff division.
+   * 
+   * @param division the event division to check
+   * @return performance round, -1 if there are no playoff rounds for this
+   *         division
+   */
+  public static int getMaxPerformanceRound(final Connection connection,
+                                           final String playoffDivision) throws SQLException {
+    PreparedStatement maxPrep = null;
+    ResultSet max = null;
+    try {
+      maxPrep = connection.prepareStatement("SELECT MAX(run_number) FROM PlayoffData WHERE" //
+          + " event_division = ?");
+
+      maxPrep.setString(1, playoffDivision);
+      max = maxPrep.executeQuery();
+      if (max.next()) {
+        final int runNumber = max.getInt(1);
+        return runNumber;
+      } else {
+        return -1;
+      }
+    } finally {
+      SQLFunctions.close(max);
+      SQLFunctions.close(maxPrep);
+    }
   }
 
   /**
@@ -817,6 +835,70 @@ public final class Playoff {
       for (int round = maxRunCompleted + 1; round <= baseRunNumber; ++round) {
         insertBye(connection, team, round);
       }
+    }
+  }
+
+  /**
+   * Find the playoff round runmber for the specified division and performance
+   * run number in the current tournament.
+   * 
+   * @return the playoff round or -1 if not found
+   */
+  public static int getPlayoffRound(final Connection connection,
+                                    final String division,
+                                    final int runNumber) throws SQLException {
+
+    final int tournament = Queries.getCurrentTournament(connection);
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT PlayoffRound FROM PlayoffData"
+          + " WHERE Tournament = ?" + " AND event_division = ?" + " AND run_number = ?");
+      prep.setInt(1, tournament);
+      prep.setString(2, division);
+      prep.setInt(3, runNumber);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        final int playoffRound = rs.getInt(1);
+        return playoffRound;
+      } else {
+        return -1;
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Given a team and run number, get the playoff division
+   * 
+   * @return the division or null if not found
+   */
+  public static String getPlayoffDivision(final Connection connection,
+                                          final int teamNumber,
+                                          final int runNumber) throws SQLException {
+    final int tournament = Queries.getCurrentTournament(connection);
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT event_division FROM PlayoffData"
+          + " WHERE Team = ?"//
+          + " AND run_number = ?" //
+          + " AND Tournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, runNumber);
+      prep.setInt(3, tournament);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        final String division = rs.getString(1);
+        return division;
+      } else {
+        return null;
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
     }
   }
 }

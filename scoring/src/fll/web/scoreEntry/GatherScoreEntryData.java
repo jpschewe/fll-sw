@@ -137,11 +137,12 @@ public class GatherScoreEntryData extends BaseFLLServlet {
       }
       session.setAttribute("lRunNumber", lRunNumber);
 
-      // FIXME need to compute this properly for custom playoff divisions
       final String roundText;
       if (lRunNumber > numSeedingRounds) {
+        final String division = Playoff.getPlayoffDivision(connection, teamNumber, lRunNumber);
+        final int playoffRun = Playoff.getPlayoffRound(connection, division, lRunNumber);
         roundText = "Playoff&nbsp;Round&nbsp;"
-            + (lRunNumber - numSeedingRounds);
+            + playoffRun;
       } else {
         roundText = "Run&nbsp;Number&nbsp;"
             + lRunNumber;
