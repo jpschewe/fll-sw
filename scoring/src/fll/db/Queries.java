@@ -776,6 +776,9 @@ public final class Queries {
     final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
     if ((runNumber > numSeedingRounds)
         && "1".equals(request.getParameter("Verified"))) {
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Updating playoff score from insert");
+      }
       updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
                          teamNumber, runNumber, teamScore);
     }
@@ -901,8 +904,12 @@ public final class Queries {
     }
 
     // Check if we need to update the PlayoffData table
+    // FIXME this should check verified
     final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
     if (runNumber > numSeedingRounds) {
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Updating playoff score from updatePerformanceScore");
+      }
       updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
                          teamNumber, runNumber, teamScore);
     }
@@ -923,13 +930,28 @@ public final class Queries {
                                          final int teamNumber,
                                          final int runNumber,
                                          final TeamScore teamScore) throws SQLException, ParseException {
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Updating playoff score for team: "
+          + teamNumber + " run: " + runNumber);
+    }
+
     final Team team = Team.getTeamFromDatabase(connection, teamNumber);
 
     final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, runNumber);
-    final String division = getEventDivision(connection, teamNumber);
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("line: "
+          + ptLine);
+    }
+
+    final String division = Playoff.getPlayoffDivision(connection, teamNumber, runNumber);
     if (ptLine > 0) {
       final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division,
                                                          (ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1), runNumber);
+
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Sibling is: "
+            + siblingTeam + " division: " + division);
+      }
 
       // If sibling team is the NULL team, then updating this score is okay,
       // and no playoff meta data needs updating.
@@ -966,10 +988,13 @@ public final class Queries {
               prep.setInt(3, currentTournament);
               rs = prep.executeQuery();
               if (rs.next()) {
-                throw new FLLRuntimeException("Unable to update score for team number "
-                    + teamNumber + " in performance run " + runNumber
-                    + " because that team has scores entered in subsequent playoff rounds which would become inconsistent. "
-                    + "Delete those scores and then you may update this score.");
+                throw new FLLRuntimeException(
+                                              "Unable to update score for team number "
+                                                  + teamNumber
+                                                  + " in performance run "
+                                                  + runNumber
+                                                  + " because that team has scores entered in subsequent playoff rounds which would become inconsistent. "
+                                                  + "Delete those scores and then you may update this score.");
               }
               SQLFunctions.close(rs);
               rs = null;
@@ -1062,7 +1087,7 @@ public final class Queries {
           + " AND Tournament = ?");
       if (irunNumber > numSeedingRounds) {
         final int ptLine = getPlayoffTableLineNumber(connection, currentTournament, teamNumber, irunNumber);
-        final String division = getEventDivision(connection, teamNumber);
+        final String division = Playoff.getPlayoffDivision(connection, teamNumber, irunNumber);
         if (ptLine > 0) {
           final int siblingLine = ptLine % 2 == 0 ? ptLine - 1 : ptLine + 1;
           final int siblingTeam = getTeamNumberByPlayoffLine(connection, currentTournament, division, siblingLine,
@@ -2776,7 +2801,7 @@ public final class Queries {
           + " WHERE event_division = ?" //
           + " AND Tournament = ?" //
           + " AND LineNumber = ?" //
-          + " AND PlayoffRound = ?");
+          + " AND run_number = ?");
       prep.setString(1, division);
       prep.setInt(2, tournament);
       prep.setInt(3, lineNumber);
