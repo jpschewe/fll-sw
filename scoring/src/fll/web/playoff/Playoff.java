@@ -901,4 +901,38 @@ public final class Playoff {
       SQLFunctions.close(prep);
     }
   }
+
+  /**
+   * Given a team number and playoff round get the performance run number in the
+   * current tournament
+   * 
+   * @return the run number or -1 if not found
+   * @throws SQLException
+   */
+  public static int getRunNumber(final Connection connection,
+                                 final int teamNumber,
+                                 final int playoffRound) throws SQLException {
+    final int tournament = Queries.getCurrentTournament(connection);
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT run_number FROM PlayoffData" //
+          + " WHERE Tournament = ?" //
+          + " AND PlayoffRound = ?" //
+          + " AND Team = ?");
+      prep.setInt(1, tournament);
+      prep.setInt(2, playoffRound);
+      prep.setInt(3, teamNumber);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        final int runNumber = rs.getInt(1);
+        return runNumber;
+      } else {
+        return -1;
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
 }

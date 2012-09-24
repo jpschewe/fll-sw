@@ -75,7 +75,6 @@ public class GatherScoreEntryData extends BaseFLLServlet {
       connection = datasource.getConnection();
       final int tournament = Queries.getCurrentTournament(connection);
       final int numSeedingRounds = Queries.getNumSeedingRounds(connection, tournament);
-      session.setAttribute("numSeedingRounds", numSeedingRounds);
       final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
       if (!tournamentTeams.containsKey(Integer.valueOf(teamNumber))) {
         throw new RuntimeException("Selected team number is not valid: "
