@@ -712,8 +712,6 @@ public final class Queries {
       throw new RuntimeException("Missing parameter: NoShow");
     }
 
-    final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
-
     final TeamScore teamScore = new HttpTeamScore(performanceElement, teamNumber, runNumber, request);
 
     final StringBuffer columns = new StringBuffer();
@@ -775,6 +773,7 @@ public final class Queries {
     }
 
     // Perform updates to the playoff data table if in playoff rounds.
+    final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
     if ((runNumber > numSeedingRounds)
         && "1".equals(request.getParameter("Verified"))) {
       updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
@@ -849,7 +848,6 @@ public final class Queries {
       throw new FLLRuntimeException("Missing parameter: NoShow");
     }
 
-    final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
     final TeamScore teamScore = new HttpTeamScore(performanceElement, teamNumber, runNumber, request);
 
     final StringBuffer sql = new StringBuffer();
@@ -903,6 +901,7 @@ public final class Queries {
     }
 
     // Check if we need to update the PlayoffData table
+    final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
     if (runNumber > numSeedingRounds) {
       updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
                          teamNumber, runNumber, teamScore);
