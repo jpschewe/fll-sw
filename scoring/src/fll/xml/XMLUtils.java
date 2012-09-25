@@ -5,6 +5,8 @@
  */
 package fll.xml;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +16,6 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import org.custommonkey.xmlunit.Diff;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 
 /**
  * Generate some XML documents.
@@ -31,8 +32,11 @@ public final class XMLUtils {
    * @param name the name to look for
    * @return the element or null if one is not found
    */
-  public static Element getSubjectiveCategoryByName(final Document challengeDocument, final String name) {
-    for (final Element categoryElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+  public static Element getSubjectiveCategoryByName(final Document challengeDocument,
+                                                    final String name) {
+    for (final Element categoryElement : new NodelistElementCollectionAdapter(
+                                                                              challengeDocument.getDocumentElement()
+                                                                                               .getElementsByTagName("subjectiveCategory"))) {
       final String categoryName = categoryElement.getAttribute("name");
       if (categoryName.equals(name)) {
         return categoryElement;
@@ -75,9 +79,9 @@ public final class XMLUtils {
     final Element root = challengeDocument.getDocumentElement();
     if (root.hasAttribute("bracketSort")) {
       final String sortStr = root.getAttribute("bracketSort");
-      if(null == sortStr) {
+      if (null == sortStr) {
         return BracketSortType.SEEDING;
-      } else{
+      } else {
         return Enum.valueOf(BracketSortType.class, sortStr);
       }
     } else {
@@ -128,11 +132,12 @@ public final class XMLUtils {
       return ScoreType.INTEGER;
     }
   }
-  
+
   /**
    * @see #getDoubleAttributeValue(Element, String)
    */
-  public static String getStringAttributeValue(final Element element, final String attributeName) {
+  public static String getStringAttributeValue(final Element element,
+                                               final String attributeName) {
     if (null == element) {
       return null;
     }
@@ -143,9 +148,9 @@ public final class XMLUtils {
   /**
    * @see #getDoubleAttributeValue(Element, String)
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { 
-  "NP_BOOLEAN_RETURN_NULL" }, justification = "Need to return Null so that we can determine when there is no score")
-  public static Boolean getBooleanAttributeValue(final Element element, final String attributeName) {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "NP_BOOLEAN_RETURN_NULL" }, justification = "Need to return Null so that we can determine when there is no score")
+  public static Boolean getBooleanAttributeValue(final Element element,
+                                                 final String attributeName) {
     if (null == element) {
       return null;
     }
@@ -163,9 +168,11 @@ public final class XMLUtils {
    * 
    * @param element the element to get the attribute from, may be null
    * @param attributeName the attribute name to get
-   * @return the value, null if element is null or the attribute value is null or empty
+   * @return the value, null if element is null or the attribute value is null
+   *         or empty
    */
-  public static Double getDoubleAttributeValue(final Element element, final String attributeName) {
+  public static Double getDoubleAttributeValue(final Element element,
+                                               final String attributeName) {
     if (null == element) {
       return null;
     }
@@ -186,22 +193,36 @@ public final class XMLUtils {
    * @return true if the documents have the same elements and attributes,
    *         reguardless of order
    */
-  public static boolean compareDocuments(final Document controlDoc, final Document testDoc) {
+  public static boolean compareDocuments(final Document controlDoc,
+                                         final Document testDoc) {
     final Diff xmldiff = new Diff(controlDoc, testDoc);
     return xmldiff.similar();
   }
 
   public static List<String> getSubjectiveCategoryNames(final Document challengeDocument) {
     final List<String> subjectiveCategories = new LinkedList<String>();
-    for (final Element categoryElement : new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory"))) {
+    for (final Element categoryElement : new NodelistElementCollectionAdapter(
+                                                                              challengeDocument.getDocumentElement()
+                                                                                               .getElementsByTagName("subjectiveCategory"))) {
       final String categoryName = categoryElement.getAttribute("name");
       subjectiveCategories.add(categoryName);
     }
     return subjectiveCategories;
   }
-  
-  public static boolean isValidCategoryName(final Document challengeDocument, final String name) {
+
+  public static boolean isValidCategoryName(final Document challengeDocument,
+                                            final String name) {
     return getSubjectiveCategoryNames(challengeDocument).contains(name);
   }
+
+  /**
+   * Date format for time type.
+   */
+  public static final ThreadLocal<DateFormat> XML_TIME_FORMAT = new ThreadLocal<DateFormat>() {
+    @Override
+    protected DateFormat initialValue() {
+      return new SimpleDateFormat("HH:mm:ss");
+    }
+  };
 
 }
