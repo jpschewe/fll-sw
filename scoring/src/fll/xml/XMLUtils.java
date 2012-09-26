@@ -26,7 +26,6 @@ import org.apache.log4j.Logger;
 import org.custommonkey.xmlunit.Diff;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -253,8 +252,6 @@ public final class XMLUtils {
    */
   public static Document parse(final Reader stream, final Schema schema) {
     try {
-      final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
       final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
       builderFactory.setNamespaceAware(true);
       builderFactory.setSchema(schema);
@@ -273,23 +270,6 @@ public final class XMLUtils {
 
         public void warning(final SAXParseException spe) throws SAXParseException {
           LOGGER.error(spe.getMessage(), spe);
-        }
-      });
-
-      parser.setEntityResolver(new EntityResolver() {
-        public InputSource resolveEntity(final String publicID,
-                                         final String systemID) throws SAXException, IOException {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("resolveEntity("
-                + publicID + ", " + systemID + ")");
-          }
-          if (systemID.endsWith("fll.xsd")) {
-            return new InputSource(classLoader.getResourceAsStream("fll/resources/fll.xsd"));
-          } else if (systemID.endsWith("schedule.xsd")) {
-            return new InputSource(classLoader.getResourceAsStream("fll/resources/schedule.xsd"));
-          } else {
-            return null;
-          }
         }
       });
 

@@ -18,6 +18,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
+import javax.xml.XMLConstants;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.XMLUtils;
@@ -25,6 +32,7 @@ import net.mtu.eggplant.xml.XMLUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import fll.db.Queries;
 import fll.scheduler.PerformanceTime;
@@ -57,8 +65,6 @@ public class DownloadSchedule extends BaseFLLServlet {
 
       final Element top = document.createElement("schedule");
       document.appendChild(top);
-      top.setAttribute("xsi:noNamespaceSchemaLocation", "http://fll-sw.sourceforge.net/schedule.xsd");
-      top.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
       for (final TeamScheduleInfo si : schedule.getSchedule()) {
         final Element team = document.createElement("team");
@@ -85,6 +91,16 @@ public class DownloadSchedule extends BaseFLLServlet {
         }
       }
 
+      try {
+        validateSchedule(document);
+      } catch (final IOException ioe) {
+        LOGGER.error("IO error validating schedule document", ioe);
+        throw new RuntimeException(ioe);
+      } catch (final SAXException e) {
+        LOGGER.error("Error validating schedule document", e);
+        throw new RuntimeException(e);
+      }
+
       response.reset();
       response.setContentType("text/xml");
       response.setHeader("Content-Disposition", "schedule.xml");
@@ -96,6 +112,25 @@ public class DownloadSchedule extends BaseFLLServlet {
     } finally {
       SQLFunctions.close(connection);
     }
+  }
+
+  /**
+   * Validate the XML document.
+   * 
+   * @throws SAXException
+   * @throws IOException
+   */
+  private void validateSchedule(final Document document) throws SAXException, IOException {
+    // validate the document
+    final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+    final SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+    final Source schemaFile = new StreamSource(classLoader.getResourceAsStream("fll/resources/schedule.xsd"));
+    final Schema schema = factory.newSchema(schemaFile);
+
+    final Validator validator = schema.newValidator();
+    validator.validate(new DOMSource(document));
+
   }
 
 }
