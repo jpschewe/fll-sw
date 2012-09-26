@@ -5,23 +5,42 @@
  */
 package fll.xml;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.validation.Schema;
+
+import net.mtu.eggplant.io.IOUtils;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
+import org.apache.log4j.Logger;
 import org.custommonkey.xmlunit.Diff;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import fll.util.LogUtils;
 
 /**
  * Generate some XML documents.
  */
 public final class XMLUtils {
 
+  private static final Logger LOGGER = LogUtils.getLogger();
+  
   private XMLUtils() {
   }
 
@@ -225,4 +244,70 @@ public final class XMLUtils {
     }
   };
 
+  /**
+   * Parse the document from the given stream. The document is validated with
+   * the specified schema.. Does not close the stream after reading.
+   * 
+   * @param stream a stream containing document
+   * @return the challengeDocument, null on an error
+   */
+  public static Document parse(final Reader stream, final Schema schema) {
+    try {
+      final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+      final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+      builderFactory.setNamespaceAware(true);
+      builderFactory.setSchema(schema);
+      builderFactory.setIgnoringComments(true);
+      builderFactory.setIgnoringElementContentWhitespace(true);
+      final DocumentBuilder parser = builderFactory.newDocumentBuilder();
+
+      parser.setErrorHandler(new ErrorHandler() {
+        public void error(final SAXParseException spe) throws SAXParseException {
+          throw spe;
+        }
+
+        public void fatalError(final SAXParseException spe) throws SAXParseException {
+          throw spe;
+        }
+
+        public void warning(final SAXParseException spe) throws SAXParseException {
+          LOGGER.error(spe.getMessage(), spe);
+        }
+      });
+
+      parser.setEntityResolver(new EntityResolver() {
+        public InputSource resolveEntity(final String publicID,
+                                         final String systemID) throws SAXException, IOException {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("resolveEntity("
+                + publicID + ", " + systemID + ")");
+          }
+          if (systemID.endsWith("fll.xsd")) {
+            return new InputSource(classLoader.getResourceAsStream("fll/resources/fll.xsd"));
+          } else if (systemID.endsWith("schedule.xsd")) {
+            return new InputSource(classLoader.getResourceAsStream("fll/resources/schedule.xsd"));
+          } else {
+            return null;
+          }
+        }
+      });
+
+      // parse
+      final String content = IOUtils.readIntoString(stream);
+      final Document document = parser.parse(new InputSource(new StringReader(content)));
+
+
+      return document;
+    } catch (final SAXParseException spe) {
+      throw new RuntimeException("Error parsing file line: "
+          + spe.getLineNumber() + " column: " + spe.getColumnNumber() + " " + spe.getMessage());
+    } catch (final SAXException se) {
+      throw new RuntimeException(se);
+    } catch (final IOException ioe) {
+      throw new RuntimeException(ioe);
+    } catch (final ParserConfigurationException pce) {
+      throw new RuntimeException(pce);
+    }
+  }
 }
