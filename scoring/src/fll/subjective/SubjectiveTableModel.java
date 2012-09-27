@@ -41,14 +41,24 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     _scoreDocument = scoreDocument;
     _subjectiveElement = subjectiveElement;
     _goals = new NodelistElementCollectionAdapter(subjectiveElement.getChildNodes()).asList();
-    final Element categoryScoreElement = (Element) (_scoreDocument.getDocumentElement()).getElementsByTagName(subjectiveElement.getAttribute("name"))
-                                                                                        .item(0);
-    final List<Element> scoreElements = new NodelistElementCollectionAdapter(
-                                                                             categoryScoreElement.getElementsByTagName("score")).asList();
+    final List<Element> scoreElements = getScoreElements(_scoreDocument, subjectiveElement.getAttribute("name"));
     _scoreElements = new Element[scoreElements.size()];
     for (int i = 0; i < scoreElements.size(); i++) {
       _scoreElements[i] = scoreElements.get(i);
     }
+  }
+
+  /**
+   * Get the score elements for the specified category.
+   */
+  private static List<Element> getScoreElements(final Document scoreDocument,
+                                                final String categoryName) {
+    final Element categoryScoreElement = (Element) (scoreDocument.getDocumentElement()).getElementsByTagName(categoryName)
+                                                                                       .item(0);
+    final List<Element> scoreElements = new NodelistElementCollectionAdapter(
+                                                                             categoryScoreElement.getElementsByTagName("score")).asList();
+
+    return scoreElements;
   }
 
   @Override
