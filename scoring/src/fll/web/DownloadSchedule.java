@@ -23,7 +23,6 @@ import net.mtu.eggplant.xml.XMLUtils;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
@@ -51,16 +50,6 @@ public class DownloadSchedule extends BaseFLLServlet {
       final TournamentSchedule schedule = new TournamentSchedule(connection, currentTournament);
 
       final Document document = schedule.createXML();
-
-      try {
-        TournamentSchedule.validateXML(document);
-      } catch (final IOException ioe) {
-        LOGGER.error("IO error validating schedule document", ioe);
-        throw new RuntimeException(ioe);
-      } catch (final SAXException e) {
-        LOGGER.error("Error validating schedule document", e);
-        throw new RuntimeException(e);
-      }
 
       response.reset();
       response.setContentType("text/xml");
