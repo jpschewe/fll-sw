@@ -36,10 +36,21 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.xml.XMLConstants;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import net.mtu.eggplant.xml.XMLUtils;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -789,7 +800,7 @@ public class TournamentSchedule implements Serializable {
       final PdfPTable stayingTable = PdfUtils.createTable(1);
       for (final TeamScheduleInfo si : teamsStaying) {
         stayingTable.addCell(PdfUtils.createCell(new Formatter().format(formatString, si.getTeamNumber()).toString(),
-                                        BaseColor.MAGENTA));
+                                                 BaseColor.MAGENTA));
       }
       detailedSchedules.add(stayingTable);
 
@@ -822,7 +833,8 @@ public class TournamentSchedule implements Serializable {
       table.addCell(PdfUtils.createCell(si.getDivision()));
       table.addCell(PdfUtils.createCell(si.getOrganization()));
       table.addCell(PdfUtils.createCell(si.getTeamName()));
-      table.addCell(PdfUtils.createCell(OUTPUT_DATE_FORMAT.get().format(si.getSubjectiveTimeByName(subjectiveStation).getTime())));
+      table.addCell(PdfUtils.createCell(OUTPUT_DATE_FORMAT.get().format(si.getSubjectiveTimeByName(subjectiveStation)
+                                                                          .getTime())));
       table.addCell(PdfUtils.createCell(si.getJudgingStation()));
     }
 
@@ -1457,4 +1469,63 @@ public class TournamentSchedule implements Serializable {
     si.setPerf(round, perfTime);
     addToMatches(si, round);
   }
+
+  /**
+   * Convert the schedule to an XML document that conforms to
+   * fll/resources/schedule.xsd.
+   */
+  public org.w3c.dom.Document createXML() {
+    final org.w3c.dom.Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
+
+    final Element top = document.createElement("schedule");
+    document.appendChild(top);
+
+    for (final TeamScheduleInfo si : getSchedule()) {
+      final Element team = document.createElement("team");
+      top.appendChild(team);
+      team.setAttribute("number", String.valueOf(si.getTeamNumber()));
+      team.setAttribute("judging_station", si.getJudgingStation());
+
+      for (final String subjName : si.getKnownSubjectiveStations()) {
+        final Date time = si.getSubjectiveTimeByName(subjName).getTime();
+        final Element subjective = document.createElement("subjective");
+        team.appendChild(subjective);
+        subjective.setAttribute("name", subjName);
+        subjective.setAttribute("time", fll.xml.XMLUtils.XML_TIME_FORMAT.get().format(time));
+      }
+
+      for (int round = 0; round < si.getNumberOfRounds(); ++round) {
+        final PerformanceTime perfTime = si.getPerf(round);
+        final Element perf = document.createElement("performance");
+        team.appendChild(perf);
+        perf.setAttribute("round", String.valueOf(round + 1));
+        perf.setAttribute("table_color", perfTime.getTable());
+        perf.setAttribute("table_side", String.valueOf(perfTime.getSide()));
+        perf.setAttribute("time", fll.xml.XMLUtils.XML_TIME_FORMAT.get().format(perfTime.getTime()));
+      }
+    }
+    return document;
+  }
+
+  /**
+   * Validate the schedule XML document.
+   * 
+   * @throws SAXException on an error
+   */
+  public static void validateXML(final org.w3c.dom.Document document) throws SAXException, IOException {
+    try {
+      final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+      final SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+      final Source schemaFile = new StreamSource(classLoader.getResourceAsStream("fll/resources/schedule.xsd"));
+      final Schema schema = factory.newSchema(schemaFile);
+
+      final Validator validator = schema.newValidator();
+      validator.validate(new DOMSource(document));
+    } catch (final IOException e) {
+      throw new RuntimeException("Internal error, should never get IOException here", e);
+    }
+
+  }
+
 }
