@@ -1472,7 +1472,8 @@ public class TournamentSchedule implements Serializable {
 
   /**
    * Convert the schedule to an XML document that conforms to
-   * fll/resources/schedule.xsd.
+   * fll/resources/schedule.xsd. The document that is returned has already been
+   * run through {@link #validateXML(org.w3c.dom.Document)}.
    */
   public org.w3c.dom.Document createXML() {
     final org.w3c.dom.Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
@@ -1504,6 +1505,13 @@ public class TournamentSchedule implements Serializable {
         perf.setAttribute("time", fll.xml.XMLUtils.XML_TIME_FORMAT.get().format(perfTime.getTime()));
       }
     }
+
+    try {
+      validateXML(document);
+    } catch (final SAXException e) {
+      throw new FLLInternalException("Schedule XML document is invalid", e);
+    }
+
     return document;
   }
 
@@ -1512,7 +1520,7 @@ public class TournamentSchedule implements Serializable {
    * 
    * @throws SAXException on an error
    */
-  public static void validateXML(final org.w3c.dom.Document document) throws SAXException, IOException {
+  public static void validateXML(final org.w3c.dom.Document document) throws SAXException {
     try {
       final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
