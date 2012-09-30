@@ -118,6 +118,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
                                         final int currentTournament,
                                         final Document challengeDocument,
                                         final Connection connection) throws SQLException, IOException, ParseException {
+    //FIXME needs to handle new schema
     ZipFile zipfile = null;
     try {
       zipfile = new ZipFile(file);

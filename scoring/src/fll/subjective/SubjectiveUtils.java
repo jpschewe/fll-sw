@@ -28,6 +28,7 @@ import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.util.LogUtils;
+import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeParser;
 
 /**
@@ -214,6 +215,8 @@ public final class SubjectiveUtils {
         final String goalTitle = goalDescription.getAttribute("title");
         final String goalName = goalDescription.getAttribute("name");
         if (fll.xml.XMLUtils.isEnumeratedGoal(goalDescription)) {
+          //FIXME need to compare subscore elements
+          
           final String masterValueStr = XMLUtils.getStringAttributeValue(masterScore, goalName);
           final String compareValueStr = XMLUtils.getStringAttributeValue(compareScore, goalName);
           if (!ComparisonUtils.safeEquals(masterValueStr, compareValueStr)) {
@@ -249,4 +252,23 @@ public final class SubjectiveUtils {
     }
     return null;
   }
+
+  /**
+   * Given the score element, find the subscore element for the specified goal
+   * in the subjective score document.
+   * 
+   * @return the element or null if not found
+   */
+  public static Element getSubscoreElement(final Element scoreElement,
+                                           final String goalName) {
+    for (final Element subEle : new NodelistElementCollectionAdapter(
+                                                                     scoreElement.getElementsByTagName(DownloadSubjectiveData.SUBSCORE_NODE_NAME))) {
+      final String name = subEle.getAttribute("name");
+      if (goalName.equals(name)) {
+        return subEle;
+      }
+    }
+    return null;
+  }
+
 }

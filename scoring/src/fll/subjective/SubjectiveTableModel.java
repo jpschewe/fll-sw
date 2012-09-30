@@ -6,6 +6,7 @@
 package fll.subjective;
 
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
@@ -19,6 +20,7 @@ import org.w3c.dom.Element;
 import fll.Utilities;
 import fll.util.LogUtils;
 import fll.util.ScoreUtils;
+import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ScoreType;
 import fll.xml.XMLUtils;
 
@@ -53,12 +55,18 @@ public final class SubjectiveTableModel extends AbstractTableModel {
    */
   private static List<Element> getScoreElements(final Document scoreDocument,
                                                 final String categoryName) {
-    final Element categoryScoreElement = (Element) (scoreDocument.getDocumentElement()).getElementsByTagName(categoryName)
-                                                                                       .item(0);
-    final List<Element> scoreElements = new NodelistElementCollectionAdapter(
-                                                                             categoryScoreElement.getElementsByTagName("score")).asList();
+    for (final Element subCatElement : new NodelistElementCollectionAdapter(
+                                                                            scoreDocument.getDocumentElement()
+                                                                                         .getElementsByTagName(DownloadSubjectiveData.SUBJECTIVE_CATEGORY_NODE_NAME))) {
+      final String name = subCatElement.getAttribute("name");
+      if (categoryName.equals(name)) {
+        final List<Element> scoreElements = new NodelistElementCollectionAdapter(
+                                                                                 subCatElement.getElementsByTagName(DownloadSubjectiveData.SCORE_NODE_NAME)).asList();
+        return scoreElements;
+      }
+    }
 
-    return scoreElements;
+    return Collections.emptyList();
   }
 
   @Override
@@ -300,11 +308,21 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       if (null == value
           || "".equals(value)) {
         // remove value
-        element.setAttribute(goalName, "");
+        final Element subscoreElement = SubjectiveUtils.getSubscoreElement(element, goalName);
+        if (null != subscoreElement) {
+          element.removeChild(subscoreElement);
+        }
         if (setModified) {
           element.setAttribute("modified", Boolean.TRUE.toString());
         }
+
       } else {
+        Element subscoreElement = SubjectiveUtils.getSubscoreElement(element, goalName);
+        if (null == subscoreElement) {
+          subscoreElement = _scoreDocument.createElement(DownloadSubjectiveData.SUBSCORE_NODE_NAME);
+          element.appendChild(subscoreElement);
+        }
+
         final List<Element> posValues = new NodelistElementCollectionAdapter(
                                                                              goalDescription.getElementsByTagName("value")).asList();
         if (posValues.size() > 0) {
@@ -313,7 +331,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           for (final Element posValue : posValues) {
             if (posValue.getAttribute("title").equalsIgnoreCase((String) value)) {
               // found it
-              element.setAttribute(goalName, posValue.getAttribute("value"));
+              subscoreElement.setAttribute("value", posValue.getAttribute("value"));
               if (setModified) {
                 element.setAttribute("modified", Boolean.TRUE.toString());
               }
@@ -345,9 +363,9 @@ public final class SubjectiveTableModel extends AbstractTableModel {
               error = true;
             } else {
               if (ScoreType.FLOAT == scoreType) {
-                element.setAttribute(goalName, String.valueOf(parsedValue.doubleValue()));
+                subscoreElement.setAttribute("value", String.valueOf(parsedValue.doubleValue()));
               } else {
-                element.setAttribute(goalName, String.valueOf(parsedValue.intValue()));
+                subscoreElement.setAttribute("value", String.valueOf(parsedValue.intValue()));
               }
               if (setModified) {
                 element.setAttribute("modified", Boolean.TRUE.toString());
