@@ -53,7 +53,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   /**
    * Get the score elements for the specified category.
    */
-  private static List<Element> getScoreElements(final Document scoreDocument,
+  public static List<Element> getScoreElements(final Document scoreDocument,
                                                 final String categoryName) {
     for (final Element subCatElement : new NodelistElementCollectionAdapter(
                                                                             scoreDocument.getDocumentElement()
@@ -186,7 +186,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           // have an entry in scoreEle
           if (XMLUtils.isComputedGoal(goalDescription)) {
             return getTeamScore(row).getComputedScore(goalName);
-          } else if (!scoreEle.hasAttribute(goalName)) {
+          } else if (null == SubjectiveUtils.getSubscoreElement(scoreEle, goalName)) {
             return null;
           } else if (XMLUtils.isEnumeratedGoal(goalDescription)) {
             return getTeamScore(row).getEnumRawScore(goalName);
