@@ -164,11 +164,11 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
                     final Element subscoreElement = document.createElement(SUBSCORE_NODE_NAME);
                     scoreElement.appendChild(subscoreElement);
 
-                    scoreElement.setAttribute("name", goalName);
-                    scoreElement.setAttribute("value", value);
+                    subscoreElement.setAttribute("name", goalName);
+                    subscoreElement.setAttribute("value", value);
                   }
                 }
-                scoreElement.setAttribute("NoShow", rs2.getString("NoShow"));
+                scoreElement.setAttribute("NoShow", rs2.getString("NoShow").toLowerCase());
               } else {
                 scoreElement.setAttribute("NoShow", "false");
               }
