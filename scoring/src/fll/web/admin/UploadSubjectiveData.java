@@ -37,6 +37,8 @@ import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.subjective.SubjectiveUtils;
+import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -117,7 +119,6 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
                                         final int currentTournament,
                                         final Document challengeDocument,
                                         final Connection connection) throws SQLException, IOException, ParseException {
-    //FIXME needs to handle new schema
     ZipFile zipfile = null;
     try {
       zipfile = new ZipFile(file);
@@ -137,7 +138,10 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       }
     }
   }
-  
+
+  /**
+   * Save the subjective data in scoreDocument to the database.
+   */
   public static void saveSubjectiveData(final Document scoreDocument,
                                         final int currentTournament,
                                         final Document challengeDocument,
@@ -154,8 +158,8 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
         LOGGER.trace("An element: "
             + scoreCategoryNode);
       }
-      final Element scoreCategoryElement = scoreCategoryNode;
-      final String categoryName = scoreCategoryElement.getNodeName();
+      final Element scoreCategoryElement = scoreCategoryNode; // "subjectiveCategory"
+      final String categoryName = scoreCategoryElement.getAttribute("name");
       final Element categoryElement = fll.xml.XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
       if (null == categoryElement) {
         throw new RuntimeException(
@@ -257,7 +261,12 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
           for (int goalIndex = 0; goalIndex < numGoals; goalIndex++) {
             final Element goalDescription = goalDescriptions.get(goalIndex);
             final String goalName = goalDescription.getAttribute("name");
-            final String value = scoreElement.getAttribute(goalName);
+            final Element subscoreElement = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
+            if (null == subscoreElement) {
+              throw new FLLInternalException("Cannot find subscore element for '"
+                  + goalName + "' in category '" + categoryName + "'");
+            }
+            final String value = subscoreElement.getAttribute("value");
             if (null != value
                 && !"".equals(value.trim())) {
               insertPrep.setString(goalIndex + 5, value.trim());
