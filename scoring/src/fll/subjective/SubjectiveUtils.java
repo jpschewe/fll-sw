@@ -142,9 +142,8 @@ public final class SubjectiveUtils {
                                            final Element masterScoreCategory,
                                            final Element compareScoresElement,
                                            final Collection<SubjectiveScoreDifference> diffs) {
-    //FIXME needs update for subjectiveCategory element
-    
-    final String categoryName = masterScoreCategory.getNodeName();
+    // masterScoreCategory and compareScoreCategory are "subjectiveCategory"
+    final String categoryName = masterScoreCategory.getAttribute("name");
     final Element compareScoreCategory = getCategoryNode(compareScoresElement, categoryName);
     if (null == compareScoreCategory) {
       throw new RuntimeException("Compare score document doesn't have scores for category: "
@@ -249,7 +248,8 @@ public final class SubjectiveUtils {
   private static Element getCategoryNode(final Element scoresElement,
                                          final String categoryName) {
     for (final Element scoreCategory : new NodelistElementCollectionAdapter(scoresElement.getChildNodes())) {
-      if (categoryName.equals(scoreCategory.getNodeName())) {
+      final String name = scoreCategory.getAttribute("name");
+      if (categoryName.equals(name)) {
         return scoreCategory;
       }
     }
