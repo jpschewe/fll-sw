@@ -113,7 +113,6 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
    *          information about the subjective categories.
    * @param connection the database connection to write to
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Generated based upon categories and goals")
   public static void saveSubjectiveData(final File file,
                                         final int currentTournament,
                                         final Document challengeDocument,
@@ -131,37 +130,44 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       final Document scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
       scoreStream.close();
       zipfile.close();
-
-      final Element scoresElement = scoreDocument.getDocumentElement();
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("first element: "
-            + scoresElement);
-      }
-
-      for (final Element scoreCategoryNode : new NodelistElementCollectionAdapter(scoresElement.getChildNodes())) {
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("An element: "
-              + scoreCategoryNode);
-        }
-        final Element scoreCategoryElement = scoreCategoryNode;
-        final String categoryName = scoreCategoryElement.getNodeName();
-        final Element categoryElement = fll.xml.XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
-        if (null == categoryElement) {
-          throw new RuntimeException(
-                                     "Cannot find subjective category description for category in score document category: "
-                                         + categoryName);
-        }
-
-        saveCategoryData(currentTournament, connection, scoreCategoryElement, categoryName, categoryElement);
-        removeNullRows(currentTournament, connection, categoryName, categoryElement);
-      }
-
-      Queries.updateSubjectiveScoreTotals(challengeDocument, connection, currentTournament);
+      saveSubjectiveData(scoreDocument, currentTournament, challengeDocument, connection);
     } finally {
       if (null != zipfile) {
         zipfile.close();
       }
     }
+  }
+  
+  public static void saveSubjectiveData(final Document scoreDocument,
+                                        final int currentTournament,
+                                        final Document challengeDocument,
+                                        final Connection connection) throws SQLException, IOException, ParseException {
+
+    final Element scoresElement = scoreDocument.getDocumentElement();
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("first element: "
+          + scoresElement);
+    }
+
+    for (final Element scoreCategoryNode : new NodelistElementCollectionAdapter(scoresElement.getChildNodes())) {
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("An element: "
+            + scoreCategoryNode);
+      }
+      final Element scoreCategoryElement = scoreCategoryNode;
+      final String categoryName = scoreCategoryElement.getNodeName();
+      final Element categoryElement = fll.xml.XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
+      if (null == categoryElement) {
+        throw new RuntimeException(
+                                   "Cannot find subjective category description for category in score document category: "
+                                       + categoryName);
+      }
+
+      saveCategoryData(currentTournament, connection, scoreCategoryElement, categoryName, categoryElement);
+      removeNullRows(currentTournament, connection, categoryName, categoryElement);
+    }
+
+    Queries.updateSubjectiveScoreTotals(challengeDocument, connection, currentTournament);
   }
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")
