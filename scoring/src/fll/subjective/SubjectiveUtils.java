@@ -142,6 +142,8 @@ public final class SubjectiveUtils {
                                            final Element masterScoreCategory,
                                            final Element compareScoresElement,
                                            final Collection<SubjectiveScoreDifference> diffs) {
+    //FIXME needs update for subjectiveCategory element
+    
     final String categoryName = masterScoreCategory.getNodeName();
     final Element compareScoreCategory = getCategoryNode(compareScoresElement, categoryName);
     if (null == compareScoreCategory) {
@@ -214,18 +216,19 @@ public final class SubjectiveUtils {
       for (final Element goalDescription : goalDescriptions) {
         final String goalTitle = goalDescription.getAttribute("title");
         final String goalName = goalDescription.getAttribute("name");
+        final Element masterSubscoreElement = getSubscoreElement(masterScore, goalName);
+        final Element compareSubscoreElement = getSubscoreElement(compareScore, goalName);
+
         if (fll.xml.XMLUtils.isEnumeratedGoal(goalDescription)) {
-          //FIXME need to compare subscore elements
-          
-          final String masterValueStr = XMLUtils.getStringAttributeValue(masterScore, goalName);
-          final String compareValueStr = XMLUtils.getStringAttributeValue(compareScore, goalName);
+          final String masterValueStr = XMLUtils.getStringAttributeValue(masterSubscoreElement, "value");
+          final String compareValueStr = XMLUtils.getStringAttributeValue(compareSubscoreElement, "value");
           if (!ComparisonUtils.safeEquals(masterValueStr, compareValueStr)) {
             diffs.add(new StringSubjectiveScoreDifference(categoryTitle, goalTitle, teamNumber, judge, masterValueStr,
                                                           compareValueStr));
           }
         } else {
-          final Double masterValue = XMLUtils.getDoubleAttributeValue(masterScore, goalName);
-          final Double compareValue = XMLUtils.getDoubleAttributeValue(compareScore, goalName);
+          final Double masterValue = XMLUtils.getDoubleAttributeValue(masterSubscoreElement, "value");
+          final Double compareValue = XMLUtils.getDoubleAttributeValue(compareSubscoreElement, "value");
           if (!ComparisonUtils.safeEquals(masterValue, compareValue)) {
             diffs.add(new DoubleSubjectiveScoreDifference(categoryTitle, goalTitle, teamNumber, judge, masterValue,
                                                           compareValue));
