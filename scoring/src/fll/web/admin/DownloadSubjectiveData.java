@@ -50,7 +50,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 
 /**
- * Commit the changes made by editTeam.jsp.
+ * Downlaod the data file for the subjective score app.
  */
 @WebServlet("/admin/subjective-data.fll")
 public class DownloadSubjectiveData extends BaseFLLServlet {
