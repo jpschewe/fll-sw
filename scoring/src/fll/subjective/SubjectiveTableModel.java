@@ -279,9 +279,9 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         + NUM_COLUMNS_LEFT_OF_SCORES) {
       // No Show
       if (value instanceof Boolean) {
-        element.setAttribute("NoShow", value.toString());
+        element.setAttributeNS(null, "NoShow", value.toString());
         if (setModified) {
-          element.setAttribute("modified", Boolean.TRUE.toString());
+          element.setAttributeNS(null, "modified", Boolean.TRUE.toString());
         }
 
         final Boolean b = (Boolean) value;
@@ -313,13 +313,13 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           element.removeChild(subscoreElement);
         }
         if (setModified) {
-          element.setAttribute("modified", Boolean.TRUE.toString());
+          element.setAttributeNS(null, "modified", Boolean.TRUE.toString());
         }
 
       } else {
         Element subscoreElement = SubjectiveUtils.getSubscoreElement(element, goalName);
         if (null == subscoreElement) {
-          subscoreElement = _scoreDocument.createElement(DownloadSubjectiveData.SUBSCORE_NODE_NAME);
+          subscoreElement = _scoreDocument.createElementNS(null, DownloadSubjectiveData.SUBSCORE_NODE_NAME);
           element.appendChild(subscoreElement);
         }
 
@@ -331,9 +331,9 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           for (final Element posValue : posValues) {
             if (posValue.getAttribute("title").equalsIgnoreCase((String) value)) {
               // found it
-              subscoreElement.setAttribute("value", posValue.getAttribute("value"));
+              subscoreElement.setAttributeNS(null, "value", posValue.getAttribute("value"));
               if (setModified) {
-                element.setAttribute("modified", Boolean.TRUE.toString());
+                element.setAttributeNS(null, "modified", Boolean.TRUE.toString());
               }
               found = true;
             }
@@ -363,12 +363,12 @@ public final class SubjectiveTableModel extends AbstractTableModel {
               error = true;
             } else {
               if (ScoreType.FLOAT == scoreType) {
-                subscoreElement.setAttribute("value", String.valueOf(parsedValue.doubleValue()));
+                subscoreElement.setAttributeNS(null, "value", String.valueOf(parsedValue.doubleValue()));
               } else {
-                subscoreElement.setAttribute("value", String.valueOf(parsedValue.intValue()));
+                subscoreElement.setAttributeNS(null, "value", String.valueOf(parsedValue.intValue()));
               }
               if (setModified) {
-                element.setAttribute("modified", Boolean.TRUE.toString());
+                element.setAttributeNS(null, "modified", Boolean.TRUE.toString());
               }
             }
           } catch (final ParseException pe) {
