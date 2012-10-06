@@ -28,6 +28,7 @@ import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.util.LogUtils;
+import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeParser;
 
 /**
@@ -141,7 +142,8 @@ public final class SubjectiveUtils {
                                            final Element masterScoreCategory,
                                            final Element compareScoresElement,
                                            final Collection<SubjectiveScoreDifference> diffs) {
-    final String categoryName = masterScoreCategory.getNodeName();
+    // masterScoreCategory and compareScoreCategory are "subjectiveCategory"
+    final String categoryName = masterScoreCategory.getAttribute("name");
     final Element compareScoreCategory = getCategoryNode(compareScoresElement, categoryName);
     if (null == compareScoreCategory) {
       throw new RuntimeException("Compare score document doesn't have scores for category: "
@@ -213,16 +215,19 @@ public final class SubjectiveUtils {
       for (final Element goalDescription : goalDescriptions) {
         final String goalTitle = goalDescription.getAttribute("title");
         final String goalName = goalDescription.getAttribute("name");
+        final Element masterSubscoreElement = getSubscoreElement(masterScore, goalName);
+        final Element compareSubscoreElement = getSubscoreElement(compareScore, goalName);
+
         if (fll.xml.XMLUtils.isEnumeratedGoal(goalDescription)) {
-          final String masterValueStr = XMLUtils.getStringAttributeValue(masterScore, goalName);
-          final String compareValueStr = XMLUtils.getStringAttributeValue(compareScore, goalName);
+          final String masterValueStr = XMLUtils.getStringAttributeValue(masterSubscoreElement, "value");
+          final String compareValueStr = XMLUtils.getStringAttributeValue(compareSubscoreElement, "value");
           if (!ComparisonUtils.safeEquals(masterValueStr, compareValueStr)) {
             diffs.add(new StringSubjectiveScoreDifference(categoryTitle, goalTitle, teamNumber, judge, masterValueStr,
                                                           compareValueStr));
           }
         } else {
-          final Double masterValue = XMLUtils.getDoubleAttributeValue(masterScore, goalName);
-          final Double compareValue = XMLUtils.getDoubleAttributeValue(compareScore, goalName);
+          final Double masterValue = XMLUtils.getDoubleAttributeValue(masterSubscoreElement, "value");
+          final Double compareValue = XMLUtils.getDoubleAttributeValue(compareSubscoreElement, "value");
           if (!ComparisonUtils.safeEquals(masterValue, compareValue)) {
             diffs.add(new DoubleSubjectiveScoreDifference(categoryTitle, goalTitle, teamNumber, judge, masterValue,
                                                           compareValue));
@@ -243,10 +248,30 @@ public final class SubjectiveUtils {
   private static Element getCategoryNode(final Element scoresElement,
                                          final String categoryName) {
     for (final Element scoreCategory : new NodelistElementCollectionAdapter(scoresElement.getChildNodes())) {
-      if (categoryName.equals(scoreCategory.getNodeName())) {
+      final String name = scoreCategory.getAttribute("name");
+      if (categoryName.equals(name)) {
         return scoreCategory;
       }
     }
     return null;
   }
+
+  /**
+   * Given the score element, find the subscore element for the specified goal
+   * in the subjective score document.
+   * 
+   * @return the element or null if not found
+   */
+  public static Element getSubscoreElement(final Element scoreElement,
+                                           final String goalName) {
+    for (final Element subEle : new NodelistElementCollectionAdapter(
+                                                                     scoreElement.getElementsByTagName(DownloadSubjectiveData.SUBSCORE_NODE_NAME))) {
+      final String name = subEle.getAttribute("name");
+      if (goalName.equals(name)) {
+        return subEle;
+      }
+    }
+    return null;
+  }
+
 }

@@ -6,6 +6,7 @@
 package fll.web.admin;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -15,6 +16,7 @@ import java.sql.Types;
 import java.text.ParseException;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import javax.servlet.ServletContext;
@@ -37,6 +39,9 @@ import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.db.Queries;
+import fll.subjective.SubjectiveUtils;
+import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -113,54 +118,79 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
    *          information about the subjective categories.
    * @param connection the database connection to write to
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Generated based upon categories and goals")
   public static void saveSubjectiveData(final File file,
                                         final int currentTournament,
                                         final Document challengeDocument,
                                         final Connection connection) throws SQLException, IOException, ParseException {
     ZipFile zipfile = null;
+    Document scoreDocument = null;
     try {
-      zipfile = new ZipFile(file);
-      // read in score data
-      final ZipEntry scoreZipEntry = zipfile.getEntry("score.xml");
-      if (null == scoreZipEntry) {
-        throw new RuntimeException("Zipfile does not contain score.xml as expected");
-      }
-      final InputStream scoreStream = zipfile.getInputStream(scoreZipEntry);
-      final Document scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
-      scoreStream.close();
-      zipfile.close();
+      try {
+        zipfile = new ZipFile(file);
 
-      final Element scoresElement = scoreDocument.getDocumentElement();
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("first element: "
-            + scoresElement);
-      }
-
-      for (final Element scoreCategoryNode : new NodelistElementCollectionAdapter(scoresElement.getChildNodes())) {
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("An element: "
-              + scoreCategoryNode);
+        // read in score data
+        final ZipEntry scoreZipEntry = zipfile.getEntry("score.xml");
+        if (null == scoreZipEntry) {
+          throw new RuntimeException("Zipfile does not contain score.xml as expected");
         }
-        final Element scoreCategoryElement = scoreCategoryNode;
-        final String categoryName = scoreCategoryElement.getNodeName();
-        final Element categoryElement = fll.xml.XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
-        if (null == categoryElement) {
-          throw new RuntimeException(
-                                     "Cannot find subjective category description for category in score document category: "
-                                         + categoryName);
-        }
+        final InputStream scoreStream = zipfile.getInputStream(scoreZipEntry);
+        scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
+        scoreStream.close();
+        zipfile.close();
 
-        saveCategoryData(currentTournament, connection, scoreCategoryElement, categoryName, categoryElement);
-        removeNullRows(currentTournament, connection, categoryName, categoryElement);
+      } catch (final ZipException ze) {
+        // not a zip file, parse as just the XML file
+        final FileInputStream fis = new FileInputStream(file);
+        scoreDocument = XMLUtils.parseXMLDocument(fis);
+        fis.close();
       }
 
-      Queries.updateSubjectiveScoreTotals(challengeDocument, connection, currentTournament);
+      if (null == scoreDocument) {
+        throw new FLLRuntimeException(
+                                      "Cannot parse input as a compressed subjective data file or an uncompressed XML file");
+      }
+
+      saveSubjectiveData(scoreDocument, currentTournament, challengeDocument, connection);
     } finally {
       if (null != zipfile) {
         zipfile.close();
       }
     }
+  }
+
+  /**
+   * Save the subjective data in scoreDocument to the database.
+   */
+  public static void saveSubjectiveData(final Document scoreDocument,
+                                        final int currentTournament,
+                                        final Document challengeDocument,
+                                        final Connection connection) throws SQLException, IOException, ParseException {
+
+    final Element scoresElement = scoreDocument.getDocumentElement();
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("first element: "
+          + scoresElement);
+    }
+
+    for (final Element scoreCategoryNode : new NodelistElementCollectionAdapter(scoresElement.getChildNodes())) {
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("An element: "
+            + scoreCategoryNode);
+      }
+      final Element scoreCategoryElement = scoreCategoryNode; // "subjectiveCategory"
+      final String categoryName = scoreCategoryElement.getAttribute("name");
+      final Element categoryElement = fll.xml.XMLUtils.getSubjectiveCategoryByName(challengeDocument, categoryName);
+      if (null == categoryElement) {
+        throw new RuntimeException(
+                                   "Cannot find subjective category description for category in score document category: "
+                                       + categoryName);
+      }
+
+      saveCategoryData(currentTournament, connection, scoreCategoryElement, categoryName, categoryElement);
+      removeNullRows(currentTournament, connection, categoryName, categoryElement);
+    }
+
+    Queries.updateSubjectiveScoreTotals(challengeDocument, connection, currentTournament);
   }
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")
@@ -250,7 +280,12 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
           for (int goalIndex = 0; goalIndex < numGoals; goalIndex++) {
             final Element goalDescription = goalDescriptions.get(goalIndex);
             final String goalName = goalDescription.getAttribute("name");
-            final String value = scoreElement.getAttribute(goalName);
+            final Element subscoreElement = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
+            if (null == subscoreElement) {
+              throw new FLLInternalException("Cannot find subscore element for '"
+                  + goalName + "' in category '" + categoryName + "'");
+            }
+            final String value = subscoreElement.getAttribute("value");
             if (null != value
                 && !"".equals(value.trim())) {
               insertPrep.setString(goalIndex + 5, value.trim());

@@ -281,7 +281,8 @@ public final class SubjectiveFrame extends JFrame {
                                                                               subjectiveElement.getElementsByTagName("goal"))) {
       final NodelistElementCollectionAdapter posValuesList = new NodelistElementCollectionAdapter(
                                                                                                   goalDescription.getElementsByTagName("value"));
-      final TableColumn column = table.getColumnModel().getColumn(g + SubjectiveTableModel.NUM_COLUMNS_LEFT_OF_SCORES);
+      final TableColumn column = table.getColumnModel().getColumn(g
+          + SubjectiveTableModel.NUM_COLUMNS_LEFT_OF_SCORES);
       if (posValuesList.hasNext()) {
         // enumerated
         final Vector<String> posValues = new Vector<String>();
@@ -485,17 +486,19 @@ public final class SubjectiveFrame extends JFrame {
       final String categoryTitle = subjectiveElement.getAttribute("title");
 
       final List<Element> goals = new NodelistElementCollectionAdapter(subjectiveElement.getElementsByTagName("goal")).asList();
-      final Element categoryElement = (Element) _scoreDocument.getDocumentElement().getElementsByTagName(category)
-                                                              .item(0);
-      for (final Element scoreElement : new NodelistElementCollectionAdapter(
-                                                                             categoryElement.getElementsByTagName("score"))) {
+      final List<Element> scoreElements = SubjectiveTableModel.getScoreElements(_scoreDocument, category);
+      for (final Element scoreElement : scoreElements) {
         int numValues = 0;
         for (final Element goalElement : goals) {
           final String goalName = goalElement.getAttribute("name");
-          final String value = scoreElement.getAttribute(goalName);
-          if (null != value
-              && !"".equals(value)) {
-            numValues++;
+
+          final Element subEle = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
+          if (null != subEle) {
+            final String value = subEle.getAttribute("value");
+            if (null != value
+                && !"".equals(value)) {
+              numValues++;
+            }
           }
         }
         if (numValues != goals.size()

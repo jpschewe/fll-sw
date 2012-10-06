@@ -17,7 +17,6 @@ import fll.web.playoff.TeamScore;
  * model.
  * 
  * @author jpschewe
- * @version $Revision$
  */
 /* package */class SubjectiveTeamScore extends TeamScore {
 
@@ -25,29 +24,35 @@ import fll.web.playoff.TeamScore;
    * @param categoryDescription passed to superclass
    * @param scoreElement the score element that describes the team score
    */
-  public SubjectiveTeamScore(final Element categoryDescription, final Element scoreEle) throws ParseException {
+  public SubjectiveTeamScore(final Element categoryDescription,
+                             final Element scoreEle) throws ParseException {
     super(categoryDescription, Utilities.NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber")).intValue());
     _scoreEle = scoreEle;
   }
 
   @Override
   public String getEnumRawScore(final String goalName) {
-    final String value = _scoreEle.getAttribute(goalName);
-    if (null == value
-        || "".equals(value)) {
+    final Element subEle = SubjectiveUtils.getSubscoreElement(_scoreEle, goalName);
+    if (null == subEle) {
       return null;
     } else {
-      return value;
+      final String value = subEle.getAttribute("value");
+      if (null == value
+          || "".equals(value)) {
+        return null;
+      } else {
+        return value;
+      }
     }
   }
 
   @Override
   public Double getRawScore(final String goalName) {
-    final String value = _scoreEle.getAttribute(goalName);
-    if (null == value
-        || "".equals(value)) {
+    final Element subEle = SubjectiveUtils.getSubscoreElement(_scoreEle, goalName);
+    if (null == subEle) {
       return null;
     } else {
+      final String value = subEle.getAttribute("value");
       try {
         return Utilities.NUMBER_FORMAT_INSTANCE.parse(value).doubleValue();
       } catch (final ParseException pe) {

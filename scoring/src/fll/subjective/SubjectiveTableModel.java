@@ -6,6 +6,7 @@
 package fll.subjective;
 
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
@@ -19,6 +20,7 @@ import org.w3c.dom.Element;
 import fll.Utilities;
 import fll.util.LogUtils;
 import fll.util.ScoreUtils;
+import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ScoreType;
 import fll.xml.XMLUtils;
 
@@ -51,14 +53,20 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   /**
    * Get the score elements for the specified category.
    */
-  private static List<Element> getScoreElements(final Document scoreDocument,
+  public static List<Element> getScoreElements(final Document scoreDocument,
                                                 final String categoryName) {
-    final Element categoryScoreElement = (Element) (scoreDocument.getDocumentElement()).getElementsByTagName(categoryName)
-                                                                                       .item(0);
-    final List<Element> scoreElements = new NodelistElementCollectionAdapter(
-                                                                             categoryScoreElement.getElementsByTagName("score")).asList();
+    for (final Element subCatElement : new NodelistElementCollectionAdapter(
+                                                                            scoreDocument.getDocumentElement()
+                                                                                         .getElementsByTagName(DownloadSubjectiveData.SUBJECTIVE_CATEGORY_NODE_NAME))) {
+      final String name = subCatElement.getAttribute("name");
+      if (categoryName.equals(name)) {
+        final List<Element> scoreElements = new NodelistElementCollectionAdapter(
+                                                                                 subCatElement.getElementsByTagName(DownloadSubjectiveData.SCORE_NODE_NAME)).asList();
+        return scoreElements;
+      }
+    }
 
-    return scoreElements;
+    return Collections.emptyList();
   }
 
   @Override
@@ -178,7 +186,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           // have an entry in scoreEle
           if (XMLUtils.isComputedGoal(goalDescription)) {
             return getTeamScore(row).getComputedScore(goalName);
-          } else if (!scoreEle.hasAttribute(goalName)) {
+          } else if (null == SubjectiveUtils.getSubscoreElement(scoreEle, goalName)) {
             return null;
           } else if (XMLUtils.isEnumeratedGoal(goalDescription)) {
             return getTeamScore(row).getEnumRawScore(goalName);
@@ -271,9 +279,9 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         + NUM_COLUMNS_LEFT_OF_SCORES) {
       // No Show
       if (value instanceof Boolean) {
-        element.setAttribute("NoShow", value.toString());
+        element.setAttributeNS(null, "NoShow", value.toString());
         if (setModified) {
-          element.setAttribute("modified", Boolean.TRUE.toString());
+          element.setAttributeNS(null, "modified", Boolean.TRUE.toString());
         }
 
         final Boolean b = (Boolean) value;
@@ -300,11 +308,22 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       if (null == value
           || "".equals(value)) {
         // remove value
-        element.setAttribute(goalName, "");
-        if (setModified) {
-          element.setAttribute("modified", Boolean.TRUE.toString());
+        final Element subscoreElement = SubjectiveUtils.getSubscoreElement(element, goalName);
+        if (null != subscoreElement) {
+          element.removeChild(subscoreElement);
         }
+        if (setModified) {
+          element.setAttributeNS(null, "modified", Boolean.TRUE.toString());
+        }
+
       } else {
+        Element subscoreElement = SubjectiveUtils.getSubscoreElement(element, goalName);
+        if (null == subscoreElement) {
+          subscoreElement = _scoreDocument.createElementNS(null, DownloadSubjectiveData.SUBSCORE_NODE_NAME);
+          subscoreElement.setAttributeNS(null, "name", goalName);
+          element.appendChild(subscoreElement);
+        }
+
         final List<Element> posValues = new NodelistElementCollectionAdapter(
                                                                              goalDescription.getElementsByTagName("value")).asList();
         if (posValues.size() > 0) {
@@ -313,9 +332,9 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           for (final Element posValue : posValues) {
             if (posValue.getAttribute("title").equalsIgnoreCase((String) value)) {
               // found it
-              element.setAttribute(goalName, posValue.getAttribute("value"));
+              subscoreElement.setAttributeNS(null, "value", posValue.getAttribute("value"));
               if (setModified) {
-                element.setAttribute("modified", Boolean.TRUE.toString());
+                element.setAttributeNS(null, "modified", Boolean.TRUE.toString());
               }
               found = true;
             }
@@ -345,12 +364,12 @@ public final class SubjectiveTableModel extends AbstractTableModel {
               error = true;
             } else {
               if (ScoreType.FLOAT == scoreType) {
-                element.setAttribute(goalName, String.valueOf(parsedValue.doubleValue()));
+                subscoreElement.setAttributeNS(null, "value", String.valueOf(parsedValue.doubleValue()));
               } else {
-                element.setAttribute(goalName, String.valueOf(parsedValue.intValue()));
+                subscoreElement.setAttributeNS(null, "value", String.valueOf(parsedValue.intValue()));
               }
               if (setModified) {
-                element.setAttribute("modified", Boolean.TRUE.toString());
+                element.setAttributeNS(null, "modified", Boolean.TRUE.toString());
               }
             }
           } catch (final ParseException pe) {
