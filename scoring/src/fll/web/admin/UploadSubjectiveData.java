@@ -6,6 +6,7 @@
 package fll.web.admin;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -15,6 +16,7 @@ import java.sql.Types;
 import java.text.ParseException;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import javax.servlet.ServletContext;
@@ -39,6 +41,7 @@ import fll.Utilities;
 import fll.db.Queries;
 import fll.subjective.SubjectiveUtils;
 import fll.util.FLLInternalException;
+import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -120,17 +123,33 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
                                         final Document challengeDocument,
                                         final Connection connection) throws SQLException, IOException, ParseException {
     ZipFile zipfile = null;
+    Document scoreDocument = null;
     try {
-      zipfile = new ZipFile(file);
-      // read in score data
-      final ZipEntry scoreZipEntry = zipfile.getEntry("score.xml");
-      if (null == scoreZipEntry) {
-        throw new RuntimeException("Zipfile does not contain score.xml as expected");
+      try {
+        zipfile = new ZipFile(file);
+
+        // read in score data
+        final ZipEntry scoreZipEntry = zipfile.getEntry("score.xml");
+        if (null == scoreZipEntry) {
+          throw new RuntimeException("Zipfile does not contain score.xml as expected");
+        }
+        final InputStream scoreStream = zipfile.getInputStream(scoreZipEntry);
+        scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
+        scoreStream.close();
+        zipfile.close();
+
+      } catch (final ZipException ze) {
+        // not a zip file, parse as just the XML file
+        final FileInputStream fis = new FileInputStream(file);
+        scoreDocument = XMLUtils.parseXMLDocument(fis);
+        fis.close();
       }
-      final InputStream scoreStream = zipfile.getInputStream(scoreZipEntry);
-      final Document scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
-      scoreStream.close();
-      zipfile.close();
+
+      if (null == scoreDocument) {
+        throw new FLLRuntimeException(
+                                      "Cannot parse input as a compressed subjective data file or an uncompressed XML file");
+      }
+
       saveSubjectiveData(scoreDocument, currentTournament, challengeDocument, connection);
     } finally {
       if (null != zipfile) {
