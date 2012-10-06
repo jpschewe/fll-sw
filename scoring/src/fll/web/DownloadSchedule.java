@@ -9,7 +9,6 @@ package fll.web;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Date;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -24,11 +23,8 @@ import net.mtu.eggplant.xml.XMLUtils;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import fll.db.Queries;
-import fll.scheduler.PerformanceTime;
-import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
 
@@ -53,37 +49,7 @@ public class DownloadSchedule extends BaseFLLServlet {
       final int currentTournament = Queries.getCurrentTournament(connection);
       final TournamentSchedule schedule = new TournamentSchedule(connection, currentTournament);
 
-      final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
-
-      final Element top = document.createElement("schedule");
-      document.appendChild(top);
-      top.setAttribute("xsi:noNamespaceSchemaLocation", "http://fll-sw.sourceforge.net/schedule.xsd");
-      top.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-
-      for (final TeamScheduleInfo si : schedule.getSchedule()) {
-        final Element team = document.createElement("team");
-        top.appendChild(team);
-        team.setAttribute("number", String.valueOf(si.getTeamNumber()));
-        team.setAttribute("judging_station", si.getJudgingStation());
-
-        for (final String subjName : si.getKnownSubjectiveStations()) {
-          final Date time = si.getSubjectiveTimeByName(subjName).getTime();
-          final Element subjective = document.createElement("subjective");
-          team.appendChild(subjective);
-          subjective.setAttribute("name", subjName);
-          subjective.setAttribute("time", fll.xml.XMLUtils.XML_TIME_FORMAT.get().format(time));
-        }
-
-        for (int round = 0; round < si.getNumberOfRounds(); ++round) {
-          final PerformanceTime perfTime = si.getPerf(round);
-          final Element perf = document.createElement("performance");
-          team.appendChild(perf);
-          perf.setAttribute("round", String.valueOf(round + 1));
-          perf.setAttribute("table_color", perfTime.getTable());
-          perf.setAttribute("table_side", String.valueOf(perfTime.getSide()));
-          perf.setAttribute("time", fll.xml.XMLUtils.XML_TIME_FORMAT.get().format(perfTime.getTime()));
-        }
-      }
+      final Document document = schedule.createXML();
 
       response.reset();
       response.setContentType("text/xml");

@@ -7,33 +7,24 @@ package fll.xml;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringReader;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import net.mtu.eggplant.io.IOUtils;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -131,59 +122,18 @@ public final class ChallengeParser {
       final Source schemaFile = new StreamSource(classLoader.getResourceAsStream("fll/resources/fll.xsd"));
       final Schema schema = factory.newSchema(schemaFile);
 
-      final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-      builderFactory.setNamespaceAware(true);
-      builderFactory.setSchema(schema);
-      builderFactory.setIgnoringComments(true);
-      builderFactory.setIgnoringElementContentWhitespace(true);
-      final DocumentBuilder parser = builderFactory.newDocumentBuilder();
 
-      parser.setErrorHandler(new ErrorHandler() {
-        public void error(final SAXParseException spe) throws SAXParseException {
-          throw spe;
-        }
-
-        public void fatalError(final SAXParseException spe) throws SAXParseException {
-          throw spe;
-        }
-
-        public void warning(final SAXParseException spe) throws SAXParseException {
-          LOG.error(spe.getMessage(), spe);
-        }
-      });
-
-      parser.setEntityResolver(new EntityResolver() {
-        public InputSource resolveEntity(final String publicID,
-                                         final String systemID) throws SAXException, IOException {
-          if (LOG.isDebugEnabled()) {
-            LOG.debug("resolveEntity("
-                + publicID + ", " + systemID + ")");
-          }
-          if (systemID.endsWith("fll.xsd")) {
-            // just use the one we store internally
-            // final int slashidx = systemID.lastIndexOf("/") + 1;
-            return new InputSource(classLoader.getResourceAsStream("fll/resources/fll.xsd")); // +
-            // systemID.substring(slashidx)));
-          } else {
-            return null;
-          }
-        }
-      });
-
-      // pull the whole stream into a string
-      final String content = IOUtils.readIntoString(stream);
-      final Document document = parser.parse(new InputSource(new StringReader(content)));
+      final Document document = XMLUtils.parse(stream, schema);
+      
+      // challenge descriptor specific checks
       validateDocument(document);
+      
       return document;
     } catch (final SAXParseException spe) {
       throw new RuntimeException("Error parsing file line: "
           + spe.getLineNumber() + " column: " + spe.getColumnNumber() + " " + spe.getMessage());
     } catch (final SAXException se) {
       throw new RuntimeException(se);
-    } catch (final IOException ioe) {
-      throw new RuntimeException(ioe);
-    } catch (final ParserConfigurationException pce) {
-      throw new RuntimeException(pce);
     } catch (final ParseException pe) {
       throw new RuntimeException(pe);
     }
