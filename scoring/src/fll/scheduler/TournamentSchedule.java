@@ -1478,31 +1478,31 @@ public class TournamentSchedule implements Serializable {
   public org.w3c.dom.Document createXML() {
     final org.w3c.dom.Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
 
-    final Element top = document.createElement("schedule");
+    final Element top = document.createElementNS(null, "schedule");
     document.appendChild(top);
 
     for (final TeamScheduleInfo si : getSchedule()) {
-      final Element team = document.createElement("team");
+      final Element team = document.createElementNS(null, "team");
       top.appendChild(team);
-      team.setAttribute("number", String.valueOf(si.getTeamNumber()));
-      team.setAttribute("judging_station", si.getJudgingStation());
+      team.setAttributeNS(null, "number", String.valueOf(si.getTeamNumber()));
+      team.setAttributeNS(null, "judging_station", si.getJudgingStation());
 
       for (final String subjName : si.getKnownSubjectiveStations()) {
         final Date time = si.getSubjectiveTimeByName(subjName).getTime();
-        final Element subjective = document.createElement("subjective");
+        final Element subjective = document.createElementNS(null, "subjective");
         team.appendChild(subjective);
-        subjective.setAttribute("name", subjName);
-        subjective.setAttribute("time", fll.xml.XMLUtils.XML_TIME_FORMAT.get().format(time));
+        subjective.setAttributeNS(null, "name", subjName);
+        subjective.setAttributeNS(null, "time", fll.xml.XMLUtils.XML_TIME_FORMAT.get().format(time));
       }
 
       for (int round = 0; round < si.getNumberOfRounds(); ++round) {
         final PerformanceTime perfTime = si.getPerf(round);
-        final Element perf = document.createElement("performance");
+        final Element perf = document.createElementNS(null, "performance");
         team.appendChild(perf);
-        perf.setAttribute("round", String.valueOf(round + 1));
-        perf.setAttribute("table_color", perfTime.getTable());
-        perf.setAttribute("table_side", String.valueOf(perfTime.getSide()));
-        perf.setAttribute("time", fll.xml.XMLUtils.XML_TIME_FORMAT.get().format(perfTime.getTime()));
+        perf.setAttributeNS(null, "round", String.valueOf(round + 1));
+        perf.setAttributeNS(null, "table_color", perfTime.getTable());
+        perf.setAttributeNS(null, "table_side", String.valueOf(perfTime.getSide()));
+        perf.setAttributeNS(null, "time", fll.xml.XMLUtils.XML_TIME_FORMAT.get().format(perfTime.getTime()));
       }
     }
 
