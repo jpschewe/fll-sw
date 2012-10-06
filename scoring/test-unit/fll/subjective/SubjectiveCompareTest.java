@@ -17,8 +17,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import fll.util.LogUtils;
+import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeParser;
 
 /**
@@ -42,19 +44,23 @@ public class SubjectiveCompareTest {
     challengeDocument = null;
   }
 
-  private Document loadDocument(final String resourceName) {
+  private Document loadDocument(final String resourceName) throws SAXException {
     final InputStream scoreStream = SubjectiveCompareTest.class.getResourceAsStream(resourceName);
     Assert.assertNotNull(scoreStream);
     final Document scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
     Assert.assertNotNull(scoreDocument);
+    
+    DownloadSubjectiveData.validateXML(scoreDocument);
+    
     return scoreDocument;
   }
 
   /**
    * Compare a document to itself and make sure there are no differences.
+   * @throws SAXException 
    */
   @Test
-  public void simpleTestWithNoDifferences() {
+  public void simpleTestWithNoDifferences() throws SAXException {
     final Document scoreDocument = loadDocument("master-score.xml");
     final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(challengeDocument, scoreDocument, scoreDocument);
     Assert.assertNotNull(diffs);
@@ -63,9 +69,11 @@ public class SubjectiveCompareTest {
 
   /**
    * Basic difference test. One difference.
+   * 
+   * @throws SAXException
    */
   @Test
-  public void simpleTestWithOneDifference() {
+  public void simpleTestWithOneDifference() throws SAXException {
     final Document masterDocument = loadDocument("master-score.xml");
     final Document compareDocument = loadDocument("single-diff.xml");
     final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(challengeDocument, masterDocument, compareDocument);
