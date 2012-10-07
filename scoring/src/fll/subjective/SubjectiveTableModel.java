@@ -320,6 +320,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         Element subscoreElement = SubjectiveUtils.getSubscoreElement(element, goalName);
         if (null == subscoreElement) {
           subscoreElement = _scoreDocument.createElementNS(null, DownloadSubjectiveData.SUBSCORE_NODE_NAME);
+          subscoreElement.setAttributeNS(null, "name", goalName);
           element.appendChild(subscoreElement);
         }
 
