@@ -307,6 +307,10 @@ public class BracketData {
 
   private final int _finalsRound;
 
+  public int getFinalsRound() {
+    return _finalsRound;
+  }
+
   private boolean _showFinalScores;
 
   private boolean _showOnlyVerifiedScores;
@@ -324,8 +328,11 @@ public class BracketData {
    *          overall spacing for the entire table. Recommended value: 4.
    * @throws SQLException
    */
-  public BracketData(final Connection pConnection, final String pDivision, final int pFirstRound, final int pLastRound, final int pRowsPerTeam)
-      throws SQLException {
+  public BracketData(final Connection pConnection,
+                     final String pDivision,
+                     final int pFirstRound,
+                     final int pLastRound,
+                     final int pRowsPerTeam) throws SQLException {
     super();
     if (pRowsPerTeam % 2 != 0
         || pRowsPerTeam < 2) {
@@ -334,7 +341,6 @@ public class BracketData {
     }
 
     final int tournament = Queries.getCurrentTournament(pConnection);
-
 
     _rowsPerTeam = pRowsPerTeam;
     _firstRoundSize = Queries.getFirstPlayoffRoundSize(pConnection, pDivision);
@@ -386,48 +392,17 @@ public class BracketData {
         d.setTeam(Team.getTeamFromDatabase(pConnection, team));
         d.setDBLine(line);
         d.setPrinted(printed);
-        // Very brief explanation of the math:
-        // Let y = target output row in the table (this is the key value of the
-        // inner Map elements of _bracketData)
-        // Let x = the number of rows per team (variable '_rowsPerTeam') in the
-        // left-most column of the output table
-        // (Given: x is a positive, even value. The math would work for other
-        // values, but it's meaningless when we
-        // can't have fractional table rows...)
-        // Let r = the round index (variable 'adjustedRound') starting at 0 in
-        // the left-most column
-        // Let n = the row number (variable 'line') as obtained from the
-        // database: 1,2,3,...
-        // Then y = n * x * 2^r - (x * 2^(r-1) + 0.5 * x - 1)
-        // The rounding operation is purely to negate any possible floating
-        // point inaccuracies introduced by Math.pow, etc.
-        final int adjustedRound = round
-            - _firstRound;
-        final int row;
-        if (_firstRound < _finalsRound
-            && round == _finalsRound && line == 3) {
-          row = topRowOfConsolationBracket();
-        } else if (_firstRound < _finalsRound
-            && round == _finalsRound && line == 4) {
-          row = topRowOfConsolationBracket()
-              + _rowsPerTeam;
-        } else if (_firstRound < _finalsRound
-            && round == _finalsRound + 1 && line == 2) {
-          row = topRowOfConsolationBracket()
-              + _rowsPerTeam / 2;
-        } else {
-          row = (int) Math.round(line
-              * _rowsPerTeam * (Math.pow(2, adjustedRound)) - (_rowsPerTeam
-                  * Math.pow(2, adjustedRound - 1) + 0.5 * _rowsPerTeam - 1));
-        }
+
+        final int row = getRowNumberForLine(round, line);
         if (LOG.isDebugEnabled()) {
           LOG.debug("Putting team "
               + d.getTeam() + " with dbLine " + d.getDBLine() + " to row " + row + " of output table\n");
         }
         if (roundData.put(row, d) != null) {
           throw new RuntimeException("Error - Map keys were not unique - PlayoffData "
-              + "might be inconsistent (you should verify that there are not multiple teams" + " occupying the same round and row for tournament:'"
-              + tournament + "' and" + " division:'" + pDivision + "')");
+              + "might be inconsistent (you should verify that there are not multiple teams"
+              + " occupying the same round and row for tournament:'" + tournament + "' and" + " division:'" + pDivision
+              + "')");
         }
       }
 
@@ -435,6 +410,50 @@ public class BracketData {
       SQLFunctions.close(rs);
       SQLFunctions.close(stmt);
     }
+  }
+
+  /**
+   * Very brief explanation of the math:
+   * 
+   * <pre>
+   * Let y = target output row in the table (this is the key value of the
+   * inner Map elements of _bracketData)
+   * Let x = the number of rows per team (variable '_rowsPerTeam') in the
+   * left-most column of the output table
+   * (Given: x is a positive, even value. The math would work for other
+   * values, but it's meaningless when we
+   * can't have fractional table rows...)
+   * Let r = the round index (variable 'adjustedRound') starting at 0 in
+   * the left-most column
+   * Let n = the row number (variable 'line') as obtained from the
+   * database: 1,2,3,...
+   * Then y = n * x * 2^r - (x * 2^(r-1) + 0.5 * x - 1)
+   * The rounding operation is purely to negate any possible floating
+   * point inaccuracies introduced by Math.pow, etc.
+   * </pre>
+   */
+  public int getRowNumberForLine(final int round,
+                                 final int line) {
+    final int adjustedRound = round
+        - _firstRound;
+    final int row;
+    if (_firstRound < _finalsRound
+        && round == _finalsRound && line == 3) {
+      row = topRowOfConsolationBracket();
+    } else if (_firstRound < _finalsRound
+        && round == _finalsRound && line == 4) {
+      row = topRowOfConsolationBracket()
+          + _rowsPerTeam;
+    } else if (_firstRound < _finalsRound
+        && round == _finalsRound + 1 && line == 2) {
+      row = topRowOfConsolationBracket()
+          + _rowsPerTeam / 2;
+    } else {
+      row = (int) Math.round(line
+          * _rowsPerTeam * (Math.pow(2, adjustedRound)) - (_rowsPerTeam
+              * Math.pow(2, adjustedRound - 1) + 0.5 * _rowsPerTeam - 1));
+    }
+    return row;
   }
 
   /**
@@ -486,12 +505,13 @@ public class BracketData {
    * @return The BracketDataType for the given cell, or null if there is no data
    *         at that cell.
    */
-  public BracketDataType getData(final int round, final int row) {
+  public BracketDataType getData(final int round,
+                                 final int row) {
     return _bracketData.get(round).get(row);
   }
 
   /**
-   * Returns the number of rows in the specified round number.
+   * Returns the maximum number of rows for this BracketData object.
    * 
    * @return Html table row number of the last row for the rounds stored in the
    *         instance of BracketData, or 0 if there are no rows in it.
@@ -500,11 +520,12 @@ public class BracketData {
     try {
       if (_firstRound < _finalsRound
           && _lastRound >= _finalsRound) {
-        final int sfr = _bracketData.get(_finalsRound).lastKey().intValue();
-        final int fr = _bracketData.get(_firstRound).lastKey().intValue();
+        final int sfr = _bracketData.get(_finalsRound).lastKey();
+        final int fr = _bracketData.get(_firstRound).lastKey();
         return sfr > fr ? sfr : fr;
+      } else {
+        return _bracketData.get(_firstRound).lastKey().intValue();
       }
-      return _bracketData.get(_firstRound).lastKey().intValue();
     } catch (final NoSuchElementException e) {
       return 0;
     }
@@ -541,7 +562,10 @@ public class BracketData {
    * @return Properly formed \<td\>element.
    * @throws SQLException If database access fails.
    */
-  public String getHtmlCell(final Connection connection, final int tournament, final int row, final int round) throws SQLException {
+  public String getHtmlCell(final Connection connection,
+                            final int tournament,
+                            final int row,
+                            final int round) throws SQLException {
     final SortedMap<Integer, BracketDataType> roundData = _bracketData.get(round);
     if (roundData == null) {
       return "<td>ERROR: No data for round "
@@ -558,7 +582,8 @@ public class BracketData {
             + comment + "-->");
       }
     } else if (d instanceof TeamBracketCell) {
-      sb.append("<td width='400' class='Leaf js-leaf' id='"+row+"-"+round+"'>");
+      sb.append("<td width='400' class='Leaf js-leaf' id='"
+          + row + "-" + round + "'>");
       if (round == _finalsRound) {
         sb.append(getDisplayString(connection, tournament, round
             + _numSeedingRounds, ((TeamBracketCell) d).getTeam(), _showFinalScores, _showOnlyVerifiedScores));
@@ -677,7 +702,9 @@ public class BracketData {
    * @return Properly formatted HTML \<td\>element for a bridge cell.
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "ICAST_IDIV_CAST_TO_DOUBLE" }, justification = "Double cast is OK as we are ok with the rounding")
-  public String getHtmlBridgeCell(final int row, final int round, final TopRightCornerStyle cs) {
+  public String getHtmlBridgeCell(final int row,
+                                  final int round,
+                                  final TopRightCornerStyle cs) {
     final StringBuffer sb = new StringBuffer();
     final int ar = round
         - _firstRound;
@@ -862,7 +889,9 @@ public class BracketData {
    * @param eventDivision
    * @throws SQLException
    */
-  public void addStaticTableLabels(final Connection connection, final int tournament, final String eventDivision) throws SQLException {
+  public void addStaticTableLabels(final Connection connection,
+                                   final int tournament,
+                                   final String eventDivision) throws SQLException {
     if (_rowsPerTeam < 4) {
       LOG.warn("Table labels cannot be added to bracket data because there are too few lines per team for them to fit.");
       return; // if there aren't enough rows-per-team to include table labels,
@@ -886,7 +915,8 @@ public class BracketData {
             tablelinemod = -1;
           }
           // Get the table assignment from cell info
-          final String table = Queries.getAssignedTable(connection, tournament, eventDivision, round.intValue(), dblinenum);
+          final String table = Queries.getAssignedTable(connection, tournament, eventDivision, round.intValue(),
+                                                        dblinenum);
           if (table != null) {
             newCells.put(lineNumber.intValue()
                 + tablelinemod, new BigScreenTableAssignmentCell(table));
@@ -908,7 +938,9 @@ public class BracketData {
    * @throws RuntimeException if playoffData table has mismatched teams in the
    *           brackets.
    */
-  public int addBracketLabelsAndScoreGenFormElements(final Connection pConnection, final int tournament, final String division) throws SQLException {
+  public int addBracketLabelsAndScoreGenFormElements(final Connection pConnection,
+                                                     final int tournament,
+                                                     final String division) throws SQLException {
     // Get the list of tournament tables
     final List<String[]> tournamentTables = Queries.getTournamentTables(pConnection);
     final List<String> tables = new LinkedList<String>();
@@ -988,9 +1020,11 @@ public class BracketData {
 
             final TeamBracketCell topCell = (TeamBracketCell) roundData.get(curArray[0]);
             final TeamBracketCell bottomCell = (TeamBracketCell) roundData.get(curArray[1]);
-            roundData.put(curArray[0] + 1, new ScoreSheetFormBracketCell(tables, bracketLabel, matchNum++, topCell.getPrinted()
-                && bottomCell.getPrinted(), tableA, tableB, topCell.getTeam(), bottomCell.getTeam(), curArray[1].intValue()
-                - curArray[0].intValue() - 1));
+            roundData.put(curArray[0] + 1,
+                          new ScoreSheetFormBracketCell(tables, bracketLabel, matchNum++, topCell.getPrinted()
+                              && bottomCell.getPrinted(), tableA, tableB, topCell.getTeam(), bottomCell.getTeam(),
+                                                        curArray[1].intValue()
+                                                            - curArray[0].intValue() - 1));
             // Put placeholders for the rows that are to be spanned over
             for (int j = curArray[0].intValue() + 2; j < curArray[1].intValue(); j++) {
               roundData.put(j, new SpannedOverBracketCell("spanned row"
@@ -1030,7 +1064,8 @@ public class BracketData {
                                         final int runNumber,
                                         final Team team,
                                         final boolean showScore,
-                                        final boolean showOnlyVerifiedScores) throws IllegalArgumentException, SQLException {
+                                        final boolean showOnlyVerifiedScores) throws IllegalArgumentException,
+      SQLException {
     if (Team.BYE.equals(team)) {
       return "<font class='TeamName'>BYE</font>";
     } else if (Team.TIE.equals(team)) {
@@ -1054,7 +1089,8 @@ public class BracketData {
           sb.append("<span style='color:red'>");
         }
         sb.append("<font class='TeamScore'>&nbsp;Score: <span id='");
-        sb.append(team.getTeamNumber() + "-" + runNumber + "-score'>");
+        sb.append(team.getTeamNumber()
+            + "-" + runNumber + "-score'>");
         if (Playoff.isNoShow(connection, currentTournament, team, runNumber)) {
           sb.append("No Show");
         } else {

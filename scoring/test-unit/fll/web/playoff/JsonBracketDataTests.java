@@ -79,27 +79,16 @@ public class JsonBracketDataTests {
     final PlayoffContainer playoff = makePlayoffs();
 
     /*
-     * Initial bracket order:
-     *
-     * 1A
-     * 2B
-     * 
-     * 3C
-     * 4D
-     * 
-     * 5E
-     * BYE
-     * 
-     * 6F
-     * BYE
+     * Initial bracket order: 1A 2B | 3C 4D | 5E BYE | 6F BYE
      */
-    
-    // Start with adding an unverified score
+
+    // Start with adding an unverified score for team 1, run 1
     insertScore(playoff.getConnection(), 1, 1, false, 5D);
     // See what json tells us
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
     // Ask for round 1 leaf 1
-    query.put(1, 1); // row 1 , round 1
+    int row = playoff.getBracketData().getRowNumberForLine(1, 1);
+    query.put(row, 1); // row 1 , round 1
     final Gson gson = new Gson();
     final Element scoreElement = (Element) playoff.getChallengeDoc().getDocumentElement()
                                                   .getElementsByTagName("Performance").item(0);
@@ -110,13 +99,14 @@ public class JsonBracketDataTests {
     // assert score is -1, indicating no score
     Assert.assertEquals(result[0].score, -1.0D, 0.0);
 
-    
-    // test to make sure 2 unverified scores for opposing teams produces no result
+    // test to make sure 2 unverified scores for opposing teams produces no
+    // result
     // give opponent a score
     insertScore(playoff.getConnection(), 2, 1, false, 20D);
     query.clear();
     // ask for round we just entered score for
-    query.put(3, 2); // row 3, round 2
+    row = playoff.getBracketData().getRowNumberForLine(2, 1);
+    query.put(row, 2); // row 3, round 2
     jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), scoreElement,
                                                     playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
@@ -132,7 +122,9 @@ public class JsonBracketDataTests {
     insertScore(playoff.getConnection(), 5, 3, true, 99D);
     // json shouldn't tell us the score for the finals round
     query.clear();
-    query.put(23, 3);
+    final int finalsRound = playoff.getBracketData().getFinalsRound();
+    row = playoff.getBracketData().getRowNumberForLine(finalsRound + 1, 1);
+    query.put(row, finalsRound+1);
     jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), scoreElement,
                                                     playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
@@ -216,12 +208,13 @@ public class JsonBracketDataTests {
     Playoff.initializeBrackets(connection, document, div, false);
 
     final int firstRound = 1;
-    final int lastRound = 3;
+    final int lastRound = 4;
     final int rowsPerTeam = 4;
     final boolean showFinals = false;
     final boolean onlyVerifiedScores = true;
-    return new PlayoffContainer(connection, new BracketData(connection, div, firstRound, lastRound, rowsPerTeam,
-                                                            showFinals, onlyVerifiedScores), document);
+    final BracketData bd = new BracketData(connection, div, firstRound, lastRound, rowsPerTeam, showFinals,
+                                           onlyVerifiedScores);
+    return new PlayoffContainer(connection, bd, document);
 
   }
 }
