@@ -121,7 +121,6 @@ FONT.TIE {
 <script type="text/javascript" src="<c:url value='/extlib/jquery.scrollTo-1.4.2-min.js'/>"></script>
 <script type="text/javascript">
   var ajaxURL = '<c:url value="/ajax/"/>';
-  var seedingRounds = <%=Queries.getNumSeedingRounds(connection, currentTournament)%>;
   var currentRound = <%=playoffRoundNumber-1%>;
   var foundNewest = false;
   var rows = <%=bracketInfo.getNumRows()%>;
