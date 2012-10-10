@@ -172,9 +172,9 @@ public class TestAJAXBrackets {
       // give the web server a chance to catch up
       Thread.sleep(30000);
 
-      final String scoreTextAfter = selenium.findElement(By.id("1-1")).getText();
+      final String scoreTextAfter = selenium.findElement(By.id("1-2")).getText();
       // final String scoreTextAfter =
-      // String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-1').innerHTML"));
+      // String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-2').innerHTML"));
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Score text after: "
             + scoreTextAfter);
