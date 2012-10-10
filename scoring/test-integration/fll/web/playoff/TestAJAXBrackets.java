@@ -134,12 +134,12 @@ public class TestAJAXBrackets {
 
       // enter unverified score for team 1
       selenium.switchTo().window(scoreEntryWindow.getWindowHandle());
-      enterScore("1", 1);
+      enterScore("4", 1);
 
       selenium.switchTo().window(bracketsWindow.getWindowHandle());
-      final String scoreTextBefore = selenium.findElement(By.id("1-2")).getText();
+      final String scoreTextBefore = selenium.findElement(By.id("9-1")).getText();
       // final String scoreTextBefore =
-      // String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-2').innerHTML"));
+      // String.valueOf(seleniumJS.executeScript("window.document.getElementById('9-1').innerHTML"));
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Score text before: "
             + scoreTextBefore);
@@ -151,7 +151,7 @@ public class TestAJAXBrackets {
       selenium.switchTo().window(scoreEntryWindow.getWindowHandle());
 
       final Select verifySelect = new Select(selenium.findElement(By.id("select-verify-teamnumber")));
-      verifySelect.selectByValue("1-2");
+      verifySelect.selectByValue("9-1");
       selenium.findElement(By.id("verify_submit")).click();
 
       selenium.findElement(By.id("Verified_yes")).click();
@@ -172,7 +172,7 @@ public class TestAJAXBrackets {
       // give the web server a chance to catch up
       Thread.sleep(30000);
 
-      final String scoreTextAfter = selenium.findElement(By.id("1-2")).getText();
+      final String scoreTextAfter = selenium.findElement(By.id("9-1")).getText();
       // final String scoreTextAfter =
       // String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-2').innerHTML"));
       if (LOGGER.isDebugEnabled()) {
