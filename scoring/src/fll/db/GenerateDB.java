@@ -28,7 +28,6 @@ import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Tournament;
-import fll.Utilities;
 import fll.util.LogUtils;
 
 /**
@@ -524,6 +523,7 @@ public final class GenerateDB {
       }
 
       Queries.setNumSeedingRounds(connection, INTERNAL_TOURNAMENT_ID, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
+      Queries.setMaxScorebaordPerformanceRound(connection, INTERNAL_TOURNAMENT_ID, TournamentParameters.MAX_SCOREBOARD_ROUND_DEFAULT);
     } finally {
       SQLFunctions.close(globalInsert);
     }

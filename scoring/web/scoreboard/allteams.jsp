@@ -21,7 +21,8 @@
   final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();
   final int currentTournament = Queries.getCurrentTournament(connection);
-  final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournament);
+  final int maxScoreboardRound = Queries.getMaxScoreboardPerformanceRound(connection, currentTournament);
+
 
   final PreparedStatement prep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.Organization, Teams.TeamName, current_tournament_teams.event_division,"
   + " verified_performance.Tournament, verified_performance.RunNumber, verified_performance.Bye, verified_performance.NoShow, verified_performance.ComputedTotal"
@@ -32,7 +33,7 @@ final Connection connection = datasource.getConnection();
   + "   AND verified_performance.RunNumber <= ?"
   + " ORDER BY Teams.Organization, Teams.TeamNumber, verified_performance.RunNumber");
   prep.setInt(1, currentTournament);
-  prep.setInt(2, numSeedingRounds);
+  prep.setInt(2, maxScoreboardRound);
   final ResultSet rs = prep.executeQuery();
   final List<String> divisions = Queries.getEventDivisions(connection);
 %>
