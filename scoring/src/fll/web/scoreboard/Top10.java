@@ -73,7 +73,7 @@ public class Top10 extends BaseFLLServlet {
       connection = datasource.getConnection();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
-      final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournament);
+      final int maxScoreboardRound = Queries.getMaxScoreboardPerformanceRound(connection, currentTournament);
 
       final Integer divisionIndexObj = SessionAttributes.getAttribute(session, "divisionIndex", Integer.class);
       int divisionIndex;
@@ -125,7 +125,7 @@ public class Top10 extends BaseFLLServlet {
           + " ORDER BY T2.MaxOfComputedScore "
           + winnerCriteria.getSortString() + " LIMIT 10");
       prep.setInt(1, currentTournament);
-      prep.setInt(2, numSeedingRounds);
+      prep.setInt(2, maxScoreboardRound);
       prep.setString(3, divisions.get(divisionIndex));
       rs = prep.executeQuery();
 

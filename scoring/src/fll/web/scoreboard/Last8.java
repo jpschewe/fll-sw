@@ -56,8 +56,8 @@ public class Last8 extends BaseFLLServlet {
       connection = datasource.getConnection();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
-      final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournament);
-      
+      final int maxScoreboardRound = Queries.getMaxScoreboardPerformanceRound(connection, currentTournament);
+
       formatter.format("<html>");
       formatter.format("<head>");
       formatter.format("<link rel='stylesheet' type='text/css' href='score_style.css' />");
@@ -91,7 +91,7 @@ public class Last8 extends BaseFLLServlet {
           + "  AND verified_performance.RunNumber <= ?"
           + " ORDER BY verified_performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 8");
       prep.setInt(1, currentTournament);
-      prep.setInt(2, numSeedingRounds);
+      prep.setInt(2, maxScoreboardRound);
       rs = prep.executeQuery();
 
       while (rs.next()) {

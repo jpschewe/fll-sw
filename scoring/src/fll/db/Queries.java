@@ -1252,14 +1252,14 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
   }
-  
+
   /**
    * Set judging station for a team.
    */
   public static void setJudgingStation(final Connection connection,
-                                      final int teamNumber,
-                                      final int tournament,
-                                      final String judgingStation) throws SQLException {
+                                       final int teamNumber,
+                                       final int tournament,
+                                       final String judgingStation) throws SQLException {
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("UPDATE TournamentTeams SET judging_station = ? WHERE TeamNumber = ? AND Tournament = ?");
@@ -1271,7 +1271,6 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
   }
-
 
   /**
    * Get a list of team numbers that have fewer runs than seeding rounds. This
@@ -3357,4 +3356,23 @@ public final class Queries {
       SQLFunctions.close(stmt);
     }
   }
+
+  /**
+   * Get the maximum performance round number to display on the scoreboard
+   * pages.
+   */
+  public static int getMaxScoreboardPerformanceRound(final Connection connection,
+                                                     final int tournament) throws SQLException {
+    return getIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND);
+  }
+
+  /**
+   * @see #getMaxScoreboardPerformanceRound(Connection, int)
+   */
+  public static void setMaxScorebaordPerformanceRound(final Connection connection,
+                                                      final int tournament,
+                                                      final int value) throws SQLException {
+    setIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND, value);
+  }
+
 }
