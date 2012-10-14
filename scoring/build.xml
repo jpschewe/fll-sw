@@ -618,15 +618,6 @@
     </copy>
   </target>
 
-  <!-- ==================== Selenium ==================== -->
-  <target name="selenium.start" description="Start Selenium">
-    <java jar="${dir.lib}/test/selenium-server-standalone-2.24.1.jar" fork="true" spawn="true" taskname="selenium" />
-  </target>
-
-  <target name="selenium.stop" description="Shutdown Selenium">
-    <get taskname="selenium-shutdown" src="http://localhost:4444/selenium-server/driver/?cmd=shutDownSeleniumServer" dest="${dir.build}/selenium-shutdown-result.txt" ignoreerrors="true" />
-  </target>
-
   <!-- ==================== Tests  ==================== -->
   <macrodef name="delete-database">
     <sequential>
@@ -695,7 +686,6 @@
   <!-- one shot tests -->
   <target name="test.single" depends="compile,compile.test.all" description="Run a single unit test specified by junit.test.class property.">
     <antcall target="tomcat.start" />
-    <antcall target="selenium.start" />
     <delete-database />
 
     <mkdir dir="${dir.build}/screenshots" />
@@ -709,7 +699,6 @@
       <test name="${junit.test.class}" if="junit.test.class" todir="${dir.build}/test-results" />
     </junit>
 
-    <antcall target="selenium.stop" />
     <antcall target="tomcat.stop" />
   </target>
 
@@ -725,14 +714,12 @@
     <copy file="${dir.lib}/cobertura/coberturaFlush.war" todir="${dir.tomcat}/webapps" />
 
     <antcall target="tomcat.start" />
-    <antcall target="selenium.start" />
 
     <run-tests working-dir="${dir.build}" dir.src="${dir.test.integration}" />
 
     <!-- force cobertura information to be written -->
     <get src="http://localhost:9080/coberturaFlush/flushCobertura" dest="${dir.build}" />
 
-    <antcall target="selenium.stop" />
     <antcall target="tomcat.stop" />
   </target>
 
