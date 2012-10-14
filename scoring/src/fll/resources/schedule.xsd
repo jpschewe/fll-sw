@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns="" elementFormDefault="qualified">
+
+	<xsd:element name="schedule">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="team" minOccurs="0" maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="team">
+		<xsd:complexType>
+			<xsd:sequence maxOccurs="unbounded">
+				<xsd:sequence>
+					<xsd:element ref="performance" minOccurs="0" maxOccurs="unbounded" />
+					<xsd:element ref="subjective" minOccurs="0" maxOccurs="unbounded" />
+				</xsd:sequence>
+			</xsd:sequence>
+			<xsd:attribute name="number" type="xsd:integer" use="required" />
+			<xsd:attribute name="judging_station" type="xsd:string"
+				use="required" />
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="subjective">
+		<xsd:annotation>
+			<xsd:documentation>
+				Represents the appearance of a team at a
+				subjective judging area.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="name" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation>
+						Name of the judging area.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="time" type="xsd:time" use="required" />
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="performance">
+		<xsd:annotation>
+			<xsd:documentation>
+				Represents the appearance of a team at a
+				performance table.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="round" type="xsd:positiveInteger"
+				use="required">
+				<xsd:annotation>
+					<xsd:documentation>
+						1 based round number
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="table_color" type="xsd:string"
+				use="required" />
+			<xsd:attribute name="table_side" type="xsd:positiveInteger"
+				use="required" />
+			<xsd:attribute name="time" type="xsd:time" use="required" />
+		</xsd:complexType>
+	</xsd:element>
+
+</xsd:schema>
