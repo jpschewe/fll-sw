@@ -56,6 +56,7 @@ public class Last8 extends BaseFLLServlet {
       connection = datasource.getConnection();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
+      final int maxScoreboardRound = Queries.getMaxScoreboardPerformanceRound(connection, currentTournament);
 
       formatter.format("<html>");
       formatter.format("<head>");
@@ -82,10 +83,15 @@ public class Last8 extends BaseFLLServlet {
           + ", verified_performance.Bye" //
           + ", verified_performance.NoShow" //
           + ", verified_performance.ComputedTotal" //
-          + " FROM Teams,verified_performance,current_tournament_teams WHERE verified_performance.Tournament = ?" //
-          + "  AND Teams.TeamNumber = verified_performance.TeamNumber AND Teams.TeamNumber = current_tournament_teams.TeamNumber" //
-          + "  AND verified_performance.Bye = False ORDER BY verified_performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 8");
+          + " FROM Teams,verified_performance,current_tournament_teams"//
+          + " WHERE verified_performance.Tournament = ?" //
+          + "  AND Teams.TeamNumber = verified_performance.TeamNumber" //
+          + "  AND Teams.TeamNumber = current_tournament_teams.TeamNumber" //
+          + "  AND verified_performance.Bye = False" //
+          + "  AND verified_performance.RunNumber <= ?"
+          + " ORDER BY verified_performance.TimeStamp DESC, Teams.TeamNumber ASC LIMIT 8");
       prep.setInt(1, currentTournament);
+      prep.setInt(2, maxScoreboardRound);
       rs = prep.executeQuery();
 
       while (rs.next()) {

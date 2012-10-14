@@ -73,6 +73,7 @@ public class Top10 extends BaseFLLServlet {
       connection = datasource.getConnection();
 
       final int currentTournament = Queries.getCurrentTournament(connection);
+      final int maxScoreboardRound = Queries.getMaxScoreboardPerformanceRound(connection, currentTournament);
 
       final Integer divisionIndexObj = SessionAttributes.getAttribute(session, "divisionIndex", Integer.class);
       int divisionIndex;
@@ -109,16 +110,23 @@ public class Top10 extends BaseFLLServlet {
       final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
       final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
 
-      prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore FROM"
-          + " (SELECT TeamNumber, "
+      prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore" //
+          + " FROM (SELECT TeamNumber, " //
           + winnerCriteria.getMinMaxString()
-          + "(ComputedTotal) AS MaxOfComputedScore FROM verified_performance WHERE Tournament = ? "
-          + " AND NoShow = False AND Bye = False GROUP BY TeamNumber) AS T2"
+          + "(ComputedTotal) AS MaxOfComputedScore" //
+          + "  FROM verified_performance WHERE Tournament = ? "
+          + "   AND NoShow = False" //
+          + "   AND Bye = False" //
+          + "   AND RunNumber <= ?" //
+          + "  GROUP BY TeamNumber) AS T2"
           + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams"
-          + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber AND current_tournament_teams.event_division = ?"
-          + " ORDER BY T2.MaxOfComputedScore " + winnerCriteria.getSortString() + " LIMIT 10");
+          + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber" //
+          + " AND current_tournament_teams.event_division = ?"
+          + " ORDER BY T2.MaxOfComputedScore "
+          + winnerCriteria.getSortString() + " LIMIT 10");
       prep.setInt(1, currentTournament);
-      prep.setString(2, divisions.get(divisionIndex));
+      prep.setInt(2, maxScoreboardRound);
+      prep.setString(3, divisions.get(divisionIndex));
       rs = prep.executeQuery();
 
       double prevScore = -1;
