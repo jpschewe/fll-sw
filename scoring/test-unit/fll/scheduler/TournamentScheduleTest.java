@@ -149,9 +149,39 @@ public class TournamentScheduleTest {
                                                                               tournament.getTournamentID());
       Assert.assertTrue("Schedule should exist now that it's been stored", existsAfter);
 
+      final Document doc = schedule.createXML();
+      Assert.assertNotNull("Should have non-null schedule document", doc);
+
     } finally {
       SQLFunctions.close(memConnection);
       memConnection = null;
     }
   }
+
+  @Test
+  public void testEmptyScheduleXML() throws SQLException, UnsupportedEncodingException {
+    Utilities.loadDBDriver();
+
+    final String url = "jdbc:hsqldb:mem:ut_ts_test_empty_xml";
+    Connection memConnection = null;
+    try {
+      final InputStream stream = TournamentScheduleTest.class.getResourceAsStream("/fll/db/data/challenge-test.xml");
+      Assert.assertNotNull(stream);
+      final Document document = ChallengeParser.parse(new InputStreamReader(stream));
+
+      memConnection = DriverManager.getConnection(url);
+
+      GenerateDB.generateDB(document, memConnection, true);
+
+      final TournamentSchedule schedule = new TournamentSchedule(memConnection, 1);
+
+      final Document doc = schedule.createXML();
+      Assert.assertNotNull("Should have non-null schedule document", doc);
+
+    } finally {
+      SQLFunctions.close(memConnection);
+      memConnection = null;
+    }
+  }
+
 }

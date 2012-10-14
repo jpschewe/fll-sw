@@ -1,0 +1,1386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="MN FIRST LEGO League Tournament" revision="Rev: 5">
+
+ <Performance minimumScore="0" weight="1.0">
+  <goal name="wood_working" title="Chair - Wood Working"
+   initialValue="0">
+   <value score="25" title="Under table" value="under" />
+   <value score="15" title="In base" value="base" />
+   <value score="0" title="None" value="none" />
+  </goal>
+
+  <goal name="medicine" title="Green Medicine in Base" multiplier="25" />
+
+  <goal name="service_animal" title="Service Animal in Base"
+   multiplier="20" />
+
+  <goal name="bowling" title="Bowling Pins Down" multiplier="0"
+   max="6" />
+  <computedGoal name="bowling_score" title="Bowling Pins Score">
+   <switch>
+    <case>
+     <condition>
+      <left>
+       <term scoreType="raw" goal="bowling" />
+      </left>
+      <equal-to />
+      <right>
+       <constant value="6" />
+      </right>
+     </condition>
+     <result>
+      <term scoreType="raw" coefficient="10" goal="bowling" />
+     </result>
+    </case>
+    <default>
+     <term scoreType="raw" coefficient="7" goal="bowling" />
+    </default>
+   </switch>
+  </computedGoal>
+
+  <goal name="strength_exercise" title="Raised Weight Location"
+   initialValue="0">
+   <value score="25" title="High" value="high" />
+   <value score="15" title="Low" value="low" />
+   <value score="0" title="Below" value="below" />
+  </goal>
+
+  <goal name="stove" title="All Burners Black" multiplier="25" />
+
+  <goal name="gardening" title="Plants in Garden" multiplier="25" />
+
+  <goal name="video_call" title="Video Call Flags Up" multiplier="20"
+   max="2" />
+
+  <goal name="blue_quilting" title="Blue Quilts Touching"
+   multiplier="15" max="2" />
+
+  <goal name="orange_quilting" title="Orange Quilts Touching"
+   multiplier="30" max="2" />
+
+  <goal name="cardio_exercise_major" title="Large Cardio Dot"
+   multiplier="0" max="9" min="1" initialValue="3" />
+  <goal name="cardio_exercise_minor" title="Small Cardio Ticks"
+   multiplier="0" max="5" />
+  <!-- On the Challenge's image of the Pointer Position, it shows major and 
+   minor portions. The major portions are indicated by a physical LEGO light, 
+   while the minor portions are just evenly split. The Challenge just provided 
+   a chart keying major and minor ticks to scores, but that would be far too 
+   lengthy to transpose. If we look at the pattern of the score changes from 
+   tick to tick (1 increment = 1 tick), we can see it first increments by five 
+   points each time, then by three, then by one point. I divided these up into 
+   progression scales. "Progression" is the total number of ticks from the bottom 
+   of the chart, leaving the default progression amount at 12 ticks. Progression 
+   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progression 
+   24 - Scale 2: Increment by 3 points, goes from progression 25 to progression 
+   36 - Note: There is a 10 point bonus added at the jump from 6-0 to 6-1. - 
+   Scale 3: Increment by 1 points, ranges from progression 37 until progression 
+   48 To calculate a score based off of a major and minor tick, the following 
+   thought process occurs: - Compute total progression from the very bottom 
+   of the entire scale. - Does it fit into scale 1? Compute and go. Add -60 
+   point offset. - Does it fit into scale 2? - If so, we must first account 
+   for the minimum number of points one could recieve purely based off of the 
+   fact we're in scale 2. This number is 120 points. (progression 24) Next, 
+   we can use a coefficient to calculate the number of points to be added in 
+   in scale 2. The same happens for scale 3, and the subset of scale 2 with 
+   the 10 point bonus. -->
+  <computedGoal name="cardio_progression" title="Cardio Progression">
+   <variable name="progression_scale_1">
+    <term scoreType="raw" goal="cardio_exercise_major" coefficient="6" />
+    <term scoreType="raw" goal="cardio_exercise_minor" />
+    <constant value="-6" />
+   </variable>
+   <variable name="progression_scale_1_max_points">
+    <constant value="120" />
+   </variable>
+   <variable name="progression_scale_2">
+    <term scoreType="raw" goal="cardio_exercise_major" coefficient="6" />
+    <term scoreType="raw" goal="cardio_exercise_minor" />
+    <constant value="-30" />
+   </variable>
+   <variable name="progression_scale_2_max_points">
+    <constant value="166" />
+   </variable>
+   <variable name="progression_scale_3">
+    <term scoreType="raw" goal="cardio_exercise_major" coefficient="6" />
+    <term scoreType="raw" goal="cardio_exercise_minor" />
+    <constant value="-42" />
+   </variable>
+   <variable name="bonus">
+    <constant value="10" />
+   </variable>
+   <variable name="offset">
+    <constant value="-60" />
+   </variable>
+   <switch>
+    <case>
+     <condition>
+      <left>
+       <variableRef variable="progression_scale_1" />
+      </left>
+      <less-than-or-equal />
+      <right>
+       <constant value="24" />
+      </right>
+     </condition>
+     <result>
+      <variableRef variable="progression_scale_1"
+       coefficient="5" />
+      <variableRef variable="offset" />
+     </result>
+    </case>
+    <case>
+     <condition>
+      <left>
+       <variableRef variable="progression_scale_1" />
+      </left>
+      <less-than-or-equal />
+      <right>
+       <constant value="30" />
+      </right>
+     </condition>
+     <result>
+      <variableRef variable="progression_scale_2"
+       coefficient="3" />
+      <variableRef variable="offset" />
+      <variableRef variable="progression_scale_1_max_points" />
+     </result>
+    </case>
+    <case>
+     <condition>
+      <left>
+       <variableRef variable="progression_scale_1" />
+      </left>
+      <less-than-or-equal />
+      <right>
+       <constant value="36" />
+      </right>
+     </condition>
+     <result>
+      <variableRef variable="progression_scale_2"
+       coefficient="3" />
+      <variableRef variable="offset" />
+      <variableRef variable="progression_scale_1_max_points" />
+      <variableRef variable="bonus" />
+      <!-- at this point, a 10 point bonus appears, although the progression 
+       is identical. -->
+     </result>
+    </case>
+    <case>
+     <condition>
+      <left>
+       <variableRef variable="progression_scale_1" />
+      </left>
+      <less-than-or-equal />
+      <right>
+       <constant value="48" />
+      </right>
+     </condition>
+     <result>
+      <variableRef variable="progression_scale_3"
+       coefficient="1" />
+      <variableRef variable="offset" />
+      <variableRef variable="progression_scale_2_max_points" />
+     </result>
+    </case>
+    <default>
+     <constant value="-1" />
+    </default>
+   </switch>
+  </computedGoal>
+  <restriction lowerBound="6" upperBound="54"
+   message="Invalid Cardio Entries">
+   <term scoreType="raw" goal="cardio_exercise_major" coefficient="6" />
+   <term scoreType="raw" goal="cardio_exercise_minor" />
+  </restriction>
+
+  <goal name="flexibility" title="Yellow Loops in Base" multiplier="20"
+   max="2" />
+
+  <goal name="transitions" title="Ending Bridge Position"
+   initialValue="0">
+   <value score="65" title="Balanced" value="balanced" />
+   <value score="45" title="Tilted" value="tilted" />
+   <value score="0" title="None" value="none" />
+  </goal>
+
+  <goal name="similarity" title="Both Pointers are Paralell"
+   multiplier="45" />
+
+  <goal name="ball_game_balls" title="Total Balls on Rack"
+   multiplier="10" max="7" initialValue="7" />
+
+  <goal name="ball_game_center_ball" title="Team's Ball in Center"
+   multiplier="60" />
+
+
+  <tiebreaker>
+   <test winner='HIGH'>
+    <term goal='blue_quilting' scoreType='computed' />
+    <term goal='orange_quilting' scoreType='computed' />
+   </test>
+
+   <test winner='HIGH'>
+    <term goal='bowling' scoreType='raw' />
+   </test>
+
+   <test winner='HIGH'>
+    <term goal='flexibility' scoreType='computed' />
+   </test>
+
+   <test winner='HIGH'>
+    <term goal='cardio_progression' scoreType='computed' />
+   </test>
+
+  </tiebreaker>
+
+ </Performance>
+
+
+ <subjectiveCategory name="robot_design" title="Robot Design - Design"
+  weight="0.5">
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="durability"
+   title="Durability" category="Mechanical Design">
+   <description>Evidence of structural integrity; ability to withstand
+    rigors of competition
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Quite fragile; breaks a lot
+      Base weak, falls apart when handled or run
+      Difficult to assemble
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>frequent or significant faults/repairs
+      Robot has some stability
+      Assembles with few errors
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>rare faults/repairs
+      Robot stable, but not robust
+      Assembles with no errors
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>sound construction, no repairs
+      Robot stable and robust
+      Robot assembles easily
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1"
+   name="mechanical_efficiency" title="Mechanical Efficiency" category="Mechanical Design">
+   <description>Economic use of parts and time; easy to repair and
+    modify
+    Components work together
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Excessive parts or time to repair/modify
+      Robot lacks critical design components: works, stays together,
+      efficient part use
+      Few components work together, belong together
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Inefficient parts or time to repair/modify
+      Robot lacks some critical design components: works, stays together,
+      efficient parts use
+      Some components work or belong together
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Appropriate use of parts and time to repair/modify
+      Robot lacks few critical design components: works, stays together,
+      efficient parts use
+      Most components work and belong together
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Streamlined use of parts and time to repair/modify
+      Robot is elegant, complete.
+      All components work together and look like they belong together.
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1"
+   name="mechanization" title="Mechanization" category="Mechanical Design">
+   <description>Ability of robot mechanisms to move or act with
+    appropriate speed, strength and accuracy for intended tasks
+    (propulsion and execution)
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Imbalance of speed, strength and accuracy on most
+      tasks
+      Difficulty going same distance repeatedly, turns inaccurate or inconsistent
+      Too fast for accuracy, too slow to complete mission
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Imbalance of speed, strength and accuracy on some
+      tasks.
+      Goes defined distances and turns sometimes.
+      Somewhat too fast for accuracy, or too slow to complete mission
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Appropriate balance of speed, strength and accuracy on
+      most tasks.
+      Goes defined distance and turns reasonable accurately and
+      consistently. Good speed balance.
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Appropriate balance of speed, strength and accuracy on
+      every task.
+      Goes defined distance and turns accurately, efficiently and
+      consistently.
+      Adjusts speed for optimum control.
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="attachments"
+   title="Attachments and Sensors" category="MN Design">
+   <description>Attachments and Sensors, if used, are an integrated part
+    of the design, they are used appropriately and achieve consistent
+    results.
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Sensors used incorrectly, Weak or poorly designed
+      attachments, difficult to add/remove.
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Sensor use inconsistent. Not modular or consistent
+      attachments, attachments awkward to add/remove. Not repeatable.
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Sensors used appropriately. Attachments somewhat
+      modular and work as expected. Easy to add/remove. Somewhat
+      repeatable.
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Sensor use precise and repeatable. Attachments modular
+      and work as expected, repeatedly. They look like they belong to
+      the robot.
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work"
+   title="Kids Did the Work" category="MN Design">
+   <description>Appropriate balance between team responsibility and
+    coach guidance
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Excessive coach guidance AND limited team
+      responsibility. Little knowledge of why parts are as they are on
+      robot. Little or no understanding of what pieces do what.
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Excessive coach guidance OR limited team
+      responsibility. Minimal understanding of underlying design,
+      technology, strategy and robot structure.
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Good balance between team responsibility and coach
+      guidance. Moderate understanding of robot structure, underlying
+      design, strategy and technology.
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Team independence with minimal coach guidance.
+      Thorough understanding of robot structure, underlying design,
+      strategy and technology.
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1"
+   name="design_process" title="Design Process" category="Strategy and Innovations">
+   <description>Ability to develop and explain improvement cycles where
+    alternatives are considered and narrowed, selections tested, design
+    improved.
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Disorganized AND poorly explained improvement cycles.
+      Uses standard design. No design process (concept build test
+      refine)
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Disorganized OR poorly explained improvement cycles.
+      Some forethought in initial design. Refinement of robot not well
+      communicated.
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Systematic and well-explained improvement cycle. Basic
+      understanding of design process, evidence of concept planning,
+      building, testing, refining
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Systematic, well-explained and well-documented
+      improvement cycle. Good communication of complete design process.
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1"
+   name="mission_strategy" title="Mission Strategy" category="Strategy and Innovations">
+   <description>Ability to clearly define and describe the team’s game
+    strategy.
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>No clear goals AND no clear strategy. Strategy based
+      only on ease of task – no combined missions or maximizing
+      time/effort.
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>No clear goals OR no clear strategy. Strategy based on
+      ease of tasks, few risks. Some consideration or
+      time/efforts/points.
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Clear strategy to accomplish the team’s well defined
+      goals. Effective strategic planning, combining of missions,
+      routes, attachments.
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Clear strategy to accomplish most/all game missions
+      and team goals. Excellent/innovative strategy, combining missions,
+      routes, points.
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation"
+   title="Innovation" category="Strategy and Innovations">
+   <description>Creation of new, unique or unexpected features (in
+    design, programming, strategy or applications) that are beneficial
+    in performing the tasks.
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Original features with no added value or potential.
+      Design, drive, structure are standard. Expected sensor use only.
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Original features with some added value or potential.
+      Either design creative, unique use of drive train or structure, or
+      unique mission strategy.
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Original features with the potential to add
+      significant value. More than one unique design, drive train,
+      structure, or mission strategy.
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Original features that add significant value.
+      Extremely unique/creative design, drive train, structure and/or
+      mission strategy.
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+ </subjectiveCategory>
+
+ <subjectiveCategory name="project" title="Project"
+  weight="1.0">
+  <goal initialValue="0" max="12" min="0" multiplier="1"
+   name="problem_identification" title="Problem Identification"
+   category="Research">
+   <description>Clear definition of the problem being studied
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Unclear, few details
+      Doesn’t relate to FLL theme, no understanding of technical terms
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Somewhat clear, details missing
+      Relates only poorly to the FLL theme, limited understanding of technical
+      terms
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>clear, detailed
+      Relates fairly well to the FLL theme, understand of technical terms, but
+      didn’t explain them all clearly
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Very clear, very detailed
+      Integrates well with the FLLS theme, demonstrated and shared a full
+      understand of technical term
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1"
+   name="sources_information" title="Sources of Information" category="Research">
+   <description>Types (e.g. books, magazines, websites, reports and
+    other resources) and number of quality source cited, including
+    professions in the field
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>one type of information cited, minimal sources
+      No hard data presented as background
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>two types of information cited, several sources
+      Weak or limited data to support proposal
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>three types of information cited, many sources,
+      including professionals
+      Adequate data supporting problem identification
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>four(+) types of information cited, extensive sources,
+      including professionals
+      Substantial data supporting proposed problem
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1"
+   name="problem_analysis" title="Problem Analysis" category="Research">
+   <description>Depth to which the problem was studied and analyzed by
+    the team
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>minimal study, no team analysis
+      No research on the impact of the problem, alternative theories or
+      interpretations ignored
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>minimal study, some team analysis
+      Limited research on the impact of the problem, alternative theories
+      obscured
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>sufficient study and analysis by team
+      Impact of problem clearly researched, considered alternative theories
+      and had clear arguments
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>extensive study and analysis by team
+      Impact of problem thoroughly examined and applied to solution.
+      Persuasive argument against alternatives
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="review"
+   title="Review Existing Solutions" category="Research">
+   <description>Extent to which existing theories and solutions were
+    analyzed by the team, including an effort to verify the originality
+    of the team’s solution
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>minimal review, no team analysis
+      No research on existing solutions or technologies used to address
+      the problem
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>minimal review, some team analysis
+      Limited research on existing solutions/tech. used to address the problem
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>sufficient review and analysis by team
+      Present solutions/techs. researched by not fully considered.
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>extensive review and analysis by team
+      Clearly researched existing solutions/techs, applied knowledge and
+      presented the information clearly
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1"
+   name="team_solution" title="Team Solution" category="Innovative Solution">
+   <description>Clear explanation of the proposed solution
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>difficult to understand
+      No solution presented
+      Team lacks enthusiasm for solution
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>some parts confusing and unclear
+      Team members showed some enthusiasm
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>understandable but may not address the problem
+      Team members were actively participating and showed excitement,
+      Project is a group effort.
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>easy to understand by all and clearly addressed the
+      problem
+      Team members were articulate and enthusiastic about their solution
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation"
+   title="Innovation" category="Innovative Solution">
+   <description>Degree to which the team’s solution makes life better by
+    improving existing options, developing a new application of existing
+    ideas, or solving the problem in a completely new way
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>existing solution/application
+      Solution is not innovative or new.
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>solution/application contains some original element(s)
+      Solution is somewhat innovative or uses limited knowledge of
+      science and or technology.
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>original solution/application
+      Solution is innovative and applies some knowledge of science and/or
+      technology
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Original solution/application with the potential to
+      add significant value
+      Solution is innovative and applies knowledge of science and/or technology
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1"
+   name="implementation" title="Implementation" category="Innovative Solution">
+   <description>Consideration of factors for implementation (cost, easy
+    of manufacturing, etc.)
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>minimal factors considered
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>some factors considered
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>factors well considered, some questions about proposed
+      solution
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>factors well considered and feasible solution
+      proposed.</description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="sharing"
+   title="Sharing" category="Presentation">
+   <description>Degree to which the team shared their Project before the
+    tournament with others who might benefit from the team’s efforts
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>shared with one individual
+      did not consider how their problem might impact themselves and others
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>shared with one group
+      Considered how this might impact themselves or family, but not others
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>shared with one individual or group who may benefit
+      Considered how this might impact themselves and family and took
+      that into account
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>shared with multiple individuals or groups who may
+      benefit
+      Considered how this impacts others and implemented a plan to include those
+      impacts
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="creativity"
+   title="Creativity" category="Presentation">
+   <description>Imagination used to develop and delivery the
+    presentation
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>minimally engaging OR unimaginative
+      Lacked excitement
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>engaging OR imaginative
+      Information presented with limited creativity
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>engaging AND imaginative
+      Creative elements used in the presentation
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>very engaging AND exceptionally imaginative
+      Unique elements of creativity included
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1"
+   name="presentation_effectiveness" title="Presentation Effectiveness"
+   category="Presentation">
+   <description>Message delivery and organization of the presentation
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>unclear OR disorganized
+      No supporting material, unable to answer judge questions
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>somewhat clear, minimal organization
+      Ineffective visual aids and support material, hesitant answers to judge
+      questions
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>mostly clear, mostly organized
+      Supporting aids/material complement presentation, adequate answers
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>very clear AND well organized, Carefully chosen
+      aids/material add to presentation, comprehensive answers
+     </description>
+    </range>
+   </rubric>
+  </goal>
+ </subjectiveCategory>
+
+
+ <subjectiveCategory name="core_values" title="Core Values"
+  weight="1.0">
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="discovery"
+   title="Discovery" category="Inspiration">
+   <description>Balanced emphasis on all three aspects (Robot, Project,
+    Core Values) of FLL; it’s not just about winning awards
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Emphasis on only one aspect; others neglected
+      Problems
+      identified, but steps not taken to solve
+      Team doesn’t mention new
+      skills acquired
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Emphasis on two aspects; one neglected
+      Problems
+      identified, but solution was inadequate
+      Limited attention to new
+      skills
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Emphasis on all three aspects
+      Problems identified and
+      solutions found
+      Team implied new skills acquired
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Balanced emphasis on all three aspects
+      Problems
+      identified, solutions found working together. Team demonstrated
+      new skills
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="team_spirit"
+   title="Team Spirit" category="Inspiration">
+   <description>Enthusiastic and fun expression of the team identity
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Minimal enthusiasm AND minimal identity
+      Limited eye contact, member disengaged
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Minimal enthusiasm OR minimal identity
+      1/2 the team interested, other members not paying attention
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Team is enthusiastic and fun; clear identity
+      Most of team appears excited, members enthusiastic, but talk over each
+      other
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Team engages others in their enthusiasm and fun; clear
+      identity
+      Concrete examples of enthusiasm, all equally invested and speak
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="integration"
+   title="Integration" category="Inspiration">
+   <description>Application of FLL values and skills outside FLL
+    (ability to describe current and potential examples from daily life
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Team does not apply FLL values and skills outside FLL.
+      Members compete with each other to talk.
+      Members show no awareness of school/ community issues No mention of
+      future goals
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Team able to describe at least one example
+      Team shows limited awareness of school/ community issues
+      Members imply future aspirations
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Team able to describe multiple examples
+      Increased awareness of outside issue evident
+      Team is vague about how this translates to other aspects of life.
+      Suggest how it may have helped.
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Team able to describe multiple examples, including
+      individual stories
+      Demonstrated increased awareness and clearly discuss how this translates to
+      other areas of life.
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1"
+   name="effectiveness" title="Effectiveness" category="Teamwork">
+   <description>Problem solving and decision making processes help team
+    achieve their goals
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Team goals AND team processes unclear
+      Team members no collaborating
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Team goals OR team processes unclear
+      Team members helping each other if asked
+      Various solutions tested in series, not thought out
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Clear team goals and processes
+      Members help each other without asking to advance progress
+      Team tested or thought about various solutions
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Clear processes enable team to accomplish well defined
+      goals
+      Members can fill in for each other easily
+      Various solutions tested and best incorporated
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="efficiency"
+   title="Efficiency" category="Teamwork">
+   <description>Resources used relative to what the team accomplishes
+    (time management, distribution of roles, responsibilities)
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Limited time management AND unclear roles
+      Not clear who completed which tasks
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Limited time management OR unclear roles
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Excellent time management and role definition allows
+      team to accomplish most goals
+      Clearly defined roles
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Excellent time management and role definition allows
+      team to accomplish all goals
+      Clearly defined roles, understood by all.
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work"
+   title="Kids Do the Work" category="Teamwork">
+   <description>Appropriate balance between team responsibility and
+    coach guidance
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Limited team responsibility AND excessive coach
+      guidance
+      Decision making unclear, no team cooperation
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Limited team responsibility OR excessive coach
+      guidance
+      Team able to describe some decision making
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Good balance between team responsibility and coach
+      guidance
+      Team cooperation, decisions made by team
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Team independence with minimal coach guidance
+      Cooperation within team is dominant theme. Team owns solutions
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="inclusion"
+   title="Inclusion" category="Gracious Professionalism">
+   <description>Consideration and appreciation for the contributions
+    (ideas and skills) of all team members, with balanced involvement
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Unbalanced team involvement AND lack of appreciation
+      for contributions
+      Only one team member spoke, worked at judging
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Unbalanced team involvement OR lack of appreciation
+      for contributions
+      Multiple members spoke, but one in full charge
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Balanced team involvement AND appreciation for
+      contributions of most team members
+      Members helped others
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Balanced team involvement AND appreciation for
+      contributions of all team members
+      All involved fully
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="respect"
+   title="Respect" category="Gracious Professionalism">
+   <description>Team members act and speak with integrity so others feel
+    valued—especially when solving problems or resolving conflicts
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Not evident with majority of team members
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Evident with majority of team members
+      Only when absolutely necessary
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Almost always evident with all team members
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Always evident, even in the most difficult situations
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="coopertition"
+   title="Coopertition" category="Gracious Professionalism">
+   <description>Team competes in the spirit of friendly competition and
+    cooperates with others
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Not evident with majority of team members
+      Members don’t help each other. Confrontation is evident
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Evident with majority of team members
+      Members rarely helped each other, coexistence is dominant theme
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Almost always evident with all team members
+      Members implied they helped other and worked together. Some collaboration
+      is evident.
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Always evident, even in difficult situations—and team
+      actively helps other teams
+      Shows respect and mutual help during judging,
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+ </subjectiveCategory>
+
+
+ <subjectiveCategory name="robot_programming"
+  title="Robot Design - Programming" weight="0.5">
+  <goal initialValue="0" max="12" min="0" multiplier="1"
+   name="code_structure" title="Code Structure and Reuse" category="MN Programming">
+   <description>Programs show proper use of variables, loops,
+    subroutines and there is an understanding of code reuse.
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Variables, loops, subroutines and conditions defined,
+      but not used.
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Variables, loops, subroutines and conditions exist,
+      but not fully understood or utilized.
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Variables, loops, subroutines and conditions are used
+      and understood. Some signs of code reuse.
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Variables, loops, subroutines and conditions are used
+      effectively. Code reuse evident and understood.
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="kids_work"
+   title="Kids Did the Work" category="MN Programming">
+   <description>Appropriate balance between team responsibility and
+    coach guidance
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Excessive coach guidance AND limited team
+      responsibility. Little knowledge of how programs work on robot.
+      Little or no understanding of what pieces do what.
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Excessive coach guidance OR limited team
+      responsibility. Appears primarily directed by the coach. Minimal
+      understanding of underlying design, strategy and robot
+      programming.
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Good balance between team responsibility and coach
+      guidance. Moderate understanding of underlying design, strategy
+      and robot programming. Kids describe most missions.
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Team independence with minimal coach guidance.
+      Thorough understanding of underlying design, strategy and
+      programming. Kids describe missions and reference appropriate
+      programs
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="quality"
+   title="Programming Quality" category="Programming">
+   <description>Programs are appropriate for the intended purpose and
+    achieve consistent results, assuming no mechanical faults
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Would not achieve purpose AND would be inconsistent.
+      Programs inefficient and/or unpredictable.
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Would not achieve purpose OR would be inconsistent.
+      Programs results still somewhat unpredictable.
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Should achieve purpose repeatedly. Efficient and as
+      expected. Easy to modify/debug. Well commented.
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Should achieve purpose every time. Programs logically
+      organized, efficient and always work, even for complex tasks
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="efficiency"
+   title="Programming Efficiency" category="Programming">
+   <description>Programs are modular, streamlined and understandable
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Excessive code and difficult to understand.
+      Programs disorganized. Only uses simple coding constructs, no knowledge of
+      complex language constructs.
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Inefficient code and challenging to understand.
+      Programs somewhat organized, efficient at a couple tasks. Some
+      understanding of language constructs.
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Appropriate code and easy to understand. Organized,
+      the team as a good understanding of language constructs.
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Streamline code and easy for anyone to understand.
+      Logically organized, and the team has an excellent understanding
+      and use of language constructs.
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="automation"
+   title="Automation/Navigation" category="Programming">
+   <description>Ability of the robot to move or act as intended using
+    mechanical and/or sensor feedback (with minimal reliance on team
+    intervention and/or program timing.
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Frequent team intervention to aim AND retrieve robot.
+      Sensors inappropriately used, and didn’t provide any help.
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Frequent team intervention to aim OR retrieve robot.
+      Sensors occasionally used effectively. Provide some aid in
+      navigation and manipulation.
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Robot moves/acts as intended repeatedly with
+      occasional team intervention. Sensors were effectively used,
+      repeatable, provided definitely improvement.
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Robot moves/acts as intended every time with no team
+      intervention. Sensors guarantee certain actions every time.
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1"
+   name="design_process" title="Design Process" category="Strategy and Innovations">
+   <description>Ability to develop and explain improvement cycles where
+    alternatives are considered and narrowed, selections tested, design
+    improved.
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Disorganized AND poorly explained improvement cycles.
+      Uses simple programming design. No design process (concept code
+      test refine)
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Disorganized OR poorly explained improvement cycles.
+      Some forethought in initial programming design. Refinement of code
+      not well communicated.
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Systematic and well-explained improvement cycle. Basic
+      understanding of design process, evidence of concept planning,
+      coding, testing, refining
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Systematic, well-explained and well-documented
+      improvement cycle. Good communication of complete design process.
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1"
+   name="mission_strategy" title="Mission Strategy" category="Strategy and Innovations">
+   <description>Ability to clearly define and describe the team’s game
+    strategy.
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>No clear goals AND no clear strategy. Strategy based
+      only on ease of task – no combined missions or maximizing
+      time/effort.
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>No clear goals OR no clear strategy. Strategy based on
+      ease of tasks, few risks. Some consideration or
+      time/efforts/points.
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Clear strategy to accomplish the team’s well defined
+      goals. Effective strategic planning, combining of missions,
+      routes, attachments, code.
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Clear strategy to accomplish most/all game missions
+      and team goals. Excellent/innovative strategy, combining missions,
+      routes, points.
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+  <goal initialValue="0" max="12" min="0" multiplier="1" name="innovation"
+   title="Innovation" category="Strategy and Innovations">
+   <description>Creation of new, unique or unexpected features (in
+    design, programming, strategy or applications) that are beneficial
+    in performing the tasks.
+   </description>
+   <rubric>
+    <range title="Beginning" min="1" max="3">
+     <description>Original features with no added value or potential.
+      Programs and strategy are standard. Expected sensor use only.
+     </description>
+    </range>
+    <range title="Developing" min="4" max="6">
+     <description>Original features with some added value or potential.
+      A unique use of programming or mission strategy.
+     </description>
+    </range>
+    <range title="Accomplished" min="7" max="9">
+     <description>Original features with the potential to add
+      significant value. More than one unique use of program controls or
+      mission coordinating strategy.
+     </description>
+    </range>
+    <range title="Exemplary" min="10" max="12">
+     <description>Original features that add significant value.
+      Extremely unique/creative/ unexpected program, control, construct
+      or mission strategy.
+     </description>
+    </range>
+   </rubric>
+  </goal>
+
+ </subjectiveCategory>
+
+
+</fll>

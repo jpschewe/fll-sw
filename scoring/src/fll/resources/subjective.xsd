@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns="" elementFormDefault="qualified">
+
+	<xsd:element name="scores">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="subjectiveCategory" minOccurs="0"
+					maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="subjectiveCategory">
+		<xsd:annotation>
+			<xsd:documentation>
+				Each subjective category has a name and children
+				elements that are the
+				scores for each team in this category.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="score" minOccurs="0" maxOccurs="unbounded" />
+			</xsd:sequence>
+			<xsd:attribute name="name" type="xsd:string" use="required" />
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="score">
+		<xsd:annotation>
+			<xsd:documentation>
+				Represents a team being scored in a subjective
+				category.
+				Initially only the team information in the score element is
+				populated. Once scores are available the subscore elements are added
+				with the scores. If scores are deleted the subscore element is
+				deleted.
+				If there are any changes in the subscore elements then the
+				modified flag of the score element needs to be set to true,
+				otherwise the upload will ignore the changes.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="subscore" minOccurs="0" maxOccurs="unbounded" />
+			</xsd:sequence>
+			<xsd:attribute name="NoShow" type="xsd:boolean" use="required" />
+			<xsd:attribute name="division" type="xsd:string" use="required" />
+			<xsd:attribute name="judge" type="xsd:string" use="required" />
+			<xsd:attribute name="judging_station" type="xsd:string"
+				use="required" />
+			<xsd:attribute name="organization" type="xsd:string"
+				use="required" />
+			<xsd:attribute name="teamName" type="xsd:string" use="required" />
+			<xsd:attribute name="teamNumber" type="xsd:integer"
+				use="required" />
+			<xsd:attribute name="modified" type="xsd:boolean"
+				default="false" />
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="subscore">
+		<xsd:annotation>
+			<xsd:documentation>
+				The score for a goal that was specified in the
+				challenge descriptor.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="name" type="xsd:string" use="required" />
+			<xsd:attribute name="value" type="xsd:float" use="required" />
+		</xsd:complexType>
+	</xsd:element>
+
+</xsd:schema>

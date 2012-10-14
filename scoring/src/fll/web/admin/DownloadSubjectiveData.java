@@ -27,6 +27,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
+import javax.xml.XMLConstants;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
@@ -34,17 +41,27 @@ import net.mtu.eggplant.xml.XMLUtils;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import fll.Team;
 import fll.db.Queries;
+import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 
 /**
- * Commit the changes made by editTeam.jsp.
+ * Downlaod the data file for the subjective score app.
  */
 @WebServlet("/admin/subjective-data.fll")
 public class DownloadSubjectiveData extends BaseFLLServlet {
+
+  public static final String SUBJECTIVE_CATEGORY_NODE_NAME = "subjectiveCategory";
+
+  public static final String SCORE_NODE_NAME = "score";
+
+  public static final String SCORES_NODE_NAME = "scores";
+
+  public static final String SUBSCORE_NODE_NAME = "subscore";
 
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -99,15 +116,16 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
       prep.setInt(2, currentTournament);
 
       final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
-      final Element top = document.createElement("scores");
+      final Element top = document.createElementNS(null, SCORES_NODE_NAME);
       document.appendChild(top);
 
       for (final Element categoryDescription : new NodelistElementCollectionAdapter(
                                                                                     challengeDocument.getDocumentElement()
                                                                                                      .getElementsByTagName("subjectiveCategory"))) {
         final String categoryName = categoryDescription.getAttribute("name");
-        final Element categoryElement = document.createElement(categoryName);
+        final Element categoryElement = document.createElementNS(null, SUBJECTIVE_CATEGORY_NODE_NAME);
         top.appendChild(categoryElement);
+        categoryElement.setAttributeNS(null, "name", categoryName);
 
         prep.setString(1, categoryName);
         rs = prep.executeQuery();
@@ -121,16 +139,15 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
             if (judgingStation.equals(teamJudgingStation)) {
               final String teamDiv = Queries.getEventDivision(connection, team.getTeamNumber());
 
-              final Element scoreElement = document.createElement("score");
+              final Element scoreElement = document.createElementNS(null, SCORE_NODE_NAME);
               categoryElement.appendChild(scoreElement);
 
-              scoreElement.setAttribute("teamName", team.getTeamName());
-              scoreElement.setAttribute("teamNumber", String.valueOf(team.getTeamNumber()));
-              scoreElement.setAttribute("division", teamDiv);
-              scoreElement.setAttribute("judging_station", teamJudgingStation);
-              scoreElement.setAttribute("organization", team.getOrganization());
-              scoreElement.setAttribute("judge", judge);
-              scoreElement.setAttribute("NoShow", "false");
+              scoreElement.setAttributeNS(null, "teamName", team.getTeamName());
+              scoreElement.setAttributeNS(null, "teamNumber", String.valueOf(team.getTeamNumber()));
+              scoreElement.setAttributeNS(null, "division", teamDiv);
+              scoreElement.setAttributeNS(null, "judging_station", teamJudgingStation);
+              scoreElement.setAttributeNS(null, "organization", team.getOrganization());
+              scoreElement.setAttributeNS(null, "judge", judge);
 
               prep2 = connection.prepareStatement("SELECT * FROM "
                   + categoryName + " WHERE TeamNumber = ? AND Tournament = ? AND Judge = ?");
@@ -144,10 +161,16 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
                   final String goalName = goalDescription.getAttribute("name");
                   final String value = rs2.getString(goalName);
                   if (!rs2.wasNull()) {
-                    scoreElement.setAttribute(goalName, value);
+                    final Element subscoreElement = document.createElementNS(null, SUBSCORE_NODE_NAME);
+                    scoreElement.appendChild(subscoreElement);
+
+                    subscoreElement.setAttributeNS(null, "name", goalName);
+                    subscoreElement.setAttributeNS(null, "value", value);
                   }
                 }
-                scoreElement.setAttribute("NoShow", rs2.getString("NoShow"));
+                scoreElement.setAttributeNS(null, "NoShow", rs2.getString("NoShow").toLowerCase());
+              } else {
+                scoreElement.setAttributeNS(null, "NoShow", "false");
               }
             }
           }
@@ -182,13 +205,40 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
     XMLUtils.writeXML(challengeDocument, writer, "UTF-8");
     zipOut.closeEntry();
 
+    final Document scoreDocument = createSubjectiveScoresDocument(challengeDocument, tournamentTeams.values(),
+                                                                  connection, tournament);
+
+    try {
+      validateXML(scoreDocument);
+    } catch (final SAXException e) {
+      throw new FLLInternalException("Subjective XML document is invalid", e);
+    }
+
     zipOut.putNextEntry(new ZipEntry("score.xml"));
-    final Document scoreDocument = DownloadSubjectiveData.createSubjectiveScoresDocument(challengeDocument,
-                                                                                         tournamentTeams.values(),
-                                                                                         connection, tournament);
     XMLUtils.writeXML(scoreDocument, writer, "UTF-8");
     zipOut.closeEntry();
 
     zipOut.close();
   }
+
+  /**
+   * Validate the schedule XML document.
+   * 
+   * @throws SAXException on an error
+   */
+  public static void validateXML(final org.w3c.dom.Document document) throws SAXException {
+    try {
+      final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+      final SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+      final Source schemaFile = new StreamSource(classLoader.getResourceAsStream("fll/resources/subjective.xsd"));
+      final Schema schema = factory.newSchema(schemaFile);
+
+      final Validator validator = schema.newValidator();
+      validator.validate(new DOMSource(document));
+    } catch (final IOException e) {
+      throw new RuntimeException("Internal error, should never get IOException here", e);
+    }
+  }
+
 }

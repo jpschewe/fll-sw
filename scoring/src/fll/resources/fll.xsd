@@ -129,6 +129,38 @@
   </xsd:keyref>
  </xsd:element>
 
+ <xsd:element name="rubric">
+  <xsd:annotation>
+   <xsd:documentation>
+    The rubric for a goal. Each rubric contains
+    multiple ranges with
+    descriptions.
+   </xsd:documentation>
+  </xsd:annotation>
+  <xsd:complexType>
+   <xsd:sequence>
+    <xsd:element name="range" minOccurs="1" maxOccurs="unbounded">
+     <xsd:complexType>
+      <xsd:sequence>
+
+       <xsd:element name="description" minOccurs="1"
+        maxOccurs="1" type="xsd:string"></xsd:element>
+
+      </xsd:sequence>
+
+      <xsd:attribute name="title" type="xsd:string" use="required" />
+      <xsd:attribute name="min" type="xsd:nonNegativeInteger"
+       use="required" />
+      <xsd:attribute name="max" type="xsd:nonNegativeInteger"
+       use="required" />
+     </xsd:complexType>
+    </xsd:element> <!-- end range -->
+
+   </xsd:sequence>
+  </xsd:complexType>
+ </xsd:element>
+
+
  <xsd:element name="goal">
   <xsd:annotation>
    <xsd:documentation>
@@ -148,6 +180,11 @@
   </xsd:annotation>
   <xsd:complexType>
    <xsd:sequence>
+
+    <xsd:element name="description" minOccurs="0" maxOccurs="1"
+     type="xsd:string" />
+    <xsd:element ref="rubric" minOccurs="0" maxOccurs="1" />
+
     <xsd:element name="value" minOccurs="0" maxOccurs="unbounded">
      <xsd:complexType>
       <xsd:attribute name="score" type="xsd:decimal"
@@ -176,6 +213,8 @@
       </xsd:attribute>
      </xsd:complexType>
     </xsd:element>
+
+
    </xsd:sequence>
    <xsd:attribute name="name" type="databaseName" use="required" />
 
@@ -219,13 +258,23 @@
     default="INTEGER">
     <xsd:annotation>
      <xsd:documentation>
-      Specifies the type of number allowed for this goal value.
+      Specifies the type of number allowed for this
+      goal value.
+     </xsd:documentation>
+    </xsd:annotation>
+   </xsd:attribute>
+
+   <xsd:attribute name="category" type="xsd:string" use="optional">
+    <xsd:annotation>
+     <xsd:documentation>
+      The category that this goal is in. This is a way
+      to group goals.
      </xsd:documentation>
     </xsd:annotation>
    </xsd:attribute>
   </xsd:complexType>
  </xsd:element>
- 
+
  <xsd:simpleType name="scoreType">
   <xsd:restriction base="xsd:string">
    <xsd:enumeration value='FLOAT' />
@@ -520,11 +569,11 @@
   <xsd:restriction base="xsd:string">
    <xsd:enumeration value="HIGH" />
    <xsd:enumeration value="LOW" />
-   
-   <!--  deprecated -->
+
+   <!-- deprecated -->
    <xsd:enumeration value="high" />
    <xsd:enumeration value="low" />
-   
+
   </xsd:restriction>
  </xsd:simpleType>
 
