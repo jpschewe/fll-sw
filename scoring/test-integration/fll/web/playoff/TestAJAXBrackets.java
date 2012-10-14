@@ -151,7 +151,7 @@ public class TestAJAXBrackets {
       selenium.switchTo().window(scoreEntryWindow.getWindowHandle());
 
       final Select verifySelect = new Select(selenium.findElement(By.id("select-verify-teamnumber")));
-      verifySelect.selectByValue("9-1");
+      verifySelect.selectByValue("4-1");
       selenium.findElement(By.id("verify_submit")).click();
 
       selenium.findElement(By.id("Verified_yes")).click();
