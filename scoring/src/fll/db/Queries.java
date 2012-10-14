@@ -1136,10 +1136,6 @@ public final class Queries {
                                          final int lineNumber) throws SQLException {
     PreparedStatement prep = null;
     try {
-      // TODO ticket:5 cache this for later, should make Queries be an
-      // instantiated
-      // class...
-
       prep = connection.prepareStatement("UPDATE PlayoffData" //
           + " SET Team = ?" //
           + ", Printed = ?" //
@@ -1252,14 +1248,14 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
   }
-  
+
   /**
    * Set judging station for a team.
    */
   public static void setJudgingStation(final Connection connection,
-                                      final int teamNumber,
-                                      final int tournament,
-                                      final String judgingStation) throws SQLException {
+                                       final int teamNumber,
+                                       final int tournament,
+                                       final String judgingStation) throws SQLException {
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("UPDATE TournamentTeams SET judging_station = ? WHERE TeamNumber = ? AND Tournament = ?");
@@ -1271,7 +1267,6 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
   }
-
 
   /**
    * Get a list of team numbers that have fewer runs than seeding rounds. This
@@ -1583,7 +1578,6 @@ public final class Queries {
   private static PreparedStatement getTournamentParameterStmt(final Connection connection,
                                                               final int tournament,
                                                               final String paramName) throws SQLException {
-    // TODO this should really be cached
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("SELECT param_value FROM tournament_parameters WHERE param = ? AND (tournament = ? OR tournament = ?) ORDER BY tournament DESC");
@@ -2148,7 +2142,6 @@ public final class Queries {
                                               final Document document,
                                               final int teamNumber,
                                               final int currentTournament) throws SQLException {
-    // TODO ticket:5 this could be cached
     PreparedStatement prep = null;
     try {
       // delete from subjective categories
@@ -2978,7 +2971,6 @@ public final class Queries {
    */
   private static PreparedStatement getGlobalParameterStmt(final Connection connection,
                                                           final String paramName) throws SQLException {
-    // TODO this should really be cached
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("SELECT param_value FROM global_parameters WHERE param = ?");
@@ -3357,4 +3349,23 @@ public final class Queries {
       SQLFunctions.close(stmt);
     }
   }
+
+  /**
+   * Get the maximum performance round number to display on the scoreboard
+   * pages.
+   */
+  public static int getMaxScoreboardPerformanceRound(final Connection connection,
+                                                     final int tournament) throws SQLException {
+    return getIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND);
+  }
+
+  /**
+   * @see #getMaxScoreboardPerformanceRound(Connection, int)
+   */
+  public static void setMaxScorebaordPerformanceRound(final Connection connection,
+                                                      final int tournament,
+                                                      final int value) throws SQLException {
+    setIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND, value);
+  }
+
 }

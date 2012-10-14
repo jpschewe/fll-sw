@@ -176,7 +176,8 @@ public final class ImportDB {
     Statement memStmt = null;
     ResultSet memRS = null;
     try {
-      final String databaseName = "dbimport" + String.valueOf(ImportDBDump.getNextDBCount()); 
+      final String databaseName = "dbimport"
+          + String.valueOf(ImportDBDump.getNextDBCount());
       final DataSource memSource = Utilities.createMemoryDataSource(databaseName);
       memConnection = memSource.getConnection();
 

@@ -115,6 +115,8 @@ public class InitFilter implements Filter {
                 + "/playoff/initializebrackets.jsp") //
             || path.startsWith(contextPath
                 + "/playoff/scoregenbrackets.jsp") //
+            || path.startsWith(contextPath
+                + "/playoff/adminbrackets.jsp") //
         || path.startsWith(contextPath
             + "/setup") //
         )) {

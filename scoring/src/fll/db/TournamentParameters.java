@@ -13,6 +13,14 @@ public final class TournamentParameters {
   private TournamentParameters() {
     // no instances
   }
+
   public static final String SEEDING_ROUNDS = "SeedingRounds";
+
   public static final int SEEDING_ROUNDS_DEFAULT = 3;
+
+  public static final String MAX_SCOREBOARD_ROUND = "MaxScoreboardRound";
+
+  public static final int MAX_SCOREBOARD_ROUND_DEFAULT = SEEDING_ROUNDS_DEFAULT;
+  
+  
 }

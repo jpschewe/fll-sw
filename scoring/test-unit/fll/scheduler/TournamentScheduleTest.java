@@ -175,7 +175,6 @@ public class TournamentScheduleTest {
 
       final TournamentSchedule schedule = new TournamentSchedule(memConnection, 1);
 
-      //FIXME throwing exception - probably something with the junit classloader
       final Document doc = schedule.createXML();
       Assert.assertNotNull("Should have non-null schedule document", doc);
 
