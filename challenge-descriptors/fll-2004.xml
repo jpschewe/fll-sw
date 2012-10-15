@@ -60,17 +60,17 @@
 		</restriction>
 
 		<tiebreaker>
-			<test goal="ball_center" winner="HIGH" />
-			<test goal="play_ball" winner="HIGH" />
-			<test goal="bonus" winner="HIGH" />
-			<test goal="serve_dinner" winner="HIGH" />
-			<test goal="feed_pets" winner="HIGH" />
-			<test goal="read_sign" winner="HIGH" />
-			<test goal="climb_stairs" winner="HIGH" />
-			<test goal="open_gate" winner="HIGH" />
-			<test goal="push_chairs" winner="HIGH" />
-			<test goal="remove_glasses" winner="HIGH" />
-			<test goal="cd" winner="HIGH" />
+			<test winner="HIGH"><term goal='ball_center' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='play_ball' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='bonus' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='serve_dinner' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='feed_pets' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='read_sign' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='climb_stairs' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='open_gate' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='push_chairs' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='remove_glasses' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='cd' scoreType="computed"/></test>
 		</tiebreaker>
 
 	</Performance>

@@ -2,8 +2,6 @@
 <fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" title="FLL 2003 Challenge: Mission Mars">
 
-	<!-- $Rev$ -->
-
 	<Performance weight="1.0">
 
 		<goal name="exit_base" title="Exit the Tetrahedron Base"
@@ -59,15 +57,15 @@
 		</restriction>
 
 		<tiebreaker>
-			<test goal="boulders_in_circle" winner="HIGH" />
-			<test goal="boulders_outside_circle" winner="HIGH" />
-			<test goal="ice_core" winner="HIGH" />
-			<test goal="free_rover" winner="HIGH" />
-			<test goal="habitation_modules" winner="HIGH" />
-			<test goal="clear_solar" winner="HIGH" />
-			<test goal="launch_canister" winner="HIGH" />
-			<test goal="exit_base" winner="HIGH" />
-			<test goal="vehicle" winner="HIGH" />
+			<test winner="HIGH"><term goal='boulders_in_circle' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='boulders_outside_circle' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='ice_core' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='free_rover' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='habitation_modules' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='clear_solar' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='launch_canister' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='exit_base' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='vehicle' scoreType='computed'/></test>
 		</tiebreaker>
 
 	</Performance>

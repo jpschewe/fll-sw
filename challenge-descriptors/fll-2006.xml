@@ -2,8 +2,6 @@
 <fll title="FLL 2006 Challenge: Nano Quest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
 
-	<!-- $Rev$ -->
-
 	<Performance minimumScore="0" weight="1.0">
 
 		<goal name="smell_off_plate" title="_ Smell (Off Paper Plate)"
@@ -76,38 +74,38 @@
 
 		<tiebreaker>
 			<test winner="HIGH">
-				<term goal="dirt_in_trap" />
-				<term goal="dirt_elsewhere" />
+				<term goal="dirt_in_trap" scoreType='computed'/>
+				<term goal="dirt_elsewhere" scoreType='computed'/>
 			</test>
 			<test winner="HIGH">
-				<term goal="molecular_motor" />
+				<term goal="molecular_motor" scoreType='computed'/>
 			</test>
 			<test winner="HIGH">
-				<term goal="move_atoms" />
+				<term goal="move_atoms" scoreType='computed'/>
 			</test>
 			<test winner="HIGH">
-				<term goal="smart_medicine" />
+				<term goal="smart_medicine" scoreType='computed'/>
 			</test>
 			<test winner="HIGH">
-				<term goal="atomic_force" />
+				<term goal="atomic_force" scoreType='computed'/>
 			</test>
 			<test winner="HIGH">
-				<term goal="dumper" />
+				<term goal="dumper" scoreType='computed'/>
 			</test>
 			<test winner="HIGH">
-				<term goal="dirt_trap" />
+				<term goal="dirt_trap" scoreType='computed'/>
 			</test>
 			<test winner="HIGH">
-				<term goal="self_assembly" />
+				<term goal="self_assembly" scoreType='computed'/>
 			</test>
 			<test winner="HIGH">
-				<term goal="smell_head" />
+				<term goal="smell_head" scoreType='computed'/>
 			</test>
 			<test winner="HIGH">
-				<term goal="smell_off_plate" />
+				<term goal="smell_off_plate" scoreType='computed'/>
 			</test>
 			<test winner="HIGH">
-				<term goal="nanotube_strength" />
+				<term goal="nanotube_strength" scoreType='computed'/>
 			</test>
 		</tiebreaker>
 
