@@ -26,6 +26,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.playoff.BracketData;
+import fll.web.playoff.Playoff;
 
 /**
  * Talk to client brackets in json.
@@ -76,7 +77,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
                                    final ServletContext application,
                                    final HttpSession session,
                                    final HttpServletResponse response,
-                                   final Connection connection) {
+                                   final Connection connection) throws SQLException {
     try {
       BracketData bd = constructBracketData(connection, session, application);
       final Element rootElement = ApplicationAttributes.getChallengeDocument(application).getDocumentElement();
@@ -94,7 +95,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
 
   private BracketData constructBracketData(final Connection connection,
                                            final HttpSession session,
-                                           final ServletContext application) {
+                                           final ServletContext application) throws SQLException {
     final String divisionKey = "playoffDivision";
     final String roundNumberKey = "playoffRoundNumber";
     final String displayNameKey = "displayName";
@@ -110,12 +111,13 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
       sessionDivision = null;
       sessionRoundNumber = null;
     }
+    final int tournament = Queries.getCurrentTournament(connection);
     final String division;
     if (null != sessionDivision) {
       division = sessionDivision;
     } else if (null == ApplicationAttributes.getAttribute(application, divisionKey, String.class)) {
       try {
-        final List<String> divisions = Queries.getEventDivisions(connection);
+        final List<String> divisions = Playoff.getPlayoffDivisions(connection, tournament);
         if (!divisions.isEmpty()) {
           division = divisions.get(0);
         } else {

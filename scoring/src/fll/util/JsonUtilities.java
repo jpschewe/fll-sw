@@ -19,9 +19,10 @@ import com.google.gson.Gson;
 
 import fll.db.Queries;
 import fll.web.playoff.BracketData;
-import fll.web.playoff.DatabaseTeamScore;
-import fll.web.playoff.TeamScore;
 import fll.web.playoff.BracketData.TeamBracketCell;
+import fll.web.playoff.DatabaseTeamScore;
+import fll.web.playoff.Playoff;
+import fll.web.playoff.TeamScore;
 
 /**
  * Methods used to generate or interpret JSON
@@ -65,25 +66,24 @@ public final class JsonUtilities {
     try {
       final int currentTournament = Queries.getCurrentTournament(connection);
       for (Map.Entry<Integer, Integer> entry : ids.entrySet()) {
-        final TeamBracketCell tbc = (TeamBracketCell) bracketData.getData(entry.getValue(), entry.getKey());
+        final int playoffRound = entry.getValue();
+        final TeamBracketCell tbc = (TeamBracketCell) bracketData.getData(playoffRound, entry.getKey());
         if (tbc == null) {
           return "{\"refresh\":\"true\"}";
         }
-        final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournament);
-        final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection); 
+        final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
         final int teamNumber = tbc.getTeam().getTeamNumber();
+        final int runNumber = Playoff.getRunNumber(connection, teamNumber, playoffRound);
         final TeamScore teamScore = new DatabaseTeamScore(performanceElement, currentTournament, teamNumber,
-                                                          numSeedingRounds
-                                                              + entry.getValue(), connection);
+                                                          runNumber, connection);
         final double computedTeamScore = ScoreUtils.computeTotalScore(teamScore);
         final boolean realScore = !Double.isNaN(computedTeamScore);
         final boolean noShow = Queries.isNoShow(connection, currentTournament, tbc.getTeam().getTeamNumber(),
-                                                numSeedingRounds
-                                                    + entry.getValue());
+                                                runNumber);
         // Sane request checks
         if (noShow) {
           datalist.add(new BracketLeafResultSet(tbc, -2.0, entry.getKey()
-              + "-" + entry.getValue()));
+              + "-" + playoffRound));
         } else if (!realScore
             || !showOnlyVerifiedScores
             || Queries.isVerified(connection, currentTournament, teamNumber,

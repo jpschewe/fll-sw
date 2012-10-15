@@ -39,6 +39,8 @@ import fll.web.SessionAttributes;
 public class PlayoffIndex extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
+  
+  public static final String CREATE_NEW_PLAYOFF_DIVISION = "Create Playoff Division...";
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -61,11 +63,20 @@ public class PlayoffIndex extends BaseFLLServlet {
       connection = datasource.getConnection();
       stmt = connection.createStatement();
 
+      
       final int currentTournamentID = Queries.getCurrentTournament(connection);
       session.setAttribute("currentTournamentID", currentTournamentID);
 
-      final List<String> divisions = Queries.getEventDivisions(connection);
-      session.setAttribute("playoffDivisions", divisions);
+      final List<String> divisions = Queries.getEventDivisions(connection, currentTournamentID);
+      
+      // add the option of creating new event divisions
+      divisions.add(CREATE_NEW_PLAYOFF_DIVISION);
+      
+      session.setAttribute("eventDivisions", divisions);
+
+      
+      final List<String> playoffDivisions = Playoff.getPlayoffDivisions(connection, currentTournamentID);
+      session.setAttribute("playoffDivisions", playoffDivisions);
 
       final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
       session.setAttribute("numPlayoffRounds", numPlayoffRounds);

@@ -51,9 +51,7 @@ table,th,td {
 	<form name='update' method='post'>
 		<p>
 			Enter update
-			<textarea name='update' rows='5' cols='60'>
-				<c:out value="${param.update}" />
-			</textarea>
+			<textarea name='update' rows='5' cols='60'><c:out value="${param.update}" /></textarea>
 		</p>
 		<c:if test="${not empty param.update}">
 			<sql:update dataSource="${datasource}" var="update_result"
