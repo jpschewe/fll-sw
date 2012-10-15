@@ -904,7 +904,6 @@ public final class Queries {
     }
 
     // Check if we need to update the PlayoffData table
-    // FIXME this should check verified
     final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
     if (runNumber > numSeedingRounds) {
       if (LOGGER.isTraceEnabled()) {
