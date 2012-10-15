@@ -96,45 +96,45 @@
 
 		<tiebreaker>
 			<test winner="HIGH">
-				<term goal="dirt_in_trap" />
-				<term goal="dirt_elsewhere" />
-				<term goal="dirt_in_base" />
+				<term goal="dirt_in_trap" scoreType='computed'/>
+				<term goal="dirt_elsewhere" scoreType='computed' />
+				<term goal="dirt_in_base" scoreType='computed' />
 			</test>
 			<test winner="HIGH">
-				<term goal="pizza_in_dirt_trap" />
+				<term goal="pizza_in_dirt_trap" scoreType='computed' />
 			</test>
 			<test winner="HIGH">
-				<term goal="pizza_off_pant_leg" />
+				<term goal="pizza_off_pant_leg" scoreType='computed' />
 			</test>
 			<test winner="HIGH">
-				<term goal="move_atoms_white" />
+				<term goal="move_atoms_white" scoreType='computed' />
 			</test>
 			<test winner="HIGH">
-				<term goal="smart_medicine" />
+				<term goal="smart_medicine" scoreType='computed' />
 			</test>
 			<test winner="HIGH">
-				<term goal="atp_frame" />
+				<term goal="atp_frame" scoreType='computed' />
 			</test>
 			<test winner="HIGH">
-				<term goal="smart_medicine_retrieve" />
+				<term goal="smart_medicine_retrieve" scoreType='computed' />
 			</test>
 			<test winner="HIGH">
-				<term goal="atp_base" />
+				<term goal="atp_base" scoreType='computed' />
 			</test>
 			<test winner="HIGH">
-				<term goal="atomic_force" />
+				<term goal="atomic_force" scoreType='computed' />
 			</test>
 			<test winner="HIGH">
-				<term goal="dumper" />
+				<term goal="dumper" scoreType='computed' />
 			</test>
 			<test winner="HIGH">
-				<term goal="dirt_trap" />
+				<term goal="dirt_trap" scoreType='computed' />
 			</test>
 			<test winner="HIGH">
-				<term goal="self_assembly" />
+				<term goal="self_assembly" scoreType='computed' />
 			</test>
 			<test winner="HIGH">
-				<term goal="nanotube_strength" />
+				<term goal="nanotube_strength" scoreType='computed' />
 			</test>
 		</tiebreaker>
 
