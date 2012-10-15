@@ -14,9 +14,9 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import fll.db.Queries;
-
+import net.mtu.eggplant.util.StringUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
+import fll.db.Queries;
 
 /**
  * The static state of a team. This does not include information about the team
@@ -183,7 +183,7 @@ public final class Team implements Serializable {
    * @return the team name shortened to {@link Team#MAX_TEAM_NAME_LEN}
    */
   public String getTrimmedTeamName() {
-    return Utilities.trimString(getTeamName(), Team.MAX_TEAM_NAME_LEN);
+    return StringUtils.trimString(getTeamName(), Team.MAX_TEAM_NAME_LEN);
   }
 
   private String _division;
