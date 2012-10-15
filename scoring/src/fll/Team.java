@@ -17,6 +17,7 @@ import java.util.List;
 import fll.db.Queries;
 
 import net.mtu.eggplant.util.ComparisonUtils;
+import net.mtu.eggplant.util.StringUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -194,7 +195,7 @@ public final class Team implements Serializable {
    * @return the team name shortened to {@link Team#MAX_TEAM_NAME_LEN}
    */
   public String getTrimmedTeamName() {
-    return Utilities.trimString(getTeamName(), Team.MAX_TEAM_NAME_LEN);
+    return StringUtils.trimString(getTeamName(), Team.MAX_TEAM_NAME_LEN);
   }
 
   private String _division;

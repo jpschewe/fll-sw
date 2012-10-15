@@ -1,6 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
 <%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
+<%@ page import="net.mtu.eggplant.util.StringUtils" %>
 
 <%@ page import="fll.Team" %>
 <%@ page import="fll.Utilities" %>
@@ -79,7 +80,7 @@ ${message}
                 out.print(">");
                 out.print(String.valueOf(teamNumber));
                 out.print(" &nbsp;&nbsp;&nbsp;[");
-                out.print(Utilities.trimString(teamName, Team.MAX_TEAM_NAME_LEN));
+                out.print(StringUtils.trimString(teamName, Team.MAX_TEAM_NAME_LEN));
                 out.print("] ");
                 out.print(organization);
                 out.print(" (Div ");
