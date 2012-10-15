@@ -73,14 +73,7 @@ public final class Playoff {
       seedingOrder = teams;
 
       // sort by team name
-      // FIXME move this to Team
-      Collections.sort(seedingOrder, new Comparator<Team>() {
-        public int compare(final Team one,
-                           final Team two) {
-          return one.getTeamName().compareTo(two.getTeamName());
-        }
-      });
-
+      Collections.sort(seedingOrder, Team.TEAM_NAME_COMPARATOR);
     } else if (BracketSortType.RANDOM == bracketSort) {
       seedingOrder = teams;
       // assign a random number to each team
@@ -89,7 +82,6 @@ public final class Playoff {
       for (int i = 0; i < randoms.length; ++i) {
         randoms[i] = generator.nextDouble();
       }
-      // FIXME make this static class
       Collections.sort(seedingOrder, new Comparator<Team>() {
         public int compare(final Team one,
                            final Team two) {
