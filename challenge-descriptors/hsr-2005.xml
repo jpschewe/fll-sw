@@ -60,18 +60,18 @@
 		</restriction>
 
 		<tiebreaker>
-			<test goal="artifical_reef" winner="HIGH"></test>
-			<test goal="crates_base" winner="HIGH"></test>
-			<test goal="crates" winner="HIGH"></test>
-			<test goal="dolphin" winner="HIGH"></test>
-			<test goal="flags_rows" winner="HIGH"></test>
-			<test goal="flags" winner="HIGH"></test>
-			<test goal="submarine" winner="HIGH"></test>
-			<test goal="archaeological" winner="HIGH"></test>
-			<test goal="shipping_container" winner="HIGH"></test>
-			<test goal="pump_station" winner="HIGH"></test>
-			<test goal="pipeline" winner="HIGH"></test>
-			<test goal="sample_species" winner="HIGH"></test>
+			<test winner="HIGH"><term goal='artifical_reef' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='crates_base' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='crates' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='dolphin' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='flags_rows' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='flags' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='submarine' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='archaeological' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='shipping_container' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='pump_station' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='pipeline' scoreType='computed'/></test>
+			<test winner="HIGH"><term goal='sample_species' scoreType='computed'/></test>
 		</tiebreaker>
 
 	</Performance>

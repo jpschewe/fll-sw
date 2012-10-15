@@ -5,11 +5,15 @@
  */
 package fll.xml;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import junit.framework.Assert;
 
+import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -18,11 +22,10 @@ import fll.util.LogUtils;
 
 /**
  * Test various aspects of the XML document parsing.
- * 
- * @author jpschewe
- * @version $Revision$
  */
 public class ChallengeParserTest {
+
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   @Before
   public void setUp() {
@@ -189,7 +192,8 @@ public class ChallengeParserTest {
     } catch (final RuntimeException e) {
       exception = true;
     }
-    Assert.assertTrue("Expected a runtime exception due a reference to the raw score of an enum in a computed goal polynomial", exception);
+    Assert.assertTrue("Expected a runtime exception due a reference to the raw score of an enum in a computed goal polynomial",
+                      exception);
   }
 
   /**
@@ -206,7 +210,8 @@ public class ChallengeParserTest {
     } catch (final RuntimeException e) {
       exception = true;
     }
-    Assert.assertTrue("Expected a runtime exception due a reference to the raw score of an enum in a tiebreaker polynomial", exception);
+    Assert.assertTrue("Expected a runtime exception due a reference to the raw score of an enum in a tiebreaker polynomial",
+                      exception);
   }
 
   /**
@@ -223,7 +228,8 @@ public class ChallengeParserTest {
     } catch (final RuntimeException e) {
       exception = true;
     }
-    Assert.assertTrue("Expected a runtime exception due a reference to the raw score of an enum in a restriction polynomial", exception);
+    Assert.assertTrue("Expected a runtime exception due a reference to the raw score of an enum in a restriction polynomial",
+                      exception);
   }
 
   /**
@@ -288,7 +294,8 @@ public class ChallengeParserTest {
     } catch (final RuntimeException e) {
       exception = true;
     }
-    Assert.assertTrue("Expected a runtime exception due the initial value being set to something that doesn't match an enum value", exception);
+    Assert.assertTrue("Expected a runtime exception due the initial value being set to something that doesn't match an enum value",
+                      exception);
   }
 
   /**
@@ -352,7 +359,57 @@ public class ChallengeParserTest {
     } catch (final RuntimeException e) {
       exception = true;
     }
-    Assert.assertTrue("Expected a runtime exception due to two variables having the same name in a computed goal.", exception);
+    Assert.assertTrue("Expected a runtime exception due to two variables having the same name in a computed goal.",
+                      exception);
+  }
+
+  /**
+   * Find the challenge descriptor directory.
+   * 
+   * @return null if not found
+   */
+  private static File findChallengeDescriptorDirctory() {
+    final String[] possibleDirs = { "../../challenge-descriptors", "challenge-descriptors" };
+    for (final String dir : possibleDirs) {
+      final File challengeDir = new File(dir);
+      if (!challengeDir.exists()) {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Challenge descriptor directory doesn't exist: "
+              + challengeDir.getAbsolutePath());
+        }
+      } else if (!challengeDir.isDirectory()) {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Challenge descriptor directory isn't a directory: "
+              + challengeDir.getAbsolutePath());
+        }
+      } else {
+        return challengeDir;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Check that all known challenge descriptors are still valid.
+   * @throws IOException 
+   */
+  @Test
+  public void testAllDescriptors() throws IOException {
+    final File challengeDir = findChallengeDescriptorDirctory();
+    if (null == challengeDir) {
+      LOGGER.warn("Unable to find challenge descriptor directory - no tests will run");
+      return;
+    }
+
+    for (final File f : challengeDir.listFiles()) {
+      LOGGER.info("File: "
+          + f.getName());
+      final FileReader reader = new FileReader(f);
+      final Document document = ChallengeParser.parse(reader);
+      Assert.assertNotNull(document);
+      reader.close();
+    }
   }
 
 }
