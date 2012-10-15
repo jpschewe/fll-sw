@@ -40,13 +40,14 @@ public class TestAJAXBrackets {
   public static String JS_EVAL_TIMEOUT = "10000";
 
   private WebDriver selenium;
+
   private JavascriptExecutor seleniumJS;
-  
+
   @Before
   public void setUp() throws Exception {
     LogUtils.initializeLogging();
     selenium = IntegrationTestUtils.createWebDriver();
-    
+
     if (selenium instanceof JavascriptExecutor) {
       seleniumJS = (JavascriptExecutor) selenium;
     } else {
@@ -68,8 +69,7 @@ public class TestAJAXBrackets {
       IntegrationTestUtils.initializeDatabase(selenium, challenge, true);
       IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
       for (int i = 1; i < 6; ++i) {
-        IntegrationTestUtils.addTeam(selenium, i, ""
-            + i, "htk", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
+        IntegrationTestUtils.addTeam(selenium, i, String.valueOf(i), "htk", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);
       }
       // table labels
       IntegrationTestUtils.loadPage(selenium, TestUtils.URL_ROOT
@@ -134,21 +134,24 @@ public class TestAJAXBrackets {
 
       // enter unverified score for team 1
       selenium.switchTo().window(scoreEntryWindow.getWindowHandle());
-      enterScore("1", 1);
+      enterScore("4", 1);
 
       selenium.switchTo().window(bracketsWindow.getWindowHandle());
-      final String scoreTextBefore = selenium.findElement(By.id("1-1")).getText();
-//      final String scoreTextBefore = String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-1').innerHTML"));        
-      if(LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Score text before: " + scoreTextBefore);
+      final String scoreTextBefore = selenium.findElement(By.id("9-1")).getText();
+      // final String scoreTextBefore =
+      // String.valueOf(seleniumJS.executeScript("window.document.getElementById('9-1').innerHTML"));
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Score text before: "
+            + scoreTextBefore);
       }
-      Assert.assertFalse("Should not find score yet '" + scoreTextBefore + "'", scoreTextBefore.contains("Score:"));
+      Assert.assertFalse("Should not find score yet '"
+          + scoreTextBefore + "'", scoreTextBefore.contains("Score:"));
 
       // verify
       selenium.switchTo().window(scoreEntryWindow.getWindowHandle());
 
       final Select verifySelect = new Select(selenium.findElement(By.id("select-verify-teamnumber")));
-      verifySelect.selectByValue("1-1");
+      verifySelect.selectByValue("4-1");
       selenium.findElement(By.id("verify_submit")).click();
 
       selenium.findElement(By.id("Verified_yes")).click();
@@ -169,12 +172,15 @@ public class TestAJAXBrackets {
       // give the web server a chance to catch up
       Thread.sleep(30000);
 
-      final String scoreTextAfter = selenium.findElement(By.id("1-1")).getText();
-//        final String scoreTextAfter = String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-1').innerHTML"));        
-      if(LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Score text after: " + scoreTextAfter);
+      final String scoreTextAfter = selenium.findElement(By.id("9-1")).getText();
+      // final String scoreTextAfter =
+      // String.valueOf(seleniumJS.executeScript("window.document.getElementById('1-2').innerHTML"));
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Score text after: "
+            + scoreTextAfter);
       }
-      Assert.assertTrue("Should find score in '" + scoreTextAfter + "'", scoreTextAfter.contains("Score:"));
+      Assert.assertTrue("Should find score in '"
+          + scoreTextAfter + "'", scoreTextAfter.contains("Score:"));
 
     } catch (final IOException e) {
       IntegrationTestUtils.storeScreenshot(selenium);

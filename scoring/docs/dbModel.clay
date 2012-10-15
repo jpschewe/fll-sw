@@ -93,12 +93,15 @@
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="false" id="1f769f17:1248908e683:-7ee1" mandatory="false" name="Printed">
 <data-type name="BOOLEAN" selected-variant-pattern="BOOLEAN"/>
 </column>
+<column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="3bbd06b0:139751a36bd:-7fc5" mandatory="true" name="run_number">
+<data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
+</column>
 </column-list>
 <primary-key id="1f769f17:1248908e683:-7ef2" name="PK_PLAYOFFDATA">
 <primary-key-column name="event_division"/>
 <primary-key-column name="Tournament"/>
-<primary-key-column name="PlayoffRound"/>
 <primary-key-column name="LineNumber"/>
+<primary-key-column name="PlayoffRound"/>
 </primary-key>
 <foreign-key-list>
 <foreign-key id="1f769f17:1248908e683:-7e97" name="FK_PlayoffData_2" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TEAMS" referenced-table="Teams" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
@@ -442,7 +445,7 @@
 <table-figure refid="1f769f17:1248908e683:-7fff" x="795" y="598"/>
 <table-figure refid="1f769f17:1248908e683:-7ff6" x="1770" y="86"/>
 <table-figure refid="1f769f17:1248908e683:-7fdf" x="535" y="363"/>
-<table-figure refid="1f769f17:1248908e683:-7ef3" x="1165" y="582"/>
+<table-figure refid="1f769f17:1248908e683:-7ef3" x="1175" y="526"/>
 <table-figure refid="1f769f17:1248908e683:-7e39" x="1014" y="151"/>
 <table-figure refid="1f769f17:1248908e683:-7d6b" x="758" y="804"/>
 <table-figure refid="1f769f17:1248908e683:-7d64" x="489" y="475"/>
