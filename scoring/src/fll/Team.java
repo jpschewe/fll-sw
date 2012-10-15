@@ -16,6 +16,7 @@ import java.util.List;
 
 import fll.db.Queries;
 
+import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
@@ -83,6 +84,16 @@ public final class Team implements Serializable {
     }
   };
 
+  /**
+   * Compare teams by name.
+   */
+  public static final Comparator<Team> TEAM_NAME_COMPARATOR = new Comparator<Team>() {
+    public int compare(final Team one,
+                       final Team two) {
+      return ComparisonUtils.compareStrings(one.getTeamName(), two.getTeamName());
+    }
+  };
+  
   public Team() {
 
   }
