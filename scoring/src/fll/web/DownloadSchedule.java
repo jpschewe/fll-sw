@@ -23,6 +23,7 @@ import net.mtu.eggplant.xml.XMLUtils;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
+import org.w3c.dom.ProcessingInstruction;
 
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
@@ -51,9 +52,12 @@ public class DownloadSchedule extends BaseFLLServlet {
 
       final Document document = schedule.createXML();
 
+      final ProcessingInstruction stylesheet = document.createProcessingInstruction("xml-stylesheet", "type='text/css' href='schedule.css'");
+      document.insertBefore(stylesheet, document.getDocumentElement());
+      
       response.reset();
       response.setContentType("text/xml");
-      response.setHeader("Content-Disposition", "schedule.xml");
+      response.setHeader("Content-Disposition", "filename=schedule.xml");
       XMLUtils.writeXML(document, response.getWriter(), "UTF-8");
 
     } catch (final SQLException sqle) {

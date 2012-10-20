@@ -1,0 +1,34 @@
+* {
+  display: block;
+  margin: 10pt;
+  font-family: Comic SANS MS, fantasy, times, serif;
+  text-align: left;
+}
+
+schedule {
+  display: table;
+  padding: 5px;
+}
+
+team {
+  display: table-row;
+  padding-bottom: 5px;
+}
+
+team * {
+  display: table-cell;
+  border: solid 1px;
+  padding: 3px;
+}
+
+team:before {
+  content: attr(number) " " attr(judging_station);
+}
+
+subjective:before {
+  content: attr(name) " at " attr(time);
+}
+
+performance:before {
+  content: "Performance " attr(round) " on table " attr(table_color) " " attr(table_side) " at " attr(time);
+}
