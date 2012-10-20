@@ -12,10 +12,37 @@ fll:before {
 	content: attr(title) " revision: " attr(revision) " playoff brackets sorted by " attr(bracketSort) " scores sorted by " attr(winner)	
 }
 
-goal:before {	
+goal:before {
 	content: "Goal: '" attr(title) "' [" attr(name) "] min: " attr(min) " max: " attr(max) " multiplier: " attr(multiplier);
+  font-size: 120%;
+}
+goal[category]:before {
+	content: "Goal: '" attr(title) "' [" attr(name) "] category: '" attr(category) "' min: " attr(min) " max: " attr(max) " multiplier: " attr(multiplier);
+  font-size: 120%;
 }
 
+description {
+  display: block
+}
+
+rubric {
+  display: table;
+  border: 2px solid;
+}
+rubric * {
+  display: table-cell;
+  padding: 5px;
+}
+range:before {
+  content: attr(title)" (" attr(min) " - " attr(max) ")";
+  font-weight: bold;
+  text-align: center;
+  display: table-caption;
+}
+range {
+  border: 2px solid;
+}
+  
 value:before {
 	content: "    Enum Value: '" attr(title) "' [" attr(value) "] score: " attr(score);
 }
@@ -115,10 +142,14 @@ test:before {
 
 Performance:before {
 	content: "Performance weight: " attr(weight);
+  	font-size: 120%;
+  font-weight: bold;
 }
 
 subjectiveCategory:before {
 	content: attr(title) " weight: " attr(weight);
+  	font-size: 120%;
+  font-weight: bold;
 }
 
 term[coefficient]:before {
