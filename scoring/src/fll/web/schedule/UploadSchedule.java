@@ -39,18 +39,28 @@ public class UploadSchedule extends BaseFLLServlet {
 
   public static final String SCHEDULE_KEY = "uploadSchedule_schedule";
   
+  /**
+   * Clear out session variables used by the schedule upload workflow.
+   */
+  public static void clearSesionVariables(final HttpSession session) {
+    session.removeAttribute("uploadSchedule_file");
+    session.removeAttribute("uploadSchedule_sheet");
+    session.removeAttribute("uploadSchedule_schedule");
+    session.removeAttribute("uploadSchedule_violations");
+    session.removeAttribute(SCHEDULE_KEY);
+    session.removeAttribute(GatherEventDivisionChanges.EVENT_DIVISION_INFO_KEY);
+    session.removeAttribute("sheetName");
+    session.removeAttribute("sheetNames");
+    session.removeAttribute(CheckViolations.SUBJECTIVE_STATIONS);
+    session.removeAttribute(CheckViolations.UNUSED_HEADERS);
+  }
+  
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    // clear out all session variables used
-    session.removeAttribute("uploadSchedule_file");
-    session.removeAttribute("uploadSchedule_sheet");
-    session.removeAttribute(SCHEDULE_KEY);
-    session.removeAttribute(GatherEventDivisionChanges.EVENT_DIVISION_INFO_KEY);
-    session.removeAttribute("sheetName");
-    session.removeAttribute("sheetNames");
+    clearSesionVariables(session);
     
     final File file = File.createTempFile("fll", null);
     file.deleteOnExit();
