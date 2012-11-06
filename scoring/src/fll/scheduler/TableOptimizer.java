@@ -7,6 +7,7 @@
 package fll.scheduler;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -29,12 +30,14 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.Logger;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import fll.Utilities;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CSVCellReader;
 import fll.util.CellFileReader;
+import fll.util.ExcelCellReader;
 import fll.util.LogUtils;
 
 /**
@@ -233,7 +236,8 @@ public class TableOptimizer {
       usage(options);
       System.exit(1);
     }
-
+    
+    FileInputStream fis = null;
     try {
       if (!schedfile.canRead()) {
         LOGGER.fatal(schedfile.getAbsolutePath()
@@ -242,12 +246,25 @@ public class TableOptimizer {
       }
 
       final boolean csv = schedfile.getName().endsWith("csv");
-      if (!csv) {
-        throw new IllegalArgumentException("Only know how to handle CSV files for now");
+      final CellFileReader reader;
+      final String sheetName;
+      if (csv) {
+        reader = new CSVCellReader(schedfile);
+        sheetName = null;
+      } else {
+        sheetName = SchedulerUI.promptForSheetName(schedfile);
+        if (null == sheetName) {
+          return;
+        }
+        fis = new FileInputStream(schedfile);
+        reader = new ExcelCellReader(fis, sheetName);
       }
-
-      final CellFileReader reader = new CSVCellReader(schedfile);
+      
       final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
+      if (null != fis) {
+        fis.close();
+        fis = null;
+      }
 
       final List<SubjectiveStation> subjectiveStations = SchedulerUI.gatherSubjectiveStationInformation(null,
                                                                                                         columnInfo);
@@ -264,7 +281,13 @@ public class TableOptimizer {
 
       final String name = Utilities.extractBasename(schedfile);
 
-      final TournamentSchedule schedule = new TournamentSchedule(name, schedfile, subjectiveHeaders);
+      final TournamentSchedule schedule;
+      if (csv) {
+        schedule = new TournamentSchedule(name, schedfile, subjectiveHeaders);
+      } else {
+        fis = new FileInputStream(schedfile);
+        schedule = new TournamentSchedule(name, fis, sheetName, subjectiveHeaders);
+      }
 
       final TableOptimizer optimizer = new TableOptimizer(params, schedule, schedfile.getAbsoluteFile().getParentFile());
       final long start = System.currentTimeMillis();
@@ -285,7 +308,21 @@ public class TableOptimizer {
     } catch (final RuntimeException e) {
       LOGGER.fatal(e, e);
       throw e;
+    } catch (InvalidFormatException e) {
+      LOGGER.fatal(e, e);
+      System.exit(7);
+    } finally {
+      try {
+        if (null != fis) {
+          fis.close();
+        }
+      } catch (final IOException e) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Error closing stream", e);
+        }
+      }
     }
+
 
   }
 
