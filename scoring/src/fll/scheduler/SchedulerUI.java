@@ -476,7 +476,7 @@ public class SchedulerUI extends JFrame {
    * @throws IOException
    * @throws InvalidFormatException
    */
-  private String promptForSheetName(final File selectedFile) throws InvalidFormatException, IOException {
+  public static String promptForSheetName(final File selectedFile) throws InvalidFormatException, IOException {
     final List<String> sheetNames = ExcelCellReader.getAllSheetNames(selectedFile);
     if (sheetNames.size() == 1) {
       return sheetNames.get(0);
