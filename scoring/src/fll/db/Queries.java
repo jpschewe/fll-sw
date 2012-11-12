@@ -1524,7 +1524,7 @@ public final class Queries {
    */
   public static int getNumSeedingRounds(final Connection connection,
                                         final int tournament) throws SQLException {
-    return getIntTournamentParameter(connection, tournament, TournamentParameters.SEEDING_ROUNDS);
+    return TournamentParameters.getIntTournamentParameter(connection, tournament, TournamentParameters.SEEDING_ROUNDS);
   }
 
   /**
@@ -1536,7 +1536,7 @@ public final class Queries {
   public static void setNumSeedingRounds(final Connection connection,
                                          final int tournament,
                                          final int newSeedingRounds) throws SQLException {
-    setIntTournamentParameter(connection, tournament, TournamentParameters.SEEDING_ROUNDS, newSeedingRounds);
+    TournamentParameters.setIntTournamentParameter(connection, tournament, TournamentParameters.SEEDING_ROUNDS, newSeedingRounds);
   }
 
   /**
@@ -1578,157 +1578,6 @@ public final class Queries {
                          String.valueOf(dummyTournament.getTournamentID()));
     }
     return getIntGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT);
-  }
-
-  /**
-   * Get the value of a tournament parameter
-   * 
-   * @param connection
-   * @param paramName
-   * @throws SQLException
-   */
-  public static double getDoubleTournamentParameter(final Connection connection,
-                                                    final int tournament,
-                                                    final String paramName) throws SQLException {
-    ResultSet rs = null;
-    PreparedStatement prep = null;
-    try {
-      prep = getTournamentParameterStmt(connection, tournament, paramName);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        return rs.getDouble(1);
-      } else {
-        throw new FLLInternalException("There is no default value for tournament parameter: "
-            + paramName);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-  }
-
-  /**
-   * @param connection
-   * @return the prepared statement for getting a tournament parameter with the
-   *         values already filled in
-   * @throws SQLException
-   */
-  private static PreparedStatement getTournamentParameterStmt(final Connection connection,
-                                                              final int tournament,
-                                                              final String paramName) throws SQLException {
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("SELECT param_value FROM tournament_parameters WHERE param = ? AND (tournament = ? OR tournament = ?) ORDER BY tournament DESC");
-      prep.setString(1, paramName);
-      prep.setInt(2, tournament);
-      prep.setInt(3, GenerateDB.INTERNAL_TOURNAMENT_ID);
-      return prep;
-    } catch (final SQLException e) {
-      SQLFunctions.close(prep);
-      throw e;
-    }
-  }
-
-  /**
-   * Get the value of a tournament parameter
-   * 
-   * @param connection
-   * @param paramName
-   * @throws SQLException
-   */
-  public static int getIntTournamentParameter(final Connection connection,
-                                              final int tournament,
-                                              final String paramName) throws SQLException {
-    ResultSet rs = null;
-    PreparedStatement prep = null;
-    try {
-      prep = getTournamentParameterStmt(connection, tournament, paramName);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        int value = rs.getInt(1);
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("getIntTournamentParameter tournament: "
-              + tournament + " param: " + paramName + " value: " + value);
-        }
-        return value;
-      } else {
-        throw new FLLInternalException("There is no default value for tournament parameter: "
-            + paramName);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-  }
-
-  /**
-   * Check if a value exists for a parameter for a tournament.
-   * 
-   * @param connection the database connection
-   * @param tournament the tournament to check
-   * @param paramName the parameter to check for
-   * @return true if there is a tournament specific value set
-   * @throws SQLException
-   */
-  public static boolean tournamentParameterValueExists(final Connection connection,
-                                                       final int tournament,
-                                                       final String paramName) throws SQLException {
-    ResultSet rs = null;
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("SELECT param_value FROM tournament_parameters WHERE param = ? AND tournament = ?");
-      prep.setString(1, paramName);
-      prep.setInt(2, tournament);
-      rs = prep.executeQuery();
-      return rs.next();
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-  }
-
-  public static void setDoubleTournamentParameter(final Connection connection,
-                                                  final int tournament,
-                                                  final String paramName,
-                                                  final double paramValue) throws SQLException {
-    final boolean paramExists = tournamentParameterValueExists(connection, tournament, paramName);
-    PreparedStatement prep = null;
-    try {
-      if (!paramExists) {
-        prep = connection.prepareStatement("INSERT INTO tournament_parameters (param, param_value, tournament) VALUES (?, ?, ?)");
-      } else {
-        prep = connection.prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?");
-      }
-      prep.setString(1, paramName);
-      prep.setDouble(2, paramValue);
-      prep.setInt(3, tournament);
-
-      prep.executeUpdate();
-    } finally {
-      SQLFunctions.close(prep);
-    }
-  }
-
-  public static void setIntTournamentParameter(final Connection connection,
-                                               final int tournament,
-                                               final String paramName,
-                                               final int paramValue) throws SQLException {
-    final boolean paramExists = tournamentParameterValueExists(connection, tournament, paramName);
-    PreparedStatement prep = null;
-    try {
-      if (!paramExists) {
-        prep = connection.prepareStatement("INSERT INTO tournament_parameters (param_value, param, tournament) VALUES (?, ?, ?)");
-      } else {
-        prep = connection.prepareStatement("UPDATE tournament_parameters SET param_value = ? WHERE param = ? AND tournament = ?");
-      }
-      prep.setInt(1, paramValue);
-      prep.setString(2, paramName);
-      prep.setInt(3, tournament);
-
-      prep.executeUpdate();
-    } finally {
-      SQLFunctions.close(prep);
-    }
   }
 
   /**
@@ -3426,7 +3275,7 @@ public final class Queries {
    */
   public static int getMaxScoreboardPerformanceRound(final Connection connection,
                                                      final int tournament) throws SQLException {
-    return getIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND);
+    return TournamentParameters.getIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND);
   }
 
   /**
@@ -3435,7 +3284,7 @@ public final class Queries {
   public static void setMaxScorebaordPerformanceRound(final Connection connection,
                                                       final int tournament,
                                                       final int value) throws SQLException {
-    setIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND, value);
+    TournamentParameters.setIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND, value);
   }
 
 }
