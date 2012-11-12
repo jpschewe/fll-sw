@@ -156,6 +156,33 @@ public final class TournamentParameters {
     }
   }
 
+  /**
+   * Unset a tournament parameter.
+   * 
+   * @param connection
+   * @param tournament
+   * @param paramName
+   * @throws SQLException
+   * @throws IllegalArgumentException if the tournament is the internal tournament
+   */
+  public static void unsetDoubleTournamentParameter(final Connection connection,
+                                                  final int tournament,
+                                                  final String paramName) throws SQLException {
+    if(tournament == GenerateDB.INTERNAL_TOURNAMENT_ID) {
+      throw new IllegalArgumentException("Cannot unset a value for the internal tournament");
+    }
+    
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("DELETE FROM tournament_parameters WHERE tournament = ? AND param = ?");
+      prep.setInt(1, tournament);
+      prep.setString(2, paramName);  
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
   public static void setDoubleTournamentParameter(final Connection connection,
                                                   final int tournament,
                                                   final String paramName,
