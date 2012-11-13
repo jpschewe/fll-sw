@@ -32,63 +32,37 @@
 <body>
 
  <div class='content'>
- 
- <!-- FIXME need form element and servlet to receive POST -->
- 
+
   <h1>Edit All Parameters</h1>
 
   <p>This page is for advanced users only. Be careful changing
    parameters here.</p>
 
-  <h2>Tournament Parameters</h2>
-  <p>These parameters are specified per tournament. Each of them has
-   a default value that is used if no value is specified for the
-   tournament</p>
+  <form name='edit_parameters' action='ChangeParameters' method='POST'>
+   <h2>Tournament Parameters</h2>
+   <p>These parameters are specified per tournament. Each of them
+    has a default value that is used if no value is specified for the
+    tournament</p>
 
-  <table>
+   <table>
 
-   <tr>
-    <th>Parameter</th>
-    <th>Default Value</th>
+    <tr>
+     <th>Parameter</th>
+     <th>Default Value</th>
 
-    <c:forEach items="${tournaments }" var="tournament">
-     <th>${tournament.name }</th>
-    </c:forEach>
+     <c:forEach items="${tournaments }" var="tournament">
+      <th>${tournament.name }</th>
+     </c:forEach>
 
-   </tr>
+    </tr>
 
-   <tr>
-    <th>Seeding Rounds</th>
+    <tr>
+     <th>Seeding Rounds</th>
 
-    <td><select name='seeding_rounds_default'>
-      <c:forEach begin="0" end="10" var="numRounds">
-       <c:choose>
-        <c:when test="${numRounds == numSeedingRounds_default}">
-         <option selected value='${numRounds}'>${numRounds}</option>
-        </c:when>
-        <c:otherwise>
-         <option value='${numRounds}'>${numRounds }</option>
-        </c:otherwise>
-       </c:choose>
-      </c:forEach>
-    </select></td>
-
-    <c:forEach items="${tournaments }" var="tournament">
-
-     <td><select name='seeding_rounds_${tournament.tournamentID }'>
-       <c:choose>
-        <c:when
-         test="${empty numSeedingRounds[tournament.tournamentID]}">
-         <option selected value="default">Default</option>
-        </c:when>
-        <c:otherwise>
-         <option value="default">Default</option>
-        </c:otherwise>
-       </c:choose>
-
+     <td><select name='seeding_rounds_default'>
        <c:forEach begin="0" end="10" var="numRounds">
         <c:choose>
-         <c:when test="${numRounds == numSeedingRounds[tournament.tournamentID]}">
+         <c:when test="${numRounds == numSeedingRounds_default}">
           <option selected value='${numRounds}'>${numRounds}</option>
          </c:when>
          <c:otherwise>
@@ -98,43 +72,44 @@
        </c:forEach>
      </select></td>
 
-    </c:forEach>
+     <c:forEach items="${tournaments }" var="tournament">
 
-   </tr>
+      <td><select name='seeding_rounds_${tournament.tournamentID }'>
+        <c:choose>
+         <c:when
+          test="${empty numSeedingRounds[tournament.tournamentID]}">
+          <option selected value="default">Default</option>
+         </c:when>
+         <c:otherwise>
+          <option value="default">Default</option>
+         </c:otherwise>
+        </c:choose>
+
+        <c:forEach begin="0" end="10" var="numRounds">
+         <c:choose>
+          <c:when
+           test="${numRounds == numSeedingRounds[tournament.tournamentID]}">
+           <option selected value='${numRounds}'>${numRounds}</option>
+          </c:when>
+          <c:otherwise>
+           <option value='${numRounds}'>${numRounds }</option>
+          </c:otherwise>
+         </c:choose>
+        </c:forEach>
+      </select></td>
+
+     </c:forEach>
+
+    </tr>
 
 
-   <tr>
-    <th>Max Scoreboard Round</th>
+    <tr>
+     <th>Max Scoreboard Round</th>
 
-    <td><select name='max_scoreboard_round_default'>
-      <c:forEach begin="0" end="10" var="numRounds">
-       <c:choose>
-        <c:when test="${numRounds == maxScoreboardRound_default}">
-         <option selected value='${numRounds}'>${numRounds}</option>
-        </c:when>
-        <c:otherwise>
-         <option value='${numRounds}'>${numRounds }</option>
-        </c:otherwise>
-       </c:choose>
-      </c:forEach>
-    </select></td>
-
-    <c:forEach items="${tournaments }" var="tournament">
-
-     <td><select name='max_scoreboard_round_${tournament.tournamentID }'>
-       <c:choose>
-        <c:when
-         test="${empty maxScoreboardRound[tournament.tournamentID]}">
-         <option selected value="default">Default</option>
-        </c:when>
-        <c:otherwise>
-         <option value="default">Default</option>
-        </c:otherwise>
-       </c:choose>
-
+     <td><select name='max_scoreboard_round_default'>
        <c:forEach begin="0" end="10" var="numRounds">
         <c:choose>
-         <c:when test="${numRounds == maxScoreboardRound[tournament.tournamentID]}">
+         <c:when test="${numRounds == maxScoreboardRound_default}">
           <option selected value='${numRounds}'>${numRounds}</option>
          </c:when>
          <c:otherwise>
@@ -144,16 +119,46 @@
        </c:forEach>
      </select></td>
 
-    </c:forEach>
+     <c:forEach items="${tournaments }" var="tournament">
 
-   </tr>
+      <td><select
+       name='max_scoreboard_round_${tournament.tournamentID }'>
+        <c:choose>
+         <c:when
+          test="${empty maxScoreboardRound[tournament.tournamentID]}">
+          <option selected value="default">Default</option>
+         </c:when>
+         <c:otherwise>
+          <option value="default">Default</option>
+         </c:otherwise>
+        </c:choose>
+
+        <c:forEach begin="0" end="10" var="numRounds">
+         <c:choose>
+          <c:when
+           test="${numRounds == maxScoreboardRound[tournament.tournamentID]}">
+           <option selected value='${numRounds}'>${numRounds}</option>
+          </c:when>
+          <c:otherwise>
+           <option value='${numRounds}'>${numRounds }</option>
+          </c:otherwise>
+         </c:choose>
+        </c:forEach>
+      </select></td>
+
+     </c:forEach>
+
+    </tr>
 
 
-  </table>
+   </table>
 
-  <!--  FIXME submit -->
 
-  <!--  FIXME global parameters -->
+   <!--  FIXME global parameters -->
+
+   <input type='submit' value='Save Changes' />
+  </form>
+
  </div>
 
 </body>
