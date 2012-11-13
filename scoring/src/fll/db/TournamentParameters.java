@@ -163,24 +163,31 @@ public final class TournamentParameters {
    * @param tournament
    * @param paramName
    * @throws SQLException
-   * @throws IllegalArgumentException if the tournament is the internal tournament
+   * @throws IllegalArgumentException if the tournament is the internal
+   *           tournament
    */
-  public static void unsetDoubleTournamentParameter(final Connection connection,
-                                                  final int tournament,
-                                                  final String paramName) throws SQLException {
-    if(tournament == GenerateDB.INTERNAL_TOURNAMENT_ID) {
+  public static void unsetTournamentParameter(final Connection connection,
+                                              final int tournament,
+                                              final String paramName) throws SQLException {
+    if (tournament == GenerateDB.INTERNAL_TOURNAMENT_ID) {
       throw new IllegalArgumentException("Cannot unset a value for the internal tournament");
     }
-    
+
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("DELETE FROM tournament_parameters WHERE tournament = ? AND param = ?");
       prep.setInt(1, tournament);
-      prep.setString(2, paramName);  
+      prep.setString(2, paramName);
       prep.executeUpdate();
     } finally {
       SQLFunctions.close(prep);
     }
+  }
+
+  public static void setDoubleDefaultParameter(final Connection connection,
+                                               final String paramName,
+                                               final double paramValue) throws SQLException {
+    setDoubleTournamentParameter(connection, GenerateDB.INTERNAL_TOURNAMENT_ID, paramName, paramValue);
   }
 
   public static void setDoubleTournamentParameter(final Connection connection,
@@ -198,11 +205,17 @@ public final class TournamentParameters {
       prep.setString(1, paramName);
       prep.setDouble(2, paramValue);
       prep.setInt(3, tournament);
-  
+
       prep.executeUpdate();
     } finally {
       SQLFunctions.close(prep);
     }
+  }
+
+  public static void setIntDefaultParameter(final Connection connection,
+                                            final String paramName,
+                                            final int paramValue) throws SQLException {
+    setIntTournamentParameter(connection, GenerateDB.INTERNAL_TOURNAMENT_ID, paramName, paramValue);
   }
 
   public static void setIntTournamentParameter(final Connection connection,
@@ -220,7 +233,7 @@ public final class TournamentParameters {
       prep.setInt(1, paramValue);
       prep.setString(2, paramName);
       prep.setInt(3, tournament);
-  
+
       prep.executeUpdate();
     } finally {
       SQLFunctions.close(prep);
@@ -261,8 +274,8 @@ public final class TournamentParameters {
    * @throws SQLException
    */
   static PreparedStatement getTournamentParameterStmt(final Connection connection,
-                                                              final int tournament,
-                                                              final String paramName) throws SQLException {
+                                                      final int tournament,
+                                                      final String paramName) throws SQLException {
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("SELECT param_value FROM tournament_parameters WHERE param = ? AND (tournament = ? OR tournament = ?) ORDER BY tournament DESC");
