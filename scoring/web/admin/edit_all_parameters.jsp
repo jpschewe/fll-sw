@@ -9,7 +9,7 @@
 
 <html>
 <head>
-<title>Administration</title>
+<title>Edit Parameters</title>
 <link rel="stylesheet" type="text/css"
  href="<c:url value='/style/style.jsp'/>" />
 
@@ -78,7 +78,7 @@
      <td><select name='seeding_rounds_${tournament.tournamentID }'>
        <c:choose>
         <c:when
-         test="${numSeedingRounds[tournament.tournamentID] == -1}">
+         test="${empty numSeedingRounds[tournament.tournamentID]}">
          <option selected value="default">Default</option>
         </c:when>
         <c:otherwise>
@@ -101,6 +101,53 @@
     </c:forEach>
 
    </tr>
+
+
+   <tr>
+    <th>Max Scoreboard Round</th>
+
+    <td><select name='max_scoreboard_round_default'>
+      <c:forEach begin="0" end="10" var="numRounds">
+       <c:choose>
+        <c:when test="${numRounds == maxScoreboardRound_default}">
+         <option selected value='${numRounds}'>${numRounds}</option>
+        </c:when>
+        <c:otherwise>
+         <option value='${numRounds}'>${numRounds }</option>
+        </c:otherwise>
+       </c:choose>
+      </c:forEach>
+    </select></td>
+
+    <c:forEach items="${tournaments }" var="tournament">
+
+     <td><select name='max_scoreboard_round_${tournament.tournamentID }'>
+       <c:choose>
+        <c:when
+         test="${empty maxScoreboardRound[tournament.tournamentID]}">
+         <option selected value="default">Default</option>
+        </c:when>
+        <c:otherwise>
+         <option value="default">Default</option>
+        </c:otherwise>
+       </c:choose>
+
+       <c:forEach begin="0" end="10" var="numRounds">
+        <c:choose>
+         <c:when test="${numRounds == maxScoreboardRound[tournament.tournamentID]}">
+          <option selected value='${numRounds}'>${numRounds}</option>
+         </c:when>
+         <c:otherwise>
+          <option value='${numRounds}'>${numRounds }</option>
+         </c:otherwise>
+        </c:choose>
+       </c:forEach>
+     </select></td>
+
+    </c:forEach>
+
+   </tr>
+
 
   </table>
 
