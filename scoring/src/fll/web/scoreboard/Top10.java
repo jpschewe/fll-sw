@@ -99,65 +99,67 @@ public class Top10 extends BaseFLLServlet {
       formatter.format("<body>");
       formatter.format("<center>");
       formatter.format("<table border='1' cellpadding='0' cellspacing='0' width='98%%'>");
-      formatter.format("<tr>");
-      int numColumns = 5;
-      if (!showOrg) {
-        --numColumns;
-      }
-      formatter.format("<th colspan='%d' bgcolor='%s'>Top Ten Performance Scores: Division %s</th>", numColumns,
-                       Queries.getColorForDivisionIndex(divisionIndex), divisions.get(divisionIndex));
-      formatter.format("</tr>");
-
-      final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
-      final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
-
-      prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore" //
-          + " FROM (SELECT TeamNumber, " //
-          + winnerCriteria.getMinMaxString()
-          + "(ComputedTotal) AS MaxOfComputedScore" //
-          + "  FROM verified_performance WHERE Tournament = ? "
-          + "   AND NoShow = False" //
-          + "   AND Bye = False" //
-          + "   AND RunNumber <= ?" //
-          + "  GROUP BY TeamNumber) AS T2"
-          + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams"
-          + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber" //
-          + " AND current_tournament_teams.event_division = ?"
-          + " ORDER BY T2.MaxOfComputedScore "
-          + winnerCriteria.getSortString() + " LIMIT 10");
-      prep.setInt(1, currentTournament);
-      prep.setInt(2, maxScoreboardRound);
-      prep.setString(3, divisions.get(divisionIndex));
-      rs = prep.executeQuery();
-
-      double prevScore = -1;
-      int i = 1;
-      int rank = 0;
-      while (rs.next()) {
-        final double score = rs.getDouble("MaxOfComputedScore");
-        if (!FP.equals(score, prevScore, 1E-6)) {
-          rank = i;
-        }
-
+      if (!divisions.isEmpty()) {
         formatter.format("<tr>");
-        formatter.format("<td class='center' width='7%%'><b>%d</b></td>", rank);
-        formatter.format("<td class='right' width='10%%'><b>%d</b></td>", rs.getInt("TeamNumber"));
-        String teamName = rs.getString("TeamName");
-        teamName = null == teamName ? "&nbsp;" : StringUtils.trimString(teamName, Team.MAX_TEAM_NAME_LEN);
-        formatter.format("<td class='left' width='28%%'><b>%s</b></td>", teamName);
-        if (showOrg) {
-          String organization = rs.getString("Organization");
-          organization = null == organization ? "&nbsp;" : StringUtils.trimString(organization, MAX_ORG_NAME);
-          formatter.format("<td class='left'><b>%s</b></td>", organization);
+        int numColumns = 5;
+        if (!showOrg) {
+          --numColumns;
         }
-        formatter.format("<td class='right' width='8%%'><b>%s</b></td>", Utilities.NUMBER_FORMAT_INSTANCE.format(score));
-
+        formatter.format("<th colspan='%d' bgcolor='%s'>Top Ten Performance Scores: Division %s</th>", numColumns,
+                         Queries.getColorForDivisionIndex(divisionIndex), divisions.get(divisionIndex));
         formatter.format("</tr>");
 
-        prevScore = score;
-        ++i;
-      }// end while next
+        final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+        final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
 
+        prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore" //
+            + " FROM (SELECT TeamNumber, " //
+            + winnerCriteria.getMinMaxString()
+            + "(ComputedTotal) AS MaxOfComputedScore" //
+            + "  FROM verified_performance WHERE Tournament = ? "
+            + "   AND NoShow = False" //
+            + "   AND Bye = False" //
+            + "   AND RunNumber <= ?" //
+            + "  GROUP BY TeamNumber) AS T2"
+            + " JOIN Teams ON Teams.TeamNumber = T2.TeamNumber, current_tournament_teams"
+            + " WHERE Teams.TeamNumber = current_tournament_teams.TeamNumber" //
+            + " AND current_tournament_teams.event_division = ?"
+            + " ORDER BY T2.MaxOfComputedScore "
+            + winnerCriteria.getSortString() + " LIMIT 10");
+        prep.setInt(1, currentTournament);
+        prep.setInt(2, maxScoreboardRound);
+        prep.setString(3, divisions.get(divisionIndex));
+        rs = prep.executeQuery();
+
+        double prevScore = -1;
+        int i = 1;
+        int rank = 0;
+        while (rs.next()) {
+          final double score = rs.getDouble("MaxOfComputedScore");
+          if (!FP.equals(score, prevScore, 1E-6)) {
+            rank = i;
+          }
+
+          formatter.format("<tr>");
+          formatter.format("<td class='center' width='7%%'><b>%d</b></td>", rank);
+          formatter.format("<td class='right' width='10%%'><b>%d</b></td>", rs.getInt("TeamNumber"));
+          String teamName = rs.getString("TeamName");
+          teamName = null == teamName ? "&nbsp;" : StringUtils.trimString(teamName, Team.MAX_TEAM_NAME_LEN);
+          formatter.format("<td class='left' width='28%%'><b>%s</b></td>", teamName);
+          if (showOrg) {
+            String organization = rs.getString("Organization");
+            organization = null == organization ? "&nbsp;" : StringUtils.trimString(organization, MAX_ORG_NAME);
+            formatter.format("<td class='left'><b>%s</b></td>", organization);
+          }
+          formatter.format("<td class='right' width='8%%'><b>%s</b></td>",
+                           Utilities.NUMBER_FORMAT_INSTANCE.format(score));
+
+          formatter.format("</tr>");
+
+          prevScore = score;
+          ++i;
+        }// end while next
+      } // end divisions not empty
       formatter.format("</table>");
       formatter.format("</body>");
       formatter.format("</html>");
