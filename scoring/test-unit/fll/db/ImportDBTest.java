@@ -39,6 +39,35 @@ public class ImportDBTest {
   }
 
   /**
+   * Test the 2012 plymouth database. Got an error about data truncation.
+   */
+  @Test
+  public void testTruncation() throws IOException, SQLException  {
+    final InputStream dumpFileIS = ImportDBTest.class.getResourceAsStream("data/plymouth-2012-11-17.flldb");
+    final File tempFile = File.createTempFile("flltest", null);
+    final String database = tempFile.getAbsolutePath();
+    Statement stmt = null;
+    ResultSet rs = null;
+    Connection connection = null;
+    try {
+      connection = Utilities.createFileDataSource(database).getConnection();
+
+      ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
+
+      connection.close();
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
+      SQLFunctions.close(connection);
+
+      if (!tempFile.delete()) {
+        tempFile.deleteOnExit();
+      }
+    }
+    TestUtils.deleteDatabase(database);
+  }
+  
+  /**
    * Make sure that no show scores in the subjective data import properly.
    * 
    * @throws IOException
