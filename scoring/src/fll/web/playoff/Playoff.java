@@ -403,7 +403,10 @@ public final class Playoff {
 
     final List<Integer> teamNumbers = new LinkedList<Integer>();
     for (final Team t : firstRound) {
-      teamNumbers.add(t.getTeamNumber());
+      if (!Team.BYE.equals(t)
+          && !Team.TIE.equals(t) && !Team.NULL.equals(t)) {
+        teamNumbers.add(t.getTeamNumber());
+      }
     }
     final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournament, teamNumbers);
     if (null != errors) {
