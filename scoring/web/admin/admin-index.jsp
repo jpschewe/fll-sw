@@ -5,12 +5,6 @@
 </c:if>
 <c:remove var="servletLoaded" />
 
-<c:if test="${not empty param.ScorePageText}">
-	<c:set var="ScorePageText" value="${param.ScorePageText}"
-		scope="application" />
-</c:if>
-
-
 <html>
 <head>
 <title>Administration</title>
@@ -185,7 +179,7 @@
 	<p>Tournament day:</p>
 	<ol>
 		<li>
-			<form action='index.jsp' method='post'>
+			<form action='ChangeScorePageText' method='post'>
 				Score page text: <input type='text' name='ScorePageText'
 					value='<c:out value="${ScorePageText}"/>'> <input
 					type='submit' value='Change text'>
