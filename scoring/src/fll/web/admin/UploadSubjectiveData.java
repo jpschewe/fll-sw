@@ -280,20 +280,29 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
           for (int goalIndex = 0; goalIndex < numGoals; goalIndex++) {
             final Element goalDescription = goalDescriptions.get(goalIndex);
             final String goalName = goalDescription.getAttribute("name");
-            final Element subscoreElement = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
-            if (null == subscoreElement) {
-              throw new FLLInternalException("Cannot find subscore element for '"
-                  + goalName + "' in category '" + categoryName + "'");
-            }
-            final String value = subscoreElement.getAttribute("value");
-            if (null != value
-                && !"".equals(value.trim())) {
-              insertPrep.setString(goalIndex + 5, value.trim());
-              updatePrep.setString(goalIndex + 2, value.trim());
+
+            if (!noShow) {
+              final Element subscoreElement = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
+              if (null == subscoreElement) {
+                throw new FLLInternalException("Cannot find subscore element for '"
+                    + goalName + "' in category '" + categoryName + "'");
+              }
+              final String value = subscoreElement.getAttribute("value");
+              if (null != value
+                  && !"".equals(value.trim())) {
+                insertPrep.setString(goalIndex + 5, value.trim());
+                updatePrep.setString(goalIndex + 2, value.trim());
+              } else {
+                insertPrep.setNull(goalIndex + 5, Types.DOUBLE);
+                updatePrep.setNull(goalIndex + 2, Types.DOUBLE);
+              }
             } else {
+              // no shows may not have the tags needed, just set everything to
+              // NULL
               insertPrep.setNull(goalIndex + 5, Types.DOUBLE);
               updatePrep.setNull(goalIndex + 2, Types.DOUBLE);
             }
+
           }
 
           // attempt the update first
