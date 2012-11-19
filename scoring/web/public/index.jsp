@@ -31,6 +31,7 @@
 
  <ul>
 
+  <li>${ScorePageText }</li>
   <li>Current Tournament -&gt; <%=Queries.getCurrentTournamentName(connection)%></li>
 
   <li><a href='<c:url value="/challenge.xml"/>'>Challenge
