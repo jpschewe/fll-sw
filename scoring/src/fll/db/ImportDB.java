@@ -276,7 +276,12 @@ public final class ImportDB {
       if (line.length != 2) {
         throw new RuntimeException("Typeinfo file has incorrect number of columns, should be 2");
       }
-      columnTypes.put(line[0].toLowerCase(), line[1]);
+      if ("character".equalsIgnoreCase(line[1])) {
+        // handle broken dumps from version 7.0
+        columnTypes.put(line[0].toLowerCase(), "character(64)");
+      } else {
+        columnTypes.put(line[0].toLowerCase(), line[1]);
+      }
     }
     return columnTypes;
   }
@@ -563,7 +568,7 @@ public final class ImportDB {
         prep.setInt(1, seedingRounds);
         prep.executeUpdate();
       }
-      
+
       setDBVersion(connection, 8);
     } finally {
       SQLFunctions.close(stmt);
