@@ -403,10 +403,7 @@ public final class Playoff {
 
     final List<Integer> teamNumbers = new LinkedList<Integer>();
     for (final Team t : firstRound) {
-      if (!Team.BYE.equals(t)
-          && !Team.TIE.equals(t) && !Team.NULL.equals(t)) {
-        teamNumbers.add(t.getTeamNumber());
-      }
+      teamNumbers.add(t.getTeamNumber());
     }
     final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournament, teamNumbers);
     if (null != errors) {
@@ -745,6 +742,9 @@ public final class Playoff {
   /**
    * Check if some teams are involved in an playoff bracket that isn't finished.
    * 
+   * @param teamNumbers the teams to check, NULL, BYE and TIE team
+   *          numbers will be ignored as they can be in multiple playoffs at the
+   *          same time
    * @return null if no teams are involved in an unfinished playoff
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to generate query from list of teams")
@@ -775,7 +775,11 @@ public final class Playoff {
       checkPrep.setInt(2, Team.NULL.getTeamNumber());
 
       detailPrep = connection.prepareStatement("SELECT DISTINCT Team from PlayoffData WHERE event_division = ?" //
+          + " AND Team NOT IN (?, ?, ?)" // exclude internal teams
           + " AND Team IN ( " + teamNumbersStr + " )");
+      detailPrep.setInt(2, Team.BYE.getTeamNumber());
+      detailPrep.setInt(3, Team.TIE.getTeamNumber());
+      detailPrep.setInt(4, Team.NULL.getTeamNumber());
 
       while (divisions.next()) {
         final String eventDivision = divisions.getString(1);
