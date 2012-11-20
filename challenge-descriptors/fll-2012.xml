@@ -62,6 +62,13 @@
    multiplier="0" max="100" min="0" initialValue="0" />
   <goal name="ticks_backward" title="Ticks Backward"
    multiplier="0" max="100" min="0" />
+  <restriction lowerBound="0" upperBound="48"
+   message="Invalid number of ticks entered">
+    <constant value="12" /> <!-- start -->
+   <term scoreType="raw" goal="ticks_forward" coefficient="1" />
+   <term scoreType="raw" goal="ticks_backward" coefficient="-1" />
+  </restriction>
+  
   <!-- On the Challenge's image of the Pointer Position, it shows major and 
    minor portions. The major portions are indicated by a physical LEGO light, 
    while the minor portions are just evenly split. The Challenge just provided 
@@ -190,12 +197,6 @@
     </default>
    </switch>
   </computedGoal>
-  <restriction lowerBound="0" upperBound="48"
-   message="Invalid number of ticks entered">
-    <constant value="12" /> <!-- start -->
-   <term scoreType="raw" goal="ticks_forward" coefficient="1" />
-   <term scoreType="raw" goal="ticks_backward" coefficient="-1" />
-  </restriction>
 
   <goal name="flexibility" title="Yellow Loops in Base" multiplier="20"
    max="2" />
