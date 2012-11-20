@@ -46,16 +46,16 @@
  <xsd:element name="Performance">
   <xsd:complexType>
    <xsd:sequence>
-    <xsd:sequence maxOccurs="unbounded">
-     <xsd:sequence minOccurs="0" maxOccurs="unbounded">
-      <xsd:element ref="goal" maxOccurs="unbounded" />
-      <xsd:element ref="computedGoal" minOccurs="0"
-       maxOccurs="unbounded" />
-     </xsd:sequence>
-     <xsd:sequence minOccurs="0" maxOccurs="unbounded">
-      <xsd:element ref="restriction" maxOccurs="unbounded" />
-     </xsd:sequence>
-     <xsd:element ref="tiebreaker" minOccurs="0" maxOccurs="1" />
+     <xsd:sequence maxOccurs="unbounded">
+       
+       <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+	 <xsd:element ref="goal" minOccurs="0" maxOccurs="unbounded" />
+	 <xsd:element ref="computedGoal" minOccurs="0"
+		      maxOccurs="unbounded" />
+	 <xsd:element ref="restriction" minOccurs="0" maxOccurs="unbounded" />
+       </xsd:sequence>
+       
+       <xsd:element ref="tiebreaker" minOccurs="0" maxOccurs="1" />
     </xsd:sequence>
    </xsd:sequence>
    <xsd:attribute name="minimumScore" type="xsd:decimal"
