@@ -58,10 +58,10 @@
   <goal name="orange_quilting" title="Orange Quilts Touching"
    multiplier="30" max="2" />
 
-  <goal name="cardio_exercise_major" title="Large Cardio Dot"
-   multiplier="0" max="9" min="1" initialValue="3" />
-  <goal name="cardio_exercise_minor" title="Small Cardio Ticks"
-   multiplier="0" max="5" />
+  <goal name="ticks_forward" title="Ticks Forward"
+   multiplier="0" max="100" min="0" initialValue="0" />
+  <goal name="ticks_backward" title="Ticks Backward"
+   multiplier="0" max="100" min="0" />
   <!-- On the Challenge's image of the Pointer Position, it shows major and 
    minor portions. The major portions are indicated by a physical LEGO light, 
    while the minor portions are just evenly split. The Challenge just provided 
@@ -84,27 +84,29 @@
    we can use a coefficient to calculate the number of points to be added in 
    in scale 2. The same happens for scale 3, and the subset of scale 2 with 
    the 10 point bonus. -->
-  <computedGoal name="cardio_progression" title="Cardio Progression">
+  <computedGoal name="cardio_progression_new" title="Cardio Progression">
    <variable name="progression_scale_1">
-    <term scoreType="raw" goal="cardio_exercise_major" coefficient="6" />
-    <term scoreType="raw" goal="cardio_exercise_minor" />
-    <constant value="-6" />
+    <constant value="12" /> <!-- start -->
+   <term scoreType="raw" goal="ticks_forward" coefficient="1" />
+   <term scoreType="raw" goal="ticks_backward" coefficient="-1" />
    </variable>
    <variable name="progression_scale_1_max_points">
     <constant value="120" />
    </variable>
    <variable name="progression_scale_2">
-    <term scoreType="raw" goal="cardio_exercise_major" coefficient="6" />
-    <term scoreType="raw" goal="cardio_exercise_minor" />
-    <constant value="-30" />
+    <constant value="12" /> <!-- start -->
+   <term scoreType="raw" goal="ticks_forward" coefficient="1" />
+   <term scoreType="raw" goal="ticks_backward" coefficient="-1" />
+    <constant value="-24" />
    </variable>
    <variable name="progression_scale_2_max_points">
     <constant value="166" />
    </variable>
    <variable name="progression_scale_3">
-    <term scoreType="raw" goal="cardio_exercise_major" coefficient="6" />
-    <term scoreType="raw" goal="cardio_exercise_minor" />
-    <constant value="-42" />
+    <constant value="12" /> <!-- start -->
+   <term scoreType="raw" goal="ticks_forward" coefficient="1" />
+   <term scoreType="raw" goal="ticks_backward" coefficient="-1" />
+    <constant value="-36" />
    </variable>
    <variable name="bonus">
     <constant value="10" />
@@ -188,10 +190,11 @@
     </default>
    </switch>
   </computedGoal>
-  <restriction lowerBound="6" upperBound="54"
-   message="Invalid Cardio Entries">
-   <term scoreType="raw" goal="cardio_exercise_major" coefficient="6" />
-   <term scoreType="raw" goal="cardio_exercise_minor" />
+  <restriction lowerBound="0" upperBound="48"
+   message="Invalid number of ticks entered">
+    <constant value="12" /> <!-- start -->
+   <term scoreType="raw" goal="ticks_forward" coefficient="1" />
+   <term scoreType="raw" goal="ticks_backward" coefficient="-1" />
   </restriction>
 
   <goal name="flexibility" title="Yellow Loops in Base" multiplier="20"
