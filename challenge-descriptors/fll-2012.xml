@@ -84,7 +84,7 @@
    we can use a coefficient to calculate the number of points to be added in 
    in scale 2. The same happens for scale 3, and the subset of scale 2 with 
    the 10 point bonus. -->
-  <computedGoal name="cardio_progression_new" title="Cardio Progression">
+  <computedGoal name="cardio_progression" title="Cardio Progression">
    <variable name="progression_scale_1">
     <constant value="12" /> <!-- start -->
    <term scoreType="raw" goal="ticks_forward" coefficient="1" />
