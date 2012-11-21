@@ -594,12 +594,18 @@ public class SchedulerUI extends JFrame {
           } else if (null != violation.getPerformance()) {
             // need to check round which round
             int round = 0;
-            while (!violation.getPerformance().equals(schedInfo.getPerfTime(round))
+            // using Math.min to handle extra round
+            while (!violation.getPerformance().equals(schedInfo.getPerfTime(Math.min(schedInfo.getNumberOfRounds() - 1,
+                                                                                     round)))
                 && round < schedInfo.getNumberOfRounds()) {
               ++round;
-              if (round >= schedInfo.getNumberOfRounds()) {
+              if (round > schedInfo.getNumberOfRounds()) {
                 throw new RuntimeException("Internal error, walked off the end of the round list");
               }
+            }
+            // handle extra run
+            if(round >= schedInfo.getNumberOfRounds()) {
+              round = schedInfo.getNumberOfRounds()-1;
             }
             final int firstIdx = getScheduleModel().getFirstPerformanceColumn()
                 + (round * SchedulerTableModel.NUM_COLUMNS_PER_ROUND);
