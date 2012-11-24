@@ -58,17 +58,20 @@
   <goal name="orange_quilting" title="Orange Quilts Touching"
    multiplier="30" max="2" />
 
-  <goal name="touch_penalties" title="Touch Penalties (tick marks)"
-   multiplier="0" max="100" min="0" initialValue="0" />
   <goal name="robot_spins" title="Robot Spins (tick marks)"
    multiplier="0" max="100" min="0" />
+    
+  <goal name="touch_penalties" title="Touch Penalties (tick marks)"
+   multiplier="0" max="100" min="0" initialValue="0" />
+    
+    
   <restriction lowerBound="0" upperBound="48"
    message="Invalid number of ticks entered">
     <constant value="12" /> <!-- start -->
    <term scoreType="raw" goal="touch_penalties" coefficient="-1" />
    <term scoreType="raw" goal="robot_spins" coefficient="1" />
   </restriction>
-    <goal name="net_cardio_position" title="Net Cardio Position"
+    <goal name="net_cardio_position" title="Net Cardio Position (Robot forward Spins minus Touch Penalties)"
       multiplier="0" max="36" min="-12" initialValue="0"/>
 
     <restriction lowerBound="0" upperBound="0"
