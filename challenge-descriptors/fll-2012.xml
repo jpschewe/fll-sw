@@ -64,24 +64,9 @@
   <goal name="touch_penalties" title="Touch Penalties (tick marks)"
    multiplier="0" max="100" min="0" initialValue="0" />
     
-    
-  <restriction lowerBound="0" upperBound="48"
-   message="Invalid number of ticks entered">
-    <constant value="12" /> <!-- start -->
-   <term scoreType="raw" goal="touch_penalties" coefficient="-1" />
-   <term scoreType="raw" goal="robot_spins" coefficient="1" />
-  </restriction>
     <goal name="net_cardio_position" title="Net Cardio Position (Robot forward Spins minus Touch Penalties)"
       multiplier="0" max="36" min="-12" initialValue="0"/>
 
-    <restriction lowerBound="0" upperBound="0"
-      message="Inconsistency between touch penalties, robot spins and net cardio position">
-   <term scoreType="raw" goal="touch_penalties" coefficient="-1" />
-   <term scoreType="raw" goal="robot_spins" coefficient="1" />
-
-   <term scoreType="raw" goal="net_cardio_position" coefficient="-1" />
-    </restriction>
-  
   <!-- On the Challenge's image of the Pointer Position, it shows major and 
    minor portions. The major portions are indicated by a physical LEGO light, 
    while the minor portions are just evenly split. The Challenge just provided 
@@ -106,12 +91,14 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
    the 10 point bonus. -->
   <computedGoal name="cardio_progression" title="Cardio Progression">
    <variable name="progression_scale_1">
+        <constant value="12"/>
    <term scoreType="raw" goal="net_cardio_position" coefficient="1" />
    </variable>
    <variable name="progression_scale_1_max_points">
     <constant value="120" />
    </variable>
    <variable name="progression_scale_2">
+        <constant value="12"/>
    <term scoreType="raw" goal="net_cardio_position" coefficient="1" />
     <constant value="-24" />
    </variable>
@@ -119,6 +106,7 @@ v   scales: - Scale 1: Increment by 5 points, goes from progression 0 to progres
     <constant value="166" />
    </variable>
    <variable name="progression_scale_3">
+        <constant value="12"/>
    <term scoreType="raw" goal="net_cardio_position" coefficient="1" />
     <constant value="-36" />
    </variable>
