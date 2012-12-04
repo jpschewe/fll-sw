@@ -275,7 +275,8 @@ FONT.TIE {
       $(".table_assignment").each(function(index, label) {
           //Sane color? Let's start by splitting the label text
           if ($.inArray(label.innerHTML.split(" ")[0].toLowerCase(), validColors) > 0) {
-              label.style.backgroundColor = label.innerHTML.split(" ")[0];
+              label.style.borderColor = label.innerHTML.split(" ")[0];
+              label.style.borderStyle = "solid";
           }
       });
   }
