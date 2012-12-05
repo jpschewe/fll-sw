@@ -111,4 +111,15 @@ public final class JsonUtilities {
     Gson gson = new Gson();
     return gson.toJson(datalist);
   }
+  public static class DisplayResponse {
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
+    public final String displayURL;
+    
+    public DisplayResponse(final String displayURL) {
+      this.displayURL = displayURL;
+    }
+  }
+  public static String generateDisplayResponse(final String displayURL) {
+    return new Gson().toJson(new DisplayResponse(displayURL));
+  }
 }
