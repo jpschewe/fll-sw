@@ -5,85 +5,37 @@
 
 <html>
   <head>
-    <meta http-equiv='refresh' content='30' />
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     
     <title>Display</title>
-          
+    <script type="text/javascript" src="<c:url value='/code.icepush'/>"></script>
+    <script type="text/javascript" src="<c:url value='/extlib/jquery-1.7.1.min.js'/>"></script>
     <script type='text/javascript'>
       var width = screen.width-10;
       var height = screen.height-10;
       var newWindow = null;
       var str = 'height='+height+',width='+width+',toolbar=0,menubar=0,scrollbars=0,location=0,directories=0,status=0,resizable=0,fullscreen=1,left=0,screenX=0,top=0,screenY=0';
-
-      <%-- Default the session variables that keep track of what we're displaying to none --%>
-      <c:if test="${empty sessionDisplayPage}">
-        <c:set var="sessionDisplayPage" value="none" scope="session"/>
-      </c:if>
-      <c:if test="${empty sessionDisplayURL}">
-        <c:set var="sessionDisplayURL" value="none" scope="session" />
-      </c:if>
-
-      <%-- Set localDisplayPage and localDisplayURL to the values depending on displayPage --%>
-      <c:choose>
-        <c:when test='${not empty displayName}'>
-          <c:set var='displayPageKey' value='${displayName}_displayPage'/>
-          <c:set var='displayURLKey' value='${displayName}_displayURL'/>
-
-          <c:choose>
-            <c:when test='${not empty applicationScope[displayPageKey]}'>
-              <c:set var='localDisplayPage' value='${applicationScope[displayPageKey]}'/>
-            </c:when>
-            <c:otherwise>
-              <c:set var='localDisplayPage' value='${displayPage}'/>
-            </c:otherwise>
-          </c:choose>
-          
-          <c:choose>
-            <c:when test='${not empty applicationScope[displayURLKey]}'>
-              <c:set var='localDisplayURL' value='${applicationScope[displayURLKey]}'/>
-            </c:when>
-            <c:otherwise>
-              <c:set var='localDisplayURL' value='${displayURL}'/>
-            </c:otherwise>
-          </c:choose>
-          
-        </c:when> <%-- end not empty displayName --%>
-        <c:otherwise>
-          <%-- if no display name, then just use the values for the default display --%>
-          <c:set var='localDisplayPage' value='${displayPage}'/>
-          <c:set var='localDisplayURL' value='${displayURL}'/>
-        </c:otherwise>
-      </c:choose>
       
-
-      <%-- Now change the display based on the current state and store that information in the session --%> 
-      <c:if test='${localDisplayPage != sessionDisplayPage || (localDisplayPage == "special" && localDisplayURL != sessionDisplayURL)}'>
-        <c:choose>
-          <c:when test='${localDisplayPage == "scoreboard"}'>
-            newWindow = window.open('<c:url value="/scoreboard/main.jsp"/>', 'displayWindow', str);
-            <c:set var="sessionDisplayURL" value="none" scope="session" />
-          </c:when>
-          <c:when test='${localDisplayPage == "slideshow"}'>
-            newWindow = window.open('<c:url value="/slideshow/index.jsp"/>', 'displayWindow', str);
-            <c:set var="sessionDisplayURL" value="none" scope="session" />
-          </c:when>
-          <c:when test='${localDisplayPage == "playoffs"}'>
-            newWindow = window.open('<c:url value="/playoff/remoteMain.jsp"/>', 'displayWindow', str);
-            <c:set var="sessionDisplayURL" value="none" scope="session" />
-          </c:when>
-          <c:when test='${localDisplayPage == "special"}'>
-            newWindow = window.open('<c:url value="${displayURL}"/>', 'displayWindow', str);
-            <c:set var="sessionDisplayURL" value="${localDisplayURL}" scope="session" />
-          </c:when>
-          <c:otherwise>
-            newWindow = window.open('<c:url value="/welcome.jsp"/>', 'displayWindow', str);
-          </c:otherwise>
-        </c:choose>
-        <c:set var="sessionDisplayPage" value="${localDisplayPage}" scope="session"/>
-      </c:if>
+      function update() {
+        $.ajax({
+          url: "<c:url value='/ajax/DisplayQuery'/>",
+          dataType: "json",
+          cache: false,
+          beforeSend: function (xhr) {
+              xhr.overrideMimeType('text/plain');
+          }
+        }).done(function(data) {
+          if (newWindow == null) {
+            newWindow = window.open(data.displayURL, 'displayWindow', str);
+          } else if (newWindow.location.pathname != data.displayURL) {
+            newWindow = window.open(data.displayURL, 'displayWindow', str);
+          }
+        });
+      }
       
+      $(document).ready(update);
     </script>
+    <icep:register group="display" callback="function(){update();}"/>
   </head>
 
   <body>

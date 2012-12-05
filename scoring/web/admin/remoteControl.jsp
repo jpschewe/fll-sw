@@ -86,6 +86,7 @@ ${message}
 <%-- clear out the message, so that we don't see it again --%>
 <c:if test="${not empty message}">
   <icep:push group="playoffs"/>
+  <icep:push group="display"/>
 </c:if>
 <c:remove var="message" />
 
