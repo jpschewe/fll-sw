@@ -117,6 +117,26 @@ public final class SubjectiveUtils {
   }
 
   /**
+   * Find the "subjectiveCategory" element in the specified challenge descriptor
+   * with the given name.
+   * 
+   * @param challengeDocument the challenge descriptor
+   * @param name the name of the subjective category
+   * @return the element or null if it's not found
+   */
+  public static Element getSubjectiveElement(final Document challengeDocument,
+                                             final String name) {
+    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
+                                                                                challengeDocument.getDocumentElement()
+                                                                                                  .getElementsByTagName("subjectiveCategory"))) {
+      if(name.equals(subjectiveElement.getAttribute("name"))) {
+        return subjectiveElement;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Compare the scores between two documents.
    * 
    * @param challengeDocument the challenge descriptor, needed to get the list
@@ -243,10 +263,12 @@ public final class SubjectiveUtils {
   /**
    * Get the category node that matches the specified name.
    * 
+   * @param scoresElement the "scores" element from a subjective scores document
+   * @param categoryName the name of the category to find
    * @return null if not found
    */
-  private static Element getCategoryNode(final Element scoresElement,
-                                         final String categoryName) {
+  public static Element getCategoryNode(final Element scoresElement,
+                                        final String categoryName) {
     for (final Element scoreCategory : new NodelistElementCollectionAdapter(scoresElement.getChildNodes())) {
       final String name = scoreCategory.getAttribute("name");
       if (categoryName.equals(name)) {
@@ -260,6 +282,8 @@ public final class SubjectiveUtils {
    * Given the score element, find the subscore element for the specified goal
    * in the subjective score document.
    * 
+   * @param scoreElement the "score" element from a subjective scores document
+   * @param goalName the name of the goal to find
    * @return the element or null if not found
    */
   public static Element getSubscoreElement(final Element scoreElement,
