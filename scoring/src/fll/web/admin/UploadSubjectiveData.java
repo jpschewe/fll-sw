@@ -281,12 +281,12 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
             final Element goalDescription = goalDescriptions.get(goalIndex);
             final String goalName = goalDescription.getAttribute("name");
 
-            if (!noShow) {
-              final Element subscoreElement = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
-              if (null == subscoreElement) {
-                throw new FLLInternalException("Cannot find subscore element for '"
-                    + goalName + "' in category '" + categoryName + "'");
-              }
+            final Element subscoreElement = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
+            if (null == subscoreElement) {
+              // no subscore element, no show or deleted
+              insertPrep.setNull(goalIndex + 5, Types.DOUBLE);
+              updatePrep.setNull(goalIndex + 2, Types.DOUBLE);
+            } else {
               final String value = subscoreElement.getAttribute("value");
               if (null != value
                   && !"".equals(value.trim())) {
@@ -296,11 +296,6 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
                 insertPrep.setNull(goalIndex + 5, Types.DOUBLE);
                 updatePrep.setNull(goalIndex + 2, Types.DOUBLE);
               }
-            } else {
-              // no shows may not have the tags needed, just set everything to
-              // NULL
-              insertPrep.setNull(goalIndex + 5, Types.DOUBLE);
-              updatePrep.setNull(goalIndex + 2, Types.DOUBLE);
             }
 
           }
@@ -308,7 +303,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
           // attempt the update first
           final int modifiedRows = updatePrep.executeUpdate();
           if (modifiedRows < 1) {
-            // do insert
+            // do insert if nothing was updated
             insertPrep.executeUpdate();
           }
         }
