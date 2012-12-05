@@ -466,7 +466,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   /**
    * Find out how many goals there are.
    */
-  private int getNumGoals() {
+  public int getNumGoals() {
     return _goals.size();
   }
 
