@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
+import org.icepush.PushContext;
 
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -112,6 +113,10 @@ public class RemoteControlPost extends BaseFLLServlet {
         }
       }
     }
+
+    PushContext pc = PushContext.getInstance(application);
+    pc.push("display");
+    pc.push("playoffs");
 
     session.setAttribute(SessionAttributes.MESSAGE, "<i id='success'>Successfully set remote control parameters</i>");
 
