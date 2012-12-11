@@ -27,6 +27,16 @@
 }
 </style>
 
+<!-- functions to displaying and hiding help -->
+<script type="text/javascript">
+	function display(id) {
+		document.getElementById(id).style.display = "block";
+	}
+	function hide(id) {
+		document.getElementById(id).style.display = "none";
+	}
+</script>
+
 </head>
 
 <body>
@@ -48,7 +58,14 @@
 
     <tr>
      <th>Parameter</th>
-     <th>Default Value</th>
+     <th>Default Value
+     
+     <a href='javascript:display("DefaultValueHelp")'>[help]</a>
+				<div id='DefaultValueHelp' class='help' style='display: none'>
+					If a value is not specified for a tournament, this value is used.					
+					<a href='javascript:hide("DefaultValueHelp")'>[hide]</a>
+				</div>
+     </th>
 
      <c:forEach items="${tournaments }" var="tournament">
       <th>${tournament.name }</th>
@@ -57,7 +74,16 @@
     </tr>
 
     <tr>
-     <th>Seeding Rounds</th>
+     <th>Seeding Rounds
+     
+     <a href='javascript:display("SeedingRoundsHelp")'>[help]</a>
+				<div id='SeedingRoundsHelp' class='help' style='display: none'>
+					This parameter specifies the number of seeding rounds. The
+					seeding rounds are used for the performance score in the final
+					report and are used to rank teams for the initial playoff round.					
+					<a href='javascript:hide("SeedingRoundsHelp")'>[hide]</a>
+				</div>
+     </th>
 
      <td><select name='seeding_rounds_default'>
        <c:forEach begin="0" end="10" var="numRounds">
@@ -104,7 +130,20 @@
 
 
     <tr>
-     <th>Max Scoreboard Round</th>
+     <th>Max Scoreboard Round
+    
+          <a href='javascript:display("MaxScoreboardRoundHelp")'>[help]</a>
+				<div id='MaxScoreboardRoundHelp' class='help' style='display: none'>
+					Performance rounds greater than this number will not be displayed
+					on the scoreboard. This exists to prevent the winners of the head
+					to head from being displayed before the awards ceremony.
+					Generally this should be the same as the number of seeding rounds.
+					Ideally this would be the number of rounds including everything
+					except the last head to head run. 					
+					<a href='javascript:hide("MaxScoreboardRoundHelp")'>[hide]</a>
+				</div>
+     
+     </th>
 
      <td><select name='max_scoreboard_round_default'>
        <c:forEach begin="0" end="10" var="numRounds">
