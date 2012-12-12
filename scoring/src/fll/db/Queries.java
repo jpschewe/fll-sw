@@ -5,7 +5,6 @@
  */
 package fll.db;
 
-import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -49,7 +48,6 @@ import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.HttpTeamScore;
 import fll.web.playoff.Playoff;
 import fll.web.playoff.TeamScore;
-import fll.xml.ChallengeParser;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
@@ -672,7 +670,7 @@ public final class Queries {
    * Get the number of scoresheets to print on a single sheet of paper.
    */
   public static int getScoresheetLayoutNUp(final Connection connection) throws SQLException {
-    return getIntGlobalParameter(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP);
+    return GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP);
   }
 
   /**
@@ -1571,13 +1569,13 @@ public final class Queries {
    * @return the tournament ID
    */
   public static int getCurrentTournament(final Connection connection) throws SQLException {
-    if (!Queries.globalParameterExists(connection, GlobalParameters.CURRENT_TOURNAMENT)) {
+    if (!GlobalParameters.globalParameterExists(connection, GlobalParameters.CURRENT_TOURNAMENT)) {
       final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
       // Call setGlobalParameter directly to avoid infinite recursion
       setGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT,
                          String.valueOf(dummyTournament.getTournamentID()));
     }
-    return getIntGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT);
+    return GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT);
   }
 
   /**
@@ -1813,34 +1811,6 @@ public final class Queries {
   }
 
   /**
-   * Get the challenge document out of the database. This method doesn't
-   * validate the document, since it's assumed that the document was validated
-   * before it was put in the database.
-   * 
-   * @param connection connection to the database
-   * @return the document
-   * @throws FLLRuntimeException if the document cannot be found
-   * @throws SQLException on a database error
-   */
-  public static Document getChallengeDocument(final Connection connection) throws SQLException, RuntimeException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-
-      prep = getGlobalParameterStmt(connection, GlobalParameters.CHALLENGE_DOCUMENT);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        return ChallengeParser.parse(new InputStreamReader(rs.getAsciiStream(1), Utilities.DEFAULT_CHARSET));
-      } else {
-        throw new FLLRuntimeException("Could not find challenge document in database");
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-  }
-
-  /**
    * Advance a team to the next tournament.
    * 
    * @param connection the database connection
@@ -1945,7 +1915,7 @@ public final class Queries {
                                                  final int teamNumber,
                                                  final int newTournament) throws SQLException {
 
-    final Document document = getChallengeDocument(connection);
+    final Document document = GlobalParameters.getChallengeDocument(connection);
 
     final int currentTournament = getTeamCurrentTournament(connection, teamNumber);
 
@@ -2844,106 +2814,14 @@ public final class Queries {
     if (!tables.contains("global_parameters")) {
       return 0;
     } else {
-      return getIntGlobalParameter(connection, GlobalParameters.DATABASE_VERSION);
-    }
-  }
-
-  /**
-   * @param connection
-   * @return the prepared statement for getting a global parameter with the
-   *         values already filled in
-   * @throws SQLException
-   */
-  private static PreparedStatement getGlobalParameterStmt(final Connection connection,
-                                                          final String paramName) throws SQLException {
-    PreparedStatement prep = null;
-    try {
-      prep = connection.prepareStatement("SELECT param_value FROM global_parameters WHERE param = ?");
-      prep.setString(1, paramName);
-      return prep;
-    } catch (final SQLException e) {
-      SQLFunctions.close(prep);
-      throw e;
-    }
-  }
-
-  /**
-   * Get a global parameter from the database that is a double.
-   * 
-   * @param connection the database connection
-   * @param parameter the parameter name
-   * @return the value
-   * @throws SQLException
-   * @throws IllegalArgumentException if the parameter cannot be found
-   */
-  public static double getDoubleGlobalParameter(final Connection connection,
-                                                final String parameter) throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = getGlobalParameterStmt(connection, parameter);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        return rs.getDouble(1);
-      } else {
-        throw new IllegalArgumentException("Can't find '"
-            + parameter + "' in global_parameters");
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-  }
-
-  /**
-   * Get a global parameter from the database that is an int.
-   * 
-   * @param connection the database connection
-   * @param parameter the parameter name
-   * @return the value
-   * @throws SQLException
-   * @throws IllegalArgumentException if the parameter cannot be found
-   */
-  public static int getIntGlobalParameter(final Connection connection,
-                                          final String parameter) throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = getGlobalParameterStmt(connection, parameter);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        return rs.getInt(1);
-      } else {
-        throw new IllegalArgumentException("Can't find '"
-            + parameter + "' in global_parameters");
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-  }
-
-  /**
-   * Check if a value exists for a global parameter.
-   */
-  /* package */static boolean globalParameterExists(final Connection connection,
-                                                    final String paramName) throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = getGlobalParameterStmt(connection, paramName);
-      rs = prep.executeQuery();
-      return rs.next();
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
+      return GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DATABASE_VERSION);
     }
   }
 
   public static void setGlobalParameter(final Connection connection,
                                         final String paramName,
                                         final String paramValue) throws SQLException {
-    final boolean exists = globalParameterExists(connection, paramName);
+    final boolean exists = GlobalParameters.globalParameterExists(connection, paramName);
     PreparedStatement prep = null;
     try {
       if (!exists) {

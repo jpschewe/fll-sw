@@ -71,7 +71,7 @@ public class TestComputedScores {
       ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
 
       
-      final Document document = Queries.getChallengeDocument(connection);
+      final Document document = GlobalParameters.getChallengeDocument(connection);
       final Element rootElement = document.getDocumentElement();
       final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
 

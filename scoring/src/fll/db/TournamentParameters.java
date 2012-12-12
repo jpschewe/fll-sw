@@ -273,7 +273,7 @@ public final class TournamentParameters {
    *         values already filled in
    * @throws SQLException
    */
-  static PreparedStatement getTournamentParameterStmt(final Connection connection,
+  private static PreparedStatement getTournamentParameterStmt(final Connection connection,
                                                       final int tournament,
                                                       final String paramName) throws SQLException {
     PreparedStatement prep = null;
