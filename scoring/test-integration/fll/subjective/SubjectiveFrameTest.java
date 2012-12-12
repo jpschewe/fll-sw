@@ -47,6 +47,7 @@ import org.w3c.dom.Element;
 
 import fll.TestUtils;
 import fll.Utilities;
+import fll.db.GlobalParameters;
 import fll.db.ImportDB;
 import fll.db.ImportDBTest;
 import fll.db.Queries;
@@ -100,7 +101,7 @@ public class SubjectiveFrameTest {
 
       ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
 
-      document = Queries.getChallengeDocument(connection);
+      document = GlobalParameters.getChallengeDocument(connection);
 
       // set the right tournament
       final String tournamentName = "11-21 Plymouth Middle";

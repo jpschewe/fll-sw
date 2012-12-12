@@ -141,11 +141,11 @@ public final class ScoreStandardization {
   }
 
   private static double getStandardizedMean(final Connection connection) throws SQLException {
-    return Queries.getDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_MEAN);
+    return GlobalParameters.getDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_MEAN);
   }
 
   private static double getStandardizedSigma(final Connection connection) throws SQLException {
-    return Queries.getDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_SIGMA);
+    return GlobalParameters.getDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_SIGMA);
   }
 
   /**

@@ -21,8 +21,8 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import fll.Utilities;
+import fll.db.GlobalParameters;
 import fll.db.ImportDB;
-import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -118,8 +118,8 @@ public class ImportDBDump extends BaseFLLServlet {
    */
   private String checkChallengeDescriptors(final Connection sourceConnection,
                                            final Connection destConnection) throws SQLException {
-    final Document sourceDoc = Queries.getChallengeDocument(sourceConnection);
-    final Document destDoc = Queries.getChallengeDocument(destConnection);
+    final Document sourceDoc = GlobalParameters.getChallengeDocument(sourceConnection);
+    final Document destDoc = GlobalParameters.getChallengeDocument(destConnection);
     final String compareMessage = ChallengeParser.compareStructure(destDoc, sourceDoc);
     return compareMessage;
   }
