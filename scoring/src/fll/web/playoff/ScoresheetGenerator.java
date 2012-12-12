@@ -520,7 +520,17 @@ public class ScoresheetGenerator {
           m_goalValue[realI].setBorder(0);
           m_goalValue[realI].setVerticalAlignment(Element.ALIGN_MIDDLE);
           realI++;
-        }
+        } // if goal       
+      } // if element
+    } // foreach goal
+    
+    // make sure that we have cells for everything
+    for(int i=0; i<m_goalValue.length; ++i) {
+      if(null == m_goalValue[i]) {
+        m_goalValue[i] = new PdfPCell();
+      }
+      if(null == m_goalLabel[i]) {
+        m_goalLabel[i] = new PdfPCell();
       }
     }
   }

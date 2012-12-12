@@ -99,6 +99,10 @@ public abstract class TeamScore {
     assertScoreExists();
     try {
       final Element goalDescription = getGoalDescription(goalName);
+      if(null == goalDescription) {
+        LOG.warn("No goal description found for '" + goalName + "'");
+        return null;
+      }
       if (XMLUtils.isComputedGoal(goalDescription)) {
         return ScoreUtils.evalComputedGoal(goalDescription, this);
       } else {
