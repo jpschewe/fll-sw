@@ -24,7 +24,7 @@ import net.mtu.eggplant.xml.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.ProcessingInstruction;
 
-import fll.db.Queries;
+import fll.db.GlobalParameters;
 
 @WebServlet("/challenge.xml")
 public class DisplayChallengeDescriptor extends BaseFLLServlet {
@@ -46,7 +46,7 @@ public class DisplayChallengeDescriptor extends BaseFLLServlet {
 
       // get challenge document from the database as it will be modified to
       // include the stylesheet information and I don't want to propagate that.
-      final Document challengeDocument = Queries.getChallengeDocument(connection);
+      final Document challengeDocument = GlobalParameters.getChallengeDocument(connection);
       final ProcessingInstruction stylesheet = challengeDocument.createProcessingInstruction("xml-stylesheet", "type='text/css' href='fll.css'");
       challengeDocument.insertBefore(stylesheet, challengeDocument.getDocumentElement());
 

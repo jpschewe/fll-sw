@@ -29,6 +29,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import fll.Utilities;
+import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -268,7 +269,7 @@ public class InitFilter implements Filter {
             LOGGER.debug("Loading challenge descriptor");
           }
           try {
-            final Document document = Queries.getChallengeDocument(connection);
+            final Document document = GlobalParameters.getChallengeDocument(connection);
             if (null == document) {
               LOGGER.warn("Could not find challenge descriptor");
               session.setAttribute(SessionAttributes.MESSAGE,
