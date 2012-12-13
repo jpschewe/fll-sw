@@ -1547,7 +1547,7 @@ public final class Queries {
    */
   public static void setScoresheetLayoutNUp(final Connection connection,
                                             final int newNup) throws SQLException {
-    setGlobalParameter(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP, String.valueOf(newNup));
+    GlobalParameters.setIntGlobalParameter(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP, newNup);
   }
 
   /**
@@ -1572,7 +1572,7 @@ public final class Queries {
     if (!GlobalParameters.globalParameterExists(connection, GlobalParameters.CURRENT_TOURNAMENT)) {
       final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
       // Call setGlobalParameter directly to avoid infinite recursion
-      setGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT,
+      GlobalParameters.setStringGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT,
                          String.valueOf(dummyTournament.getTournamentID()));
     }
     return GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT);
@@ -1588,7 +1588,7 @@ public final class Queries {
                                           final int tournamentID) throws SQLException {
     final int currentID = getCurrentTournament(connection);
     if (currentID != tournamentID) {
-      setGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT, String.valueOf(tournamentID));
+      GlobalParameters.setIntGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT, tournamentID);
     }
   }
 
@@ -2815,25 +2815,6 @@ public final class Queries {
       return 0;
     } else {
       return GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DATABASE_VERSION);
-    }
-  }
-
-  public static void setGlobalParameter(final Connection connection,
-                                        final String paramName,
-                                        final String paramValue) throws SQLException {
-    final boolean exists = GlobalParameters.globalParameterExists(connection, paramName);
-    PreparedStatement prep = null;
-    try {
-      if (!exists) {
-        prep = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
-      } else {
-        prep = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?");
-      }
-      prep.setString(1, paramValue);
-      prep.setString(2, paramName);
-      prep.executeUpdate();
-    } finally {
-      SQLFunctions.close(prep);
     }
   }
 
