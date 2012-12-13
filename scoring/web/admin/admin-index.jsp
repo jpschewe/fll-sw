@@ -30,7 +30,7 @@
 	<%-- clear out the message, so that we don't see it again --%>
 	<c:remove var="message" />
 
-	<p>Before tournament day:</p>
+	<h2>Before tournament day</h2>
 	<ol>
 		<li>
 			<form id='uploadTeams' ACTION="<c:url value='/UploadSpreadsheet'/>"
@@ -176,7 +176,7 @@
 
 	</ol>
 
-	<p>Tournament day:</p>
+	<h2>Tournament day</h2>
 	<ol>
 		<li>
 			<form action='ChangeScorePageText' method='post'>
@@ -231,24 +231,31 @@
 		<li><a href='remoteControl.jsp'>Remote control of display</a></li>
 	</ol>
 
-	<p>After the tournament</p>
+	<h2>After the tournament</h2>
 	<ul>
 		<li><a href='database.flldb'>Download database</a></li>
 
-		<li><a href="GatherAdvancementData">Advance teams</a></li>
-
-		<li>
-			<form id='uploadAdvancingTeams'
-				ACTION="<c:url value='/UploadSpreadsheet'/>" METHOD="POST"
-				ENCTYPE="multipart/form-data">
-				Upload CSV or Excel of teams to advance <input type="file" size="32"
-					name="file" /> <input type='hidden' name='uploadRedirect'
-					value="<c:url value='/admin/UploadAdvancingTeams'/>" /> <input
-					type="submit" value="Upload" />
-			</form>
-		</li>
 	</ul>
 
+<h2>Advanced</h2>
+<p>These links are for advanced users.</p>
+<ul>
+<li><a href="edit_all_parameters.jsp">Edit all parameters</a></li>
+
+  <li><a href="GatherAdvancementData">Advance teams</a></li>
+
+  <li>
+   <form id='uploadAdvancingTeams'
+    ACTION="<c:url value='/UploadSpreadsheet'/>" METHOD="POST"
+    ENCTYPE="multipart/form-data">
+    Upload CSV or Excel of teams to advance <input type="file" size="32"
+     name="file" /> <input type='hidden' name='uploadRedirect'
+     value="<c:url value='/admin/UploadAdvancingTeams'/>" /> <input
+     type="submit" value="Upload" />
+   </form>
+  </li>
+
+</ul>
 
 </body>
 </html>

@@ -42,6 +42,7 @@ import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;
+import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.CellFileReader;
 import fll.util.FLLRuntimeException;
@@ -437,7 +438,7 @@ public final class UploadTeams extends BaseFLLServlet {
       prep.executeUpdate();
       prep = connection.prepareStatement("DELETE FROM FinalScores");
       prep.executeUpdate();
-      final Document challenge = Queries.getChallengeDocument(connection);
+      final Document challenge = GlobalParameters.getChallengeDocument(connection);
       final Element rootElement = challenge.getDocumentElement();
       for (final Element categoryElement : new NodelistElementCollectionAdapter(
                                                                                 rootElement.getElementsByTagName("subjectiveCategory"))) {
