@@ -24,6 +24,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 
 import fll.Tournament;
+import fll.db.GlobalParameters;
 import fll.db.TournamentParameters;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -59,6 +60,12 @@ public class ChangeParameters extends BaseFLLServlet {
       storeSeedingRounds(connection, request, tournaments);
 
       storeMaxScoreboardRound(connection, request, tournaments);
+
+      GlobalParameters.setDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_MEAN,
+                                                Double.valueOf(request.getParameter("gStandardizedMean")));
+
+      GlobalParameters.setDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_SIGMA,
+                                                Double.valueOf(request.getParameter("gStandardizedSigma")));
 
       message.append("<p id='success'>Parameters saved</p>");
     } catch (final SQLException sqle) {

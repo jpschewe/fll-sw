@@ -27,6 +27,8 @@
 }
 </style>
 
+<script type='text/javascript' src='../extlib/jquery-1.7.1.min.js'></script>
+
 <!-- functions to displaying and hiding help -->
 <script type="text/javascript">
 	function display(id) {
@@ -35,6 +37,28 @@
 	function hide(id) {
 		document.getElementById(id).style.display = "none";
 	}
+
+	function checkParams() {
+		var value = $("#gStandardizedMean").val();
+		if (!$.isNumeric(value)) {
+			alert("Standardized Mean must be a decimal number");
+			return false;
+		}
+
+		value = $("#gStandardizedSigma").val();
+		if (!$.isNumeric(value)) {
+			alert("Standardized Sigma must be a decimal number");
+			return false;
+		}
+
+		return true;
+	}
+
+	$(document).ready(function() {
+		$("#submit").click(function() {
+			return checkParams();
+		});
+	});
 </script>
 
 </head>
@@ -190,7 +214,6 @@
 			</table>
 
 
-			<!--  FIXME global parameters -->
 			<h2>Global Parameters</h2>
 			<p>These parameters are specified globally and apply to all
 				tournaments in the database.</p>
@@ -202,11 +225,36 @@
 					<th>Value</th>
 				</tr>
 
+				<tr>
+					<th>Standardized Mean <a
+						href='javascript:display("StandardizedMeanHelp")'>[help]</a>
+						<div id='StandardizedMeanHelp' class='help' style='display: none'>
+							The mean that we scale the raw mean of all scores in a category for a
+							judge to. <a href='javascript:hide("StandardizedMeanHelp")'>[hide]</a>
+						</div>
+
+					</th>
+					<td><input type='text' value="${gStandardizedMean }"
+						id='gStandardizedMean' name='gStandardizedMean' /></td>
+				</tr>
+
+				<tr>
+					<th>Standardized Sigma <a
+						href='javascript:display("StandardizedSigmaHelp")'>[help]</a>
+						<div id='StandardizedSigmaHelp' class='help' style='display: none'>
+							The sigma to use when scaling scores for comparison. <a
+								href='javascript:hide("StandardizedSigmaHelp")'>[hide]</a>
+						</div>
+
+					</th>
+					<td><input type='text' value="${gStandardizedSigma }"
+						id='gStandardizedSigma' name='gStandardizedSigma' /></td>
+				</tr>
 
 			</table>
 
 
-			<input type='submit' value='Save Changes' />
+			<input type='submit' value='Save Changes' id='submit' />
 		</form>
 
 	</div>

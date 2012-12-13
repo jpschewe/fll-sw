@@ -26,6 +26,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.apache.log4j.Logger;
 
 import fll.Tournament;
+import fll.db.GlobalParameters;
 import fll.db.TournamentParameters;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -65,14 +66,13 @@ public class GatherParameterInformation extends BaseFLLServlet {
       final Map<Integer, Integer> numSeedingRounds = new HashMap<Integer, Integer>();
       for (final Tournament tournament : tournaments) {
         if (TournamentParameters.tournamentParameterValueExists(connection, tournament.getTournamentID(),
-                                                                 TournamentParameters.SEEDING_ROUNDS)) {
+                                                                TournamentParameters.SEEDING_ROUNDS)) {
           numSeedingRounds.put(tournament.getTournamentID(),
                                TournamentParameters.getIntTournamentParameter(connection, tournament.getTournamentID(),
                                                                               TournamentParameters.SEEDING_ROUNDS));
         }
       }
       session.setAttribute("numSeedingRounds", numSeedingRounds);
-      
 
       session.setAttribute("maxScoreboardRound_default",
                            TournamentParameters.getIntTournamentParameterDefault(connection,
@@ -80,14 +80,20 @@ public class GatherParameterInformation extends BaseFLLServlet {
       final Map<Integer, Integer> maxScoreboardRound = new HashMap<Integer, Integer>();
       for (final Tournament tournament : tournaments) {
         if (TournamentParameters.tournamentParameterValueExists(connection, tournament.getTournamentID(),
-                                                                 TournamentParameters.MAX_SCOREBOARD_ROUND)) {
+                                                                TournamentParameters.MAX_SCOREBOARD_ROUND)) {
           maxScoreboardRound.put(tournament.getTournamentID(),
-                               TournamentParameters.getIntTournamentParameter(connection, tournament.getTournamentID(),
-                                                                              TournamentParameters.MAX_SCOREBOARD_ROUND));
+                                 TournamentParameters.getIntTournamentParameter(connection,
+                                                                                tournament.getTournamentID(),
+                                                                                TournamentParameters.MAX_SCOREBOARD_ROUND));
         }
       }
       session.setAttribute("maxScoreboardRound", maxScoreboardRound);
-      
+
+      session.setAttribute("gStandardizedMean",
+                           GlobalParameters.getDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_MEAN));
+
+      session.setAttribute("gStandardizedSigma",
+                           GlobalParameters.getDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_SIGMA));
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
