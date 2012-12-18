@@ -114,10 +114,7 @@ public class RemoteControlPost extends BaseFLLServlet {
       }
     }
 
-    PushContext pc = PushContext.getInstance(application);
-    pc.push("display");
-    pc.push("playoffs");
-
+    PushContext.getInstance(application).push("playoffs");
     session.setAttribute(SessionAttributes.MESSAGE, "<i id='success'>Successfully set remote control parameters</i>");
 
     response.sendRedirect(response.encodeRedirectURL("remoteControl.jsp"));
