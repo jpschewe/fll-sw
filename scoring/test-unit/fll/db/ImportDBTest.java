@@ -132,7 +132,7 @@ public class ImportDBTest {
       final FileOutputStream fos = new FileOutputStream(temp);
       final ZipOutputStream zipOut = new ZipOutputStream(fos);
 
-      final Document challengeDocument = Queries.getChallengeDocument(connection);
+      final Document challengeDocument = GlobalParameters.getChallengeDocument(connection);
       Assert.assertNotNull(challengeDocument);
       DumpDB.dumpDatabase(zipOut, connection, challengeDocument);
       fos.close();

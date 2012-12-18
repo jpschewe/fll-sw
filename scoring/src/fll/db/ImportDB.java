@@ -763,7 +763,7 @@ public final class ImportDB {
                                     final Connection destinationConnection,
                                     final String tournamentName) throws SQLException {
 
-    final Document document = Queries.getChallengeDocument(destinationConnection);
+    final Document document = GlobalParameters.getChallengeDocument(destinationConnection);
     final Element rootElement = document.getDocumentElement();
 
     final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournamentName);

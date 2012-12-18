@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import fll.Tournament;
+import fll.db.GlobalParameters;
 import fll.db.ImportDB;
 import fll.db.Queries;
 import fll.util.LogUtils;
@@ -66,7 +67,7 @@ public class ExecuteImport extends BaseFLLServlet {
         // update score totals
         final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
         final int destTournamentID = destTournament.getTournamentID();
-        final Document document = Queries.getChallengeDocument(destConnection);
+        final Document document = GlobalParameters.getChallengeDocument(destConnection);
         Queries.updateScoreTotals(document, destConnection, destTournamentID);
 
         message.append(String.format("<p>Import of tournament %s successful. You may now optionally select another tournament to import.</p>", tournament));
