@@ -498,7 +498,7 @@ public final class GenerateDB {
     try {
       globalInsert = connection.prepareStatement("INSERT INTO global_parameters (param_value, param) VALUES (?, ?)");
 
-      check = Queries.globalParameterExists(connection, GlobalParameters.CURRENT_TOURNAMENT);
+      check = GlobalParameters.globalParameterExists(connection, GlobalParameters.CURRENT_TOURNAMENT);
       if (!check) {
         final Tournament dummyTournament = Tournament.findTournamentByName(connection, DUMMY_TOURNAMENT_NAME);
         globalInsert.setString(2, GlobalParameters.CURRENT_TOURNAMENT);
@@ -506,21 +506,21 @@ public final class GenerateDB {
         globalInsert.executeUpdate();
       }
 
-      check = Queries.globalParameterExists(connection, GlobalParameters.STANDARDIZED_MEAN);
+      check = GlobalParameters.globalParameterExists(connection, GlobalParameters.STANDARDIZED_MEAN);
       if (!check) {
         globalInsert.setString(2, GlobalParameters.STANDARDIZED_MEAN);
         globalInsert.setDouble(1, GlobalParameters.STANDARDIZED_MEAN_DEFAULT);
         globalInsert.executeUpdate();
       }
 
-      check = Queries.globalParameterExists(connection, GlobalParameters.STANDARDIZED_SIGMA);
+      check = GlobalParameters.globalParameterExists(connection, GlobalParameters.STANDARDIZED_SIGMA);
       if (!check) {
         globalInsert.setString(2, GlobalParameters.STANDARDIZED_SIGMA);
         globalInsert.setDouble(1, GlobalParameters.STANDARDIZED_SIGMA_DEFAULT);
         globalInsert.executeUpdate();
       }
 
-      check = Queries.globalParameterExists(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP);
+      check = GlobalParameters.globalParameterExists(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP);
       if (!check) {
         globalInsert.setString(2, GlobalParameters.SCORESHEET_LAYOUT_NUP);
         globalInsert.setInt(1, GlobalParameters.SCORESHEET_LAYOUT_NUP_DEFAULT);
@@ -538,7 +538,7 @@ public final class GenerateDB {
                                                      final Connection connection) throws SQLException {
     PreparedStatement challengePrep = null;
     try {
-      final boolean check = Queries.globalParameterExists(connection, GlobalParameters.CHALLENGE_DOCUMENT);
+      final boolean check = GlobalParameters.globalParameterExists(connection, GlobalParameters.CHALLENGE_DOCUMENT);
       if (check) {
         challengePrep = connection.prepareStatement("UPDATE global_parameters SET param_value = ? WHERE param = ?");
       } else {
