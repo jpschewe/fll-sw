@@ -168,6 +168,11 @@ public final class ScoreEntry {
     formatter.format("var Verified;%n");
     formatter.format("function %s(newValue) {%n", getSetMethodName("Verified"));
     formatter.format("  Verified = newValue;%n");
+    formatter.format("  if (newValue == 1 && document.getElementsByName('EditFlag').length == 0) {");
+    formatter.format("    replaceText('verification_error', 'Are you sure this score has been Verified?');");
+    formatter.format("  } else if (newValue == 0) {");
+    formatter.format("    replaceText('verification_error', '');");
+    formatter.format("  }");
     formatter.format("  refresh();%n");
     formatter.format("}%n%n%n");
 
@@ -420,7 +425,8 @@ public final class ScoreEntry {
     writer.println("      <td><table border='0' cellpadding='0' cellspacing='0' width='150'><tr align='center'>");
     generateYesNoButtons("Verified", writer);
     writer.println("      </tr></table></td>");
-    writer.println("      <td colspan='3'>&nbsp;</td>");
+    writer.println("      <td colspan='2'>&nbsp;</td>");
+    writer.println("      <td class='error' id='verification_error'>&nbsp;</td>");
     writer.println("    </tr>");
   }
 
