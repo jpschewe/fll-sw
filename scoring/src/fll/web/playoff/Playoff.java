@@ -770,16 +770,20 @@ public final class Playoff {
 
       checkPrep = connection.prepareStatement("SELECT * FROM PlayoffData WHERE" //
           + " run_number = " //
-          + "   (SELECT MAX(run_number) FROM PlayoffData WHERE event_division = ?)" //
-          + "     AND team = ?");
-      checkPrep.setInt(2, Team.NULL.getTeamNumber());
+          + "   (SELECT MAX(run_number) FROM PlayoffData WHERE event_division = ? AND Tournament = ?)" //
+          + "     AND team = ? AND Tournament = ?");
+      checkPrep.setInt(2, tournament);
+      checkPrep.setInt(3, Team.NULL.getTeamNumber());
+      checkPrep.setInt(4, tournament);
 
       detailPrep = connection.prepareStatement("SELECT DISTINCT Team from PlayoffData WHERE event_division = ?" //
+          + " AND tournament = ?" //
           + " AND Team NOT IN (?, ?, ?)" // exclude internal teams
           + " AND Team IN ( " + teamNumbersStr + " )");
-      detailPrep.setInt(2, Team.BYE.getTeamNumber());
-      detailPrep.setInt(3, Team.TIE.getTeamNumber());
-      detailPrep.setInt(4, Team.NULL.getTeamNumber());
+      detailPrep.setInt(2, tournament);
+      detailPrep.setInt(3, Team.BYE.getTeamNumber());
+      detailPrep.setInt(4, Team.TIE.getTeamNumber());
+      detailPrep.setInt(5, Team.NULL.getTeamNumber());
 
       while (divisions.next()) {
         final String eventDivision = divisions.getString(1);
