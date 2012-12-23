@@ -117,11 +117,13 @@ import fll.web.admin.DownloadSubjectiveData;
         for (final Element goalElement : goals) {
           final String goalName = goalElement.getAttribute("name");
           final Element subscoreElement = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
-          final String value = subscoreElement.getAttribute("value");
-          if (null != value
-              && !"".equals(value)) {
-            numValues++;
-            break;
+          if (null != subscoreElement) {
+            final String value = subscoreElement.getAttribute("value");
+            if (null != value
+                && !"".equals(value)) {
+              numValues++;
+              break;
+            }
           }
         } // end foreach goal
 
