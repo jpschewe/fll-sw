@@ -8,6 +8,7 @@
 <%@ page import="fll.db.Queries" %>
 <%@ page import="java.sql.Connection" %>
 <%@ page import="fll.Team" %>
+<%@ page import="fll.web.playoff.Playoff" %>
 
 <%
 	/*
@@ -40,7 +41,7 @@
   if (null != sessionDivision) {
     division = sessionDivision;
   } else if (null == application.getAttribute(divisionKey)) {
-    final List<String> divisions = Queries.getEventDivisions(connection);
+    final List<String> divisions = Playoff.getPlayoffDivisions(connection, currentTournament);
     if (!divisions.isEmpty()) {
       division = divisions.get(0);
     } else {

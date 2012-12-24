@@ -8,12 +8,14 @@
 <%@ page import="fll.db.Queries" %>
 <%@ page import="fll.web.ApplicationAttributes" %>
 <%@ page import="javax.sql.DataSource" %>
+<%@ page import="fll.web.playoff.Playoff" %>
       
 <%
       	final DataSource datasource = ApplicationAttributes.getDataSource(application);
       final Connection connection = datasource.getConnection();
-            
-      final List<String> divisions = Queries.getEventDivisions(connection);
+      final int currentTournament = Queries.getCurrentTournament(connection);
+      
+      final List<String> divisions = Playoff.getPlayoffDivisions(connection, currentTournament);
       pageContext.setAttribute("divisions", divisions);
 
       if(null == application.getAttribute("playoffDivision") && !divisions.isEmpty()) {
