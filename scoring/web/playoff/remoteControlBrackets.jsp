@@ -127,6 +127,7 @@ FONT.TIE {
   var rows = <%=bracketInfo.getNumRows()%>;
   var finalRound = <%=Queries.getNumPlayoffRounds(connection, division)+1%>;
   var maxNameLength = <%=Team.MAX_TEAM_NAME_LEN%>;
+  var division = "<%=division%>";
   
   var displayStrings = new Object();
   displayStrings.parseTeamName = function (team) {
@@ -168,7 +169,7 @@ FONT.TIE {
       foundNewest = false;
       $("a[name=newest]").remove();
       $.ajax({
-          url: ajaxURL + "BracketQuery?multi=" + ajaxList,
+          url: ajaxURL + "BracketQuery?division=" + division + "&multi=" + ajaxList,
           dataType: "json",
           cache: false,
           beforeSend: function (xhr) {
@@ -177,7 +178,7 @@ FONT.TIE {
       }).done(function (mainData) {
           $.each(mainData, function (index, data) {
               var lid = data.originator;
-              //First and foremost, make sure rounds haven't advanced.
+              //First and foremost, make sure rounds haven't advanced and the division is the same.
               if (mainData.refresh == "true") {
                   window.location.reload();
               }
