@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     
     <title>Display</title>
+    <script type="text/javascript" src="<c:url value='/code.icepush'/>"></script>
     <script type="text/javascript" src="<c:url value='/extlib/jquery-1.7.1.min.js'/>"></script>
     <script type='text/javascript'>
       var width = screen.width-10;
@@ -34,10 +35,11 @@
       
       function onLoad() {
         update();
-        setInterval(update, 15000);
+        setInterval(update, 60000);
       }
       $(document).ready(onLoad);
     </script>
+    <icep:register group="display" callback="function(){update();}"/>
   </head>
 
   <body>
