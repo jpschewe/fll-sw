@@ -27,7 +27,7 @@
         }).done(function(data) {
           if (newWindow == null) {
             newWindow = window.open(data.displayURL, 'displayWindow', str);
-          } else if (newWindow.location.pathname != data.displayURL) {
+          } else if (newWindow.location == null || newWindow.location.pathname != data.displayURL) {
             newWindow = window.open(data.displayURL, 'displayWindow', str);
           }
         });
