@@ -10,7 +10,10 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -90,8 +93,10 @@ public class RankingReport extends BaseFLLServlet {
                                                                                                  challengeDocument);
       for (final Map.Entry<String, Map<Integer, Map<String, Integer>>> divEntry : rankingMap.entrySet()) {
         final String division = divEntry.getKey();
-        for (final Map.Entry<Integer, Map<String, Integer>> teamEntry : divEntry.getValue().entrySet()) {
-          final int teamNum = teamEntry.getKey();
+        final Map<Integer, Map<String, Integer>> divisionTeams = divEntry.getValue();
+        final List<Integer> teamNumbers = new LinkedList<Integer>(divisionTeams.keySet());
+        Collections.sort(teamNumbers);
+        for (final int teamNum : teamNumbers) {
           final Team team = Team.getTeamFromDatabase(connection, teamNum);
           final Paragraph para = new Paragraph();
           para.add(Chunk.NEWLINE);
@@ -109,7 +114,8 @@ public class RankingReport extends BaseFLLServlet {
                              RANK_VALUE_FONT));
           para.add(Chunk.NEWLINE);
           para.add(Chunk.NEWLINE);
-          for (final Map.Entry<String, Integer> rankEntry : teamEntry.getValue().entrySet()) {
+          final Map<String, Integer> teamRankings = divisionTeams.get(teamNum);
+          for (final Map.Entry<String, Integer> rankEntry : teamRankings.entrySet()) {
             para.add(new Chunk(rankEntry.getKey()
                 + ": ", RANK_TITLE_FONT));
 
