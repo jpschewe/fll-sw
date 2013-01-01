@@ -5,13 +5,16 @@
 
 <html>
 <head>
+
 <link rel="stylesheet" type="text/css"
  href="<c:url value='/style/style.jsp'/>" />
 
 <title>Display</title>
 <script type="text/javascript" src="<c:url value='/code.icepush'/>"></script>
+
 <script type="text/javascript"
  src="<c:url value='/extlib/jquery-1.7.1.min.js'/>"></script>
+
 <script type='text/javascript'>
 	var width = screen.width - 10;
 	var height = screen.height - 10;
@@ -21,6 +24,33 @@
 			+ ',width='
 			+ width
 			+ ',toolbar=0,menubar=0,scrollbars=0,location=0,directories=0,status=0,resizable=0,fullscreen=1,left=0,screenX=0,top=0,screenY=0';
+	var connected = true;
+
+	function displayPage(url) {
+		if (null == newWindow || newWindow.location.pathname != url) {
+			newWindow = window.open(url, 'displayWindow', str);
+		}
+	};
+
+	function pollSuccess(newURL) {
+		if (!connected) {
+			connected = true;
+
+			// display index for a second so that the browser doesn't cache
+			displayPage('<c:url value="/public"/>');
+
+			// display the page that we want to see
+			setTimeout(function() {
+				displayPage(newURL);
+			}, 1000);
+		} else {
+			displayPage(newURL);
+		}
+	};
+
+	function pollFailure() {
+		connected = false;
+	};
 
 	function update() {
 		$.ajax({
@@ -30,17 +60,11 @@
 			beforeSend : function(xhr) {
 				xhr.overrideMimeType('text/plain');
 			}
-		}).done(
-				function(data) {
-					if (newWindow == null) {
-						newWindow = window.open(data.displayURL,
-								'displayWindow', str);
-					} else if (newWindow.location == null
-							|| newWindow.location.pathname != data.displayURL) {
-						newWindow = window.open(data.displayURL,
-								'displayWindow', str);
-					}
-				});
+		}).done(function(data) {
+			pollSuccess(data.displayURL);
+		}).fail(function(data) {
+			pollFailure();
+		});
 	}
 
 	function onLoad() {
@@ -51,6 +75,7 @@
 </script>
 <icep:register group="display" callback="function(){update();}" />
 </head>
+
 
 <body>
 
