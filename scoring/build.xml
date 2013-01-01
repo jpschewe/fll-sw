@@ -479,6 +479,7 @@
     <copy todir="${dir.dist}/docs">
       <fileset dir="${basedir}/docs" />
     </copy>
+    <copy todir="${dir.dist}/docs" file="Changes.txt" />
 
     <!-- copy reports -->
     <mkdir dir="${dir.dist}/docs/reports" />
