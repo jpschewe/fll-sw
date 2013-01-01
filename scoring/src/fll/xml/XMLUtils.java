@@ -31,6 +31,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 
 /**
@@ -39,7 +40,7 @@ import fll.util.LogUtils;
 public final class XMLUtils {
 
   private static final Logger LOGGER = LogUtils.getLogger();
-  
+
   private XMLUtils() {
   }
 
@@ -249,8 +250,12 @@ public final class XMLUtils {
    * 
    * @param stream a stream containing document
    * @return the challengeDocument, null on an error
+   * @throws ParserConfigurationException
+   * @throws IOException
+   * @throws SAXException
    */
-  public static Document parse(final Reader stream, final Schema schema) {
+  public static Document parse(final Reader stream,
+                               final Schema schema) throws IOException, SAXException {
     try {
       final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
       builderFactory.setNamespaceAware(true);
@@ -277,17 +282,9 @@ public final class XMLUtils {
       final String content = IOUtils.readIntoString(stream);
       final Document document = parser.parse(new InputSource(new StringReader(content)));
 
-
       return document;
-    } catch (final SAXParseException spe) {
-      throw new RuntimeException("Error parsing file line: "
-          + spe.getLineNumber() + " column: " + spe.getColumnNumber() + " " + spe.getMessage());
-    } catch (final SAXException se) {
-      throw new RuntimeException(se);
-    } catch (final IOException ioe) {
-      throw new RuntimeException(ioe);
-    } catch (final ParserConfigurationException pce) {
-      throw new RuntimeException(pce);
+    } catch (ParserConfigurationException e) {
+      throw new FLLInternalException("Error setting up the XML parser", e);
     }
   }
 }
