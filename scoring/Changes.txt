@@ -1,4 +1,56 @@
+Release 7.4
+---------
+* 167 - Use AJAX push for changing display pages quickly
+
+* 187 - Use AJAX polling for updating the display pages and handling network
+  timeouts
+
+* 6 - Ranking reports are sorted by division and then team number
+
+* 193 - Make sure all exceptions are logged to fllweb.log.
+
+* 191 - Show all playoff divisions, even those created for playoffs only
+
+* 181 Update summary button in the subjective app for the new schema
+
+* 184 - Make sure team names can be changed after the playoffs start
+
+* 182 - Correctly handle previous playoff data from other tournaments in the
+  database
+
+* Warn users when they are marking a performance score as validated without
+  the double check.
+
+* More robust handling of data when printing scoresheets (ticket:179)
+
+* 15, 16, 22 - Add the ability to edit all global parameters and parameter defaults as
+  an advanced admin option
+
+Release 7.3
+---------
+* 173 - allow the schedule tables to have teams that aren't in the current
+  tournament for cases when teams move tournaments and a new schedule isn't
+  uploaded.
+
+* 8 - color table labels in the playoff brackets by border rather than the
+  whole cell to make them readable
+
+* 172 - Handle deleted scores in the subjective score file on upload
+
+Release 7.1
+---------
+* 161 - Make sure that score page text can be set
+
+* 162 - Handle no show's in the subjective upload with the new subjective
+  score schema
+
+* Ignore internal teams when initializing playoff data
+
+* Allow the top 10 page to not error out when there is no data in the
+  database
+
 Release 7.0
+---------
 * Debug importing a database into a current database and make sure that creating a tournament works.
 
 * 27 - track the number of teams per judge by assigning teams to judging stations
@@ -9,6 +61,7 @@ Release 7.0
 
 
 Release 3.0
+---------
 * Restrictions are now checked on the client side instead of by the server and sending users back to the score entry page on an error.
 
 * Added support for computed goals.
@@ -61,9 +114,11 @@ Release 2.10
 * Set path in setenv.bat (1605786)
 
 Release 2.9
+---------
 * fixed compilation error in remoteControl.jsp and added unit test to watch for it
 
 Release 2.8
+---------
 * fixed categorized score report to show by division (1599044)
 
 * Remote control for the scoreboard now uses all divisions to determine how many rounds are possible (1599039)
@@ -71,6 +126,7 @@ Release 2.8
 * PDF reports now show all raw scores, just like the HTML reports (1599786)
 
 Release 2.7
+---------
 * Added the ability for tiebreakers to have sums (and coefficients on the goals)
 
 * added help text to the admin pages
@@ -78,7 +134,7 @@ Release 2.7
 * added underscores to the front of the goal titles in the PDF scoresheet to allow the refs to check them off
 
 Release 2.6
-
+---------
 * include Sun's JDK for Linux and Windows distributions so that Java doesn't need to be installed
 
 * Switched databases from MySQL to HSQL to make installation easier.  Now the only thing that needs to be installed for the software to run is Java.
