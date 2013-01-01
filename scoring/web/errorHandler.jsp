@@ -4,6 +4,11 @@
   <head>
     <title>An error has occurred</title>
     <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
+    
+    <%
+    // make sure the exception gets logged
+    fll.util.LogUtils.getLogger().error("An unhandled exception occurred", exception);
+    %>
   </head>
 
   <body id='exception-handler'>
@@ -11,7 +16,10 @@
   
     <h1>An error has occurred</h1>
 
-    <p><font class="error">An error has occurred!</font><br/>  Error messages:</p>
+    <p><font class="error">An error has occurred!</font><br/>
+        Please send the text of this page and the files in <code>tomcat/logs</code> along with <code>tomcat/webapps/fll-sw/fllweb*</code> along with your bug report.<br/>
+        
+        Error messages:</p>
     <ul>
 <%
 Throwable e = exception;

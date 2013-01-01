@@ -27,12 +27,7 @@
 
 <script language="javascript">
     <c:if test="${not isBye}">
-    <!-- Verified -->
-    var Verified;
-    function set_Verified(newValue) {
-      Verified = newValue;
-      refresh();
-    }
+
 
 <!-- No Show -->
 var gbl_NoShow;

@@ -36,6 +36,8 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import fll.web.admin.DownloadSubjectiveData;
+
 /**
  * Summary dialog for subjective scores.
  * 
@@ -91,12 +93,16 @@ import org.w3c.dom.Element;
    * @param scoreDocument
    * @return [0] is the team table model, [1] is the summary table model
    */
-  private TableModel[] buildTableModels(final Document challengeDocument, final Document scoreDocument) {
+  private TableModel[] buildTableModels(final Document challengeDocument,
+                                        final Document scoreDocument) {
     final Map<Integer, Integer[]> data = new HashMap<Integer, Integer[]>();
 
+    final Element scoresElement = scoreDocument.getDocumentElement();
     final List<String> columnNames = new LinkedList<String>();
     final Map<Integer, String> teamNumberToDivision = new HashMap<Integer, String>();
-    final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(challengeDocument.getDocumentElement().getElementsByTagName("subjectiveCategory")).asList();
+    final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
+                                                                                    challengeDocument.getDocumentElement()
+                                                                                                     .getElementsByTagName("subjectiveCategory")).asList();
     for (int catIdx = 0; catIdx < subjectiveCategories.size(); catIdx++) {
       final Element subjectiveElement = subjectiveCategories.get(catIdx);
       final String category = subjectiveElement.getAttribute("name");
@@ -104,16 +110,20 @@ import org.w3c.dom.Element;
       columnNames.add(categoryTitle);
 
       final List<Element> goals = new NodelistElementCollectionAdapter(subjectiveElement.getElementsByTagName("goal")).asList();
-      final Element categoryElement = (Element) scoreDocument.getDocumentElement().getElementsByTagName(category).item(0);
-      for (final Element scoreElement : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("score"))) {
+      final Element categoryElement = SubjectiveUtils.getCategoryNode(scoresElement, category);
+      for (final Element scoreElement : new NodelistElementCollectionAdapter(
+                                                                             categoryElement.getElementsByTagName(DownloadSubjectiveData.SCORE_NODE_NAME))) {
         int numValues = 0;
         for (final Element goalElement : goals) {
           final String goalName = goalElement.getAttribute("name");
-          final String value = scoreElement.getAttribute(goalName);
-          if (null != value
-              && !"".equals(value)) {
-            numValues++;
-            break;
+          final Element subscoreElement = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
+          if (null != subscoreElement) {
+            final String value = subscoreElement.getAttribute("value");
+            if (null != value
+                && !"".equals(value)) {
+              numValues++;
+              break;
+            }
           }
         } // end foreach goal
 
@@ -173,14 +183,16 @@ import org.w3c.dom.Element;
       tableData.add(teamSummaryData);
     }
 
-    return new TableModel[] { new CountTableModel(tableData, columnNames), new SummaryTableModel(summaryData.values(), columnNames) };
+    return new TableModel[] { new CountTableModel(tableData, columnNames),
+                             new SummaryTableModel(summaryData.values(), columnNames) };
   }
 
   /**
    * Table model for the summary data
    */
   private static final class SummaryTableModel extends AbstractTableModel {
-    public SummaryTableModel(final Collection<List<SummaryData>> summaryData, final List<String> columnNames) {
+    public SummaryTableModel(final Collection<List<SummaryData>> summaryData,
+                             final List<String> columnNames) {
       _summaryData = new ArrayList<SummaryData>();
       for (final List<SummaryData> list : summaryData) {
         _summaryData.addAll(list);
@@ -224,7 +236,8 @@ import org.w3c.dom.Element;
       }
     }
 
-    public Object getValueAt(final int row, final int column) {
+    public Object getValueAt(final int row,
+                             final int column) {
       final SummaryData data = _summaryData.get(row);
       switch (column) {
       case 0:
@@ -246,7 +259,8 @@ import org.w3c.dom.Element;
      * @param data the summary data
      * @param categoryColumnNames names of category columns
      */
-    public CountTableModel(final List<SummaryData> data, final List<String> categoryColumnNames) {
+    public CountTableModel(final List<SummaryData> data,
+                           final List<String> categoryColumnNames) {
       _data = data;
       _categoryColumnNames = categoryColumnNames;
     }
@@ -287,7 +301,8 @@ import org.w3c.dom.Element;
       }
     }
 
-    public Object getValueAt(final int row, final int column) {
+    public Object getValueAt(final int row,
+                             final int column) {
       final SummaryData rowData = _data.get(row);
       switch (column) {
       case 0:
@@ -327,7 +342,7 @@ import org.w3c.dom.Element;
   /**
    * Contains summary information.
    */
-  private static final class SummaryData  {
+  private static final class SummaryData {
     private final String division;
 
     public String getDivision() {
@@ -349,7 +364,9 @@ import org.w3c.dom.Element;
       return teamNumber;
     }
 
-    public SummaryData(final int teamNumber, final String division, final List<Integer> scoreData) {
+    public SummaryData(final int teamNumber,
+                       final String division,
+                       final List<Integer> scoreData) {
       this.division = division;
       this.scoreData = scoreData;
       this.teamNumber = teamNumber;
