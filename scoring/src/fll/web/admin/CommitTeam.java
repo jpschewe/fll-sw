@@ -93,6 +93,9 @@ public class CommitTeam extends BaseFLLServlet {
       final String organization = request.getParameter("organization");
       session.setAttribute(ORGANIZATION, organization);
 
+      // this will be null if the tournament can't be changed
+      final String newTournamentStr = request.getParameter("currentTournament");
+
       String redirect = null;
       if (null != request.getParameter("delete")) {
         if (LOGGER.isInfoEnabled()) {
@@ -105,8 +108,6 @@ public class CommitTeam extends BaseFLLServlet {
 
         redirect = "select_team.jsp";
       } else {
-        // this will be null if the tournament can't be changed
-        final String newTournamentStr = request.getParameter("currentTournament");
         final int newTournament = newTournamentStr == null ? -1
             : Utilities.NUMBER_FORMAT_INSTANCE.parse(newTournamentStr).intValue();
 
@@ -180,7 +181,12 @@ public class CommitTeam extends BaseFLLServlet {
       }
 
       if (null == redirect) {
-        response.sendRedirect(response.encodeRedirectURL("CheckEventDivisionNeeded"));
+        // this is needed if editing team information after the playoffs have been initialized
+        if (null == newTournamentStr) {
+          response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+        } else {
+          response.sendRedirect(response.encodeRedirectURL("CheckEventDivisionNeeded"));
+        }
       } else {
         response.sendRedirect(response.encodeRedirectURL(redirect));
       }
