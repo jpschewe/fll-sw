@@ -6,11 +6,10 @@
 
 package fll.subjective;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
-
-import net.mtu.eggplant.xml.XMLUtils;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -22,7 +21,7 @@ import org.xml.sax.SAXException;
 import fll.util.LogUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.ChallengeParser;
-
+import fll.xml.XMLUtils;
 /**
  * Test comparing subjective score documents.
  */
@@ -44,7 +43,7 @@ public class SubjectiveCompareTest {
     challengeDocument = null;
   }
 
-  private Document loadDocument(final String resourceName) throws SAXException {
+  private Document loadDocument(final String resourceName) throws SAXException, IOException {
     final InputStream scoreStream = SubjectiveCompareTest.class.getResourceAsStream(resourceName);
     Assert.assertNotNull(scoreStream);
     final Document scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
@@ -58,9 +57,10 @@ public class SubjectiveCompareTest {
   /**
    * Compare a document to itself and make sure there are no differences.
    * @throws SAXException 
+   * @throws IOException 
    */
   @Test
-  public void simpleTestWithNoDifferences() throws SAXException {
+  public void simpleTestWithNoDifferences() throws SAXException, IOException {
     final Document scoreDocument = loadDocument("master-score.xml");
     final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(challengeDocument, scoreDocument, scoreDocument);
     Assert.assertNotNull(diffs);
@@ -71,9 +71,10 @@ public class SubjectiveCompareTest {
    * Basic difference test. One difference.
    * 
    * @throws SAXException
+   * @throws IOException 
    */
   @Test
-  public void simpleTestWithOneDifference() throws SAXException {
+  public void simpleTestWithOneDifference() throws SAXException, IOException {
     final Document masterDocument = loadDocument("master-score.xml");
     final Document compareDocument = loadDocument("single-diff.xml");
     final Collection<SubjectiveScoreDifference> diffs = SubjectiveUtils.compareScoreDocuments(challengeDocument, masterDocument, compareDocument);

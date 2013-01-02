@@ -37,7 +37,6 @@ import javax.xml.validation.Validator;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-import net.mtu.eggplant.xml.XMLUtils;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -48,6 +47,7 @@ import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.xml.XMLUtils;
 
 /**
  * Downlaod the data file for the subjective score app.

@@ -45,7 +45,6 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.XMLUtils;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -74,6 +73,7 @@ import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.util.PdfUtils;
 import fll.util.SimpleFooterHandler;
+import fll.xml.XMLUtils;
 
 /**
  * Tournament schedule. Can parse the schedule from a spreadsheet or CSV file.

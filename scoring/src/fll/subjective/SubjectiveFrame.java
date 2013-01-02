@@ -64,16 +64,18 @@ import javax.swing.text.StyledDocument;
 
 import net.mtu.eggplant.util.BasicFileFilter;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-import net.mtu.eggplant.xml.XMLUtils;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.xml.ChallengeParser;
+import fll.xml.XMLUtils;
 
 /**
  * Application to enter subjective scores with
@@ -139,8 +141,8 @@ public final class SubjectiveFrame extends JFrame {
       zipfile = new ZipFile(file);
       final ZipEntry challengeEntry = zipfile.getEntry("challenge.xml");
       if (null == challengeEntry) {
-        throw new RuntimeException(
-                                   "Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
+        throw new FLLRuntimeException(
+                                      "Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
       }
       final InputStream challengeStream = zipfile.getInputStream(challengeEntry);
       _challengeDocument = ChallengeParser.parse(new InputStreamReader(challengeStream, Utilities.DEFAULT_CHARSET));
@@ -148,12 +150,19 @@ public final class SubjectiveFrame extends JFrame {
 
       final ZipEntry scoreEntry = zipfile.getEntry("score.xml");
       if (null == scoreEntry) {
-        throw new RuntimeException(
-                                   "Unable to find score data in file, you probably choose the wrong file or it is corrupted");
+        throw new FLLRuntimeException(
+                                      "Unable to find score data in file, you probably choose the wrong file or it is corrupted");
       }
       final InputStream scoreStream = zipfile.getInputStream(scoreEntry);
       _scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
       scoreStream.close();
+    } catch (final SAXParseException spe) {
+      final String errorMessage = String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software attempting to parse a file that is not subjective data.",
+                                                spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage());
+      throw new FLLRuntimeException(errorMessage, spe);
+    } catch (final SAXException se) {
+      final String errorMessage = "The subjective scores file was found to be invalid, check that you are parsing a subjective scores file and not something else";
+      throw new FLLRuntimeException(errorMessage, se);
     } finally {
       if (null != zipfile) {
         try {
@@ -226,7 +235,17 @@ public final class SubjectiveFrame extends JFrame {
                                             JOptionPane.INFORMATION_MESSAGE);
 
             }
+          } catch (final SAXParseException spe) {
+            final String errorMessage = String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software attempting to parse a file that is not subjective data.",
+                                                      spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage());
+            LOGGER.error(errorMessage, spe);
+            JOptionPane.showMessageDialog(null, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+          } catch (final SAXException se) {
+            final String errorMessage = "The subjective scores file was found to be invalid, check that you are parsing a subjective scores file and not something else";
+            LOGGER.error(errorMessage, se);
+            JOptionPane.showMessageDialog(null, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
           } catch (final IOException e) {
+            LOGGER.error("Error reading compare file", e);
             JOptionPane.showMessageDialog(null, "Error reading compare file: "
                 + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 
