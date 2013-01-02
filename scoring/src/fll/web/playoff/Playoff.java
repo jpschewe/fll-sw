@@ -842,7 +842,7 @@ public final class Playoff {
   }
 
   /**
-   * Find the playoff round runmber for the specified division and performance
+   * Find the playoff round run number for the specified division and performance
    * run number in the current tournament.
    * 
    * @return the playoff round or -1 if not found
