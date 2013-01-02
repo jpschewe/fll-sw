@@ -1,4 +1,5 @@
 * 177 - Give a more reasonable error message when an XML document fails to parse
+* 188 - Display a reasonable error message to the user when no score sheets are selected to print
 
 Release 7.4
 ---------
