@@ -7,6 +7,7 @@ package fll.xml;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.text.ParseException;
@@ -122,20 +123,24 @@ public final class ChallengeParser {
       final Source schemaFile = new StreamSource(classLoader.getResourceAsStream("fll/resources/fll.xsd"));
       final Schema schema = factory.newSchema(schemaFile);
 
-
       final Document document = XMLUtils.parse(stream, schema);
-      
+
       // challenge descriptor specific checks
       validateDocument(document);
-      
+
       return document;
     } catch (final SAXParseException spe) {
-      throw new RuntimeException("Error parsing file line: "
-          + spe.getLineNumber() + " column: " + spe.getColumnNumber() + " " + spe.getMessage());
+      throw new RuntimeException(
+                                 String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software or an improperly formatted challenge descriptor or attempting to parse a file that is not a challenge descriptor.",
+                                               spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage()), spe);
     } catch (final SAXException se) {
-      throw new RuntimeException(se);
+      throw new RuntimeException(
+                                 "The challenge descriptor was found to be invalid, check that you are parsing a challenge descriptor file and not something else",
+                                 se);
     } catch (final ParseException pe) {
       throw new RuntimeException(pe);
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
     }
   }
 

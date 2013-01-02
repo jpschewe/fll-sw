@@ -8,7 +8,7 @@
   <property file="override.properties" />
 
   <property name="app.name" value="${ant.project.name}" />
-  <property name="app.version" value="7.4" />
+  <property name="app.version" value="7.5" />
 
   <property name="dir.build" value="${basedir}/build" />
   <property name="dir.tomcat" value="${dir.build}/tomcat" />
@@ -86,7 +86,7 @@
   <path id="base.classpath">
     <!-- the classpath without the classes dir -->
     <pathelement location="${dir.lib}/xmlunit-1.2.jar" />
-    <pathelement location="${dir.lib}/JonsInfra-1.4.jar" />
+    <pathelement location="${dir.lib}/JonsInfra-1.5.jar" />
 
     <pathelement location="${dir.lib}/commons-lang3-3.1.jar" />
 
@@ -479,6 +479,7 @@
     <copy todir="${dir.dist}/docs">
       <fileset dir="${basedir}/docs" />
     </copy>
+    <copy todir="${dir.dist}/docs" file="Changes.txt" />
 
     <!-- copy reports -->
     <mkdir dir="${dir.dist}/docs/reports" />

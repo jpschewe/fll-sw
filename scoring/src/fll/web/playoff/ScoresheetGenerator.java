@@ -38,6 +38,7 @@ import fll.Team;
 import fll.Utilities;
 import fll.Version;
 import fll.db.Queries;
+import fll.util.FLLRuntimeException;
 import fll.util.FP;
 import fll.util.LogUtils;
 import fll.xml.ChallengeParser;
@@ -113,6 +114,10 @@ public class ScoresheetGenerator {
         checkedMatches[i] = null != request.getParameter(checkX);
         if (checkedMatches[i]) {
           checkedMatchCount++;
+        }
+        if (checkedMatchCount == 0) {
+          throw new FLLRuntimeException(
+                                        "No matches were found checked. Please go back and select the checkboxes for the scoresheets that you want to print");
         }
       }
 
@@ -520,16 +525,16 @@ public class ScoresheetGenerator {
           m_goalValue[realI].setBorder(0);
           m_goalValue[realI].setVerticalAlignment(Element.ALIGN_MIDDLE);
           realI++;
-        } // if goal       
+        } // if goal
       } // if element
     } // foreach goal
-    
+
     // make sure that we have cells for everything
-    for(int i=0; i<m_goalValue.length; ++i) {
-      if(null == m_goalValue[i]) {
+    for (int i = 0; i < m_goalValue.length; ++i) {
+      if (null == m_goalValue[i]) {
         m_goalValue[i] = new PdfPCell();
       }
-      if(null == m_goalLabel[i]) {
+      if (null == m_goalLabel[i]) {
         m_goalLabel[i] = new PdfPCell();
       }
     }

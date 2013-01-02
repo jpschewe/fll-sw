@@ -29,23 +29,24 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-import net.mtu.eggplant.xml.XMLUtils;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import fll.Utilities;
 import fll.db.Queries;
 import fll.subjective.SubjectiveUtils;
-import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.UploadProcessor;
+import fll.xml.XMLUtils;
 
 /**
  * Java code behind uploading subjective scores
@@ -76,6 +77,17 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       saveSubjectiveData(file, Queries.getCurrentTournament(connection),
                          ApplicationAttributes.getChallengeDocument(application), connection);
       message.append("<p id='success'><i>Subjective data uploaded successfully</i></p>");
+    } catch (final SAXParseException spe) {
+      final String errorMessage = String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software attempting to parse a file that is not subjective data.",
+                                                spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage());
+      message.append("<p class='error'>"
+          + errorMessage + "</p>");
+      LOGGER.error(errorMessage, spe);
+    } catch (final SAXException se) {
+      final String errorMessage = "The subjective scores file was found to be invalid, check that you are parsing a subjective scores file and not something else";
+      message.append("<p class='error'>"
+          + errorMessage + "</p>");
+      LOGGER.error(errorMessage, se);
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error saving subjective data into the database: "
           + sqle.getMessage() + "</p>");
@@ -117,11 +129,13 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
    * @param challengeDocument the already parsed challenge document. Used to get
    *          information about the subjective categories.
    * @param connection the database connection to write to
+   * @throws SAXException if there is an error parsing the document
    */
   public static void saveSubjectiveData(final File file,
                                         final int currentTournament,
                                         final Document challengeDocument,
-                                        final Connection connection) throws SQLException, IOException, ParseException {
+                                        final Connection connection) throws SQLException, IOException, ParseException,
+      SAXException {
     ZipFile zipfile = null;
     Document scoreDocument = null;
     try {

@@ -26,6 +26,7 @@ import org.icepush.PushContext;
 import com.itextpdf.text.DocumentException;
 
 import fll.db.Queries;
+import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -65,11 +66,13 @@ public class ScoresheetServlet extends BaseFLLServlet {
       gen.writeFile(connection, response.getOutputStream());
 
     } catch (final SQLException e) {
-      LOGGER.error(e, e);
-      throw new RuntimeException(e);
+      final String errorMessage = "There was an error talking to the database";
+      LOGGER.error(errorMessage, e);
+      throw new FLLRuntimeException(errorMessage, e);
     } catch (final DocumentException e) {
-      LOGGER.error(e, e);
-      throw new RuntimeException(e);
+      final String errorMessage = "There was an error creating the PDF document - perhaps you didn't select any scoresheets to print?";
+      LOGGER.error(errorMessage, e);
+      throw new FLLRuntimeException(errorMessage, e);
     } finally {
       SQLFunctions.close(connection);
     }
