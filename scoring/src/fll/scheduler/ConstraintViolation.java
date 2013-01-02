@@ -6,6 +6,7 @@
 
 package fll.scheduler;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -16,7 +17,7 @@ import net.mtu.eggplant.util.DateUtils;
 /**
  * Constraint violation during scheduling.
  */
-public final class ConstraintViolation {
+public final class ConstraintViolation implements Serializable {
 
   // TODO use Team.Null_TEam_number
   public static final int NO_TEAM = -1;
