@@ -23,7 +23,6 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.XMLUtils;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -33,6 +32,7 @@ import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.xml.XMLUtils;
 
 /**
  * Download the subjective scores to be used by mobile apps.

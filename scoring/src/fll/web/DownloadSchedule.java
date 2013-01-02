@@ -19,7 +19,6 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.XMLUtils;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -28,6 +27,7 @@ import org.w3c.dom.ProcessingInstruction;
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
+import fll.xml.XMLUtils;
 
 /**
  * Download the schedule for the current tournament.

@@ -25,6 +25,7 @@ import net.mtu.eggplant.xml.XMLUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import fll.Utilities;
 import fll.util.LogUtils;
@@ -49,13 +50,15 @@ public final class SubjectiveUtils {
    * @param compareFile the second file to compare
    * @return null if the challenge descriptors are different, otherwise the
    *         differences
-   * @throws IOException
-   * @throws ZipException
+   * @throws IOException if there is an error reading the raw file
+   * @throws ZipException if there is an error in the subjective data file
+   * @throws SAXException if there is an error parsing the subjective scores
+   *           documents
    * @see #compareScoreDocuments(Document, Document, Document)
    */
   public static Collection<SubjectiveScoreDifference> compareSubjectiveFiles(final File masterFile,
                                                                              final File compareFile)
-      throws ZipException, IOException {
+      throws ZipException, IOException, SAXException {
     ZipFile masterZipfile = null;
     ZipFile compareZipfile = null;
 
@@ -128,8 +131,8 @@ public final class SubjectiveUtils {
                                              final String name) {
     for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
                                                                                 challengeDocument.getDocumentElement()
-                                                                                                  .getElementsByTagName("subjectiveCategory"))) {
-      if(name.equals(subjectiveElement.getAttribute("name"))) {
+                                                                                                 .getElementsByTagName("subjectiveCategory"))) {
+      if (name.equals(subjectiveElement.getAttribute("name"))) {
         return subjectiveElement;
       }
     }

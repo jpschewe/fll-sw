@@ -41,6 +41,7 @@ import fll.util.LogUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.web.admin.UploadSubjectiveData;
 import fll.xml.ChallengeParser;
+import fll.xml.XMLUtils;
 
 /**
  * Test editing subjective scores.
@@ -113,7 +114,7 @@ public class SubjectiveScoresTest {
                                                                                            tournamentTeams.values(),
                                                                                            connection, tournament.getTournamentID());
       StringWriter testWriter = new StringWriter();
-      net.mtu.eggplant.xml.XMLUtils.writeXML(scoreDocument, testWriter, "UTF-8");
+      XMLUtils.writeXML(scoreDocument, testWriter, "UTF-8");
       LOGGER.info(testWriter.toString());
       
       final Element subjectiveElement = SubjectiveUtils.getSubjectiveElement(challengeDocument, category);

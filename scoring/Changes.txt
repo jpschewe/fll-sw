@@ -1,3 +1,5 @@
+* 177 - Give a more reasonable error message when an XML document fails to parse
+
 Release 7.4
 ---------
 * 167 - Use AJAX push for changing display pages quickly
