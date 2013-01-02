@@ -664,8 +664,8 @@ public final class Playoff {
    */
   public static int[] computeInitialBrackets(final int numTeams) {
     if (numTeams < 1) {
-      throw new IllegalArgumentException("numTeams must be greater than or equal to 1: "
-          + numTeams);
+      throw new IllegalArgumentException("numTeams must be greater than or equal to 1 found: "
+          + numTeams + " perhaps teams have not had scores entered for seeding rounds?");
     }
 
     int n = numTeams;
