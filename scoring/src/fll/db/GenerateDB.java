@@ -20,7 +20,6 @@ import java.util.Iterator;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-import net.mtu.eggplant.xml.XMLUtils;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -29,6 +28,7 @@ import org.w3c.dom.Element;
 import fll.Team;
 import fll.Tournament;
 import fll.util.LogUtils;
+import fll.xml.XMLUtils;
 
 /**
  * Generate tables for tournament from XML document

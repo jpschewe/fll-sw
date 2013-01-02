@@ -481,6 +481,11 @@ public class FullTournamentTest {
     response = WebTestUtils.loadPage(conversation, request);
     Assert.assertEquals("application/pdf", response.getContentType());
 
+    request = new GetMethodWebRequest(TestUtils.URL_ROOT
+        + "report/PlayoffReport");
+    response = WebTestUtils.loadPage(conversation, request);
+    Assert.assertEquals("application/pdf", response.getContentType());
+
   }
 
   private void checkRankAndScores(final String testTournamentName) throws IOException, SAXException {
@@ -573,6 +578,8 @@ public class FullTournamentTest {
     // find form named 'printScoreSheets'
     form = response.getFormWithName("printScoreSheets");
     Assert.assertNotNull("printScoreSheets form not found", form);
+
+    form.setCheckbox("print1", true);
 
     // click 'Print scoresheets'
     request = form.getRequest();
@@ -980,7 +987,8 @@ public class FullTournamentTest {
         Thread.sleep(1000);
 
         // check for errors
-// Gives trouble too often       Assert.assertEquals(selectTeamPage, selenium.getCurrentUrl());
+        // Gives trouble too often Assert.assertEquals(selectTeamPage,
+        // selenium.getCurrentUrl());
         Assert.assertTrue("Error submitting form, not on select team page",
                           selenium.getPageSource().contains("Unverified Runs"));
 
