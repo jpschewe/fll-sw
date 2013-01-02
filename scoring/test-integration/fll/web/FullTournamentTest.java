@@ -574,6 +574,8 @@ public class FullTournamentTest {
     form = response.getFormWithName("printScoreSheets");
     Assert.assertNotNull("printScoreSheets form not found", form);
 
+    form.setCheckbox("print1", true);
+    
     // click 'Print scoresheets'
     request = form.getRequest();
     response = WebTestUtils.loadPage(conversation, request);
