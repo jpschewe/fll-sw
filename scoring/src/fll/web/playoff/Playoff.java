@@ -740,6 +740,34 @@ public final class Playoff {
   }
 
   /**
+   * Get the run number for a given playoff bracket.
+   * This run number specifies the winner of the playoff bracket.
+   * 
+   * @return the run max run number or -1 if not found
+   */
+  public static int getMaxRunNumber(final Connection connection,
+                                    final int tournament,
+                                    final String division) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT MAX(run_number) FROM PlayoffData WHERE event_division = ? AND Tournament = ?");
+      prep.setString(1, division);
+      prep.setInt(2, tournament);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        return rs.getInt(1);
+      } else {
+        return -1;
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+    
+
+  /**
    * Check if some teams are involved in an playoff bracket that isn't finished.
    * 
    * @param teamNumbers the teams to check, NULL, BYE and TIE team
@@ -842,7 +870,8 @@ public final class Playoff {
   }
 
   /**
-   * Find the playoff round run number for the specified division and performance
+   * Find the playoff round run number for the specified division and
+   * performance
    * run number in the current tournament.
    * 
    * @return the playoff round or -1 if not found
