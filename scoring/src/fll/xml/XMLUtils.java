@@ -21,6 +21,7 @@ import fll.util.LogUtils;
 /**
  * XML utilities for FLL.
  */
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS" }, justification = "Intentionally shadowing parent class")
 public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
 
   private static final Logger LOGGER = LogUtils.getLogger();
