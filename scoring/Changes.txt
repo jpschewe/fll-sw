@@ -1,3 +1,5 @@
+* 188 - Display a reasonable error message to the user when no score sheets are selected to print
+
 Release 7.4
 ---------
 * 167 - Use AJAX push for changing display pages quickly
