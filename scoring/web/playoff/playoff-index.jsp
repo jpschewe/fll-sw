@@ -31,7 +31,7 @@
 
 		<li>Check to make sure all teams have scores entered for each
 			seeding round.<br />
-			<form name='check' action='check.jsp' method='get'>
+			<form name='check' action='CheckSeedingRounds' method='get'>
 				Select Division: <select id='check-division' name='division'>
 					<c:forEach items="${eventDivisions }" var="division">
 						<option value='${division}'>${division}</option>
