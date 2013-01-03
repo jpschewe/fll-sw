@@ -71,6 +71,10 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
         message.append("<p class='error'>The division '"
             + divisionStr + "' already exists, please pick a different name");
         redirect = "create_playoff_division.jsp";
+      } else if (Queries.getEventDivisions(connection, currentTournamentID).contains(divisionStr)) {
+        message.append("<p class='error'>The division '"
+            + divisionStr + "' matches an event division, please pick a different name");
+        redirect = "create_playoff_division.jsp";
       } else {
         final String[] selectedTeams = request.getParameterValues("selected_team");
         final List<Integer> teamNumbers = new LinkedList<Integer>();
@@ -95,7 +99,7 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
                                                                             Boolean.class);
 
           final List<Team> teams = new LinkedList<Team>();
-          for(final int number : teamNumbers) {
+          for (final int number : teamNumbers) {
             final Team team = Team.getTeamFromDatabase(connection, number);
             teams.add(team);
           }
