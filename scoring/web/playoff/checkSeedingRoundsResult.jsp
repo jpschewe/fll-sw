@@ -1,0 +1,43 @@
+<%@ include file="/WEB-INF/jspf/init.jspf"%>
+
+
+<html>
+<head>
+<link rel="stylesheet" type="text/css"
+ href="<c:url value='/style/style.jsp'/>" />
+<title>Team Playoff check</title>
+</head>
+
+<body>
+ <h1>
+  <x:out select="$challengeDocument/fll/@title" />
+ </h1>
+ <h2>Team Playoff check [Division: ${division } ]</h2>
+
+ ${message}
+ <%-- clear out the message, so that we don't see it again --%>
+ <c:remove var="message" />
+
+ <p>Teams with fewer runs than seeding rounds. Teams with no runs
+  are excluded from this check.</p>
+ <ul>
+  <c:forEach items="${less }" var="team">
+   <li>${team.teamName } ( ${team.teamNumber } )</li>
+  </c:forEach>
+ </ul>
+
+ <p>Teams with more runs than seeding rounds:</p>
+ <ul>
+  <c:forEach items="${more }" var="team">
+   <li>${team.teamName } ( ${team.teamNumber } )</li>
+  </c:forEach>
+
+ </ul>
+
+ <p>
+  <a href="index.jsp">Back to Playoff menu</a>
+ </p>
+
+
+</body>
+</html>
