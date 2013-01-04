@@ -81,29 +81,43 @@ public final class WebUtils {
    */
   public static Collection<String> getAllURLs(final HttpServletRequest request) throws IOException {
     final Collection<String> urls = new LinkedList<String>();
-    final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-    if (null != interfaces) {
-      while (interfaces.hasMoreElements()) {
-        final NetworkInterface ifce = interfaces.nextElement();
-        final Enumeration<InetAddress> addresses = ifce.getInetAddresses();
-        while (addresses.hasMoreElements()) {
-          final InetAddress addr = addresses.nextElement();
-          final String addrStr = addr.getHostAddress();
-          if (!addrStr.contains(":")) {
-            // skip IPv6 for now, need to figure out how to encode and get
-            // Tomcat to listen on IPv6
-            if (!addr.isLoopbackAddress()) {
-              final String url = "http://"
-                  + addr.getHostAddress() + ":" + request.getLocalPort() + "/" + request.getContextPath();
-              urls.add(url);
-            }
-          }
+    for (final InetAddress address : getAllIPs()) {
+      final String addrStr = address.getHostAddress();
+      if (!addrStr.contains(":")) {
+        // skip IPv6 for now, need to figure out how to encode and get
+        // Tomcat to listen on IPv6
+        if (!address.isLoopbackAddress()) {
+          final String url = "http://"
+              + addrStr + ":" + request.getLocalPort() + "/" + request.getContextPath();
+          urls.add(url);
         }
       }
     }
     return urls;
   }
 
+  public static Collection<String> getAllIPStrings() throws IOException {
+    final Collection<String> ips = new LinkedList<String>();
+    for (final InetAddress address : getAllIPs()) {
+      ips.add(address.getHostAddress());
+    }
+    return ips;
+  }
+
+  public static Collection<InetAddress> getAllIPs() throws IOException {
+    final Collection<InetAddress> ips = new LinkedList<InetAddress>();
+    final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+    if (null != interfaces) {
+      while (interfaces.hasMoreElements()) {
+        final NetworkInterface ifce = interfaces.nextElement();
+        final Enumeration<InetAddress> addresses = ifce.getInetAddresses();
+        while (addresses.hasMoreElements()) {
+          ips.add(addresses.nextElement());
+        }
+      }
+    }
+    return ips;
+  }
   /**
    * Take a string and quote it for Javascript.
    */
