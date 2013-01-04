@@ -1,3 +1,4 @@
+* 196 - allow playoff divisions to be created from the seeding round check as well as the initialization
 * 164 - Add report for winners of the playoff brackets
 * 177 - Give a more reasonable error message when an XML document fails to parse
 * 188 - Display a reasonable error message to the user when no score sheets are selected to print
