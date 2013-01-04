@@ -42,8 +42,6 @@ public class InitFilter implements Filter {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  private static final String IPV4_LOOPBACK = "127.0.0.1";
-
   /**
    * @see javax.servlet.Filter#destroy()
    */
@@ -183,10 +181,9 @@ public class InitFilter implements Filter {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
-    //check request against loopback addresses
+    //check request against all interfaces
     final String requestAddress = request.getRemoteAddr();
-    if (requestAddress.equals(IPV4_LOOPBACK)
-        || WebUtils.getAllIPStrings().contains(requestAddress)) {
+    if (WebUtils.getAllIPStrings().contains(requestAddress)) {
       LOGGER.debug("Returning true from checkSecurity for connection from own ip, "
           + requestAddress);
       return true;
