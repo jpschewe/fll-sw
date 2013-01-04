@@ -43,7 +43,6 @@ public class InitFilter implements Filter {
   private static final Logger LOGGER = LogUtils.getLogger();
 
   private static final String IPV4_LOOPBACK = "127.0.0.1";
-  private static final String IPV6_LOOPBACK = "::1";
 
   /**
    * @see javax.servlet.Filter#destroy()
@@ -187,8 +186,9 @@ public class InitFilter implements Filter {
     //check request against loopback addresses
     final String requestAddress = request.getRemoteAddr();
     if (requestAddress.equals(IPV4_LOOPBACK)
-        || requestAddress.equals(IPV6_LOOPBACK)) {
-      LOGGER.debug("Returning true from checkSecurity for connection from loopback. Provided address: " + requestAddress);
+        || WebUtils.getAllIPStrings().contains(requestAddress)) {
+      LOGGER.debug("Returning true from checkSecurity for connection from own ip, "
+          + requestAddress);
       return true;
     }
 
