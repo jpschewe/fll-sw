@@ -83,6 +83,10 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
           teamNumbers.add(num);
         }
 
+        // FIXME store division and teams in session and redirect to
+        // InitializeBrackets. Initialize brackets needs to check the session
+        // for this variable
+
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Selected team numbers: "
               + teamNumbers);

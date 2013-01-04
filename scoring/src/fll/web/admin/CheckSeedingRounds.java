@@ -31,6 +31,7 @@ import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.web.playoff.PlayoffIndex;
 
 /**
  * Check seeding round information for teams. Redirects to
@@ -60,6 +61,11 @@ public class CheckSeedingRounds extends BaseFLLServlet {
       final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
 
       session.setAttribute("division", division);
+      
+      if(PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION.equals(division)) {
+        // FIXME create new division and come back here when done
+        
+      }
 
       if (Queries.isPlayoffDataInitialized(connection, division)) {
         message.append("<p class='warning'>Playoffs have already been initialized for this division.</p>");
