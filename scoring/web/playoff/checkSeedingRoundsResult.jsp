@@ -22,14 +22,14 @@
   are excluded from this check.</p>
  <ul>
   <c:forEach items="${less }" var="team">
-   <li>${team.teamName } ( ${team.teamNumber } )</li>
+   <li class='warning'>${team.teamName } ( ${team.teamNumber } )</li>
   </c:forEach>
  </ul>
 
  <p>Teams with more runs than seeding rounds:</p>
  <ul>
   <c:forEach items="${more }" var="team">
-   <li>${team.teamName } ( ${team.teamNumber } )</li>
+   <li class='warning'>${team.teamName } ( ${team.teamNumber } )</li>
   </c:forEach>
 
  </ul>
