@@ -52,6 +52,9 @@ public class PlayoffIndex extends BaseFLLServlet {
     if (null != existingMessage) {
       message.append(existingMessage);
     }
+    
+    // cleanup session a bit
+    session.removeAttribute(InitializeBrackets.ENABLE_THIRD_PLACE);
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     ResultSet rs = null;
@@ -67,7 +70,7 @@ public class PlayoffIndex extends BaseFLLServlet {
       final int currentTournamentID = Queries.getCurrentTournament(connection);
       session.setAttribute("currentTournamentID", currentTournamentID);
 
-      final List<String> divisions = Queries.getEventDivisions(connection, currentTournamentID);
+      final List<String> divisions = Playoff.getPlayoffDivisions(connection, currentTournamentID);
       
       // add the option of creating new event divisions
       divisions.add(CREATE_NEW_PLAYOFF_DIVISION);

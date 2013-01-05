@@ -23,7 +23,6 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
 
 import fll.Team;
 import fll.db.Queries;
@@ -53,7 +52,6 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
 
     String redirect = "index.jsp";
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
     Connection connection = null;
     try {
       connection = datasource.getConnection();
@@ -83,36 +81,22 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
           teamNumbers.add(num);
         }
 
-        // FIXME store division and teams in session and redirect to
-        // InitializeBrackets. Initialize brackets needs to check the session
-        // for this variable
+        session.setAttribute(InitializeBrackets.DIVISION, divisionStr);
 
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Selected team numbers: "
               + teamNumbers);
         }
 
-        final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournamentID, teamNumbers);
-        if (null != errors) {
-          message.append(errors);
-          redirect = "create_playoff_division.jsp";
-        } else {
-
-          final boolean enableThird = SessionAttributes.getNonNullAttribute(session,
-                                                                            InitializeBrackets.ENABLE_THIRD_PLACE,
-                                                                            Boolean.class);
-
-          final List<Team> teams = new LinkedList<Team>();
-          for (final int number : teamNumbers) {
-            final Team team = Team.getTeamFromDatabase(connection, number);
-            teams.add(team);
-          }
-          Playoff.initializeBrackets(connection, challengeDocument, divisionStr, enableThird, teams);
-
-          message.append("<p>Playoffs have been successfully initialized for division "
-              + divisionStr + ".</p>");
+        final List<Team> teams = new LinkedList<Team>();
+        for (final int number : teamNumbers) {
+          final Team team = Team.getTeamFromDatabase(connection, number);
+          teams.add(team);
         }
 
+        session.setAttribute(InitializeBrackets.DIVISION_TEAMS, teams);
+
+        redirect = "InitializeBrackets";
       }
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
