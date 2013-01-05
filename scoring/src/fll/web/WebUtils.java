@@ -26,6 +26,12 @@ public final class WebUtils {
 
   private static final Pattern needsEscape = Pattern.compile("[\'\"\\\\]");
 
+  private static final Collection<InetAddress> ips = new LinkedList<InetAddress>();
+
+  private static long ipsExpiration = 0;
+
+  private static final long IP_CACHE_LIFETIME = 30000;
+
   private WebUtils() {
     // no instances
   }
@@ -105,15 +111,20 @@ public final class WebUtils {
   }
 
   public static Collection<InetAddress> getAllIPs() throws IOException {
-    final Collection<InetAddress> ips = new LinkedList<InetAddress>();
-    final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-    if (null != interfaces) {
-      while (interfaces.hasMoreElements()) {
-        final NetworkInterface ifce = interfaces.nextElement();
-        final Enumeration<InetAddress> addresses = ifce.getInetAddresses();
-        while (addresses.hasMoreElements()) {
-          ips.add(addresses.nextElement());
+    if (System.currentTimeMillis() > ipsExpiration) {
+      synchronized (ips) {
+        ips.clear();
+        final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+        if (null != interfaces) {
+          while (interfaces.hasMoreElements()) {
+            final NetworkInterface ifce = interfaces.nextElement();
+            final Enumeration<InetAddress> addresses = ifce.getInetAddresses();
+            while (addresses.hasMoreElements()) {
+              ips.add(addresses.nextElement());
+            }
+          }
         }
+        ipsExpiration = System.currentTimeMillis() + IP_CACHE_LIFETIME;
       }
     }
     return ips;
