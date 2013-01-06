@@ -30,7 +30,7 @@ public final class WebUtils {
 
   private static long ipsExpiration = 0;
 
-  private static final long IP_CACHE_LIFETIME = 30000;
+  private static final long IP_CACHE_LIFETIME = 300000;
 
   private WebUtils() {
     // no instances
