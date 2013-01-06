@@ -96,7 +96,7 @@ public final class WebUtils {
     for (final InetAddress address : getAllIPs()) {
       final String addrStr = address.getHostAddress();
       if (!addrStr.contains(":")) {
-        // skip IPv6 for now, need to figure out how to encode and get
+        // TODO skip IPv6 for now, need to figure out how to encode and get
         // Tomcat to listen on IPv6
         if (!address.isLoopbackAddress()) {
           final String url = "http://"
