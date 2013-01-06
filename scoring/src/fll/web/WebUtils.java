@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
@@ -19,10 +20,15 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Some utilities for dealing with the web.
  */
 public final class WebUtils {
+
+  private static Logger LOGGER = LoggerFactory.getLogger(WebUtils.class);
 
   private static final Pattern needsEscape = Pattern.compile("[\'\"\\\\]");
 
@@ -85,7 +91,7 @@ public final class WebUtils {
    * @return the list of URLs, will be empty if no interfaces (other than
    *         localhost) are found
    */
-  public static Collection<String> getAllURLs(final HttpServletRequest request) throws IOException {
+  public static Collection<String> getAllURLs(final HttpServletRequest request) {
     final Collection<String> urls = new LinkedList<String>();
     for (final InetAddress address : getAllIPs()) {
       final String addrStr = address.getHostAddress();
@@ -102,7 +108,7 @@ public final class WebUtils {
     return urls;
   }
 
-  public static Collection<String> getAllIPStrings() throws IOException {
+  public static Collection<String> getAllIPStrings() {
     final Collection<String> ips = new LinkedList<String>();
     for (final InetAddress address : getAllIPs()) {
       ips.add(address.getHostAddress());
@@ -110,25 +116,40 @@ public final class WebUtils {
     return ips;
   }
 
-  public static Collection<InetAddress> getAllIPs() throws IOException {
-    if (System.currentTimeMillis() > ipsExpiration) {
-      synchronized (ips) {
+  /**
+   * Get all IP addresses associated with this host.
+   * Thread safe.
+   * 
+   * @return unmodifiable collection of IP addresses
+   */
+  public static Collection<InetAddress> getAllIPs() {
+    synchronized (ips) {
+      if (System.currentTimeMillis() > ipsExpiration) {
         ips.clear();
-        final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-        if (null != interfaces) {
-          while (interfaces.hasMoreElements()) {
-            final NetworkInterface ifce = interfaces.nextElement();
-            final Enumeration<InetAddress> addresses = ifce.getInetAddresses();
-            while (addresses.hasMoreElements()) {
-              ips.add(addresses.nextElement());
+
+        try {
+          final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+          if (null != interfaces) {
+            while (interfaces.hasMoreElements()) {
+              final NetworkInterface ifce = interfaces.nextElement();
+              final Enumeration<InetAddress> addresses = ifce.getInetAddresses();
+              while (addresses.hasMoreElements()) {
+                ips.add(addresses.nextElement());
+              }
             }
           }
+        } catch (final IOException e) {
+          LOGGER.error("Error getting list of IP addresses for this host", e);
         }
-        ipsExpiration = System.currentTimeMillis() + IP_CACHE_LIFETIME;
-      }
-    }
-    return ips;
+
+        ipsExpiration = System.currentTimeMillis()
+            + IP_CACHE_LIFETIME;
+        
+      } // end if
+    } // end synchronized
+    return Collections.unmodifiableCollection(ips);
   }
+
   /**
    * Take a string and quote it for Javascript.
    */
