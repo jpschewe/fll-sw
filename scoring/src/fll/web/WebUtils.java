@@ -111,7 +111,14 @@ public final class WebUtils {
   public static Collection<String> getAllIPStrings() {
     final Collection<String> ips = new LinkedList<String>();
     for (final InetAddress address : getAllIPs()) {
-      ips.add(address.getHostAddress());
+      String addr = address.getHostAddress();
+      
+      // remove IPv6 zone information 
+      if (addr.contains("%")) {
+        addr = addr.substring(0, addr.indexOf('%'));
+      }
+      
+      ips.add(addr);
     }
     return ips;
   }
@@ -144,7 +151,7 @@ public final class WebUtils {
 
         ipsExpiration = System.currentTimeMillis()
             + IP_CACHE_LIFETIME;
-        
+
       } // end if
     } // end synchronized
     return Collections.unmodifiableCollection(ips);
