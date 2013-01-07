@@ -56,6 +56,9 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
     try {
       connection = datasource.getConnection();
 
+      final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
+                                                                            PlayoffSessionData.class);
+
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
       final List<String> playoffDivisions = Playoff.getPlayoffDivisions(connection, currentTournamentID);
@@ -81,7 +84,7 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
           teamNumbers.add(num);
         }
 
-        session.setAttribute(InitializeBrackets.DIVISION, divisionStr);
+        data.setDivision(divisionStr);
 
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Selected team numbers: "
