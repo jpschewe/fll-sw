@@ -41,36 +41,6 @@ import fll.web.SessionAttributes;
 @WebServlet("/playoff/InitializeBrackets")
 public class InitializeBrackets extends BaseFLLServlet {
 
-  /**
-   * Used as both a request parameter and a session key to specify the division
-   * to initialize.
-   */
-  public static final String DIVISION = "division";
-
-  /**
-   * Collection of teams at this tournament in a Collection<Team>. Stored in the
-   * session.
-   */
-  public static final String TOURNAMENT_TEAMS = "tournament_teams";
-
-  /**
-   * If the division is not an event division, the teams to put
-   * in the playoff bracket. Stored in the session. Type is List<Team>.
-   */
-  public static final String DIVISION_TEAMS = "division_teams";
-
-  /**
-   * Page to redirect to once this servlet is finished successfully. Type is
-   * String and is stored in the session.
-   */
-  public static final String NEXTHOP_SUCCESS = "nexthop_success";
-
-  /**
-   * Page to redirect to once this servlet is finished with an error. Type is
-   * String and is stored in the session.
-   */
-  public static final String NEXTHOP_ERROR = "nexthop_error";
-
   private static final Logger LOGGER = LogUtils.getLogger();
 
   @Override
@@ -104,7 +74,7 @@ public class InitializeBrackets extends BaseFLLServlet {
       final int currentTournamentID = currentTournament.getTournamentID();
 
       final String divisionStr;
-      final String divParam = request.getParameter(DIVISION);
+      final String divParam = request.getParameter("division");
       if (null == divParam
           || "".equals(divParam)) {
         divisionStr = data.getDivision();
@@ -145,11 +115,7 @@ public class InitializeBrackets extends BaseFLLServlet {
           } else {
             // assume new playoff division
 
-            // can't do generics inside the session
-            @SuppressWarnings("unchecked")
-            final List<Team> teams = (List<Team>) SessionAttributes.getNonNullAttribute(session,
-                                                                                        InitializeBrackets.DIVISION_TEAMS,
-                                                                                        List.class);
+            final List<Team> teams = data.getDivisionTeams();
             final List<Integer> teamNumbers = new LinkedList<Integer>();
             for (final Team t : teams) {
               teamNumbers.add(t.getTeamNumber());
