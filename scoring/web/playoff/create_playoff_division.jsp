@@ -32,7 +32,7 @@
 				<th>Number</th>
 				<th>Name</th>
 			</tr>
-			<c:forEach items="${teams }" var="team">
+			<c:forEach items="${playoff_data.tournamentTeamsValues }" var="team">
 				<tr>
 
 					<td><input name="selected_team" type="checkbox" value="${team.teamNumber }" /></td>

@@ -23,7 +23,6 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
 
 import fll.Team;
 import fll.db.Queries;
@@ -53,10 +52,12 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
 
     String redirect = "index.jsp";
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
     Connection connection = null;
     try {
       connection = datasource.getConnection();
+
+      final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
+                                                                            PlayoffSessionData.class);
 
       final int currentTournamentID = Queries.getCurrentTournament(connection);
 
@@ -71,6 +72,10 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
         message.append("<p class='error'>The division '"
             + divisionStr + "' already exists, please pick a different name");
         redirect = "create_playoff_division.jsp";
+      } else if (Queries.getEventDivisions(connection, currentTournamentID).contains(divisionStr)) {
+        message.append("<p class='error'>The division '"
+            + divisionStr + "' matches an event division, please pick a different name");
+        redirect = "create_playoff_division.jsp";
       } else {
         final String[] selectedTeams = request.getParameterValues("selected_team");
         final List<Integer> teamNumbers = new LinkedList<Integer>();
@@ -79,32 +84,22 @@ public class CreatePlayoffDivision extends BaseFLLServlet {
           teamNumbers.add(num);
         }
 
+        data.setDivision(divisionStr);
+
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("Selected team numbers: "
               + teamNumbers);
         }
 
-        final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournamentID, teamNumbers);
-        if (null != errors) {
-          message.append(errors);
-          redirect = "create_playoff_division.jsp";
-        } else {
-
-          final boolean enableThird = SessionAttributes.getNonNullAttribute(session,
-                                                                            InitializeBrackets.ENABLE_THIRD_PLACE,
-                                                                            Boolean.class);
-
-          final List<Team> teams = new LinkedList<Team>();
-          for(final int number : teamNumbers) {
-            final Team team = Team.getTeamFromDatabase(connection, number);
-            teams.add(team);
-          }
-          Playoff.initializeBrackets(connection, challengeDocument, divisionStr, enableThird, teams);
-
-          message.append("<p>Playoffs have been successfully initialized for division "
-              + divisionStr + ".</p>");
+        final List<Team> teams = new LinkedList<Team>();
+        for (final int number : teamNumbers) {
+          final Team team = Team.getTeamFromDatabase(connection, number);
+          teams.add(team);
         }
 
+        data.setDivisionTeams(teams);
+
+        redirect = "InitializeBrackets";
       }
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
