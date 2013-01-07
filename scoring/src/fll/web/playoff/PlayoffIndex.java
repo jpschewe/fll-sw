@@ -8,10 +8,7 @@ package fll.web.playoff;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -57,14 +54,9 @@ public class PlayoffIndex extends BaseFLLServlet {
     session.removeAttribute(InitializeBrackets.ENABLE_THIRD_PLACE);
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    ResultSet rs = null;
-    ResultSet rs2 = null;
-    Statement stmt = null;
-    PreparedStatement prep = null;
     Connection connection = null;
     try {
       connection = datasource.getConnection();
-      stmt = connection.createStatement();
 
       
       final int currentTournamentID = Queries.getCurrentTournament(connection);
@@ -90,10 +82,6 @@ public class PlayoffIndex extends BaseFLLServlet {
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving team data into the database", sqle);
     } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(rs2);
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(prep);
       SQLFunctions.close(connection);
     }
 
