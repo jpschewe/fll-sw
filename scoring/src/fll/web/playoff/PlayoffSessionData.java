@@ -106,4 +106,17 @@ public final class PlayoffSessionData implements Serializable {
     mTeamsNeedingSeedingRuns = v;
   }
 
+  /**
+   * Teams that are to be used to initialize a custom division.
+   */
+  public List<Team> getDivisionTeams() {
+    return mDivisionTeams;
+  }
+
+  public void setDivisionTeams(final List<Team> v) {
+    mDivisionTeams = v;
+  }
+
+  private List<Team> mDivisionTeams;
+
 }
