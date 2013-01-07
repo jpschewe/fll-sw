@@ -9,7 +9,6 @@ package fll.web.admin;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +31,8 @@ import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
-import fll.web.playoff.InitializeBrackets;
 import fll.web.playoff.PlayoffIndex;
+import fll.web.playoff.PlayoffSessionData;
 
 /**
  * Check seeding round information for teams. Redirects to
@@ -58,39 +57,30 @@ public class CheckSeedingRounds extends BaseFLLServlet {
         message.append(SessionAttributes.getMessage(session));
       }
 
-      final String division = request.getParameter(InitializeBrackets.DIVISION);
+      final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
+                                                                            PlayoffSessionData.class);
 
-      final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-
-      session.setAttribute(InitializeBrackets.DIVISION, division);
-
-      if (PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION.equals(division)) {
-        // create new division and come back here when done
-        final int currentTournamentID = Queries.getCurrentTournament(connection);
-
-        final Collection<Team> teams = Queries.getTournamentTeams(connection, currentTournamentID).values();
-        session.setAttribute(InitializeBrackets.TOURNAMENT_TEAMS, teams);
-
-        session.setAttribute(InitializeBrackets.NEXTHOP_SUCCESS, "CheckSeedingRounds");
-        session.setAttribute(InitializeBrackets.NEXTHOP_ERROR, "create_playoff_division.jsp");
-        response.sendRedirect(response.encodeRedirectURL("create_playoff_division.jsp"));
-      } else {
-
-        if (Queries.isPlayoffDataInitialized(connection, division)) {
-          message.append("<p class='warning'>Playoffs have already been initialized for this division.</p>");
-          session.setAttribute("less", Collections.emptyList());
-          session.setAttribute("more", Collections.emptyList());
-        } else {
-          final List<Team> less = Queries.getTeamsNeedingSeedingRuns(connection, tournamentTeams, division, true);
-          session.setAttribute("less", less);
-
-          final List<Team> more = Queries.getTeamsWithExtraRuns(connection, tournamentTeams, division, true);
-          session.setAttribute("more", more);
-        }
-
-        session.setAttribute(SessionAttributes.MESSAGE, message.toString());
-        response.sendRedirect(response.encodeRedirectURL("checkSeedingRoundsResult.jsp"));
+      final String division = request.getParameter("division");
+      if (null == division
+          || "".equals(division)) {
+        throw new IllegalArgumentException("Missing division parameter");
       }
+      data.setDivision(division);
+
+      final Map<Integer, Team> tournamentTeams = data.getTournamentTeams();
+
+      final List<Team> less;
+      if (Queries.isPlayoffDataInitialized(connection, division)) {
+        message.append("<p class='warning'>Playoffs have already been initialized for this division.</p>");
+        less = Collections.emptyList();
+
+      } else {
+        less = Queries.getTeamsNeedingSeedingRuns(connection, tournamentTeams, division, true);
+      }
+      data.setTeamsNeedingSeedingRounds(less);
+
+      session.setAttribute(SessionAttributes.MESSAGE, message.toString());
+      response.sendRedirect(response.encodeRedirectURL("checkSeedingRoundsResult.jsp"));
 
     } catch (final SQLException e) {
       LOGGER.error("Error talking to the database", e);

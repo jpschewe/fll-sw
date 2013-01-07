@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import fll.Team;
+import fll.Tournament;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -98,27 +98,29 @@ public class InitializeBrackets extends BaseFLLServlet {
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
     Connection connection = null;
 
-    String nexthopSuccess = SessionAttributes.getAttribute(session, NEXTHOP_SUCCESS, String.class);
-    if (null == nexthopSuccess) {
-      nexthopSuccess = "index.jsp";
-    }
-    String nexthopError = SessionAttributes.getAttribute(session, NEXTHOP_ERROR, String.class);
-    if (null == nexthopError) {
-      nexthopError = "index.jsp";
-    }
-
-    String redirect = nexthopSuccess;
+    String redirect = "index.jsp";
     try {
       connection = datasource.getConnection();
 
-      final int currentTournamentID = Queries.getCurrentTournament(connection);
+      final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
+                                                                            PlayoffSessionData.class);
 
-      final String divisionStr = getDivision(request, session);
+      final Tournament currentTournament = data.getCurrentTournament();
+      final int currentTournamentID = currentTournament.getTournamentID();
+
+      final String divisionStr;
+      final String divParam = request.getParameter(DIVISION);
+      if (null == divParam
+          || "".equals(divParam)) {
+        divisionStr = data.getDivision();
+      } else {
+        divisionStr = divParam;
+      }
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("division: '"
             + divisionStr + "'");
       }
-      session.setAttribute(DIVISION, divisionStr);
+      data.setDivision(divisionStr);
 
       final boolean enableThird;
       if (null == session.getAttribute(ENABLE_THIRD_PLACE)) {
@@ -135,25 +137,17 @@ public class InitializeBrackets extends BaseFLLServlet {
 
       if (null == divisionStr) {
         message.append("<p class='error'>No division specified.</p>");
-        redirect = nexthopError;
       } else if (PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION.equals(divisionStr)) {
-        final Collection<Team> teams = Queries.getTournamentTeams(connection, currentTournamentID).values();
-        session.setAttribute(TOURNAMENT_TEAMS, teams);
-        redirect = nexthopSuccess;
-
-        session.setAttribute(NEXTHOP_ERROR, "create_playoff_division.jsp");
         redirect = "create_playoff_division.jsp";
-
       } else {
 
         if (Queries.isPlayoffDataInitialized(connection, divisionStr)) {
           message.append("<p class='warning'>Playoffs have already been initialized for division "
               + divisionStr + ".</p>");
-          redirect = nexthopSuccess;
         } else {
           final List<String> eventDivisions = Queries.getEventDivisions(connection, currentTournamentID);
           if (eventDivisions.contains(divisionStr)) {
-            final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection, currentTournamentID);
+            final Map<Integer, Team> tournamentTeams = data.getTournamentTeams();
             final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
             Team.filterTeamsToEventDivision(connection, teams, divisionStr);
 
@@ -174,12 +168,9 @@ public class InitializeBrackets extends BaseFLLServlet {
             final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournamentID, teamNumbers);
             if (null != errors) {
               message.append(errors);
-              redirect = nexthopError;
             } else {
 
               Playoff.initializeBrackets(connection, challengeDocument, divisionStr, enableThird, teams);
-
-              redirect = nexthopSuccess;
             }
           }
           message.append("<p>Playoffs have been successfully initialized for division "
@@ -198,26 +189,6 @@ public class InitializeBrackets extends BaseFLLServlet {
 
     session.setAttribute(SessionAttributes.MESSAGE, message.toString());
     response.sendRedirect(response.encodeRedirectURL(redirect));
-  }
-
-  /**
-   * Get the division. Check the request parameters first, then check the
-   * session.
-   * 
-   * @return the division
-   * @throws NullPointerException if division not found in the request and not
-   *           found in the session
-   */
-  private String getDivision(final HttpServletRequest request,
-                             final HttpSession session) {
-
-    final String divParam = request.getParameter(DIVISION);
-    if (null == divParam || "".equals(divParam)) {
-      final String divSession = SessionAttributes.getNonNullAttribute(session, DIVISION, String.class);
-      return divSession;
-    } else {
-      return divParam;
-    }
   }
 
 }

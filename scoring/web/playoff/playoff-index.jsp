@@ -33,7 +33,7 @@
 			seeding round.<br />
 			<form name='check' action='CheckSeedingRounds' method='POST'>
 				Select Division: <select id='check-division' name='division'>
-					<c:forEach items="${eventDivisions }" var="division">
+					<c:forEach items="${playoff_data.eventDivisions }" var="division">
 						<option value='${division}'>${division}</option>
 					</c:forEach>
 				</select> <input type='submit' id='check_seeding_rounds'
@@ -45,10 +45,11 @@
 		<li><b>WARNING: Do not initialize playoff brackets for a
 				division until all seeding runs for that division have been
 				recorded!</b> Doing so will automatically add bye runs to the teams that
-			don't have enough seeding runs.<br />
+			don't have enough seeding runs. If creating a new playoff division it
+			is assumed that you know how many runs each team has completed.<br />
 			<form name='initialize' action='InitializeBrackets' method='POST'>
 				Select Division: <select id='initialize-division' name='division'>
-					<c:forEach items="${eventDivisions }" var="division">
+					<c:forEach items="${playoff_data.divisions }" var="division">
 						<option value='${division}'>${division}</option>
 					</c:forEach>
 				</select><br> <input type='checkbox' name='enableThird' value='yes' />Check
@@ -57,17 +58,19 @@
 			</form></li>
 
 
-		<c:if test="${not empty playoffDivisions }">
+		<c:if test="${not empty playoff_data.existingDivisions }">
 
 			<li>
 				<form name='admin' action='adminbrackets.jsp' method='get'>
 					<b>Printable Brackets</b><br /> Select Division: <select
 						name='division'>
-						<c:forEach items="${playoffDivisions }" var="division">
+						<c:forEach items="${playoff_data.existingDivisions }"
+							var="division">
 							<option value='${division}'>${division}</option>
 						</c:forEach>
 					</select> from round <select name='firstRound'>
-						<c:forEach begin="1" end="${numPlayoffRounds }" var="numRounds">
+						<c:forEach begin="1" end="${playoff_data.numPlayoffRounds }"
+							var="numRounds">
 							<c:choose>
 								<c:when test="${numRounds == 1 }">
 									<option value='${numRounds }' selected>${numRounds }</option>
@@ -80,7 +83,8 @@
 					</select> to
 					<%-- numPlayoffRounds+1 == the column in which the 1st place winner is displayed  --%>
 					<select name='lastRound'>
-						<c:forEach begin="2" end="${numPlayoffRounds+1 }" var="numRounds">
+						<c:forEach begin="2" end="${playoff_data.numPlayoffRounds+1 }"
+							var="numRounds">
 							<c:choose>
 								<c:when test="${numRounds == numPlayoffRounds+1 }">
 									<option value='${numRounds }' selected>${numRounds }</option>
@@ -99,11 +103,13 @@
 				<form name='printable' action='scoregenbrackets.jsp' method='get'>
 					<b>Scoresheet Generation Brackets</b><br /> Select Division: <select
 						name='division'>
-						<c:forEach items="${playoffDivisions }" var="division">
+						<c:forEach items="${playoff_data.existingDivisions }"
+							var="division">
 							<option value='${division}'>${division}</option>
 						</c:forEach>
 					</select> from round <select name='firstRound'>
-						<c:forEach begin="1" end="${numPlayoffRounds }" var="numRounds">
+						<c:forEach begin="1" end="${playoff_data.numPlayoffRounds }"
+							var="numRounds">
 							<c:choose>
 								<c:when test="${numRounds == 1 }">
 									<option value='${numRounds }' selected>${numRounds }</option>
@@ -117,9 +123,10 @@
 
 					<%-- numPlayoffRounds+1 == the column in which the 1st place winner is displayed  --%>
 					<select name='lastRound'>
-						<c:forEach begin="2" end="${numPlayoffRounds+1 }" var="numRounds">
+						<c:forEach begin="2" end="${playoff_data.numPlayoffRounds+1 }"
+							var="numRounds">
 							<c:choose>
-								<c:when test="${numRounds == numPlayoffRounds+1 }">
+								<c:when test="${numRounds == playoff_data.numPlayoffRounds+1 }">
 									<option value='${numRounds }' selected>${numRounds }</option>
 								</c:when>
 								<c:otherwise>
