@@ -60,11 +60,6 @@ public class InitializeBrackets extends BaseFLLServlet {
   public static final String DIVISION_TEAMS = "division_teams";
 
   /**
-   * Boolean if third place brackets should be enabled.
-   */
-  public static final String ENABLE_THIRD_PLACE = "enableThird";
-
-  /**
    * Page to redirect to once this servlet is finished successfully. Type is
    * String and is stored in the session.
    */
@@ -123,16 +118,11 @@ public class InitializeBrackets extends BaseFLLServlet {
       data.setDivision(divisionStr);
 
       final boolean enableThird;
-      if (null == session.getAttribute(ENABLE_THIRD_PLACE)) {
-        final String thirdFourthPlaceBrackets = request.getParameter("enableThird");
-        if (null == thirdFourthPlaceBrackets) {
-          enableThird = false;
-        } else {
-          enableThird = true;
-        }
-        session.setAttribute(ENABLE_THIRD_PLACE, enableThird);
+      final String thirdFourthPlaceBrackets = request.getParameter("enableThird");
+      if (null == thirdFourthPlaceBrackets) {
+        enableThird = false;
       } else {
-        enableThird = SessionAttributes.getNonNullAttribute(session, ENABLE_THIRD_PLACE, Boolean.class);
+        enableThird = true;
       }
 
       if (null == divisionStr) {

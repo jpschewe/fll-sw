@@ -53,9 +53,6 @@ public class PlayoffIndex extends BaseFLLServlet {
       message.append(existingMessage);
     }
     
-    // cleanup session a bit
-    session.removeAttribute(InitializeBrackets.ENABLE_THIRD_PLACE);
-
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
     try {

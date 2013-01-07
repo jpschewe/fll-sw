@@ -26,16 +26,14 @@ public final class PlayoffSessionData implements Serializable {
   public PlayoffSessionData(final Connection connection) throws SQLException {
     final int currentTournamentID = Queries.getCurrentTournament(connection);
     mCurrentTournament = Tournament.findTournamentByID(connection, currentTournamentID);
+    mEventDivisions = Queries.getEventDivisions(connection, mCurrentTournament.getTournamentID());
+    mNumPlayoffRounds = Queries.getNumPlayoffRounds(connection);
+    mTournamentTeams = Queries.getTournamentTeams(connection, mCurrentTournament.getTournamentID());
 
     mExistingDivisions = Playoff.getPlayoffDivisions(connection, mCurrentTournament.getTournamentID());
 
-    mDivisions = new LinkedList<String>(mExistingDivisions);
-    mDivisions.add(PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION);
-    mEventDivisions = Queries.getEventDivisions(connection, mCurrentTournament.getTournamentID());
-    mNumPlayoffRounds = Queries.getNumPlayoffRounds(connection);
-
-    mTournamentTeams = Queries.getTournamentTeams(connection, mCurrentTournament.getTournamentID());
-
+    mInitDivisions = new LinkedList<String>(mEventDivisions);
+    mInitDivisions.add(PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION);
   }
 
   private final Map<Integer, Team> mTournamentTeams;
@@ -72,14 +70,14 @@ public final class PlayoffSessionData implements Serializable {
     return mEventDivisions;
   }
 
-  private final List<String> mDivisions;
+  private final List<String> mInitDivisions;
 
   /**
-   * Divisions that have been created, plus the create division string
+   * Divisions that can be initialized, this is event divisions plus
    * {@link PlayoffIndex#CREATE_NEW_PLAYOFF_DIVISION}.
    */
-  public List<String> getDivisions() {
-    return mDivisions;
+  public List<String> getInitDivisions() {
+    return mInitDivisions;
   }
 
   private final int mNumPlayoffRounds;

@@ -49,7 +49,7 @@
 			is assumed that you know how many runs each team has completed.<br />
 			<form name='initialize' action='InitializeBrackets' method='POST'>
 				Select Division: <select id='initialize-division' name='division'>
-					<c:forEach items="${playoff_data.divisions }" var="division">
+					<c:forEach items="${playoff_data.initDivisions }" var="division">
 						<option value='${division}'>${division}</option>
 					</c:forEach>
 				</select><br> <input type='checkbox' name='enableThird' value='yes' />Check
