@@ -8,11 +8,7 @@ package fll.web.playoff;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -26,7 +22,6 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
-import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -41,6 +36,11 @@ public class PlayoffIndex extends BaseFLLServlet {
   private static final Logger LOGGER = LogUtils.getLogger();
   
   public static final String CREATE_NEW_PLAYOFF_DIVISION = "Create Playoff Division...";
+  
+  /**
+   * Instance of {@link PlayoffSessionData} is stored here.
+   */
+  public static final String SESSION_DATA = "playoff_data";
 
   @Override
   protected void processRequest(final HttpServletRequest request,
@@ -52,34 +52,14 @@ public class PlayoffIndex extends BaseFLLServlet {
     if (null != existingMessage) {
       message.append(existingMessage);
     }
-
+    
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    ResultSet rs = null;
-    ResultSet rs2 = null;
-    Statement stmt = null;
-    PreparedStatement prep = null;
     Connection connection = null;
     try {
       connection = datasource.getConnection();
-      stmt = connection.createStatement();
 
-      
-      final int currentTournamentID = Queries.getCurrentTournament(connection);
-      session.setAttribute("currentTournamentID", currentTournamentID);
-
-      final List<String> divisions = Queries.getEventDivisions(connection, currentTournamentID);
-      
-      // add the option of creating new event divisions
-      divisions.add(CREATE_NEW_PLAYOFF_DIVISION);
-      
-      session.setAttribute("eventDivisions", divisions);
-
-      
-      final List<String> playoffDivisions = Playoff.getPlayoffDivisions(connection, currentTournamentID);
-      session.setAttribute("playoffDivisions", playoffDivisions);
-
-      final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
-      session.setAttribute("numPlayoffRounds", numPlayoffRounds);
+      final PlayoffSessionData data = new PlayoffSessionData(connection);
+      session.setAttribute(SESSION_DATA, data);      
 
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
@@ -87,10 +67,6 @@ public class PlayoffIndex extends BaseFLLServlet {
       LOGGER.error(sqle, sqle);
       throw new RuntimeException("Error saving team data into the database", sqle);
     } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(rs2);
-      SQLFunctions.close(stmt);
-      SQLFunctions.close(prep);
       SQLFunctions.close(connection);
     }
 
