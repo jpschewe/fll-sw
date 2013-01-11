@@ -1130,7 +1130,8 @@ public class TournamentSchedule implements Serializable {
   }
 
   /**
-   * Check for AM/PM flag and then pick the right parser.
+   * Check for AM/PM flag and the presence of the seconds field; then pick the
+   * right parser based upon this information.
    * 
    * @throws ParseException if the date cannot be parsed
    */
