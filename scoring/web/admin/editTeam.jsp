@@ -69,18 +69,30 @@ function confirmChangeTournament() {
         <td>Division (required)</td>
         <td>
           <c:forEach items="${divisions}" var="possibleDivision">
-    <c:choose>
-     <c:when test="${division == possibleDivision}">
-      <input type='radio' name='division' value='${possibleDivision}' checked />
-     </c:when>
-     <c:otherwise>
-      <input type='radio' name='division' value='${possibleDivision}' />
-     </c:otherwise>
-    </c:choose>
-    ${possibleDivision}
-   </c:forEach> 
-   <input type='radio' id='division_text_choice' name='division' value='text' /> 
-   <input type='text' name='division_text' />
+   <input type='radio' name='division' value='${possibleDivision}' id='${possibleDivision}'
+     <c:if test="${division == possibleDivision}">
+       checked='true'
+     </c:if>
+     <c:if test="${playoffsInitialized}">
+       disabled='disabled'
+     </c:if>
+   />
+   <label for='${possibleDivision}'>${possibleDivision}</label>
+          </c:forEach>
+   <input type='radio' id='division_text_choice' name='division' value='text'
+   <c:if test="${playoffsInitialized}">
+       disabled='disabled'
+   </c:if>
+   />
+   <input type='text' name='division_text'
+   <c:if test="${playoffsInitialized}">
+       disabled='disabled'
+   </c:if>
+   />
+   <c:if test="${playoffsInitialized}">
+     <input type='hidden' name='division' value='${division}'/>
+     <!-- Browsers don't seem to submit the disabled form data, so I add this such that the edit still goes through -->
+   </c:if>
         </td>
       </tr>
 
@@ -92,6 +104,7 @@ function confirmChangeTournament() {
           <c:choose>
           <c:when test="${playoffsInitialized}">
             <p>Playoffs are initialized for the team's current tournament, the current tournament may not be modified now.</p>
+            <input type='hidden' name='currentTournament' value='${teamCurrentTournament.tournamentID}'/>
           </c:when>
           <c:otherwise>
             <select id='currentTournamentSelect' name='currentTournament'>
