@@ -181,11 +181,23 @@ public class InitFilter implements Filter {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
-    //check request against all interfaces
-    final String requestAddress = request.getRemoteAddr();
-    if (WebUtils.getAllIPStrings().contains(requestAddress)) {
-      LOGGER.debug("Returning true from checkSecurity for connection from own ip, "
-          + requestAddress);
+    // check request against all interfaces
+    String requestAddress = request.getRemoteAddr();
+    
+    // remove zone from IPv6 addresses
+    final int zoneIndex = requestAddress.indexOf('%');
+    requestAddress = requestAddress.substring(0, zoneIndex);
+    
+    final Collection<String> localIps = WebUtils.getAllIPStrings();
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Local IPs: "
+          + localIps + " requestAddress: " + requestAddress);
+    }
+    if (localIps.contains(requestAddress)) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Returning true from checkSecurity for connection from own ip, "
+            + requestAddress);
+      }
       return true;
     }
 
@@ -226,7 +238,7 @@ public class InitFilter implements Filter {
 
   public static void initDataSource(final ServletContext application) {
     final String database = application.getRealPath("/WEB-INF/flldb");
-    
+
     // initialize the datasource
     if (null == ApplicationAttributes.getDataSource(application)) {
       if (LOGGER.isDebugEnabled()) {
@@ -234,9 +246,9 @@ public class InitFilter implements Filter {
       }
       final DataSource datasource = Utilities.createFileDataSource(database);
       application.setAttribute(ApplicationAttributes.DATASOURCE, datasource);
-    } 
+    }
   }
-  
+
   /**
    * @param request
    * @param response
