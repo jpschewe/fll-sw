@@ -1,3 +1,15 @@
+* Allow team information to be edited after the playoffs are
+  initialized. Team divisions cannot be changed after the playoffs are
+  initialized to avoid issues with divisions and the playoffs.
+
+
+Release 7.6
+-----------
+* Fix bug where scoresheets wouldn't print due to incorrect error
+     checking
+
+Release 7.5
+-----------
 * 164 - Add report for winners of the playoff brackets
 * 177 - Give a more reasonable error message when an XML document fails to parse
 * 188 - Display a reasonable error message to the user when no score sheets are selected to print
