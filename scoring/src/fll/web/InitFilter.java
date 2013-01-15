@@ -181,6 +181,14 @@ public class InitFilter implements Filter {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
+    //check request against all interfaces
+    final String requestAddress = request.getRemoteAddr();
+    if (WebUtils.getAllIPStrings().contains(requestAddress)) {
+      LOGGER.debug("Returning true from checkSecurity for connection from own ip, "
+          + requestAddress);
+      return true;
+    }
+
     Connection connection = null;
     try {
       connection = datasource.getConnection();
