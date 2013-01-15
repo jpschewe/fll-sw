@@ -198,6 +198,11 @@ public class InitFilter implements Filter {
       return true;
     }
 
+    if (null == datasource) {
+      throw new FLLRuntimeException(
+                                    "Database is not initialized and security is required, you must initialize the database from localhost");
+    }
+
     Connection connection = null;
     try {
       connection = datasource.getConnection();
