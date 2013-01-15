@@ -269,10 +269,8 @@ public class FullTournamentTest {
     select.selectByValue(division);
     selenium.findElement(By.id("check_seeding_rounds")).click();
 
-    Assert.assertTrue("Found teams with less than seeding rounds division: '"
-        + division + "'", IntegrationTestUtils.isElementPresent(selenium, By.id("no_teams_fewer")));
-    Assert.assertTrue("Found teams with more than seeding rounds division: '"
-        + division + "'", IntegrationTestUtils.isElementPresent(selenium, By.id("no_teams_more")));
+    Assert.assertFalse("Some teams with more or less than seeding rounds found for division '" + division + "'", 
+                       IntegrationTestUtils.isElementPresent(selenium, By.className("warning")));
   }
 
   /**
