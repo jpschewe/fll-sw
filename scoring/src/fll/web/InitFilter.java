@@ -151,13 +151,8 @@ public class InitFilter implements Filter {
           || path.endsWith(".png") //
           || path.endsWith(".html")) {
         return false;
-      } else if (path.equals(contextPath
-          + "/setup/index.jsp")) {
-        return false;
-      } else if (path.equals(contextPath
-          + "/setup/CreateDB")) {
-        // FIXME need to know the difference between creating new database and
-        // importing into an existing one
+      } else if (path.startsWith(contextPath
+          + "/setup")) {
         return false;
       }
     }
@@ -183,11 +178,13 @@ public class InitFilter implements Filter {
 
     // check request against all interfaces
     String requestAddress = request.getRemoteAddr();
-    
+
     // remove zone from IPv6 addresses
     final int zoneIndex = requestAddress.indexOf('%');
-    requestAddress = requestAddress.substring(0, zoneIndex);
-    
+    if (-1 != zoneIndex) {
+      requestAddress = requestAddress.substring(0, zoneIndex);
+    }
+
     final Collection<String> localIps = WebUtils.getAllIPStrings();
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Local IPs: "
