@@ -804,8 +804,10 @@ public class GreedySolver {
           if (!result) {
             // if we get to this point we should look for another solution
             unassignPerformance(team.getGroup(), team.getIndex(), timeslot, table, 1);
-            unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, 0);
-            team1 = null;
+
+            // unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot,
+            // table, 0);
+            // team1 = null;
 
             // if (timeslot
             // + getPerformanceDuration() >= getNumTimeslots()) {
@@ -823,12 +825,22 @@ public class GreedySolver {
 
     // undo partial assignment if not allowed
     if (null != team1) {
-      final SchedTeam prevTeamOnTable = findPrevTeamOnTable(timeslot, table, 0);
+      final SchedTeam prevTeamOnTable = findPrevTeamOnTable(timeslot, table, 1);
       if (partialPerformanceAssignmentAllowed()
           && null != prevTeamOnTable
-          /*&& assignPerformance(prevTeamOnTable.getGroup(), prevTeamOnTable.getIndex(), timeslot, table, 0, false)*/) {
+          && assignPerformance(prevTeamOnTable.getGroup(), prevTeamOnTable.getIndex(), timeslot, table, 1, false)) {
+        // use a dummy team as the other team
         dummyPerformanceSlotUsed = true;
-        return true;
+        
+        final boolean result = scheduleNextStation();
+        if (!result) {
+          dummyPerformanceSlotUsed = false;
+          unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, 0);
+          team1 = null;
+        } else {
+          return true;
+        }
+        
       } else {
         unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, 0);
         team1 = null;
@@ -954,14 +966,14 @@ public class GreedySolver {
         if (!result
             || optimize) {
           unassignSubjective(team.getGroup(), team.getIndex(), station, timeslot);
-          
-//          if (timeslot
-//              + getSubjectiveDuration(station) >= getNumTimeslots()) {
-//            if (LOGGER.isDebugEnabled()) {
-//              LOGGER.debug("Hit max timeslots - subj");
-//            }
-//            return false;
-//          }
+
+          // if (timeslot
+          // + getSubjectiveDuration(station) >= getNumTimeslots()) {
+          // if (LOGGER.isDebugEnabled()) {
+          // LOGGER.debug("Hit max timeslots - subj");
+          // }
+          // return false;
+          // }
         } else {
           return true;
         }
