@@ -629,9 +629,31 @@ public class GreedySolver {
                                     final int timeslot,
                                     final int table,
                                     final int side) {
+    return assignPerformance(group, team, timeslot, table, side, true);
+  }
+
+  /**
+   * Assign a team to a performance slot if possible.
+   * 
+   * @param group
+   * @param team
+   * @param timeslot
+   * @param table
+   * @param side
+   * @param doAssignment if we should actually do the assignment, useful for
+   *          checking extra runs
+   * @return
+   */
+  private boolean assignPerformance(final int group,
+                                    final int team,
+                                    final int timeslot,
+                                    final int table,
+                                    final int side,
+                                    final boolean doAssignment) {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Attempting to assigning performance group: "
-          + group + " team: " + team + " table: " + table + " side: " + side + " time: " + timeslot);
+          + group + " team: " + team + " table: " + table + " side: " + side + " time: " + timeslot + " doAssignment: "
+          + doAssignment);
     }
 
     if (timeslot
@@ -669,21 +691,24 @@ public class GreedySolver {
       return false;
     }
 
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("Assigning performance group: "
-          + group + " team: " + team + " table: " + table + " side: " + side + " time: " + timeslot);
+    if (doAssignment) {
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Assigning performance group: "
+            + group + " team: " + team + " table: " + table + " side: " + side + " time: " + timeslot);
+      }
+
+      ++performanceScheduled[group][team];
+      pz[group][team][table][side][timeslot] = true;
+      for (int slot = timeslot; slot < timeslot
+          + getPerformanceDuration(); ++slot) {
+        py[group][team][table][side][slot] = true;
+      }
+
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("SUCCESS");
+      }
     }
 
-    ++performanceScheduled[group][team];
-    pz[group][team][table][side][timeslot] = true;
-    for (int slot = timeslot; slot < timeslot
-        + getPerformanceDuration(); ++slot) {
-      py[group][team][table][side][slot] = true;
-    }
-
-    if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("SUCCESS");
-    }
     return true;
   }
 
@@ -742,6 +767,20 @@ public class GreedySolver {
     return performanceDuration;
   }
 
+  private boolean dummyPerformanceSlotUsed = false;
+
+  /**
+   * Check if we're allowed to have a table assigned with no second team.
+   * This will be true if there is an odd number of teams and an odd number
+   * performance rounds and the dummy slot hasn't been used.
+   */
+  private boolean partialPerformanceAssignmentAllowed() {
+    final boolean oddPerfRounds = (numPerformanceRounds & 1) == 1;
+    final boolean oddTeams = (getAllTeams().size() & 1) == 1;
+    return !dummyPerformanceSlotUsed
+        && oddTeams && oddPerfRounds;
+  }
+
   private boolean schedPerf(final int table,
                             final int timeslot) {
     final List<SchedTeam> teams = getPossiblePerformanceTeams();
@@ -764,8 +803,8 @@ public class GreedySolver {
           final boolean result = scheduleNextStation();
           if (!result) {
             // if we get to this point we should look for another solution
-            unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, 0);
             unassignPerformance(team.getGroup(), team.getIndex(), timeslot, table, 1);
+            unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, 0);
             team1 = null;
 
             if (timeslot
@@ -782,10 +821,18 @@ public class GreedySolver {
       }
     }
 
-    // undo partial assignment
+    // undo partial assignment if not allowed
     if (null != team1) {
-      unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, 0);
-      team1 = null;
+      final SchedTeam prevTeamOnTable = findPrevTeamOnTable(timeslot, table, 0);
+      if (partialPerformanceAssignmentAllowed()
+          && null != prevTeamOnTable
+          /*&& assignPerformance(prevTeamOnTable.getGroup(), prevTeamOnTable.getIndex(), timeslot, table, 0, false)*/) {
+        dummyPerformanceSlotUsed = true;
+        return true;
+      } else {
+        unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, 0);
+        team1 = null;
+      }
     }
 
     if (optimize
@@ -821,6 +868,27 @@ public class GreedySolver {
     }
 
     return false;
+  }
+
+  /**
+   * Find the team that is on the table and side prior to timeslot.
+   * 
+   * @param timeslot
+   * @param table
+   * @param side
+   * @return the team or null if no team can be found
+   */
+  private SchedTeam findPrevTeamOnTable(final int timeslot,
+                                        final int table,
+                                        final int side) {
+    for (int slot = timeslot - 1; slot >= 0; --slot) {
+      for (final SchedTeam team : getAllTeams()) {
+        if (py[team.getGroup()][team.getIndex()][table][side][slot]) {
+          return team;
+        }
+      }
+    }
+    return null;
   }
 
   /**
@@ -963,6 +1031,12 @@ public class GreedySolver {
     return solutionsFound;
   }
 
+  /**
+   * Get the number of warnings.
+   * 
+   * @param scheduleFile
+   * @return the number of warnings or -1 if there are hard violations
+   */
   private int getNumWarnings(final File scheduleFile) {
     final List<SubjectiveStation> subjectiveParams = new LinkedList<SubjectiveStation>();
     final Collection<String> subjectiveHeaders = new LinkedList<String>();
@@ -986,8 +1060,9 @@ public class GreedySolver {
       final List<ConstraintViolation> violations = checker.verifySchedule();
       for (final ConstraintViolation violation : violations) {
         if (violation.isHard()) {
-          throw new FLLRuntimeException("Should not have any hard constraint violations from autosched: "
+          LOGGER.debug("Found hard constraint violations from autosched: "
               + violation.getMessage());
+          return -1;
         }
       }
       return violations.size();
@@ -1000,6 +1075,10 @@ public class GreedySolver {
     }
   }
 
+  /**
+   * @param scheduleFile
+   * @return the objective value, null on failure
+   */
   private ObjectiveValue computeObjectiveValue(final File scheduleFile) {
     final int[] numTeams = new int[getNumGroups()];
     final int[] latestSubjectiveTime = new int[getNumGroups()];
@@ -1007,8 +1086,11 @@ public class GreedySolver {
       numTeams[group] = subjectiveScheduled[group].length;
       latestSubjectiveTime[group] = findLatestSubjectiveTime(group);
     }
-    return new ObjectiveValue(solutionsFound, findLatestPerformanceTime(), numTeams, latestSubjectiveTime,
-                              getNumWarnings(scheduleFile));
+    final int numWarnings = getNumWarnings(scheduleFile);
+    if (numWarnings == -1) {
+      return null;
+    }
+    return new ObjectiveValue(solutionsFound, findLatestPerformanceTime(), numTeams, latestSubjectiveTime, numWarnings);
   }
 
   /**
@@ -1053,13 +1135,15 @@ public class GreedySolver {
 
   private boolean scheduleNextStation() {
     if (scheduleFinished()) {
-      ++solutionsFound;
+      if (outputCurrentSolution()) {
+        ++solutionsFound;
+        LOGGER.info("Schedule finished num solutions: "
+            + solutionsFound);
 
-      LOGGER.info("Schedule finished num solutions: "
-          + solutionsFound);
-      outputCurrentSolution();
-
-      return true;
+        return true;
+      } else {
+        return false;
+      }
     }
 
     // find possible values
@@ -1188,14 +1272,11 @@ public class GreedySolver {
     return nextAvailableSubjSlot;
   }
 
-  private void outputCurrentSolution() {
+  private boolean outputCurrentSolution() {
     final File scheduleFile = new File(Utilities.extractAbsoluteBasename(datafile)
         + "-" + solutionsFound + ".csv");
     final File objectiveFile = new File(Utilities.extractAbsoluteBasename(datafile)
         + "-" + solutionsFound + ".obj");
-
-    LOGGER.info("Solution output to "
-        + scheduleFile.getAbsolutePath());
 
     try {
       outputSchedule(scheduleFile);
@@ -1204,6 +1285,13 @@ public class GreedySolver {
     }
 
     final ObjectiveValue objective = computeObjectiveValue(scheduleFile);
+    if (null == objective) {
+      scheduleFile.delete();
+      return false;
+    }
+
+    LOGGER.info("Solution output to "
+        + scheduleFile.getAbsolutePath());
 
     Writer objectiveWriter = null;
     try {
@@ -1236,6 +1324,8 @@ public class GreedySolver {
       }
       numTimeslots = newNumTimeslots;
     }
+
+    return true;
   }
 
   private final int numSubjectiveStations;
