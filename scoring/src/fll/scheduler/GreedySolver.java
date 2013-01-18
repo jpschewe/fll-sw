@@ -807,13 +807,13 @@ public class GreedySolver {
             unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, 0);
             team1 = null;
 
-            if (timeslot
-                + getPerformanceDuration() >= getNumTimeslots()) {
-              if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Hit max timeslots - perf");
-              }
-              return false;
-            }
+            // if (timeslot
+            // + getPerformanceDuration() >= getNumTimeslots()) {
+            // if (LOGGER.isDebugEnabled()) {
+            // LOGGER.debug("Hit max timeslots - perf");
+            // }
+            // return false;
+            // }
           } else {
             return true;
           }
@@ -954,13 +954,14 @@ public class GreedySolver {
         if (!result
             || optimize) {
           unassignSubjective(team.getGroup(), team.getIndex(), station, timeslot);
-          if (timeslot
-              + getSubjectiveDuration(station) >= getNumTimeslots()) {
-            if (LOGGER.isDebugEnabled()) {
-              LOGGER.debug("Hit max timeslots - subj");
-            }
-            return false;
-          }
+          
+//          if (timeslot
+//              + getSubjectiveDuration(station) >= getNumTimeslots()) {
+//            if (LOGGER.isDebugEnabled()) {
+//              LOGGER.debug("Hit max timeslots - subj");
+//            }
+//            return false;
+//          }
         } else {
           return true;
         }
