@@ -147,6 +147,13 @@ public class TournamentSchedule implements Serializable {
   public static final ThreadLocal<DateFormat> OUTPUT_DATE_FORMAT = new ThreadLocal<DateFormat>() {
     @Override
     protected DateFormat initialValue() {
+      return new SimpleDateFormat("h:mm");
+    }
+  };
+
+  public static final ThreadLocal<DateFormat> DATE_FORMAT_MILITARY = new ThreadLocal<DateFormat>() {
+    @Override
+    protected DateFormat initialValue() {
       return new SimpleDateFormat("H:mm");
     }
   };
@@ -1132,24 +1139,38 @@ public class TournamentSchedule implements Serializable {
   /**
    * Check for AM/PM flag and the presence of the seconds field; then pick the
    * right parser based upon this information.
+   * Any date with an hour before this needs to have 12 added to it as it must be
+   * in the afternoon.
+   */
+  private static final int EARLIEST_HOUR = 7;
+
+  /**
+   * Check for AM/PM flag and then pick the right parser.
    * 
    * @throws ParseException if the date cannot be parsed
    */
-  private static Date parseDate(final String s) throws ParseException {
+  public static Date parseDate(final String s) throws ParseException {
+    final Date retval;
     if (s.indexOf("AM") >= 0
         || s.indexOf("PM") >= 0) {
       if (s.split(":").length > 2) {
-        return DATE_FORMAT_AM_PM_SS.get().parse(s);
+        retval = DATE_FORMAT_AM_PM_SS.get().parse(s);
       } else {
-        return DATE_FORMAT_AM_PM.get().parse(s);
+        retval = DATE_FORMAT_AM_PM.get().parse(s);
       }
     } else {
       if (s.split(":").length > 2) {
-        return DATE_FORMAT_SS.get().parse(s);
+        retval = DATE_FORMAT_SS.get().parse(s);
       } else {
-        return OUTPUT_DATE_FORMAT.get().parse(s);
+        retval = DATE_FORMAT_MILITARY.get().parse(s);
       }
     }
+    final Calendar cal = Calendar.getInstance();
+    cal.setTime(retval);
+    if(cal.get(Calendar.HOUR_OF_DAY) <= EARLIEST_HOUR) {
+      cal.add(Calendar.HOUR_OF_DAY, 12);
+    }
+    return cal.getTime();
   }
 
   /**
