@@ -222,7 +222,7 @@ public class GreedySolver {
     }
     LOGGER.debug(properties.toString());
 
-    this.startTime = TournamentSchedule.OUTPUT_DATE_FORMAT.get().parse(properties.getProperty("start_time"));
+    this.startTime = TournamentSchedule.parseDate(properties.getProperty("start_time"));
 
     tinc = Utilities.readIntProperty(properties, "TInc");
     ngroups = Utilities.readIntProperty(properties, "NGroups");
@@ -428,7 +428,7 @@ public class GreedySolver {
         throw new FLLRuntimeException(String.format("Missing start or duration for %s break %d", breakType, i));
       }
 
-      final Date start = TournamentSchedule.OUTPUT_DATE_FORMAT.get().parse(startStr);
+      final Date start = TournamentSchedule.parseDate(startStr);
       final int startMinutes = (int) ((start.getTime() - startTime.getTime())
           / Utilities.MILLISECONDS_PER_SECOND / Utilities.SECONDS_PER_MINUTE);
       final int startInc = startMinutes
