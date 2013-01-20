@@ -1299,7 +1299,9 @@ public class GreedySolver {
 
     final ObjectiveValue objective = computeObjectiveValue(scheduleFile);
     if (null == objective) {
-      scheduleFile.delete();
+      if(!scheduleFile.delete()) {
+        scheduleFile.deleteOnExit();
+      }
       return false;
     }
 
