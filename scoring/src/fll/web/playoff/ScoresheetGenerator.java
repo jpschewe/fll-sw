@@ -115,10 +115,11 @@ public class ScoresheetGenerator {
         if (checkedMatches[i]) {
           checkedMatchCount++;
         }
-        if (checkedMatchCount == 0) {
-          throw new FLLRuntimeException(
-                                        "No matches were found checked. Please go back and select the checkboxes for the scoresheets that you want to print");
-        }
+      }
+
+      if (checkedMatchCount == 0) {
+        throw new FLLRuntimeException(
+                                      "No matches were found checked. Please go back and select the checkboxes for the scoresheets that you want to print");
       }
 
       m_numTeams = checkedMatchCount * 2;

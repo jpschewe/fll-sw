@@ -403,12 +403,14 @@ public class ChallengeParserTest {
     }
 
     for (final File f : challengeDir.listFiles()) {
-      LOGGER.info("File: "
-          + f.getName());
-      final FileReader reader = new FileReader(f);
-      final Document document = ChallengeParser.parse(reader);
-      Assert.assertNotNull(document);
-      reader.close();
+      if(f.getName().endsWith(".xml")) {
+        LOGGER.info("File: "
+                    + f.getName());
+        final FileReader reader = new FileReader(f);
+        final Document document = ChallengeParser.parse(reader);
+        Assert.assertNotNull(document);
+        reader.close();
+      }
     }
   }
 
