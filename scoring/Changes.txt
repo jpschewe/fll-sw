@@ -1,3 +1,6 @@
+* Allow schedules to be in 12 hour or 24 hour format. All schedules are
+  output in 12 hour format.
+
 Release 7.6
 -----------
 * Fix bug where scoresheets wouldn't print due to incorrect error
