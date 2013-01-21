@@ -1,5 +1,7 @@
 * Allow schedules to be in 12 hour or 24 hour format. All schedules are
   output in 12 hour format.
+* Added support for generating a schedule for an odd number of teams
+  with an odd number of performance rounds
 
 Release 7.6
 -----------
