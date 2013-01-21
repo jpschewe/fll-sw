@@ -106,9 +106,13 @@ public class GreedySolver {
 
   private final boolean optimize;
 
+  private final boolean subjectiveFirst;
+
   private static final String OPTIMIZE_OPTION = "o";
 
   private static final String DATA_FILE_OPTION = "d";
+
+  private static final String SUBJECTIVE_FIRST_OPTION = "s";
 
   private final Collection<ScheduledBreak> subjectiveBreaks = new LinkedList<ScheduledBreak>();
 
@@ -121,6 +125,13 @@ public class GreedySolver {
     options.addOption(option);
 
     option = new Option(OPTIMIZE_OPTION, "optimize", false, "Turn on optimization (default: false)");
+    options.addOption(option);
+
+    option = new Option(
+                        SUBJECTIVE_FIRST_OPTION,
+                        "subjective-first",
+                        false,
+                        "Schedule subjective slots first, then schedule performance. This can sometimes create schedules that finish earlier in the day.");
     options.addOption(option);
 
     return options;
@@ -138,6 +149,7 @@ public class GreedySolver {
 
     // parse options
     boolean optimize = false;
+    boolean subjectiveFirst = false;
     File datafile = null;
     try {
       final CommandLineParser parser = new PosixParser();
@@ -145,6 +157,10 @@ public class GreedySolver {
 
       if (cmd.hasOption(OPTIMIZE_OPTION)) {
         optimize = true;
+      }
+
+      if (cmd.hasOption(SUBJECTIVE_FIRST_OPTION)) {
+        subjectiveFirst = true;
       }
 
       datafile = new File(cmd.getOptionValue(DATA_FILE_OPTION));
@@ -161,7 +177,7 @@ public class GreedySolver {
         System.exit(4);
       }
 
-      final GreedySolver solver = new GreedySolver(datafile, optimize);
+      final GreedySolver solver = new GreedySolver(datafile, optimize, subjectiveFirst);
       final long start = System.currentTimeMillis();
       solver.solve();
       final long stop = System.currentTimeMillis();
@@ -185,9 +201,11 @@ public class GreedySolver {
    * @throws ParseException
    */
   public GreedySolver(final File datafile,
-                      final boolean optimize) throws IOException, ParseException {
+                      final boolean optimize,
+                      final boolean subjectiveFirst) throws IOException, ParseException {
     this.datafile = datafile;
     this.optimize = optimize;
+    this.subjectiveFirst = subjectiveFirst;
     if (this.optimize) {
       LOGGER.info("Optimization is turned on");
     }
@@ -204,7 +222,7 @@ public class GreedySolver {
     }
     LOGGER.debug(properties.toString());
 
-    this.startTime = TournamentSchedule.OUTPUT_DATE_FORMAT.get().parse(properties.getProperty("start_time"));
+    this.startTime = TournamentSchedule.parseDate(properties.getProperty("start_time"));
 
     tinc = Utilities.readIntProperty(properties, "TInc");
     ngroups = Utilities.readIntProperty(properties, "NGroups");
@@ -410,7 +428,7 @@ public class GreedySolver {
         throw new FLLRuntimeException(String.format("Missing start or duration for %s break %d", breakType, i));
       }
 
-      final Date start = TournamentSchedule.OUTPUT_DATE_FORMAT.get().parse(startStr);
+      final Date start = TournamentSchedule.parseDate(startStr);
       final int startMinutes = (int) ((start.getTime() - startTime.getTime())
           / Utilities.MILLISECONDS_PER_SECOND / Utilities.SECONDS_PER_MINUTE);
       final int startInc = startMinutes
@@ -883,6 +901,17 @@ public class GreedySolver {
     return false;
   }
 
+  private boolean subjectiveFinished() {
+    for (final SchedTeam team : getAllTeams()) {
+      for (int station = 0; station < getNumSubjectiveStations(); ++station) {
+        if (!subjectiveScheduled[team.getGroup()][team.getIndex()][station]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   private boolean scheduleFinished() {
     for (final SchedTeam team : getAllTeams()) {
       for (int station = 0; station < getNumSubjectiveStations(); ++station) {
@@ -1049,7 +1078,8 @@ public class GreedySolver {
     }
 
     // try possible values
-    if (nextAvailableSubjSlot <= nextAvailablePerfSlot) {
+    if ((subjectiveFirst && !subjectiveFinished())
+        || (nextAvailableSubjSlot <= nextAvailablePerfSlot)) {
       for (int i = 0; i < possibleSubjectiveStations.size(); ++i) {
         final int station = possibleSubjectiveStations.get(i);
         final int group = subjectiveGroups.get(i);
