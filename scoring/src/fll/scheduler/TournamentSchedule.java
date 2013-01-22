@@ -6,10 +6,13 @@
 package fll.scheduler;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,6 +21,7 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -50,6 +54,8 @@ import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -1139,7 +1145,8 @@ public class TournamentSchedule implements Serializable {
   /**
    * Check for AM/PM flag and the presence of the seconds field; then pick the
    * right parser based upon this information.
-   * Any date with an hour before this needs to have 12 added to it as it must be
+   * Any date with an hour before this needs to have 12 added to it as it must
+   * be
    * in the afternoon.
    */
   private static final int EARLIEST_HOUR = 7;
@@ -1167,7 +1174,7 @@ public class TournamentSchedule implements Serializable {
     }
     final Calendar cal = Calendar.getInstance();
     cal.setTime(retval);
-    if(cal.get(Calendar.HOUR_OF_DAY) <= EARLIEST_HOUR) {
+    if (cal.get(Calendar.HOUR_OF_DAY) <= EARLIEST_HOUR) {
       cal.add(Calendar.HOUR_OF_DAY, 12);
     }
     return cal.getTime();
@@ -1558,4 +1565,68 @@ public class TournamentSchedule implements Serializable {
 
   }
 
+  /**
+   * Write out to the specified writer.
+   * 
+   * @param outputWriter
+   * @throws IOException
+   */
+  public void writeToCSV(final Writer outputWriter) throws IOException {
+    CSVWriter csv = null;
+    try {
+      csv = new CSVWriter(outputWriter);
+
+      final List<String> line = new ArrayList<String>();
+      line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
+      line.add(TournamentSchedule.DIVISION_HEADER);
+      line.add(TournamentSchedule.TEAM_NAME_HEADER);
+      line.add(TournamentSchedule.ORGANIZATION_HEADER);
+      line.add(TournamentSchedule.JUDGE_GROUP_HEADER);
+      final List<String> categories = Collections.unmodifiableList(new LinkedList<String>(getSubjectiveStations()));
+      for (final String category : categories) {
+        line.add(category);
+      }
+      for (int round = 0; round < getNumberOfRounds(); ++round) {
+        line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round + 1));
+        line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round + 1));
+      }
+      csv.writeNext(line.toArray(new String[line.size()]));
+      line.clear();
+
+      for (final TeamScheduleInfo si : getSchedule()) {
+        line.add(String.valueOf(si.getTeamNumber()));
+        line.add(si.getDivision());
+        line.add(si.getTeamName());
+        line.add(si.getOrganization());
+        line.add(si.getJudgingStation());
+        for (final String category : categories) {
+          final Date d = si.getSubjectiveTimeByName(category).getTime();
+          line.add(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(d));
+        }
+        for (int round = 0; round < getNumberOfRounds(); ++round) {
+          final PerformanceTime p = si.getPerf(round);
+          line.add(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(p.getTime()));
+          line.add(p.getTable()
+              + " " + p.getSide());
+        }
+        csv.writeNext(line.toArray(new String[line.size()]));
+        line.clear();
+      }
+    } finally {
+      if (null != csv) {
+        csv.close();
+      }
+    }
+  }
+
+  /**
+   * Write out the current schedule to a CSV file.
+   * 
+   * @param outputFile where to write
+   * @throws IOException
+   */
+  public void writeToCSV(final File outputFile) throws IOException {
+    final Writer writer = new OutputStreamWriter(new FileOutputStream(outputFile), Utilities.DEFAULT_CHARSET);
+    writeToCSV(writer);
+  }
 }

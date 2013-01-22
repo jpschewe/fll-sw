@@ -9,6 +9,7 @@ package fll.scheduler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.sql.Connection;
@@ -182,6 +183,76 @@ public class TournamentScheduleTest {
       SQLFunctions.close(memConnection);
       memConnection = null;
     }
+  }
+
+  /**
+   * Test that we can parse a 12 hour formatted schedule
+   * and a 24 hour formatted schedule and that they come
+   * out the same.
+   * 
+   * @throws IOException
+   * @throws InvalidFormatException
+   * @throws ScheduleParseException
+   * @throws ParseException
+   */
+  @Test
+  public void testScheduleTimeFormat() throws InvalidFormatException, IOException, ParseException,
+      ScheduleParseException {
+    final Collection<String> possibleSubjectiveHeaders = new LinkedList<String>();
+    possibleSubjectiveHeaders.add("Core Values");
+    possibleSubjectiveHeaders.add("Design");
+    possibleSubjectiveHeaders.add("Project");
+
+    final URL schedule12Resource = TournamentScheduleTest.class.getResource("data/12-hour-format.xls");
+    Assert.assertNotNull(schedule12Resource);
+    final TournamentSchedule schedule12 = loadSchedule(schedule12Resource, possibleSubjectiveHeaders);
+
+    final URL schedule24Resource = TournamentScheduleTest.class.getResource("data/24-hour-format.xls");
+    Assert.assertNotNull(schedule24Resource);
+    final TournamentSchedule schedule24 = loadSchedule(schedule12Resource, possibleSubjectiveHeaders);
+
+    // write out the schedules to CSV and then compare
+    final StringWriter output12 = new StringWriter();
+    schedule12.writeToCSV(output12);
+    final String str12 = output12.toString();
+
+    final StringWriter output24 = new StringWriter();
+    schedule24.writeToCSV(output24);
+    final String str24 = output24.toString();
+
+    Assert.assertEquals(str24, str12);
+  }
+
+  public TournamentSchedule loadSchedule(final URL path,
+                                         final Collection<String> possibleSubjectiveHeaders) throws IOException,
+      InvalidFormatException, ParseException, ScheduleParseException {
+    InputStream scheduleStream = path.openStream();
+    final List<String> sheetNames = ExcelCellReader.getAllSheetNames(scheduleStream);
+    scheduleStream.close();
+    Assert.assertEquals("Expecting exactly 1 sheet in schedule spreadsheet", 1, sheetNames.size());
+
+    final String sheetName = sheetNames.get(0);
+
+    // determine the subjective columns
+    scheduleStream = path.openStream();
+    final CellFileReader reader = new ExcelCellReader(scheduleStream, sheetName);
+    final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
+
+    // prompt for which headers are subjective
+    final Collection<String> subjectiveHeaders = new LinkedList<String>();
+    for (final String unused : columnInfo.getUnusedColumns()) {
+      if (possibleSubjectiveHeaders.contains(unused)) {
+        subjectiveHeaders.add(unused);
+      }
+    }
+
+    scheduleStream = path.openStream();
+    final TournamentSchedule schedule = new TournamentSchedule("Test Tournament", scheduleStream, sheetName,
+                                                               subjectiveHeaders);
+    scheduleStream.close();
+
+    return schedule;
+
   }
 
 }
