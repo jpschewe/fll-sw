@@ -939,18 +939,14 @@ public class TournamentSchedule implements Serializable {
 
       for (int i = 0; i < getNumberOfRounds(); ++i) {
         if (null != si.getPerfTime(i)) {
-          // ignore the teams that cross round boundaries
-          final int opponentRound = findOpponentRound(si, i);
-          if (opponentRound == i) {
-            if (null == minPerf
-                || si.getPerfTime(i).before(minPerf)) {
-              minPerf = si.getPerfTime(i);
-            }
+          if (null == minPerf
+              || si.getPerfTime(i).before(minPerf)) {
+            minPerf = si.getPerfTime(i);
+          }
 
-            if (null == maxPerf
-                || si.getPerfTime(i).after(maxPerf)) {
-              maxPerf = si.getPerfTime(i);
-            }
+          if (null == maxPerf
+              || si.getPerfTime(i).after(maxPerf)) {
+            maxPerf = si.getPerfTime(i);
           }
         }
       }
