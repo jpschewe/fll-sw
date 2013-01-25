@@ -1,3 +1,14 @@
+* Disallow setting up the database from a computer other than localhost.
+    This solves a number of issues around init and security given that
+    the database is part of the webapp. If the database is moved out of the
+    app, then this might work again.
+* Allow team information to be edited after the playoffs are
+* 165 - Allow one to bypass security when connecting from localhost.
+* 200 - Allow team information to be edited after the playoffs are
+  initialized. Team divisions cannot be changed after the playoffs are
+  initialized to avoid issues with divisions and the playoffs.
+
+
 Release 7.6
 -----------
 * Fix bug where scoresheets wouldn't print due to incorrect error
