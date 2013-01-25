@@ -151,13 +151,8 @@ public class InitFilter implements Filter {
           || path.endsWith(".png") //
           || path.endsWith(".html")) {
         return false;
-      } else if (path.equals(contextPath
-          + "/setup/index.jsp")) {
-        return false;
-      } else if (path.equals(contextPath
-          + "/setup/CreateDB")) {
-        // FIXME need to know the difference between creating new database and
-        // importing into an existing one
+      } else if (path.startsWith(contextPath
+          + "/setup")) {
         return false;
       }
     }
@@ -180,6 +175,33 @@ public class InitFilter implements Filter {
                                 final HttpSession session) throws IOException {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
+
+    // check request against all interfaces
+    String requestAddress = request.getRemoteAddr();
+
+    // remove zone from IPv6 addresses
+    final int zoneIndex = requestAddress.indexOf('%');
+    if (-1 != zoneIndex) {
+      requestAddress = requestAddress.substring(0, zoneIndex);
+    }
+
+    final Collection<String> localIps = WebUtils.getAllIPStrings();
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Local IPs: "
+          + localIps + " requestAddress: " + requestAddress);
+    }
+    if (localIps.contains(requestAddress)) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Returning true from checkSecurity for connection from own ip, "
+            + requestAddress);
+      }
+      return true;
+    }
+
+    if (null == datasource) {
+      throw new FLLRuntimeException(
+                                    "Database is not initialized and security is required, you must initialize the database from localhost");
+    }
 
     Connection connection = null;
     try {
@@ -218,7 +240,7 @@ public class InitFilter implements Filter {
 
   public static void initDataSource(final ServletContext application) {
     final String database = application.getRealPath("/WEB-INF/flldb");
-    
+
     // initialize the datasource
     if (null == ApplicationAttributes.getDataSource(application)) {
       if (LOGGER.isDebugEnabled()) {
@@ -226,9 +248,9 @@ public class InitFilter implements Filter {
       }
       final DataSource datasource = Utilities.createFileDataSource(database);
       application.setAttribute(ApplicationAttributes.DATASOURCE, datasource);
-    } 
+    }
   }
-  
+
   /**
    * @param request
    * @param response

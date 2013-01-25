@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import fll.Team;
+import fll.Tournament;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -39,16 +40,6 @@ import fll.web.SessionAttributes;
  */
 @WebServlet("/playoff/InitializeBrackets")
 public class InitializeBrackets extends BaseFLLServlet {
-
-  /**
-   * Collection of teams at this tournament in a Collection<Team>.
-   */
-  public static final String TEAMS = "teams";
-
-  /**
-   * Boolean if third place brackets should be enabled.
-   */
-  public static final String ENABLE_THIRD_PLACE = "enableThird";
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -71,32 +62,42 @@ public class InitializeBrackets extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
     Connection connection = null;
+
     String redirect = "index.jsp";
     try {
       connection = datasource.getConnection();
 
-      final String divisionStr = request.getParameter("division");
+      final PlayoffSessionData data = SessionAttributes.getNonNullAttribute(session, PlayoffIndex.SESSION_DATA,
+                                                                            PlayoffSessionData.class);
 
+      final Tournament currentTournament = data.getCurrentTournament();
+      final int currentTournamentID = currentTournament.getTournamentID();
+
+      final String divisionStr;
+      final String divParam = request.getParameter("division");
+      if (null == divParam
+          || "".equals(divParam)) {
+        divisionStr = data.getDivision();
+      } else {
+        divisionStr = divParam;
+      }
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("division: '"
             + divisionStr + "'");
       }
+      data.setDivision(divisionStr);
 
+      final boolean enableThird;
       final String thirdFourthPlaceBrackets = request.getParameter("enableThird");
-      boolean enableThird;
       if (null == thirdFourthPlaceBrackets) {
         enableThird = false;
       } else {
         enableThird = true;
       }
-      session.setAttribute(ENABLE_THIRD_PLACE, enableThird);
-
 
       if (null == divisionStr) {
         message.append("<p class='error'>No division specified.</p>");
       } else if (PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION.equals(divisionStr)) {
-        final Collection<Team> teams = Queries.getTournamentTeams(connection).values();
-        session.setAttribute(TEAMS, teams);
         redirect = "create_playoff_division.jsp";
       } else {
 
@@ -104,11 +105,30 @@ public class InitializeBrackets extends BaseFLLServlet {
           message.append("<p class='warning'>Playoffs have already been initialized for division "
               + divisionStr + ".</p>");
         } else {
-          final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-          final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
-          Team.filterTeamsToEventDivision(connection, teams, divisionStr);
+          final List<String> eventDivisions = Queries.getEventDivisions(connection, currentTournamentID);
+          if (eventDivisions.contains(divisionStr)) {
+            final Map<Integer, Team> tournamentTeams = data.getTournamentTeams();
+            final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
+            Team.filterTeamsToEventDivision(connection, teams, divisionStr);
 
-          Playoff.initializeBrackets(connection, challengeDocument, divisionStr, enableThird, teams);
+            Playoff.initializeBrackets(connection, challengeDocument, divisionStr, enableThird, teams);
+          } else {
+            // assume new playoff division
+
+            final List<Team> teams = data.getDivisionTeams();
+            final List<Integer> teamNumbers = new LinkedList<Integer>();
+            for (final Team t : teams) {
+              teamNumbers.add(t.getTeamNumber());
+            }
+
+            final String errors = Playoff.involvedInUnfinishedPlayoff(connection, currentTournamentID, teamNumbers);
+            if (null != errors) {
+              message.append(errors);
+            } else {
+
+              Playoff.initializeBrackets(connection, challengeDocument, divisionStr, enableThird, teams);
+            }
+          }
           message.append("<p>Playoffs have been successfully initialized for division "
               + divisionStr + ".</p>");
         }
