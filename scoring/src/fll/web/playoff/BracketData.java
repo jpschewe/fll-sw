@@ -524,7 +524,12 @@ public class BracketData {
    */
   public BracketDataType getData(final int round,
                                  final int row) {
-    return _bracketData.get(round).get(row);
+    final SortedMap<Integer, BracketDataType> theRound = _bracketData.get(round);
+    if (theRound != null) {
+      return theRound.get(row);
+    } else {
+      return null;
+    }
   }
 
   /**
