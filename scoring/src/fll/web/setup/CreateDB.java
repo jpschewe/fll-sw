@@ -50,7 +50,7 @@ public class CreateDB extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    String redirect = null;
+    String redirect;
     final StringBuilder message = new StringBuilder();
     InitFilter.initDataSource(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -66,8 +66,10 @@ public class CreateDB extends BaseFLLServlet {
         final FileItem xmlFileItem = (FileItem) request.getAttribute("xmldocument");
 
         final boolean forceRebuild = "1".equals(request.getAttribute("force_rebuild"));
-        if (null == xmlFileItem) {
+        if (null == xmlFileItem
+            || xmlFileItem.getSize() < 1) {
           message.append("<p class='error'>XML description document not specified</p>");
+          redirect = "/setup";
         } else {
           final Document document = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
                                                                                 Utilities.DEFAULT_CHARSET));
@@ -77,23 +79,33 @@ public class CreateDB extends BaseFLLServlet {
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
 
           message.append("<p id='success'><i>Successfully initialized database</i></p>");
+          redirect = "/admin/createUsername.jsp";
         }
       } else if (null != request.getAttribute("createdb")) {
         // import a database from a dump
         final FileItem dumpFileItem = (FileItem) request.getAttribute("dbdump");
 
-        ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileItem.getInputStream()), connection);
+        if (null == dumpFileItem
+            || dumpFileItem.getSize() < 1) {
+          message.append("<p class='error'>Database dump not specified</p>");
+          redirect = "/setup";
+        } else {
 
-        // remove application variables that depend on the database
-        application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
+          ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileItem.getInputStream()), connection);
 
-        message.append("<p id='success'><i>Successfully initialized database from dump</i></p>");
+          // remove application variables that depend on the database
+          application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
+
+          message.append("<p id='success'><i>Successfully initialized database from dump</i></p>");
+          redirect = "/admin/createUsername.jsp";
+        }
+
       } else {
         message.append("<p class='error'>Unknown form state, expected form fields not seen: "
             + request + "</p>");
+        redirect = "/setup";
       }
 
-      redirect = "/admin/createUsername.jsp";
     } catch (final FileUploadException fue) {
       message.append("<p class='error'>Error handling the file upload: "
           + fue.getMessage() + "</p>");
