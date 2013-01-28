@@ -19,10 +19,9 @@ import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.util.LogUtils;
-import fll.util.ScoreUtils;
 import fll.web.admin.DownloadSubjectiveData;
+import fll.xml.AbstractGoal;
 import fll.xml.EnumeratedValue;
-import fll.xml.Goal;
 import fll.xml.ScoreCategory;
 import fll.xml.ScoreType;
 import fll.xml.XMLUtils;
@@ -123,13 +122,12 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         // Total Score
         return Double.class;
       } else {
-        final Goal goal = getGoalDescription(column
+        final AbstractGoal goal = getGoalDescription(column
             - NUM_COLUMNS_LEFT_OF_SCORES);
         if (goal.isEnumerated()) {
           return String.class;
-          // FIXME do I want this? } else if (XMLUtils.isComputedGoal(goalEle))
-          // {
-          // return Double.class;
+        } else if (goal.isComputed()) {
+          return Double.class;
         } else {
           return Integer.class;
         }
@@ -183,17 +181,15 @@ public final class SubjectiveTableModel extends AbstractTableModel {
             return newTotalScore;
           }
         } else {
-          final Goal goalDescription = getGoalDescription(column
+          final AbstractGoal goalDescription = getGoalDescription(column
               - NUM_COLUMNS_LEFT_OF_SCORES);
           final String goalName = goalDescription.getName();
           // the order really matters here because a computed goal will never
           // have an entry in scoreEle
-          /*
-           * FIXME rethink computed goals if
-           * (XMLUtils.isComputedGoal(goalDescription)) {
-           * return getTeamScore(row).getComputedScore(goalName);
-           * } else
-           */if (null == SubjectiveUtils.getSubscoreElement(scoreEle, goalName)) {
+
+          if (goalDescription.isComputed()) {
+            return getTeamScore(row).getComputedScore(goalName);
+          } else if (null == SubjectiveUtils.getSubscoreElement(scoreEle, goalName)) {
             return null;
           } else if (goalDescription.isEnumerated()) {
             return getTeamScore(row).getEnumRawScore(goalName);
@@ -248,21 +244,15 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         final Element scoreEle = getScoreElement(row);
         if (Boolean.valueOf(scoreEle.getAttribute("NoShow"))) {
           return false;
+        }
+
+        final AbstractGoal goalDescription = getGoalDescription(column
+            - NUM_COLUMNS_LEFT_OF_SCORES);
+        if (goalDescription.isComputed()) {
+          return false;
         } else {
           return true;
         }
-        //
-        // final Element goalDescription = getGoalDescription(column
-        // - NUM_COLUMNS_LEFT_OF_SCORES);
-        // /*FIXME if (XMLUtils.isComputedGoal(goalDescription)) {
-        // return false;
-        // } else */ if ("goal".equals(goalDescription.getNodeName())) {
-        // return true;
-        // } else {
-        // throw new
-        // RuntimeException("Expected 'computedGoal' or 'goal', but found: "
-        // + goalDescription.getNodeName());
-        // }
       }
     }
   }
@@ -311,7 +301,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       // scores to be set to null
       error = true;
     } else {
-      final Goal goalDescription = getGoalDescription(column
+      final AbstractGoal goalDescription = getGoalDescription(column
           - NUM_COLUMNS_LEFT_OF_SCORES);
       final String goalName = goalDescription.getName();
       // support deleting a value
@@ -356,7 +346,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           double min = goalDescription.getMin();
           double max = goalDescription.getMax();
 
-          final ScoreType scoreType = XMLUtils.getScoreType(element);
+          final ScoreType scoreType = goalDescription.getScoreType();
           try {
             final Number parsedValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.toString());
             if (parsedValue.doubleValue() > max
@@ -397,14 +387,13 @@ public final class SubjectiveTableModel extends AbstractTableModel {
    * Force the computed goals in the specified row to be updated.
    */
   private void forceComputedGoalUpdates(final int row) {
-    // FIXME rethink computed goals in the subjective app
-    // for (int i = 0; i < getNumGoals(); ++i) {
-    // final Element goalEle = getGoalDescription(i);
-    // if (XMLUtils.isComputedGoal(goalEle)) {
-    // fireTableCellUpdated(row, i
-    // + NUM_COLUMNS_LEFT_OF_SCORES);
-    // }
-    // }
+    for (int i = 0; i < getNumGoals(); ++i) {
+      final AbstractGoal goal = getGoalDescription(i);
+      if (goal.isComputed()) {
+        fireTableCellUpdated(row, i
+            + NUM_COLUMNS_LEFT_OF_SCORES);
+      }
+    }
   }
 
   /**
@@ -460,7 +449,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   /**
    * Get the description element for goal at index
    */
-  private Goal getGoalDescription(final int index) {
+  private AbstractGoal getGoalDescription(final int index) {
     return _goals.get(index);
   }
 
@@ -471,7 +460,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     return _goals.size();
   }
 
-  private final List<Goal> _goals;
+  private final List<AbstractGoal> _goals;
 
   /**
    * The backing for the model

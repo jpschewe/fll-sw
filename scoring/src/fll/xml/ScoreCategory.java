@@ -33,32 +33,24 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
     mTitle = title;
     mWeight = Double.valueOf(ele.getAttribute("weight"));
 
-    final List<Goal> goals = new LinkedList<Goal>();
-    for (final Element goalEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("goal"))) {
-      final Goal goal = new Goal(goalEle);
-      goals.add(goal);
+    final List<AbstractGoal> goals = new LinkedList<AbstractGoal>();
+    for (final Element goalEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
+      if ("goal".equals(goalEle.getNodeName())) {
+        final Goal goal = new Goal(goalEle);
+        goals.add(goal);
+      } else if ("computedGoal".equals(goalEle.getNodeName())) {
+        final ComputedGoal compGoal = new ComputedGoal(goalEle, this);
+        goals.add(compGoal);
+      }
     }
     mGoals = Collections.unmodifiableList(goals);
 
-    final List<ComputedGoal> computedGoals = new LinkedList<ComputedGoal>();
-    for (final Element compEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("computedGoal"))) {
-      final ComputedGoal compGoal = new ComputedGoal(compEle, this);
-      computedGoals.add(compGoal);
-    }
-    mComputedGoals = Collections.unmodifiableList(computedGoals);
-
   }
 
-  private final List<Goal> mGoals;
+  private final List<AbstractGoal> mGoals;
 
-  public List<Goal> getGoals() {
+  public List<AbstractGoal> getGoals() {
     return mGoals;
-  }
-
-  private final List<ComputedGoal> mComputedGoals;
-
-  public List<ComputedGoal> getComputedGoals() {
-    return mComputedGoals;
   }
 
   private final String mName;
@@ -80,13 +72,7 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
   }
 
   public AbstractGoal getGoal(final String name) {
-    for (final Goal g : getGoals()) {
-      if (g.getName().equals(name)) {
-        return g;
-      }
-    }
-
-    for (final ComputedGoal g : getComputedGoals()) {
+    for (final AbstractGoal g : getGoals()) {
       if (g.getName().equals(name)) {
         return g;
       }
@@ -98,10 +84,7 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
   @Override
   public double evaluate(final TeamScore teamScore) {
     double total = 0;
-    for (final Goal g : getGoals()) {
-      total += g.getComputedScore(teamScore);
-    }
-    for (final ComputedGoal g : getComputedGoals()) {
+    for (final AbstractGoal g : getGoals()) {
       total += g.getComputedScore(teamScore);
     }
     return total;

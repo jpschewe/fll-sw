@@ -7,6 +7,7 @@
 package fll.xml;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -61,4 +62,15 @@ public abstract class AbstractGoal implements Serializable {
    */
   public abstract double getComputedScore(final TeamScore teamScore);
 
+  public abstract boolean isComputed();
+
+  public abstract boolean isEnumerated();
+
+  public abstract List<EnumeratedValue> getValues();
+
+  public abstract ScoreType getScoreType();
+
+  public abstract double getMin();
+
+  public abstract double getMax();
 }

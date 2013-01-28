@@ -126,4 +126,9 @@ public class Goal extends AbstractGoal {
     }
   }
 
+  @Override
+  public boolean isComputed() {
+    return false;
+  }
+
 }
