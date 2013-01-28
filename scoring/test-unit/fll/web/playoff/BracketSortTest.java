@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.db.GenerateDB;
@@ -86,8 +87,9 @@ public class BracketSortTest {
 
       final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
 
-      final BracketSortType bracketSort = XMLUtils.getBracketSort(document);
-      final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(document);
+      final Element root = document.getDocumentElement();
+      final BracketSortType bracketSort = XMLUtils.getBracketSort(root);
+      final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(root);
 
       final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
       Team.filterTeamsToEventDivision(connection, teams, divisionStr);

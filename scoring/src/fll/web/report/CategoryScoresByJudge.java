@@ -50,7 +50,8 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+    final Element root = challengeDocument.getDocumentElement();
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(root);
 
     final PrintWriter writer = response.getWriter();
     writer.write("<html><body>");
@@ -60,8 +61,7 @@ public class CategoryScoresByJudge extends BaseFLLServlet {
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
     for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
-                                                                                challengeDocument.getDocumentElement()
-                                                                                                 .getElementsByTagName("subjectiveCategory"))) {
+                                                                                root.getElementsByTagName("subjectiveCategory"))) {
       final String title = subjectiveElement.getAttribute("title");
       final String name = subjectiveElement.getAttribute("name");
       subjectiveCategories.put(title, name);

@@ -384,7 +384,8 @@ public final class Queries {
     final int tournament = getCurrentTournament(connection);
     final List<String> divisions = getEventDivisions(connection);
 
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+    final Element root = challengeDocument.getDocumentElement();
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(root);
     final String ascDesc = winnerCriteria.getSortString();
 
     // find the performance ranking
@@ -688,9 +689,10 @@ public final class Queries {
                                               final HttpServletRequest request) throws SQLException, ParseException,
       RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(document);
-    final Element performanceElement = (Element) document.getDocumentElement().getElementsByTagName("Performance")
-                                                         .item(0);
+
+    final Element root = document.getDocumentElement();
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(root);
+    final Element performanceElement = (Element) root.getElementsByTagName("Performance").item(0);
     final Element tiebreakerElement = (Element) performanceElement.getElementsByTagName("tiebreaker").item(0);
 
     final String teamNumberStr = request.getParameter("TeamNumber");
@@ -827,9 +829,10 @@ public final class Queries {
                                               final HttpServletRequest request) throws SQLException, ParseException,
       RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(document);
-    final Element performanceElement = (Element) document.getDocumentElement().getElementsByTagName("Performance")
-                                                         .item(0);
+
+    final Element root = document.getDocumentElement();
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(root);
+    final Element performanceElement = (Element) root.getElementsByTagName("Performance").item(0);
     final Element tiebreakerElement = (Element) performanceElement.getElementsByTagName("tiebreaker").item(0);
 
     final String teamNumberStr = request.getParameter("TeamNumber");
@@ -1467,7 +1470,8 @@ public final class Queries {
   public static void setNumSeedingRounds(final Connection connection,
                                          final int tournament,
                                          final int newSeedingRounds) throws SQLException {
-    TournamentParameters.setIntTournamentParameter(connection, tournament, TournamentParameters.SEEDING_ROUNDS, newSeedingRounds);
+    TournamentParameters.setIntTournamentParameter(connection, tournament, TournamentParameters.SEEDING_ROUNDS,
+                                                   newSeedingRounds);
   }
 
   /**
@@ -1506,7 +1510,7 @@ public final class Queries {
       final Tournament dummyTournament = Tournament.findTournamentByName(connection, GenerateDB.DUMMY_TOURNAMENT_NAME);
       // Call setGlobalParameter directly to avoid infinite recursion
       GlobalParameters.setStringGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT,
-                         String.valueOf(dummyTournament.getTournamentID()));
+                                                String.valueOf(dummyTournament.getTournamentID()));
     }
     return GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.CURRENT_TOURNAMENT);
   }
@@ -3067,7 +3071,8 @@ public final class Queries {
    */
   public static int getMaxScoreboardPerformanceRound(final Connection connection,
                                                      final int tournament) throws SQLException {
-    return TournamentParameters.getIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND);
+    return TournamentParameters.getIntTournamentParameter(connection, tournament,
+                                                          TournamentParameters.MAX_SCOREBOARD_ROUND);
   }
 
   /**
@@ -3076,7 +3081,8 @@ public final class Queries {
   public static void setMaxScorebaordPerformanceRound(final Connection connection,
                                                       final int tournament,
                                                       final int value) throws SQLException {
-    TournamentParameters.setIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND, value);
+    TournamentParameters.setIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND,
+                                                   value);
   }
 
 }
