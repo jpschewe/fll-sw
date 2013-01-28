@@ -14,11 +14,11 @@ import fll.web.playoff.TeamScore;
  * Common parent class of {@link ConditionStatement} and
  * {@link EnumConditionStatement}.
  */
-public abstract class AbstractConditionStatement implements Evaluatable, Serializable {
+public abstract class AbstractConditionStatement implements Serializable {
 
   /**
    * Does this conditional statement evaluate to true?
    */
-  // FIXME public abstract boolean isTrue(TeamScore teamScore);
+  public abstract boolean isTrue(TeamScore teamScore);
 
 }

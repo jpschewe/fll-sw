@@ -14,6 +14,8 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Element;
 
+import fll.web.playoff.TeamScore;
+
 public class Goal extends AbstractGoal {
 
   public Goal(final Element ele) {
@@ -26,7 +28,6 @@ public class Goal extends AbstractGoal {
 
     mScoreType = XMLUtils.getScoreType(ele);
     mCategory = ele.getAttribute("category");
-    
 
     final List<RubricRange> rubric = new LinkedList<RubricRange>();
     final NodelistElementCollectionAdapter rubricEles = new NodelistElementCollectionAdapter(
@@ -95,6 +96,34 @@ public class Goal extends AbstractGoal {
 
   public String getCategory() {
     return mCategory;
+  }
+
+  public boolean isEnumerated() {
+    return !getValues().isEmpty();
+  }
+
+  public double getRawScore(final TeamScore teamScore) {
+    if (isEnumerated()) {
+      final String val = teamScore.getEnumRawScore(getName());
+      for (final EnumeratedValue ev : getValues()) {
+        if (ev.getValue().equals(val)) {
+          return ev.getScore();
+        }
+      }
+      return Double.NaN;
+    } else {
+      return teamScore.getRawScore(getName());
+    }
+  }
+
+  public double getComputedScore(final TeamScore teamScore) {
+    final Double rawScore = getRawScore(teamScore);
+    if (null == rawScore) {
+      return Double.NaN;
+    } else {
+      return rawScore
+          * getMultiplier();
+    }
   }
 
 }

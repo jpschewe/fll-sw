@@ -15,20 +15,23 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Element;
 
+import fll.web.playoff.TeamScore;
+
 /**
- * 
+ * Polynomial that references goals.
  */
 public class BasicPolynomial implements Evaluatable, Serializable {
 
-  public BasicPolynomial(final Element ele, final GoalScope goalScope) {
+  public BasicPolynomial(final Element ele,
+                         final GoalScope goalScope) {
 
     final List<Term> terms = new LinkedList<Term>();
-    for(final Element termEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("term"))) {
+    for (final Element termEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("term"))) {
       final Term term = new Term(termEle, goalScope);
       terms.add(term);
     }
     mTerms = Collections.unmodifiableList(terms);
-    
+
     double constant = 0;
     for (final Element constantEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("constant"))) {
       final double value = Double.valueOf(constantEle.getAttribute("value"));
@@ -47,6 +50,16 @@ public class BasicPolynomial implements Evaluatable, Serializable {
 
   public double getConstant() {
     return mConstant;
+  }
+
+  @Override
+  public double evaluate(final TeamScore teamScore) {
+    double score = getConstant();
+    for (final Term t : getTerms()) {
+      final double val = t.evaluate(teamScore);
+      score += val;
+    }
+    return score;
   }
 
 }

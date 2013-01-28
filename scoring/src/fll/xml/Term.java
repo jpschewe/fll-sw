@@ -8,6 +8,12 @@ package fll.xml;
 
 import org.w3c.dom.Element;
 
+import fll.util.FLLInternalException;
+import fll.web.playoff.TeamScore;
+
+/**
+ * Term in a polynomial.
+ */
 public class Term extends AbstractTerm {
 
   public Term(final Element ele,
@@ -29,6 +35,36 @@ public class Term extends AbstractTerm {
 
   public GoalScoreType getScoreType() {
     return mScoreType;
+  }
+
+  @Override
+  public double evaluate(final TeamScore teamScore) {
+    double value;
+    switch (getScoreType()) {
+    case COMPUTED:
+      value = getGoal().getComputedScore(teamScore);
+      break;
+    case RAW:
+      value = getGoal().getRawScore(teamScore);
+      break;
+    default:
+      throw new FLLInternalException("Unknown score type: "
+          + getScoreType());
+    }
+    
+    value = value * getCoefficient();
+
+    switch (getFloatingPoint()) {
+    case DECIMAL:
+      return value;
+    case ROUND:
+      return Math.round(value);
+    case TRUNCATE:
+      return (double) ((long) value);
+    default:
+      throw new FLLInternalException("Unknown floating point type: "
+          + getFloatingPoint());
+    }
   }
 
 }

@@ -6,6 +6,7 @@
 
 package fll.xml;
 
+import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Element;
@@ -98,4 +99,31 @@ public class EnumConditionStatement extends AbstractConditionStatement {
     return mComparison;
   }
 
+  public boolean isTrue(TeamScore teamScore) {
+    final String leftStr;
+    if (null != getLeftGoal()) {
+      leftStr = teamScore.getEnumRawScore(getLeftGoal().getName());
+    } else {
+      leftStr = getLeftString();
+    }
+
+    final String rightStr;
+    if (null != getRightGoal()) {
+      rightStr = teamScore.getEnumRawScore(getRightGoal().getName());
+    } else {
+      rightStr = getLeftString();
+    }
+
+    final boolean result = ComparisonUtils.safeEquals(leftStr, rightStr);
+    switch (getComparison()) {
+    case EQUAL_TO:
+      return result;
+    case NOT_EQUAL_TO:
+      return !result;
+    default:
+      throw new FLLInternalException("Unknown comparison: "
+          + getComparison());
+    }
+
+  }
 }

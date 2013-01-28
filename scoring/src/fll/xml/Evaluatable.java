@@ -19,6 +19,6 @@ public interface Evaluatable {
    * @param teamScore the individual score elements for a team
    * @return the score
    */
-  //FIXME public double evaluate(final TeamScore teamScore);
+  public double evaluate(final TeamScore teamScore);
 
 }

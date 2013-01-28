@@ -14,6 +14,8 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Element;
 
+import fll.web.playoff.TeamScore;
+
 public class ComputedGoal extends AbstractGoal implements VariableScope {
 
   public ComputedGoal(final Element ele,
@@ -51,6 +53,14 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
     }
     throw new ScopeException("Cannot find variable '"
         + name + "'");
+  }
+
+  public double getRawScore(final TeamScore teamScore) {
+    return getSwitch().evaluate(teamScore);
+  }
+
+  public double getComputedScore(final TeamScore teamScore) {
+    return getRawScore(teamScore);
   }
 
 }

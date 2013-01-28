@@ -11,7 +11,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import org.w3c.dom.Element;
 
 import fll.util.FLLInternalException;
-import fll.util.FLLRuntimeException;
+import fll.util.FP;
 import fll.web.playoff.TeamScore;
 
 /**
@@ -63,6 +63,29 @@ public class ConditionStatement extends AbstractConditionStatement {
 
   public InequalityComparison getComparison() {
     return mComparison;
+  }
+
+  public boolean isTrue(TeamScore teamScore) {
+    final double left = getLeft().evaluate(teamScore);
+    final double right = getRight().evaluate(teamScore);
+
+    switch (getComparison()) {
+    case GREATER_THAN:
+      return FP.greaterThan(left, right, ChallengeParser.INITIAL_VALUE_TOLERANCE);
+    case GREATER_THAN_OR_EQUAL:
+      return FP.greaterThanOrEqual(left, right, ChallengeParser.INITIAL_VALUE_TOLERANCE);
+    case LESS_THAN:
+      return FP.lessThan(left, right, ChallengeParser.INITIAL_VALUE_TOLERANCE);
+    case LESS_THAN_OR_EQUAL:
+      return FP.lessThanOrEqual(left, right, ChallengeParser.INITIAL_VALUE_TOLERANCE);
+    case EQUAL_TO:
+      return FP.equals(left, right, ChallengeParser.INITIAL_VALUE_TOLERANCE);
+    case NOT_EQUAL_TO:
+      return !FP.equals(left, right, ChallengeParser.INITIAL_VALUE_TOLERANCE);
+    default:
+      throw new FLLInternalException("Unknown comparison: "
+          + getComparison());
+    }
   }
 
 }

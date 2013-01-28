@@ -26,4 +26,10 @@ public class VariableTerm extends AbstractTerm {
     return mVariable;
   }
 
+  @Override
+  public double evaluate(final TeamScore teamScore) {
+    return getCoefficient()
+        * getVariable().evaluate(teamScore);
+  }
+
 }
