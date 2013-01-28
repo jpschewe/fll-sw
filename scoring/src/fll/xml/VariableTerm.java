@@ -16,14 +16,16 @@ public class VariableTerm extends AbstractTerm {
                       final VariableScope scope) {
     super(ele);
 
-    final String variableName = ele.getAttribute("variable");
-    mVariable = scope.getVariable(variableName);
+    mVariableName = ele.getAttribute("variable");
+    mVariableScope = scope;
   }
 
-  private final Variable mVariable;
+  private final String mVariableName;
+
+  private final VariableScope mVariableScope;
 
   public Variable getVariable() {
-    return mVariable;
+    return mVariableScope.getVariable(mVariableName);
   }
 
   @Override

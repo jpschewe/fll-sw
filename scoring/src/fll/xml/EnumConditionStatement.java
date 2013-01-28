@@ -22,17 +22,19 @@ public class EnumConditionStatement extends AbstractConditionStatement {
   public EnumConditionStatement(final Element ele,
                                 final GoalScope goalScope) {
 
+    mGoalScope = goalScope;
+
     final Element leftEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName("left")).next();
     final NodelistElementCollectionAdapter leftEles = new NodelistElementCollectionAdapter(
                                                                                            leftEle.getElementsByTagName("goalRef"));
     if (leftEles.hasNext()) {
       final Element e = leftEles.next();
-      mLeftGoal = goalScope.getGoal(e.getAttribute("goal"));
+      mLeftGoalName = e.getAttribute("goal");
       mLeftString = null;
     } else {
       final Element e = new NodelistElementCollectionAdapter(leftEle.getElementsByTagName("stringConstant")).next();
       mLeftString = e.getAttribute("value");
-      mLeftGoal = null;
+      mLeftGoalName = null;
     }
 
     if (new NodelistElementCollectionAdapter(ele.getElementsByTagName("equal-to")).hasNext()) {
@@ -48,14 +50,16 @@ public class EnumConditionStatement extends AbstractConditionStatement {
                                                                                             rightEle.getElementsByTagName("goalRef"));
     if (rightEles.hasNext()) {
       final Element e = rightEles.next();
-      mRightGoal = goalScope.getGoal(e.getAttribute("goal"));
+      mRightGoalName = e.getAttribute("goal");
       mRightString = null;
     } else {
       final Element e = new NodelistElementCollectionAdapter(rightEle.getElementsByTagName("stringConstant")).next();
       mRightString = e.getAttribute("value");
-      mRightGoal = null;
+      mRightGoalName = null;
     }
   }
+
+  private final GoalScope mGoalScope;
 
   private final String mLeftString;
 
@@ -66,13 +70,13 @@ public class EnumConditionStatement extends AbstractConditionStatement {
     return mLeftString;
   }
 
-  private final AbstractGoal mLeftGoal;
+  private final String mLeftGoalName;
 
   /**
    * Left goal, may be null, but then leftString is not null.
    */
   public AbstractGoal getLeftGoal() {
-    return mLeftGoal;
+    return mGoalScope.getGoal(mLeftGoalName);
   }
 
   private final String mRightString;
@@ -84,13 +88,13 @@ public class EnumConditionStatement extends AbstractConditionStatement {
     return mRightString;
   }
 
-  private final AbstractGoal mRightGoal;
+  private final String mRightGoalName;
 
   /**
    * Right goal, may be null, but then rightString is not null.
    */
   public AbstractGoal getRightGoal() {
-    return mRightGoal;
+    return mGoalScope.getGoal(mRightGoalName);
   }
 
   private final EqualityComparison mComparison;

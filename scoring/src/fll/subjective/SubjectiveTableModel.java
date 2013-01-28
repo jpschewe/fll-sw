@@ -7,6 +7,7 @@ package fll.subjective;
 
 import java.text.ParseException;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
@@ -44,7 +45,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
                               final ScoreCategory subjectiveCategory) {
     _scoreDocument = scoreDocument;
     _subjectiveCategory = subjectiveCategory;
-    _goals = _subjectiveCategory.getGoals();
+    _goals = new LinkedList<AbstractGoal>(_subjectiveCategory.getGoals());
     final List<Element> scoreElements = getScoreElements(_scoreDocument, _subjectiveCategory.getName());
     _scoreElements = new Element[scoreElements.size()];
     for (int i = 0; i < scoreElements.size(); i++) {

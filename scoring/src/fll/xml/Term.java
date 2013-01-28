@@ -21,14 +21,16 @@ public class Term extends AbstractTerm {
     super(ele);
     mScoreType = GoalScoreType.fromString(ele.getAttribute("scoreType"));
 
-    final String goalName = ele.getAttribute("goal");
-    mGoal = scope.getGoal(goalName);
+    mGoalScope = scope;
+    mGoalName = ele.getAttribute("goal");
   }
 
-  private final AbstractGoal mGoal;
+  private final String mGoalName;
+
+  private final GoalScope mGoalScope;
 
   public AbstractGoal getGoal() {
-    return mGoal;
+    return mGoalScope.getGoal(mGoalName);
   }
 
   private final GoalScoreType mScoreType;
@@ -51,8 +53,9 @@ public class Term extends AbstractTerm {
       throw new FLLInternalException("Unknown score type: "
           + getScoreType());
     }
-    
-    value = value * getCoefficient();
+
+    value = value
+        * getCoefficient();
 
     switch (getFloatingPoint()) {
     case DECIMAL:
