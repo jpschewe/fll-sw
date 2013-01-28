@@ -172,23 +172,6 @@ public abstract class TeamScore {
     return _categoryDescription;
   }
 
-  /**
-   * Get the name of the the category, same as the name of the database table
-   * that stores the category information.
-   * 
-   * @return the name of the category
-   */
-  public final String getCategoryName() {
-    if ("Performance".equals(getCategoryDescription().getNodeName())) {
-      return "Performance";
-    } else if ("subjectiveCategory".equals(getCategoryDescription().getNodeName())) {
-      return getCategoryDescription().getAttribute("name");
-    } else {
-      throw new RuntimeException("Unexpected category element found: "
-          + getCategoryDescription().getNodeName());
-    }
-  }
-
   private final Element _categoryDescription;
 
   /**

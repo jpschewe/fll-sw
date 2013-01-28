@@ -40,7 +40,9 @@ import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.web.admin.UploadSubjectiveData;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
+import fll.xml.ScoreCategory;
 import fll.xml.XMLUtils;
 
 /**
@@ -117,11 +119,18 @@ public class SubjectiveScoresTest {
       XMLUtils.writeXML(scoreDocument, testWriter, "UTF-8");
       LOGGER.info(testWriter.toString());
       
-      final Element subjectiveElement = SubjectiveUtils.getSubjectiveElement(challengeDocument, category);
+      final ChallengeDescription challenge = new ChallengeDescription(challengeDocument.getDocumentElement());
+      ScoreCategory scoreCategory = null;
+      for(final ScoreCategory sc : challenge.getSubjectiveCategories()) {
+        if(category.equals(sc.getName())) {
+          scoreCategory = sc;
+        }
+      }
+      Assert.assertNotNull(scoreCategory);
 
       
       // create subjective table model for the category we're going to edit
-      final SubjectiveTableModel tableModel = new SubjectiveTableModel(scoreDocument, subjectiveElement);
+      final SubjectiveTableModel tableModel = new SubjectiveTableModel(scoreDocument, scoreCategory);
 
       
       // enter scores for a team and category
