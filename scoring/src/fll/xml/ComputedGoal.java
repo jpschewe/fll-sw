@@ -63,4 +63,34 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
     return getRawScore(teamScore);
   }
 
+  @Override
+  public boolean isComputed() {
+    return true;
+  }
+
+  @Override
+  public boolean isEnumerated() {
+    return false;
+  }
+
+  @Override
+  public List<EnumeratedValue> getValues() {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public ScoreType getScoreType() {
+    return ScoreType.FLOAT;
+  }
+
+  @Override
+  public double getMin() {
+    return -1
+        * Double.MAX_VALUE;
+  }
+
+  public double getMax() {
+    return Double.MAX_VALUE;
+  }
+
 }

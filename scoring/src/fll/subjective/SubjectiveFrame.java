@@ -63,7 +63,6 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyledDocument;
 
 import net.mtu.eggplant.util.BasicFileFilter;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -74,10 +73,10 @@ import org.xml.sax.SAXParseException;
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
+import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.EnumeratedValue;
-import fll.xml.Goal;
 import fll.xml.ScoreCategory;
 import fll.xml.XMLUtils;
 
@@ -300,7 +299,7 @@ public final class SubjectiveFrame extends JFrame {
     setupTabReturnBehavior(table);
 
     int goalIndex = 0;
-    for (final Goal goal : subjectiveCategory.getGoals()) {
+    for (final AbstractGoal goal : subjectiveCategory.getGoals()) {
       final TableColumn column = table.getColumnModel().getColumn(goalIndex
           + SubjectiveTableModel.NUM_COLUMNS_LEFT_OF_SCORES);
       if (goal.isEnumerated()) {
@@ -502,11 +501,11 @@ public final class SubjectiveFrame extends JFrame {
       final String category = subjectiveCategory.getName();
       final String categoryTitle = subjectiveCategory.getTitle();
 
-      final List<Goal> goals = subjectiveCategory.getGoals();
+      final List<AbstractGoal> goals = subjectiveCategory.getGoals();
       final List<Element> scoreElements = SubjectiveTableModel.getScoreElements(_scoreDocument, category);
       for (final Element scoreElement : scoreElements) {
         int numValues = 0;
-        for (final Goal goal : goals) {
+        for (final AbstractGoal goal : goals) {
           final String goalName = goal.getName();
 
           final Element subEle = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
