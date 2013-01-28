@@ -10,6 +10,9 @@ import java.io.Serializable;
 
 import org.w3c.dom.Element;
 
+/**
+ * Common elements of {@link Term} and {@link VariableTerm}.
+ */
 public abstract class AbstractTerm implements Evaluatable, Serializable {
 
   public AbstractTerm(final Element ele) {

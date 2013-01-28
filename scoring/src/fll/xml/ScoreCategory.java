@@ -18,7 +18,7 @@ import org.w3c.dom.Element;
 /**
  * 
  */
-public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
+public class ScoreCategory implements Serializable, GoalScope {
 
   public ScoreCategory(final Element ele) {
     this(ele, ele.getAttribute("name"), ele.getAttribute("title"));

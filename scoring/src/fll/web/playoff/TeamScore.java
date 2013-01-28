@@ -85,7 +85,7 @@ public abstract class TeamScore {
    * @param goalName the goal to get the score for
    * @return the score, null if there is no score for the specified name
    */
-  public abstract Double getRawScore(String goalName);
+  public abstract Double getRawScore(final String goalName);
 
   /**
    * The computed score for a particular goal. This handles both "goal" elements

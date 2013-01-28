@@ -24,12 +24,12 @@ public class SwitchStatement implements Evaluatable, Serializable {
                          final VariableScope variableScope) {
 
     final List<CaseStatement> cases = new LinkedList<CaseStatement>();
-    for(final Element caseEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("case"))) {
+    for (final Element caseEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("case"))) {
       final CaseStatement cs = new CaseStatement(caseEle, goalScope, variableScope);
       cases.add(cs);
     }
     mCases = Collections.unmodifiableList(cases);
-    
+
     final Element defaultEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName("default")).next();
     mDefaultCase = new ComplexPolynomial(defaultEle, goalScope, variableScope);
   }
@@ -44,6 +44,16 @@ public class SwitchStatement implements Evaluatable, Serializable {
 
   public ComplexPolynomial getDefaultCase() {
     return mDefaultCase;
+  }
+
+  @Override
+  public double evaluate(final TeamScore teamScore) {
+    for (final CaseStatement cs : getCases()) {
+      if (cs.getCondition().isTrue(teamScore)) {
+        return cs.evaluate(teamScore);
+      }
+    }
+    return getDefaultCase().evaluate(teamScore);
   }
 
 }

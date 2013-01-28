@@ -67,4 +67,17 @@ public class CaseStatement implements Evaluatable, Serializable {
     return mResultSwitch;
   }
 
+  @Override
+  public double evaluate(final TeamScore teamScore) {
+    if (getCondition().isTrue(teamScore)) {
+      if (null != getResultPoly()) {
+        return getResultPoly().evaluate(teamScore);
+      } else {
+        return getResultSwitch().evaluate(teamScore);
+      }
+    } else {
+      return 0;
+    }
+  }
+
 }

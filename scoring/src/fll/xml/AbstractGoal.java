@@ -12,7 +12,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public abstract class AbstractGoal implements Evaluatable, Serializable {
+import fll.web.playoff.TeamScore;
+
+public abstract class AbstractGoal implements Serializable {
 
   public AbstractGoal(final Element ele) {
     mName = ele.getAttribute("name");
@@ -44,5 +46,19 @@ public abstract class AbstractGoal implements Evaluatable, Serializable {
   public String getDescription() {
     return mDescription;
   }
+
+  /**
+   * Get the raw score.
+   * 
+   * @return the score or NaN if there is currently no score for this goal
+   */
+  public abstract double getRawScore(final TeamScore teamScore);
+
+  /**
+   * Get the computed score.
+   * 
+   * @return the score or NaN if there is currently no score for this goal
+   */
+  public abstract double getComputedScore(final TeamScore teamScore);
 
 }
