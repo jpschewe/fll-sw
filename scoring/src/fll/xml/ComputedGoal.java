@@ -6,9 +6,11 @@
 
 package fll.xml;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
@@ -22,21 +24,21 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
                       final GoalScope goalScope) {
     super(ele);
 
-    final List<Variable> variables = new LinkedList<Variable>();
+    final Map<String, Variable> variables = new HashMap<String, Variable>();
     for (final Element varEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("variable"))) {
       final Variable var = new Variable(varEle, goalScope);
-      variables.add(var);
+      variables.put(var.getName(), var);
     }
-    mVariables = Collections.unmodifiableList(variables);
+    mVariables = Collections.unmodifiableMap(variables);
 
     final Element switchEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName("switch")).next();
     mSwitch = new SwitchStatement(switchEle, goalScope, this);
   }
 
-  private final List<Variable> mVariables;
+  private final Map<String, Variable> mVariables;
 
-  public List<Variable> getVariables() {
-    return mVariables;
+  public Collection<Variable> getVariables() {
+    return mVariables.values();
   }
 
   private final SwitchStatement mSwitch;
@@ -46,13 +48,12 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
   }
 
   public Variable getVariable(final String name) throws ScopeException {
-    for (final Variable var : mVariables) {
-      if (name.equals(var.getName())) {
-        return var;
-      }
+    if (mVariables.containsKey(name)) {
+      return mVariables.get(name);
+    } else {
+      throw new ScopeException("Cannot find variable '"
+          + name + "'");
     }
-    throw new ScopeException("Cannot find variable '"
-        + name + "'");
   }
 
   public double getRawScore(final TeamScore teamScore) {

@@ -7,9 +7,10 @@
 package fll.xml;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
@@ -33,24 +34,24 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
     mTitle = title;
     mWeight = Double.valueOf(ele.getAttribute("weight"));
 
-    final List<AbstractGoal> goals = new LinkedList<AbstractGoal>();
+    final Map<String, AbstractGoal> goals = new HashMap<String, AbstractGoal>();
     for (final Element goalEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
       if ("goal".equals(goalEle.getNodeName())) {
         final Goal goal = new Goal(goalEle);
-        goals.add(goal);
+        goals.put(goal.getName(), goal);
       } else if ("computedGoal".equals(goalEle.getNodeName())) {
         final ComputedGoal compGoal = new ComputedGoal(goalEle, this);
-        goals.add(compGoal);
+        goals.put(compGoal.getName(), compGoal);
       }
     }
-    mGoals = Collections.unmodifiableList(goals);
+    mGoals = Collections.unmodifiableMap(goals);
 
   }
 
-  private final List<AbstractGoal> mGoals;
+  private final Map<String, AbstractGoal> mGoals;
 
-  public List<AbstractGoal> getGoals() {
-    return mGoals;
+  public Collection<AbstractGoal> getGoals() {
+    return mGoals.values();
   }
 
   private final String mName;
@@ -72,13 +73,13 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
   }
 
   public AbstractGoal getGoal(final String name) {
-    for (final AbstractGoal g : getGoals()) {
-      if (g.getName().equals(name)) {
-        return g;
-      }
+    if (mGoals.containsKey(name)) {
+      return mGoals.get(name);
+    } else {
+      throw new ScopeException("Cannot find goal named '"
+          + name + "'");
     }
-    throw new ScopeException("Cannot find goal named '"
-        + name + "'");
+
   }
 
   @Override
