@@ -94,7 +94,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
     try {
       final Element root = challengeDocument.getDocumentElement();
       final String challengeTitle = root.getAttribute("title");
-      final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+      final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(root);
 
       final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
                                                                                       root.getElementsByTagName("subjectiveCategory")).asList();

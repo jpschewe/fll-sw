@@ -50,7 +50,8 @@ public class CategorizedScores extends BaseFLLServlet {
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
 
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+    final Element root = challengeDocument.getDocumentElement();
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(root);
 
     final Formatter writer = new Formatter(response.getWriter());
     writer.format("<html><body>");

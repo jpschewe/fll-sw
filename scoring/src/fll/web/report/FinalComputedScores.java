@@ -113,7 +113,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                     "Cannot generate final score report for a tournament other than the current tournament");
     }
 
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+    final Element root = challengeDocument.getDocumentElement();
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(root);
 
     final TournamentSchedule schedule;
     if (TournamentSchedule.scheduleExistsInDatabase(connection, tournament.getTournamentID())) {

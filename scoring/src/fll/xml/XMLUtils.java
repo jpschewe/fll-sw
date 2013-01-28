@@ -76,11 +76,10 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
   }
 
   /**
-   * Get the bracket sort type from the document. If the attribute doesn't
+   * Get the bracket sort type from the element. If the attribute doesn't
    * exist, then return {@link BracketSortType#SEEDING}.
    */
-  public static BracketSortType getBracketSort(final Document challengeDocument) {
-    final Element root = challengeDocument.getDocumentElement();
+  public static BracketSortType getBracketSort(final Element root) {
     if (root.hasAttribute("bracketSort")) {
       final String sortStr = root.getAttribute("bracketSort");
       if (null == sortStr) {
@@ -91,14 +90,6 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
     } else {
       return BracketSortType.SEEDING;
     }
-  }
-
-  /**
-   * Get the winner criteria for the tournament.
-   */
-  public static WinnerType getWinnerCriteria(final Document challengeDocument) {
-    final Element root = challengeDocument.getDocumentElement();
-    return getWinnerCriteria(root);
   }
 
   /**

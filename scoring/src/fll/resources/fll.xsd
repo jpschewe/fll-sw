@@ -430,12 +430,14 @@
   </xsd:annotation>
   <xsd:complexType>
    <xsd:sequence>
+    <xsd:element name="description" minOccurs="0" maxOccurs="1"
+     type="xsd:string" />
+   
     <xsd:element ref="variable" minOccurs="0" maxOccurs="unbounded" />
     <xsd:element ref="switch" />
    </xsd:sequence>
    <xsd:attribute name="name" type="databaseName" use="required" />
-   <xsd:attribute name="title" type="xsd:string" use="required" />
-   <xsd:attribute name="description" type="xsd:string" />
+   <xsd:attribute name="title" type="xsd:string" use="required" />   
   </xsd:complexType>
   <xsd:key name="variableKey">
    <xsd:annotation>

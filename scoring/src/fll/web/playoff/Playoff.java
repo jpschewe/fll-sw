@@ -392,8 +392,9 @@ public final class Playoff {
     }
     final int currentTournament = Queries.getCurrentTournament(connection);
 
-    final BracketSortType bracketSort = XMLUtils.getBracketSort(challengeDocument);
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+    final Element root = challengeDocument.getDocumentElement();
+    final BracketSortType bracketSort = XMLUtils.getBracketSort(root);
+    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(root);
 
     // Initialize currentRound to contain a full bracket setup (i.e. playoff
     // round 1 teams)

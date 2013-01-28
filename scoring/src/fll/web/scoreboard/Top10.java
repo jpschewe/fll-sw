@@ -26,6 +26,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Utilities;
@@ -110,7 +111,8 @@ public class Top10 extends BaseFLLServlet {
         formatter.format("</tr>");
 
         final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
-        final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+        final Element root = challengeDocument.getDocumentElement();
+        final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(root);
 
         prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore" //
             + " FROM (SELECT TeamNumber, " //
