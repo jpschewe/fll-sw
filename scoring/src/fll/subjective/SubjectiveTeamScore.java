@@ -24,9 +24,8 @@ import fll.web.playoff.TeamScore;
    * @param categoryDescription passed to superclass
    * @param scoreElement the score element that describes the team score
    */
-  public SubjectiveTeamScore(final Element categoryDescription,
-                             final Element scoreEle) throws ParseException {
-    super(categoryDescription, Utilities.NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber")).intValue());
+  public SubjectiveTeamScore(final Element scoreEle) throws ParseException {
+    super(null, Utilities.NUMBER_FORMAT_INSTANCE.parse(scoreEle.getAttribute("teamNumber")).intValue());
     _scoreEle = scoreEle;
   }
 

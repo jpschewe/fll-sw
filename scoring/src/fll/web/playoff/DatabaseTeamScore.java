@@ -147,6 +147,24 @@ public class DatabaseTeamScore extends TeamScore {
   private PreparedStatement _prep = null;
 
   /**
+   * Get the name of the the category, same as the name of the database table
+   * that stores the category information.
+   * 
+   * @return the name of the category
+   */
+  private final String getCategoryName() {
+    if ("Performance".equals(getCategoryDescription().getNodeName())) {
+      return "Performance";
+    } else if ("subjectiveCategory".equals(getCategoryDescription().getNodeName())) {
+      return getCategoryDescription().getAttribute("name");
+    } else {
+      throw new RuntimeException("Unexpected category element found: "
+          + getCategoryDescription().getNodeName());
+    }
+  }
+
+
+  /**
    * Create the result set.
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table")

@@ -15,10 +15,12 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Element;
 
+import fll.web.playoff.TeamScore;
+
 /**
  * 
  */
-public class ScoreCategory implements Serializable, GoalScope {
+public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
 
   public ScoreCategory(final Element ele) {
     this(ele, ele.getAttribute("name"), ele.getAttribute("title"));
@@ -78,19 +80,31 @@ public class ScoreCategory implements Serializable, GoalScope {
   }
 
   public AbstractGoal getGoal(final String name) {
-    for (final Goal g : mGoals) {
+    for (final Goal g : getGoals()) {
       if (g.getName().equals(name)) {
         return g;
       }
     }
 
-    for (final ComputedGoal g : mComputedGoals) {
+    for (final ComputedGoal g : getComputedGoals()) {
       if (g.getName().equals(name)) {
         return g;
       }
     }
     throw new ScopeException("Cannot find goal named '"
         + name + "'");
+  }
+
+  @Override
+  public double evaluate(final TeamScore teamScore) {
+    double total = 0;
+    for (final Goal g : getGoals()) {
+      total += g.getComputedScore(teamScore);
+    }
+    for (final ComputedGoal g : getComputedGoals()) {
+      total += g.getComputedScore(teamScore);
+    }
+    return total;
   }
 
 }
