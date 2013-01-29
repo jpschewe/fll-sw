@@ -28,7 +28,7 @@ if(null == errorMessage || "".equals(errorMessage)) {
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument/fll/@title"/> (Team Column Selection)</h1>
+    <h1>Team Column Selection</h1>
 
     <p>Do not use the forward and back buttons!  Use the supplied links/buttons.</p>
 

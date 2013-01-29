@@ -51,7 +51,7 @@
   </head>          
   <body>
 
-    <h1><x:out select="$challengeDocument/fll/@title"/> (Display Controller)</h1>
+    <h1>Display Controller</h1>
 
     <p>This page is used to control what page is currently visible on the
     display screen.  Note that it takes some time for the display to

@@ -26,7 +26,7 @@ final String errorMsg = ScoreStandardization.checkDataConsistency(connection);
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument/fll/@title"/> (Summarize Scores)</h1>
+    <h1>Summarize Scores</h1>
 
 <%if(null == errorMsg) {%>
   <a href="index.jsp">Normally you'd be redirected here</a>

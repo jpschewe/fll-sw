@@ -64,7 +64,7 @@
 <table border='0' cellpadding='0' cellspacing='0' width='98%'>
 <tr>
 <td align='center'>
-<font face='arial' size='3'><b><x:out select="$challengeDocument/fll/@title" /> (Playoff
+<font face='arial' size='3'><b>${challengeDescription.title } (Playoff
 Round <%=playoffRoundNumber%>, Division <%=division%>)</b></font>
 </td>
 </tr>
