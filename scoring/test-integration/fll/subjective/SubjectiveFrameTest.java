@@ -53,6 +53,7 @@ import fll.db.ImportDBTest;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.admin.DownloadSubjectiveData;
+import fll.xml.ChallengeDescription;
 
 /**
  * Some basic tests for the subjective app.
@@ -122,7 +123,8 @@ public class SubjectiveFrameTest {
       // create the subjective datafile
       subjectiveScores = File.createTempFile("testStartupState", ".fll");
       final FileOutputStream fileStream = new FileOutputStream(subjectiveScores);
-      DownloadSubjectiveData.writeSubjectiveScores(connection, document, fileStream);
+      final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+      DownloadSubjectiveData.writeSubjectiveScores(connection, document, description, fileStream);
       fileStream.close();
 
       final SubjectiveFrame frame = GuiActionRunner.execute(new GuiQuery<SubjectiveFrame>() {

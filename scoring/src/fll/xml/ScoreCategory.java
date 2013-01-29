@@ -7,9 +7,10 @@
 package fll.xml;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
@@ -35,23 +36,28 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
     mWeight = Double.valueOf(ele.getAttribute("weight"));
 
     final Map<String, AbstractGoal> goals = new HashMap<String, AbstractGoal>();
+    final List<AbstractGoal> goalsList = new LinkedList<AbstractGoal>();
     for (final Element goalEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
       if ("goal".equals(goalEle.getNodeName())) {
         final Goal goal = new Goal(goalEle);
         goals.put(goal.getName(), goal);
+        goalsList.add(goal);
       } else if ("computedGoal".equals(goalEle.getNodeName())) {
         final ComputedGoal compGoal = new ComputedGoal(goalEle, this);
         goals.put(compGoal.getName(), compGoal);
+        goalsList.add(compGoal);
       }
     }
     mGoals = Collections.unmodifiableMap(goals);
-
+    mGoalsList = Collections.unmodifiableList(goalsList);
   }
 
   private final Map<String, AbstractGoal> mGoals;
 
-  public Collection<AbstractGoal> getGoals() {
-    return mGoals.values();
+  private final List<AbstractGoal> mGoalsList;
+
+  public List<AbstractGoal> getGoals() {
+    return mGoalsList;
   }
 
   private final String mName;

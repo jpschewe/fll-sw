@@ -17,9 +17,6 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-
-import org.w3c.dom.Element;
-
 import fll.db.Queries;
 import fll.util.JsonUtilities;
 import fll.web.ApplicationAttributes;
@@ -80,13 +77,11 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
                                    final Connection connection) throws SQLException {
     try {
       BracketData bd = constructBracketData(connection, session, application);
-      final Element rootElement = ApplicationAttributes.getChallengeDocument(application).getDocumentElement();
-      final Element perfElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
       final boolean showOnlyVerifiedScores = true;
       final boolean showFinalsScores = false;
       response.reset();
       response.setContentType("application/json");
-      os.print(JsonUtilities.generateJsonBracketInfo(pairedMap, connection, perfElement, bd, showOnlyVerifiedScores,
+      os.print(JsonUtilities.generateJsonBracketInfo(pairedMap, connection, bd, showOnlyVerifiedScores,
                                                      showFinalsScores));
     } catch (final IOException e) {
       throw new RuntimeException(e);

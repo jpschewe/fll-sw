@@ -48,6 +48,9 @@ import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.HttpTeamScore;
 import fll.web.playoff.Playoff;
 import fll.web.playoff.TeamScore;
+import fll.xml.ChallengeDescription;
+import fll.xml.PerformanceScoreCategory;
+import fll.xml.ScoreCategory;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
@@ -378,21 +381,20 @@ public final class Queries {
    *         category and the value is the rank.
    */
   public static Map<String, Map<Integer, Map<String, Integer>>> getTeamRankings(final Connection connection,
-                                                                                final Document challengeDocument)
+                                                                                final ChallengeDescription challengeDescription)
       throws SQLException {
     final Map<String, Map<Integer, Map<String, Integer>>> rankingMap = new HashMap<String, Map<Integer, Map<String, Integer>>>();
     final int tournament = getCurrentTournament(connection);
     final List<String> divisions = getEventDivisions(connection);
 
-    final Element root = challengeDocument.getDocumentElement();
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(root);
+    final WinnerType winnerCriteria = challengeDescription.getWinner();
     final String ascDesc = winnerCriteria.getSortString();
 
     // find the performance ranking
     determinePerformanceRanking(connection, ascDesc, tournament, divisions, rankingMap);
 
     // find the subjective category rankings
-    determineSubjectiveRanking(connection, ascDesc, tournament, divisions, challengeDocument, rankingMap);
+    determineSubjectiveRanking(connection, ascDesc, tournament, divisions, challengeDescription, rankingMap);
 
     // find the overall ranking
     determineOverallRanking(connection, ascDesc, tournament, divisions, rankingMap);
@@ -414,17 +416,15 @@ public final class Queries {
                                                  final String ascDesc,
                                                  final int tournament,
                                                  final List<String> divisions,
-                                                 final Document challengeDocument,
+                                                 final ChallengeDescription challengeDescription,
                                                  final Map<String, Map<Integer, Map<String, Integer>>> rankingMap)
       throws SQLException {
 
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
-    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
-                                                                                challengeDocument.getDocumentElement()
-                                                                                                 .getElementsByTagName("subjectiveCategory"))) {
-      final String title = subjectiveElement.getAttribute("title");
-      final String name = subjectiveElement.getAttribute("name");
+    for (final ScoreCategory cat : challengeDescription.getSubjectiveCategories()) {
+      final String title = cat.getTitle();
+      final String name = cat.getName();
       subjectiveCategories.put(title, name);
     }
 
@@ -1535,13 +1535,12 @@ public final class Queries {
    * team doesn't exist.
    * 
    * @param teamNumber team to delete
-   * @param document the challenge document
    * @param connection connection to database, needs delete privileges
    * @throws SQLException on an error talking to the database
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table")
   public static void deleteTeam(final int teamNumber,
-                                final Document document,
+                                final ChallengeDescription description,
                                 final Connection connection) throws SQLException {
     PreparedStatement prep = null;
     final boolean autoCommit = connection.getAutoCommit();
@@ -1556,10 +1555,8 @@ public final class Queries {
       prep = null;
 
       // delete from subjective categories
-      for (final Element category : new NodelistElementCollectionAdapter(
-                                                                         document.getDocumentElement()
-                                                                                 .getElementsByTagName("subjectiveCategory"))) {
-        final String name = category.getAttribute("name");
+      for (final ScoreCategory category : description.getSubjectiveCategories()) {
+        final String name = category.getName();
         prep = connection.prepareStatement("DELETE FROM "
             + name + " WHERE TeamNumber = ?");
         prep.setInt(1, teamNumber);
@@ -1605,53 +1602,48 @@ public final class Queries {
   /**
    * Defaults to current tournament.
    * 
-   * @see #updateScoreTotals(Document, Connection, int)
+   * @see #updateScoreTotals(ChallengeDescription, Connection, int)
    */
-  public static void updateScoreTotals(final Document document,
+  public static void updateScoreTotals(final ChallengeDescription description,
                                        final Connection connection) throws SQLException {
     final int tournament = getCurrentTournament(connection);
-    updateScoreTotals(document, connection, tournament);
+    updateScoreTotals(description, connection, tournament);
   }
 
   /**
    * Total the scores in the database for the specified tournament.
    * 
-   * @param document the challenge document
    * @param connection connection to database, needs write privileges
    * @param tournament tournament to update score totals for
    * @throws SQLException if an error occurs
-   * @see #updatePerformanceScoreTotals(Document, Connection, int)
-   * @see #updateSubjectiveScoreTotals(Document, Connection, int)
+   * @see #updatePerformanceScoreTotals(ChallengeDescription, Connection, int)
+   * @see #updateSubjectiveScoreTotals(ChallengeDescription, Connection, int)
    */
-  public static void updateScoreTotals(final Document document,
+  public static void updateScoreTotals(final ChallengeDescription description,
                                        final Connection connection,
                                        final int tournament) throws SQLException {
-    updatePerformanceScoreTotals(document, connection, tournament);
+    updatePerformanceScoreTotals(description, connection, tournament);
 
-    updateSubjectiveScoreTotals(document, connection, tournament);
+    updateSubjectiveScoreTotals(description, connection, tournament);
   }
 
   /**
    * Compute the total scores for all entered subjective scores.
    * 
-   * @param document
    * @param connection
    * @throws SQLException
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
-  public static void updateSubjectiveScoreTotals(final Document document,
+  public static void updateSubjectiveScoreTotals(final ChallengeDescription description,
                                                  final Connection connection,
                                                  final int tournament) throws SQLException {
-    final Element rootElement = document.getDocumentElement();
-
     PreparedStatement updatePrep = null;
     PreparedStatement selectPrep = null;
     ResultSet rs = null;
     try {
       // Subjective ---
-      for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
-                                                                                  rootElement.getElementsByTagName("subjectiveCategory"))) {
-        final String categoryName = subjectiveElement.getAttribute("name");
+      for (final ScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
+        final String categoryName = subjectiveElement.getName();
 
         // build up the SQL
         updatePrep = connection.prepareStatement("UPDATE "//
@@ -1665,8 +1657,8 @@ public final class Queries {
         rs = selectPrep.executeQuery();
         while (rs.next()) {
           final int teamNumber = rs.getInt("TeamNumber");
-          final double computedTotal = ScoreUtils.computeTotalScore(new DatabaseTeamScore(subjectiveElement,
-                                                                                          teamNumber, rs));
+          // FIXME remove first parameter
+          final double computedTotal = ScoreUtils.computeTotalScore(new DatabaseTeamScore(null, teamNumber, rs));
           if (Double.isNaN(computedTotal)) {
             updatePrep.setNull(1, Types.DOUBLE);
           } else {
@@ -1699,11 +1691,9 @@ public final class Queries {
    * @param tournament the tournament to update scores for.
    * @throws SQLException
    */
-  public static void updatePerformanceScoreTotals(final Document document,
+  public static void updatePerformanceScoreTotals(final ChallengeDescription description,
                                                   final Connection connection,
                                                   final int tournament) throws SQLException {
-    final Element rootElement = document.getDocumentElement();
-
     PreparedStatement updatePrep = null;
     PreparedStatement selectPrep = null;
     ResultSet rs = null;
@@ -1715,15 +1705,15 @@ public final class Queries {
       selectPrep = connection.prepareStatement("SELECT * FROM Performance WHERE Tournament = ?");
       selectPrep.setInt(1, tournament);
 
-      final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
-      final double minimumPerformanceScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(performanceElement.getAttribute("minimumScore"))
-                                                                             .doubleValue();
+      final PerformanceScoreCategory performanceElement = description.getPerformance();
+      final double minimumPerformanceScore = performanceElement.getMinimumScore();
       rs = selectPrep.executeQuery();
       while (rs.next()) {
         if (!rs.getBoolean("Bye")) {
           final int teamNumber = rs.getInt("TeamNumber");
           final int runNumber = rs.getInt("RunNumber");
-          final double computedTotal = ScoreUtils.computeTotalScore(new DatabaseTeamScore(performanceElement,
+          final double computedTotal = ScoreUtils.computeTotalScore(new DatabaseTeamScore(null, // FIXME
+                                                                                                // performanceElement,
                                                                                           teamNumber, runNumber, rs));
           if (!Double.isNaN(computedTotal)) {
             updatePrep.setDouble(1, Math.max(computedTotal, minimumPerformanceScore));
@@ -1853,6 +1843,7 @@ public final class Queries {
                                                  final int newTournament) throws SQLException {
 
     final Document document = GlobalParameters.getChallengeDocument(connection);
+    final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
 
     final int currentTournament = getTeamCurrentTournament(connection, teamNumber);
 
@@ -1863,7 +1854,7 @@ public final class Queries {
 
     PreparedStatement prep = null;
     try {
-      deleteTeamFromTournamet(connection, document, teamNumber, currentTournament);
+      deleteTeamFromTournamet(connection, description, teamNumber, currentTournament);
 
       final String division = getDivisionOfTeam(connection, teamNumber);
       if (LOGGER.isTraceEnabled()) {
@@ -1921,10 +1912,10 @@ public final class Queries {
    * @param teamNumber the team
    */
   public static void demoteTeam(final Connection connection,
-                                final Document document,
+                                final ChallengeDescription description,
                                 final int teamNumber) throws SQLException {
     final int currentTournament = getTeamCurrentTournament(connection, teamNumber);
-    deleteTeamFromTournamet(connection, document, teamNumber, currentTournament);
+    deleteTeamFromTournamet(connection, description, teamNumber, currentTournament);
   }
 
   /**
@@ -1933,16 +1924,14 @@ public final class Queries {
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   private static void deleteTeamFromTournamet(final Connection connection,
-                                              final Document document,
+                                              final ChallengeDescription description,
                                               final int teamNumber,
                                               final int currentTournament) throws SQLException {
     PreparedStatement prep = null;
     try {
       // delete from subjective categories
-      for (final Element category : new NodelistElementCollectionAdapter(
-                                                                         document.getDocumentElement()
-                                                                                 .getElementsByTagName("subjectiveCategory"))) {
-        final String name = category.getAttribute("name");
+      for (final ScoreCategory category : description.getSubjectiveCategories()) {
+        final String name = category.getName();
         prep = connection.prepareStatement("DELETE FROM "
             + name + " WHERE TeamNumber = ? AND Tournament = ?");
         prep.setInt(1, teamNumber);
@@ -2199,11 +2188,10 @@ public final class Queries {
    * tournament
    * 
    * @param connection the database connection
-   * @param document XML document to describe the tournament
    * @return true if everything is ok
    */
   public static boolean isJudgesProperlyAssigned(final Connection connection,
-                                                 final Document document) throws SQLException {
+                                                 final ChallengeDescription challengeDescription) throws SQLException {
 
     PreparedStatement prep = null;
     ResultSet rs = null;
@@ -2211,10 +2199,8 @@ public final class Queries {
       prep = connection.prepareStatement("SELECT id FROM Judges WHERE Tournament = ? AND category = ?");
       prep.setInt(1, getCurrentTournament(connection));
 
-      for (final Element element : new NodelistElementCollectionAdapter(
-                                                                        document.getDocumentElement()
-                                                                                .getElementsByTagName("subjectiveCategory"))) {
-        final String categoryName = element.getAttribute("name");
+      for (final ScoreCategory element : challengeDescription.getSubjectiveCategories()) {
+        final String categoryName = element.getName();
         prep.setString(2, categoryName);
         rs = prep.executeQuery();
         if (!rs.next()) {

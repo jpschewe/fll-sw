@@ -21,7 +21,8 @@ public class EnumConditionStatement extends AbstractConditionStatement {
 
   public EnumConditionStatement(final Element ele,
                                 final GoalScope goalScope) {
-
+    super(ele);
+    
     mGoalScope = goalScope;
 
     final Element leftEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName("left")).next();
@@ -35,14 +36,6 @@ public class EnumConditionStatement extends AbstractConditionStatement {
       final Element e = new NodelistElementCollectionAdapter(leftEle.getElementsByTagName("stringConstant")).next();
       mLeftString = e.getAttribute("value");
       mLeftGoalName = null;
-    }
-
-    if (new NodelistElementCollectionAdapter(ele.getElementsByTagName("equal-to")).hasNext()) {
-      mComparison = EqualityComparison.EQUAL_TO;
-    } else if (new NodelistElementCollectionAdapter(ele.getElementsByTagName("not-equal-to")).hasNext()) {
-      mComparison = EqualityComparison.NOT_EQUAL_TO;
-    } else {
-      throw new FLLInternalException("Unknown comparison");
     }
 
     final Element rightEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName("right")).next();
@@ -95,12 +88,6 @@ public class EnumConditionStatement extends AbstractConditionStatement {
    */
   public AbstractGoal getRightGoal() {
     return mGoalScope.getGoal(mRightGoalName);
-  }
-
-  private final EqualityComparison mComparison;
-
-  public EqualityComparison getComparison() {
-    return mComparison;
   }
 
   public boolean isTrue(TeamScore teamScore) {

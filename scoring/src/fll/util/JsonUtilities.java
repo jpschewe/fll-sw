@@ -13,8 +13,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.w3c.dom.Element;
-
 import com.google.gson.Gson;
 
 import fll.db.Queries;
@@ -58,7 +56,6 @@ public final class JsonUtilities {
   }
   public static String generateJsonBracketInfo(final Map<Integer, Integer> ids,
                                                final Connection connection,
-                                               final Element performanceElement,
                                                final BracketData bracketData,
                                                final boolean showOnlyVerifiedScores,
                                                final boolean showFinalsScores) {
@@ -74,7 +71,8 @@ public final class JsonUtilities {
         final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
         final int teamNumber = tbc.getTeam().getTeamNumber();
         final int runNumber = Playoff.getRunNumber(connection, teamNumber, playoffRound);
-        final TeamScore teamScore = new DatabaseTeamScore(performanceElement, currentTournament, teamNumber,
+        //FIXME database team score
+        final TeamScore teamScore = new DatabaseTeamScore(null, currentTournament, teamNumber,
                                                           runNumber, connection);
         final double computedTeamScore = ScoreUtils.computeTotalScore(teamScore);
         final boolean realScore = !Double.isNaN(computedTeamScore);

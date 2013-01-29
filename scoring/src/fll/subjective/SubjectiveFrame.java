@@ -501,7 +501,7 @@ public final class SubjectiveFrame extends JFrame {
       final String category = subjectiveCategory.getName();
       final String categoryTitle = subjectiveCategory.getTitle();
 
-      final Collection<AbstractGoal> goals = subjectiveCategory.getGoals();
+      final List<AbstractGoal> goals = subjectiveCategory.getGoals();
       final List<Element> scoreElements = SubjectiveTableModel.getScoreElements(_scoreDocument, category);
       for (final Element scoreElement : scoreElements) {
         int numValues = 0;

@@ -24,6 +24,8 @@ import org.w3c.dom.Element;
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
+import fll.xml.ChallengeDescription;
+import fll.xml.ScoreCategory;
 
 /**
  * Does score standardization routines from the web.
@@ -45,7 +47,7 @@ public final class ScoreStandardization {
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable param for column to set")
   public static void summarizeScores(final Connection connection,
-                                     final Document document,
+                                     final ChallengeDescription description,
                                      final int tournament) throws SQLException, ParseException {
     if (tournament != Queries.getCurrentTournament(connection)) {
       throw new FLLRuntimeException(
@@ -105,10 +107,8 @@ public final class ScoreStandardization {
         }
 
         // subjective
-        final Element rootElement = document.getDocumentElement();
-        for (final Element catElement : new NodelistElementCollectionAdapter(
-                                                                             rootElement.getElementsByTagName("subjectiveCategory"))) {
-          final String catName = catElement.getAttribute("name");
+        for (final ScoreCategory catElement : description.getSubjectiveCategories()) {
+          final String catName = catElement.getName();
 
           // insert rows from the current tournament and category, keeping team
           // number and score group as well as computing the average (across
@@ -153,7 +153,7 @@ public final class ScoreStandardization {
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable for column name in update")
   public static void standardizeSubjectiveScores(final Connection connection,
-                                                 final Document document,
+                                                 final ChallengeDescription description,
                                                  final int tournament) throws SQLException {
     ResultSet rs = null;
     PreparedStatement updatePrep = null;
@@ -162,12 +162,9 @@ public final class ScoreStandardization {
       final double mean = getStandardizedMean(connection);
       final double sigma = getStandardizedSigma(connection);
 
-      final Element rootElement = document.getDocumentElement();
-
       // subjective categories
-      for (final Element catElement : new NodelistElementCollectionAdapter(
-                                                                           rootElement.getElementsByTagName("subjectiveCategory"))) {
-        final String category = catElement.getAttribute("name");
+      for (final ScoreCategory catElement : description.getSubjectiveCategories()) {
+        final String category = catElement.getName();
 
         /*
          * Update StandardizedScore for each team in the ScoreGroup formula: SS

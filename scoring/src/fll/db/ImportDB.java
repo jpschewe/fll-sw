@@ -47,7 +47,11 @@ import fll.db.TeamPropertyDifference.TeamProperty;
 import fll.util.LogUtils;
 import fll.web.developer.importdb.ImportDBDump;
 import fll.web.developer.importdb.TournamentDifference;
+import fll.xml.AbstractGoal;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
+import fll.xml.PerformanceScoreCategory;
+import fll.xml.ScoreCategory;
 import fll.xml.XMLUtils;
 
 /**
@@ -764,7 +768,7 @@ public final class ImportDB {
                                     final String tournamentName) throws SQLException {
 
     final Document document = GlobalParameters.getChallengeDocument(destinationConnection);
-    final Element rootElement = document.getDocumentElement();
+    final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
 
     final Tournament sourceTournament = Tournament.findTournamentByName(sourceConnection, tournamentName);
     final int sourceTournamentID = sourceTournament.getTournamentID();
@@ -775,9 +779,9 @@ public final class ImportDB {
 
     importTournamentTeams(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
-    importPerformance(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, rootElement);
+    importPerformance(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, description);
 
-    importSubjective(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, rootElement);
+    importSubjective(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID, description);
 
     importTableNames(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
@@ -786,7 +790,7 @@ public final class ImportDB {
     importSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     // update score totals
-    Queries.updateScoreTotals(document, destinationConnection, destTournamentID);
+    Queries.updateScoreTotals(description, destinationConnection, destTournamentID);
   }
 
   private static void importSchedule(final Connection sourceConnection,
@@ -987,13 +991,12 @@ public final class ImportDB {
                                        final Connection destinationConnection,
                                        final int sourceTournamentID,
                                        final int destTournamentID,
-                                       final Element rootElement) throws SQLException {
+                                       final ChallengeDescription description) throws SQLException {
     PreparedStatement destPrep = null;
     try {
       // loop over each subjective category
-      for (final Element categoryElement : new NodelistElementCollectionAdapter(
-                                                                                rootElement.getElementsByTagName("subjectiveCategory"))) {
-        final String tableName = categoryElement.getAttribute("name");
+      for (final ScoreCategory categoryElement : description.getSubjectiveCategories()) {
+        final String tableName = categoryElement.getName();
         if (LOG.isDebugEnabled()) {
           LOG.debug("Importing "
               + tableName);
@@ -1009,11 +1012,14 @@ public final class ImportDB {
         columns.append(" Tournament,");
         columns.append(" TeamNumber,");
         columns.append(" NoShow,");
-        final List<Element> goals = new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("goal")).asList();
-        final int numColumns = goals.size() + 4;
-        for (final Element element : goals) {
-          columns.append(" "
-              + element.getAttribute("name") + ",");
+        final List<AbstractGoal> goals = categoryElement.getGoals();
+        int numColumns = 4;
+        for (final AbstractGoal element : goals) {
+          if (!element.isComputed()) {
+            columns.append(" "
+                + element.getName() + ",");
+            ++numColumns;
+          }
         }
         columns.append(" Judge");
 
@@ -1095,13 +1101,13 @@ public final class ImportDB {
                                         final Connection destinationConnection,
                                         final int sourceTournamentID,
                                         final int destTournamentID,
-                                        final Element rootElement) throws SQLException {
+                                        final ChallengeDescription description) throws SQLException {
     PreparedStatement destPrep = null;
     try {
       if (LOG.isDebugEnabled()) {
         LOG.debug("Importing performance scores");
       }
-      final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
+      final PerformanceScoreCategory performanceElement = description.getPerformance();
       final String tableName = "Performance";
       destPrep = destinationConnection.prepareStatement("DELETE FROM "
           + tableName + " WHERE Tournament = ?");
@@ -1117,11 +1123,14 @@ public final class ImportDB {
       // Note: If TimeStamp is no longer the 3rd element, then the hack below
       // needs to be modified
       columns.append(" TimeStamp,");
-      final List<Element> goals = new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal")).asList();
-      final int numColumns = goals.size() + 7;
-      for (final Element element : goals) {
-        columns.append(" "
-            + element.getAttribute("name") + ",");
+      final List<AbstractGoal> goals = performanceElement.getGoals();
+      int numColumns = 7;
+      for (final AbstractGoal element : goals) {
+        if (!element.isComputed()) {
+          columns.append(" "
+              + element.getName() + ",");
+          ++numColumns;
+        }
       }
       columns.append(" NoShow,");
       columns.append(" Bye,");

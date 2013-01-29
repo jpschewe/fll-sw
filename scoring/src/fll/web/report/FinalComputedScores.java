@@ -24,10 +24,8 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Element;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -51,8 +49,10 @@ import fll.util.PdfUtils;
 import fll.util.SimpleFooterHandler;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.xml.ChallengeDescription;
+import fll.xml.PerformanceScoreCategory;
+import fll.xml.ScoreCategory;
 import fll.xml.WinnerType;
-import fll.xml.XMLUtils;
 
 /**
  * Final computed scores report.
@@ -71,18 +71,17 @@ public final class FinalComputedScores extends BaseFLLServlet {
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
-      final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
       final int tournamentID = Queries.getCurrentTournament(connection);
       final Tournament tournament = Tournament.findTournamentByID(connection, tournamentID);
       response.reset();
       response.setContentType("application/pdf");
       response.setHeader("Content-Disposition", "filename=finalComputedScores.pdf");
 
-      final Element root = challengeDocument.getDocumentElement();
-      final String challengeTitle = root.getAttribute("title");
+      final String challengeTitle = challengeDescription.getTitle();
       final SimpleFooterHandler pageHandler = new SimpleFooterHandler();
 
-      generateReport(connection, response.getOutputStream(), challengeDocument, challengeTitle, tournament, pageHandler);
+      generateReport(connection, response.getOutputStream(), challengeDescription, challengeTitle, tournament, pageHandler);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     } finally {
@@ -104,7 +103,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
    */
   private void generateReport(final Connection connection,
                               final OutputStream out,
-                              final org.w3c.dom.Document challengeDocument,
+                              final ChallengeDescription challengeDescription,
                               final String challengeTitle,
                               final Tournament tournament,
                               final SimpleFooterHandler pageHandler) throws SQLException, IOException {
@@ -113,8 +112,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
                                     "Cannot generate final score report for a tournament other than the current tournament");
     }
 
-    final Element root = challengeDocument.getDocumentElement();
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(root);
+    final WinnerType winnerCriteria = challengeDescription.getWinner();
 
     final TournamentSchedule schedule;
     if (TournamentSchedule.scheduleExistsInDatabase(connection, tournament.getTournamentID())) {
@@ -132,10 +130,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       // orientation
       final Document pdfDoc = PdfUtils.createPdfDoc(out, pageHandler);
 
-      final Element rootElement = challengeDocument.getDocumentElement();
-
-      final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
-                                                                                      rootElement.getElementsByTagName("subjectiveCategory")).asList();
+      final List<ScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
 
       final Iterator<String> divisionIter = Queries.getEventDivisions(connection).iterator();
       while (divisionIter.hasNext()) {
@@ -143,11 +138,11 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
         // Figure out how many subjective categories have weights > 0.
         final double[] weights = new double[subjectiveCategories.size()];
-        final Element[] catElements = new Element[subjectiveCategories.size()];
+        final ScoreCategory[] catElements = new ScoreCategory[subjectiveCategories.size()];
         int nonZeroWeights = 0;
         for (int cat = 0; cat < subjectiveCategories.size(); cat++) {
           catElements[cat] = subjectiveCategories.get(cat);
-          weights[cat] = Utilities.NUMBER_FORMAT_INSTANCE.parse(catElements[cat].getAttribute("weight")).doubleValue();
+          weights[cat] = catElements[cat].getWeight();
           if (weights[cat] > 0.0) {
             nonZeroWeights++;
           }
@@ -199,7 +194,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
           }
         }
 
-        writeColumnHeaders(schedule, weights, catElements, relativeWidths, rootElement, subjectiveCategories, divTable);
+        writeColumnHeaders(schedule, weights, catElements, relativeWidths, challengeDescription, subjectiveCategories, divTable);
 
         writeScores(connection, catElements, weights, relativeWidths, division, winnerCriteria, tournament, schedule,
                     subjectiveCategories, divTable);
@@ -223,14 +218,14 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
   private void writeScores(final Connection connection,
-                           final Element[] catElements,
+                           final ScoreCategory[] catElements,
                            final double[] weights,
                            final float[] relativeWidths,
                            final String division,
                            final WinnerType winnerCriteria,
                            final Tournament tournament,
                            final TournamentSchedule schedule,
-                           final List<Element> subjectiveCategories,
+                           final List<ScoreCategory> subjectiveCategories,
                            final PdfPTable divTable) throws SQLException {
     ResultSet rawScoreRS = null;
     PreparedStatement teamPrep = null;
@@ -241,7 +236,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
       query.append("SELECT Teams.Organization,Teams.TeamName,Teams.TeamNumber,FinalScores.OverallScore,FinalScores.performance");
       for (int cat = 0; cat < catElements.length; cat++) {
         if (weights[cat] > 0.0) {
-          final String catName = catElements[cat].getAttribute("name");
+          final String catName = catElements[cat].getName();
           query.append(",FinalScores."
               + catName);
         }
@@ -439,10 +434,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
    */
   private void writeColumnHeaders(final TournamentSchedule schedule,
                                   final double[] weights,
-                                  final Element[] catElements,
+                                  final ScoreCategory[] catElements,
                                   final float[] relativeWidths,
-                                  final Element rootElement,
-                                  final List<Element> subjectiveCategories,
+                                  final ChallengeDescription challengeDescription,
+                                  final List<ScoreCategory> subjectiveCategories,
                                   final PdfPTable divTable) throws ParseException {
 
     // /////////////////////////////////////////////////////////////////////
@@ -470,7 +465,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
 
     for (int cat = 0; cat < catElements.length; cat++) {
       if (weights[cat] > 0.0) {
-        final String catTitle = catElements[cat].getAttribute("title");
+        final String catTitle = catElements[cat].getTitle();
 
         final Paragraph catPar = new Paragraph(catTitle, ARIAL_8PT_BOLD);
         final PdfPCell catCell = new PdfPCell(catPar);
@@ -527,9 +522,8 @@ public final class FinalComputedScores extends BaseFLLServlet {
       }
     }
 
-    final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
-    final double perfWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(performanceElement.getAttribute("weight"))
-                                                              .doubleValue();
+    final PerformanceScoreCategory performanceElement = challengeDescription.getPerformance();
+    final double perfWeight = performanceElement.getWeight();
     final Paragraph perfWeightPar = new Paragraph(Double.toString(perfWeight), ARIAL_8PT_NORMAL);
     final PdfPCell perfWeightCell = new PdfPCell(perfWeightPar);
     perfWeightCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
@@ -554,7 +548,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
   private void insertRawScoreColumns(final Connection connection,
                                      final Tournament tournament,
                                      final String ascDesc,
-                                     final List<Element> subjectiveCategories,
+                                     final List<ScoreCategory> subjectiveCategories,
                                      final double[] weights,
                                      final int teamNumber,
                                      final PdfPTable curteam) throws SQLException {
@@ -564,10 +558,10 @@ public final class FinalComputedScores extends BaseFLLServlet {
       // Next, one column containing the raw score for each subjective
       // category with weight > 0
       for (int cat = 0; cat < subjectiveCategories.size(); cat++) {
-        final Element catElement = subjectiveCategories.get(cat);
+        final ScoreCategory catElement = subjectiveCategories.get(cat);
         final double catWeight = weights[cat];
         if (catWeight > 0.0) {
-          final String catName = catElement.getAttribute("name");
+          final String catName = catElement.getName();
           prep = connection.prepareStatement("SELECT ComputedTotal"
               + " FROM " + catName + " WHERE TeamNumber = ? AND Tournament = ? ORDER BY ComputedTotal " + ascDesc);
           prep.setInt(1, teamNumber);

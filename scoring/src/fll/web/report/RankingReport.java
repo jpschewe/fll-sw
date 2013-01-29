@@ -28,7 +28,6 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Element;
 
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -49,6 +48,7 @@ import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.xml.ChallengeDescription;
 
 /**
  * @author jpschewe
@@ -75,14 +75,15 @@ public class RankingReport extends BaseFLLServlet {
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
-      final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+
+      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
       // create simple doc and write to a ByteArrayOutputStream
       final Document document = new Document(PageSize.LETTER);
       final ByteArrayOutputStream baos = new ByteArrayOutputStream();
       final PdfWriter writer = PdfWriter.getInstance(document, baos);
-      final Element root = challengeDocument.getDocumentElement();
-      writer.setPageEvent(new PageEventHandler(root.getAttribute("title"), Queries.getCurrentTournamentName(connection)));
+      writer.setPageEvent(new PageEventHandler(challengeDescription.getTitle(),
+                                               Queries.getCurrentTournamentName(connection)));
 
       document.open();
 
@@ -90,7 +91,7 @@ public class RankingReport extends BaseFLLServlet {
 
       // add content
       final Map<String, Map<Integer, Map<String, Integer>>> rankingMap = Queries.getTeamRankings(connection,
-                                                                                                 challengeDocument);
+                                                                                                 challengeDescription);
       for (final Map.Entry<String, Map<Integer, Map<String, Integer>>> divEntry : rankingMap.entrySet()) {
         final String division = divEntry.getKey();
         final Map<Integer, Map<String, Integer>> divisionTeams = divEntry.getValue();
