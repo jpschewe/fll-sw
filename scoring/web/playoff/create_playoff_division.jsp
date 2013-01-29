@@ -9,8 +9,7 @@
 
 <body>
 	<h1>
-		<x:out select="$challengeDocument/fll/@title" />
-		(Create Playoff Division)
+Create Playoff Division
 	</h1>
 
 	${message}

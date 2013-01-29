@@ -80,7 +80,7 @@
 <body>
 
  <h1>
-  <x:out select="$challengeDocument/fll/@title" />
+  Big Screen Display Control page
  </h1>
 
  <c:if test="${not empty param.name}">

@@ -20,8 +20,7 @@
 
 <body>
  <h1>
-  <x:out select="$challengeDocument/fll/@title" />
- </h1>
+${challengeDescription.title } </h1>
 
  ${message}
  <%-- clear out the message, so that we don't see it again --%>

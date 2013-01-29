@@ -21,10 +21,7 @@
 </head>
 
 <body>
-	<h1>
-		<x:out select="$challengeDocument/fll/@title" />
-		(Administration)
-	</h1>
+	<h1>${challengeDescription.title } (Administration)</h1>
 
 	${message}
 	<%-- clear out the message, so that we don't see it again --%>
@@ -237,25 +234,25 @@
 
 	</ul>
 
-<h2>Advanced</h2>
-<p>These links are for advanced users.</p>
-<ul>
-<li><a href="edit_all_parameters.jsp">Edit all parameters</a></li>
+	<h2>Advanced</h2>
+	<p>These links are for advanced users.</p>
+	<ul>
+		<li><a href="edit_all_parameters.jsp">Edit all parameters</a></li>
 
-  <li><a href="GatherAdvancementData">Advance teams</a></li>
+		<li><a href="GatherAdvancementData">Advance teams</a></li>
 
-  <li>
-   <form id='uploadAdvancingTeams'
-    ACTION="<c:url value='/UploadSpreadsheet'/>" METHOD="POST"
-    ENCTYPE="multipart/form-data">
-    Upload CSV or Excel of teams to advance <input type="file" size="32"
-     name="file" /> <input type='hidden' name='uploadRedirect'
-     value="<c:url value='/admin/UploadAdvancingTeams'/>" /> <input
-     type="submit" value="Upload" />
-   </form>
-  </li>
+		<li>
+			<form id='uploadAdvancingTeams'
+				ACTION="<c:url value='/UploadSpreadsheet'/>" METHOD="POST"
+				ENCTYPE="multipart/form-data">
+				Upload CSV or Excel of teams to advance <input type="file" size="32"
+					name="file" /> <input type='hidden' name='uploadRedirect'
+					value="<c:url value='/admin/UploadAdvancingTeams'/>" /> <input
+					type="submit" value="Upload" />
+			</form>
+		</li>
 
-</ul>
+	</ul>
 
 </body>
 </html>

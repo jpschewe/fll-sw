@@ -7,7 +7,7 @@
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument/fll/@title"/> (Troubleshooting)</h1>
+    <h1>Troubleshooting</h1>
 
     <p>Here's where you'll find various errors you might get and what to do
     about them.  First to remember is that just because you get a nasty error

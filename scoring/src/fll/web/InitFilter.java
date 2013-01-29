@@ -33,6 +33,7 @@ import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
+import fll.xml.ChallengeDescription;
 
 /**
  * Initialize web attributes.
@@ -301,6 +302,9 @@ public class InitFilter implements Filter {
               return false;
             }
             application.setAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT, document);
+
+            final ChallengeDescription challengeDescription = new ChallengeDescription(document.getDocumentElement());
+            application.setAttribute(ApplicationAttributes.CHALLENGE_DESCRIPTION, challengeDescription);
           } catch (final FLLRuntimeException e) {
             LOGGER.error("Error getting challenge document", e);
             session.setAttribute(SessionAttributes.MESSAGE, "<p class='error'>"

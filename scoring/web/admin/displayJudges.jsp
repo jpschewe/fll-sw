@@ -12,8 +12,7 @@
 
 <body>
  <h1>
-  <x:out select="$challengeDocument/fll/@title" />
-  (Judge Assignment Verification)
+  ${challengeDescription.title } (Judge Assignment Verification)
  </h1>
 
 
