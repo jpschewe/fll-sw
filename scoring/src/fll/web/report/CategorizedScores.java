@@ -23,17 +23,13 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import fll.Utilities;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.xml.ChallengeDescription;
+import fll.xml.ScoreCategory;
 import fll.xml.WinnerType;
-import fll.xml.XMLUtils;
 
 /**
  * Display the report for scores by score group.
@@ -48,10 +44,9 @@ public class CategorizedScores extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
-    final Element root = challengeDocument.getDocumentElement();
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(root);
+    final WinnerType winnerCriteria = challengeDescription.getWinner();
 
     final Formatter writer = new Formatter(response.getWriter());
     writer.format("<html><body>");
@@ -60,11 +55,9 @@ public class CategorizedScores extends BaseFLLServlet {
 
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
-    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
-                                                                                challengeDocument.getDocumentElement()
-                                                                                                 .getElementsByTagName("subjectiveCategory"))) {
-      final String title = subjectiveElement.getAttribute("title");
-      final String name = subjectiveElement.getAttribute("name");
+    for (final ScoreCategory subjectiveElement : challengeDescription.getSubjectiveCategories()) {
+      final String title = subjectiveElement.getTitle();
+      final String name = subjectiveElement.getName();
       subjectiveCategories.put(title, name);
     }
 

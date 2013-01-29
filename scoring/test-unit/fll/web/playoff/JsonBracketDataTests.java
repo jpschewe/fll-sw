@@ -25,7 +25,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import com.google.gson.Gson;
 
@@ -34,8 +33,9 @@ import fll.Tournament;
 import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.util.JsonUtilities;
-import fll.util.LogUtils;
 import fll.util.JsonUtilities.BracketLeafResultSet;
+import fll.util.LogUtils;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 
 /**
@@ -61,12 +61,10 @@ public class JsonBracketDataTests {
     // shouldn't be able to access out of context rounds
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
     query.put(4, 1);
-    Assert.assertEquals("{\"refresh\":\"true\"}",
-                        JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(),
-                                                              (Element) playoff.getChallengeDoc().getDocumentElement()
-                                                                               .getElementsByTagName("Performance")
-                                                                               .item(0), playoff.getBracketData(),
-                                                              SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS));
+    Assert.assertEquals("{\"refresh\":\"true\"}", JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(),
+                                                                                        playoff.getBracketData(),
+                                                                                        SHOW_ONLY_VERIFIED,
+                                                                                        SHOW_FINAL_ROUNDS));
     // done
     SQLFunctions.close(playoff.getConnection());
   }
@@ -83,32 +81,29 @@ public class JsonBracketDataTests {
     /*
      * Initial bracket order:
      * 
-     *  1A
-     *  BYE
-     *  
-     *  4D
-     *  5E
-     *  
-     *  3C
-     *  6F
-     *  
-     *  BYE
-     *  2B
+     * 1A
+     * BYE
+     * 
+     * 4D
+     * 5E
+     * 
+     * 3C
+     * 6F
+     * 
+     * BYE
+     * 2B
      */
-    
+
     // Start with adding some scores
     insertScore(playoff.getConnection(), 4, 1, false, 5D);
     // See what json tells us
     Map<Integer, Integer> query = new HashMap<Integer, Integer>();
     // Ask for round 1 leaf 1
     int row = playoff.getBracketData().getRowNumberForLine(1, 3);
-    query.put(row, 1); 
+    query.put(row, 1);
     final Gson gson = new Gson();
-    final Element scoreElement = (Element) playoff.getChallengeDoc().getDocumentElement()
-                                                  .getElementsByTagName("Performance").item(0);
-    String jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), scoreElement,
-                                                           playoff.getBracketData(), SHOW_ONLY_VERIFIED,
-                                                           SHOW_FINAL_ROUNDS);
+    String jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), playoff.getBracketData(),
+                                                           SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     BracketLeafResultSet[] result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
     // assert score is -1, indicating no score
     Assert.assertEquals(result[0].score, -1.0D, 0.0);
@@ -121,57 +116,52 @@ public class JsonBracketDataTests {
     // ask for round we just entered score for
     row = playoff.getBracketData().getRowNumberForLine(2, 2);
     query.put(row, 2);
-    jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), scoreElement,
-                                                    playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
+    jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), playoff.getBracketData(),
+                                                    SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
     Assert.assertEquals(result[0].leaf.getTeam().getTeamNumber(), Team.NULL_TEAM_NUMBER);
 
-    
     // verify a score that has been entered as unverified and make sure we
     // get data from it
     // verify 4,1 and 5,1
     verifyScore(playoff.getConnection(), 4, 1);
     verifyScore(playoff.getConnection(), 5, 1);
-    
+
     row = playoff.getBracketData().getRowNumberForLine(1, 3);
-    query.put(row, 1); 
-    jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), scoreElement,
-                                                           playoff.getBracketData(), SHOW_ONLY_VERIFIED,
-                                                           SHOW_FINAL_ROUNDS);
+    query.put(row, 1);
+    jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), playoff.getBracketData(),
+                                                    SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
     Assert.assertEquals(result[0].score, 5D, 0.0);
 
-
-    
     // advance 1 and 6 all the way to finals
     insertScore(playoff.getConnection(), 3, 1, true, 5D);
     insertScore(playoff.getConnection(), 6, 1, true, 50D);
-    
+
     insertScore(playoff.getConnection(), 5, 2, true, 5D);
     insertScore(playoff.getConnection(), 1, 2, true, 10D);
 
     insertScore(playoff.getConnection(), 2, 2, true, 5D);
     insertScore(playoff.getConnection(), 6, 2, true, 10D);
-       
 
     // score finals bit
     insertScore(playoff.getConnection(), 1, 3, true, 99D);
     insertScore(playoff.getConnection(), 6, 3, true, 5D);
-    
+
     // json shouldn't tell us the score for the finals round
     query.clear();
     final int finalsRound = playoff.getBracketData().getFinalsRound();
     row = playoff.getBracketData().getRowNumberForLine(finalsRound + 1, 1);
-    query.put(row, finalsRound+1);
-    jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), scoreElement,
-                                                    playoff.getBracketData(), SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
+    query.put(row, finalsRound + 1);
+    jsonOut = JsonUtilities.generateJsonBracketInfo(query, playoff.getConnection(), playoff.getBracketData(),
+                                                    SHOW_ONLY_VERIFIED, SHOW_FINAL_ROUNDS);
     result = gson.fromJson(jsonOut, BracketLeafResultSet[].class);
     Assert.assertEquals(result[0].score, -1.0D, 0.0);
 
     SQLFunctions.close(playoff.getConnection());
   }
 
-  //TODO switch to using methods in Queries
+  // TODO switch to using methods in Queries
   private void insertScore(final Connection connection,
                            final int team,
                            final int run,
@@ -192,7 +182,7 @@ public class JsonBracketDataTests {
     }
   }
 
-  //TODO switch to using methods in Queries
+  // TODO switch to using methods in Queries
   private void verifyScore(final Connection connection,
                            final int team,
                            final int run) throws SQLException {
@@ -213,14 +203,10 @@ public class JsonBracketDataTests {
 
     private BracketData bd = null;
 
-    private Document challengeDoc = null;
-
     public PlayoffContainer(final Connection con,
-                            final BracketData brackets,
-                            final Document doc) {
+                            final BracketData brackets) {
       c = con;
       bd = brackets;
-      challengeDoc = doc;
     }
 
     public Connection getConnection() {
@@ -229,10 +215,6 @@ public class JsonBracketDataTests {
 
     public BracketData getBracketData() {
       return bd;
-    }
-
-    public Document getChallengeDoc() {
-      return challengeDoc;
     }
 
   }
@@ -248,6 +230,8 @@ public class JsonBracketDataTests {
     final Document document = ChallengeParser.parse(new InputStreamReader(challengeDocIS));
     Assert.assertNotNull(document);
 
+    final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+
     // in-memory db instance
     Class.forName("org.hsqldb.jdbcDriver").newInstance();
     connection = DriverManager.getConnection("jdbc:hsqldb:mem:flldb-testJsonBrackets");
@@ -260,12 +244,12 @@ public class JsonBracketDataTests {
     for (int i = 0; i < teamNames.length; ++i) {
       Assert.assertNull(Queries.addTeam(connection, i + 1, teamNames[i], "htk", div, 2));
     }
-    
+
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
     final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
     Team.filterTeamsToEventDivision(connection, teams, div);
 
-    Playoff.initializeBrackets(connection, document, div, false, teams);
+    Playoff.initializeBrackets(connection, description, div, false, teams);
 
     final int firstRound = 1;
     final int lastRound = 4;
@@ -274,7 +258,7 @@ public class JsonBracketDataTests {
     final boolean onlyVerifiedScores = true;
     final BracketData bd = new BracketData(connection, div, firstRound, lastRound, rowsPerTeam, showFinals,
                                            onlyVerifiedScores);
-    return new PlayoffContainer(connection, bd, document);
+    return new PlayoffContainer(connection, bd);
 
   }
 }

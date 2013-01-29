@@ -22,7 +22,6 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
 
 import fll.Utilities;
 import fll.db.Queries;
@@ -30,6 +29,7 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.xml.ChallengeDescription;
 
 /**
  * Commit the changes made by editTeam.jsp.
@@ -74,7 +74,7 @@ public class CommitTeam extends BaseFLLServlet {
     }
 
     final StringBuilder message = new StringBuilder();
-    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
 
     Connection connection = null;
@@ -102,7 +102,7 @@ public class CommitTeam extends BaseFLLServlet {
           LOGGER.info("Deleting "
               + teamNumber);
         }
-        Queries.deleteTeam(teamNumber, challengeDocument, connection);
+        Queries.deleteTeam(teamNumber, challengeDescription, connection);
         message.append("<p id='success'>Successfully deleted team "
             + teamNumber + "</p>");
 
@@ -142,7 +142,7 @@ public class CommitTeam extends BaseFLLServlet {
                 + teamNumber);
           }
 
-          Queries.demoteTeam(connection, challengeDocument, teamNumber);
+          Queries.demoteTeam(connection, challengeDescription, teamNumber);
           message.append("<p id='success'>Successfully demoted team "
               + teamNumber + "</p>");
         }

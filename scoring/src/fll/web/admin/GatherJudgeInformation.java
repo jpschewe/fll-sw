@@ -26,11 +26,8 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import fll.JudgeInformation;
 import fll.db.Queries;
@@ -39,6 +36,8 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.xml.ChallengeDescription;
+import fll.xml.ScoreCategory;
 
 /**
  * Get the information needed to edit judges and store it in the session.
@@ -83,11 +82,9 @@ public class GatherJudgeInformation extends BaseFLLServlet {
     try {
       connection = datasource.getConnection();
       final int tournament = Queries.getCurrentTournament(connection);
-      final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
-      final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
-                                                                                      challengeDocument.getDocumentElement()
-                                                                                                       .getElementsByTagName("subjectiveCategory")).asList();
+      final List<ScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
 
       if (!TournamentSchedule.scheduleExistsInDatabase(connection, tournament)) {
         message.append("<p class='warning'>You have not loaded a schedule. If you intend to do so you should go back to the <a href='index.jsp'>admin page</a> and do this before assigning judges.</p>");
@@ -117,13 +114,13 @@ public class GatherJudgeInformation extends BaseFLLServlet {
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
   private static boolean checkForEnteredSubjectiveScores(final Connection connection,
-                                                         final List<Element> subjectiveCategories,
+                                                         final List<ScoreCategory> subjectiveCategories,
                                                          final int tournament) throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      for (final Element category : subjectiveCategories) {
-        final String categoryName = category.getAttribute("name");
+      for (final ScoreCategory category : subjectiveCategories) {
+        final String categoryName = category.getName();
         prep = connection.prepareStatement(String.format("SELECT * FROM %s WHERE Tournament = ?", categoryName));
         prep.setInt(1, tournament);
         rs = prep.executeQuery();
@@ -146,11 +143,11 @@ public class GatherJudgeInformation extends BaseFLLServlet {
     return stations;
   }
 
-  private Map<String, String> gatherCategories(final List<Element> subjectiveCategories) {
+  private Map<String, String> gatherCategories(final List<ScoreCategory> subjectiveCategories) {
     final Map<String, String> categories = new HashMap<String, String>();
-    for (final Element element : subjectiveCategories) {
-      final String categoryName = element.getAttribute("name");
-      final String categoryTitle = element.getAttribute("title");
+    for (final ScoreCategory element : subjectiveCategories) {
+      final String categoryName = element.getName();
+      final String categoryTitle = element.getTitle();
       categories.put(categoryName, categoryTitle);
     }
     return categories;

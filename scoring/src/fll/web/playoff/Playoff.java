@@ -23,7 +23,6 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.Team;
@@ -32,6 +31,7 @@ import fll.util.FP;
 import fll.util.LogUtils;
 import fll.util.ScoreUtils;
 import fll.xml.BracketSortType;
+import fll.xml.ChallengeDescription;
 import fll.xml.WinnerType;
 import fll.xml.XMLUtils;
 
@@ -371,7 +371,6 @@ public final class Playoff {
    * tournament is assumed to be the tournament to initialize.
    * 
    * @param connection the connection
-   * @param challengeDocument challenge descriptor
    * @param division the playoff division that the specified teams are in
    * @param enableThird true if 3rd place bracket needs to be computed
    * @param teams the teams that are to compete in the specified playoff
@@ -381,7 +380,7 @@ public final class Playoff {
    *           unfinished playoffs
    */
   public static void initializeBrackets(final Connection connection,
-                                        final Document challengeDocument,
+                                        final ChallengeDescription challengeDescription,
                                         final String division,
                                         final boolean enableThird,
                                         final List<Team> teams) throws SQLException {
@@ -392,9 +391,8 @@ public final class Playoff {
     }
     final int currentTournament = Queries.getCurrentTournament(connection);
 
-    final Element root = challengeDocument.getDocumentElement();
-    final BracketSortType bracketSort = XMLUtils.getBracketSort(root);
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(root);
+    final BracketSortType bracketSort = challengeDescription.getBracketSort();
+    final WinnerType winnerCriteria = challengeDescription.getWinner();
 
     // Initialize currentRound to contain a full bracket setup (i.e. playoff
     // round 1 teams)

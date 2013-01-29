@@ -23,11 +23,8 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import fll.JudgeInformation;
 import fll.Utilities;
@@ -36,6 +33,8 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.xml.ChallengeDescription;
+import fll.xml.ScoreCategory;
 
 /**
  * Verify the judges information
@@ -61,16 +60,14 @@ public class VerifyJudges extends BaseFLLServlet {
 
       final int tournament = Queries.getCurrentTournament(connection);
 
-      final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
       // keep track of any errors
       final StringBuilder error = new StringBuilder();
 
       // populate a hash where key is category name and value is an empty
       // Set. Use set so there are no duplicates
-      final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
-                                                                                      challengeDocument.getDocumentElement()
-                                                                                                       .getElementsByTagName("subjectiveCategory")).asList();
+      final List<ScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
 
       final int numRows = Utilities.NUMBER_FORMAT_INSTANCE.parse(request.getParameter("total_num_rows")).intValue();
       if (LOGGER.isDebugEnabled()) {
@@ -102,8 +99,8 @@ public class VerifyJudges extends BaseFLLServlet {
       // check that each judging station has a judge for each category
       final Collection<String> judgingStations = Queries.getJudgingStations(connection, tournament);
       for (final String jstation : judgingStations) {
-        for (final Element element : subjectiveCategories) {
-          final String categoryName = element.getAttribute("name");
+        for (final ScoreCategory cat : subjectiveCategories) {
+          final String categoryName = cat.getName();
           boolean found = false;
 
           for (final JudgeInformation judge : judges) {

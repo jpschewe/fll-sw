@@ -17,17 +17,14 @@ import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import fll.Team;
 import fll.db.Queries;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
+import fll.xml.ChallengeDescription;
+import fll.xml.ScoreCategory;
 
 /**
  * Support for /report/finalist/load.jsp.
@@ -118,14 +115,12 @@ public class FinalistLoad {
    */
   public static void outputCategories(final Writer writer,
                                       final ServletContext application) {
-    final Document document = ApplicationAttributes.getChallengeDocument(application);
-    final Element rootElement = document.getDocumentElement();
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
     final Formatter output = new Formatter(writer);
 
-    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
-                                                                                rootElement.getElementsByTagName("subjectiveCategory"))) {
-      final String categoryName = subjectiveElement.getAttribute("name");
-      final String categoryTitle = subjectiveElement.getAttribute("title");
+    for (final ScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
+      final String categoryName = subjectiveElement.getName();
+      final String categoryTitle = subjectiveElement.getTitle();
       final String quotedCatTitle = WebUtils.quoteJavascriptString(categoryTitle);
 
       final String catVarName = getCategoryVarName(categoryName);
@@ -146,8 +141,7 @@ public class FinalistLoad {
     try {
 
       connection = datasource.getConnection();
-      final Document document = ApplicationAttributes.getChallengeDocument(application);
-      final Element rootElement = document.getDocumentElement();
+      final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
       final int tournament = Queries.getCurrentTournament(connection);
       final Formatter output = new Formatter(writer);
 
@@ -176,9 +170,8 @@ public class FinalistLoad {
         output.format("$.finalist.setCategoryScore(%s, championship, %.02f, %s);%n", teamVar, overallScore,
                       WebUtils.quoteJavascriptString(overallGroup));
 
-        for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
-                                                                                    rootElement.getElementsByTagName("subjectiveCategory"))) {
-          final String categoryName = subjectiveElement.getAttribute("name");
+        for (final ScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
+          final String categoryName = subjectiveElement.getName();
           final String categoryVar = getCategoryVarName(categoryName);
           final double catScore = rs.getDouble(categoryName);
           final String group;

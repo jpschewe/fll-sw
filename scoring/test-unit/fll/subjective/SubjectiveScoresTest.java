@@ -77,6 +77,8 @@ public class SubjectiveScoresTest {
     Assert.assertNotNull(stream);
     final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(stream));
     Assert.assertNotNull(challengeDocument);
+    
+    final ChallengeDescription challenge = new ChallengeDescription(challengeDocument.getDocumentElement());
 
     final File tempFile = File.createTempFile("flltest", null);
     final String database = tempFile.getAbsolutePath();
@@ -112,14 +114,13 @@ public class SubjectiveScoresTest {
 
       // create subjective scores document
       final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-      final Document scoreDocument = DownloadSubjectiveData.createSubjectiveScoresDocument(challengeDocument,
+      final Document scoreDocument = DownloadSubjectiveData.createSubjectiveScoresDocument(challenge,
                                                                                            tournamentTeams.values(),
                                                                                            connection, tournament.getTournamentID());
       StringWriter testWriter = new StringWriter();
       XMLUtils.writeXML(scoreDocument, testWriter, "UTF-8");
       LOGGER.info(testWriter.toString());
       
-      final ChallengeDescription challenge = new ChallengeDescription(challengeDocument.getDocumentElement());
       ScoreCategory scoreCategory = null;
       for(final ScoreCategory sc : challenge.getSubjectiveCategories()) {
         if(category.equals(sc.getName())) {
@@ -149,7 +150,7 @@ public class SubjectiveScoresTest {
 
             
       // upload the scores
-      UploadSubjectiveData.saveSubjectiveData(scoreDocument, tournament.getTournamentID(), challengeDocument, connection);
+      UploadSubjectiveData.saveSubjectiveData(scoreDocument, tournament.getTournamentID(), challenge, connection);
 
     } finally {
       SQLFunctions.close(prep);
