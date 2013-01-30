@@ -13,6 +13,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import fll.util.FLLInternalException;
 import fll.web.playoff.TeamScore;
 
 public abstract class AbstractGoal implements Serializable {
@@ -73,4 +74,17 @@ public abstract class AbstractGoal implements Serializable {
   public abstract double getMin();
 
   public abstract double getMax();
+
+  protected final double applyScoreType(final double score) {
+    switch (getScoreType()) {
+    case FLOAT:
+      return score;
+    case INTEGER:
+      return (double) ((long) score);
+    default:
+      throw new FLLInternalException("Unknown score type: "
+          + getScoreType());
+    }
+  }
+
 }

@@ -12,6 +12,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Element;
 
+import fll.util.FLLInternalException;
 import fll.web.playoff.TeamScore;
 
 public class CaseStatement implements Evaluatable, Serializable {
@@ -19,26 +20,27 @@ public class CaseStatement implements Evaluatable, Serializable {
   public CaseStatement(final Element ele,
                        final GoalScope goalScope,
                        final VariableScope variableScope) {
-    final NodelistElementCollectionAdapter condEles = new NodelistElementCollectionAdapter(
-                                                                                           ele.getElementsByTagName("condition"));
-    if (condEles.hasNext()) {
-      final Element e = condEles.next();
-      mCondition = new ConditionStatement(e, goalScope, variableScope);
+    final NodelistElementCollectionAdapter children = new NodelistElementCollectionAdapter(ele.getChildNodes());
+    final Element condEle = children.next();
+    if ("condition".equals(condEle.getNodeName())) {
+      mCondition = new ConditionStatement(condEle, goalScope, variableScope);
+    } else if ("enumCondition".equals(condEle.getNodeName())) {
+      mCondition = new EnumConditionStatement(condEle, goalScope);
     } else {
-      final Element ee = new NodelistElementCollectionAdapter(ele.getElementsByTagName("enumCondition")).next();
-      mCondition = new EnumConditionStatement(ee, goalScope);
+      throw new FLLInternalException("Expecting 'condition' or 'enumCondition', but found '"
+          + condEle.getNodeName() + "'");
     }
 
-    final NodelistElementCollectionAdapter resultEles = new NodelistElementCollectionAdapter(
-                                                                                             ele.getElementsByTagName("result"));
-    if (resultEles.hasNext()) {
-      final Element re = resultEles.next();
-      mResultPoly = new ComplexPolynomial(re, goalScope, variableScope);
+    final Element resultEle = children.next();
+    if ("result".equals(resultEle.getNodeName())) {
+      mResultPoly = new ComplexPolynomial(resultEle, goalScope, variableScope);
       mResultSwitch = null;
-    } else {
-      final Element se = new NodelistElementCollectionAdapter(ele.getElementsByTagName("switch")).next();
-      mResultSwitch = new SwitchStatement(se, goalScope, variableScope);
+    } else if ("switch".equals(resultEle.getNodeName())) {
+      mResultSwitch = new SwitchStatement(resultEle, goalScope, variableScope);
       mResultPoly = null;
+    } else {
+      throw new FLLInternalException("Expecting 'switch' or 'result', but found '"
+          + resultEle.getNodeName() + "'");
     }
 
   }

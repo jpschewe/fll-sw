@@ -15,15 +15,12 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.db.Queries;
@@ -32,8 +29,9 @@ import fll.util.LogUtils;
 import fll.util.ScoreUtils;
 import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
+import fll.xml.PerformanceScoreCategory;
+import fll.xml.TiebreakerTest;
 import fll.xml.WinnerType;
-import fll.xml.XMLUtils;
 
 /**
  * Handle playoff information.
@@ -147,16 +145,16 @@ public final class Playoff {
    */
   public static Team pickWinner(final Connection connection,
                                 final int tournament,
-                                final Element performanceElement,
-                                final Element tiebreakerElement,
+                                final PerformanceScoreCategory performanceElement,
+                                final List<TiebreakerTest> tiebreakerElement,
                                 final WinnerType winnerCriteria,
                                 final Team teamA,
                                 final Team teamB,
                                 final TeamScore teamBScore,
                                 final int runNumber) throws SQLException, ParseException {
-    final TeamScore teamAScore = new DatabaseTeamScore(performanceElement, tournament, teamA.getTeamNumber(),
-                                                       runNumber, connection);
-    final Team retval = pickWinner(tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB, teamBScore);
+    final TeamScore teamAScore = new DatabaseTeamScore("Performance", tournament, teamA.getTeamNumber(), runNumber, connection);
+    final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
+                                   teamBScore);
     teamAScore.cleanup();
     teamBScore.cleanup();
     return retval;
@@ -183,17 +181,16 @@ public final class Playoff {
    */
   public static Team pickWinner(final Connection connection,
                                 final int tournament,
-                                final Element performanceElement,
-                                final Element tiebreakerElement,
+                                final PerformanceScoreCategory performanceElement,
+                                final List<TiebreakerTest> tiebreakerElement,
                                 final WinnerType winnerCriteria,
                                 final Team teamA,
                                 final Team teamB,
                                 final int runNumber) throws SQLException, ParseException {
-    final TeamScore teamAScore = new DatabaseTeamScore(performanceElement, tournament, teamA.getTeamNumber(),
-                                                       runNumber, connection);
-    final TeamScore teamBScore = new DatabaseTeamScore(performanceElement, tournament, teamB.getTeamNumber(),
-                                                       runNumber, connection);
-    final Team retval = pickWinner(tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB, teamBScore);
+    final TeamScore teamAScore = new DatabaseTeamScore("Performance", tournament, teamA.getTeamNumber(), runNumber, connection);
+    final TeamScore teamBScore = new DatabaseTeamScore("Performance", tournament, teamB.getTeamNumber(), runNumber, connection);
+    final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
+                                   teamBScore);
     teamAScore.cleanup();
     teamBScore.cleanup();
     return retval;
@@ -204,7 +201,8 @@ public final class Playoff {
    * 
    * @return the winner, null on a tie or a missing score
    */
-  private static Team pickWinner(final Element tiebreakerElement,
+  private static Team pickWinner(final PerformanceScoreCategory perf,
+                                 final List<TiebreakerTest> tiebreakerElement,
                                  final WinnerType winnerCriteria,
                                  final Team teamA,
                                  final TeamScore teamAScore,
@@ -230,8 +228,8 @@ public final class Playoff {
             && noshowB) {
           return teamA;
         } else {
-          final double scoreA = ScoreUtils.computeTotalScore(teamAScore);
-          final double scoreB = ScoreUtils.computeTotalScore(teamBScore);
+          final double scoreA = perf.evaluate(teamAScore);
+          final double scoreB = perf.evaluate(teamBScore);
           if (FP.lessThan(scoreA, scoreB, TIEBREAKER_TOLERANCE)) {
             return WinnerType.HIGH == winnerCriteria ? teamB : teamA;
           } else if (FP.lessThan(scoreB, scoreA, TIEBREAKER_TOLERANCE)) {
@@ -255,24 +253,21 @@ public final class Playoff {
    * @param teamBScore team B's score information
    * @return the winner, may be Team.TIE
    */
-  private static Team evaluateTiebreaker(final Element tiebreakerElement,
+  private static Team evaluateTiebreaker(final List<TiebreakerTest> tiebreakerElement,
                                          final Team teamA,
                                          final TeamScore teamAScore,
                                          final Team teamB,
                                          final TeamScore teamBScore) throws ParseException {
 
     // walk test elements in tiebreaker to decide who wins
-    for (final Element testElement : new NodelistElementCollectionAdapter(tiebreakerElement.getChildNodes())) {
-      if ("test".equals(testElement.getTagName())) {
-        final Map<String, Double> variableValues = Collections.emptyMap();
-        final double sumA = ScoreUtils.evalPoly(testElement, teamAScore, variableValues);
-        final double sumB = ScoreUtils.evalPoly(testElement, teamBScore, variableValues);
-        final WinnerType highlow = XMLUtils.getWinnerCriteria(testElement);
-        if (sumA > sumB) {
-          return (WinnerType.HIGH == highlow ? teamA : teamB);
-        } else if (sumA < sumB) {
-          return (WinnerType.HIGH == highlow ? teamB : teamA);
-        }
+    for (final TiebreakerTest testElement : tiebreakerElement) {
+      final double sumA = testElement.evaluate(teamAScore);
+      final double sumB = testElement.evaluate(teamBScore);
+      final WinnerType highlow = testElement.getWinner();
+      if (sumA > sumB) {
+        return (WinnerType.HIGH == highlow ? teamA : teamB);
+      } else if (sumA < sumB) {
+        return (WinnerType.HIGH == highlow ? teamB : teamA);
       }
     }
     return Team.TIE;
@@ -764,7 +759,6 @@ public final class Playoff {
       SQLFunctions.close(prep);
     }
   }
-    
 
   /**
    * Check if some teams are involved in an playoff bracket that isn't finished.

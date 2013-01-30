@@ -57,7 +57,9 @@ public class ComputedGoal extends AbstractGoal implements VariableScope {
   }
 
   public double getRawScore(final TeamScore teamScore) {
-    return getSwitch().evaluate(teamScore);
+    final double score = getSwitch().evaluate(teamScore);
+    return applyScoreType(score);
+
   }
 
   public double getComputedScore(final TeamScore teamScore) {

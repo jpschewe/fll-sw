@@ -57,17 +57,7 @@ public class Term extends AbstractTerm {
     value = value
         * getCoefficient();
 
-    switch (getFloatingPoint()) {
-    case DECIMAL:
-      return value;
-    case ROUND:
-      return Math.round(value);
-    case TRUNCATE:
-      return (double) ((long) value);
-    default:
-      throw new FLLInternalException("Unknown floating point type: "
-          + getFloatingPoint());
-    }
+    return applyFloatingPointType(value);
   }
 
 }

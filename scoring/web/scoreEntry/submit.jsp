@@ -5,11 +5,11 @@
 
 <%@ page import="java.sql.Connection"%>
 <%@ page import="javax.sql.DataSource" %>
-<%@ page import="org.w3c.dom.Document"%>
+<%@ page import="fll.xml.ChallengeDescription"%>
 <%@ page import="fll.db.Queries"%>
 
 <%
-final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
 final DataSource datasource = ApplicationAttributes.getDataSource(application);
 final Connection connection = datasource.getConnection();
@@ -31,10 +31,10 @@ final Connection connection = datasource.getConnection();
         <icep:push group="playoffs"/>
       </c:when>
       <c:when test="${not empty param.EditFlag}">
-        <%Queries.updatePerformanceScore(challengeDocument, connection, request);%>
+        <%Queries.updatePerformanceScore(challengeDescription, connection, request);%>
       </c:when>
       <c:otherwise>
-        <%Queries.insertPerformanceScore(challengeDocument, connection, request);%>
+        <%Queries.insertPerformanceScore(challengeDescription, connection, request);%>
       </c:otherwise>
     </c:choose>
     <%-- push ajax if the score has verified flag. saves us a little bit of resources --%>

@@ -7,15 +7,13 @@ package fll.web.playoff;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.w3c.dom.Element;
-
 /**
  * A team score in an HTTP request.
  */
 public final class HttpTeamScore extends TeamScore {
 
-  public HttpTeamScore(final Element categoryElement, final int teamNumber, final int runNumber, final HttpServletRequest request) {
-    super(categoryElement, teamNumber, runNumber);
+  public HttpTeamScore(final int teamNumber, final int runNumber, final HttpServletRequest request) {
+    super(teamNumber, runNumber);
     _request = request;
   }
 

@@ -14,6 +14,8 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Element;
 
+import fll.web.playoff.TeamScore;
+
 /**
  * A polynomial that can reference variables.
  */
@@ -37,6 +39,15 @@ public class ComplexPolynomial extends BasicPolynomial {
 
   public List<VariableTerm> getVariableTerms() {
     return mVariableTerms;
+  }
+
+  public double evaluate(final TeamScore teamScore) {
+    double score = super.evaluate(teamScore);
+    for (final VariableTerm t : getVariableTerms()) {
+      final double ts = t.evaluate(teamScore);
+      score += ts;
+    }
+    return score;
   }
 
 }

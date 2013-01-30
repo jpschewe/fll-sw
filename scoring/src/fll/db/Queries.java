@@ -30,12 +30,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Tournament;
@@ -43,16 +41,16 @@ import fll.Utilities;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
-import fll.util.ScoreUtils;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.HttpTeamScore;
 import fll.web.playoff.Playoff;
 import fll.web.playoff.TeamScore;
+import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
+import fll.xml.TiebreakerTest;
 import fll.xml.WinnerType;
-import fll.xml.XMLUtils;
 
 /**
  * Does all of our queries.
@@ -684,16 +682,15 @@ public final class Queries {
    * @throws ParseException if the XML document is invalid.
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Goals determine columns")
-  public static String insertPerformanceScore(final Document document,
+  public static String insertPerformanceScore(final ChallengeDescription description,
                                               final Connection connection,
                                               final HttpServletRequest request) throws SQLException, ParseException,
       RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
 
-    final Element root = document.getDocumentElement();
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(root);
-    final Element performanceElement = (Element) root.getElementsByTagName("Performance").item(0);
-    final Element tiebreakerElement = (Element) performanceElement.getElementsByTagName("tiebreaker").item(0);
+    final WinnerType winnerCriteria = description.getWinner();
+    final PerformanceScoreCategory performanceElement = description.getPerformance();
+    final List<TiebreakerTest> tiebreakerElement = performanceElement.getTiebreaker();
 
     final String teamNumberStr = request.getParameter("TeamNumber");
     if (null == teamNumberStr) {
@@ -712,7 +709,7 @@ public final class Queries {
       throw new RuntimeException("Missing parameter: NoShow");
     }
 
-    final TeamScore teamScore = new HttpTeamScore(performanceElement, teamNumber, runNumber, request);
+    final TeamScore teamScore = new HttpTeamScore(teamNumber, runNumber, request);
 
     final StringBuffer columns = new StringBuffer();
     final StringBuffer values = new StringBuffer();
@@ -725,7 +722,7 @@ public final class Queries {
 
     columns.append(", ComputedTotal");
     values.append(", "
-        + ScoreUtils.computeTotalScore(teamScore));
+        + performanceElement.evaluate(teamScore));
 
     columns.append(", RunNumber");
     values.append(", "
@@ -740,27 +737,27 @@ public final class Queries {
         + request.getParameter("Verified"));
 
     // now do each goal
-    for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
-      final String name = element.getAttribute("name");
+    for (final AbstractGoal element : performanceElement.getGoals()) {
+      if (!element.isComputed()) {
+        final String name = element.getName();
 
-      final String value = request.getParameter(name);
-      if (null == value) {
-        throw new RuntimeException("Missing parameter: "
+        final String value = request.getParameter(name);
+        if (null == value) {
+          throw new RuntimeException("Missing parameter: "
+              + name);
+        }
+        columns.append(", "
             + name);
-      }
-      columns.append(", "
-          + name);
-      final Iterator<Element> valueChildren = new NodelistElementCollectionAdapter(
-                                                                                   element.getElementsByTagName("value"));
-      if (valueChildren.hasNext()) {
-        // enumerated
-        values.append(", '"
-            + value + "'");
-      } else {
-        values.append(", "
-            + value);
-      }
-    }
+        if (element.isEnumerated()) {
+          // enumerated
+          values.append(", '"
+              + value + "'");
+        } else {
+          values.append(", "
+              + value);
+        }
+      } // !computed
+    } // foreach goal
 
     final String sql = "INSERT INTO Performance"
         + " ( " + columns.toString() + ") " + "VALUES ( " + values.toString() + ")";
@@ -824,16 +821,15 @@ public final class Queries {
    * @throws RuntimeException if a parameter is missing.
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
-  public static String updatePerformanceScore(final Document document,
+  public static String updatePerformanceScore(final ChallengeDescription description,
                                               final Connection connection,
                                               final HttpServletRequest request) throws SQLException, ParseException,
       RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
 
-    final Element root = document.getDocumentElement();
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(root);
-    final Element performanceElement = (Element) root.getElementsByTagName("Performance").item(0);
-    final Element tiebreakerElement = (Element) performanceElement.getElementsByTagName("tiebreaker").item(0);
+    final WinnerType winnerCriteria = description.getWinner();
+    final PerformanceScoreCategory performanceElement = description.getPerformance();
+    final List<TiebreakerTest> tiebreakerElement = performanceElement.getTiebreaker();
 
     final String teamNumberStr = request.getParameter("TeamNumber");
     if (null == teamNumberStr) {
@@ -852,7 +848,7 @@ public final class Queries {
       throw new FLLRuntimeException("Missing parameter: NoShow");
     }
 
-    final TeamScore teamScore = new HttpTeamScore(performanceElement, teamNumber, runNumber, request);
+    final TeamScore teamScore = new HttpTeamScore(teamNumber, runNumber, request);
 
     final StringBuffer sql = new StringBuffer();
 
@@ -862,28 +858,28 @@ public final class Queries {
         + noShow);
 
     sql.append(", ComputedTotal = "
-        + ScoreUtils.computeTotalScore(teamScore));
+        + performanceElement.evaluate(teamScore));
 
     // now do each goal
-    for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
-      final String name = element.getAttribute("name");
+    for (final AbstractGoal element : performanceElement.getGoals()) {
+      if (!element.isComputed()) {
+        final String name = element.getName();
 
-      final String value = request.getParameter(name);
-      if (null == value) {
-        throw new FLLRuntimeException("Missing parameter: "
-            + name);
-      }
-      final Iterator<Element> valueChildren = new NodelistElementCollectionAdapter(
-                                                                                   element.getElementsByTagName("value"));
-      if (valueChildren.hasNext()) {
-        // enumerated
-        sql.append(", "
-            + name + " = '" + value + "'");
-      } else {
-        sql.append(", "
-            + name + " = " + value);
-      }
-    }
+        final String value = request.getParameter(name);
+        if (null == value) {
+          throw new FLLRuntimeException("Missing parameter: "
+              + name);
+        }
+        if (element.isEnumerated()) {
+          // enumerated
+          sql.append(", "
+              + name + " = '" + value + "'");
+        } else {
+          sql.append(", "
+              + name + " = " + value);
+        }
+      } // !computed
+    } // foreach goal
 
     sql.append(", Verified = "
         + request.getParameter("Verified"));
@@ -925,8 +921,8 @@ public final class Queries {
                                          final HttpServletRequest request,
                                          final int currentTournament,
                                          final WinnerType winnerCriteria,
-                                         final Element performanceElement,
-                                         final Element tiebreakerElement,
+                                         final PerformanceScoreCategory performanceElement,
+                                         final List<TiebreakerTest> tiebreakerElement,
                                          final int teamNumber,
                                          final int runNumber,
                                          final TeamScore teamScore) throws SQLException, ParseException {
@@ -1657,8 +1653,8 @@ public final class Queries {
         rs = selectPrep.executeQuery();
         while (rs.next()) {
           final int teamNumber = rs.getInt("TeamNumber");
-          // FIXME remove first parameter
-          final double computedTotal = ScoreUtils.computeTotalScore(new DatabaseTeamScore(null, teamNumber, rs));
+          final TeamScore teamScore = new DatabaseTeamScore(teamNumber, rs);
+          final double computedTotal = subjectiveElement.evaluate(teamScore);
           if (Double.isNaN(computedTotal)) {
             updatePrep.setNull(1, Types.DOUBLE);
           } else {
@@ -1673,8 +1669,6 @@ public final class Queries {
         updatePrep.close();
         selectPrep.close();
       }
-    } catch (final ParseException e) {
-      throw new FLLRuntimeException("Error parsing data in the challenge descriptor, this shouldn't happen", e);
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(updatePrep);
@@ -1712,9 +1706,8 @@ public final class Queries {
         if (!rs.getBoolean("Bye")) {
           final int teamNumber = rs.getInt("TeamNumber");
           final int runNumber = rs.getInt("RunNumber");
-          final double computedTotal = ScoreUtils.computeTotalScore(new DatabaseTeamScore(null, // FIXME
-                                                                                                // performanceElement,
-                                                                                          teamNumber, runNumber, rs));
+          final TeamScore teamScore = new DatabaseTeamScore(teamNumber, runNumber, rs);
+          final double computedTotal = performanceElement.evaluate(teamScore);
           if (!Double.isNaN(computedTotal)) {
             updatePrep.setDouble(1, Math.max(computedTotal, minimumPerformanceScore));
           } else {
@@ -1728,8 +1721,6 @@ public final class Queries {
       rs.close();
       updatePrep.close();
       selectPrep.close();
-    } catch (final ParseException e) {
-      throw new FLLRuntimeException("Error parsing data in the challenge descriptor, this shouldn't happen", e);
     } finally {
       SQLFunctions.close(rs);
       SQLFunctions.close(updatePrep);

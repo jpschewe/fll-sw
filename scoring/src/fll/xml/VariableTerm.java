@@ -30,8 +30,9 @@ public class VariableTerm extends AbstractTerm {
 
   @Override
   public double evaluate(final TeamScore teamScore) {
-    return getCoefficient()
+    final double value = getCoefficient()
         * getVariable().evaluate(teamScore);
+    return applyFloatingPointType(value);
   }
 
 }

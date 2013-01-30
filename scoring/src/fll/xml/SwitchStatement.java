@@ -15,6 +15,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Element;
 
+import fll.util.FLLInternalException;
 import fll.web.playoff.TeamScore;
 
 public class SwitchStatement implements Evaluatable, Serializable {
@@ -22,16 +23,21 @@ public class SwitchStatement implements Evaluatable, Serializable {
   public SwitchStatement(final Element ele,
                          final GoalScope goalScope,
                          final VariableScope variableScope) {
-
+    ComplexPolynomial defaultCase = null;
     final List<CaseStatement> cases = new LinkedList<CaseStatement>();
-    for (final Element caseEle : new NodelistElementCollectionAdapter(ele.getElementsByTagName("case"))) {
-      final CaseStatement cs = new CaseStatement(caseEle, goalScope, variableScope);
-      cases.add(cs);
+    for (final Element caseEle : new NodelistElementCollectionAdapter(ele.getChildNodes())) {
+      if ("case".equals(caseEle.getNodeName())) {
+        final CaseStatement cs = new CaseStatement(caseEle, goalScope, variableScope);
+        cases.add(cs);
+      } else if ("default".equals(caseEle.getNodeName())) {
+        defaultCase = new ComplexPolynomial(caseEle, goalScope, variableScope);
+      } else {
+        throw new FLLInternalException("Expecting 'case' or 'default', but found '"
+            + caseEle.getNodeName() + "'");
+      }
     }
     mCases = Collections.unmodifiableList(cases);
-
-    final Element defaultEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName("default")).next();
-    mDefaultCase = new ComplexPolynomial(defaultEle, goalScope, variableScope);
+    mDefaultCase = defaultCase;
   }
 
   private final List<CaseStatement> mCases;
