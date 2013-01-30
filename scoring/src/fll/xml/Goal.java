@@ -103,6 +103,11 @@ public class Goal extends AbstractGoal {
   }
 
   public double getRawScore(final TeamScore teamScore) {
+    final double score = internalGetRawScore(teamScore);
+    return applyScoreType(score);
+  }
+
+  private double internalGetRawScore(final TeamScore teamScore) {
     if (isEnumerated()) {
       final String val = teamScore.getEnumRawScore(getName());
       for (final EnumeratedValue ev : getValues()) {
@@ -112,7 +117,12 @@ public class Goal extends AbstractGoal {
       }
       return Double.NaN;
     } else {
-      return teamScore.getRawScore(getName());
+      final Double score = teamScore.getRawScore(getName());
+      if (null == score) {
+        return Double.NaN;
+      } else {
+        return score;
+      }
     }
   }
 

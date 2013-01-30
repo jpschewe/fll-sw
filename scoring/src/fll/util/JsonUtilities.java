@@ -8,7 +8,6 @@ package fll.util;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -21,14 +20,17 @@ import fll.web.playoff.BracketData.TeamBracketCell;
 import fll.web.playoff.DatabaseTeamScore;
 import fll.web.playoff.Playoff;
 import fll.web.playoff.TeamScore;
+import fll.xml.PerformanceScoreCategory;
 
 /**
  * Methods used to generate or interpret JSON
+ * 
  * @author jjkoletar
  */
 public final class JsonUtilities {
   private JsonUtilities() {
   }
+
   public static class BracketLeafResultSet {
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
     public final TeamBracketCell leaf;
@@ -54,8 +56,10 @@ public final class JsonUtilities {
       originator = null;
     }
   }
+
   public static String generateJsonBracketInfo(final Map<Integer, Integer> ids,
                                                final Connection connection,
+                                               final PerformanceScoreCategory perf,
                                                final BracketData bracketData,
                                                final boolean showOnlyVerifiedScores,
                                                final boolean showFinalsScores) {
@@ -71,13 +75,11 @@ public final class JsonUtilities {
         final int numPlayoffRounds = Queries.getNumPlayoffRounds(connection);
         final int teamNumber = tbc.getTeam().getTeamNumber();
         final int runNumber = Playoff.getRunNumber(connection, teamNumber, playoffRound);
-        //FIXME database team score
-        final TeamScore teamScore = new DatabaseTeamScore(null, currentTournament, teamNumber,
-                                                          runNumber, connection);
-        final double computedTeamScore = ScoreUtils.computeTotalScore(teamScore);
+        final TeamScore teamScore = new DatabaseTeamScore("Performance", currentTournament, teamNumber, runNumber,
+                                                          connection);
+        final double computedTeamScore = perf.evaluate(teamScore);
         final boolean realScore = !Double.isNaN(computedTeamScore);
-        final boolean noShow = Queries.isNoShow(connection, currentTournament, tbc.getTeam().getTeamNumber(),
-                                                runNumber);
+        final boolean noShow = Queries.isNoShow(connection, currentTournament, tbc.getTeam().getTeamNumber(), runNumber);
         // Sane request checks
         if (noShow) {
           datalist.add(new BracketLeafResultSet(tbc, -2.0, entry.getKey()
@@ -99,8 +101,6 @@ public final class JsonUtilities {
       }
     } catch (final SQLException e) {
       throw new RuntimeException(e);
-    } catch (final ParseException e) {
-      throw new RuntimeException(e);
     }
     if (datalist.size() == 0) {
       // Add some data, so gson's happy.
@@ -109,14 +109,16 @@ public final class JsonUtilities {
     Gson gson = new Gson();
     return gson.toJson(datalist);
   }
+
   public static class DisplayResponse {
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Read in the javascript")
     public final String displayURL;
-    
+
     public DisplayResponse(final String displayURL) {
       this.displayURL = displayURL;
     }
   }
+
   public static String generateDisplayResponse(final String displayURL) {
     return new Gson().toJson(new DisplayResponse(displayURL));
   }

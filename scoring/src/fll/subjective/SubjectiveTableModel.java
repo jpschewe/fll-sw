@@ -189,7 +189,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           // have an entry in scoreEle
 
           if (goalDescription.isComputed()) {
-            return getTeamScore(row).getComputedScore(goalName);
+            return goalDescription.getComputedScore(getTeamScore(row));
           } else if (null == SubjectiveUtils.getSubscoreElement(scoreEle, goalName)) {
             return null;
           } else if (goalDescription.isEnumerated()) {

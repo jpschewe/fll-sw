@@ -8,8 +8,6 @@ package fll.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.w3c.dom.Element;
-
 import fll.web.playoff.TeamScore;
 
 /**
@@ -20,15 +18,18 @@ import fll.web.playoff.TeamScore;
  */
 public class DummyTeamScore extends TeamScore {
 
-  public DummyTeamScore(final Element categoryElement, final int teamNumber, final int runNumber, final Map<String, Double> simpleGoals,
-      final Map<String, String> enumGoals) {
-    super(categoryElement, teamNumber, runNumber);
+  public DummyTeamScore(final int teamNumber,
+                        final int runNumber,
+                        final Map<String, Double> simpleGoals,
+                        final Map<String, String> enumGoals) {
+    super(teamNumber, runNumber);
     _simpleGoals = new HashMap<String, Double>(simpleGoals);
     _enumGoals = new HashMap<String, String>(enumGoals);
   }
 
   /*
    * (non-Javadoc)
+   * 
    * @see fll.web.playoff.TeamScore#getEnumRawScore(java.lang.String)
    */
   @Override
@@ -42,6 +43,7 @@ public class DummyTeamScore extends TeamScore {
 
   /*
    * (non-Javadoc)
+   * 
    * @see fll.web.playoff.TeamScore#getRawScore(java.lang.String)
    */
   @Override
@@ -55,6 +57,7 @@ public class DummyTeamScore extends TeamScore {
 
   /*
    * (non-Javadoc)
+   * 
    * @see fll.web.playoff.TeamScore#isNoShow()
    */
   @Override
@@ -64,6 +67,7 @@ public class DummyTeamScore extends TeamScore {
 
   /*
    * (non-Javadoc)
+   * 
    * @see fll.web.playoff.TeamScore#scoreExists()
    */
   @Override

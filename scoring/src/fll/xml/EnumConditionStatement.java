@@ -6,7 +6,6 @@
 
 package fll.xml;
 
-import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Element;
@@ -22,7 +21,7 @@ public class EnumConditionStatement extends AbstractConditionStatement {
   public EnumConditionStatement(final Element ele,
                                 final GoalScope goalScope) {
     super(ele);
-    
+
     mGoalScope = goalScope;
 
     final Element leftEle = new NodelistElementCollectionAdapter(ele.getElementsByTagName("left")).next();
@@ -69,7 +68,11 @@ public class EnumConditionStatement extends AbstractConditionStatement {
    * Left goal, may be null, but then leftString is not null.
    */
   public AbstractGoal getLeftGoal() {
-    return mGoalScope.getGoal(mLeftGoalName);
+    if (null == mLeftGoalName) {
+      return null;
+    } else {
+      return mGoalScope.getGoal(mLeftGoalName);
+    }
   }
 
   private final String mRightString;
@@ -87,7 +90,11 @@ public class EnumConditionStatement extends AbstractConditionStatement {
    * Right goal, may be null, but then rightString is not null.
    */
   public AbstractGoal getRightGoal() {
-    return mGoalScope.getGoal(mRightGoalName);
+    if (null == mRightGoalName) {
+      return null;
+    } else {
+      return mGoalScope.getGoal(mRightGoalName);
+    }
   }
 
   public boolean isTrue(TeamScore teamScore) {
@@ -102,10 +109,10 @@ public class EnumConditionStatement extends AbstractConditionStatement {
     if (null != getRightGoal()) {
       rightStr = teamScore.getEnumRawScore(getRightGoal().getName());
     } else {
-      rightStr = getLeftString();
+      rightStr = getRightString();
     }
 
-    final boolean result = ComparisonUtils.safeEquals(leftStr, rightStr);
+    final boolean result = leftStr.equalsIgnoreCase(rightStr);
     switch (getComparison()) {
     case EQUAL_TO:
       return result;
