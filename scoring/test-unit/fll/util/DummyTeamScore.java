@@ -34,10 +34,14 @@ public class DummyTeamScore extends TeamScore {
    */
   @Override
   public String getEnumRawScore(final String goalName) {
-    if (_enumGoals.containsKey(goalName)) {
-      return _enumGoals.get(goalName);
-    } else {
+    if (!scoreExists()) {
       return null;
+    } else {
+      if (_enumGoals.containsKey(goalName)) {
+        return _enumGoals.get(goalName);
+      } else {
+        return null;
+      }
     }
   }
 
@@ -47,11 +51,15 @@ public class DummyTeamScore extends TeamScore {
    * @see fll.web.playoff.TeamScore#getRawScore(java.lang.String)
    */
   @Override
-  public Double getRawScore(final String goalName) {
-    if (_simpleGoals.containsKey(goalName)) {
-      return _simpleGoals.get(goalName);
+  public double getRawScore(final String goalName) {
+    if (!scoreExists()) {
+      return Double.NaN;
     } else {
-      return null;
+      if (_simpleGoals.containsKey(goalName)) {
+        return _simpleGoals.get(goalName);
+      } else {
+        return Double.NaN;
+      }
     }
   }
 

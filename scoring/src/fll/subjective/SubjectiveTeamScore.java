@@ -31,25 +31,29 @@ import fll.web.playoff.TeamScore;
 
   @Override
   public String getEnumRawScore(final String goalName) {
-    final Element subEle = SubjectiveUtils.getSubscoreElement(_scoreEle, goalName);
-    if (null == subEle) {
+    if (!scoreExists()) {
       return null;
     } else {
-      final String value = subEle.getAttribute("value");
-      if (null == value
-          || "".equals(value)) {
+      final Element subEle = SubjectiveUtils.getSubscoreElement(_scoreEle, goalName);
+      if (null == subEle) {
         return null;
       } else {
-        return value;
+        final String value = subEle.getAttribute("value");
+        if (null == value
+            || "".equals(value)) {
+          return null;
+        } else {
+          return value;
+        }
       }
     }
   }
 
   @Override
-  public Double getRawScore(final String goalName) {
+  public double getRawScore(final String goalName) {
     final Element subEle = SubjectiveUtils.getSubscoreElement(_scoreEle, goalName);
     if (null == subEle) {
-      return null;
+      return Double.NaN;
     } else {
       final String value = subEle.getAttribute("value");
       try {
@@ -62,7 +66,11 @@ import fll.web.playoff.TeamScore;
 
   @Override
   public boolean isNoShow() {
-    return Boolean.valueOf(_scoreEle.getAttribute("NoShow"));
+    if (!scoreExists()) {
+      return false;
+    } else {
+      return Boolean.valueOf(_scoreEle.getAttribute("NoShow"));
+    }
   }
 
   @Override

@@ -90,6 +90,10 @@ public class ScoreCategory implements Evaluatable, Serializable, GoalScope {
 
   @Override
   public double evaluate(final TeamScore teamScore) {
+    if(!teamScore.scoreExists()) {
+      return Double.NaN;
+    }
+    
     double total = 0;
     for (final AbstractGoal g : getGoals()) {
       total += g.getComputedScore(teamScore);

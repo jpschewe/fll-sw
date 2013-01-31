@@ -117,23 +117,15 @@ public class Goal extends AbstractGoal {
       }
       return Double.NaN;
     } else {
-      final Double score = teamScore.getRawScore(getName());
-      if (null == score) {
-        return Double.NaN;
-      } else {
-        return score;
-      }
+      final double score = teamScore.getRawScore(getName());
+      return score;
     }
   }
 
   public double getComputedScore(final TeamScore teamScore) {
-    final Double rawScore = getRawScore(teamScore);
-    if (null == rawScore) {
-      return Double.NaN;
-    } else {
-      return rawScore
-          * getMultiplier();
-    }
+    final double rawScore = getRawScore(teamScore);
+    return rawScore
+        * getMultiplier();
   }
 
   @Override

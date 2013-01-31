@@ -78,10 +78,14 @@ public class DatabaseTeamScore extends TeamScore {
    */
   @Override
   public String getEnumRawScore(final String goalName) {
-    try {
-      return getResultSet().getString(goalName);
-    } catch (final SQLException sqle) {
-      throw new RuntimeException(sqle);
+    if (!scoreExists()) {
+      return null;
+    } else {
+      try {
+        return getResultSet().getString(goalName);
+      } catch (final SQLException sqle) {
+        throw new RuntimeException(sqle);
+      }
     }
   }
 
@@ -89,14 +93,14 @@ public class DatabaseTeamScore extends TeamScore {
    * @see fll.web.playoff.TeamScore#getRawScore(java.lang.String)
    */
   @Override
-  public Double getRawScore(final String goalName) {
+  public double getRawScore(final String goalName) {
     if (!scoreExists()) {
-      return null;
+      return Double.NaN;
     } else {
       try {
         final double val = getResultSet().getDouble(goalName);
         if (getResultSet().wasNull()) {
-          return null;
+          return Double.NaN;
         } else {
           return val;
         }

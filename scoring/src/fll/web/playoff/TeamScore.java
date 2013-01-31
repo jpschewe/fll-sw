@@ -28,7 +28,8 @@ public abstract class TeamScore {
     this(teamNumber, NON_PERFORMANCE_RUN_NUMBER);
   }
 
-  public TeamScore(final int teamNumber, final int runNumber) {
+  public TeamScore(final int teamNumber,
+                   final int runNumber) {
     _teamNumber = teamNumber;
     _runNumber = runNumber;
   }
@@ -74,16 +75,15 @@ public abstract class TeamScore {
    * The raw score for a particular simple goal, as a double.
    * 
    * @param goalName the goal to get the score for
-   * @return the score, null if there is no score for the specified name
+   * @return the score, NaN if there is no score for the specified name
    */
-  public abstract Double getRawScore(final String goalName);
-
+  public abstract double getRawScore(final String goalName);
 
   /**
    * The raw score for a particular enumerated goal, as a String.
    * 
    * @param goalName the goal to get the score for
-   * @return the score
+   * @return the score, null if there is no score for the specified name
    */
   public abstract String getEnumRawScore(String goalName);
 
@@ -95,12 +95,4 @@ public abstract class TeamScore {
     // nothing by default
   }
 
-  /**
-   * If the score doesn't exist, throw a RuntimeException
-   */
-  protected final void assertScoreExists() {
-    if (!scoreExists()) {
-      throw new RuntimeException("Attempt to retrieve team score data when the data does not exist");
-    }
-  }
 }
