@@ -8,8 +8,8 @@
 </head>
 
 <body>
-<h1><x:out select="$challengeDocument/fll/@title" /> (Developer
-Commands)</h1>
+<h1>Developer
+Commands</h1>
 
 <p><font color='red'><b>This page is intended for
 developers only. If you don't know what you're doing, LEAVE THIS PAGE!</b></font></p>

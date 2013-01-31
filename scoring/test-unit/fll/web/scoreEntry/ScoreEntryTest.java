@@ -19,6 +19,7 @@ import org.w3c.dom.Document;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.DummyServletContext;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.ChallengeParserTest;
 
@@ -30,20 +31,25 @@ public class ScoreEntryTest {
 
   /**
    * Just returns the document when asked.
-   * 
    * TODO use a mocking library to do this.
    */
   private static class TestServletContext extends DummyServletContext {
     @Override
     public Object getAttribute(final String attr) {
-      if(ApplicationAttributes.CHALLENGE_DOCUMENT.equals(attr)) {
+      if (ApplicationAttributes.CHALLENGE_DOCUMENT.equals(attr)) {
         final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml");
         Assert.assertNotNull(stream);
         final Document document = ChallengeParser.parse(new InputStreamReader(stream));
         Assert.assertNotNull(document);
         return document;
+      } else if (ApplicationAttributes.CHALLENGE_DESCRIPTION.equals(attr)) {
+        final InputStream stream = ChallengeParserTest.class.getResourceAsStream("data/all-elements.xml");
+        Assert.assertNotNull(stream);
+        final Document document = ChallengeParser.parse(new InputStreamReader(stream));
+        Assert.assertNotNull(document);
+        return new ChallengeDescription(document.getDocumentElement());
       } else {
-      return null;
+        return null;
       }
     }
   }
@@ -65,10 +71,9 @@ public class ScoreEntryTest {
   @Test
   public void testGenerateCheckRestrictionsBody() throws IOException, ParseException {
     final StringWriter writer = new StringWriter();
-    
+
     ScoreEntry.generateCheckRestrictionsBody(writer, new TestServletContext());
     Assert.assertTrue(writer.toString().length() > 0);
   }
-  
-  
+
 }

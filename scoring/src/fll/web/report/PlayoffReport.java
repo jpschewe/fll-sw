@@ -28,7 +28,6 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Element;
 
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -51,6 +50,7 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.playoff.Playoff;
+import fll.xml.ChallengeDescription;
 
 /**
  * Report displaying which teams won each playoff bracket.
@@ -73,7 +73,7 @@ public class PlayoffReport extends BaseFLLServlet {
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
-      final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
       final Tournament tournament = Tournament.findTournamentByID(connection, Queries.getCurrentTournament(connection));
 
@@ -81,8 +81,7 @@ public class PlayoffReport extends BaseFLLServlet {
       final Document document = new Document(PageSize.LETTER);
       final ByteArrayOutputStream baos = new ByteArrayOutputStream();
       final PdfWriter writer = PdfWriter.getInstance(document, baos);
-      final Element root = challengeDocument.getDocumentElement();
-      writer.setPageEvent(new PageEventHandler(root.getAttribute("title"), tournament.getName()));
+      writer.setPageEvent(new PageEventHandler(challengeDescription.getTitle(), tournament.getName()));
 
       document.open();
 

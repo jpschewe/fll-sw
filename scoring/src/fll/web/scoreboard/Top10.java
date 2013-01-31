@@ -25,7 +25,6 @@ import net.mtu.eggplant.util.StringUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
 
 import fll.Team;
 import fll.Utilities;
@@ -35,8 +34,8 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.xml.ChallengeDescription;
 import fll.xml.WinnerType;
-import fll.xml.XMLUtils;
 
 @WebServlet("/scoreboard/Top10")
 public class Top10 extends BaseFLLServlet {
@@ -109,8 +108,8 @@ public class Top10 extends BaseFLLServlet {
                          Queries.getColorForDivisionIndex(divisionIndex), divisions.get(divisionIndex));
         formatter.format("</tr>");
 
-        final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
-        final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+        final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+        final WinnerType winnerCriteria = challengeDescription.getWinner();
 
         prep = connection.prepareStatement("SELECT Teams.TeamName, Teams.Organization, Teams.TeamNumber, T2.MaxOfComputedScore" //
             + " FROM (SELECT TeamNumber, " //

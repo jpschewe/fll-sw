@@ -36,8 +36,7 @@
 
 <body>
 	<h1>
-		<x:out select="$challengeDocument/fll/@title" />
-		(Reporting)
+		Reporting
 	</h1>
 
 	${message}

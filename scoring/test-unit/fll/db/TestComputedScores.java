@@ -22,14 +22,14 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import fll.TestUtils;
 import fll.Tournament;
 import fll.Utilities;
 import fll.util.LogUtils;
-import fll.util.ScoreUtils;
 import fll.web.playoff.DatabaseTeamScore;
+import fll.xml.ChallengeDescription;
+import fll.xml.PerformanceScoreCategory;
 
 /**
  * 
@@ -55,7 +55,7 @@ public class TestComputedScores {
     final int runNumber = 1;
     final String tournamentName = "11-21 Plymouth Middle";
     final double expectedTotal = 295;
-    
+
     PreparedStatement selectPrep = null;
     ResultSet rs = null;
     Connection connection = null;
@@ -65,15 +65,14 @@ public class TestComputedScores {
     try {
       final InputStream dumpFileIS = TestComputedScores.class.getResourceAsStream("data/plymouth-2009-11-21.zip");
       Assert.assertNotNull("Cannot find test data", dumpFileIS);
-      
+
       connection = Utilities.createFileDataSource(database).getConnection();
 
       ImportDB.loadFromDumpIntoNewDB(new ZipInputStream(dumpFileIS), connection);
 
-      
       final Document document = GlobalParameters.getChallengeDocument(connection);
-      final Element rootElement = document.getDocumentElement();
-      final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
+      final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+      final PerformanceScoreCategory performanceElement = description.getPerformance();
 
       final Tournament tournament = Tournament.findTournamentByName(connection, tournamentName);
       final int tournamentID = tournament.getTournamentID();
@@ -84,16 +83,16 @@ public class TestComputedScores {
       rs = selectPrep.executeQuery();
       Assert.assertNotNull("Error getting performance scores", rs);
       Assert.assertTrue("No scores found", rs.next());
-      
-      final double computedTotal = ScoreUtils.computeTotalScore(new DatabaseTeamScore(performanceElement, teamNumber, runNumber, rs));
+
+      final double computedTotal = performanceElement.evaluate(new DatabaseTeamScore(teamNumber, runNumber, rs));
       Assert.assertEquals(expectedTotal, computedTotal, 0D);
-      
+
     } finally {
-      if(!tempFile.delete()) {
+      if (!tempFile.delete()) {
         tempFile.deleteOnExit();
       }
       SQLFunctions.close(rs);
-      SQLFunctions.close(selectPrep);   
+      SQLFunctions.close(selectPrep);
       SQLFunctions.close(connection);
       TestUtils.deleteDatabase(database);
     }

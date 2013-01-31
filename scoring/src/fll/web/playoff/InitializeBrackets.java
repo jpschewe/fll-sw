@@ -25,7 +25,6 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
 
 import fll.Team;
 import fll.Tournament;
@@ -34,6 +33,7 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.xml.ChallengeDescription;
 
 /**
  * Initialize playoff brackets.
@@ -60,7 +60,7 @@ public class InitializeBrackets extends BaseFLLServlet {
      */
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     Connection connection = null;
 
     String redirect = "index.jsp";
@@ -111,7 +111,7 @@ public class InitializeBrackets extends BaseFLLServlet {
             final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
             Team.filterTeamsToEventDivision(connection, teams, divisionStr);
 
-            Playoff.initializeBrackets(connection, challengeDocument, divisionStr, enableThird, teams);
+            Playoff.initializeBrackets(connection, challengeDescription, divisionStr, enableThird, teams);
           } else {
             // assume new playoff division
 
@@ -126,7 +126,7 @@ public class InitializeBrackets extends BaseFLLServlet {
               message.append(errors);
             } else {
 
-              Playoff.initializeBrackets(connection, challengeDocument, divisionStr, enableThird, teams);
+              Playoff.initializeBrackets(connection, challengeDescription, divisionStr, enableThird, teams);
             }
           }
           message.append("<p>Playoffs have been successfully initialized for division "

@@ -409,6 +409,8 @@ public class ChallengeParserTest {
       final Document document = ChallengeParser.parse(reader);
       Assert.assertNotNull(document);
       reader.close();
+      
+      new ChallengeDescription(document.getDocumentElement());
     }
   }
 

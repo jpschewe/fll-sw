@@ -40,7 +40,7 @@ function confirmChangeTournament() {
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument/fll/@title"/> (Add/Edit Team)</h1>
+    <h1>Add/Edit Team</h1>
 
     <form action="CommitTeam" method="post" name="editTeam">
     <table border='1'>          

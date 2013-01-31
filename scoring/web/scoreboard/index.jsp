@@ -6,7 +6,7 @@
     <title>Scoreboard</title>
   </head>
   <body>
-    <h1><x:out select="$challengeDocument/fll/@title"/> (Scoreboard)</h1>
+    <h1>Scoreboard</h1>
     <ul>
       <li><a href='<c:url value="main.jsp" />'>Primary Scoreboard (1024x768)</a></li>
       <li><a href='<c:url value="/scoreboard_800/main.jsp" />'>Primary Scoreboard

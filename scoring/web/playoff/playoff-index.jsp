@@ -14,8 +14,7 @@
 
 <body>
 	<h1>
-		<x:out select="$challengeDocument/fll/@title" />
-		(Playoff menu)
+Playoff menu
 	</h1>
 
 	${message}

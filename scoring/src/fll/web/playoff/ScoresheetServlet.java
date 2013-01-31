@@ -30,6 +30,7 @@ import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.xml.ChallengeDescription;
 
 @WebServlet("/playoff/ScoresheetServlet")
 public class ScoresheetServlet extends BaseFLLServlet {
@@ -50,7 +51,7 @@ public class ScoresheetServlet extends BaseFLLServlet {
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
-      final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
       final int tournament = Queries.getCurrentTournament(connection);
       response.reset();
       response.setContentType("application/pdf");
@@ -61,7 +62,7 @@ public class ScoresheetServlet extends BaseFLLServlet {
 
       // Create the scoresheet generator - must provide correct number of
       // scoresheets
-      final ScoresheetGenerator gen = new ScoresheetGenerator(request, connection, tournament, challengeDocument);
+      final ScoresheetGenerator gen = new ScoresheetGenerator(request, connection, tournament, challengeDescription);
 
       gen.writeFile(connection, response.getOutputStream());
 

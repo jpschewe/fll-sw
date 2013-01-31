@@ -10,7 +10,7 @@
 
 <body>
 	<h1>
-		<x:out select="$challengeDocument/fll/@title" />
+		Check Seeding Rounds
 	</h1>
 
 	${message}
