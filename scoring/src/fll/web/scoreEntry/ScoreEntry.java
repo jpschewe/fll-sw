@@ -27,10 +27,8 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Element;
 
 import fll.Team;
-import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.util.FP;
@@ -260,11 +258,10 @@ public final class ScoreEntry {
           // enumerated
           final List<EnumeratedValue> posValues = element.getValues();
           for (int valueIdx = 0; valueIdx < posValues.size(); valueIdx++) {
-            final Element valueEle = (Element) posValues.get(valueIdx);
+            final EnumeratedValue valueEle = posValues.get(valueIdx);
 
-            final String value = valueEle.getAttribute("value");
-            final double valueScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(valueEle.getAttribute("score"))
-                                                                      .doubleValue();
+            final String value = valueEle.getValue();
+            final double valueScore = valueEle.getScore();
             if (valueIdx > 0) {
               formatter.format("} else ");
             }
