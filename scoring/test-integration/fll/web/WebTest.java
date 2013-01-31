@@ -56,7 +56,6 @@ public class WebTest {
         // "playoff/remoteMain.jsp",
         "report/index.jsp",
         // "report/CategorizedScores",
-        // "report/ScoreGroupScores",
         // "scoreboard/index.jsp",
         // "scoreboard/main.jsp",
         // "scoreboard_800/main.jsp",

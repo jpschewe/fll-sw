@@ -32,12 +32,10 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.io.IOUtils;
 import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fll.Team;
@@ -341,9 +339,14 @@ public final class ImportDB {
       zipfile.closeEntry();
     }
 
+    if (null == challengeDocument) {
+      throw new RuntimeException("Cannot find challenge document in the zipfile");
+    }
+
+    final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
     if (typeInfo.isEmpty()) {
       // before types were added, assume version 0 types
-      createVersion0TypeInfo(typeInfo, challengeDocument);
+      createVersion0TypeInfo(typeInfo, description);
     }
     for (Map.Entry<String, String> tableEntry : tableData.entrySet()) {
       final String tablename = tableEntry.getKey();
@@ -355,9 +358,6 @@ public final class ImportDB {
 
     upgradeDatabase(connection, challengeDocument);
 
-    if (null == challengeDocument) {
-      throw new RuntimeException("Cannot find challenge document in the zipfile");
-    }
     return challengeDocument;
   }
 
@@ -366,7 +366,7 @@ public final class ImportDB {
    * stored).
    */
   private static void createVersion0TypeInfo(final Map<String, Map<String, String>> typeInfo,
-                                             final Document challengeDocument) {
+                                             final ChallengeDescription description) {
     final Map<String, String> tournaments = new HashMap<String, String>();
     tournaments.put("Name".toLowerCase(), "varchar(128)");
     tournaments.put("Location".toLowerCase(), "longvarchar");
@@ -419,13 +419,14 @@ public final class ImportDB {
     performance.put("NoShow".toLowerCase(), "boolean");
     performance.put("Bye".toLowerCase(), "boolean");
     performance.put("Verified".toLowerCase(), "boolean");
-    final Element rootElement = challengeDocument.getDocumentElement();
-    final Element performanceElement = new NodelistElementCollectionAdapter(
-                                                                            rootElement.getElementsByTagName("Performance")).next();
-    for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
-      final String goalName = element.getAttribute("name");
-      final String type = GenerateDB.getTypeForGoalColumn(element);
-      performance.put(goalName.toLowerCase(), type);
+
+    final PerformanceScoreCategory performanceElement = description.getPerformance();
+    for (final AbstractGoal element : performanceElement.getGoals()) {
+      if (!element.isComputed()) {
+        final String goalName = element.getName();
+        final String type = GenerateDB.getTypeForGoalColumn(element);
+        performance.put(goalName.toLowerCase(), type);
+      }
     }
     performance.put("ComputedTotal".toLowerCase(), "float");
     performance.put("StandardizedScore".toLowerCase(), "float");
@@ -434,9 +435,8 @@ public final class ImportDB {
     final Map<String, String> finalScores = new HashMap<String, String>();
     finalScores.put("TeamNumber".toLowerCase(), "integer");
     finalScores.put("Tournament".toLowerCase(), "varchar(128)");
-    for (final Element categoryElement : new NodelistElementCollectionAdapter(
-                                                                              rootElement.getElementsByTagName("subjectiveCategory"))) {
-      final String tableName = categoryElement.getAttribute("name");
+    for (final ScoreCategory categoryElement : description.getSubjectiveCategories()) {
+      final String tableName = categoryElement.getName();
 
       final Map<String, String> subjective = new HashMap<String, String>();
       subjective.put("TeamNumber".toLowerCase(), "integer");
@@ -444,10 +444,12 @@ public final class ImportDB {
       subjective.put("Judge".toLowerCase(), "varchar(64)");
       subjective.put("NoShow".toLowerCase(), "boolean");
 
-      for (final Element element : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("goal"))) {
-        final String goalName = element.getAttribute("name");
-        final String type = GenerateDB.getTypeForGoalColumn(element);
-        subjective.put(goalName.toLowerCase(), type);
+      for (final AbstractGoal element : categoryElement.getGoals()) {
+        if (!element.isComputed()) {
+          final String goalName = element.getName();
+          final String type = GenerateDB.getTypeForGoalColumn(element);
+          subjective.put(goalName.toLowerCase(), type);
+        }
       }
       subjective.put("ComputedTotal".toLowerCase(), "float");
       subjective.put("StandardizedScore".toLowerCase(), "float");

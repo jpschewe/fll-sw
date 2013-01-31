@@ -25,8 +25,6 @@ import net.mtu.eggplant.util.StringUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Utilities;
@@ -38,7 +36,6 @@ import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.xml.ChallengeDescription;
 import fll.xml.WinnerType;
-import fll.xml.XMLUtils;
 
 @WebServlet("/scoreboard/Top10")
 public class Top10 extends BaseFLLServlet {

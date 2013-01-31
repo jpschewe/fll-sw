@@ -27,7 +27,7 @@ if(null == session.getAttribute("columnSelectOptions")) {
   <body>
     <h1>Verify Teams</h1>
 
-    <% if(UploadTeams.verifyTeams(connection, request, response, session, out)) { %>
+    <% if(UploadTeams.verifyTeams(connection, request, response, application, session, out)) { %>
     <c:set var="message" scope='session' value='<p id="success"><i>Teams successfully uploaded</i></p>'/>
     <c:redirect url="index.jsp"></c:redirect>
     <% } %>

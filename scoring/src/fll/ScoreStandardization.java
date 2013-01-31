@@ -16,15 +16,11 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.xml.ChallengeDescription;
+import fll.xml.PerformanceScoreCategory;
 import fll.xml.ScoreCategory;
 
 /**
@@ -230,7 +226,7 @@ public final class ScoreStandardization {
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable for column name in select")
   public static void updateTeamTotalScores(final Connection connection,
-                                           final Document document,
+                                           final ChallengeDescription description,
                                            final int tournament) throws SQLException, ParseException {
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection, tournament);
 
@@ -239,21 +235,17 @@ public final class ScoreStandardization {
     PreparedStatement perfSelect = null;
     final Collection<PreparedStatement> subjectiveSelects = new LinkedList<PreparedStatement>();
     try {
-      final Element rootElement = document.getDocumentElement();
-      for (final Element catElement : new NodelistElementCollectionAdapter(
-                                                                           rootElement.getElementsByTagName("subjectiveCategory"))) {
-        final String catName = catElement.getAttribute("name");
-        final double catWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(catElement.getAttribute("weight"))
-                                                                 .doubleValue();
+      for (final ScoreCategory catElement : description.getSubjectiveCategories()) {
+        final String catName = catElement.getName();
+        final double catWeight = catElement.getWeight();
         final PreparedStatement prep = connection.prepareStatement("SELECT "
             + catName + " * " + catWeight + " FROM FinalScores WHERE Tournament = ? AND TeamNumber = ?");
         prep.setInt(1, tournament);
         subjectiveSelects.add(prep);
       }
 
-      final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
-      final double performanceWeight = Utilities.NUMBER_FORMAT_INSTANCE.parse(performanceElement.getAttribute("weight"))
-                                                                       .doubleValue();
+      final PerformanceScoreCategory performanceElement = description.getPerformance();
+      final double performanceWeight = performanceElement.getWeight();
       perfSelect = connection.prepareStatement("SELECT performance * "
           + performanceWeight + " FROM FinalScores WHERE TOurnament = ? AND TeamNumber = ?");
       perfSelect.setInt(1, tournament);

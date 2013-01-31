@@ -21,7 +21,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -48,8 +47,7 @@ public class ScoreTest {
     Assert.assertNotNull(stream);
     final Document document = ChallengeParser.parse(new InputStreamReader(stream));
     Assert.assertNotNull(document);
-    final Element rootElement = document.getDocumentElement();
-    final ChallengeDescription desc = new ChallengeDescription(rootElement);
+    final ChallengeDescription desc = new ChallengeDescription(document.getDocumentElement());
     final PerformanceScoreCategory performanceElement = desc.getPerformance();
     Assert.assertNotNull(performanceElement);
     return performanceElement;
