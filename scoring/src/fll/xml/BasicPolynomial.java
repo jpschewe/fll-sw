@@ -54,6 +54,10 @@ public class BasicPolynomial implements Evaluatable, Serializable {
 
   @Override
   public double evaluate(final TeamScore teamScore) {
+    if(!teamScore.scoreExists()) {
+      return Double.NaN;
+    }
+
     double score = getConstant();
     for (final Term t : getTerms()) {
       final double val = t.evaluate(teamScore);

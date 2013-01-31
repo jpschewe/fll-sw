@@ -195,13 +195,15 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           } else if (goalDescription.isEnumerated()) {
             return getTeamScore(row).getEnumRawScore(goalName);
           } else {
-            final Double score = getTeamScore(row).getRawScore(goalName);
+            final double score = getTeamScore(row).getRawScore(goalName);
             final ScoreType scoreType = XMLUtils.getScoreType(scoreEle);
-            if (ScoreType.FLOAT == scoreType
-                || null == score) {
+            if(Double.isNaN(score)) {
+              return null;
+            }
+            else if (ScoreType.FLOAT == scoreType) {
               return score;
             } else {
-              return score.intValue();
+              return (int)score;
             }
           }
         }

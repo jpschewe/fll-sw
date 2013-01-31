@@ -26,7 +26,6 @@ import fll.Team;
 import fll.db.Queries;
 import fll.util.FP;
 import fll.util.LogUtils;
-import fll.util.ScoreUtils;
 import fll.xml.BracketSortType;
 import fll.xml.ChallengeDescription;
 import fll.xml.PerformanceScoreCategory;
