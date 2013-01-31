@@ -24,9 +24,7 @@
 <body>
  <div class='content'>
 
-  <h1>
-   <x:out select="$challengeDocument/fll/@title" />
-   (Developer Database Commands)
+  <h1>Developer Database Commands
   </h1>
 
   <p>

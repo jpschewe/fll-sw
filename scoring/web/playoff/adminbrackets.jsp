@@ -82,7 +82,7 @@ bracketInfo.addStaticTableLabels(connection, currentTournament, divisionStr);
   </style>
 
   <body>
-    <h2><x:out select="$challengeDocument/fll/@title"/> (Playoff Brackets Division: <%=divisionStr%>)</h2>
+    <h2>Playoff Brackets Division: <%=divisionStr%></h2>
     <table align='center' width='100%' border='0' cellpadding='3' cellspacing='0'>
     <%=bracketInfo.getHtmlHeaderRow()%>
 <%  for(int rowIndex = 1; rowIndex <= bracketInfo.getNumRows(); rowIndex++) { %>

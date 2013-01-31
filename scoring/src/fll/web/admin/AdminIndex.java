@@ -25,7 +25,6 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
 
 import fll.Tournament;
 import fll.db.Queries;
@@ -34,6 +33,7 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.xml.ChallengeDescription;
 
 /**
  * Index page for admin.
@@ -54,7 +54,7 @@ public class AdminIndex extends BaseFLLServlet {
       message.append(existingMessage);
     }
 
-    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     ResultSet rs = null;
@@ -92,7 +92,7 @@ public class AdminIndex extends BaseFLLServlet {
       session.setAttribute("scheduleUploaded",
                            TournamentSchedule.scheduleExistsInDatabase(connection, currentTournamentID));
 
-      session.setAttribute("judgesAssigned", Queries.isJudgesProperlyAssigned(connection, challengeDocument));
+      session.setAttribute("judgesAssigned", Queries.isJudgesProperlyAssigned(connection, challengeDescription));
 
       boolean tablesAssigned = false;
       prep = connection.prepareStatement("SELECT COUNT(*) FROM tablenames WHERE Tournament = ?");

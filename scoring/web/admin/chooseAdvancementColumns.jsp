@@ -8,7 +8,7 @@
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument/fll/@title"/> (Advance Team Column Selection)</h1>
+    <h1>${challengeDescription.title } (Advance Team Column Selection)</h1>
 
 	<p>Select the column that specifies the team numbers to be advanced to the next tournament.</p>
       

@@ -22,9 +22,6 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-
-import org.w3c.dom.Element;
 
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Chunk;
@@ -42,8 +39,9 @@ import fll.util.PdfUtils;
 import fll.util.SimpleFooterHandler;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.xml.ChallengeDescription;
+import fll.xml.ScoreCategory;
 import fll.xml.WinnerType;
-import fll.xml.XMLUtils;
 
 /**
  * Display the report for scores by score group.
@@ -61,7 +59,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
-      final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
       final int tournamentID = Queries.getCurrentTournament(connection);
       final Tournament tournament = Tournament.findTournamentByID(connection, tournamentID);
       response.reset();
@@ -70,7 +68,7 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
 
       final Document pdfDoc = PdfUtils.createPdfDoc(response.getOutputStream(), new SimpleFooterHandler());
 
-      generateReport(connection, pdfDoc, challengeDocument, tournament);
+      generateReport(connection, pdfDoc, challengeDescription, tournament);
 
       pdfDoc.close();
 
@@ -86,24 +84,22 @@ public class CategoryScoresByScoreGroup extends BaseFLLServlet {
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table column, winner criteria determines sort")
   private void generateReport(final Connection connection,
                               final Document pdfDoc,
-                              final org.w3c.dom.Document challengeDocument,
+                              final ChallengeDescription challengeDescription,
                               final Tournament tournament) throws SQLException, DocumentException {
 
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      final Element root = challengeDocument.getDocumentElement();
-      final String challengeTitle = root.getAttribute("title");
-      final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+      final String challengeTitle = challengeDescription.getTitle();
+      final WinnerType winnerCriteria = challengeDescription.getWinner();
 
-      final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
-                                                                                      root.getElementsByTagName("subjectiveCategory")).asList();
+      final List<ScoreCategory> subjectiveCategories = challengeDescription.getSubjectiveCategories();
       final Collection<String> eventDivisions = Queries.getEventDivisions(connection);
       final Collection<String> judgingStations = Queries.getJudgingStations(connection, tournament.getTournamentID());
 
-      for (final Element catElement : subjectiveCategories) {
-        final String catName = catElement.getAttribute("name");
-        final String catTitle = catElement.getAttribute("title");
+      for (final ScoreCategory catElement : subjectiveCategories) {
+        final String catName = catElement.getName();
+        final String catTitle = catElement.getTitle();
 
         for (final String division : eventDivisions) {
           for (final String judgingStation : judgingStations) {

@@ -20,7 +20,7 @@
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument/fll/@title"/> (Performance Run <c:out value="${param.RunNumber}"/>)</h1>
+    <h1>Performance Run <c:out value="${param.RunNumber}"/></h1>
 
     <c:if test="${empty param.RunNumber}">
       <font color='red'>You must specify a run number!</font>

@@ -8,7 +8,7 @@
 </head>
 
 <body>
-<h1><x:out select="$challengeDocument/fll/@title" /> (Credits)</h1>
+<h1>Credits</h1>
 
 <p>This software is licensed by INSciTE under the <a
  href="LICENSE.txt">GPL</a></p>

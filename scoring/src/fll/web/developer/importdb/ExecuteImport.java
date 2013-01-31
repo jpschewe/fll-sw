@@ -30,6 +30,7 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.xml.ChallengeDescription;
 
 /**
  * Servlet to do the actual import.
@@ -68,7 +69,8 @@ public class ExecuteImport extends BaseFLLServlet {
         final Tournament destTournament = Tournament.findTournamentByName(destConnection, tournament);
         final int destTournamentID = destTournament.getTournamentID();
         final Document document = GlobalParameters.getChallengeDocument(destConnection);
-        Queries.updateScoreTotals(document, destConnection, destTournamentID);
+        final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+        Queries.updateScoreTotals(description, destConnection, destTournamentID);
 
         message.append(String.format("<p>Import of tournament %s successful. You may now optionally select another tournament to import.</p>", tournament));
         session.setAttribute(SessionAttributes.REDIRECT_URL, "selectTournament.jsp");

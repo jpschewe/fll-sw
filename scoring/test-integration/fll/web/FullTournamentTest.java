@@ -25,7 +25,6 @@ import java.util.Map;
 import javax.swing.table.TableModel;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -38,7 +37,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.Button;
@@ -58,8 +56,12 @@ import fll.util.LogUtils;
 import fll.web.developer.QueryHandler;
 import fll.web.playoff.PlayoffIndex;
 import fll.web.scoreEntry.ScoreEntry;
+import fll.xml.AbstractGoal;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
-import fll.xml.XMLUtils;
+import fll.xml.Goal;
+import fll.xml.PerformanceScoreCategory;
+import fll.xml.ScoreCategory;
 
 /**
  * Test a full tournament.
@@ -163,8 +165,8 @@ public class FullTournamentTest {
       final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(
                                                                                      FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml")));
       Assert.assertNotNull(challengeDocument);
-      final Element rootElement = challengeDocument.getDocumentElement();
-      final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
+      final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
+      final PerformanceScoreCategory performanceElement = description.getPerformance();
 
       prep = testDataConn.prepareStatement("SELECT TeamNumber FROM Performance WHERE Tournament = ? AND RunNumber = ?");
       boolean initializedPlayoff = false;
@@ -215,7 +217,7 @@ public class FullTournamentTest {
 
       checkDisplays();
 
-      enterSubjectiveScores(testDataConn, challengeDocument, testTournamentName);
+      enterSubjectiveScores(testDataConn, description, testTournamentName);
 
       computeFinalScores();
 
@@ -269,8 +271,8 @@ public class FullTournamentTest {
     select.selectByValue(division);
     selenium.findElement(By.id("check_seeding_rounds")).click();
 
-    Assert.assertFalse("Some teams with more or less than seeding rounds found for division '" + division + "'", 
-                       IntegrationTestUtils.isElementPresent(selenium, By.className("warning")));
+    Assert.assertFalse("Some teams with more or less than seeding rounds found for division '"
+        + division + "'", IntegrationTestUtils.isElementPresent(selenium, By.className("warning")));
   }
 
   /**
@@ -598,7 +600,7 @@ public class FullTournamentTest {
    * @throws SAXException
    */
   private void enterSubjectiveScores(final Connection testDataConn,
-                                     final Document challengeDocument,
+                                     final ChallengeDescription description,
                                      final String testTournament) throws SQLException, IOException,
       MalformedURLException, ParseException, SAXException {
 
@@ -631,11 +633,9 @@ public class FullTournamentTest {
       final SubjectiveFrame subjective = new SubjectiveFrame(subjectiveZip);
 
       // insert scores into zip
-      for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
-                                                                                  challengeDocument.getDocumentElement()
-                                                                                                   .getElementsByTagName("subjectiveCategory"))) {
-        final String category = subjectiveElement.getAttribute("name");
-        final String title = subjectiveElement.getAttribute("title");
+      for (final ScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
+        final String category = subjectiveElement.getName();
+        final String title = subjectiveElement.getTitle();
 
         // find appropriate table model
         final TableModel tableModel = subjective.getTableModelForTitle(title);
@@ -682,17 +682,18 @@ public class FullTournamentTest {
             Assert.assertTrue("Can't find No Show column in subjective table model", columnIndex >= 0);
             tableModel.setValueAt(Boolean.TRUE, rowIndex, columnIndex);
           } else {
-            for (final Element goalElement : new NodelistElementCollectionAdapter(
-                                                                                  subjectiveElement.getElementsByTagName("goal"))) {
-              final String goalName = goalElement.getAttribute("name");
-              final String goalTitle = goalElement.getAttribute("title");
+            for (final AbstractGoal goalElement : subjectiveElement.getGoals()) {
+              if (!goalElement.isComputed()) {
+                final String goalName = goalElement.getName();
+                final String goalTitle = goalElement.getTitle();
 
-              // find column index for goal and call set
-              final int columnIndex = findColumnByName(tableModel, goalTitle);
-              Assert.assertTrue("Can't find "
-                  + goalTitle + " column in subjective table model", columnIndex >= 0);
-              final int value = rs.getInt(goalName);
-              tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
+                // find column index for goal and call set
+                final int columnIndex = findColumnByName(tableModel, goalTitle);
+                Assert.assertTrue("Can't find "
+                    + goalTitle + " column in subjective table model", columnIndex >= 0);
+                final int value = rs.getInt(goalName);
+                tableModel.setValueAt(Integer.valueOf(value), rowIndex, columnIndex);
+              }
             }
           }
         }
@@ -764,7 +765,7 @@ public class FullTournamentTest {
    * pushed to the website.
    */
   private void enterPerformanceScore(final Connection testDataConn,
-                                     final Element performanceElement,
+                                     final PerformanceScoreCategory performanceElement,
                                      final String testTournament,
                                      final int runNumber,
                                      final int teamNumber) throws SQLException, IOException, MalformedURLException,
@@ -799,59 +800,60 @@ public class FullTournamentTest {
         } else {
           // walk over challenge descriptor to get all element names and then
           // use the values from rs
-          for (final Element element : new NodelistElementCollectionAdapter(
-                                                                            performanceElement.getElementsByTagName("goal"))) {
-            final String name = element.getAttribute("name");
-            final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
-            final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
-            if (LOGGER.isDebugEnabled()) {
-              LOGGER.debug("Setting form parameter: "
-                  + name + " min: " + min + " max: " + max);
-            }
+          for (final AbstractGoal element : performanceElement.getGoals()) {
+            if (!element.isComputed()) {
+              final Goal goal = (Goal) element;
+              final String name = goal.getName();
+              final double min = goal.getMin();
+              final double max = goal.getMax();
+              if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Setting form parameter: "
+                    + name + " min: " + min + " max: " + max);
+              }
 
-            if (XMLUtils.isEnumeratedGoal(element)) {
-              final String valueStr = rs.getString(name);
-              final String radioID = ScoreEntry.getIDForEnumRadio(name, valueStr);
-              selenium.findElement(By.id(radioID)).click();
-            } else if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
-                && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-              final int value = rs.getInt(name);
-              final String buttonID;
-              if (0 == value) {
-                buttonID = name
-                    + "_no";
-              } else {
-                buttonID = name
-                    + "_yes";
-              }
-              selenium.findElement(By.id(buttonID)).click();
-            } else {
-              final int initialValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("initialValue"))
-                                                                       .intValue();
-              final int value = rs.getInt(name);
-              final String buttonID;
-              final int difference;
-              if (initialValue < value) {
-                // increment
-                difference = value
-                    - initialValue;
-                buttonID = ScoreEntry.getIncDecButtonID(name, 1);
-              } else if (value < initialValue) {
-                // decrement
-                difference = initialValue
-                    - value;
-                buttonID = ScoreEntry.getIncDecButtonID(name, -1);
-              } else {
-                // no change
-                difference = 0;
-                buttonID = null;
-              }
-              for (int i = 0; i < difference; ++i) {
+              if (goal.isEnumerated()) {
+                final String valueStr = rs.getString(name);
+                final String radioID = ScoreEntry.getIDForEnumRadio(name, valueStr);
+                selenium.findElement(By.id(radioID)).click();
+              } else if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
+                  && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+                final int value = rs.getInt(name);
+                final String buttonID;
+                if (0 == value) {
+                  buttonID = name
+                      + "_no";
+                } else {
+                  buttonID = name
+                      + "_yes";
+                }
                 selenium.findElement(By.id(buttonID)).click();
-              }
+              } else {
+                final int initialValue = (int) goal.getInitialValue();
+                final int value = rs.getInt(name);
+                final String buttonID;
+                final int difference;
+                if (initialValue < value) {
+                  // increment
+                  difference = value
+                      - initialValue;
+                  buttonID = ScoreEntry.getIncDecButtonID(name, 1);
+                } else if (value < initialValue) {
+                  // decrement
+                  difference = initialValue
+                      - value;
+                  buttonID = ScoreEntry.getIncDecButtonID(name, -1);
+                } else {
+                  // no change
+                  difference = 0;
+                  buttonID = null;
+                }
+                for (int i = 0; i < difference; ++i) {
+                  selenium.findElement(By.id(buttonID)).click();
+                }
 
-            }
-          }
+              }
+            } // !computed
+          } // foreach goal
 
           selenium.findElement(By.id("submit")).click();
         }
@@ -882,7 +884,7 @@ public class FullTournamentTest {
    * @throws InterruptedException
    */
   private void verifyPerformanceScore(final Connection testDataConn,
-                                      final Element performanceElement,
+                                      final PerformanceScoreCategory performanceElement,
                                       final String testTournament,
                                       final int runNumber,
                                       final int teamNumber) throws SQLException, IOException, MalformedURLException,
@@ -920,51 +922,53 @@ public class FullTournamentTest {
 
           // walk over challenge descriptor to get all element names and then
           // use the values from rs
-          for (final Element element : new NodelistElementCollectionAdapter(
-                                                                            performanceElement.getElementsByTagName("goal"))) {
-            final String name = element.getAttribute("name");
-            final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
-            final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
+          for (final AbstractGoal element : performanceElement.getGoals()) {
+            if (!element.isComputed()) {
+              final Goal goal = (Goal) element;
+              final String name = goal.getName();
+              final double min = goal.getMin();
+              final double max = goal.getMax();
 
-            if (XMLUtils.isEnumeratedGoal(element)) {
-              // need check if the right radio button is selected
-              final String value = rs.getString(name);
+              if (goal.isEnumerated()) {
+                // need check if the right radio button is selected
+                final String value = rs.getString(name);
 
-              final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
-                                               .getAttribute("value");
-              Assert.assertNotNull("Null value for goal: "
-                  + name, formValue);
+                final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
+                                                 .getAttribute("value");
+                Assert.assertNotNull("Null value for goal: "
+                    + name, formValue);
 
-              Assert.assertEquals("Wrong enum selected for goal: "
-                  + name, value.toLowerCase(), formValue.toLowerCase());
-            } else if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
-                && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-              final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
-                                               .getAttribute("value");
-              Assert.assertNotNull("Null value for goal: "
-                  + name, formValue);
+                Assert.assertEquals("Wrong enum selected for goal: "
+                    + name, value.toLowerCase(), formValue.toLowerCase());
+              } else if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
+                  && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+                final String formValue = selenium.findElement(By.name(ScoreEntry.getElementNameForYesNoDisplay(name)))
+                                                 .getAttribute("value");
+                Assert.assertNotNull("Null value for goal: "
+                    + name, formValue);
 
-              // yes/no
-              final int value = rs.getInt(name);
-              final String expectedValue;
-              if (value == 0) {
-                expectedValue = "no";
+                // yes/no
+                final int value = rs.getInt(name);
+                final String expectedValue;
+                if (value == 0) {
+                  expectedValue = "no";
+                } else {
+                  expectedValue = "yes";
+                }
+                Assert.assertEquals("Wrong value for goal: "
+                    + name, expectedValue.toLowerCase(), formValue.toLowerCase());
               } else {
-                expectedValue = "yes";
-              }
-              Assert.assertEquals("Wrong value for goal: "
-                  + name, expectedValue.toLowerCase(), formValue.toLowerCase());
-            } else {
-              final String formValue = selenium.findElement(By.name(name)).getAttribute("value");
-              Assert.assertNotNull("Null value for goal: "
-                  + name, formValue);
+                final String formValue = selenium.findElement(By.name(name)).getAttribute("value");
+                Assert.assertNotNull("Null value for goal: "
+                    + name, formValue);
 
-              final int value = rs.getInt(name);
-              final int formValueInt = Integer.valueOf(formValue);
-              Assert.assertEquals("Wrong value for goal: "
-                  + name, value, formValueInt);
-            }
-          }
+                final int value = rs.getInt(name);
+                final int formValueInt = Integer.valueOf(formValue);
+                Assert.assertEquals("Wrong value for goal: "
+                    + name, value, formValueInt);
+              }
+            } // !computed
+          } // foreach goal
 
           // Set the verified field to yes
           selenium.findElement(By.id("Verified_yes")).click();

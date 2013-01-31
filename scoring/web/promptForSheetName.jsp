@@ -7,7 +7,7 @@
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument/fll/@title"/> (Choose Sheet Name)</h1>
+    <h1>Choose Sheet Name</h1>
 
     <form action='ProcessSelectedSheet' method='post'>
     <ul>

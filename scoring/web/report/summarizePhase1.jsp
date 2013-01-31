@@ -9,8 +9,7 @@
 
 <body>
 	<h1>
-		<x:out select="$challengeDocument/fll/@title" />
-		(Summarize Scores)
+		Summarize Scores
 	</h1>
 
 	<p>
