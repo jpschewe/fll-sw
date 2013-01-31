@@ -83,15 +83,10 @@ public final class ChallengeParser {
         System.exit(1);
       }
 
+      final ChallengeDescription description = new ChallengeDescription(challengeDocument.getDocumentElement());
+
       LOG.info("Title: "
-          + challengeDocument.getDocumentElement().getAttribute("title"));
-      final Element rootElement = challengeDocument.getDocumentElement();
-      final Element performanceElement = (org.w3c.dom.Element) rootElement.getElementsByTagName("Performance").item(0);
-      LOG.info("The performance goals are");
-      for (final Element element : new NodelistElementCollectionAdapter(performanceElement.getElementsByTagName("goal"))) {
-        final String name = element.getAttribute("name");
-        LOG.info(name);
-      }
+          + description.getTitle());
     } catch (final Exception e) {
       LOG.fatal(e, e);
       System.exit(1);
@@ -250,6 +245,12 @@ public final class ChallengeParser {
     } // end foreach child node
   } // end validateDocument
 
+  public static String compareStructure(final Document curDoc,
+                                        final Document newDoc) {
+    return compareStructure(new ChallengeDescription(curDoc.getDocumentElement()),
+                            new ChallengeDescription(newDoc.getDocumentElement()));
+  }
+
   /**
    * If the new document differs from the current document in a way that the
    * database structure will be modified.
@@ -258,12 +259,10 @@ public final class ChallengeParser {
    * @param newDoc the document to check against
    * @return null if everything checks out OK, otherwise the error message
    */
-  public static String compareStructure(final Document curDoc,
-                                        final Document newDoc) {
-    final Element curDocRoot = curDoc.getDocumentElement();
-    final Element newDocRoot = newDoc.getDocumentElement();
-    final Element curPerfElement = (Element) curDocRoot.getElementsByTagName("Performance").item(0);
-    final Element newPerfElement = (Element) newDocRoot.getElementsByTagName("Performance").item(0);
+  public static String compareStructure(final ChallengeDescription curDoc,
+                                        final ChallengeDescription newDoc) {
+    final PerformanceScoreCategory curPerfElement = curDoc.getPerformance();
+    final PerformanceScoreCategory newPerfElement = newDoc.getPerformance();
 
     final Map<String, String> curPerGoals = gatherColumnDefinitions(curPerfElement);
     final Map<String, String> newPerGoals = gatherColumnDefinitions(newPerfElement);
@@ -272,24 +271,22 @@ public final class ChallengeParser {
       return goalCompareMessage;
     }
 
-    final List<Element> curSubCats = new NodelistElementCollectionAdapter(
-                                                                          curDocRoot.getElementsByTagName("subjectiveCategory")).asList();
-    final List<Element> newSubCats = new NodelistElementCollectionAdapter(
-                                                                          newDocRoot.getElementsByTagName("subjectiveCategory")).asList();
+    final List<ScoreCategory> curSubCats = curDoc.getSubjectiveCategories();
+    final List<ScoreCategory> newSubCats = newDoc.getSubjectiveCategories();
     if (curSubCats.size() != newSubCats.size()) {
       return "New document has "
           + newSubCats.size() + " subjective categories, current document has " + curSubCats.size()
           + " subjective categories";
     }
     final Map<String, Map<String, String>> curCats = new HashMap<String, Map<String, String>>();
-    for (final Element ele : curSubCats) {
-      final String name = ele.getAttribute("name");
+    for (final ScoreCategory ele : curSubCats) {
+      final String name = ele.getName();
       final Map<String, String> goalDefs = gatherColumnDefinitions(ele);
       curCats.put(name, goalDefs);
     }
 
-    for (final Element ele : newSubCats) {
-      final String name = ele.getAttribute("name");
+    for (final ScoreCategory ele : newSubCats) {
+      final String name = ele.getName();
       if (!curCats.containsKey(name)) {
         return "New document has subjective category '"
             + name + "' which is not in the current document";
@@ -334,13 +331,15 @@ public final class ChallengeParser {
   /**
    * Get the column definitions for all goals in the specified element
    */
-  private static Map<String, String> gatherColumnDefinitions(final Element element) {
+  private static Map<String, String> gatherColumnDefinitions(final ScoreCategory element) {
     final Map<String, String> goalDefs = new HashMap<String, String>();
 
-    for (final Element goal : new NodelistElementCollectionAdapter(element.getElementsByTagName("goal"))) {
-      final String columnDefinition = GenerateDB.generateGoalColumnDefinition(goal);
-      final String goalName = goal.getAttribute("name");
-      goalDefs.put(goalName, columnDefinition);
+    for (final AbstractGoal goal : element.getGoals()) {
+      if (!goal.isComputed()) {
+        final String columnDefinition = GenerateDB.generateGoalColumnDefinition(goal);
+        final String goalName = goal.getName();
+        goalDefs.put(goalName, columnDefinition);
+      }
     }
 
     return goalDefs;
