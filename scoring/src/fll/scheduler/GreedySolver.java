@@ -112,8 +112,6 @@ public class GreedySolver {
 
   private static final String DATA_FILE_OPTION = "d";
 
-  private static final String SUBJECTIVE_FIRST_OPTION = "s";
-
   private final Collection<ScheduledBreak> subjectiveBreaks = new LinkedList<ScheduledBreak>();
 
   private final Collection<ScheduledBreak> performanceBreaks = new LinkedList<ScheduledBreak>();
@@ -125,13 +123,6 @@ public class GreedySolver {
     options.addOption(option);
 
     option = new Option(OPTIMIZE_OPTION, "optimize", false, "Turn on optimization (default: false)");
-    options.addOption(option);
-
-    option = new Option(
-                        SUBJECTIVE_FIRST_OPTION,
-                        "subjective-first",
-                        false,
-                        "Schedule subjective slots first, then schedule performance. This can sometimes create schedules that finish earlier in the day.");
     options.addOption(option);
 
     return options;
@@ -149,7 +140,6 @@ public class GreedySolver {
 
     // parse options
     boolean optimize = false;
-    boolean subjectiveFirst = false;
     File datafile = null;
     try {
       final CommandLineParser parser = new PosixParser();
@@ -157,10 +147,6 @@ public class GreedySolver {
 
       if (cmd.hasOption(OPTIMIZE_OPTION)) {
         optimize = true;
-      }
-
-      if (cmd.hasOption(SUBJECTIVE_FIRST_OPTION)) {
-        subjectiveFirst = true;
       }
 
       datafile = new File(cmd.getOptionValue(DATA_FILE_OPTION));
@@ -177,7 +163,7 @@ public class GreedySolver {
         System.exit(4);
       }
 
-      final GreedySolver solver = new GreedySolver(datafile, optimize, subjectiveFirst);
+      final GreedySolver solver = new GreedySolver(datafile, optimize);
       final long start = System.currentTimeMillis();
       solver.solve();
       final long stop = System.currentTimeMillis();
@@ -201,11 +187,9 @@ public class GreedySolver {
    * @throws ParseException
    */
   public GreedySolver(final File datafile,
-                      final boolean optimize,
-                      final boolean subjectiveFirst) throws IOException, ParseException {
+                      final boolean optimize) throws IOException, ParseException {
     this.datafile = datafile;
     this.optimize = optimize;
-    this.subjectiveFirst = subjectiveFirst;
     if (this.optimize) {
       LOGGER.info("Optimization is turned on");
     }
@@ -231,6 +215,11 @@ public class GreedySolver {
     final boolean alternate = alternateValue == 1;
     LOGGER.debug("Alternate is: "
         + alternate);
+
+    final int subjectiveFirst = Integer.valueOf(properties.getProperty("subjective_first", "0").trim());
+    this.subjectiveFirst = subjectiveFirst == 1;
+    LOGGER.debug("Subjective first is: "
+        + this.subjectiveFirst);
 
     final int perfOffsetMinutes = Integer.valueOf(properties.getProperty("perf_attempt_offset_minutes",
                                                                          String.valueOf(tinc)).trim());
