@@ -91,7 +91,7 @@ public class TableOptimizer {
             final File outputFile = new File(basedir, String.format("%s-opt-%d.csv", schedule.getName(), numSolutions));
             LOGGER.info(String.format("Found better schedule (%d -> %d), writing to: %s", minWarnings,
                                       newWarnings.size(), outputFile.getAbsolutePath()));
-            writeSchedule(outputFile);
+            schedule.writeToCSV(outputFile);
             ++numSolutions;
           } catch (final IOException e) {
             throw new RuntimeException(e);
@@ -236,7 +236,7 @@ public class TableOptimizer {
       usage(options);
       System.exit(1);
     }
-    
+
     FileInputStream fis = null;
     try {
       if (!schedfile.canRead()) {
@@ -259,7 +259,7 @@ public class TableOptimizer {
         fis = new FileInputStream(schedfile);
         reader = new ExcelCellReader(fis, sheetName);
       }
-      
+
       final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
       if (null != fis) {
         fis.close();
@@ -323,7 +323,6 @@ public class TableOptimizer {
       }
     }
 
-
   }
 
   /**
@@ -351,60 +350,6 @@ public class TableOptimizer {
     if (!this.basedir.isDirectory()) {
       throw new IllegalArgumentException("Basedir must be a directory");
     }
-  }
-
-  /**
-   * @param outputFile
-   * @throws IOException
-   */
-  private void writeSchedule(final File outputFile) throws IOException {
-    CSVWriter csv = null;
-    try {
-      csv = new CSVWriter(new OutputStreamWriter(new FileOutputStream(outputFile), Utilities.DEFAULT_CHARSET));
-
-      final List<String> line = new ArrayList<String>();
-      line.add(TournamentSchedule.TEAM_NUMBER_HEADER);
-      line.add(TournamentSchedule.DIVISION_HEADER);
-      line.add(TournamentSchedule.TEAM_NAME_HEADER);
-      line.add(TournamentSchedule.ORGANIZATION_HEADER);
-      line.add(TournamentSchedule.JUDGE_GROUP_HEADER);
-      final List<String> categories = Collections.unmodifiableList(new LinkedList<String>(
-                                                                                          schedule.getSubjectiveStations()));
-      for (final String category : categories) {
-        line.add(category);
-      }
-      for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
-        line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round + 1));
-        line.add(String.format(TournamentSchedule.TABLE_HEADER_FORMAT, round + 1));
-      }
-      csv.writeNext(line.toArray(new String[line.size()]));
-      line.clear();
-
-      for (final TeamScheduleInfo si : schedule.getSchedule()) {
-        line.add(String.valueOf(si.getTeamNumber()));
-        line.add(si.getDivision());
-        line.add(si.getTeamName());
-        line.add(si.getOrganization());
-        line.add(si.getJudgingStation());
-        for (final String category : categories) {
-          final Date d = si.getSubjectiveTimeByName(category).getTime();
-          line.add(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(d));
-        }
-        for (int round = 0; round < schedule.getNumberOfRounds(); ++round) {
-          final PerformanceTime p = si.getPerf(round);
-          line.add(TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(p.getTime()));
-          line.add(p.getTable()
-              + " " + p.getSide());
-        }
-        csv.writeNext(line.toArray(new String[line.size()]));
-        line.clear();
-      }
-    } finally {
-      if (null != csv) {
-        csv.close();
-      }
-    }
-
   }
 
   public void optimize() {
