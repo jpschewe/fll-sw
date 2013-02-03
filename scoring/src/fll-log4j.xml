@@ -42,7 +42,8 @@
  </logger>
 
  <!-- stuff for debugging -->
- <!-- logger name="fll.scheduler.GreedySolver"><level value="TRACE"/></logger -->
+ <!-- logger name="fll.web.admin.CommitJudges"><level value="TRACE"/></logger-->
+ <!-- logger name="fll.web.FullTournamentTest"><level value="TRACE"/></logger-->
 
 
  <!-- database connection information -->

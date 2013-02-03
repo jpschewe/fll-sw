@@ -138,15 +138,20 @@ public class FullTournamentTest {
       final String testTournamentName = "Field";
 
       // --- initialize database ---
+      LOGGER.info("Initializing the database from data/challenge-ft.xml");
       final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml");
       IntegrationTestUtils.initializeDatabase(selenium, challengeDocIS, true);
 
+      LOGGER.info("Loading teams");
       loadTeams();
 
+      LOGGER.info("Setting current tournament");
       IntegrationTestUtils.setTournament(selenium, testTournamentName);
 
+      LOGGER.info("Assigning judges");
       assignJudges(testDataConn, testTournamentName);
 
+      LOGGER.info("Assigning table labels");
       assignTableLabels();
 
       /*
@@ -181,10 +186,8 @@ public class FullTournamentTest {
 
             // initialize the playoff brackets with playoff/index.jsp form
             for (final String division : divisions) {
-              if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Initializing playoff brackets for division "
-                    + division);
-              }
+              LOGGER.info("Initializing playoff brackets for division "
+                  + division);
               checkSeedingRoundsForDivision(division);
               IntegrationTestUtils.initializePlayoffsForDivision(selenium, division);
             }
@@ -215,14 +218,20 @@ public class FullTournamentTest {
 
       }
 
+      LOGGER.info("Checking displays");
       checkDisplays();
 
+      LOGGER.info("Checking the subjective scores");
       enterSubjectiveScores(testDataConn, description, testTournamentName);
 
+      
+      LOGGER.info("Computing final scores");
       computeFinalScores();
 
+      LOGGER.info("Checking the reports");
       checkReports();
 
+      LOGGER.info("Checking rank and scores");
       checkRankAndScores(testTournamentName);
 
     } catch (final AssertionError e) {
