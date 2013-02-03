@@ -905,6 +905,7 @@ public final class Playoff {
   /**
    * Given a team and run number, get the playoff division
    * 
+   * @param runNumber the performance run number
    * @return the division or null if not found
    */
   public static String getPlayoffDivision(final Connection connection,
