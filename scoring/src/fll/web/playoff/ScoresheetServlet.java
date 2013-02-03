@@ -36,11 +36,6 @@ public class ScoresheetServlet extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  /**
-   * @see fll.web.BaseFLLServlet#processRequest(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse, javax.servlet.ServletContext,
-   *      javax.servlet.http.HttpSession)
-   */
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
