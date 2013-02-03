@@ -67,7 +67,7 @@ body {
    }
    %>
    
-   <td valign="bottom">
+   <td valign="middle">
      <%
       //out.print("<img width='" + fllPercentage + "%' src='images/fll_logo.gif' />");
       out.print("<img width='100%' src='images/fll_logo.gif' />");
