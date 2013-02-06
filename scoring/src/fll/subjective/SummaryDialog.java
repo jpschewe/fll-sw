@@ -37,6 +37,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fll.web.admin.DownloadSubjectiveData;
+import fll.xml.AbstractGoal;
+import fll.xml.ChallengeDescription;
+import fll.xml.ScoreCategory;
 
 /**
  * Summary dialog for subjective scores.
@@ -52,7 +55,7 @@ import fll.web.admin.DownloadSubjectiveData;
     final Container cpane = getContentPane();
     cpane.setLayout(new BorderLayout());
 
-    final TableModel[] models = buildTableModels(owner.getChallengeDocument(), owner.getScoreDocument());
+    final TableModel[] models = buildTableModels(owner.getChallengeDescription(), owner.getScoreDocument());
     final JTable teamTable = new JTable(models[0]);
     teamTable.setGridColor(Color.BLACK);
     teamTable.setAutoCreateRowSorter(true);
@@ -89,42 +92,40 @@ import fll.web.admin.DownloadSubjectiveData;
   }
 
   /**
-   * @param challengeDocument
-   * @param scoreDocument
    * @return [0] is the team table model, [1] is the summary table model
    */
-  private TableModel[] buildTableModels(final Document challengeDocument,
+  private TableModel[] buildTableModels(final ChallengeDescription description,
                                         final Document scoreDocument) {
     final Map<Integer, Integer[]> data = new HashMap<Integer, Integer[]>();
 
     final Element scoresElement = scoreDocument.getDocumentElement();
     final List<String> columnNames = new LinkedList<String>();
     final Map<Integer, String> teamNumberToDivision = new HashMap<Integer, String>();
-    final List<Element> subjectiveCategories = new NodelistElementCollectionAdapter(
-                                                                                    challengeDocument.getDocumentElement()
-                                                                                                     .getElementsByTagName("subjectiveCategory")).asList();
+    final List<ScoreCategory> subjectiveCategories = description.getSubjectiveCategories();
     for (int catIdx = 0; catIdx < subjectiveCategories.size(); catIdx++) {
-      final Element subjectiveElement = subjectiveCategories.get(catIdx);
-      final String category = subjectiveElement.getAttribute("name");
-      final String categoryTitle = subjectiveElement.getAttribute("title");
+      final ScoreCategory subjectiveElement = subjectiveCategories.get(catIdx);
+      final String category = subjectiveElement.getName();
+      final String categoryTitle = subjectiveElement.getTitle();
       columnNames.add(categoryTitle);
 
-      final List<Element> goals = new NodelistElementCollectionAdapter(subjectiveElement.getElementsByTagName("goal")).asList();
+      final List<AbstractGoal> goals = subjectiveElement.getGoals();
       final Element categoryElement = SubjectiveUtils.getCategoryNode(scoresElement, category);
       for (final Element scoreElement : new NodelistElementCollectionAdapter(
                                                                              categoryElement.getElementsByTagName(DownloadSubjectiveData.SCORE_NODE_NAME))) {
         int numValues = 0;
-        for (final Element goalElement : goals) {
-          final String goalName = goalElement.getAttribute("name");
-          final Element subscoreElement = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
-          if (null != subscoreElement) {
-            final String value = subscoreElement.getAttribute("value");
-            if (null != value
-                && !"".equals(value)) {
-              numValues++;
-              break;
+        for (final AbstractGoal goalElement : goals) {
+          if (!goalElement.isComputed()) {
+            final String goalName = goalElement.getName();
+            final Element subscoreElement = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
+            if (null != subscoreElement) {
+              final String value = subscoreElement.getAttribute("value");
+              if (null != value
+                  && !"".equals(value)) {
+                numValues++;
+                break;
+              }
             }
-          }
+          }// !computed
         } // end foreach goal
 
         final int teamNumber = Integer.parseInt(scoreElement.getAttribute("teamNumber"));
