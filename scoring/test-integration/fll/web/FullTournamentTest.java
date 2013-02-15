@@ -994,7 +994,7 @@ public class FullTournamentTest {
         confirmScoreChange.accept();
 
         // give the web server a chance to catch up
-        Thread.sleep(1000);
+        Thread.sleep(1500);
 
         // check for errors
         // Gives trouble too often
