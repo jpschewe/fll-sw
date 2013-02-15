@@ -224,7 +224,6 @@ public class FullTournamentTest {
       LOGGER.info("Checking the subjective scores");
       enterSubjectiveScores(testDataConn, description, testTournamentName);
 
-      
       LOGGER.info("Computing final scores");
       computeFinalScores();
 
@@ -998,9 +997,9 @@ public class FullTournamentTest {
         Thread.sleep(1000);
 
         // check for errors
-        // Gives trouble too often Assert.assertEquals(selectTeamPage,
-        // selenium.getCurrentUrl());
-        Assert.assertTrue("Error submitting form, not on select team page",
+        // Gives trouble too often
+        //Assert.assertEquals(selectTeamPage, selenium.getCurrentUrl());
+        Assert.assertTrue("Error submitting form, not on select team page url: " + selenium.getCurrentUrl(),
                           selenium.getPageSource().contains("Unverified Runs"));
 
       } else {
