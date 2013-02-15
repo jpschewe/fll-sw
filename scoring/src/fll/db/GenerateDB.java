@@ -79,8 +79,12 @@ public final class GenerateDB {
     try {
       stmt = connection.createStatement();
 
+      // write to disk regularly in case of a crash
       stmt.executeUpdate("SET WRITE_DELAY 100 MILLIS");
 
+      // use MVCC transaction model to handle high rate of updates from multiple threads
+      stmt.executeUpdate("SET DATABASE TRANSACTION CONTROL MVCC");
+      
       final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
 
       createGlobalParameters(document, connection, forceRebuild, tables);
