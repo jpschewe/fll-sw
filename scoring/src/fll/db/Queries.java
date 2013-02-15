@@ -673,18 +673,47 @@ public final class Queries {
   }
 
   /**
+   * Insert or update a performance score.
+   * 
+   * @throws SQLException on a database error.
+   * @throws RuntimeException if a parameter is missing.
+   * @throws ParseException if the team number cannot be parsed
+   */
+  public static void insertOrUpdatePerformanceScore(final ChallengeDescription description,
+                                                    final Connection connection,
+                                                    final HttpServletRequest request) throws SQLException,
+      ParseException, RuntimeException {
+    final int oldTransactionIsolation = connection.getTransactionIsolation();
+    final boolean oldAutoCommit = connection.getAutoCommit();
+    try {
+      // make sure that we don't get into a race with another thread
+      connection.setAutoCommit(false);
+      connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+      
+      final int rowsUpdated = updatePerformanceScore(description, connection, request);
+      if(rowsUpdated < 1) {
+        insertPerformanceScore(description, connection, request);
+      }
+      
+      connection.commit();
+    } finally {
+      connection.setTransactionIsolation(oldTransactionIsolation);
+      connection.setAutoCommit(oldAutoCommit);
+    }
+  }
+
+  /**
    * Insert a performance score into the database. All of the values are
    * expected to be in request.
    * 
-   * @return the SQL executed
    * @throws SQLException on a database error.
    * @throws RuntimeException if a parameter is missing.
-   * @throws ParseException if the XML document is invalid.
+   * @throws ParseException if the team number cannot be parsed
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Goals determine columns")
-  public static String insertPerformanceScore(final ChallengeDescription description,
-                                              final Connection connection,
-                                              final HttpServletRequest request) throws SQLException, ParseException,
+  private static void insertPerformanceScore(final ChallengeDescription description,
+                                             final Connection connection,
+                                             final HttpServletRequest request) throws SQLException, ParseException,
       RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
 
@@ -779,8 +808,6 @@ public final class Queries {
       updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
                          teamNumber, runNumber, teamScore);
     }
-
-    return sql;
   }
 
   public static boolean isThirdPlaceEnabled(final Connection connection,
@@ -815,15 +842,15 @@ public final class Queries {
    * Update a performance score in the database. All of the values are expected
    * to be in request.
    * 
-   * @return the SQL executed
+   * @return the number of rows updated, should be 0 or 1
    * @throws SQLException on a database error.
    * @throws ParseException if the XML document is invalid.
    * @throws RuntimeException if a parameter is missing.
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Need to generate list of columns off the goals")
-  public static String updatePerformanceScore(final ChallengeDescription description,
-                                              final Connection connection,
-                                              final HttpServletRequest request) throws SQLException, ParseException,
+  private static int updatePerformanceScore(final ChallengeDescription description,
+                                            final Connection connection,
+                                            final HttpServletRequest request) throws SQLException, ParseException,
       RuntimeException {
     final int currentTournament = getCurrentTournament(connection);
 
@@ -892,25 +919,28 @@ public final class Queries {
     sql.append(" AND Tournament = "
         + currentTournament);
 
+    int numRowsUpdated = 0;
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
-      stmt.executeUpdate(sql.toString());
+      numRowsUpdated = stmt.executeUpdate(sql.toString());
     } finally {
       SQLFunctions.close(stmt);
     }
 
-    // Check if we need to update the PlayoffData table
-    final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
-    if (runNumber > numSeedingRounds) {
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Updating playoff score from updatePerformanceScore");
+    if (numRowsUpdated > 0) {
+      // Check if we need to update the PlayoffData table
+      final int numSeedingRounds = getNumSeedingRounds(connection, currentTournament);
+      if (runNumber > numSeedingRounds) {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Updating playoff score from updatePerformanceScore");
+        }
+        updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement,
+                           tiebreakerElement, teamNumber, runNumber, teamScore);
       }
-      updatePlayoffScore(connection, request, currentTournament, winnerCriteria, performanceElement, tiebreakerElement,
-                         teamNumber, runNumber, teamScore);
     }
 
-    return sql.toString();
+    return numRowsUpdated;
   }
 
   /**
