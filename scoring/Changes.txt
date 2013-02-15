@@ -1,3 +1,5 @@
+* 204 - Allow score entry to update or insert a score in a safe manner
+    under heavy load
 * Disallow setting up the database from a computer other than localhost.
     This solves a number of issues around init and security given that
     the database is part of the webapp. If the database is moved out of the
