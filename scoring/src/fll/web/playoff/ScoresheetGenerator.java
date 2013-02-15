@@ -145,6 +145,7 @@ public class ScoresheetGenerator {
             final String round = request.getParameter("round"
                 + i);
             final int iRound = Integer.parseInt(round);
+            
             // Get teamA info
             final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamA"
                 + i)));
@@ -154,12 +155,20 @@ public class ScoresheetGenerator {
                 + round;
             m_table[j] = request.getParameter("tableA"
                 + i);
+            
+            final int performanceRunA = Playoff.getRunNumber(connection, teamA.getTeamNumber(), iRound);                 
+            final String divA = Playoff.getPlayoffDivision(connection, teamA.getTeamNumber(), performanceRunA);
+            
             updatePrep.setString(1, m_table[j]);
-            updatePrep.setString(2, Queries.getEventDivision(connection, teamA.getTeamNumber()));
+            updatePrep.setString(2, divA);
             updatePrep.setInt(4, iRound);
             updatePrep.setInt(5, teamA.getTeamNumber());
-            updatePrep.executeUpdate();
+            if (updatePrep.executeUpdate() < 1) {
+              LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff division: %s",
+                                        teamA.getTeamNumber(), iRound, divA));
+            }
             j++;
+            
             // Get teamB info
             final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamB"
                 + i)));
@@ -169,11 +178,18 @@ public class ScoresheetGenerator {
                 + round;
             m_table[j] = request.getParameter("tableB"
                 + i);
+
+            final int performanceRunB = Playoff.getRunNumber(connection, teamB.getTeamNumber(), iRound);                 
+            final String divB = Playoff.getPlayoffDivision(connection, teamB.getTeamNumber(), performanceRunB);
+            
             updatePrep.setString(1, m_table[j]);
-            updatePrep.setString(2, Queries.getEventDivision(connection, teamB.getTeamNumber()));
+            updatePrep.setString(2, divB);
             updatePrep.setInt(4, iRound);
             updatePrep.setInt(5, teamB.getTeamNumber());
-            updatePrep.executeUpdate();
+            if (updatePrep.executeUpdate() < 1) {
+              LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff division: %s",
+                                        teamB.getTeamNumber(), iRound, divB));
+            }
             j++;
           }
         }
