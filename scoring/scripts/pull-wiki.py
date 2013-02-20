@@ -59,7 +59,6 @@ def main(argv=None):
 
     pages = get_pages('fll-sw')
     for page in pages:
-        print page
         with open('%s.md' % (page), 'w') as markdown_file:
             source = get_page_source(page)
             markdown_file.write(source)
