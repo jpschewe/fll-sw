@@ -157,6 +157,8 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
         zipfile.close();
 
       } catch (final ZipException ze) {
+        LOGGER.info("Subjective upload is not a zip file, trying as an XML file");
+        
         // not a zip file, parse as just the XML file
         final FileInputStream fis = new FileInputStream(file);
         scoreDocument = XMLUtils.parseXMLDocument(fis);
@@ -191,12 +193,13 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
     }
 
     for (final Element scoreCategoryNode : new NodelistElementCollectionAdapter(scoresElement.getChildNodes())) {
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("An element: "
-            + scoreCategoryNode);
-      }
       final Element scoreCategoryElement = scoreCategoryNode; // "subjectiveCategory"
       final String categoryName = scoreCategoryElement.getAttribute("name");
+
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Saving category: " + categoryName);
+      }
+      
       ScoreCategory categoryElement = null;
       for (final ScoreCategory cat : challengeDescription.getSubjectiveCategories()) {
         if (cat.getName().equals(categoryName)) {
@@ -288,6 +291,11 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
             && "true".equalsIgnoreCase(scoreElement.getAttribute("modified"))) {
           final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(scoreElement.getAttribute("teamNumber"))
                                                                  .intValue();
+
+          if(LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Saving score data for team: " + teamNumber);
+          }
+          
           final String judge = scoreElement.getAttribute("judge");
           final boolean noShow = Boolean.parseBoolean(scoreElement.getAttribute("NoShow"));
           updatePrep.setBoolean(1, noShow);
