@@ -21,7 +21,7 @@ git clean -xdf || fatal "Error cleaning workspace"
 
 # get wiki documentation
 cd "${fllsw_root}"/scoring/web/wiki
-../scripts/pull-wiki.py || fatal "Error getting wiki documentation"
+../../scripts/pull-wiki.py || fatal "Error getting wiki documentation"
 
 cd "${fllsw_root}"/scoring
 ./ant.sh dist || fatal "Error building distribution"
