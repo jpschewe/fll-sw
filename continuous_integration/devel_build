@@ -23,7 +23,9 @@ cd scoring
 echo "app.version=devel-${BUILD_ID}" > override.properties
 
 # get wiki documentation
-./get-wiki || fatal "Error getting wiki documentation"
+cd "${fllsw_root}"/scoring/web/wiki
+../scripts/pull-wiki.py || fatal "Error getting wiki documentation"
+
 
 ./ant.sh dist || fatal "Error building distribution"
 
