@@ -7,7 +7,7 @@
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument/fll/@title"/> (Advance Teams)</h1>
+    <h1>Advance Teams</h1>
 
       <form action="GatherAdvancementData" method="POST">
         <table border='1'>

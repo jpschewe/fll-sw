@@ -23,7 +23,6 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.XMLUtils;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -33,6 +32,8 @@ import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.xml.ChallengeDescription;
+import fll.xml.XMLUtils;
 
 /**
  * Download the subjective scores to be used by mobile apps.
@@ -48,8 +49,8 @@ public class DownloadSubjectiveScores extends BaseFLLServlet {
     Connection connection = null;
     try {
       connection = datasource.getConnection();
-      final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
-      if (Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
+      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+      if (Queries.isJudgesProperlyAssigned(connection, challengeDescription)) {
         response.reset();
         response.setContentType("text/xml");
         response.setHeader("Content-Disposition", "filename=score.xml");
@@ -57,7 +58,7 @@ public class DownloadSubjectiveScores extends BaseFLLServlet {
         final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
         final int tournament = Queries.getCurrentTournament(connection);
 
-        final Document scoreDocument = DownloadSubjectiveData.createSubjectiveScoresDocument(challengeDocument,
+        final Document scoreDocument = DownloadSubjectiveData.createSubjectiveScoresDocument(challengeDescription,
                                                                                              tournamentTeams.values(),
                                                                                              connection, tournament);
 

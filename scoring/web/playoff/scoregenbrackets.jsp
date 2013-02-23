@@ -80,7 +80,7 @@ final Connection connection = datasource.getConnection();
   </style>
 
   <body>
-    <h2><x:out select="$challengeDocument/fll/@title"/> (Playoff Brackets Division: <%=divisionStr%>)</h2>
+    <h2>Playoff Brackets Division: <%=divisionStr%></h2>
     <p><a href="index.jsp">Return to Playoff menu</a></p>
       <form name='printScoreSheets' method='post' action='ScoresheetServlet' target='_new'>
       <input type='hidden' name='numMatches' value='<%=numMatches %>'/>

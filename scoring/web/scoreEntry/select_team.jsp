@@ -89,7 +89,7 @@ $(document).ready(function() {
             <table border="0" cellpadding="5" cellspacing="0" width="90%">
               <tr>
                 <td valign="middle" align="center">
-                  <font face="Arial" size="4"><x:out select="$challengeDocument/fll/@title"/></font><br>
+                  <font face="Arial" size="4">${challengeDescription.title }</font><br>
 									<font face="Arial" size="2">Score Card Entry and Review Page</font>
                 </td>
               </tr>

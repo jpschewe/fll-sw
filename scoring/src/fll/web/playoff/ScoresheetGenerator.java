@@ -9,16 +9,13 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -35,12 +32,16 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
-import fll.Utilities;
 import fll.Version;
 import fll.db.Queries;
+import fll.util.FLLRuntimeException;
 import fll.util.FP;
 import fll.util.LogUtils;
+import fll.xml.AbstractGoal;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
+import fll.xml.EnumeratedValue;
+import fll.xml.PerformanceScoreCategory;
 
 /**
  * @author Dan Churchill
@@ -85,7 +86,7 @@ public class ScoresheetGenerator {
   public ScoresheetGenerator(final HttpServletRequest request,
                              final Connection connection,
                              final int tournament,
-                             final org.w3c.dom.Document document) throws SQLException {
+                             final ChallengeDescription description) throws SQLException {
     final String numMatchesStr = request.getParameter("numMatches");
     if (null == numMatchesStr) {
       // must have been called asking for blank
@@ -116,6 +117,11 @@ public class ScoresheetGenerator {
         }
       }
 
+      if (checkedMatchCount == 0) {
+        throw new FLLRuntimeException(
+                                      "No matches were found checked. Please go back and select the checkboxes for the scoresheets that you want to print");
+      }
+
       m_numTeams = checkedMatchCount * 2;
 
       initializeArrays();
@@ -139,6 +145,7 @@ public class ScoresheetGenerator {
             final String round = request.getParameter("round"
                 + i);
             final int iRound = Integer.parseInt(round);
+            
             // Get teamA info
             final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamA"
                 + i)));
@@ -148,12 +155,20 @@ public class ScoresheetGenerator {
                 + round;
             m_table[j] = request.getParameter("tableA"
                 + i);
+            
+            final int performanceRunA = Playoff.getRunNumber(connection, teamA.getTeamNumber(), iRound);                 
+            final String divA = Playoff.getPlayoffDivision(connection, teamA.getTeamNumber(), performanceRunA);
+            
             updatePrep.setString(1, m_table[j]);
-            updatePrep.setString(2, Queries.getEventDivision(connection, teamA.getTeamNumber()));
+            updatePrep.setString(2, divA);
             updatePrep.setInt(4, iRound);
             updatePrep.setInt(5, teamA.getTeamNumber());
-            updatePrep.executeUpdate();
+            if (updatePrep.executeUpdate() < 1) {
+              LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff division: %s",
+                                        teamA.getTeamNumber(), iRound, divA));
+            }
             j++;
+            
             // Get teamB info
             final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamB"
                 + i)));
@@ -163,11 +178,18 @@ public class ScoresheetGenerator {
                 + round;
             m_table[j] = request.getParameter("tableB"
                 + i);
+
+            final int performanceRunB = Playoff.getRunNumber(connection, teamB.getTeamNumber(), iRound);                 
+            final String divB = Playoff.getPlayoffDivision(connection, teamB.getTeamNumber(), performanceRunB);
+            
             updatePrep.setString(1, m_table[j]);
-            updatePrep.setString(2, Queries.getEventDivision(connection, teamB.getTeamNumber()));
+            updatePrep.setString(2, divB);
             updatePrep.setInt(4, iRound);
             updatePrep.setInt(5, teamB.getTeamNumber());
-            updatePrep.executeUpdate();
+            if (updatePrep.executeUpdate() < 1) {
+              LOGGER.warn(String.format("Could not update playoff table and print flags for team: %s playoff round: %s playoff division: %s",
+                                        teamB.getTeamNumber(), iRound, divB));
+            }
             j++;
           }
         }
@@ -175,7 +197,7 @@ public class ScoresheetGenerator {
         SQLFunctions.close(updatePrep);
       }
     }
-    setChallengeInfo(document);
+    setChallengeInfo(description);
   }
 
   /**
@@ -435,101 +457,86 @@ public class ScoresheetGenerator {
    * @param document The document object containing the challenge descriptor
    *          info.
    */
-  public void setChallengeInfo(final org.w3c.dom.Document document) {
-    final org.w3c.dom.Element rootElement = document.getDocumentElement();
-    setPageTitle(rootElement.getAttribute("title"));
-    if (rootElement.hasAttribute("revision")) {
-      setRevisionInfo(rootElement.getAttribute("revision"));
+  public void setChallengeInfo(final ChallengeDescription description) {
+    setPageTitle(description.getTitle());
+    if (null != description.getRevision()) {
+      setRevisionInfo(description.getRevision());
     }
 
-    final org.w3c.dom.Element performanceElement = (org.w3c.dom.Element) rootElement.getElementsByTagName("Performance")
-                                                                                    .item(0);
-    final List<org.w3c.dom.Element> goals = new NodelistElementCollectionAdapter(
-                                                                                 performanceElement.getElementsByTagName("goal")).asList();
+    final PerformanceScoreCategory performanceElement = description.getPerformance();
+    final List<AbstractGoal> goals = performanceElement.getGoals();
 
     m_goalLabel = new PdfPCell[goals.size()];
     m_goalValue = new PdfPCell[goals.size()];
     int realI = 0;
-    for (final org.w3c.dom.Element element : new NodelistElementCollectionAdapter(performanceElement.getChildNodes())) {
-      if (element.getNodeType() == Node.ELEMENT_NODE) {
-        if (element.getNodeName().equals("goal")) {
-          final String name = element.getAttribute("name");
+    for (final AbstractGoal goal : goals) {
+      if (!goal.isComputed()) {
+        // This is the text for the left hand "label" cell
+        final String title = goal.getTitle();
+        final Paragraph p = new Paragraph(title, ARIAL_10PT_NORMAL);
+        p.setAlignment(Element.ALIGN_RIGHT);
+        m_goalLabel[realI] = new PdfPCell();
+        m_goalLabel[realI].setBorder(0);
+        m_goalLabel[realI].setPaddingRight(9);
+        m_goalLabel[realI].addElement(p);
+        m_goalLabel[realI].setVerticalAlignment(Element.ALIGN_TOP);
+        final double min = goal.getMin();
+        final String minStr = FP.equals(min, Math.round(min), 1E-6) ? String.valueOf((int) min) : String.valueOf(min);
+        final double max = goal.getMax();
+        final String maxStr = FP.equals(max, Math.round(max), 1E-6) ? String.valueOf((int) max) : String.valueOf(max);
 
-          // This is the text for the left hand "label" cell
-          final String title = element.getAttribute("title");
-          final Paragraph p = new Paragraph(title, ARIAL_10PT_NORMAL);
-          p.setAlignment(Element.ALIGN_RIGHT);
-          m_goalLabel[realI] = new PdfPCell();
-          m_goalLabel[realI].setBorder(0);
-          m_goalLabel[realI].setPaddingRight(9);
-          m_goalLabel[realI].addElement(p);
-          m_goalLabel[realI].setVerticalAlignment(Element.ALIGN_TOP);
-          try {
-            final double min = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("min")).doubleValue();
-            final String minStr = FP.equals(min, Math.round(min), 1E-6) ? String.valueOf((int) min)
-                : String.valueOf(min);
-            final double max = Utilities.NUMBER_FORMAT_INSTANCE.parse(element.getAttribute("max")).doubleValue();
-            final String maxStr = FP.equals(max, Math.round(max), 1E-6) ? String.valueOf((int) max)
-                : String.valueOf(max);
-
-            // If element has child nodes, then we have an enumerated list
-            // of choices. Otherwise it is either yes/no or a numeric field.
-            m_goalValue[realI] = new PdfPCell();
-            final Chunk choices = new Chunk("", COURIER_10PT_NORMAL);
-            if (element.hasChildNodes()) {
-              // replace spaces with "no-break" spaces
-              boolean first = true;
-              for (final org.w3c.dom.Element value : new NodelistElementCollectionAdapter(
-                                                                                          element.getElementsByTagName("value"))) {
-                if (!first) {
-                  choices.append(" /"
-                      + NON_BREAKING_SPACE);
-                } else {
-                  first = false;
-                }
-                choices.append(value.getAttribute("title").toUpperCase().replace(' ', NON_BREAKING_SPACE));
-              }
-              m_goalValue[realI].addElement(choices);
-
+        // If element has child nodes, then we have an enumerated list
+        // of choices. Otherwise it is either yes/no or a numeric field.
+        m_goalValue[realI] = new PdfPCell();
+        final Chunk choices = new Chunk("", COURIER_10PT_NORMAL);
+        if (goal.isEnumerated()) {
+          // replace spaces with "no-break" spaces
+          boolean first = true;
+          for (final EnumeratedValue value : goal.getValues()) {
+            if (!first) {
+              choices.append(" /"
+                  + NON_BREAKING_SPACE);
             } else {
-              if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
-                  && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
-                final Paragraph q = new Paragraph("YES / NO", COURIER_10PT_NORMAL);
-                m_goalValue[realI].addElement(q);
-
-              } else {
-                final String range = "("
-                    + minStr + " - " + maxStr + ")";
-                final PdfPTable t = new PdfPTable(2);
-                t.setHorizontalAlignment(Element.ALIGN_LEFT);
-                t.setTotalWidth(1 * POINTS_PER_INCH);
-                t.setLockedWidth(true);
-                final Phrase r = new Phrase("", ARIAL_8PT_NORMAL);
-                t.addCell(new PdfPCell(r));
-                final Phrase q = new Phrase(range, ARIAL_8PT_NORMAL);
-                t.addCell(new PdfPCell(q));
-                m_goalValue[realI].setPaddingTop(9);
-                m_goalValue[realI].addElement(t);
-              }
+              first = false;
             }
-          } catch (final ParseException pe) {
-            throw new RuntimeException("FATAL: min/max not parsable for goal: "
-                + name);
+            choices.append(value.getTitle().toUpperCase().replace(' ', NON_BREAKING_SPACE));
           }
+          m_goalValue[realI].addElement(choices);
 
-          m_goalValue[realI].setBorder(0);
-          m_goalValue[realI].setVerticalAlignment(Element.ALIGN_MIDDLE);
-          realI++;
-        } // if goal       
-      } // if element
+        } else {
+          if (FP.equals(0, min, ChallengeParser.INITIAL_VALUE_TOLERANCE)
+              && FP.equals(1, max, ChallengeParser.INITIAL_VALUE_TOLERANCE)) {
+            final Paragraph q = new Paragraph("YES / NO", COURIER_10PT_NORMAL);
+            m_goalValue[realI].addElement(q);
+
+          } else {
+            final String range = "("
+                + minStr + " - " + maxStr + ")";
+            final PdfPTable t = new PdfPTable(2);
+            t.setHorizontalAlignment(Element.ALIGN_LEFT);
+            t.setTotalWidth(1 * POINTS_PER_INCH);
+            t.setLockedWidth(true);
+            final Phrase r = new Phrase("", ARIAL_8PT_NORMAL);
+            t.addCell(new PdfPCell(r));
+            final Phrase q = new Phrase(range, ARIAL_8PT_NORMAL);
+            t.addCell(new PdfPCell(q));
+            m_goalValue[realI].setPaddingTop(9);
+            m_goalValue[realI].addElement(t);
+          }
+        }
+
+        m_goalValue[realI].setBorder(0);
+        m_goalValue[realI].setVerticalAlignment(Element.ALIGN_MIDDLE);
+        realI++;
+      } // if goal
     } // foreach goal
-    
+
     // make sure that we have cells for everything
-    for(int i=0; i<m_goalValue.length; ++i) {
-      if(null == m_goalValue[i]) {
+    for (int i = 0; i < m_goalValue.length; ++i) {
+      if (null == m_goalValue[i]) {
         m_goalValue[i] = new PdfPCell();
       }
-      if(null == m_goalLabel[i]) {
+      if (null == m_goalLabel[i]) {
         m_goalLabel[i] = new PdfPCell();
       }
     }

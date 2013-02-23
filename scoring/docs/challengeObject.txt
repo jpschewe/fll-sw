@@ -1,0 +1,112 @@
+ChallengeDescription:
+  title: String
+  revision: String
+  bracketSort: BracketSortType
+  winner: WinnerType
+  performance: PerformanceScoreCategory
+  subjectiveCategories: List<ScoreCategory>
+
+ScoreCategory: Evaluatable, GoalScope
+  goals: List<Goal>
+  computedGoals: List<ComputedGoal>
+  name: String
+  title: String
+  weight: double
+
+
+PerformanceScoreCategory: ScoreCategory
+  restrictions: List<Restriction>
+  tiebreaker: List<TiebreakerTest>
+  minimumScore: double
+  name: "performance"
+  title: "Performance"
+
+BasicPolynomial: Evaluatable
+  terms: List<Term>
+  constant: double
+
+ComplexPolynomial: BasicPolynomial
+  variableTerms: List<VariableTerm>
+
+Variable: BasicPolynomial
+  name: String
+
+TiebreakerTest: BasicPolynomial
+  winner: WinnerType
+
+
+AbstractGoal: Evaluatable
+  name: String
+  title: String
+  description: String
+
+Goal: AbstractGoal
+  rubric: List<RubricRange>
+  values: List<EnumeratedValue>
+  min: double
+  max: double
+  multiplier: double
+  initialValue: double
+  scoreType: ScoreType
+  category: String
+
+ComputedGoal: AbstractGoal, VariableScope
+  variables: List<Variable>
+  switch: SwitchStatement
+
+EnumeratedValue:
+  score: double
+  title: String
+  value: String
+
+Restriction: BasicPolynomial
+  lowerBound: double
+  upperBound: double
+  message: String
+
+AbstractTerm: Evaluatable
+  coefficient: double
+  floatingPoint: FloatingPointType
+
+Term: AbstractTerm
+  goal: Goal
+  scoreType: GoalScoreType
+
+VariableTerm: AbstractTerm
+  variable: Variable
+
+  
+GoalScoreType: enum {raw, computed}
+  
+FloatingPointType: enum {decimal, round, truncate}
+
+SwitchStatement: Evaluatable
+  cases: List<CaseStatement>
+  defaultCase: ComplexPolynomial
+  
+CaseStatement: Evaluatable
+  condition: AbstractConditionStatement
+  result: ComplexPolynomial/SwitchStatement
+
+AbstractConditionStatement: Evaluatable
+
+ConditionStatement: AbstractConditionStatement
+  left: ComplexPolynomial
+  comparison: lessThan, lessThanOrEqual, greaterThan, greaterThanOrEqual, equalTo, notEqualTo
+  right: ComplexPolynomial
+
+EnumConditionStatement: AbstractConditionStatement
+  left: String/Goal
+  comparison: equalTo, notEqualTo
+  right: String/Goal
+
+interface Evaluatable:
+  double evaluate(TeamScore)
+
+
+RubricRange:
+  title: String
+  description: String
+  min: int
+  max: int
+  

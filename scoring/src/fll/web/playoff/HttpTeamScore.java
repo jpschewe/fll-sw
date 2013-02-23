@@ -7,15 +7,15 @@ package fll.web.playoff;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.w3c.dom.Element;
-
 /**
  * A team score in an HTTP request.
  */
 public final class HttpTeamScore extends TeamScore {
 
-  public HttpTeamScore(final Element categoryElement, final int teamNumber, final int runNumber, final HttpServletRequest request) {
-    super(categoryElement, teamNumber, runNumber);
+  public HttpTeamScore(final int teamNumber,
+                       final int runNumber,
+                       final HttpServletRequest request) {
+    super(teamNumber, runNumber);
     _request = request;
   }
 
@@ -24,17 +24,25 @@ public final class HttpTeamScore extends TeamScore {
    */
   @Override
   public String getEnumRawScore(final String goalName) {
-    assertScoreExists();
-    return _request.getParameter(goalName);
+    if (!scoreExists()) {
+      return null;
+    } else {
+      return _request.getParameter(goalName);
+    }
   }
 
   /**
    * @see fll.web.playoff.TeamScore#getRawScore(java.lang.String)
    */
   @Override
-  public Double getRawScore(final String goalName) {
-    assertScoreExists();
-    return Double.parseDouble(_request.getParameter(goalName));
+  public double getRawScore(final String goalName) {
+    if (!scoreExists()) {
+      return Double.NaN;
+    } else if (null == _request.getParameter(goalName)) {
+      return Double.NaN;
+    } else {
+      return Double.parseDouble(_request.getParameter(goalName));
+    }
   }
 
   /**
@@ -42,13 +50,16 @@ public final class HttpTeamScore extends TeamScore {
    */
   @Override
   public boolean isNoShow() {
-    assertScoreExists();
-    final String noShow = _request.getParameter("NoShow");
-    if (null == noShow) {
-      throw new RuntimeException("Missing parameter: NoShow");
+    if (!scoreExists()) {
+      return false;
+    } else {
+      final String noShow = _request.getParameter("NoShow");
+      if (null == noShow) {
+        throw new RuntimeException("Missing parameter: NoShow");
+      }
+      return noShow.equalsIgnoreCase("true")
+          || noShow.equalsIgnoreCase("t") || noShow.equals("1");
     }
-    return noShow.equalsIgnoreCase("true")
-        || noShow.equalsIgnoreCase("t") || noShow.equals("1");
   }
 
   /*

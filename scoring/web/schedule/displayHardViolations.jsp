@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<h1><x:out select="$challengeDocument/fll/@title"/> (Upload Schedule)</h1>
+<h1>Upload Schedule</h1>
 
 ${message}
 <%-- clear out the message, so that we don't see it again --%>

@@ -7,23 +7,6 @@ error() { log "ERROR: $*" >&2; }
 fatal() { error "$*"; exit 1; }
 mydir=$(cd "$(dirname "$0")" && pwd -L) || fatal "Unable to determine script directory"
 
-if [ -z "${WORKSPACE}" ]; then
-    fatal "WORKSPACE not defined, cannot continue"
-fi
-
-cd "${WORKSPACE}"
-
-#clean up from previous run
-git clean -xdf || fatal "Error cleaning workspace"
-
-cd scoring
-
-
-# setup version identifier
-echo "app.version=devel-${BUILD_ID}" > override.properties
-
-# get wiki documentation
-./get-wiki || fatal "Error getting wiki documentation"
-
-./ant.sh dist || fatal "Error building distribution"
-
+DEVEL_BUILD=1
+export DEVEL_BUILD
+exec "${mydir}"/build_release

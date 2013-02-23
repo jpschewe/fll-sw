@@ -3,7 +3,6 @@
 <html>
   <head>
     <title>An error has occurred</title>
-    <link rel="stylesheet" type="text/css" href="<c:url value='/style/style.jsp'/>" />
     
     <%
     // make sure the exception gets logged

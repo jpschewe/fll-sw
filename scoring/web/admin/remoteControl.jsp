@@ -51,7 +51,7 @@
   </head>          
   <body>
 
-    <h1><x:out select="$challengeDocument/fll/@title"/> (Display Controller)</h1>
+    <h1>Display Controller</h1>
 
     <p>This page is used to control what page is currently visible on the
     display screen.  Note that it takes some time for the display to
@@ -86,9 +86,6 @@ END DEBUG --%>
 
 ${message}
 <%-- clear out the message, so that we don't see it again --%>
-<c:if test="${not empty message}">
-  <icep:push group="playoffs"/>
-</c:if>
 <c:remove var="message" />
 
     <form name='remote' action='RemoteControlPost' method='post'>

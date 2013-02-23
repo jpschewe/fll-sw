@@ -32,8 +32,7 @@
 
 <body>
  <h1>
-  <x:out select="$challengeDocument/fll/@title" />
-  (Judge Assignments)
+  Judge Assignments
  </h1>
 
  <p>Judges ID's must be unique. They can be just the name of the

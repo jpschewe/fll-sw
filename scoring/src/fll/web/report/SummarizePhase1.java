@@ -24,13 +24,11 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-
-import org.w3c.dom.Document;
-
 import fll.ScoreStandardization;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.xml.ChallengeDescription;
 
 /**
  * Do first part of summarizing scores and gather information to show the user
@@ -50,7 +48,7 @@ public class SummarizePhase1 extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     PreparedStatement getJudges = null;
     PreparedStatement getExpected = null;
@@ -62,10 +60,10 @@ public class SummarizePhase1 extends BaseFLLServlet {
       final Connection connection = datasource.getConnection();
       final int tournament = Queries.getCurrentTournament(connection);
 
-      Queries.updateScoreTotals(challengeDocument, connection);
+      Queries.updateScoreTotals(challengeDescription, connection);
 
-      ScoreStandardization.standardizeSubjectiveScores(connection, challengeDocument, tournament);
-      ScoreStandardization.summarizeScores(connection, challengeDocument, tournament);
+      ScoreStandardization.standardizeSubjectiveScores(connection, challengeDescription, tournament);
+      ScoreStandardization.summarizeScores(connection, challengeDescription, tournament);
 
       final Collection<JudgeSummary> summary = new LinkedList<JudgeSummary>();
 
