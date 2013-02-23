@@ -26,20 +26,17 @@ import org.icepush.PushContext;
 import com.itextpdf.text.DocumentException;
 
 import fll.db.Queries;
+import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.xml.ChallengeDescription;
 
 @WebServlet("/playoff/ScoresheetServlet")
 public class ScoresheetServlet extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  /**
-   * @see fll.web.BaseFLLServlet#processRequest(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse, javax.servlet.ServletContext,
-   *      javax.servlet.http.HttpSession)
-   */
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -49,7 +46,7 @@ public class ScoresheetServlet extends BaseFLLServlet {
     try {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
-      final org.w3c.dom.Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
       final int tournament = Queries.getCurrentTournament(connection);
       response.reset();
       response.setContentType("application/pdf");
@@ -60,16 +57,18 @@ public class ScoresheetServlet extends BaseFLLServlet {
 
       // Create the scoresheet generator - must provide correct number of
       // scoresheets
-      final ScoresheetGenerator gen = new ScoresheetGenerator(request, connection, tournament, challengeDocument);
+      final ScoresheetGenerator gen = new ScoresheetGenerator(request, connection, tournament, challengeDescription);
 
       gen.writeFile(connection, response.getOutputStream());
 
     } catch (final SQLException e) {
-      LOGGER.error(e, e);
-      throw new RuntimeException(e);
+      final String errorMessage = "There was an error talking to the database";
+      LOGGER.error(errorMessage, e);
+      throw new FLLRuntimeException(errorMessage, e);
     } catch (final DocumentException e) {
-      LOGGER.error(e, e);
-      throw new RuntimeException(e);
+      final String errorMessage = "There was an error creating the PDF document - perhaps you didn't select any scoresheets to print?";
+      LOGGER.error(errorMessage, e);
+      throw new FLLRuntimeException(errorMessage, e);
     } finally {
       SQLFunctions.close(connection);
     }

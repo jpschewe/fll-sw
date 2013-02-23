@@ -22,10 +22,6 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import fll.Team;
 import fll.Utilities;
 import fll.db.Queries;
@@ -33,6 +29,7 @@ import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
 import fll.web.playoff.Playoff;
+import fll.xml.ChallengeDescription;
 
 /**
  * Gather the data required for scoreEntry.jsp.
@@ -47,7 +44,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
                                 final HttpSession session) throws IOException, ServletException {
     Connection connection = null;
     try {
-      final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
+      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 
       session.setAttribute("EditFlag", request.getParameter("EditFlag"));
 
@@ -148,9 +145,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
       }
       session.setAttribute("roundText", roundText);
 
-      final String minimumAllowedScoreStr = ((Element) challengeDocument.getDocumentElement()
-                                                                        .getElementsByTagName("Performance").item(0)).getAttribute("minimumScore");
-      final int minimumAllowedScore = Utilities.NUMBER_FORMAT_INSTANCE.parse(minimumAllowedScoreStr).intValue();
+      final double minimumAllowedScore = challengeDescription.getPerformance().getMinimumScore();
       session.setAttribute("minimumAllowedScore", minimumAllowedScore);
 
       // check if this is the last run a team has completed

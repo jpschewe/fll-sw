@@ -50,7 +50,7 @@ ${message}
                   <table border="0" cellpadding="5" cellspacing="0" width="90%">
                     <tr>
                       <td valign="middle" align="center">
-                        <font face="Arial" size="4"><x:out select="$challengeDocument/fll/@title"/></font>
+                        <font face="Arial" size="4">${challengeDescription.title }</font>
                       </td>
                     </tr>
                   </table>

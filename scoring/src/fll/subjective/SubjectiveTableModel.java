@@ -7,6 +7,7 @@ package fll.subjective;
 
 import java.text.ParseException;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
@@ -19,8 +20,10 @@ import org.w3c.dom.Element;
 
 import fll.Utilities;
 import fll.util.LogUtils;
-import fll.util.ScoreUtils;
 import fll.web.admin.DownloadSubjectiveData;
+import fll.xml.AbstractGoal;
+import fll.xml.EnumeratedValue;
+import fll.xml.ScoreCategory;
 import fll.xml.ScoreType;
 import fll.xml.XMLUtils;
 
@@ -39,11 +42,11 @@ public final class SubjectiveTableModel extends AbstractTableModel {
    * @param subjectiveElement subjective category
    */
   public SubjectiveTableModel(final Document scoreDocument,
-                              final Element subjectiveElement) {
+                              final ScoreCategory subjectiveCategory) {
     _scoreDocument = scoreDocument;
-    _subjectiveElement = subjectiveElement;
-    _goals = new NodelistElementCollectionAdapter(subjectiveElement.getChildNodes()).asList();
-    final List<Element> scoreElements = getScoreElements(_scoreDocument, subjectiveElement.getAttribute("name"));
+    _subjectiveCategory = subjectiveCategory;
+    _goals = new LinkedList<AbstractGoal>(_subjectiveCategory.getGoals());
+    final List<Element> scoreElements = getScoreElements(_scoreDocument, _subjectiveCategory.getName());
     _scoreElements = new Element[scoreElements.size()];
     for (int i = 0; i < scoreElements.size(); i++) {
       _scoreElements[i] = scoreElements.get(i);
@@ -54,7 +57,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
    * Get the score elements for the specified category.
    */
   public static List<Element> getScoreElements(final Document scoreDocument,
-                                                final String categoryName) {
+                                               final String categoryName) {
     for (final Element subCatElement : new NodelistElementCollectionAdapter(
                                                                             scoreDocument.getDocumentElement()
                                                                                          .getElementsByTagName(DownloadSubjectiveData.SUBJECTIVE_CATEGORY_NODE_NAME))) {
@@ -91,7 +94,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         return "Total Score";
       } else {
         return getGoalDescription(column
-            - NUM_COLUMNS_LEFT_OF_SCORES).getAttribute("title");
+            - NUM_COLUMNS_LEFT_OF_SCORES).getTitle();
       }
     }
   }
@@ -120,11 +123,11 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         // Total Score
         return Double.class;
       } else {
-        final Element goalEle = getGoalDescription(column
+        final AbstractGoal goal = getGoalDescription(column
             - NUM_COLUMNS_LEFT_OF_SCORES);
-        if (XMLUtils.isEnumeratedGoal(goalEle)) {
+        if (goal.isEnumerated()) {
           return String.class;
-        } else if (XMLUtils.isComputedGoal(goalEle)) {
+        } else if (goal.isComputed()) {
           return Double.class;
         } else {
           return Integer.class;
@@ -175,29 +178,32 @@ public final class SubjectiveTableModel extends AbstractTableModel {
             return 0;
           } else {
             // compute total score
-            final double newTotalScore = ScoreUtils.computeTotalScore(getTeamScore(row));
+            final double newTotalScore = _subjectiveCategory.evaluate(getTeamScore(row));
             return newTotalScore;
           }
         } else {
-          final Element goalDescription = getGoalDescription(column
+          final AbstractGoal goalDescription = getGoalDescription(column
               - NUM_COLUMNS_LEFT_OF_SCORES);
-          final String goalName = goalDescription.getAttribute("name");
+          final String goalName = goalDescription.getName();
           // the order really matters here because a computed goal will never
           // have an entry in scoreEle
-          if (XMLUtils.isComputedGoal(goalDescription)) {
-            return getTeamScore(row).getComputedScore(goalName);
+
+          if (goalDescription.isComputed()) {
+            return goalDescription.getComputedScore(getTeamScore(row));
           } else if (null == SubjectiveUtils.getSubscoreElement(scoreEle, goalName)) {
             return null;
-          } else if (XMLUtils.isEnumeratedGoal(goalDescription)) {
+          } else if (goalDescription.isEnumerated()) {
             return getTeamScore(row).getEnumRawScore(goalName);
           } else {
-            final Double score = getTeamScore(row).getRawScore(goalName);
+            final double score = getTeamScore(row).getRawScore(goalName);
             final ScoreType scoreType = XMLUtils.getScoreType(scoreEle);
-            if (ScoreType.FLOAT == scoreType
-                || null == score) {
+            if(Double.isNaN(score)) {
+              return null;
+            }
+            else if (ScoreType.FLOAT == scoreType) {
               return score;
             } else {
-              return score.intValue();
+              return (int)score;
             }
           }
         }
@@ -243,15 +249,12 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           return false;
         }
 
-        final Element goalDescription = getGoalDescription(column
+        final AbstractGoal goalDescription = getGoalDescription(column
             - NUM_COLUMNS_LEFT_OF_SCORES);
-        if (XMLUtils.isComputedGoal(goalDescription)) {
+        if (goalDescription.isComputed()) {
           return false;
-        } else if ("goal".equals(goalDescription.getNodeName())) {
-          return true;
         } else {
-          throw new RuntimeException("Expected 'computedGoal' or 'goal', but found: "
-              + goalDescription.getNodeName());
+          return true;
         }
       }
     }
@@ -301,9 +304,9 @@ public final class SubjectiveTableModel extends AbstractTableModel {
       // scores to be set to null
       error = true;
     } else {
-      final Element goalDescription = getGoalDescription(column
+      final AbstractGoal goalDescription = getGoalDescription(column
           - NUM_COLUMNS_LEFT_OF_SCORES);
-      final String goalName = goalDescription.getAttribute("name");
+      final String goalName = goalDescription.getName();
       // support deleting a value
       if (null == value
           || "".equals(value)) {
@@ -324,15 +327,13 @@ public final class SubjectiveTableModel extends AbstractTableModel {
           element.appendChild(subscoreElement);
         }
 
-        final List<Element> posValues = new NodelistElementCollectionAdapter(
-                                                                             goalDescription.getElementsByTagName("value")).asList();
-        if (posValues.size() > 0) {
+        if (goalDescription.isEnumerated()) {
           // enumerated, convert from title to value
           boolean found = false;
-          for (final Element posValue : posValues) {
-            if (posValue.getAttribute("title").equalsIgnoreCase((String) value)) {
+          for (final EnumeratedValue posValue : goalDescription.getValues()) {
+            if (posValue.getTitle().equalsIgnoreCase((String) value)) {
               // found it
-              subscoreElement.setAttributeNS(null, "value", posValue.getAttribute("value"));
+              subscoreElement.setAttributeNS(null, "value", posValue.getValue());
               if (setModified) {
                 element.setAttributeNS(null, "modified", Boolean.TRUE.toString());
               }
@@ -345,18 +346,10 @@ public final class SubjectiveTableModel extends AbstractTableModel {
         } else {
           // numeric
 
-          double min = 0;
-          double max = 1;
-          try {
-            min = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalDescription.getAttribute("min")).doubleValue();
-            max = Utilities.NUMBER_FORMAT_INSTANCE.parse(goalDescription.getAttribute("max")).doubleValue();
+          double min = goalDescription.getMin();
+          double max = goalDescription.getMax();
 
-          } catch (final ParseException pe) {
-            throw new RuntimeException("Error in challenge.xml!!! min or max unparseable for goal: "
-                + goalDescription.getAttribute("name"));
-          }
-
-          final ScoreType scoreType = XMLUtils.getScoreType(element);
+          final ScoreType scoreType = goalDescription.getScoreType();
           try {
             final Number parsedValue = Utilities.NUMBER_FORMAT_INSTANCE.parse(value.toString());
             if (parsedValue.doubleValue() > max
@@ -398,8 +391,8 @@ public final class SubjectiveTableModel extends AbstractTableModel {
    */
   private void forceComputedGoalUpdates(final int row) {
     for (int i = 0; i < getNumGoals(); ++i) {
-      final Element goalEle = getGoalDescription(i);
-      if (XMLUtils.isComputedGoal(goalEle)) {
+      final AbstractGoal goal = getGoalDescription(i);
+      if (goal.isComputed()) {
         fireTableCellUpdated(row, i
             + NUM_COLUMNS_LEFT_OF_SCORES);
       }
@@ -448,18 +441,18 @@ public final class SubjectiveTableModel extends AbstractTableModel {
    */
   private SubjectiveTeamScore getTeamScore(final int index) {
     try {
-      return new SubjectiveTeamScore(_subjectiveElement, getScoreElement(index));
+      return new SubjectiveTeamScore(getScoreElement(index));
     } catch (final ParseException pe) {
       throw new RuntimeException(pe);
     }
   }
 
-  private final Element _subjectiveElement;
+  private final ScoreCategory _subjectiveCategory;
 
   /**
    * Get the description element for goal at index
    */
-  private Element getGoalDescription(final int index) {
+  private AbstractGoal getGoalDescription(final int index) {
     return _goals.get(index);
   }
 
@@ -470,7 +463,7 @@ public final class SubjectiveTableModel extends AbstractTableModel {
     return _goals.size();
   }
 
-  private final List<Element> _goals;
+  private final List<AbstractGoal> _goals;
 
   /**
    * The backing for the model

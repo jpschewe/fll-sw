@@ -40,7 +40,10 @@ import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.web.admin.UploadSubjectiveData;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
+import fll.xml.ScoreCategory;
+import fll.xml.XMLUtils;
 
 /**
  * Test editing subjective scores.
@@ -74,6 +77,8 @@ public class SubjectiveScoresTest {
     Assert.assertNotNull(stream);
     final Document challengeDocument = ChallengeParser.parse(new InputStreamReader(stream));
     Assert.assertNotNull(challengeDocument);
+    
+    final ChallengeDescription challenge = new ChallengeDescription(challengeDocument.getDocumentElement());
 
     final File tempFile = File.createTempFile("flltest", null);
     final String database = tempFile.getAbsolutePath();
@@ -109,18 +114,24 @@ public class SubjectiveScoresTest {
 
       // create subjective scores document
       final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-      final Document scoreDocument = DownloadSubjectiveData.createSubjectiveScoresDocument(challengeDocument,
+      final Document scoreDocument = DownloadSubjectiveData.createSubjectiveScoresDocument(challenge,
                                                                                            tournamentTeams.values(),
                                                                                            connection, tournament.getTournamentID());
       StringWriter testWriter = new StringWriter();
-      net.mtu.eggplant.xml.XMLUtils.writeXML(scoreDocument, testWriter, "UTF-8");
+      XMLUtils.writeXML(scoreDocument, testWriter, "UTF-8");
       LOGGER.info(testWriter.toString());
       
-      final Element subjectiveElement = SubjectiveUtils.getSubjectiveElement(challengeDocument, category);
+      ScoreCategory scoreCategory = null;
+      for(final ScoreCategory sc : challenge.getSubjectiveCategories()) {
+        if(category.equals(sc.getName())) {
+          scoreCategory = sc;
+        }
+      }
+      Assert.assertNotNull(scoreCategory);
 
       
       // create subjective table model for the category we're going to edit
-      final SubjectiveTableModel tableModel = new SubjectiveTableModel(scoreDocument, subjectiveElement);
+      final SubjectiveTableModel tableModel = new SubjectiveTableModel(scoreDocument, scoreCategory);
 
       
       // enter scores for a team and category
@@ -139,7 +150,7 @@ public class SubjectiveScoresTest {
 
             
       // upload the scores
-      UploadSubjectiveData.saveSubjectiveData(scoreDocument, tournament.getTournamentID(), challengeDocument, connection);
+      UploadSubjectiveData.saveSubjectiveData(scoreDocument, tournament.getTournamentID(), challenge, connection);
 
     } finally {
       SQLFunctions.close(prep);

@@ -65,11 +65,11 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
   </sql:update>
   
   <%-- clear out subjective scores --%>
-  <x:forEach select="$challengeDocument/fll/subjectiveCategory">
+  <c:forEach items="${challengeDescription.subjectiveCategories }" var="category">
     <sql:update dataSource='${datasource}'>
-    DELETE FROM <x:out select="./@name"/> WHERE Tournament = ${currentTournament } 
+    DELETE FROM ${category.name } WHERE Tournament = ${currentTournament } 
     </sql:update>
-  </x:forEach>
+  </c:forEach>
   
   </c:if>
  </c:forEach>
@@ -83,8 +83,8 @@ pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(conne
 </head>
 
 <body>
-<h1><x:out select="$challengeDocument/fll/@title" /> (Edit Event
-Division)</h1>
+<h1>Edit Event
+Division</h1>
 
  <sql:query var="result" dataSource="${datasource}">
   SELECT id FROM Judges WHERE Tournament = ${currentTournament } LIMIT 1

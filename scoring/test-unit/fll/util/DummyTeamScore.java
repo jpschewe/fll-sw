@@ -8,8 +8,6 @@ package fll.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.w3c.dom.Element;
-
 import fll.web.playoff.TeamScore;
 
 /**
@@ -20,41 +18,54 @@ import fll.web.playoff.TeamScore;
  */
 public class DummyTeamScore extends TeamScore {
 
-  public DummyTeamScore(final Element categoryElement, final int teamNumber, final int runNumber, final Map<String, Double> simpleGoals,
-      final Map<String, String> enumGoals) {
-    super(categoryElement, teamNumber, runNumber);
+  public DummyTeamScore(final int teamNumber,
+                        final int runNumber,
+                        final Map<String, Double> simpleGoals,
+                        final Map<String, String> enumGoals) {
+    super(teamNumber, runNumber);
     _simpleGoals = new HashMap<String, Double>(simpleGoals);
     _enumGoals = new HashMap<String, String>(enumGoals);
   }
 
   /*
    * (non-Javadoc)
+   * 
    * @see fll.web.playoff.TeamScore#getEnumRawScore(java.lang.String)
    */
   @Override
   public String getEnumRawScore(final String goalName) {
-    if (_enumGoals.containsKey(goalName)) {
-      return _enumGoals.get(goalName);
-    } else {
+    if (!scoreExists()) {
       return null;
+    } else {
+      if (_enumGoals.containsKey(goalName)) {
+        return _enumGoals.get(goalName);
+      } else {
+        return null;
+      }
     }
   }
 
   /*
    * (non-Javadoc)
+   * 
    * @see fll.web.playoff.TeamScore#getRawScore(java.lang.String)
    */
   @Override
-  public Double getRawScore(final String goalName) {
-    if (_simpleGoals.containsKey(goalName)) {
-      return _simpleGoals.get(goalName);
+  public double getRawScore(final String goalName) {
+    if (!scoreExists()) {
+      return Double.NaN;
     } else {
-      return null;
+      if (_simpleGoals.containsKey(goalName)) {
+        return _simpleGoals.get(goalName);
+      } else {
+        return Double.NaN;
+      }
     }
   }
 
   /*
    * (non-Javadoc)
+   * 
    * @see fll.web.playoff.TeamScore#isNoShow()
    */
   @Override
@@ -64,6 +75,7 @@ public class DummyTeamScore extends TeamScore {
 
   /*
    * (non-Javadoc)
+   * 
    * @see fll.web.playoff.TeamScore#scoreExists()
    */
   @Override

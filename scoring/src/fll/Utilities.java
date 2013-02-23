@@ -363,6 +363,7 @@ public final class Utilities {
   // System.setProperty("log4jdbc.enabled", "true");
   // final DataSourceSpy debugDatasource = new DataSourceSpy(dataSource);
   // return debugDatasource;
+  // if we want to debug we can execute "SET DATABASE SQL LOG LEVEL 3" and then inspect flldb.sql.log 
 
   /**
    * Filter used to select only graphics files

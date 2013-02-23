@@ -183,10 +183,10 @@ return m;
                       <td valign="middle" align="center">
                         <c:choose>
                         <c:when test="${1 == EditFlag}">
-                          <font face="Arial" size="4"><x:out select="$challengeDocument/fll/@title"/> (Score Edit)</font>
+                          <font face="Arial" size="4">Score Edit</font>
                         </c:when>
                         <c:otherwise>
-                          <font face="Arial" size="4"><x:out select="$challengeDocument/fll/@title"/> (Score Entry)</font>
+                          <font face="Arial" size="4">Score Entry</font>
                         </c:otherwise>
                         </c:choose>
                       </td>

@@ -63,17 +63,22 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyledDocument;
 
 import net.mtu.eggplant.util.BasicFileFilter;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-import net.mtu.eggplant.xml.XMLUtils;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
+import fll.xml.AbstractGoal;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
+import fll.xml.EnumeratedValue;
+import fll.xml.ScoreCategory;
+import fll.xml.XMLUtils;
 
 /**
  * Application to enter subjective scores with
@@ -139,21 +144,30 @@ public final class SubjectiveFrame extends JFrame {
       zipfile = new ZipFile(file);
       final ZipEntry challengeEntry = zipfile.getEntry("challenge.xml");
       if (null == challengeEntry) {
-        throw new RuntimeException(
-                                   "Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
+        throw new FLLRuntimeException(
+                                      "Unable to find challenge descriptor in file, you probably choose the wrong file or it is corrupted");
       }
       final InputStream challengeStream = zipfile.getInputStream(challengeEntry);
       _challengeDocument = ChallengeParser.parse(new InputStreamReader(challengeStream, Utilities.DEFAULT_CHARSET));
       challengeStream.close();
 
+      _challengeDescription = new ChallengeDescription(_challengeDocument.getDocumentElement());
+
       final ZipEntry scoreEntry = zipfile.getEntry("score.xml");
       if (null == scoreEntry) {
-        throw new RuntimeException(
-                                   "Unable to find score data in file, you probably choose the wrong file or it is corrupted");
+        throw new FLLRuntimeException(
+                                      "Unable to find score data in file, you probably choose the wrong file or it is corrupted");
       }
       final InputStream scoreStream = zipfile.getInputStream(scoreEntry);
       _scoreDocument = XMLUtils.parseXMLDocument(scoreStream);
       scoreStream.close();
+    } catch (final SAXParseException spe) {
+      final String errorMessage = String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software attempting to parse a file that is not subjective data.",
+                                                spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage());
+      throw new FLLRuntimeException(errorMessage, spe);
+    } catch (final SAXException se) {
+      final String errorMessage = "The subjective scores file was found to be invalid, check that you are parsing a subjective scores file and not something else";
+      throw new FLLRuntimeException(errorMessage, se);
     } finally {
       if (null != zipfile) {
         try {
@@ -226,7 +240,17 @@ public final class SubjectiveFrame extends JFrame {
                                             JOptionPane.INFORMATION_MESSAGE);
 
             }
+          } catch (final SAXParseException spe) {
+            final String errorMessage = String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software attempting to parse a file that is not subjective data.",
+                                                      spe.getLineNumber(), spe.getColumnNumber(), spe.getMessage());
+            LOGGER.error(errorMessage, spe);
+            JOptionPane.showMessageDialog(null, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+          } catch (final SAXException se) {
+            final String errorMessage = "The subjective scores file was found to be invalid, check that you are parsing a subjective scores file and not something else";
+            LOGGER.error(errorMessage, se);
+            JOptionPane.showMessageDialog(null, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
           } catch (final IOException e) {
+            LOGGER.error("Error reading compare file", e);
             JOptionPane.showMessageDialog(null, "Error reading compare file: "
                 + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 
@@ -238,10 +262,8 @@ public final class SubjectiveFrame extends JFrame {
     tabbedPane = new JTabbedPane();
     getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
-    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
-                                                                                _challengeDocument.getDocumentElement()
-                                                                                                  .getElementsByTagName("subjectiveCategory"))) {
-      createSubjectiveTable(tabbedPane, subjectiveElement);
+    for (final ScoreCategory subjectiveCategory : getChallengeDescription().getSubjectiveCategories()) {
+      createSubjectiveTable(tabbedPane, subjectiveCategory);
     }
 
     addWindowListener(new WindowAdapter() {
@@ -256,8 +278,8 @@ public final class SubjectiveFrame extends JFrame {
   }
 
   private void createSubjectiveTable(final JTabbedPane tabbedPane,
-                                     final Element subjectiveElement) {
-    final SubjectiveTableModel tableModel = new SubjectiveTableModel(_scoreDocument, subjectiveElement);
+                                     final ScoreCategory subjectiveCategory) {
+    final SubjectiveTableModel tableModel = new SubjectiveTableModel(_scoreDocument, subjectiveCategory);
     final JTable table = new JTable(tableModel);
 
     // Make grid lines black (needed for Mac)
@@ -266,7 +288,7 @@ public final class SubjectiveFrame extends JFrame {
     // auto table sorter
     table.setAutoCreateRowSorter(true);
 
-    final String title = subjectiveElement.getAttribute("title");
+    final String title = subjectiveCategory.getTitle();
     _tables.put(title, table);
     final JScrollPane tableScroller = new JScrollPane(table);
     tableScroller.setPreferredSize(new Dimension(640, 480));
@@ -276,19 +298,15 @@ public final class SubjectiveFrame extends JFrame {
 
     setupTabReturnBehavior(table);
 
-    int g = 0;
-    for (final Element goalDescription : new NodelistElementCollectionAdapter(
-                                                                              subjectiveElement.getElementsByTagName("goal"))) {
-      final NodelistElementCollectionAdapter posValuesList = new NodelistElementCollectionAdapter(
-                                                                                                  goalDescription.getElementsByTagName("value"));
-      final TableColumn column = table.getColumnModel().getColumn(g
+    int goalIndex = 0;
+    for (final AbstractGoal goal : subjectiveCategory.getGoals()) {
+      final TableColumn column = table.getColumnModel().getColumn(goalIndex
           + SubjectiveTableModel.NUM_COLUMNS_LEFT_OF_SCORES);
-      if (posValuesList.hasNext()) {
-        // enumerated
+      if (goal.isEnumerated()) {
         final Vector<String> posValues = new Vector<String>();
         posValues.add("");
-        for (final Element posValue : posValuesList) {
-          posValues.add(posValue.getAttribute("title"));
+        for (final EnumeratedValue posValue : goal.getValues()) {
+          posValues.add(posValue.getTitle());
         }
 
         column.setCellEditor(new DefaultCellEditor(new JComboBox(posValues)));
@@ -296,7 +314,7 @@ public final class SubjectiveFrame extends JFrame {
         final JTextField editor = new SelectTextField();
         column.setCellEditor(new DefaultCellEditor(editor));
       }
-      ++g;
+      ++goalIndex;
     }
   }
 
@@ -479,18 +497,16 @@ public final class SubjectiveFrame extends JFrame {
     stopCellEditors();
 
     final List<String> warnings = new LinkedList<String>();
-    for (final Element subjectiveElement : new NodelistElementCollectionAdapter(
-                                                                                _challengeDocument.getDocumentElement()
-                                                                                                  .getElementsByTagName("subjectiveCategory"))) {
-      final String category = subjectiveElement.getAttribute("name");
-      final String categoryTitle = subjectiveElement.getAttribute("title");
+    for (final ScoreCategory subjectiveCategory : getChallengeDescription().getSubjectiveCategories()) {
+      final String category = subjectiveCategory.getName();
+      final String categoryTitle = subjectiveCategory.getTitle();
 
-      final List<Element> goals = new NodelistElementCollectionAdapter(subjectiveElement.getElementsByTagName("goal")).asList();
+      final List<AbstractGoal> goals = subjectiveCategory.getGoals();
       final List<Element> scoreElements = SubjectiveTableModel.getScoreElements(_scoreDocument, category);
       for (final Element scoreElement : scoreElements) {
         int numValues = 0;
-        for (final Element goalElement : goals) {
-          final String goalName = goalElement.getAttribute("name");
+        for (final AbstractGoal goal : goals) {
+          final String goalName = goal.getName();
 
           final Element subEle = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
           if (null != subEle) {
@@ -658,11 +674,13 @@ public final class SubjectiveFrame extends JFrame {
     return _file;
   }
 
-  private final Document _challengeDocument;
+  private final ChallengeDescription _challengeDescription;
 
-  /* package */Document getChallengeDocument() {
-    return _challengeDocument;
+  /* package */ChallengeDescription getChallengeDescription() {
+    return _challengeDescription;
   }
+
+  private final Document _challengeDocument;
 
   private final Document _scoreDocument;
 

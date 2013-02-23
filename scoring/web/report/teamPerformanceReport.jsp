@@ -20,7 +20,7 @@ pageContext.setAttribute("tournament", Queries.getCurrentTournament(connection))
   </head>
 
   <body>
-    <h1><x:out select="$challengeDocument/fll/@title"/> (Team <c:out value="${param.TeamNumber}"/> Performance Scores)</h1>
+    <h1>Team <c:out value="${param.TeamNumber}"/> Performance Scores</h1>
     <sql:query var="result" dataSource="${datasource}">
       SELECT RunNumber, ComputedTotal, NoShow
         FROM Performance

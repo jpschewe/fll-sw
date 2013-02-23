@@ -16,19 +16,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
-import java.util.Iterator;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-import net.mtu.eggplant.xml.XMLUtils;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Tournament;
 import fll.util.LogUtils;
+import fll.xml.AbstractGoal;
+import fll.xml.ChallengeDescription;
+import fll.xml.PerformanceScoreCategory;
+import fll.xml.ScoreCategory;
+import fll.xml.XMLUtils;
 
 /**
  * Generate tables for tournament from XML document
@@ -78,11 +79,17 @@ public final class GenerateDB {
     try {
       stmt = connection.createStatement();
 
+      // write to disk regularly in case of a crash
       stmt.executeUpdate("SET WRITE_DELAY 100 MILLIS");
 
+      // use MVCC transaction model to handle high rate of updates from multiple threads
+      stmt.executeUpdate("SET DATABASE TRANSACTION CONTROL MVCC");
+      
       final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
 
       createGlobalParameters(document, connection, forceRebuild, tables);
+
+      final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
 
       // authentication tables
       createAuthentication(connection);
@@ -181,7 +188,6 @@ public final class GenerateDB {
           + " ,CONSTRAINT judges_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
           + ")");
 
-      final Element rootElement = document.getDocumentElement();
       final StringBuilder createStatement = new StringBuilder();
 
       // performance
@@ -189,7 +195,7 @@ public final class GenerateDB {
       // view
       // below
       {
-        final Element performanceElement = (Element) rootElement.getElementsByTagName("Performance").item(0);
+        final PerformanceScoreCategory performanceElement = description.getPerformance();
         final String tableName = "Performance";
         stmt.executeUpdate("DROP VIEW IF EXISTS performance_seeding_max CASCADE");
         stmt.executeUpdate("DROP TABLE IF EXISTS "
@@ -209,13 +215,14 @@ public final class GenerateDB {
         performanceColumns.append("Bye,");
         createStatement.append(" Bye boolean DEFAULT FALSE NOT NULL,");
         createStatement.append(" Verified boolean DEFAULT FALSE NOT NULL,");
-        for (final Element element : new NodelistElementCollectionAdapter(
-                                                                          performanceElement.getElementsByTagName("goal"))) {
-          final String columnDefinition = generateGoalColumnDefinition(element);
-          createStatement.append(" "
-              + columnDefinition + ",");
-          performanceColumns.append(element.getAttribute("name")
-              + ",");
+        for (final AbstractGoal element : performanceElement.getGoals()) {
+          if (!element.isComputed()) {
+            final String columnDefinition = generateGoalColumnDefinition(element);
+            createStatement.append(" "
+                + columnDefinition + ",");
+            performanceColumns.append(element.getName()
+                + ",");
+          }
         }
         performanceColumns.append("ComputedTotal,");
         createStatement.append(" ComputedTotal float DEFAULT NULL,");
@@ -237,11 +244,10 @@ public final class GenerateDB {
       finalScores.append("CREATE TABLE FinalScores (");
       finalScores.append("TeamNumber integer NOT NULL,");
       finalScores.append("Tournament INTEGER NOT NULL,");
-      for (final Element categoryElement : new NodelistElementCollectionAdapter(
-                                                                                rootElement.getElementsByTagName("subjectiveCategory"))) {
+      for (final ScoreCategory categoryElement : description.getSubjectiveCategories()) {
         createStatement.setLength(0);
 
-        final String tableName = categoryElement.getAttribute("name");
+        final String tableName = categoryElement.getName();
 
         stmt.executeUpdate("DROP TABLE IF EXISTS "
             + tableName + " CASCADE");
@@ -251,7 +257,7 @@ public final class GenerateDB {
         createStatement.append(" Tournament INTEGER NOT NULL,");
         createStatement.append(" Judge VARCHAR(64) NOT NULL,");
         createStatement.append(" NoShow boolean DEFAULT FALSE NOT NULL,");
-        for (final Element element : new NodelistElementCollectionAdapter(categoryElement.getElementsByTagName("goal"))) {
+        for (final AbstractGoal element : categoryElement.getGoals()) {
           final String columnDefinition = generateGoalColumnDefinition(element);
           createStatement.append(" "
               + columnDefinition + ",");
@@ -528,7 +534,8 @@ public final class GenerateDB {
       }
 
       Queries.setNumSeedingRounds(connection, INTERNAL_TOURNAMENT_ID, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
-      Queries.setMaxScorebaordPerformanceRound(connection, INTERNAL_TOURNAMENT_ID, TournamentParameters.MAX_SCOREBOARD_ROUND_DEFAULT);
+      Queries.setMaxScorebaordPerformanceRound(connection, INTERNAL_TOURNAMENT_ID,
+                                               TournamentParameters.MAX_SCOREBOARD_ROUND_DEFAULT);
     } finally {
       SQLFunctions.close(globalInsert);
     }
@@ -607,11 +614,8 @@ public final class GenerateDB {
   /**
    * Get SQL type for a given goal.
    */
-  public static String getTypeForGoalColumn(final Element goalElement) {
-    // check if there are any subelements to determine if this goal is
-    // enumerated or not
-    final Iterator<Element> posValues = new NodelistElementCollectionAdapter(goalElement.getElementsByTagName("value"));
-    if (posValues.hasNext()) {
+  public static String getTypeForGoalColumn(final AbstractGoal goalElement) {
+    if (goalElement.isEnumerated()) {
       // enumerated
       // HSQLDB doesn't support enum
       return "longvarchar";
@@ -626,8 +630,8 @@ public final class GenerateDB {
    * @param goalElement element that represents the goal
    * @return the column definition
    */
-  public static String generateGoalColumnDefinition(final Element goalElement) {
-    final String goalName = goalElement.getAttribute("name");
+  public static String generateGoalColumnDefinition(final AbstractGoal goalElement) {
+    final String goalName = goalElement.getName();
 
     String definition = goalName;
     definition += " "

@@ -15,25 +15,22 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.db.Queries;
 import fll.util.FP;
 import fll.util.LogUtils;
-import fll.util.ScoreUtils;
 import fll.xml.BracketSortType;
+import fll.xml.ChallengeDescription;
+import fll.xml.PerformanceScoreCategory;
+import fll.xml.TiebreakerTest;
 import fll.xml.WinnerType;
-import fll.xml.XMLUtils;
 
 /**
  * Handle playoff information.
@@ -147,16 +144,16 @@ public final class Playoff {
    */
   public static Team pickWinner(final Connection connection,
                                 final int tournament,
-                                final Element performanceElement,
-                                final Element tiebreakerElement,
+                                final PerformanceScoreCategory performanceElement,
+                                final List<TiebreakerTest> tiebreakerElement,
                                 final WinnerType winnerCriteria,
                                 final Team teamA,
                                 final Team teamB,
                                 final TeamScore teamBScore,
                                 final int runNumber) throws SQLException, ParseException {
-    final TeamScore teamAScore = new DatabaseTeamScore(performanceElement, tournament, teamA.getTeamNumber(),
-                                                       runNumber, connection);
-    final Team retval = pickWinner(tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB, teamBScore);
+    final TeamScore teamAScore = new DatabaseTeamScore("Performance", tournament, teamA.getTeamNumber(), runNumber, connection);
+    final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
+                                   teamBScore);
     teamAScore.cleanup();
     teamBScore.cleanup();
     return retval;
@@ -183,17 +180,16 @@ public final class Playoff {
    */
   public static Team pickWinner(final Connection connection,
                                 final int tournament,
-                                final Element performanceElement,
-                                final Element tiebreakerElement,
+                                final PerformanceScoreCategory performanceElement,
+                                final List<TiebreakerTest> tiebreakerElement,
                                 final WinnerType winnerCriteria,
                                 final Team teamA,
                                 final Team teamB,
                                 final int runNumber) throws SQLException, ParseException {
-    final TeamScore teamAScore = new DatabaseTeamScore(performanceElement, tournament, teamA.getTeamNumber(),
-                                                       runNumber, connection);
-    final TeamScore teamBScore = new DatabaseTeamScore(performanceElement, tournament, teamB.getTeamNumber(),
-                                                       runNumber, connection);
-    final Team retval = pickWinner(tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB, teamBScore);
+    final TeamScore teamAScore = new DatabaseTeamScore("Performance", tournament, teamA.getTeamNumber(), runNumber, connection);
+    final TeamScore teamBScore = new DatabaseTeamScore("Performance", tournament, teamB.getTeamNumber(), runNumber, connection);
+    final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
+                                   teamBScore);
     teamAScore.cleanup();
     teamBScore.cleanup();
     return retval;
@@ -204,7 +200,8 @@ public final class Playoff {
    * 
    * @return the winner, null on a tie or a missing score
    */
-  private static Team pickWinner(final Element tiebreakerElement,
+  private static Team pickWinner(final PerformanceScoreCategory perf,
+                                 final List<TiebreakerTest> tiebreakerElement,
                                  final WinnerType winnerCriteria,
                                  final Team teamA,
                                  final TeamScore teamAScore,
@@ -230,8 +227,8 @@ public final class Playoff {
             && noshowB) {
           return teamA;
         } else {
-          final double scoreA = ScoreUtils.computeTotalScore(teamAScore);
-          final double scoreB = ScoreUtils.computeTotalScore(teamBScore);
+          final double scoreA = perf.evaluate(teamAScore);
+          final double scoreB = perf.evaluate(teamBScore);
           if (FP.lessThan(scoreA, scoreB, TIEBREAKER_TOLERANCE)) {
             return WinnerType.HIGH == winnerCriteria ? teamB : teamA;
           } else if (FP.lessThan(scoreB, scoreA, TIEBREAKER_TOLERANCE)) {
@@ -255,24 +252,21 @@ public final class Playoff {
    * @param teamBScore team B's score information
    * @return the winner, may be Team.TIE
    */
-  private static Team evaluateTiebreaker(final Element tiebreakerElement,
+  private static Team evaluateTiebreaker(final List<TiebreakerTest> tiebreakerElement,
                                          final Team teamA,
                                          final TeamScore teamAScore,
                                          final Team teamB,
                                          final TeamScore teamBScore) throws ParseException {
 
     // walk test elements in tiebreaker to decide who wins
-    for (final Element testElement : new NodelistElementCollectionAdapter(tiebreakerElement.getChildNodes())) {
-      if ("test".equals(testElement.getTagName())) {
-        final Map<String, Double> variableValues = Collections.emptyMap();
-        final double sumA = ScoreUtils.evalPoly(testElement, teamAScore, variableValues);
-        final double sumB = ScoreUtils.evalPoly(testElement, teamBScore, variableValues);
-        final WinnerType highlow = XMLUtils.getWinnerCriteria(testElement);
-        if (sumA > sumB) {
-          return (WinnerType.HIGH == highlow ? teamA : teamB);
-        } else if (sumA < sumB) {
-          return (WinnerType.HIGH == highlow ? teamB : teamA);
-        }
+    for (final TiebreakerTest testElement : tiebreakerElement) {
+      final double sumA = testElement.evaluate(teamAScore);
+      final double sumB = testElement.evaluate(teamBScore);
+      final WinnerType highlow = testElement.getWinner();
+      if (sumA > sumB) {
+        return (WinnerType.HIGH == highlow ? teamA : teamB);
+      } else if (sumA < sumB) {
+        return (WinnerType.HIGH == highlow ? teamB : teamA);
       }
     }
     return Team.TIE;
@@ -371,7 +365,6 @@ public final class Playoff {
    * tournament is assumed to be the tournament to initialize.
    * 
    * @param connection the connection
-   * @param challengeDocument challenge descriptor
    * @param division the playoff division that the specified teams are in
    * @param enableThird true if 3rd place bracket needs to be computed
    * @param teams the teams that are to compete in the specified playoff
@@ -381,7 +374,7 @@ public final class Playoff {
    *           unfinished playoffs
    */
   public static void initializeBrackets(final Connection connection,
-                                        final Document challengeDocument,
+                                        final ChallengeDescription challengeDescription,
                                         final String division,
                                         final boolean enableThird,
                                         final List<Team> teams) throws SQLException {
@@ -392,8 +385,8 @@ public final class Playoff {
     }
     final int currentTournament = Queries.getCurrentTournament(connection);
 
-    final BracketSortType bracketSort = XMLUtils.getBracketSort(challengeDocument);
-    final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(challengeDocument);
+    final BracketSortType bracketSort = challengeDescription.getBracketSort();
+    final WinnerType winnerCriteria = challengeDescription.getWinner();
 
     // Initialize currentRound to contain a full bracket setup (i.e. playoff
     // round 1 teams)
@@ -664,8 +657,8 @@ public final class Playoff {
    */
   public static int[] computeInitialBrackets(final int numTeams) {
     if (numTeams < 1) {
-      throw new IllegalArgumentException("numTeams must be greater than or equal to 1: "
-          + numTeams);
+      throw new IllegalArgumentException("numTeams must be greater than or equal to 1 found: "
+          + numTeams + " perhaps teams have not had scores entered for seeding rounds?");
     }
 
     int n = numTeams;
@@ -737,6 +730,33 @@ public final class Playoff {
       SQLFunctions.close(prep);
     }
     return list;
+  }
+
+  /**
+   * Get the run number for a given playoff bracket.
+   * This run number specifies the winner of the playoff bracket.
+   * 
+   * @return the run max run number or -1 if not found
+   */
+  public static int getMaxRunNumber(final Connection connection,
+                                    final int tournament,
+                                    final String division) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT MAX(run_number) FROM PlayoffData WHERE event_division = ? AND Tournament = ?");
+      prep.setString(1, division);
+      prep.setInt(2, tournament);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        return rs.getInt(1);
+      } else {
+        return -1;
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
   }
 
   /**
@@ -842,7 +862,8 @@ public final class Playoff {
   }
 
   /**
-   * Find the playoff round runmber for the specified division and performance
+   * Find the playoff round run number for the specified division and
+   * performance
    * run number in the current tournament.
    * 
    * @return the playoff round or -1 if not found
@@ -876,6 +897,7 @@ public final class Playoff {
   /**
    * Given a team and run number, get the playoff division
    * 
+   * @param runNumber the performance run number
    * @return the division or null if not found
    */
   public static String getPlayoffDivision(final Connection connection,

@@ -27,9 +27,9 @@ import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.xml.BracketSortType;
+import fll.xml.ChallengeDescription;
 import fll.xml.ChallengeParser;
 import fll.xml.WinnerType;
-import fll.xml.XMLUtils;
 
 /**
  * Test the various playoff bracket sort methods.
@@ -64,6 +64,8 @@ public class BracketSortTest {
       final Document document = ChallengeParser.parse(new InputStreamReader(challengeDocIS));
       Assert.assertNotNull(document);
 
+      final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+      
       // create in memory test database instance
       Class.forName("org.hsqldb.jdbcDriver").newInstance();
       connection = DriverManager.getConnection("jdbc:hsqldb:mem:flldb-testAlphaTeam");
@@ -86,8 +88,8 @@ public class BracketSortTest {
 
       final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
 
-      final BracketSortType bracketSort = XMLUtils.getBracketSort(document);
-      final WinnerType winnerCriteria = XMLUtils.getWinnerCriteria(document);
+      final BracketSortType bracketSort = description.getBracketSort();
+      final WinnerType winnerCriteria = description.getWinner();
 
       final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
       Team.filterTeamsToEventDivision(connection, teams, divisionStr);

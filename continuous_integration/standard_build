@@ -13,6 +13,12 @@ fi
 
 cd "${WORKSPACE}"
 
+env
+
+log "Java is: $(type -p java)"
+log "Javac is : $(type -p javac)"
+
+
 #clean up from previous run
 git clean -xdf || fatal "Unable to clean workspace"
 

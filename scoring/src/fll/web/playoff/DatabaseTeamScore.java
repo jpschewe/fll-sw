@@ -12,8 +12,6 @@ import java.sql.SQLException;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
-import org.w3c.dom.Element;
-
 /**
  * TeamScore implementation for a performance score in the database. Note that
  * this object is only valid as long as the {@link ResultSet} used to create it
@@ -30,8 +28,9 @@ public class DatabaseTeamScore extends TeamScore {
    * @param rs the {@link ResultSet} to pull the scores from
    * @throws SQLException if there is an error getting the current tournament
    */
-  public DatabaseTeamScore(final Element categoryDescription, final int teamNumber, final ResultSet rs) throws SQLException {
-    super(categoryDescription, teamNumber);
+  public DatabaseTeamScore(final int teamNumber,
+                           final ResultSet rs) throws SQLException {
+    super(teamNumber);
 
     _result = rs;
     _scoreExists = true;
@@ -40,17 +39,19 @@ public class DatabaseTeamScore extends TeamScore {
   /**
    * Create a database team score object for a performance score.
    * 
-   * @param categoryDescription passed to superclass
    * @param connection the connection to get the data from
    * @param teamNumber passed to superclass
    * @param runNumber passed to superclass
    * @throws SQLException if there is an error getting the current tournament
    */
-  public DatabaseTeamScore(final Element categoryDescription, final int tournament, final int teamNumber, final int runNumber, final Connection connection)
-      throws SQLException {
-    super(categoryDescription, teamNumber, runNumber);
+  public DatabaseTeamScore(final String categoryName,
+                           final int tournament,
+                           final int teamNumber,
+                           final int runNumber,
+                           final Connection connection) throws SQLException {
+    super(teamNumber, runNumber);
 
-    _result = createResultSet(connection, tournament);
+    _result = createResultSet(connection, tournament, categoryName);
     _scoreExists = _result.next();
   }
 
@@ -58,14 +59,15 @@ public class DatabaseTeamScore extends TeamScore {
    * Create a database team score object for a performance score, for use when
    * the result set is already available.
    * 
-   * @param categoryDescription passed to superclass
    * @param teamNumber passed to superclass
    * @param runNumber passed to superclass
    * @param rs the {@link ResultSet} to pull the scores from
    * @throws SQLException if there is an error getting the current tournament
    */
-  public DatabaseTeamScore(final Element categoryDescription, final int teamNumber, final int runNumber, final ResultSet rs) throws SQLException {
-    super(categoryDescription, teamNumber, runNumber);
+  public DatabaseTeamScore(final int teamNumber,
+                           final int runNumber,
+                           final ResultSet rs) throws SQLException {
+    super(teamNumber, runNumber);
 
     _result = rs;
     _scoreExists = true;
@@ -76,10 +78,14 @@ public class DatabaseTeamScore extends TeamScore {
    */
   @Override
   public String getEnumRawScore(final String goalName) {
-    try {
-      return getResultSet().getString(goalName);
-    } catch (final SQLException sqle) {
-      throw new RuntimeException(sqle);
+    if (!scoreExists()) {
+      return null;
+    } else {
+      try {
+        return getResultSet().getString(goalName);
+      } catch (final SQLException sqle) {
+        throw new RuntimeException(sqle);
+      }
     }
   }
 
@@ -87,16 +93,20 @@ public class DatabaseTeamScore extends TeamScore {
    * @see fll.web.playoff.TeamScore#getRawScore(java.lang.String)
    */
   @Override
-  public Double getRawScore(final String goalName) {
-    try {
-      final double val = getResultSet().getDouble(goalName);
-      if (getResultSet().wasNull()) {
-        return null;
-      } else {
-        return val;
+  public double getRawScore(final String goalName) {
+    if (!scoreExists()) {
+      return Double.NaN;
+    } else {
+      try {
+        final double val = getResultSet().getDouble(goalName);
+        if (getResultSet().wasNull()) {
+          return Double.NaN;
+        } else {
+          return val;
+        }
+      } catch (final SQLException sqle) {
+        throw new RuntimeException(sqle);
       }
-    } catch (final SQLException sqle) {
-      throw new RuntimeException(sqle);
     }
   }
 
@@ -105,10 +115,14 @@ public class DatabaseTeamScore extends TeamScore {
    */
   @Override
   public boolean isNoShow() {
-    try {
-      return getResultSet().getBoolean("NoShow");
-    } catch (final SQLException sqle) {
-      throw new RuntimeException(sqle);
+    if (!scoreExists()) {
+      return false;
+    } else {
+      try {
+        return getResultSet().getBoolean("NoShow");
+      } catch (final SQLException sqle) {
+        throw new RuntimeException(sqle);
+      }
     }
   }
 
@@ -150,9 +164,10 @@ public class DatabaseTeamScore extends TeamScore {
    * Create the result set.
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table")
-  private ResultSet createResultSet(final Connection connection, final int tournament) throws SQLException {
+  private ResultSet createResultSet(final Connection connection,
+                                    final int tournament,
+                                    final String categoryName) throws SQLException {
     ResultSet result;
-    final String categoryName = getCategoryName();
     if (NON_PERFORMANCE_RUN_NUMBER == getRunNumber()) {
       _prep = connection.prepareStatement("SELECT * FROM "
           + categoryName + " WHERE TeamNumber = ? AND Tournament = ?");

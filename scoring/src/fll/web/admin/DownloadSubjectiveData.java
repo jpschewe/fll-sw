@@ -36,8 +36,6 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
-import net.mtu.eggplant.xml.XMLUtils;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -48,6 +46,10 @@ import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.xml.AbstractGoal;
+import fll.xml.ChallengeDescription;
+import fll.xml.ScoreCategory;
+import fll.xml.XMLUtils;
 
 /**
  * Downlaod the data file for the subjective score app.
@@ -72,11 +74,12 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
     try {
       connection = datasource.getConnection();
       final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
-      if (Queries.isJudgesProperlyAssigned(connection, challengeDocument)) {
+      final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+      if (Queries.isJudgesProperlyAssigned(connection, challengeDescription)) {
         response.reset();
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", "filename=subjective-data.fll");
-        writeSubjectiveScores(connection, challengeDocument, response.getOutputStream());
+        writeSubjectiveScores(connection, challengeDocument, challengeDescription, response.getOutputStream());
       } else {
         response.reset();
         response.setContentType("text/plain");
@@ -94,7 +97,6 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
    * Create a document to hold subject scores for the tournament described in
    * challengeDocument.
    * 
-   * @param challengeDocument describes the tournament
    * @param teams the teams for this tournament
    * @param connection the database connection used to retrieve the judge
    *          information
@@ -103,7 +105,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
    * @return the document
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
-  public static Document createSubjectiveScoresDocument(final Document challengeDocument,
+  public static Document createSubjectiveScoresDocument(final ChallengeDescription challengeDescription,
                                                         final Collection<Team> teams,
                                                         final Connection connection,
                                                         final int currentTournament) throws SQLException {
@@ -119,10 +121,8 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
       final Element top = document.createElementNS(null, SCORES_NODE_NAME);
       document.appendChild(top);
 
-      for (final Element categoryDescription : new NodelistElementCollectionAdapter(
-                                                                                    challengeDocument.getDocumentElement()
-                                                                                                     .getElementsByTagName("subjectiveCategory"))) {
-        final String categoryName = categoryDescription.getAttribute("name");
+      for (final ScoreCategory categoryDescription : challengeDescription.getSubjectiveCategories()) {
+        final String categoryName = categoryDescription.getName();
         final Element categoryElement = document.createElementNS(null, SUBJECTIVE_CATEGORY_NODE_NAME);
         top.appendChild(categoryElement);
         categoryElement.setAttributeNS(null, "name", categoryName);
@@ -156,9 +156,8 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
               prep2.setString(3, judge);
               rs2 = prep2.executeQuery();
               if (rs2.next()) {
-                for (final Element goalDescription : new NodelistElementCollectionAdapter(
-                                                                                          categoryDescription.getElementsByTagName("goal"))) {
-                  final String goalName = goalDescription.getAttribute("name");
+                for (final AbstractGoal goalDescription : categoryDescription.getGoals()) {
+                  final String goalName = goalDescription.getName();
                   final String value = rs2.getString(goalName);
                   if (!rs2.wasNull()) {
                     final Element subscoreElement = document.createElementNS(null, SUBSCORE_NODE_NAME);
@@ -193,6 +192,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
    */
   public static void writeSubjectiveScores(final Connection connection,
                                            final Document challengeDocument,
+                                           final ChallengeDescription challengeDescription,
                                            final OutputStream stream) throws IOException, SQLException {
     final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
     final int tournament = Queries.getCurrentTournament(connection);
@@ -205,7 +205,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
     XMLUtils.writeXML(challengeDocument, writer, "UTF-8");
     zipOut.closeEntry();
 
-    final Document scoreDocument = createSubjectiveScoresDocument(challengeDocument, tournamentTeams.values(),
+    final Document scoreDocument = createSubjectiveScoresDocument(challengeDescription, tournamentTeams.values(),
                                                                   connection, tournament);
 
     try {

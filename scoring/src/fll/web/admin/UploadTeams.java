@@ -30,19 +30,15 @@ import javax.servlet.jsp.JspWriter;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.GenerateDB;
-import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.CellFileReader;
 import fll.util.FLLRuntimeException;
@@ -50,6 +46,8 @@ import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
 import fll.web.SessionAttributes;
+import fll.xml.ChallengeDescription;
+import fll.xml.ScoreCategory;
 
 /**
  * Java code for uploading team data to the database. Called from
@@ -383,8 +381,11 @@ public final class UploadTeams extends BaseFLLServlet {
   public static boolean verifyTeams(final Connection connection,
                                     final HttpServletRequest request,
                                     final HttpServletResponse response,
+                                    final ServletContext application,
                                     final HttpSession session,
                                     final JspWriter out) throws SQLException, IOException {
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
+    
     final String teamNumberColumn = request.getParameter("TeamNumber");
     if (null == teamNumberColumn
         || "".equals(teamNumberColumn)) {
@@ -438,11 +439,9 @@ public final class UploadTeams extends BaseFLLServlet {
       prep.executeUpdate();
       prep = connection.prepareStatement("DELETE FROM FinalScores");
       prep.executeUpdate();
-      final Document challenge = GlobalParameters.getChallengeDocument(connection);
-      final Element rootElement = challenge.getDocumentElement();
-      for (final Element categoryElement : new NodelistElementCollectionAdapter(
-                                                                                rootElement.getElementsByTagName("subjectiveCategory"))) {
-        final String tableName = categoryElement.getAttribute("name");
+      
+      for (final ScoreCategory categoryElement : description.getSubjectiveCategories()) {
+        final String tableName = categoryElement.getName();
         prep = connection.prepareStatement("DELETE FROM "
             + tableName);
         prep.executeUpdate();

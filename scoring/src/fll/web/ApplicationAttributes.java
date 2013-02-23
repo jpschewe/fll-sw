@@ -10,6 +10,8 @@ import javax.sql.DataSource;
 
 import org.w3c.dom.Document;
 
+import fll.xml.ChallengeDescription;
+
 /**
  * Keys for all attributes in the application. These are initialized from
  * 'jspf/init.jspf', unless otherwise noted. Each key has an associated accessor
@@ -37,6 +39,15 @@ public final class ApplicationAttributes {
 
   public static Document getChallengeDocument(final ServletContext application) {
     return getAttribute(application, CHALLENGE_DOCUMENT, Document.class);
+  }
+
+  /**
+   * {@link ChallengeDescription} that describes the current tournament.
+   */
+  public static final String CHALLENGE_DESCRIPTION = "challengeDescription";
+
+  public static ChallengeDescription getChallengeDescription(final ServletContext application) {
+    return getAttribute(application, CHALLENGE_DESCRIPTION, ChallengeDescription.class);
   }
 
   /**
@@ -69,13 +80,17 @@ public final class ApplicationAttributes {
    * @param attribute the attribute to get
    * @param clazz the expected type
    */
-  public static <T> T getAttribute(final ServletContext application, final String attribute, final Class<T> clazz) {
+  public static <T> T getAttribute(final ServletContext application,
+                                   final String attribute,
+                                   final Class<T> clazz) {
     final Object o = application.getAttribute(attribute);
     if (o == null
         || clazz.isInstance(o)) {
       return clazz.cast(o);
     } else {
-      throw new RuntimeException(String.format("Expecting application attribute '%s' to be of type '%s', but was of type '%s'", attribute, clazz, o.getClass()));
+      throw new RuntimeException(
+                                 String.format("Expecting application attribute '%s' to be of type '%s', but was of type '%s'",
+                                               attribute, clazz, o.getClass()));
     }
   }
 
