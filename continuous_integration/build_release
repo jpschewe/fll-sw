@@ -13,11 +13,16 @@ fi
 
 fllsw_root="${mydir}"/..
 
-cd "${fllsw_root}"
 
 #clean up from previous run
+cd "${fllsw_root}"
 git clean -xdf || fatal "Error cleaning workspace"
 
+if [ "${DEVEL_BUILD}" -eq "1" ]; then
+    # setup version identifier
+    cd "${fllsw_root}"/scoring
+    echo "app.version=devel-${BUILD_ID}" > override.properties
+fi
 
 # get wiki documentation
 cd "${fllsw_root}"/scoring/web/wiki
@@ -25,3 +30,4 @@ cd "${fllsw_root}"/scoring/web/wiki
 
 cd "${fllsw_root}"/scoring
 ./ant.sh dist || fatal "Error building distribution"
+
