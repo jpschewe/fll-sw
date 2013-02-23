@@ -11,15 +11,23 @@ if [ -z "${WORKSPACE}" ]; then
     fatal "WORKSPACE not defined, cannot continue"
 fi
 
-cd "${WORKSPACE}"
+fllsw_root="${mydir}"/..
+
 
 #clean up from previous run
+cd "${fllsw_root}"
 git clean -xdf || fatal "Error cleaning workspace"
 
-cd scoring
+if [ "${DEVEL_BUILD}" -eq "1" ]; then
+    # setup version identifier
+    cd "${fllsw_root}"/scoring
+    echo "app.version=devel-${BUILD_ID}" > override.properties
+fi
 
 # get wiki documentation
-./get-wiki || fatal "Error getting wiki documentation"
+cd "${fllsw_root}"/scoring/web/wiki
+../../scripts/pull-wiki.py || fatal "Error getting wiki documentation"
 
+cd "${fllsw_root}"/scoring
 ./ant.sh dist || fatal "Error building distribution"
 
