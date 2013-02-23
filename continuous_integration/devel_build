@@ -7,26 +7,6 @@ error() { log "ERROR: $*" >&2; }
 fatal() { error "$*"; exit 1; }
 mydir=$(cd "$(dirname "$0")" && pwd -L) || fatal "Unable to determine script directory"
 
-if [ -z "${WORKSPACE}" ]; then
-    fatal "WORKSPACE not defined, cannot continue"
-fi
-
-fllsw_root="${mydir}"/..
-
-
-#clean up from previous run
-cd "${fllsw_root}"
-git clean -xdf || fatal "Error cleaning workspace"
-
-
-# setup version identifier
-cd "${fllsw_root}"/scoring
-echo "app.version=devel-${BUILD_ID}" > override.properties
-
-# get wiki documentation
-cd "${fllsw_root}"/scoring/web/wiki
-../../scripts/pull-wiki.py || fatal "Error getting wiki documentation"
-
-cd "${fllsw_root}"/scoring
-./ant.sh dist || fatal "Error building distribution"
-
+DEVEL_BUILD=1
+export DEVEL_BUILD
+exec "${mydir}"/build_release
