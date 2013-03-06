@@ -41,9 +41,10 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
       connection = datasource.getConnection();
       final ServletOutputStream os = response.getOutputStream();
       final String multiParam = request.getParameter("multi");
+      final String division = request.getParameter("division");
       if (multiParam != null) {
         // Send off request to helpers
-        handleMultipleQuery(parseInputToMap(multiParam), os, application, session, response, connection);
+        handleMultipleQuery(parseInputToMap(multiParam), division, os, application, session, response, connection);
       } else {
         response.reset();
         response.setContentType("application/json");
@@ -71,6 +72,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
   }
 
   private void handleMultipleQuery(final Map<Integer, Integer> pairedMap,
+                                   final String division,
                                    final ServletOutputStream os,
                                    final ServletContext application,
                                    final HttpSession session,
@@ -79,7 +81,14 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     try {
       final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
 
-      BracketData bd = constructBracketData(connection, session, application);
+      BracketData bd = constructBracketData(division, connection, session, application);
+      if (bd == null) {
+        response.reset();
+        response.setContentType("application/json");
+        os.print("{\"refresh\":\"true\"}");
+        return;
+      }
+
       final boolean showOnlyVerifiedScores = true;
       final boolean showFinalsScores = false;
       response.reset();
@@ -91,7 +100,8 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     }
   }
 
-  private BracketData constructBracketData(final Connection connection,
+  private BracketData constructBracketData(final String queryDivision,
+                                           final Connection connection,
                                            final HttpSession session,
                                            final ServletContext application) throws SQLException {
     final String divisionKey = "playoffDivision";
@@ -127,6 +137,10 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     } else {
       division = ApplicationAttributes.getAttribute(application, divisionKey, String.class);
     }
+    if (!division.equals(queryDivision)) {
+      return null; // The divisions have switched on us, return null so we force
+                   // the display to refresh
+    }
     final int playoffRoundNumber;
     if (null != sessionRoundNumber) {
       playoffRoundNumber = sessionRoundNumber.intValue();
@@ -142,7 +156,7 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     try {
       return new BracketData(connection, division, playoffRoundNumber, playoffRoundNumber
           + roundsLong - 1, rowsPerTeam, showFinalsScores, onlyShowVerifiedScores);
-    } catch (SQLException e) {
+    } catch (final SQLException e) {
       throw new RuntimeException(e);
     }
   }
