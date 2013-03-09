@@ -1,5 +1,5 @@
+* 211 - make sure to schedule finalists that are more constrained first, this allows the finalist schedule to be as short as possible
 * 187 - Refresh the playoff brackets when the division changes
-
 * 204 - Allow score entry to update or insert a score in a safe manner
     under heavy load
 * Disallow setting up the database from a computer other than localhost.
