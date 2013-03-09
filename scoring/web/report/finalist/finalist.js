@@ -522,7 +522,7 @@
 				var bCount = bCategories.length;
 				if (aCount == bCount) {
 					return 0;
-				} else if (aCount < bCount) {
+				} else if (aCount > bCount) {
 					return -1;
 				} else {
 					return 1;
