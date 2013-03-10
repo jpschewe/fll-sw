@@ -26,6 +26,16 @@ String.prototype.padL = function(width, pad) {
 	return (String.repeat(pad, length) + this).substr(0, width);
 }
 
+/**
+ * Used for packaging up and sending to the server to put in the database.
+ */
+function FinalistDBRow(categoryName, hour, minute, teamNumber) {
+	this.categoryName = categoryName;
+	this.hour = hour;
+	this.minute = minute;
+	this.teamNumber = teamNumber;
+}
+
 $(document).ready(
 		function() {
 			$("#division").text($.finalist.getCurrentDivision());
@@ -43,6 +53,8 @@ $(document).ready(
 			var duration = $.finalist.getDuration();
 			var time = $.finalist.getStartTime();
 			var schedule = $.finalist.scheduleFinalists();
+			
+			var schedRows = [];			
 			$.each(schedule, function(i, slot) {
 				var row = $("<tr></tr>");
 				$("#schedule").append(row);
@@ -62,11 +74,16 @@ $(document).ready(
 										category);
 								row.append($("<td>" + teamNum + " - "
 										+ team.name + " (" + group + ")</td>"));
+								
+								var dbrow = new FinalistDBRow(category.name, time.getHours(), time.getMinutes(), teamNum);
+								schedRows.push(dbrow);
 							}
 						}); // foreach category
 
 				time.setTime(time.getTime() + (duration * 60 * 1000));
 			}); // foreach timeslot
+
+			$('#sched_data').val($.toJSON(schedRows));
 
 			$.finalist.displayNavbar();
 		});

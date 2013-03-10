@@ -490,6 +490,9 @@ public final class ImportDB {
     if (dbVersion < 8) {
       upgrade7To8(connection);
     }
+    if (dbVersion < 9) {
+      upgrade8To9(connection);
+    }
     final int newVersion = Queries.getDatabaseVersion(connection);
     if (newVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
@@ -504,6 +507,12 @@ public final class ImportDB {
     // global_parameters, but we need to force it to 2 for later upgrade
     // functions to not be confused
     setDBVersion(connection, 2);
+  }
+
+  private static void upgrade8To9(final Connection connection) throws SQLException {
+    GenerateDB.createFinalistScheduleTable(connection, true, SQLFunctions.getTablesInDB(connection), false);
+
+    setDBVersion(connection, 9);
   }
 
   private static void upgrade2To6(final Connection connection) throws SQLException {
