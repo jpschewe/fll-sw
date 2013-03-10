@@ -39,7 +39,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 8;
+  public static final int DATABASE_VERSION = 9;
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -176,6 +176,8 @@ public final class GenerateDB {
       tournamentParameters(connection, forceRebuild, tables);
 
       createScheduleTables(connection, forceRebuild, tables, true);
+      
+      createFinalistScheduleTable(connection, forceRebuild, tables, true);
 
       // Table structure for table 'Judges'
       stmt.executeUpdate("DROP TABLE IF EXISTS Judges CASCADE");
@@ -333,6 +335,48 @@ public final class GenerateDB {
       SQLFunctions.close(prep);
     }
 
+  }
+
+  /**
+   * Create finalist_schedule table
+   * 
+   * @param connection
+   * @param forceRebuild
+   * @param tables
+   * @param createConstraints if false, don't create foreign key constraints
+   */
+  /*package*/ static void createFinalistScheduleTable(final Connection connection,
+                                                  final boolean forceRebuild,
+                                                  final Collection<String> tables,
+                                                  final boolean createConstraints) throws SQLException {
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+
+      if (forceRebuild) {
+        stmt.executeUpdate("DROP TABLE IF EXISTS finalist_schedule");
+      }
+      if (forceRebuild
+          || !tables.contains("finalist_schedule".toLowerCase())) {
+        final StringBuilder sql = new StringBuilder();
+        sql.append("CREATE TABLE finalist_schedule (");
+        sql.append("  tournament INTEGER NOT NULL");
+        sql.append(" ,category LONGVARCHAR NOT NULL");
+        sql.append(" ,judge_time TIME NOT NULL");
+        sql.append(" ,team_number INTEGER NOT NULL");
+        sql.append(" ,CONSTRAINT finalist_schedule_pk PRIMARY KEY (tournament, category, judge_time)");
+        if (createConstraints) {
+          sql.append(" ,CONSTRAINT finalist_schedule_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
+          sql.append(" ,CONSTRAINT finalist_schedule_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+        }
+        sql.append(")");
+        stmt.executeUpdate(sql.toString());
+      }
+
+    } finally {
+      SQLFunctions.close(stmt);
+      stmt = null;
+    }    
   }
 
   /**

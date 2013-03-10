@@ -191,7 +191,7 @@
 	function Timeslot() {
 		this.categories = {};
 	}
-
+	
 	// //////////////////////// PUBLIC INTERFACE /////////////////////////
 	$.finalist = {
 		CHAMPIONSHIP_NAME : "Championship",
