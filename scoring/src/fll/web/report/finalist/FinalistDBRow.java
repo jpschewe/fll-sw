@@ -48,21 +48,3 @@ final class FinalistDBRow {
     return teamNumber;
   }
 }
-//
-// private static class DateTimeDeserializer implements JsonDeserializer<Date> {
-// private static final DateFormat mFormat = new
-// SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-//
-// public Date deserialize(JsonElement json,
-// Type typeOfT,
-// JsonDeserializationContext context) throws JsonParseException {
-// final String dateStr = json.getAsJsonPrimitive().getAsString();
-// try {
-// return mFormat.parse(dateStr);
-// } catch (final ParseException e) {
-// LOGGER.error("Unparsable date: '"
-// + dateStr + "'");
-// return null;
-// }
-// }
-// }

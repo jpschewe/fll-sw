@@ -85,6 +85,8 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
       
       final FinalistSchedule schedule = new FinalistSchedule(tournament, rows);
       schedule.store(connection);
+
+      message.append("<p id='success'>Finalist schedule saved to the database</p>");
       
     } catch (final SQLException e) {
       message.append("<p class='error'>Error saving finalist schedule into the database: "
@@ -94,7 +96,7 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
     }
 
     session.setAttribute("message", message.toString());
-    // FIXME response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+    response.sendRedirect(response.encodeRedirectURL("schedule-saved.jsp"));
 
   }
 
