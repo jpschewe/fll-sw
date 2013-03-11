@@ -177,7 +177,7 @@ public final class GenerateDB {
 
       createScheduleTables(connection, forceRebuild, tables, true);
       
-      createFinalistScheduleTable(connection, forceRebuild, tables, true);
+      createFinalistScheduleTables(connection, forceRebuild, tables, true);
 
       // Table structure for table 'Judges'
       stmt.executeUpdate("DROP TABLE IF EXISTS Judges CASCADE");
@@ -338,14 +338,14 @@ public final class GenerateDB {
   }
 
   /**
-   * Create finalist_schedule table
+   * Create finalist schedule tables.
    * 
    * @param connection
    * @param forceRebuild
    * @param tables
    * @param createConstraints if false, don't create foreign key constraints
    */
-  /*package*/ static void createFinalistScheduleTable(final Connection connection,
+  /*package*/ static void createFinalistScheduleTables(final Connection connection,
                                                   final boolean forceRebuild,
                                                   final Collection<String> tables,
                                                   final boolean createConstraints) throws SQLException {
@@ -355,7 +355,24 @@ public final class GenerateDB {
 
       if (forceRebuild) {
         stmt.executeUpdate("DROP TABLE IF EXISTS finalist_schedule");
+        stmt.executeUpdate("DROP TABLE IF EXISTS finalist_categories");
       }
+      
+      if (forceRebuild
+          || !tables.contains("finalist_categories".toLowerCase())) {
+        final StringBuilder sql = new StringBuilder();
+        sql.append("CREATE TABLE finalist_categories (");
+        sql.append("  tournament INTEGER NOT NULL");
+        sql.append(" ,category LONGVARCHAR NOT NULL");
+        sql.append(" ,is_public BOOLEAN NOT NULL");
+        sql.append(" ,CONSTRAINT finalist_categories_pk PRIMARY KEY (tournament, category)");
+        if (createConstraints) {
+        }
+        sql.append(")");
+        stmt.executeUpdate(sql.toString());
+      }
+
+
       if (forceRebuild
           || !tables.contains("finalist_schedule".toLowerCase())) {
         final StringBuilder sql = new StringBuilder();
@@ -368,6 +385,7 @@ public final class GenerateDB {
         if (createConstraints) {
           sql.append(" ,CONSTRAINT finalist_schedule_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
           sql.append(" ,CONSTRAINT finalist_schedule_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
+          sql.append(" ,CONSTRAINT finalist_schedule_fk3 FOREIGN KEY(tournament, category) REFERENCES finalist_categories(tournament, category)");
         }
         sql.append(")");
         stmt.executeUpdate(sql.toString());

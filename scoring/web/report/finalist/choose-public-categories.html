@@ -7,32 +7,23 @@
 <script type='text/javascript' src='../../extlib/jquery.json-2.3.min.js'></script>
 <script type='text/javascript' src='../../extlib/jstorage.js'></script>
 <script type='text/javascript' src='finalist.js'></script>
-<script type='text/javascript' src='schedule.js'></script>
+<script type='text/javascript' src='choose-public-categories.js'></script>
 </head>
 
 <body>
  <div id='navbar'></div>
  <hr />
 
- <h1>Finalist schedule</h1>
+ <h1>Choose Public Categories</h1>
 
- <h2>
-  Division <span id='division'></span>
- </h2>
-
- <table id='schedule' border='1'></table>
+ <p>Categories that are public will be displayed on the big screen
+  and the public PDF. Non-public categories are only displayed within
+  this scheduling app and on the private PDF that is given to the judges</p>
 
 
- <form id='get_sched_data' method='POST' action='StoreFinalistSchedule'>
+ <div id='categories'>
+ </div>
 
-  <input type='hidden' id='sched_data' name='sched_data' /> 
-  <input type='hidden' id='category_data' name='category_data' /> 
-  
-  
-  <input
-   type='submit' value='Send Schedule To Server' />
-
- </form>
 
 </body>
 </html>
