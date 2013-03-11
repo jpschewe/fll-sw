@@ -28,12 +28,22 @@ String.prototype.padL = function(width, pad) {
 
 /**
  * Used for packaging up and sending to the server to put in the database.
+ * Needs to match fll.web.report.finalist.FinalistDBRow.
  */
 function FinalistDBRow(categoryName, hour, minute, teamNumber) {
 	this.categoryName = categoryName;
 	this.hour = hour;
 	this.minute = minute;
 	this.teamNumber = teamNumber;
+}
+
+/**
+ * Used for packaging up and sending to the server to put in the database.
+ * Needs to match fll.web.report.finalist.FinalistCategoryRow.
+ */
+function FinalistCategoryRow(categoryName, isPublic) {
+	this.categoryName = categoryName;
+	this.isPublic = isPublic;
 }
 
 $(document).ready(
@@ -85,5 +95,15 @@ $(document).ready(
 
 			$('#sched_data').val($.toJSON(schedRows));
 
+			
+			var categoryRows = [];
+			$.each($.finalist.getAllCategories(),
+					function(i, category) {
+						var cat = new FinalistCategoryRow(category.name, category.isPublic);
+						categoryRows.push(cat);
+					}); // foreach category
+			$('#category_data').val($.toJSON(categoryRows));
+			
+			
 			$.finalist.displayNavbar();
 		});

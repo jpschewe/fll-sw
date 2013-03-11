@@ -10,6 +10,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.db.Queries;
@@ -19,12 +22,23 @@ import fll.db.Queries;
  */
 public class FinalistSchedule {
 
+  /**
+   * Create a schedule.
+   * 
+   * @param tournament the tournament that the schedule is associated with
+   * @param categories key is the category name, value is if the category is public
+   * @param schedule the schedule entries
+   */
   public FinalistSchedule(final int tournament,
+                          final Map<String, Boolean> categories,
                           final Collection<FinalistDBRow> schedule) {
     this.mTournament = tournament;
-    this.mSchedule = schedule;
+    this.mCategories = new HashMap<String, Boolean>(categories);
+    this.mSchedule = new LinkedList<FinalistDBRow>(schedule);
   }
 
+  private final Map<String, Boolean> mCategories;
+  
   private final Collection<FinalistDBRow> mSchedule;
 
   private final int mTournament;
@@ -41,25 +55,44 @@ public class FinalistSchedule {
    * @throws SQLException
    */
   public void store(final Connection connection) throws SQLException {
-    PreparedStatement deletePrep = null;
-    PreparedStatement insertPrep = null;
+    PreparedStatement deleteCategoriesPrep = null;
+    PreparedStatement insertCategoriesPrep = null;
+    PreparedStatement deleteSchedPrep = null;
+    PreparedStatement insertSchedPrep = null;
     try {
-      deletePrep = connection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ?");
-      deletePrep.setInt(1, getTournament());
-      deletePrep.executeUpdate();
+      deleteSchedPrep = connection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ?");
+      deleteSchedPrep.setInt(1, getTournament());
+      deleteSchedPrep.executeUpdate();
 
-      insertPrep = connection.prepareStatement("INSERT INTO finalist_schedule (tournament, category, judge_time, team_number) VALUES(?, ?, ?, ?)");
-      insertPrep.setInt(1, getTournament());
+     
+      deleteCategoriesPrep = connection.prepareStatement("DELETE FROM finalist_categories WHERE tournament = ?");
+      deleteCategoriesPrep.setInt(1, getTournament());
+      deleteCategoriesPrep.executeUpdate();
+
+      insertCategoriesPrep = connection.prepareStatement("INSERT INTO finalist_categories (tournament, category, is_public) VALUES(?, ?, ?)");
+      insertCategoriesPrep.setInt(1, getTournament());
+      
+      for(final Map.Entry<String, Boolean> entry : mCategories.entrySet()) {
+        insertCategoriesPrep.setString(2, entry.getKey());
+        insertCategoriesPrep.setBoolean(3, entry.getValue());
+        insertCategoriesPrep.executeUpdate();
+      }
+
+
+      insertSchedPrep = connection.prepareStatement("INSERT INTO finalist_schedule (tournament, category, judge_time, team_number) VALUES(?, ?, ?, ?)");
+      insertSchedPrep.setInt(1, getTournament());
       for (final FinalistDBRow row : mSchedule) {
-        insertPrep.setString(2, row.getCategoryName());
-        insertPrep.setTime(3, Queries.dateToTime(row.getTime()));
-        insertPrep.setInt(4, row.getTeamNumber());
-        insertPrep.executeUpdate();
+        insertSchedPrep.setString(2, row.getCategoryName());
+        insertSchedPrep.setTime(3, Queries.dateToTime(row.getTime()));
+        insertSchedPrep.setInt(4, row.getTeamNumber());
+        insertSchedPrep.executeUpdate();
       }
 
     } catch (final SQLException e) {
-      SQLFunctions.close(deletePrep);
-      SQLFunctions.close(insertPrep);
+      SQLFunctions.close(deleteSchedPrep);
+      SQLFunctions.close(insertSchedPrep);
+      SQLFunctions.close(deleteCategoriesPrep);
+      SQLFunctions.close(insertCategoriesPrep);
     }
   }
 

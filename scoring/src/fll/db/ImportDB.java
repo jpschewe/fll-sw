@@ -510,7 +510,7 @@ public final class ImportDB {
   }
 
   private static void upgrade8To9(final Connection connection) throws SQLException {
-    GenerateDB.createFinalistScheduleTable(connection, true, SQLFunctions.getTablesInDB(connection), false);
+    GenerateDB.createFinalistScheduleTables(connection, true, SQLFunctions.getTablesInDB(connection), false);
 
     setDBVersion(connection, 9);
   }
@@ -1244,11 +1244,33 @@ public final class ImportDB {
         LOG.debug("Importing finalist schedule");
       }
 
+      // do drops first
       destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ?");
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
       SQLFunctions.close(destPrep);
 
+      destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_categories WHERE tournament = ?");
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+      SQLFunctions.close(destPrep);
+
+      
+      // insert categories next
+      destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_categories (tournament, category, is_public) VALUES(?, ?, ?)");
+      destPrep.setInt(1, destTournamentID);
+
+      sourcePrep = sourceConnection.prepareStatement("SELECT category, is_public FROM finalist_categories WHERE tournament = ?");
+      sourcePrep.setInt(1, sourceTournamentID);
+      sourceRS = sourcePrep.executeQuery();
+      while (sourceRS.next()) {
+        destPrep.setString(2, sourceRS.getString(1));
+        destPrep.setBoolean(3, sourceRS.getBoolean(2));
+        destPrep.executeUpdate();
+      }
+
+           
+      // insert schedule values last
       destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_schedule (tournament, category, judge_time, team_number) VALUES(?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
 

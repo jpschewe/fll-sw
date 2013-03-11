@@ -7,10 +7,11 @@
 package fll.web.report.finalist;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -60,30 +61,41 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
           || "".equals(schedDataStr)) {
         throw new FLLRuntimeException("Parameter 'sched_data' cannot be null");
       }
-      if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("JSON: "
-            + schedDataStr);
+      
+      final String categoryDataStr = request.getParameter("category_data");
+      if (null == categoryDataStr
+          || "".equals(categoryDataStr)) {
+        throw new FLLRuntimeException("Parameter 'category_data' cannot be null");
       }
 
       // decode JSON
       Gson gson = new Gson();
-      final Type collectionType = new TypeToken<Collection<FinalistDBRow>>() {
-      }.getType();
-      final Collection<FinalistDBRow> rows = gson.fromJson(schedDataStr, collectionType);
+      final Collection<FinalistDBRow> rows = gson.fromJson(schedDataStr, new TypeToken<Collection<FinalistDBRow>>() {
+      }.getType());
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Sched Data has "
             + rows.size() + " rows");
       }
-
-
       for (final FinalistDBRow row : rows) {
         if (LOGGER.isTraceEnabled()) {
           LOGGER.trace("row category: "
               + row.getCategoryName() + " time: " + row.getTime() + " team: " + row.getTeamNumber());
         }
       }
+
+      final Collection<FinalistCategoryRow> categories = gson.fromJson(categoryDataStr, new TypeToken<Collection<FinalistCategoryRow>>() {
+      }.getType());
+      if (LOGGER.isTraceEnabled()) {
+        LOGGER.trace("Category Data has "
+            + rows.size() + " rows");
+      }
+      final Map<String, Boolean> categoryMap = new HashMap<String, Boolean>();
+      for(final FinalistCategoryRow cat : categories) {
+        categoryMap.put(cat.getCategoryName(), cat.isPublic());
+      }
+
       
-      final FinalistSchedule schedule = new FinalistSchedule(tournament, rows);
+      final FinalistSchedule schedule = new FinalistSchedule(tournament, categoryMap, rows);
       schedule.store(connection);
 
       message.append("<p id='success'>Finalist schedule saved to the database</p>");
