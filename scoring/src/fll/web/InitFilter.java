@@ -122,8 +122,14 @@ public class InitFilter implements Filter {
         || path.startsWith(contextPath
             + "/setup") //
         )) {
-      LOGGER.debug("Returning true from needsSecurity");
-      return true;
+      if (path.startsWith(contextPath
+          + "/report/PublicFinalistSchedule")) {
+        // this report is public
+        return false;
+      } else {
+        LOGGER.debug("Returning true from needsSecurity");
+        return true;
+      }
     } else {
       return false;
     }

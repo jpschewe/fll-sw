@@ -7,6 +7,7 @@
 package fll.web.report.finalist;
 
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 
 /**
@@ -58,4 +59,19 @@ final class FinalistDBRow {
   public int getTeamNumber() {
     return teamNumber;
   }
+
+  public static final TimeSort TIME_SORT_INSTANCE = new TimeSort();
+
+  /**
+   * Sort {@link FinalistDBRow} objects by time.
+   */
+  private static final class TimeSort implements Comparator<FinalistDBRow> {
+
+    @Override
+    public int compare(final FinalistDBRow rowOne,
+                       final FinalistDBRow rowTwo) {
+      return rowOne.getTime().compareTo(rowTwo.getTime());
+    }
+  }
+
 }

@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -100,7 +101,32 @@ public class FinalistSchedule {
 
   private final Map<String, Boolean> mCategories;
 
+  /**
+   * Unmodifiable version of the categories.
+   * 
+   * @return key=category name, value=is public
+   */
+  public Map<String, Boolean> getCategories() {
+    return Collections.unmodifiableMap(mCategories);
+  }
+
   private final Collection<FinalistDBRow> mSchedule;
+
+  /**
+   * The schedule time slots for the specified category.
+   * 
+   * @return list sorted by time
+   */
+  public List<FinalistDBRow> getScheduleForCategory(final String category) {
+    final List<FinalistDBRow> result = new LinkedList<FinalistDBRow>();
+    for (final FinalistDBRow row : mSchedule) {
+      if (row.getCategoryName().equals(category)) {
+        result.add(row);
+      }
+    }
+    Collections.sort(result, FinalistDBRow.TIME_SORT_INSTANCE);
+    return result;
+  }
 
   private final int mTournament;
 

@@ -35,9 +35,7 @@
 </head>
 
 <body>
-	<h1>
-		Reporting
-	</h1>
+	<h1>Reporting</h1>
 
 	${message}
 	<%-- clear out the message, so that we don't see it again --%>
@@ -69,6 +67,12 @@
 		<li><a href="finalist/load.jsp">Schedule Finalists</a>. This is
 			used when one judge doesn't see all teams in a division and the top
 			teams need to be judged again to choose the winners.</li>
+
+		<li><a href="finalist/PrivateFinalistSchedule">Private Finalist
+				Schedule</a>. This displays the finalist schedule for all categories</li>
+
+        <li><a href="finalist/PublicFinalistSchedule">Public Finalist
+                Schedule</a>. This displays the finalist schedule for public categories</li>
 
 		<li><a href="RankingReport">Ranking Report for teams</a>. This is
 			printed at the end of the day and each team gets their page.</li>
