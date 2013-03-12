@@ -14,6 +14,17 @@ import java.util.Date;
  * javascript/JSON.
  */
 final class FinalistDBRow {
+
+  public FinalistDBRow(final String categoryName,
+                       final int hour,
+                       final int minute,
+                       final int teamNumber) {
+    this.categoryName = categoryName;
+    this.hour = hour;
+    this.minute = minute;
+    this.teamNumber = teamNumber;
+  }
+
   private String categoryName;
 
   public String getCategoryName() {
