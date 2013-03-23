@@ -19,8 +19,7 @@
 </head>
 
 <body>
- <h1>
-${challengeDescription.title } </h1>
+ <h1>${challengeDescription.title }</h1>
 
  ${message}
  <%-- clear out the message, so that we don't see it again --%>
@@ -49,6 +48,10 @@ ${challengeDescription.title } </h1>
 
   <li><a href='<c:url value="/playoff/remoteMain.jsp"/>'>Playoff
     brackets that are currently on the big screen</a></li>
+
+  <li><a
+   href='<c:url value="/report/finalist/PublicFinalistSchedule"/>'>Finalist
+    Schedule - PDF</a></li>
 
   <li><a href='<c:url value="/credits/credits.jsp"/>'>Credits</a></li>
 
