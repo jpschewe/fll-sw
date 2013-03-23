@@ -6,6 +6,7 @@
 
 package fll.web.report.finalist;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,7 +27,7 @@ import fll.db.Queries;
 /**
  * The schedule for finalist judging.
  */
-public class FinalistSchedule {
+public class FinalistSchedule implements Serializable {
 
   /**
    * Create a schedule.
@@ -37,9 +38,11 @@ public class FinalistSchedule {
    * @param schedule the schedule entries
    */
   public FinalistSchedule(final int tournament,
+                          final String division,
                           final Map<String, Boolean> categories,
                           final Collection<FinalistDBRow> schedule) {
     this.mTournament = tournament;
+    this.mDivision = division;
     this.mCategories = Collections.unmodifiableMap(new HashMap<String, Boolean>(categories));
     this.mSchedule = Collections.unmodifiableCollection(new LinkedList<FinalistDBRow>(schedule));
   }
@@ -51,18 +54,21 @@ public class FinalistSchedule {
    * @param tournament the tournament to load a schedule for
    */
   public FinalistSchedule(final Connection connection,
-                          final int tournament) throws SQLException {
+                          final int tournament,
+                          final String division) throws SQLException {
     final Map<String, Boolean> newCategories = new HashMap<String, Boolean>();
     final Collection<FinalistDBRow> newSchedule = new LinkedList<FinalistDBRow>();
     mTournament = tournament;
+    mDivision = division;
 
     PreparedStatement getCategories = null;
     ResultSet categories = null;
     PreparedStatement getSchedule = null;
     ResultSet schedule = null;
     try {
-      getCategories = connection.prepareStatement("SELECT category, is_public FROM finalist_categories WHERE tournament = ?");
-      getCategories.setInt(1, tournament);
+      getCategories = connection.prepareStatement("SELECT category, is_public FROM finalist_categories WHERE tournament = ? AND division = ?");
+      getCategories.setInt(1, mTournament);
+      getCategories.setString(2, mDivision);
       categories = getCategories.executeQuery();
       while (categories.next()) {
         final String name = categories.getString(1);
@@ -70,8 +76,9 @@ public class FinalistSchedule {
         newCategories.put(name, isPublic);
       }
 
-      getSchedule = connection.prepareStatement("SELECT category, judge_time, team_number FROM finalist_schedule WHERE tournament = ?");
-      getSchedule.setInt(1, tournament);
+      getSchedule = connection.prepareStatement("SELECT category, judge_time, team_number FROM finalist_schedule WHERE tournament = ? AND division = ?");
+      getSchedule.setInt(1, mTournament);
+      getSchedule.setString(2, mDivision);
       schedule = getSchedule.executeQuery();
       while (schedule.next()) {
         final String name = schedule.getString(1);
@@ -134,6 +141,12 @@ public class FinalistSchedule {
     return mTournament;
   }
 
+  private final String mDivision;
+
+  public String getDivision() {
+    return mDivision;
+  }
+
   /**
    * Store the schedule to the database. Remove any finalist schedule existing
    * for the tournament.
@@ -147,38 +160,71 @@ public class FinalistSchedule {
     PreparedStatement deleteSchedPrep = null;
     PreparedStatement insertSchedPrep = null;
     try {
-      deleteSchedPrep = connection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ?");
+      deleteSchedPrep = connection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ? AND division = ?");
       deleteSchedPrep.setInt(1, getTournament());
+      deleteSchedPrep.setString(2, getDivision());
       deleteSchedPrep.executeUpdate();
 
-      deleteCategoriesPrep = connection.prepareStatement("DELETE FROM finalist_categories WHERE tournament = ?");
+      deleteCategoriesPrep = connection.prepareStatement("DELETE FROM finalist_categories WHERE tournament = ? AND division = ?");
       deleteCategoriesPrep.setInt(1, getTournament());
+      deleteCategoriesPrep.setString(2, getDivision());
       deleteCategoriesPrep.executeUpdate();
 
-      insertCategoriesPrep = connection.prepareStatement("INSERT INTO finalist_categories (tournament, category, is_public) VALUES(?, ?, ?)");
+      insertCategoriesPrep = connection.prepareStatement("INSERT INTO finalist_categories (tournament, division, category, is_public) VALUES(?, ?, ?, ?)");
       insertCategoriesPrep.setInt(1, getTournament());
+      insertCategoriesPrep.setString(2, getDivision());
 
       for (final Map.Entry<String, Boolean> entry : mCategories.entrySet()) {
-        insertCategoriesPrep.setString(2, entry.getKey());
-        insertCategoriesPrep.setBoolean(3, entry.getValue());
+        insertCategoriesPrep.setString(3, entry.getKey());
+        insertCategoriesPrep.setBoolean(4, entry.getValue());
         insertCategoriesPrep.executeUpdate();
       }
 
-      insertSchedPrep = connection.prepareStatement("INSERT INTO finalist_schedule (tournament, category, judge_time, team_number) VALUES(?, ?, ?, ?)");
+      insertSchedPrep = connection.prepareStatement("INSERT INTO finalist_schedule (tournament, division, category, judge_time, team_number) VALUES(?, ?, ?, ?, ?)");
       insertSchedPrep.setInt(1, getTournament());
+      insertSchedPrep.setString(2, getDivision());
       for (final FinalistDBRow row : mSchedule) {
-        insertSchedPrep.setString(2, row.getCategoryName());
-        insertSchedPrep.setTime(3, Queries.dateToTime(row.getTime()));
-        insertSchedPrep.setInt(4, row.getTeamNumber());
+        insertSchedPrep.setString(3, row.getCategoryName());
+        insertSchedPrep.setTime(4, Queries.dateToTime(row.getTime()));
+        insertSchedPrep.setInt(5, row.getTeamNumber());
         insertSchedPrep.executeUpdate();
       }
 
-    } catch (final SQLException e) {
+    } finally {
       SQLFunctions.close(deleteSchedPrep);
       SQLFunctions.close(insertSchedPrep);
       SQLFunctions.close(deleteCategoriesPrep);
       SQLFunctions.close(insertCategoriesPrep);
     }
+  }
+
+  /**
+   * Get the names of all divisions that have finalist schedules
+   * stored for the specified tournament.
+   * 
+   * @param connection the database connection
+   * @param tournament the tournament id
+   * @return the division names
+   * @throws SQLException
+   */
+  public static Collection<String> getAllDivisions(final Connection connection,
+                                                   final int tournament) throws SQLException {
+    PreparedStatement getDivisions = null;
+    ResultSet divisions = null;
+    final Collection<String> result = new LinkedList<String>();
+    try {
+      getDivisions = connection.prepareStatement("SELECT DISTINCT division FROM finalist_categories WHERE tournament = ?");
+      getDivisions.setInt(1, tournament);
+      divisions = getDivisions.executeQuery();
+      while (divisions.next()) {
+        result.add(divisions.getString(1));
+      }
+    } finally {
+      SQLFunctions.close(divisions);
+      SQLFunctions.close(getDivisions);
+    }
+
+    return result;
   }
 
 }

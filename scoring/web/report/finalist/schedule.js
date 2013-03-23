@@ -103,6 +103,7 @@ $(document).ready(
 						categoryRows.push(cat);
 					}); // foreach category
 			$('#category_data').val($.toJSON(categoryRows));
+			$('#division_data').val($.finalist.getCurrentDivision());
 			
 			
 			$.finalist.displayNavbar();

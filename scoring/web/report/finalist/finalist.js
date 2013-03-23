@@ -643,16 +643,6 @@
 				}
 			});
 
-			if (window.location.pathname.match(/\/choose-public-categories.html$/)) {
-				element = $("<span></span>")
-			} else {
-				element = $("<a href='choose-public-categories.html'></a>")
-			}
-			element.text("Public Categories");
-			$("#navbar").append(element);
-
-			$("#navbar").append($("<span> - </span>"));
-
 			// make sure that championship is last
 			var championshipCategory = $.finalist
 					.getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
@@ -673,6 +663,18 @@
 
 			$("#navbar").append($("<span> - </span>"));
 
+			
+			if (window.location.pathname.match(/\/choose-public-categories.html$/)) {
+				element = $("<span></span>")
+			} else {
+				element = $("<a href='choose-public-categories.html'></a>")
+			}
+			element.text("Public Categories");
+			$("#navbar").append(element);
+
+			$("#navbar").append($("<span> - </span>"));
+
+			
 			if (window.location.pathname.match(/\/schedule.html$/)) {
 				element = $("<span></span>")
 			} else {

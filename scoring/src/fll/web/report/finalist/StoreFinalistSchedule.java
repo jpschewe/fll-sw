@@ -55,7 +55,7 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
 
       final int tournament = Queries.getCurrentTournament(connection);
       
-      // Convert JSON
+      // get parameters
       final String schedDataStr = request.getParameter("sched_data");
       if (null == schedDataStr
           || "".equals(schedDataStr)) {
@@ -66,6 +66,12 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
       if (null == categoryDataStr
           || "".equals(categoryDataStr)) {
         throw new FLLRuntimeException("Parameter 'category_data' cannot be null");
+      }
+      
+      final String division = request.getParameter("division_data");
+      if (null == division
+          || "".equals(division)) {
+        throw new FLLRuntimeException("Parameter 'division_data' cannot be null");
       }
 
       // decode JSON
@@ -93,9 +99,9 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
       for(final FinalistCategoryRow cat : categories) {
         categoryMap.put(cat.getCategoryName(), cat.isPublic());
       }
-
       
-      final FinalistSchedule schedule = new FinalistSchedule(tournament, categoryMap, rows);
+      
+      final FinalistSchedule schedule = new FinalistSchedule(tournament, division, categoryMap, rows);
       schedule.store(connection);
 
       message.append("<p id='success'>Finalist schedule saved to the database</p>");

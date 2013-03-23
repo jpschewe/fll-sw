@@ -15,18 +15,26 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import fll.util.FLLRuntimeException;
+
 /**
  * Outputs the PDF showing times of all finalist categories.
  */
 @WebServlet("/report/finalist/PublicFinalistSchedule")
-public class PublicFinalistSchedule extends AbstractFinalistReport {
+public class PublicFinalistSchedule extends AbstractFinalistSchedule {
 
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    processRequest(false, response, application);
+    final String division = request.getParameter("division");
+    if (null == division
+        || "".equals(division)) {
+      throw new FLLRuntimeException("Parameter 'division' cannot be null");
+    }
+
+    processRequest(division, false, response, application);
   }
 
 }

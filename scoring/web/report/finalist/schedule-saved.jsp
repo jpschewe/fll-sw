@@ -1,8 +1,10 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
 <html>
 <head>
+<link rel="stylesheet" type="text/css"
+    href="<c:url value='/style/style.jsp'/>" />
+
 <title>Finalist Schedule Saved</title>
 </head>
 
