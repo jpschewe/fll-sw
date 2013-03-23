@@ -365,7 +365,8 @@ public final class GenerateDB {
         sql.append("  tournament INTEGER NOT NULL");
         sql.append(" ,category LONGVARCHAR NOT NULL");
         sql.append(" ,is_public BOOLEAN NOT NULL");
-        sql.append(" ,CONSTRAINT finalist_categories_pk PRIMARY KEY (tournament, category)");
+        sql.append(" ,division VARCHAR(32) NOT NULL");
+        sql.append(" ,CONSTRAINT finalist_categories_pk PRIMARY KEY (tournament, category, division)");
         if (createConstraints) {
         }
         sql.append(")");
@@ -381,11 +382,12 @@ public final class GenerateDB {
         sql.append(" ,category LONGVARCHAR NOT NULL");
         sql.append(" ,judge_time TIME NOT NULL");
         sql.append(" ,team_number INTEGER NOT NULL");
-        sql.append(" ,CONSTRAINT finalist_schedule_pk PRIMARY KEY (tournament, category, judge_time)");
+        sql.append(" ,division VARCHAR(32) NOT NULL");
+        sql.append(" ,CONSTRAINT finalist_schedule_pk PRIMARY KEY (tournament, category, division, judge_time)");
         if (createConstraints) {
           sql.append(" ,CONSTRAINT finalist_schedule_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
           sql.append(" ,CONSTRAINT finalist_schedule_fk2 FOREIGN KEY(team_number) REFERENCES Teams(TeamNumber)");
-          sql.append(" ,CONSTRAINT finalist_schedule_fk3 FOREIGN KEY(tournament, category) REFERENCES finalist_categories(tournament, category)");
+          sql.append(" ,CONSTRAINT finalist_schedule_fk3 FOREIGN KEY(tournament, category, division) REFERENCES finalist_categories(tournament, category, division)");
         }
         sql.append(")");
         stmt.executeUpdate(sql.toString());

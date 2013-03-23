@@ -50,7 +50,7 @@ import fll.xml.ChallengeDescription;
 /**
  * Outputs the PDF showing times of finalist categories.
  */
-abstract public class AbstractFinalistReport extends BaseFLLServlet {
+abstract public class AbstractFinalistSchedule extends BaseFLLServlet {
 
   private static final Font TITLE_FONT = FontFactory.getFont(FontFactory.TIMES, 12, Font.BOLD);
 
@@ -62,7 +62,8 @@ abstract public class AbstractFinalistReport extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
-  protected void processRequest(final boolean showPrivate,
+  protected void processRequest(final String division,
+                                final boolean showPrivate,
                                 final HttpServletResponse response,
                                 final ServletContext application) throws IOException, ServletException {
     Connection connection = null;
@@ -76,15 +77,17 @@ abstract public class AbstractFinalistReport extends BaseFLLServlet {
       final Document document = new Document(PageSize.LETTER);
       final ByteArrayOutputStream baos = new ByteArrayOutputStream();
       final PdfWriter writer = PdfWriter.getInstance(document, baos);
+
+      final FinalistSchedule schedule = new FinalistSchedule(connection, Queries.getCurrentTournament(connection),
+                                                             division);
+
       writer.setPageEvent(new PageEventHandler(challengeDescription.getTitle(),
-                                               Queries.getCurrentTournamentName(connection), showPrivate));
+                                               Queries.getCurrentTournamentName(connection), schedule.getDivision(),
+                                               showPrivate));
 
       document.open();
 
       document.addTitle("Finalist Schedule");
-
-      // add content
-      final FinalistSchedule schedule = new FinalistSchedule(connection, Queries.getCurrentTournament(connection));
 
       for (final Map.Entry<String, Boolean> entry : schedule.getCategories().entrySet()) {
         if (showPrivate
@@ -177,20 +180,24 @@ abstract public class AbstractFinalistReport extends BaseFLLServlet {
   private static final class PageEventHandler extends PdfPageEventHelper {
     public PageEventHandler(final String challengeTitle,
                             final String tournament,
+                            final String division,
                             final boolean showPrivate) {
-      _tournament = tournament;
-      _challengeTitle = challengeTitle;
-      _formattedDate = DateFormat.getDateInstance().format(new Date());
-      _showPrivate = showPrivate;
+      mTournament = tournament;
+      mDivision = division;
+      mChallengeTitle = challengeTitle;
+      mFormattedDate = DateFormat.getDateInstance().format(new Date());
+      mShowPrivate = showPrivate;
     }
 
-    private final boolean _showPrivate;
+    private final String mDivision;
 
-    private final String _formattedDate;
+    private final boolean mShowPrivate;
 
-    private final String _tournament;
+    private final String mFormattedDate;
 
-    private final String _challengeTitle;
+    private final String mTournament;
+
+    private final String mChallengeTitle;
 
     @Override
     // initialization of the header table
@@ -198,14 +205,14 @@ abstract public class AbstractFinalistReport extends BaseFLLServlet {
                           final Document document) {
       final PdfPTable header = new PdfPTable(2);
       final Phrase p = new Phrase();
-      final Chunk ck = new Chunk(String.format("%s%n %s Finalist Schedule", //
-                                               _challengeTitle, //
-                                               _showPrivate ? "Private" : ""), HEADER_FONT);
+      final Chunk ck = new Chunk(String.format("%s%n %s Finalist Schedule - Division: %s", //
+                                               mChallengeTitle, //
+                                               mShowPrivate ? "Private" : "", mDivision), HEADER_FONT);
       p.add(ck);
       header.getDefaultCell().setBorderWidth(0);
       header.addCell(p);
       header.getDefaultCell().setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
-      header.addCell(new Phrase(new Chunk(String.format("Tournament: %s %nDate: %s", _tournament, _formattedDate),
+      header.addCell(new Phrase(new Chunk(String.format("Tournament: %s %nDate: %s", mTournament, mFormattedDate),
                                           HEADER_FONT)));
       final PdfPCell blankCell = new PdfPCell();
       blankCell.setBorder(0);

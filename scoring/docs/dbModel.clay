@@ -451,6 +451,9 @@
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="53c71eaf:13d4d04e085:-7fbf" mandatory="true" name="team_number">
 <data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
 </column>
+<column auto-increment="false" column-size="32" decimal-digits="0" default-value="" id="7ecec1e4:13d94fd3d20:-7f7a" mandatory="false" name="division">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
 </column-list>
 <primary-key id="53c71eaf:13d4d04e085:-7fc9" name="PK_FINALIST_SCHEDULE">
 <primary-key-column name="tournament"/>
@@ -477,10 +480,14 @@
 <column auto-increment="false" column-size="0" decimal-digits="0" default-value="" id="3ef5c978:13d55c84af2:-7fbd" mandatory="true" name="tournament">
 <data-type name="INTEGER" selected-variant-pattern="INTEGER"/>
 </column>
+<column auto-increment="false" column-size="32" decimal-digits="0" default-value="" id="7ecec1e4:13d94fd3d20:-7f7d" mandatory="true" name="division">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
 </column-list>
 <primary-key id="3ef5c978:13d55c84af2:-7fc4" name="PK_FINALIST_CATGORIES">
 <primary-key-column name="category"/>
 <primary-key-column name="tournament"/>
+<primary-key-column name="division"/>
 </primary-key>
 <foreign-key-list>
 <foreign-key id="3ef5c978:13d55c84af2:-7f82" name="FK_finalist_catgories_1" on-delete="UNSPECIFIED" on-update="UNSPECIFIED" referenced-key="PK_TOURNAMENTS" referenced-table="Tournaments" referenced-table-schema="DEFAULT_SCHEMA" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="">
@@ -497,7 +504,7 @@
 <table-figure refid="1f769f17:1248908e683:-7ff6" x="1783" y="19"/>
 <table-figure refid="1f769f17:1248908e683:-7fdf" x="503" y="367"/>
 <table-figure refid="1f769f17:1248908e683:-7ef3" x="1192" y="526"/>
-<table-figure refid="1f769f17:1248908e683:-7e39" x="1076" y="196"/>
+<table-figure height="97" refid="1f769f17:1248908e683:-7e39" width="182" x="1076" y="196"/>
 <table-figure refid="1f769f17:1248908e683:-7d6b" x="775" y="804"/>
 <table-figure refid="1f769f17:1248908e683:-7d64" x="416" y="474"/>
 <table-figure refid="1f769f17:1248908e683:-7cf8" x="1502" y="975"/>
@@ -509,7 +516,7 @@
 <table-figure refid="1b527d23:12fd1ad49f2:-7fd1" x="345" y="303"/>
 <table-figure refid="1b527d23:12fd1ad49f2:-7fc7" x="325" y="382"/>
 <table-figure refid="7637d490:13084efdedd:-7f9e" x="3" y="150"/>
-<table-figure height="98" refid="53c71eaf:13d4d04e085:-7fca" width="182" x="951" y="72"/>
-<table-figure height="102" refid="3ef5c978:13d55c84af2:-7fc5" width="188" x="746" y="122"/>
+<table-figure refid="53c71eaf:13d4d04e085:-7fca" x="951" y="72"/>
+<table-figure refid="3ef5c978:13d55c84af2:-7fc5" x="746" y="122"/>
 </diagram>
 </clay-model>

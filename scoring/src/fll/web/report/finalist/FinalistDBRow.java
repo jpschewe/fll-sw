@@ -6,6 +6,7 @@
 
 package fll.web.report.finalist;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -14,7 +15,7 @@ import java.util.Date;
  * Mirrors javascript class in schedule.js. Variable names need to match the
  * javascript/JSON.
  */
-final class FinalistDBRow {
+final class FinalistDBRow implements Serializable {
 
   public FinalistDBRow(final String categoryName,
                        final int hour,
