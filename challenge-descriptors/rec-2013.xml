@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fll title="Minnesota Renewable Energy Challenge: 2013"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="1">
+
+  <Performance minimumScore="0" weight="0.50">
+
+    <goal name="energy" title="Energy Output mWs" max="100000" scoreType="FLOAT"/>
+    
+    <tiebreaker>
+      <!-- should be empty, but not allowed by the schema -->
+      <test winner='HIGH'>
+        <term goal='energy' scoreType='computed'/>
+      </test>
+    </tiebreaker>
+
+  </Performance>
+
+  <subjectiveCategory name="construction" title="Construction and Energy Output"
+    weight="0.10">
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="quality"
+      title="Construction Quality">
+    </goal>
+  </subjectiveCategory>
+
+  <subjectiveCategory name="documentation" title="Documentation"
+    weight="0.10">
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="knowledge"
+      title="Demonstrated Knowledge">
+    </goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="statement"
+      title="Design Statement">
+    </goal>
+  </subjectiveCategory>
+
+  <subjectiveCategory name="design" title="Design"
+    weight="0.10">
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="innovation"
+      title="Innovation">
+    </goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="material"
+      title="Material Selection">
+    </goal>
+  </subjectiveCategory>
+  
+  <subjectiveCategory name="industry" title="Industry Knowledge Component"
+    weight="0.20">
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="exploration"
+      title="Exploration">
+    </goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="reaching_out"
+      title="Reaching Out">
+    </goal>
+    <goal initialValue="0" max="10" min="0" multiplier="1" name="presentation"
+      title="Presentation">
+    </goal>
+  </subjectiveCategory>
+  
+  
+</fll>
