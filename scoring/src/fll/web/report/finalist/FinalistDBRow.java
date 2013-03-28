@@ -15,7 +15,7 @@ import java.util.Date;
  * Mirrors javascript class in schedule.js. Variable names need to match the
  * javascript/JSON.
  */
-final class FinalistDBRow implements Serializable {
+public final class FinalistDBRow implements Serializable {
 
   public FinalistDBRow(final String categoryName,
                        final int hour,
