@@ -49,7 +49,7 @@
      <c:forEach var="division" items="${finalistDivisions }">
       <option value='${division }'>${division }</option>
      </c:forEach>
-    </select> <input type='submit' value='Private Finalist Schedule' /> This
+    </select> <input type='submit' value='Private Finalist Schedule (PDF)' /> This
     displays the finalist schedule for all categories.
    </form>
   </li>
@@ -60,8 +60,20 @@
      <c:forEach var="division" items="${finalistDivisions }">
       <option value='${division }'>${division }</option>
      </c:forEach>
-    </select> <input type='submit' value='Public Finalist Schedule' /> This
+    </select> <input type='submit' value='Public Finalist Schedule (PDF)' /> This
     displays the finalist schedule for public categories.
+   </form>
+  </li>
+
+  <li>
+   <form ACTION='finalist/PublicFinalistDisplaySchedule.jsp' METHOD='POST'>
+    <select name='division'>
+     <c:forEach var="division" items="${finalistDivisions }">
+      <option value='${division }'>${division }</option>
+     </c:forEach>
+    </select> <input type='submit' value='Public Finalist Schedule (HTML)' /> This
+    displays the finalist schedule for public categories. This should be used 
+    on the big screen display.
    </form>
   </li>
 
