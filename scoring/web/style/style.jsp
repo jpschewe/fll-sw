@@ -7,7 +7,6 @@ BODY {
 }
 
 <%-- How to include another css file? --%>
-
 .help {
   background-color:#fafafa;
   border:1px solid black;
