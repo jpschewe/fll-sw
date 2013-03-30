@@ -29,9 +29,9 @@ public class DisplayQueryServlet extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    String localDisplayPage;
-    String localDisplayURL;
-    String displayName = SessionAttributes.getAttribute(session, "displayName", String.class);
+    final String localDisplayPage;
+    final String localDisplayURL;
+    final String displayName = SessionAttributes.getAttribute(session, "displayName", String.class);
     if (displayName != null) {
       String myDisplayPage = ApplicationAttributes.getAttribute(application, displayName + "_displayPage", String.class);
       String myDisplayURL = ApplicationAttributes.getAttribute(application, displayName + "_displayURL", String.class);
@@ -43,16 +43,17 @@ public class DisplayQueryServlet extends BaseFLLServlet {
     }
     response.getOutputStream().print(JsonUtilities.generateDisplayResponse(pickURL(localDisplayPage, localDisplayURL)));
   }
+  
   private String pickURL(final String displayPage, final String displayURL) {
-    if (displayPage == null) {
+    if (null == displayPage) {
       return "/fll-sw/welcome.jsp";
-    } else if (displayPage.equals("scoreboard")) {
+    } else if ("scoreboard".equals(displayPage)) {
       return "/fll-sw/scoreboard/main.jsp";
-    } else if (displayPage.equals("slideshow")) {
+    } else if ("slideshow".equals(displayPage)) {
       return "/fll-sw/slideshow/index.jsp";
-    } else if (displayPage.equals("playoffs")) {
+    } else if ("playoffs".equals(displayPage)) {
       return "/fll-sw/playoff/remoteMain.jsp";
-    } else if (displayPage.equals("special")) {
+    } else if ("special".equals(displayPage)) {
       return "/fll-sw/" + displayURL;
     } else {
       return "/fll-sw/welcome.jsp";
