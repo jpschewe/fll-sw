@@ -41,27 +41,28 @@ public class DisplayQueryServlet extends BaseFLLServlet {
       localDisplayPage = ApplicationAttributes.getAttribute(application, "displayPage", String.class);
       localDisplayURL = ApplicationAttributes.getAttribute(application, "displayURL", String.class);
     }
-    response.getOutputStream().print(JsonUtilities.generateDisplayResponse(pickURL(localDisplayPage, localDisplayURL)));
+    response.getOutputStream().print(JsonUtilities.generateDisplayResponse(pickURL(request, localDisplayPage, localDisplayURL)));
   }
   
   /**
    * Convert displayPage variable into URL. The names here need to match the values
    * of the "remotePage" radio buttons in remoteControl.jsp.
    */
-  private String pickURL(final String displayPage, final String displayURL) {
-    //FIXME remove "fll-sw" from paths, needs to use the context-path
+  private String pickURL(final HttpServletRequest request, final String displayPage, final String displayURL) {
+    final String contextPath  = request.getContextPath();
+    
     if (null == displayPage) {
-      return "/fll-sw/welcome.jsp";
+      return contextPath + "/welcome.jsp";
     } else if ("scoreboard".equals(displayPage)) {
-      return "/fll-sw/scoreboard/main.jsp";
+      return contextPath + "/scoreboard/main.jsp";
     } else if ("slideshow".equals(displayPage)) {
-      return "/fll-sw/slideshow/index.jsp";
+      return contextPath + "/slideshow/index.jsp";
     } else if ("playoffs".equals(displayPage)) {
-      return "/fll-sw/playoff/remoteMain.jsp";
+      return contextPath + "/playoff/remoteMain.jsp";
     } else if ("special".equals(displayPage)) {
-      return "/fll-sw/" + displayURL;
+      return contextPath + "/" + displayURL;
     } else {
-      return "/fll-sw/welcome.jsp";
+      return contextPath + "/welcome.jsp";
     }
   }
 }
