@@ -44,7 +44,12 @@ public class DisplayQueryServlet extends BaseFLLServlet {
     response.getOutputStream().print(JsonUtilities.generateDisplayResponse(pickURL(localDisplayPage, localDisplayURL)));
   }
   
+  /**
+   * Convert displayPage variable into URL. The names here need to match the values
+   * of the "remotePage" radio buttons in remoteControl.jsp.
+   */
   private String pickURL(final String displayPage, final String displayURL) {
+    //FIXME remove "fll-sw" from paths, needs to use the context-path
     if (null == displayPage) {
       return "/fll-sw/welcome.jsp";
     } else if ("scoreboard".equals(displayPage)) {
