@@ -8,6 +8,7 @@ package fll.web.admin;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -22,6 +23,7 @@ import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.playoff.Playoff;
+import fll.web.report.finalist.FinalistSchedule;
 
 /**
  * Context information for remoteControl.jsp.
@@ -56,6 +58,14 @@ public class RemoteControl {
       }
 
       pageContext.setAttribute("numPlayoffRounds", Queries.getNumPlayoffRounds(connection));
+
+      final Collection<String> finalistDivisions = FinalistSchedule.getAllDivisions(connection, currentTournament);
+      if (null == application.getAttribute("finalistDivision")
+          && !finalistDivisions.isEmpty()) {
+        application.setAttribute("finalistDivision", finalistDivisions.iterator().next());
+      }
+      pageContext.setAttribute("finalistDivisions", finalistDivisions);
+
     } catch (final SQLException e) {
       LOGGER.error(e.getMessage(), e);
       throw new RuntimeException(e.getMessage(), e);
