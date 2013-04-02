@@ -265,6 +265,79 @@ END DEBUG --%>
    </tr>
 
    <tr>
+    <th>Finalist Schedule</th>
+    <td><c:choose>
+      <c:when test='${displayPage == "finalistSchedule"}'>
+       <input type='radio' id='finalistSchedule' name='remotePage'
+        value='finalistSchedule' checked />
+      </c:when>
+      <c:otherwise>
+
+       <input type='radio' id='finalistSchedule' name='remotePage'
+        value='finalistSchedule' />
+      </c:otherwise>
+     </c:choose> Division: <select name='finalistDivision'>
+      <c:forEach var="fdiv" items="${finalistDivisions }">
+
+       <c:choose>
+        <c:when test="${fdiv == finalistDivision}">
+         <option value="${fdiv}" selected>${fdiv}</option>
+        </c:when>
+        <c:otherwise>
+         <option value="${fdiv}">${fdiv}</option>
+        </c:otherwise>
+       </c:choose>
+      </c:forEach>
+    </select></td>
+
+    <c:if test="${not empty displayNames}">
+     <c:forEach items="${displayNames}" var="displayName">
+      <td><c:set var="displayPageKey"
+        value="${displayName}_displayPage" /> <c:set
+        var="playoffDivisionKey" value="${displayName}_playoffDivision" />
+       <c:set var="playoffRoundNumberKey"
+        value="${displayName}_playoffRoundNumber" /> <c:choose>
+        <c:when test="${applicationScope[displayPageKey] == 'playoffs'}">
+         <input type='radio' name="${displayName}_remotePage"
+          value='playoffs' checked />
+        </c:when>
+        <c:otherwise>
+         <input type='radio' name="${displayName}_remotePage"
+          value='playoffs' />
+        </c:otherwise>
+       </c:choose> Division: <select name='${displayName}_playoffDivision'>
+        <c:forEach items="${divisions}" var="division">
+         <c:choose>
+          <c:when
+           test="${division == applicationScope[playoffDivisionKey]}">
+           <option value="${division}" selected>${division}</option>
+          </c:when>
+          <c:otherwise>
+           <option value="${division}">${division}</option>
+          </c:otherwise>
+         </c:choose>
+        </c:forEach>
+      </select> <br /> Playoff Round: <select
+       name='${displayName}_playoffRoundNumber'>
+        <c:forEach begin="1" end="${numPlayoffRounds}" var="numRounds">
+         <c:choose>
+          <c:when
+           test="${numRounds == applicationScope[playoffRoundNumberKey]}">
+           <option value="${numRounds}" selected>${numRounds}</option>
+          </c:when>
+          <c:otherwise>
+           <option value="${numRounds}">${numRounds}</option>
+          </c:otherwise>
+         </c:choose>
+        </c:forEach>
+      </select></td>
+
+     </c:forEach>
+    </c:if>
+
+   </tr>
+
+   <tr>
     <th>Specify page relative to /fll-sw</th>
     <td><c:choose>
       <c:when test='${displayPage == "special"}'>

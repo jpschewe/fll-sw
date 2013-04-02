@@ -47,6 +47,8 @@ public class RemoteControlPost extends BaseFLLServlet {
           + request.getParameter("playoffDivision"));
       LOGGER.trace("playoffRoundNumber "
           + request.getParameter("playoffRoundNumber"));
+      LOGGER.trace("finalistDivision "
+          + request.getParameter("finalistDivision"));
 
       if (null != displayNames) {
         for (final String displayName : displayNames) {
@@ -81,6 +83,8 @@ public class RemoteControlPost extends BaseFLLServlet {
     }
     application.setAttribute("playoffDivision", request.getParameter("playoffDivision"));
 
+    application.setAttribute("finalistDivision", request.getParameter("finalistDivision"));
+
     // named displays
     if (null != displayNames) {
       for (final String displayName : displayNames) {
@@ -94,6 +98,8 @@ public class RemoteControlPost extends BaseFLLServlet {
               + "_playoffRoundNumber");
           application.removeAttribute(displayName
               + "_playoffDivision");
+          application.removeAttribute(displayName
+              + "_finalistDivision");
         } else {
           application.setAttribute(displayName
               + "_displayPage", request.getParameter(displayName
@@ -110,6 +116,9 @@ public class RemoteControlPost extends BaseFLLServlet {
           application.setAttribute(displayName
               + "_playoffDivision", request.getParameter(displayName
               + "_playoffDivision"));
+          application.setAttribute(displayName
+              + "_finalistDivision", request.getParameter(displayName
+              + "_finalistDivision"));
         }
       }
     }
