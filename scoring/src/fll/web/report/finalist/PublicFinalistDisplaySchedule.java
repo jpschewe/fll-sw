@@ -104,7 +104,7 @@ public class PublicFinalistDisplaySchedule {
    */
   private static void storeScroll(final HttpServletRequest request,
                                   final HttpSession session) {
-    String scrollStr = request.getParameter("scroll");
+    String scrollStr = request.getParameter("finalistScheduleScroll");
     final boolean scroll;
     if (null == scrollStr
         || "".equals(scrollStr)) {
@@ -117,7 +117,8 @@ public class PublicFinalistDisplaySchedule {
     } else {
       scroll = Boolean.valueOf(scrollStr);
     }
-    session.setAttribute("scroll", scroll);
+    
+    session.setAttribute("finalistScheduleScroll", scroll);
   }
 
 }
