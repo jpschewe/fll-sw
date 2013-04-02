@@ -180,6 +180,7 @@
 		this.numeric = numeric;
 		this.catId = category_id;
 		this.teams = [];
+		this.isPublic = true;
 
 		_categories[this.catId] = this;
 		_save();
@@ -191,7 +192,7 @@
 	function Timeslot() {
 		this.categories = {};
 	}
-
+	
 	// //////////////////////// PUBLIC INTERFACE /////////////////////////
 	$.finalist = {
 		CHAMPIONSHIP_NAME : "Championship",
@@ -619,7 +620,7 @@
 			} else {
 				element = $("<a href='non-numeric.html'></a>")
 			}
-			element.text("Non-numeric Categories");
+			element.text("Non-numeric");
 			$("#navbar").append(element);
 
 			$("#navbar").append($("<span> - </span>"));
@@ -662,6 +663,18 @@
 
 			$("#navbar").append($("<span> - </span>"));
 
+			
+			if (window.location.pathname.match(/\/choose-public-categories.html$/)) {
+				element = $("<span></span>")
+			} else {
+				element = $("<a href='choose-public-categories.html'></a>")
+			}
+			element.text("Public Categories");
+			$("#navbar").append(element);
+
+			$("#navbar").append($("<span> - </span>"));
+
+			
 			if (window.location.pathname.match(/\/schedule.html$/)) {
 				element = $("<span></span>")
 			} else {

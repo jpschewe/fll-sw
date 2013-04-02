@@ -1,15 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
-<%@ page import="java.sql.Connection"%>
-<%@ page import="javax.sql.DataSource"%>
-
-<%@ page import="fll.db.Queries"%>
-<%@ page import="fll.web.ApplicationAttributes"%>
-
-<%
-  final DataSource datasource = ApplicationAttributes.getDataSource(application);
-  final Connection connection = datasource.getConnection();
-%>
+<% fll.web.PublicIndex.populateContext(application, pageContext); %>
 
 <html>
 <head>
@@ -19,8 +10,7 @@
 </head>
 
 <body>
- <h1>
-${challengeDescription.title } </h1>
+ <h1>${challengeDescription.title }</h1>
 
  ${message}
  <%-- clear out the message, so that we don't see it again --%>
@@ -31,7 +21,7 @@ ${challengeDescription.title } </h1>
  <ul>
 
   <li>${ScorePageText }</li>
-  <li>Current Tournament -&gt; <%=Queries.getCurrentTournamentName(connection)%></li>
+  <li>Current Tournament -&gt; ${tournamentName }</li>
 
   <li><a href='<c:url value="/challenge.xml"/>'>Challenge
     Descriptor</a></li>
@@ -49,6 +39,17 @@ ${challengeDescription.title } </h1>
 
   <li><a href='<c:url value="/playoff/remoteMain.jsp"/>'>Playoff
     brackets that are currently on the big screen</a></li>
+
+  <li>
+   <form ACTION='<c:url value="/report/finalist/PublicFinalistSchedule"/>' METHOD='POST'>
+    <select name='division'>
+     <c:forEach var="division" items="${finalistDivisions }">
+      <option value='${division }'>${division }</option>
+     </c:forEach>
+    </select> <input type='submit' value='Finalist Schedule - PDF' />
+   </form>
+  </li>
+
 
   <li><a href='<c:url value="/credits/credits.jsp"/>'>Credits</a></li>
 

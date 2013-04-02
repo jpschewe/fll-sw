@@ -490,6 +490,9 @@ public final class ImportDB {
     if (dbVersion < 8) {
       upgrade7To8(connection);
     }
+    if (dbVersion < 9) {
+      upgrade8To9(connection);
+    }
     final int newVersion = Queries.getDatabaseVersion(connection);
     if (newVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
@@ -504,6 +507,12 @@ public final class ImportDB {
     // global_parameters, but we need to force it to 2 for later upgrade
     // functions to not be confused
     setDBVersion(connection, 2);
+  }
+
+  private static void upgrade8To9(final Connection connection) throws SQLException {
+    GenerateDB.createFinalistScheduleTables(connection, true, SQLFunctions.getTablesInDB(connection), false);
+
+    setDBVersion(connection, 9);
   }
 
   private static void upgrade2To6(final Connection connection) throws SQLException {
@@ -791,6 +800,8 @@ public final class ImportDB {
 
     importSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
+    importFinalistSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+    
     // update score totals
     Queries.updateScoreTotals(description, destinationConnection, destTournamentID);
   }
@@ -1221,6 +1232,64 @@ public final class ImportDB {
     }
   }
 
+  private static void importFinalistSchedule(final Connection sourceConnection,
+                                   final Connection destinationConnection,
+                                   final int sourceTournamentID,
+                                   final int destTournamentID) throws SQLException {
+    PreparedStatement destPrep = null;
+    PreparedStatement sourcePrep = null;
+    ResultSet sourceRS = null;
+    try {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Importing finalist schedule");
+      }
+
+      // do drops first
+      destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ?");
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+      SQLFunctions.close(destPrep);
+
+      destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_categories WHERE tournament = ?");
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+      SQLFunctions.close(destPrep);
+
+      
+      // insert categories next
+      destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_categories (tournament, category, is_public) VALUES(?, ?, ?)");
+      destPrep.setInt(1, destTournamentID);
+
+      sourcePrep = sourceConnection.prepareStatement("SELECT category, is_public FROM finalist_categories WHERE tournament = ?");
+      sourcePrep.setInt(1, sourceTournamentID);
+      sourceRS = sourcePrep.executeQuery();
+      while (sourceRS.next()) {
+        destPrep.setString(2, sourceRS.getString(1));
+        destPrep.setBoolean(3, sourceRS.getBoolean(2));
+        destPrep.executeUpdate();
+      }
+
+           
+      // insert schedule values last
+      destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_schedule (tournament, category, judge_time, team_number) VALUES(?, ?, ?, ?)");
+      destPrep.setInt(1, destTournamentID);
+
+      sourcePrep = sourceConnection.prepareStatement("SELECT category, judge_time, team_number FROM finalist_schedule WHERE tournament = ?");
+      sourcePrep.setInt(1, sourceTournamentID);
+      sourceRS = sourcePrep.executeQuery();
+      while (sourceRS.next()) {
+        destPrep.setString(2, sourceRS.getString(1));
+        destPrep.setTime(3, sourceRS.getTime(2));
+        destPrep.setInt(4, sourceRS.getInt(3));
+        destPrep.executeUpdate();
+      }
+    } finally {
+      SQLFunctions.close(sourceRS);
+      SQLFunctions.close(sourcePrep);
+      SQLFunctions.close(destPrep);
+    }
+  }
+  
   /**
    * Check for differences between two tournaments in team information.
    * 

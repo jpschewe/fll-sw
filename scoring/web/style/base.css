@@ -1,12 +1,4 @@
-<%@ page contentType="text/css" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 
-BODY { 
-  background: url(<c:url value="/images/bricks1.gif"/>) white;
-  margin-top: 4;
-}
-
-<%-- How to include another css file? --%>
 .help {
   background-color:#fafafa;
   border:1px solid black;
@@ -39,5 +31,4 @@ BODY {
 .bold {
   font-weight: bold;
 }
-  
   

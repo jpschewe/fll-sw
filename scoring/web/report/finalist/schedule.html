@@ -11,18 +11,29 @@
 </head>
 
 <body>
-	<div id='navbar'></div>
-	<hr />
+ <div id='navbar'></div>
+ <hr />
 
-	<h1>Finalist schedule</h1>
+ <h1>Finalist schedule</h1>
 
-	<h2>
-		Division <span id='division'></span>
-	</h2>
+ <h2>
+  Division <span id='division'></span>
+ </h2>
 
-	<table id='schedule' border='1'></table>
+ <table id='schedule' border='1'></table>
 
 
+ <form id='get_sched_data' method='POST' action='StoreFinalistSchedule'>
+
+  <input type='hidden' id='sched_data' name='sched_data' /> 
+  <input type='hidden' id='category_data' name='category_data' /> 
+  <input type='hidden' id='division_data' name='division_data' />
+  
+  
+  <input
+   type='submit' value='Send Schedule To Server' />
+
+ </form>
 
 </body>
 </html>

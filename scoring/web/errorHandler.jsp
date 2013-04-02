@@ -16,7 +16,7 @@
     <h1>An error has occurred</h1>
 
     <p><font class="error">An error has occurred!</font><br/>
-        Please send the text of this page and the files in <code>tomcat/logs</code> along with <code>tomcat/webapps/fll-sw/fllweb*</code> along with your bug report.<br/>
+        Please send the text of this page and the files in <code>tomcat/logs</code> and <code>tomcat/webapps/fll-sw/fllweb*</code> along with your bug report.<br/>
         
         Error messages:</p>
     <ul>
