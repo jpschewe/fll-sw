@@ -26,7 +26,7 @@ BODY {
 
 <script type="text/javascript">
 	$(document).ready(function() {
-		<c:if test="${not empty finalistScheduleScroll}">
+		<c:if test="${finalistScheduleScroll}">
 		startScrolling();
 		</c:if>
 	});
