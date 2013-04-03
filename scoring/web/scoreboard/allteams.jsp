@@ -16,6 +16,11 @@
 <%@ page import="fll.web.SessionAttributes"%>
 <%@ page import="fll.web.ApplicationAttributes"%>
 
+<%
+    fll.web.scoreboard.AllTeams
+            .populateContext(request, application, session, pageContext);
+%>
+
 
 <%
   final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -80,46 +85,24 @@ TABLE.B {
 }
 </style>
 
-<!-- stuff for automatic scrolling -->
+<script type='text/javascript'
+    src="<c:url value='/extlib/jquery-1.7.1.min.js'/>"></script>
+
+
+<script type='text/javascript' src="<c:url value='/scripts/scroll.js'/>"></script>
+
 <script type="text/javascript">
-	var scrollTimer;
-	var scrollAmount = 2; // scroll by 100 pixels each time
-	var documentYposition = 0;
-	var scrollPause = 100; // amount of time, in milliseconds, to pause between scrolls
-
-	//http://www.evolt.org/article/document_body_doctype_switching_and_more/17/30655/index.html
-	function getScrollPosition() {
-		if (window.pageYOffset) {
-			return window.pageYOffset
-		} else if (document.documentElement
-				&& document.documentElement.scrollTop) {
-			return document.documentElement.scrollTop
-		} else if (document.body) {
-			return document.body.scrollTop
-		}
-	}
-
-	function myScroll() {
-		documentYposition += scrollAmount;
-		window.scrollBy(0, scrollAmount);
-		if (getScrollPosition() + 300 < documentYposition) { //wait 300 pixels until we refresh
-			window.clearInterval(scrollTimer);
-			window.scroll(0, 0); //scroll back to top and then refresh
-			location.href = '<c:out value="${thisURL}" />'
-		}
-	}
-
-	function start() {
-		<c:if test="${not empty param.scroll}">
-		scrollTimer = window.setInterval('myScroll()', scrollPause);
-		</c:if>
-	}
+    $(document).ready(function() {
+        <c:if test="${allTeamsScroll}">
+        startScrolling();
+        </c:if>
+    });
 </script>
 
 
 </head>
 
-<body bgcolor='#000080' onload='start()'>
+<body bgcolor='#000080'>
  <br />
  <br />
  <br />
