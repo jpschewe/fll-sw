@@ -108,7 +108,7 @@ public class PublicFinalistDisplaySchedule {
     final boolean scroll;
     if (null == scrollStr
         || "".equals(scrollStr)) {
-      final Boolean value = SessionAttributes.getAttribute(session, "scroll", Boolean.class);
+      final Boolean value = SessionAttributes.getAttribute(session, "finalistScheduleScroll", Boolean.class);
       if (null == value) {
         scroll = false;
       } else {
