@@ -228,7 +228,7 @@ public final class ScoreStandardization {
   public static void updateTeamTotalScores(final Connection connection,
                                            final ChallengeDescription description,
                                            final int tournament) throws SQLException, ParseException {
-    final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection, tournament);
+    final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection, tournament);
 
     PreparedStatement update = null;
     ResultSet rs = null;

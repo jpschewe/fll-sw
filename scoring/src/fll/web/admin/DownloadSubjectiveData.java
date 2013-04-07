@@ -42,6 +42,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import fll.Team;
+import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
@@ -106,7 +107,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   public static Document createSubjectiveScoresDocument(final ChallengeDescription challengeDescription,
-                                                        final Collection<Team> teams,
+                                                        final Collection<? extends Team> teams,
                                                         final Connection connection,
                                                         final int currentTournament) throws SQLException {
     ResultSet rs = null;
@@ -194,7 +195,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
                                            final Document challengeDocument,
                                            final ChallengeDescription challengeDescription,
                                            final OutputStream stream) throws IOException, SQLException {
-    final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
+    final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
     final int tournament = Queries.getCurrentTournament(connection);
 
     final ZipOutputStream zipOut = new ZipOutputStream(stream);

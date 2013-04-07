@@ -23,6 +23,7 @@ import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.Team;
+import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
@@ -72,7 +73,7 @@ public class GatherScoreEntryData extends BaseFLLServlet {
       connection = datasource.getConnection();
       final int tournament = Queries.getCurrentTournament(connection);
       final int numSeedingRounds = Queries.getNumSeedingRounds(connection, tournament);
-      final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
+      final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
       if (!tournamentTeams.containsKey(Integer.valueOf(teamNumber))) {
         throw new RuntimeException("Selected team number is not valid: "
             + teamNumber);
