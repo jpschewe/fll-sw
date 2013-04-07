@@ -200,36 +200,6 @@ public final class Queries {
     return tournamentTeams;
   }
 
-  /**
-   * Get a list of all teams in the database.
-   */
-  public static List<Team> getAllTeams(final Connection connection) throws SQLException {
-    final List<Team> teams = new LinkedList<Team>();
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = connection.createStatement();
-
-      rs = stmt.executeQuery("SELECT Teams.TeamNumber, Teams.Organization"//
-          + ", Teams.TeamName"//
-          + ", Teams.Division, TournamentTeams.event_division" //
-          + " FROM Teams");
-      while (rs.next()) {
-        final Team team = new Team();
-        team.setTeamNumber(rs.getInt("TeamNumber"));
-        team.setOrganization(rs.getString("Organization"));
-        team.setTeamName(rs.getString("TeamName"));
-        team.setDivision(rs.getString("Division"));
-        team.setEventDivision(rs.getString("event_division"));
-        teams.add(team);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
-    }
-    return teams;
-  }
-
   public static List<String[]> getTournamentTables(final Connection connection) throws SQLException {
     final int currentTournament = getCurrentTournament(connection);
 
