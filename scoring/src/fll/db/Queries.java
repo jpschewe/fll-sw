@@ -179,7 +179,9 @@ public final class Queries {
     try {
       prep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.Organization"//
           + ", Teams.TeamName"//
-          + ", Teams.Division, TournamentTeams.event_division" //
+          + ", Teams.Division" //
+          + ", TournamentTeams.event_division" //
+          + ", TournamentTeams.judging_station" //
           + " FROM Teams, TournamentTeams" //
           + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber"//
           + " AND TournamentTeams.Tournament = ?");
@@ -192,6 +194,7 @@ public final class Queries {
         team.setTeamName(rs.getString("TeamName"));
         team.setDivision(rs.getString("Division"));
         team.setEventDivision(rs.getString("event_division"));
+        team.setJudgingStation(rs.getString("judging_station"));
         tournamentTeams.put(Integer.valueOf(team.getTeamNumber()), team);
       }
     } finally {
