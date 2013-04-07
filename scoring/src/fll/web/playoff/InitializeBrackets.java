@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 
 import fll.Team;
 import fll.Tournament;
+import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -107,9 +108,9 @@ public class InitializeBrackets extends BaseFLLServlet {
         } else {
           final List<String> eventDivisions = Queries.getEventDivisions(connection, currentTournamentID);
           if (eventDivisions.contains(divisionStr)) {
-            final Map<Integer, Team> tournamentTeams = data.getTournamentTeams();
-            final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
-            Team.filterTeamsToEventDivision(connection, teams, divisionStr);
+            final Map<Integer, TournamentTeam> tournamentTeams = data.getTournamentTeams();
+            final List<TournamentTeam> teams = new ArrayList<TournamentTeam>(tournamentTeams.values());
+            TournamentTeam.filterTeamsToEventDivision(teams, divisionStr);
 
             Playoff.initializeBrackets(connection, challengeDescription, divisionStr, enableThird, teams);
           } else {

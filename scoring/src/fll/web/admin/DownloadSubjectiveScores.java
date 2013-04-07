@@ -27,7 +27,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import fll.Team;
+import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
@@ -55,7 +55,7 @@ public class DownloadSubjectiveScores extends BaseFLLServlet {
         response.setContentType("text/xml");
         response.setHeader("Content-Disposition", "filename=score.xml");
 
-        final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
+        final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
         final int tournament = Queries.getCurrentTournament(connection);
 
         final Document scoreDocument = DownloadSubjectiveData.createSubjectiveScoresDocument(challengeDescription,

@@ -14,8 +14,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import fll.db.Queries;
-
 import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.StringUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -29,7 +27,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
  * someone changes the database, this object does not notice the changes. It's a
  * snapshot in time from when the object was created.
  */
-public final class Team implements Serializable {
+public class Team implements Serializable {
 
   /**
    * Constant to represent the team number for a bye
@@ -94,7 +92,7 @@ public final class Team implements Serializable {
       return ComparisonUtils.compareStrings(one.getTeamName(), two.getTeamName());
     }
   };
-  
+
   public Team() {
 
   }
@@ -213,26 +211,11 @@ public final class Team implements Serializable {
     _division = v;
   }
 
-  private String _eventDivision;
-
   /**
    * Max team name length. Used to keep names from
    * wrapping in a number of places.
    */
   public static final int MAX_TEAM_NAME_LEN = 24;
-
-  /**
-   * The event division that a team is entered as.
-   * 
-   * @return division
-   */
-  public String getEventDivision() {
-    return _eventDivision;
-  }
-
-  public void setEventDivision(final String v) {
-    _eventDivision = v;
-  }
 
   /**
    * Compares team numbers.
@@ -263,28 +246,6 @@ public final class Team implements Serializable {
    */
   public boolean isInternal() {
     return isInternalTeamNumber(getTeamNumber());
-  }
-
-  /**
-   * Filter the specified list to just the teams in the specified event
-   * division.
-   * 
-   * @param teams list that is modified
-   * @param divisionStr the division to keep
-   * @throws RuntimeException
-   * @throws SQLException
-   */
-  public static void filterTeamsToEventDivision(final Connection connection,
-                                            final List<Team> teams,
-                                            final String divisionStr) throws SQLException, RuntimeException {
-    final Iterator<Team> iter = teams.iterator();
-    while (iter.hasNext()) {
-      final Team t = iter.next();
-      final String eventDivision = Queries.getEventDivision(connection, t.getTeamNumber());
-      if (!eventDivision.equals(divisionStr)) {
-        iter.remove();
-      }
-    }
   }
 
   /**
