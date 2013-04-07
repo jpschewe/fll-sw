@@ -18,11 +18,11 @@ public class TournamentTeam extends Team {
   public TournamentTeam() {
     super();
   }
-  
+
   private String _eventDivision;
 
   /**
-   * The event division that a team is entered as.
+   * The event division that a team is entered in.
    * 
    * @return division
    */
@@ -34,6 +34,18 @@ public class TournamentTeam extends Team {
     _eventDivision = v;
   }
 
+  private String _judgingStation;
+
+  /**
+   * The judging station for the team.
+   */
+  public String getJudgingStation() {
+    return _judgingStation;
+  }
+
+  public void setJudgingStation(final String v) {
+    _judgingStation = v;
+  }
 
   /**
    * Filter the specified list to just the teams in the specified event
@@ -55,6 +67,5 @@ public class TournamentTeam extends Team {
       }
     }
   }
-
 
 }
