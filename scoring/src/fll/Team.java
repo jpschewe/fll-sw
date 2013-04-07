@@ -11,8 +11,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
 
 import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.StringUtils;
