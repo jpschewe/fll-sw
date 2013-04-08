@@ -1,3 +1,5 @@
+* 220 - Always auto-select top 1 finalist in finalist scheduling app
+* 220 - If two teams are tied (within 1) select them both
 * 213 - Allow finalist categories to be marked public/private. Add PDF
         and HTML outputs of the finalist schedule (public & private).
 * 211 - make sure to schedule finalists that are more constrained first, this allows the finalist schedule to be as short as possible
