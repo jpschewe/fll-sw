@@ -33,7 +33,7 @@
 		_tournament = null;
 		_divisions = [];
 		_currentDivision = null;
-		_numTeamsAutoSelected = 2;
+		_numTeamsAutoSelected = 1;
 		_startHour = 2;
 		_startMinute = 0;
 		_duration = 20;
