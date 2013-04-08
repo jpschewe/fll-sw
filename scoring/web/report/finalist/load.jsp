@@ -37,24 +37,17 @@
 	}
 
 	$(document).ready(function() {
-		var numTeamsAutoSelected = $.finalist.getNumTeamsAutoSelected();
-		$("#numSelected").val(numTeamsAutoSelected);
-		$("#numSelected").change(function() {
-			$.finalist.setNumTeamsAutoSelected($(this).val());
-		});
-
-		$("#choose_numSelected").hide();
 		$("#choose_clear").hide();
 		$("#clear").click(function() {
 			clearData();
 			loadData();
 			$("#choose_clear").hide();
-			$("#choose_numSelected").show();
+			location.href="params.html";
 		});
 		$("#keep").click(function() {
 			loadData();
 			$("#choose_clear").hide();
-			$("#choose_numSelected").show();
+			location.href="params.html";
 		});
 
 		var allTeams = $.finalist.getAllTeams();
@@ -66,14 +59,14 @@
 				clearData();
 				loadData();
 				$("#choose_clear").hide();
-				$("#choose_numSelected").show();
+				location.href="params.html";
 			} else {
 				$("#choose_clear").show();
 			}
 		} else {
 			loadData();
 			$("#choose_clear").hide();
-			$("#choose_numSelected").show();
+			location.href="params.html";
 		}
 	});
 </script>
@@ -88,17 +81,6 @@
 		<button id='clear'>Yes, clear the data</button>
 		<button id='keep'>No, just refresh the data</button>
 	</div>
-
-	<form id='choose_numSelected' action='params.html'>
-		Please choose the number of teams that should be selected from each
-		judging group. <select id='numSelected'><option value='0'>0</option>
-			<option value='1'>1</option>
-			<option value='2'>2</option>
-			<option value='3'>3</option>
-			<option value='4'>4</option>
-			<option value='5'>5</option></select> <br /> <input type='submit'
-			value='Next' />
-	</form>
 
 
 </body>
