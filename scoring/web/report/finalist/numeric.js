@@ -1,30 +1,37 @@
 /*
- * Copyright (c) 2012INSciTE.  All rights reserved
+ * Copyright (c) 2012 High Tech Kids.  All rights reserved
  * INSciTE is on the web at: http://www.hightechkids.org
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
 function initializeTeamsInCategory(currentCategory, teams, scoreGroups) {
 	var checkedEnoughTeams = false;
+	var prevScores = {};
 	$.each(teams, function(i, team) {
 		if (team.division == $.finalist.getCurrentDivision()) {
 			if (!checkedEnoughTeams) {
 				var group = $.finalist.getCategoryGroup(team, currentCategory);
-
-				if (currentCategory.name == $.finalist.CHAMPIONSHIP_NAME
-						|| scoreGroups[group] > 0) {
+				prevScore = prevScores[group];
+				curScore = $.finalist.getCategoryScore(team, currentCategory);
+				if (prevScore == undefined) {
 					$.finalist.addTeamToCategory(currentCategory, team.num);
-					scoreGroups[group] = scoreGroups[group] - 1;
-
-					checkedEnoughTeams = true;
-					$.each(scoreGroups, function(key, value) {
-						if (value > 0) {
-							checkedEnoughTeams = false;
-						}
-					});
-				} // if championship
-			} // if not enough teams
-		} // if current division
+				} else if(scoreGroups[group] > 0) {
+					if(Math.abs(prevScore - curScore) < 1) {
+						$.finalist.addTeamToCategory(currentCategory, team.num);
+					} else {
+						scoreGroups[group] = scoreGroups[group] - 1;
+						
+						checkedEnoughTeams = true;
+						$.each(scoreGroups, function(key, value) {
+							if (value > 0) {
+								checkedEnoughTeams = false;
+							}
+						});
+					}
+				}
+				prevScores[group] = curScore;
+			} // checked enough teams
+		}  // if current division
 	}); // foreach team
 }
 
