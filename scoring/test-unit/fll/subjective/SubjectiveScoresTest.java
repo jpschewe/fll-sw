@@ -31,9 +31,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import fll.Team;
 import fll.TestUtils;
 import fll.Tournament;
+import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.Queries;
@@ -113,7 +113,7 @@ public class SubjectiveScoresTest {
 
 
       // create subjective scores document
-      final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
+      final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
       final Document scoreDocument = DownloadSubjectiveData.createSubjectiveScoresDocument(challenge,
                                                                                            tournamentTeams.values(),
                                                                                            connection, tournament.getTournamentID());

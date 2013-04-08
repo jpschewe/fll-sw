@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fll.Team;
+import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -67,7 +68,7 @@ public class CheckSeedingRounds extends BaseFLLServlet {
       }
       data.setDivision(division);
 
-      final Map<Integer, Team> tournamentTeams = data.getTournamentTeams();
+      final Map<Integer, TournamentTeam> tournamentTeams = data.getTournamentTeams();
 
       final List<Team> less;
       if (Queries.isPlayoffDataInitialized(connection, division)) {

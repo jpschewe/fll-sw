@@ -28,7 +28,7 @@ pageContext.setAttribute("maxRunNumber", maxRunNumber);
 SQLFunctions.close(rs);
 SQLFunctions.close(stmt);
 
-final Collection<Team> tournamentTeams = Queries.getTournamentTeams(connection).values();
+final Collection<? extends Team> tournamentTeams = Queries.getTournamentTeams(connection).values();
 pageContext.setAttribute("tournamentTeams", tournamentTeams);
 
 pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));

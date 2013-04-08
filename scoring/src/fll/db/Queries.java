@@ -37,6 +37,7 @@ import org.w3c.dom.Document;
 
 import fll.Team;
 import fll.Tournament;
+import fll.TournamentTeam;
 import fll.Utilities;
 import fll.util.FLLInternalException;
 import fll.util.FLLRuntimeException;
@@ -124,7 +125,7 @@ public final class Queries {
       prep.setInt(2, tournament);
 
       // foreach team, put the team in a score group
-      for (final Team team : Queries.getTournamentTeams(connection).values()) {
+      for (final TournamentTeam team : Queries.getTournamentTeams(connection).values()) {
         // only show the teams for the division that we are looking at right
         // now
         if (division.equals(team.getEventDivision())) {
@@ -162,7 +163,7 @@ public final class Queries {
    * Get a map of teams for this tournament keyed on team number. Uses the table
    * TournamentTeams to determine which teams should be included.
    */
-  public static Map<Integer, Team> getTournamentTeams(final Connection connection) throws SQLException {
+  public static Map<Integer, TournamentTeam> getTournamentTeams(final Connection connection) throws SQLException {
     return getTournamentTeams(connection, getCurrentTournament(connection));
   }
 
@@ -170,27 +171,30 @@ public final class Queries {
    * Get a map of teams for the specified tournament keyed on team number. Uses
    * the table TournamentTeams to determine which teams should be included.
    */
-  public static Map<Integer, Team> getTournamentTeams(final Connection connection,
+  public static Map<Integer, TournamentTeam> getTournamentTeams(final Connection connection,
                                                       final int tournamentID) throws SQLException {
-    final SortedMap<Integer, Team> tournamentTeams = new TreeMap<Integer, Team>();
+    final SortedMap<Integer, TournamentTeam> tournamentTeams = new TreeMap<Integer, TournamentTeam>();
     ResultSet rs = null;
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.Organization"//
           + ", Teams.TeamName"//
-          + ", Teams.Division, TournamentTeams.event_division" //
+          + ", Teams.Division" //
+          + ", TournamentTeams.event_division" //
+          + ", TournamentTeams.judging_station" //
           + " FROM Teams, TournamentTeams" //
           + " WHERE Teams.TeamNumber = TournamentTeams.TeamNumber"//
           + " AND TournamentTeams.Tournament = ?");
       prep.setInt(1, tournamentID);
       rs = prep.executeQuery();
       while (rs.next()) {
-        final Team team = new Team();
+        final TournamentTeam team = new TournamentTeam();
         team.setTeamNumber(rs.getInt("TeamNumber"));
         team.setOrganization(rs.getString("Organization"));
         team.setTeamName(rs.getString("TeamName"));
         team.setDivision(rs.getString("Division"));
         team.setEventDivision(rs.getString("event_division"));
+        team.setJudgingStation(rs.getString("judging_station"));
         tournamentTeams.put(Integer.valueOf(team.getTeamNumber()), team);
       }
     } finally {
@@ -198,36 +202,6 @@ public final class Queries {
       SQLFunctions.close(prep);
     }
     return tournamentTeams;
-  }
-
-  /**
-   * Get a list of all teams in the database.
-   */
-  public static List<Team> getAllTeams(final Connection connection) throws SQLException {
-    final List<Team> teams = new LinkedList<Team>();
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      stmt = connection.createStatement();
-
-      rs = stmt.executeQuery("SELECT Teams.TeamNumber, Teams.Organization"//
-          + ", Teams.TeamName"//
-          + ", Teams.Division, TournamentTeams.event_division" //
-          + " FROM Teams");
-      while (rs.next()) {
-        final Team team = new Team();
-        team.setTeamNumber(rs.getInt("TeamNumber"));
-        team.setOrganization(rs.getString("Organization"));
-        team.setTeamName(rs.getString("TeamName"));
-        team.setDivision(rs.getString("Division"));
-        team.setEventDivision(rs.getString("event_division"));
-        teams.add(team);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(stmt);
-    }
-    return teams;
   }
 
   public static List<String[]> getTournamentTables(final Connection connection) throws SQLException {
@@ -1344,7 +1318,7 @@ public final class Queries {
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to pick view dynamically")
   public static List<Team> getTeamsNeedingSeedingRuns(final Connection connection,
-                                                      final Map<Integer, Team> tournamentTeams,
+                                                      final Map<Integer, ? extends Team> tournamentTeams,
                                                       final String division,
                                                       final boolean verifiedScoresOnly) throws SQLException,
       RuntimeException {
@@ -1402,7 +1376,7 @@ public final class Queries {
    * 
    * @throws RuntimeException if a team couldn't be found in the map
    */
-  private static List<Team> collectTeamsFromQuery(final Map<Integer, Team> tournamentTeams,
+  private static List<Team> collectTeamsFromQuery(final Map<Integer, ? extends Team> tournamentTeams,
                                                   final ResultSet rs) throws SQLException {
     final List<Team> list = new LinkedList<Team>();
     while (rs.next()) {
@@ -1427,14 +1401,14 @@ public final class Queries {
    * @param winnerCriteria what determines a winner
    * @param divisionStr the division to generate brackets for, as a String
    * @param tournamentTeams keyed by team number
-   * @return a List of team numbers as Integers
+   * @return a List of teams
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to choose ascending or descending order based upon winner criteria")
   public static List<Team> getPlayoffSeedingOrder(final Connection connection,
                                                   final WinnerType winnerCriteria,
-                                                  final Collection<Team> teams) throws SQLException, RuntimeException {
+                                                  final Collection<? extends Team> teams) throws SQLException, RuntimeException {
 
     final List<Integer> teamNumbers = new LinkedList<Integer>();
     for (final Team t : teams) {

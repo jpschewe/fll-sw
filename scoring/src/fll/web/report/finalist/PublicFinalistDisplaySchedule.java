@@ -26,7 +26,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
-import fll.Team;
+import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -68,7 +68,7 @@ public class PublicFinalistDisplaySchedule {
       pageContext.setAttribute("publicCategories", publicCategories);
       pageContext.setAttribute("publicSchedules", publicSchedules);
 
-      final Map<Integer, Team> allTeams = Queries.getTournamentTeams(connection, tournament);
+      final Map<Integer, TournamentTeam> allTeams = Queries.getTournamentTeams(connection, tournament);
       pageContext.setAttribute("allTeams", allTeams);
 
     } catch (final SQLException e) {

@@ -16,6 +16,7 @@ import java.util.Map;
 
 import fll.Team;
 import fll.Tournament;
+import fll.TournamentTeam;
 import fll.db.Queries;
 
 /**
@@ -36,13 +37,13 @@ public final class PlayoffSessionData implements Serializable {
     mInitDivisions.add(PlayoffIndex.CREATE_NEW_PLAYOFF_DIVISION);
   }
 
-  private final Map<Integer, Team> mTournamentTeams;
+  private final Map<Integer, TournamentTeam> mTournamentTeams;
 
-  public Map<Integer, Team> getTournamentTeams() {
+  public Map<Integer, TournamentTeam> getTournamentTeams() {
     return mTournamentTeams;
   }
 
-  public Collection<Team> getTournamentTeamsValues() {
+  public Collection<TournamentTeam> getTournamentTeamsValues() {
     return mTournamentTeams.values();
   }
 
