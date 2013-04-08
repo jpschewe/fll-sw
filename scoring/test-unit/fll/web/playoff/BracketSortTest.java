@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 
 import fll.Team;
+import fll.TournamentTeam;
 import fll.db.GenerateDB;
 import fll.db.Queries;
 import fll.util.LogUtils;
@@ -86,13 +87,13 @@ public class BracketSortTest {
         // tournamentTeams.put(team.getTeamNumber(), team);
       }
 
-      final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
+      final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
 
       final BracketSortType bracketSort = description.getBracketSort();
       final WinnerType winnerCriteria = description.getWinner();
 
-      final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
-      Team.filterTeamsToEventDivision(connection, teams, divisionStr);
+      final List<TournamentTeam> teams = new ArrayList<TournamentTeam>(tournamentTeams.values());
+      TournamentTeam.filterTeamsToEventDivision(teams, divisionStr);
 
       final List<Team> order = Playoff.buildInitialBracketOrder(connection, bracketSort, winnerCriteria, teams);
       Assert.assertEquals("A", order.get(0).getTeamName());

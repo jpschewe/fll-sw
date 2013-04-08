@@ -58,14 +58,14 @@ public final class Playoff {
    * @throws SQLException on a database error
    */
   public static List<Team> buildInitialBracketOrder(final Connection connection,
-                                                    final BracketSortType bracketSort,
-                                                    final WinnerType winnerCriteria,
-                                                    final List<Team> teams) throws SQLException {
+                                                              final BracketSortType bracketSort,
+                                                              final WinnerType winnerCriteria,
+                                                              final List<? extends Team> teams) throws SQLException {
     if (null == connection) {
       throw new NullPointerException("Connection cannot be null");
     }
 
-    final List<Team> seedingOrder;
+    final List<? extends Team> seedingOrder;
     if (BracketSortType.ALPHA_TEAM == bracketSort) {
       seedingOrder = teams;
 
@@ -151,7 +151,8 @@ public final class Playoff {
                                 final Team teamB,
                                 final TeamScore teamBScore,
                                 final int runNumber) throws SQLException, ParseException {
-    final TeamScore teamAScore = new DatabaseTeamScore("Performance", tournament, teamA.getTeamNumber(), runNumber, connection);
+    final TeamScore teamAScore = new DatabaseTeamScore("Performance", tournament, teamA.getTeamNumber(), runNumber,
+                                                       connection);
     final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
                                    teamBScore);
     teamAScore.cleanup();
@@ -186,8 +187,10 @@ public final class Playoff {
                                 final Team teamA,
                                 final Team teamB,
                                 final int runNumber) throws SQLException, ParseException {
-    final TeamScore teamAScore = new DatabaseTeamScore("Performance", tournament, teamA.getTeamNumber(), runNumber, connection);
-    final TeamScore teamBScore = new DatabaseTeamScore("Performance", tournament, teamB.getTeamNumber(), runNumber, connection);
+    final TeamScore teamAScore = new DatabaseTeamScore("Performance", tournament, teamA.getTeamNumber(), runNumber,
+                                                       connection);
+    final TeamScore teamBScore = new DatabaseTeamScore("Performance", tournament, teamB.getTeamNumber(), runNumber,
+                                                       connection);
     final Team retval = pickWinner(performanceElement, tiebreakerElement, winnerCriteria, teamA, teamAScore, teamB,
                                    teamBScore);
     teamAScore.cleanup();
@@ -377,7 +380,7 @@ public final class Playoff {
                                         final ChallengeDescription challengeDescription,
                                         final String division,
                                         final boolean enableThird,
-                                        final List<Team> teams) throws SQLException {
+                                        final List<? extends Team> teams) throws SQLException {
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("initializing brackets for division: "
@@ -392,7 +395,7 @@ public final class Playoff {
     // round 1 teams)
     // Note: Our math will rely on the length of the list returned by
     // buildInitialBracketOrder to be a power of 2. It always should be.
-    final List<Team> firstRound = buildInitialBracketOrder(connection, bracketSort, winnerCriteria, teams);
+    final List<? extends Team> firstRound = buildInitialBracketOrder(connection, bracketSort, winnerCriteria, teams);
 
     final List<Integer> teamNumbers = new LinkedList<Integer>();
     for (final Team t : firstRound) {
@@ -435,7 +438,7 @@ public final class Playoff {
 
       // Insert those teams into the database.
       // At this time we let the table assignment field default to NULL.
-      final Iterator<Team> it = firstRound.iterator();
+      final Iterator<? extends Team> it = firstRound.iterator();
       insertStmt.setInt(1, currentTournament);
       insertStmt.setString(2, division);
       insertStmt.setInt(3, 1);
@@ -852,7 +855,7 @@ public final class Playoff {
    */
   static private void insertByes(final Connection connection,
                                  final int baseRunNumber,
-                                 final List<Team> teams) throws SQLException {
+                                 final List<? extends Team> teams) throws SQLException {
     for (final Team team : teams) {
       final int maxRunCompleted = Queries.maxPerformanceRunNumberCompleted(connection, team.getTeamNumber());
       for (int round = maxRunCompleted + 1; round <= baseRunNumber; ++round) {

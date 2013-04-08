@@ -18,6 +18,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -38,6 +39,31 @@ import fll.web.SessionAttributes;
 public class CreatePlayoffDivision extends BaseFLLServlet {
 
   private static final Logger LOGGER = LogUtils.getLogger();
+
+  /**
+   * Populate the context for create_playoff_division.jsp.
+   * 
+   * @param application
+   */
+  public static void populateContext(final ServletContext application,
+                                     final PageContext pageContext) {
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+    Connection connection = null;
+    try {
+      connection = datasource.getConnection();
+
+      final int currentTournamentID = Queries.getCurrentTournament(connection);
+
+      final List<String> judgingStations = Queries.getJudgingStations(connection, currentTournamentID);
+      pageContext.setAttribute("judgingStations", judgingStations);
+
+    } catch (final SQLException sqle) {
+      LOGGER.error(sqle, sqle);
+      throw new RuntimeException("Error talking to the database", sqle);
+    } finally {
+      SQLFunctions.close(connection);
+    }
+  }
 
   @Override
   protected void processRequest(final HttpServletRequest request,

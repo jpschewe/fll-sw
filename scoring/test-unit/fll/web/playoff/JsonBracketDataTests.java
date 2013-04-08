@@ -32,6 +32,7 @@ import com.google.gson.Gson;
 
 import fll.Team;
 import fll.Tournament;
+import fll.TournamentTeam;
 import fll.db.DumpDB;
 import fll.db.GenerateDB;
 import fll.db.GlobalParameters;
@@ -121,12 +122,11 @@ public class JsonBracketDataTests {
     // give opponent a score
     insertScore(playoff.getConnection(), 5, 1, false, 20D);
     query.clear();
-    
-    //FIXME debug
+
+    // FIXME debug
     final ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream("test.flldb"));
     DumpDB.dumpDatabase(zipOut, playoff.getConnection(), GlobalParameters.getChallengeDocument(playoff.getConnection()));
     zipOut.close();
-    
 
     // ask for round we just entered score for
     row = playoff.getBracketData().getRowNumberForLine(2, 2);
@@ -271,9 +271,9 @@ public class JsonBracketDataTests {
       Assert.assertNull(Queries.addTeam(connection, i + 1, teamNames[i], "htk", div, 2));
     }
 
-    final Map<Integer, Team> tournamentTeams = Queries.getTournamentTeams(connection);
-    final List<Team> teams = new ArrayList<Team>(tournamentTeams.values());
-    Team.filterTeamsToEventDivision(connection, teams, div);
+    final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
+    final List<TournamentTeam> teams = new ArrayList<TournamentTeam>(tournamentTeams.values());
+    TournamentTeam.filterTeamsToEventDivision(teams, div);
 
     Playoff.initializeBrackets(connection, description, div, false, teams);
 

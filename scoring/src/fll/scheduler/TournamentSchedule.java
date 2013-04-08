@@ -69,6 +69,7 @@ import com.itextpdf.text.pdf.PdfPTable;
 
 import fll.Team;
 import fll.Tournament;
+import fll.TournamentTeam;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.util.CSVCellReader;
@@ -1299,7 +1300,7 @@ public class TournamentSchedule implements Serializable {
   public Collection<ConstraintViolation> compareWithDatabase(final Connection connection,
                                                              final int tournamentID) throws SQLException {
     final Collection<ConstraintViolation> violations = new LinkedList<ConstraintViolation>();
-    final Map<Integer, Team> dbTeams = Queries.getTournamentTeams(connection, tournamentID);
+    final Map<Integer, TournamentTeam> dbTeams = Queries.getTournamentTeams(connection, tournamentID);
     final Set<Integer> scheduleTeamNumbers = new HashSet<Integer>();
     for (final TeamScheduleInfo si : _schedule) {
       scheduleTeamNumbers.add(si.getTeamNumber());
