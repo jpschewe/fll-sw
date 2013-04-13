@@ -61,9 +61,10 @@ public class FinalistLoad {
     final String teamVarName = getTeamVarName(team.getTeamNumber());
     output.format("var %s = $.finalist.lookupTeam(%d);%n", teamVarName, team.getTeamNumber());
     output.format("if(null == %s) {%n", teamVarName);
-    output.format("  %s = $.finalist.addTeam(%d, %s, %s);%n", teamVarName, team.getTeamNumber(),
+    output.format("  %s = $.finalist.addTeam(%d, %s, %s, %s);%n", teamVarName, team.getTeamNumber(),
                   WebUtils.quoteJavascriptString(team.getTrimmedTeamName()),
-                  WebUtils.quoteJavascriptString(team.getOrganization()));
+                  WebUtils.quoteJavascriptString(team.getOrganization()),
+                  WebUtils.quoteJavascriptString(team.getJudgingStation()));
     output.format("}%n");
 
     output.format("$.finalist.addTeamToDivision(%s, %s);%n", teamVarName,
@@ -178,30 +179,13 @@ public class FinalistLoad {
 
         final String teamVar = getTeamVarName(teamNumber);
         final double overallScore = rs.getDouble("OverallScore");
-        final String overallGroup;
-        if (null == schedule) {
-          overallGroup = "Unknown";
-        } else {
-          final TeamScheduleInfo si = schedule.getSchedInfoForTeam(teamNumber);
-          overallGroup = si.getJudgingStation();
-        }
-        output.format("$.finalist.setCategoryScore(%s, championship, %.02f, %s);%n", teamVar, overallScore,
-                      WebUtils.quoteJavascriptString(overallGroup));
+        output.format("$.finalist.setCategoryScore(%s, championship, %.02f);%n", teamVar, overallScore);
 
         for (final ScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
           final String categoryName = subjectiveElement.getName();
           final String categoryVar = getCategoryVarName(categoryName);
           final double catScore = rs.getDouble(categoryName);
-          final String group;
-          if (null == schedule) {
-            group = Queries.computeScoreGroupForTeam(connection, tournament, categoryName, teamNumber);
-          } else {
-            final TeamScheduleInfo si = schedule.getSchedInfoForTeam(teamNumber);
-            group = si.getJudgingStation();
-          }
-
-          output.format("$.finalist.setCategoryScore(%s, %s, %.02f, %s);%n", teamVar, categoryVar, catScore,
-                        WebUtils.quoteJavascriptString(group));
+          output.format("$.finalist.setCategoryScore(%s, %s, %.02f);%n", teamVar, categoryVar, catScore);
         } // foreach category
       }// foreach team
     } finally {
