@@ -15,11 +15,13 @@ import java.util.List;
  */
 public class TournamentTeam extends Team {
 
-  public TournamentTeam() {
-    super();
+  public TournamentTeam(final int teamNumber, final String org, final String name, final String division, final String eventDivision, final String judgingStation) {
+    super(teamNumber, org, name, division);
+    _eventDivision = eventDivision;
+    _judgingStation = judgingStation;
   }
 
-  private String _eventDivision;
+  private final String _eventDivision;
 
   /**
    * The event division that a team is entered in.
@@ -30,21 +32,13 @@ public class TournamentTeam extends Team {
     return _eventDivision;
   }
 
-  public void setEventDivision(final String v) {
-    _eventDivision = v;
-  }
-
-  private String _judgingStation;
+  private final String _judgingStation;
 
   /**
    * The judging station for the team.
    */
   public String getJudgingStation() {
     return _judgingStation;
-  }
-
-  public void setJudgingStation(final String v) {
-    _judgingStation = v;
   }
 
   /**
