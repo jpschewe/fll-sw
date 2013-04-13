@@ -17,12 +17,13 @@ import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
-import fll.Team;
+import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.scheduler.TeamScheduleInfo;
 import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
+import fll.web.playoff.Playoff;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 
@@ -52,17 +53,26 @@ public class FinalistLoad {
    * 
    * @param output where to write
    * @param team the team
+   * @throws SQLException
    */
   public static void outputTeamVarDefinition(final Formatter output,
-                                             final Team team) {
+                                             final Connection connection,
+                                             final TournamentTeam team) throws SQLException {
     final String teamVarName = getTeamVarName(team.getTeamNumber());
     output.format("var %s = $.finalist.lookupTeam(%d);%n", teamVarName, team.getTeamNumber());
     output.format("if(null == %s) {%n", teamVarName);
-    output.format("  %s = $.finalist.addTeam(%d, %s, %s, %s);%n", teamVarName, team.getTeamNumber(),
-                  WebUtils.quoteJavascriptString(team.getDivision()),
+    output.format("  %s = $.finalist.addTeam(%d, %s, %s);%n", teamVarName, team.getTeamNumber(),
                   WebUtils.quoteJavascriptString(team.getTrimmedTeamName()),
                   WebUtils.quoteJavascriptString(team.getOrganization()));
     output.format("}%n");
+
+    output.format("$.finalist.addTeamToDivision(%s, %s);%n", teamVarName,
+                  WebUtils.quoteJavascriptString(team.getEventDivision()));
+
+    for (final String playoffDivision : Playoff.getPlayoffDivisionsForTeam(connection, team.getTeamNumber())) {
+      output.format("$.finalist.addTeamToDivision(%s, %s);%n", teamVarName,
+                    WebUtils.quoteJavascriptString(playoffDivision));
+    }
   }
 
   public static void outputTeamVariables(final Writer writer,
@@ -72,8 +82,8 @@ public class FinalistLoad {
     try {
       connection = datasource.getConnection();
       final Formatter output = new Formatter(writer);
-      for (final Team team : Queries.getTournamentTeams(connection).values()) {
-        outputTeamVarDefinition(output, team);
+      for (final TournamentTeam team : Queries.getTournamentTeams(connection).values()) {
+        outputTeamVarDefinition(output, connection, team);
       }
     } finally {
       SQLFunctions.close(connection);
@@ -86,10 +96,18 @@ public class FinalistLoad {
     Connection connection = null;
     try {
       connection = datasource.getConnection();
+
+      final int tournament = Queries.getCurrentTournament(connection);
+
       final Formatter output = new Formatter(writer);
-      for (final String division : Queries.getEventDivisions(connection)) {
+      for (final String division : Queries.getEventDivisions(connection, tournament)) {
         output.format("$.finalist.addDivision(%s);%n", WebUtils.quoteJavascriptString(division));
       }
+
+      for (final String playoffDivision : Playoff.getPlayoffDivisions(connection, tournament)) {
+        output.format("$.finalist.addDivision(%s);%n", WebUtils.quoteJavascriptString(playoffDivision));
+      }
+
     } finally {
       SQLFunctions.close(connection);
     }
