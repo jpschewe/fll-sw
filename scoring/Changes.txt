@@ -1,3 +1,5 @@
+* 216 - Add judging station to non-numeric categories in the finalist
+        scheduling app
 * 212 - Add playoff divisions to the list of divisions one can schedule
         finalists for.
 * 223 - Add the ability to easily choose teams for playoff divisions 
