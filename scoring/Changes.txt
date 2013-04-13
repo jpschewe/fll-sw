@@ -1,3 +1,5 @@
+* 212 - Add playoff divisions to the list of divisions one can schedule
+        finalists for.
 * 223 - Add the ability to easily choose teams for playoff divisions 
         by judging station.
 * 220 - Always auto-select top 1 finalist in finalist scheduling app
