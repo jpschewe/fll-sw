@@ -58,9 +58,9 @@ public final class Playoff {
    * @throws SQLException on a database error
    */
   public static List<Team> buildInitialBracketOrder(final Connection connection,
-                                                              final BracketSortType bracketSort,
-                                                              final WinnerType winnerCriteria,
-                                                              final List<? extends Team> teams) throws SQLException {
+                                                    final BracketSortType bracketSort,
+                                                    final WinnerType winnerCriteria,
+                                                    final List<? extends Team> teams) throws SQLException {
     if (null == connection) {
       throw new NullPointerException("Connection cannot be null");
     }
@@ -895,6 +895,35 @@ public final class Playoff {
       SQLFunctions.close(rs);
       SQLFunctions.close(prep);
     }
+  }
+
+  /**
+   * Given a team, get the playoff divisions that the team is associated with.
+   * 
+   * @return the division or null if not found
+   */
+  public static List<String> getPlayoffDivisionsForTeam(final Connection connection,
+                                                        final int teamNumber) throws SQLException {
+    final List<String> ret = new LinkedList<String>();
+    final int tournament = Queries.getCurrentTournament(connection);
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT event_division FROM PlayoffData"
+          + " WHERE Team = ?"//
+          + " AND Tournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, tournament);
+      rs = prep.executeQuery();
+      while (rs.next()) {
+        final String division = rs.getString(1);
+        ret.add(division);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+    return ret;
   }
 
   /**

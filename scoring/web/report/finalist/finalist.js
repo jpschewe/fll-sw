@@ -140,13 +140,13 @@
 	/**
 	 * Constructor for a Team.
 	 */
-	function Team(num, division, name, org) {
+	function Team(num, name, org) {
 		if (typeof (_teams[num]) != 'undefined') {
 			throw new Error("Team already exists with number: " + num);
 		}
 
 		this.num = num;
-		this.division = division;
+		this._divisions = [];
 		this.name = name;
 		this.org = org;
 		this.categoryScores = {};
@@ -192,7 +192,7 @@
 	function Timeslot() {
 		this.categories = {};
 	}
-	
+
 	// //////////////////////// PUBLIC INTERFACE /////////////////////////
 	$.finalist = {
 		CHAMPIONSHIP_NAME : "Championship",
@@ -267,8 +267,39 @@
 		/**
 		 * Create a new team.
 		 */
-		addTeam : function(num, division, name, org) {
-			return new Team(num, division, name, org);
+		addTeam : function(num, name, org) {
+			return new Team(num, name, org);
+		},
+
+		/**
+		 * Add a team to a division. A team may be in multiple divisions.
+		 * 
+		 * @param team
+		 *            a team object
+		 * @param division
+		 *            a string
+		 */
+		addTeamToDivision : function(team, division) {
+			if (-1 == $.inArray(division, team._divisions)) {
+				team._divisions.push(division);
+			}
+		},
+
+		/**
+		 * Check if a team is in a division.
+		 * 
+		 * @param team
+		 *            a team object
+		 * @param division
+		 *            a string
+		 * @return true/false
+		 */
+		isTeamInDivision : function(team, division) {
+			if (-1 == $.inArray(division, team._divisions)) {
+				return false;
+			} else {
+				return true;
+			}
 		},
 
 		/**
@@ -486,6 +517,15 @@
 			});
 			return found;
 		},
+		
+		setCategoryPublic : function(category, value) {
+			category.isPublic = value;
+			_save();
+		},
+		
+		isCategoryPublic : function(category) {
+			return category.isPublic;
+		},
 
 		/**
 		 * Create the finalist schedule.
@@ -498,7 +538,7 @@
 			$.each($.finalist.getAllCategories(), function(i, category) {
 				$.each(category.teams, function(j, teamNum) {
 					var team = $.finalist.lookupTeam(teamNum);
-					if (team.division == $.finalist.getCurrentDivision()) {
+					if ($.finalist.isTeamInDivision(team, $.finalist.getCurrentDivision())) {
 						if (null == finalistsCount[teamNum]) {
 							finalistsCount[teamNum] = [];
 						}
@@ -663,8 +703,8 @@
 
 			$("#navbar").append($("<span> - </span>"));
 
-			
-			if (window.location.pathname.match(/\/choose-public-categories.html$/)) {
+			if (window.location.pathname
+					.match(/\/choose-public-categories.html$/)) {
 				element = $("<span></span>")
 			} else {
 				element = $("<a href='choose-public-categories.html'></a>")
@@ -674,7 +714,6 @@
 
 			$("#navbar").append($("<span> - </span>"));
 
-			
 			if (window.location.pathname.match(/\/schedule.html$/)) {
 				element = $("<span></span>")
 			} else {

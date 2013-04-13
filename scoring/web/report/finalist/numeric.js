@@ -7,32 +7,38 @@
 function initializeTeamsInCategory(currentCategory, teams, scoreGroups) {
 	var checkedEnoughTeams = false;
 	var prevScores = {};
-	$.each(teams, function(i, team) {
-		if (team.division == $.finalist.getCurrentDivision()) {
-			if (!checkedEnoughTeams) {
-				var group = $.finalist.getCategoryGroup(team, currentCategory);
-				prevScore = prevScores[group];
-				curScore = $.finalist.getCategoryScore(team, currentCategory);
-				if (prevScore == undefined) {
-					$.finalist.addTeamToCategory(currentCategory, team.num);
-				} else if(scoreGroups[group] > 0) {
-					if(Math.abs(prevScore - curScore) < 1) {
-						$.finalist.addTeamToCategory(currentCategory, team.num);
-					} else {
-						scoreGroups[group] = scoreGroups[group] - 1;
-						
-						checkedEnoughTeams = true;
-						$.each(scoreGroups, function(key, value) {
-							if (value > 0) {
-								checkedEnoughTeams = false;
+	$.each(teams,
+			function(i, team) {
+				if ($.finalist.isTeamInDivision(team, $.finalist
+						.getCurrentDivision())) {
+					if (!checkedEnoughTeams) {
+						var group = $.finalist.getCategoryGroup(team,
+								currentCategory);
+						prevScore = prevScores[group];
+						curScore = $.finalist.getCategoryScore(team,
+								currentCategory);
+						if (prevScore == undefined) {
+							$.finalist.addTeamToCategory(currentCategory,
+									team.num);
+						} else if (scoreGroups[group] > 0) {
+							if (Math.abs(prevScore - curScore) < 1) {
+								$.finalist.addTeamToCategory(currentCategory,
+										team.num);
+							} else {
+								scoreGroups[group] = scoreGroups[group] - 1;
+
+								checkedEnoughTeams = true;
+								$.each(scoreGroups, function(key, value) {
+									if (value > 0) {
+										checkedEnoughTeams = false;
+									}
+								});
 							}
-						});
-					}
-				}
-				prevScores[group] = curScore;
-			} // checked enough teams
-		}  // if current division
-	}); // foreach team
+						}
+						prevScores[group] = curScore;
+					} // checked enough teams
+				} // if current division
+			}); // foreach team
 }
 
 function getNumFinalistsId(team) {
@@ -54,7 +60,7 @@ function initializeFinalistCounts(teams) {
 
 function createTeamTable(teams, currentDivision, currentCategory) {
 	$.each(teams, function(i, team) {
-		if (team.division == currentDivision) {
+		if ($.finalist.isTeamInDivision(team, currentDivision)) {
 			var row = $("<tr></tr>");
 			$("#data").append(row);
 
@@ -161,14 +167,16 @@ $(document)
 
 					// compute the set of all score groups
 					var scoreGroups = {};
-					$.each(teams, function(i, team) {
-						if (team.division == currentDivision) {
-							var group = $.finalist.getCategoryGroup(team,
-									currentCategory);
-							scoreGroups[group] = $.finalist
-									.getNumTeamsAutoSelected();
-						}
-					});
+					$.each(teams,
+							function(i, team) {
+								if ($.finalist.isTeamInDivision(team,
+										currentDivision)) {
+									var group = $.finalist.getCategoryGroup(
+											team, currentCategory);
+									scoreGroups[group] = $.finalist
+											.getNumTeamsAutoSelected();
+								}
+							});
 
 					if (!previouslyVisited) {
 						// initialize teams in category

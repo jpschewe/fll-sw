@@ -22,12 +22,12 @@ function addCategoryElement(category) {
 	var checkbox = $("<input type='checkbox'/>");
 	checkbox.change(function() {
 		if ($(this).attr("checked") == undefined) {
-			category.isPublic = false;
+			$.finalist.setCategoryPublic(category, false);
 		} else {
-			category.isPublic = true;
+			$.finalist.setCategoryPublic(category, true);
 		}
 	});
-	if(category.isPublic) {
+	if($.finalist.isCategoryPublic(category)) {
 		checkbox.attr("checked", true);
 	}
 	catEle.append(checkbox);
