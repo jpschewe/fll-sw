@@ -30,7 +30,8 @@
 	var championship = $.finalist
 				.getCategoryByName($.finalist.CHAMPIONSHIP_NAME);
 		if (null == championship) {
-			championship = $.finalist.addCategory($.finalist.CHAMPIONSHIP_NAME, true);
+			championship = $.finalist.addCategory($.finalist.CHAMPIONSHIP_NAME,
+					true);
 		}
 <%FinalistLoad.outputCategoryScores(out, application);%>
 	$.finalist.setTournament(_loadingTournament);
@@ -42,12 +43,12 @@
 			clearData();
 			loadData();
 			$("#choose_clear").hide();
-			location.href="params.html";
+			location.href = "params.html";
 		});
 		$("#keep").click(function() {
 			loadData();
 			$("#choose_clear").hide();
-			location.href="params.html";
+			location.href = "params.html";
 		});
 
 		var allTeams = $.finalist.getAllTeams();
@@ -59,14 +60,14 @@
 				clearData();
 				loadData();
 				$("#choose_clear").hide();
-				location.href="params.html";
+				location.href = "params.html";
 			} else {
 				$("#choose_clear").show();
 			}
 		} else {
 			loadData();
 			$("#choose_clear").hide();
-			location.href="params.html";
+			location.href = "params.html";
 		}
 	});
 </script>
@@ -75,12 +76,21 @@
 
 <body>
 
-	<div id='choose_clear'>
-		You already have data loaded for this tournament. Would you like to
-		clear the existing data and load from scratch?
-		<button id='clear'>Yes, clear the data</button>
-		<button id='keep'>No, just refresh the data</button>
-	</div>
+ <p>
+  If you are going to create custom playoff divisions and you want to
+  use them to do finalist scheduling you need to create the playoff
+  divisions before starting the finalist scheduling app. If you are
+  going to do this you should visit the <a
+   href="<c:url value='/playoff'/>">Playoffs Page</a>, create the custom
+  playoff divisions and then come back to this page.
+ </p>
+
+ <div id='choose_clear'>
+  You already have data loaded for this tournament. Would you like to
+  clear the existing data and load from scratch?
+  <button id='clear'>Yes, clear the data</button>
+  <button id='keep'>No, just refresh the data</button>
+ </div>
 
 
 </body>

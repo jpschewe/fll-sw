@@ -17,7 +17,7 @@ $(document).ready(
 				var addedTeam = false;
 				$.each(category.teams, function(j, teamNum) {
 					var team = $.finalist.lookupTeam(teamNum);
-					if (team.division == $.finalist.getCurrentDivision()) {
+					if ($.finalist.isTeamInDivision(team, $.finalist.getCurrentDivision())) {
 						addedTeam = true;
 						var teamIdx = addTeam(category);
 						populateTeamInformation(category, teamIdx, team);
