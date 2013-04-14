@@ -19,8 +19,6 @@ import javax.sql.DataSource;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 import fll.TournamentTeam;
 import fll.db.Queries;
-import fll.scheduler.TeamScheduleInfo;
-import fll.scheduler.TournamentSchedule;
 import fll.web.ApplicationAttributes;
 import fll.web.WebUtils;
 import fll.web.playoff.Playoff;
@@ -163,13 +161,6 @@ public class FinalistLoad {
       final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
       final int tournament = Queries.getCurrentTournament(connection);
       final Formatter output = new Formatter(writer);
-
-      final TournamentSchedule schedule;
-      if (TournamentSchedule.scheduleExistsInDatabase(connection, tournament)) {
-        schedule = new TournamentSchedule(connection, tournament);
-      } else {
-        schedule = null;
-      }
 
       prep = connection.prepareStatement("SELECT * from FinalScores WHERE tournament = ?");
       prep.setInt(1, tournament);
