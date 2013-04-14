@@ -140,7 +140,7 @@
 	/**
 	 * Constructor for a Team.
 	 */
-	function Team(num, name, org) {
+	function Team(num, name, org, judgingStation) {
 		if (typeof (_teams[num]) != 'undefined') {
 			throw new Error("Team already exists with number: " + num);
 		}
@@ -149,8 +149,8 @@
 		this._divisions = [];
 		this.name = name;
 		this.org = org;
+		this.judgingStation = judgingStation;
 		this.categoryScores = {};
-		this.categoryGroups = {};
 		_teams[num] = this;
 		_save();
 	}
@@ -267,8 +267,8 @@
 		/**
 		 * Create a new team.
 		 */
-		addTeam : function(num, name, org) {
-			return new Team(num, name, org);
+		addTeam : function(num, name, org, judgingStation) {
+			return new Team(num, name, org, judgingStation);
 		},
 
 		/**
@@ -313,13 +313,8 @@
 			return team.categoryScores[category.catId];
 		},
 
-		getCategoryGroup : function(team, category) {
-			return team.categoryGroups[category.catId];
-		},
-
-		setCategoryScore : function(team, category, score, group) {
+		setCategoryScore : function(team, category, score) {
 			team.categoryScores[category.catId] = score;
-			team.categoryGroups[category.catId] = group;
 			_save;
 		},
 

@@ -12,8 +12,7 @@ function initializeTeamsInCategory(currentCategory, teams, scoreGroups) {
 				if ($.finalist.isTeamInDivision(team, $.finalist
 						.getCurrentDivision())) {
 					if (!checkedEnoughTeams) {
-						var group = $.finalist.getCategoryGroup(team,
-								currentCategory);
+						var group = team.judgingStation;
 						prevScore = prevScores[group];
 						curScore = $.finalist.getCategoryScore(team,
 								currentCategory);
@@ -87,7 +86,7 @@ function createTeamTable(teams, currentDivision, currentCategory) {
 
 			var sgCol = $("<td></td>");
 			row.append(sgCol);
-			var group = $.finalist.getCategoryGroup(team, currentCategory);
+			var group = team.judgingStation;
 			sgCol.text(group);
 
 			var numCol = $("<td></td>");
@@ -141,10 +140,8 @@ $(document)
 							.sort(function(a, b) {
 								if (currentCategory.name != $.finalist.CHAMPIONSHIP_NAME) {
 									// sort by score group first
-									var aGroup = $.finalist.getCategoryGroup(a,
-											currentCategory);
-									var bGroup = $.finalist.getCategoryGroup(b,
-											currentCategory);
+									var aGroup = a.judgingStation;
+									var bGroup = b.judgingStation;
 									if (aGroup < bGroup) {
 										return -1;
 									} else if (aGroup > bGroup) {
@@ -171,8 +168,7 @@ $(document)
 							function(i, team) {
 								if ($.finalist.isTeamInDivision(team,
 										currentDivision)) {
-									var group = $.finalist.getCategoryGroup(
-											team, currentCategory);
+									var group = team.judgingStation;
 									scoreGroups[group] = $.finalist
 											.getNumTeamsAutoSelected();
 								}

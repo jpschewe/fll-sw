@@ -172,7 +172,7 @@ public final class Queries {
    * the table TournamentTeams to determine which teams should be included.
    */
   public static Map<Integer, TournamentTeam> getTournamentTeams(final Connection connection,
-                                                      final int tournamentID) throws SQLException {
+                                                                final int tournamentID) throws SQLException {
     final SortedMap<Integer, TournamentTeam> tournamentTeams = new TreeMap<Integer, TournamentTeam>();
     ResultSet rs = null;
     PreparedStatement prep = null;
@@ -188,14 +188,15 @@ public final class Queries {
       prep.setInt(1, tournamentID);
       rs = prep.executeQuery();
       while (rs.next()) {
-        final TournamentTeam team = new TournamentTeam();
-        team.setTeamNumber(rs.getInt("TeamNumber"));
-        team.setOrganization(rs.getString("Organization"));
-        team.setTeamName(rs.getString("TeamName"));
-        team.setDivision(rs.getString("Division"));
-        team.setEventDivision(rs.getString("event_division"));
-        team.setJudgingStation(rs.getString("judging_station"));
-        tournamentTeams.put(Integer.valueOf(team.getTeamNumber()), team);
+        final int teamNumber = rs.getInt("TeamNumber");
+        final String org = rs.getString("Organization");
+        final String name = rs.getString("TeamName");
+        final String division = rs.getString("Division");
+        final String eventDivision = rs.getString("event_division");
+        final String judgingStation = rs.getString("judging_station");
+
+        final TournamentTeam team = new TournamentTeam(teamNumber, org, name, division, eventDivision, judgingStation);
+        tournamentTeams.put(teamNumber, team);
       }
     } finally {
       SQLFunctions.close(rs);
@@ -663,12 +664,12 @@ public final class Queries {
       // make sure that we don't get into a race with another thread
       connection.setAutoCommit(false);
       connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-      
+
       final int rowsUpdated = updatePerformanceScore(description, connection, request);
-      if(rowsUpdated < 1) {
+      if (rowsUpdated < 1) {
         insertPerformanceScore(description, connection, request);
       }
-      
+
       connection.commit();
     } finally {
       connection.setTransactionIsolation(oldTransactionIsolation);
@@ -1408,7 +1409,8 @@ public final class Queries {
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to choose ascending or descending order based upon winner criteria")
   public static List<Team> getPlayoffSeedingOrder(final Connection connection,
                                                   final WinnerType winnerCriteria,
-                                                  final Collection<? extends Team> teams) throws SQLException, RuntimeException {
+                                                  final Collection<? extends Team> teams) throws SQLException,
+      RuntimeException {
 
     final List<Integer> teamNumbers = new LinkedList<Integer>();
     for (final Team t : teams) {

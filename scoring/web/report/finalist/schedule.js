@@ -80,8 +80,7 @@ $(document).ready(
 								row.append($("<td>&nbsp;</td>"));
 							} else {
 								var team = $.finalist.lookupTeam(teamNum);
-								var group = $.finalist.getCategoryGroup(team,
-										category);
+								var group = team.judgingStation;
 								row.append($("<td>" + teamNum + " - "
 										+ team.name + " (" + group + ")</td>"));
 								
