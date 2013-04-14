@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Comparator;
 
+import fll.db.GenerateDB;
+
 import net.mtu.eggplant.util.ComparisonUtils;
 import net.mtu.eggplant.util.StringUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
@@ -45,26 +47,17 @@ public class Team implements Serializable {
   /**
    * Team that represents a BYE
    */
-  public static final Team BYE = new Team();
+  public static final Team BYE = new Team(BYE_TEAM_NUMBER, "INTERNAL", "BYE", GenerateDB.DEFAULT_TEAM_DIVISION);
 
   /**
    * Team that represents a TIE.
    */
-  public static final Team TIE = new Team();
+  public static final Team TIE = new Team(TIE_TEAM_NUMBER, "INTERNAL", "TIE", GenerateDB.DEFAULT_TEAM_DIVISION);
 
   /**
    * NULL Team.
    */
-  public static final Team NULL = new Team();
-
-  static {
-    BYE.setTeamNumber(BYE_TEAM_NUMBER);
-    BYE.setTeamName("BYE");
-    TIE.setTeamNumber(TIE_TEAM_NUMBER);
-    TIE.setTeamName("TIE");
-    NULL.setTeamNumber(NULL_TEAM_NUMBER);
-    NULL.setTeamName("NULL");
-  }
+  public static final Team NULL = new Team(NULL_TEAM_NUMBER, "INTERNAL", "NULL", GenerateDB.DEFAULT_TEAM_DIVISION);
 
   public static final Comparator<Team> TEAM_NUMBER_COMPARATOR = new Comparator<Team>() {
     public int compare(final Team one,
@@ -91,8 +84,14 @@ public class Team implements Serializable {
     }
   };
 
-  public Team() {
-
+  public Team(final int teamNumber,
+              final String org,
+              final String name,
+              final String division) {
+    _teamNumber = teamNumber;
+    _organization = org;
+    _teamName = name;
+    _division = division;
   }
 
   /**
@@ -126,11 +125,11 @@ public class Team implements Serializable {
       stmt.setInt(1, teamNumber);
       rs = stmt.executeQuery();
       if (rs.next()) {
-        final Team x = new Team();
-        x._division = rs.getString(1);
-        x._organization = rs.getString(2);
-        x._teamName = rs.getString(3);
-        x._teamNumber = teamNumber;
+        final String division = rs.getString(1);
+        final String org = rs.getString(2);
+        final String name = rs.getString(3);
+
+        final Team x = new Team(teamNumber, org, name, division);
         return x;
       } else {
         return null;
@@ -141,7 +140,7 @@ public class Team implements Serializable {
     }
   }
 
-  private int _teamNumber;
+  private final int _teamNumber;
 
   /**
    * The team's number. This is the primary key for identifying a team.
@@ -152,11 +151,7 @@ public class Team implements Serializable {
     return _teamNumber;
   }
 
-  public void setTeamNumber(final int v) {
-    _teamNumber = v;
-  }
-
-  private String _organization;
+  private final String _organization;
 
   /**
    * The organization that the team belongs to, this may be a school or youth
@@ -168,11 +163,7 @@ public class Team implements Serializable {
     return _organization;
   }
 
-  public void setOrganization(final String v) {
-    _organization = v;
-  }
-
-  private String _teamName;
+  private final String _teamName;
 
   /**
    * The name of the team.
@@ -183,10 +174,6 @@ public class Team implements Serializable {
     return _teamName;
   }
 
-  public void setTeamName(final String v) {
-    _teamName = v;
-  }
-
   /**
    * @return the team name shortened to {@link Team#MAX_TEAM_NAME_LEN}
    */
@@ -194,7 +181,7 @@ public class Team implements Serializable {
     return StringUtils.trimString(getTeamName(), Team.MAX_TEAM_NAME_LEN);
   }
 
-  private String _division;
+  private final String _division;
 
   /**
    * The division that a team is entered as.
@@ -203,10 +190,6 @@ public class Team implements Serializable {
    */
   public String getDivision() {
     return _division;
-  }
-
-  public void setDivision(final String v) {
-    _division = v;
   }
 
   /**

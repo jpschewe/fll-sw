@@ -98,11 +98,16 @@ function teamOrgId(category, teamIdx) {
 	return "org_" + category + "_" + teamIdx;
 }
 
+function teamJudgingStationId(category, teamIdx) {
+	return "judgingStation_" + category + "_" + teamIdx;
+}
+
 function populateTeamInformation(category, teamIdx, team) {
 	$("#" + teamNumId(category.catId, teamIdx)).val(team.num);
 	$("#" + teamNumId(category.catId, teamIdx)).data('oldVal', team.num);
 	$("#" + teamNameId(category.catId, teamIdx)).val(team.name);
 	$("#" + teamOrgId(category.catId, teamIdx)).val(team.org);
+	$("#" + teamJudgingStationId(category.catId, teamIdx)).val(team.judgingStation);
 }
 
 /**
@@ -148,6 +153,10 @@ function addTeam(category) {
 	var orgEle = $("<input id='" + teamOrgId(category.catId, teamIdx)
 			+ "' readonly/>");
 	teamEle.append(orgEle);
+
+	var judgingStationEle = $("<input id='" + teamJudgingStationId(category.catId, teamIdx)
+			+ "' readonly/>");
+	teamEle.append(judgingStationEle);
 
 	return teamIdx;
 }
