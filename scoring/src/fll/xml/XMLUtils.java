@@ -5,9 +5,20 @@
  */
 package fll.xml;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.security.CodeSource;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
@@ -210,4 +221,80 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
     return getSubjectiveCategoryNames(challengeDocument).contains(name);
   }
 
+  /**
+   * Get all challenge descriptors build into the software.
+   * 
+   * @return
+   */
+  public static Collection<URL> getAllKnownChallengeDescriptorURLs() {
+    final String baseDir = "fll/resources/challenge-descriptors";
+
+    final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    final URL directory = classLoader.getResource(baseDir);
+    if (null == directory) {
+      return Collections.emptyList();
+    }
+
+    final Collection<URL> urls = new LinkedList<URL>();
+    if ("file".equals(directory.getProtocol())) {
+      try {
+        final URI uri = directory.toURI();
+        final File fileDir = new File(uri);
+        for (final File file : fileDir.listFiles()) {
+          if (file.getName().endsWith(".xml")) {
+            try {
+              final URL fileUrl = file.toURI().toURL();
+              urls.add(fileUrl);
+            } catch (final MalformedURLException e) {
+              LOGGER.error("Unable to convert file to URL: "
+                  + file.getAbsolutePath(), e);
+            }
+          }
+        }
+      } catch (final URISyntaxException e) {
+        LOGGER.error("Unable to convert URL to URI: "
+            + e.getMessage(), e);
+      }
+    } else if (directory.getProtocol().equals("jar")) {
+      final CodeSource src = XMLUtils.class.getProtectionDomain().getCodeSource();
+      if (null != src) {
+        final URL jar = src.getLocation();
+
+        try {
+          final JarInputStream zip = new JarInputStream(jar.openStream());
+
+          JarEntry ze = null;
+          while ((ze = zip.getNextJarEntry()) != null) {
+            final String entryName = ze.getName();
+            if (entryName.startsWith(baseDir)
+                && entryName.endsWith(".xml")) {
+              // add 1 to baseDir to skip past the path separator
+              final String challengeName = entryName.substring(baseDir.length() + 1);
+              
+              // check that the file really exists and turn it into a URL
+              final URL challengeUrl = classLoader.getResource(baseDir
+                  + "/" + challengeName);
+              if (null != challengeUrl) {
+                urls.add(challengeUrl);
+
+              }
+            }
+          }
+
+          zip.close();
+        } catch (final IOException e) {
+          LOGGER.error("Error reading jar file at: "
+              + jar.toString(), e);
+        }
+
+      }
+    } else {
+      throw new UnsupportedOperationException("Cannot list files for URL "
+          + directory);
+
+    }
+
+    return urls;
+
+  }
 }
