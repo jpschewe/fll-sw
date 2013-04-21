@@ -117,6 +117,11 @@ public class SetupIndex {
         return false;
       }
     }
-
+    
+    @Override
+    public int hashCode() {
+      return getTitle().hashCode();
+    }
+    
   }
 }
