@@ -54,20 +54,20 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
       connection = datasource.getConnection();
 
       final int tournament = Queries.getCurrentTournament(connection);
-      
+
       // get parameters
       final String schedDataStr = request.getParameter("sched_data");
       if (null == schedDataStr
           || "".equals(schedDataStr)) {
         throw new FLLRuntimeException("Parameter 'sched_data' cannot be null");
       }
-      
+
       final String categoryDataStr = request.getParameter("category_data");
       if (null == categoryDataStr
           || "".equals(categoryDataStr)) {
         throw new FLLRuntimeException("Parameter 'category_data' cannot be null");
       }
-      
+
       final String division = request.getParameter("division_data");
       if (null == division
           || "".equals(division)) {
@@ -76,8 +76,7 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
 
       // decode JSON
       Gson gson = new Gson();
-      final Collection<FinalistDBRow> rows = gson.fromJson(schedDataStr, new TypeToken<Collection<FinalistDBRow>>() {
-      }.getType());
+      final Collection<FinalistDBRow> rows = gson.fromJson(schedDataStr, FinalistDBRowDeserialize.INSTANCE.getType());
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Sched Data has "
             + rows.size() + " rows");
@@ -89,23 +88,22 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
         }
       }
 
-      final Collection<FinalistCategoryRow> categories = gson.fromJson(categoryDataStr, new TypeToken<Collection<FinalistCategoryRow>>() {
-      }.getType());
+      final Collection<FinalistCategoryRow> categories = gson.fromJson(categoryDataStr,
+                                                                       FinalistCategoryRowDeserialize.INSTANCE.getType());
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("Category Data has "
             + rows.size() + " rows");
       }
       final Map<String, Boolean> categoryMap = new HashMap<String, Boolean>();
-      for(final FinalistCategoryRow cat : categories) {
+      for (final FinalistCategoryRow cat : categories) {
         categoryMap.put(cat.getCategoryName(), cat.isPublic());
       }
-      
-      
+
       final FinalistSchedule schedule = new FinalistSchedule(tournament, division, categoryMap, rows);
       schedule.store(connection);
 
       message.append("<p id='success'>Finalist schedule saved to the database</p>");
-      
+
     } catch (final SQLException e) {
       message.append("<p class='error'>Error saving finalist schedule into the database: "
           + e.getMessage() + "</p>");
@@ -118,4 +116,11 @@ public class StoreFinalistSchedule extends BaseFLLServlet {
 
   }
 
+  private static final class FinalistDBRowDeserialize extends TypeToken<Collection<FinalistDBRow>> {
+    public static final FinalistDBRowDeserialize INSTANCE = new FinalistDBRowDeserialize();
+  }
+
+  private static final class FinalistCategoryRowDeserialize extends TypeToken<Collection<FinalistCategoryRow>> {
+    public static final FinalistCategoryRowDeserialize INSTANCE = new FinalistCategoryRowDeserialize();
+  }
 }

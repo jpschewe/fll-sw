@@ -66,7 +66,7 @@ public final class FinalistDBRow implements Serializable {
   /**
    * Sort {@link FinalistDBRow} objects by time.
    */
-  private static final class TimeSort implements Comparator<FinalistDBRow> {
+  private static final class TimeSort implements Comparator<FinalistDBRow>, Serializable {
 
     @Override
     public int compare(final FinalistDBRow rowOne,

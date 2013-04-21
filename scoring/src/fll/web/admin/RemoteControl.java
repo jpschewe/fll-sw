@@ -48,10 +48,10 @@ public class RemoteControl {
         application.setAttribute("playoffDivision", divisions.get(0));
       }
       if (null == application.getAttribute("playoffRoundNumber")) {
-        application.setAttribute("playoffRoundNumber", new Integer(1));
+        application.setAttribute("playoffRoundNumber", Integer.valueOf(1));
       }
       if (null == application.getAttribute("slideShowInterval")) {
-        application.setAttribute("slideShowInterval", new Integer(10));
+        application.setAttribute("slideShowInterval", Integer.valueOf(10));
       }
       if (null == application.getAttribute("displayPage")) {
         application.setAttribute("displayPage", "welcome");

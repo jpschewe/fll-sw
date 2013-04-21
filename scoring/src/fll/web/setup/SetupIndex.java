@@ -104,5 +104,19 @@ public class SetupIndex {
       }
     }
 
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      } else if (null == o) {
+        return false;
+      } else if (o.getClass().equals(DescriptionInfo.class)) {
+        final DescriptionInfo other = (DescriptionInfo) o;
+        return getTitle().equals(other.getTitle());
+      } else {
+        return false;
+      }
+    }
+
   }
 }
