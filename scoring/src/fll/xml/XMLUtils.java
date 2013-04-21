@@ -223,8 +223,6 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
 
   /**
    * Get all challenge descriptors build into the software.
-   * 
-   * @return
    */
   public static Collection<URL> getAllKnownChallengeDescriptorURLs() {
     final String baseDir = "fll/resources/challenge-descriptors";

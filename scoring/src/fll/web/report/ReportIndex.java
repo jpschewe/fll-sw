@@ -34,7 +34,6 @@ public class ReportIndex {
 
   /**
    * @param application application context
-   * @param session session context
    * @param pageContext page context, information is put in here
    */
   public static void populateContext(final ServletContext application,

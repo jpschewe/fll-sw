@@ -333,13 +333,13 @@ public final class Queries {
 
   /**
    * Category name used for the overall rank for a team in the map returned by
-   * {@link #getTeamRankings(Connection, Document)}.
+   * {@link #getTeamRankings(Connection, ChallengeDescription)}.
    */
   public static final String OVERALL_CATEGORY_NAME = "Overall";
 
   /**
    * Category name used for the performance rank for a team in the map returned
-   * by {@link #getTeamRankings(Connection, Document)}.
+   * by {@link #getTeamRankings(Connection, ChallengeDescription)}.
    */
   public static final String PERFORMANCE_CATEGORY_NAME = "Performance";
 
@@ -1400,8 +1400,6 @@ public final class Queries {
    * 
    * @param connection connection to the database
    * @param winnerCriteria what determines a winner
-   * @param divisionStr the division to generate brackets for, as a String
-   * @param tournamentTeams keyed by team number
    * @return a List of teams
    * @throws SQLException on a database error
    * @throws RuntimeException if a team can't be found in tournamentTeams
@@ -1686,7 +1684,6 @@ public final class Queries {
    * Compute the total scores for all entered performance scores. Uses both
    * verified and unverified scores.
    * 
-   * @param document the challenge document
    * @param connection connection to the database
    * @param tournament the tournament to update scores for.
    * @throws SQLException
@@ -1904,8 +1901,6 @@ public final class Queries {
    * for the team in it's current tournament.
    * 
    * @param connection db connection
-   * @param document the description of the tournament, used to determine what
-   *          tables scores exist in
    * @param teamNumber the team
    */
   public static void demoteTeam(final Connection connection,

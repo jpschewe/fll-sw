@@ -38,7 +38,6 @@ public final class ScoreStandardization {
    * 
    * @param connection connection to the database with delete and insert
    *          privileges
-   * @param document the challenge document
    * @param tournament which tournament to summarize scores for
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Can't use variable param for column to set")
@@ -220,7 +219,6 @@ public final class ScoreStandardization {
    * the given tournament.
    * 
    * @param connection database connection
-   * @param document the challenge document
    * @param tournament the tournament to add scores for
    * @throws SQLException on an error talking to the database
    */

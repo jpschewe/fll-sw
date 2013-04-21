@@ -9,8 +9,7 @@ import fll.util.ScoreUtils;
 
 /**
  * Represents a score for a team. Only the values of simple goals are available
- * through this object. The values of computed goals are only computed when
- * computing the {@link ScoreUtils#computeTotalScore(TeamScore) total score}.
+ * through this object.
  */
 public abstract class TeamScore {
 
