@@ -86,7 +86,6 @@ public class CreateDB extends BaseFLLServlet {
         // create a new empty database from an XML descriptor
         final FileItem xmlFileItem = (FileItem) request.getAttribute("xmldocument");
 
-        final boolean forceRebuild = "1".equals(request.getAttribute("force_rebuild"));
         if (null == xmlFileItem
             || xmlFileItem.getSize() < 1) {
           message.append("<p class='error'>XML description document not specified</p>");
@@ -95,7 +94,7 @@ public class CreateDB extends BaseFLLServlet {
           final Document document = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
                                                                                 Utilities.DEFAULT_CHARSET));
 
-          GenerateDB.generateDB(document, connection, forceRebuild);
+          GenerateDB.generateDB(document, connection, true);
 
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
 

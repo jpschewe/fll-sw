@@ -66,7 +66,7 @@ public class TestAJAXBrackets {
     try {
       // Setup our playoffs
       final InputStream challenge = TestAJAXBrackets.class.getResourceAsStream("data/very-simple.xml");
-      IntegrationTestUtils.initializeDatabase(selenium, challenge, true);
+      IntegrationTestUtils.initializeDatabase(selenium, challenge);
       IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
       for (int i = 1; i < 6; ++i) {
         IntegrationTestUtils.addTeam(selenium, i, String.valueOf(i), "htk", "1", GenerateDB.DUMMY_TOURNAMENT_NAME);

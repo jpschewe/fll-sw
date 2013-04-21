@@ -45,12 +45,8 @@
 
 
   <p>Or provide your own challenge description file</p>
-
-  XML description document <input type='file' size='32'
-   name='xmldocument'><br /> <input type='checkbox'
-   name='force_rebuild' value='1' /> Rebuild the whole database,
-  including team data?<br /> <input type='submit'
-   name='reinitializeDatabase' value='Upload Description'
+  <input type='file' size='32' name='xmldocument'><br /> <input
+   type='submit' name='reinitializeDatabase' value='Upload Description'
    onclick='return confirm("This will erase ALL scores in the database fll (if it already exists), are you sure?")' />
 
 

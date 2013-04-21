@@ -57,7 +57,7 @@ public class TestPlayoffs {
       // initialize database using simple challenge descriptor that just has 1
       // goal from 1 - 100
       final InputStream challengeStream = TestPlayoffs.class.getResourceAsStream("data/simple.xml");
-      IntegrationTestUtils.initializeDatabase(selenium, challengeStream, true);
+      IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
 
       IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
 
