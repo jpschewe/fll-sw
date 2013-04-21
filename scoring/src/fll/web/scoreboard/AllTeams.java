@@ -6,22 +6,15 @@
 
 package fll.web.scoreboard;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.servlet.jsp.PageContext;
 
-import org.apache.log4j.Logger;
-
-import fll.util.LogUtils;
 import fll.web.SessionAttributes;
 
 /**
  * Populate the context for allteams.jsp.
  */
 public class AllTeams {
-
-  private static final Logger LOGGER = LogUtils.getLogger();
 
   public static void populateContext(final HttpServletRequest request,
                                      final HttpSession session) {
