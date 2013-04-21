@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fll title="FLL 2006 HSR Challenge: Nano Quest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<fll title="HSR 2006 Challenge: Nano Quest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd">
-
-	<!-- $Rev: 351 $ -->
 
 	<Performance minimumScore="0" weight="1.0">
 

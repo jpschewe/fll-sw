@@ -9,11 +9,11 @@ var scrollPause = 100; // amount of time, in milliseconds, to pause between
 // http://www.evolt.org/article/document_body_doctype_switching_and_more/17/30655/index.html
 function getScrollPosition() {
 	if (window.pageYOffset) {
-		return window.pageYOffset
+		return window.pageYOffset;
 	} else if (document.documentElement && document.documentElement.scrollTop) {
-		return document.documentElement.scrollTop
+		return document.documentElement.scrollTop;
 	} else if (document.body) {
-		return document.body.scrollTop
+		return document.body.scrollTop;
 	}
 }
 

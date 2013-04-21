@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fll title="Paul Keeny (Anoka): Smart Move" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="$Rev: 351 $">
+<fll title="2009 Boston Scientific MN FIRST LEGO League Tournament: Smart Move" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 351">
 
   <Performance minimumScore="0" weight="1.0">
 
@@ -127,7 +127,7 @@
 
 
   <subjectiveCategory name="robustdesign" title="Design"
-    weight="1.0">
+    weight="0.5">
     <goal initialValue="0" max="20" min="0" multiplier="1" name="strategy"
       title="Strategy, Process, Problem Solving">
     </goal>
@@ -147,7 +147,7 @@
 
 
   <subjectiveCategory name="programming" title="Programming"
-    weight="1.0">
+    weight="0.5">
     <goal initialValue="0" max="20" min="0" multiplier="1"
       name="programming_strategy" title="Strategy, Process, Problem Solving" />
     <goal initialValue="0" max="20" min="0" multiplier="1"
@@ -161,6 +161,25 @@
     </goal>
     <goal initialValue="0" max="20" min="0" multiplier="1" name="design"
       title="Overall Design">
+    </goal>
+  </subjectiveCategory>
+
+  <subjectiveCategory name="research"
+    title="Research Project Assessment" weight="1.0">
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="research"
+      title="Research">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1"
+      name="innovative_solution" title="Innovative Solution">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="background"
+      title="Background, Data and Graphics">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="creative"
+      title="Quality of Presentation/Creative Presentation">
+    </goal>
+    <goal initialValue="0" max="20" min="0" multiplier="1" name="sharing"
+      title="Sharing">
     </goal>
   </subjectiveCategory>
 

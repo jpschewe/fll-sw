@@ -92,12 +92,10 @@ public final class IntegrationTestUtils {
    * 
    * @param driver the test controller
    * @param challengeStream the challenge descriptor
-   * @param forceRebuild if true, then force the database to be rebuilt
    * @throws IOException
    */
   public static void initializeDatabase(final WebDriver driver,
-                                        final InputStream challengeStream,
-                                        final boolean forceRebuild) throws IOException {
+                                        final InputStream challengeStream) throws IOException {
     try {
       Assert.assertNotNull(challengeStream);
       final File challengeFile = IntegrationTestUtils.storeInputStreamToFile(challengeStream);
@@ -114,11 +112,6 @@ public final class IntegrationTestUtils {
 
         final WebElement fileEle = driver.findElement(By.name("xmldocument"));
         fileEle.sendKeys(challengeFile.getAbsolutePath());
-
-        if (forceRebuild) {
-          final WebElement rebuildEle = driver.findElement(By.name("force_rebuild"));
-          rebuildEle.click();
-        }
 
         final WebElement reinitDB = driver.findElement(By.name("reinitializeDatabase"));
         reinitDB.click();

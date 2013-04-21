@@ -1,109 +1,116 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fll title="Boston Scientific MN FIRST LEGO League Tournament: Smart Move" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="$Rev: 351 $">
+<fll title="2010 Boston Scientific MN FIRST LEGO League Tournament" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" revision="Rev: 5">
 
   <Performance minimumScore="0" weight="1.0">
 
-    <goal name="access_places" title="Gain Access To Places - Drive wheels touching"
-      initialValue="0">
-      <value score="25" title="Target Spot" value="target_spot"/>
-      <value score="25" title="Red Deck" value="vehicle_sharing"/>
-      <value score="20" title="Yellow Bridge Deck" value="bridge_deck"/>
-      <value score="0" title="None" value="none"/>
-    </goal>
-
-    <goal name="access_markers" title="Gain Access To Things: Access Markers Down"
+    <goal name="common_bone_repair" title="Common Arm Bone Repair"
       multiplier="25"
-      max="4" />
-
-    <goal name="loops" title="Gain Access To Things: Loops in Base"
-      multiplier="10"
-      max="11" />
-
-    <goal name="warning_beacons" title="Avoid Impacts: Warning Beacons Standing"
-      multiplier="10"
-      max="8"
-      initialValue="8"
       />
 
-    <goal name="walls_remaining_up" title="Number of walls upright"
-      multiplier="0"
-      max="5"
-      initialValue="4"
-      />
-
-    <goal name="vehicle_impact_test" title="Survive Impacts: Vehicle Release Test"
-      multiplier="20"
-      />
-
-    <goal name="passenger_restraint_test" title="Survive Impacts: Single Passenger Restraint Test"
+    <goal name="bone_bridge_inserted" title="Leg Bone Bridge Inserted"
       multiplier="15"
       />
 
-    <goal name="multiple_safety_test" title="Passenger Safety Test - 4 People in Target"
-      multiplier="10"
+    <goal name="goal_scored" title="Goal Scored"
+      multiplier="25"
       />
 
-    <computedGoal name="avoid_sensor_walls" title="Avoid Impacts: Sensor Walls">
-      <switch>
-        <case>
-          <condition>
-            <left>
-              <term scoreType="raw" goal="walls_remaining_up"/>
-            </left>
-            <greater-than/>
-            <right>
-              <term scoreType="raw" goal="access_markers"/>
-            </right>
-          </condition>
-          <result>
-            <term coefficient="10" scoreType="raw" goal="access_markers"/>
-          </result>
-        </case>
-        <default>
-          <term coefficient="10" scoreType="raw" goal="walls_remaining_up"/>
-        </default>
-      </switch>
-    </computedGoal>
-    
+    <!-- if goal_scored, must have bone_bridge_inserted -->
+    <restriction lowerBound="0" upperBound="1"
+      message="You cannot have the Goal Scored without the Bone Bridge Inserted">
+      <term coefficient="-1" goal="goal_scored" scoreType="raw"/>
+      <term coefficient="1" goal="bone_bridge_inserted" scoreType="raw"/>
+    </restriction>
 
-    <computedGoal name="survive_sensor_walls" title="Survive Impacts: Sensor Walls">
-      <switch>
-        <case>
-          <condition>
-            <left>
-              <term scoreType="raw" goal="walls_remaining_up"/>
-            </left>
-            <equal-to/>
-            <right>
-              <constant value="0"/>
-            </right>
-          </condition>
-          <result>
-            <constant value="40"/>
-          </result>
-        </case>
-        <default>
-          <constant value="0"/>
-        </default>
-      </switch>
-    </computedGoal>
+    <goal name="rapid_blood_screening_syringe" title="Syringe Ever In Base"
+      multiplier="25"
+      />
+
+    <goal name="rapid_blood_screening_cells" title="White and No Red Blood Cells in Patient Area"
+      multiplier="15"
+      />
+
+    <goal name="red_blood_cells" title="Red Blood Cells"
+      multiplier="5"
+      max="8"
+      />
+
+    <goal name="bad_cell_destruction" title="Bad Cell Destruction"
+      initialValue="0">
+      <value score="25" title="Destruction" value="destruction"/>
+      <value score="20" title="Id" value="identification"/>
+      <value score="0" title="None" value="none"/>
+    </goal>
+
+    <goal name="mechanical_arm_patent" title="Mechanical Arm Holding Patent"
+      multiplier="25"
+      />
+
+    <goal name="cardiac_patch" title="Cardiac Patch"
+      multiplier="20"
+      />
+
+    <goal name="pace_maker" title="Pace Maker"
+      multiplier="25"
+      />
+
+    <goal name="nerve_mapping" title="Nerve Mapping"
+      multiplier="15"
+      />
+
+    <goal name="object_control" title="Door Control Through Thought"
+      multiplier="20"
+      />
+
+    <goal name="medicine_part1" title="Medicine Auto-dispensing: Blue and Whites off, pinks on"
+      multiplier="25"
+      />
+
+    <goal name="medicine_part2" title="Blue/White/Container in Patient Area"
+      multiplier="5"
+      />
+
+    <goal name="sensitivity" title="Robotic Sensitivity - Weight Up"
+      multiplier="25"
+      />
+
+    <goal name="professional_teamwork" title="Professional Teamwork"
+      multiplier="25"
+      />
+
+    <goal name="bionic_eyes" title="Bionic Eye Touching Upper Body"
+      multiplier="20"
+      />
+
+    <goal name="stent" title="Stent Inserted"
+      multiplier="25"
+      />
+
 
     <tiebreaker>
       <test winner='HIGH'>
-        <term goal='access_places' scoreType='computed' />
+        <term goal='goal_scored' scoreType='computed' />
       </test>
+
       <test winner='HIGH'>
-        <term goal='loops' scoreType='computed' />
+        <term goal='pace_maker' scoreType='computed' />
       </test>
+
       <test winner='HIGH'>
-        <term goal='survive_sensor_walls' scoreType='computed' />
+        <term goal='professional_teamwork' scoreType='computed' />
       </test>
+
       <test winner='HIGH'>
-        <term goal='warning_beacons' scoreType='computed' />
+        <term goal='bad_cell_destruction' scoreType='computed' />
       </test>
+
+      <test winner='HIGH'>
+        <term goal='mechanical_arm_patent' scoreType='computed' />
+      </test>
+      
     </tiebreaker>
-    
+
   </Performance>
 
   <subjectiveCategory name="teamwork" title="Teamwork"

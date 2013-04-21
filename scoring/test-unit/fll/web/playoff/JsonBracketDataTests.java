@@ -261,7 +261,7 @@ public class JsonBracketDataTests {
     // in-memory db instance
     Class.forName("org.hsqldb.jdbcDriver").newInstance();
     connection = DriverManager.getConnection("jdbc:hsqldb:mem:flldb-testJsonBrackets");
-    GenerateDB.generateDB(document, connection, true);
+    GenerateDB.generateDB(document, connection);
 
     Tournament.createTournament(connection, "Playoff Test Tournament", "Test");
     Queries.setCurrentTournament(connection, 2); // 2 is tournament ID

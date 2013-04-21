@@ -23,7 +23,6 @@ public class DatabaseTeamScore extends TeamScore {
    * Create a database team score object for a non-performance score, for use
    * when the result set is already available.
    * 
-   * @param categoryDescription passed to superclass
    * @param teamNumber passed to superclass
    * @param rs the {@link ResultSet} to pull the scores from
    * @throws SQLException if there is an error getting the current tournament
