@@ -25,19 +25,24 @@
  <form id='setup' action='CreateDB' method='post'
   enctype='multipart/form-data'>
 
-  <p>On this page you can setup the database used by the scoring software.</p>
+  <p>On this page you can setup the database used by the scoring
+   software.</p>
 
   <p>You can select a description that shipped with the software</p>
   <select id='description' name='description'>
    <c:forEach items="${descriptions}" var="description">
-    <option value="${description.URL }">${description.title }</option>
+    <option value="${description.URL }">
+     ${description.title }
+     <c:if test='${not empty description.revision }'>
+     (${description.revision })
+     </c:if>
+    </option>
    </c:forEach>
-  </select>
-<input type='submit'
-   name='chooseDescription' value='Choose Description'
+  </select> <input type='submit' name='chooseDescription'
+   value='Choose Description'
    onclick='return confirm("This will erase ALL scores in the database fll (if it already exists), are you sure?")' />
-   
-   
+
+
 
   <p>Or provide your own challenge description file</p>
 
@@ -53,7 +58,7 @@
   <p>This will allow one to initialize the database based upon a
    previous database dump that was created using the download database
    link on the administration page.</p>
-   
+
   <input type='file' size='32' name='dbdump'> <input
    type='submit' name='createdb' value='Upload Dump' />
 

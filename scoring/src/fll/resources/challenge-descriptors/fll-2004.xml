@@ -2,8 +2,6 @@
 <fll xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="http://fll-sw.sourceforge.net/fll.xsd" title="FLL 2004 Challenge: No Limits">
 
-	<!-- $Rev$ -->
-
 	<Performance weight="1.0">
 
 		<goal name="remove_glasses" title="Remove the Glasses"
