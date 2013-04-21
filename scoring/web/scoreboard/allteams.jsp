@@ -18,7 +18,7 @@
 
 <%
     fll.web.scoreboard.AllTeams
-            .populateContext(request, application, session, pageContext);
+            .populateContext(request, session);
 %>
 
 
