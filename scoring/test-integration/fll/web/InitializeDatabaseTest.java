@@ -32,6 +32,6 @@ public class InitializeDatabaseTest {
   @Test
   public void testInitializeDatabase() throws IOException {
     final InputStream challengeStream = getClass().getResourceAsStream("data/challenge-ft.xml");
-    IntegrationTestUtils.initializeDatabase(selenium, challengeStream, true);
+    IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
   }
 }
