@@ -454,8 +454,6 @@ public class ScoresheetGenerator {
    * headers and before the scoring/initials blanks at the bottom of the
    * scoresheet.
    * 
-   * @param document The document object containing the challenge descriptor
-   *          info.
    */
   public void setChallengeInfo(final ChallengeDescription description) {
     setPageTitle(description.getTitle());

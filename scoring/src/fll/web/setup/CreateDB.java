@@ -7,6 +7,8 @@ package fll.web.setup;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.zip.ZipInputStream;
@@ -29,6 +31,7 @@ import org.w3c.dom.Document;
 import fll.Utilities;
 import fll.db.GenerateDB;
 import fll.db.ImportDB;
+import fll.util.FLLInternalException;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -61,11 +64,28 @@ public class CreateDB extends BaseFLLServlet {
       // must be first to ensure the form parameters are set
       UploadProcessor.processUpload(request);
 
-      if (null != request.getAttribute("reinitializeDatabase")) {
+      if (null != request.getAttribute("chooseDescription")) {
+        final String description = (String) request.getAttribute("description");
+        try {
+          final URL descriptionURL = new URL(description);
+          final Document document = ChallengeParser.parse(new InputStreamReader(descriptionURL.openStream(),
+                                                                                Utilities.DEFAULT_CHARSET));
+
+          GenerateDB.generateDB(document, connection);
+
+          application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
+
+          message.append("<p id='success'><i>Successfully initialized database</i></p>");
+          redirect = "/admin/createUsername.jsp";
+
+        } catch (final MalformedURLException e) {
+          throw new FLLInternalException("Could not parse URL from choosen description: "
+              + description, e);
+        }
+      } else if (null != request.getAttribute("reinitializeDatabase")) {
         // create a new empty database from an XML descriptor
         final FileItem xmlFileItem = (FileItem) request.getAttribute("xmldocument");
 
-        final boolean forceRebuild = "1".equals(request.getAttribute("force_rebuild"));
         if (null == xmlFileItem
             || xmlFileItem.getSize() < 1) {
           message.append("<p class='error'>XML description document not specified</p>");
@@ -74,7 +94,7 @@ public class CreateDB extends BaseFLLServlet {
           final Document document = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
                                                                                 Utilities.DEFAULT_CHARSET));
 
-          GenerateDB.generateDB(document, connection, forceRebuild);
+          GenerateDB.generateDB(document, connection);
 
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
 

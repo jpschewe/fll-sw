@@ -129,8 +129,6 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
    * score totals.
    * 
    * @param file the file to read the data from
-   * @param challengeDocument the already parsed challenge document. Used to get
-   *          information about the subjective categories.
    * @param connection the database connection to write to
    * @throws SAXException if there is an error parsing the document
    */

@@ -39,7 +39,6 @@ public final class SubjectiveTableModel extends AbstractTableModel {
   /**
    * @param scoreDocument XML document that represents the teams that are being
    *          scored along with the judges and the current set of scores
-   * @param subjectiveElement subjective category
    */
   public SubjectiveTableModel(final Document scoreDocument,
                               final ScoreCategory subjectiveCategory) {

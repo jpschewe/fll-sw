@@ -140,7 +140,7 @@ public class FullTournamentTest {
       // --- initialize database ---
       LOGGER.info("Initializing the database from data/challenge-ft.xml");
       final InputStream challengeDocIS = FullTournamentTest.class.getResourceAsStream("data/challenge-ft.xml");
-      IntegrationTestUtils.initializeDatabase(selenium, challengeDocIS, true);
+      IntegrationTestUtils.initializeDatabase(selenium, challengeDocIS);
 
       LOGGER.info("Loading teams");
       loadTeams();

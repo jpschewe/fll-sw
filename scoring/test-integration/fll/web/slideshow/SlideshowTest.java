@@ -55,7 +55,7 @@ public class SlideshowTest {
   public void testSlideshowInterval() throws IOException {
     LOGGER.info("Top testSlideshowInterval");
     final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
-    IntegrationTestUtils.initializeDatabase(selenium, challengeStream, true);
+    IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
 
     IntegrationTestUtils.setTournament(selenium, GenerateDB.DUMMY_TOURNAMENT_NAME);
 

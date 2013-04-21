@@ -61,7 +61,7 @@ public class TournamentScheduleTest {
 
       memConnection = DriverManager.getConnection(url);
 
-      GenerateDB.generateDB(document, memConnection, true);
+      GenerateDB.generateDB(document, memConnection);
       final boolean exists = TournamentSchedule.scheduleExistsInDatabase(memConnection, 1);
       Assert.assertFalse(exists);
 
@@ -86,7 +86,7 @@ public class TournamentScheduleTest {
 
       memConnection = DriverManager.getConnection(url);
 
-      GenerateDB.generateDB(document, memConnection, true);
+      GenerateDB.generateDB(document, memConnection);
 
       Queries.createTournament(memConnection, tournamentName, null);
       final Tournament tournament = Tournament.findTournamentByName(memConnection, tournamentName);
@@ -172,7 +172,7 @@ public class TournamentScheduleTest {
 
       memConnection = DriverManager.getConnection(url);
 
-      GenerateDB.generateDB(document, memConnection, true);
+      GenerateDB.generateDB(document, memConnection);
 
       final TournamentSchedule schedule = new TournamentSchedule(memConnection, 1);
 

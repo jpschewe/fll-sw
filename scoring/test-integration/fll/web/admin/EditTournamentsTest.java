@@ -43,7 +43,7 @@ public class EditTournamentsTest {
   @Test
   public void testAddTournament() throws IOException {
     final InputStream challengeStream = InitializeDatabaseTest.class.getResourceAsStream("data/challenge-ft.xml");
-    IntegrationTestUtils.initializeDatabase(selenium, challengeStream, true);
+    IntegrationTestUtils.initializeDatabase(selenium, challengeStream);
     try {
       selenium.findElement(By.linkText("Admin Index")).click();
 

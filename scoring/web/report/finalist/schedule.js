@@ -7,11 +7,11 @@
 String.repeat = function(chr, count) {
 	var str = "";
 	for ( var x = 0; x < count; x++) {
-		str += chr
+		str += chr;
 	}
-	;
+	
 	return str;
-}
+};
 
 String.prototype.padL = function(width, pad) {
 	if (!width || width < 1)
@@ -19,12 +19,12 @@ String.prototype.padL = function(width, pad) {
 
 	if (!pad)
 		pad = " ";
-	var length = width - this.length
+	var length = width - this.length;
 	if (length < 1)
 		return this.substr(0, width);
 
 	return (String.repeat(pad, length) + this).substr(0, width);
-}
+};
 
 /**
  * Used for packaging up and sending to the server to put in the database.
@@ -75,7 +75,7 @@ $(document).ready(
 
 				$.each($.finalist.getAllCategories(),
 						function(i, category) {
-							var teamNum = slot.categories[category.catId]
+							var teamNum = slot.categories[category.catId];
 							if (teamNum == null) {
 								row.append($("<td>&nbsp;</td>"));
 							} else {

@@ -5,11 +5,12 @@
  */
 package fll.xml;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
+import java.util.Collection;
 
 import junit.framework.Assert;
 
@@ -18,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import fll.Utilities;
 import fll.util.LogUtils;
 
 /**
@@ -364,56 +366,24 @@ public class ChallengeParserTest {
   }
 
   /**
-   * Find the challenge descriptor directory.
-   * 
-   * @return null if not found
-   */
-  private static File findChallengeDescriptorDirctory() {
-    final String[] possibleDirs = { "../../challenge-descriptors", "challenge-descriptors" };
-    for (final String dir : possibleDirs) {
-      final File challengeDir = new File(dir);
-      if (!challengeDir.exists()) {
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Challenge descriptor directory doesn't exist: "
-              + challengeDir.getAbsolutePath());
-        }
-      } else if (!challengeDir.isDirectory()) {
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Challenge descriptor directory isn't a directory: "
-              + challengeDir.getAbsolutePath());
-        }
-      } else {
-        return challengeDir;
-      }
-    }
-
-    return null;
-  }
-
-  /**
    * Check that all known challenge descriptors are still valid.
-   * @throws IOException 
+   * 
+   * @throws IOException
    */
   @Test
   public void testAllDescriptors() throws IOException {
-    final File challengeDir = findChallengeDescriptorDirctory();
-    if (null == challengeDir) {
-      LOGGER.warn("Unable to find challenge descriptor directory - no tests will run");
-      return;
-    }
+    final Collection<URL> urls = XMLUtils.getAllKnownChallengeDescriptorURLs();
 
-    for (final File f : challengeDir.listFiles()) {
-      LOGGER.info("File: "
-          + f.getName());
-      if(f.getName().endsWith(".xml")) {
-        LOGGER.info("File: "
-                    + f.getName());
-        final FileReader reader = new FileReader(f);
-        final Document document = ChallengeParser.parse(reader);
-        Assert.assertNotNull(document);
-        reader.close();
-        new ChallengeDescription(document.getDocumentElement());
-      }
+    for (final URL u : urls) {
+      LOGGER.info("Challenge: "
+          + u.toString());
+
+      final InputStream stream = u.openStream();
+      final Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET);
+      final Document document = ChallengeParser.parse(reader);
+      Assert.assertNotNull(document);
+      reader.close();
+      new ChallengeDescription(document.getDocumentElement());
     }
   }
 

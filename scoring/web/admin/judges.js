@@ -34,6 +34,7 @@ $(document).ready(function() {
 }); // end ready function
 
 function addRows(numRows) {
+	var rowIndex;
 	for (rowIndex = 0; rowIndex < numRows; ++rowIndex) {
 		var judgeIdx = maxIndex + 1;
 		maxIndex = judgeIdx;
