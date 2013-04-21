@@ -58,9 +58,9 @@ public class GenerateDBTest {
     Connection connection = null;
     try {
       connection = datasource.getConnection();
-      GenerateDB.generateDB(document, connection, false);
+      GenerateDB.generateDB(document, connection);
 
-      GenerateDB.generateDB(document, connection, true);
+      GenerateDB.generateDB(document, connection);
     } finally {
       SQLFunctions.close(connection);
       

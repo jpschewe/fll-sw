@@ -71,7 +71,7 @@ public class CreateDB extends BaseFLLServlet {
           final Document document = ChallengeParser.parse(new InputStreamReader(descriptionURL.openStream(),
                                                                                 Utilities.DEFAULT_CHARSET));
 
-          GenerateDB.generateDB(document, connection, true);
+          GenerateDB.generateDB(document, connection);
 
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
 
@@ -94,7 +94,7 @@ public class CreateDB extends BaseFLLServlet {
           final Document document = ChallengeParser.parse(new InputStreamReader(xmlFileItem.getInputStream(),
                                                                                 Utilities.DEFAULT_CHARSET));
 
-          GenerateDB.generateDB(document, connection, true);
+          GenerateDB.generateDB(document, connection);
 
           application.removeAttribute(ApplicationAttributes.CHALLENGE_DOCUMENT);
 
