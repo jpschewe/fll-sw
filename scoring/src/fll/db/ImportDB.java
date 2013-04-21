@@ -184,7 +184,7 @@ public final class ImportDB {
       memConnection = memSource.getConnection();
 
       final Document challengeDocument = loadDatabaseDump(zipfile, memConnection);
-      GenerateDB.generateDB(challengeDocument, destConnection, true);
+      GenerateDB.generateDB(challengeDocument, destConnection);
 
       memStmt = memConnection.createStatement();
 
@@ -501,7 +501,7 @@ public final class ImportDB {
   }
 
   private static void upgrade1To2(final Connection connection) throws SQLException {
-    GenerateDB.createScheduleTables(connection, true, SQLFunctions.getTablesInDB(connection), false);
+    GenerateDB.createScheduleTables(connection, false);
 
     // set the version to 2 - this will have been set while creating
     // global_parameters, but we need to force it to 2 for later upgrade
@@ -510,7 +510,7 @@ public final class ImportDB {
   }
 
   private static void upgrade8To9(final Connection connection) throws SQLException {
-    GenerateDB.createFinalistScheduleTables(connection, true, SQLFunctions.getTablesInDB(connection), false);
+    GenerateDB.createFinalistScheduleTables(connection, false);
 
     setDBVersion(connection, 9);
   }
@@ -652,7 +652,7 @@ public final class ImportDB {
       stmt.executeUpdate("DROP Table IF EXISTS TournamentParameters");
 
       // add the global_parameters table
-      GenerateDB.createGlobalParameters(challengeDocument, connection, true, SQLFunctions.getTablesInDB(connection));
+      GenerateDB.createGlobalParameters(challengeDocument, connection);
 
       // ---- switch from string tournament names to integers ----
 
@@ -673,7 +673,7 @@ public final class ImportDB {
       stmt.executeUpdate("DROP TABLE Tournaments");
 
       // create Tournaments table
-      GenerateDB.tournaments(connection, true, SQLFunctions.getTablesInDB(connection));
+      GenerateDB.tournaments(connection);
 
       // add all tournaments back
       for (final Map.Entry<String, String> entry : nameLocation.entrySet()) {
@@ -731,7 +731,7 @@ public final class ImportDB {
       }
 
       // create new tournament parameters table
-      GenerateDB.tournamentParameters(connection, true, SQLFunctions.getTablesInDB(connection));
+      GenerateDB.tournamentParameters(connection);
 
       GenerateDB.setDefaultParameters(connection);
 
