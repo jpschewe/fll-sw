@@ -12,12 +12,14 @@ package fll.web.report.finalist;
  * javascript/JSON.
  */
 final class FinalistCategoryRow {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "UWF_UNWRITTEN_FIELD" }, justification = "Populated by JSON deserialization")
   private String categoryName;
 
   public String getCategoryName() {
     return categoryName;
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "UWF_UNWRITTEN_FIELD" }, justification = "Populated by JSON deserialization")
   private boolean isPublic;
 
   public boolean isPublic() {

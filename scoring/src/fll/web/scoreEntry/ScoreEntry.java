@@ -895,7 +895,7 @@ public final class ScoreEntry {
         throw new RuntimeException("Expected 'raw' or 'computed', but found: "
             + scoreType);
       }
-      final String value = String.format("%f * %s", coefficient, varName).toString();
+      final String value = String.format("%f * %s", coefficient, varName);
       final FloatingPointType floatingPoint = childEle.getFloatingPoint();
       formatter.format("%s", applyFloatingPoint(value, floatingPoint));
     }
