@@ -52,8 +52,7 @@ public class SetupIndex {
         reader.close();
         final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
 
-        final String title = description.getTitle();
-        descriptions.add(new DescriptionInfo(url, title));
+        descriptions.add(new DescriptionInfo(url, description));
 
       } catch (final IOException e) {
         LOGGER.error("Error reading description: "
@@ -61,7 +60,7 @@ public class SetupIndex {
       }
     }
 
-    Collections.sort(descriptions);    
+    Collections.sort(descriptions);
     pageContext.setAttribute("descriptions", descriptions);
   }
 
@@ -70,9 +69,9 @@ public class SetupIndex {
    */
   public static final class DescriptionInfo implements Comparable<DescriptionInfo> {
     public DescriptionInfo(final URL url,
-                           final String title) {
+                           final ChallengeDescription description) {
       mUrl = url;
-      mTitle = title;
+      mDescription = description;
     }
 
     private final URL mUrl;
@@ -81,10 +80,18 @@ public class SetupIndex {
       return mUrl;
     }
 
-    private final String mTitle;
+    private final ChallengeDescription mDescription;
+
+    public ChallengeDescription getDescription() {
+      return mDescription;
+    }
 
     public String getTitle() {
-      return mTitle;
+      return mDescription.getTitle();
+    }
+
+    public String getRevision() {
+      return mDescription.getRevision();
     }
 
     public int compareTo(final DescriptionInfo other) {
