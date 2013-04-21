@@ -24,9 +24,7 @@ public class AllTeams {
   private static final Logger LOGGER = LogUtils.getLogger();
 
   public static void populateContext(final HttpServletRequest request,
-                                     final ServletContext application,
-                                     final HttpSession session,
-                                     final PageContext pageContext) {
+                                     final HttpSession session) {
     storeScroll(request, session);
   }
  

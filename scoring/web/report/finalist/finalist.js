@@ -641,9 +641,9 @@
 		displayNavbar : function() {
 			var element;
 			if (window.location.pathname.match(/\/params.html$/)) {
-				element = $("<span></span>")
+				element = $("<span></span>");
 			} else {
-				element = $("<a href='params.html'></a>")
+				element = $("<a href='params.html'></a>");
 			}
 			element.text("Parameters");
 			$("#navbar").append(element);
@@ -651,9 +651,9 @@
 			$("#navbar").append($("<span> - </span>"));
 
 			if (window.location.pathname.match(/\/non-numeric.html$/)) {
-				element = $("<span></span>")
+				element = $("<span></span>");
 			} else {
-				element = $("<a href='non-numeric.html'></a>")
+				element = $("<a href='non-numeric.html'></a>");
 			}
 			element.text("Non-numeric");
 			$("#navbar").append(element);
@@ -664,7 +664,7 @@
 				if (category.name != $.finalist.CHAMPIONSHIP_NAME) {
 					if (window.location.pathname.match(/\/numeric.html$/)
 							&& window.location.search == "?" + category.catId) {
-						element = $("<span></span>")
+						element = $("<span></span>");
 					} else {
 						element = $("<a href='numeric.html'></a>");
 						element.click(function() {
@@ -684,9 +684,9 @@
 			if (window.location.pathname.match(/\/numeric.html$/)
 					&& window.location.search == "?"
 							+ championshipCategory.catId) {
-				element = $("<span></span>")
+				element = $("<span></span>");
 			} else {
-				element = $("<a href='numeric.html'></a>")
+				element = $("<a href='numeric.html'></a>");
 				element
 						.click(function() {
 							$.finalist
@@ -700,9 +700,9 @@
 
 			if (window.location.pathname
 					.match(/\/choose-public-categories.html$/)) {
-				element = $("<span></span>")
+				element = $("<span></span>");
 			} else {
-				element = $("<a href='choose-public-categories.html'></a>")
+				element = $("<a href='choose-public-categories.html'></a>");
 			}
 			element.text("Public Categories");
 			$("#navbar").append(element);
@@ -710,9 +710,9 @@
 			$("#navbar").append($("<span> - </span>"));
 
 			if (window.location.pathname.match(/\/schedule.html$/)) {
-				element = $("<span></span>")
+				element = $("<span></span>");
 			} else {
-				element = $("<a href='schedule.html'></a>")
+				element = $("<a href='schedule.html'></a>");
 			}
 			element.text("Schedule");
 			$("#navbar").append(element);
