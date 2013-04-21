@@ -5,9 +5,6 @@
  */
 package fll.web.playoff;
 
-import org.apache.log4j.Logger;
-
-import fll.util.LogUtils;
 import fll.util.ScoreUtils;
 
 /**
@@ -16,8 +13,6 @@ import fll.util.ScoreUtils;
  * computing the {@link ScoreUtils#computeTotalScore(TeamScore) total score}.
  */
 public abstract class TeamScore {
-
-  private static final Logger LOG = LogUtils.getLogger();
 
   /**
    * Run number used for team scores that are not performance scores.
