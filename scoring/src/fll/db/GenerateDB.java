@@ -346,6 +346,7 @@ public final class GenerateDB {
       sql.append(" ,division VARCHAR(32) NOT NULL");
       sql.append(" ,CONSTRAINT finalist_categories_pk PRIMARY KEY (tournament, category, division)");
       if (createConstraints) {
+        sql.append(" ,CONSTRAINT finalist_categories_fk1 FOREIGN KEY(tournament) REFERENCES Tournaments(tournament_id)");
       }
       sql.append(")");
       stmt.executeUpdate(sql.toString());
