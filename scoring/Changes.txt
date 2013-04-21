@@ -1,3 +1,4 @@
+* 159 - Allow one to choose a known challenge description
 * 216 - Add judging station to non-numeric categories in the finalist
         scheduling app
 * 212 - Add playoff divisions to the list of divisions one can schedule
