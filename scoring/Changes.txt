@@ -1,3 +1,4 @@
+* 224 - handle '&' in column headers when uploading teams
 * 159 - Allow one to choose a known challenge description
 * 216 - Add judging station to non-numeric categories in the finalist
         scheduling app
