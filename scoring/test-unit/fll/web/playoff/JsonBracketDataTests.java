@@ -6,7 +6,6 @@
 
 package fll.web.playoff;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipOutputStream;
 
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -33,9 +31,7 @@ import com.google.gson.Gson;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
-import fll.db.DumpDB;
 import fll.db.GenerateDB;
-import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.JsonUtilities;
 import fll.util.JsonUtilities.BracketLeafResultSet;
@@ -122,11 +118,6 @@ public class JsonBracketDataTests {
     // give opponent a score
     insertScore(playoff.getConnection(), 5, 1, false, 20D);
     query.clear();
-
-    // FIXME debug
-    final ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream("test.flldb"));
-    DumpDB.dumpDatabase(zipOut, playoff.getConnection(), GlobalParameters.getChallengeDocument(playoff.getConnection()));
-    zipOut.close();
 
     // ask for round we just entered score for
     row = playoff.getBracketData().getRowNumberForLine(2, 2);
