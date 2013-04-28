@@ -1,3 +1,5 @@
+* 219 - Add more number of teams and judging group information to the
+        ranking report
 * 224 - handle '&' in column headers when uploading teams
 * 159 - Allow one to choose a known challenge description
 * 216 - Add judging station to non-numeric categories in the finalist

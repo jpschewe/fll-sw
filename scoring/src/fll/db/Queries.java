@@ -35,7 +35,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
+import fll.CategoryRank;
 import fll.Team;
+import fll.TeamRanking;
 import fll.Tournament;
 import fll.TournamentTeam;
 import fll.Utilities;
@@ -111,7 +113,7 @@ public final class Queries {
    *         that score group
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
-  public static Map<String, Collection<Integer>> computeScoreGroups(final Connection connection,
+  private static Map<String, Collection<Integer>> computeScoreGroups(final Connection connection,
                                                                     final int tournament,
                                                                     final String division,
                                                                     final String categoryName) throws SQLException {
@@ -120,8 +122,12 @@ public final class Queries {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT Judge FROM "
-          + categoryName + " WHERE TeamNumber = ? AND Tournament = ? AND ComputedTotal IS NOT NULL ORDER BY Judge");
+      prep = connection.prepareStatement("SELECT DISTINCT Judges.station"
+          + " FROM " + categoryName + ", Judges" //
+          + " WHERE TeamNumber = ?" //
+          + " AND Tournament = ?" //
+          + " AND Judges.id = " + categoryName + ".Judge"
+          + " AND ComputedTotal IS NOT NULL");
       prep.setInt(2, tournament);
 
       // foreach team, put the team in a score group
@@ -332,31 +338,15 @@ public final class Queries {
   }
 
   /**
-   * Category name used for the overall rank for a team in the map returned by
-   * {@link #getTeamRankings(Connection, ChallengeDescription)}.
-   */
-  public static final String OVERALL_CATEGORY_NAME = "Overall";
-
-  /**
-   * Category name used for the performance rank for a team in the map returned
-   * by {@link #getTeamRankings(Connection, ChallengeDescription)}.
-   */
-  public static final String PERFORMANCE_CATEGORY_NAME = "Performance";
-
-  public static final int NO_SHOW_RANK = -1;
-
-  /**
    * Get the ranking of all teams in all categories.
    * 
-   * @return Map with key of division and value is another Map. This Map has a
-   *         key of team number and a value of another Map. The key of this Map
-   *         is the category name {@link #OVERALL_CATEGORY_NAME} is a special
-   *         category and the value is the rank.
+   * @return Map with key of team number and value is the ranking information
+   *         for that team.
    */
-  public static Map<String, Map<Integer, Map<String, Integer>>> getTeamRankings(final Connection connection,
-                                                                                final ChallengeDescription challengeDescription)
+  public static Map<Integer, TeamRanking> getTeamRankings(final Connection connection,
+                                                          final ChallengeDescription challengeDescription)
       throws SQLException {
-    final Map<String, Map<Integer, Map<String, Integer>>> rankingMap = new HashMap<String, Map<Integer, Map<String, Integer>>>();
+    final Map<Integer, TeamRanking> teamRankings = new HashMap<Integer, TeamRanking>();
     final int tournament = getCurrentTournament(connection);
     final List<String> divisions = getEventDivisions(connection);
 
@@ -364,15 +354,15 @@ public final class Queries {
     final String ascDesc = winnerCriteria.getSortString();
 
     // find the performance ranking
-    determinePerformanceRanking(connection, ascDesc, tournament, divisions, rankingMap);
+    determinePerformanceRanking(connection, ascDesc, tournament, divisions, teamRankings);
 
     // find the subjective category rankings
-    determineSubjectiveRanking(connection, ascDesc, tournament, divisions, challengeDescription, rankingMap);
+    determineSubjectiveRanking(connection, ascDesc, tournament, divisions, challengeDescription, teamRankings);
 
     // find the overall ranking
-    determineOverallRanking(connection, ascDesc, tournament, divisions, rankingMap);
+    determineOverallRanking(connection, ascDesc, tournament, divisions, teamRankings);
 
-    return rankingMap;
+    return teamRankings;
   }
 
   /**
@@ -390,8 +380,7 @@ public final class Queries {
                                                  final int tournament,
                                                  final List<String> divisions,
                                                  final ChallengeDescription challengeDescription,
-                                                 final Map<String, Map<Integer, Map<String, Integer>>> rankingMap)
-      throws SQLException {
+                                                 final Map<Integer, TeamRanking> teamRankings) throws SQLException {
 
     // cache the subjective categories title->dbname
     final Map<String, String> subjectiveCategories = new HashMap<String, String>();
@@ -405,13 +394,6 @@ public final class Queries {
     ResultSet rs = null;
     try {
       for (final String division : divisions) {
-        final Map<Integer, Map<String, Integer>> teamMap;
-        if (rankingMap.containsKey(division)) {
-          teamMap = rankingMap.get(division);
-        } else {
-          teamMap = new HashMap<Integer, Map<String, Integer>>();
-          rankingMap.put(division, teamMap);
-        }
 
         // foreach subjective category
         for (final Map.Entry<String, String> entry : subjectiveCategories.entrySet()) {
@@ -427,14 +409,17 @@ public final class Queries {
 
             final String teamSelect = StringUtils.join(teamScores.iterator(), ", ");
             prep = connection.prepareStatement("SELECT Teams.TeamNumber,FinalScores."
-                + categoryName
-                + " FROM Teams, FinalScores WHERE FinalScores.TeamNumber IN ( "
-                + teamSelect
-                + ") AND Teams.TeamNumber = FinalScores.TeamNumber AND FinalScores.Tournament = ? ORDER BY FinalScores."
-                + categoryName + " " + ascDesc);
+                + categoryName //
+                + " FROM Teams, FinalScores" //
+                + " WHERE FinalScores.TeamNumber IN ( " + teamSelect + ")" //
+                + " AND Teams.TeamNumber = FinalScores.TeamNumber" //
+                + " AND FinalScores.Tournament = ?" //
+                + " ORDER BY FinalScores." + categoryName + " " + ascDesc);
             prep.setInt(1, tournament);
             rs = prep.executeQuery();
-            processTeamRankings(teamMap, categoryTitle, rs);
+            final String rankingGroup = String.format("division %s judging group %s", division, sgEntry.getKey());
+
+            processTeamRankings(teamRankings, categoryTitle, rankingGroup, rs);
           } // end foreach score group
         } // end foreach category
       } // end foreach division
@@ -457,49 +442,23 @@ public final class Queries {
                                               final String ascDesc,
                                               final int tournament,
                                               final List<String> divisions,
-                                              final Map<String, Map<Integer, Map<String, Integer>>> rankingMap)
-      throws SQLException {
-    final StringBuilder query = new StringBuilder();
-    query.append("SELECT Teams.TeamNumber, FinalScores.OverallScore");
-    query.append(" FROM Teams,FinalScores,current_tournament_teams");
-    query.append(" WHERE FinalScores.TeamNumber = Teams.TeamNumber");
-    query.append(" AND FinalScores.Tournament = ?");
-    query.append(" AND current_tournament_teams.event_division = ?");
-    query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
-    query.append(" ORDER BY FinalScores.OverallScore "
-        + ascDesc + ", Teams.TeamNumber");
-    computeRanking(connection, tournament, divisions, rankingMap, query.toString(), OVERALL_CATEGORY_NAME);
-  }
-
-  /**
-   * Assumes that <code>query</code> has 1 parameter, the tournament, and that
-   * the result set will have two columns. The first column is the team number
-   * and the second is the score.
-   */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "SQL is passed in")
-  private static void computeRanking(final Connection connection,
-                                     final int tournament,
-                                     final List<String> divisions,
-                                     final Map<String, Map<Integer, Map<String, Integer>>> rankingMap,
-                                     final String query,
-                                     final String categoryTitle) throws SQLException {
+                                              final Map<Integer, TeamRanking> teamRankings) throws SQLException {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement(query);
+      prep = connection.prepareStatement("SELECT Teams.TeamNumber, FinalScores.OverallScore" //
+          + " FROM Teams,FinalScores,current_tournament_teams" //
+          + " WHERE FinalScores.TeamNumber = Teams.TeamNumber" //
+          + " AND FinalScores.Tournament = ?"//
+          + " AND current_tournament_teams.event_division = ?" //
+          + " AND current_tournament_teams.TeamNumber = Teams.TeamNumber" //
+          + " ORDER BY FinalScores.OverallScore " + ascDesc + ", Teams.TeamNumber");
       prep.setInt(1, tournament);
       for (final String division : divisions) {
-        final Map<Integer, Map<String, Integer>> teamMap;
-        if (rankingMap.containsKey(division)) {
-          teamMap = rankingMap.get(division);
-        } else {
-          teamMap = new HashMap<Integer, Map<String, Integer>>();
-          rankingMap.put(division, teamMap);
-        }
-
         prep.setString(2, division);
         rs = prep.executeQuery();
-        processTeamRankings(teamMap, categoryTitle, rs);
+        final String rankingGroup = String.format("division %s", division);
+        processTeamRankings(teamRankings, CategoryRank.OVERALL_CATEGORY_NAME, rankingGroup, rs);
       }
     } finally {
       SQLFunctions.close(rs);
@@ -512,38 +471,31 @@ public final class Queries {
    * query returns first an int that is the team number and then a double that
    * is the score. <code>teamMap</code> is populated with the data. The
    * ResultSet is closed by this function.
-   * 
-   * @param categoryName the category name to put the ranks into teamRanks as
    */
-  private static void processTeamRankings(final Map<Integer, Map<String, Integer>> teamMap,
+  private static void processTeamRankings(final Map<Integer, TeamRanking> teamRankings,
                                           final String categoryTitle,
+                                          final String rankingGroup,
                                           final ResultSet rs) throws SQLException {
+    final List<Integer> ranks = new LinkedList<Integer>();
+    final List<Integer> teams = new LinkedList<Integer>();
+
+    int numTeams = 0;
     int tieRank = 1;
     int rank = 1;
     double prevScore = Double.NaN;
     while (rs.next()) {
       final int team = rs.getInt(1);
       double score = rs.getDouble(2);
+      teams.add(team);
       if (rs.wasNull()) {
-        score = Double.NaN;
-      }
-
-      final Map<String, Integer> teamRanks;
-      if (teamMap.containsKey(team)) {
-        teamRanks = teamMap.get(team);
-      } else {
-        teamRanks = new HashMap<String, Integer>();
-        teamMap.put(team, teamRanks);
-      }
-      if (Double.isNaN(score)) {
-        teamRanks.put(categoryTitle, NO_SHOW_RANK);
+        ranks.add(CategoryRank.NO_SHOW_RANK);
       } else if (Math.abs(score
           - prevScore) < 0.001) {
         // 3 decimal places should be considered equal
-        teamRanks.put(categoryTitle, tieRank);
+        ranks.add(tieRank);
       } else {
         tieRank = rank;
-        teamRanks.put(categoryTitle, rank);
+        ranks.add(rank);
       }
 
       // setup for next round
@@ -551,7 +503,19 @@ public final class Queries {
 
       // increment rank counter
       ++rank;
+      ++numTeams;
     } // end score group rank
+
+    for (int i = 0; i < ranks.size(); ++i) {
+      final CategoryRank catRank = new CategoryRank(rankingGroup, categoryTitle, ranks.get(i), numTeams);
+      TeamRanking teamRank = teamRankings.get(teams.get(i));
+      if (null == teamRank) {
+        teamRank = new TeamRanking(teams.get(i));
+        teamRankings.put(teams.get(i), teamRank);
+      }
+      teamRank.setRankForCategory(categoryTitle, catRank);
+    }
+
     SQLFunctions.close(rs);
   }
 
@@ -568,19 +532,30 @@ public final class Queries {
                                                   final String ascDesc,
                                                   final int tournament,
                                                   final List<String> divisions,
-                                                  final Map<String, Map<Integer, Map<String, Integer>>> rankingMap)
-      throws SQLException {
+                                                  final Map<Integer, TeamRanking> teamRankings) throws SQLException {
 
-    final StringBuilder query = new StringBuilder();
-    query.append("SELECT Teams.TeamNumber, FinalScores.performance");
-    query.append(" FROM Teams,FinalScores,current_tournament_teams");
-    query.append(" WHERE FinalScores.TeamNumber = Teams.TeamNumber");
-    query.append(" AND FinalScores.Tournament = ?");
-    query.append(" AND current_tournament_teams.event_division = ?");
-    query.append(" AND current_tournament_teams.TeamNumber = Teams.TeamNumber");
-    query.append(" ORDER BY FinalScores.performance "
-        + ascDesc + ", Teams.TeamNumber");
-    computeRanking(connection, tournament, divisions, rankingMap, query.toString(), PERFORMANCE_CATEGORY_NAME);
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT Teams.TeamNumber, FinalScores.performance" //
+          + " FROM Teams,FinalScores,current_tournament_teams" //
+          + " WHERE FinalScores.TeamNumber = Teams.TeamNumber" //
+          + " AND FinalScores.Tournament = ?" //
+          + " AND current_tournament_teams.event_division = ?" //
+          + " AND current_tournament_teams.TeamNumber = Teams.TeamNumber"//
+          + " ORDER BY FinalScores.performance " + ascDesc + ", Teams.TeamNumber");
+
+      prep.setInt(1, tournament);
+      for (final String division : divisions) {
+        prep.setString(2, division);
+        rs = prep.executeQuery();
+        final String rankingGroup = String.format("division %s", division);
+        processTeamRankings(teamRankings, CategoryRank.PERFORMANCE_CATEGORY_NAME, rankingGroup, rs);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
   }
 
   /**
