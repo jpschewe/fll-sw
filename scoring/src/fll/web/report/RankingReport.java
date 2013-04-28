@@ -43,7 +43,9 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import fll.Team;
+import fll.CategoryRank;
+import fll.TeamRanking;
+import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -90,47 +92,47 @@ public class RankingReport extends BaseFLLServlet {
       document.addTitle("Ranking Report");
 
       // add content
-      final Map<String, Map<Integer, Map<String, Integer>>> rankingMap = Queries.getTeamRankings(connection,
-                                                                                                 challengeDescription);
-      for (final Map.Entry<String, Map<Integer, Map<String, Integer>>> divEntry : rankingMap.entrySet()) {
-        final String division = divEntry.getKey();
-        final Map<Integer, Map<String, Integer>> divisionTeams = divEntry.getValue();
-        final List<Integer> teamNumbers = new LinkedList<Integer>(divisionTeams.keySet());
-        Collections.sort(teamNumbers);
-        for (final int teamNum : teamNumbers) {
-          final Team team = Team.getTeamFromDatabase(connection, teamNum);
-          final Paragraph para = new Paragraph();
-          para.add(Chunk.NEWLINE);
-          para.add(new Chunk("Ranks for Team "
-              + teamNum, TITLE_FONT));
-          para.add(Chunk.NEWLINE);
-          para.add(new Chunk(team.getTeamName()
-              + " / " + team.getOrganization(), TITLE_FONT));
-          para.add(Chunk.NEWLINE);
-          para.add(new Chunk("Division "
-              + division, TITLE_FONT));
-          para.add(Chunk.NEWLINE);
-          para.add(new Chunk(
-                             "Each team is ranked in each category in the judging group and division they were judged in (if mutiple judging groups exist). Performance and Overall score are ranked by division only. Team may have the same rank if they were tied or were in different judging groups. ",
-                             RANK_VALUE_FONT));
-          para.add(Chunk.NEWLINE);
-          para.add(Chunk.NEWLINE);
-          final Map<String, Integer> teamRankings = divisionTeams.get(teamNum);
-          for (final Map.Entry<String, Integer> rankEntry : teamRankings.entrySet()) {
-            para.add(new Chunk(rankEntry.getKey()
-                + ": ", RANK_TITLE_FONT));
+      final Map<Integer, TeamRanking> teamRankings = Queries.getTeamRankings(connection, challengeDescription);
+      final List<Integer> teamNumbers = new LinkedList<Integer>(teamRankings.keySet());
+      Collections.sort(teamNumbers);
+      final Map<Integer, TournamentTeam> tournamentTeams = Queries.getTournamentTeams(connection);
 
-            final int rank = rankEntry.getValue();
-            if (Queries.NO_SHOW_RANK == rank) {
-              para.add(new Chunk("No Show", RANK_VALUE_FONT));
-            } else {
-              para.add(new Chunk(String.valueOf(rank), RANK_VALUE_FONT));
-            }
-            para.add(Chunk.NEWLINE);
+      for (final int teamNum : teamNumbers) {
+        final TournamentTeam team = tournamentTeams.get(teamNum);
+        final Paragraph para = new Paragraph();
+        para.add(Chunk.NEWLINE);
+        para.add(new Chunk("Ranks for Team "
+            + teamNum, TITLE_FONT));
+        para.add(Chunk.NEWLINE);
+        para.add(new Chunk(team.getTeamName()
+            + " / " + team.getOrganization(), TITLE_FONT));
+        para.add(Chunk.NEWLINE);
+        para.add(new Chunk("Division "
+            + team.getEventDivision(), TITLE_FONT));
+        para.add(Chunk.NEWLINE);
+        para.add(new Chunk(
+                           "Each team is ranked in each category in the judging group and division they were judged in. Performance and Overall score are ranked by division only. Team may have the same rank if they were tied.",
+                           RANK_VALUE_FONT));
+        para.add(Chunk.NEWLINE);
+        para.add(Chunk.NEWLINE);
+        final TeamRanking teamRanks = teamRankings.get(teamNum);
+        for (final String category : teamRanks.getCategories()) {
+          para.add(new Chunk(category
+              + ": ", RANK_TITLE_FONT));
+
+          final CategoryRank catRank = teamRanks.getRankForCategory(category);
+
+          final int rank = catRank.getRank();
+          if (CategoryRank.NO_SHOW_RANK == rank) {
+            para.add(new Chunk("No Show", RANK_VALUE_FONT));
+          } else {
+            para.add(new Chunk(String.format("%d out of %d teams in %s", rank, catRank.getNumTeams(),
+                                             catRank.getGroup()), RANK_VALUE_FONT));
           }
-          document.add(para);
-          document.add(Chunk.NEXTPAGE);
+          para.add(Chunk.NEWLINE);
         }
+        document.add(para);
+        document.add(Chunk.NEXTPAGE);
       }
 
       document.close();
