@@ -1,3 +1,5 @@
+* 197 - keep internal teams out of the team selection list for entering
+        scores
 * 219 - Add more number of teams and judging group information to the
         ranking report
 * 224 - handle '&' in column headers when uploading teams
