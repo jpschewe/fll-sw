@@ -52,7 +52,7 @@ public class DisplayQueryServlet extends BaseFLLServlet {
       localDisplayPage = ApplicationAttributes.getAttribute(application, "displayPage", String.class);
       localDisplayURL = ApplicationAttributes.getAttribute(application, "displayURL", String.class);
     }
-    response.getOutputStream().print(JsonUtilities.generateDisplayResponse(pickURL(request, localDisplayPage,
+    response.getWriter().print(JsonUtilities.generateDisplayResponse(pickURL(request, localDisplayPage,
                                                                                    localDisplayURL, application,
                                                                                    session)));
   }

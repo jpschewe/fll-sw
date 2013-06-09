@@ -6,16 +6,14 @@
 package fll.web.admin;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -68,15 +66,14 @@ public class DownloadSubjectiveScores extends BaseFLLServlet {
           throw new FLLInternalException("Subjective XML document is invalid", e);
         }
 
-        final Charset charset = Charset.forName("UTF-8");
-        final Writer writer = new OutputStreamWriter(response.getOutputStream(), charset);
+        final Writer writer = response.getWriter();
         XMLUtils.writeXML(scoreDocument, writer, "UTF-8");
 
       } else {
         response.reset();
         response.setContentType("text/plain");
-        final ServletOutputStream os = response.getOutputStream();
-        os.println("Judges are not properly assigned, please go back to the administration page and assign judges");
+        final PrintWriter writer = response.getWriter();
+        writer.println("Judges are not properly assigned, please go back to the administration page and assign judges");
       }
     } catch (final SQLException e) {
       throw new RuntimeException(e);
