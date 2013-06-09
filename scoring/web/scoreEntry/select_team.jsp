@@ -1,38 +1,6 @@
 <%@ include file="/WEB-INF/jspf/init.jspf" %>
 
-<%@ page import="fll.Team" %>
-<%@ page import="fll.web.ApplicationAttributes"%>
-<%@ page import="fll.db.Queries"%>
-
-<%@ page import="java.util.Collection" %>
-
-<%@ page import="java.sql.Statement" %>
-<%@ page import="java.sql.ResultSet" %>
-<%@ page import="java.sql.Connection" %>
-<%@ page import="javax.sql.DataSource" %>
-
-<%@ page import="net.mtu.eggplant.util.sql.SQLFunctions" %>
-
-<%
-final DataSource datasource = ApplicationAttributes.getDataSource(application);
-final Connection connection = datasource.getConnection();
-final Statement stmt = connection.createStatement();
-final ResultSet rs = stmt.executeQuery("SELECT MAX(RunNumber) FROM Performance WHERE Tournament = " + Queries.getCurrentTournament(connection));
-final int maxRunNumber;
-if(rs.next()) {
-  maxRunNumber = rs.getInt(1);
-} else {
-  maxRunNumber = 1;
-}
-pageContext.setAttribute("maxRunNumber", maxRunNumber);
-SQLFunctions.close(rs);
-SQLFunctions.close(stmt);
-
-final Collection<? extends Team> tournamentTeams = Queries.getTournamentTeams(connection).values();
-pageContext.setAttribute("tournamentTeams", tournamentTeams);
-
-pageContext.setAttribute("currentTournament", Queries.getCurrentTournament(connection));
-%>
+<% fll.web.scoreEntry.SelectTeam.populateContext(application, pageContext);%>
 
 <html>
   <head>
@@ -119,7 +87,9 @@ $(document).ready(function() {
             <font face='arial' size='4'>Select team for this scorecard:</font><br>
             <select size='20' id='select-teamnumber' name='TeamNumber' ondblclick='selectTeam.submit()'>
               <c:forEach items="${tournamentTeams }" var="team">
-                <option value="${team.teamNumber }">${team.teamNumber }&nbsp;&nbsp;&nbsp;[${team.trimmedTeamName }]</option>
+                <c:if test="${not team.internal }">
+                  <option value="${team.teamNumber }">${team.teamNumber }&nbsp;&nbsp;&nbsp;[${team.trimmedTeamName }]</option>
+                </c:if>
               </c:forEach>
             </select>
           </td>
