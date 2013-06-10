@@ -1,6 +1,7 @@
 package fll.web.ajax;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -9,7 +10,6 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,16 +39,16 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
     Connection connection = null;
     try {
       connection = datasource.getConnection();
-      final ServletOutputStream os = response.getOutputStream();
+      final PrintWriter writer = response.getWriter();
       final String multiParam = request.getParameter("multi");
       final String division = request.getParameter("division");
       if (multiParam != null) {
         // Send off request to helpers
-        handleMultipleQuery(parseInputToMap(multiParam), division, os, application, session, response, connection);
+        handleMultipleQuery(parseInputToMap(multiParam), division, writer, application, session, response, connection);
       } else {
         response.reset();
         response.setContentType("application/json");
-        os.print("{\"_rmsg\": \"Error: No Params\"}");
+        writer.print("{\"_rmsg\": \"Error: No Params\"}");
       }
     } catch (final SQLException e) {
       throw new RuntimeException(e);
@@ -73,31 +73,27 @@ public class AJAXBracketQueryServlet extends BaseFLLServlet {
 
   private void handleMultipleQuery(final Map<Integer, Integer> pairedMap,
                                    final String division,
-                                   final ServletOutputStream os,
+                                   final PrintWriter writer,
                                    final ServletContext application,
                                    final HttpSession session,
                                    final HttpServletResponse response,
                                    final Connection connection) throws SQLException {
-    try {
-      final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
+    final ChallengeDescription description = ApplicationAttributes.getChallengeDescription(application);
 
-      BracketData bd = constructBracketData(division, connection, session, application);
-      if (bd == null) {
-        response.reset();
-        response.setContentType("application/json");
-        os.print("{\"refresh\":\"true\"}");
-        return;
-      }
-
-      final boolean showOnlyVerifiedScores = true;
-      final boolean showFinalsScores = false;
+    BracketData bd = constructBracketData(division, connection, session, application);
+    if (bd == null) {
       response.reset();
       response.setContentType("application/json");
-      os.print(JsonUtilities.generateJsonBracketInfo(pairedMap, connection, description.getPerformance(), bd,
-                                                     showOnlyVerifiedScores, showFinalsScores));
-    } catch (final IOException e) {
-      throw new RuntimeException(e);
+      writer.print("{\"refresh\":\"true\"}");
+      return;
     }
+
+    final boolean showOnlyVerifiedScores = true;
+    final boolean showFinalsScores = false;
+    response.reset();
+    response.setContentType("application/json");
+    writer.print(JsonUtilities.generateJsonBracketInfo(pairedMap, connection, description.getPerformance(), bd,
+                                                       showOnlyVerifiedScores, showFinalsScores));
   }
 
   private BracketData constructBracketData(final String queryDivision,
