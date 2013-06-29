@@ -223,7 +223,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
   }
 
   /**
-   * Validate the schedule XML document.
+   * Validate the subjective XML document.
    * 
    * @throws SAXException on an error
    */
