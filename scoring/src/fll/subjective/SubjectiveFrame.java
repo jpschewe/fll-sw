@@ -309,7 +309,7 @@ public final class SubjectiveFrame extends JFrame {
           posValues.add(posValue.getTitle());
         }
 
-        column.setCellEditor(new DefaultCellEditor(new JComboBox(posValues)));
+        column.setCellEditor(new DefaultCellEditor(new JComboBox<String>(posValues)));
       } else {
         final JTextField editor = new SelectTextField();
         column.setCellEditor(new DefaultCellEditor(editor));
