@@ -5,7 +5,6 @@
  */
 package fll.web.playoff;
 
-import fll.util.ScoreUtils;
 
 /**
  * Represents a score for a team. Only the values of simple goals are available
