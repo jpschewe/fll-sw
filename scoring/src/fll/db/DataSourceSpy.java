@@ -10,6 +10,8 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -43,6 +45,7 @@ public class DataSourceSpy implements DataSource, Serializable {
     this.enabled = enabled;
   }
 
+  @Override
   public Connection getConnection() throws SQLException {
     if (enabled) {
       return new ConnectionSpy(this.realDataSource.getConnection());
@@ -51,6 +54,7 @@ public class DataSourceSpy implements DataSource, Serializable {
     }
   }
 
+  @Override
   public Connection getConnection(final String username,
                                   final String password) throws SQLException {
     if (enabled) {
@@ -60,28 +64,39 @@ public class DataSourceSpy implements DataSource, Serializable {
     }
   }
 
+  @Override
   public int getLoginTimeout() throws SQLException {
     return realDataSource.getLoginTimeout();
   }
 
+  @Override
   public PrintWriter getLogWriter() throws SQLException {
     return realDataSource.getLogWriter();
   }
 
+  @Override
   public boolean isWrapperFor(final Class<?> iface) throws SQLException {
     return realDataSource.isWrapperFor(iface);
   }
 
+  @Override
   public void setLoginTimeout(final int seconds) throws SQLException {
     realDataSource.setLoginTimeout(seconds);
   }
 
+  @Override
   public void setLogWriter(final PrintWriter out) throws SQLException {
     realDataSource.setLogWriter(out);
   }
 
+  @Override
   public <T> T unwrap(final Class<T> iface) throws SQLException {
     return realDataSource.unwrap(iface);
+  }
+  
+  @Override
+  public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+    return realDataSource.getParentLogger();
   }
 
 }
