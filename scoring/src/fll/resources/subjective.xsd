@@ -8,6 +8,8 @@
 				<xsd:element ref="subjectiveCategory" minOccurs="0"
 					maxOccurs="unbounded" />
 			</xsd:sequence>
+            <xsd:attribute name="tournamentName" type="xsd:string" use="required" />
+            <xsd:attribute name="tournamentLocation" type="xsd:string" use="optional" />
 		</xsd:complexType>
 	</xsd:element>
 
