@@ -42,6 +42,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import fll.Team;
+import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
@@ -115,12 +116,19 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
     PreparedStatement prep = null;
     PreparedStatement prep2 = null;
     try {
+      final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
+
       prep = connection.prepareStatement("SELECT id, station FROM Judges WHERE category = ? AND Tournament = ?");
       prep.setInt(2, currentTournament);
 
       final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
       final Element top = document.createElementNS(null, SCORES_NODE_NAME);
       document.appendChild(top);
+
+      top.setAttribute("tournamentName", tournament.getName());
+      if (null != tournament.getLocation()) {
+        top.setAttribute("tournamentLocation", tournament.getLocation());
+      }
 
       for (final ScoreCategory categoryDescription : challengeDescription.getSubjectiveCategories()) {
         final String categoryName = categoryDescription.getName();
