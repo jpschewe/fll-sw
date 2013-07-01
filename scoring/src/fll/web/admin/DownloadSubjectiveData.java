@@ -54,7 +54,7 @@ import fll.xml.ScoreCategory;
 import fll.xml.XMLUtils;
 
 /**
- * Downlaod the data file for the subjective score app.
+ * Download the data file for the subjective score app.
  */
 @WebServlet("/admin/subjective-data.fll")
 public class DownloadSubjectiveData extends BaseFLLServlet {
