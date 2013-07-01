@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<scores>
+<scores tournamentName="test">
  <subjectiveCategory name="teamwork">
   <score NoShow="false" division="1" judge="DEB_JOHNSON"
    judging_station="1" organization="Centerpoint Elementary" teamName="Alien Tree Huggers"
