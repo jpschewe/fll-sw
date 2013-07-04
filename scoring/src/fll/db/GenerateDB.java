@@ -23,6 +23,7 @@ import org.w3c.dom.Document;
 
 import fll.Team;
 import fll.Tournament;
+import fll.Utilities;
 import fll.util.LogUtils;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -582,8 +583,7 @@ public final class GenerateDB {
       // dump the document into a byte array so we can push it into the
       // database
       final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      final Charset charset = Charset.forName("UTF-8");
-      XMLUtils.writeXML(document, new OutputStreamWriter(baos, charset), "UTF-8");
+      XMLUtils.writeXML(document, new OutputStreamWriter(baos, Utilities.DEFAULT_CHARSET), Utilities.DEFAULT_CHARSET.name());
       final byte[] bytes = baos.toByteArray();
       final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
       challengePrep.setAsciiStream(1, bais, bytes.length);

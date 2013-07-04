@@ -26,6 +26,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import fll.TournamentTeam;
+import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
@@ -67,7 +68,7 @@ public class DownloadSubjectiveScores extends BaseFLLServlet {
         }
 
         final Writer writer = response.getWriter();
-        XMLUtils.writeXML(scoreDocument, writer, "UTF-8");
+        XMLUtils.writeXML(scoreDocument, writer, Utilities.DEFAULT_CHARSET.name());
 
       } else {
         response.reset();

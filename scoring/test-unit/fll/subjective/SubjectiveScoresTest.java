@@ -118,7 +118,7 @@ public class SubjectiveScoresTest {
                                                                                            tournamentTeams.values(),
                                                                                            connection, tournament.getTournamentID());
       StringWriter testWriter = new StringWriter();
-      XMLUtils.writeXML(scoreDocument, testWriter, "UTF-8");
+      XMLUtils.writeXML(scoreDocument, testWriter, Utilities.DEFAULT_CHARSET.name());
       LOGGER.info(testWriter.toString());
       
       ScoreCategory scoreCategory = null;

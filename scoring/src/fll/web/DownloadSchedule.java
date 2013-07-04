@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.ProcessingInstruction;
 
+import fll.Utilities;
 import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.LogUtils;
@@ -58,7 +59,7 @@ public class DownloadSchedule extends BaseFLLServlet {
       response.reset();
       response.setContentType("text/xml");
       response.setHeader("Content-Disposition", "filename=schedule.xml");
-      XMLUtils.writeXML(document, response.getWriter(), "UTF-8");
+      XMLUtils.writeXML(document, response.getWriter(), Utilities.DEFAULT_CHARSET.name());
 
     } catch (final SQLException sqle) {
       LOGGER.error(sqle, sqle);

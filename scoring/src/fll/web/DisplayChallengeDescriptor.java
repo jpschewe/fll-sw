@@ -23,6 +23,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 import org.w3c.dom.Document;
 import org.w3c.dom.ProcessingInstruction;
 
+import fll.Utilities;
 import fll.db.GlobalParameters;
 import fll.xml.XMLUtils;
 
@@ -54,7 +55,7 @@ public class DisplayChallengeDescriptor extends BaseFLLServlet {
       response.setContentType("text/xml");
       response.setHeader("Content-Disposition", "filename=challenge.xml");
 
-      XMLUtils.writeXML(challengeDocument, response.getWriter(), "UTF-8");
+      XMLUtils.writeXML(challengeDocument, response.getWriter(), Utilities.DEFAULT_CHARSET.name());
     } catch (final SQLException sqle) {
       throw new RuntimeException("Error talking to the database", sqle);
     } finally {
