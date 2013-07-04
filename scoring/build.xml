@@ -98,7 +98,8 @@
 		<pathelement location="${dir.lib}/log4jdbc4-1.2.jar" />
 
 		<!-- pdf library -->
-		<pathelement location="${dir.lib}/iText-5.0.4.jar" />
+		<pathelement location="${dir.lib}/itextpdf-5.4.2.jar" />
+        <pathelement location="${dir.lib}/itext-xtra-5.4.2.jar" />
 
 		<pathelement location="${dir.lib}/opencsv-jps-2.4.jar" />
 
