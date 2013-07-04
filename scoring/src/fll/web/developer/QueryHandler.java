@@ -31,6 +31,7 @@ import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 
+import fll.Utilities;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -91,7 +92,7 @@ public class QueryHandler extends BaseFLLServlet {
     final Gson gson = new Gson();
     final String resultJson = gson.toJson(result);
     response.setContentType("application/json");
-    response.setCharacterEncoding("UTF-8");
+    response.setCharacterEncoding(Utilities.DEFAULT_CHARSET.name());
     response.getWriter().write(resultJson);
 
   }

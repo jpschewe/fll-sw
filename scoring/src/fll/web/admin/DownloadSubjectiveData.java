@@ -11,7 +11,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -45,6 +44,7 @@ import org.xml.sax.SAXException;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
+import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
 import fll.web.ApplicationAttributes;
@@ -208,11 +208,10 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
     final int tournament = Queries.getCurrentTournament(connection);
 
     final ZipOutputStream zipOut = new ZipOutputStream(stream);
-    final Charset charset = Charset.forName("UTF-8");
-    final Writer writer = new OutputStreamWriter(zipOut, charset);
+    final Writer writer = new OutputStreamWriter(zipOut, Utilities.DEFAULT_CHARSET);
 
     zipOut.putNextEntry(new ZipEntry("challenge.xml"));
-    XMLUtils.writeXML(challengeDocument, writer, "UTF-8");
+    XMLUtils.writeXML(challengeDocument, writer, Utilities.DEFAULT_CHARSET.name());
     zipOut.closeEntry();
 
     final Document scoreDocument = createSubjectiveScoresDocument(challengeDescription, tournamentTeams.values(),
@@ -225,7 +224,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
     }
 
     zipOut.putNextEntry(new ZipEntry("score.xml"));
-    XMLUtils.writeXML(scoreDocument, writer, "UTF-8");
+    XMLUtils.writeXML(scoreDocument, writer, Utilities.DEFAULT_CHARSET.name());
     zipOut.closeEntry();
 
     zipOut.close();
@@ -255,7 +254,9 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
         // work.
         // JPS 2013-07-03
         final java.io.File temp = java.io.File.createTempFile("fll", "xml");
-        fll.xml.XMLUtils.writeXML(document, new java.io.FileWriter(temp), "UTF-8");
+        fll.xml.XMLUtils.writeXML(document, new java.io.OutputStreamWriter(new java.io.FileOutputStream(temp),
+                                                                           Utilities.DEFAULT_CHARSET),
+                                  Utilities.DEFAULT_CHARSET.name());
         final InputStream scoreStream = new java.io.FileInputStream(temp);
         final Document tempDocument = fll.xml.XMLUtils.parseXMLDocument(scoreStream);
         if (!temp.delete()) {

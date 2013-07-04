@@ -7,7 +7,6 @@ package fll.db;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -31,6 +30,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import fll.Utilities;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
@@ -86,12 +86,11 @@ public final class DumpDB extends BaseFLLServlet {
     try {
       stmt = connection.createStatement();
 
-      final Charset charset = Charset.forName("UTF-8");
-      final OutputStreamWriter outputWriter = new OutputStreamWriter(output, charset);
+      final OutputStreamWriter outputWriter = new OutputStreamWriter(output, Utilities.DEFAULT_CHARSET);
 
       // output the challenge descriptor
       output.putNextEntry(new ZipEntry("challenge.xml"));
-      XMLUtils.writeXML(challengeDocument, outputWriter, "UTF-8");
+      XMLUtils.writeXML(challengeDocument, outputWriter, Utilities.DEFAULT_CHARSET.name());
       output.closeEntry();
 
       // can't use Queries.getTablesInDB because it lowercases names and we need
