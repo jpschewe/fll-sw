@@ -1,3 +1,5 @@
+* 222 - Added tournament name and optional tournament location to the
+        subjective scores file.
 * 197 - keep internal teams out of the team selection list for entering
         scores
 * 206 - Use resposne.getWriter to write text and
