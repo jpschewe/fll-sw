@@ -29,7 +29,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="scoring/lib/JonsInfra-1.5.jar" sourcepath="scoring/lib/source/JonsInfra-1.5-src.zip"/>
-	<classpathentry kind="lib" path="scoring/lib/gson-2.0.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/icepush-2.0.0-alpha3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/jstl-1.2.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/icepush-jsp-2.0.0-alpha3.jar"/>
@@ -66,5 +65,6 @@
 	<classpathentry kind="lib" path="scoring/lib/poi-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-schemas-3.9-20121203.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/gson-2.2.4.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
