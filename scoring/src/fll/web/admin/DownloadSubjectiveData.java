@@ -6,6 +6,7 @@
 package fll.web.admin;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -244,7 +245,22 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
       final Schema schema = factory.newSchema(schemaFile);
 
       final Validator validator = schema.newValidator();
-      validator.validate(new DOMSource(document));
+
+      try {
+        validator.validate(new DOMSource(document));
+      } catch (final SAXException se) {
+        // For some reason the SubjectiveFrameTest fails the above validation
+        // and
+        // writing the document out and reading it back in causes everything to
+        // work.
+        // JPS 2013-07-03
+        final java.io.File temp = java.io.File.createTempFile("fll", "xml");
+        fll.xml.XMLUtils.writeXML(document, new java.io.FileWriter(temp), "UTF-8");
+        final InputStream scoreStream = new java.io.FileInputStream(temp);
+        final Document tempDocument = fll.xml.XMLUtils.parseXMLDocument(scoreStream);
+        validator.validate(new DOMSource(tempDocument));
+      }
+
     } catch (final IOException e) {
       throw new RuntimeException("Internal error, should never get IOException here", e);
     }
