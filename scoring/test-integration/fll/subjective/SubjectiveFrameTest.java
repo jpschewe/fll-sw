@@ -152,7 +152,10 @@ public class SubjectiveFrameTest {
 
   @After
   public void tearDown() {
-    window.cleanUp();
+    if (null != window) {
+      window.cleanUp();
+    }
+
     if (!subjectiveScores.delete()) {
       subjectiveScores.deleteOnExit();
     }

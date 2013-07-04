@@ -6,6 +6,7 @@
 package fll.web.admin;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -42,6 +43,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import fll.Team;
+import fll.Tournament;
 import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.util.FLLInternalException;
@@ -53,7 +55,7 @@ import fll.xml.ScoreCategory;
 import fll.xml.XMLUtils;
 
 /**
- * Downlaod the data file for the subjective score app.
+ * Download the data file for the subjective score app.
  */
 @WebServlet("/admin/subjective-data.fll")
 public class DownloadSubjectiveData extends BaseFLLServlet {
@@ -115,12 +117,19 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
     PreparedStatement prep = null;
     PreparedStatement prep2 = null;
     try {
+      final Tournament tournament = Tournament.findTournamentByID(connection, currentTournament);
+
       prep = connection.prepareStatement("SELECT id, station FROM Judges WHERE category = ? AND Tournament = ?");
       prep.setInt(2, currentTournament);
 
       final Document document = XMLUtils.DOCUMENT_BUILDER.newDocument();
       final Element top = document.createElementNS(null, SCORES_NODE_NAME);
       document.appendChild(top);
+
+      top.setAttribute("tournamentName", tournament.getName());
+      if (null != tournament.getLocation()) {
+        top.setAttribute("tournamentLocation", tournament.getLocation());
+      }
 
       for (final ScoreCategory categoryDescription : challengeDescription.getSubjectiveCategories()) {
         final String categoryName = categoryDescription.getName();
@@ -223,7 +232,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
   }
 
   /**
-   * Validate the schedule XML document.
+   * Validate the subjective XML document.
    * 
    * @throws SAXException on an error
    */
@@ -236,7 +245,25 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
       final Schema schema = factory.newSchema(schemaFile);
 
       final Validator validator = schema.newValidator();
-      validator.validate(new DOMSource(document));
+
+      try {
+        validator.validate(new DOMSource(document));
+      } catch (final SAXException se) {
+        // For some reason the SubjectiveFrameTest fails the above validation
+        // and
+        // writing the document out and reading it back in causes everything to
+        // work.
+        // JPS 2013-07-03
+        final java.io.File temp = java.io.File.createTempFile("fll", "xml");
+        fll.xml.XMLUtils.writeXML(document, new java.io.FileWriter(temp), "UTF-8");
+        final InputStream scoreStream = new java.io.FileInputStream(temp);
+        final Document tempDocument = fll.xml.XMLUtils.parseXMLDocument(scoreStream);
+        if (!temp.delete()) {
+          temp.deleteOnExit();
+        }
+        validator.validate(new DOMSource(tempDocument));
+      }
+
     } catch (final IOException e) {
       throw new RuntimeException("Internal error, should never get IOException here", e);
     }

@@ -48,7 +48,12 @@ public final class TestUtils {
   private static final ScreenshotTaker SCREENSHOT_TAKER = new ScreenshotTaker();
 
   public static void saveScreenshot() throws IOException {
-    final File screenshot = File.createTempFile("fll", ".png", new File("screenshots"));
+    final File screenshotDir = new File("screenshots");
+    if(!screenshotDir.exists()) {
+      screenshotDir.mkdirs();
+    }
+
+    final File screenshot = File.createTempFile("fll", ".png", screenshotDir);
     LOG.error("Screenshot saved to "
         + screenshot.getAbsolutePath());
     // file can't exist when calling save desktop as png

@@ -274,6 +274,16 @@ public final class SubjectiveFrame extends JFrame {
     });
     setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
+    // get the name and location of the tournament
+    final Element top = _scoreDocument.getDocumentElement();
+    final String tournamentName = top.getAttribute("tournamentName");
+    if (top.hasAttribute("tournamentLocation")) {
+      final String tournamentLocation = top.getAttribute("tournamentName");
+      setTitle(String.format("Subjective Score Entry - %s @ %s", tournamentName, tournamentLocation));
+    } else {
+      setTitle(String.format("Subjective Score Entry - %s", tournamentName));
+    }
+
     pack();
   }
 
@@ -309,7 +319,7 @@ public final class SubjectiveFrame extends JFrame {
           posValues.add(posValue.getTitle());
         }
 
-        column.setCellEditor(new DefaultCellEditor(new JComboBox(posValues)));
+        column.setCellEditor(new DefaultCellEditor(new JComboBox<String>(posValues)));
       } else {
         final JTextField editor = new SelectTextField();
         column.setCellEditor(new DefaultCellEditor(editor));
