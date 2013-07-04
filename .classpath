@@ -13,7 +13,6 @@
 	<classpathentry kind="lib" path="scoring/lib/commons-fileupload-1.1.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/slf4j-api-1.5.3.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/slf4j-log4j12-1.5.3.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/jakarta-oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/xmlunit-1.2.jar">
 		<attributes>
@@ -63,5 +62,6 @@
 	<classpathentry kind="lib" path="scoring/lib/cobertura/asm-4.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/asm-commons-4.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/asm-tree-4.1.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura-2.0.1.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>

@@ -76,7 +76,8 @@
 	<!-- ==================== Classpaths =========================== -->
 	<path id="cobertura.classpath">
 		<fileset dir="${dir.lib}/cobertura">
-			<include name="*.jar" />
+			 <include name="*.jar" />
+			 <include name="lib/*.jar" />
 		</fileset>
 		<pathelement location="${dir.lib}/log4j-1.2.16.jar" />
 	</path>
