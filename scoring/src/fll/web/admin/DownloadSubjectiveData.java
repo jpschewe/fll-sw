@@ -258,6 +258,9 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
         fll.xml.XMLUtils.writeXML(document, new java.io.FileWriter(temp), "UTF-8");
         final InputStream scoreStream = new java.io.FileInputStream(temp);
         final Document tempDocument = fll.xml.XMLUtils.parseXMLDocument(scoreStream);
+        if (!temp.delete()) {
+          temp.deleteOnExit();
+        }
         validator.validate(new DOMSource(tempDocument));
       }
 
