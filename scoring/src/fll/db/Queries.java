@@ -438,6 +438,7 @@ public final class Queries {
    * @param rankingMap
    * @throws SQLException
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to compute sort order")
   private static void determineOverallRanking(final Connection connection,
                                               final String ascDesc,
                                               final int tournament,
@@ -528,6 +529,7 @@ public final class Queries {
    * @param rankingMap
    * @throws SQLException
    */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Need to compute sort order")
   private static void determinePerformanceRanking(final Connection connection,
                                                   final String ascDesc,
                                                   final int tournament,
