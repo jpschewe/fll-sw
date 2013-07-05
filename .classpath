@@ -36,7 +36,6 @@
 	<classpathentry kind="lib" path="scoring/lib/opencsv-jps-2.4.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/test/selenium-server-standalone-2.33.0.jar" sourcepath="scoring/lib/test/selenium-java-2.33.0-srcs.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/commons-io-2.4.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura-2.0.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/asm-4.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/asm-analysis-4.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/asm-commons-4.1.jar"/>
@@ -44,7 +43,6 @@
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/asm-util-4.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/dom4j-1.6.1.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/icu4j-2.6.1.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/javax.servlet-3.0.0.v201112011016.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/jaxen-1.1-beta-8.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/jdom-1.0.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/lib/oro-2.0.8.jar"/>
@@ -66,5 +64,6 @@
 	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-schemas-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/gson-2.2.4.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura-2.0.2.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
