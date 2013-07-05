@@ -182,9 +182,7 @@ public class AssignTournaments {
     String[] line = csvReader.readNext();
     while (null != line) {
       final TeamInfo team = parseLine(line);
-      if (null != team) {
-        teams.add(team);
-      }
+      teams.add(team);
       line = csvReader.readNext();
     }
 

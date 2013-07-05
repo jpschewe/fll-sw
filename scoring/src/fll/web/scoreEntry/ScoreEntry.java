@@ -907,7 +907,7 @@ public final class ScoreEntry {
         final double coefficient = childEle.getCoefficient();
         final String variable = getComputedGoalLocalVarName(childEle.getVariable());
         final FloatingPointType floatingPoint = childEle.getFloatingPoint();
-        final String value = String.format("%f * %s", coefficient, variable).toString();
+        final String value = String.format("%f * %s", coefficient, variable);
         formatter.format("%s", applyFloatingPoint(value, floatingPoint));
       }
     }
