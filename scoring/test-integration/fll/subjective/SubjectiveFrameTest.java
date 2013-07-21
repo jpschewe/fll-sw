@@ -271,6 +271,7 @@ public class SubjectiveFrameTest {
       final JTabbedPaneFixture tabbedPane = window.tabbedPane();
 
       tabbedPane.selectTab("Design");
+      Thread.yield();
       final JTableFixture table = window.table();
       // find 306
       final TableCell teamCell = table.cell("306");
