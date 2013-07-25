@@ -19,10 +19,10 @@ pushd . > /dev/null 2>&1
 
 ## this may not be portable:
 mypath=`dirname $0`
-cd ${mypath}
+cd "${mypath}"
 mypath=`pwd`
 
-cd ${mypath}
+cd "${mypath}"
 popd > /dev/null 2>&1
 
 
@@ -32,4 +32,4 @@ popd > /dev/null 2>&1
 #Make sure that the right ant is being used
 unset ANT_HOME
 
-${mypath}/tools/ant/bin/ant --noconfig $*
+"${mypath}"/tools/ant/bin/ant --noconfig $*
