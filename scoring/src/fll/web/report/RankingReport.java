@@ -116,21 +116,31 @@ public class RankingReport extends BaseFLLServlet {
         para.add(Chunk.NEWLINE);
         para.add(Chunk.NEWLINE);
         final TeamRanking teamRanks = teamRankings.get(teamNum);
-        for (final String category : teamRanks.getCategories()) {
-          para.add(new Chunk(category
-              + ": ", RANK_TITLE_FONT));
 
-          final CategoryRank catRank = teamRanks.getRankForCategory(category);
-
-          final int rank = catRank.getRank();
-          if (CategoryRank.NO_SHOW_RANK == rank) {
-            para.add(new Chunk("No Show", RANK_VALUE_FONT));
-          } else {
-            para.add(new Chunk(String.format("%d out of %d teams in %s", rank, catRank.getNumTeams(),
-                                             catRank.getGroup()), RANK_VALUE_FONT));
-          }
-          para.add(Chunk.NEWLINE);
+        final List<String> categories = teamRanks.getCategories();
+        Collections.sort(categories);
+        
+        // pull out Overall first
+        if (categories.contains(CategoryRank.OVERALL_CATEGORY_NAME)) {
+          final String category = CategoryRank.OVERALL_CATEGORY_NAME;
+          outputCategory(para, teamRanks, category);
         }
+        para.add(Chunk.NEWLINE);
+
+        // pull out performance next
+        if (categories.contains(CategoryRank.PERFORMANCE_CATEGORY_NAME)) {
+          final String category = CategoryRank.PERFORMANCE_CATEGORY_NAME;
+          outputCategory(para, teamRanks, category);
+        }
+        para.add(Chunk.NEWLINE);
+
+        for (final String category : categories) {
+          if (!CategoryRank.PERFORMANCE_CATEGORY_NAME.equals(category)
+              && !CategoryRank.OVERALL_CATEGORY_NAME.equals(category)) {
+            outputCategory(para, teamRanks, category);
+          }
+        }
+        
         document.add(para);
         document.add(Chunk.NEXTPAGE);
       }
@@ -160,6 +170,24 @@ public class RankingReport extends BaseFLLServlet {
     } finally {
       SQLFunctions.close(connection);
     }
+  }
+
+  private void outputCategory(final Paragraph para,
+                              final TeamRanking teamRanks,
+                              final String category) {
+    para.add(new Chunk(category
+        + ": ", RANK_TITLE_FONT));
+
+    final CategoryRank catRank = teamRanks.getRankForCategory(category);
+
+    final int rank = catRank.getRank();
+    if (CategoryRank.NO_SHOW_RANK == rank) {
+      para.add(new Chunk("No Show", RANK_VALUE_FONT));
+    } else {
+      para.add(new Chunk(String.format("%d out of %d teams in %s", rank, catRank.getNumTeams(), catRank.getGroup()),
+                         RANK_VALUE_FONT));
+    }
+    para.add(Chunk.NEWLINE);
   }
 
   /**
