@@ -9,7 +9,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="scoring/lib/hsqldb-20120703.001730-11.jar"/>
 	<classpathentry kind="lib" path="scoring/tools/tomcat/lib/jsp-api.jar"/>
 	<classpathentry kind="lib" path="scoring/tools/tomcat/lib/servlet-api.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/jlfgr-1_0.jar"/>
@@ -65,5 +64,6 @@
 	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-schemas-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/gson-2.2.4.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura-2.0.2.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/hsql-2.3.0.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
