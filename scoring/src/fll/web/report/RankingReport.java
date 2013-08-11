@@ -111,7 +111,7 @@ public class RankingReport extends BaseFLLServlet {
             + team.getEventDivision(), TITLE_FONT));
         para.add(Chunk.NEWLINE);
         para.add(new Chunk(
-                           "Each team is ranked in each category in the judging group and division they were judged in. Performance and Overall score are ranked by division only. Team may have the same rank if they were tied.",
+                           "Each team is ranked in each category in the judging group and division they were judged in. Performance and Overall score are ranked by division only. Teams may have the same rank if they were tied.",
                            RANK_VALUE_FONT));
         para.add(Chunk.NEWLINE);
         para.add(Chunk.NEWLINE);
