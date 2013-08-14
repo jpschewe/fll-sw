@@ -389,15 +389,15 @@
 </table>
 <table id="1b527d23:12fd1ad49f2:-7fd1" name="authentication">
 <column-list>
-<column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1b527d23:12fd1ad49f2:-7fcd" mandatory="true" name="user">
+<column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1b527d23:12fd1ad49f2:-7fcd" mandatory="true" name="fll_user">
 <data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
 </column>
-<column auto-increment="false" column-size="32" decimal-digits="0" default-value="" id="1b527d23:12fd1ad49f2:-7fcc" mandatory="false" name="pass">
+<column auto-increment="false" column-size="32" decimal-digits="0" default-value="" id="1b527d23:12fd1ad49f2:-7fcc" mandatory="false" name="fll_pass">
 <data-type name="CHAR" selected-variant-pattern="CHAR(%n)"/>
 </column>
 </column-list>
 <primary-key id="1b527d23:12fd1ad49f2:-7fd0" name="PK_AUTHENTICATION">
-<primary-key-column name="user"/>
+<primary-key-column name="fll_user"/>
 </primary-key>
 </table>
 <table id="1b527d23:12fd1ad49f2:-7fc7" name="valid_login">
@@ -405,9 +405,13 @@
 <column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1b527d23:12fd1ad49f2:-7fc3" mandatory="true" name="magic_key">
 <data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
 </column>
+<column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="45a39630:1407a447e19:-7fc0" mandatory="true" name="fll_user">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
 </column-list>
 <primary-key id="1b527d23:12fd1ad49f2:-7fc6" name="PK_VALID_LOGIN">
 <primary-key-column name="magic_key"/>
+<primary-key-column name="fll_user"/>
 </primary-key>
 </table>
 <table id="7637d490:13084efdedd:-7f9e" name="sched_subjective">
