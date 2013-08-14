@@ -64,6 +64,6 @@
 	<classpathentry kind="lib" path="scoring/lib/poi-ooxml-schemas-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/gson-2.2.4.jar"/>
 	<classpathentry kind="lib" path="scoring/lib/cobertura/cobertura-2.0.2.jar"/>
-	<classpathentry kind="lib" path="scoring/lib/hsql-2.3.0.jar"/>
+	<classpathentry kind="lib" path="scoring/lib/hsqldb-2.3.0.jar"/>
 	<classpathentry kind="output" path="scoring/build/tomcat/webapps/fll-sw/WEB-INF/classes"/>
 </classpath>
