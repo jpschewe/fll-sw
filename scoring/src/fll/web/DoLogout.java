@@ -7,24 +7,16 @@
 package fll.web;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Collection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.sql.DataSource;
-
-import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
-import fll.db.Queries;
 import fll.util.LogUtils;
 
 /**
@@ -40,37 +32,8 @@ public class DoLogout extends BaseFLLServlet {
                                 final HttpServletResponse response,
                                 final ServletContext application,
                                 final HttpSession session) throws IOException, ServletException {
-    final Collection<Cookie> loginCookies = CookieUtils.findLoginCookie(request);
-    final DataSource datasource = ApplicationAttributes.getDataSource(application);
-    final String hostHeader = request.getHeader("host");
-    final int colonIndex = hostHeader.indexOf(":");
-    final String domain;
-    if (-1 != colonIndex) {
-      domain = hostHeader.substring(0, colonIndex);
-    } else {
-      domain = hostHeader;
-    }
-    LOGGER.debug("domain: "
-        + domain);
+    CookieUtils.clearLoginCookies(application, request, response);
 
-    for (final Cookie loginCookie : loginCookies) {
-      Cookie delCookie = new Cookie(loginCookie.getName(), "");
-      delCookie.setMaxAge(0);
-      delCookie.setDomain(domain);
-      response.addCookie(delCookie);
-
-      Connection connection = null;
-      try {
-        connection = datasource.getConnection();
-        Queries.removeValidLogin(connection, loginCookie.getValue());
-        LOGGER.debug("Removed cookie from DB: "
-            + loginCookie.getValue());
-      } catch (final SQLException e) {
-        throw new RuntimeException(e);
-      } finally {
-        SQLFunctions.close(connection);
-      }
-    }
     response.sendRedirect(response.encodeRedirectURL(request.getContextPath()));
 
   }

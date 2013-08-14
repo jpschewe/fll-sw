@@ -387,7 +387,7 @@
 </foreign-key>
 </foreign-key-list>
 </table>
-<table id="1b527d23:12fd1ad49f2:-7fd1" name="authentication">
+<table id="1b527d23:12fd1ad49f2:-7fd1" name="fll_authentication">
 <column-list>
 <column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1b527d23:12fd1ad49f2:-7fcd" mandatory="true" name="fll_user">
 <data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
@@ -396,7 +396,7 @@
 <data-type name="CHAR" selected-variant-pattern="CHAR(%n)"/>
 </column>
 </column-list>
-<primary-key id="1b527d23:12fd1ad49f2:-7fd0" name="PK_AUTHENTICATION">
+<primary-key id="1b527d23:12fd1ad49f2:-7fd0" name="PK_FLL_AUTHENTICATION">
 <primary-key-column name="fll_user"/>
 </primary-key>
 </table>
