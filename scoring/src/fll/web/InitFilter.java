@@ -220,9 +220,10 @@ public class InitFilter implements Filter {
       }
 
       final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
-      if (Queries.checkValidLogin(connection, loginKeys)) {
+      final String user = Queries.checkValidLogin(connection, loginKeys);
+      if (null != user) {
         LOGGER.debug("Returning true from checkSecurity for valid login: "
-            + loginKeys);
+            + loginKeys + " user: " + user);
         return true;
       } else {
         session.setAttribute(SessionAttributes.REDIRECT_URL, request.getRequestURI());

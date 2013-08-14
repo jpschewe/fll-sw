@@ -114,9 +114,9 @@ public final class Queries {
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
   private static Map<String, Collection<Integer>> computeScoreGroups(final Connection connection,
-                                                                    final int tournament,
-                                                                    final String division,
-                                                                    final String categoryName) throws SQLException {
+                                                                     final int tournament,
+                                                                     final String division,
+                                                                     final String categoryName) throws SQLException {
     final Map<String, Collection<Integer>> scoreGroups = new HashMap<String, Collection<Integer>>();
 
     PreparedStatement prep = null;
@@ -126,8 +126,7 @@ public final class Queries {
           + " FROM " + categoryName + ", Judges" //
           + " WHERE TeamNumber = ?" //
           + " AND Tournament = ?" //
-          + " AND Judges.id = " + categoryName + ".Judge"
-          + " AND ComputedTotal IS NOT NULL");
+          + " AND Judges.id = " + categoryName + ".Judge" + " AND ComputedTotal IS NOT NULL");
       prep.setInt(2, tournament);
 
       // foreach team, put the team in a score group
@@ -2952,11 +2951,13 @@ public final class Queries {
    * @param magicKey
    */
   public static void addValidLogin(final Connection connection,
+                                   final String user,
                                    final String magicKey) throws SQLException {
     PreparedStatement prep = null;
     try {
-      prep = connection.prepareStatement("INSERT INTO valid_login (magic_key) VALUES(?)");
-      prep.setString(1, magicKey);
+      prep = connection.prepareStatement("INSERT INTO valid_login (fll_user, magic_key) VALUES(?, ?)");
+      prep.setString(1, user);
+      prep.setString(2, magicKey);
       prep.executeUpdate();
     } finally {
       SQLFunctions.close(prep);
@@ -2966,22 +2967,23 @@ public final class Queries {
   /**
    * Check if any of the specified login keys matches one that was stored.
    * 
-   * @param keys teh keys to check
-   * @return true if it matches on in the database, false otherwise
+   * @param keys the keys to check
+   * @return the username that the key matches, null otherwise
    */
-  public static boolean checkValidLogin(final Connection connection,
-                                        final Collection<String> keys) throws SQLException {
+  public static String checkValidLogin(final Connection connection,
+                                       final Collection<String> keys) throws SQLException {
     // not doing the comparison with SQL to avoid SQL injection attack
     Statement stmt = null;
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT magic_key FROM valid_login");
+      rs = stmt.executeQuery("SELECT fll_user, magic_key FROM valid_login");
       while (rs.next()) {
-        final String compare = rs.getString(1);
+        final String user = rs.getString(1);
+        final String compare = rs.getString(2);
         for (final String magicKey : keys) {
           if (ComparisonUtils.safeEquals(magicKey, compare)) {
-            return true;
+            return user;
           }
         }
       }
@@ -2989,7 +2991,7 @@ public final class Queries {
       SQLFunctions.close(rs);
       SQLFunctions.close(stmt);
     }
-    return false;
+    return null;
   }
 
   /**

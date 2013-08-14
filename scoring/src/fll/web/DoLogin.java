@@ -88,7 +88,7 @@ public class DoLogin extends BaseFLLServlet {
         if (user.equals(entry.getKey())
             && hashedPass.equals(entry.getValue())) {
           final String magicKey = String.valueOf(System.currentTimeMillis());
-          Queries.addValidLogin(connection, magicKey);
+          Queries.addValidLogin(connection, user, magicKey);
           CookieUtils.setLoginCookie(response, magicKey);
 
           String redirect = SessionAttributes.getRedirectURL(session);
