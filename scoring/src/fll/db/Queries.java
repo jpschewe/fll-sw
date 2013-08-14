@@ -2916,6 +2916,38 @@ public final class Queries {
   }
 
   /**
+   * Get the hashed password for a user for checking.
+   * 
+   * @param connection
+   * @param user
+   * @return the password or null
+   * @throws SQLException
+   */
+  public static String getHashedPassword(final Connection connection,
+                                         final String user) throws SQLException {
+    final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
+    if (!tables.contains("valid_login")) {
+      GenerateDB.createValidLogin(connection);
+    }
+
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT fll_pass FROM fll_authentication WHERE fll_user = ?");
+      prep.setString(1, user);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        final String pass = rs.getString(1);
+        return pass;
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+    return null;
+  }
+
+  /**
    * Get the authentication information.
    * 
    * @param connection
@@ -2995,14 +3027,43 @@ public final class Queries {
   }
 
   /**
-   * Remove a valid login.
+   * Remove a valid login by magic key.
    */
-  public static void removeValidLogin(final Connection connection,
-                                      final String magicKey) throws SQLException {
+  public static void removeValidLoginByKey(final Connection connection,
+                                           final String magicKey) throws SQLException {
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("DELETE FROM valid_login WHERE magic_key = ?");
       prep.setString(1, magicKey);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
+  public static void changePassword(final Connection connection,
+                                    final String user,
+                                    final String passwordHash) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE fll_authentication SET fll_pass = ? WHERE fll_user = ?");
+      prep.setString(1, passwordHash);
+      prep.setString(2, user);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Remove a valid login by user.
+   */
+  public static void removeValidLoginByUser(final Connection connection,
+                                            final String user) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("DELETE FROM valid_login WHERE fll_user = ?");
+      prep.setString(1, user);
       prep.executeUpdate();
     } finally {
       SQLFunctions.close(prep);

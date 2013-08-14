@@ -6,15 +6,22 @@
 
 package fll.web;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
+
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
+import fll.db.Queries;
 import fll.util.LogUtils;
 
 /**
@@ -22,11 +29,59 @@ import fll.util.LogUtils;
  */
 public final class CookieUtils {
 
-  private static final Logger LOG = LogUtils.getLogger();
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   public static final String LOGIN_KEY = "fll-login";
 
   private CookieUtils() {
+  }
+
+  /**
+   * Clear out all login cookies.
+   */
+  public static void clearLoginCookies(final ServletContext application,
+                                       final HttpServletRequest request,
+                                       final HttpServletResponse response) {
+    final String hostHeader = request.getHeader("host");
+    final int colonIndex = hostHeader.indexOf(":");
+    final String domain;
+    if (-1 != colonIndex) {
+      domain = hostHeader.substring(0, colonIndex);
+    } else {
+      domain = hostHeader;
+    }
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("domain: "
+          + domain);
+    }
+
+    final Collection<Cookie> loginCookies = CookieUtils.findLoginCookie(request);
+    final DataSource datasource = ApplicationAttributes.getDataSource(application);
+
+    Connection connection = null;
+    try {
+      connection = datasource.getConnection();
+
+      for (final Cookie loginCookie : loginCookies) {
+        Cookie delCookie = new Cookie(loginCookie.getName(), "");
+        delCookie.setMaxAge(0);
+        delCookie.setDomain(domain);
+        response.addCookie(delCookie);
+
+        Queries.removeValidLoginByKey(connection, loginCookie.getValue());
+
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Removed cookie from DB: "
+              + loginCookie.getValue());
+        }
+      }
+  
+    } catch (final SQLException e) {
+      throw new RuntimeException(e);
+    } finally {
+      SQLFunctions.close(connection);
+    }
+
   }
 
   /**
@@ -58,8 +113,8 @@ public final class CookieUtils {
     }
 
     for (final Cookie cookie : cookies) {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Checking cookie: "
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Checking cookie: "
             + cookie.getName());
       }
       if (LOGIN_KEY.equals(cookie.getName())) {
