@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -26,6 +27,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import fll.db.Queries;
 import fll.web.ApplicationAttributes;
 import fll.web.BaseFLLServlet;
+import fll.web.CookieUtils;
 import fll.web.DoLogin;
 import fll.web.SessionAttributes;
 
@@ -46,14 +48,6 @@ public class CreateUser extends BaseFLLServlet {
     Connection connection = null;
     try {
       connection = datasource.getConnection();
-
-      // check for authentication table
-      if (!Queries.isAuthenticationEmpty(connection)) {
-        session.setAttribute(SessionAttributes.MESSAGE,
-                             "<p class='error'>Authentication information already exists in the database, cannot create user.</p>");
-        response.sendRedirect(response.encodeRedirectURL("createUsername.jsp"));
-        return;
-      }
 
       final String user = request.getParameter("user");
       final String pass = request.getParameter("pass");
@@ -79,10 +73,18 @@ public class CreateUser extends BaseFLLServlet {
       prep.setString(2, hashedPass);
       prep.executeUpdate();
 
-      session.setAttribute(SessionAttributes.MESSAGE, "<p id='success-create-user'>Successfully created user</p>");
+      session.setAttribute(SessionAttributes.MESSAGE, "<p id='success-create-user'>Successfully created user '"
+          + user + "'</p>");
 
-      // do a login
-      DoLogin.doLogin(request, response, application, session);
+      // do a login if not already logged in
+      final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
+      final String authenticatedUser = Queries.checkValidLogin(connection, loginKeys);
+      if (null == authenticatedUser) {
+        DoLogin.doLogin(request, response, application, session);
+      } else {
+        response.sendRedirect(response.encodeRedirectURL("index.jsp"));
+      }
+
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     } finally {

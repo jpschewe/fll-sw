@@ -1,4 +1,4 @@
-* 221 - Allow one to change a user's password
+* 221 - Allow one to change a user's password, create and remove users
 * 227 - Upgrade to HSQL 2.3.0
 * 228 - Put overall and performance at the top of the ranking report
 * 222 - Added tournament name and optional tournament location to the
