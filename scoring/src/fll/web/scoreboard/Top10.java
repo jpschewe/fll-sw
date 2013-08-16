@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import fll.db.GlobalParameters;
 import net.mtu.eggplant.util.StringUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
@@ -92,7 +93,7 @@ public class Top10 extends BaseFLLServlet {
       formatter.format("<html>");
       formatter.format("<head>");
       formatter.format("<link rel='stylesheet' type='text/css' href='score_style.css' />");
-      formatter.format("<meta http-equiv='refresh' content='30' />");
+      formatter.format("<meta http-equiv='refresh' content='%d' />", GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
       formatter.format("</head>");
 
       formatter.format("<body>");

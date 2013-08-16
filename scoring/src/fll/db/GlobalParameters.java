@@ -40,6 +40,10 @@ public final class GlobalParameters {
 
   public static final int SCORESHEET_LAYOUT_NUP_DEFAULT = 2;
 
+  public static final String DIVISION_FLIP_RATE = "DivisionFlipRate";
+
+  public static final int DIVISION_FLIP_RATE_DEFAULT = 30;
+
   private GlobalParameters() {
     // no instances
   }

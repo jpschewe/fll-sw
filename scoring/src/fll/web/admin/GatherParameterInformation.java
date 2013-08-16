@@ -95,6 +95,9 @@ public class GatherParameterInformation extends BaseFLLServlet {
       session.setAttribute("gStandardizedSigma",
                            GlobalParameters.getDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_SIGMA));
 
+      session.setAttribute("divisionFlipRate",
+                           GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE));
+
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
           + sqle.getMessage() + "</p>");
