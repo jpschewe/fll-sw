@@ -67,6 +67,9 @@ public class ChangeParameters extends BaseFLLServlet {
       GlobalParameters.setDoubleGlobalParameter(connection, GlobalParameters.STANDARDIZED_SIGMA,
                                                 Double.valueOf(request.getParameter("gStandardizedSigma")));
 
+      GlobalParameters.setDoubleGlobalParameter(connection, GlobalParameters.DIVISION_FLIP_RATE,
+                                                Double.valueOf(request.getParameter("divisionFlipRate")));
+
       message.append("<p id='success'>Parameters saved</p>");
     } catch (final SQLException sqle) {
       message.append("<p class='error'>Error talking to the database: "
