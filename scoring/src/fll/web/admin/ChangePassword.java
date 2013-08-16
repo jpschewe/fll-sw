@@ -17,6 +17,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.PageContext;
 import javax.sql.DataSource;
 
 import net.mtu.eggplant.util.ComparisonUtils;
@@ -38,7 +39,7 @@ public class ChangePassword extends BaseFLLServlet {
 
   public static void populateContext(final HttpServletRequest request,
                                      final ServletContext application,
-                                     final HttpSession session) {
+                                     final PageContext pageContext) {
 
     final DataSource datasource = ApplicationAttributes.getDataSource(application);
     Connection connection = null;
@@ -47,7 +48,7 @@ public class ChangePassword extends BaseFLLServlet {
 
       final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
       final String user = Queries.checkValidLogin(connection, loginKeys);
-      session.setAttribute("fll_user", user);
+      pageContext.setAttribute("fll_user", user);
 
     } catch (final SQLException e) {
       throw new RuntimeException(e);
@@ -67,7 +68,8 @@ public class ChangePassword extends BaseFLLServlet {
     try {
       connection = datasource.getConnection();
 
-      final String user = SessionAttributes.getNonNullAttribute(session, "fll_user", String.class);
+      final Collection<String> loginKeys = CookieUtils.findLoginKey(request);
+      final String user = Queries.checkValidLogin(connection, loginKeys);
 
       final String passwordHash = Queries.getHashedPassword(connection, user);
       final String oldPassword = request.getParameter("old_password");

@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-  fll.web.admin.ChangePassword.populateContext(request, application, session);
+  fll.web.admin.ChangePassword.populateContext(request, application, pageContext);
 %>
 
 <html>
