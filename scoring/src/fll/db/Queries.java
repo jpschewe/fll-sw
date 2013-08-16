@@ -3084,6 +3084,47 @@ public final class Queries {
   }
 
   /**
+   * Remove a user.
+   */
+  public static void removeUser(final Connection connection, final String user) throws SQLException {
+    PreparedStatement removeKeys = null;
+    PreparedStatement removeUser = null;
+    try {
+      removeKeys = connection.prepareStatement("DELETE FROM valid_login where fll_user = ?");
+      removeKeys.setString(1, user);
+      removeKeys.executeUpdate();
+      
+      removeUser = connection.prepareStatement("DELETE FROM fll_authentication where fll_user = ?");
+      removeUser.setString(1, user);
+      removeUser.executeUpdate();
+    } finally {
+      SQLFunctions.close(removeKeys);
+      SQLFunctions.close(removeUser);
+    }
+  }
+  
+  /**
+   * Get the list of current users known to the system.
+   */
+  public static Collection<String> getUsers(final Connection connection) throws SQLException {
+    final Collection<String> users = new LinkedList<String>();
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT fll_user from fll_authentication");
+      while (rs.next()) {
+        final String user = rs.getString(1);
+        users.add(user);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
+    }
+    return users;
+  }
+
+  /**
    * Get the maximum performance round number to display on the scoreboard
    * pages.
    */

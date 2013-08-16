@@ -237,6 +237,8 @@
  <h2>User Management</h2>
  <ul>
   <li><a href="changePassword.jsp">Change Password</a></li>
+  <li><a href="createUsername.jsp">Create User</a>
+  <li><a href="removeUser.jsp">Remove User</a>
  </ul>
 
  <h2>Advanced</h2>
