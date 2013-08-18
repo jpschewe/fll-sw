@@ -9,7 +9,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -124,8 +123,11 @@ public final class GenerateDB {
       // Table structure for table 'tablenames'
       stmt.executeUpdate("DROP TABLE IF EXISTS tablenames CASCADE");
       stmt.executeUpdate("CREATE TABLE tablenames ("
-          + "  Tournament INTEGER NOT NULL," + "  PairID INTEGER NOT NULL," + "  SideA varchar(64) NOT NULL,"
-          + "  SideB varchar(64) NOT NULL," + "  CONSTRAINT tablenames_pk PRIMARY KEY (Tournament,PairID)"
+          + "  Tournament INTEGER NOT NULL," //
+          + "  PairID INTEGER NOT NULL," //
+          + "  SideA varchar(64) NOT NULL," //
+          + "  SideB varchar(64) NOT NULL," //
+          + "  CONSTRAINT tablenames_pk PRIMARY KEY (Tournament,PairID)" //
           + " ,CONSTRAINT tablenames_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" + ")");
 
       // table to hold head-to-head playoff meta-data
@@ -404,8 +406,9 @@ public final class GenerateDB {
 
       stmt.executeUpdate("DROP TABLE IF EXISTS valid_login CASCADE");
       stmt.executeUpdate("CREATE TABLE valid_login ("
-          + "  magic_key varchar(64) NOT NULL" //
-          + " ,CONSTRAINT valid_login_pk PRIMARY KEY (magic_key)" //
+          + "  fll_user varchar(64) NOT NULL" //
+          + " ,magic_key varchar(64) NOT NULL" //
+          + " ,CONSTRAINT valid_login_pk PRIMARY KEY (fll_user, magic_key)" //
           + ")");
     } finally {
       SQLFunctions.close(stmt);
@@ -590,7 +593,8 @@ public final class GenerateDB {
       // dump the document into a byte array so we can push it into the
       // database
       final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      XMLUtils.writeXML(document, new OutputStreamWriter(baos, Utilities.DEFAULT_CHARSET), Utilities.DEFAULT_CHARSET.name());
+      XMLUtils.writeXML(document, new OutputStreamWriter(baos, Utilities.DEFAULT_CHARSET),
+                        Utilities.DEFAULT_CHARSET.name());
       final byte[] bytes = baos.toByteArray();
       final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
       challengePrep.setAsciiStream(1, bais, bytes.length);

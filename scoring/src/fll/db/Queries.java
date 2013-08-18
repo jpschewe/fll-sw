@@ -114,9 +114,9 @@ public final class Queries {
    */
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
   private static Map<String, Collection<Integer>> computeScoreGroups(final Connection connection,
-                                                                    final int tournament,
-                                                                    final String division,
-                                                                    final String categoryName) throws SQLException {
+                                                                     final int tournament,
+                                                                     final String division,
+                                                                     final String categoryName) throws SQLException {
     final Map<String, Collection<Integer>> scoreGroups = new HashMap<String, Collection<Integer>>();
 
     PreparedStatement prep = null;
@@ -126,8 +126,7 @@ public final class Queries {
           + " FROM " + categoryName + ", Judges" //
           + " WHERE TeamNumber = ?" //
           + " AND Tournament = ?" //
-          + " AND Judges.id = " + categoryName + ".Judge"
-          + " AND ComputedTotal IS NOT NULL");
+          + " AND Judges.id = " + categoryName + ".Judge" + " AND ComputedTotal IS NOT NULL");
       prep.setInt(2, tournament);
 
       // foreach team, put the team in a score group
@@ -2917,6 +2916,38 @@ public final class Queries {
   }
 
   /**
+   * Get the hashed password for a user for checking.
+   * 
+   * @param connection
+   * @param user
+   * @return the password or null
+   * @throws SQLException
+   */
+  public static String getHashedPassword(final Connection connection,
+                                         final String user) throws SQLException {
+    final Collection<String> tables = SQLFunctions.getTablesInDB(connection);
+    if (!tables.contains("valid_login")) {
+      GenerateDB.createValidLogin(connection);
+    }
+
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT fll_pass FROM fll_authentication WHERE fll_user = ?");
+      prep.setString(1, user);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        final String pass = rs.getString(1);
+        return pass;
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+    return null;
+  }
+
+  /**
    * Get the authentication information.
    * 
    * @param connection
@@ -2952,11 +2983,13 @@ public final class Queries {
    * @param magicKey
    */
   public static void addValidLogin(final Connection connection,
+                                   final String user,
                                    final String magicKey) throws SQLException {
     PreparedStatement prep = null;
     try {
-      prep = connection.prepareStatement("INSERT INTO valid_login (magic_key) VALUES(?)");
-      prep.setString(1, magicKey);
+      prep = connection.prepareStatement("INSERT INTO valid_login (fll_user, magic_key) VALUES(?, ?)");
+      prep.setString(1, user);
+      prep.setString(2, magicKey);
       prep.executeUpdate();
     } finally {
       SQLFunctions.close(prep);
@@ -2966,22 +2999,23 @@ public final class Queries {
   /**
    * Check if any of the specified login keys matches one that was stored.
    * 
-   * @param keys teh keys to check
-   * @return true if it matches on in the database, false otherwise
+   * @param keys the keys to check
+   * @return the username that the key matches, null otherwise
    */
-  public static boolean checkValidLogin(final Connection connection,
-                                        final Collection<String> keys) throws SQLException {
+  public static String checkValidLogin(final Connection connection,
+                                       final Collection<String> keys) throws SQLException {
     // not doing the comparison with SQL to avoid SQL injection attack
     Statement stmt = null;
     ResultSet rs = null;
     try {
       stmt = connection.createStatement();
-      rs = stmt.executeQuery("SELECT magic_key FROM valid_login");
+      rs = stmt.executeQuery("SELECT fll_user, magic_key FROM valid_login");
       while (rs.next()) {
-        final String compare = rs.getString(1);
+        final String user = rs.getString(1);
+        final String compare = rs.getString(2);
         for (final String magicKey : keys) {
           if (ComparisonUtils.safeEquals(magicKey, compare)) {
-            return true;
+            return user;
           }
         }
       }
@@ -2989,18 +3023,47 @@ public final class Queries {
       SQLFunctions.close(rs);
       SQLFunctions.close(stmt);
     }
-    return false;
+    return null;
   }
 
   /**
-   * Remove a valid login.
+   * Remove a valid login by magic key.
    */
-  public static void removeValidLogin(final Connection connection,
-                                      final String magicKey) throws SQLException {
+  public static void removeValidLoginByKey(final Connection connection,
+                                           final String magicKey) throws SQLException {
     PreparedStatement prep = null;
     try {
       prep = connection.prepareStatement("DELETE FROM valid_login WHERE magic_key = ?");
       prep.setString(1, magicKey);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
+  public static void changePassword(final Connection connection,
+                                    final String user,
+                                    final String passwordHash) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("UPDATE fll_authentication SET fll_pass = ? WHERE fll_user = ?");
+      prep.setString(1, passwordHash);
+      prep.setString(2, user);
+      prep.executeUpdate();
+    } finally {
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
+   * Remove a valid login by user.
+   */
+  public static void removeValidLoginByUser(final Connection connection,
+                                            final String user) throws SQLException {
+    PreparedStatement prep = null;
+    try {
+      prep = connection.prepareStatement("DELETE FROM valid_login WHERE fll_user = ?");
+      prep.setString(1, user);
       prep.executeUpdate();
     } finally {
       SQLFunctions.close(prep);
@@ -3018,6 +3081,47 @@ public final class Queries {
     } finally {
       SQLFunctions.close(stmt);
     }
+  }
+
+  /**
+   * Remove a user.
+   */
+  public static void removeUser(final Connection connection, final String user) throws SQLException {
+    PreparedStatement removeKeys = null;
+    PreparedStatement removeUser = null;
+    try {
+      removeKeys = connection.prepareStatement("DELETE FROM valid_login where fll_user = ?");
+      removeKeys.setString(1, user);
+      removeKeys.executeUpdate();
+      
+      removeUser = connection.prepareStatement("DELETE FROM fll_authentication where fll_user = ?");
+      removeUser.setString(1, user);
+      removeUser.executeUpdate();
+    } finally {
+      SQLFunctions.close(removeKeys);
+      SQLFunctions.close(removeUser);
+    }
+  }
+  
+  /**
+   * Get the list of current users known to the system.
+   */
+  public static Collection<String> getUsers(final Connection connection) throws SQLException {
+    final Collection<String> users = new LinkedList<String>();
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT fll_user from fll_authentication");
+      while (rs.next()) {
+        final String user = rs.getString(1);
+        users.add(user);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
+    }
+    return users;
   }
 
   /**
