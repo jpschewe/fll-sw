@@ -251,6 +251,18 @@
 						id='gStandardizedSigma' name='gStandardizedSigma' /></td>
 				</tr>
 
+                <tr>
+                    <th>Division Flip Rate <a
+                        href='javascript:display("DivisionFlipRateHelp")'>[help]</a>
+                        <div id='DivisionFlipRateHelp' class='help' style='display: none'>
+                            The number of seconds between when the scoreboard's "Top Division Scores" panel switches which division is shown. Default 30 seconds.
+                            <a href='javascript:hide("DivisionFlipRateHelp")'>[hide]</a>
+                        </div>
+                    </th>
+                    <td><input type='text' value="${divisionFlipRate}"
+                        id='divisionFlipRate' name='divisionFlipRate'/></td>
+                </tr>
+
 			</table>
 
 

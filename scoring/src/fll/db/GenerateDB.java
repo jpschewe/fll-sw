@@ -561,6 +561,13 @@ public final class GenerateDB {
         globalInsert.executeUpdate();
       }
 
+      check = GlobalParameters.globalParameterExists(connection, GlobalParameters.DIVISION_FLIP_RATE);
+      if (!check) {
+        globalInsert.setString(2, GlobalParameters.DIVISION_FLIP_RATE);
+        globalInsert.setInt(1, GlobalParameters.DIVISION_FLIP_RATE_DEFAULT);
+        globalInsert.executeUpdate();
+      }
+
       Queries.setNumSeedingRounds(connection, INTERNAL_TOURNAMENT_ID, TournamentParameters.SEEDING_ROUNDS_DEFAULT);
       Queries.setMaxScorebaordPerformanceRound(connection, INTERNAL_TOURNAMENT_ID,
                                                TournamentParameters.MAX_SCOREBOARD_ROUND_DEFAULT);

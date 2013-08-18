@@ -1,3 +1,5 @@
+* 20 - Allow one to modify the flip rate of the top 10 through a global
+        parameter
 * 221 - Allow one to change a user's password, create and remove users
 * 227 - Upgrade to HSQL 2.3.0
 * 228 - Put overall and performance at the top of the ranking report
