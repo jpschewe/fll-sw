@@ -1,74 +1,131 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fll title="2013 MN FIRST LEGO League Tournament" revision="Rev: 1">
+<fll title="2013 MN FIRST LEGO League Tournament" revision="2">
  <Performance minimumScore="0" weight="1.0">
-   <goal name="supply_truck" title="Blue Supply Truck in Yellow Zone" multiplier="20" />
 
-   <goal name="sign" title="Evacuation Sign Up" multiplier="30" />
 
-   <goal name="plane" title="Cargo Plane Zone" initialValue="0">
-     <value score="30" title="Light Blue" value="lt_blue" />
-     <value score="20" title="Yellow" value="yellow" />
-     <value score="0" title="None" value="none" />
-   </goal>
+  <goal name="obstacles" title="Furthest Obstacle Zone Reached"
+   initialValue="0">
+   <value score="31" title="Red" value="red" />
+   <value score="23" title="Purple" value="purple" />
+   <value score="16" title="Dark Green" value="dk_green" />
+   <value score="10" title="Dark Blue" value="dk_blue" />
+   <value score="0" title="None" value="none" />
+  </goal>
 
-   <goal name="tree_branch" title="Tree Branch Below Power Lines" multiplier="30" />
 
-   <goal name="tsunami" title="All Tsunami Waves Touching Mat" multiplier="20" />
+  <goal name="tsunami" title="All Tsunami Waves Touching Mat"
+   multiplier="20" />
+  <goal name="tree_branch" title="Tree Branch Below Power Lines"
+   multiplier="30" />
 
-   <goal name="ambulance" title="Ambulance in Yellow Zone" multiplier="25" />
+  <goal name="house" title="House Lifted" multiplier="25" />
 
-   <goal name="runway_clear" title="Runway is Clear" multiplier="30" />
+  <goal name="progress" title="Color Zone Reached on Wheel"
+   multiplier="2" max="16" />
 
-   <goal name="construction_relocation" title="Gray Construction Units Only Outside Light Green Zone" multiplier="20" />
+  <goal name="isolation_test" title="West Building Undamaged and East Damaged"
+   multiplier="30" />
+  <goal name="construction_relocation" title="All Gray Units removed from Light Green Zone"
+   multiplier="20" />
 
-   <goal name="isolation_test" title="West Tan Building Undamaged and East Tan Building Damaged" multiplier="30" />
+  <goal name="code_construction" title="Building in the Pink Zone"
+   multiplier="5" max="13" />
 
-   <goal name="obstacles" title="Obstacle Zone Reached" initialValue="0">
-     <value score="31" title="Red" value="red" />
-     <value score="23" title="Purple" value="purple" />
-     <value score="16" title="Dark Green" value="dk_green" />
-     <value score="10" title="Dark Blue" value="dk_blue" />
-     <value score="0" title="None" value="none" />
-   </goal>
 
-   <goal name="house" title="House Lifted" multiplier="25" />
+  <goal name="sign" title="Evacuation Sign Up" multiplier="30" />
 
-   <goal name="progress" title="Colors Reached on Wheel" multiplier="2" max="16" />
+  <goal name="plane" title="Cargo Plane Zone" initialValue="0">
+   <value score="30" title="Light Blue" value="lt_blue" />
+   <value score="20" title="Yellow" value="yellow" />
+   <value score="0" title="None" value="none" />
+  </goal>
 
-   <goal name="family" title="Family Members Reunited" initialValue="0">
-     <value score="66" title="Three" value="three" />
-     <value score="33" title="Two" value="two" />
-     <value score="0" title="None" value="none" />
-   </goal>
 
-   <goal name="water" title="People with Bottled Water" multiplier="15" max="2" />
+  <goal name="runway_clear" title="Runway is Clear" multiplier="30" />
 
-   <goal name="safety_yellow" title="People in Yellow Zone" multiplier="12" max="2" />
-   <goal name="safety_red" title="People in Red Zone" multiplier="15" max="2" />
-   <restriction lowerBound="0" upperBound="2" message="There are only 2 people on the table">
-       <term goal="safety_yellow" scoreType="raw" />
-       <term goal="safety_red" scoreType="raw" />
-   </restriction>
+  <goal name="water" title="People with Bottled Water" multiplier="15"
+   max="3" />
 
-   <goal name="pets" title="Zones with a Pet and Person" multiplier="15" max="2" />
+  <goal name="pets" title="Pets in a zone with a Person"
+   multiplier="15" max="2" />
 
-   <goal name="supplies_yellow" title="Supplies in Yellow Zone" multiplier="3" max="12" />
-   <goal name="supplies_red" title="Supplies in Red Zone" multiplier="4" max="12" />
-   <restriction lowerBound="0" upperBound="12" message="There are only 12 supplies on the table">
-       <term goal="supplies_yellow" scoreType="raw" />
-       <term goal="supplies_red" scoreType="raw" />
-   </restriction>
+  <goal name="family" title="Family Members Together in Zone"
+   initialValue="0">
+   <value score="66" title="Three" value="three" />
+   <value score="33" title="Two" value="two" />
+   <value score="0" title="None" value="none" />
+  </goal>
 
-   <goal name="safe_place" title="Robot in Red Zone" multiplier="25" />
+  <goal name="supply_truck" title="Supply Truck in Yellow Zone"
+   multiplier="20" />
 
-   <goal name="penalties_nonblue" title="Penalties Outside Light Blue Zone" multiplier="-10" max="4" />
-   <goal name="penalties_ltblue" title="Penalties Inside Light Blue Zone" multiplier="-13" max="4" />
-   <!-- TODO verify there's only 4 penalties, and constrain penalty count -->
+  <goal name="ambulance" title="Ambulance in Yellow Zone"
+   multiplier="25" />
 
-  <!-- FIXME picked this at random -->
+
+  <goal name="safety_yellow" title="People in Yellow Zone"
+   multiplier="12" max="3" />
+
+  <goal name="safety_red" title="People in Red Zone" multiplier="18"
+   max="3" />
+
+  <restriction lowerBound="0" upperBound="3"
+   message="There are only 3 people on the table">
+   <term goal="safety_yellow" scoreType="raw" />
+   <term goal="safety_red" scoreType="raw" />
+  </restriction>
+
+
+  <goal name="supplies_yellow" title="Supplies in Yellow Zone"
+   multiplier="3" max="12" />
+
+  <goal name="supplies_red" title="Supplies in Red Zone"
+   multiplier="4" max="12" />
+
+  <restriction lowerBound="0" upperBound="12"
+   message="There are only 12 supplies on the table">
+   <term goal="supplies_yellow" scoreType="raw" />
+   <term goal="supplies_red" scoreType="raw" />
+  </restriction>
+
+  <goal name="safe_place" title="Robot in Red Zone at End"
+   multiplier="25" />
+
+  <goal name="penalties_nonblue" title="Roof Debris Outside Light Blue Zone"
+   multiplier="-10" max="4" />
+  <goal name="penalties_ltblue" title="Roof Debris Inside Light Blue Zone"
+   multiplier="-13" max="4" />
+
+  <restriction lowerBound="0" upperBound="4"
+   message="There are only 4 roof debris on the table">
+   <term goal="penalties_nonblue" scoreType="raw" />
+   <term goal="penalties_ltblue" scoreType="raw" />
+  </restriction>
+
+  <goal name="junk_penalties_large" title="Large Strategic Objects Outside Base"
+   multiplier="-13" max="1000" />
+
+  <goal name="junk_penalties_small" title="Small Strategic Objects Outside Base"
+   multiplier="-5" max="1000" />
+
   <tiebreaker>
+
    <test winner='HIGH'>
-    <term goal='safe_place' scoreType='computed' />
+    <term goal='family' scoreType='computed' />
+   </test>
+
+   <test winner='HIGH'>
+    <term goal='safety_yellow' scoreType='computed' />
+    <term goal='safety_red' scoreType='computed' />
+   </test>
+
+   <test winner='HIGH'>
+    <term goal='pets' scoreType='computed' />
+   </test>
+
+   <test winner='HIGH'>
+    <term goal='supplies_yellow' scoreType='computed' />
+    <term goal='supplies_red' scoreType='computed' />
    </test>
 
   </tiebreaker>
