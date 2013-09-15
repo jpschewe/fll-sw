@@ -135,7 +135,7 @@
     method='post'>
     Select the number of scoresheets per printed page. <select
      name='scoresheetsPerPage'>
-     <c:forEach begin="0" end="2" var="numSheets">
+     <c:forEach begin="1" end="2" var="numSheets">
       <c:choose>
        <c:when test="${numSheets == scoressheetsPerPage}">
         <option selected value='${numSheets}'>${numSheets }</option>
