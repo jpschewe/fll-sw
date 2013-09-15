@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fll title="2013 MN FIRST LEGO League Tournament" revision="2">
+<fll title="2013 MN FIRST LEGO League Tournament" revision="3">
  <Performance minimumScore="0" weight="1.0">
 
 
-  <goal name="obstacles" title="Furthest Obstacle Zone Reached"
+  <goal name="obstacles" title="Furthest Obstacle Region Reached"
    initialValue="0">
    <value score="31" title="Red" value="red" />
    <value score="23" title="Purple" value="purple" />
@@ -20,21 +20,21 @@
 
   <goal name="house" title="House Lifted" multiplier="25" />
 
-  <goal name="progress" title="Color Zone Reached on Wheel"
+  <goal name="progress" title="Color Region Reached on Wheel"
    multiplier="2" max="16" />
 
   <goal name="isolation_test" title="West Building Undamaged and East Damaged"
    multiplier="30" />
-  <goal name="construction_relocation" title="All Gray Units removed from Light Green Zone"
+  <goal name="construction_relocation" title="All Gray Units removed from Light Green Region"
    multiplier="20" />
 
-  <goal name="code_construction" title="Building in the Pink Zone"
+  <goal name="code_construction" title="Building in the Pink Region"
    multiplier="5" max="13" />
 
 
   <goal name="sign" title="Evacuation Sign Up" multiplier="30" />
 
-  <goal name="plane" title="Cargo Plane Zone" initialValue="0">
+  <goal name="plane" title="Cargo Plane Region" initialValue="0">
    <value score="30" title="Light Blue" value="lt_blue" />
    <value score="20" title="Yellow" value="yellow" />
    <value score="0" title="None" value="none" />
@@ -43,30 +43,30 @@
 
   <goal name="runway_clear" title="Runway is Clear" multiplier="30" />
 
-  <goal name="water" title="People with Bottled Water" multiplier="15"
+  <goal name="water" title="People in a Region with Bottled Water" multiplier="15"
    max="3" />
 
-  <goal name="pets" title="Pets in a zone with a Person"
+  <goal name="pets" title="Pets in a Region with a Person"
    multiplier="15" max="2" />
 
-  <goal name="family" title="Family Members Together in Zone"
+  <goal name="family" title="Family Members Together in Region"
    initialValue="0">
    <value score="66" title="Three" value="three" />
    <value score="33" title="Two" value="two" />
    <value score="0" title="None" value="none" />
   </goal>
 
-  <goal name="supply_truck" title="Supply Truck in Yellow Zone"
+  <goal name="supply_truck" title="Supply Truck in Yellow Region"
    multiplier="20" />
 
-  <goal name="ambulance" title="Ambulance in Yellow Zone"
+  <goal name="ambulance" title="Ambulance in Yellow Region"
    multiplier="25" />
 
 
-  <goal name="safety_yellow" title="People in Yellow Zone"
+  <goal name="safety_yellow" title="People in Yellow Region"
    multiplier="12" max="3" />
 
-  <goal name="safety_red" title="People in Red Zone" multiplier="18"
+  <goal name="safety_red" title="People in Red Region" multiplier="18"
    max="3" />
 
   <restriction lowerBound="0" upperBound="3"
@@ -76,10 +76,10 @@
   </restriction>
 
 
-  <goal name="supplies_yellow" title="Supplies in Yellow Zone"
+  <goal name="supplies_yellow" title="Supplies in Yellow Region"
    multiplier="3" max="12" />
 
-  <goal name="supplies_red" title="Supplies in Red Zone"
+  <goal name="supplies_red" title="Supplies in Red Region"
    multiplier="4" max="12" />
 
   <restriction lowerBound="0" upperBound="12"
@@ -88,12 +88,12 @@
    <term goal="supplies_red" scoreType="raw" />
   </restriction>
 
-  <goal name="safe_place" title="Robot in Red Zone at End"
+  <goal name="safe_place" title="Robot in Red Region at End"
    multiplier="25" />
 
-  <goal name="penalties_nonblue" title="Roof Debris Outside Light Blue Zone"
+  <goal name="penalties_nonblue" title="Roof Debris Outside Light Blue Region"
    multiplier="-10" max="4" />
-  <goal name="penalties_ltblue" title="Roof Debris Inside Light Blue Zone"
+  <goal name="penalties_ltblue" title="Roof Debris Inside Light Blue Region"
    multiplier="-13" max="4" />
 
   <restriction lowerBound="0" upperBound="4"
@@ -103,10 +103,10 @@
   </restriction>
 
   <goal name="junk_penalties_large" title="Large Strategic Objects Outside Base"
-   multiplier="-13" max="1000" />
+   multiplier="-13" max="50" />
 
   <goal name="junk_penalties_small" title="Small Strategic Objects Outside Base"
-   multiplier="-5" max="1000" />
+   multiplier="-5" max="50" />
 
   <tiebreaker>
 
