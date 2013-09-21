@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fll title="2013 MN FIRST LEGO League Tournament" revision="3">
+<fll title="2013 MN FIRST LEGO League Tournament" revision="5">
  <Performance minimumScore="0" weight="1.0">
 
 
@@ -43,8 +43,8 @@
 
   <goal name="runway_clear" title="Runway is Clear" multiplier="30" />
 
-  <goal name="water" title="People in a Region with Bottled Water" multiplier="15"
-   max="3" />
+  <goal name="water" title="People in a Region with Bottled Water"
+   multiplier="15" max="3" />
 
   <goal name="pets" title="Pets in a Region with a Person"
    multiplier="15" max="2" />
@@ -92,15 +92,38 @@
    multiplier="25" />
 
   <goal name="penalties_nonblue" title="Roof Debris Outside Light Blue Region"
-   multiplier="-10" max="4" />
+   multiplier="0" max="4" />
   <goal name="penalties_ltblue" title="Roof Debris Inside Light Blue Region"
-   multiplier="-13" max="4" />
+   multiplier="0" max="4" />
 
   <restriction lowerBound="0" upperBound="4"
    message="There are only 4 roof debris on the table">
    <term goal="penalties_nonblue" scoreType="raw" />
    <term goal="penalties_ltblue" scoreType="raw" />
   </restriction>
+
+  <computedGoal name="sprawl_touch_penalties" title="Sprawl/Touch Penalities">
+   <switch>
+    <case>
+     <condition>
+      <left>
+       <term goal="penalties_ltblue" scoreType="raw" />
+      </left>
+      <equal-to />
+      <right>
+       <constant value="0" />
+      </right>
+     </condition>
+     <result>
+      <term goal="penalties_nonblue" scoreType="raw" coefficient="-10" />
+     </result>
+    </case>
+    <default>
+     <constant value="-40" />
+     <term goal="penalties_ltblue" scoreType="raw" coefficient="-13" />
+    </default>
+   </switch>
+  </computedGoal>
 
   <goal name="junk_penalties_large" title="Large Strategic Objects Outside Base"
    multiplier="-13" max="50" />
