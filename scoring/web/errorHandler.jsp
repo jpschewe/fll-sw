@@ -1,56 +1,67 @@
-<%@ page isErrorPage="true" %>
-  
+<%@ include file="/WEB-INF/jspf/init.jspf"%>
+
+<%@ page isErrorPage="true"%>
+
 <html>
-  <head>
-    <title>An error has occurred</title>
-    
-    <%
-    // make sure the exception gets logged
-    fll.util.LogUtils.getLogger().error("An unhandled exception occurred", exception);
-    %>
-  </head>
+<head>
+<title>An error has occurred</title>
 
-  <body id='exception-handler'>
-  ${message}
-  
-    <h1>An error has occurred</h1>
-
-    <p><font class="error">An error has occurred!</font><br/>
-        Please send the text of this page and the files in <code>tomcat/logs</code> and <code>tomcat/webapps/fll-sw/fllweb*</code> along with your bug report.<br/>
-        
-        Error messages:</p>
-    <ul>
 <%
-Throwable e = exception;
-while(null != e) {
+  // make sure the exception gets logged
+  fll.util.LogUtils.getLogger().error("An unhandled exception occurred", exception);
 %>
-       <li><%=e.getMessage()%></li>
-<%
-  e = e.getCause();
-}
-%>
-    </ul>
+</head>
 
-    <p>Full exception trace:</p>
-    <ul>
-    <%
+<body id='exception-handler'>
+ ${message}
+ <%-- clear out the message, so that we don't see it again --%>
+ <c:remove var="message" />
+ 
+
+ <h1 class="error">An error has occurred</h1>
+
+ <form action="<c:url value='/GatherBugReport'/>">
+  <p>If you would like to submit a bug report please fill in a brief
+   description and submit the bug report.</p>
+
+  <textarea rows="5" cols="40" name="bug_description"
+   id="bug_description" wrap="virtual"></textarea>
+<br/>
+
+  <input type='submit' id='submit_bug_report' value="Submit Bug Report" />
+ </form>
+
+ <p>Error messages:</p>
+ <ul>
+  <%
+    Throwable e = exception;
+    while (null != e) {
+  %>
+  <li><%=e.getMessage()%></li>
+  <%
+    e = e.getCause();
+    }
+  %>
+ </ul>
+
+ <p>Full exception trace:</p>
+ <ul>
+  <%
     e = exception;
-    while(null != e) {
+    while (null != e) {
       out.println("<li>");
       out.println(e.getMessage());
       out.println("<ul>");
       StackTraceElement[] stack = e.getStackTrace();
-      for(StackTraceElement ele : stack) {
-        out.println("<li>" + ele.toString() + "</li>");      
+      for (StackTraceElement ele : stack) {
+        out.println("<li>"
+            + ele.toString() + "</li>");
       }
       out.println("</ul></li>");
       e = e.getCause();
     }
-    %>
-    </ul>
-      
+  %>
+ </ul>
 
-
-
-  </body>
+</body>
 </html>
