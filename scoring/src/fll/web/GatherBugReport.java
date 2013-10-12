@@ -32,6 +32,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
+import fll.Utilities;
 import fll.db.DumpDB;
 import fll.util.LogUtils;
 
@@ -68,7 +69,7 @@ public class GatherBugReport extends BaseFLLServlet {
       final String description = request.getParameter("bug_description");
       if (null != description) {
         zipOut.putNextEntry(new ZipEntry("bug_description.txt"));
-        zipOut.write(description.getBytes());
+        zipOut.write(description.getBytes(Utilities.DEFAULT_CHARSET));
       }
 
       addDatabase(zipOut, connection, challengeDocument);
@@ -103,7 +104,6 @@ public class GatherBugReport extends BaseFLLServlet {
     FileInputStream fis = null;
     try {
       final File temp = File.createTempFile("database", ".flldb");
-      temp.deleteOnExit();
 
       dbZipOut = new ZipOutputStream(new FileOutputStream(temp));
       DumpDB.dumpDatabase(dbZipOut, connection, challengeDocument);
@@ -114,7 +114,9 @@ public class GatherBugReport extends BaseFLLServlet {
       IOUtils.copy(fis, zipOut);
       fis.close();
 
-      temp.delete();
+      if(!temp.delete()) {
+        temp.deleteOnExit();
+      }
 
     } finally {
       IOUtils.closeQuietly(dbZipOut);
