@@ -18,7 +18,7 @@ fllsw_root="${mydir}"/..
 cd "${fllsw_root}"
 git clean -xdf || fatal "Error cleaning workspace"
 
-if [ "${DEVEL_BUILD}" -eq "1" ]; then
+if [ -n "${DEVEL_BUILD}" -a "${DEVEL_BUILD}" -eq "1" ]; then
     # setup version identifier
     cd "${fllsw_root}"/scoring
     echo "app.version=devel-${BUILD_ID}" > override.properties
