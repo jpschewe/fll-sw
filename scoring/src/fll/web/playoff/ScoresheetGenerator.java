@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,6 +35,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import fll.Team;
 import fll.Version;
 import fll.db.Queries;
+import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
 import fll.util.LogUtils;
@@ -90,15 +92,16 @@ public class ScoresheetGenerator {
     final String numMatchesStr = request.getParameter("numMatches");
     if (null == numMatchesStr) {
       // must have been called asking for blank
-      m_numTeams = Queries.getScoresheetLayoutNUp(connection);
+      m_numSheets = Queries.getScoresheetLayoutNUp(connection);
       initializeArrays();
 
       setPageTitle("");
-      for (int i = 0; i < m_numTeams; i++) {
+      for (int i = 0; i < m_numSheets; i++) {
         m_table[i] = SHORT_BLANK;
         m_name[i] = LONG_BLANK;
         m_round[i] = SHORT_BLANK;
         m_number[i] = null;
+        m_time[i] = null;
       }
     } else {
       // called with specific sheets to print
@@ -122,7 +125,7 @@ public class ScoresheetGenerator {
                                       "No matches were found checked. Please go back and select the checkboxes for the scoresheets that you want to print");
       }
 
-      m_numTeams = checkedMatchCount * 2;
+      m_numSheets = checkedMatchCount * 2;
 
       initializeArrays();
       setPageTitle(m_pageTitle);
@@ -206,10 +209,11 @@ public class ScoresheetGenerator {
    * call to this method is made.
    */
   private void initializeArrays() {
-    m_table = new String[m_numTeams];
-    m_name = new String[m_numTeams];
-    m_round = new String[m_numTeams];
-    m_number = new Integer[m_numTeams];
+    m_table = new String[m_numSheets];
+    m_name = new String[m_numSheets];
+    m_round = new String[m_numSheets];
+    m_number = new Integer[m_numSheets];
+    m_time = new Date[m_numSheets];
     m_goalLabel = new PdfPCell[0];
     m_goalValue = new PdfPCell[0];
   }
@@ -291,13 +295,13 @@ public class ScoresheetGenerator {
     sciC.setPaddingRight(36);
     sciC.setHorizontalAlignment(Element.ALIGN_RIGHT);
 
-    final PdfPTable[] team = new PdfPTable[m_numTeams];
-    final PdfPCell[] cell = new PdfPCell[m_numTeams];
+    final PdfPTable[] team = new PdfPTable[m_numSheets];
+    final PdfPCell[] cell = new PdfPCell[m_numSheets];
 
     // Create a table with a grid cell for each scoresheet on the page
     PdfPTable wholePage = getTableForPage(nup);
     wholePage.setWidthPercentage(100);
-    for (int i = 0; i < m_numTeams; i++) {
+    for (int i = 0; i < m_numSheets; i++) {
       if (i > 0
           && (i % nup) == 0) {
         pdfDoc.newPage();
@@ -311,7 +315,7 @@ public class ScoresheetGenerator {
 
       final PdfPTable teamInfo = new PdfPTable(7);
       teamInfo.setWidthPercentage(100);
-      teamInfo.setWidths(new float[] { 1f, .75f, 1f, 1f, .75f, 1.1f, 1f });
+      teamInfo.setWidths(new float[] { 1f, .75f, 1f, 1f, .75f, 1f, 1f });
 
       // Time label cell
       final Paragraph timeP = new Paragraph("Time:", ARIAL_10PT_NORMAL);
@@ -321,7 +325,8 @@ public class ScoresheetGenerator {
       timeLc.addElement(timeP);
       teamInfo.addCell(timeLc);
       // Time value cell
-      final Paragraph timeV = new Paragraph("     ", COURIER_10PT_NORMAL);
+      final Paragraph timeV = new Paragraph(null == m_time[i] ? SHORT_BLANK
+          : TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(m_time[i]), COURIER_10PT_NORMAL);
       final PdfPCell timeVc = new PdfPCell(team[i].getDefaultCell());
       timeVc.addElement(timeV);
       teamInfo.addCell(timeVc);
@@ -450,7 +455,7 @@ public class ScoresheetGenerator {
     }
 
     // Add a blank cells to complete the table of the last page
-    final int numBlanks = (nup - (m_numTeams % nup))
+    final int numBlanks = (nup - (m_numSheets % nup))
         % nup;
     if (numBlanks > 0) {
       for (int j = 0; j < numBlanks; j++) {
@@ -554,7 +559,7 @@ public class ScoresheetGenerator {
     }
   }
 
-  private int m_numTeams;
+  private int m_numSheets;
 
   private String m_revision;
 
@@ -567,6 +572,8 @@ public class ScoresheetGenerator {
   private String[] m_round;
 
   private Integer[] m_number;
+
+  private Date[] m_time;
 
   private PdfPCell[] m_goalLabel;
 
@@ -593,9 +600,9 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numTeams) {
+    if (i >= m_numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numTeams);
+          + m_numSheets);
     }
     m_table[i] = table;
   }
@@ -613,9 +620,9 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numTeams) {
+    if (i >= m_numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numTeams);
+          + m_numSheets);
     }
     m_name[i] = name;
   }
@@ -633,11 +640,30 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numTeams) {
+    if (i >= m_numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numTeams);
+          + m_numSheets);
     }
     m_number[i] = number;
+  }
+
+  /**
+   * Sets the time for scoresheet with index i.
+   * 
+   * @param i The 0-based index of the scoresheet to which to assign this time.
+   * @param time the time for the specified scoresheet.
+   * @throws IllegalArgumentException Thrown if the index is out of valid range.
+   */
+  public void setTime(final int i,
+                      final Date time) throws IllegalArgumentException {
+    if (i < 0) {
+      throw new IllegalArgumentException("Index must not be < 0");
+    }
+    if (i >= m_numSheets) {
+      throw new IllegalArgumentException("Index must be < "
+          + m_numSheets);
+    }
+    m_time[i] = time;
   }
 
   /**
@@ -654,9 +680,9 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numTeams) {
+    if (i >= m_numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numTeams);
+          + m_numSheets);
     }
     m_round[i] = round;
   }
