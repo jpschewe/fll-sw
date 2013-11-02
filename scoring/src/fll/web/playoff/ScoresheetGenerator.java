@@ -5,6 +5,9 @@
  */
 package fll.web.playoff;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -30,6 +33,7 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
@@ -62,11 +66,11 @@ public class ScoresheetGenerator {
    * Create document with the specified number of sheets. Initially all sheets
    * are empty. They should be filled in using the set methods.
    * 
-   * @param numShets
+   * @param numSheets
    */
-  public ScoresheetGenerator(final int numShets,
+  public ScoresheetGenerator(final int numSheets,
                              final ChallengeDescription description) {
-    m_numSheets = numShets;
+    m_numSheets = numSheets;
     initializeArrays();
 
     setPageTitle("");
@@ -115,7 +119,7 @@ public class ScoresheetGenerator {
     final String numMatchesStr = request.getParameter("numMatches");
     if (null == numMatchesStr) {
       // must have been called asking for blank
-      m_numSheets = Queries.getScoresheetLayoutNUp(connection);
+      m_numSheets = 1;
       initializeArrays();
 
       setPageTitle("");
@@ -255,17 +259,25 @@ public class ScoresheetGenerator {
 
   private static final int POINTS_PER_INCH = 72;
 
-  public void writeFile(final Connection connection,
-                        final OutputStream out) throws DocumentException, SQLException {
-
-    final int nup = Queries.getScoresheetLayoutNUp(connection);
-    final boolean orientationIsPortrait;
-    if (nup == 1) {
-      orientationIsPortrait = true;
+  /**
+   * Guess the orientation that the document should be.
+   * 
+   * @return true if it should be portrait
+   * @throws DocumentException
+   * @throws IOException
+   */
+  public static boolean guessOrientation(final ChallengeDescription description) throws DocumentException, IOException {
+    final ScoresheetGenerator gen = new ScoresheetGenerator(1, description);
+    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    gen.writeFile(out, false);
+    final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+    final PdfReader reader = new PdfReader(in);
+    if (reader.getNumberOfPages() > 1) {
+      // doesn't fit landscape
+      return true;
     } else {
-      orientationIsPortrait = false;
+      return false;
     }
-    writeFile(out, orientationIsPortrait);
   }
 
   public void writeFile(final OutputStream out,
@@ -336,7 +348,7 @@ public class ScoresheetGenerator {
     wholePage.setWidthPercentage(100);
     for (int i = 0; i < m_numSheets; i++) {
       if (i > 0
-          && (i % 2) == 0) {
+          && (orientationIsPortrait || (i % 2) == 0)) {
         pdfDoc.newPage();
         wholePage = getTableForPage(orientationIsPortrait);
         wholePage.setWidthPercentage(100);
@@ -476,8 +488,8 @@ public class ScoresheetGenerator {
       wholePage.addCell(cell[i]);
 
       // Add the current table of scoresheets to the document
-      if (!orientationIsPortrait
-          && i % 2 == 1) {
+      if (orientationIsPortrait
+          || (i % 2 == 1)) {
         pdfDoc.add(wholePage);
       }
     }

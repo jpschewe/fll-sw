@@ -72,9 +72,6 @@ public class AdminIndex extends BaseFLLServlet {
       session.setAttribute("playoffsInitialized",
                            Queries.isPlayoffDataInitialized(connection, Queries.getCurrentTournament(connection)));
 
-      final int scoresheetsPerPage = Queries.getScoresheetLayoutNUp(connection);
-      session.setAttribute("scoressheetsPerPage", scoresheetsPerPage);
-
       final int numSeedingRounds = Queries.getNumSeedingRounds(connection, currentTournamentID);
       session.setAttribute("numSeedingRounds", numSeedingRounds);
 

@@ -131,27 +131,6 @@
 
 
   <li>
-   <form id='changeScoresheetLayoutNUp' action='ChangeScoresheetLayout'
-    method='post'>
-    Select the number of scoresheets per printed page. <select
-     name='scoresheetsPerPage'>
-     <c:forEach begin="1" end="2" var="numSheets">
-      <c:choose>
-       <c:when test="${numSheets == scoressheetsPerPage}">
-        <option selected value='${numSheets}'>${numSheets }</option>
-       </c:when>
-       <c:otherwise>
-        <option value='${numSheets}'>${numSheets }</option>
-       </c:otherwise>
-      </c:choose>
-     </c:forEach>
-    </select> <input type='submit' name='changeScoresheetLayoutNUp'
-     value='Commit'>
-   </form>
-  </li>
-
-
-  <li>
    <form id='changeSeedingRounds' action='ChangeSeedingRounds'
     method='post'>
     Select the number of seeding runs. <select name='seedingRounds'>
