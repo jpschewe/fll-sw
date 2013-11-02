@@ -145,7 +145,7 @@ public class ScoresheetGenerator {
             final String round = request.getParameter("round"
                 + i);
             final int iRound = Integer.parseInt(round);
-            
+
             // Get teamA info
             final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamA"
                 + i)));
@@ -155,10 +155,10 @@ public class ScoresheetGenerator {
                 + round;
             m_table[j] = request.getParameter("tableA"
                 + i);
-            
-            final int performanceRunA = Playoff.getRunNumber(connection, teamA.getTeamNumber(), iRound);                 
+
+            final int performanceRunA = Playoff.getRunNumber(connection, teamA.getTeamNumber(), iRound);
             final String divA = Playoff.getPlayoffDivision(connection, teamA.getTeamNumber(), performanceRunA);
-            
+
             updatePrep.setString(1, m_table[j]);
             updatePrep.setString(2, divA);
             updatePrep.setInt(4, iRound);
@@ -168,7 +168,7 @@ public class ScoresheetGenerator {
                                         teamA.getTeamNumber(), iRound, divA));
             }
             j++;
-            
+
             // Get teamB info
             final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamB"
                 + i)));
@@ -179,9 +179,9 @@ public class ScoresheetGenerator {
             m_table[j] = request.getParameter("tableB"
                 + i);
 
-            final int performanceRunB = Playoff.getRunNumber(connection, teamB.getTeamNumber(), iRound);                 
+            final int performanceRunB = Playoff.getRunNumber(connection, teamB.getTeamNumber(), iRound);
             final String divB = Playoff.getPlayoffDivision(connection, teamB.getTeamNumber(), performanceRunB);
-            
+
             updatePrep.setString(1, m_table[j]);
             updatePrep.setString(2, divB);
             updatePrep.setInt(4, iRound);
@@ -309,8 +309,22 @@ public class ScoresheetGenerator {
 
       team[i].addCell(head);
 
-      final PdfPTable teamInfo = new PdfPTable(5);
+      final PdfPTable teamInfo = new PdfPTable(7);
       teamInfo.setWidthPercentage(100);
+      teamInfo.setWidths(new float[] { 1f, .75f, 1f, 1f, .75f, 1.1f, 1f });
+
+      // Time label cell
+      final Paragraph timeP = new Paragraph("Time:", ARIAL_10PT_NORMAL);
+      timeP.setAlignment(Element.ALIGN_RIGHT);
+      final PdfPCell timeLc = new PdfPCell(team[i].getDefaultCell());
+      timeLc.setPaddingRight(2);
+      timeLc.addElement(timeP);
+      teamInfo.addCell(timeLc);
+      // Time value cell
+      final Paragraph timeV = new Paragraph("     ", COURIER_10PT_NORMAL);
+      final PdfPCell timeVc = new PdfPCell(team[i].getDefaultCell());
+      timeVc.addElement(timeV);
+      teamInfo.addCell(timeVc);
 
       // Table label cell
       final Paragraph tblP = new Paragraph("Table:", ARIAL_10PT_NORMAL);
@@ -374,7 +388,7 @@ public class ScoresheetGenerator {
       }
       final Paragraph divV = new Paragraph(divStr, COURIER_10PT_NORMAL);
       final PdfPCell divVc = new PdfPCell(team[i].getDefaultCell());
-      // divVc.setColspan(2);
+      divVc.setColspan(3);
       divVc.addElement(divV);
       teamInfo.addCell(divVc);
 
@@ -388,12 +402,13 @@ public class ScoresheetGenerator {
       nameP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell namelc = new PdfPCell(team[i].getDefaultCell());
       namelc.setPaddingRight(9);
+      namelc.setColspan(2);
       namelc.addElement(nameP);
       teamInfo.addCell(namelc);
       // Team name value cell
       final Paragraph nameV = new Paragraph(m_name[i], COURIER_10PT_NORMAL);
       final PdfPCell nameVc = new PdfPCell(team[i].getDefaultCell());
-      nameVc.setColspan(4);
+      nameVc.setColspan(5);
       nameVc.addElement(nameV);
       teamInfo.addCell(nameVc);
 
@@ -453,7 +468,6 @@ public class ScoresheetGenerator {
    * Stores the goal cells that are inserted into the output after the team name
    * headers and before the scoring/initials blanks at the bottom of the
    * scoresheet.
-   * 
    */
   public void setChallengeInfo(final ChallengeDescription description) {
     setPageTitle(description.getTitle());
