@@ -41,24 +41,7 @@ public class SetupIndex {
    */
   public static void populateContext(final PageContext pageContext) {
 
-    final List<DescriptionInfo> descriptions = new LinkedList<DescriptionInfo>();
-
-    final Collection<URL> urls = XMLUtils.getAllKnownChallengeDescriptorURLs();
-    for (final URL url : urls) {
-      try {
-        final InputStream stream = url.openStream();
-        final Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET);
-        final Document document = ChallengeParser.parse(reader);
-        reader.close();
-        final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
-
-        descriptions.add(new DescriptionInfo(url, description));
-
-      } catch (final IOException e) {
-        LOGGER.error("Error reading description: "
-            + url.toString(), e);
-      }
-    }
+    final List<DescriptionInfo> descriptions = DescriptionInfo.getAllKnownChallengeDescriptionInfo();
 
     Collections.sort(descriptions);
     pageContext.setAttribute("descriptions", descriptions);
@@ -68,6 +51,30 @@ public class SetupIndex {
    * Information to display about a challenge description.
    */
   public static final class DescriptionInfo implements Comparable<DescriptionInfo> {
+
+    public static List<DescriptionInfo> getAllKnownChallengeDescriptionInfo() {
+      final List<DescriptionInfo> descriptions = new LinkedList<DescriptionInfo>();
+
+      final Collection<URL> urls = XMLUtils.getAllKnownChallengeDescriptorURLs();
+      for (final URL url : urls) {
+        try {
+          final InputStream stream = url.openStream();
+          final Reader reader = new InputStreamReader(stream, Utilities.DEFAULT_CHARSET);
+          final Document document = ChallengeParser.parse(reader);
+          reader.close();
+          final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+
+          descriptions.add(new DescriptionInfo(url, description));
+
+        } catch (final IOException e) {
+          LOGGER.error("Error reading description: "
+              + url.toString(), e);
+        }
+      }
+
+      return descriptions;
+    }
+
     public DescriptionInfo(final URL url,
                            final ChallengeDescription description) {
       mUrl = url;
@@ -117,11 +124,11 @@ public class SetupIndex {
         return false;
       }
     }
-    
+
     @Override
     public int hashCode() {
       return getTitle().hashCode();
     }
-    
+
   }
 }
