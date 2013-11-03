@@ -80,6 +80,8 @@ import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.util.PdfUtils;
 import fll.util.SimpleFooterHandler;
+import fll.web.playoff.ScoresheetGenerator;
+import fll.xml.ChallengeDescription;
 import fll.xml.XMLUtils;
 
 /**
@@ -752,6 +754,38 @@ public class TournamentSchedule implements Serializable {
                        "Note that there may be more judging and a head to head round after this judging, please see the main tournament schedule for these details.",
                        TEAM_HEADER_FONT));
     detailedSchedules.add(para);
+  }
+
+  public void outputPerformanceSheets(final OutputStream output,
+                                      final ChallengeDescription description) throws DocumentException, SQLException,
+      IOException {
+    final ScoresheetGenerator scoresheets = new ScoresheetGenerator(getNumberOfRounds()
+        * _schedule.size(), description);
+    final SortedMap<PerformanceTime, TeamScheduleInfo> performanceTimes = new TreeMap<PerformanceTime, TeamScheduleInfo>();
+    for (int round = 0; round < getNumberOfRounds(); ++round) {
+      for (final TeamScheduleInfo si : _schedule) {
+        performanceTimes.put(si.getPerf(round), si);
+      }
+    }
+
+    int sheetIndex = 0;
+    for (final Map.Entry<PerformanceTime, TeamScheduleInfo> entry : performanceTimes.entrySet()) {
+      final PerformanceTime performance = entry.getKey();
+      final TeamScheduleInfo si = entry.getValue();
+      final int round = si.computeRound(performance);
+
+      scoresheets.setTime(sheetIndex, performance.getTime());
+      scoresheets.setTable(sheetIndex, String.format("%s %d", performance.getTable(), performance.getSide()));
+      scoresheets.setRound(sheetIndex, String.valueOf(round));
+      scoresheets.setNumber(sheetIndex, si.getTeamNumber());
+      scoresheets.setDivision(sheetIndex, si.getDivision());
+      scoresheets.setName(sheetIndex, si.getTeamName());
+
+      ++sheetIndex;
+    }
+
+    final boolean orientationIsPortrait = ScoresheetGenerator.guessOrientation(description);
+    scoresheets.writeFile(output, orientationIsPortrait);
   }
 
   private void outputPerformanceSchedule(final Document detailedSchedules) throws DocumentException {

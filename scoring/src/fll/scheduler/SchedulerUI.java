@@ -17,6 +17,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Collections;
@@ -54,8 +57,10 @@ import net.mtu.eggplant.util.BasicFileFilter;
 import net.mtu.eggplant.util.gui.BasicWindowMonitor;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.w3c.dom.Document;
 
 import com.itextpdf.text.DocumentException;
 
@@ -66,6 +71,8 @@ import fll.util.CellFileReader;
 import fll.util.ExcelCellReader;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
+import fll.xml.ChallengeDescription;
+import fll.xml.ChallengeParser;
 
 /**
  * UI for the scheduler.
@@ -153,6 +160,7 @@ public class SchedulerUI extends JFrame {
 
   private JToolBar createToolbar() {
     final JToolBar toolbar = new JToolBar("SchedulerUI Main Toolbar");
+    toolbar.setFloatable(false);
 
     toolbar.add(openAction);
     toolbar.add(reloadFileAction);
@@ -294,7 +302,8 @@ public class SchedulerUI extends JFrame {
     }
 
     public void actionPerformed(final ActionEvent ae) {
-      FileOutputStream fos = null;
+      FileOutputStream pdfFos = null;
+      FileOutputStream scoresheetFos = null;
       try {
         final String baseFilename = Utilities.extractBasename(getCurrentFile());
         final File pdfFile = new File(getCurrentFile().getParentFile(), baseFilename
@@ -302,10 +311,37 @@ public class SchedulerUI extends JFrame {
         LOGGER.info("Writing detailed schedule to "
             + pdfFile.getAbsolutePath());
 
-        fos = new FileOutputStream(pdfFile);
-        getScheduleData().outputDetailedSchedules(getSchedParams(), fos);
+        pdfFos = new FileOutputStream(pdfFile);
+        getScheduleData().outputDetailedSchedules(getSchedParams(), pdfFos);
         JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedule written '"
             + pdfFile.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
+
+        final int answer = JOptionPane.showConfirmDialog(SchedulerUI.this,
+                                                         "Would you like to print the morning score sheets as well?",
+                                                         "Print Scoresheets?", JOptionPane.YES_NO_OPTION);
+        if (JOptionPane.YES_OPTION == answer) {
+          final ChooseChallengeDescriptor dialog = new ChooseChallengeDescriptor(SchedulerUI.this);
+          dialog.setLocationRelativeTo(SchedulerUI.this);
+          dialog.setVisible(true);
+          final URL descriptorLocation = dialog.getSelectedDescription();
+          if (null != descriptorLocation) {
+            final Reader descriptorReader = new InputStreamReader(descriptorLocation.openStream());
+
+            final Document document = ChallengeParser.parse(descriptorReader);
+            final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+
+            final File scoresheetFile = new File(getCurrentFile().getParentFile(), baseFilename
+                + "-scoresheets.pdf");
+            scoresheetFos = new FileOutputStream(scoresheetFile);
+
+            getScheduleData().outputPerformanceSheets(scoresheetFos, description);
+
+            JOptionPane.showMessageDialog(SchedulerUI.this, "Scoresheets written '"
+                + scoresheetFile.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
+          }
+
+        }
+
       } catch (final DocumentException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Error writing detailed schedules: %s", e.getMessage());
@@ -325,15 +361,8 @@ public class SchedulerUI extends JFrame {
         JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
         return;
       } finally {
-        if (null != fos) {
-          try {
-            fos.close();
-          } catch (final IOException e) {
-            if (LOGGER.isDebugEnabled()) {
-              LOGGER.debug("Exception closing stream", e);
-            }
-          }
-        }
+        IOUtils.closeQuietly(pdfFos);
+        IOUtils.closeQuietly(scoresheetFos);
       }
     }
   };
@@ -357,7 +386,7 @@ public class SchedulerUI extends JFrame {
         fileChooser.setCurrentDirectory(new File(startingDirectory));
       }
 
-      final int returnVal = fileChooser.showOpenDialog(null);
+      final int returnVal = fileChooser.showOpenDialog(SchedulerUI.this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
         final File currentDirectory = fileChooser.getCurrentDirectory();
         PREFS.put(STARTING_DIRECTORY_PREF, currentDirectory.getAbsolutePath());
@@ -604,8 +633,8 @@ public class SchedulerUI extends JFrame {
               }
             }
             // handle extra run
-            if(round >= schedInfo.getNumberOfRounds()) {
-              round = schedInfo.getNumberOfRounds()-1;
+            if (round >= schedInfo.getNumberOfRounds()) {
+              round = schedInfo.getNumberOfRounds() - 1;
             }
             final int firstIdx = getScheduleModel().getFirstPerformanceColumn()
                 + (round * SchedulerTableModel.NUM_COLUMNS_PER_ROUND);

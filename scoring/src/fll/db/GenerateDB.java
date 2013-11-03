@@ -554,13 +554,6 @@ public final class GenerateDB {
         globalInsert.executeUpdate();
       }
 
-      check = GlobalParameters.globalParameterExists(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP);
-      if (!check) {
-        globalInsert.setString(2, GlobalParameters.SCORESHEET_LAYOUT_NUP);
-        globalInsert.setInt(1, GlobalParameters.SCORESHEET_LAYOUT_NUP_DEFAULT);
-        globalInsert.executeUpdate();
-      }
-
       check = GlobalParameters.globalParameterExists(connection, GlobalParameters.DIVISION_FLIP_RATE);
       if (!check) {
         globalInsert.setString(2, GlobalParameters.DIVISION_FLIP_RATE);

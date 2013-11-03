@@ -5,10 +5,14 @@
  */
 package fll.web.playoff;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,11 +33,13 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
 import fll.Version;
 import fll.db.Queries;
+import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
 import fll.util.LogUtils;
@@ -55,6 +61,29 @@ public class ScoresheetGenerator {
   private static final String SHORT_BLANK = "______";
 
   private static final char NON_BREAKING_SPACE = '\u00a0';
+
+  /**
+   * Create document with the specified number of sheets. Initially all sheets
+   * are empty. They should be filled in using the set methods.
+   * 
+   * @param numSheets
+   */
+  public ScoresheetGenerator(final int numSheets,
+                             final ChallengeDescription description) {
+    m_numSheets = numSheets;
+    initializeArrays();
+
+    setPageTitle("");
+    for (int i = 0; i < m_numSheets; i++) {
+      m_table[i] = SHORT_BLANK;
+      m_name[i] = LONG_BLANK;
+      m_round[i] = SHORT_BLANK;
+      m_number[i] = null;
+      m_time[i] = null;
+    }
+
+    setChallengeInfo(description);
+  }
 
   /**
    * Create a new ScoresheetGenerator object populated with form header data
@@ -90,15 +119,17 @@ public class ScoresheetGenerator {
     final String numMatchesStr = request.getParameter("numMatches");
     if (null == numMatchesStr) {
       // must have been called asking for blank
-      m_numTeams = Queries.getScoresheetLayoutNUp(connection);
+      m_numSheets = 1;
       initializeArrays();
 
       setPageTitle("");
-      for (int i = 0; i < m_numTeams; i++) {
+      for (int i = 0; i < m_numSheets; i++) {
         m_table[i] = SHORT_BLANK;
         m_name[i] = LONG_BLANK;
         m_round[i] = SHORT_BLANK;
+        m_division[i] = SHORT_BLANK;
         m_number[i] = null;
+        m_time[i] = null;
       }
     } else {
       // called with specific sheets to print
@@ -122,7 +153,7 @@ public class ScoresheetGenerator {
                                       "No matches were found checked. Please go back and select the checkboxes for the scoresheets that you want to print");
       }
 
-      m_numTeams = checkedMatchCount * 2;
+      m_numSheets = checkedMatchCount * 2;
 
       initializeArrays();
       setPageTitle(m_pageTitle);
@@ -145,7 +176,7 @@ public class ScoresheetGenerator {
             final String round = request.getParameter("round"
                 + i);
             final int iRound = Integer.parseInt(round);
-            
+
             // Get teamA info
             final Team teamA = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamA"
                 + i)));
@@ -155,10 +186,13 @@ public class ScoresheetGenerator {
                 + round;
             m_table[j] = request.getParameter("tableA"
                 + i);
-            
-            final int performanceRunA = Playoff.getRunNumber(connection, teamA.getTeamNumber(), iRound);                 
+            if (null != m_number[j]) {
+              m_division[j] = Queries.getEventDivision(connection, m_number[j], tournament);
+            }
+
+            final int performanceRunA = Playoff.getRunNumber(connection, teamA.getTeamNumber(), iRound);
             final String divA = Playoff.getPlayoffDivision(connection, teamA.getTeamNumber(), performanceRunA);
-            
+
             updatePrep.setString(1, m_table[j]);
             updatePrep.setString(2, divA);
             updatePrep.setInt(4, iRound);
@@ -168,7 +202,7 @@ public class ScoresheetGenerator {
                                         teamA.getTeamNumber(), iRound, divA));
             }
             j++;
-            
+
             // Get teamB info
             final Team teamB = Team.getTeamFromDatabase(connection, Integer.parseInt(request.getParameter("teamB"
                 + i)));
@@ -179,9 +213,9 @@ public class ScoresheetGenerator {
             m_table[j] = request.getParameter("tableB"
                 + i);
 
-            final int performanceRunB = Playoff.getRunNumber(connection, teamB.getTeamNumber(), iRound);                 
+            final int performanceRunB = Playoff.getRunNumber(connection, teamB.getTeamNumber(), iRound);
             final String divB = Playoff.getPlayoffDivision(connection, teamB.getTeamNumber(), performanceRunB);
-            
+
             updatePrep.setString(1, m_table[j]);
             updatePrep.setString(2, divB);
             updatePrep.setInt(4, iRound);
@@ -206,10 +240,12 @@ public class ScoresheetGenerator {
    * call to this method is made.
    */
   private void initializeArrays() {
-    m_table = new String[m_numTeams];
-    m_name = new String[m_numTeams];
-    m_round = new String[m_numTeams];
-    m_number = new Integer[m_numTeams];
+    m_table = new String[m_numSheets];
+    m_name = new String[m_numSheets];
+    m_round = new String[m_numSheets];
+    m_number = new Integer[m_numSheets];
+    m_division = new String[m_numSheets];
+    m_time = new Date[m_numSheets];
     m_goalLabel = new PdfPCell[0];
     m_goalValue = new PdfPCell[0];
   }
@@ -223,16 +259,29 @@ public class ScoresheetGenerator {
 
   private static final int POINTS_PER_INCH = 72;
 
-  public void writeFile(final Connection connection,
-                        final OutputStream out) throws DocumentException, SQLException {
-
-    final int nup = Queries.getScoresheetLayoutNUp(connection);
-    final boolean orientationIsPortrait;
-    if (nup == 1) {
-      orientationIsPortrait = true;
+  /**
+   * Guess the orientation that the document should be.
+   * 
+   * @return true if it should be portrait
+   * @throws DocumentException
+   * @throws IOException
+   */
+  public static boolean guessOrientation(final ChallengeDescription description) throws DocumentException, IOException {
+    final ScoresheetGenerator gen = new ScoresheetGenerator(1, description);
+    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    gen.writeFile(out, false);
+    final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+    final PdfReader reader = new PdfReader(in);
+    if (reader.getNumberOfPages() > 1) {
+      // doesn't fit landscape
+      return true;
     } else {
-      orientationIsPortrait = false;
+      return false;
     }
+  }
+
+  public void writeFile(final OutputStream out,
+                        final boolean orientationIsPortrait) throws DocumentException {
 
     // This creates our new PDF document and declares its orientation
     Document pdfDoc;
@@ -291,17 +340,17 @@ public class ScoresheetGenerator {
     sciC.setPaddingRight(36);
     sciC.setHorizontalAlignment(Element.ALIGN_RIGHT);
 
-    final PdfPTable[] team = new PdfPTable[m_numTeams];
-    final PdfPCell[] cell = new PdfPCell[m_numTeams];
+    final PdfPTable[] team = new PdfPTable[m_numSheets];
+    final PdfPCell[] cell = new PdfPCell[m_numSheets];
 
     // Create a table with a grid cell for each scoresheet on the page
-    PdfPTable wholePage = getTableForPage(nup);
+    PdfPTable wholePage = getTableForPage(orientationIsPortrait);
     wholePage.setWidthPercentage(100);
-    for (int i = 0; i < m_numTeams; i++) {
+    for (int i = 0; i < m_numSheets; i++) {
       if (i > 0
-          && (i % nup) == 0) {
+          && (orientationIsPortrait || (i % 2) == 0)) {
         pdfDoc.newPage();
-        wholePage = getTableForPage(nup);
+        wholePage = getTableForPage(orientationIsPortrait);
         wholePage.setWidthPercentage(100);
       }
       team[i] = new PdfPTable(2);
@@ -309,8 +358,23 @@ public class ScoresheetGenerator {
 
       team[i].addCell(head);
 
-      final PdfPTable teamInfo = new PdfPTable(5);
+      final PdfPTable teamInfo = new PdfPTable(7);
       teamInfo.setWidthPercentage(100);
+      teamInfo.setWidths(new float[] { 1f, .75f, 1f, 1f, .75f, 1f, 1f });
+
+      // Time label cell
+      final Paragraph timeP = new Paragraph("Time:", ARIAL_10PT_NORMAL);
+      timeP.setAlignment(Element.ALIGN_RIGHT);
+      final PdfPCell timeLc = new PdfPCell(team[i].getDefaultCell());
+      timeLc.setPaddingRight(2);
+      timeLc.addElement(timeP);
+      teamInfo.addCell(timeLc);
+      // Time value cell
+      final Paragraph timeV = new Paragraph(null == m_time[i] ? SHORT_BLANK
+          : TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(m_time[i]), COURIER_10PT_NORMAL);
+      final PdfPCell timeVc = new PdfPCell(team[i].getDefaultCell());
+      timeVc.addElement(timeV);
+      teamInfo.addCell(timeVc);
 
       // Table label cell
       final Paragraph tblP = new Paragraph("Table:", ARIAL_10PT_NORMAL);
@@ -366,15 +430,9 @@ public class ScoresheetGenerator {
       divlc.addElement(divP);
       teamInfo.addCell(divlc);
       // Team division value cell
-      final String divStr;
-      if (null != m_number[i]) {
-        divStr = Queries.getEventDivision(connection, m_number[i]);
-      } else {
-        divStr = SHORT_BLANK;
-      }
-      final Paragraph divV = new Paragraph(divStr, COURIER_10PT_NORMAL);
+      final Paragraph divV = new Paragraph(m_division[i], COURIER_10PT_NORMAL);
       final PdfPCell divVc = new PdfPCell(team[i].getDefaultCell());
-      // divVc.setColspan(2);
+      divVc.setColspan(3);
       divVc.addElement(divV);
       teamInfo.addCell(divVc);
 
@@ -388,12 +446,13 @@ public class ScoresheetGenerator {
       nameP.setAlignment(Element.ALIGN_RIGHT);
       final PdfPCell namelc = new PdfPCell(team[i].getDefaultCell());
       namelc.setPaddingRight(9);
+      namelc.setColspan(2);
       namelc.addElement(nameP);
       teamInfo.addCell(namelc);
       // Team name value cell
       final Paragraph nameV = new Paragraph(m_name[i], COURIER_10PT_NORMAL);
       final PdfPCell nameVc = new PdfPCell(team[i].getDefaultCell());
-      nameVc.setColspan(4);
+      nameVc.setColspan(5);
       nameVc.addElement(nameV);
       teamInfo.addCell(nameVc);
 
@@ -417,7 +476,7 @@ public class ScoresheetGenerator {
       cell[i].setPadding(0);
 
       // Interior borders between scoresheets on a page
-      if (nup > 1) {
+      if (!orientationIsPortrait) {
         if (i % 2 == 0) {
           cell[i].setPaddingRight(0.1f * POINTS_PER_INCH);
         } else {
@@ -429,20 +488,18 @@ public class ScoresheetGenerator {
       wholePage.addCell(cell[i]);
 
       // Add the current table of scoresheets to the document
-      if ((i % nup) == (nup - 1)) {
+      if (orientationIsPortrait
+          || (i % 2 == 1)) {
         pdfDoc.add(wholePage);
       }
     }
 
     // Add a blank cells to complete the table of the last page
-    final int numBlanks = (nup - (m_numTeams % nup))
-        % nup;
-    if (numBlanks > 0) {
-      for (int j = 0; j < numBlanks; j++) {
-        final PdfPCell blank = new PdfPCell();
-        blank.setBorder(0);
-        wholePage.addCell(blank);
-      }
+    if (!orientationIsPortrait
+        && m_numSheets % 2 == 1) {
+      final PdfPCell blank = new PdfPCell();
+      blank.setBorder(0);
+      wholePage.addCell(blank);
       pdfDoc.add(wholePage);
     }
 
@@ -453,9 +510,8 @@ public class ScoresheetGenerator {
    * Stores the goal cells that are inserted into the output after the team name
    * headers and before the scoring/initials blanks at the bottom of the
    * scoresheet.
-   * 
    */
-  public void setChallengeInfo(final ChallengeDescription description) {
+  private void setChallengeInfo(final ChallengeDescription description) {
     setPageTitle(description.getTitle());
     if (null != description.getRevision()) {
       setRevisionInfo(description.getRevision());
@@ -540,7 +596,7 @@ public class ScoresheetGenerator {
     }
   }
 
-  private int m_numTeams;
+  private int m_numSheets;
 
   private String m_revision;
 
@@ -553,6 +609,10 @@ public class ScoresheetGenerator {
   private String[] m_round;
 
   private Integer[] m_number;
+
+  private String[] m_division;
+
+  private Date[] m_time;
 
   private PdfPCell[] m_goalLabel;
 
@@ -579,11 +639,31 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numTeams) {
+    if (i >= m_numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numTeams);
+          + m_numSheets);
     }
     m_table[i] = table;
+  }
+
+  /**
+   * Sets the division for scoresheet with index i.
+   * 
+   * @param i The 0-based index of the scoresheet to which to assign this table
+   *          label.
+   * @param table A string with the division for the specified scoresheet.
+   * @throws IllegalArgumentException Thrown if the index is out of valid range.
+   */
+  public void setDivision(final int i,
+                          final String division) throws IllegalArgumentException {
+    if (i < 0) {
+      throw new IllegalArgumentException("Index must not be < 0");
+    }
+    if (i >= m_numSheets) {
+      throw new IllegalArgumentException("Index must be < "
+          + m_numSheets);
+    }
+    m_division[i] = division;
   }
 
   /**
@@ -599,9 +679,9 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numTeams) {
+    if (i >= m_numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numTeams);
+          + m_numSheets);
     }
     m_name[i] = name;
   }
@@ -619,11 +699,30 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numTeams) {
+    if (i >= m_numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numTeams);
+          + m_numSheets);
     }
     m_number[i] = number;
+  }
+
+  /**
+   * Sets the time for scoresheet with index i.
+   * 
+   * @param i The 0-based index of the scoresheet to which to assign this time.
+   * @param time the time for the specified scoresheet.
+   * @throws IllegalArgumentException Thrown if the index is out of valid range.
+   */
+  public void setTime(final int i,
+                      final Date time) throws IllegalArgumentException {
+    if (i < 0) {
+      throw new IllegalArgumentException("Index must not be < 0");
+    }
+    if (i >= m_numSheets) {
+      throw new IllegalArgumentException("Index must be < "
+          + m_numSheets);
+    }
+    m_time[i] = time;
   }
 
   /**
@@ -640,9 +739,9 @@ public class ScoresheetGenerator {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
-    if (i >= m_numTeams) {
+    if (i >= m_numSheets) {
       throw new IllegalArgumentException("Index must be < "
-          + m_numTeams);
+          + m_numSheets);
     }
     m_round[i] = round;
   }
@@ -653,24 +752,12 @@ public class ScoresheetGenerator {
    * @param nup
    * @return
    */
-  private static PdfPTable getTableForPage(final int nup) {
+  private static PdfPTable getTableForPage(final boolean orientationIsPortrait) {
     final PdfPTable wholePage;
-    switch (nup) {
-    case 1: {
+    if (orientationIsPortrait) {
       wholePage = new PdfPTable(1); // 1 column
-      break;
-    }
-    case 2: {
+    } else {
       wholePage = new PdfPTable(2); // 2 columns
-      break;
-    }
-    default: {
-      wholePage = new PdfPTable(2); // default to 2 columns - should never get
-      // here
-      LOGGER.error("Nup set to something later than 2: "
-          + nup + " defaulting to 2.");
-      break;
-    }
     }
     return wholePage;
   }
