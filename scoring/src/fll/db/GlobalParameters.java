@@ -36,8 +36,6 @@ public final class GlobalParameters {
 
   public static final String CHALLENGE_DOCUMENT = "ChallengeDocument";
 
-  public static final String SCORESHEET_LAYOUT_NUP = "ScoresheetLayoutNUp";
-
   public static final int SCORESHEET_LAYOUT_NUP_DEFAULT = 2;
 
   public static final String DIVISION_FLIP_RATE = "DivisionFlipRate";
