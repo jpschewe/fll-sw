@@ -780,6 +780,8 @@ public class TournamentSchedule implements Serializable {
       scoresheets.setNumber(sheetIndex, si.getTeamNumber());
       scoresheets.setDivision(sheetIndex, si.getDivision());
       scoresheets.setName(sheetIndex, si.getTeamName());
+
+      ++sheetIndex;
     }
 
     final boolean orientationIsPortrait = ScoresheetGenerator.guessOrientation(description);
