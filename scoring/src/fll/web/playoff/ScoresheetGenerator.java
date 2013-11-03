@@ -489,7 +489,7 @@ public class ScoresheetGenerator {
 
       // Add the current table of scoresheets to the document
       if (orientationIsPortrait
-          || (i % 2 == 1)) {
+          || (i % 2 != 0)) {
         pdfDoc.add(wholePage);
       }
     }
