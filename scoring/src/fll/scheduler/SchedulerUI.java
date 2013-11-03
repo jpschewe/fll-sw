@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Collections;
@@ -325,7 +326,7 @@ public class SchedulerUI extends JFrame {
           dialog.setVisible(true);
           final URL descriptorLocation = dialog.getSelectedDescription();
           if (null != descriptorLocation) {
-            final Reader descriptorReader = new InputStreamReader(descriptorLocation.openStream());
+            final Reader descriptorReader = new InputStreamReader(descriptorLocation.openStream(), Utilities.DEFAULT_CHARSET);
 
             final Document document = ChallengeParser.parse(descriptorReader);
             final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
@@ -354,7 +355,7 @@ public class SchedulerUI extends JFrame {
         LOGGER.error(errorFormatter, e);
         JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
         return;
-      } catch (final Exception e) {
+      } catch (final SQLException e) {
         final Formatter errorFormatter = new Formatter();
         errorFormatter.format("Unexpected Error writing detailed schedules: %s", e.getMessage());
         LOGGER.error(errorFormatter, e);
