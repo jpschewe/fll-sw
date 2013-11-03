@@ -57,9 +57,9 @@ import net.mtu.eggplant.util.BasicFileFilter;
 import net.mtu.eggplant.util.gui.BasicWindowMonitor;
 import net.mtu.eggplant.util.gui.GraphicsUtils;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.openqa.selenium.io.IOUtils;
 import org.w3c.dom.Document;
 
 import com.itextpdf.text.DocumentException;
