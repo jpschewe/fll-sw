@@ -123,14 +123,14 @@ public class SchedulerUI extends JFrame {
     final Container cpane = getContentPane();
     cpane.setLayout(new BorderLayout());
     cpane.add(createToolbar(), BorderLayout.PAGE_START);
-    scheduleTable = new JTable();
-    scheduleTable.setAutoCreateRowSorter(true);
-    scheduleTable.setDefaultRenderer(Date.class, schedTableRenderer);
-    scheduleTable.setDefaultRenderer(String.class, schedTableRenderer);
-    scheduleTable.setDefaultRenderer(Integer.class, schedTableRenderer);
-    scheduleTable.setDefaultRenderer(Object.class, schedTableRenderer);
+    mScheduleTable = new JTable();
+    mScheduleTable.setAutoCreateRowSorter(true);
+    mScheduleTable.setDefaultRenderer(Date.class, schedTableRenderer);
+    mScheduleTable.setDefaultRenderer(String.class, schedTableRenderer);
+    mScheduleTable.setDefaultRenderer(Integer.class, schedTableRenderer);
+    mScheduleTable.setDefaultRenderer(Object.class, schedTableRenderer);
 
-    final JScrollPane dataScroller = new JScrollPane(scheduleTable);
+    final JScrollPane dataScroller = new JScrollPane(mScheduleTable);
 
     violationTable = new JTable();
     violationTable.setDefaultRenderer(String.class, violationTableRenderer);
@@ -163,7 +163,7 @@ public class SchedulerUI extends JFrame {
     final JToolBar toolbar = new JToolBar("SchedulerUI Main Toolbar");
     toolbar.setFloatable(false);
 
-    toolbar.add(openAction);
+    toolbar.add(openScheduleAction);
     toolbar.add(reloadFileAction);
     toolbar.add(writeSchedulesAction);
     toolbar.add(displayGeneralScheduleAction);
@@ -184,8 +184,9 @@ public class SchedulerUI extends JFrame {
     final JMenu menu = new JMenu("File");
     menu.setMnemonic('f');
 
-    menu.add(openAction);
+    menu.add(openScheduleAction);
     menu.add(reloadFileAction);
+    menu.add(runOptimizerAction);
     menu.add(EXIT_ACTION);
 
     return menu;
@@ -209,10 +210,10 @@ public class SchedulerUI extends JFrame {
         final TournamentSchedule newData;
         if (null == sheetName) {
           // if no sheet name, assume CSV file
-          newData = new TournamentSchedule(name, selectedFile, scheduleData.getSubjectiveStations());
+          newData = new TournamentSchedule(name, selectedFile, mScheduleData.getSubjectiveStations());
         } else {
           fis = new FileInputStream(selectedFile);
-          newData = new TournamentSchedule(name, fis, sheetName, scheduleData.getSubjectiveStations());
+          newData = new TournamentSchedule(name, fis, sheetName, mScheduleData.getSubjectiveStations());
         }
         setScheduleData(newData);
       } catch (final IOException e) {
@@ -326,7 +327,8 @@ public class SchedulerUI extends JFrame {
           dialog.setVisible(true);
           final URL descriptorLocation = dialog.getSelectedDescription();
           if (null != descriptorLocation) {
-            final Reader descriptorReader = new InputStreamReader(descriptorLocation.openStream(), Utilities.DEFAULT_CHARSET);
+            final Reader descriptorReader = new InputStreamReader(descriptorLocation.openStream(),
+                                                                  Utilities.DEFAULT_CHARSET);
 
             final Document document = ChallengeParser.parse(descriptorReader);
             final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
@@ -368,7 +370,136 @@ public class SchedulerUI extends JFrame {
     }
   };
 
-  private final Action openAction = new AbstractAction("Open") {
+  /**
+   * Run the table optimizer on the current schedule and open the resulting
+   * file.
+   */
+  private void runTableOptimizer() {
+    final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData, mCurrentFile.getAbsoluteFile()
+                                                                                                 .getParentFile());
+    optimizer.optimize();
+    final File optimizedFile = optimizer.getBestScheduleOutputFile();
+    if (null == optimizedFile) {
+      JOptionPane.showMessageDialog(SchedulerUI.this, "No better schedule found", "Information",
+                                    JOptionPane.INFORMATION_MESSAGE);
+    } else {
+      loadFile(optimizedFile, mSchedParams.getSubjectiveStations());
+    }
+
+  }
+
+  /**
+   * Load the specified file
+   * 
+   * @param selectedFile
+   * @param subjectiveStations if not null, use as the subjective stations,
+   *          otherwise prompt the user for the subjective stations
+   */
+  private void loadFile(final File selectedFile,
+                        final List<SubjectiveStation> subjectiveStations) {
+    FileInputStream fis = null;
+    try {
+      final boolean csv = selectedFile.getName().endsWith("csv");
+      final CellFileReader reader;
+      final String sheetName;
+      if (csv) {
+        reader = new CSVCellReader(selectedFile);
+        sheetName = null;
+      } else {
+        sheetName = promptForSheetName(selectedFile);
+        if (null == sheetName) {
+          return;
+        }
+        fis = new FileInputStream(selectedFile);
+        reader = new ExcelCellReader(fis, sheetName);
+      }
+
+      final List<SubjectiveStation> newSubjectiveStations;
+      if (null == subjectiveStations) {
+        final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
+        newSubjectiveStations = gatherSubjectiveStationInformation(SchedulerUI.this, columnInfo);
+      } else {
+        newSubjectiveStations = subjectiveStations;
+      }
+
+      if (null != fis) {
+        fis.close();
+        fis = null;
+      }
+
+      mSchedParams = new SchedParams(newSubjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
+                                     SchedParams.DEFAULT_CHANGETIME_MINUTES,
+                                     SchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
+      final List<String> subjectiveHeaders = new LinkedList<String>();
+      for (final SubjectiveStation station : newSubjectiveStations) {
+        subjectiveHeaders.add(station.getName());
+      }
+
+      final String name = Utilities.extractBasename(selectedFile);
+
+      final TournamentSchedule schedule;
+      if (csv) {
+        schedule = new TournamentSchedule(name, selectedFile, subjectiveHeaders);
+      } else {
+        fis = new FileInputStream(selectedFile);
+        schedule = new TournamentSchedule(name, fis, sheetName, subjectiveHeaders);
+      }
+      mCurrentFile = selectedFile;
+      mCurrentSheetName = sheetName;
+      setScheduleData(schedule);
+
+      setTitle(BASE_TITLE
+          + " - " + mCurrentFile.getName() + ":" + mCurrentSheetName);
+    } catch (final ParseException e) {
+      final Formatter errorFormatter = new Formatter();
+      errorFormatter.format("Error reading file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
+      LOGGER.error(errorFormatter, e);
+      JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file", JOptionPane.ERROR_MESSAGE);
+      return;
+    } catch (final IOException e) {
+      final Formatter errorFormatter = new Formatter();
+      errorFormatter.format("Error reading file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
+      LOGGER.error(errorFormatter, e);
+      JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file", JOptionPane.ERROR_MESSAGE);
+      return;
+    } catch (final InvalidFormatException e) {
+      final Formatter errorFormatter = new Formatter();
+      errorFormatter.format("Unknown file format %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
+      LOGGER.error(errorFormatter, e);
+      JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file", JOptionPane.ERROR_MESSAGE);
+      return;
+    } catch (final ScheduleParseException e) {
+      final Formatter errorFormatter = new Formatter();
+      errorFormatter.format("Error parsing file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
+      LOGGER.error(errorFormatter, e);
+      JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
+      return;
+    } catch (final FLLRuntimeException e) {
+      final Formatter errorFormatter = new Formatter();
+      errorFormatter.format("Error parsing file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
+      LOGGER.error(errorFormatter, e);
+      JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file", JOptionPane.ERROR_MESSAGE);
+      return;
+    } finally {
+      try {
+        if (null != fis) {
+          fis.close();
+        }
+      } catch (final IOException e) {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("Error closing stream", e);
+        }
+      }
+    }
+  }
+  
+  private final Action runOptimizerAction = new AbstractAction("Run Table Optimizer") {
+    public void actionPerformed(final ActionEvent ae) {
+      runTableOptimizer();
+    }
+  };
+
+  private final Action openScheduleAction = new AbstractAction("Open Schedule") {
     {
       putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Open16.gif"));
       putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Open24.gif"));
@@ -395,100 +526,7 @@ public class SchedulerUI extends JFrame {
         final File selectedFile = fileChooser.getSelectedFile();
         if (null != selectedFile
             && selectedFile.isFile() && selectedFile.canRead()) {
-          FileInputStream fis = null;
-          try {
-            final boolean csv = selectedFile.getName().endsWith("csv");
-            final CellFileReader reader;
-            final String sheetName;
-            if (csv) {
-              reader = new CSVCellReader(selectedFile);
-              sheetName = null;
-            } else {
-              sheetName = promptForSheetName(selectedFile);
-              if (null == sheetName) {
-                return;
-              }
-              fis = new FileInputStream(selectedFile);
-              reader = new ExcelCellReader(fis, sheetName);
-            }
-            final ColumnInformation columnInfo = TournamentSchedule.findColumns(reader, new LinkedList<String>());
-            if (null != fis) {
-              fis.close();
-              fis = null;
-            }
-
-            final List<SubjectiveStation> subjectiveStations = gatherSubjectiveStationInformation(SchedulerUI.this,
-                                                                                                  columnInfo);
-            schedParams = new SchedParams(subjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
-                                          SchedParams.DEFAULT_CHANGETIME_MINUTES,
-                                          SchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
-            final List<String> subjectiveHeaders = new LinkedList<String>();
-            for (final SubjectiveStation station : subjectiveStations) {
-              subjectiveHeaders.add(station.getName());
-            }
-
-            final String name = Utilities.extractBasename(selectedFile);
-
-            final TournamentSchedule schedule;
-            if (csv) {
-              schedule = new TournamentSchedule(name, selectedFile, subjectiveHeaders);
-            } else {
-              fis = new FileInputStream(selectedFile);
-              schedule = new TournamentSchedule(name, fis, sheetName, subjectiveHeaders);
-            }
-            currentFile = selectedFile;
-            currentSheetName = sheetName;
-            setScheduleData(schedule);
-
-            setTitle(BASE_TITLE
-                + " - " + currentFile.getName() + ":" + currentSheetName);
-          } catch (final ParseException e) {
-            final Formatter errorFormatter = new Formatter();
-            errorFormatter.format("Error reading file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
-            LOGGER.error(errorFormatter, e);
-            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file",
-                                          JOptionPane.ERROR_MESSAGE);
-            return;
-          } catch (final IOException e) {
-            final Formatter errorFormatter = new Formatter();
-            errorFormatter.format("Error reading file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
-            LOGGER.error(errorFormatter, e);
-            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file",
-                                          JOptionPane.ERROR_MESSAGE);
-            return;
-          } catch (final InvalidFormatException e) {
-            final Formatter errorFormatter = new Formatter();
-            errorFormatter.format("Unknown file format %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
-            LOGGER.error(errorFormatter, e);
-            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error reading file",
-                                          JOptionPane.ERROR_MESSAGE);
-            return;
-          } catch (final ScheduleParseException e) {
-            final Formatter errorFormatter = new Formatter();
-            errorFormatter.format("Error parsing file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
-            LOGGER.error(errorFormatter, e);
-            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file",
-                                          JOptionPane.ERROR_MESSAGE);
-            return;
-          } catch (final FLLRuntimeException e) {
-            final Formatter errorFormatter = new Formatter();
-            errorFormatter.format("Error parsing file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
-            LOGGER.error(errorFormatter, e);
-            JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error parsing file",
-                                          JOptionPane.ERROR_MESSAGE);
-            return;
-          } finally {
-            try {
-              if (null != fis) {
-                fis.close();
-              }
-            } catch (final IOException e) {
-              if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Error closing stream", e);
-              }
-            }
-          }
-
+          loadFile(selectedFile, null);
         } else if (null != selectedFile) {
           JOptionPane.showMessageDialog(SchedulerUI.this,
                                         new Formatter().format("%s is not a file or is not readable",
@@ -527,36 +565,36 @@ public class SchedulerUI extends JFrame {
   private static final String STARTING_DIRECTORY_PREF = "startingDirectory";
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SE_BAD_FIELD", justification = "This calss isn't going to be serialized")
-  private TournamentSchedule scheduleData;
+  private TournamentSchedule mScheduleData;
 
   /* package */TournamentSchedule getScheduleData() {
-    return scheduleData;
+    return mScheduleData;
   }
 
-  private SchedParams schedParams;
+  private SchedParams mSchedParams;
 
   public SchedParams getSchedParams() {
-    return schedParams;
+    return mSchedParams;
   }
 
-  private SchedulerTableModel scheduleModel;
+  private SchedulerTableModel mScheduleModel;
 
   SchedulerTableModel getScheduleModel() {
-    return scheduleModel;
+    return mScheduleModel;
   }
 
-  private ViolationTableModel violationsModel;
+  private ViolationTableModel mViolationsModel;
 
   /* package */ViolationTableModel getViolationsModel() {
-    return violationsModel;
+    return mViolationsModel;
   }
 
   private void setScheduleData(final TournamentSchedule sd) {
-    scheduleTable.clearSelection();
+    mScheduleTable.clearSelection();
 
-    scheduleData = sd;
-    scheduleModel = new SchedulerTableModel(scheduleData);
-    scheduleTable.setModel(scheduleModel);
+    mScheduleData = sd;
+    mScheduleModel = new SchedulerTableModel(mScheduleData);
+    mScheduleTable.setModel(mScheduleModel);
 
     checkSchedule();
   }
@@ -568,14 +606,14 @@ public class SchedulerUI extends JFrame {
     violationTable.clearSelection();
 
     final ScheduleChecker checker = new ScheduleChecker(getSchedParams(), getScheduleData());
-    violationsModel = new ViolationTableModel(checker.verifySchedule());
-    violationTable.setModel(violationsModel);
+    mViolationsModel = new ViolationTableModel(checker.verifySchedule());
+    violationTable.setModel(mViolationsModel);
   }
 
-  private final JTable scheduleTable;
+  private final JTable mScheduleTable;
 
   JTable getScheduleTable() {
-    return scheduleTable;
+    return mScheduleTable;
   }
 
   private final JTable violationTable;
@@ -718,16 +756,16 @@ public class SchedulerUI extends JFrame {
     }
   };
 
-  private File currentFile;
+  private File mCurrentFile;
 
   protected File getCurrentFile() {
-    return currentFile;
+    return mCurrentFile;
   }
 
-  private String currentSheetName;
+  private String mCurrentSheetName;
 
   protected String getCurrentSheetName() {
-    return currentSheetName;
+    return mCurrentSheetName;
   }
 
   /**

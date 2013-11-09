@@ -51,8 +51,19 @@ public class TableOptimizer {
   private final File basedir;
 
   private int numSolutions = 0;
-  
-  private File mPrevOutputFile = null;
+
+  private File mBestScheduleOutputFile = null;
+
+  /**
+   * The best schedule found so far. Starts out at null and
+   * is modified by {@link #optimize()}.
+   * 
+   * @return the file containing the best schedule or null if no such schedule
+   *         has been found
+   */
+  public File getBestScheduleOutputFile() {
+    return mBestScheduleOutputFile;
+  }
 
   private final ScheduleChecker checker;
 
@@ -90,13 +101,13 @@ public class TableOptimizer {
             LOGGER.info(String.format("Found better schedule (%d -> %d), writing to: %s", minWarnings,
                                       newWarnings.size(), outputFile.getAbsolutePath()));
             schedule.writeToCSV(outputFile);
-            
+
             ++numSolutions;
 
-            if(null != mPrevOutputFile) {
-              mPrevOutputFile.delete();
+            if (null != mBestScheduleOutputFile) {
+              mBestScheduleOutputFile.delete();
             }
-            mPrevOutputFile = outputFile;
+            mBestScheduleOutputFile = outputFile;
           } catch (final IOException e) {
             throw new RuntimeException(e);
           }
