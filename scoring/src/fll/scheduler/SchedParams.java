@@ -6,8 +6,8 @@
 package fll.scheduler;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
 import java.io.Serializable;
 
 /**
@@ -89,6 +89,13 @@ public class SchedParams implements Serializable {
 
   public String getSubjectiveName(final int station) {
     return mSubjectiveStations.get(station).getName();
+  }
+
+  /**
+   * @return Read-only copy of the subjective stations
+   */
+  public List<SubjectiveStation> getSubjectiveStations() {
+    return Collections.unmodifiableList(mSubjectiveStations);
   }
 
   /**
