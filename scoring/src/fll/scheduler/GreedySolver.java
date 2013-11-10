@@ -1304,7 +1304,7 @@ public class GreedySolver {
     final File scheduleFile = new File(Utilities.extractAbsoluteBasename(datafile)
         + "-" + solutionsFound + ".csv");
     final File objectiveFile = new File(Utilities.extractAbsoluteBasename(datafile)
-        + "-" + solutionsFound + ".obj");
+        + "-" + solutionsFound + ".obj.txt");
 
     try {
       outputSchedule(scheduleFile);
