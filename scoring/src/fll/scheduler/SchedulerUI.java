@@ -140,6 +140,10 @@ public class SchedulerUI extends JFrame {
     final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, dataScroller, violationScroller);
     cpane.add(splitPane, BorderLayout.CENTER);
 
+    // initial state
+    mRunOptimizerAction.setEnabled(false);
+    mReloadFileAction.setEnabled(false);
+    
   }
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SE_TRANSIENT_FIELD_NOT_RESTORED", justification = "There is no state needed to be kept here")
@@ -164,10 +168,10 @@ public class SchedulerUI extends JFrame {
     toolbar.setFloatable(false);
 
     toolbar.add(openScheduleAction);
-    toolbar.add(reloadFileAction);
-    toolbar.add(writeSchedulesAction);
-    toolbar.add(displayGeneralScheduleAction);
-    toolbar.add(preferencesAction);
+    toolbar.add(mReloadFileAction);
+    toolbar.add(mWriteSchedulesAction);
+    toolbar.add(mDisplayGeneralScheduleAction);
+    toolbar.add(mPreferencesAction);
 
     return toolbar;
   }
@@ -185,14 +189,14 @@ public class SchedulerUI extends JFrame {
     menu.setMnemonic('f');
 
     menu.add(openScheduleAction);
-    menu.add(reloadFileAction);
-    menu.add(runOptimizerAction);
+    menu.add(mReloadFileAction);
+    menu.add(mRunOptimizerAction);
     menu.add(EXIT_ACTION);
 
     return menu;
   }
 
-  private final Action reloadFileAction = new AbstractAction("Reload File") {
+  private final Action mReloadFileAction = new AbstractAction("Reload File") {
     {
       putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Refresh16.gif"));
       putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Refresh24.gif"));
@@ -254,7 +258,7 @@ public class SchedulerUI extends JFrame {
     }
   };
 
-  private final Action preferencesAction = new AbstractAction("Preferences") {
+  private final Action mPreferencesAction = new AbstractAction("Preferences") {
     {
       putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Preferences16.gif"));
       putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Preferences24.gif"));
@@ -281,7 +285,7 @@ public class SchedulerUI extends JFrame {
     }
   };
 
-  private final Action displayGeneralScheduleAction = new AbstractAction("General Schedule") {
+  private final Action mDisplayGeneralScheduleAction = new AbstractAction("General Schedule") {
     {
       putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/History16.gif"));
       putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/History24.gif"));
@@ -295,7 +299,7 @@ public class SchedulerUI extends JFrame {
     }
   };
 
-  private final Action writeSchedulesAction = new AbstractAction("Write Detailed Schedules") {
+  private final Action mWriteSchedulesAction = new AbstractAction("Write Detailed Schedules") {
     {
       putValue(SMALL_ICON, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Export16.gif"));
       putValue(LARGE_ICON_KEY, GraphicsUtils.getIcon("toolbarButtonGraphics/general/Export24.gif"));
@@ -383,7 +387,7 @@ public class SchedulerUI extends JFrame {
       JOptionPane.showMessageDialog(SchedulerUI.this, "No better schedule found", "Information",
                                     JOptionPane.INFORMATION_MESSAGE);
     } else {
-      loadFile(optimizedFile, mSchedParams.getSubjectiveStations());
+      loadScheduleFile(optimizedFile, mSchedParams.getSubjectiveStations());
     }
 
   }
@@ -395,7 +399,7 @@ public class SchedulerUI extends JFrame {
    * @param subjectiveStations if not null, use as the subjective stations,
    *          otherwise prompt the user for the subjective stations
    */
-  private void loadFile(final File selectedFile,
+  private void loadScheduleFile(final File selectedFile,
                         final List<SubjectiveStation> subjectiveStations) {
     FileInputStream fis = null;
     try {
@@ -450,6 +454,9 @@ public class SchedulerUI extends JFrame {
 
       setTitle(BASE_TITLE
           + " - " + mCurrentFile.getName() + ":" + mCurrentSheetName);
+      
+      mRunOptimizerAction.setEnabled(true);
+      mReloadFileAction.setEnabled(true);
     } catch (final ParseException e) {
       final Formatter errorFormatter = new Formatter();
       errorFormatter.format("Error reading file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
@@ -493,7 +500,7 @@ public class SchedulerUI extends JFrame {
     }
   }
   
-  private final Action runOptimizerAction = new AbstractAction("Run Table Optimizer") {
+  private final Action mRunOptimizerAction = new AbstractAction("Run Table Optimizer") {
     public void actionPerformed(final ActionEvent ae) {
       runTableOptimizer();
     }
@@ -526,7 +533,7 @@ public class SchedulerUI extends JFrame {
         final File selectedFile = fileChooser.getSelectedFile();
         if (null != selectedFile
             && selectedFile.isFile() && selectedFile.canRead()) {
-          loadFile(selectedFile, null);
+          loadScheduleFile(selectedFile, null);
         } else if (null != selectedFile) {
           JOptionPane.showMessageDialog(SchedulerUI.this,
                                         new Formatter().format("%s is not a file or is not readable",
