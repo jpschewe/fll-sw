@@ -1306,6 +1306,15 @@ public class GreedySolver {
     final File objectiveFile = new File(Utilities.extractAbsoluteBasename(datafile)
         + "-" + solutionsFound + ".obj");
 
+    try {
+      outputSchedule(scheduleFile);
+    } catch (final IOException ioe) {
+      throw new FLLRuntimeException("Error writing schedule", ioe);
+    }
+
+    LOGGER.info("Solution output to "
+        + scheduleFile.getAbsolutePath());
+
     final ObjectiveValue objective = computeObjectiveValue(scheduleFile);
     if (null == objective) {
       if (!scheduleFile.delete()) {
@@ -1318,15 +1327,6 @@ public class GreedySolver {
         || objective.compareTo(bestObjective) < 0) {
       LOGGER.info("Schedule provides a better objective value");
       bestObjective = objective;
-
-      try {
-        outputSchedule(scheduleFile);
-      } catch (final IOException ioe) {
-        throw new FLLRuntimeException("Error writing schedule", ioe);
-      }
-
-      LOGGER.info("Solution output to "
-          + scheduleFile.getAbsolutePath());
 
       Writer objectiveWriter = null;
       try {
@@ -1368,6 +1368,10 @@ public class GreedySolver {
             + numTimeslots + " to " + newNumTimeslots);
       }
       numTimeslots = newNumTimeslots;
+    } else {
+      if (!scheduleFile.delete()) {
+        scheduleFile.deleteOnExit();
+      }
     }
 
     return true;
