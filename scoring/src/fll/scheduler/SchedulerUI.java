@@ -134,12 +134,13 @@ public class SchedulerUI extends JFrame {
 
     final JPanel scheduleDescriptionPanel = new JPanel(new BorderLayout());
     mTabbedPane.addTab("Description", scheduleDescriptionPanel);
-    
+
     mDescriptionFilename = new JLabel("");
     scheduleDescriptionPanel.add(createDescriptionToolbar(), BorderLayout.PAGE_START);
 
     mScheduleDescriptionEditor = new JEditorPane("text/plain", null);
-    scheduleDescriptionPanel.add(mScheduleDescriptionEditor, BorderLayout.CENTER);
+    final JScrollPane editorScroller = new JScrollPane(mScheduleDescriptionEditor);
+    scheduleDescriptionPanel.add(editorScroller, BorderLayout.CENTER);
 
     final JPanel schedulePanel = new JPanel(new BorderLayout());
     mTabbedPane.addTab("Schedule", schedulePanel);
@@ -250,7 +251,7 @@ public class SchedulerUI extends JFrame {
         if (null != optimizedFile) {
           loadScheduleFile(optimizedFile, subjectiveStations);
         }
-        
+
         mTabbedPane.setSelectedIndex(1);
       }
     } catch (final IOException e) {
@@ -849,13 +850,12 @@ public class SchedulerUI extends JFrame {
     violationTable.setModel(mViolationsModel);
   }
 
-  
   private final JLabel mDescriptionFilename;
-  
+
   private final JLabel mScheduleFilename;
-  
+
   private final JTabbedPane mTabbedPane;
-  
+
   private final JEditorPane mScheduleDescriptionEditor;
 
   private final JTable mScheduleTable;
