@@ -120,6 +120,10 @@ public class GreedySolver {
 
   private File mBestObjectiveFile = null;
 
+  public File getBestObjectiveFile() {
+    return mBestObjectiveFile;
+  }
+
   private ObjectiveValue bestObjective = null;
 
   private final boolean optimize;
