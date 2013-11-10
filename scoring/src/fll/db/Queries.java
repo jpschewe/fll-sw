@@ -617,13 +617,6 @@ public final class Queries {
   }
 
   /**
-   * Get the number of scoresheets to print on a single sheet of paper.
-   */
-  public static int getScoresheetLayoutNUp(final Connection connection) throws SQLException {
-    return GlobalParameters.getIntGlobalParameter(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP);
-  }
-
-  /**
    * Insert or update a performance score.
    * 
    * @throws SQLException on a database error.
@@ -1448,19 +1441,6 @@ public final class Queries {
                                          final int newSeedingRounds) throws SQLException {
     TournamentParameters.setIntTournamentParameter(connection, tournament, TournamentParameters.SEEDING_ROUNDS,
                                                    newSeedingRounds);
-  }
-
-  /**
-   * Set the number of scoresheets per printed page.
-   * 
-   * @param connection The database connection.
-   * @param newNup The new number of scoresheets per printed page. Currently
-   *          must be 1 or 2.
-   * @throws SQLException
-   */
-  public static void setScoresheetLayoutNUp(final Connection connection,
-                                            final int newNup) throws SQLException {
-    GlobalParameters.setIntGlobalParameter(connection, GlobalParameters.SCORESHEET_LAYOUT_NUP, newNup);
   }
 
   /**

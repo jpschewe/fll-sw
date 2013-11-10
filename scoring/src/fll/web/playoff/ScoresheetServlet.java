@@ -55,11 +55,13 @@ public class ScoresheetServlet extends BaseFLLServlet {
       PushContext pc = PushContext.getInstance(application);
       pc.push("playoffs");
 
+      final boolean orientationIsPortrait = ScoresheetGenerator.guessOrientation(challengeDescription);
+
       // Create the scoresheet generator - must provide correct number of
       // scoresheets
       final ScoresheetGenerator gen = new ScoresheetGenerator(request, connection, tournament, challengeDescription);
 
-      gen.writeFile(connection, response.getOutputStream());
+      gen.writeFile(response.getOutputStream(), orientationIsPortrait);
 
     } catch (final SQLException e) {
       final String errorMessage = "There was an error talking to the database";
