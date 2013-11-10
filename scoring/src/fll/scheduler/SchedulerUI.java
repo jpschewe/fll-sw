@@ -249,6 +249,14 @@ public class SchedulerUI extends JFrame {
         optimizer.optimize();
         final File optimizedFile = optimizer.getBestScheduleOutputFile();
         if (null != optimizedFile) {
+          if(!solutionFile.delete()) {
+            solutionFile.deleteOnExit();
+          }
+          final File objectiveFile = solver.getBestObjectiveFile();
+          if(!objectiveFile.delete()) {
+            objectiveFile.deleteOnExit();
+          }
+          
           loadScheduleFile(optimizedFile, subjectiveStations);
         }
 
