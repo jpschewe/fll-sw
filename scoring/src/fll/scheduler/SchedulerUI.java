@@ -134,8 +134,9 @@ public class SchedulerUI extends JFrame {
 
     final JPanel scheduleDescriptionPanel = new JPanel(new BorderLayout());
     mTabbedPane.addTab("Description", scheduleDescriptionPanel);
-
-    scheduleDescriptionPanel.add(createDatafileToolbar(), BorderLayout.PAGE_START);
+    
+    mDescriptionFilename = new JLabel("");
+    scheduleDescriptionPanel.add(createDescriptionToolbar(), BorderLayout.PAGE_START);
 
     mScheduleDescriptionEditor = new JEditorPane("text/plain", null);
     scheduleDescriptionPanel.add(mScheduleDescriptionEditor, BorderLayout.CENTER);
@@ -143,6 +144,7 @@ public class SchedulerUI extends JFrame {
     final JPanel schedulePanel = new JPanel(new BorderLayout());
     mTabbedPane.addTab("Schedule", schedulePanel);
 
+    mScheduleFilename = new JLabel("");
     schedulePanel.add(createScheduleToolbar(), BorderLayout.PAGE_START);
 
     mScheduleTable = new JTable();
@@ -332,6 +334,7 @@ public class SchedulerUI extends JFrame {
 
       mSaveScheduleDescriptionAction.setEnabled(true);
       mRunSchedulerAction.setEnabled(true);
+      mDescriptionFilename.setText(file.getName());
     } catch (final IOException e) {
       final Formatter errorFormatter = new Formatter();
       errorFormatter.format("Error loading file: %s", e.getMessage());
@@ -342,10 +345,12 @@ public class SchedulerUI extends JFrame {
     }
   }
 
-  private JToolBar createDatafileToolbar() {
-    final JToolBar toolbar = new JToolBar("Editor Toolbar");
+  private JToolBar createDescriptionToolbar() {
+    final JToolBar toolbar = new JToolBar("Description Toolbar");
     toolbar.setFloatable(false);
 
+    toolbar.add(mDescriptionFilename);
+    toolbar.addSeparator();
     toolbar.add(mOpenScheduleDescriptionAction);
     toolbar.add(mSaveScheduleDescriptionAction);
     toolbar.add(mRunSchedulerAction);
@@ -357,6 +362,8 @@ public class SchedulerUI extends JFrame {
     final JToolBar toolbar = new JToolBar("Schedule Toolbar");
     toolbar.setFloatable(false);
 
+    toolbar.add(mScheduleFilename);
+    toolbar.addSeparator();
     toolbar.add(mOpenScheduleAction);
     toolbar.add(mReloadFileAction);
     toolbar.add(mWriteSchedulesAction);
@@ -679,6 +686,7 @@ public class SchedulerUI extends JFrame {
       mDisplayGeneralScheduleAction.setEnabled(true);
       mRunOptimizerAction.setEnabled(true);
       mReloadFileAction.setEnabled(true);
+      mScheduleFilename.setText(mScheduleFile.getName());
     } catch (final ParseException e) {
       final Formatter errorFormatter = new Formatter();
       errorFormatter.format("Error reading file %s: %s", selectedFile.getAbsolutePath(), e.getMessage());
@@ -841,7 +849,12 @@ public class SchedulerUI extends JFrame {
     violationTable.setModel(mViolationsModel);
   }
 
-  final JTabbedPane mTabbedPane;
+  
+  private final JLabel mDescriptionFilename;
+  
+  private final JLabel mScheduleFilename;
+  
+  private final JTabbedPane mTabbedPane;
   
   private final JEditorPane mScheduleDescriptionEditor;
 
