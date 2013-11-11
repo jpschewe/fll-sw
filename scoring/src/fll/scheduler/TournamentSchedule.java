@@ -684,7 +684,12 @@ public class TournamentSchedule implements Serializable {
     final Document detailedSchedules = PdfUtils.createPdfDoc(output, new SimpleFooterHandler());
 
     for (final String subjectiveStation : subjectiveStations) {
-      outputSubjectiveSchedule(detailedSchedules, subjectiveStation);
+      outputSubjectiveScheduleByDivision(detailedSchedules, subjectiveStation);
+      detailedSchedules.add(Chunk.NEXTPAGE);
+    }
+
+    for (final String subjectiveStation : subjectiveStations) {
+      outputSubjectiveScheduleByTime(detailedSchedules, subjectiveStation);
       detailedSchedules.add(Chunk.NEXTPAGE);
     }
 
@@ -857,8 +862,8 @@ public class TournamentSchedule implements Serializable {
     detailedSchedules.add(Chunk.NEXTPAGE);
   }
 
-  private void outputSubjectiveSchedule(final Document detailedSchedules,
-                                        final String subjectiveStation) throws DocumentException {
+  private void outputSubjectiveScheduleByDivision(final Document detailedSchedules,
+                                                  final String subjectiveStation) throws DocumentException {
     final PdfPTable table = PdfUtils.createTable(6);
     table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
 
@@ -875,7 +880,40 @@ public class TournamentSchedule implements Serializable {
     table.addCell(PdfUtils.createHeaderCell(JUDGE_GROUP_HEADER));
     table.setHeaderRows(2);
 
-    Collections.sort(_schedule, getComparatorForSubjective(subjectiveStation));
+    Collections.sort(_schedule, getComparatorForSubjectiveByDivision(subjectiveStation));
+    for (final TeamScheduleInfo si : _schedule) {
+      table.addCell(PdfUtils.createCell(String.valueOf(si.getTeamNumber())));
+      table.addCell(PdfUtils.createCell(si.getDivision()));
+      table.addCell(PdfUtils.createCell(si.getOrganization()));
+      table.addCell(PdfUtils.createCell(si.getTeamName()));
+      table.addCell(PdfUtils.createCell(OUTPUT_DATE_FORMAT.get().format(si.getSubjectiveTimeByName(subjectiveStation)
+                                                                          .getTime())));
+      table.addCell(PdfUtils.createCell(si.getJudgingStation()));
+    }
+
+    detailedSchedules.add(table);
+
+  }
+
+  private void outputSubjectiveScheduleByTime(final Document detailedSchedules,
+                                                  final String subjectiveStation) throws DocumentException {
+    final PdfPTable table = PdfUtils.createTable(6);
+    table.setWidths(new float[] { 2, 1, 3, 3, 2, 2 });
+
+    final PdfPCell tournamentCell = PdfUtils.createHeaderCell("Tournament: "
+        + getName() + " - " + subjectiveStation);
+    tournamentCell.setColspan(6);
+    table.addCell(tournamentCell);
+
+    table.addCell(PdfUtils.createHeaderCell(TEAM_NUMBER_HEADER));
+    table.addCell(PdfUtils.createHeaderCell(DIVISION_HEADER));
+    table.addCell(PdfUtils.createHeaderCell("School or Organization"));
+    table.addCell(PdfUtils.createHeaderCell("Team Name"));
+    table.addCell(PdfUtils.createHeaderCell(subjectiveStation));
+    table.addCell(PdfUtils.createHeaderCell(JUDGE_GROUP_HEADER));
+    table.setHeaderRows(2);
+
+    Collections.sort(_schedule, getComparatorForSubjectiveByTime(subjectiveStation));
     for (final TeamScheduleInfo si : _schedule) {
       table.addCell(PdfUtils.createCell(String.valueOf(si.getTeamNumber())));
       table.addCell(PdfUtils.createCell(si.getDivision()));
@@ -894,17 +932,25 @@ public class TournamentSchedule implements Serializable {
    * Get the comparator for outputting the schedule for the specified subjective
    * station. Sort by division, then judge, then by time.
    */
-  private Comparator<TeamScheduleInfo> getComparatorForSubjective(final String name) {
-    return new SubjectiveComparator(name);
+  private Comparator<TeamScheduleInfo> getComparatorForSubjectiveByDivision(final String name) {
+    return new SubjectiveComparatorByDivision(name);
+  }
+
+  /**
+   * Get the comparator for outputting the schedule for the specified subjective
+   * station. Sort by time, division, then judge.
+   */
+  private Comparator<TeamScheduleInfo> getComparatorForSubjectiveByTime(final String name) {
+    return new SubjectiveComparatorByTime(name);
   }
 
   /**
    * Comparator for for sorting by the specified subjective station.
    */
-  private static class SubjectiveComparator implements Comparator<TeamScheduleInfo>, Serializable {
+  private static class SubjectiveComparatorByDivision implements Comparator<TeamScheduleInfo>, Serializable {
     private final String name;
 
-    public SubjectiveComparator(final String name) {
+    public SubjectiveComparatorByDivision(final String name) {
       this.name = name;
     }
 
@@ -938,6 +984,48 @@ public class TournamentSchedule implements Serializable {
         }
       }
     }
+  }
+
+  /**
+   * Comparator for for sorting by the specified subjective station.
+   */
+  private static class SubjectiveComparatorByTime implements Comparator<TeamScheduleInfo>, Serializable {
+    private final String name;
+
+    public SubjectiveComparatorByTime(final String name) {
+      this.name = name;
+    }
+
+    public int compare(final TeamScheduleInfo one,
+                       final TeamScheduleInfo two) {
+
+      final SubjectiveTime oneTime = one.getSubjectiveTimeByName(name);
+      final SubjectiveTime twoTime = two.getSubjectiveTimeByName(name);
+
+      final int timeCompare;
+      if (oneTime == null) {
+        if (twoTime == null) {
+          timeCompare = 0;
+        } else {
+          timeCompare = -1;
+        }
+      } else {
+        if (null == twoTime) {
+          timeCompare = 1;
+        } else {
+          timeCompare = oneTime.getTime().compareTo(twoTime.getTime());
+        }
+      }
+      if (timeCompare == 0) {
+        if (!one.getDivision().equals(two.getDivision())) {
+          return one.getDivision().compareTo(two.getDivision());
+        } else {
+          return one.getJudgingStation().compareTo(two.getJudgingStation());
+        }
+      } else {
+        return timeCompare;
+      }
+    } 
   }
 
   /**
