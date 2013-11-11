@@ -496,7 +496,7 @@ public class ScoresheetGenerator {
 
     // Add a blank cells to complete the table of the last page
     if (!orientationIsPortrait
-        && m_numSheets % 2 == 1) {
+        && m_numSheets % 2 != 0) {
       final PdfPCell blank = new PdfPCell();
       blank.setBorder(0);
       wholePage.addCell(blank);

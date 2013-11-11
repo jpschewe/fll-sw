@@ -16,10 +16,9 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
@@ -193,7 +192,7 @@ public class SchedulerUI extends JFrame {
   void saveScheduleDescription() {
     Writer writer = null;
     try {
-      writer = new FileWriter(mScheduleDescriptionFile);
+      writer = new OutputStreamWriter(new FileOutputStream(mScheduleDescriptionFile), Utilities.DEFAULT_CHARSET);
       final String text = mScheduleDescriptionEditor.getText();
       writer.write(text);
     } catch (final IOException e) {
@@ -249,14 +248,14 @@ public class SchedulerUI extends JFrame {
         optimizer.optimize();
         final File optimizedFile = optimizer.getBestScheduleOutputFile();
         if (null != optimizedFile) {
-          if(!solutionFile.delete()) {
+          if (!solutionFile.delete()) {
             solutionFile.deleteOnExit();
           }
           final File objectiveFile = solver.getBestObjectiveFile();
-          if(!objectiveFile.delete()) {
+          if (!objectiveFile.delete()) {
             objectiveFile.deleteOnExit();
           }
-          
+
           loadScheduleFile(optimizedFile, subjectiveStations);
         }
 
@@ -334,7 +333,7 @@ public class SchedulerUI extends JFrame {
   private void loadScheduleDescription(final File file) {
     Reader reader = null;
     try {
-      reader = new FileReader(file);
+      reader = new InputStreamReader(new FileInputStream(file), Utilities.DEFAULT_CHARSET);
       final String text = net.mtu.eggplant.io.IOUtils.readIntoString(reader);
 
       mScheduleDescriptionEditor.setText(text);
