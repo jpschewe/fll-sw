@@ -1,3 +1,4 @@
+* 232 - Allow one to run all scheduling from the SchedulerUI
 * 233 - cleanup temp files created by the table optimizer
 * 230 - add the ability to print out the morning score sheets from the
         SchedulerUI
