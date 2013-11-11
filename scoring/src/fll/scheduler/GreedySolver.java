@@ -46,6 +46,11 @@ import fll.util.LogUtils;
  */
 public class GreedySolver {
 
+  /**
+   * Prefix for columns of subjective stations.
+   */
+  public static final String SUBJECTIVE_COLUMN_PREFIX = "Subj";
+
   private static final Logger LOGGER = LogUtils.getLogger();
 
   /**
@@ -96,11 +101,28 @@ public class GreedySolver {
     return ngroups;
   }
 
+  private File mBestSchedule = null;
+
+  /**
+   * File that contains the best schedule found.
+   * 
+   * @return
+   */
+  public File getBestSchedule() {
+    return mBestSchedule;
+  }
+
   private final int tinc;
 
   private final Date startTime;
 
   private int solutionsFound = 0;
+
+  private File mBestObjectiveFile = null;
+
+  public File getBestObjectiveFile() {
+    return mBestObjectiveFile;
+  }
 
   private ObjectiveValue bestObjective = null;
 
@@ -535,8 +557,16 @@ public class GreedySolver {
   /**
    * Get the duration for the given subjective station in time increments.
    */
-  private int getSubjectiveDuration(final int station) {
+  public int getSubjectiveDuration(final int station) {
     return subjectiveDurations[station];
+  }
+
+  /**
+   * @param station zero based
+   * @return
+   */
+  public String getSubjectiveColumnName(final int station) {
+    return String.format("%s%d", SUBJECTIVE_COLUMN_PREFIX, station + 1);
   }
 
   private void unassignSubjective(final int group,
@@ -820,7 +850,7 @@ public class GreedySolver {
           && assignPerformance(prevTeamOnTable.getGroup(), prevTeamOnTable.getIndex(), timeslot, table, 1, false)) {
         // use a dummy team as the other team
         dummyPerformanceSlotUsed = true;
-        
+
         final boolean result = scheduleNextStation();
         if (!result) {
           dummyPerformanceSlotUsed = false;
@@ -829,7 +859,7 @@ public class GreedySolver {
         } else {
           return true;
         }
-        
+
       } else {
         unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, 0);
         team1 = null;
@@ -1278,7 +1308,7 @@ public class GreedySolver {
     final File scheduleFile = new File(Utilities.extractAbsoluteBasename(datafile)
         + "-" + solutionsFound + ".csv");
     final File objectiveFile = new File(Utilities.extractAbsoluteBasename(datafile)
-        + "-" + solutionsFound + ".obj");
+        + "-" + solutionsFound + ".obj.txt");
 
     try {
       outputSchedule(scheduleFile);
@@ -1286,40 +1316,55 @@ public class GreedySolver {
       throw new FLLRuntimeException("Error writing schedule", ioe);
     }
 
+    LOGGER.info("Solution output to "
+        + scheduleFile.getAbsolutePath());
+
     final ObjectiveValue objective = computeObjectiveValue(scheduleFile);
     if (null == objective) {
-      if(!scheduleFile.delete()) {
+      if (!scheduleFile.delete()) {
         scheduleFile.deleteOnExit();
       }
       return false;
     }
 
-    LOGGER.info("Solution output to "
-        + scheduleFile.getAbsolutePath());
-
-    Writer objectiveWriter = null;
-    try {
-      objectiveWriter = new OutputStreamWriter(new FileOutputStream(objectiveFile), Utilities.DEFAULT_CHARSET);
-      objectiveWriter.write(objective.toString());
-      objectiveWriter.close();
-    } catch (final IOException e) {
-      throw new FLLRuntimeException("Error writing objective", e);
-    } finally {
-      try {
-        if (null != objectiveWriter) {
-          objectiveWriter.close();
-        }
-      } catch (final IOException e2) {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug(e2);
-        }
-      }
-    }
-
     if (null == bestObjective
-        || -1 == objective.compareTo(bestObjective)) {
+        || objective.compareTo(bestObjective) < 0) {
       LOGGER.info("Schedule provides a better objective value");
       bestObjective = objective;
+
+      Writer objectiveWriter = null;
+      try {
+        objectiveWriter = new OutputStreamWriter(new FileOutputStream(objectiveFile), Utilities.DEFAULT_CHARSET);
+        objectiveWriter.write(objective.toString());
+        objectiveWriter.close();
+      } catch (final IOException e) {
+        throw new FLLRuntimeException("Error writing objective", e);
+      } finally {
+        try {
+          if (null != objectiveWriter) {
+            objectiveWriter.close();
+          }
+        } catch (final IOException e2) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(e2);
+          }
+        }
+      }
+
+      if (null != mBestSchedule) {
+        if (!mBestSchedule.delete()) {
+          mBestSchedule.deleteOnExit();
+        }
+      }
+      mBestSchedule = scheduleFile;
+
+      if (null != mBestObjectiveFile) {
+        if (!mBestObjectiveFile.delete()) {
+          mBestObjectiveFile.deleteOnExit();
+        }
+      }
+      mBestObjectiveFile = objectiveFile;
+
       // tighten down the constraints so that we find a better solution
       final int newNumTimeslots = objective.getLatestPerformanceTime() + 1;
       if (LOGGER.isDebugEnabled()) {
@@ -1327,6 +1372,10 @@ public class GreedySolver {
             + numTimeslots + " to " + newNumTimeslots);
       }
       numTimeslots = newNumTimeslots;
+    } else {
+      if (!scheduleFile.delete()) {
+        scheduleFile.deleteOnExit();
+      }
     }
 
     return true;
@@ -1334,7 +1383,7 @@ public class GreedySolver {
 
   private final int numSubjectiveStations;
 
-  private int getNumSubjectiveStations() {
+  public int getNumSubjectiveStations() {
     return numSubjectiveStations;
   }
 
@@ -1378,8 +1427,7 @@ public class GreedySolver {
       line.add(TournamentSchedule.ORGANIZATION_HEADER);
       line.add(TournamentSchedule.JUDGE_GROUP_HEADER);
       for (int subj = 0; subj < getNumSubjectiveStations(); ++subj) {
-        line.add("Subj"
-            + (subj + 1));
+        line.add(getSubjectiveColumnName(subj));
       }
       for (int round = 0; round < getNumPerformanceRounds(); ++round) {
         line.add(String.format(TournamentSchedule.PERF_HEADER_FORMAT, round + 1));
