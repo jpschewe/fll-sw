@@ -105,7 +105,9 @@ public class TableOptimizer {
             ++numSolutions;
 
             if (null != mBestScheduleOutputFile) {
-              mBestScheduleOutputFile.delete();
+              if(!mBestScheduleOutputFile.delete()) {
+                mBestScheduleOutputFile.deleteOnExit();
+              }
             }
             mBestScheduleOutputFile = outputFile;
           } catch (final IOException e) {
