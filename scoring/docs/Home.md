@@ -61,7 +61,7 @@ Fix the bugs and make the software more user-friendly. If you have suggestions o
 
 Developers
 ==========
-If you are really interested in digging in, see the [Developer Information](DeveloperInformation) page.
+If you are really interested in digging in, see the [Developer Information](DeveloperInformation.md) page.
 
 Minnesota
 =========

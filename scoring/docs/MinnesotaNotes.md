@@ -8,6 +8,8 @@ Notes about things to remember in Minnesota
 Public Wireless
 ==============
 
+*This is still experimental and not in general use yet.*
+
 Setup of public wireless. Each server needs to be matched with a public router. This router is configured specifically for the specified server.
 
 Setup of public routers

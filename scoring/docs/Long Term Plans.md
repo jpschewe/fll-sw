@@ -34,14 +34,3 @@ Java Scriptlets
 ===============
 There are a number of JSPs that have Java code in them. The goal here is to move all of this custom logic out to servlets that put the data into a session variable and then access the data using JSTL syntax and JSTL tags.
 
-
-SourceForge Migration
-=====================
-Migrate to the new Allura software that is the current SourceForge front end. This is supported by SourceForge and the hosted apps that I'm currently using to get Trac is going away as a supported option. Allura contains a ticket tracker and wiki as well as git integration, so this should be better all around. 
-
-Status
--------
-The change over will be in 2 stages. The first is to tell SourceForge to migrate the project to the Allura software. This will likely change the URLs to our Trac page and to our git repository. I plan on doing this towards the end of February 2013 once the current season is done. At this point I will also move the wiki over. I will remove everyone's write privileges to the Trac wiki at this point. 
-As of 2/18/2013 this stage has been completed.
-
-The second step is to migrate all of our ticket information out of Trac and into Allura. The tickets will be mostly migrated using a bulk import into Allura with some manual cleanup after. I will disable writes to the Trac ticket system when this is started.

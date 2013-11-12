@@ -59,7 +59,7 @@ When you start work on a ticket, mark it as accepted. Don't work on someone else
 
 Wiki Editing
 ------------
-Please stick to [standard markdown syntax](http://daringfireball.net/projects/markdown/syntax) as much as possible and avoid lots of SourceForge-specific extensions. This is because we package a copy of the wiki in the release and the processor only handles standard markdown plus basic linking.
+Please stick to [standard markdown syntax](http://daringfireball.net/projects/markdown/syntax) as much as possible. This is because we package a copy of the wiki in the release and the processor only handles standard markdown plus basic linking.
 
 
 Using Eclipse
@@ -104,5 +104,5 @@ Making a release
 Misc Notes
 ===========
 
-  * [Vendor Branches]
-  * [Long Term Plans]
+  * [Vendor Branches.md]
+  * [Long Term Plans.md]
