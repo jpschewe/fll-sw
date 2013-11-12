@@ -1,7 +1,7 @@
 Latest Development Releases
 ===========================
 
-If you want to test out the latest code you can do so by [downloading the most recent automated packaged development release](http://mtu.net:8042/job/fll-sw-devel-release/). These are built automatically by our continuous integration system. They are a good place to see what features are coming up in the next release and a relatively easy way for people to test if a bug has been fixed as they'd like it.
+If you want to test out the latest code you can do so by [downloading the most recent automated packaged development release](http://mtu.net/jenkins/job/fll-sw-devel-release/). These are built automatically by our continuous integration system. They are a good place to see what features are coming up in the next release and a relatively easy way for people to test if a bug has been fixed as they'd like it.
 
 
 Getting started as a developer
