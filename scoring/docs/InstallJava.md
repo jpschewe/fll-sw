@@ -20,7 +20,7 @@ These instructions don't directly link to the download location so that one can 
   1. Execute the downloaded file
       * Windows - just double click on the file
       * Linux - sh <filename>
-  1. Keep track of where you install the JDK, this is the path that you need to find when [setting up the JAVA_HOME environment variable](SettingUpJavaHome)
+  1. Keep track of where you install the JDK, this is the path that you need to find when [setting up the JAVA_HOME environment variable](SettingUpJavaHome.md)
 
 JRE
 ----
