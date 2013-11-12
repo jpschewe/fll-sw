@@ -16,7 +16,7 @@ This computer is the brains behind the whole system. It contains the database an
 I would suggest something with a 1Ghz processor and at least 512MB of RAM, preferably 1GB, just to be comfortable.
 This computer must have a network connection and be able to be networked to the performance score entry computers and the display computer.
 
-This computer requires the [Java JDK](InstallJava) and the [server software](InstallServerSoftware) and a [Supported Web browser](SupportedWebBrowsers). It also requires that the [JAVA_HOME environment variable be set properly](wiki:SettingUpJavaHome).
+This computer requires the [Java JDK](InstallJava.md) and the [server software](InstallServerSoftware) and a [Supported Web browser](SupportedWebBrowsers.md). It also requires that the [JAVA_HOME environment variable be set properly](SettingUpJavaHome.md).
 
 This computer is also the one that is used to print out reports. So it needs to have a printer attached. Technically any computer on the network can be used for printing, but the server is usually a logical choice. I would stick with a small laser printer as they print reasonably fast and everything is black and white. Any printer will work though, it just may get slow during the head to head competition.
 
@@ -24,7 +24,7 @@ Display
 -------
 This computer is used to display scores, either on it's screen or on an LCD projector. LCD projector is recommended. I've used a Pentium 133Mhz with 32MB RAM for this function at the state tournament without problems, so anything that powerful or greater would work fine. The important part here is that the display be good. The monitor/projector and video card need to be capable of at least 800x600 resolution, 1024x768 is better, however I understand that LCD projectors of this resolution are rather expensive. Anything bigger than 1024x768 really won't buy you much though. This computer needs to be networked to the server.
 
-The only software required on this computer is a [Supported Web browser](SupportedWebBrowsers). 
+The only software required on this computer is a [Supported Web browser](SupportedWebBrowsers.md). 
 
 When setting up the tournament, make sure there is a good place for teams to see the scores. A large white wall high up in a gym works pretty well, provided the gym is dark enough. At larger tournaments we've tapped into the building's TV monitors or setup extra large monitors with extra computers around the performance and pit areas.
 
@@ -34,13 +34,13 @@ Performance Score Entry
 
 This computer is used to enter performance scores. The hardware requirements are the same as the display computer with the exception that output to an LCD projector is not needed. Users will just be using a web browser to enter scores. So a reasonable size screen is nice and a good mouse is a plus, but trackpads on laptops work fine too.
 
-The only software required on this computer is a [Supported Web browser](SupportedWebBrowsers). 
+The only software required on this computer is a [Supported Web browser](SupportedWebBrowsers.md). 
 
 Subjective Score Entry
 -----------------------
 This computer is used to enter the scores from subjective judging. A Pentium 166Mhz with 32MB of RAM running Windows 95 would be ok. I'd suggest a Pentium II 266Mhz or better if possible though as this computer needs to do a little more work than the Performance score entry computer. The display is also important here. 1024x768 is the recommended display, although it should work with 800x600 as well. A network card is not required for this machine if floppies or USB drives are used to transfer the scores to a networked machine. Otherwise this computer needs to be networked to the server and have a [Supported Web browser](SupportedWebBrowsers).
 
-This computer requires the [Java JRE](InstallJava) and the [subjective software](InstallSubjective).
+This computer requires the [Java JRE](InstallJava.md) and the [subjective software](InstallSubjective.md).
 
 
 Number of computers
