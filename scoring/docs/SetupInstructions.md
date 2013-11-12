@@ -16,7 +16,7 @@ This computer is the brains behind the whole system. It contains the database an
 I would suggest something with a 1Ghz processor and at least 512MB of RAM, preferably 1GB, just to be comfortable.
 This computer must have a network connection and be able to be networked to the performance score entry computers and the display computer.
 
-This computer requires the [Java JDK](InstallJava.md) and the [server software](InstallServerSoftware) and a [Supported Web browser](SupportedWebBrowsers.md). It also requires that the [JAVA_HOME environment variable be set properly](SettingUpJavaHome.md).
+This computer requires the [Java JDK](InstallJava.md) and the [server software](InstallServerSoftware.md) and a [Supported Web browser](SupportedWebBrowsers.md). It also requires that the [JAVA_HOME environment variable be set properly](SettingUpJavaHome.md).
 
 This computer is also the one that is used to print out reports. So it needs to have a printer attached. Technically any computer on the network can be used for printing, but the server is usually a logical choice. I would stick with a small laser printer as they print reasonably fast and everything is black and white. Any printer will work though, it just may get slow during the head to head competition.
 
@@ -38,7 +38,7 @@ The only software required on this computer is a [Supported Web browser](Support
 
 Subjective Score Entry
 -----------------------
-This computer is used to enter the scores from subjective judging. A Pentium 166Mhz with 32MB of RAM running Windows 95 would be ok. I'd suggest a Pentium II 266Mhz or better if possible though as this computer needs to do a little more work than the Performance score entry computer. The display is also important here. 1024x768 is the recommended display, although it should work with 800x600 as well. A network card is not required for this machine if floppies or USB drives are used to transfer the scores to a networked machine. Otherwise this computer needs to be networked to the server and have a [Supported Web browser](SupportedWebBrowsers).
+This computer is used to enter the scores from subjective judging. A Pentium 166Mhz with 32MB of RAM running Windows 95 would be ok. I'd suggest a Pentium II 266Mhz or better if possible though as this computer needs to do a little more work than the Performance score entry computer. The display is also important here. 1024x768 is the recommended display, although it should work with 800x600 as well. A network card is not required for this machine if floppies or USB drives are used to transfer the scores to a networked machine. Otherwise this computer needs to be networked to the server and have a [Supported Web browser](SupportedWebBrowsers.md).
 
 This computer requires the [Java JRE](InstallJava.md) and the [subjective software](InstallSubjective.md).
 
@@ -93,7 +93,7 @@ If you do not have a zip tool to open up the archives you can use the jar tool t
   1. Change to the directory you put the zip file in, on windows cd <path to zip file>
   1. Execute jar -xf zipfile
   1. You should now have the files uncompressed in a directory and you can move them around as needed.
-  1. [Install Java (the JDK) 1.6 or higher](InstallJava) (the language everything is written in). If you downloaded a version of the software is the JDK bundled in, then you can skip this step for the server. This needs to be done on the server and on any machines that will be used to enter subjective scores.
+  1. [Install Java (the JDK) 1.6 or higher](InstallJava.md) (the language everything is written in). If you downloaded a version of the software is the JDK bundled in, then you can skip this step for the server. This needs to be done on the server and on any machines that will be used to enter subjective scores.
       * When prompted for where to install it choose c:\packages\jdk-1.5.0
       * Set the environment variable JAVA_HOME to c:\packages\jdk-1.5.0
           * Under `*nix` this can be done by doing "JAVA_HOME=path; export JAVA_HOME"
@@ -126,7 +126,7 @@ If you do not have a zip tool to open up the archives you can use the jar tool t
   1. When you're done for the day you should make a copy of the database for the head of your state.
       1. Shut down tomcat
       1. Send a copy of tomcat/webapps/fll-sw/WEB-INF/flldb.* to the head of your tournaments
-  1. For those interested in looking at the source and possibly making changes the source can be found [here](Home). Developers please look at README.developer. Any changes that you do make need to be sent back to me under the terms of the GPL. I look forward to any fixes you make. Please follow the coding standards listed [here](http://mtu.net/%7Ejpschewe/java/CodingStandards.html).
+  1. For those interested in looking at the source and possibly making changes the source can be found [here](Home.md). Developers please look at README.developer. Any changes that you do make need to be sent back to me under the terms of the GPL. I look forward to any fixes you make. Please follow the coding standards listed [here](http://mtu.net/%7Ejpschewe/java/CodingStandards.html).
   1. Once you're done with the tournament you might want to uninstall everything. This can be accomplished by deleting the JAVA_HOME environment variable. Then uninstalling the JDK from the control panel.
 
 Sponsor Logos

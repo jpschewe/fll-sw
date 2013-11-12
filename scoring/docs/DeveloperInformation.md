@@ -104,5 +104,5 @@ Making a release
 Misc Notes
 ===========
 
-  * [Vendor Branches.md]
-  * [Long Term Plans.md]
+  * [Vendor Branches](VendorBranches.md)
+  * [Long Term Plans](LongTermPlans.md)
