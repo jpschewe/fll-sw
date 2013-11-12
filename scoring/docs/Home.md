@@ -10,7 +10,8 @@ Partners known to be running the software include
   * Illinois
   * San Paulo, Brazil
 
-If you are using the software for your tournaments, please let me know at jpschewe@users.sourceforge.net so that I can you add to this list.
+If you are using the software for your tournaments, please let me know
+at jpschewe@mtu.net so that I can you add to this list.
 
 Features
 ========
@@ -24,8 +25,8 @@ Features
 
 Instructions
 ============
-  1. The [setup instructions](SetupInstructions) include information on preparing to run the software, including the hardware and software for tournaments of different sizes.
-  1. You should look at the [instructions for running the software](InstructionsForRunningTheSoftware) for how to use the software to run a tournament.
+  1. The [setup instructions](SetupInstructions.md) include information on preparing to run the software, including the hardware and software for tournaments of different sizes.
+  1. You should look at the [instructions for running the software](InstructionsForRunningTheSoftware.md) for how to use the software to run a tournament.
 
 
 Descriptions of the design
