@@ -847,9 +847,13 @@ public class GreedySolver {
       final SchedTeam prevTeamOnTable = findPrevTeamOnTable(timeslot, table, 1);
       if (partialPerformanceAssignmentAllowed()
           && null != prevTeamOnTable
+          /* commenting this out makes search go crazy on odd number of teams */
           && assignPerformance(prevTeamOnTable.getGroup(), prevTeamOnTable.getIndex(), timeslot, table, 1, false)) {
         // use a dummy team as the other team
         dummyPerformanceSlotUsed = true;
+        if(LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Scheduling dummy slot");
+        }
 
         final boolean result = scheduleNextStation();
         if (!result) {
@@ -861,6 +865,15 @@ public class GreedySolver {
         }
 
       } else {
+        if(LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Partial table assignment, unassigning group: " + team1.getGroup() //
+                       + " team: " + team1.getIndex() //
+                       + " slot: " + timeslot //
+                       + " table: " + table //
+                       + " prevTeamOnTable null?: " + (null == prevTeamOnTable) //
+                       + " partial allowed: " + partialPerformanceAssignmentAllowed() //
+                       );
+        }
         unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, 0);
         team1 = null;
       }
@@ -1321,6 +1334,7 @@ public class GreedySolver {
 
     final ObjectiveValue objective = computeObjectiveValue(scheduleFile);
     if (null == objective) {
+      LOGGER.info("Objective is null, solution is not valid");
       if (!scheduleFile.delete()) {
         scheduleFile.deleteOnExit();
       }
