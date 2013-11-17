@@ -1,12 +1,16 @@
+Release 8.2
+-----------
 * 232 - Allow one to run all scheduling from the SchedulerUI
 * 233 - cleanup temp files created by the table optimizer
 * 230 - add the ability to print out the morning score sheets from the
         SchedulerUI
+
+Release 8.1
+-----------
 * minor rewording to 2013 challenge description
 
 Release 8.0
 -----------
-
 * 189 - Add a form to the error handler page to gather bug
         reporting information
 * 20 - Allow one to modify the flip rate of the top 10 through a global
