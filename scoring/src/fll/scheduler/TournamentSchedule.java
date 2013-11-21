@@ -781,7 +781,7 @@ public class TournamentSchedule implements Serializable {
 
       scoresheets.setTime(sheetIndex, performance.getTime());
       scoresheets.setTable(sheetIndex, String.format("%s %d", performance.getTable(), performance.getSide()));
-      scoresheets.setRound(sheetIndex, String.valueOf(round));
+      scoresheets.setRound(sheetIndex, String.valueOf(round+1));
       scoresheets.setNumber(sheetIndex, si.getTeamNumber());
       scoresheets.setDivision(sheetIndex, si.getDivision());
       scoresheets.setName(sheetIndex, si.getTeamName());

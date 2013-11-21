@@ -731,7 +731,7 @@ public class ScoresheetGenerator {
    * @param i The 0-based index of the scoresheet to which to assign this round
    *          number.
    * @param round A string with the round number descriptor for the specified
-   *          scoresheet.
+   *          scoresheet. Should be a 1-based number.
    * @throws IllegalArgumentException Thrown if the index is out of valid range.
    */
   public void setRound(final int i,
