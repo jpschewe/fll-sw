@@ -1,3 +1,9 @@
+Release 8.3
+-----------
+* Make sure minimum performance score is respected for entries into the database and displays
+* Handle invalid scores properly in the subjective app
+* When printing the morning score sheets start count at round 1 rather than round 0
+
 Release 8.2
 -----------
 * 232 - Allow one to run all scheduling from the SchedulerUI
