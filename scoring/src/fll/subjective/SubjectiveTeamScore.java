@@ -56,6 +56,9 @@ import fll.web.playoff.TeamScore;
       return Double.NaN;
     } else {
       final String value = subEle.getAttribute("value");
+      if(null == value || "".equals(value)) {
+        return Double.NaN;
+      }
       try {
         return Utilities.NUMBER_FORMAT_INSTANCE.parse(value).doubleValue();
       } catch (final ParseException pe) {
