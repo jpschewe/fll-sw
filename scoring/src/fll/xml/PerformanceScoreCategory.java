@@ -14,6 +14,8 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.w3c.dom.Element;
 
+import fll.web.playoff.TeamScore;
+
 /**
  * Description of the performance.
  */
@@ -57,6 +59,16 @@ public class PerformanceScoreCategory extends ScoreCategory {
 
   public double getMinimumScore() {
     return mMinimumScore;
+  }
+  
+  @Override
+  public double evaluate(final TeamScore teamScore) {
+    final double score = super.evaluate(teamScore);
+    if(score < mMinimumScore) {
+      return mMinimumScore;
+    } else {
+      return score;
+    }
   }
 
 }
