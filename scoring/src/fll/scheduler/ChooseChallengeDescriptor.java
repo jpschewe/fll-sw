@@ -168,17 +168,21 @@ public class ChooseChallengeDescriptor extends JDialog {
                                                   final int index,
                                                   final boolean isSelected,
                                                   final boolean cellHasFocus) {
-      final String title = descriptionInfo.getTitle();
-      final String revision = descriptionInfo.getRevision();
-      final StringBuilder value = new StringBuilder();
-      value.append(title);
-      if (null != revision) {
-        value.append('(');
-        value.append(revision);
-        value.append(')');
-      }
+      if (null == descriptionInfo) {
+        return mDelegate.getListCellRendererComponent(list, descriptionInfo, index, isSelected, cellHasFocus);
+      } else {
+        final String title = descriptionInfo.getTitle();
+        final String revision = descriptionInfo.getRevision();
+        final StringBuilder value = new StringBuilder();
+        value.append(title);
+        if (null != revision) {
+          value.append('(');
+          value.append(revision);
+          value.append(')');
+        }
 
-      return mDelegate.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        return mDelegate.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+      }
     }
   }
 }
