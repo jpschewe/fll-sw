@@ -225,13 +225,17 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
    * Get all challenge descriptors build into the software.
    */
   public static Collection<URL> getAllKnownChallengeDescriptorURLs() {
-    final String baseDir = "fll/resources/challenge-descriptors";
+    final String baseDir = "fll/resources/challenge-descriptors/";
 
     final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     final URL directory = classLoader.getResource(baseDir);
     if (null == directory) {
+      LOGGER.warn("base dir for challenge descriptors not found");
       return Collections.emptyList();
     }
+
+    LOGGER.info("base dir protocol: "
+        + directory.getProtocol());
 
     final Collection<URL> urls = new LinkedList<URL>();
     if ("file".equals(directory.getProtocol())) {
@@ -258,6 +262,9 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
       if (null != src) {
         final URL jar = src.getLocation();
 
+        LOGGER.info("Jar for code source: "
+            + jar.toString());
+
         try {
           final JarInputStream zip = new JarInputStream(jar.openStream());
 
@@ -267,14 +274,18 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
             if (entryName.startsWith(baseDir)
                 && entryName.endsWith(".xml")) {
               // add 1 to baseDir to skip past the path separator
-              final String challengeName = entryName.substring(baseDir.length() + 1);
-              
+              final String challengeName = entryName.substring(baseDir.length());
+
               // check that the file really exists and turn it into a URL
               final URL challengeUrl = classLoader.getResource(baseDir
-                  + "/" + challengeName);
+                  + challengeName);
               if (null != challengeUrl) {
                 urls.add(challengeUrl);
-
+              } else {
+                //TODO could write the resource out to a temporary file if needed
+                // then mark the file as delete on exit
+                LOGGER.warn("URL doesn't exist for "
+                    + baseDir + challengeName + " entry: " + entryName);
               }
             }
           }
@@ -285,6 +296,8 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
               + jar.toString(), e);
         }
 
+      } else {
+        LOGGER.warn("Null code source in protection domain, cannot get challenge descriptors");
       }
     } else {
       throw new UnsupportedOperationException("Cannot list files for URL "
