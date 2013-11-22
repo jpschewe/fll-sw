@@ -1,3 +1,5 @@
+* g1 - Find challenge descriptors inside of OneJar file for SchedulerUI distribution
+
 Release 8.3
 -----------
 * Make sure minimum performance score is respected for entries into the database and displays
