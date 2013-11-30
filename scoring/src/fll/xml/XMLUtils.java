@@ -234,9 +234,6 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
       return Collections.emptyList();
     }
 
-    LOGGER.info("base dir protocol: "
-        + directory.getProtocol());
-
     final Collection<URL> urls = new LinkedList<URL>();
     if ("file".equals(directory.getProtocol())) {
       try {
