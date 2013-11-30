@@ -38,7 +38,6 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
 import fll.Version;
-import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
@@ -186,13 +185,14 @@ public class ScoresheetGenerator {
                 + round;
             m_table[j] = request.getParameter("tableA"
                 + i);
-            if (null != m_number[j]) {
-              m_division[j] = Queries.getEventDivision(connection, m_number[j], tournament);
-            }
 
             final int performanceRunA = Playoff.getRunNumber(connection, teamA.getTeamNumber(), iRound);
             final String divA = Playoff.getPlayoffDivision(connection, teamA.getTeamNumber(), performanceRunA);
-
+            m_division[j] = divA;
+            final int bracketA = Playoff.getBracketNumber(connection, teamA.getTeamNumber(), performanceRunA);
+            final String bracketALabel = String.format("Bracket %d", bracketA);
+            m_time[j] = bracketALabel;
+            
             updatePrep.setString(1, m_table[j]);
             updatePrep.setString(2, divA);
             updatePrep.setInt(4, iRound);
@@ -215,6 +215,10 @@ public class ScoresheetGenerator {
 
             final int performanceRunB = Playoff.getRunNumber(connection, teamB.getTeamNumber(), iRound);
             final String divB = Playoff.getPlayoffDivision(connection, teamB.getTeamNumber(), performanceRunB);
+            m_division[j] = divB;
+            final int bracketB = Playoff.getBracketNumber(connection, teamB.getTeamNumber(), performanceRunB);
+            final String bracketBLabel = String.format("Bracket %d", bracketB);
+            m_time[j] = bracketBLabel;
 
             updatePrep.setString(1, m_table[j]);
             updatePrep.setString(2, divB);
@@ -245,7 +249,7 @@ public class ScoresheetGenerator {
     m_round = new String[m_numSheets];
     m_number = new Integer[m_numSheets];
     m_division = new String[m_numSheets];
-    m_time = new Date[m_numSheets];
+    m_time = new String[m_numSheets];
     m_goalLabel = new PdfPCell[0];
     m_goalValue = new PdfPCell[0];
   }
@@ -370,8 +374,7 @@ public class ScoresheetGenerator {
       timeLc.addElement(timeP);
       teamInfo.addCell(timeLc);
       // Time value cell
-      final Paragraph timeV = new Paragraph(null == m_time[i] ? SHORT_BLANK
-          : TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(m_time[i]), COURIER_10PT_NORMAL);
+      final Paragraph timeV = new Paragraph(null == m_time[i] ? SHORT_BLANK : m_time[i], COURIER_10PT_NORMAL);
       final PdfPCell timeVc = new PdfPCell(team[i].getDefaultCell());
       timeVc.addElement(timeV);
       teamInfo.addCell(timeVc);
@@ -612,7 +615,7 @@ public class ScoresheetGenerator {
 
   private String[] m_division;
 
-  private Date[] m_time;
+  private String[] m_time;
 
   private PdfPCell[] m_goalLabel;
 
@@ -715,6 +718,18 @@ public class ScoresheetGenerator {
    */
   public void setTime(final int i,
                       final Date time) throws IllegalArgumentException {
+    setTime(i, TournamentSchedule.OUTPUT_DATE_FORMAT.get().format(time));
+  }
+
+  /**
+   * Puts an arbitrary string in the time field.
+   * 
+   * @param i The 0-based index of the scoresheet to which to assign this time.
+   * @param time the time for the specified scoresheet.
+   * @throws IllegalArgumentException Thrown if the index is out of valid range.
+   */
+  public void setTime(final int i,
+                      final String time) throws IllegalArgumentException {
     if (i < 0) {
       throw new IllegalArgumentException("Index must not be < 0");
     }
