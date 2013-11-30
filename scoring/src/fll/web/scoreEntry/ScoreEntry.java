@@ -691,13 +691,14 @@ public final class ScoreEntry {
     for (final EnumeratedValue valueEle : goal.getValues()) {
       final String valueTitle = valueEle.getTitle();
       final String value = valueEle.getValue();
+      final String id = getIDForEnumRadio(goalName, value);
       writer.println("      <tr>");
       writer.println("        <td>");
       writer.println("          <input type='radio' name='"
-          + goalName + "' value='" + value + "' id='" + getIDForEnumRadio(goalName, value) + "' ' onclick='"
+          + goalName + "' value='" + value + "' id='" + id + "' ' onclick='"
           + getSetMethodName(goalName) + "(\"" + value + "\")'>");
       writer.println("        </td>");
-      writer.println("        <td>");
+      writer.println("        <td><label for='" + id + "'/>");
       writer.println("          "
           + valueTitle);
       writer.println("        </td>");
