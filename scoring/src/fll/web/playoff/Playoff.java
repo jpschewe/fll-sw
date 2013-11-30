@@ -865,6 +865,42 @@ public final class Playoff {
   }
 
   /**
+   * Determine the playoff bracket number given a team number and performance
+   * run number (1-based).
+   * 
+   * @param connection the database connection
+   * @param teamNumber the team
+   * @param runNumber the run
+   * @return the bracket number or -1 if the bracket cannot be determined
+   * @throws SQLException if a database error occurs
+   */
+  public static int getBracketNumber(final Connection connection,
+                                     final int teamNumber,
+                                     final int runNumber) throws SQLException {
+    PreparedStatement prep = null;
+    ResultSet rs = null;
+    try {
+      prep = connection.prepareStatement("SELECT LineNumber FROM PlayoffData"//
+          + " WHERE Team = ? " //
+          + " AND run_number = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, runNumber);
+      rs = prep.executeQuery();
+      if (rs.next()) {
+        final int lineNumber = rs.getInt(1);
+        // Always want to round up
+        final int bracket = (lineNumber + 1) / 2;
+        return bracket;
+      } else {
+        return -1;
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(prep);
+    }
+  }
+
+  /**
    * Find the playoff round run number for the specified division and
    * performance
    * run number in the current tournament.
