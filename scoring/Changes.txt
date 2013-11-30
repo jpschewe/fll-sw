@@ -1,3 +1,4 @@
+* 236 - write out detailed schedules to inidividual files
 * g1 - Find challenge descriptors inside of OneJar file for SchedulerUI distribution
 
 Release 8.3
