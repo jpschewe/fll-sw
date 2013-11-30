@@ -1,3 +1,4 @@
+* 239 - add "label for" tag to enums, this allows one to click on the text next to an enum button
 * 240 - make sure the division is present on all playoff scoresheets
 * 241 - put the bracket number on the playoff scoresheets
 * 236 - write out detailed schedules to inidividual files
