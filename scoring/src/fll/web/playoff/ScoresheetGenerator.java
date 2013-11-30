@@ -38,7 +38,6 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import fll.Team;
 import fll.Version;
-import fll.db.Queries;
 import fll.scheduler.TournamentSchedule;
 import fll.util.FLLRuntimeException;
 import fll.util.FP;
@@ -186,13 +185,14 @@ public class ScoresheetGenerator {
                 + round;
             m_table[j] = request.getParameter("tableA"
                 + i);
-            if (null != m_number[j]) {
-              m_division[j] = Queries.getEventDivision(connection, m_number[j], tournament);
-            }
 
             final int performanceRunA = Playoff.getRunNumber(connection, teamA.getTeamNumber(), iRound);
             final String divA = Playoff.getPlayoffDivision(connection, teamA.getTeamNumber(), performanceRunA);
-
+            m_division[j] = divA;
+            final int bracketA = Playoff.getBracketNumber(connection, teamA.getTeamNumber(), performanceRunA);
+            final String bracketALabel = String.format("Bracket %d", bracketA);
+            m_time[j] = bracketALabel;
+            
             updatePrep.setString(1, m_table[j]);
             updatePrep.setString(2, divA);
             updatePrep.setInt(4, iRound);
@@ -215,6 +215,10 @@ public class ScoresheetGenerator {
 
             final int performanceRunB = Playoff.getRunNumber(connection, teamB.getTeamNumber(), iRound);
             final String divB = Playoff.getPlayoffDivision(connection, teamB.getTeamNumber(), performanceRunB);
+            m_division[j] = divB;
+            final int bracketB = Playoff.getBracketNumber(connection, teamB.getTeamNumber(), performanceRunB);
+            final String bracketBLabel = String.format("Bracket %d", bracketB);
+            m_time[j] = bracketBLabel;
 
             updatePrep.setString(1, m_table[j]);
             updatePrep.setString(2, divB);
