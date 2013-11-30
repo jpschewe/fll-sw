@@ -8,6 +8,22 @@
  href="<c:url value='/style/style.jsp'/>" />
 
 <script type='text/javascript' src='../extlib/jquery-1.7.1.min.js'></script>
+
+<script type='text/javascript'>
+$(document).ready(function() {
+
+    $("#commit").click(function() {
+    	location.href='CommitJudges';
+    });
+
+    $("#cancel").click(function() {
+        location.href='index.jsp';
+    });
+
+}); // end ready function
+
+</script>
+
 </head>
 
 <body>
@@ -20,6 +36,7 @@
  <%-- clear out the message, so that we don't see it again --%>
  <c:remove var="message" />
 
+<p>Please verify that these judges look correct and then commit the changes.</p>
 
  <table border='1' id='data'>
   <tr>
@@ -42,7 +59,10 @@
 
  </table>
 
- <a href='CommitJudges' id='commit'>Commit</a>
- <a href='index.jsp' id='cancel'>Cancel</a>
+<br/>
+ <button id='commit'>Commit the judges</button>
+ 
+ <button id='cancel'>Cancel</button>
+ 
 </body>
 </html>
