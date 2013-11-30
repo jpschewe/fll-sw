@@ -543,19 +543,16 @@ public class SchedulerUI extends JFrame {
 
     @Override
     public void actionPerformed(final ActionEvent ae) {
-      FileOutputStream pdfFos = null;
       FileOutputStream scoresheetFos = null;
       try {
+        final File directory = getScheduleFile().getParentFile();
         final String baseFilename = Utilities.extractBasename(getScheduleFile());
-        final File pdfFile = new File(getScheduleFile().getParentFile(), baseFilename
-            + "-detailed.pdf");
-        LOGGER.info("Writing detailed schedule to "
-            + pdfFile.getAbsolutePath());
+        LOGGER.info("Writing detailed schedules to "
+            + directory.getAbsolutePath());
 
-        pdfFos = new FileOutputStream(pdfFile);
-        getScheduleData().outputDetailedSchedules(getSchedParams(), pdfFos);
+        getScheduleData().outputDetailedSchedules(getSchedParams(), getScheduleFile().getParentFile(), baseFilename);
         JOptionPane.showMessageDialog(SchedulerUI.this, "Detailed schedule written '"
-            + pdfFile.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
+            + directory.getAbsolutePath() + "'", "Information", JOptionPane.INFORMATION_MESSAGE);
 
         final int answer = JOptionPane.showConfirmDialog(SchedulerUI.this,
                                                          "Would you like to print the morning score sheets as well?",
@@ -572,7 +569,7 @@ public class SchedulerUI extends JFrame {
             final Document document = ChallengeParser.parse(descriptorReader);
             final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
 
-            final File scoresheetFile = new File(getScheduleFile().getParentFile(), baseFilename
+            final File scoresheetFile = new File(directory, baseFilename
                 + "-scoresheets.pdf");
             scoresheetFos = new FileOutputStream(scoresheetFile);
 
@@ -603,7 +600,6 @@ public class SchedulerUI extends JFrame {
         JOptionPane.showMessageDialog(SchedulerUI.this, errorFormatter, "Error", JOptionPane.ERROR_MESSAGE);
         return;
       } finally {
-        IOUtils.closeQuietly(pdfFos);
         IOUtils.closeQuietly(scoresheetFos);
       }
     }
