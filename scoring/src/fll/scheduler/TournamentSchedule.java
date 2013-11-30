@@ -698,7 +698,7 @@ public class TournamentSchedule implements Serializable {
     FileOutputStream pdfFos = null;
     try {
       final File byDivision = new File(directory, baseFilename
-          + "-subjective-by-division");
+          + "-subjective-by-division.pdf");
 
       pdfFos = new FileOutputStream(byDivision);
       final Document detailedSchedulesByDivision = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
@@ -711,7 +711,7 @@ public class TournamentSchedule implements Serializable {
       pdfFos = null;
 
       final File byTime = new File(directory, baseFilename
-          + "-subjective-by-time");
+          + "-subjective-by-time.pdf");
       pdfFos = new FileOutputStream(byTime);
       final Document detailedSchedulesByTime = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
       for (final String subjectiveStation : subjectiveStations) {
@@ -723,7 +723,7 @@ public class TournamentSchedule implements Serializable {
       pdfFos = null;
 
       final File performance = new File(directory, baseFilename
-          + "-performance");
+          + "-performance.pdf");
       pdfFos = new FileOutputStream(performance);
       final Document performanceDoc = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
       outputPerformanceSchedule(performanceDoc);
@@ -732,7 +732,7 @@ public class TournamentSchedule implements Serializable {
       pdfFos = null;
 
       final File teamSchedules = new File(directory, baseFilename
-          + "-team-schedules");
+          + "-team-schedules.pdf");
       pdfFos = new FileOutputStream(teamSchedules);
       final Document teamDoc = PdfUtils.createPdfDoc(pdfFos, new SimpleFooterHandler());
       for (final TeamScheduleInfo si : _schedule) {
