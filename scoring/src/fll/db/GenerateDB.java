@@ -130,6 +130,8 @@ public final class GenerateDB {
           + "  CONSTRAINT tablenames_pk PRIMARY KEY (Tournament,PairID)" //
           + " ,CONSTRAINT tablenames_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" + ")");
 
+      createTableDivision(connection, true);
+      
       // table to hold head-to-head playoff meta-data
       stmt.executeUpdate("DROP TABLE IF EXISTS PlayoffData CASCADE");
       stmt.executeUpdate("CREATE TABLE PlayoffData ("
@@ -664,6 +666,31 @@ public final class GenerateDB {
     }
 
     return definition;
+  }
+
+  /* package */static void createTableDivision(final Connection connection,
+                                               final boolean createConstraints) throws SQLException {
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+
+      stmt.executeUpdate("DROP TABLE IF EXISTS table_division CASCADE");
+      final StringBuilder sql = new StringBuilder();
+      sql.append("CREATE TABLE table_division (");
+      sql.append("  playoff_division VARCHAR(32) NOT NULL");
+      sql.append(" ,tournament INTEGER NOT NULL");
+      sql.append(" ,table_id INTEGER NOT NULL");
+      sql.append(" ,CONSTRAINT table_division_pk PRIMARY KEY (playoff_division, tournament, table_id)");
+      if (createConstraints) {
+        sql.append(" ,CONSTRAINT table_division_fk1 FOREIGN KEY(tournament, table_id) REFERENCES tablenames(tournament, PairID)");
+      }
+      sql.append(")");
+      stmt.executeUpdate(sql.toString());
+
+    } finally {
+      SQLFunctions.close(stmt);
+      stmt = null;
+    }
   }
 
   /**

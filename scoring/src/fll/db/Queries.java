@@ -210,6 +210,14 @@ public final class Queries {
     return tournamentTeams;
   }
 
+  /**
+   * Get tables for the tournament
+   * 
+   * @param connection the database connection
+   * @return List of String arrays, each array has 2 elements which are the two
+   *         sides of the table
+   * @throws SQLException
+   */
   public static List<String[]> getTournamentTables(final Connection connection) throws SQLException {
     final int currentTournament = getCurrentTournament(connection);
 
@@ -3066,14 +3074,15 @@ public final class Queries {
   /**
    * Remove a user.
    */
-  public static void removeUser(final Connection connection, final String user) throws SQLException {
+  public static void removeUser(final Connection connection,
+                                final String user) throws SQLException {
     PreparedStatement removeKeys = null;
     PreparedStatement removeUser = null;
     try {
       removeKeys = connection.prepareStatement("DELETE FROM valid_login where fll_user = ?");
       removeKeys.setString(1, user);
       removeKeys.executeUpdate();
-      
+
       removeUser = connection.prepareStatement("DELETE FROM fll_authentication where fll_user = ?");
       removeUser.setString(1, user);
       removeUser.executeUpdate();
@@ -3082,7 +3091,7 @@ public final class Queries {
       SQLFunctions.close(removeUser);
     }
   }
-  
+
   /**
    * Get the list of current users known to the system.
    */
@@ -3123,5 +3132,6 @@ public final class Queries {
     TournamentParameters.setIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND,
                                                    value);
   }
+
 
 }

@@ -493,6 +493,10 @@ public final class ImportDB {
     if (dbVersion < 9) {
       upgrade8To9(connection);
     }
+    if (dbVersion < 10) {
+      upgrade9To10(connection);
+    }
+
     final int newVersion = Queries.getDatabaseVersion(connection);
     if (newVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
@@ -513,6 +517,12 @@ public final class ImportDB {
     GenerateDB.createFinalistScheduleTables(connection, false);
 
     setDBVersion(connection, 9);
+  }
+
+  private static void upgrade9To10(final Connection connection) throws SQLException {
+    GenerateDB.createTableDivision(connection, false);
+
+    setDBVersion(connection, 10);
   }
 
   private static void upgrade2To6(final Connection connection) throws SQLException {
@@ -801,7 +811,7 @@ public final class ImportDB {
     importSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
     importFinalistSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
-    
+
     // update score totals
     Queries.updateScoreTotals(description, destinationConnection, destTournamentID);
   }
@@ -1233,9 +1243,9 @@ public final class ImportDB {
   }
 
   private static void importFinalistSchedule(final Connection sourceConnection,
-                                   final Connection destinationConnection,
-                                   final int sourceTournamentID,
-                                   final int destTournamentID) throws SQLException {
+                                             final Connection destinationConnection,
+                                             final int sourceTournamentID,
+                                             final int destTournamentID) throws SQLException {
     PreparedStatement destPrep = null;
     PreparedStatement sourcePrep = null;
     ResultSet sourceRS = null;
@@ -1255,7 +1265,6 @@ public final class ImportDB {
       destPrep.executeUpdate();
       SQLFunctions.close(destPrep);
 
-      
       // insert categories next
       destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_categories (tournament, category, is_public) VALUES(?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
@@ -1269,7 +1278,6 @@ public final class ImportDB {
         destPrep.executeUpdate();
       }
 
-           
       // insert schedule values last
       destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_schedule (tournament, category, judge_time, team_number) VALUES(?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
@@ -1289,7 +1297,7 @@ public final class ImportDB {
       SQLFunctions.close(destPrep);
     }
   }
-  
+
   /**
    * Check for differences between two tournaments in team information.
    * 
