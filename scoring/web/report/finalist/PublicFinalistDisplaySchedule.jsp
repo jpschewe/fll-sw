@@ -26,7 +26,7 @@ BODY {
 
 <script type="text/javascript">
 	$(document).ready(function() {
-		<c:if test="${finalistScheduleScroll}">
+		<c:if test="${param.finalistScheduleScroll}">
 		startScrolling();
 		</c:if>
 	});
