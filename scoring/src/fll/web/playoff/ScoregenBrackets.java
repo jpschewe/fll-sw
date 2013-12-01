@@ -47,16 +47,22 @@ public class ScoregenBrackets {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
 
-      final String division = request.getParameter("division");
+      String division = request.getParameter("division");
       if (null == division) {
-        throw new RuntimeException(
-                                   "No division specified, please go back to the <a href='index.jsp'>playoff main page</a> and start again.");
+        division = (String) request.getAttribute("division");
+
+        if (null == division) {
+          throw new RuntimeException(
+                                     "No division specified, please go back to the <a href='index.jsp'>playoff main page</a> and start again.");
+        }
       }
       pageContext.setAttribute("division", division);
-      
+
       final int currentTournament = Queries.getCurrentTournament(connection);
 
-      final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection, currentTournament, division);
+      final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection,
+                                                                                              currentTournament,
+                                                                                              division);
       pageContext.setAttribute("tableInfo", tableInfo);
 
     } catch (final SQLException e) {

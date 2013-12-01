@@ -7,6 +7,7 @@
 package fll.web.playoff;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -23,6 +24,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
+import fll.Utilities;
 import fll.db.Queries;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -68,11 +70,21 @@ public class LimitTableAssignments extends BaseFLLServlet {
       insert = connection.prepareStatement("INSERT INTO table_division (tournament, playoff_division, table_id) VALUES (?, ?, ?)");
       insert.setInt(1, tournament);
       insert.setString(2, division);
-      for (final String idStr : request.getParameterValues("tables")) {
-        final int id = Integer.valueOf(idStr);
-        insert.setInt(3, id);
-        insert.executeUpdate();
+      final String[] tables = request.getParameterValues("tables");
+      if (null != tables) {
+        for (final String idStr : tables) {
+          final int id = Integer.valueOf(idStr);
+          insert.setInt(3, id);
+          insert.executeUpdate();
+        }
       }
+
+      request.setAttribute("division", division);
+      request.getRequestDispatcher("scoregenbrackets.jsp").forward(request, response);
+
+      response.sendRedirect(response.encodeRedirectURL(String.format("scoregenbrackets.jsp?division=%s",
+                                                                     URLEncoder.encode(division,
+                                                                                       Utilities.DEFAULT_CHARSET.name()))));
 
     } catch (final SQLException e) {
       final String errorMessage = "There was an error talking to the database";
@@ -83,10 +95,6 @@ public class LimitTableAssignments extends BaseFLLServlet {
       SQLFunctions.close(insert);
       SQLFunctions.close(connection);
     }
-    
-    //FIXME set form parameters division, firstRound, lastRound
-    response.sendRedirect(response.encodeRedirectURL("scoregenbrackets.jsp"));
 
   }
-
 }
