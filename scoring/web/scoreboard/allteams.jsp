@@ -16,11 +16,6 @@
 <%@ page import="fll.web.SessionAttributes"%>
 <%@ page import="fll.web.ApplicationAttributes"%>
 
-<%
-    fll.web.scoreboard.AllTeams
-            .populateContext(request, session);
-%>
-
 
 <%
   final DataSource datasource = ApplicationAttributes.getDataSource(application);
@@ -62,12 +57,6 @@ if(numLogos < 1) {
 }
 %>
 
-<c:set var="thisURL">
- <c:url value="${pageContext.request.servletPath}">
-  <c:param name="scroll" value="${param.scroll}" />
- </c:url>
-</c:set>
-
 <html>
 <head>
 <style>
@@ -93,7 +82,7 @@ TABLE.B {
 
 <script type="text/javascript">
     $(document).ready(function() {
-        <c:if test="${allTeamsScroll}">
+        <c:if test="${param.allTeamsScroll}">
         startScrolling();
         </c:if>
     });
