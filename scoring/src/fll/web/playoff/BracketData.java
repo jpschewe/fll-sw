@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 
 import fll.Team;
 import fll.db.Queries;
+import fll.db.TableInformation;
 import fll.util.LogUtils;
 
 /**
@@ -964,26 +965,22 @@ public class BracketData {
                                                      final int tournament,
                                                      final String division) throws SQLException {
     // Get the list of tournament tables
-    final List<String[]> tournamentTables = Queries.getTournamentTables(pConnection);
-    final List<String> tables = new LinkedList<String>();
-    final Iterator<String[]> ttIt = tournamentTables.iterator();
-    while (ttIt.hasNext()) {
-      final String[] tt = ttIt.next();
-      tables.add(tt[0]);
-      tables.add(tt[1]);
-    }
+    final List<TableInformation> tournamentTables = TableInformation.getTournamentTableInformation(pConnection,
+                                                                                                   tournament, division);
+
     // Prevent divide by 0 errors if no tables were set in the database.
-    if (tables.isEmpty()) {
-      tables.add("Table 1");
-      tables.add("Table 2");
+    if (tournamentTables.isEmpty()) {
+      tournamentTables.add(new TableInformation(0, "Table 1", "Table 2", true));
     }
 
-    Iterator<String> tAssignIt = tables.iterator();
-    int assignCount = Queries.getTableAssignmentCount(pConnection, tournament, division)
-        % tables.size();
-    while (assignCount-- > 0) {
-      tAssignIt.next();
+    final List<String> tables = new LinkedList<String>();
+    for (final TableInformation info : tournamentTables) {
+      if (info.getUse()) {
+        tables.add(info.getSideA());
+        tables.add(info.getSideB());
+      }
     }
+    Iterator<String> tAssignIt = tables.iterator();
 
     // Build the cells...
     int matchNum = 1;

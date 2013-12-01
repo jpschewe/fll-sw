@@ -211,38 +211,6 @@ public final class Queries {
   }
 
   /**
-   * Get tables for the tournament
-   * 
-   * @param connection the database connection
-   * @return List of String arrays, each array has 2 elements which are the two
-   *         sides of the table
-   * @throws SQLException
-   */
-  public static List<String[]> getTournamentTables(final Connection connection) throws SQLException {
-    final int currentTournament = getCurrentTournament(connection);
-
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    final List<String[]> tableList = new LinkedList<String[]>();
-    try {
-      prep = connection.prepareStatement("SELECT SideA,SideB FROM tablenames WHERE Tournament = ?");
-      prep.setInt(1, currentTournament);
-      rs = prep.executeQuery();
-      while (rs.next()) {
-        final String[] labels = new String[2];
-        labels[0] = rs.getString("SideA");
-        labels[1] = rs.getString("SideB");
-        tableList.add(labels);
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-
-    return tableList;
-  }
-
-  /**
    * Get the list of divisions of all teams.
    * 
    * @param connection the database connection
@@ -2608,30 +2576,6 @@ public final class Queries {
           + " WHERE Tournament= ?" //
           + " AND event_division= ?" //
           + " AND PlayoffRound=1");
-      prep.setInt(1, tournament);
-      prep.setString(2, division);
-      rs = prep.executeQuery();
-      if (rs.next()) {
-        return rs.getInt(1);
-      } else {
-        return 0;
-      }
-    } finally {
-      SQLFunctions.close(rs);
-      SQLFunctions.close(prep);
-    }
-  }
-
-  public static int getTableAssignmentCount(final Connection connection,
-                                            final int tournament,
-                                            final String division) throws SQLException {
-    PreparedStatement prep = null;
-    ResultSet rs = null;
-    try {
-      prep = connection.prepareStatement("SELECT count(*) FROM PlayoffData" //
-          + " WHERE Tournament= ?" //
-          + " AND event_division= ?" //
-          + " AND AssignedTable IS NOT NULL");
       prep.setInt(1, tournament);
       prep.setString(2, division);
       rs = prep.executeQuery();
