@@ -22,14 +22,9 @@
   final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
   final int currentTournament = Queries.getCurrentTournament(connection);
 
-  final String divisionStr = request.getParameter("division");
-  if (null == divisionStr) {
-    throw new RuntimeException(
-                               "No division specified, please go back to the <a href='index.jsp'>playoff main page</a> and start again.");
-  }
-
-  int firstRound = 1;
+  final String divisionStr = (String)pageContext.getAttribute("division");
   
+  int firstRound = 1;
   int lastRound = 1 + Queries.getNumPlayoffRounds(connection, divisionStr);
 
   // Sanity check that the last round is valid
