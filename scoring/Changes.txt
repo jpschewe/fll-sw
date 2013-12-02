@@ -1,3 +1,4 @@
+* 237 - Keep track of if allteams.jsp should scroll or not without using a session variable
 * 203 - Allow the user to limit which tables are used for the playoff brackets
 * 239 - add "label for" tag to enums, this allows one to click on the text next to an enum button
 * 235 - make commit button more obvious on the judges verification page
