@@ -1,3 +1,5 @@
+* g3 - Allow one to store the subjective files uploaded if loglevel
+       DEBUG is enabled for fll.web.admin.UploadSubjectiveData
 * 238 - Make sure that the subjective application has a window so that
         it shows up in the task bar before a file is loaded.
 
