@@ -7,13 +7,17 @@ package fll.web.admin;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -32,6 +36,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -78,7 +83,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       final DataSource datasource = ApplicationAttributes.getDataSource(application);
       connection = datasource.getConnection();
       saveSubjectiveData(file, Queries.getCurrentTournament(connection),
-                         ApplicationAttributes.getChallengeDescription(application), connection);
+                         ApplicationAttributes.getChallengeDescription(application), connection, application);
       message.append("<p id='success'><i>Subjective data uploaded successfully</i></p>");
     } catch (final SAXParseException spe) {
       final String errorMessage = String.format("Error parsing file line: %d column: %d%n Message: %s%n This may be caused by using the wrong version of the software attempting to parse a file that is not subjective data.",
@@ -124,6 +129,13 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
     response.sendRedirect(response.encodeRedirectURL("index.jsp"));
   }
 
+  private static final ThreadLocal<DateFormat> DATE_TIME_FORMAT = new ThreadLocal<DateFormat>() {
+    @Override
+    protected DateFormat initialValue() {
+      return new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss");
+    }
+  };
+
   /**
    * Save the data stored in file to the database and update the subjective
    * score totals.
@@ -135,8 +147,32 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
   public static void saveSubjectiveData(final File file,
                                         final int currentTournament,
                                         final ChallengeDescription challengeDescription,
-                                        final Connection connection) throws SQLException, IOException, ParseException,
-      SAXException {
+                                        final Connection connection,
+                                        final ServletContext application) throws SQLException, IOException,
+      ParseException, SAXException {
+    if (LOGGER.isDebugEnabled()) {
+      try {
+        LOGGER.debug("Saving uploaded file to ");
+        final String baseFilename = "subjective-upload_"
+            + DATE_TIME_FORMAT.get().format(new Date());
+        final String filename = application.getRealPath("/WEB-INF/"
+            + baseFilename);
+
+        final File copy = new File(filename);
+        FileOutputStream output = null;
+        FileInputStream input = null;
+        try {
+          input = new FileInputStream(file);
+          output = new FileOutputStream(copy);
+          IOUtils.copy(input, output);
+        } finally {
+          IOUtils.closeQuietly(input);
+          IOUtils.closeQuietly(output);
+        }
+      } catch (final IOException e) {
+        LOGGER.debug("Error creating copy of subjective datafile", e);
+      }
+    }
     ZipFile zipfile = null;
     Document scoreDocument = null;
     try {
@@ -155,7 +191,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
 
       } catch (final ZipException ze) {
         LOGGER.info("Subjective upload is not a zip file, trying as an XML file");
-        
+
         // not a zip file, parse as just the XML file
         final FileInputStream fis = new FileInputStream(file);
         scoreDocument = XMLUtils.parseXMLDocument(fis);
@@ -194,9 +230,10 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
       final String categoryName = scoreCategoryElement.getAttribute("name");
 
       if (LOGGER.isTraceEnabled()) {
-        LOGGER.trace("Saving category: " + categoryName);
+        LOGGER.trace("Saving category: "
+            + categoryName);
       }
-      
+
       ScoreCategory categoryElement = null;
       for (final ScoreCategory cat : challengeDescription.getSubjectiveCategories()) {
         if (cat.getName().equals(categoryName)) {
@@ -289,10 +326,11 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
           final int teamNumber = Utilities.NUMBER_FORMAT_INSTANCE.parse(scoreElement.getAttribute("teamNumber"))
                                                                  .intValue();
 
-          if(LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Saving score data for team: " + teamNumber);
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Saving score data for team: "
+                + teamNumber);
           }
-          
+
           final String judge = scoreElement.getAttribute("judge");
           final boolean noShow = Boolean.parseBoolean(scoreElement.getAttribute("NoShow"));
           updatePrep.setBoolean(1, noShow);
