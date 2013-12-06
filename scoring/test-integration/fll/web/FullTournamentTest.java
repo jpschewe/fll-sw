@@ -638,7 +638,8 @@ public class FullTournamentTest {
       outputStream.close();
       zipStream.close();
 
-      final SubjectiveFrame subjective = new SubjectiveFrame(subjectiveZip);
+      final SubjectiveFrame subjective = new SubjectiveFrame();
+      subjective.load(subjectiveZip);
 
       // insert scores into zip
       for (final ScoreCategory subjectiveElement : description.getSubjectiveCategories()) {
