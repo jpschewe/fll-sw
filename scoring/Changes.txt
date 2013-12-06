@@ -1,3 +1,6 @@
+* 238 - Make sure that the subjective application has a window so that
+        it shows up in the task bar before a file is loaded.
+
 Release 8.4
 -----------
 * 237 - Keep track of if allteams.jsp should scroll or not without using a session variable
