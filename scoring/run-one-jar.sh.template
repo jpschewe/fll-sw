@@ -9,8 +9,8 @@ cd "${mypath}"
 mypath="${PWD}"
 cd "${OPWD}"
 
-if [ -e ${mypath}/setenv.sh ]; then
-  . ${mypath}/setenv.sh
+if [ -e "${mypath}"/setenv.sh ]; then
+  . "${mypath}"/setenv.sh
 fi
 
 # OS specific support.  $var _must_ be set to either true or false.
