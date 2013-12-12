@@ -1368,12 +1368,13 @@ public final class Queries {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT performance_seeding_max.TeamNumber, performance_seeding_max.Score, RAND() as random"
+      prep = connection.prepareStatement("SELECT performance_seeding_max.TeamNumber, performance_seeding_max.Score as score, RAND() as random"
           + " FROM performance_seeding_max, current_tournament_teams" //
           + " WHERE performance_seeding_max.Tournament = ?" //
+          + " AND score IS NOT NULL" // exclude no shows
           + " AND performance_seeding_max.TeamNumber = current_tournament_teams.TeamNumber" //
           + " AND current_tournament_teams.TeamNumber IN ( " + teamNumbersStr + " )" //
-          + " ORDER BY performance_seeding_max.Score " + winnerCriteria.getSortString() //
+          + " ORDER BY score " + winnerCriteria.getSortString() //
           + ", performance_seeding_max.average " + winnerCriteria.getSortString() //
           + ", random");
       prep.setInt(1, currentTournament);
