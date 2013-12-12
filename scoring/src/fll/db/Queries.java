@@ -1642,7 +1642,18 @@ public final class Queries {
           final int teamNumber = rs.getInt("TeamNumber");
           final int runNumber = rs.getInt("RunNumber");
           final TeamScore teamScore = new DatabaseTeamScore(teamNumber, runNumber, rs);
-          final double computedTotal = performanceElement.evaluate(teamScore);
+          final double computedTotal;
+          if (teamScore.isNoShow()) {
+            computedTotal = 0;
+          } else {
+            computedTotal = performanceElement.evaluate(teamScore);
+          }
+
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Updating performance score for "
+                + teamNumber + " run: " + runNumber + " total: " + computedTotal);
+          }
+
           if (!Double.isNaN(computedTotal)) {
             updatePrep.setDouble(1, Math.max(computedTotal, minimumPerformanceScore));
           } else {
@@ -3076,6 +3087,5 @@ public final class Queries {
     TournamentParameters.setIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND,
                                                    value);
   }
-
 
 }
