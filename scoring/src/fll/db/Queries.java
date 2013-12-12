@@ -1368,12 +1368,13 @@ public final class Queries {
     PreparedStatement prep = null;
     ResultSet rs = null;
     try {
-      prep = connection.prepareStatement("SELECT performance_seeding_max.TeamNumber, performance_seeding_max.Score, RAND() as random"
+      prep = connection.prepareStatement("SELECT performance_seeding_max.TeamNumber, performance_seeding_max.Score as score, RAND() as random"
           + " FROM performance_seeding_max, current_tournament_teams" //
           + " WHERE performance_seeding_max.Tournament = ?" //
+          + " AND score IS NOT NULL" // exclude no shows
           + " AND performance_seeding_max.TeamNumber = current_tournament_teams.TeamNumber" //
           + " AND current_tournament_teams.TeamNumber IN ( " + teamNumbersStr + " )" //
-          + " ORDER BY performance_seeding_max.Score " + winnerCriteria.getSortString() //
+          + " ORDER BY score " + winnerCriteria.getSortString() //
           + ", performance_seeding_max.average " + winnerCriteria.getSortString() //
           + ", random");
       prep.setInt(1, currentTournament);
@@ -1590,7 +1591,12 @@ public final class Queries {
         while (rs.next()) {
           final int teamNumber = rs.getInt("TeamNumber");
           final TeamScore teamScore = new DatabaseTeamScore(teamNumber, rs);
-          final double computedTotal = subjectiveElement.evaluate(teamScore);
+          final double computedTotal;
+          if (teamScore.isNoShow()) {
+            computedTotal = Double.NaN;
+          } else {
+            computedTotal = subjectiveElement.evaluate(teamScore);
+          }
           if (Double.isNaN(computedTotal)) {
             updatePrep.setNull(1, Types.DOUBLE);
           } else {
@@ -1642,7 +1648,18 @@ public final class Queries {
           final int teamNumber = rs.getInt("TeamNumber");
           final int runNumber = rs.getInt("RunNumber");
           final TeamScore teamScore = new DatabaseTeamScore(teamNumber, runNumber, rs);
-          final double computedTotal = performanceElement.evaluate(teamScore);
+          final double computedTotal;
+          if (teamScore.isNoShow()) {
+            computedTotal = Double.NaN;
+          } else {
+            computedTotal = performanceElement.evaluate(teamScore);
+          }
+
+          if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Updating performance score for "
+                + teamNumber + " run: " + runNumber + " total: " + computedTotal);
+          }
+
           if (!Double.isNaN(computedTotal)) {
             updatePrep.setDouble(1, Math.max(computedTotal, minimumPerformanceScore));
           } else {
@@ -3076,6 +3093,5 @@ public final class Queries {
     TournamentParameters.setIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND,
                                                    value);
   }
-
 
 }
