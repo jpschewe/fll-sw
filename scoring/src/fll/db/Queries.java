@@ -1590,7 +1590,12 @@ public final class Queries {
         while (rs.next()) {
           final int teamNumber = rs.getInt("TeamNumber");
           final TeamScore teamScore = new DatabaseTeamScore(teamNumber, rs);
-          final double computedTotal = subjectiveElement.evaluate(teamScore);
+          final double computedTotal;
+          if (teamScore.isNoShow()) {
+            computedTotal = 0;
+          } else {
+            computedTotal = subjectiveElement.evaluate(teamScore);
+          }
           if (Double.isNaN(computedTotal)) {
             updatePrep.setNull(1, Types.DOUBLE);
           } else {
