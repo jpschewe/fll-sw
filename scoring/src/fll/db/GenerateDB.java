@@ -289,8 +289,8 @@ public final class GenerateDB {
       stmt.executeUpdate("CREATE VIEW performance_seeding_max AS "//
           + " SELECT TeamNumber, Tournament, Max(ComputedTotal) As Score, AVG(ComputedTotal) As average" //
           + " FROM Performance" //
-          + " WHERE NoShow = 0" //
-          + " AND RunNumber <= ("//
+          + " WHERE " //
+          + " RunNumber <= ("//
           // compute the run number for the current tournament
           + "   SELECT CONVERT(param_value, INTEGER) FROM tournament_parameters" //
           + "     WHERE param = 'SeedingRounds' AND tournament = ("
