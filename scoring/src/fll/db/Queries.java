@@ -1592,7 +1592,7 @@ public final class Queries {
           final TeamScore teamScore = new DatabaseTeamScore(teamNumber, rs);
           final double computedTotal;
           if (teamScore.isNoShow()) {
-            computedTotal = 0;
+            computedTotal = Double.NaN;
           } else {
             computedTotal = subjectiveElement.evaluate(teamScore);
           }
@@ -1649,7 +1649,7 @@ public final class Queries {
           final TeamScore teamScore = new DatabaseTeamScore(teamNumber, runNumber, rs);
           final double computedTotal;
           if (teamScore.isNoShow()) {
-            computedTotal = 0;
+            computedTotal = Double.NaN;
           } else {
             computedTotal = performanceElement.evaluate(teamScore);
           }
