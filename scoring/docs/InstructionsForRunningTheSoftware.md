@@ -1,10 +1,10 @@
-FLL Instructions
-=================
+# FLL Instructions
+
 If you are viewing this page on the server and the software is up and running, then the links should work, otherwise they will not.
 
 
-Setup of tournament
--------------------
+## Setup of tournament
+
 Links in this section are also found on the [administration page](http://localhost:9080/fll-sw/admin/index.jsp). Not all of these things need to be done the day before, you can do them the morning of, but it helps to prepare as much as you can the first few tournaments you do. You can skip this section if you were provided a database dump to load.
 
   1. Go to the [administration page](http://localhost:9080/fll-sw/admin/index.jsp) and upload the team datafile. This takes in a tab delimited file and uses that information to determine what teams will exist in the database. Note the sizes and datatypes of columns. If the columns in your datafile are too large the text will be truncated. The most common problem here is with region names and not being able to tell regions apart.
@@ -15,8 +15,12 @@ Links in this section are also found on the [administration page](http://localho
   1. At this point you can just use this computer, or you can export the database to a file from the admin page and import that into another computer at the tournament from the setup page. In Minnesota we typically have one person create the database that contains all tournament data and then distribute that database to all of the regional tournaments.  
 
 
-Things to bring to the tournament
----------------------------------
+## Loading from a saved database
+
+If you, or someone else, setup the database previously you can then load that database onto the server. To do that visit http://localhost:9080/fll-sw/setup and then use the last box on the page to specify a database to load. If you connect from the server you don't need to know the username and password.
+
+
+## Things to bring to the tournament
 
   * Computers for score entry, display and the server
   * Extension cables and power strips. Many times these are provided by the site or other setup people.
@@ -28,8 +32,7 @@ Things to bring to the tournament
   * A paper cutter is handy for the score sheets during playoffs as many times they are printed off 2 to a page and the page needs to be cut in half  
 
 
-Tournament day
---------------
+## Tournament day
 
   * The other computers on the network will need to know the address of the server. You can find this information at the bottom of the main page.
   * [Assign judges](http://localhost:9080/fll-sw/admin/judges.jsp) for each of the subjective categories
@@ -46,23 +49,20 @@ Tournament day
   * If there is a tie during playoffs the software will attempt to break it with the standard tie breaker defined in the software. However if this is not possible TIE will be shown as the winner of a round. This means that these two teams need to compete again and their scores edited, using the score entry page with the edit checkbox checked, to represent the second run's score. Then the brackets page will display the new scores as it updates.
 
 
-End of tournament
------------------
+## End of tournament
 
   * Make sure you upload all data from the subjective scoring computers via the [administration page](http://localhost:9080/fll-sw/admin/index.jsp).
   * Follow the compute summarized scores link on the [reporting page](http://localhost:9080/fll-sw/report/index.jsp) to summarize the scores. Make sure the score groups shown are the ones you'd expect and that the number of teams seen by each score group are correct.
   * [View the reports](http://localhost:9080/fll-sw/report/index.jsp) and print them out through your web browser. You can visit these pages as many times as you like. Each time you visit them the report page will be recomputed. So if you find any missing scores, just enter them and goto the reporting pages again and make sure you compute summarized scores before going to the reports.
 
-Troubleshooting
----------------
+## Troubleshooting
 
 If something blows up, take a look at the message that was spit out. It should be the first thing at the top of the page. Usually this will be something descriptive like "Not enough teams to compute standardized score" followed by a bunch of filenames and line numbers.
 
 If you encounter an error, please file a bug report. Save the error log that is displayed (if there is one) as well as `tomcat/webapps/fll-sw/fllweb*` and `tomcat/logs` and attach them to the bug report.
 
 
-Discussion of divisions
-========================
+# Discussion of divisions
 
 In the scoring software there are references to divisions and event divisions. 
 A team is in a division for a season.
