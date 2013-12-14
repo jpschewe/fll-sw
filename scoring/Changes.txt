@@ -1,3 +1,5 @@
+Release 8.5
+-----------
 * Fix display remote control so that it shows which finalist schedule is up
 * Allow the public to see the public finalist schedule without username and password
 * 26 - put No Shows in the reports
