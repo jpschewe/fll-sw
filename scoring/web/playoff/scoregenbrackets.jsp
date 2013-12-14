@@ -24,14 +24,33 @@
 
   final String divisionStr = (String)pageContext.getAttribute("division");
   
-  int firstRound = 1;
-  int lastRound = 1 + Queries.getNumPlayoffRounds(connection, divisionStr);
+  final String specifiedFirstRound = request.getParameter("firstRound");
+  final String specifiedLastRound = request.getParameter("lastRound");
+  int firstRound;
+  try {
+    firstRound = Integer.parseInt(specifiedFirstRound);
+  } catch (NumberFormatException nfe) {
+    firstRound = 1;
+  }
+  
+  final int lastColumn = 1 + Queries.getNumPlayoffRounds(connection, divisionStr);
 
+  int lastRound;
+  try {
+    lastRound = Integer.parseInt(specifiedLastRound);
+  } catch (NumberFormatException nfe) {
+    lastRound = lastColumn;
+  }
+  
   // Sanity check that the last round is valid
   if (lastRound < 2) {
     lastRound = 2;
   }
   
+  if (lastRound > lastColumn) {
+    lastRound = lastColumn;
+  }
+
   // Sanity check that the first round is valid
   if (firstRound < 1) {
     firstRound = 1;

@@ -58,6 +58,19 @@ public class ScoregenBrackets {
       }
       pageContext.setAttribute("division", division);
 
+
+      String specifiedFirstRound = request.getParameter("firstRound");
+      if(null == specifiedFirstRound) {
+        specifiedFirstRound = (String)request.getAttribute("firstRound");
+      }
+      pageContext.setAttribute("firstRound", specifiedFirstRound);
+      
+      String specifiedLastRound = request.getParameter("lastRound");
+      if(null == specifiedLastRound) {
+        specifiedLastRound = (String)request.getAttribute("lasRound");
+      }
+      pageContext.setAttribute("lastRound", specifiedLastRound);
+      
       final int currentTournament = Queries.getCurrentTournament(connection);
 
       final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection,
