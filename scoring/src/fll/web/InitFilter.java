@@ -123,7 +123,7 @@ public class InitFilter implements Filter {
             + "/setup") //
         )) {
       if (path.startsWith(contextPath
-          + "/report/PublicFinalistSchedule")) {
+          + "/report/finalist/PublicFinalistDisplaySchedule")) {
         // this report is public
         return false;
       } else {
