@@ -1,8 +1,7 @@
 <%@ include file="/WEB-INF/jspf/init.jspf"%>
 
 <%
-  fll.web.admin.RemoteControl.populateContext(application,
-					pageContext);
+  fll.web.admin.RemoteControl.populateContext(application, pageContext);
 %>
 
 <html>
@@ -294,39 +293,28 @@ END DEBUG --%>
      <c:forEach items="${displayNames}" var="displayName">
       <td><c:set var="displayPageKey"
         value="${displayName}_displayPage" /> <c:set
-        var="playoffDivisionKey" value="${displayName}_playoffDivision" />
-       <c:set var="playoffRoundNumberKey"
-        value="${displayName}_playoffRoundNumber" /> <c:choose>
-        <c:when test="${applicationScope[displayPageKey] == 'playoffs'}">
+        var="finalistDivisionKey"
+        value="${displayName}_finalistDivision" /> <c:choose>
+        <c:when
+         test="${applicationScope[displayPageKey] == 'finalistSchedule'}">
          <input type='radio' name="${displayName}_remotePage"
-          value='playoffs' checked />
+          value='finalistSchedule' checked />
         </c:when>
         <c:otherwise>
          <input type='radio' name="${displayName}_remotePage"
-          value='playoffs' />
+          value='finalistSchedule' />
         </c:otherwise>
-       </c:choose> Division: <select name='${displayName}_playoffDivision'>
-        <c:forEach items="${divisions}" var="division">
+
+       </c:choose> Division: <select name='${displayName}_finalistDivision'>
+
+        <c:forEach items="${finalistDivisions}" var="fdiv">
          <c:choose>
           <c:when
-           test="${division == applicationScope[playoffDivisionKey]}">
-           <option value="${division}" selected>${division}</option>
+           test="${fdiv == applicationScope[finalistDivisionKey]}">
+           <option value="${fdiv}" selected>${fdiv}</option>
           </c:when>
           <c:otherwise>
-           <option value="${division}">${division}</option>
-          </c:otherwise>
-         </c:choose>
-        </c:forEach>
-      </select> <br /> Playoff Round: <select
-       name='${displayName}_playoffRoundNumber'>
-        <c:forEach begin="1" end="${numPlayoffRounds}" var="numRounds">
-         <c:choose>
-          <c:when
-           test="${numRounds == applicationScope[playoffRoundNumberKey]}">
-           <option value="${numRounds}" selected>${numRounds}</option>
-          </c:when>
-          <c:otherwise>
-           <option value="${numRounds}">${numRounds}</option>
+           <option value="${fdiv}">${fdiv}</option>
           </c:otherwise>
          </c:choose>
         </c:forEach>
