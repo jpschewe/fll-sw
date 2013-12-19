@@ -59,18 +59,53 @@ public class ScoregenBrackets {
       pageContext.setAttribute("division", division);
 
 
-      String specifiedFirstRound = request.getParameter("firstRound");
-      if(null == specifiedFirstRound) {
-        specifiedFirstRound = (String)request.getAttribute("firstRound");
+      int firstRound;
+      String firstRoundStr = request.getParameter("firstRound");
+      if(null == firstRoundStr) {
+        firstRound =1 ;
+      } else {
+        try {
+          firstRound = Integer.parseInt(firstRoundStr);
+        } catch (NumberFormatException nfe) {
+          firstRound = 1;
+        }        
       }
-      pageContext.setAttribute("firstRound", specifiedFirstRound);
-      
-      String specifiedLastRound = request.getParameter("lastRound");
-      if(null == specifiedLastRound) {
-        specifiedLastRound = (String)request.getAttribute("lasRound");
+
+      final int lastColumn = 1 + Queries.getNumPlayoffRounds(connection, division);
+
+      int lastRound;
+      String lastRoundStr = request.getParameter("lastRound");
+      if(null == lastRoundStr) {
+        lastRound =1 ;
+      } else {
+        try {
+          lastRound = Integer.parseInt(lastRoundStr);
+        } catch (NumberFormatException nfe) {
+          lastRound = lastColumn;
+        }        
       }
-      pageContext.setAttribute("lastRound", specifiedLastRound);
       
+      // Sanity check that the last round is valid
+      if (lastRound < 2) {
+        lastRound = 2;
+      }
+      
+      if (lastRound > lastColumn) {
+        lastRound = lastColumn;
+      }
+
+      // Sanity check that the first round is valid
+      if (firstRound < 1) {
+        firstRound = 1;
+      }
+      if (firstRound > 1
+          && firstRound >= lastRound) {
+        firstRound = lastRound - 1; // force the display of at least 2 rounds
+      }
+
+      request.setAttribute("firstRound", Integer.valueOf(firstRound));
+      request.setAttribute("lastRound", Integer.valueOf(lastRound));
+
       final int currentTournament = Queries.getCurrentTournament(connection);
 
       final List<TableInformation> tableInfo = TableInformation.getTournamentTableInformation(connection,
