@@ -96,18 +96,57 @@
     </form>
    </li>
 
+
+   <%-- scoresheet generation --%>
    <li>
     <form name='printable' action='scoregenbrackets.jsp' method='get'>
-     <b>Scoresheet Generation Brackets</b><br /> Select Division: <select
-      name='division'>
+     <b>Scoresheet Generation Brackets</b><br />
+
+     <%-- division --%>
+     Select Division: <select name='division'>
       <c:forEach items="${playoff_data.existingDivisions }"
        var="division">
        <option value='${division}'>${division}</option>
       </c:forEach>
-     </select> <input type='submit' id='display_scoregen_brackets'
+     </select>
+
+     <%-- select rounds --%>
+     from round <select name='firstRound'>
+      <c:forEach begin="1" end="${playoff_data.numPlayoffRounds }"
+       var="numRounds">
+       <c:choose>
+        <c:when test="${numRounds == 1 }">
+         <option value='${numRounds }' selected>${numRounds }</option>
+        </c:when>
+        <c:otherwise>
+         <option value='${numRounds }'>${numRounds }</option>
+        </c:otherwise>
+       </c:choose>
+      </c:forEach>
+     </select> to
+
+     <%-- numPlayoffRounds+1 == the column in which the 1st place winner is displayed  --%>
+     <select name='lastRound'>
+      <c:forEach begin="2" end="${playoff_data.numPlayoffRounds+1 }"
+       var="numRounds">
+       <c:choose>
+        <c:when test="${numRounds == playoff_data.numPlayoffRounds+1 }">
+         <option value='${numRounds }' selected>${numRounds }</option>
+        </c:when>
+        <c:otherwise>
+         <option value='${numRounds }'>${numRounds }</option>
+        </c:otherwise>
+       </c:choose>
+      </c:forEach>
+     </select>
+
+     <%-- submit--%>
+     <input type='submit' id='display_scoregen_brackets'
       value='Display Brackets'>
     </form>
    </li>
+   <%-- end scoresheet generation --%>
+
    <li><b>Scrolling Brackets</b> (as on big screen display)<br />
     <a href="remoteMain.jsp">Display brackets</a><br /> Division and
     round must be selected from the big screen display <a

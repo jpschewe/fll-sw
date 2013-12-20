@@ -19,27 +19,12 @@
    */
   final DataSource datasource = ApplicationAttributes.getDataSource(application);
   final Connection connection = datasource.getConnection();
-  final Document challengeDocument = ApplicationAttributes.getChallengeDocument(application);
   final int currentTournament = Queries.getCurrentTournament(connection);
 
   final String divisionStr = (String)pageContext.getAttribute("division");
   
-  int firstRound = 1;
-  int lastRound = 1 + Queries.getNumPlayoffRounds(connection, divisionStr);
-
-  // Sanity check that the last round is valid
-  if (lastRound < 2) {
-    lastRound = 2;
-  }
-  
-  // Sanity check that the first round is valid
-  if (firstRound < 1) {
-    firstRound = 1;
-  }
-  if (firstRound > 1
-      && firstRound >= lastRound) {
-    firstRound = lastRound - 1; // force the display of at least 2 rounds
-  }
+  final int firstRound = (Integer)request.getAttribute("firstRound");
+  final int lastRound = (Integer)request.getAttribute("lastRound");  
 
   final BracketData bracketInfo = new BracketData(connection, divisionStr, firstRound, lastRound, 4, true, false);
 
