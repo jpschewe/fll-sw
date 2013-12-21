@@ -8,10 +8,13 @@ package fll.web;
 
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
+
+import fll.util.LogUtils;
 
 /**
  * Creates and Handles a New window. Based on code from
@@ -19,6 +22,8 @@ import org.openqa.selenium.WebDriverException;
  * 2012/01/10/creating-new-window-in-selenium-2-webdriver-java/
  */
 public class WebWindow {
+
+  private static final Logger LOGGER = LogUtils.getLogger();
 
   private final WebDriver driver;
 
@@ -43,9 +48,30 @@ public class WebWindow {
     this.driver = parent;
     parentHandle = parent.getWindowHandle();
     name = createUniqueName();
-    handle = createWindow(url);
-    // Switch to that window and load the url to wait
-    switchToWindow().get(url);
+
+    // sometimes this fails in tests, let's try a couple of times before we
+    // error
+    final int maxAttempts = 5;
+    int attempt = 0;
+    boolean done = false;
+    while (!done) {
+      try {
+        handle = createWindow(url);
+        // Switch to that window and load the url to wait
+        switchToWindow().get(url);
+        done = true;
+      } catch (final WebDriverException e) {
+        done = false;
+        if (attempt >= maxAttempts) {
+          throw e;
+        } else {
+          LOGGER.warn("Error creating web window, trying again. Attempt: "
+              + attempt, e);
+        }
+
+      }
+      ++attempt;
+    }
   }
 
   public String getWindowHandle() {
@@ -115,7 +141,8 @@ public class WebWindow {
   private void checkForClosed() {
     if (handle == null
         || handle.equals(""))
-      throw new WebDriverException("Web Window closed or not initialized handle: " + handle);
+      throw new WebDriverException("Web Window closed or not initialized handle: "
+          + handle);
   }
 
   private String injectAnchorTag(final String id,
