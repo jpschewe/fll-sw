@@ -183,15 +183,19 @@ public class TestAJAXBrackets {
           + scoreTextAfter + "'", scoreTextAfter.contains("Score:"));
 
     } catch (final IOException e) {
+      LOGGER.fatal(e, e);
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     } catch (final SAXException e) {
+      LOGGER.fatal(e, e);
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     } catch (final RuntimeException e) {
+      LOGGER.fatal(e, e);
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     } catch (final AssertionError e) {
+      LOGGER.fatal(e, e);
       IntegrationTestUtils.storeScreenshot(selenium);
       throw e;
     }
