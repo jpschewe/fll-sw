@@ -1692,7 +1692,8 @@ public final class Queries {
 
     final int currentTournamentID = getTeamCurrentTournament(connection, teamNumber);
     final Tournament currentTournament = Tournament.findTournamentByID(connection, currentTournamentID);
-    if (null == currentTournament.getNextTournament()) {
+    final Integer nextTournamentID = currentTournament.getNextTournament();
+    if (null == nextTournamentID) {
       if (LOGGER.isInfoEnabled()) {
         LOGGER.info("advanceTeam - No next tournament exists for tournament: "
             + currentTournament.getName() + " team: " + teamNumber);
@@ -1703,7 +1704,7 @@ public final class Queries {
       try {
         prep = connection.prepareStatement("INSERT INTO TournamentTeams (TeamNumber, Tournament, event_division, judging_station) VALUES (?, ?, ?, ?)");
         prep.setInt(1, teamNumber);
-        prep.setInt(2, currentTournament.getNextTournament().getTournamentID());
+        prep.setInt(2, currentTournament.getNextTournament());
         prep.setString(3, getDivisionOfTeam(connection, teamNumber));
         prep.setString(4, getDivisionOfTeam(connection, teamNumber));
         prep.executeUpdate();
