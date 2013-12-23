@@ -219,7 +219,7 @@ public final class ImportDB {
       for (final Tournament sourceTournament : Tournament.getTournaments(memConnection)) {
         if (!GenerateDB.INTERNAL_TOURNAMENT_NAME.equals(sourceTournament.getName())
             && GenerateDB.INTERNAL_TOURNAMENT_ID != sourceTournament.getTournamentID()) {
-          createTournament(sourceTournament, destConnection);
+          createTournament(sourceTournament, memConnection, destConnection);
         }
       }
 
@@ -245,6 +245,7 @@ public final class ImportDB {
    * Recursively create a tournament and it's next tournament.
    */
   private static void createTournament(final Tournament sourceTournament,
+                                       final Connection sourceConnection,
                                        final Connection destConnection) throws SQLException {
     // add the tournament to the tournaments table if it doesn't already
     // exist
@@ -253,10 +254,10 @@ public final class ImportDB {
       if (null == sourceTournament.getNextTournament()) {
         Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getLocation());
       } else {
-        createTournament(sourceTournament.getNextTournament(), destConnection);
-        final Tournament nextTournament = Tournament.findTournamentByName(destConnection,
-                                                                          sourceTournament.getNextTournament()
-                                                                                          .getName());
+        final Tournament sourceNext = Tournament.findTournamentByID(sourceConnection,
+                                                                    sourceTournament.getNextTournament());
+        createTournament(sourceNext, sourceConnection, destConnection);
+        final Tournament nextTournament = Tournament.findTournamentByName(destConnection, sourceNext.getName());
         Tournament.createTournament(destConnection, sourceTournament.getName(), sourceTournament.getLocation(),
                                     nextTournament.getTournamentID());
       }

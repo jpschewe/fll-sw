@@ -25,11 +25,11 @@ import fll.db.GenerateDB;
  */
 public final class Tournament implements Serializable {
 
-  private Tournament(final int tournamentID, final String name, final String location, final Tournament nextTournament) {
+  private Tournament(final int tournamentID, final String name, final String location, final Integer nextTournamentId) {
     this.tournamentID = tournamentID;
     this.name = name;
     this.location = location;
-    this.nextTournament = nextTournament;
+    this.nextTournament = nextTournamentId;
   }
 
   private final int tournamentID;
@@ -44,14 +44,14 @@ public final class Tournament implements Serializable {
     return name;
   }
 
-  private final Tournament nextTournament;
+  private final Integer nextTournament;
 
   /**
    * The next tournament after this one.
    * 
    * @return null if there is no next tournament
    */
-  public Tournament getNextTournament() {
+  public Integer getNextTournament() {
     return nextTournament;
   }
 
@@ -133,11 +133,11 @@ public final class Tournament implements Serializable {
         final String name = rs.getString(2);
         final String location = rs.getString(3);
         final int nextTournamentID = rs.getInt(4);
-        final Tournament nextTournament;
+        final Integer nextTournament;
         if(rs.wasNull()) {
           nextTournament = null;
         } else {
-          nextTournament = findTournamentByID(connection, nextTournamentID);
+          nextTournament = nextTournamentID;
         }
 
         final Tournament tournament = new Tournament(tournamentID, name, location, nextTournament);
@@ -169,11 +169,11 @@ public final class Tournament implements Serializable {
         final int id = rs.getInt(1);
         final String location = rs.getString(2);
         final int nextID = rs.getInt(3);
-        final Tournament next;
+        final Integer next;
         if (rs.wasNull()) {
           next = null;
         } else {
-          next = findTournamentByID(connection, nextID);
+          next = nextID;
         }
         return new Tournament(id, name, location, next);
       } else {
@@ -204,11 +204,11 @@ public final class Tournament implements Serializable {
         final String name = rs.getString(1);
         final String location = rs.getString(2);
         final int nextID = rs.getInt(3);
-        final Tournament next;
+        final Integer next;
         if (rs.wasNull()) {
           next = null;
         } else {
-          next = findTournamentByID(connection, nextID);
+          next = nextID;
         }
         return new Tournament(tournamentID, name, location, next);
       } else {
