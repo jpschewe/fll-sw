@@ -7,9 +7,7 @@
 package fll.web.api;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -18,8 +16,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.formula.eval.NotImplementedException;
-
-import com.google.gson.Gson;
 
 import fll.util.LogUtils;
 
@@ -31,13 +27,13 @@ public class ChallengeDescriptionServlet extends HttpServlet {
   @Override
   protected final void doGet(final HttpServletRequest request,
                              final HttpServletResponse response) throws IOException, ServletException {
-    final ServletContext application = getServletContext();
+//    final ServletContext application = getServletContext();
 
-    response.reset();
-    response.setContentType("application/json");
-    final PrintWriter writer = response.getWriter();
-
-    final Gson gson = new Gson();
+//    response.reset();
+//    response.setContentType("application/json");
+//    final PrintWriter writer = response.getWriter();
+//
+//    final Gson gson = new Gson();
 
 //    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
 //
