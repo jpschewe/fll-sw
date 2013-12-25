@@ -648,7 +648,7 @@ public class GreedySolver {
                                     final int timeslot,
                                     final int table,
                                     final int side) {
-    return assignPerformance(group, team, timeslot, table, side, true);
+    return assignPerformance(group, team, timeslot, table, side, true, false);
   }
 
   /**
@@ -661,6 +661,8 @@ public class GreedySolver {
    * @param side
    * @param doAssignment if we should actually do the assignment, useful for
    *          checking extra runs
+   * @param ignoreChangeTime if scheduling a team staying for an extra run, then
+   *          the performance change time doesn't matter
    * @return
    */
   private boolean assignPerformance(final int group,
@@ -668,7 +670,8 @@ public class GreedySolver {
                                     final int timeslot,
                                     final int table,
                                     final int side,
-                                    final boolean doAssignment) {
+                                    final boolean doAssignment,
+                                    final boolean ignoreChangetime) {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("Attempting to assigning performance group: "
           + group + " team: " + team + " table: " + table + " side: " + side + " time: " + timeslot + " doAssignment: "
@@ -697,7 +700,8 @@ public class GreedySolver {
       }
       return false;
     }
-    if (!checkPerfChangetime(group, team, timeslot)) {
+    if (!ignoreChangetime
+        && !checkPerfChangetime(group, team, timeslot)) {
       if (LOGGER.isTraceEnabled()) {
         LOGGER.trace("FAILED: performance changetime");
       }
@@ -842,14 +846,66 @@ public class GreedySolver {
       }
     }
 
+    // TODO find prev team on each table and see if any of them can be assigned,
+    // if so, keep going
+    // not working yet...
+
     // undo partial assignment if not allowed
     if (null != team1) {
+      final boolean lastRoundForTeam1 = performanceScheduled[team1.getGroup()][team1.getIndex()] == getNumPerformanceRounds();
+
+      boolean foundOtherTeam = false;
+      if (lastRoundForTeam1
+          && partialPerformanceAssignmentAllowed()) {
+        for (int otable = 0; !foundOtherTeam
+            && otable < getNumTables(); ++otable) {
+          final SchedTeam prevTeamOnTable0 = findPrevTeamOnTable(timeslot, table, 0);
+          if (null != prevTeamOnTable0) {
+            if (assignPerformance(prevTeamOnTable0.getGroup(), prevTeamOnTable0.getIndex(), timeslot, table, 1, false,
+                                  true)) {
+              if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("Choose dummy group: "
+                    + prevTeamOnTable0.getGroup() + " team: " + prevTeamOnTable0.getIndex());
+              }
+              foundOtherTeam = true;
+            }
+          }
+
+          if (!foundOtherTeam) {
+            final SchedTeam prevTeamOnTable1 = findPrevTeamOnTable(timeslot, table, 1);
+            if (null != prevTeamOnTable1) {
+              if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("Choose dummy group: "
+                    + prevTeamOnTable1.getGroup() + " team: " + prevTeamOnTable1.getIndex());
+              }
+              if (assignPerformance(prevTeamOnTable1.getGroup(), prevTeamOnTable1.getIndex(), timeslot, table, 1,
+                                    false, true)) {
+                foundOtherTeam = true;
+              }
+            }
+          }
+        }
+      }
+
       final SchedTeam prevTeamOnTable = findPrevTeamOnTable(timeslot, table, 1);
       if (partialPerformanceAssignmentAllowed()
           && null != prevTeamOnTable
-          && assignPerformance(prevTeamOnTable.getGroup(), prevTeamOnTable.getIndex(), timeslot, table, 1, false)) {
+          /*
+           * commenting this out makes search go crazy on odd number of teams,
+           * leaving it in seems to cause problems as well
+           */
+          && foundOtherTeam
+      /*
+       * && assignPerformance(prevTeamOnTable.getGroup(),
+       * prevTeamOnTable.getIndex(), timeslot, table, 1, false)
+       */
+      ) {
         // use a dummy team as the other team
+
         dummyPerformanceSlotUsed = true;
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Scheduling dummy slot");
+        }
 
         final boolean result = scheduleNextStation();
         if (!result) {
@@ -861,6 +917,16 @@ public class GreedySolver {
         }
 
       } else {
+        if (LOGGER.isTraceEnabled()) {
+          LOGGER.trace("Partial table assignment, unassigning group: "
+              + team1.getGroup() //
+              + " team: " + team1.getIndex() //
+              + " slot: " + timeslot //
+              + " table: " + table //
+              + " prevTeamOnTable null?: " + (null == prevTeamOnTable) //
+              + " partial allowed: " + partialPerformanceAssignmentAllowed() //
+          );
+        }
         unassignPerformance(team1.getGroup(), team1.getIndex(), timeslot, table, 0);
         team1 = null;
       }
@@ -900,6 +966,10 @@ public class GreedySolver {
 
     return false;
   }
+
+  /**
+   *  
+   */
 
   /**
    * Find the team that is on the table and side prior to timeslot.
@@ -1321,6 +1391,7 @@ public class GreedySolver {
 
     final ObjectiveValue objective = computeObjectiveValue(scheduleFile);
     if (null == objective) {
+      LOGGER.info("Objective is null, solution is not valid");
       if (!scheduleFile.delete()) {
         scheduleFile.deleteOnExit();
       }
