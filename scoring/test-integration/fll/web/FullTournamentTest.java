@@ -381,7 +381,7 @@ public class FullTournamentTest {
 
       if ("All".equals(division)) {
 
-        final Select select = new Select(selenium.findElement(By.name("station1")));
+        final Select select = new Select(IntegrationTestUtils.findElement(selenium, By.name("station1"), 5));
         for (final WebElement option : select.getOptions()) {
           final String station = option.getText();
           assignJudge(id, category, station, judgeIndex);
@@ -999,9 +999,9 @@ public class FullTournamentTest {
 
         // check for errors
         // Gives trouble too often
-        //Assert.assertEquals(selectTeamPage, selenium.getCurrentUrl());
-        Assert.assertTrue("Error submitting form, not on select team page url: " + selenium.getCurrentUrl(),
-                          selenium.getPageSource().contains("Unverified Runs"));
+        // Assert.assertEquals(selectTeamPage, selenium.getCurrentUrl());
+        Assert.assertTrue("Error submitting form, not on select team page url: "
+            + selenium.getCurrentUrl(), selenium.getPageSource().contains("Unverified Runs"));
 
       } else {
         Assert.fail("Cannot find scores for "
