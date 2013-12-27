@@ -415,16 +415,21 @@ public final class IntegrationTestUtils {
                                        final int maxAttempts) {
     int attempts = 0;
     WebElement e = null;
-    try {
-      e = selenium.findElement(by);
-    } catch (final NoSuchElementException ex) {
-      ++attempts;
-      if (attempts >= maxAttempts) {
-        throw ex;
-      } else {
-        LOGGER.warn("Trouble finding element, trying again", ex);
+    while (e == null
+        && attempts <= maxAttempts) {
+      try {
+        e = selenium.findElement(by);
+      } catch (final NoSuchElementException ex) {
+        ++attempts;
+        e = null;
+        if (attempts >= maxAttempts) {
+          throw ex;
+        } else {
+          LOGGER.warn("Trouble finding element, trying again", ex);
+        }
       }
     }
+
     return e;
   }
 
