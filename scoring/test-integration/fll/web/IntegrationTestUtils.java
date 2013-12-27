@@ -221,7 +221,7 @@ public final class IntegrationTestUtils {
       throw e;
     }
   }
-  
+
   public static void storeScreenshot(final WebDriver driver) throws IOException {
     final File baseFile = File.createTempFile("fll", null, new File("screenshots"));
 
@@ -405,6 +405,32 @@ public final class IntegrationTestUtils {
     selenium.findElement(By.id("initialize_brackets")).click();
     Assert.assertFalse("Error loading page", isElementPresent(selenium, By.id("exception-handler")));
 
+  }
+
+  /**
+   * Try harder to find elements.
+   */
+  public static WebElement findElement(final WebDriver selenium,
+                                       final By by,
+                                       final int maxAttempts) {
+    int attempts = 0;
+    WebElement e = null;
+    while (e == null
+        && attempts <= maxAttempts) {
+      try {
+        e = selenium.findElement(by);
+      } catch (final NoSuchElementException ex) {
+        ++attempts;
+        e = null;
+        if (attempts >= maxAttempts) {
+          throw ex;
+        } else {
+          LOGGER.warn("Trouble finding element, trying again", ex);
+        }
+      }
+    }
+
+    return e;
   }
 
 }

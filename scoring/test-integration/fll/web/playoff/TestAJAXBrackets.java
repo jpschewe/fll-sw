@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.Select;
 import org.xml.sax.SAXException;
@@ -212,9 +213,26 @@ public class TestAJAXBrackets {
     }
     selenium.findElement(By.id("submit")).click();
 
-    final Alert confirmScoreChange = selenium.switchTo().alert();
-    LOGGER.info("Confirmation text: "
-        + confirmScoreChange.getText());
-    confirmScoreChange.accept();
+    Alert confirmScoreChange = null;
+    final int maxAttempts = 5;
+    int attempt = 0;
+    while (null == confirmScoreChange
+        && attempt <= maxAttempts) {
+      try {
+        confirmScoreChange = selenium.switchTo().alert();
+        LOGGER.info("Confirmation text: "
+            + confirmScoreChange.getText());
+        confirmScoreChange.accept();
+      } catch (final NoAlertPresentException ex) {
+        ++attempt;
+        confirmScoreChange = null;
+
+        if (attempt >= maxAttempts) {
+          throw ex;
+        } else {
+          LOGGER.warn("Trouble finding alert, trying again", ex);
+        }
+      }
+    }
   }
 }
