@@ -33,7 +33,7 @@
   <property name="dir.reports" value="${dir.build}/docs/reports" />
   <property name="dir.coverage" value="${dir.build}/coverage" />
 
-  <property name="findbugs.home" value="${dir.lib}/findbugs-2.0.2" />
+  <property name="findbugs.home" value="${dir.lib}/findbugs-2.0.3" />
   <property name="dir.lib.findbugs" value="${findbugs.home}/lib" />
 
 
