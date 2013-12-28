@@ -38,6 +38,7 @@ import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.Queries;
@@ -216,7 +217,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     }
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category name determines table name")
   private void writeScores(final Connection connection,
                            final ScoreCategory[] catElements,
                            final double[] weights,
@@ -544,7 +545,7 @@ public final class FinalComputedScores extends BaseFLLServlet {
     divTable.setHeaderRows(4);
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Winner type is used to determine sort order")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Winner type is used to determine sort order")
   private void insertRawScoreColumns(final Connection connection,
                                      final Tournament tournament,
                                      final String ascDesc,

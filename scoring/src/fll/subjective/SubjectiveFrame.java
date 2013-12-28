@@ -71,6 +71,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -228,6 +229,7 @@ public final class SubjectiveFrame extends JFrame {
    * 
    * @throws IOException
    */
+  @SuppressFBWarnings(value = "DM_EXIT", justification = "If no file is chosen we cannot continue")
   public void promptForFile() throws IOException {
     final File file = chooseSubjectiveFile("Please choose the subjective data file");
     try {
@@ -306,7 +308,7 @@ public final class SubjectiveFrame extends JFrame {
     } else {
       setTitle(String.format("Subjective Score Entry - %s", tournamentName));
     }
-    
+
     pack();
   }
 
@@ -490,7 +492,7 @@ public final class SubjectiveFrame extends JFrame {
    * Prompt the user with yes/no/cancel. Yes exits and saves, no exits without
    * saving and cancel doesn't quit.
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DM_EXIT", justification = "This is the exit method for the application")
+  @SuppressFBWarnings(value = "DM_EXIT", justification = "This is the exit method for the application")
   /* package */void quit() {
     if (validateData()) {
 
@@ -525,7 +527,7 @@ public final class SubjectiveFrame extends JFrame {
    * 
    * @return true if everything is ok
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SIC_INNER_SHOULD_BE_STATIC_ANON", justification = "Static inner class to replace anonomous listener isn't worth the confusion of finding the class definition")
+  @SuppressFBWarnings(value = "SIC_INNER_SHOULD_BE_STATIC_ANON", justification = "Static inner class to replace anonomous listener isn't worth the confusion of finding the class definition")
   private boolean validateData() {
     stopCellEditors();
 
@@ -544,8 +546,7 @@ public final class SubjectiveFrame extends JFrame {
           final Element subEle = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
           if (null != subEle) {
             final String value = subEle.getAttribute("value");
-            if (null != value
-                && !"".equals(value)) {
+            if (!value.isEmpty()) {
               numValues++;
             }
           }

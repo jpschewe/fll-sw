@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import au.com.bytecode.opencsv.CSVReader;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
@@ -650,7 +651,7 @@ public final class ImportDB {
     }
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon tables in the database")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon tables in the database")
   private static void upgrade0To1(final Connection connection,
                                   final Document challengeDocument) throws SQLException {
     Statement stmt = null;
@@ -1009,7 +1010,7 @@ public final class ImportDB {
     }
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon categories")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon categories")
   private static void importSubjective(final Connection sourceConnection,
                                        final Connection destinationConnection,
                                        final int sourceTournamentID,
@@ -1068,7 +1069,7 @@ public final class ImportDB {
    * @param sourceTournamentID
    * @throws SQLException
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon goals and category")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic based upon goals and category")
   private static void importCommon(final StringBuilder columns,
                                    final String tableName,
                                    final int numColumns,
@@ -1119,7 +1120,7 @@ public final class ImportDB {
 
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon category")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Dynamic table based upon category")
   private static void importPerformance(final Connection sourceConnection,
                                         final Connection destinationConnection,
                                         final int sourceTournamentID,

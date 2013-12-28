@@ -70,6 +70,7 @@ import org.w3c.dom.Document;
 
 import com.itextpdf.text.DocumentException;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.scheduler.TournamentSchedule.ColumnInformation;
 import fll.util.CSVCellReader;
@@ -172,7 +173,7 @@ public class SchedulerUI extends JFrame {
     mRunSchedulerAction.setEnabled(false);
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SE_TRANSIENT_FIELD_NOT_RESTORED", justification = "There is no state needed to be kept here")
+  @SuppressFBWarnings(value = "SE_TRANSIENT_FIELD_NOT_RESTORED", justification = "There is no state needed to be kept here")
   private final transient ListSelectionListener violationSelectionListener = new ListSelectionListener() {
     public void valueChanged(final ListSelectionEvent e) {
       final int selectedRow = getViolationTable().getSelectedRow();
@@ -512,7 +513,7 @@ public class SchedulerUI extends JFrame {
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
     }
 
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DM_EXIT", justification = "This is the exit method for the application")
+    @SuppressFBWarnings(value = "DM_EXIT", justification = "This is the exit method for the application")
     public void actionPerformed(final ActionEvent ae) {
       System.exit(0);
     }
@@ -807,7 +808,7 @@ public class SchedulerUI extends JFrame {
 
   private static final String STARTING_DIRECTORY_PREF = "startingDirectory";
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SE_BAD_FIELD", justification = "This calss isn't going to be serialized")
+  @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This calss isn't going to be serialized")
   private TournamentSchedule mScheduleData;
 
   /* package */TournamentSchedule getScheduleData() {

@@ -40,6 +40,7 @@ import org.apache.log4j.Logger;
 import org.hsqldb.jdbc.JDBCDataSource;
 
 import au.com.bytecode.opencsv.CSVReader;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.db.ImportDB;
 import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
@@ -86,8 +87,8 @@ public final class Utilities {
    * @throws IOException if there is an error reading the data
    * @throws RuntimeException if the first line cannot be read
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
-                                                             "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Generate columns based upon file loaded")
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE",
+                               "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Generate columns based upon file loaded")
   public static void loadCSVFile(final Connection connection,
                                  final String tablename,
                                  final Map<String, String> types,
@@ -197,10 +198,11 @@ public final class Utilities {
           || "".equals(data.trim())) {
         prep.setNull(index, Types.INTEGER);
       } else {
-        final long value = Long.valueOf(data);
+        final long value = Long.parseLong(data);
         prep.setLong(index, value);
       }
-    } else if ("float".equals(typeLower) || "double".equals(typeLower)) {
+    } else if ("float".equals(typeLower)
+        || "double".equals(typeLower)) {
       if (null == data
           || "".equals(data.trim())) {
         prep.setNull(index, Types.DOUBLE);
@@ -358,12 +360,13 @@ public final class Utilities {
 
     return dataSource;
   }
-  
-  //TODO get datasource debugging back in at some point?
+
+  // TODO get datasource debugging back in at some point?
   // System.setProperty("log4jdbc.enabled", "true");
   // final DataSourceSpy debugDatasource = new DataSourceSpy(dataSource);
   // return debugDatasource;
-  // if we want to debug we can execute "SET DATABASE SQL LOG LEVEL 3" and then inspect flldb.sql.log 
+  // if we want to debug we can execute "SET DATABASE SQL LOG LEVEL 3" and then
+  // inspect flldb.sql.log
 
   /**
    * Filter used to select only graphics files
@@ -549,7 +552,7 @@ public final class Utilities {
       throw new NullPointerException("Property '"
           + property + "' doesn't have a value");
     }
-    return Integer.valueOf(value.trim());
+    return Integer.parseInt(value.trim());
   }
 
 }

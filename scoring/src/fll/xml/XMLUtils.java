@@ -24,15 +24,17 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
 import org.apache.log4j.Logger;
 import org.custommonkey.xmlunit.Diff;
+import org.openqa.selenium.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.util.LogUtils;
 
 /**
  * XML utilities for FLL.
  */
-@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS" }, justification = "Intentionally shadowing parent class")
+@SuppressFBWarnings(value = { "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS" }, justification = "Intentionally shadowing parent class")
 public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
 
   private static final Logger LOGGER = LogUtils.getLogger();
@@ -93,7 +95,7 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
   public static BracketSortType getBracketSort(final Element root) {
     if (root.hasAttribute("bracketSort")) {
       final String sortStr = root.getAttribute("bracketSort");
-      if (null == sortStr) {
+      if (sortStr.isEmpty()) {
         return BracketSortType.SEEDING;
       } else {
         return Enum.valueOf(BracketSortType.class, sortStr);
@@ -110,7 +112,7 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
     if (element.hasAttribute("winner")) {
       final String str = element.getAttribute("winner");
       final String sortStr;
-      if (null != str) {
+      if (!str.isEmpty()) {
         sortStr = str.toUpperCase();
       } else {
         sortStr = "HIGH";
@@ -128,7 +130,7 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
     if (element.hasAttribute("scoreType")) {
       final String str = element.getAttribute("scoreType");
       final String sortStr;
-      if (null != str) {
+      if (!str.isEmpty()) {
         sortStr = str.toUpperCase();
       } else {
         sortStr = "INTEGER";
@@ -154,15 +156,14 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
   /**
    * @see #getDoubleAttributeValue(Element, String)
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "NP_BOOLEAN_RETURN_NULL" }, justification = "Need to return Null so that we can determine when there is no score")
+  @SuppressFBWarnings(value = { "NP_BOOLEAN_RETURN_NULL" }, justification = "Need to return Null so that we can determine when there is no score")
   public static Boolean getBooleanAttributeValue(final Element element,
                                                  final String attributeName) {
     if (null == element) {
       return null;
     }
     final String str = element.getAttribute(attributeName);
-    if (null == str
-        || "".equals(str)) {
+    if (str.isEmpty()) {
       return null;
     } else {
       return Boolean.valueOf(str);
@@ -183,8 +184,7 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
       return null;
     }
     final String str = element.getAttribute(attributeName);
-    if (null == str
-        || "".equals(str)) {
+    if (str.isEmpty()) {
       return null;
     } else {
       return Double.valueOf(str);
@@ -262,8 +262,9 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
         LOGGER.info("Jar for code source: "
             + jar.toString());
 
+        JarInputStream zip = null;
         try {
-          final JarInputStream zip = new JarInputStream(jar.openStream());
+          zip = new JarInputStream(jar.openStream());
 
           JarEntry ze = null;
           while ((ze = zip.getNextJarEntry()) != null) {
@@ -279,7 +280,8 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
               if (null != challengeUrl) {
                 urls.add(challengeUrl);
               } else {
-                //TODO could write the resource out to a temporary file if needed
+                // TODO could write the resource out to a temporary file if
+                // needed
                 // then mark the file as delete on exit
                 LOGGER.warn("URL doesn't exist for "
                     + baseDir + challengeName + " entry: " + entryName);
@@ -291,6 +293,8 @@ public final class XMLUtils extends net.mtu.eggplant.xml.XMLUtils {
         } catch (final IOException e) {
           LOGGER.error("Error reading jar file at: "
               + jar.toString(), e);
+        } finally {
+          IOUtils.closeQuietly(zip);
         }
 
       } else {

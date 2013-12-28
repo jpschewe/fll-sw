@@ -29,6 +29,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.scheduler.TournamentSchedule;
 
 /**
@@ -131,7 +132,7 @@ public class ExcelCellReader extends CellFileReader {
   /**
    * @see fll.util.CellFileReader#readNext()
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS", justification = "Return null rather than zero length array so that we know when we hit EFO")
+  @SuppressFBWarnings(value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS", justification = "Return null rather than zero length array so that we know when we hit EFO")
   public String[] readNext() throws IOException {
     if (lineNumber >= sheet.getLastRowNum()) {
       return null;

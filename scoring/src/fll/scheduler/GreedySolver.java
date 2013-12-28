@@ -233,7 +233,7 @@ public class GreedySolver {
     tinc = Utilities.readIntProperty(properties, "TInc");
     ngroups = Utilities.readIntProperty(properties, "NGroups");
 
-    final int alternateValue = Integer.valueOf(properties.getProperty("alternate_tables", "0").trim());
+    final int alternateValue = Integer.parseInt(properties.getProperty("alternate_tables", "0").trim());
     final boolean alternate = alternateValue == 1;
     LOGGER.debug("Alternate is: "
         + alternate);
@@ -428,7 +428,7 @@ public class GreedySolver {
                                                  final String breakType) throws ParseException {
     final Collection<ScheduledBreak> breaks = new LinkedList<ScheduledBreak>();
 
-    final int numBreaks = Integer.valueOf(properties.getProperty(String.format("num_%s_breaks", breakType), "0"));
+    final int numBreaks = Integer.parseInt(properties.getProperty(String.format("num_%s_breaks", breakType), "0"));
     final String startFormat = "%s_break_%d_start";
     final String durationFormat = "%s_break_%d_duration";
     for (int i = 0; i < numBreaks; ++i) {
