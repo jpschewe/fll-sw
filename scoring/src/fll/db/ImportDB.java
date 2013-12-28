@@ -1259,13 +1259,13 @@ public final class ImportDB {
       destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ?");
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
+      
       SQLFunctions.close(destPrep);
-
       destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_categories WHERE tournament = ?");
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
-      SQLFunctions.close(destPrep);
 
+      SQLFunctions.close(destPrep);
       // insert categories next
       destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_categories (tournament, category, is_public) VALUES(?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
@@ -1279,10 +1279,13 @@ public final class ImportDB {
         destPrep.executeUpdate();
       }
 
+      SQLFunctions.close(destPrep);
       // insert schedule values last
       destPrep = destinationConnection.prepareStatement("INSERT INTO finalist_schedule (tournament, category, judge_time, team_number) VALUES(?, ?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
 
+      SQLFunctions.close(sourceRS);
+      SQLFunctions.close(sourcePrep);
       sourcePrep = sourceConnection.prepareStatement("SELECT category, judge_time, team_number FROM finalist_schedule WHERE tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();

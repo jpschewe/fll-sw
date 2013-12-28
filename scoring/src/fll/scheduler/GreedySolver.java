@@ -238,12 +238,12 @@ public class GreedySolver {
     LOGGER.debug("Alternate is: "
         + alternate);
 
-    final int subjectiveFirst = Integer.valueOf(properties.getProperty("subjective_first", "0").trim());
+    final int subjectiveFirst = Integer.parseInt(properties.getProperty("subjective_first", "0").trim());
     this.subjectiveFirst = subjectiveFirst == 1;
     LOGGER.debug("Subjective first is: "
         + this.subjectiveFirst);
 
-    final int perfOffsetMinutes = Integer.valueOf(properties.getProperty("perf_attempt_offset_minutes",
+    final int perfOffsetMinutes = Integer.parseInt(properties.getProperty("perf_attempt_offset_minutes",
                                                                          String.valueOf(tinc)).trim());
     performanceAttemptOffset = perfOffsetMinutes
         / tinc;
@@ -254,7 +254,7 @@ public class GreedySolver {
     LOGGER.debug("Performance attempt offset: "
         + performanceAttemptOffset);
 
-    final int subjOffsetMinutes = Integer.valueOf(properties.getProperty("subjective_attempt_offset_minutes",
+    final int subjOffsetMinutes = Integer.parseInt(properties.getProperty("subjective_attempt_offset_minutes",
                                                                          String.valueOf(tinc)).trim());
     subjectiveAttemptOffset = subjOffsetMinutes
         / tinc;
@@ -288,7 +288,7 @@ public class GreedySolver {
     }
     subjectiveDurations = new int[getNumSubjectiveStations()];
     for (int station = 0; station < subjDurs.length; ++station) {
-      final int durationMinutes = Integer.valueOf(subjDurs[station].trim());
+      final int durationMinutes = Integer.parseInt(subjDurs[station].trim());
       subjectiveDurations[station] = durationMinutes
           / tinc;
       if (durationMinutes != subjectiveDurations[station]
@@ -376,7 +376,7 @@ public class GreedySolver {
       Arrays.fill(performanceTables, 0);
     }
     for (int group = 0; group < groups.length; ++group) {
-      final int count = Integer.valueOf(groups[group].trim());
+      final int count = Integer.parseInt(groups[group].trim());
       sz[group] = new boolean[count][getNumSubjectiveStations()][getNumTimeslots()];
       sy[group] = new boolean[count][getNumSubjectiveStations()][getNumTimeslots()];
       pz[group] = new boolean[count][getNumTables()][2][getNumTimeslots()];
@@ -449,7 +449,7 @@ public class GreedySolver {
         throw new FLLRuntimeException(String.format("%s break %d start isn't divisible by tinc", breakType, i));
       }
 
-      final int durationMinutes = Integer.valueOf(durationStr);
+      final int durationMinutes = Integer.parseInt(durationStr);
       final int durationInc = durationMinutes
           / tinc;
       if (durationMinutes != durationInc

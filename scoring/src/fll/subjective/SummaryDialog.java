@@ -97,7 +97,7 @@ import fll.xml.ScoreCategory;
    */
   private TableModel[] buildTableModels(final ChallengeDescription description,
                                         final Document scoreDocument) {
-    final Map<Integer, Integer[]> data = new HashMap<Integer, Integer[]>();
+    final Map<Integer, int[]> data = new HashMap<Integer, int[]>();
 
     final Element scoresElement = scoreDocument.getDocumentElement();
     final List<String> columnNames = new LinkedList<String>();
@@ -130,7 +130,7 @@ import fll.xml.ScoreCategory;
 
         final int teamNumber = Integer.parseInt(scoreElement.getAttribute("teamNumber"));
         if (!data.containsKey(teamNumber)) {
-          final Integer[] counts = new Integer[subjectiveCategories.size()];
+          final int[] counts = new int[subjectiveCategories.size()];
           Arrays.fill(counts, 0);
           data.put(teamNumber, counts);
         }
@@ -140,7 +140,9 @@ import fll.xml.ScoreCategory;
             || Boolean.parseBoolean(scoreElement.getAttribute("NoShow"))) {
           // if there is a score or a No Show, then increment counter for this
           // team/category combination
-          data.get(teamNumber)[catIdx]++;
+          final int[] array = data.get(teamNumber);
+          array[catIdx]++;
+          data.put(teamNumber, array);
         } // end if score
 
       } // end foreach score row
@@ -160,7 +162,7 @@ import fll.xml.ScoreCategory;
         divisionSummaryData = new ArrayList<SummaryData>();
         summaryData.put(division, divisionSummaryData);
       }
-      final Integer[] counts = data.get(teamNumber);
+      final int[] counts = data.get(teamNumber);
       for (int column = 0; column < counts.length; ++column) {
         // make sure that counts[column] rows exist in summaryData
         final int numScoresForTeam = counts[column];

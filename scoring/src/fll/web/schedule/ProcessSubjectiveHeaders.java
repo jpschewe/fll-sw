@@ -47,7 +47,7 @@ public class ProcessSubjectiveHeaders extends BaseFLLServlet {
       final String header = unusedHeaders.get(index);
       final String durationStr = request.getParameter("duration_"
           + index);
-      subjectiveStations.add(new SubjectiveStation(header, Integer.valueOf(durationStr)));
+      subjectiveStations.add(new SubjectiveStation(header, Integer.parseInt(durationStr)));
     }
 
     session.setAttribute(CheckViolations.SUBJECTIVE_STATIONS, subjectiveStations);
