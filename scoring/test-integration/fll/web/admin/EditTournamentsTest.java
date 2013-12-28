@@ -55,7 +55,7 @@ public class EditTournamentsTest {
       final WebElement numRowsEle = selenium.findElement(By.name("numRows"));
       final String numRowsStr = numRowsEle.getAttribute("value");
       Assert.assertNotNull(numRowsStr);
-      final int numRows = Integer.valueOf(numRowsStr);
+      final int numRows = Integer.parseInt(numRowsStr);
 
       // type in tournament name
       final int lastRowIdx = numRows - 1;

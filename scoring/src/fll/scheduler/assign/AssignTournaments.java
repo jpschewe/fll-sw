@@ -34,6 +34,7 @@ import org.apache.log4j.Logger;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.LogUtils;
 
@@ -191,7 +192,7 @@ public class AssignTournaments {
 
   private TeamInfo parseLine(final String[] line) throws ParseException {
     final Date signupDate = parseSignupDate(line[columnAssignments.get(signupDateHeader)]);
-    final int teamNumber = Integer.valueOf(line[columnAssignments.get(teamNumHeader)]);
+    final int teamNumber = Integer.parseInt(line[columnAssignments.get(teamNumHeader)]);
     final String division = line[columnAssignments.get(divisionHeader)];
     final String name = line[columnAssignments.get(nameHeader)];
     final String pref1 = line[columnAssignments.get(pref1Header)];
@@ -233,7 +234,7 @@ public class AssignTournaments {
    * 
    * @throws IOException
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DM_EXIT", justification = "Method is documented to cause an exit")
+  @SuppressFBWarnings(value = "DM_EXIT", justification = "Method is documented to cause an exit")
   private void findColumns(final CSVReader csvreader) throws IOException {
     initializeColumnAssignments();
 
