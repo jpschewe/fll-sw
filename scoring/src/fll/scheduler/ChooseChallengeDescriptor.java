@@ -169,7 +169,7 @@ public class ChooseChallengeDescriptor extends JDialog {
                                                   final boolean isSelected,
                                                   final boolean cellHasFocus) {
       if (null == descriptionInfo) {
-        return mDelegate.getListCellRendererComponent(list, descriptionInfo, index, isSelected, cellHasFocus);
+        return mDelegate.getListCellRendererComponent(list, null, index, isSelected, cellHasFocus);
       } else {
         final String title = descriptionInfo.getTitle();
         final String revision = descriptionInfo.getRevision();

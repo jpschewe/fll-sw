@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -150,7 +151,7 @@ public final class DumpDB extends BaseFLLServlet {
     return retval;
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE", justification = "Dynamic based upon tables in the database")
+  @SuppressFBWarnings(value = "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE", justification = "Dynamic based upon tables in the database")
   private static void dumpTable(final ZipOutputStream output,
                                 final Connection connection,
                                 final DatabaseMetaData metadata,

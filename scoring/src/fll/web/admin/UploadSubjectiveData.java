@@ -43,6 +43,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.db.Queries;
 import fll.subjective.SubjectiveUtils;
@@ -193,9 +194,13 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
         LOGGER.info("Subjective upload is not a zip file, trying as an XML file");
 
         // not a zip file, parse as just the XML file
-        final FileInputStream fis = new FileInputStream(file);
-        scoreDocument = XMLUtils.parseXMLDocument(fis);
-        fis.close();
+        FileInputStream fis = null;
+        try {
+          fis = new FileInputStream(file);
+          scoreDocument = XMLUtils.parseXMLDocument(fis);
+        } finally {
+          IOUtils.closeQuietly(fis);
+        }
       }
 
       if (null == scoreDocument) {
@@ -253,7 +258,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
     Queries.updateSubjectiveScoreTotals(challengeDescription, connection, currentTournament);
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")
   private static void removeNullRows(final int currentTournament,
                                      final Connection connection,
                                      final String categoryName,
@@ -280,7 +285,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
     }
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "columns are dynamic")
   private static void saveCategoryData(final int currentTournament,
                                        final Connection connection,
                                        final Element scoreCategoryElement,
@@ -352,8 +357,7 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
               updatePrep.setNull(goalIndex + 2, Types.DOUBLE);
             } else {
               final String value = subscoreElement.getAttribute("value");
-              if (null != value
-                  && !"".equals(value.trim())) {
+              if (!value.trim().isEmpty()) {
                 insertPrep.setString(goalIndex + 5, value.trim());
                 updatePrep.setString(goalIndex + 2, value.trim());
               } else {

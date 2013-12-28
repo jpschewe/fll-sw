@@ -43,11 +43,11 @@ public class ProcessSubjectiveHeaders extends BaseFLLServlet {
     // get params for subjectiveHeader
     final List<SubjectiveStation> subjectiveStations = new LinkedList<SubjectiveStation>();
     for (final String str : request.getParameterValues("subjectiveHeader")) {
-      final int index = Integer.valueOf(str);
+      final int index = Integer.parseInt(str);
       final String header = unusedHeaders.get(index);
       final String durationStr = request.getParameter("duration_"
           + index);
-      subjectiveStations.add(new SubjectiveStation(header, Integer.valueOf(durationStr)));
+      subjectiveStations.add(new SubjectiveStation(header, Integer.parseInt(durationStr)));
     }
 
     session.setAttribute(CheckViolations.SUBJECTIVE_STATIONS, subjectiveStations);

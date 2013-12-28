@@ -10,10 +10,12 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * A team with tournament information.
  */
-@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "EQ_DOESNT_OVERRIDE_EQUALS" }, justification = "Equality doesn't change in this subclass of Team")
+@SuppressFBWarnings(value = { "EQ_DOESNT_OVERRIDE_EQUALS" }, justification = "Equality doesn't change in this subclass of Team")
 public class TournamentTeam extends Team {
 
   public TournamentTeam(final int teamNumber, final String org, final String name, final String division, final String eventDivision, final String judgingStation) {
