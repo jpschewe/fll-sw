@@ -194,9 +194,13 @@ public final class UploadSubjectiveData extends BaseFLLServlet {
         LOGGER.info("Subjective upload is not a zip file, trying as an XML file");
 
         // not a zip file, parse as just the XML file
-        final FileInputStream fis = new FileInputStream(file);
-        scoreDocument = XMLUtils.parseXMLDocument(fis);
-        fis.close();
+        FileInputStream fis = null;
+        try {
+          fis = new FileInputStream(file);
+          scoreDocument = XMLUtils.parseXMLDocument(fis);
+        } finally {
+          IOUtils.closeQuietly(fis);
+        }
       }
 
       if (null == scoreDocument) {

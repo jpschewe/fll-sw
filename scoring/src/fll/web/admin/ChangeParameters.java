@@ -97,7 +97,7 @@ public class ChangeParameters extends BaseFLLServlet {
         TournamentParameters.unsetTournamentParameter(connection, tournament.getTournamentID(),
                                                       TournamentParameters.SEEDING_ROUNDS);
       } else {
-        final int value = Integer.valueOf(str);
+        final int value = Integer.parseInt(str);
         TournamentParameters.setIntTournamentParameter(connection, tournament.getTournamentID(),
                                                        TournamentParameters.SEEDING_ROUNDS, value);
       }
@@ -117,7 +117,7 @@ public class ChangeParameters extends BaseFLLServlet {
         TournamentParameters.unsetTournamentParameter(connection, tournament.getTournamentID(),
                                                       TournamentParameters.MAX_SCOREBOARD_ROUND);
       } else {
-        final int value = Integer.valueOf(str);
+        final int value = Integer.parseInt(str);
         TournamentParameters.setIntTournamentParameter(connection, tournament.getTournamentID(),
                                                        TournamentParameters.MAX_SCOREBOARD_ROUND, value);
       }
