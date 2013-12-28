@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.FLLRuntimeException;
 
@@ -137,7 +138,7 @@ public class ScheduleChecker {
     }
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "IM_BAD_CHECK_FOR_ODD", justification = "The size of a container cannot be negative")
+  @SuppressFBWarnings(value = "IM_BAD_CHECK_FOR_ODD", justification = "The size of a container cannot be negative")
   private void verifyTeam(final Collection<ConstraintViolation> violations,
                           final TeamScheduleInfo ti) {
     // Relationship between each subjective category

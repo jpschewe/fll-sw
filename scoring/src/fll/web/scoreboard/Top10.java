@@ -21,14 +21,15 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-import fll.db.GlobalParameters;
 import net.mtu.eggplant.util.StringUtils;
 import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Utilities;
+import fll.db.GlobalParameters;
 import fll.db.Queries;
 import fll.util.FP;
 import fll.util.LogUtils;
@@ -53,7 +54,7 @@ public class Top10 extends BaseFLLServlet {
    */
   public static final int MAX_ORG_NAME = 20;
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Determine sort order based upon winner criteria")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Determine sort order based upon winner criteria")
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 final ServletContext application,

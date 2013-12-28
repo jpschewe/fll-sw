@@ -39,8 +39,7 @@ import fll.web.playoff.TeamScore;
         return null;
       } else {
         final String value = subEle.getAttribute("value");
-        if (null == value
-            || "".equals(value)) {
+        if (value.isEmpty()) {
           return null;
         } else {
           return value;
@@ -56,7 +55,7 @@ import fll.web.playoff.TeamScore;
       return Double.NaN;
     } else {
       final String value = subEle.getAttribute("value");
-      if(null == value || "".equals(value)) {
+      if (value.isEmpty()) {
         return Double.NaN;
       }
       try {

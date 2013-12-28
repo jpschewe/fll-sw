@@ -36,6 +36,7 @@ import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.web.admin.DownloadSubjectiveData;
 import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
@@ -119,8 +120,7 @@ import fll.xml.ScoreCategory;
             final Element subscoreElement = SubjectiveUtils.getSubscoreElement(scoreElement, goalName);
             if (null != subscoreElement) {
               final String value = subscoreElement.getAttribute("value");
-              if (null != value
-                  && !"".equals(value)) {
+              if (!value.isEmpty()) {
                 numValues++;
                 break;
               }
@@ -201,10 +201,10 @@ import fll.xml.ScoreCategory;
       _columnNames = columnNames;
     }
 
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SE_BAD_FIELD" }, justification = "Not serializing these classes")
+    @SuppressFBWarnings(value = { "SE_BAD_FIELD" }, justification = "Not serializing these classes")
     private final List<SummaryData> _summaryData;
 
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SE_BAD_FIELD" }, justification = "Not serializing these classes")
+    @SuppressFBWarnings(value = { "SE_BAD_FIELD" }, justification = "Not serializing these classes")
     private final List<String> _columnNames;
 
     @Override
@@ -266,10 +266,10 @@ import fll.xml.ScoreCategory;
       _categoryColumnNames = categoryColumnNames;
     }
 
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SE_BAD_FIELD" }, justification = "Not serializing these classes")
+    @SuppressFBWarnings(value = { "SE_BAD_FIELD" }, justification = "Not serializing these classes")
     private final List<SummaryData> _data;
 
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SE_BAD_FIELD" }, justification = "Not serializing these classes")
+    @SuppressFBWarnings(value = { "SE_BAD_FIELD" }, justification = "Not serializing these classes")
     private final List<String> _categoryColumnNames;
 
     @Override

@@ -41,6 +41,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Team;
 import fll.Tournament;
 import fll.TournamentTeam;
@@ -107,7 +108,7 @@ public class DownloadSubjectiveData extends BaseFLLServlet {
    *          for deciding which set of judges to use
    * @return the document
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines table name")
   public static Document createSubjectiveScoresDocument(final ChallengeDescription challengeDescription,
                                                         final Collection<? extends Team> teams,
                                                         final Connection connection,

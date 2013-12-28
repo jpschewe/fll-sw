@@ -52,7 +52,7 @@ public class ChangeSeedingRounds extends BaseFLLServlet {
         final String seedingRoundsParam = request.getParameter("seedingRounds");
         if (null != seedingRoundsParam
             && !"".equals(seedingRoundsParam)) {
-          final int newSeedingRounds = Integer.valueOf(seedingRoundsParam);
+          final int newSeedingRounds = Integer.parseInt(seedingRoundsParam);
           if (newSeedingRounds < 0) {
             message.append("<p class='error'>Cannot have negative number of seeding rounds</p>");
           } else {

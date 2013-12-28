@@ -31,6 +31,7 @@ import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.Utilities;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -50,7 +51,7 @@ public class QueryHandler extends BaseFLLServlet {
    */
   public static final String QUERY_PARAMETER = "query";
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Executing query from user")
+  @SuppressFBWarnings(value = { "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE" }, justification = "Executing query from user")
   @Override
   protected void processRequest(final HttpServletRequest request,
                                 final HttpServletResponse response,
@@ -104,7 +105,7 @@ public class QueryHandler extends BaseFLLServlet {
     /**
      * If there is an error, this will be non-null.
      */
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Used in the web pages")
+    @SuppressFBWarnings(value = { "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" }, justification = "Used in the web pages")
     public String error = null;
 
     public final List<String> columnNames = new LinkedList<String>();

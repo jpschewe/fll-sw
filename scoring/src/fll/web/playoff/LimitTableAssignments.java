@@ -73,7 +73,7 @@ public class LimitTableAssignments extends BaseFLLServlet {
       final String[] tables = request.getParameterValues("tables");
       if (null != tables) {
         for (final String idStr : tables) {
-          final int id = Integer.valueOf(idStr);
+          final int id = Integer.parseInt(idStr);
           insert.setInt(3, id);
           insert.executeUpdate();
         }

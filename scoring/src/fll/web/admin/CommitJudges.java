@@ -27,6 +27,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fll.JudgeInformation;
 import fll.db.Queries;
 import fll.util.LogUtils;
@@ -76,7 +77,7 @@ public class CommitJudges extends BaseFLLServlet {
    * 
    * @param tournament the current tournament
    */
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
+  @SuppressFBWarnings(value = { "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING" }, justification = "Category determines the table name")
   private static void commitData(final HttpSession session,
                                  final Connection connection,
                                  final int tournament) throws SQLException, IOException {
