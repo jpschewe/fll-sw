@@ -22,9 +22,9 @@ import java.util.jar.JarInputStream;
 
 import net.mtu.eggplant.xml.NodelistElementCollectionAdapter;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.custommonkey.xmlunit.Diff;
-import org.openqa.selenium.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
