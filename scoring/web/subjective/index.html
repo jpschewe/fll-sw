@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
+<html>
+<head>
+<title>Subjective Scoring</title>
+
+<script type='text/javascript' src='../extlib/jquery-1.7.1.min.js'></script>
+<script type='text/javascript' src='../extlib/jquery.json-2.3.min.js'></script>
+<script type='text/javascript' src='../extlib/jstorage.js'></script>
+<script type='text/javascript' src='subjective.js'></script>
+
+<script type='text/javascript'>
+	$(document).ready(
+			function() {
+				$("#wait").hide();
+				$("#choose_clear").hide();
+
+				$("#clear").click(function() {
+					$.subjective.clearAllData();
+					$.subjective.loadFromServer();
+					$("#choose_clear").hide();
+					//location.href = "params.html";
+				});
+				$("#keep").click(function() {
+					//FIXME
+					$("#choose_clear").hide();
+					//location.href = "params.html";
+				});
+
+				var messages = $("#messages");
+
+				var subjectiveCategories = $.subjective
+						.getSubjectiveCategories();
+				//FIXME var tournament = $.subjective.getTournament();
+
+				if (null != subjectiveCategories
+						&& subjectiveCategories.length > 0) {
+					/*
+					if (tournament != _loadingTournament) {
+						console.log("Clearing data for old tournament: "
+								+ tournament);
+						clearData();
+						loadData();
+						$("#choose_clear").hide();
+						location.href = "params.html";
+					} else {
+					 */
+					$("#choose_clear").show();
+					//}
+				} else {
+					$("#wait").show();
+
+					$.subjective.loadFromServer(function() {
+						subjectiveCategories = $.subjective
+								.getSubjectiveCategories();
+
+						$("#wait").hide();
+						$("#choose_clear").hide();
+						//location.href = "params.html";
+
+						if (0 == subjectiveCategories.length) {
+							messages.append("Loaded no data from server<br/>");
+						} else {
+							messages.append("<p>Loaded "
+									+ subjectiveCategories.length
+									+ " categories from the server");
+						}
+						messages.append("<p>Current tournament is "
+								+ $.subjective.getTournament().name + "</p>");
+
+					}, function() {
+						alert("Error getting data from server");
+					});
+				}
+
+			});
+</script>
+
+</head>
+
+<body>
+
+ <div id="wait" style="position: absolute; top: 50%; left: 50%;">
+  Loading...</div>
+
+ <p id='messages'></p>
+
+ <div id='test'></div>
+
+ <div id='choose_clear'>
+  You already have data loaded for this tournament. Would you like to
+  clear the existing data and load from scratch? This will remove any
+  scores stored on your device.
+  <button id='clear'>Yes, clear the data</button>
+  <button id='keep'>No, just refresh the data</button>
+ </div>
+
+</body>
+</html>
