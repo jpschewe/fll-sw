@@ -19,11 +19,13 @@
 	var _subjectiveCategories;
 	var _tournament;
 	var _teams;
+	var _schedule;
 
 	function _init_variables() {
 		_subjectiveCategories = {};
 		_tournament = null;
 		_teams = {};
+		_schedule = null;
 	}
 
 	function _log(str) {
@@ -63,6 +65,14 @@
 
 		return $.getJSON("../api/Tournaments/current", function(tournament) {
 			_tournament = tournament;
+		});
+	}
+
+	function _loadSchedule() {
+		_schedule = null;
+
+		return $.getJSON("../api/Schedule", function(data) {
+			_schedule = data;
 		});
 	}
 
@@ -117,12 +127,13 @@
 		loadFromServer : function(doneCallback, failCallback) {
 			_init_variables();
 
-			console.log("Loading from server");
+			_log("Loading from server");
 
 			var waitList = []
 			waitList.push(_loadSubjectiveCategories());
 			waitList.push(_loadTournament());
 			waitList.push(_loadTeams());
+			waitList.push(_loadSchedule());
 
 			$.when.apply($, waitList).done(function() {
 				_save();
