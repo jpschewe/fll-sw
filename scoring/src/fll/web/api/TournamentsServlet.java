@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -25,10 +24,9 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.Tournament;
-import fll.TournamentTeam;
 import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -48,7 +46,7 @@ public class TournamentsServlet extends HttpServlet {
     try {
       connection = datasource.getConnection();
 
-      final Gson gson = new Gson();
+      final ObjectMapper jsonMapper = new ObjectMapper();
 
       response.reset();
       response.setContentType("application/json");
@@ -73,8 +71,7 @@ public class TournamentsServlet extends HttpServlet {
 
         final Tournament tournament = Tournament.findTournamentByID(connection, id);
         if (null != tournament) {
-          final String json = gson.toJson(tournament);
-          writer.print(json);
+          jsonMapper.writeValue(writer, tournament);
           return;
         } else {
           throw new RuntimeException("No tournament found with id "
@@ -85,10 +82,7 @@ public class TournamentsServlet extends HttpServlet {
 
       final Collection<Tournament> tournaments = Tournament.getTournaments(connection);
 
-      final String json = gson.toJson(tournaments);
-
-      writer.print(json);
-
+      jsonMapper.writeValue(writer, tournaments);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     } finally {

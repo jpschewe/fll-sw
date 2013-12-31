@@ -25,7 +25,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.TournamentTeam;
 import fll.db.Queries;
@@ -48,7 +48,7 @@ public class TournamentTeamsServlet extends HttpServlet {
       connection = datasource.getConnection();
 
       final Map<Integer, TournamentTeam> teamMap = Queries.getTournamentTeams(connection);
-      final Gson gson = new Gson();
+      final ObjectMapper jsonMapper = new ObjectMapper();
 
       response.reset();
       response.setContentType("application/json");
@@ -64,8 +64,7 @@ public class TournamentTeamsServlet extends HttpServlet {
               + teamNumber);
           final TournamentTeam team = teamMap.get(teamNumber);
           if (null != team) {
-            final String json = gson.toJson(team);
-            writer.print(json);
+            jsonMapper.writeValue(writer, team);
             return;
           } else {
             throw new RuntimeException("No team found with number "
@@ -79,10 +78,7 @@ public class TournamentTeamsServlet extends HttpServlet {
 
       final Collection<TournamentTeam> teams = teamMap.values();
 
-      final String json = gson.toJson(teams);
-
-      writer.print(json);
-
+      jsonMapper.writeValue(writer, teams);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     } finally {

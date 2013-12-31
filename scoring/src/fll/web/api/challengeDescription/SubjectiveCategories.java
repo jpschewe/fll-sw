@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
@@ -40,15 +40,12 @@ public class SubjectiveCategories extends HttpServlet {
     response.setContentType("application/json");
     final PrintWriter writer = response.getWriter();
 
-    final Gson gson = new Gson();
+    final ObjectMapper jsonMapper = new ObjectMapper();
 
     final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
     final List<ScoreCategory> categories = challengeDescription.getSubjectiveCategories();
-    
-    final String json = gson.toJson(categories);
-    writer.print(json);
-    
+
+    jsonMapper.writeValue(writer, categories);
   }
 
-  
 }
