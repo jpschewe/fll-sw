@@ -28,6 +28,42 @@
 		_schedule = null;
 	}
 
+	function _loadFromDisk() {
+		_init_variables();
+
+		_log("Loading from disk");
+
+		var value = $.jStorage.get(STORAGE_PREFIX + "_subjectiveCategories");
+		if (null != value) {
+			_subjectiveCategories = value;
+		}
+
+		value = $.jStorage.get(STORAGE_PREFIX + "_tournament");
+		if (null != value) {
+			_tournament = value;
+		}
+		
+		value = $.jStorage.get(STORAGE_PREFIX + "_teams");
+		if (null != value) {
+			_teams = value;
+		}
+
+		value = $.jStorage.get(STORAGE_PREFIX + "_schedule");
+		if (null != value) {
+			_schedule = value;
+		}
+
+	}
+
+	function _save() {		
+		_log("Saving data to disk");
+		
+		$.jStorage.set(STORAGE_PREFIX + "_subjectiveCategories", _subjectiveCategories);
+		$.jStorage.set(STORAGE_PREFIX + "_tournament", _tournament);
+		$.jStorage.set(STORAGE_PREFIX + "_teams", _teams);
+		$.jStorage.set(STORAGE_PREFIX + "_schedule", _schedule);
+	}
+
 	function _log(str) {
 		if (typeof (console) != 'undefined') {
 			console.log(str);
@@ -43,21 +79,6 @@
 				$.jStorage.deleteKey(value);
 			}
 		});
-	}
-
-	function _loadFromDisk() {
-		_init_variables();
-
-		_log("Loading from disk");
-
-		var value = $.jStorage.get(STORAGE_PREFIX + "_subjectiveCategories");
-		if (null != value) {
-			_subjectiveCategories = value;
-		}
-	}
-
-	function _save() {
-		_log("Save not yet implemented");
 	}
 
 	function _loadTournament() {
@@ -211,6 +232,13 @@
 			} else {
 				return true;
 			}
+		},
+		
+		/**
+		 * @return list of judging groups
+		 */
+		getJudgingGroups: function() {
+			return _schedule.judgingGroups;
 		},
 
 	};

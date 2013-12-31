@@ -40,7 +40,7 @@ function checkStoredData() {
 }
 
 function promptForJudgingGroup() {
-	$("#messages").append("<p>FIXME prompt user for judging group</p>");
+	location.href="choose-judging-group.html";
 }
 
 function promptForReload() {
