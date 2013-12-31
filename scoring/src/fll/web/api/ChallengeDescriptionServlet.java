@@ -7,7 +7,9 @@
 package fll.web.api;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -15,9 +17,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.formula.eval.NotImplementedException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.util.LogUtils;
+import fll.web.ApplicationAttributes;
+import fll.xml.ChallengeDescription;
 
 @WebServlet("/api/ChallengeDescription")
 public class ChallengeDescriptionServlet extends HttpServlet {
@@ -27,22 +32,17 @@ public class ChallengeDescriptionServlet extends HttpServlet {
   @Override
   protected final void doGet(final HttpServletRequest request,
                              final HttpServletResponse response) throws IOException, ServletException {
-//    final ServletContext application = getServletContext();
+    final ServletContext application = getServletContext();
 
-//    response.reset();
-//    response.setContentType("application/json");
-//    final PrintWriter writer = response.getWriter();
-//
-//    final Gson gson = new Gson();
+    response.reset();
+    response.setContentType("application/json");
+    final PrintWriter writer = response.getWriter();
 
-//    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
-//
-//    final String json = gson.toJson(challengeDescription);
-//    writer.print(json);
+    final ObjectMapper jsonMapper = new ObjectMapper();
 
-    throw new NotImplementedException("Not currently implemented as this causes infinite recursion");
-    
+    final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
+
+    jsonMapper.writeValue(writer, challengeDescription);
   }
 
-  
 }
