@@ -1,9 +1,15 @@
-<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
+<!DOCTYPE html>
+
 <html>
 <head>
 <title>Subjective Scoring</title>
 
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../extlib/jquery.mobile-1.4.0.min.css" />
+
 <script type='text/javascript' src='../extlib/jquery-1.7.1.min.js'></script>
+<script type='text/javascript'
+ src='../extlib/jquery.mobile-1.4.0.min.js'></script>
 <script type='text/javascript' src='../extlib/jquery.json-2.3.min.js'></script>
 <script type='text/javascript' src='../extlib/jstorage.js'></script>
 <script type='text/javascript' src='subjective.js'></script>
@@ -12,21 +18,39 @@
 </head>
 
 <body>
+ <div data-role="page" id='index'>
 
- <div id="wait" style="position: absolute; top: 50%; left: 50%;">
-  Loading...</div>
+  <div data-role="header">
+   <h1>Load subjective data</h1>
+  </div>
+  <!-- /header -->
 
- <p id='messages'></p>
+  <div class="ui-content" role="main">
 
- <div id='test'></div>
+   <div id="wait" style="position: absolute; top: 50%; left: 50%;">
+    <img src="../extlib/images/ajax-loader.gif" /> Loading...
+   </div>
 
- <div id='choose_clear'>
-  You already have data loaded for this tournament. Would you like to
-  clear the existing data and load from scratch? This will remove any
-  scores stored on your device.
-  <button id='clear'>Yes, clear the data</button>
-  <button id='keep'>No, just refresh the data</button>
+   <p id='messages'></p>
+
+   <div id='choose_clear'>
+    You already have data loaded for this tournament. Would you like to
+    clear the existing data and load from scratch? This will remove any
+    scores stored on your device.
+    <button id='clear'>Yes, clear the data</button>
+    <button id='keep'>No, just refresh the data</button>
+   </div>
+
+  </div>
+  <!-- /content -->
+
+  <div data-role="footer" data-position="fixed">
+   <h4>Footer</h4>
+  </div>
+  <!-- /footer -->
+
  </div>
+ <!-- /page -->
 
 </body>
 </html>

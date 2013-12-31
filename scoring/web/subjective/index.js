@@ -15,15 +15,15 @@ function loadData() {
 		// location.href = "params.html";
 
 		if (0 == subjectiveCategories.length) {
-			$("#messages").append("Loaded no data from server<br/>");
+			alert("No subjective data loaded from server");
 		} else {
 			$("#messages").append(
-					"<p>Loaded " + subjectiveCategories.length
-							+ " categories from the server");
+					"Loaded " + subjectiveCategories.length
+							+ " categories from the server<br/>");
 		}
 		$("#messages").append(
-				"<p>Current tournament is " + $.subjective.getTournament().name
-						+ "</p>");
+				"Current tournament is " + $.subjective.getTournament().name
+						+ "<br/>");
 		
 		promptForJudgingGroup();
 	}, function() {
@@ -45,9 +45,6 @@ function promptForJudgingGroup() {
 
 function promptForReload() {
 	$("#choose_clear").show();
-
-	$("#messages").append(
-			"<p>FIXME prompt user if they want to reload or not</p>");
 }
 
 function reloadData() {
