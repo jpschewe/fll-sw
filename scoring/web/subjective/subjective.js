@@ -125,6 +125,7 @@
 			waitList.push(_loadTeams());
 
 			$.when.apply($, waitList).done(function() {
+				_save();
 				doneCallback();
 			}).fail(function() {
 				failCallback();
