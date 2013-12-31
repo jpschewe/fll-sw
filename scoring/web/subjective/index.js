@@ -24,7 +24,7 @@ function loadData() {
 		$("#messages").append(
 				"Current tournament is " + $.subjective.getTournament().name
 						+ "<br/>");
-		
+
 		promptForJudgingGroup();
 	}, function() {
 		alert("Error getting data from server");
@@ -40,7 +40,7 @@ function checkStoredData() {
 }
 
 function promptForJudgingGroup() {
-	location.href="choose-judging-group.html";
+	location.href = "choose-judging-group.html";
 }
 
 function promptForReload() {
@@ -73,7 +73,7 @@ function checkTournament() {
 					});
 }
 
-$(document).ready(function() {
+$(document).on("pagecreate", function() {
 	$("#wait").hide();
 	$("#choose_clear").hide();
 
@@ -87,5 +87,5 @@ $(document).ready(function() {
 	});
 
 	checkStoredData();
-	
+
 });
