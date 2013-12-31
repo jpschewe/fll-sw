@@ -52,7 +52,7 @@ public class ExcelCellReader extends CellFileReader {
    */
   public static boolean isExcelFile(final File file) {
     return file.getName().endsWith(".xls")
-        || file.getName().endsWith(".xslx");
+        || file.getName().endsWith(".xlsx");
   }
 
   public static List<String> getAllSheetNames(final File file) throws InvalidFormatException, IOException {
