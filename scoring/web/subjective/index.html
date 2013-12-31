@@ -7,73 +7,7 @@
 <script type='text/javascript' src='../extlib/jquery.json-2.3.min.js'></script>
 <script type='text/javascript' src='../extlib/jstorage.js'></script>
 <script type='text/javascript' src='subjective.js'></script>
-
-<script type='text/javascript'>
-	$(document).ready(
-			function() {
-				$("#wait").hide();
-				$("#choose_clear").hide();
-
-				$("#clear").click(function() {
-					$.subjective.clearAllData();
-					$.subjective.loadFromServer();
-					$("#choose_clear").hide();
-					//location.href = "params.html";
-				});
-				$("#keep").click(function() {
-					//FIXME
-					$("#choose_clear").hide();
-					//location.href = "params.html";
-				});
-
-				var messages = $("#messages");
-
-				var subjectiveCategories = $.subjective
-						.getSubjectiveCategories();
-				//FIXME var tournament = $.subjective.getTournament();
-
-				if (null != subjectiveCategories
-						&& subjectiveCategories.length > 0) {
-					/*
-					if (tournament != _loadingTournament) {
-						console.log("Clearing data for old tournament: "
-								+ tournament);
-						clearData();
-						loadData();
-						$("#choose_clear").hide();
-						location.href = "params.html";
-					} else {
-					 */
-					$("#choose_clear").show();
-					//}
-				} else {
-					$("#wait").show();
-
-					$.subjective.loadFromServer(function() {
-						subjectiveCategories = $.subjective
-								.getSubjectiveCategories();
-
-						$("#wait").hide();
-						$("#choose_clear").hide();
-						//location.href = "params.html";
-
-						if (0 == subjectiveCategories.length) {
-							messages.append("Loaded no data from server<br/>");
-						} else {
-							messages.append("<p>Loaded "
-									+ subjectiveCategories.length
-									+ " categories from the server");
-						}
-						messages.append("<p>Current tournament is "
-								+ $.subjective.getTournament().name + "</p>");
-
-					}, function() {
-						alert("Error getting data from server");
-					});
-				}
-
-			});
-</script>
+<script type='text/javascript' src='index.js'></script>
 
 </head>
 

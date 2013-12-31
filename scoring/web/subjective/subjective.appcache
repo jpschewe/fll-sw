@@ -6,4 +6,6 @@ CACHE MANIFEST
 ../extlib/jstorage.js
 
 subjective.js
+
 index.html
+index.js

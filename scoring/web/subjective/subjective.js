@@ -100,11 +100,20 @@
 	// //////////////////////// PUBLIC INTERFACE /////////////////////////
 	$.subjective = {
 
+		/**
+		 * Clear all data from local storage.
+		 */
 		clearAllData : function() {
 			_clear_local_storage();
 			_init_variables();
 		},
 
+		/**
+		 * @param doneCallback
+		 *            called with no arguments on success
+		 * @param failCallback
+		 *            called with no arguments on failure
+		 */
 		loadFromServer : function(doneCallback, failCallback) {
 			_init_variables();
 
@@ -122,6 +131,9 @@
 			});
 		},
 
+		/**
+		 * @return list of subjective categories
+		 */
 		getSubjectiveCategories : function() {
 			var retval = [];
 			$.each(_subjectiveCategories, function(i, val) {
@@ -130,6 +142,9 @@
 			return retval;
 		},
 
+		/**
+		 * @return list of teams
+		 */
 		getTeams : function() {
 			var retval = [];
 			$.each(_teams, function(i, val) {
@@ -149,13 +164,41 @@
 			_log(str);
 		},
 
+		/**
+		 * @return current stored tournament
+		 */
 		getTournament : function() {
 			return _tournament;
 		},
 
-		setTournament : function(tournament) {
-			_tournament = tournament;
-			_save();
+		/**
+		 * Get the current tournament from the server.
+		 * 
+		 * @param doneCallback
+		 *            called with the server tournament as the argument
+		 * @param failCallback
+		 *            called with no arguments
+		 */
+		getServerTournament : function(doneCallback, failCallback) {
+			return $.getJSON("../api/Tournaments/current",
+					function(tournament) {
+						doneCallback(tournament);
+					}).fail(function() {
+				failCallback();
+			});
+		},
+
+		/**
+		 * @return true if stored data exists
+		 */
+		storedDataExists : function() {
+			if (null == _subjectiveCategories) {
+				return false;
+			} else if (_subjectiveCategories.length == 0) {
+				return false;
+			} else {
+				return true;
+			}
 		},
 
 	};
