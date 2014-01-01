@@ -59,7 +59,7 @@
 
     <tr>
 
-     <td><input type='text' value='${judge.id }'
+     <td><input type='text' value="${judge.id}"
       name='id${loopStatus.count}' /></td>
      <td><select name='cat${loopStatus.count }'>
        <c:forEach items="${CATEGORIES}" var="cat">
