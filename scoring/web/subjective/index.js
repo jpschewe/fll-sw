@@ -73,7 +73,8 @@ function checkTournament() {
 					});
 }
 
-$(document).on("pagecreate", function() {
+$("#index-page").live("pageinit", function(event) {
+
 	$("#wait").hide();
 	$("#choose_clear").hide();
 

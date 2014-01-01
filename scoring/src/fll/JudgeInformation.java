@@ -7,6 +7,14 @@
 package fll;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.LinkedList;
+
+import net.mtu.eggplant.util.sql.SQLFunctions;
 
 /**
  * Judge information.
@@ -56,5 +64,38 @@ public final class JudgeInformation implements Serializable {
     } else {
       return false;
     }
+  }
+
+  /**
+   * Get all judges stored for this tournament. 
+   * 
+   * @param connection the database
+   * @param tournament tournament ID
+   * @return the judges
+   * @throws SQLException
+   */
+  public static Collection<JudgeInformation> getJudges(final Connection connection,
+                                                        final int tournament) throws SQLException {
+    Collection<JudgeInformation> judges = new LinkedList<JudgeInformation>();
+  
+    ResultSet rs = null;
+    PreparedStatement stmt = null;
+    try {
+      stmt = connection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?");
+      stmt.setInt(1, tournament);
+      rs = stmt.executeQuery();
+      while (rs.next()) {
+        final String id = rs.getString(1);
+        final String category = rs.getString(2);
+        final String station = rs.getString(3);
+        final JudgeInformation judge = new JudgeInformation(id, category, station);
+        judges.add(judge);
+      }
+    } finally {
+      SQLFunctions.close(rs);
+      SQLFunctions.close(stmt);
+    }
+  
+    return judges;
   }
 }

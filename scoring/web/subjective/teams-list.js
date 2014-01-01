@@ -4,15 +4,11 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-function selectCategory(category) {
-	$.subjective.setCurrentCategory(category);
-	location.href = "choose-judge.html";
-}
-
-$("#choose-category-page").live(
+$("#teams-list").live(
 		"pagebeforecreate",
 		function(event) {
 
+			/*
 			var categories = $.subjective.getSubjectiveCategories();
 			$.each(categories, function(i, category) {
 				var button = $("<button class='ui-btn ui-corner-all'>"
@@ -23,8 +19,12 @@ $("#choose-category-page").live(
 				});
 
 			});
-
+*/
+			
 			var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
 			$("#judging-group").text(currentJudgingGroup);
+
+			var currentCategory = $.subjective.getCurrentCategory();
+			$("#category").text(currentCategory.title);
 
 		});

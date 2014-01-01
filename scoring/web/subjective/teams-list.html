@@ -13,38 +13,21 @@
 <script type='text/javascript' src='../extlib/jquery.json-2.3.min.js'></script>
 <script type='text/javascript' src='../extlib/jstorage.js'></script>
 <script type='text/javascript' src='subjective.js'></script>
-<script type='text/javascript' src='choose-judge.js'></script>
+<script type='text/javascript' src='teams-list.js'></script>
 
 </head>
 
 <body>
- <div data-role="page" id='choose-judge-page'>
+ <div data-role="page" id='teams-list'>
 
   <div data-role="header">
-   <h1>Choose judge</h1>
+   <h1>Choose category</h1>
   </div>
   <!-- /header -->
 
   <div class="ui-content" role="main">
 
-   <p>Are you one of the known judges? If not, enter your name.</p>
-
-   <div class="ui-field-contain">
-    <fieldset id='judges' data-role="controlgroup">
-
-     <input type='radio' name='judge' id='new-judge' value='new-judge' /> <label
-      for='new-judge'><input type='text' id='new-judge-name'
-      data-clear-btn='true' placeholder='Enter your name' /></label>
-
-    </fieldset>
-   </div>
-
-   <p>
-    Phone number is required in case we need to contact you <input
-     type='text' id='judge-phone' data-clear-btn='true' />
-   </p>
-
-   <button class='ui-btn ui-corner-all' id='judge-submit'>Submit</button>
+<div id='teams'></div>
 
   </div>
   <!-- /content -->
