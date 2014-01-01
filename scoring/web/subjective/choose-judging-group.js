@@ -5,14 +5,8 @@
  */
 
 function selectJudgingGroup(group) {
-	alert("Selected group " + group);
-	
 	$.subjective.setCurrentJudgingGroup(group);
-
-	// FIXME store judging group
-	// FIXME display judging group in footer
-
-	// FIXME location.href="choose-category.html";
+	location.href="choose-category.html";
 }
 
 $(document).on(
