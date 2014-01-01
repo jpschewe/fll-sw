@@ -13,7 +13,7 @@
 <script type='text/javascript' src='../extlib/jquery.json-2.3.min.js'></script>
 <script type='text/javascript' src='../extlib/jstorage.js'></script>
 <script type='text/javascript' src='subjective.js'></script>
-<script type='text/javascript' src='choose-judging-group.js'></script>
+<script type='text/javascript' src='choose-judge.js'></script>
 
 </head>
 
@@ -21,18 +21,22 @@
  <div data-role="page">
 
   <div data-role="header">
-   <h1>Choose judging group</h1>
+   <h1>Choose judge</h1>
   </div>
   <!-- /header -->
 
   <div class="ui-content" role="main">
 
-<div id='judging-groups'></div>
+<p>Are you one of the known judges? If not, enter your name.</p>
+<div id='judges'></div>
+
+<p>Phone number is required in case we need to contact you after you leave.</p>
 
   </div>
   <!-- /content -->
 
   <div data-role="footer" data-position="fixed">
+  <p>Judging Group: <span id='judging-group'></span> Category: <span id='category'></span></p>
   </div>
   <!-- /footer -->
 

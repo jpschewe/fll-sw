@@ -12,7 +12,7 @@
 		throw new Error("jStorage needs to be loaded!");
 	}
 
-	var STORAGE_PREFIX = "fll.subjective";
+	var STORAGE_PREFIX = "fll.subjective.";
 
 	// //////////////////////// PRIVATE INTERFACE ////////////////////////
 
@@ -20,12 +20,16 @@
 	var _tournament;
 	var _teams;
 	var _schedule;
+	var _currentJudgingGroup;
+	var _currentCategory;
 
 	function _init_variables() {
 		_subjectiveCategories = {};
 		_tournament = null;
 		_teams = {};
 		_schedule = null;
+		_currentJudgingGroup = null;
+		_currentCategory = null;
 	}
 
 	function _loadFromDisk() {
@@ -53,6 +57,15 @@
 			_schedule = value;
 		}
 
+		value = $.jStorage.get(STORAGE_PREFIX + "_currentJudgingGroup");
+		if (null != value) {
+			_currentJudgingGroup = value;
+		}
+
+		value = $.jStorage.get(STORAGE_PREFIX + "_currentCategory");
+		if (null != value) {
+			_currentCategory = value;
+		}
 	}
 
 	function _save() {		
@@ -62,6 +75,9 @@
 		$.jStorage.set(STORAGE_PREFIX + "_tournament", _tournament);
 		$.jStorage.set(STORAGE_PREFIX + "_teams", _teams);
 		$.jStorage.set(STORAGE_PREFIX + "_schedule", _schedule);
+		$.jStorage.set(STORAGE_PREFIX + "_currentJudgingGroup", _currentJudgingGroup);
+		$.jStorage.set(STORAGE_PREFIX + "_currentCategory", _currentCategory);
+
 	}
 
 	function _log(str) {
@@ -239,6 +255,30 @@
 		 */
 		getJudgingGroups: function() {
 			return _schedule.judgingGroups;
+		},
+		
+		/**
+		 * @return current judging group, may be null
+		 */
+		getCurrentJudgingGroup: function() {
+			return _currentJudgingGroup;
+		},
+		
+		setCurrentJudgingGroup: function(v) {
+			_currentJudgingGroup = v;
+			_save();
+		},
+
+		/**
+		 * @return current category, may be null
+		 */
+		getCurrentCategory: function() {
+			return _currentCategory;
+		},
+		
+		setCurrentCategory: function(v) {
+			_currentCategory = v;
+			_save();
 		},
 
 	};
