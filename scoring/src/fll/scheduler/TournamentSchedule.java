@@ -110,10 +110,6 @@ public class TournamentSchedule implements Serializable {
 
   public static final String DIVISION_HEADER = "Div";
 
-  public static final String RESEARCH_HEADER = "Research";
-
-  public static final String TECHNICAL_HEADER = "Technical";
-
   public static final String JUDGE_GROUP_HEADER = "Judging Group";
 
   public static final String BASE_PERF_HEADER = "Perf #";
