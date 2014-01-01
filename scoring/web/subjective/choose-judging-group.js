@@ -6,12 +6,12 @@
 
 function selectJudgingGroup(group) {
 	$.subjective.setCurrentJudgingGroup(group);
-	location.href="choose-category.html";
+	location.href = "choose-category.html";
 }
 
-$(document).on(
-		"pagecreate",
-		function() {
+$("#choose-judging-group-page").live(
+		"pagebeforecreate",
+		function(event) {
 
 			var judgingGroups = $.subjective.getJudgingGroups();
 			$.each(judgingGroups, function(i, group) {

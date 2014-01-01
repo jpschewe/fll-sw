@@ -22,6 +22,9 @@
 	var _schedule;
 	var _currentJudgingGroup;
 	var _currentCategory;
+	var _judges;
+	var _currentJudge;
+	var _currentJudgePhone;
 
 	function _init_variables() {
 		_subjectiveCategories = {};
@@ -30,6 +33,9 @@
 		_schedule = null;
 		_currentJudgingGroup = null;
 		_currentCategory = null;
+		_judges = [];
+		_currentJudge = null;
+		_currentJudgePhone = null;
 	}
 
 	function _loadFromDisk() {
@@ -46,7 +52,7 @@
 		if (null != value) {
 			_tournament = value;
 		}
-		
+
 		value = $.jStorage.get(STORAGE_PREFIX + "_teams");
 		if (null != value) {
 			_teams = value;
@@ -66,17 +72,37 @@
 		if (null != value) {
 			_currentCategory = value;
 		}
+
+		value = $.jStorage.get(STORAGE_PREFIX + "_judges");
+		if (null != value) {
+			_judges = value;
+		}
+
+		value = $.jStorage.get(STORAGE_PREFIX + "_currentJudge");
+		if (null != value) {
+			_currentJudge = value;
+		}
+
+		value = $.jStorage.get(STORAGE_PREFIX + "_currentJudgePhone");
+		if (null != value) {
+			_currentJudgePhone = value;
+		}
 	}
 
-	function _save() {		
+	function _save() {
 		_log("Saving data to disk");
-		
-		$.jStorage.set(STORAGE_PREFIX + "_subjectiveCategories", _subjectiveCategories);
+
+		$.jStorage.set(STORAGE_PREFIX + "_subjectiveCategories",
+				_subjectiveCategories);
 		$.jStorage.set(STORAGE_PREFIX + "_tournament", _tournament);
 		$.jStorage.set(STORAGE_PREFIX + "_teams", _teams);
 		$.jStorage.set(STORAGE_PREFIX + "_schedule", _schedule);
-		$.jStorage.set(STORAGE_PREFIX + "_currentJudgingGroup", _currentJudgingGroup);
+		$.jStorage.set(STORAGE_PREFIX + "_currentJudgingGroup",
+				_currentJudgingGroup);
 		$.jStorage.set(STORAGE_PREFIX + "_currentCategory", _currentCategory);
+		$.jStorage.set(STORAGE_PREFIX + "_judges", _judges);
+		$.jStorage.set(STORAGE_PREFIX + "_currentJudge", _currentJudge);
+		$.jStorage.set(STORAGE_PREFIX + "_currentJudgePhone", _currentJudgePhone);
 
 	}
 
@@ -110,6 +136,16 @@
 
 		return $.getJSON("../api/Schedule", function(data) {
 			_schedule = data;
+		});
+	}
+
+	function _loadJudges() {
+		_judges = [];
+
+		return $.getJSON("../api/Judges", function(data) {
+			$.each(data, function(i, judge) {
+				_judges.push(judge);
+			});
 		});
 	}
 
@@ -171,6 +207,7 @@
 			waitList.push(_loadTournament());
 			waitList.push(_loadTeams());
 			waitList.push(_loadSchedule());
+			waitList.push(_loadJudges());
 
 			$.when.apply($, waitList).done(function() {
 				_save();
@@ -249,22 +286,22 @@
 				return true;
 			}
 		},
-		
+
 		/**
 		 * @return list of judging groups
 		 */
-		getJudgingGroups: function() {
+		getJudgingGroups : function() {
 			return _schedule.judgingGroups;
 		},
-		
+
 		/**
 		 * @return current judging group, may be null
 		 */
-		getCurrentJudgingGroup: function() {
+		getCurrentJudgingGroup : function() {
 			return _currentJudgingGroup;
 		},
-		
-		setCurrentJudgingGroup: function(v) {
+
+		setCurrentJudgingGroup : function(v) {
 			_currentJudgingGroup = v;
 			_save();
 		},
@@ -272,13 +309,61 @@
 		/**
 		 * @return current category, may be null
 		 */
-		getCurrentCategory: function() {
+		getCurrentCategory : function() {
 			return _currentCategory;
 		},
-		
-		setCurrentCategory: function(v) {
+
+		setCurrentCategory : function(v) {
 			_currentCategory = v;
 			_save();
+		},
+
+		/**
+		 * The judges that are judging at current station and current category.
+		 */
+		getPossibleJudges : function() {
+			retval = [];
+			if (null == _judges) {
+				return retval;
+			} else {
+				$.each(_judges, function(index, judge) {
+					if (judge.station == _currentJudgingGroup
+							&& judge.category == _currentCategory.name) {
+						retval.push(judge);
+					}
+				});
+				return retval;
+			}
+		},
+
+		setCurrentJudge : function(judgeId, judgePhone) {
+			var foundJudge = null;
+			$.each(_judges, function(index, judge) {
+				if (judge.station == _currentJudgingGroup
+						&& judge.category == _currentCategory.name
+						&& judge.id == judgeId) {
+					foundJudge = judge;
+				}
+			});
+			if (null == foundJudge) {
+				foundJudge = new Object();
+				foundJudge.id = judgeId;
+				foundJudge.category = _currentCategory.name;
+				foundJudge.station = _currentJudgingGroup;
+				_judges.push(foundJudge);
+			}
+
+			_currentJudge = foundJudge;
+			_currentJudgePhone = judgePhone;
+			_save();
+		},
+
+		getCurrentJudge : function() {
+			return _currentJudge;
+		},
+
+		getCurrentJudgePhone : function() {
+			return _currentJudgePhone;
 		},
 
 	};
