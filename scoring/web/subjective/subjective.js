@@ -25,6 +25,8 @@
 	var _judges;
 	var _currentJudge;
 	var _currentJudgePhone;
+	
+	var _teamTimeCache = {}; // don't save
 
 	function _init_variables() {
 		_subjectiveCategories = {};
@@ -102,7 +104,8 @@
 		$.jStorage.set(STORAGE_PREFIX + "_currentCategory", _currentCategory);
 		$.jStorage.set(STORAGE_PREFIX + "_judges", _judges);
 		$.jStorage.set(STORAGE_PREFIX + "_currentJudge", _currentJudge);
-		$.jStorage.set(STORAGE_PREFIX + "_currentJudgePhone", _currentJudgePhone);
+		$.jStorage.set(STORAGE_PREFIX + "_currentJudgePhone",
+				_currentJudgePhone);
 
 	}
 
@@ -315,6 +318,7 @@
 
 		setCurrentCategory : function(v) {
 			_currentCategory = v;
+			_teamTimeCache = {};
 			_save();
 		},
 
@@ -364,6 +368,107 @@
 
 		getCurrentJudgePhone : function() {
 			return _currentJudgePhone;
+		},
+
+		/**
+		 * Get the teams that the current judge should see.
+		 * 
+		 * @return list of teams sorted by completed, then scheduled time
+		 */
+		getCurrentTeams : function() {
+			var retval = [];
+			$.each(_teams, function(index, team) {
+				if (team.judgingStation == _currentJudgingGroup) {
+					retval.push(team);
+				}
+			});
+			// FIXME sort by completion status before time
+			
+			retval.sort(function(a, b) {
+				var timeA = $.subjective.getScheduledTime(a.teamNumber);
+				var timeB = $.subjective.getScheduledTime(b.teamNumber);
+				return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
+			});
+			return retval;
+		},
+
+		/**
+		 * Get schedule info object for the specified team.
+		 * 
+		 * @param teamNumber
+		 *            the team number
+		 * @return the object or null if not found
+		 */
+		getSchedInfoForTeam : function(teamNumber) {
+			if (null == _schedule) {
+				_log("No schedule");
+				return null;
+			} else {
+				var schedInfo = null;
+				$.each(_schedule.schedule, function(index, value) {				
+					if (value.teamNumber == teamNumber) {
+						schedInfo = value;
+					}
+				});			
+				return schedInfo;
+			}
+		},
+
+		/**
+		 * Get the scheduled time for the specified team for the current
+		 * category. If there is no schedule, this returns the Date(0).
+		 * 
+		 * @param teamNumber
+		 *            number of the team to find
+		 * @return Date
+		 */
+		getScheduledTime : function(teamNumber) {
+			var cachedDate = _teamTimeCache[teamNumber];
+			if(null != cachedDate) {
+				return cachedDate;
+			}
+				
+			var retval;
+			var schedInfo = $.subjective.getSchedInfoForTeam(teamNumber);
+			if (null == schedInfo) {
+				_log("No schedinfo for " + teamNumber);
+				retval = new Date(0);
+			} else {
+				var timeStr = null;
+				$.each(schedInfo.subjectiveTimes, function(index, value) {
+					//FIXME need a non-hardcoded mapping between schedule 
+					// stations and category names
+					var found = false;
+					if("Project" == value.name) {
+						if("project" == _currentCategory.name) {
+							found = true;
+						}
+					} else if("Design" == value.name) {
+						if("robot_design" == _currentCategory.name) {
+							found = true;
+						} else if("robot_programming" == _currentCategory.name) {
+							found = true;
+						}
+					} else if("Core Values" == value.name) {
+						if("core_values" == _currentCategory.name) {
+							found = true;
+						}
+					}
+					if (found) {
+						timeStr = value.time;
+					}
+				});
+				if (null == timeStr) {
+					_log("No time found for " + teamNumber);
+					retval = new Date(0);
+				} else {
+					_teamTimeCache[teamNumber] = 
+					retval = new Date(Number(timeStr));
+				}
+			}
+			
+			_teamTimeCache[teamNumber] = retval;
+			return retval;
 		},
 
 	};
