@@ -25,8 +25,11 @@
 	var _judges;
 	var _currentJudge;
 	var _currentJudgePhone;
-	
-	var _teamTimeCache = {}; // don't save
+	var _allScores;
+
+	// cache values, don't save
+	var _teamTimeCache = {};
+	var _currentScoresCache = {};
 
 	function _init_variables() {
 		_subjectiveCategories = {};
@@ -38,6 +41,7 @@
 		_judges = [];
 		_currentJudge = null;
 		_currentJudgePhone = null;
+		_allScores = {};
 	}
 
 	function _loadFromDisk() {
@@ -89,6 +93,12 @@
 		if (null != value) {
 			_currentJudgePhone = value;
 		}
+
+		value = $.jStorage.get(STORAGE_PREFIX + "_allScores");
+		if (null != value) {
+			_allScores = value;
+		}
+
 	}
 
 	function _save() {
@@ -106,6 +116,7 @@
 		$.jStorage.set(STORAGE_PREFIX + "_currentJudge", _currentJudge);
 		$.jStorage.set(STORAGE_PREFIX + "_currentJudgePhone",
 				_currentJudgePhone);
+		$.jStorage.set(STORAGE_PREFIX + "_allScores", _allScores);
 
 	}
 
@@ -162,6 +173,14 @@
 		});
 	}
 
+	function _loadAllScores() {
+		_allScores = {};
+
+		return $.getJSON("../api/SubjectiveScores", function(data) {
+			_allScores = data;
+		});
+	}
+
 	/**
 	 * Load the subjective categories.
 	 * 
@@ -211,6 +230,7 @@
 			waitList.push(_loadTeams());
 			waitList.push(_loadSchedule());
 			waitList.push(_loadJudges());
+			waitList.push(_loadAllScores());
 
 			$.when.apply($, waitList).done(function() {
 				_save();
@@ -318,7 +338,11 @@
 
 		setCurrentCategory : function(v) {
 			_currentCategory = v;
+
 			_teamTimeCache = {};
+
+			_currentScoreCache = {};
+
 			_save();
 		},
 
@@ -382,12 +406,19 @@
 					retval.push(team);
 				}
 			});
-			// FIXME sort by completion status before time
-			
+
 			retval.sort(function(a, b) {
-				var timeA = $.subjective.getScheduledTime(a.teamNumber);
-				var timeB = $.subjective.getScheduledTime(b.teamNumber);
-				return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
+				var scoreA = $.subjective.getScore(a.teamNumber);
+				var scoreB = $.subjective.getScore(b.teamNumber);
+				if (null == scoreA && null != scoreB) {
+					return -1;
+				} else if (null != scoreA && null == scoreB) {
+					return 1;
+				} else {
+					var timeA = $.subjective.getScheduledTime(a.teamNumber);
+					var timeB = $.subjective.getScheduledTime(b.teamNumber);
+					return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
+				}
 			});
 			return retval;
 		},
@@ -405,13 +436,61 @@
 				return null;
 			} else {
 				var schedInfo = null;
-				$.each(_schedule.schedule, function(index, value) {				
+				$.each(_schedule.schedule, function(index, value) {
 					if (value.teamNumber == teamNumber) {
 						schedInfo = value;
 					}
-				});			
+				});
 				return schedInfo;
 			}
+		},
+
+		/**
+		 * Get the score for the specified team for the current category.
+		 * 
+		 * @param teamNumber
+		 *            number of the team to find
+		 * @return the score object or null if not yet scored
+		 */
+		getScore : function(teamNumber) {
+			if ($.isEmptyObject(_currentScoresCache)) {
+				$.each(_allScores[_currentCategory.name],
+						function(index, value) {
+							if (value.judge == _currentJudge.id) {
+								_currentScoresCache[value.teamNumber] = value;
+							}
+						});
+			}
+
+			return _currentScoresCache[teamNumber];
+		},
+		
+		
+		/**
+		 * Compute the score. Assumes the score is 
+		 * for the current category.
+		 * 
+		 * @param score a score object from getScore
+		 * @return a number
+		 */
+		computeScore : function(score) {
+			var retval = 0;
+			
+			if(!score.isDeleted) {
+				$.each(_currentCategory.goals, function(index, goal) {
+					if(goal.enumerated) {
+						alert("Enumerated goals are not yet supported");
+					} else {
+						var rawScore = Number(score.standardSubScores[goal.name]);
+						var multiplier = Number(goal.multiplier);
+						var subscore = rawScore * multiplier;
+
+						retval = retval + subscore;
+					}
+				});
+			}			
+			
+			return retval;
 		},
 
 		/**
@@ -424,10 +503,10 @@
 		 */
 		getScheduledTime : function(teamNumber) {
 			var cachedDate = _teamTimeCache[teamNumber];
-			if(null != cachedDate) {
+			if (null != cachedDate) {
 				return cachedDate;
 			}
-				
+
 			var retval;
 			var schedInfo = $.subjective.getSchedInfoForTeam(teamNumber);
 			if (null == schedInfo) {
@@ -435,38 +514,42 @@
 				retval = new Date(0);
 			} else {
 				var timeStr = null;
-				$.each(schedInfo.subjectiveTimes, function(index, value) {
-					//FIXME need a non-hardcoded mapping between schedule 
-					// stations and category names
-					var found = false;
-					if("Project" == value.name) {
-						if("project" == _currentCategory.name) {
-							found = true;
-						}
-					} else if("Design" == value.name) {
-						if("robot_design" == _currentCategory.name) {
-							found = true;
-						} else if("robot_programming" == _currentCategory.name) {
-							found = true;
-						}
-					} else if("Core Values" == value.name) {
-						if("core_values" == _currentCategory.name) {
-							found = true;
-						}
-					}
-					if (found) {
-						timeStr = value.time;
-					}
-				});
+				$
+						.each(
+								schedInfo.subjectiveTimes,
+								function(index, value) {
+									// FIXME need a non-hardcoded mapping
+									// between schedule
+									// stations and category names
+									var found = false;
+									if ("Project" == value.name) {
+										if ("project" == _currentCategory.name) {
+											found = true;
+										}
+									} else if ("Design" == value.name) {
+										if ("robot_design" == _currentCategory.name) {
+											found = true;
+										} else if ("robot_programming" == _currentCategory.name) {
+											found = true;
+										}
+									} else if ("Core Values" == value.name) {
+										if ("core_values" == _currentCategory.name) {
+											found = true;
+										}
+									}
+									if (found) {
+										timeStr = value.time;
+									}
+								});
 				if (null == timeStr) {
 					_log("No time found for " + teamNumber);
 					retval = new Date(0);
 				} else {
-					_teamTimeCache[teamNumber] = 
-					retval = new Date(Number(timeStr));
+					_teamTimeCache[teamNumber] = retval = new Date(
+							Number(timeStr));
 				}
 			}
-			
+
 			_teamTimeCache[teamNumber] = retval;
 			return retval;
 		},
