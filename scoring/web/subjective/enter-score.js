@@ -4,6 +4,24 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+function recomputeTotal() {
+	var currentTeam = $.subjective.getCurrentTeam();
+	var score = $.subjective.getScore(currentTeam.teamNumber);
+
+	var total = 0;
+	$.each($.subjective.getCurrentCategory().goals, function(index, goal) {
+		if (goal.enumerated) {
+			alert("Enumerated goals not supported: " + goal.name);
+		} else {
+			var subscore = Number($("#" + goal.name).val());
+			var multiplier = Number(goal.multiplier);
+			$.subjective.log("subscore: " + subscore + " multiplier: " + multiplier + " name: " + goal.name);
+			total = total + subscore * multiplier;
+		}
+	});
+	$("#total-score").text(total);
+}
+
 function createScoreRow(goal, subscore) {
 	var row = $("<div class=\"ui-grid-b ui-responsive\"></div>");
 
@@ -21,10 +39,11 @@ function createScoreRow(goal, subscore) {
 	var rightContainer = $("<div class=\"ui-grid-a ui-responsive\"></div>");
 	rightBlock.append(rightContainer);
 
-	// FIXME update total score when this
-	// score changes
 	var scoreBlock = $("<div class=\"ui-block-a\"></div>");
-	var scoreSelect = $("<select></select>");
+	var scoreSelect = $("<select id=\"" + goal.name + "\"></select>");
+	scoreSelect.change(function() {
+		recomputeTotal();
+	});
 	if (goal.scoreType == "INTEGER") {
 		for (var v = Number(goal.min); v <= Number(goal.max); ++v) {
 			var selected = "";
@@ -67,6 +86,7 @@ $("#enter-score-page").live("pagebeforecreate", function(event) {
 		}
 	});
 
+	recomputeTotal();
 });
 
 $("#enter-score-page").live("pageinit", function(event) {
