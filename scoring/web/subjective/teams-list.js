@@ -5,41 +5,43 @@
  */
 
 function selectTeam(team) {
-	alert("Selected team: " + team.teamNumber);
-	// FIXME
+	$.subjective.setCurrentTeam(team);
+
+	location.href = "enter-score.html";
 }
 
-$("#teams-list").live(
-		"pagebeforecreate",
-		function(event) {
+$("#teams-list-page").live("pagebeforecreate", function(event) {
 
-			var teams = $.subjective.getCurrentTeams();
-			$.each(teams, function(i, team) {
-				var time = $.subjective.getScheduledTime(team.teamNumber);
-				var timeStr = time.getHours() + ":" + time.getMinutes();
+	var teams = $.subjective.getCurrentTeams();
+	$.each(teams, function(i, team) {
+		var time = $.subjective.getScheduledTime(team.teamNumber);
+		var timeStr = time.getHours() + ":" + time.getMinutes();
 
-				var scoreStr;
-				var score = $.subjective.getScore(team.teamNumber);
-				if (null == score) {
-					scoreStr = "";
-				} else {
-					var computedScore = $.subjective.computeScore(score);
-					scoreStr = computedScore;
-				}
-				var button = $("<button class='ui-btn ui-corner-all'>"
-						+ timeStr + " " + team.teamNumber + " " + team.teamName
-						+ " " + scoreStr + "</button>");
-				$("#teams").append(button);
-				button.click(function() {
-					selectTeam(team);
-				});
-
-			});
-
-			var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
-			$("#judging-group").text(currentJudgingGroup);
-
-			var currentCategory = $.subjective.getCurrentCategory();
-			$("#category").text(currentCategory.title);
-
+		var scoreStr;
+		var score = $.subjective.getScore(team.teamNumber);
+		if (null == score) {
+			scoreStr = "";
+		} else {
+			var computedScore = $.subjective.computeScore(score);
+			scoreStr = computedScore;
+		}
+		var button = $("<button class='ui-btn ui-corner-all'>" + timeStr //
+				+ " " + team.teamNumber //
+				+ " " + team.teamName //
+				+ " " + team.organization //
+				+ " " + scoreStr //
+				+ "</button>");
+		$("#teams").append(button);
+		button.click(function() {
+			selectTeam(team);
 		});
+
+	});
+
+	var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
+	$("#judging-group").text(currentJudgingGroup);
+
+	var currentCategory = $.subjective.getCurrentCategory();
+	$("#category").text(currentCategory.title);
+
+});

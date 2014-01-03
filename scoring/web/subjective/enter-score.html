@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>Subjective Scoring</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../extlib/jquery.mobile-1.4.0.min.css" />
+
+<script type='text/javascript' src='../extlib/jquery-1.7.1.min.js'></script>
+<script type='text/javascript'
+ src='../extlib/jquery.mobile-1.4.0.min.js'></script>
+<script type='text/javascript' src='../extlib/jquery.json-2.3.min.js'></script>
+<script type='text/javascript' src='../extlib/jstorage.js'></script>
+<script type='text/javascript' src='subjective.js'></script>
+<script type='text/javascript' src='enter-score.js'></script>
+
+</head>
+
+<body>
+ <div data-role="page" id='enter-score-page'>
+
+  <div data-role="header" data-position="fixed">
+
+   <div class="ui-grid-a">
+
+    <div class="ui-block-a">
+      <span id="team-number"></span>
+    </div>
+
+    <div class="ui-block-b">
+      <span id="team-name"></span>
+    </div>
+
+    <div class="ui-block-a">
+     <button id="add-note">Add Note</button>
+    </div>
+
+    <div class="ui-block-b">
+     <span id="total-score">0</span>
+    </div>
+
+   </div>
+   <!-- end grid -->
+
+  </div>
+  <!-- /header -->
+
+  <div class="ui-content" role="main">
+
+   <div id='score-content'></div>
+
+  </div>
+  <!-- /content -->
+
+  <div data-role="footer" data-position="fixed">
+
+   <div class="ui-grid-c ui-responsive">
+
+    <div class="ui-block-a">
+     <button id='save-score' data-mini="true">Save Changes</button>
+    </div>
+
+    <div class="ui-block-b">
+     <button id='cancel-score' data-mini="true">Cancel Changes</button>
+    </div>
+
+    <div class="ui-block-c">
+     <button id='delete-score' data-mini="true">Delete</button>
+    </div>
+
+    <div class="ui-block-d">
+     <button id='noshow-score' data-mini="true">No Show</button>
+    </div>
+
+   </div>
+
+  </div>
+  <!-- /footer -->
+
+ </div>
+ <!-- /page -->
+</body>
+</html>

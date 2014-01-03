@@ -26,10 +26,8 @@
 	var _currentJudge;
 	var _currentJudgePhone;
 	var _allScores;
-
-	// cache values, don't save
-	var _teamTimeCache = {};
-	var _currentScoresCache = {};
+	var _teamTimeCache;
+	var _currentTeam;
 
 	function _init_variables() {
 		_subjectiveCategories = {};
@@ -42,6 +40,8 @@
 		_currentJudge = null;
 		_currentJudgePhone = null;
 		_allScores = {};
+		_teamTimeCache = {};
+		_currentTeam = null;
 	}
 
 	function _loadFromDisk() {
@@ -99,6 +99,16 @@
 			_allScores = value;
 		}
 
+		value = $.jStorage.get(STORAGE_PREFIX + "_teamTimeCache");
+		if (null != value) {
+			_teamTimeCache = value;
+		}
+
+		value = $.jStorage.get(STORAGE_PREFIX + "_currentTeam");
+		if (null != value) {
+			_currentTeam = value;
+		}
+
 	}
 
 	function _save() {
@@ -117,6 +127,8 @@
 		$.jStorage.set(STORAGE_PREFIX + "_currentJudgePhone",
 				_currentJudgePhone);
 		$.jStorage.set(STORAGE_PREFIX + "_allScores", _allScores);
+		$.jStorage.set(STORAGE_PREFIX + "_teamTimeCache", _teamTimeCache);
+		$.jStorage.set(STORAGE_PREFIX + "_currentTeam", _currentTeam);
 
 	}
 
@@ -341,8 +353,6 @@
 
 			_teamTimeCache = {};
 
-			_currentScoreCache = {};
-
 			_save();
 		},
 
@@ -453,43 +463,63 @@
 		 * @return the score object or null if not yet scored
 		 */
 		getScore : function(teamNumber) {
-			if ($.isEmptyObject(_currentScoresCache)) {
-				$.each(_allScores[_currentCategory.name],
-						function(index, value) {
-							if (value.judge == _currentJudge.id) {
-								_currentScoresCache[value.teamNumber] = value;
-							}
-						});
+			var categoryScores = _allScores[_currentCategory.name];
+			if(null == categoryScores) {
+				return null;
 			}
-
-			return _currentScoresCache[teamNumber];
+			
+			var judgeScores = categoryScores[_currentJudge.id];
+			if(null == judgeScores) {
+				return null;
+			}
+			
+			return judgeScores[teamNumber];
 		},
 		
-		
+		saveScore : function(score) { 
+			var categoryScores = _allScores[_currentCategory.name];
+			if(null == categoryScores) {
+				categoryScores = {}
+				_allScores[_currentCategory.name] = categoryScores;
+			}
+			
+			var judgeScores = categoryScores[_currentJudge.id];
+			if(null == judgeScores) {
+				judgeScores = {}
+				categoryScores[_currentJudge.id] = judgeScores;
+			}
+			
+			judgeScores[score.teamNumber] = score;
+			_save();			
+		},
+
 		/**
-		 * Compute the score. Assumes the score is 
-		 * for the current category.
+		 * Compute the score. Assumes the score is for the current category.
 		 * 
-		 * @param score a score object from getScore
+		 * @param score
+		 *            a score object from getScore
 		 * @return a number
 		 */
 		computeScore : function(score) {
 			var retval = 0;
-			
-			if(!score.isDeleted) {
-				$.each(_currentCategory.goals, function(index, goal) {
-					if(goal.enumerated) {
-						alert("Enumerated goals are not yet supported");
-					} else {
-						var rawScore = Number(score.standardSubScores[goal.name]);
-						var multiplier = Number(goal.multiplier);
-						var subscore = rawScore * multiplier;
 
-						retval = retval + subscore;
-					}
-				});
-			}			
-			
+			if (!score.isDeleted) {
+				$
+						.each(
+								_currentCategory.goals,
+								function(index, goal) {
+									if (goal.enumerated) {
+										alert("Enumerated goals are not yet supported");
+									} else {
+										var rawScore = Number(score.standardSubScores[goal.name]);
+										var multiplier = Number(goal.multiplier);
+										var subscore = rawScore * multiplier;
+
+										retval = retval + subscore;
+									}
+								});
+			}
+
 			return retval;
 		},
 
@@ -504,7 +534,7 @@
 		getScheduledTime : function(teamNumber) {
 			var cachedDate = _teamTimeCache[teamNumber];
 			if (null != cachedDate) {
-				return cachedDate;
+				return new Date(cachedDate);
 			}
 
 			var retval;
@@ -551,7 +581,19 @@
 			}
 
 			_teamTimeCache[teamNumber] = retval;
+			_save();
+			
 			return retval;
+		},
+
+		setCurrentTeam : function(team) {
+			_currentTeam = team;
+			
+			_save();
+		},
+
+		getCurrentTeam : function() {
+			return _currentTeam;
 		},
 
 	};

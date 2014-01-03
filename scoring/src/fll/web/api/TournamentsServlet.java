@@ -31,6 +31,9 @@ import fll.db.Queries;
 import fll.util.LogUtils;
 import fll.web.ApplicationAttributes;
 
+/**
+ * [Tournament]
+ */
 @WebServlet("/api/Tournaments/*")
 public class TournamentsServlet extends HttpServlet {
 
