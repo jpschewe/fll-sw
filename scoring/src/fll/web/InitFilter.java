@@ -119,6 +119,10 @@ public class InitFilter implements Filter {
                 + "/playoff/scoregenbrackets.jsp") //
             || path.startsWith(contextPath
                 + "/playoff/adminbrackets.jsp") //
+            || path.startsWith(contextPath
+                + "/api") //
+            || path.startsWith(contextPath
+                + "/subjective") //
         || path.startsWith(contextPath
             + "/setup") //
         )) {
@@ -332,7 +336,7 @@ public class InitFilter implements Filter {
         }
 
       }
-      
+
       // TODO ticket:87 allow static data to be cached
 
       // keep browser from caching any content
