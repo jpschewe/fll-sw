@@ -27,6 +27,8 @@ function loadData() {
 
 		promptForJudgingGroup();
 	}, function() {
+		$("#wait").hide();
+
 		alert("Error getting data from server");
 	});
 }
@@ -48,6 +50,12 @@ function promptForReload() {
 }
 
 function reloadData() {
+	if($.subjective.checkForModifiedScores()) {
+		var answer = confirm("You have modified scores, this will remove them. Are you sure?")
+		if(!answer) {
+			return;
+		}
+	}
 	$.subjective.clearAllData();
 	loadData();
 }

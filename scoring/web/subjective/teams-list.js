@@ -10,8 +10,8 @@ function selectTeam(team) {
 	location.href = "enter-score.html";
 }
 
-$(document).on("pagebeforecreate", "#teams-list-page", function(event) {
-
+function populateTeams() {
+	$("#teams").empty();
 	var teams = $.subjective.getCurrentTeams();
 	$.each(teams, function(i, team) {
 		var time = $.subjective.getScheduledTime(team.teamNumber);
@@ -39,6 +39,11 @@ $(document).on("pagebeforecreate", "#teams-list-page", function(event) {
 		});
 
 	});
+}
+
+$(document).on("pagebeforecreate", "#teams-list-page", function(event) {
+
+	populateTeams();
 
 	var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
 	$("#judging-group").text(currentJudgingGroup);
@@ -47,3 +52,32 @@ $(document).on("pagebeforecreate", "#teams-list-page", function(event) {
 	$("#category").text(currentCategory.title);
 
 });
+
+$(document).on(
+		"pageinit",
+		"#teams-list-page",
+		function(event) {
+			$("#upload-scores-wait").hide();
+
+			$("#upload-scores").click(
+					function() {
+						$("#upload-scores-wait").show();
+
+						$.subjective.uploadScores(function(result) {
+							$("#upload-scores-wait").hide();
+							alert("Uploaded " + result.numModified
+									+ " scores: " + result.message);
+							populateTeams();
+						}, function(result) {
+							$("#upload-scores-wait").hide();
+							var message;
+							if (null == result) {
+								message = "Unknown server error";
+							} else {
+								message = result.message;
+							}
+							alert("Failed to upload data: " + message);
+							populateTeams();
+						});
+					});
+		});
