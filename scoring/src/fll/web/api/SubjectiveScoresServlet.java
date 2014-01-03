@@ -39,6 +39,9 @@ import fll.xml.AbstractGoal;
 import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 
+/**
+ * {category, {judge, {teamNumber, SubjectiveScore}}}
+ */
 @WebServlet("/api/SubjectiveScores/*")
 public class SubjectiveScoresServlet extends HttpServlet {
 
@@ -58,11 +61,13 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
       final int currentTournament = Queries.getCurrentTournament(connection);
 
-      final Map<String, Collection<SubjectiveScore>> allScores = new HashMap<String, Collection<SubjectiveScore>>();
+      // category->judge->teamNumber->score
+      final Map<String, Map<String, Map<Integer, SubjectiveScore>>> allScores = new HashMap<String, Map<String, Map<Integer, SubjectiveScore>>>();
 
       final ChallengeDescription challengeDescription = ApplicationAttributes.getChallengeDescription(application);
       for (final ScoreCategory sc : challengeDescription.getSubjectiveCategories()) {
-        final Collection<SubjectiveScore> scores = new LinkedList<SubjectiveScore>();
+        // judge->teamNumber->score
+        final Map<String, Map<Integer, SubjectiveScore>> categoryScores = new HashMap<String, Map<Integer, SubjectiveScore>>();
 
         prep = connection.prepareStatement("SELECT * FROM "
             + sc.getName() + " WHERE Tournament = ?");
@@ -72,8 +77,17 @@ public class SubjectiveScoresServlet extends HttpServlet {
         while (rs.next()) {
           final SubjectiveScore score = new SubjectiveScore();
 
+          final String judge = rs.getString("Judge");
+          final Map<Integer, SubjectiveScore> judgeScores;
+          if (categoryScores.containsKey(judge)) {
+            judgeScores = categoryScores.get(judge);
+          } else {
+            judgeScores = new HashMap<Integer, SubjectiveScore>();
+            categoryScores.put(judge, judgeScores);
+          }
+
           score.setTeamNumber(rs.getInt("TeamNumber"));
-          score.setJudge(rs.getString("Judge"));
+          score.setJudge(judge);
           score.setNoShow(rs.getBoolean("NoShow"));
 
           final Map<String, Double> standardSubScores = new HashMap<String, Double>();
@@ -90,10 +104,10 @@ public class SubjectiveScoresServlet extends HttpServlet {
           score.setStandardSubScores(standardSubScores);
           score.setEnumSubScores(enumSubScores);
 
-          scores.add(score);
+          judgeScores.put(score.getTeamNumber(), score);
         }
 
-        allScores.put(sc.getName(), scores);
+        allScores.put(sc.getName(), categoryScores);
 
         SQLFunctions.close(rs);
         rs = null;
