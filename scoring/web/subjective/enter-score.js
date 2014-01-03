@@ -11,8 +11,7 @@ function createNewScore() {
 	score.noShow = false;
 	score.standardSubScores = {};
 	score.enumSubScores = {};
-	score.judge = $.subjective.getCurrentJudge();
-	score.category = $.subjective.getCurrentCategory().name;
+	score.judge = $.subjective.getCurrentJudge().id;
 	score.teamNumber = $.subjective.getCurrentTeam().teamNumber;
 
 	return score;

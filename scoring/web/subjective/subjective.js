@@ -226,13 +226,20 @@
 		},
 
 		/**
+		 * Load all data from server.
+		 * 
 		 * @param doneCallback
 		 *            called with no arguments on success
 		 * @param failCallback
 		 *            called with no arguments on failure
+		 * @param clearVariables
+		 *            if true, clear all variables, false to just load data from
+		 *            server
 		 */
-		loadFromServer : function(doneCallback, failCallback) {
-			_init_variables();
+		loadFromServer : function(doneCallback, failCallback, clearVariables) {
+			if(clearVariables) {
+				_init_variables();
+			}
 
 			_log("Loading from server");
 
@@ -250,7 +257,7 @@
 			}).fail(function() {
 				failCallback();
 			});
-		},
+		},		
 
 		/**
 		 * @return list of subjective categories
@@ -615,23 +622,44 @@
 		 * Upload scores to the server calling the appropriate callback.
 		 * 
 		 * @param doneCallback
-		 *            called with no arguments on success
+		 *            called with a SubjectiveScoresServlet.UploadResult object
+		 *            on success
 		 * @param failCallback
-		 *            called with an error string on failure
+		 *            called with a SubjectiveScoresServlet.UploadResult object
+		 *            on failure, may be null
 		 */
 		uploadScores : function(doneCallback, failCallback) {
 			$.post("../api/SubjectiveScores", $.toJSON(_allScores),
-					function(data) {
-						var result = $.parseJSON(data);
-						if ("success" == result) {
-							doneCallback();
+					function(result) {
+						if (result.success) {
+							$.subjective.loadFromServer(function() {
+								doneCallback(result);
+							}, function() {
+								failCallback("Error getting updated scores");
+							}, false);
 						} else {
 							failCallback(result);
 						}
-					}, 'json').fail(function(data) {
-				var error = $.parseJSON(data);
-				failCallback(error);
+					}, 'json').fail(function(result) {
+				failCallback(result);
 			});
+		},
+
+		/**
+		 * @return true if there are modified scores in the list
+		 */
+		checkForModifiedScores : function() {
+			var modified = false;
+			$.each(_allScores, function(category, categoryScores) {
+				$.each(categoryScores, function(judge, judgeScores) {
+					$.each(judgeScores, function(teamNumber, score) {
+						if (score.modified) {
+							modified = true;
+						}
+					});
+				});
+			});
+			return modified;
 		},
 
 	};
