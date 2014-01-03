@@ -611,6 +611,29 @@
 			return _currentTeam;
 		},
 
+		/**
+		 * Upload scores to the server calling the appropriate callback.
+		 * 
+		 * @param doneCallback
+		 *            called with no arguments on success
+		 * @param failCallback
+		 *            called with an error string on failure
+		 */
+		uploadScores : function(doneCallback, failCallback) {
+			$.post("../api/SubjectiveScores", $.toJSON(_allScores),
+					function(data) {
+						var result = $.parseJSON(data);
+						if ("success" == result) {
+							doneCallback();
+						} else {
+							failCallback(result);
+						}
+					}, 'json').fail(function(data) {
+				var error = $.parseJSON(data);
+				failCallback(error);
+			});
+		},
+
 	};
 
 	// ///// Load data //////////
