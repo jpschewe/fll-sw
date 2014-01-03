@@ -9,8 +9,9 @@ function selectJudgingGroup(group) {
 	location.href = "choose-category.html";
 }
 
-$("#choose-judging-group-page").live(
+$(document).on(
 		"pagebeforecreate",
+		"#choose-judging-group-page",
 		function(event) {
 
 			var judgingGroups = $.subjective.getJudgingGroups();

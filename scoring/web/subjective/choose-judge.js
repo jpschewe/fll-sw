@@ -4,8 +4,9 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
-$("#choose-judge-page").live(
+$(document).on(
 		"pagebeforecreate",
+		"#choose-judge-page",
 		function(event) {
 
 			var judges = $.subjective.getPossibleJudges();
@@ -25,47 +26,45 @@ $("#choose-judge-page").live(
 			$("#category").text(currentCategory.title);
 
 			var currentJudge = $.subjective.getCurrentJudge();
-			if(null != currentJudge) {
-				$("input:radio[value=\"" + currentJudge.id + "\"]").prop('checked', true);
+			if (null != currentJudge) {
+				$("input:radio[value=\"" + currentJudge.id + "\"]").prop(
+						'checked', true);
 			} else {
 				$("input:radio[value='new-judge']").prop('checked', true);
 			}
-			
+
 			var currentJudgePhone = $.subjective.getCurrentJudgePhone();
-			if(null != currentJudgePhone) {
+			if (null != currentJudgePhone) {
 				$("#judge-phone").val(currentJudgePhone);
 			}
 		});
 
-$("#choose-judge-page").live(
-		"pageinit",
-		function(event) {
+$(document).on("pageinit", "#choose-judge-page", function(event) {
 
-			$("#judge-submit").click(function() {
-				setJudge();
-			});
-			
-		});
+	$("#judge-submit").click(function() {
+		setJudge();
+	});
+
+});
 
 function setJudge() {
 	var judgeID = $("input:radio[name='judge']:checked").val();
-	if('new-judge' == judgeID) {
+	if ('new-judge' == judgeID) {
 		judgeID = $("#new-judge-name").val();
-		if(null == judgeID || "" == judgeID) {
+		if (null == judgeID || "" == judgeID) {
 			alert("You must enter a name");
 			return;
 		}
 		judgeID = judgeID.toUpperCase();
 	}
-	
+
 	var phone = $("#judge-phone").val();
-	if(null == phone || "" == phone)
-	{
+	if (null == phone || "" == phone) {
 		alert("You must enter a phone nunmber");
 		return;
 	}
-	
+
 	$.subjective.setCurrentJudge(judgeID, phone);
-	
+
 	location.href = "teams-list.html";
 }

@@ -10,7 +10,7 @@ function selectTeam(team) {
 	location.href = "enter-score.html";
 }
 
-$("#teams-list-page").live("pagebeforecreate", function(event) {
+$(document).on("pagebeforecreate", "#teams-list-page", function(event) {
 
 	var teams = $.subjective.getCurrentTeams();
 	$.each(teams, function(i, team) {
