@@ -27,18 +27,34 @@
 
   <div class="ui-content" role="main">
 
-<div id='teams'></div>
+   <div id='teams'></div>
 
   </div>
   <!-- /content -->
 
   <div data-role="footer" data-position="fixed">
-   <p>
-    Judging Group: <span id='judging-group'></span> - Category: <span
-     id='category'></span>
-   </p>
+   <a href="#nav-panel"
+    class="ui-btn ui-corner-all ui-shadow ui-btn-icon-notext ui-icon-gear ui-mini"></a>
+
+   Judging Group: <span id='judging-group'></span> - Category: <span
+    id='category'></span>
   </div>
   <!-- /footer -->
+
+  <!-- side panel -->
+  <div data-role="panel" id="nav-panel" data-display="overlay">
+   <ul data-role="listview">
+    <li data-icon="delete"><a href="#" data-rel="close">Close</a></li>
+    <li><a href="choose-judging-group.html">Choose Judging
+      Group</a></li>
+    <li><a href="choose-category.html">Choose Category</a></li>
+    <li><a href="choose-judge.html">Choose Judge</a></li>
+   </ul>
+   <br /> <br />
+   <button class="ui-btn ui-corner-all ui-shadow" id="upload-scores">Upload
+    Scores</button>
+  </div>
+  <!-- end side panel -->
 
  </div>
  <!-- /page -->
