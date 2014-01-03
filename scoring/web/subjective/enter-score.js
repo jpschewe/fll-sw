@@ -15,7 +15,6 @@ function recomputeTotal() {
 		} else {
 			var subscore = Number($("#" + goal.name).val());
 			var multiplier = Number(goal.multiplier);
-			$.subjective.log("subscore: " + subscore + " multiplier: " + multiplier + " name: " + goal.name);
 			total = total + subscore * multiplier;
 		}
 	});
@@ -95,8 +94,15 @@ $("#enter-score-page").live("pageinit", function(event) {
 		var currentTeam = $.subjective.getCurrentTeam();
 		var score = $.subjective.getScore(currentTeam.teamNumber);
 		score.modified = true;
-		
-		// FIXME populate score based upon values in the dropdown boxes 
+			
+		$.each($.subjective.getCurrentCategory().goals, function(index, goal) {
+			if (goal.enumerated) {
+				alert("Enumerated goals not supported: " + goal.name);
+			} else {
+				var subscore = Number($("#" + goal.name).val());
+				score.standardSubScores[goal.name] = subscore;
+			}
+		});
 		
 		$.subjective.saveScore(score);
 		
