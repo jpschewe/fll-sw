@@ -6,15 +6,14 @@
 
 package fll.web.api;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -29,6 +28,7 @@ import net.mtu.eggplant.util.sql.SQLFunctions;
 
 import org.apache.log4j.Logger;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fll.SubjectiveScore;
@@ -40,7 +40,9 @@ import fll.xml.ChallengeDescription;
 import fll.xml.ScoreCategory;
 
 /**
- * {category, {judge, {teamNumber, SubjectiveScore}}}
+ * GET: {category, {judge, {teamNumber, SubjectiveScore}}}
+ * POST: expects the data from GET and returns JSON string "success" or error
+ * message
  */
 @WebServlet("/api/SubjectiveScores/*")
 public class SubjectiveScoresServlet extends HttpServlet {
@@ -132,4 +134,40 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
   }
 
+  @Override
+  protected final void doPost(final HttpServletRequest request,
+                              final HttpServletResponse response) throws IOException, ServletException {
+    final BufferedReader reader = request.getReader();
+    final ObjectMapper jsonMapper = new ObjectMapper();
+
+    final Map<String, Map<String, Map<Integer, SubjectiveScore>>> allScores = jsonMapper.readValue(reader,
+                                                                                                   new TypeReference<Map<String, Map<String, Map<Integer, SubjectiveScore>>>>() {
+                                                                                                   });
+    for (final Map.Entry<String, Map<String, Map<Integer, SubjectiveScore>>> catEntry : allScores.entrySet()) {
+      final String category = catEntry.getKey();
+      for (final Map.Entry<String, Map<Integer, SubjectiveScore>> judgeEntry : catEntry.getValue().entrySet()) {
+        final String judgeId = judgeEntry.getKey();
+        for (final Map.Entry<Integer, SubjectiveScore> teamEntry : judgeEntry.getValue().entrySet()) {
+          final int teamNumber = teamEntry.getKey();
+          final SubjectiveScore score = teamEntry.getValue();
+          if (score.getModified()) {
+            if (score.getDeleted()) {
+              // FIXME delete
+              LOGGER.info("Deleting team: "
+                  + teamNumber + " judge: " + judgeId + " category: " + category);
+            } else if (score.getNoShow()) {
+              // FIXME enter no show
+              LOGGER.info("NoShow team: "
+                  + teamNumber + " judge: " + judgeId + " category: " + category);
+            } else {
+              // FIXME enter all scores
+              LOGGER.info("scores for team: "
+                  + teamNumber + " judge: " + judgeId + " category: " + category);
+            }
+          }
+        }
+      }
+    }
+
+  }
 }
