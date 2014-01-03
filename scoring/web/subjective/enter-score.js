@@ -14,7 +14,7 @@ function createNewScore() {
 	score.judge = $.subjective.getCurrentJudge();
 	score.category = $.subjective.getCurrentCategory().name;
 	score.teamNumber = $.subjective.getCurrentTeam().teamNumber;
-	
+
 	return score;
 }
 
@@ -84,7 +84,7 @@ function createScoreRow(goal, subscore) {
 	$("#score-content").append(row);
 }
 
-$("#enter-score-page").live("pagebeforecreate", function(event) {
+$(document).on("pagebeforecreate", "#enter-score-page", function(event) {
 	var currentTeam = $.subjective.getCurrentTeam();
 	$("#team-number").text(currentTeam.teamNumber);
 	$("#team-name").text(currentTeam.teamName);
@@ -105,7 +105,7 @@ $("#enter-score-page").live("pagebeforecreate", function(event) {
 	recomputeTotal();
 });
 
-$("#enter-score-page").live("pageinit", function(event) {
+$(document).on("pageinit", "#enter-score-page", function(event) {
 	$("#save-score").click(function() {
 
 		var currentTeam = $.subjective.getCurrentTeam();

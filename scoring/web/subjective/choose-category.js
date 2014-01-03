@@ -9,9 +9,13 @@ function selectCategory(category) {
 	location.href = "choose-judge.html";
 }
 
-$("#choose-category-page").live(
+$(document).on(
 		"pagebeforecreate",
+		"#choose-category-page",
 		function(event) {
+			$.subjective.log("creating choose-category page");
+
+			$("#categories").empty();
 
 			var categories = $.subjective.getSubjectiveCategories();
 			$.each(categories, function(i, category) {
@@ -21,7 +25,7 @@ $("#choose-category-page").live(
 				button.click(function() {
 					selectCategory(category);
 				});
-
+				button.trigger("updateLayout");
 			});
 
 			var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
