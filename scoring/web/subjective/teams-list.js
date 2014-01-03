@@ -19,8 +19,10 @@ $("#teams-list-page").live("pagebeforecreate", function(event) {
 
 		var scoreStr;
 		var score = $.subjective.getScore(team.teamNumber);
-		if (null == score) {
+		if (!$.subjective.isScoreCompleted(score)) {
 			scoreStr = "";
+		} else if (score.noShow) {
+			scoreStr = "No Show";
 		} else {
 			var computedScore = $.subjective.computeScore(score);
 			scoreStr = computedScore;

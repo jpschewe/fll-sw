@@ -405,6 +405,19 @@
 		},
 
 		/**
+		 * @return false if the score is null or score.deleted is true
+		 */
+		isScoreCompleted : function(score) {
+			if (null == score) {
+				return false;
+			} else if (score.deleted) {
+				return false;
+			} else {
+				return true;
+			}
+		},
+
+		/**
 		 * Get the teams that the current judge should see.
 		 * 
 		 * @return list of teams sorted by completed, then scheduled time
@@ -420,9 +433,11 @@
 			retval.sort(function(a, b) {
 				var scoreA = $.subjective.getScore(a.teamNumber);
 				var scoreB = $.subjective.getScore(b.teamNumber);
-				if (null == scoreA && null != scoreB) {
+				if (!$.subjective.isScoreCompleted(scoreA)
+						&& $.subjective.isScoreCompleted(scoreB)) {
 					return -1;
-				} else if (null != scoreA && null == scoreB) {
+				} else if ($.subjective.isScoreCompleted(scoreA)
+						&& !$.subjective.isScoreCompleted(scoreB)) {
 					return 1;
 				} else {
 					var timeA = $.subjective.getScheduledTime(a.teamNumber);
@@ -464,33 +479,33 @@
 		 */
 		getScore : function(teamNumber) {
 			var categoryScores = _allScores[_currentCategory.name];
-			if(null == categoryScores) {
+			if (null == categoryScores) {
 				return null;
 			}
-			
+
 			var judgeScores = categoryScores[_currentJudge.id];
-			if(null == judgeScores) {
+			if (null == judgeScores) {
 				return null;
 			}
-			
+
 			return judgeScores[teamNumber];
 		},
-		
-		saveScore : function(score) { 
+
+		saveScore : function(score) {
 			var categoryScores = _allScores[_currentCategory.name];
-			if(null == categoryScores) {
+			if (null == categoryScores) {
 				categoryScores = {}
 				_allScores[_currentCategory.name] = categoryScores;
 			}
-			
+
 			var judgeScores = categoryScores[_currentJudge.id];
-			if(null == judgeScores) {
+			if (null == judgeScores) {
 				judgeScores = {}
 				categoryScores[_currentJudge.id] = judgeScores;
 			}
-			
+
 			judgeScores[score.teamNumber] = score;
-			_save();			
+			_save();
 		},
 
 		/**
@@ -503,7 +518,7 @@
 		computeScore : function(score) {
 			var retval = 0;
 
-			if (!score.isDeleted) {
+			if (!score.deleted && !score.noShow) {
 				$
 						.each(
 								_currentCategory.goals,
@@ -582,13 +597,13 @@
 
 			_teamTimeCache[teamNumber] = retval;
 			_save();
-			
+
 			return retval;
 		},
 
 		setCurrentTeam : function(team) {
 			_currentTeam = team;
-			
+
 			_save();
 		},
 

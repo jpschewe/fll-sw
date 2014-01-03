@@ -4,6 +4,20 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+function createNewScore() {
+	score = new Object();
+	score.modified = false;
+	score.deleted = false;
+	score.noShow = false;
+	score.standardSubScores = {};
+	score.enumSubScores = {};
+	score.judge = $.subjective.getCurrentJudge();
+	score.category = $.subjective.getCurrentCategory().name;
+	score.teamNumber = $.subjective.getCurrentTeam().teamNumber;
+	
+	return score;
+}
+
 function recomputeTotal() {
 	var currentTeam = $.subjective.getCurrentTeam();
 	var score = $.subjective.getScore(currentTeam.teamNumber);
@@ -80,7 +94,10 @@ $("#enter-score-page").live("pagebeforecreate", function(event) {
 		if (goal.enumerated) {
 			alert("Enumerated goals not supported: " + goal.name);
 		} else {
-			var subscore = score.standardSubScores[goal.name];
+			var subscore = null;
+			if ($.subjective.isScoreCompleted(score)) {
+				subscore = score.standardSubScores[goal.name];
+			}
 			createScoreRow(goal, subscore);
 		}
 	});
@@ -90,11 +107,16 @@ $("#enter-score-page").live("pagebeforecreate", function(event) {
 
 $("#enter-score-page").live("pageinit", function(event) {
 	$("#save-score").click(function() {
-		
+
 		var currentTeam = $.subjective.getCurrentTeam();
 		var score = $.subjective.getScore(currentTeam.teamNumber);
+		if (null == score) {
+			score = createNewScore();
+		}
 		score.modified = true;
-			
+		score.deleted = false;
+		score.noShow = false;
+
 		$.each($.subjective.getCurrentCategory().goals, function(index, goal) {
 			if (goal.enumerated) {
 				alert("Enumerated goals not supported: " + goal.name);
@@ -103,9 +125,9 @@ $("#enter-score-page").live("pageinit", function(event) {
 				score.standardSubScores[goal.name] = subscore;
 			}
 		});
-		
+
 		$.subjective.saveScore(score);
-		
+
 		location.href = "teams-list.html";
 	});
 
@@ -116,18 +138,26 @@ $("#enter-score-page").live("pageinit", function(event) {
 	$("#delete-score").click(function() {
 		var currentTeam = $.subjective.getCurrentTeam();
 		var score = $.subjective.getScore(currentTeam.teamNumber);
+		if (null == score) {
+			score = createNewScore();
+		}
 		score.modified = true;
+		score.noShow = false;
 		score.deleted = true;
 		$.subjective.saveScore(score);
-		
+
 		location.href = "teams-list.html";
 	});
 
 	$("#noshow-score").click(function() {
 		var currentTeam = $.subjective.getCurrentTeam();
 		var score = $.subjective.getScore(currentTeam.teamNumber);
+		if (null == score) {
+			score = createNewScore();
+		}
 		score.modified = true;
 		score.noShow = true;
+		score.deleted = false;
 		$.subjective.saveScore(score);
 
 		location.href = "teams-list.html";
