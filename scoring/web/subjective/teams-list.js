@@ -59,6 +59,20 @@ $(document).on(
 		function(event) {
 			$("#upload-scores-wait").hide();
 
+
+			$("#nav-top").click(function() {
+				location.href="index.html";
+			});
+			$("#nav-choose-judging-group").click(function() {
+				location.href="choose-judge.html";
+			});
+			$("#nav-choose-category").click(function() {
+				location.href="choose-category.html";
+			});
+			$("#nav-choose-judge").click(function() {
+				location.href="choose-judge.html";
+			});
+
 			$("#upload-scores").click(
 					function() {
 						$("#upload-scores-wait").show();
