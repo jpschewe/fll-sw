@@ -42,6 +42,7 @@ import fll.Team;
 import fll.Tournament;
 import fll.Utilities;
 import fll.db.TeamPropertyDifference.TeamProperty;
+import fll.util.FLLRuntimeException;
 import fll.util.LogUtils;
 import fll.web.developer.importdb.ImportDBDump;
 import fll.web.developer.importdb.TournamentDifference;
@@ -310,6 +311,7 @@ public final class ImportDB {
    * @throws IOException if there is an error reading the zipfile
    * @throws SQLException if there is an error loading the data into the
    *           database
+   * @throws FLLRuntimeException if the database version in the dump is too new
    */
   public static Document loadDatabaseDump(final ZipInputStream zipfile,
                                           final Connection connection) throws IOException, SQLException {
@@ -355,6 +357,12 @@ public final class ImportDB {
       final Map<String, String> tableTypes = typeInfo.get(tablename);
 
       Utilities.loadCSVFile(connection, tablename, tableTypes, new StringReader(content));
+    }
+
+    int dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion > GenerateDB.DATABASE_VERSION) {
+      throw new FLLRuntimeException("Database dump too new. Current known database version : "
+          + GenerateDB.DATABASE_VERSION + " dump version: " + dbVersion);
     }
 
     upgradeDatabase(connection, challengeDocument);
@@ -475,33 +483,43 @@ public final class ImportDB {
    */
   private static void upgradeDatabase(final Connection connection,
                                       final Document challengeDocument) throws SQLException, IllegalArgumentException {
-    final int dbVersion = Queries.getDatabaseVersion(connection);
+    int dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 1) {
       upgrade0To1(connection, challengeDocument);
     }
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 2) {
       upgrade1To2(connection);
     }
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 6) {
       upgrade2To6(connection);
     }
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 7) {
       upgrade6To7(connection);
     }
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 8) {
       upgrade7To8(connection);
     }
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 9) {
       upgrade8To9(connection);
     }
+    dbVersion = Queries.getDatabaseVersion(connection);
     if (dbVersion < 10) {
       upgrade9To10(connection);
     }
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < 11) {
+      upgrade10To11(connection);
+    }
 
-    final int newVersion = Queries.getDatabaseVersion(connection);
-    if (newVersion < GenerateDB.DATABASE_VERSION) {
+    dbVersion = Queries.getDatabaseVersion(connection);
+    if (dbVersion < GenerateDB.DATABASE_VERSION) {
       throw new RuntimeException("Internal error, database version not updated to current instead was: "
-          + newVersion);
+          + dbVersion);
     }
   }
 
@@ -524,6 +542,21 @@ public final class ImportDB {
     GenerateDB.createTableDivision(connection, false);
 
     setDBVersion(connection, 10);
+  }
+
+  private static void upgrade10To11(final Connection connection) throws SQLException {
+    Statement stmt = null;
+    try {
+      stmt = connection.createStatement();
+      stmt.executeUpdate("ALTER TABLE Judges ADD COLUMN phone varchar(15) default NULL");
+      
+      stmt.executeUpdate("UPDATE Judges SET phone = '612-555-1212' WHERE phone IS NULL");
+      
+      setDBVersion(connection, 11);
+    } finally {
+      SQLFunctions.close(stmt);
+      stmt = null;
+    }
   }
 
   private static void upgrade2To6(final Connection connection) throws SQLException {
@@ -1224,16 +1257,17 @@ public final class ImportDB {
       destPrep.executeUpdate();
       SQLFunctions.close(destPrep);
 
-      destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, station, Tournament) VALUES (?, ?, ?, ?)");
-      destPrep.setInt(4, destTournamentID);
+      destPrep = destinationConnection.prepareStatement("INSERT INTO Judges (id, category, station, phone, Tournament) VALUES (?, ?, ?, ?, ?)");
+      destPrep.setInt(5, destTournamentID);
 
-      sourcePrep = sourceConnection.prepareStatement("SELECT id, category, station FROM Judges WHERE Tournament = ?");
+      sourcePrep = sourceConnection.prepareStatement("SELECT id, category, station, phone FROM Judges WHERE Tournament = ?");
       sourcePrep.setInt(1, sourceTournamentID);
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
         destPrep.setString(1, sourceRS.getString(1));
         destPrep.setString(2, sourceRS.getString(2));
         destPrep.setString(3, sourceRS.getString(3));
+        destPrep.setString(4, sourceRS.getString(4));
         destPrep.executeUpdate();
       }
     } finally {

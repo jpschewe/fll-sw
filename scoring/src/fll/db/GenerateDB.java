@@ -38,7 +38,7 @@ public final class GenerateDB {
   /**
    * Version of the database that will be created.
    */
-  public static final int DATABASE_VERSION = 9;
+  public static final int DATABASE_VERSION = 11;
 
   private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -176,6 +176,7 @@ public final class GenerateDB {
           + "  category varchar(64) NOT NULL," //
           + "  Tournament INTEGER NOT NULL," //
           + "  station varchar(64) NOT NULL," //
+          + "  phone varchar(15) default NULL,"
           + "  CONSTRAINT judges_pk PRIMARY KEY (id,category,Tournament,station)"//
           + " ,CONSTRAINT judges_fk1 FOREIGN KEY(Tournament) REFERENCES Tournaments(tournament_id)" //
           + ")");

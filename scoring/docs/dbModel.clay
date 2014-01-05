@@ -175,6 +175,9 @@
 <column auto-increment="false" column-size="64" decimal-digits="0" default-value="" id="1f769f17:1248908e683:-7d5d" mandatory="true" name="station">
 <data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
 </column>
+<column auto-increment="false" column-size="15" decimal-digits="0" default-value="" id="5dd9504e:1435d92b423:-7fbb" mandatory="false" name="phone">
+<data-type name="VARCHAR" selected-variant-pattern="VARCHAR(%n)"/>
+</column>
 </column-list>
 <primary-key id="1f769f17:1248908e683:-7d63" name="PK_JUDGES">
 <primary-key-column name="id"/>
