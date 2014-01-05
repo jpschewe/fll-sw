@@ -62,7 +62,7 @@
       name='id${loopStatus.count}' /></td>
 
      <td><input type='text' value="${judge.phone }"
-      name="phone${loopStatus.count}" /></td>
+      name='phone${loopStatus.count}' /></td>
 
      <td><select name='cat${loopStatus.count }'>
        <c:forEach items="${CATEGORIES}" var="cat">
