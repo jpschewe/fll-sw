@@ -344,6 +344,9 @@ public class FullTournamentTest {
     selenium.findElement(By.name("id"
         + judgeIndex)).sendKeys(id);
 
+    selenium.findElement(By.name("phone"
+        + judgeIndex)).sendKeys("612-555-1212");
+
     final Select categorySelect = new Select(selenium.findElement(By.name("cat"
         + judgeIndex)));
     categorySelect.selectByValue(category);

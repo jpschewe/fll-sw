@@ -31,9 +31,7 @@
 </head>
 
 <body>
- <h1>
-  Judge Assignments
- </h1>
+ <h1>Judge Assignments</h1>
 
  <p>Judges ID's must be unique. They can be just the name of the
   judge. Keep in mind that this ID needs to be entered on the judging
@@ -46,11 +44,12 @@
 
  <form action='VerifyJudges' method='POST' name='judges'>
 
- <input type='hidden' name='total_num_rows' id='total_num_rows' />
+  <input type='hidden' name='total_num_rows' id='total_num_rows' />
 
   <table border='1' id='data'>
    <tr>
     <th>ID</th>
+    <th>Phone</th>
     <th>Category</th>
     <th>Judging Station</th>
    </tr>
@@ -61,6 +60,10 @@
 
      <td><input type='text' value="${judge.id}"
       name='id${loopStatus.count}' /></td>
+
+     <td><input type='text' value="${judge.phone }"
+      name="phone${loopStatus.count}" /></td>
+
      <td><select name='cat${loopStatus.count }'>
        <c:forEach items="${CATEGORIES}" var="cat">
 
@@ -100,7 +103,8 @@
 
   <input type='text' name='num_rows' id='num_rows' value='1' size='10' />
   <button id='add_rows'>Add Rows</button>
-  <br /> <input type='submit' id='finished' name='finished' value='Finished' /><br />
+  <br /> <input type='submit' id='finished' name='finished'
+   value='Finished' /><br />
 
  </form>
 
