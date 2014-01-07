@@ -1902,6 +1902,14 @@ public final class Queries {
       prep.setInt(2, currentTournament);
       prep.executeUpdate();
       SQLFunctions.close(prep);
+      
+      // delete from PlayoffData
+      prep = connection.prepareStatement("DELETE FROM PlayoffData WHERE Team = ? AND Tournament = ?");
+      prep.setInt(1, teamNumber);
+      prep.setInt(2, currentTournament);
+      prep.executeUpdate();
+      SQLFunctions.close(prep);
+      
 
     } finally {
       SQLFunctions.close(prep);
