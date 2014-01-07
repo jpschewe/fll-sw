@@ -15,6 +15,7 @@ import java.sql.Types;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -390,7 +391,11 @@ public final class Queries {
                 + " WHERE FinalScores.TeamNumber IN ( " + teamSelect + ")" //
                 + " AND Teams.TeamNumber = FinalScores.TeamNumber" //
                 + " AND FinalScores.Tournament = ?" //
-                + " ORDER BY FinalScores." + categoryName + " " + ascDesc);
+                + " ORDER BY" //
+                + " CASE when FinalScores." + categoryName + " IS NULL THEN 1 ELSE 0 END ASC" //
+                + ",FinalScores." + categoryName + " " + ascDesc //
+                + ",Teams.TeamNumber");
+
             prep.setInt(1, tournament);
             rs = prep.executeQuery();
             final String rankingGroup = String.format("division %s judging group %s", division, sgEntry.getKey());
@@ -429,7 +434,10 @@ public final class Queries {
           + " AND FinalScores.Tournament = ?"//
           + " AND current_tournament_teams.event_division = ?" //
           + " AND current_tournament_teams.TeamNumber = Teams.TeamNumber" //
-          + " ORDER BY FinalScores.OverallScore " + ascDesc + ", Teams.TeamNumber");
+          + " ORDER BY" //
+          + " CASE when FinalScores.OverallScore IS NULL THEN 1 ELSE 0 END ASC" //
+          + ",FinalScores.OverallScore " + ascDesc //
+          + ",Teams.TeamNumber");
       prep.setInt(1, tournament);
       for (final String division : divisions) {
         prep.setString(2, division);
@@ -521,7 +529,10 @@ public final class Queries {
           + " AND FinalScores.Tournament = ?" //
           + " AND current_tournament_teams.event_division = ?" //
           + " AND current_tournament_teams.TeamNumber = Teams.TeamNumber"//
-          + " ORDER BY FinalScores.performance " + ascDesc + ", Teams.TeamNumber");
+          + " ORDER BY" //
+          + " CASE when FinalScores.performance IS NULL THEN 1 ELSE 0 END ASC" //
+          + ",FinalScores.performance " + ascDesc //
+          + ",Teams.TeamNumber");
 
       prep.setInt(1, tournament);
       for (final String division : divisions) {
@@ -3101,5 +3112,4 @@ public final class Queries {
     TournamentParameters.setIntTournamentParameter(connection, tournament, TournamentParameters.MAX_SCOREBOARD_ROUND,
                                                    value);
   }
-
 }
