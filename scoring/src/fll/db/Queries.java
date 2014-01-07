@@ -2386,8 +2386,7 @@ public final class Queries {
       if (rs.next()) {
         return rs.getBoolean("Verified");
       } else {
-        throw new RuntimeException("No score exists for tournament: "
-            + tournament + " teamNumber: " + teamNumber + " runNumber: " + runNumber);
+        return false;
       }
     } finally {
       SQLFunctions.close(rs);
