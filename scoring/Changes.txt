@@ -1,3 +1,6 @@
+Release 8.6
+-----------
+* Properly sort no shows to the bottom of the list when computing rankings
 * Fix bug causing scores to not be displayed in playoff brackets when data from another tournament exists
 * Add back the ability to select which rounds to show on the scoresheet generation playoff brackets
 
