@@ -607,7 +607,7 @@ public final class Playoff {
       while (divisions.next()) {
         final String eventDivision = divisions.getString(1);
 
-        final int runNumber = getMaxPerformanceRound(connection, eventDivision);
+        final int runNumber = getMaxPerformanceRound(connection, currentTournament, eventDivision);
         if (-1 != runNumber) {
           maxRunNumber = Math.max(maxRunNumber, runNumber);
         }
@@ -630,14 +630,17 @@ public final class Playoff {
    *         division
    */
   public static int getMaxPerformanceRound(final Connection connection,
+                                           final int currentTournament,
                                            final String playoffDivision) throws SQLException {
     PreparedStatement maxPrep = null;
     ResultSet max = null;
     try {
       maxPrep = connection.prepareStatement("SELECT MAX(run_number) FROM PlayoffData WHERE" //
-          + " event_division = ?");
+          + " event_division = ? AND tournament = ?");
 
       maxPrep.setString(1, playoffDivision);
+      maxPrep.setInt(2,  currentTournament);
+      
       max = maxPrep.executeQuery();
       if (max.next()) {
         final int runNumber = max.getInt(1);
