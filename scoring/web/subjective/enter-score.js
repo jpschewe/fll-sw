@@ -17,6 +17,25 @@ function createNewScore() {
 	return score;
 }
 
+/**
+ * Save the state of the current page to the specified score object. If null, do
+ * nothing.
+ */
+function saveToScoreObject(score) {
+	if (null == score) {
+		return;
+	}
+
+	$.each($.subjective.getCurrentCategory().goals, function(index, goal) {
+		if (goal.enumerated) {
+			alert("Enumerated goals not supported: " + goal.name);
+		} else {
+			var subscore = Number($("#" + goal.name).val());
+			score.standardSubScores[goal.name] = subscore;
+		}
+	});
+}
+
 function recomputeTotal() {
 	var currentTeam = $.subjective.getCurrentTeam();
 	var score = $.subjective.getScore(currentTeam.teamNumber);
@@ -73,10 +92,23 @@ function createScoreRow(goal, subscore) {
 	scoreBlock.append(scoreSelect);
 	rightContainer.append(scoreBlock);
 
-	var detailBlock = $("<div class=\"ui-block-b\"></div>");
-	rightContainer.append(detailBlock);
-	var detailButton = $("<button class=\"ui-btn ui-corner-all ui-icon-arrow-r ui-btn-icon-notext ui-btn-inline\"></button>");
-	detailBlock.append(detailButton);
+	var rubricBlock = $("<div class=\"ui-block-b\"></div>");
+	rightContainer.append(rubricBlock);
+	var rubricButton = $("<button class=\"ui-btn ui-corner-all ui-icon-arrow-r ui-btn-icon-notext ui-btn-inline\"></button>");
+	rubricBlock.append(rubricButton);
+	rubricButton.click(function() {
+		var currentTeam = $.subjective.getCurrentTeam();
+		var score = $.subjective.getScore(currentTeam.teamNumber);
+		if(null == score) {
+			score = createNewScore();
+		}
+		
+		var scoreCopy = $.extend(true, {}, score);
+		saveToScoreObject(scoreCopy);
+		$.subjective.setTempScore(scoreCopy);
+		$.subjective.setCurrentGoal(goal);
+		location.href = "rubric.html";
+	});
 
 	row.append(rightContainer);
 
@@ -88,7 +120,11 @@ $(document).on("pagebeforecreate", "#enter-score-page", function(event) {
 	$("#team-number").text(currentTeam.teamNumber);
 	$("#team-name").text(currentTeam.teamName);
 
-	var score = $.subjective.getScore(currentTeam.teamNumber);
+	// load the saved score if needed
+	var score = $.subjective.getTempScore();
+	if (null == score) {
+		score = $.subjective.getScore(currentTeam.teamNumber);
+	}
 	$.each($.subjective.getCurrentCategory().goals, function(index, goal) {
 		if (goal.enumerated) {
 			alert("Enumerated goals not supported: " + goal.name);
@@ -102,6 +138,10 @@ $(document).on("pagebeforecreate", "#enter-score-page", function(event) {
 	});
 
 	recomputeTotal();
+
+	// clear out temp state so that we don't get it again
+	$.subjective.setTempScore(null);
+	$.subjective.setCurrentGoal(null);
 });
 
 $(document).on("pageinit", "#enter-score-page", function(event) {
@@ -116,14 +156,7 @@ $(document).on("pageinit", "#enter-score-page", function(event) {
 		score.deleted = false;
 		score.noShow = false;
 
-		$.each($.subjective.getCurrentCategory().goals, function(index, goal) {
-			if (goal.enumerated) {
-				alert("Enumerated goals not supported: " + goal.name);
-			} else {
-				var subscore = Number($("#" + goal.name).val());
-				score.standardSubScores[goal.name] = subscore;
-			}
-		});
+		saveToScoreObject(score);
 
 		$.subjective.saveScore(score);
 
