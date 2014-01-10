@@ -24,7 +24,6 @@
 	var _currentCategory;
 	var _judges;
 	var _currentJudge;
-	var _currentJudgePhone;
 	var _allScores;
 	var _teamTimeCache;
 	var _currentTeam;
@@ -40,7 +39,6 @@
 		_currentCategory = null;
 		_judges = [];
 		_currentJudge = null;
-		_currentJudgePhone = null;
 		_allScores = {};
 		_teamTimeCache = {};
 		_currentTeam = null;
@@ -93,11 +91,6 @@
 			_currentJudge = value;
 		}
 
-		value = $.jStorage.get(STORAGE_PREFIX + "_currentJudgePhone");
-		if (null != value) {
-			_currentJudgePhone = value;
-		}
-
 		value = $.jStorage.get(STORAGE_PREFIX + "_allScores");
 		if (null != value) {
 			_allScores = value;
@@ -138,8 +131,6 @@
 		$.jStorage.set(STORAGE_PREFIX + "_currentCategory", _currentCategory);
 		$.jStorage.set(STORAGE_PREFIX + "_judges", _judges);
 		$.jStorage.set(STORAGE_PREFIX + "_currentJudge", _currentJudge);
-		$.jStorage.set(STORAGE_PREFIX + "_currentJudgePhone",
-				_currentJudgePhone);
 		$.jStorage.set(STORAGE_PREFIX + "_allScores", _allScores);
 		$.jStorage.set(STORAGE_PREFIX + "_teamTimeCache", _teamTimeCache);
 		$.jStorage.set(STORAGE_PREFIX + "_currentTeam", _currentTeam);
@@ -397,7 +388,7 @@
 			}
 		},
 
-		setCurrentJudge : function(judgeId, judgePhone) {
+		setCurrentJudge : function(judgeId) {
 			var foundJudge = null;
 			$.each(_judges, function(index, judge) {
 				if (judge.station == _currentJudgingGroup
@@ -415,7 +406,6 @@
 			}
 
 			_currentJudge = foundJudge;
-			_currentJudgePhone = judgePhone;
 			_save();
 		},
 
@@ -423,8 +413,24 @@
 			return _currentJudge;
 		},
 
-		getCurrentJudgePhone : function() {
-			return _currentJudgePhone;
+		addJudge: function(judgeID, phone) {
+			var foundJudge = null;
+			$.each(_judges, function(index, judge) {
+				if (judge.station == _currentJudgingGroup
+						&& judge.category == _currentCategory.name
+						&& judge.id == judgeId) {
+					foundJudge = judge;
+				}
+			});
+			if (null == foundJudge) {
+				var judge = new Object();
+				judge.id = judgeID;
+				judge.category = _currentCategory.name;
+				judge.station = _currentJudgingGroup;
+				judge.phone = phone;
+			}
+			_judges.push(judge);
+			_save();
 		},
 
 		/**
