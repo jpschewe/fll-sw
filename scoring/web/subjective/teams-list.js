@@ -53,45 +53,72 @@ $(document).on("pagebeforecreate", "#teams-list-page", function(event) {
 
 });
 
-$(document).on(
-		"pageinit",
-		"#teams-list-page",
-		function(event) {
-			$("#upload-scores-wait").hide();
+function uploadScoresSuccess(result) {
+	populateTeams();
 
+	alert("Uploaded " + result.numModified + " scores. message: " + result.message);
+}
 
-			$("#nav-top").click(function() {
-				location.href="index.html";
-			});
-			$("#nav-choose-judging-group").click(function() {
-				location.href="choose-judge.html";
-			});
-			$("#nav-choose-category").click(function() {
-				location.href="choose-category.html";
-			});
-			$("#nav-choose-judge").click(function() {
-				location.href="choose-judge.html";
-			});
+function uploadScoresFail(result) {
+	populateTeams();
 
-			$("#upload-scores").click(
-					function() {
-						$("#upload-scores-wait").show();
+	var message;
+	if (null == result) {
+		message = "Unknown server error";
+	} else {
+		message = result.message;
+	}
 
-						$.subjective.uploadScores(function(result) {
-							$("#upload-scores-wait").hide();
-							alert("Uploaded " + result.numModified
-									+ " scores: " + result.message);
-							populateTeams();
-						}, function(result) {
-							$("#upload-scores-wait").hide();
-							var message;
-							if (null == result) {
-								message = "Unknown server error";
-							} else {
-								message = result.message;
-							}
-							alert("Failed to upload data: " + message);
-							populateTeams();
-						});
-					});
-		});
+	alert("Failed to upload scores: " + message);
+}
+
+function uploadJudgesSuccess(result) {
+	$.subjective.log("Judges modified: " + result.numModifiedJudges + " new: " + result.numNewJudges);
+}
+
+function uploadJudgesFail(result) {
+	var message;
+	if (null == result) {
+		message = "Unknown server error";
+	} else {
+		message = result.message;
+	}
+
+	alert("Failed to upload judges: " + message);
+}
+
+function loadScoresSuccess() {
+	$("#upload-scores-wait").hide();
+}
+
+function loadScoresFail(message) {
+	$("#upload-scores-wait").hide();
+
+	alert("Failed to load scores from server: " + message);
+}
+
+$(document).on("pageinit", "#teams-list-page", function(event) {
+	$("#upload-scores-wait").hide();
+
+	$("#nav-top").click(function() {
+		location.href = "index.html";
+	});
+	$("#nav-choose-judging-group").click(function() {
+		location.href = "choose-judge.html";
+	});
+	$("#nav-choose-category").click(function() {
+		location.href = "choose-category.html";
+	});
+	$("#nav-choose-judge").click(function() {
+		location.href = "choose-judge.html";
+	});
+
+	$("#upload-scores").click(function() {
+		$("#upload-scores-wait").show();
+
+		$.subjective.uploadData(uploadScoresSuccess, uploadScoresFail,
+				uploadJudgesSuccess, uploadJudgesFail,
+				loadScoresSuccess, loadScoresFail);
+	});
+});
+

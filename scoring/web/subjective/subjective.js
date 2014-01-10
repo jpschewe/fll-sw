@@ -418,7 +418,7 @@
 			$.each(_judges, function(index, judge) {
 				if (judge.station == _currentJudgingGroup
 						&& judge.category == _currentCategory.name
-						&& judge.id == judgeId) {
+						&& judge.id == judgeID) {
 					foundJudge = judge;
 				}
 			});
@@ -649,21 +649,81 @@
 		 * @param failCallback
 		 *            called with a SubjectiveScoresServlet.UploadResult object
 		 *            on failure, may be null
+		 * @return the promise from the AJAX function
 		 */
-		uploadScores : function(doneCallback, failCallback) {
-			$.post("../api/SubjectiveScores", $.toJSON(_allScores),
+		uploadScores : function(doneCallback, failCallback) {			
+			return $.post("../api/SubjectiveScores", $.toJSON(_allScores),
 					function(result) {
 						if (result.success) {
-							$.subjective.loadFromServer(function() {
-								doneCallback(result);
-							}, function() {
-								failCallback("Error getting updated scores");
-							}, false);
+							doneCallback(result);
 						} else {
 							failCallback(result);
 						}
 					}, 'json').fail(function(result) {
 				failCallback(result);
+			});
+		},
+		
+		/**
+		 * Upload judges to the server calling the appropriate callback.
+		 * 
+		 * @param doneCallback
+		 *            called with a JudgesServlet.UploadResult object on success
+		 * @param failCallback
+		 *            called with a JudgesServlet.UploadResult object on
+		 *            failure, may be null
+		 * @return the promise from the AJAX function
+		 */
+		uploadJudges : function(doneCallback, failCallback) {	
+			return $.post("../api/Judges", $.toJSON(_judges),
+					function(result) {
+				$.subjective.log("uploading judges success");
+						if (result.success) {
+							doneCallback(result);
+						} else {
+							failCallback(result);
+						}
+					}, 'json').fail(function(result) {
+				failCallback(result);
+			});
+		},
+		
+		/**
+		 * Upload all data to the server
+		 * 
+		 * @param scoresSuccess
+		 *            called with a SubjectiveScoresServlet.UploadResult object
+		 *            on successful upload of scores
+		 * @param scoresFail
+		 *            called with a SubjectiveScoresServlet.UploadResult object
+		 *            on failed upload of scores
+		 * @param judgesSuccess
+		 *            called with a JudgesServlet.UploadResult object on
+		 *            successful upload of judges
+		 * @param judgesFail
+		 *            called with a JudgesServlet.UploadResult object on failed
+		 *            upload of judges
+		 * @param loadSuccess
+		 *            called after all uploads and successful load of data (no
+		 *            argument)
+		 * @param loadFail
+		 *            called after all uploads and failed load of data (string
+		 *            message)
+		 */
+		uploadData : function(scoresSuccess, scoresFail,
+				judgesSuccess, judgesFail,
+				loadSuccess, loadFail) {
+			var waitList = []
+			waitList.push($.subjective.uploadScores(scoresSuccess, scoresFail));
+			waitList.push($.subjective.uploadJudges(judgesSuccess, judgesFail));
+
+			$.when.apply($, waitList).done(function() {				
+				$.subjective.loadFromServer(function() {
+					loadSuccess();
+				}, function() {
+					loadFail("Error getting updated scores");
+				}, false);
+				
 			});
 		},
 
@@ -685,10 +745,9 @@
 		},
 		
 		/**
-		 * Save a score to be retrieved later. Only one temp
-		 * score can be saved at a time. This is meant to store
-		 * a score object to be retrieved later without 
-		 * effecting the scores that will be sent.
+		 * Save a score to be retrieved later. Only one temp score can be saved
+		 * at a time. This is meant to store a score object to be retrieved
+		 * later without effecting the scores that will be sent.
 		 */
 		setTempScore : function(score) {
 			_tempScore = score;
