@@ -8,7 +8,14 @@ $(document).on(
 		"pagebeforecreate",
 		"#choose-judge-page",
 		function(event) {
+			$("#new-judge-info").hide();
 
+			$("#judges").empty();
+			$("#judges").append(
+					"<input type='radio' name='judge' id='new-judge' value='new-judge'>");
+			$("#judges").append(
+					"<label for='new-judge'>New Judge</label>");
+			
 			var judges = $.subjective.getPossibleJudges();
 			$.each(judges, function(i, judge) {
 				$("#judges").append(
@@ -31,12 +38,18 @@ $(document).on(
 						'checked', true);
 			} else {
 				$("input:radio[value='new-judge']").prop('checked', true);
+				$("#new-judge-info").show();
 			}
-
-			var currentJudgePhone = $.subjective.getCurrentJudgePhone();
-			if (null != currentJudgePhone) {
-				$("#judge-phone").val(currentJudgePhone);
-			}
+						
+			$("input[name=judge]:radio").change(function () {
+				var judgeID = $("input:radio[name='judge']:checked").val();
+				if ('new-judge' == judgeID) {
+					$("#new-judge-info").show();
+				} else {
+					$("#new-judge-info").hide();
+				}
+			});
+			
 		});
 
 $(document).on("pageinit", "#choose-judge-page", function(event) {
@@ -56,15 +69,18 @@ function setJudge() {
 			return;
 		}
 		judgeID = judgeID.toUpperCase();
+		
+		var phone = $("#new-judge-phone").val();
+		if (null == phone || "" == phone) {
+			alert("You must enter a phone nunmber");
+			return;
+		}
+		
+		$.subjective.addJudge(judgeID, phone);
 	}
 
-	var phone = $("#judge-phone").val();
-	if (null == phone || "" == phone) {
-		alert("You must enter a phone nunmber");
-		return;
-	}
 
-	$.subjective.setCurrentJudge(judgeID, phone);
+	$.subjective.setCurrentJudge(judgeID);
 
 	location.href = "teams-list.html";
 }

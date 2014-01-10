@@ -27,21 +27,19 @@
 
   <div class="ui-content" role="main">
 
-   <p>Are you one of the known judges? If not, enter your name.</p>
+   <p>Are you one of the known judges? If not, select 'New Judge' and enter your information.</p>
 
    <div class="ui-field-contain">
     <fieldset id='judges' data-role="controlgroup">
-
-     <input type='radio' name='judge' id='new-judge' value='new-judge' /> <label
-      for='new-judge'><input type='text' id='new-judge-name'
-      data-clear-btn='true' placeholder='Enter your name' /></label>
-
     </fieldset>
    </div>
 
-   <p>
-    Phone number is required in case we need to contact you <input
-     type='text' id='judge-phone' data-clear-btn='true' />
+   <p id='new-judge-info'>
+   <input type='text' id='new-judge-name' data-clear-btn='true'
+    placeholder='Enter your name' /><br/> Phone number is required in
+    case we need to contact you<br/>
+   <input type='text' id='new-judge-phone' data-clear-btn='true'
+    placeholder='Enter your phone number' /><br/>
    </p>
 
    <button class='ui-btn ui-corner-all' id='judge-submit'>Submit</button>
