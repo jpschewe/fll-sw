@@ -332,7 +332,7 @@
   </goal>
 
   <goal initialValue="0" max="12" min="0" multiplier="1"
-   name="design_process" title="Design Process" category="Strategy and Innovations">
+   name="design_process" title="Design Process" category="Strategy and Innovation">
    <description>Ability to develop and explain improvement cycles where
     alternatives are considered and narrowed, selections tested, design
     improved.
