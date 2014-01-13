@@ -813,6 +813,8 @@ public final class ImportDB {
 
     importFinalistSchedule(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
 
+    importTableDivision(sourceConnection, destinationConnection, sourceTournamentID, destTournamentID);
+
     // update score totals
     Queries.updateScoreTotals(description, destinationConnection, destTournamentID);
   }
@@ -995,6 +997,46 @@ public final class ImportDB {
       sourceRS = sourcePrep.executeQuery();
       while (sourceRS.next()) {
         for (int i = 1; i <= 3; i++) {
+          Object sourceObj = sourceRS.getObject(i);
+          if ("".equals(sourceObj)) {
+            sourceObj = null;
+          }
+          destPrep.setObject(i + 1, sourceObj);
+        }
+        destPrep.executeUpdate();
+      }
+    } finally {
+      SQLFunctions.close(sourceRS);
+      SQLFunctions.close(sourcePrep);
+      SQLFunctions.close(destPrep);
+    }
+  }
+
+  private static void importTableDivision(final Connection sourceConnection,
+                                          final Connection destinationConnection,
+                                          final int sourceTournamentID,
+                                          final int destTournamentID) throws SQLException {
+    PreparedStatement destPrep = null;
+    PreparedStatement sourcePrep = null;
+    ResultSet sourceRS = null;
+    try {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Importing table_division");
+      }
+      destPrep = destinationConnection.prepareStatement("DELETE FROM table_division WHERE tournament = ?");
+      destPrep.setInt(1, destTournamentID);
+      destPrep.executeUpdate();
+      SQLFunctions.close(destPrep);
+
+      sourcePrep = sourceConnection.prepareStatement("SELECT playoff_division, table_id"
+          + "FROM table_diision WHERE tournament=?");
+      sourcePrep.setInt(1, sourceTournamentID);
+      destPrep = destinationConnection.prepareStatement("INSERT INTO table_diision (tournament, playoff_division, table_id) "
+          + "VALUES (?, ?, ?)");
+      destPrep.setInt(1, destTournamentID);
+      sourceRS = sourcePrep.executeQuery();
+      while (sourceRS.next()) {
+        for (int i = 1; i <= 2; i++) {
           Object sourceObj = sourceRS.getObject(i);
           if ("".equals(sourceObj)) {
             sourceObj = null;
@@ -1259,7 +1301,7 @@ public final class ImportDB {
       destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_schedule WHERE tournament = ?");
       destPrep.setInt(1, destTournamentID);
       destPrep.executeUpdate();
-      
+
       SQLFunctions.close(destPrep);
       destPrep = destinationConnection.prepareStatement("DELETE FROM finalist_categories WHERE tournament = ?");
       destPrep.setInt(1, destTournamentID);
