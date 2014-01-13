@@ -1029,9 +1029,9 @@ public final class ImportDB {
       SQLFunctions.close(destPrep);
 
       sourcePrep = sourceConnection.prepareStatement("SELECT playoff_division, table_id"
-          + "FROM table_diision WHERE tournament=?");
+          + " FROM table_division WHERE tournament=?");
       sourcePrep.setInt(1, sourceTournamentID);
-      destPrep = destinationConnection.prepareStatement("INSERT INTO table_diision (tournament, playoff_division, table_id) "
+      destPrep = destinationConnection.prepareStatement("INSERT INTO table_division (tournament, playoff_division, table_id) "
           + "VALUES (?, ?, ?)");
       destPrep.setInt(1, destTournamentID);
       sourceRS = sourcePrep.executeQuery();
