@@ -1022,21 +1022,23 @@ public class BracketData {
           if (((TeamBracketCell) roundData.get(curArray[0])).getTeam().getTeamNumber() > 0
               && ((TeamBracketCell) roundData.get(curArray[1])).getTeam().getTeamNumber() > 0) {
 
+            if (!tAssignIt.hasNext()) {
+              tAssignIt = tables.iterator();
+            }
+            final String nextAssignA = tAssignIt.next();
             String tableA = ((TeamBracketCell) roundData.get(curArray[0])).getTable();
             if (null == tableA
                 || tableA.length() == 0) {
-              if (!tAssignIt.hasNext()) {
-                tAssignIt = tables.iterator();
-              }
-              tableA = tAssignIt.next();
+              tableA = nextAssignA;
             }
+            if (!tAssignIt.hasNext()) {
+              tAssignIt = tables.iterator();
+            }
+            final String nextAssignB = tAssignIt.next();
             String tableB = ((TeamBracketCell) roundData.get(curArray[1])).getTable();
             if (null == tableB
                 || tableB.length() == 0) {
-              if (!tAssignIt.hasNext()) {
-                tAssignIt = tables.iterator();
-              }
-              tableB = tAssignIt.next();
+              tableB = nextAssignB;
             }
 
             final TeamBracketCell topCell = (TeamBracketCell) roundData.get(curArray[0]);
