@@ -1,3 +1,5 @@
+* Import playoff table limits
+
 Release 8.6
 -----------
 * Properly sort no shows to the bottom of the list when computing rankings
