@@ -4,6 +4,59 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+function rangeSort(a, b) {
+	if (a.min < b.min) {
+		return -1;
+	} else if (a.min > b.min) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+function populateRubric(goal) {
+	$("#rubric-content").empty();
+
+	var ranges = goal.rubric;
+	ranges.sort(rangeSort);
+
+	var ndGrid = $("<div class=\"ui-grid-a\"></div>");
+	var ndBlockA = $("<div class=\"ui-grid-a rubric-not-done\">Not Done</div>");
+	var ndBlockB = $("<div class=\"ui-grid-b\"></div>");
+	var ndButton = $("<button>Set</button>");
+	ndButton.click(function() {
+		$("#rubric-score").val("0");
+	});
+	ndBlockB.append(ndButton);
+	ndGrid.append(ndBlockA);
+	ndGrid.append(ndBlockB);
+	$("#rubric-content").append(ndGrid);
+
+	$.each(ranges, function(index, range) {
+		var titleDiv = $("<div class=\"rubric-title\">" + range.title + " (" + range.min + "-"
+				+ range.max + ")<div>");
+		$("#rubric-content").append(titleDiv);
+
+		var grid = $("<div class=\"ui-grid-a\"></div>");
+		var blockA = $("<div class=\"ui-grid-a\"></div>");
+		blockA.text(range.description);
+
+		var blockB = $("<div class=\"ui-grid-b\"></div>");
+		var button = $("<button>Set</button>");
+		button.click(function() {
+			var mid = Math.floor((range.min + range.max)/2);
+			$.subjective.log("Setting score to " + mid);
+			$("#rubric-score").val(mid.toString());
+		});
+		blockB.append(button);
+
+		grid.append(blockA);
+		grid.append(blockB);
+		$("#rubric-content").append(grid);
+
+	});
+}
+
 $(document).on(
 		"pagebeforecreate",
 		"#rubric-page",
@@ -38,6 +91,9 @@ $(document).on(
 
 			$("#rubric-category").text(goal.category);
 			$("#rubric-goal-title").text(goal.title);
+			$("#rubric-description").text(goal.description);
+
+			populateRubric(goal);
 
 		});
 
