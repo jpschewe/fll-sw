@@ -4,6 +4,10 @@
  * This code is released under GPL; see LICENSE.txt for details.
  */
 
+function setRubricScore(value) {
+	$("#rubric-score").val(value).selectmenu("refresh", true);
+}
+
 function rangeSort(a, b) {
 	if (a.min < b.min) {
 		return -1;
@@ -25,7 +29,7 @@ function populateRubric(goal) {
 	var ndBlockB = $("<div class=\"ui-grid-b\"></div>");
 	var ndButton = $("<button>Set</button>");
 	ndButton.click(function() {
-		$("#rubric-score").val("0");
+		setRubricScore(0);
 	});
 	ndBlockB.append(ndButton);
 	ndGrid.append(ndBlockA);
@@ -33,8 +37,8 @@ function populateRubric(goal) {
 	$("#rubric-content").append(ndGrid);
 
 	$.each(ranges, function(index, range) {
-		var titleDiv = $("<div class=\"rubric-title\">" + range.title + " (" + range.min + "-"
-				+ range.max + ")<div>");
+		var titleDiv = $("<div class=\"rubric-title\">" + range.title + " ("
+				+ range.min + "-" + range.max + ")<div>");
 		$("#rubric-content").append(titleDiv);
 
 		var grid = $("<div class=\"ui-grid-a\"></div>");
@@ -44,9 +48,9 @@ function populateRubric(goal) {
 		var blockB = $("<div class=\"ui-grid-b\"></div>");
 		var button = $("<button>Set</button>");
 		button.click(function() {
-			var mid = Math.floor((range.min + range.max)/2);
+			var mid = Math.floor((range.min + range.max) / 2);
 			$.subjective.log("Setting score to " + mid);
-			$("#rubric-score").val(mid.toString());
+			setRubricScore(mid);
 		});
 		blockB.append(button);
 
@@ -57,8 +61,27 @@ function populateRubric(goal) {
 	});
 }
 
+$(document).on("pagebeforecreate", "#rubric-page", function(event) {
+	var goal = $.subjective.getCurrentGoal();
+
+	if (goal.scoreType == "INTEGER") {
+		for (var v = Number(goal.min); v <= Number(goal.max); ++v) {
+			var option = $("<option value=\"" + v + "\">" + v + "</option>");
+			$("#rubric-score").append(option);
+		}
+	} else {
+		alert("Non-integer goals are not supported: " + goal.name);
+	}
+
+	$("#rubric-category").text(goal.category);
+	$("#rubric-goal-title").text(goal.title);
+	$("#rubric-description").text(goal.description);
+
+	populateRubric(goal);
+});
+
 $(document).on(
-		"pagebeforecreate",
+		"pagecreate",
 		"#rubric-page",
 		function(event) {
 			var score = $.subjective.getTempScore();
@@ -75,26 +98,7 @@ $(document).on(
 				$.subjective.log("score: " + subscore);
 			}
 
-			if (goal.scoreType == "INTEGER") {
-				for (var v = Number(goal.min); v <= Number(goal.max); ++v) {
-					var selected = "";
-					if (null != subscore && subscore == v) {
-						selected = "selected";
-					}
-					var option = $("<option value=\"" + v + "\" " + selected
-							+ " >" + v + "</option>");
-					$("#rubric-score").append(option);
-				}
-			} else {
-				alert("Non-integer goals are not supported: " + goal.name);
-			}
-
-			$("#rubric-category").text(goal.category);
-			$("#rubric-goal-title").text(goal.title);
-			$("#rubric-description").text(goal.description);
-
-			populateRubric(goal);
-
+			setRubricScore(subscore);
 		});
 
 $(document).on("pageinit", "#rubric-page", function(event) {
