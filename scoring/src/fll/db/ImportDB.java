@@ -548,10 +548,19 @@ public final class ImportDB {
     Statement stmt = null;
     try {
       stmt = connection.createStatement();
-      stmt.executeUpdate("ALTER TABLE Judges ADD COLUMN phone varchar(15) default NULL");
-      
+      stmt.executeUpdate("ALTER TABLE Judges ADD COLUMN phone varchar(15) DEFAULT NULL");
+
       stmt.executeUpdate("UPDATE Judges SET phone = '612-555-1212' WHERE phone IS NULL");
-      
+
+      final Document document = GlobalParameters.getChallengeDocument(connection);
+      final ChallengeDescription description = new ChallengeDescription(document.getDocumentElement());
+      for (final ScoreCategory categoryElement : description.getSubjectiveCategories()) {
+        final String tableName = categoryElement.getName();
+
+        stmt.executeUpdate("ALTER TABLE "
+            + tableName + " ADD COLUMN note longvarchar DEFAULT NULL");
+      }
+
       setDBVersion(connection, 11);
     } finally {
       SQLFunctions.close(stmt);
@@ -1070,7 +1079,7 @@ public final class ImportDB {
         columns.append(" TeamNumber,");
         columns.append(" NoShow,");
         final List<AbstractGoal> goals = categoryElement.getGoals();
-        int numColumns = 4;
+        int numColumns = 5;
         for (final AbstractGoal element : goals) {
           if (!element.isComputed()) {
             columns.append(" "
@@ -1078,6 +1087,7 @@ public final class ImportDB {
             ++numColumns;
           }
         }
+        columns.append(" note,");
         columns.append(" Judge");
 
         importCommon(columns, tableName, numColumns, destinationConnection, destTournamentID, sourceConnection,

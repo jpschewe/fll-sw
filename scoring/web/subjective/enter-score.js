@@ -13,6 +13,7 @@ function createNewScore() {
 	score.enumSubScores = {};
 	score.judge = $.subjective.getCurrentJudge().id;
 	score.teamNumber = $.subjective.getCurrentTeam().teamNumber;
+	score.note = null;
 
 	return score;
 }
@@ -99,10 +100,10 @@ function createScoreRow(goal, subscore) {
 	rubricButton.click(function() {
 		var currentTeam = $.subjective.getCurrentTeam();
 		var score = $.subjective.getScore(currentTeam.teamNumber);
-		if(null == score) {
+		if (null == score) {
 			score = createNewScore();
 		}
-		
+
 		var scoreCopy = $.extend(true, {}, score);
 		saveToScoreObject(scoreCopy);
 		$.subjective.setTempScore(scoreCopy);
@@ -125,6 +126,13 @@ $(document).on("pagebeforecreate", "#enter-score-page", function(event) {
 	if (null == score) {
 		score = $.subjective.getScore(currentTeam.teamNumber);
 	}
+
+	if (null != score) {
+		$("#enter-score-note-text").val(score.note);
+	} else {
+		$("#enter-score-note-text").val("");
+	}
+
 	$.each($.subjective.getCurrentCategory().goals, function(index, goal) {
 		if (goal.enumerated) {
 			alert("Enumerated goals not supported: " + goal.name);
@@ -155,6 +163,10 @@ $(document).on("pageinit", "#enter-score-page", function(event) {
 		score.modified = true;
 		score.deleted = false;
 		score.noShow = false;
+
+		var text = $("#enter-score-note-text").val();
+		score.note = text;
+		$.subjective.log("note text: " + score.note);
 
 		saveToScoreObject(score);
 
@@ -193,11 +205,6 @@ $(document).on("pageinit", "#enter-score-page", function(event) {
 		$.subjective.saveScore(score);
 
 		location.href = "teams-list.html";
-	});
-
-	$("#add-note").click(function() {
-		// FIXME setup click handler for add note
-		alert("Adding notes not yet supported");
 	});
 
 });

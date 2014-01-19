@@ -20,6 +20,7 @@ public class SubjectiveScore {
     mDeleted = false;
     mJudge = null;
     mTeamNumber = Team.NULL_TEAM_NUMBER;
+    mNote = null;
     mStandardSubScores = new HashMap<String, Double>();
     mEnumSubScores = new HashMap<String, String>();
   }
@@ -102,6 +103,16 @@ public class SubjectiveScore {
 
   public void setEnumSubScores(final Map<String, String> v) {
     mEnumSubScores = v;
+  }
+
+  private String mNote;
+
+  public String getNote() {
+    return mNote;
+  }
+
+  public void setNote(final String v) {
+    mNote = v;
   }
 
 }

@@ -255,6 +255,7 @@ public final class GenerateDB {
           createStatement.append(" "
               + columnDefinition + ",");
         }
+        createStatement.append(" note longvarchar DEFAULT NULL,");
         createStatement.append(" ComputedTotal float DEFAULT NULL,");
         createStatement.append(" StandardizedScore float default NULL,");
         createStatement.append(" CONSTRAINT "
