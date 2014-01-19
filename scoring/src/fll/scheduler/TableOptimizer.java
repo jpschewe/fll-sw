@@ -87,6 +87,11 @@ public class TableOptimizer {
 
     List<Integer> bestPermutation = null;
     int minWarnings = checker.verifySchedule().size();
+    if(minWarnings == 0) {
+      // already best score
+      return;
+    }
+    
     final List<List<Integer>> permutations = computePossibleOrderings(teams.size());
     for (final List<Integer> possibleValue : permutations) {
       applyPerformanceOrdering(teams, times, possibleValue);
@@ -116,6 +121,10 @@ public class TableOptimizer {
         }
         bestPermutation = possibleValue;
         minWarnings = newWarnings.size();
+        
+        if(minWarnings == 0) {
+          break;
+        }
       }
     }
 
