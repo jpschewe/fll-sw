@@ -95,6 +95,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
           score.setTeamNumber(rs.getInt("TeamNumber"));
           score.setJudge(judge);
           score.setNoShow(rs.getBoolean("NoShow"));
+          score.setNote(rs.getString("note"));
 
           final Map<String, Double> standardSubScores = new HashMap<String, Double>();
           final Map<String, String> enumSubScores = new HashMap<String, String>();
@@ -190,6 +191,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
         noShowPrep.setInt(2, currentTournament);
         noShowPrep.setBoolean(4, true);
 
+        final int NUM_COLUMNS_BEFORE_GOALS = 6;
         insertPrep = createInsertStatement(connection, categoryDescription);
         insertPrep.setInt(2, currentTournament);
         insertPrep.setBoolean(4, false);
@@ -208,6 +210,7 @@ public class SubjectiveScoresServlet extends HttpServlet {
               deletePrep.setInt(1, teamNumber);
               noShowPrep.setInt(1, teamNumber);
               insertPrep.setInt(1, teamNumber);
+              insertPrep.setString(5, score.getNote());
 
               ++numModified;
               if (score.getDeleted()) {
@@ -239,16 +242,20 @@ public class SubjectiveScoresServlet extends HttpServlet {
                     if (goalDescription.isEnumerated()) {
                       final String value = score.getEnumSubScores().get(goalName);
                       if (null == value) {
-                        insertPrep.setNull(goalIndex + 5, Types.VARCHAR);
+                        insertPrep.setNull(goalIndex
+                            + NUM_COLUMNS_BEFORE_GOALS, Types.VARCHAR);
                       } else {
-                        insertPrep.setString(goalIndex + 5, value.trim());
+                        insertPrep.setString(goalIndex
+                            + NUM_COLUMNS_BEFORE_GOALS, value.trim());
                       }
                     } else {
                       final Double value = score.getStandardSubScores().get(goalName);
                       if (null == value) {
-                        insertPrep.setNull(goalIndex + 5, Types.DOUBLE);
+                        insertPrep.setNull(goalIndex
+                            + NUM_COLUMNS_BEFORE_GOALS, Types.DOUBLE);
                       } else {
-                        insertPrep.setDouble(goalIndex + 5, value);
+                        insertPrep.setDouble(goalIndex
+                            + NUM_COLUMNS_BEFORE_GOALS, value);
                       }
                     }
                     ++goalIndex;
@@ -309,9 +316,9 @@ public class SubjectiveScoresServlet extends HttpServlet {
 
     final StringBuffer insertSQLColumns = new StringBuffer();
     insertSQLColumns.append("INSERT INTO "
-        + categoryDescription.getName() + " (TeamNumber, Tournament, Judge, NoShow");
+        + categoryDescription.getName() + " (TeamNumber, Tournament, Judge, NoShow, note");
     final StringBuffer insertSQLValues = new StringBuffer();
-    insertSQLValues.append(") VALUES ( ?, ?, ?, ?");
+    insertSQLValues.append(") VALUES ( ?, ?, ?, ?, ?");
 
     for (final AbstractGoal goalDescription : goalDescriptions) {
       if (!goalDescription.isComputed()) {

@@ -25,15 +25,18 @@
    <div class="ui-grid-a">
 
     <div class="ui-block-a">
-      <span id="team-number"></span>
+     <span id="team-number"></span>
     </div>
 
     <div class="ui-block-b">
-      <span id="team-name"></span>
+     <span id="team-name"></span>
     </div>
 
     <div class="ui-block-a">
-     <button id="add-note">Add Note</button>
+     <a id="enter-score-note-button" href="#enter-score-note" data-rel="popup"
+      data-position-to="window"
+      class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-a">Edit
+      Note</a>
     </div>
 
     <div class="ui-block-b">
@@ -78,8 +81,17 @@
   </div>
   <!-- /footer -->
 
+
+  <div id="enter-score-note" class="ui-content" data-role="popup" data-dismissible="false">
+   <textarea id="enter-score-note-text" rows="10" cols="30"></textarea>
+
+     <a href="#" data-rel="back" id="enter-score-note-save"
+      class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b">Save</a>
+
+ </div>
+
  </div>
  <!-- end enter-score-page -->
- 
+
 </body>
 </html>
