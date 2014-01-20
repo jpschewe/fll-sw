@@ -1,0 +1,50 @@
+ 
+I actually think including end-of-round delays:
+16 or 15 teams 50 minutes
+14 or 13 teams 45 minutes
+12 or 11 teams 40 minutes
+10 or  9 teams 35 minutes
+8  teams 30 minutes
+ 
+some examples below –
+ 
+16 teams - 2 double tables (total of 15 matches)
+ 
+                8 first round matches
+                4xtimes (20 minutes)
+scoring completed enough to do next round immediately
+                4 second round matches
+                2xtimes (10 minutes)
+scoring of second set not completed - 5 minute delay
+                2 third round matches
+                1xtimes (5 minutes)
+scoring of third round not completed - 5 minute delay
+                1 final match (5 minutes)
+ 
+11 team – 2 double tables (total of 10 matches)
+                3 first round matches (5 teams had byes)
+                2xtimes  (10 minutes)
+(and could do a single second round match in this time,
+                but that creates odd number and doesn’t save overall time)
+scoring completed enough to do next round immediately
+                4 second round matches
+                2xtimes (10 minutes)
+scoring of second set not completed - 5 minute delay
+                2 third round matches
+                1xtimes (5 minutes)
+scoring of third round not completed - 5 minute delay
+                1 final match (5 minutes)
+ 
+10 teams – 2 double tables (total of 9 matches)
+                2 first round matches (8/9 and 7/10, 6 teams had byes)
+                1xtime  (5 minutes)
+                2 second round matches can go (3/6 and 4/5) no delay
+                1xtime (5 minutes)
+                2 second round matches can go (1/8-9 and 2/7-10) no delay
+                1xtime (5 minutes)
+scoring  not completed - 5 minute delay
+                2 third round matches
+                1xtimes (5 minutes)
+scoring of third round not completed - 5 minute delay
+                1 final match (5 minutes)
+ 
