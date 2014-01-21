@@ -1,3 +1,5 @@
+* 264 - Use the correct run number to check if a playoff round is verified before sending JSON back
+
 Release 8.6
 -----------
 * Fix table assignment during playoffs to ensure we don't trivally repeat tables

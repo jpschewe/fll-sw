@@ -86,10 +86,7 @@ public final class JsonUtilities {
           datalist.add(new BracketLeafResultSet(tbc, -2.0, entry.getKey()
               + "-" + playoffRound));
         } else if (!realScore
-            || !showOnlyVerifiedScores
-            || Queries.isVerified(connection, currentTournament, teamNumber,
-                                  Queries.getNumSeedingRounds(connection, currentTournament)
-                                      + entry.getValue())) {
+            || !showOnlyVerifiedScores || Queries.isVerified(connection, currentTournament, teamNumber, runNumber)) {
           if ((entry.getValue() == numPlayoffRounds && !showFinalsScores)
               || !realScore) {
             datalist.add(new BracketLeafResultSet(tbc, -1.0, entry.getKey()
