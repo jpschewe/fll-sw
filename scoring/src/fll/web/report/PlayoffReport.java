@@ -145,7 +145,7 @@ public class PlayoffReport extends BaseFLLServlet {
       if (maxRun < 1) {
         para.add("Cannot determine max run number for this division. This is an internal error");
       } else {
-        teamPrep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName FROM PlayoffData, Teams" //
+        teamPrep = connection.prepareStatement("SELECT Teams.TeamNumber, Teams.TeamName, Teams.Organization FROM PlayoffData, Teams" //
             + " WHERE PlayoffData.Tournament = ?" //
             + " AND PlayoffData.event_division = ?" + " AND PlayoffData.run_number = ?" //
             + " AND Teams.TeamNumber = PlayoffData.team");
@@ -166,6 +166,7 @@ public class PlayoffReport extends BaseFLLServlet {
         while (teamResult.next()) {
           final int teamNumber = teamResult.getInt(1);
           final String teamName = teamResult.getString(2);
+          final String organization = teamResult.getString(3);
 
           scorePrep.setInt(3, teamNumber);
           scoreResult = scorePrep.executeQuery();
@@ -177,7 +178,8 @@ public class PlayoffReport extends BaseFLLServlet {
             scoreStr = "Unknown";
           }
 
-          para.add(String.format("Team %d - %s with a score of %s", teamNumber, teamName, scoreStr));
+          para.add(String.format("Team %d from %s - %s with a score of %s", teamNumber, organization, teamName,
+                                 scoreStr));
           para.add(Chunk.NEWLINE);
 
           SQLFunctions.close(scoreResult);
