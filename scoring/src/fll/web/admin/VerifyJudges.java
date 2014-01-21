@@ -88,8 +88,7 @@ public class VerifyJudges extends BaseFLLServlet {
         final String station = request.getParameter("station"
             + row);
         if (null != id) {
-          id = id.trim();
-          id = id.toUpperCase();
+          id = sanitizeJudgeId(id);
           if (id.length() > 0) {
             final JudgeInformation judge = new JudgeInformation(id, category, station);
             judges.add(judge);
@@ -140,6 +139,22 @@ public class VerifyJudges extends BaseFLLServlet {
       SQLFunctions.close(connection);
     }
 
+  }
+
+  /**
+   * Make sure that judge ID's don't contain characters that
+   * will give us problems.
+   */
+  private String sanitizeJudgeId(final String id) {
+    if (null == id) {
+      return null;
+    } else {
+      String fixed = id.trim();
+      fixed = fixed.toUpperCase();
+      fixed = fixed.replaceAll("\"", "_");
+      fixed = fixed.replaceAll("'", "_");
+      return fixed;
+    }
   }
 
 }
