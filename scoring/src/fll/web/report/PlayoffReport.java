@@ -102,7 +102,7 @@ public class PlayoffReport extends BaseFLLServlet {
       response.setHeader("Pragma", "public");
       // setting the content type
       response.setContentType("application/pdf");
-      response.setHeader("Content-Disposition", "filename=rankingReport.pdf");
+      response.setHeader("Content-Disposition", "filename=playoffReport.pdf");
       // the content length is needed for MSIE!!!
       response.setContentLength(baos.size());
       // write ByteArrayOutputStream to the ServletOutputStream
