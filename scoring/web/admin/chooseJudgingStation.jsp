@@ -11,7 +11,7 @@
 
 	<form method="POST" action="CommitJudgingStation">
 		<p>Team ${teamNumber} is assigned to a tournament that is using
-			judging stations. You need to specify which judging station this team
+			judging stations. You need to specify which <b>judging station</b> this team
 			is to be in.</p>
 
 		<select name='judging_station'>
