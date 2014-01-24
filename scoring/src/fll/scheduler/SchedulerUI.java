@@ -240,6 +240,12 @@ public class SchedulerUI extends JFrame {
 
         // this causes mSchedParams, mScheduleData and mScheduleFile to be set
         final File solutionFile = solver.getBestSchedule();
+        if(null == solutionFile) {
+          JOptionPane.showMessageDialog(SchedulerUI.this, "No valid schedule found", "Error Running Scheduler",
+                                        JOptionPane.ERROR_MESSAGE);
+          return;
+        }
+        
         loadScheduleFile(solutionFile, subjectiveStations);
 
         final TableOptimizer optimizer = new TableOptimizer(mSchedParams, mScheduleData,
