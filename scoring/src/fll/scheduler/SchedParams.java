@@ -29,7 +29,7 @@ public class SchedParams implements Serializable {
 
   public static final int MINIMUM_CHANGETIME_MINUTES = 15;
 
-  public static final int MINIMUM_PERFORMANCE_CHANGETIME_MINUTES = 45;
+  public static final int MINIMUM_PERFORMANCE_CHANGETIME_MINUTES = 30;
 
   /**
    * @param subjectiveParams the parameters for the subjective categories, one
