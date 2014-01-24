@@ -244,7 +244,7 @@ public class GreedySolver {
         + this.subjectiveFirst);
 
     final int perfOffsetMinutes = Integer.parseInt(properties.getProperty("perf_attempt_offset_minutes",
-                                                                         String.valueOf(tinc)).trim());
+                                                                          String.valueOf(tinc)).trim());
     performanceAttemptOffset = perfOffsetMinutes
         / tinc;
     if (perfOffsetMinutes != performanceAttemptOffset
@@ -255,7 +255,7 @@ public class GreedySolver {
         + performanceAttemptOffset);
 
     final int subjOffsetMinutes = Integer.parseInt(properties.getProperty("subjective_attempt_offset_minutes",
-                                                                         String.valueOf(tinc)).trim());
+                                                                          String.valueOf(tinc)).trim());
     subjectiveAttemptOffset = subjOffsetMinutes
         / tinc;
     if (subjOffsetMinutes != subjectiveAttemptOffset
@@ -329,6 +329,10 @@ public class GreedySolver {
         * tinc) {
       throw new FLLRuntimeException("Changetime isn't divisible by tinc");
     }
+    if (changetimeMinutes < SchedParams.MINIMUM_CHANGETIME_MINUTES) {
+      throw new FLLRuntimeException("Change time between events is too short, cannot be less than "
+          + SchedParams.MINIMUM_CHANGETIME_MINUTES + " minutes");
+    }
 
     final int performanceChangetimeMinutes = Utilities.readIntProperty(properties, "pct_minutes");
     performanceChangetime = performanceChangetimeMinutes
@@ -336,6 +340,10 @@ public class GreedySolver {
     if (performanceChangetimeMinutes != performanceChangetime
         * tinc) {
       throw new FLLRuntimeException("Performance changetime isn't divisible by tinc");
+    }
+    if (performanceChangetimeMinutes < SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES) {
+      throw new FLLRuntimeException("Change time between performance rounds is too short, cannot be less than "
+          + SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES + " minutes");
     }
 
     if (alternate) {
