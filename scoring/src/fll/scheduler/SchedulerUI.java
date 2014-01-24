@@ -664,8 +664,8 @@ public class SchedulerUI extends JFrame {
       }
 
       mSchedParams = new SchedParams(newSubjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
-                                     SchedParams.DEFAULT_CHANGETIME_MINUTES,
-                                     SchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
+                                     SchedParams.MINIMUM_CHANGETIME_MINUTES,
+                                     SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES);
       final List<String> subjectiveHeaders = new LinkedList<String>();
       for (final SubjectiveStation station : newSubjectiveStations) {
         subjectiveHeaders.add(station.getName());

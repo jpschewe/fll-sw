@@ -298,8 +298,8 @@ public class TableOptimizer {
       // not bothering to get the schedule params as we're just tweaking table
       // assignments, which wont't be effected by the schedule params.
       final SchedParams params = new SchedParams(subjectiveStations, SchedParams.DEFAULT_PERFORMANCE_MINUTES,
-                                                 SchedParams.DEFAULT_CHANGETIME_MINUTES,
-                                                 SchedParams.DEFAULT_PERFORMANCE_CHANGETIME_MINUTES);
+                                                 SchedParams.MINIMUM_CHANGETIME_MINUTES,
+                                                 SchedParams.MINIMUM_PERFORMANCE_CHANGETIME_MINUTES);
       final List<String> subjectiveHeaders = new LinkedList<String>();
       for (final SubjectiveStation station : subjectiveStations) {
         subjectiveHeaders.add(station.getName());
