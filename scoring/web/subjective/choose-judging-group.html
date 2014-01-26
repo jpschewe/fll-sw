@@ -13,7 +13,7 @@
 <script type='text/javascript' src='../extlib/jquery.json-2.4.min.js'></script>
 <script type='text/javascript' src='../extlib/jstorage.js'></script>
 <script type='text/javascript' src='subjective.js'></script>
-<script type='text/javascript' src='choose-judging-group.js'></script>
+<script type='text/javascript' src='subjective-ui.js'></script>
 
 </head>
 
@@ -27,7 +27,7 @@
 
   <div class="ui-content" role="main">
 
-<div id='judging-groups'></div>
+<div id='choose-judging-group_judging-groups'></div>
 
   </div>
   <!-- /content -->
@@ -37,7 +37,71 @@
   <!-- /footer -->
 
  </div>
- <!-- /page -->
+ <!-- /page choose-judging-group -->
 
+
+ <div data-role="page" id='choose-category-page'>
+
+  <div data-role="header">
+   <h1>Choose category</h1>
+  </div>
+  <!-- /header -->
+
+  <div class="ui-content" role="main">
+
+<div id='choose-category_categories'></div>
+
+  </div>
+  <!-- /content -->
+
+  <div data-role="footer" data-position="fixed">
+  <p>Judging Group: <span id='choose-category_judging-group'></span></p>
+  </div>
+  <!-- /footer -->
+
+ </div>
+ <!-- /page choose-category -->
+ 
+ <div data-role="page" id='choose-judge-page'>
+
+  <div data-role="header">
+   <h1>Choose judge</h1>
+  </div>
+  <!-- /header -->
+
+  <div class="ui-content" role="main">
+
+   <p>Are you one of the known judges? If not, select 'New Judge' and enter your information.</p>
+
+   <div class="ui-field-contain">
+    <fieldset id='choose-judge_judges' data-role="controlgroup">
+    </fieldset>
+   </div>
+
+   <p id='choose-judge_new-judge-info'>
+   <input type='text' id='choose-judge_new-judge-name' data-clear-btn='true'
+    placeholder='Enter your name' /><br/> Phone number is required in
+    case we need to contact you<br/>
+   <input type='text' id='choose-judge_new-judge-phone' data-clear-btn='true'
+    placeholder='Enter your phone number' /><br/>
+   </p>
+
+   <button class='ui-btn ui-corner-all' id='choose-judge_judge-submit'>Submit</button>
+
+  </div>
+  <!-- /content -->
+
+  <div data-role="footer" data-position="fixed">
+   <p>
+    Judging Group: <span id='choose-judge_judging-group'></span> - Category: <span
+     id='choose-judge_category'></span>
+   </p>
+  </div>
+  <!-- /footer -->
+
+ </div>
+ <!-- /page choose-judge -->
+ 
+ 
 </body>
 </html>
