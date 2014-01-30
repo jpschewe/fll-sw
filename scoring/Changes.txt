@@ -1,3 +1,5 @@
+Release 8.7
+-----------
 * 263 - Make it clear when specifying judging station vs. event division
 * 264 - Use the correct run number to check if a playoff round is verified before sending JSON back
 
