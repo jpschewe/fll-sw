@@ -61,8 +61,21 @@ function populateRubric(goal) {
 	});
 }
 
-$(document).on("pagebeforecreate", "#rubric-page", function(event) {
+$(document).on("pagebeforeshow", "#rubric-page", function(event) {
+	var score = $.subjective.getTempScore();
 	var goal = $.subjective.getCurrentGoal();
+
+	var subscore;
+	$.subjective.log("goal: " + goal.name);
+	if (goal.enumerated) {
+		subscore = null;
+		$.subjective.log("enumerated score: "
+				+ score.enumSubScores[goal.name]);
+	} else {
+		subscore = score.standardSubScores[goal.name];
+		$.subjective.log("score: " + subscore);
+	}
+	setRubricScore(subscore);
 
 	if (goal.scoreType == "INTEGER") {
 		for (var v = Number(goal.min); v <= Number(goal.max); ++v) {
@@ -78,28 +91,9 @@ $(document).on("pagebeforecreate", "#rubric-page", function(event) {
 	$("#rubric-description").text(goal.description);
 
 	populateRubric(goal);
+	
+	$("#rubric-page").trigger("create");
 });
-
-$(document).on(
-		"pagecreate",
-		"#rubric-page",
-		function(event) {
-			var score = $.subjective.getTempScore();
-			var goal = $.subjective.getCurrentGoal();
-
-			var subscore;
-			$.subjective.log("goal: " + goal.name);
-			if (goal.enumerated) {
-				subscore = null;
-				$.subjective.log("enumerated score: "
-						+ score.enumSubScores[goal.name]);
-			} else {
-				subscore = score.standardSubScores[goal.name];
-				$.subjective.log("score: " + subscore);
-			}
-
-			setRubricScore(subscore);
-		});
 
 $(document).on("pageinit", "#rubric-page", function(event) {
 	$("#rubric-save-score").click(function() {
