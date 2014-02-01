@@ -150,7 +150,7 @@ function setJudge() {
 function selectTeam(team) {
 	$.subjective.setCurrentTeam(team);
 
-	location.href = "enter-score.html";
+	$.mobile.navigate("#enter-score-page");
 }
 
 function populateTeams() {
@@ -184,7 +184,7 @@ function populateTeams() {
 	});
 }
 
-$(document).on("pagebeforecreate", "#teams-list-page", function(event) {
+$(document).on("pagebeforeshow", "#teams-list-page", function(event) {
 
 	populateTeams();
 
@@ -194,6 +194,7 @@ $(document).on("pagebeforecreate", "#teams-list-page", function(event) {
 	var currentCategory = $.subjective.getCurrentCategory();
 	$("#teams-list_category").text(currentCategory.title);
 
+	$("#teams-list-page").trigger("create");
 });
 
 function uploadScoresSuccess(result) {
@@ -263,4 +264,214 @@ $(document).on("pageinit", "#teams-list-page", function(event) {
 				uploadJudgesSuccess, uploadJudgesFail,
 				loadScoresSuccess, loadScoresFail);
 	});
+});
+
+
+function createNewScore() {
+	score = new Object();
+	score.modified = false;
+	score.deleted = false;
+	score.noShow = false;
+	score.standardSubScores = {};
+	score.enumSubScores = {};
+	score.judge = $.subjective.getCurrentJudge().id;
+	score.teamNumber = $.subjective.getCurrentTeam().teamNumber;
+	score.note = null;
+
+	return score;
+}
+
+/**
+ * Save the state of the current page to the specified score object. If null, do
+ * nothing.
+ */
+function saveToScoreObject(score) {
+	if (null == score) {
+		return;
+	}
+
+	$.each($.subjective.getCurrentCategory().goals, function(index, goal) {
+		if (goal.enumerated) {
+			alert("Enumerated goals not supported: " + goal.name);
+		} else {
+			var subscore = Number($("#enter-score_" + goal.name).val());
+			score.standardSubScores[goal.name] = subscore;
+		}
+	});
+}
+
+function recomputeTotal() {
+	var currentTeam = $.subjective.getCurrentTeam();
+	var score = $.subjective.getScore(currentTeam.teamNumber);
+
+	var total = 0;
+	$.each($.subjective.getCurrentCategory().goals, function(index, goal) {
+		if (goal.enumerated) {
+			alert("Enumerated goals not supported: " + goal.name);
+		} else {
+			var subscore = Number($("#enter-score_" + goal.name).val());
+			var multiplier = Number(goal.multiplier);
+			total = total + subscore * multiplier;
+		}
+	});
+	$("#enter-score_total-score").text(total);
+}
+
+function createScoreRow(goal, subscore) {
+	var row = $("<div class=\"ui-grid-b ui-responsive\"></div>");
+
+	var categoryBlock = $("<div class=\"ui-block-a\"></div>");
+	var categoryLabel = $("<p>" + goal.category + "</p>");
+	categoryBlock.append(categoryLabel);
+	row.append(categoryBlock);
+
+	var titleBlock = $("<div class=\"ui-block-b\"></div>");
+	var titleLabel = $("<p>" + goal.title + "</p>");
+	titleBlock.append(titleLabel);
+	row.append(titleBlock);
+
+	var rightBlock = $("<div class=\"ui-block-c\"></div>");
+	var rightContainer = $("<div class=\"ui-grid-a ui-responsive\"></div>");
+	rightBlock.append(rightContainer);
+
+	var scoreBlock = $("<div class=\"ui-block-a\"></div>");
+	var scoreSelect = $("<select id=\"enter-score_" + goal.name + "\"></select>");
+	scoreSelect.change(function() {
+		recomputeTotal();
+	});
+	if (goal.scoreType == "INTEGER") {
+		for (var v = Number(goal.min); v <= Number(goal.max); ++v) {
+			var selected = "";
+			if (null != subscore && subscore == v) {
+				selected = "selected";
+			}
+			var option = $("<option value=\"" + v + "\" " + selected + " >" + v
+					+ "</option>");
+			scoreSelect.append(option);
+		}
+	} else {
+		alert("Non-integer goals are not supported: " + goal.name);
+	}
+
+	scoreBlock.append(scoreSelect);
+	rightContainer.append(scoreBlock);
+
+	var rubricBlock = $("<div class=\"ui-block-b\"></div>");
+	rightContainer.append(rubricBlock);
+	var rubricButton = $("<button class=\"ui-btn ui-corner-all ui-icon-arrow-r ui-btn-icon-notext ui-btn-inline\"></button>");
+	rubricBlock.append(rubricButton);
+	rubricButton.click(function() {
+		var currentTeam = $.subjective.getCurrentTeam();
+		var score = $.subjective.getScore(currentTeam.teamNumber);
+		if (null == score) {
+			score = createNewScore();
+		}
+
+		var scoreCopy = $.extend(true, {}, score);
+		saveToScoreObject(scoreCopy);
+		$.subjective.setTempScore(scoreCopy);
+		$.subjective.setCurrentGoal(goal);
+		location.href = "rubric.html";
+	});
+
+	row.append(rightContainer);
+
+	$("#enter-score_score-content").append(row);
+}
+
+$(document).on("pagebeforeshow", "#enter-score-page", function(event) {
+	var currentTeam = $.subjective.getCurrentTeam();
+	$("#enter-score_team-number").text(currentTeam.teamNumber);
+	$("#enter-score_team-name").text(currentTeam.teamName);
+
+	// load the saved score if needed
+	var score = $.subjective.getTempScore();
+	if (null == score) {
+		score = $.subjective.getScore(currentTeam.teamNumber);
+	}
+
+	if (null != score) {
+		$("#enter-score-note-text").val(score.note);
+	} else {
+		$("#enter-score-note-text").val("");
+	}
+
+	
+	$("#enter-score_score-content").empty();
+	$.each($.subjective.getCurrentCategory().goals, function(index, goal) {
+		if (goal.enumerated) {
+			alert("Enumerated goals not supported: " + goal.name);
+		} else {
+			var subscore = null;
+			if ($.subjective.isScoreCompleted(score)) {
+				subscore = score.standardSubScores[goal.name];
+			}
+			createScoreRow(goal, subscore);
+		}
+	});
+
+	recomputeTotal();
+
+	// clear out temp state so that we don't get it again
+	$.subjective.setTempScore(null);
+	$.subjective.setCurrentGoal(null);
+	
+	$("#enter-score-page").trigger("create");
+});
+
+$(document).on("pageinit", "#enter-score-page", function(event) {
+	$("#enter-score_save-score").click(function() {
+
+		var currentTeam = $.subjective.getCurrentTeam();
+		var score = $.subjective.getScore(currentTeam.teamNumber);
+		if (null == score) {
+			score = createNewScore();
+		}
+		score.modified = true;
+		score.deleted = false;
+		score.noShow = false;
+
+		var text = $("#enter-score-note-text").val();
+		score.note = text;
+		$.subjective.log("note text: " + score.note);
+
+		saveToScoreObject(score);
+
+		$.subjective.saveScore(score);
+
+		$.mobile.navigate("#teams-list-page");
+	});
+
+	$("#enter-score_cancel-score").click(function() {
+		$.mobile.navigate("#teams-list-page");
+	});
+
+	$("#enter-score_delete-score").click(function() {
+		var currentTeam = $.subjective.getCurrentTeam();
+		var score = $.subjective.getScore(currentTeam.teamNumber);
+		if (null == score) {
+			score = createNewScore();
+		}
+		score.modified = true;
+		score.noShow = false;
+		score.deleted = true;
+		$.subjective.saveScore(score);
+
+		$.mobile.navigate("#teams-list-page");
+	});
+
+	$("#enter-score_noshow-score").click(function() {
+		var currentTeam = $.subjective.getCurrentTeam();
+		var score = $.subjective.getScore(currentTeam.teamNumber);
+		if (null == score) {
+			score = createNewScore();
+		}
+		score.modified = true;
+		score.noShow = true;
+		score.deleted = false;
+		$.subjective.saveScore(score);
+
+		$.mobile.navigate("#teams-list-page");
+	});
+
 });
