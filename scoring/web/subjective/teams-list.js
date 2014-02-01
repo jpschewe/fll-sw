@@ -11,7 +11,7 @@ function selectTeam(team) {
 }
 
 function populateTeams() {
-	$("#teams").empty();
+	$("#teams-list_teams").empty();
 	var teams = $.subjective.getCurrentTeams();
 	$.each(teams, function(i, team) {
 		var time = $.subjective.getScheduledTime(team.teamNumber);
@@ -33,7 +33,7 @@ function populateTeams() {
 				+ " " + team.organization //
 				+ " " + scoreStr //
 				+ "</button>");
-		$("#teams").append(button);
+		$("#teams-list_teams").append(button);
 		button.click(function() {
 			selectTeam(team);
 		});
@@ -46,10 +46,10 @@ $(document).on("pagebeforecreate", "#teams-list-page", function(event) {
 	populateTeams();
 
 	var currentJudgingGroup = $.subjective.getCurrentJudgingGroup();
-	$("#judging-group").text(currentJudgingGroup);
+	$("#teams-list_judging-group").text(currentJudgingGroup);
 
 	var currentCategory = $.subjective.getCurrentCategory();
-	$("#category").text(currentCategory.title);
+	$("#teams-list_category").text(currentCategory.title);
 
 });
 
