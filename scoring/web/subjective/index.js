@@ -42,7 +42,7 @@ function checkStoredData() {
 }
 
 function promptForJudgingGroup() {
-	location.href = "choose-judging-group.html";
+	location.href = "subjective-ui.html";
 }
 
 function promptForReload() {
