@@ -31,7 +31,7 @@ function saveToScoreObject(score) {
 		if (goal.enumerated) {
 			alert("Enumerated goals not supported: " + goal.name);
 		} else {
-			var subscore = Number($("#" + goal.name).val());
+			var subscore = Number($("#enter-score_" + goal.name).val());
 			score.standardSubScores[goal.name] = subscore;
 		}
 	});
@@ -46,12 +46,12 @@ function recomputeTotal() {
 		if (goal.enumerated) {
 			alert("Enumerated goals not supported: " + goal.name);
 		} else {
-			var subscore = Number($("#" + goal.name).val());
+			var subscore = Number($("#enter-score_" + goal.name).val());
 			var multiplier = Number(goal.multiplier);
 			total = total + subscore * multiplier;
 		}
 	});
-	$("#total-score").text(total);
+	$("#enter-score_total-score").text(total);
 }
 
 function createScoreRow(goal, subscore) {
@@ -72,7 +72,7 @@ function createScoreRow(goal, subscore) {
 	rightBlock.append(rightContainer);
 
 	var scoreBlock = $("<div class=\"ui-block-a\"></div>");
-	var scoreSelect = $("<select id=\"" + goal.name + "\"></select>");
+	var scoreSelect = $("<select id=\"enter-score_" + goal.name + "\"></select>");
 	scoreSelect.change(function() {
 		recomputeTotal();
 	});
@@ -113,13 +113,13 @@ function createScoreRow(goal, subscore) {
 
 	row.append(rightContainer);
 
-	$("#score-content").append(row);
+	$("#enter-score_score-content").append(row);
 }
 
 $(document).on("pagebeforecreate", "#enter-score-page", function(event) {
 	var currentTeam = $.subjective.getCurrentTeam();
-	$("#team-number").text(currentTeam.teamNumber);
-	$("#team-name").text(currentTeam.teamName);
+	$("#enter-score_team-number").text(currentTeam.teamNumber);
+	$("#enter-score_team-name").text(currentTeam.teamName);
 
 	// load the saved score if needed
 	var score = $.subjective.getTempScore();
@@ -153,7 +153,7 @@ $(document).on("pagebeforecreate", "#enter-score-page", function(event) {
 });
 
 $(document).on("pageinit", "#enter-score-page", function(event) {
-	$("#save-score").click(function() {
+	$("#enter-score_save-score").click(function() {
 
 		var currentTeam = $.subjective.getCurrentTeam();
 		var score = $.subjective.getScore(currentTeam.teamNumber);
@@ -175,11 +175,11 @@ $(document).on("pageinit", "#enter-score-page", function(event) {
 		location.href = "teams-list.html";
 	});
 
-	$("#cancel-score").click(function() {
+	$("#enter-score_cancel-score").click(function() {
 		location.href = "teams-list.html";
 	});
 
-	$("#delete-score").click(function() {
+	$("#enter-score_delete-score").click(function() {
 		var currentTeam = $.subjective.getCurrentTeam();
 		var score = $.subjective.getScore(currentTeam.teamNumber);
 		if (null == score) {
@@ -193,7 +193,7 @@ $(document).on("pageinit", "#enter-score-page", function(event) {
 		location.href = "teams-list.html";
 	});
 
-	$("#noshow-score").click(function() {
+	$("#enter-score_noshow-score").click(function() {
 		var currentTeam = $.subjective.getCurrentTeam();
 		var score = $.subjective.getScore(currentTeam.teamNumber);
 		if (null == score) {
