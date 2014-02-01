@@ -148,6 +148,81 @@
  </div>
  <!-- /page teams-list -->
  
+ <div data-role="page" id='enter-score-page'>
+
+  <div data-role="header" data-position="fixed">
+
+   <div class="ui-grid-a">
+
+    <div class="ui-block-a">
+     <span id="enter-score_team-number"></span>
+    </div>
+
+    <div class="ui-block-b">
+     <span id="enter-score_team-name"></span>
+    </div>
+
+    <div class="ui-block-a">
+     <a id="enter-score-note-button" href="#enter-score-note" data-rel="popup"
+      data-position-to="window"
+      class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-a">Edit
+      Note</a>
+    </div>
+
+    <div class="ui-block-b">
+     <span id="enter-score_total-score">0</span>
+    </div>
+
+   </div>
+   <!-- end grid -->
+
+  </div>
+  <!-- /header -->
+
+  <div class="ui-content" role="main">
+
+   <div id='enter-score_score-content'></div>
+
+  </div>
+  <!-- /content -->
+
+  <div data-role="footer" data-position="fixed">
+
+   <div class="ui-grid-c ui-responsive">
+
+    <div class="ui-block-a">
+     <button id='enter-score_save-score' data-mini="true">Save Changes</button>
+    </div>
+
+    <div class="ui-block-b">
+     <button id='enter-score_cancel-score' data-mini="true">Cancel Changes</button>
+    </div>
+
+    <div class="ui-block-c">
+     <button id='enter-score_delete-score' data-mini="true">Delete</button>
+    </div>
+
+    <div class="ui-block-d">
+     <button id='enter-score_noshow-score' data-mini="true">No Show</button>
+    </div>
+
+   </div>
+
+  </div>
+  <!-- /footer -->
+
+
+  <div id="enter-score-note" class="ui-content" data-role="popup" data-dismissible="false">
+   <textarea id="enter-score-note-text" rows="10" cols="30"></textarea>
+
+     <a href="#" data-rel="back" id="enter-score-note-save"
+      class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b">Save</a>
+
+ </div>
+
+ </div>
+ <!-- end enter-score-page -->
+ 
  
 </body>
 </html>
