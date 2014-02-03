@@ -49,8 +49,6 @@
 	function _loadFromDisk() {
 		_init_variables();
 
-		_log("Loading from disk");
-
 		var value = $.jStorage.get(STORAGE_PREFIX + "_subjectiveCategories");
 		if (null != value) {
 			_subjectiveCategories = value;
@@ -119,8 +117,6 @@
 	}
 
 	function _save() {
-		_log("Saving data to disk");
-
 		$.jStorage.set(STORAGE_PREFIX + "_subjectiveCategories",
 				_subjectiveCategories);
 		$.jStorage.set(STORAGE_PREFIX + "_tournament", _tournament);

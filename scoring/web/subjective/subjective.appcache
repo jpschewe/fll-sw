@@ -230,14 +230,6 @@ subjective.js
 index.html
 index.js
 
-choose-judging-group.html
-choose-judging-group.js
+subjective-ui.html
+subjective-ui.js
 
-choose-category.html
-choose-category.js
-
-choose-judge.html
-choose-judge.js
-
-teams-list.html
-teams-list.js
