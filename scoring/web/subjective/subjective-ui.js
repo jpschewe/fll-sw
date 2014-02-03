@@ -39,7 +39,7 @@ $(document).on(
 		"pagebeforeshow",
 		"#choose-category-page",
 		function(event) {
-			
+
 			$("#choose-category_categories").empty();
 
 			var categories = $.subjective.getSubjectiveCategories();
@@ -416,7 +416,7 @@ $(document).on("pagebeforeshow", "#enter-score-page", function(event) {
 			if ($.subjective.isScoreCompleted(score)) {
 				subscore = score.standardSubScores[goal.name];
 			}
-			 
+
 			createScoreRow(goal, subscore);
 		}
 	});
@@ -458,17 +458,19 @@ $(document).on("pageinit", "#enter-score-page", function(event) {
 	});
 
 	$("#enter-score_delete-score").click(function() {
-		var currentTeam = $.subjective.getCurrentTeam();
-		var score = $.subjective.getScore(currentTeam.teamNumber);
-		if (null == score) {
-			score = createNewScore();
-		}
-		score.modified = true;
-		score.noShow = false;
-		score.deleted = true;
-		$.subjective.saveScore(score);
+		if (confirm("Are you sure you want to delete a score?")) {
+			var currentTeam = $.subjective.getCurrentTeam();
+			var score = $.subjective.getScore(currentTeam.teamNumber);
+			if (null == score) {
+				score = createNewScore();
+			}
+			score.modified = true;
+			score.noShow = false;
+			score.deleted = true;
+			$.subjective.saveScore(score);
 
-		$.mobile.navigate("#teams-list-page");
+			$.mobile.navigate("#teams-list-page");
+		}
 	});
 
 	$("#enter-score_noshow-score").click(function() {
